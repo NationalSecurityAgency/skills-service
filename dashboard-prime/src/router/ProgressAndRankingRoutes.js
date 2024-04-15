@@ -28,17 +28,6 @@ const createProgressAndRankingRoutes = () => {
           }
         }
       }, {
-        name: 'MyProjectSkills',
-        path: 'projects/:projectId',
-        component: MyProjectSkillsPage,
-        meta: {
-          requiresAuth: true,
-          nonAdmin: true,
-          announcer: {
-            message: 'My Progress Project',
-          },
-        },
-      }, {
         name: 'QuizRun',
         path: 'quizzes/:quizId',
         component: QuizRun,

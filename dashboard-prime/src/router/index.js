@@ -44,7 +44,12 @@ import MetricsOnSubjectPage from '@/components/metrics/subject/MetricsOnSubjectP
 import BadgePage from '@/components/badges/BadgePage.vue'
 import BadgeSkills from '@/components/badges/BadgeSkills.vue'
 import ErrorPage from '@/components/utils/errors/ErrorPage.vue'
-import createSkillsDisplayRoutes from '@/router/SkillsDisplayRoutes.js'
+import createSkillsClientRoutes from '@/router/SkillsDisplaySkillsClientRoutes.js'
+import createSkillsDisplayChildRoutes from '@/router/SkillsDisplayChildRoutes.js'
+import createSkillsDisplayLocalRoutes from '@/router/SkillsDisplayLocalRoutes.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import MyProjectSkillsPage from '@/components/myProgress/MyProjectSkillsPage.vue'
+import TestSkillsClient from '@/skills-display/components/test/TestSkillsClient.vue'
 
 const routes = [
   {
@@ -530,9 +535,24 @@ const routes = [
 ]
 
 routes.push(createAdminRoutes())
-routes.push(createProgressAndRankingRoutes())
 routes.push(createQuizRoutes())
-routes.push(createSkillsDisplayRoutes())
+routes.push(createProgressAndRankingRoutes())
+
+// skills display routes support local components and skills-client apps
+// const skillsDisplayChildRoutes = createSkillsDisplayChildRoutes()
+const skillsDisplayInfo = useSkillsDisplayInfo()
+routes.push(createSkillsDisplayLocalRoutes(createSkillsDisplayChildRoutes(skillsDisplayInfo.localContextAppend)))
+routes.push(createSkillsClientRoutes(createSkillsDisplayChildRoutes(skillsDisplayInfo.skillsClientContextAppend)))
+
+routes.push({
+  path: '/test-skills-client/:projectId',
+  component: TestSkillsClient,
+  name: 'TestSkillsClient',
+  meta: {
+    requiresAuth: true,
+    nonAdmin: true,
+  },
+})
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

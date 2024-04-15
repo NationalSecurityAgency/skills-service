@@ -5,11 +5,14 @@ import { useRoute, useRouter } from 'vue-router'
 import SkillsDisplayBreadcrumb from '@/skills-display/components/header/SkillsDisplayBreadcrumb.vue'
 import PoweredBySkilltree from '@/skills-display/components/header/PoweredBySkilltree.vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import SkillsDisplay from '@/skills-display/components/SkillsDisplay.vue'
 
 const displayPreferences = useSkillsDisplayPreferencesState()
 const route = useRoute()
 const router = useRouter()
 const themeState = useSkillsDisplayThemeState()
+const skillDisplayInfo = useSkillsDisplayInfo()
 
 const props = defineProps({
   backButton: { type: Boolean, default: true },
@@ -20,7 +23,7 @@ const showBackButton = computed(() => {
   return props.backButton && displayPreferences.internalBackButton
 })
 const navigateBack = () => {
-  const previousRoute = route.params.previousRoute || { name: 'SkillsDisplayHome' }
+  const previousRoute = route.params.previousRoute || { name: skillDisplayInfo.getContextSpecificRouteName('SkillsDisplay') }
   router.push(previousRoute)
 }
 </script>

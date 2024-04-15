@@ -16,11 +16,6 @@ const displayPreferences = useSkillsDisplayPreferencesState()
 const displayAttributes = useSkillsDisplayAttributesState()
 const log = useLog()
 
-const getDocumentHeight = () => {
-  const { body } = document
-  return Math.max(body.scrollHeight, body.offsetHeight) + 10;
-}
-
 tryOnBeforeMount(() => {
 
   log.debug('SkillsDisplayInIframe.vue: tryOnBeforeMount')
@@ -48,7 +43,7 @@ tryOnBeforeMount(() => {
     // will only display summary and component will not be interactive
     displayPreferences.isSummaryOnly = parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false
 
-    // whether or not to use an internal back button as opposed to the browser back button
+    // whether to use an internal back button as opposed to the browser back button
     // displayPreferences.internalBackButton = parent.model.internalBackButton == null || parent.model.internalBackButton
 
     displayAttributes.projectId = parent.model.projectId

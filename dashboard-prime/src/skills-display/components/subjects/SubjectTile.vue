@@ -4,6 +4,7 @@ import Ribbon from '@/skills-display/components/subjects/Ribbon.vue'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 const props = defineProps({
   subject: {
@@ -17,6 +18,7 @@ const props = defineProps({
 })
 
 const preferencesState = useSkillsDisplayPreferencesState()
+const skillsDisplayInfo = useSkillsDisplayInfo()
 const numFormat = useNumberFormat()
 const ribbonColor = ['#4472ba', '#c74a41', '#44843E', '#BE5A09', '#A15E9A', '#23806A'][props.tileIndex % 6]
 
@@ -114,7 +116,7 @@ const progress = computed(() => {
     </template>
     <template #footer>
       <router-link
-        :to="{ name:'SubjectDetailsPage', params: { subjectId: subject.subjectId } }"
+        :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('SubjectDetailsPage'), params: { subjectId: subject.subjectId } }"
         :aria-label="`Click to navigate to the ${subject.subject} subject page.`"
         data-cy="subjectTileBtn">
         <Button

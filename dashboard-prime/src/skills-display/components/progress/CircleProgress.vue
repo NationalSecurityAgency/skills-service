@@ -38,7 +38,8 @@ const props = defineProps({
 
 const numFormat = useNumberFormat()
 
-const percentComplete = Math.trunc(props.totalCompletedPoints / props.totalPossiblePoints)
+const percentComplete = props.totalPossiblePoints > 0 && props.totalCompletedPoints > 0 ?
+  Math.trunc(props.totalCompletedPoints / props.totalPossiblePoints) : 0
 
 const series = [percentComplete]
 const chartOptions = {
@@ -63,7 +64,7 @@ const chartOptions = {
       }
     },
   },
-  labels: [`${numFormat.pretty(props.totalCompletedPoints)} Points`],
+  labels: [`${numFormat.pretty(props.totalCompletedPoints > 0 ? props.totalCompletedPoints : 0)} Points`],
 }
 </script>
 

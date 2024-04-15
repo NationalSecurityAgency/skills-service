@@ -3,8 +3,10 @@ import { computed, onMounted } from 'vue'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 const preferences = useSkillsDisplayPreferencesState()
+const skillsDisplayInfo = useSkillsDisplayInfo()
 const progress = useUserProgressSummaryState()
 const numberFormat = useNumberFormat()
 
@@ -41,7 +43,7 @@ onMounted(() => {
   </template>
   <template #footer>
     <router-link
-      :to="{ name:'MyRankDetailsPage' }"
+      :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('MyRankDetailsPage') }"
       aria-label="Click to navigate to My Rank page"
       data-cy="myRank">
       <Button
