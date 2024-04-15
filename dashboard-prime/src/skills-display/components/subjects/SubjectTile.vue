@@ -85,7 +85,7 @@ const progress = computed(() => {
           </div>
           <div v-if="!progress.allLevelsComplete" class="">
             <label class="skill-label">
-              {{ subject.levelPoints | number }} / {{ subject.levelTotalPoints | number }}
+              {{ numFormat.pretty(subject.levelPoints) }} / {{ numFormat.pretty(subject.levelTotalPoints) }}
             </label>
           </div>
         </div>

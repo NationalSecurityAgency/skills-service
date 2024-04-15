@@ -12,6 +12,8 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import { useAccessState } from '@/stores/UseAccessState.js'
 import { useInviteOnlyProjectState } from '@/stores/UseInviteOnlyProjectState.js'
+import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
+import { useLog } from '@/components/utils/misc/useLog.js'
 
 export const useGlobalNavGuards = () => {
 
@@ -27,6 +29,8 @@ export const useGlobalNavGuards = () => {
   const projConfig = useProjConfig()
   const router = useRouter()
   const route = useRoute()
+  const skillDisplayParentFrameState = useSkillsDisplayParentFrameState()
+  const log = useLog()
 
   const isAdminPage = (route) => route.path.startsWith('/administrator')
   const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId
@@ -149,6 +153,20 @@ export const useGlobalNavGuards = () => {
             }
           })
         }, 150)
+      }
+      if (skillDisplayParentFrameState.parentFrame) {
+        const params = {
+          path: to.path,
+          fullPath: to.fullPath,
+          name: to.name,
+          query: to.query,
+          currentLocation: window.location.toString(),
+          historySize: window.history.length,
+        };
+        if (log.isDebugEnabled()) {
+          log.debug(`emit route-change event to parent frame with ${JSON.stringify(params)}`)
+        }
+        skillDisplayParentFrameState.parentFrame.emit('route-changed', params);
       }
     })
 
