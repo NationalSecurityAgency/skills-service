@@ -32,7 +32,7 @@ const navigateBack = () => {
   <Card class=" skills-theme-page-title" data-cy="skillsTitle"
         :pt="{ body: { class: 'p-0' }, content: { class: 'px-0 py-2' } }">
     <template #content>
-      <div class="skills-page-title-text-color">
+      <div class="skills-page-title-text-color" style="position: relative">
         <div v-if="backButton"
              class="absolute" style="top: 1rem !important; left: 1rem !important;">
           <SkillsButton
@@ -52,7 +52,7 @@ const navigateBack = () => {
         </div>
 
         <div v-if="!themeState.theme.disableSkillTreeBrand"
-          class="absolute" style="top: 0.5rem !important; right: 1rem !important;">
+          class="absolute" style="top: 0.25rem !important; right: 1rem !important;">
           <powered-by-skilltree
             :animate-power-by-label="animatePowerByLabel" />
         </div>

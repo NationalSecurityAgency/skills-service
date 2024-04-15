@@ -4,7 +4,7 @@ import MyProjectSkillsPage from '@/components/myProgress/MyProjectSkillsPage.vue
 import QuizRun from '@/components/quiz/QuizRunInDashboard.vue';
 import DiscoverProjectsPage from '@/components/myProgress/discover/DiscoverProjectsPage.vue'
 
-const createProgressAndRankingRoutes = () => {
+const createProgressAndRankingRoutes = (skillsDisplayChildRoutes) => {
   return {
     path: '/progress-and-rankings',
     component: MyProgress,
@@ -28,6 +28,18 @@ const createProgressAndRankingRoutes = () => {
           }
         }
       }, {
+        path: 'projects/:projectId',
+        component: MyProjectSkillsPage,
+        name: 'MyProjectSkillsPage',
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'Skills Display'
+          }
+        },
+        children: skillsDisplayChildRoutes
+      },{
         name: 'QuizRun',
         path: 'quizzes/:quizId',
         component: QuizRun,
