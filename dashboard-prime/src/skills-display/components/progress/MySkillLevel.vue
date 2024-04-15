@@ -23,14 +23,14 @@ const totalLevels = computed(() => userProgress.userProgressSummary.totalLevels)
     <div data-cy="overallLevelDesc" class="mt-3">
       {{ skillsDisplayPreferences.levelDisplayName }} <Tag severity="info">{{ level }}</Tag> out of <Tag>{{ totalLevels }}</Tag>
     </div>
-    <div class="flex justify-content-center mt-2 progress-stars-icons">
+    <div class="flex justify-content-center mt-2 overall-progress-stars-icons">
       <Rating v-model="level" :stars="totalLevels" readonly :cancel="false" />
     </div>
   </div>
 </template>
 
 <style>
-.progress-stars-icons .p-rating-icon {
+.overall-progress-stars-icons .p-rating-icon {
   width:2rem;
   height:2rem;
 }

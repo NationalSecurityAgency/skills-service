@@ -1,9 +1,9 @@
 <script setup>
 import { computed } from 'vue'
 import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
-import NoDataYet from '@/common-components/utilities/NoDataYet.vue'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import SubjectTile from '@/skills-display/components/subjects/SubjectTile.vue'
+import NoContent2 from '@/components/utils/NoContent2.vue'
 
 const userProgress = useUserProgressSummaryState()
 const preferences = useSkillsDisplayPreferencesState()
@@ -14,10 +14,10 @@ const hasData = computed(() => userProgress.userProgressSummary.subjects.length 
   <div>
     <Card v-if="!hasData">
       <template #content>
-        <no-data-yet
-          class="my-2"
+        <no-content2
+          class="my-2 text-center"
           :title="`${preferences.subjectDisplayName}s have not been added yet.`"
-          :sub-title="`Please contact this ${preferences.projectDisplayName.toLowerCase()}'s administrator.`" />
+          :message="`Please contact this ${preferences.projectDisplayName.toLowerCase()}'s administrator.`" />
       </template>
     </Card>
 <!--    <search-all-project-skills v-if="hasData" />-->
@@ -26,7 +26,7 @@ const hasData = computed(() => userProgress.userProgressSummary.subjects.length 
            :key="`unique-subject-${index}`"
            class="flex-1 w-min-20rem md:max-w-30rem">
         <div class="">
-          <subject-tile :subject="subject"/>
+          <subject-tile :subject="subject" :tile-index="index"/>
         </div>
       </div>
     </div>
