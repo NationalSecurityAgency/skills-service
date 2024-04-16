@@ -251,7 +251,7 @@ const deleteRun = () => {
               <span v-else><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
             </template>
             <template #body="slotProps">
-              <div v-if="slotProps.field == 'userIdForDisplay'" class="flex flex-row flex-wrap"
+              <div v-if="slotProps.field === 'userIdForDisplay'" class="flex flex-row flex-wrap"
                    :data-cy="`row${slotProps.index}-userCell`">
                 <div class="flex align-items-start justify-content-start">
                   <highlighted-value :value="userInfo.getUserDisplay(slotProps.data, true)"

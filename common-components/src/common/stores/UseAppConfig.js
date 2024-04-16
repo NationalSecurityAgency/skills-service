@@ -105,6 +105,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const dashboardVersion = computed(() => config.value.dashboardVersion)
   const buildTimestamp = computed(() => config.value.buildTimestamp)
   const currentUsersCommunityDescriptor = computed(() => config.value.currentUsersCommunityDescriptor)
+  const activityHistoryStartDate = computed(() => config.value.activityHistoryStartDate)
   return {
     loadConfigState,
     refreshConfig,
@@ -167,6 +168,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     customFooter,
     dashboardVersion,
     buildTimestamp,
-    currentUsersCommunityDescriptor
+    currentUsersCommunityDescriptor,
+    activityHistoryStartDate
   }
 })

@@ -1,6 +1,7 @@
 import AdminHomePage from '@/components/AdminHomePage.vue'
 import MyProjects from '@/components/projects/MyProjects.vue'
 import QuizDefinitionsPage from '@/components/quiz/QuizDefinitionsPage.vue'
+import UserActionsPage from '@/components/userActions/UserActionsPage.vue';
 
 const createAdminRoutes = () => {
   return {
@@ -31,6 +32,16 @@ const createAdminRoutes = () => {
           requiresAuth: true,
           announcer: {
             message: 'Quizzes and Surveys',
+          },
+        },
+      }, {
+        name: 'UserActions',
+        path: 'userActions',
+        component: UserActionsPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'User Actions History',
           },
         },
       }

@@ -227,7 +227,7 @@ defineExpose({
             <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
           </template>
           <template #body="slotProps">
-            <div v-if="slotProps.field == 'name'" class="flex flex-row flex-wrap">
+            <div v-if="slotProps.field === 'name'" class="flex flex-row flex-wrap">
                 <div class="flex align-items-start justify-content-start">
                   <router-link :data-cy="`managesQuizLink_${slotProps.data.quizId}`"
                                :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"

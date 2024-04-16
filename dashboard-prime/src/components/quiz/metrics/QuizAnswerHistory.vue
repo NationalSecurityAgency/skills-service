@@ -170,7 +170,7 @@ const expandLabel = (truncated) => {
           <span :data-cy="col.dataCy" ><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
         </template>
         <template #body="slotProps">
-          <div v-if="slotProps.field == 'answerTxt'" :data-cy="`row${slotProps.index}-colAnswerTxt`">
+          <div v-if="slotProps.field === 'answerTxt'" :data-cy="`row${slotProps.index}-colAnswerTxt`">
             <pre v-if="slotProps.data.truncated" data-cy="textTruncated">{{ truncateFormatter.truncate(slotProps.data[col.key], answerTxtTruncate.truncateTo) }}</pre>
             <pre v-else data-cy="text">{{ slotProps.data[col.key] }}</pre>
             <div class="text-right">

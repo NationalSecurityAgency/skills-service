@@ -1,6 +1,12 @@
 <script setup>
-import Navigation from "@/components/utils/Navigation.vue";
-import {ref} from "vue";
+import Navigation from '@/components/utils/Navigation.vue';
+import { computed, ref } from 'vue';
+import { useAccessState } from '@/stores/UseAccessState.js';
+
+const accessState = useAccessState()
+const isRoot = computed(() => {
+  return accessState.isRoot;
+});
 
 const itemsTmp = [];
 itemsTmp.push({
@@ -27,19 +33,19 @@ itemsTmp.push({
 //   });
 // }
 //
-// if (this.isRoot) {
+if (isRoot.value) {
 //   items.push({
 //     name: 'Contact Admins',
 //     iconClass: 'fas fa-mail-bulk',
 //     page: 'ContactAdmins',
 //   });
 //
-//   items.push({
-//     name: 'Activity History',
-//     iconClass: 'fas fa-users-cog text-success',
-//     page: 'UserActions',
-//   });
-// }
+  itemsTmp.push({
+    name: 'Activity History',
+    iconClass: 'fas fa-users-cog text-success',
+    page: 'UserActions',
+  });
+}
 
 
 const items = ref(itemsTmp);
