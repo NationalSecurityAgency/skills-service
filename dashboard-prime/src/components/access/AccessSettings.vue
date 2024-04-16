@@ -17,16 +17,18 @@ const errMsg = ref(null);
 </script>
 
 <template>
-  <sub-page-header title="Access Management"/>
+  <div>
+    <sub-page-header title="Access Management"/>
 
-  <Card>
-    <template #header>
-      <SkillsCardHeader title="Project Management Users"></SkillsCardHeader>
-    </template>
-    <template #content>
-      <role-manager :project-id="route.params.projectId" :add-role-confirmation="privateProject"/>
-    </template>
-  </Card>
+    <Card>
+      <template #header>
+        <SkillsCardHeader title="Project Management Users"></SkillsCardHeader>
+      </template>
+      <template #content>
+        <role-manager :project-id="route.params.projectId" :add-role-confirmation="privateProject"/>
+      </template>
+    </Card>
+  </div>
 </template>
 
 <style scoped></style>
