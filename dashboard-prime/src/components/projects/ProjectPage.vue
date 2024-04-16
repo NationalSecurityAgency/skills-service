@@ -240,7 +240,7 @@ const setProject = (newProject) => {
           <router-link
             class="ml-1"
             data-cy="projectPreview"
-            :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
+            :to="{ name:'MyProjectSkillsPage', params: { projectId: project.projectId } }"
             target="_blank" rel="noopener">
             <SkillsButton
               target="_blank"
