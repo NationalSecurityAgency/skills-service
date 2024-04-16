@@ -240,7 +240,7 @@ const tableFilters = ref({
           </Column>
           <Column field="userIdForDisplay" :showFilterMenu="false" header="User" :sortable="true">
             <template #header>
-              <i class="fas fa-user-cog skills-color-skills" aria-hidden="true"></i>
+              <i class="fas fa-user-cog skills-color-skills mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
               <span :data-cy="`row${slotProps.index}-userId`">{{ userInfo.getUserDisplay(slotProps.data, true) }}</span>
@@ -257,7 +257,7 @@ const tableFilters = ref({
           </Column>
           <Column field="action" header="Action" :showFilterMenu="false" :sortable="true">
             <template #header>
-              <i class="fas fa-stamp text-success" aria-hidden="true"></i>
+              <i class="fas fa-stamp text-success mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
               <span :data-cy="`row${slotProps.index}-${slotProps.field}`">{{ formatLabel(slotProps.data.action) }}</span>
@@ -278,7 +278,7 @@ const tableFilters = ref({
           </Column>
           <Column field="item" header="Item" :showFilterMenu="false" :sortable="true">
             <template #header>
-              <i class="fas fa-clipboard-check skills-color-subjects" aria-hidden="true"></i>
+              <i class="fas fa-clipboard-check skills-color-subjects mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
               <span :data-cy="`row${slotProps.index}-${slotProps.field}`">{{ formatLabel(slotProps.data.item) }}</span>
@@ -299,7 +299,7 @@ const tableFilters = ref({
           </Column>
           <Column field="itemId" header="Item ID" :showFilterMenu="false" :sortable="true">
             <template #header>
-              <i class="fas fa-fingerprint skills-color-points" aria-hidden="true"></i>
+              <i class="fas fa-fingerprint skills-color-points mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
               <span :data-cy="`row${slotProps.index}-${slotProps.field}`">{{ slotProps.data.itemId }}</span>
@@ -316,7 +316,7 @@ const tableFilters = ref({
           </Column>
           <Column v-if="isAllEvents" field="projectId" header="Project ID" :showFilterMenu="false" :sortable="true">
             <template #header>
-              <i class="fas fa-tasks skills-color-projects" aria-hidden="true"></i>
+              <i class="fas fa-tasks skills-color-projects mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
               <span :data-cy="`row${slotProps.index}-${slotProps.field}`">{{ slotProps.data.projectId }}</span>
@@ -333,7 +333,7 @@ const tableFilters = ref({
           </Column>
           <Column v-if="isAllEvents" field="quizId" header="Quiz ID" :showFilterMenu="false" :sortable="true">
             <template #header>
-              <i class="fas fa-spell-check skills-color-subjects" aria-hidden="true"></i>
+              <i class="fas fa-spell-check skills-color-subjects mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
               <span :data-cy="`row${slotProps.index}-${slotProps.field}`">{{ slotProps.data.quizId }}</span>
@@ -350,7 +350,7 @@ const tableFilters = ref({
           </Column>
           <Column field="created" header="Performed" :sortable="false">
             <template #header>
-              <i class="fas fa-clock text-warning" aria-hidden="true"></i>
+              <i class="fas fa-clock text-warning mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
               <DateCell :value="slotProps.data.created" />
