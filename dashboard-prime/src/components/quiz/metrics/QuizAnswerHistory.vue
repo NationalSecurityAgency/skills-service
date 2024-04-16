@@ -85,7 +85,7 @@ const loadData = () => {
   tableOptions.value.busy = true;
   const params = {
     limit: tableOptions.value.pagination.pageSize,
-    ascending: sortInfo.value.sortOrder === 1 ? true : false,
+    ascending: sortInfo.value.sortOrder === 1,
     page: tableOptions.value.pagination.currentPage,
     orderBy: sortInfo.value.sortBy,
   };
@@ -153,10 +153,8 @@ const expandLabel = (truncated) => {
 
       <template #empty>
         <div class="flex justify-content-center flex-wrap">
-          <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle"
-             aria-hidden="true"></i>
-          <span class="flex align-items-center justify-content-center">There are no records to show
-              </span>
+          <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+          <span class="flex align-items-center justify-content-center">There are no records to show</span>
         </div>
       </template>
 
