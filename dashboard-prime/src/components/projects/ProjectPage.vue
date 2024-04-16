@@ -164,7 +164,8 @@ const fromExpirationDate = () => {
   return dayjs().startOf('day').to(dayjs(expirationDate));
 };
 const projectSaved = (updatedProject) => {
-    const origProjId = project.value.projectId;
+  const origProjId = project.value.projectId;
+  ProjectService.saveProject(updatedProject).then(() => {
     setProject(updatedProject);
     if (updatedProject.projectId !== origProjId) {
       router.replace({ name: route.name, params: { ...route.params, projectId: updatedProject.projectId } })
@@ -173,6 +174,7 @@ const projectSaved = (updatedProject) => {
         });
     }
     announcer.polite(`Project ${updatedProject.name} has been edited`);
+  });
 };
 
 const keepIt = () => {

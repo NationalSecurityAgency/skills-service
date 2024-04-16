@@ -30,6 +30,7 @@ const pinned = ref(false);
 const projectInternal = ref({ ...props.project });
 const stats = ref([]);
 const showEditProjectModal = ref(false);
+const showCopyProjectModal = ref(false);
 const deleteProjectDisabled = ref(false);
 const deleteProjectToolTip = ref('');
 const cancellingExpiration = ref(false);
@@ -37,13 +38,12 @@ const showDeleteValidation = ref(false);
 let overSortControl = ref(false);
 const sortControl = ref();
 
-let copyProjectInfo = {
-  showModal: false,
+let copyProjectInfo = ref({
   newProject: {},
-};
+});
 
 onMounted(() => {
-  pinned.value = projectInternal.pinned;
+  pinned.value = projectInternal.value.pinned;
   createCardOptions();
 });
 
@@ -55,15 +55,15 @@ const isRootUser = computed(() => {
   return accessState.isRoot;
 });
 const expirationDate = computed(() => {
-  if (!projectInternal.expiring) {
+  if (!projectInternal.value.expiring) {
     return '';
   }
   const gracePeriodInDays = appConfig.expirationGracePeriod;
-  const expires = dayjs(projectInternal.expirationTriggered).add(gracePeriodInDays, 'day').startOf('day');
+  const expires = dayjs(projectInternal.value.expirationTriggered).add(gracePeriodInDays, 'day').startOf('day');
   return expires.format('YYYY-MM-DD HH:mm');
 });
 const isReadOnlyProj = computed(() => {
-  return UserRolesUtil.isReadOnlyProjRole(projectInternal.userRole);
+  return UserRolesUtil.isReadOnlyProjRole(projectInternal.value.userRole);
 });
 
 // methods
@@ -127,7 +127,7 @@ const doDeleteProject = () => {
       .then((belongsToGlobal) => {
         if (belongsToGlobal) {
           const msg = 'Cannot delete this project as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
-          msgOk(msg, 'Unable to delete');
+          // msgOk(msg, 'Unable to delete');
         } else {
           emit('project-deleted', projectInternal.value);
         }
@@ -135,12 +135,12 @@ const doDeleteProject = () => {
 };
 
 const copyProject = () => {
-  copyProjectInfo.newProject = { userCommunity: props.project.userCommunity };
-  copyProjectInfo.showModal = true;
+  copyProjectInfo.value.newProject = { userCommunity: props.project.userCommunity };
+  showCopyProjectModal.value = true;
 };
 const projectCopied = (project) => {
   emit('copy-project', {
-    originalProjectId: projectInternal.projectId,
+    originalProjectId: projectInternal.value.projectId,
     newProject: project,
   });
 };
@@ -293,25 +293,13 @@ defineExpose({
       </template>
     </Card>
 
-    <edit-project
-      v-if="showEditProjectModal"
-      v-model="showEditProjectModal"
-      :is-edit="true"
-      :id="`editProjectModal${projectInternal.projectId}`"
-      :project="projectInternal"
-      @project-saved="projectSaved"
-      :enable-return-focus="true"/>
-
-<!--    <edit-project id="editProjectModal" v-if="showEditProjectModal" v-model="showEditProjectModal"-->
-<!--                  :project="projectInternal" :is-edit="true"-->
-<!--                  @project-saved="projectSaved" @hidden="handleHidden"/>-->
-<!--    <edit-project id="copyProjectModal" v-if="copyProjectInfo.showModal"-->
-<!--                  v-model="copyProjectInfo.showModal"-->
-<!--                  :project="copyProjectInfo.newProject"-->
-<!--                  :is-edit="false"-->
-<!--                  :is-copy="true"-->
-<!--                  @project-saved="projectCopied"-->
-<!--                  @hidden="handleCopyModalIsHidden"/>-->
+    <edit-project id="copyProjectModal" v-if="showCopyProjectModal"
+                  v-model="showCopyProjectModal"
+                  :project="copyProjectInfo.newProject"
+                  :is-edit="false"
+                  :is-copy="true"
+                  @project-saved="projectCopied"
+                  :enable-return-focus="true" />
 
     <removal-validation
       v-if="showDeleteValidation"

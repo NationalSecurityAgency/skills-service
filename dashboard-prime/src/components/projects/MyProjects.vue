@@ -13,6 +13,9 @@ import { useAccessState } from '@/stores/UseAccessState.js'
 import PinProjects from '@/components/projects/PinProjects.vue';
 import Sortable from 'sortablejs'
 import BlockUI from "primevue/blockui";
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
+import SettingsService from "@/components/settings/SettingsService.js";
+import LengthyOperationProgressBarModal from "@/components/utils/modal/LengthyOperationProgressBarModal.vue";
 
 const appConfig = useAppConfig()
 const accessState = useAccessState()
@@ -35,11 +38,11 @@ const sortOrder = ref({
   loading: false,
   loadingProjectId: '-1',
 });
-const copyProgressModal = {
+const copyProgressModal = ref({
   show: false,
   isComplete: false,
   copiedProjectId: '',
-};
+});
 
 const addProjectDisabled = computed(() => {
   return projects.value && projects.value.length >= appConfig.maxProjectsPerAdmin && !accessState.isRoot;
@@ -83,21 +86,22 @@ const projectRemoved = (project) => {
       });
 };
 const copyProject = (projectInfo) => {
-  copyProgressModal.isComplete = false;
-  copyProgressModal.copiedProjectId = '';
-  copyProgressModal.show = true;
+  copyProgressModal.value.isComplete = false;
+  copyProgressModal.value.copiedProjectId = '';
+  copyProgressModal.value.show = true;
   ProjectService.copyProject(projectInfo.originalProjectId, projectInfo.newProject)
       .then(() => {
-        copyProgressModal.copiedProjectId = projectInfo.newProject.projectId;
-        copyProgressModal.isComplete = true;
+        copyProgressModal.value.copiedProjectId = projectInfo.newProject.projectId;
+        copyProgressModal.value.isComplete = true;
         announcer.polite(`Project ${projectInfo.newProject.name} was copied`);
         SkillsReporter.reportSkill('CopyProject');
+        loadProjectsAfterCopy();
       });
 };
 const loadProjectsAfterCopy = () => {
   loadProjects()
       .then(() => {
-        focusOnProjectCard(copyProgressModal.copiedProjectId);
+        focusOnProjectCard(copyProgressModal.value.copiedProjectId);
       });
 };
 
@@ -120,18 +124,14 @@ const projectAdded = (project) => {
   announcer.polite(`Project ${project.name} has been created`);
 };
 const projectEdited = (editedProject) => {
-  ProjectService.saveProject(editedProject).then(() => {
+  // ProjectService.saveProject(editedProject).then(() => {
     loadProjects().then(() => {
-      this.$refs.projectsTable.focusOnEditButton(editedProject.projectId);
+      // this.$refs.projectsTable.focusOnEditButton(editedProject.projectId);
       nextTick(() => {
-        if (editedProject.isEdit) {
-          // this.$announcer.polite(`Project ${editedProject.name} has been edited`);
-        } else {
-          // this.$announcer.polite(`Project ${editedProject.name} has been created`);
-        }
+        announcer.polite(`Project ${editedProject.name} has been edited`);
       });
     });
-  });
+  // });
 };
 const enableDropAndDrop = () => {
   if (projects.value && projects.value.length > 0 && projects.value.length < appConfig.numProjectsForTableView) {
@@ -187,6 +187,32 @@ const updateSortAndReloadProjects = (updateInfo) => {
         });
   }
 };
+
+const saveProject = (values, isEdit, projectId) => {
+  const projToSave = {
+    ...values,
+    originalProjectId: projectId,
+    isEdit: isEdit,
+    name: InputSanitizer.sanitize(values.projectName),
+    projectId: InputSanitizer.sanitize(values.projectId)
+  }
+  return ProjectService.saveProject(projToSave)
+      .then((projRes) => {
+        if (!isEdit && isRootUser.value) {
+          SettingsService.pinProject(projToSave.projectId)
+              .then(() => {
+                return {...projRes, originalProjectId: projectId}
+              })
+        }
+        return {...projRes, originalProjectId: projectId}
+      }).finally(() => {
+        if (!isEdit) {
+          projectAdded(projToSave);
+        } else {
+          projectEdited(projToSave);
+        }
+      });
+}
 
 const focusOnProjectCard = (projectId) => {
   nextTick(() => {
@@ -261,7 +287,7 @@ const hasData = computed(() => {
     </div>
 
     <NoContent2
-      v-if="!hasData"
+      v-if="!hasData && !isLoading"
       title="No Projects Yet..."
       class="my-5"
       message="A Project represents a gamified training profile that consists of skills divided into subjects. Create as many Projects as you need."
@@ -270,10 +296,19 @@ const hasData = computed(() => {
       v-if="newProject.show"
       v-model="newProject.show"
       :project="newProject.project"
-      @project-saved="projectAdded"
+      :is-edit="newProject.isEdit"
+      @project-saved="saveProject"
       :enable-return-focus="true"/>
     <pin-projects v-if="showSearchProjectModal" v-model="showSearchProjectModal"
                   @done="pinModalClosed"/>
+
+    <lengthy-operation-progress-bar-modal v-if="copyProgressModal.show"
+                                          v-model="copyProgressModal.show"
+                                          :is-complete="copyProgressModal.isComplete"
+                                          @operation-done="loadProjectsAfterCopy"
+                                          title="Copying Project"
+                                          progress-message="Copying Project's Training Profile"
+                                          success-message="Project's training profile was successfully copied, please enjoy!"/>
   </div>
 </template>
 

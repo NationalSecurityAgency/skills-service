@@ -61,7 +61,7 @@ const schema = object({
     .min(appConfig.minNameLength)
     .max(appConfig.maxProjectNameLength)
     .nullValueNotAllowed()
-    .test('uniqueName', 'Project Name already exist', (value) => checkProjNameUnique(value))
+    .test('uniqueName', 'Project Name already exists', (value) => checkProjNameUnique(value))
     .customNameValidator()
     .label('Project Name'),
   'projectId': string()
@@ -70,7 +70,7 @@ const schema = object({
     .max(appConfig.maxIdLength)
     .idValidator()
     .nullValueNotAllowed()
-    .test('uniqueId', 'Project ID already exist', (value) => checkProjIdUnique(value))
+    .test('uniqueId', 'Project ID already exists', (value) => checkProjIdUnique(value))
     .label('Project ID'),
   'description': string()
     .max(appConfig.descriptionMaxLength)
@@ -100,21 +100,13 @@ const saveProject = (values) => {
     isEdit: props.isEdit,
     name: InputSanitizer.sanitize(values.projectName),
     projectId: InputSanitizer.sanitize(values.projectId)
-  }
-  return ProjectService.saveProject(projToSave)
-    .then((projRes) => {
-      if (!props.isEdit && isRootUser.value) {
-        SettingsService.pinProject(projToSave.projectId)
-          .then(() => {
-            return {  ...projRes, originalProjectId: props.project.projectId }
-          })
-      }
-      return {  ...projRes, originalProjectId: props.project.projectId }
-    })
+  };
+
+  emit('project-saved', projToSave, props.isEdit, props.project.projectId)
+  return Promise.resolve();
 }
 
-const onSavedProject = (savedProj) => {
-  emit('project-saved', savedProj)
+const onSavedProject = () => {
   close()
 }
 

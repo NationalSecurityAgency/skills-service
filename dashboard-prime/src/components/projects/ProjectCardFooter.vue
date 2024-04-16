@@ -8,7 +8,7 @@ const props = defineProps(['project']);
 const project = props.project;
 
 const hasIssues = computed(() => {
-  return project.numErrors && this.project.numErrors > 0;
+  return project.numErrors && project.numErrors > 0;
 });
 const numIssues = computed(() => {
   return project.numErrors;
