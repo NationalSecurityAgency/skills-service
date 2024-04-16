@@ -48,6 +48,7 @@ import createSkillsClientRoutes from '@/router/SkillsDisplaySkillsClientRoutes.j
 import createSkillsDisplayChildRoutes from '@/router/SkillsDisplayChildRoutes.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import TestSkillsClient from '@/skills-display/components/test/TestSkillsClient.vue'
+import TestSkillsDisplay from '@/skills-display/components/test/TestSkillsDisplay.vue'
 
 const routes = [
   {
@@ -549,6 +550,16 @@ routes.push({
     requiresAuth: true,
     nonAdmin: true,
   },
+})
+routes.push({
+  path: '/test-skills-display/:projectId',
+  component: TestSkillsDisplay,
+  name: 'TestSkillsDisplay',
+  meta: {
+    requiresAuth: true,
+    nonAdmin: true,
+  },
+  children: createSkillsDisplayChildRoutes(skillsDisplayInfo.localTestContextAppend)
 })
 
 const router = createRouter({

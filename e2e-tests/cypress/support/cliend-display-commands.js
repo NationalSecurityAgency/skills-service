@@ -18,13 +18,13 @@ Cypress.Commands.add("validatePoweredBy", () => {
     cy.url().then(url => {
         cy.log(`url: ${url}`);
         if (!url.includes('disableSkillTreeBrand|true') && !url.includes('disableSkillTreeBrand%7Ctrue')) {
-            cy.get('.titleBody').contains('powered by');
+            cy.get('[data-cy="skillsTitle"]').contains('powered by');
         }
     });
 });
 
 Cypress.Commands.add("cdVisit", (url) => {
-    cy.visit(`http://localhost:8083${url}`);
+    cy.visit(`/test-skills-display/proj1${url}`);
     cy.validatePoweredBy();
 });
 
@@ -40,10 +40,10 @@ Cypress.Commands.add("cdBack", (expectedTitle = 'User Skills') => {
 });
 
 Cypress.Commands.add("cdClickSubj", (subjIndex, expectedTitle) => {
-    cy.get(`.user-skill-subject-tile:nth-child(${subjIndex+1})`).first().click();
+    cy.get(`[data-cy="subjectTile"] [data-cy="subjectTileBtn"]`).eq(subjIndex).click();
     cy.validatePoweredBy();
     if (expectedTitle){
-        cy.contains(expectedTitle);
+        cy.get('[data-cy="skillsTitle"]').contains(expectedTitle);
     }
 });
 

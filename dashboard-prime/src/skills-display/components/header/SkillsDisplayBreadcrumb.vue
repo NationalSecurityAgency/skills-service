@@ -4,9 +4,11 @@ import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDis
 import { useRoute } from 'vue-router'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import SkillsBreadcrumbItem from '@/components/header/SkillsBreadcrumbItem.vue'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 const themeState = useSkillsDisplayThemeState()
 const displayPreferences = useSkillsDisplayPreferencesState()
+const skillsDisplayInfo = useSkillsDisplayInfo()
 const route = useRoute()
 const disabled = computed(() => themeState.theme.disableBreadcrumb)
 const items = ref([])
@@ -17,7 +19,7 @@ onMounted(() => {
 
 const build = () => {
   let ignoreNext = false;
-  const path = route.path.replace('/static/clientPortal/index.html', '/')
+  const path = skillsDisplayInfo.cleanPath(route.path)
   const res = path.split('/').filter((item) => item);
   res.unshift('');
   let key = null;
