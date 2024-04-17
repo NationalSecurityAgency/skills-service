@@ -1,8 +1,177 @@
 <script setup>
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import ProjectService from '@/components/projects/ProjectService';
+import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
+import DateCell from "@/components/utils/table/DateCell.vue";
+import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
+import { useConfirm } from 'primevue/useconfirm'
+import {useProjDetailsState} from "@/stores/UseProjDetailsState.js";
+
+const route = useRoute();
+
+onMounted(loadErrors);
+
+const projectDetailsState = useProjDetailsState();
+const confirm = useConfirm();
+const loading = ref(true);
+const errors = ref([]);
+const totalRows = ref(null);
+const pageSize = ref(5);
+const currentPage = ref(1);
+const sortOrder = ref(-1);
+const sortBy = ref('lastSeen');
+const possiblePageSizes = ref([5, 10, 25]);
+
+const formatErrorMsg = (errorType, error) => {
+  if (errorType === 'SkillNotFound') {
+    return `Reported Skill Id [${error}] does not exist in this Project`;
+  }
+  return error;
+};
+
+const pageChanged = (pagingInfo) => {
+  currentPage.value = pagingInfo.page + 1;
+  pageSize.value = pagingInfo.rows;
+  loadErrors();
+};
+
+const sortTable = (sortContext) => {
+  sortBy.value = sortContext.sortField;
+  sortOrder.value = sortContext.sortOrder;
+
+  // set to the first page
+  currentPage.value = 1;
+  loadErrors();
+};
+
+const removeAllErrors = () => {
+  const msg = 'Are you absolutely sure you want to remove all Project issues?';
+  confirm.require({
+    message: msg,
+    header: 'Please Confirm!',
+    acceptLabel: 'YES, Delete It!',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      loading.value = true;
+      ProjectService.deleteAllProjectErrors(route.params.projectId).then(() => {
+        loadErrors();
+        projectDetailsState.loadProjectDetailsState();
+      });
+    }
+  })
+};
+
+const removeError = (projectError) => {
+  const msg = `Are you absolutely sure you want to remove issue related to ${projectError.error}?`;
+  confirm.require({
+    message: msg,
+    header: 'Please Confirm!',
+    acceptLabel: 'YES, Delete It!',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      loading.value = true;
+      ProjectService.deleteProjectError(projectError.projectId, projectError.errorId).then(() => {
+        loadErrors();
+        projectDetailsState.loadProjectDetailsState();
+      });
+    }
+  })
+};
+
+function loadErrors() {
+  loading.value = true;
+  const pageParams = {
+    limit: pageSize.value,
+    ascending: sortOrder.value === 1,
+    page: currentPage.value,
+    orderBy: sortBy.value,
+  };
+  ProjectService.getProjectErrors(route.params.projectId, pageParams).then((res) => {
+    errors.value = res.data;
+    totalRows.value = res.totalCount;
+    projectDetailsState.loadProjectDetailsState();
+  }).finally(() => {
+    loading.value = false;
+  });
+}
 </script>
 
 <template>
-  <div>Project Errors</div>
+  <div id="projectErrorsPanel">
+    <sub-page-header title="Project Issues">
+      <div class="row">
+        <div class="col">
+          <span id="remove-button" class="mr-2">
+            <SkillsButton @click="removeAllErrors" :disabled="errors.length < 1" size="small" data-cy="removeAllErrors" label="Remove All" icon="fas fa-trash-alt">
+            </SkillsButton>
+          </span>
+        </div>
+      </div>
+    </sub-page-header>
+
+    <Card>
+      <template #content>
+        <SkillsDataTable :busy="loading"
+                         :value="errors"
+                         tableStoredStateId="projectErrorsTable"
+                         data-cy="projectErrorsTable" paginator lazy
+                         :totalRecords="totalRows"
+                         :rows="pageSize"
+                         @page="pageChanged"
+                         @sort="sortTable"
+                         :sort-field="sortBy"
+                         :sort-order="sortOrder"
+                         :rowsPerPageOptions="possiblePageSizes">
+          <Column header="Error" field="typeAndError" sortable>
+            <template #body="slotProps">
+              <div class="pl-3">
+                <div class="mb-2">
+                  {{ slotProps.data.errorType }}
+                </div>
+                <div class="text-sm">
+                  {{ formatErrorMsg(slotProps.data.errorType, slotProps.data.error) }}
+                </div>
+              </div>
+            </template>
+          </Column>
+          <Column header="First Seen" field="created" sortable>
+            <template #body="slotProps">
+              <date-cell :value="slotProps.data.created" />
+            </template>
+          </Column>
+          <Column header="Last Seen" field="lastSeen" sortable>
+            <template #body="slotProps">
+              <date-cell :value="slotProps.data.lastSeen" />
+            </template>
+          </Column>
+          <Column header="Times Seen" field="count" sortable></Column>
+          <Column header="Delete">
+            <template #body="slotProps">
+              <SkillsButton :ref="`delete_${slotProps.data.error}`" @click="removeError(slotProps.data)" variant="outline-info" size="small"
+                        :data-cy="`deleteErrorButton_${encodeURI(slotProps.data.error)}`"
+                        :aria-label="`delete error for reported skill ${slotProps.data.error}`"
+                        icon="fas fa-trash-alt" label="Delete">
+              </SkillsButton>
+            </template>
+          </Column>
+
+          <template #paginatorstart>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy="skillsBTableTotalRows">{{ totalRows }}</span>
+          </template>
+
+          <template #empty>
+            <div class="flex justify-content-center flex-wrap" data-cy="emptyTable">
+              <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle"
+                 aria-hidden="true"></i>
+              <span class="flex align-items-center justify-content-center">There are no records to show
+              </span>
+            </div>
+          </template>
+        </SkillsDataTable>
+      </template>
+    </Card>
+  </div>
 </template>
 
 <style scoped></style>

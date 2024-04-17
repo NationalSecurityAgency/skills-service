@@ -31,7 +31,7 @@ describe('Project Errors Tests', () => {
         });
     });
 
-    it('issues card should be update when Project Issues page is loaded', () => {
+    it('issues card should be updated when Project Issues page is loaded', () => {
         cy.visit('/administrator/projects/proj1/');
         // cy.wait('@getProject');
         cy.get('[data-cy=pageHeaderStat_Issues]')
@@ -43,24 +43,21 @@ describe('Project Errors Tests', () => {
 
         cy.reportSkill(1, 42, 'user@skills.org', '2021-02-24 10:00', false);
         cy.reportSkill(1, 75, 'user@skills.org', '2021-02-24 10:00', false);
-        cy.clickNav('Access')
-            .click();
-        cy.clickNav('Issues')
-            .click();
+        cy.clickNav('Access').click();
+        cy.clickNav('Issues').click();
         const expected = [
             [{
                 colIndex: 0,
-                value: ' SkillNotFound'
+                value: 'SkillNotFound'
             }],
             [{
                 colIndex: 0,
-                value: ' SkillNotFound'
+                value: 'SkillNotFound'
             }],
         ];
         const tableSelector = '[data-cy=projectErrorsTable]';
         cy.validateTable(tableSelector, expected);
-        cy.get('[data-cy=pageHeaderStat_Issues]')
-            .contains('2');
+        cy.get('[data-cy=pageHeaderStat_Issues]').contains('2');
     });
 
     it('displays errors associated with project', () => {
@@ -253,49 +250,49 @@ describe('Project Errors Tests', () => {
         const expected = [
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill47] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill47] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '7'
             }],
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill46] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill46] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '6'
             }],
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill45] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill45] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '5'
             }],
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill44] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill44] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '4'
             }],
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill43] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill43] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '3'
             }],
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill42] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill42] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '2'
             }],
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill41] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill41] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '1'
@@ -311,49 +308,49 @@ describe('Project Errors Tests', () => {
         const sortByFirstSeenExpected = [
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill41] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill41] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '1'
             }],
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill42] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill42] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '2'
             }],
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill43] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill43] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '3'
             }],
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill44] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill44] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '4'
             }],
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill45] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill45] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '5'
             }],
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill46] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill46] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '6'
             }],
             [{
                 colIndex: 0,
-                value: ' SkillNotFound  Reported Skill Id [skill47] does not exist in this Project '
+                value: 'SkillNotFoundReported Skill Id [skill47] does not exist in this Project'
             }, {
                 colIndex: 3,
                 value: '7'
