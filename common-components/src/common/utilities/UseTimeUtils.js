@@ -104,12 +104,15 @@ export const useTimeUtils = () => {
     return `${years} year${years > 1 ? 's' : ''}`;
   };
 
+  const relativeTime = (date) => dayjs(date).fromNow()
+
   return {
     timeFromNow,
     isToday,
     formatDate,
     formatDuration,
     formatDurationDiff,
-    simpleClockFilter
+    simpleClockFilter,
+    relativeTime
   }
 }

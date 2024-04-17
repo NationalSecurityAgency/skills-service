@@ -7,8 +7,17 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
 import SkillLevel from '@/skills-display/components/progress/MySkillLevel.vue'
+import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 
-const userProgress = useUserProgressSummaryState()
+const props = defineProps({
+  isSubject: {
+    type: Boolean,
+    default: false,
+  }
+})
+
+const userProgress = props.isSubject ?
+  useSkillsDisplaySubjectState().subjectSummary : useUserProgressSummaryState().userProgressSummary
 const themeState = useSkillsDisplayThemeState()
 const skillsDisplayPreferences = useSkillsDisplayPreferencesState()
 const numFormat = useNumberFormat()
@@ -18,12 +27,12 @@ const beforeTodayColor = computed(() => themeState.theme.progressIndicators.befo
 const earnedTodayColor = computed(() => themeState.theme.progressIndicators.earnedTodayColor)
 const completeColor = computed(() => themeState.theme.progressIndicators.completeColor)
 const incompleteColor = computed(() => themeState.theme.progressIndicators.incompleteColor)
-const isLevelComplete = computed(() => userProgress.userProgressSummary.levelTotalPoints === -1)
+const isLevelComplete = computed(() => userProgress.levelTotalPoints === -1)
 const levelStats = computed(() => {
   return {
-    title: isLevelComplete.value ? `${skillsDisplayPreferences.levelDisplayName} Progress` : `${skillsDisplayPreferences.levelDisplayName} ${userProgress.userProgressSummary.skillsLevel + 1} Progress`,
-    nextLevel: userProgress.userProgressSummary.skillsLevel + 1,
-    pointsTillNextLevel: userProgress.userProgressSummary.levelTotalPoints - userProgress.userProgressSummary.levelPoints,
+    title: isLevelComplete.value ? `${skillsDisplayPreferences.levelDisplayName} Progress` : `${skillsDisplayPreferences.levelDisplayName} ${userProgress.skillsLevel + 1} Progress`,
+    nextLevel: userProgress.skillsLevel + 1,
+    pointsTillNextLevel: userProgress.levelTotalPoints - userProgress.levelPoints,
   }
 })
 </script>
@@ -35,19 +44,19 @@ const levelStats = computed(() => {
         <div class="flex-1">
           <div>
             <circle-progress
-              :total-completed-points="userProgress.userProgressSummary.points"
-              :points-completed-today="userProgress.userProgressSummary.todaysPoints"
-              :total-possible-points="userProgress.userProgressSummary.totalPoints"
+              :total-completed-points="userProgress.points"
+              :points-completed-today="userProgress.todaysPoints"
+              :total-possible-points="userProgress.totalPoints"
               :completed-before-today-color="beforeTodayColor"
               :incomplete-color="incompleteColor"
-              :total-completed-color="userProgress.userProgressSummary.points === userProgress.userProgressSummary.totalPoints ? completeColor : earnedTodayColor"
+              :total-completed-color="userProgress.points === userProgress.totalPoints ? completeColor : earnedTodayColor"
               title="Overall Points">
               <template #footer>
-                <p v-if="userProgress.userProgressSummary.points > 0 && userProgress.userProgressSummary.points === userProgress.userProgressSummary.totalPoints">All Points earned</p>
+                <p v-if="userProgress.points > 0 && userProgress.points === userProgress.totalPoints">All Points earned</p>
                 <div v-else>
-                  <div>Earn up to <Tag>{{ numFormat.pretty(userProgress.userProgressSummary.totalPoints) }}</Tag> points</div>
+                  <div>Earn up to <Tag>{{ numFormat.pretty(userProgress.totalPoints) }}</Tag> points</div>
                   <div data-cy="overallPointsEarnedToday">
-                    <Tag severity="info">{{ numFormat.pretty(userProgress.userProgressSummary.todaysPoints) }}</Tag> Points earned Today
+                    <Tag severity="info">{{ numFormat.pretty(userProgress.todaysPoints) }}</Tag> Points earned Today
                   </div>
                 </div>
               </template>
@@ -60,9 +69,9 @@ const levelStats = computed(() => {
         </div>
         <div class="flex-1">
           <circle-progress
-            :total-completed-points="userProgress.userProgressSummary.levelPoints"
-            :points-completed-today="userProgress.userProgressSummary.todaysPoints"
-            :total-possible-points="userProgress.userProgressSummary.levelTotalPoints"
+            :total-completed-points="userProgress.levelPoints"
+            :points-completed-today="userProgress.todaysPoints"
+            :total-possible-points="userProgress.levelTotalPoints"
             :completed-before-today-color="beforeTodayColor"
             :incomplete-color="incompleteColor"
             :total-completed-color="isLevelComplete ? completeColor : earnedTodayColor"
@@ -76,7 +85,7 @@ const levelStats = computed(() => {
                   Point {{ pluralSupport.plural(levelStats.pointsTillNextLevel) }} to {{ skillsDisplayPreferences.levelDisplayName }} {{levelStats.nextLevel }}
                 </div>
                 <div  data-cy="pointsEarnedTodayForTheNextLevel">
-                  <Tag severity="info">{{ numFormat.pretty(userProgress.userProgressSummary.todaysPoints) }}</Tag> Points earned Today
+                  <Tag severity="info">{{ numFormat.pretty(userProgress.todaysPoints) }}</Tag> Points earned Today
                 </div>
               </div>
             </template>

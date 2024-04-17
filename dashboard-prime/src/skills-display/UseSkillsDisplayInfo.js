@@ -5,9 +5,11 @@ export const useSkillsDisplayInfo = () => {
   const route = useRoute()
   const skillsClientContextAppend = 'SkillsClient'
   const localContextAppend = 'Local'
-  const progressAndRankingsCleanRegex = /\/progress-and-rankings\/projects\/[^/]*/i
+  const progressAndRankingsRegex = /\/progress-and-rankings\/projects\/[^/]*/i
+  const localTestRegex = /\/test-skills-display\/[^/]*/i
+  const clientDisplayRegex =/\/static\/clientPortal\/index\.html/i
+  const regexes = [progressAndRankingsRegex, localTestRegex, clientDisplayRegex]
   const localTestContextAppend = 'LocalTest'
-  const localTestCleanRegex = /\/test-skills-display\/[^/]*/i
   const isSkillsDisplayPath = computed(() => {
     return route.path.startsWith('/static/clientPortal/')
   })
@@ -22,10 +24,21 @@ export const useSkillsDisplayInfo = () => {
   }
 
   const cleanPath = (path) => {
-    let cleanPath = path.replace('/static/clientPortal/index.html', '')
-    cleanPath = cleanPath.replace(progressAndRankingsCleanRegex, '')
-    cleanPath = cleanPath.replace(localTestCleanRegex, '')
-    return cleanPath || '/'
+    let cleanPath = path
+    for(const regex of regexes) {
+      cleanPath = cleanPath.replace(regex, '')
+    }
+    return cleanPath
+  }
+
+  const getRootUrl = () => {
+    for(const regex of regexes) {
+      let found = route.path.match(regex);
+      if (found) {
+        return found[0]
+      }
+    }
+    return '/'
   }
 
   return {
@@ -34,6 +47,7 @@ export const useSkillsDisplayInfo = () => {
     localContextAppend,
     localTestContextAppend,
     getContextSpecificRouteName,
-    cleanPath
+    cleanPath,
+    getRootUrl
   }
 }

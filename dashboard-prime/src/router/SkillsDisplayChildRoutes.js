@@ -2,8 +2,20 @@ import SkillsDisplay from '@/skills-display/components/SkillsDisplay.vue'
 import SkillsDisplayErrorPage from '@/skills-display/components/errors/SkillsDisplayErrorPage.vue'
 import MyRankDetailsPage from '@/skills-display/components/rank/MyRankDetailsPage.vue'
 import SubjectDetailsPage from '@/skills-display/components/subjects/SubjectPage.vue'
+import SkillPage from '@/skills-display/components/skill/SkillPage.vue'
 
 const createSkillsDisplayChildRoutes = (appendToName) => {
+
+  const projectPlaceholder = '##PROJECT##';
+  const projectPlaceholderRegex = new RegExp(projectPlaceholder, 'g');
+  const subjectPlaceholder = '##SUBJECT##';
+  const subjectPlaceholderRegex = new RegExp(subjectPlaceholder, 'g');
+  const groupPlaceholder = '##GROUP##';
+  const groupPlaceholderRegex = new RegExp(groupPlaceholder, 'g');
+  const skillPlaceholder = '##SKILL##';
+  const skillPlaceholderRegex = new RegExp(skillPlaceholder, 'g');
+
+
   return [{
     name: `SkillsDisplay${appendToName}`,
     path: '',
@@ -37,6 +49,13 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
         message: 'Subject'
       }
     }
+  }, {
+    path: 'subjects/:subjectId/skills/:skillId',
+    component: SkillPage,
+    name: `skillDetails${appendToName}`,
+    meta: {
+      title: `${skillPlaceholder} Details`,
+    },
   }, {
     name: `SkillsDisplayErrorPage${appendToName}`,
     path: 'error',
