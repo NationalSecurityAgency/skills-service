@@ -17,7 +17,7 @@ onMounted(() => {
 </script>
 
 <template>
-<div class="mt-3">
+<div class="my-3">
   <skills-display-home />
 </div>
 </template>

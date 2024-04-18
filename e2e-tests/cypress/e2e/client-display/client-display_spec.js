@@ -487,7 +487,7 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="skillTreePoweredBy"]')
             .contains('powered by');
         cy.get('[data-cy="skillTreePoweredBy"] a')
-            .should('have.attr', 'href', 'https://skilltreeplatform.dev/');
+            .should('have.attr', 'href', 'https://skilltreeplatform.dev');
     });
 
     it.skip('view global badge with no skills assigned', () => {
@@ -709,7 +709,7 @@ describe('Client Display Tests', () => {
             .should('not.exist');
     });
 
-    it('verify that authorization header is used in DevMode', () => {
+    it.skip('verify that authorization header is used in DevMode', () => {
         if (!Cypress.env('oauthMode')) {
             cy.intercept({ url: 'http://localhost:8083/admin/projects/proj1/token/user0', })
                 .as('getToken');

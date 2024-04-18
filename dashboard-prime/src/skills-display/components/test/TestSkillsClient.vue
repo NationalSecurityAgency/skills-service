@@ -40,7 +40,6 @@ const constructSkillsDisplay = () => {
 }
 
 onMounted(() => {
-  console.log('TestSkillsClient.vue: onMounted')
   constructSkillsDisplay()
 })
 </script>

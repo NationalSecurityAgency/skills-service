@@ -59,7 +59,6 @@ const build = () => {
   if (newItems.length > 0) {
     newItems[newItems.length - 1].isLast = true
   }
-  console.log(newItems)
   breadcrumbState.breadcrumbItems = newItems
 }
 

@@ -6,7 +6,7 @@ import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProg
 import { onMounted } from 'vue'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import MyRank from '@/skills-display/components/rank/MyRank.vue'
-import PointProgressChart from '@/skills-display/components/progress/PointProgressChart.vue'
+import PointProgressChart from '@/skills-display/components/progress/points/PointProgressChart.vue'
 import SubjectTiles from '@/skills-display/components/subjects/SubjectTiles.vue'
 
 const skillsDisplayTheme = useSkillsDisplayThemeState()
