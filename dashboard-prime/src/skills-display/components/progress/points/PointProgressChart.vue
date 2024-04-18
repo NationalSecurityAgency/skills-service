@@ -34,7 +34,7 @@ const chartOptions = {
     type: 'area',
     toolbar: {
       offsetY: -37
-    },
+    }
   },
   dataLabels: {
     enabled: false
@@ -87,7 +87,7 @@ onMounted(() => {
 })
 const loadPointsHistory = () => {
   pointHistoryState.loadPointHistory(route.params.subjectId)
-    .then((result) => {
+    .then(() => {
       const pointHistoryRes = pointHistoryState.getPointHistory(route.params.subjectId)
       const seriesData = pointHistoryRes.pointsHistory.map((value) => ({
         x: new Date(value.dayPerformed).getTime(),
@@ -97,7 +97,10 @@ const loadPointsHistory = () => {
         data: seriesData,
         name: 'Points'
       }]
-      chartOptions.xaxis.max = PointProgressHelper.calculateXAxisMaxTimestamp(result)
+      chartOptions.xaxis.max = PointProgressHelper.calculateXAxisMaxTimestamp(pointHistoryRes)
+      if (chartOptions.xaxis.max) {
+        chartWasZoomed.value = true
+      }
       let lastDay = -1
       let firstDay = -1
       if (seriesData && seriesData.length > 0) {
@@ -173,6 +176,28 @@ const hasData = computed(() => {
   return chartSeries.value && chartSeries.value.length > 0 && chartSeries.value[0].data && chartSeries.value[0].data.length > 0
 })
 
+const chartWasZoomed = ref(false)
+const zoomedInfo = ref({})
+const ptChart = ref(null)
+const resetZoom = () => {
+  chartWasZoomed.value = false
+  ptChart.value.updateOptions({
+    xaxis: {
+      max: undefined,
+      min: undefined,
+    },
+  });
+}
+const zoomed = (chartContext, { xaxis, yaxis }) => {
+  if (xaxis.min === undefined && xaxis.max === undefined) {
+    chartWasZoomed.value = false;
+  } else {
+    chartWasZoomed.value = true;
+  }
+  zoomedInfo.value = {
+    x: xaxis, y: yaxis,
+  };
+}
 </script>
 
 <template>
@@ -180,8 +205,20 @@ const hasData = computed(() => {
         :pt="{ content: { class: 'pt-2 pb-0' } }"
         data-cy="pointHistoryChart">
     <template #subtitle>
-      <div>
-        Point History
+      <div class="flex">
+        <div>
+          Point History
+          <SkillsButton
+            v-if="chartWasZoomed"
+            @click="resetZoom"
+            icon="fas fa-search-minus"
+            label="Reset Zoom"
+            outlined
+            size="small"
+            class="absolute ml-2"
+            data-cy="pointProgressChart-resetZoomBtn"
+          />
+        </div>
       </div>
     </template>
     <template #content>
@@ -214,6 +251,7 @@ const hasData = computed(() => {
             <apexchart ref="ptChart" id="points-chart"
                        :options="chartOptions"
                        @animationEnd="animationEnded = true"
+                       @zoomed="zoomed"
                        :series="chartSeries"
                        height="200" type="area" />
             <span v-if="animationEnded" data-cy="pointHistoryChart-animationEnded"></span>

@@ -7,6 +7,8 @@ import UserOverallProgress from '@/skills-display/components/home/UserOverallPro
 import { tryOnBeforeMount } from '@vueuse/core'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 import SkillsProgressList from '@/skills-display/components/progress/SkillsProgressList.vue'
+import MyRank from '@/skills-display/components/rank/MyRank.vue'
+import PointProgressChart from '@/skills-display/components/progress/points/PointProgressChart.vue'
 
 const subject = useSkillsDisplaySubjectState()
 const route = useRoute()
@@ -26,6 +28,15 @@ onMounted(() => {
       <skills-title>{{  subject.subjectSummary.subject }}</skills-title>
       <div class="mt-3">
         <user-overall-progress :is-subject="true"/>
+      </div>
+
+      <div class="mt-3 flex gap-4 align-items-stretch">
+        <div class="flex align-items-center">
+          <my-rank />
+        </div>
+        <div class="flex-1 align-items-center">
+          <point-progress-chart />
+        </div>
       </div>
 
       <Card v-if="subject.subjectSummary.description" class="mt-2">

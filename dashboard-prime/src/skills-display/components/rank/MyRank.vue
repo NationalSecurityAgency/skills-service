@@ -4,20 +4,23 @@ import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSki
 import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useRoute } from 'vue-router'
 
 const preferences = useSkillsDisplayPreferencesState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const progress = useUserProgressSummaryState()
 const numberFormat = useNumberFormat()
+const route = useRoute()
 
 const position = computed(() => numberFormat.pretty(progress.userRanking.position))
 onMounted(() => {
-  progress.loadUserSkillsRanking()
+  progress.loadUserSkillsRanking(route.params.subjectId)
 })
 </script>
 
 <template>
-<Card class="skills-my-rank w-min-20rem">
+<Card class="skills-my-rank w-min-20rem"
+      :pt="{ content: { class: 'py-0' } }">
   <template #subtitle>
     <div class="text-center">
       My Rank

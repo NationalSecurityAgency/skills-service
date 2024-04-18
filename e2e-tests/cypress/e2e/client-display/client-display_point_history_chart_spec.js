@@ -651,7 +651,7 @@ describe('Client Display Point History Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]', 'PointHistoryChart-Reset');
     });
 
-    it.skip('subject rapid growth of points af start followed by no activity', () => {
+    it('subject rapid growth of points af start followed by no activity', () => {
         const pointHistory = createTimeline('2019-09-12', 240, 10, 100, 7, 30);
         cy.log(`Generated ${pointHistory.length} points`);
         const data = {
@@ -702,7 +702,7 @@ describe('Client Display Point History Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
     });
 
-    it.skip('achievement after initial rapid growth and then flat-line', () => {
+    it('achievement after initial rapid growth and then flat-line', () => {
         const data = {
             'pointsHistory': [{
                 'dayPerformed': '2020-12-01T00:00:00.000+00:00',
