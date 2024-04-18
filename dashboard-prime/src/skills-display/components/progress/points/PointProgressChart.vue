@@ -12,10 +12,9 @@ const numFormat = useNumberFormat()
 const themeState = useSkillsDisplayThemeState()
 const route = useRoute()
 
-const zoomedInfo = ref({})
 const chartSeries = ref([])
-const chartWasZoomed = ref(false)
 const loading = ref(true)
+const animationEnded = ref(false)
 
 const pointHistoryChart = () => {
   const chartsModule = themeState.theme?.charts?.pointHistory
@@ -34,20 +33,8 @@ const chartOptions = {
   chart: {
     type: 'area',
     toolbar: {
-      offsetY: -30
+      offsetY: -37
     },
-    events: {
-      zoomed(chartContext, { xaxis, yaxis }) {
-        if (xaxis.min === undefined && xaxis.max === undefined) {
-          self.chartWasZoomed = false
-        } else {
-          self.chartWasZoomed = true
-        }
-        zoomedInfo.value = {
-          x: xaxis, y: yaxis
-        }
-      }
-    }
   },
   dataLabels: {
     enabled: false
@@ -111,10 +98,6 @@ const loadPointsHistory = () => {
         name: 'Points'
       }]
       chartOptions.xaxis.max = PointProgressHelper.calculateXAxisMaxTimestamp(result)
-      if (chartOptions.xaxis.max) {
-        chartWasZoomed.value = true
-      }
-
       let lastDay = -1
       let firstDay = -1
       if (seriesData && seriesData.length > 0) {
@@ -161,9 +144,9 @@ const loadPointsHistory = () => {
 const chartLabels = () => {
   const chartsModule = themeState.theme?.charts
   return {
-    borderColor: chartsModule?.labelBorderColor ? chartsModule.labelBorderColor : colors.primary,
-    backgroundColor: chartsModule?.labelBackgroundColor ? chartsModule.labelBackgroundColor : colors.success,
-    foregroundColor: chartsModule?.labelForegroundColor ? chartsModule.labelForegroundColor : colors.white
+    borderColor: chartsModule?.labelBorderColor ? chartsModule.labelBorderColor : themeState.colors.primary,
+    backgroundColor: chartsModule?.labelBackgroundColor ? chartsModule.labelBackgroundColor : themeState.colors.success,
+    foregroundColor: chartsModule?.labelForegroundColor ? chartsModule.labelForegroundColor : themeState.colors.white
   }
 }
 const getOffsetX = (name, firstDay, lastDay, timestamp) => {
@@ -189,10 +172,13 @@ const getLeftOffset = (name) => {
 const hasData = computed(() => {
   return chartSeries.value && chartSeries.value.length > 0 && chartSeries.value[0].data && chartSeries.value[0].data.length > 0
 })
+
 </script>
 
 <template>
-  <Card class="h-full" data-cy="pointHistoryChart">
+  <Card class="h-full"
+        :pt="{ content: { class: 'pt-2 pb-0' } }"
+        data-cy="pointHistoryChart">
     <template #subtitle>
       <div>
         Point History
@@ -223,6 +209,15 @@ const hasData = computed(() => {
                 </div>
               </div>
             </div>
+          </div>
+          <div v-if="hasData">
+            <apexchart ref="ptChart" id="points-chart"
+                       :options="chartOptions"
+                       @animationEnd="animationEnded = true"
+                       :series="chartSeries"
+                       height="200" type="area" />
+            <span v-if="animationEnded" data-cy="pointHistoryChart-animationEnded"></span>
+
           </div>
         </div>
       </div>

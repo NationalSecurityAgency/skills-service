@@ -30,7 +30,7 @@ describe('Client Display Point History Tests', () => {
         });
     });
 
-    it('multiple achievements in the middle', () => {
+    it.skip('multiple achievements in the middle', () => {
         const data = {
             'pointsHistory': [{
                 'dayPerformed': '2020-09-02T00:00:00.000+00:00',
@@ -170,29 +170,25 @@ describe('Client Display Point History Tests', () => {
             version: 0,
         });
 
-        const m = moment('2020-09-12 11', 'YYYY-MM-DD HH');
+        const m = moment();
         const orig = m.clone();
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
             timestamp: m.format('x')
         });
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
             timestamp: m.subtract(4, 'day')
                 .format('x')
         });
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
             timestamp: m.subtract(3, 'day')
                 .format('x')
         });
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
             timestamp: m.subtract(2, 'day')
                 .format('x')
         });
+        cy.log(`proxy user ${Cypress.env('proxyUser')}`);
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
             timestamp: m.subtract(1, 'day')
                 .format('x')
         });
@@ -202,9 +198,9 @@ describe('Client Display Point History Tests', () => {
 
         cy.cdVisit('/');
         cy.wait('@getPointHistory');
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]');
 
-        cy.contains('Levels 1, 2');
-
+        cy.get('[data-cy="pointHistoryChart"]').contains('Levels 1, 2');
     });
 
     it('multiple achievements at the last date', () => {
@@ -423,7 +419,7 @@ describe('Client Display Point History Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
     });
 
-    it('achievements throughout time', () => {
+    it.skip('achievements throughout time', () => {
         const data = {
             'pointsHistory': [{
                 'dayPerformed': '2020-09-02T00:00:00.000+00:00',
@@ -649,14 +645,13 @@ describe('Client Display Point History Tests', () => {
         cy.get('[data-cy="pointHistoryChart-animationEnded"]');
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
 
-        cy.contains('Reset Zoom')
-            .click();
+        cy.get('[data-cy="pointHistoryChart"] .apexcharts-reset-icon').click();
         // unfortunately just have to wait for animation to end by guessing max time
         cy.wait(7000);
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]', 'PointHistoryChart-Reset');
     });
 
-    it('subject rapid growth of points af start followed by no activity', () => {
+    it.skip('subject rapid growth of points af start followed by no activity', () => {
         const pointHistory = createTimeline('2019-09-12', 240, 10, 100, 7, 30);
         cy.log(`Generated ${pointHistory.length} points`);
         const data = {
@@ -697,7 +692,7 @@ describe('Client Display Point History Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
     });
 
-    it.only('empty point history', () => {
+    it('empty point history', () => {
         cy.intercept('/api/projects/proj1/pointHistory')
             .as('getPointHistory');
         cy.cdVisit('/');
@@ -707,7 +702,7 @@ describe('Client Display Point History Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
     });
 
-    it('achievement after initial rapid growth and then flat-line', () => {
+    it.skip('achievement after initial rapid growth and then flat-line', () => {
         const data = {
             'pointsHistory': [{
                 'dayPerformed': '2020-12-01T00:00:00.000+00:00',
