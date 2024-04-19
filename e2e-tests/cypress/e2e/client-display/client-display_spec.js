@@ -826,7 +826,7 @@ describe('Client Display Tests', () => {
             .contains('100% Complete');
     });
 
-    it.skip('verify correct # of stars on subject card', () => {
+    it('verify correct # of stars on subject card', () => {
         cy.request('PUT', '/admin/projects/proj1/subjects/subj1/levels/next', {
             percent: '99',
             'iconClass': 'fas fa-user-ninja',
@@ -841,11 +841,19 @@ describe('Client Display Tests', () => {
             .contains('Subject 1');
         cy.get('[data-cy=subjectTile]')
             .eq(0)
-            .find('span.fa.fa-star')
+            .find('[data-cy="subjectStars"] [data-pc-section="officon"]')
             .should('have.length', 6);
+        cy.get('[data-cy=subjectTile]')
+          .eq(1)
+          .find('[data-cy="subjectStars"] [data-pc-section="officon"]')
+          .should('have.length', 5);
+        cy.get('[data-cy=subjectTile]')
+          .eq(2)
+          .find('[data-cy="subjectStars"] [data-pc-section="officon"]')
+          .should('have.length', 5);
     });
 
-    it.skip('description is rendered in client-display if configured on project', () => {
+    it('description is rendered in client-display if configured on project', () => {
         cy.request('POST', '/admin/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1',
@@ -857,11 +865,9 @@ describe('Client Display Tests', () => {
             projectId: 'proj1'
         }]);
 
-
         cy.cdVisit('/');
-        cy.injectAxe();
-        cy.contains('I am a description');
-        cy.matchSnapshotImageForElement('.project-description', {
+        cy.get('[data-cy="projectDescription"]').contains('I am a description');
+        cy.matchSnapshotImageForElement('[data-cy="projectDescription"]', {
             blackout: '[data-cy=pointHistoryChart]'
         });
     });

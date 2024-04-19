@@ -1,18 +1,18 @@
 <script setup>
 import { computed } from 'vue'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 const userProgress = useUserProgressSummaryState()
-const skillsDisplayPreferences = useSkillsDisplayPreferencesState()
+const attributes = useSkillsDisplayAttributesState()
 
 const level = computed(() => userProgress.userProgressSummary.skillsLevel)
 const totalLevels = computed(() => userProgress.userProgressSummary.totalLevels)
 </script>
 
 <template>
-  <div class="progress-circle-wrapper">
-    <label class="text-2xl">My {{ skillsDisplayPreferences.levelDisplayName }}</label>
+  <div class="progress-circle-wrapper" data-cy="overallLevel">
+    <label class="text-2xl" data-cy="overallLevelTitle">My {{ attributes.levelDisplayName }}</label>
     <div class="mt-4">
       <div class="fa-stack skills-icon trophy-stack">
         <i class="fa fa-trophy fa-stack-2x" />
@@ -21,7 +21,7 @@ const totalLevels = computed(() => userProgress.userProgressSummary.totalLevels)
       </div>
     </div>
     <div data-cy="overallLevelDesc" class="mt-3">
-      {{ skillsDisplayPreferences.levelDisplayName }} <Tag severity="info">{{ level }}</Tag> out of <Tag>{{ totalLevels }}</Tag>
+      {{ attributes.levelDisplayName }} <Tag severity="info">{{ level }}</Tag> out of <Tag>{{ totalLevels }}</Tag>
     </div>
     <div class="flex justify-content-center mt-2 overall-progress-stars-icons">
       <Rating v-model="level" :stars="totalLevels" readonly :cancel="false" />

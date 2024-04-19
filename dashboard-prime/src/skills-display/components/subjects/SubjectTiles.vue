@@ -7,7 +7,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 
 const userProgress = useUserProgressSummaryState()
 const preferences = useSkillsDisplayPreferencesState()
-const hasData = computed(() => userProgress.userProgressSummary.subjects.length > 0)
+const hasData = computed(() => userProgress.userProgressSummary.subjects?.length > 0)
 </script>
 
 <template>

@@ -4,10 +4,10 @@ import CircleProgress from '@/skills-display/components/progress/CircleProgress.
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { computed } from 'vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
 import SkillLevel from '@/skills-display/components/progress/MySkillLevel.vue'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 const props = defineProps({
   isSubject: {
@@ -19,7 +19,7 @@ const props = defineProps({
 const userProgress = props.isSubject ?
   useSkillsDisplaySubjectState().subjectSummary : useUserProgressSummaryState().userProgressSummary
 const themeState = useSkillsDisplayThemeState()
-const skillsDisplayPreferences = useSkillsDisplayPreferencesState()
+const attributes = useSkillsDisplayAttributesState()
 const numFormat = useNumberFormat()
 const pluralSupport = useLanguagePluralSupport()
 
@@ -30,7 +30,7 @@ const incompleteColor = computed(() => themeState.theme.progressIndicators.incom
 const isLevelComplete = computed(() => userProgress.levelTotalPoints === -1)
 const levelStats = computed(() => {
   return {
-    title: isLevelComplete.value ? `${skillsDisplayPreferences.levelDisplayName} Progress` : `${skillsDisplayPreferences.levelDisplayName} ${userProgress.skillsLevel + 1} Progress`,
+    title: isLevelComplete.value ? `${attributes.levelDisplayName} Progress` : `${attributes.levelDisplayName} ${userProgress.skillsLevel + 1} Progress`,
     nextLevel: userProgress.skillsLevel + 1,
     pointsTillNextLevel: userProgress.levelTotalPoints - userProgress.levelPoints,
   }
@@ -77,12 +77,12 @@ const levelStats = computed(() => {
             :total-completed-color="isLevelComplete ? completeColor : earnedTodayColor"
             :title="levelStats.title">
             <template #footer>
-              <p v-if="isLevelComplete">All {{ skillsDisplayPreferences.levelDisplayName.toLowerCase() }}s complete</p>
+              <p v-if="isLevelComplete">All {{ attributes.levelDisplayName.toLowerCase() }}s complete</p>
 
               <div v-if="!isLevelComplete">
                 <div>
                   <Tag>{{ numFormat.pretty(levelStats.pointsTillNextLevel) }}</Tag>
-                  Point {{ pluralSupport.plural(levelStats.pointsTillNextLevel) }} to {{ skillsDisplayPreferences.levelDisplayName }} {{levelStats.nextLevel }}
+                  Point {{ pluralSupport.plural(levelStats.pointsTillNextLevel) }} to {{ attributes.levelDisplayName }} {{levelStats.nextLevel }}
                 </div>
                 <div  data-cy="pointsEarnedTodayForTheNextLevel">
                   <Tag severity="info">{{ numFormat.pretty(userProgress.todaysPoints) }}</Tag> Points earned Today

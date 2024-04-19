@@ -9,7 +9,6 @@ export const useSkillsDisplayPreferencesState = defineStore('skillsDisplayPrefer
   const subjectDisplayName = ref('Subject')
   const groupDisplayName = ref('Group')
   const skillDisplayName = ref('Skill')
-  const levelDisplayName = ref('Level')
 
   return {
     isSummaryOnly,
@@ -18,6 +17,5 @@ export const useSkillsDisplayPreferencesState = defineStore('skillsDisplayPrefer
     subjectDisplayName,
     groupDisplayName,
     skillDisplayName,
-    levelDisplayName,
   }
 })

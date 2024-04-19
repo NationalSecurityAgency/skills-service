@@ -18,7 +18,7 @@ export const useErrorHandling = () => {
 
   const navToErrorPage = () => {
     const errPageName =
-      skillsDisplayInfo.isSkillsDisplayPath?.value ? 'SkillsDisplayErrorPage' : 'ErrorPage'
+      skillsDisplayInfo.isSkillsClientPath() ? skillsDisplayInfo.getContextSpecificRouteName('SkillsDisplayErrorPage') : 'ErrorPage'
     log.debug(`Navigating to error page: ${errPageName}`)
     return router.push({ name: errPageName })
   }

@@ -10,11 +10,12 @@ export const useSkillsDisplayInfo = () => {
   const clientDisplayRegex =/\/static\/clientPortal\/index\.html/i
   const regexes = [progressAndRankingsRegex, localTestRegex, clientDisplayRegex]
   const localTestContextAppend = 'LocalTest'
-  const isSkillsDisplayPath = computed(() => {
+
+  const isSkillsClientPath = () => {
     return route.path.startsWith('/static/clientPortal/')
-  })
+  }
   const getContextSpecificRouteName = (name) => {
-    if (isSkillsDisplayPath.value) {
+    if (isSkillsClientPath()) {
       return `${name}${skillsClientContextAppend}`
     }
     if (route.path.startsWith('/progress-and-rankings')) {
@@ -41,7 +42,19 @@ export const useSkillsDisplayInfo = () => {
     return '/'
   }
 
+  const isSkillsDisplayPath = (optionalpath = null) => {
+    const pathToCheck = optionalpath || route.path
+    for(const regex of regexes) {
+      let found = pathToCheck.match(regex);
+      if (found) {
+        return true
+      }
+    }
+    return false
+  }
+
   return {
+    isSkillsClientPath,
     isSkillsDisplayPath,
     skillsClientContextAppend,
     localContextAppend,

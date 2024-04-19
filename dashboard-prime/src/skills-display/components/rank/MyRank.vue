@@ -20,9 +20,10 @@ onMounted(() => {
 
 <template>
 <Card class="skills-my-rank w-min-20rem"
+      data-cy="myRank"
       :pt="{ content: { class: 'py-0' } }">
   <template #subtitle>
-    <div class="text-center">
+    <div class="text-center" data-cy="myRankTitle">
       My Rank
     </div>
   </template>
@@ -48,7 +49,7 @@ onMounted(() => {
     <router-link
       :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('MyRankDetailsPage') }"
       aria-label="Click to navigate to My Rank page"
-      data-cy="myRank">
+      data-cy="myRankBtn">
       <Button
         label="View"
         icon="far fa-eye"

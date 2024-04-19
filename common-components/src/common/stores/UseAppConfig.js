@@ -106,7 +106,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const buildTimestamp = computed(() => config.value.buildTimestamp)
   const currentUsersCommunityDescriptor = computed(() => config.value.currentUsersCommunityDescriptor)
   const activityHistoryStartDate = computed(() => config.value.activityHistoryStartDate)
-  const motivationalSkillWarningGracePeriod = (() => config.value.motivationalSkillWarningGracePeriod)
+  const motivationalSkillWarningGracePeriod = computed(() => config.value.motivationalSkillWarningGracePeriod)
+  const skillsDisplayProjectDescription = computed(() => config.value.skillsDisplayProjectDescription)
   return {
     loadConfigState,
     refreshConfig,
@@ -171,6 +172,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     buildTimestamp,
     currentUsersCommunityDescriptor,
     activityHistoryStartDate,
-    motivationalSkillWarningGracePeriod
+    motivationalSkillWarningGracePeriod,
+    skillsDisplayProjectDescription
   }
 })

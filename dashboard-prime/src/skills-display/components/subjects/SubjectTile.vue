@@ -1,10 +1,10 @@
 <script setup>
 import { computed } from 'vue'
 import Ribbon from '@/skills-display/components/subjects/Ribbon.vue'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 const props = defineProps({
   subject: {
@@ -17,7 +17,7 @@ const props = defineProps({
   }
 })
 
-const preferencesState = useSkillsDisplayPreferencesState()
+const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const numFormat = useNumberFormat()
 const ribbonColor = ['#4472ba', '#c74a41', '#44843E', '#BE5A09', '#A15E9A', '#23806A'][props.tileIndex % 6]
@@ -57,9 +57,9 @@ const progress = computed(() => {
       </ribbon>
 
       <i :class="subject.iconClass" class="text-7xl text-400" />
-      <div class="text-xl pt-1 font-medium">{{ preferencesState.levelDisplayName }} {{ subject.skillsLevel }}</div>
+      <div class="text-xl pt-1 font-medium">{{ attributes.levelDisplayName }} {{ subject.skillsLevel }}</div>
       <div class="flex justify-content-center mt-2 subject-progress-stars-icons">
-        <Rating v-model="subject.skillsLevel" :stars="subject.totalLevels" readonly :cancel="false" />
+        <Rating v-model="subject.skillsLevel" :stars="subject.totalLevels" readonly :cancel="false" data-cy="subjectStars"/>
       </div>
 
       <div class="flex mt-2">
@@ -82,7 +82,7 @@ const progress = computed(() => {
       <div class=" mt-4">
         <div class="flex">
           <div v-if="!progress.allLevelsComplete" class="flex-1 text-left">
-            <label class="skill-label" style="min-width: 10rem;">Next {{ preferencesState.levelDisplayName
+            <label class="skill-label" style="min-width: 10rem;">Next {{ attributes.levelDisplayName
               }}</label>
           </div>
           <div v-if="!progress.allLevelsComplete" class="">
@@ -93,7 +93,7 @@ const progress = computed(() => {
         </div>
         <div v-if="progress.allLevelsComplete" class="">
           <label class="skill-label text-center text-uppercase"><i class="fas fa-check text-success" /> All
-            {{ preferencesState.levelDisplayName.toLowerCase() }}s complete</label>
+            {{ attributes.levelDisplayName.toLowerCase() }}s complete</label>
         </div>
         <div class="">
           <vertical-progress-bar

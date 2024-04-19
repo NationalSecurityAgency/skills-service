@@ -31,7 +31,6 @@ onMounted(() => {
           .then((quiz) => {
             const quizCreated = dayjs(quiz.created);
             show.value = quizCreated.isBefore(configuredStartDate.value);
-            console.log('setting true')
           });
     }
   }

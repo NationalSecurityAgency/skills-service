@@ -15,6 +15,7 @@ import { useInviteOnlyProjectState } from '@/stores/UseInviteOnlyProjectState.js
 import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 export const useGlobalNavGuards = () => {
 
@@ -32,6 +33,7 @@ export const useGlobalNavGuards = () => {
   const route = useRoute()
   const skillDisplayParentFrameState = useSkillsDisplayParentFrameState()
   const skillsDisplayInfo = useSkillsDisplayInfo()
+  const skillsDisplayAttributes = useSkillsDisplayAttributesState()
 
   const log = useLog()
 
@@ -120,6 +122,10 @@ export const useGlobalNavGuards = () => {
 
   const addNavGuards = () => {
     router.beforeEach(beforeEachNavGuard)
+    router.beforeEach((to, from, next) => {
+      skillsDisplayAttributes.loadConfigStateIfNeeded(to)
+      next()
+    })
     const DEFAULT_TITLE = 'SkillTree Dashboard'
     router.afterEach((to, from) => {
 
