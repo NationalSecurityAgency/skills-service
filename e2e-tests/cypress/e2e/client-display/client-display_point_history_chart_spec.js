@@ -647,7 +647,7 @@ describe('Client Display Point History Tests', () => {
 
         cy.get('[data-cy="pointHistoryChart"] .apexcharts-reset-icon').click();
         // unfortunately just have to wait for animation to end by guessing max time
-        cy.wait(7000);
+        cy.wait(10000);
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]', 'PointHistoryChart-Reset');
     });
 
