@@ -52,65 +52,68 @@ const progress = computed(() => {
 <template>
   <Card class="h-full text-center" data-cy="subjectTile">
     <template #content>
-      <ribbon :color="ribbonColor" class="subject-tile-ribbon">
-        {{ subject.subject }}
-      </ribbon>
+      <div :data-cy="`subjectTile-${subject.subjectId}`">
+        <ribbon :color="ribbonColor" class="subject-tile-ribbon">
+          {{ subject.subject }}
+        </ribbon>
 
-      <i :class="subject.iconClass" class="text-7xl text-400" />
-      <div class="text-xl pt-1 font-medium">{{ attributes.levelDisplayName }} {{ subject.skillsLevel }}</div>
-      <div class="flex justify-content-center mt-2 subject-progress-stars-icons">
-        <Rating v-model="subject.skillsLevel" :stars="subject.totalLevels" readonly :cancel="false" data-cy="subjectStars"/>
-      </div>
-
-      <div class="flex mt-2">
-        <div class="flex-1 text-left">
-          <label class="skill-label" style="min-width: 5rem;">Overall</label>
+        <i :class="subject.iconClass" class="text-7xl text-400" />
+        <div class="text-xl pt-1 font-medium" data-cy="levelTitle">{{ attributes.levelDisplayName }} {{ subject.skillsLevel }}</div>
+        <div class="flex justify-content-center mt-2 subject-progress-stars-icons">
+          <Rating v-model="subject.skillsLevel" :stars="subject.totalLevels" readonly :cancel="false"
+                  data-cy="subjectStars" />
         </div>
-        <div class="">
-          <label class="skill-label text-right">
-            {{ numFormat.pretty(subject.points) }} / {{ numFormat.pretty(subject.totalPoints) }}
-          </label>
-        </div>
-      </div>
-      <div>
-        <vertical-progress-bar
-          :total-progress="progress.total"
-          :total-progress-before-today="progress.totalBeforeToday"
-        />
-      </div>
 
-      <div class=" mt-4">
-        <div class="flex">
-          <div v-if="!progress.allLevelsComplete" class="flex-1 text-left">
-            <label class="skill-label" style="min-width: 10rem;">Next {{ attributes.levelDisplayName
-              }}</label>
+        <div class="flex mt-2">
+          <div class="flex-1 text-left">
+            <label class="skill-label" style="min-width: 5rem;">Overall</label>
           </div>
-          <div v-if="!progress.allLevelsComplete" class="">
-            <label class="skill-label">
-              {{ numFormat.pretty(subject.levelPoints) }} / {{ numFormat.pretty(subject.levelTotalPoints) }}
+          <div class="">
+            <label class="skill-label text-right" data-cy="pointsProgress">
+              <span class="text-orange-600 font-medium">{{ numFormat.pretty(subject.points) }}</span> /
+              {{ numFormat.pretty(subject.totalPoints) }}
             </label>
           </div>
         </div>
-        <div v-if="progress.allLevelsComplete" class="">
-          <label class="skill-label text-center text-uppercase"><i class="fas fa-check text-success" /> All
-            {{ attributes.levelDisplayName.toLowerCase() }}s complete</label>
-        </div>
-        <div class="">
+        <div>
           <vertical-progress-bar
-            :total-progress="progress.level"
-            :total-progress-before-today="progress.levelBeforeToday"
+            :total-progress="progress.total"
+            :total-progress-before-today="progress.totalBeforeToday"
           />
-          <!--          <progress-bar-->
-          <!--            v-if="progress.allLevelsComplete"-->
-          <!--            :val="progress.level"-->
-          <!--            :size="18"-->
-          <!--            :bar-color="completeColor"-->
-          <!--            class="progress-border"/>-->
-          <!--          <vertical-progress-bar v-else-->
-          <!--                                 :before-today-bar-color="beforeTodayColor"-->
-          <!--                                 :total-progress-bar-color="earnedTodayColor"-->
-          <!--                                 :total-progress="progress.level"-->
-          <!--                                 :total-progress-before-today="progress.levelBeforeToday"/>-->
+        </div>
+
+        <div class=" mt-4">
+          <div class="flex">
+            <div v-if="!progress.allLevelsComplete" class="flex-1 text-left">
+              <label class="skill-label" style="min-width: 10rem;">Next {{ attributes.levelDisplayName
+                }}</label>
+            </div>
+            <div v-if="!progress.allLevelsComplete" data-cy="levelProgress">
+                <span class="text-orange-600 font-medium">{{ numFormat.pretty(subject.levelPoints) }}</span> /
+                {{ numFormat.pretty(subject.levelTotalPoints) }}
+            </div>
+          </div>
+          <div v-if="progress.allLevelsComplete" data-cy="allLevelsComplete">
+            <label class="skill-label text-center uppercase"><i class="fas fa-check text-green-500" /> All
+              {{ attributes.levelDisplayName.toLowerCase() }}s complete</label>
+          </div>
+          <div class="">
+            <vertical-progress-bar
+              :total-progress="progress.level"
+              :total-progress-before-today="progress.levelBeforeToday"
+            />
+            <!--          <progress-bar-->
+            <!--            v-if="progress.allLevelsComplete"-->
+            <!--            :val="progress.level"-->
+            <!--            :size="18"-->
+            <!--            :bar-color="completeColor"-->
+            <!--            class="progress-border"/>-->
+            <!--          <vertical-progress-bar v-else-->
+            <!--                                 :before-today-bar-color="beforeTodayColor"-->
+            <!--                                 :total-progress-bar-color="earnedTodayColor"-->
+            <!--                                 :total-progress="progress.level"-->
+            <!--                                 :total-progress-before-today="progress.levelBeforeToday"/>-->
+          </div>
         </div>
       </div>
     </template>

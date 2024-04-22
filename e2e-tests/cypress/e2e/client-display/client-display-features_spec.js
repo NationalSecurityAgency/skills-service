@@ -230,7 +230,7 @@ describe('Client Display Features Tests', () => {
         cy.get('[data-cy="newSoftwareVersion"]').should('not.exist');
     });
 
-    it.skip('achieve level 5, then add new skill', () => {
+    it('achieve level 5, then add new skill', () => {
         cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -247,27 +247,33 @@ describe('Client Display Features Tests', () => {
         });
 
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: Cypress.env('proxyUser'),
+            // userId: Cypress.env('proxyUser'),
             timestamp: new Date().getTime()
         });
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: Cypress.env('proxyUser'),
+            // userId: Cypress.env('proxyUser'),
             timestamp: new Date().getTime() - 1000 * 60 * 60 * 24
         });
         cy.intercept('GET', '/api/projects/proj1/pointHistory')
             .as('pointHistoryChart');
 
         cy.cdVisit('/');
-        cy.injectAxe();
 
-        cy.contains('Overall Points');
+        cy.get('[data-cy="overallPoints"]').contains('Overall Points');
+        cy.get('[data-cy="overallPoints"]').contains('100 Points');
+        cy.get('[data-cy="overallPoints"]').contains('100%');
+        cy.get('[data-cy="overallPoints"]').contains('All Points earned');
 
-        cy.get('[data-cy=subjectTile]')
-            .eq(0)
-            .contains('Subject 1');
-        cy.get('[data-cy=subjectTile]')
-            .eq(0)
-            .contains('Level 5');
+        cy.get('[data-cy="levelProgress"]').contains('Level Progress')
+        cy.get('[data-cy="levelProgress"]').contains('✓')
+        cy.get('[data-cy="levelProgress"]').contains('100%')
+        cy.get('[data-cy="levelProgress"]').contains('All levels complete')
+
+        cy.get('[data-cy="subjectTile-subj1"]').contains('Subject 1');
+        cy.get('[data-cy="subjectTile-subj1"] [data-cy="levelTitle"]').contains('Level 5');
+        cy.get('[data-cy="subjectTile-subj1"] [data-cy="pointsProgress"]').should('have.text', '100 / 100')
+        cy.get('[data-cy="subjectTile-subj1"] [data-cy="allLevelsComplete"]').should("exist")
+        cy.get('[data-cy="subjectTile-subj1"] [data-cy="levelProgress"]').should("not.exist")
 
         cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
             projectId: 'proj1',
@@ -285,17 +291,33 @@ describe('Client Display Features Tests', () => {
         });
 
         cy.wait('@pointHistoryChart');
-        cy.customA11y();
         cy.cdVisit('/');
 
-        cy.contains('Overall Points');
+        cy.get('[data-cy="overallPoints"]').contains('Overall Points');
+        cy.get('[data-cy="overallPoints"]').contains('100 Points');
+        cy.get('[data-cy="overallPoints"]').contains('50%');
+        cy.get('[data-cy="overallPoints"]').contains('Earn up to 200 points');
 
-        cy.get('[data-cy=subjectTile]')
-            .eq(0)
-            .contains('Subject 1');
-        cy.get('[data-cy=subjectTile]')
-            .eq(0)
-            .contains('Level 5');
+        cy.get('[data-cy="levelProgress"]').contains('Level Progress')
+        cy.get('[data-cy="levelProgress"]').contains('✓')
+        cy.get('[data-cy="levelProgress"]').contains('100%')
+        cy.get('[data-cy="levelProgress"]').contains('All levels complete')
+
+        cy.get('[data-cy="overallPoints"]').contains('Overall Points');
+        cy.get('[data-cy="overallPoints"]').contains('100 Points');
+        cy.get('[data-cy="overallPoints"]').contains('50%');
+        cy.get('[data-cy="overallPoints"]').contains('Earn up to 200 points');
+
+        cy.get('[data-cy="levelProgress"]').contains('Level Progress')
+        cy.get('[data-cy="levelProgress"]').contains('✓')
+        cy.get('[data-cy="levelProgress"]').contains('100%')
+        cy.get('[data-cy="levelProgress"]').contains('All levels complete')
+
+        cy.get('[data-cy="subjectTile-subj1"]').contains('Subject 1');
+        cy.get('[data-cy="subjectTile-subj1"] [data-cy="levelTitle"]').contains('Level 5');
+        cy.get('[data-cy="subjectTile-subj1"] [data-cy="pointsProgress"]').should('have.text', '100 / 200')
+        cy.get('[data-cy="subjectTile-subj1"] [data-cy="allLevelsComplete"]').should("exist")
+        cy.get('[data-cy="subjectTile-subj1"] [data-cy="levelProgress"]').should("not.exist")
     });
 
     it.skip('custom icon for badge must display after a refresh', () => {

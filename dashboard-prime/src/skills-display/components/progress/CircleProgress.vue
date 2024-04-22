@@ -38,34 +38,54 @@ const props = defineProps({
 
 const numFormat = useNumberFormat()
 
-const percentComplete = props.totalPossiblePoints > 0 && props.totalCompletedPoints > 0 ?
-  Math.trunc(props.totalCompletedPoints / props.totalPossiblePoints) : 0
+// If totalPossiblePoints is -1 it means this is charting Level progress and the user has completed this level
+const isCompleted = props.totalPossiblePoints === -1
+const calcPercentComplete = () => {
+  if (isCompleted) {
+    return 100
+  }
+  if (props.totalPossiblePoints > 0 && props.totalCompletedPoints > 0 ) {
+    return Math.trunc((props.totalCompletedPoints / props.totalPossiblePoints) * 100 )
+  }
+  return 0
+}
+const percentComplete = calcPercentComplete()
+const is100Percent = percentComplete === 100
 
 const series = [percentComplete]
+const defaultColor = '#0ea5e9'
+const completedColor = '#22C55E'
 const chartOptions = {
   chart: {
     height: 250,
       type: 'radialBar',
   },
+  fill: {
+    colors: [completedColor]
+  },
   plotOptions: {
     radialBar: {
       hollow: {
-        size: '70%',
+        size: '67%',
       },
       dataLabels: {
         name: {
           show: true,
-          fontSize: '1.2rem'
+          fontSize: isCompleted ? '3.5rem' : '1.2rem',
+          color: isCompleted ? completedColor : defaultColor
         },
         value: {
           show: true,
-          fontSize: '1rem'
+          fontSize: is100Percent || isCompleted ? '1.2rem' : '1rem',
+          color: is100Percent || isCompleted ? completedColor : defaultColor
         },
       }
     },
   },
-  labels: [`${numFormat.pretty(props.totalCompletedPoints > 0 ? props.totalCompletedPoints : 0)} Points`],
+  labels: [isCompleted ? '✓' : `${numFormat.pretty(props.totalCompletedPoints > 0 ? props.totalCompletedPoints : 0)} Points`],
 }
+
+
 </script>
 
 <template>

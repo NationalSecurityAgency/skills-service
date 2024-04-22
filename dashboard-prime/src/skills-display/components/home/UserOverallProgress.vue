@@ -76,7 +76,8 @@ const levelStats = computed(() => {
             :completed-before-today-color="beforeTodayColor"
             :incomplete-color="incompleteColor"
             :total-completed-color="isLevelComplete ? completeColor : earnedTodayColor"
-            :title="levelStats.title">
+            :title="levelStats.title"
+            data-cy="levelProgress">
             <template #footer>
               <p v-if="isLevelComplete">All {{ attributes.levelDisplayName.toLowerCase() }}s complete</p>
 
