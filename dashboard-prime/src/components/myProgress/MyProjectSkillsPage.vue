@@ -18,7 +18,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <skills-display-home class="mt-3" />
+    <skills-display-home class="my-3" />
   </div>
 </template>
 

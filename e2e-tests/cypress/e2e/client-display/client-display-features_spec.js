@@ -337,8 +337,8 @@ describe('Client Display Features Tests', () => {
         cy.get('[data-cy="badge_badge1"] .proj1-validiconpng');
     });
 
-    it.skip('ability to enable page visits reporting to the backend', () => {
-        cy.intercept('GET', '/public/clientDisplay/config?projectId=proj1', (req) => {
+    it('ability to enable page visits reporting to the backend', () => {
+        cy.intercept('GET', '/public/config', (req) => {
             req.reply({
                 body: {
                     enablePageVisitReporting: 'true',
@@ -366,8 +366,8 @@ describe('Client Display Features Tests', () => {
         cy.wait('@pageVisit');
     });
 
-    it.skip('by default page visits reporting to the backend must not happen', () => {
-        cy.intercept('GET', '/public/clientDisplay/config?projectId=proj1')
+    it('by default page visits reporting to the backend must not happen', () => {
+        cy.intercept('GET', '/public/config')
             .as('getConfig');
         cy.intercept('PUT', '/api/pageVisit', cy.spy()
             .as('pageVisit'));

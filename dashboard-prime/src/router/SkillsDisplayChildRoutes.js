@@ -3,6 +3,7 @@ import SkillsDisplayErrorPage from '@/skills-display/components/errors/SkillsDis
 import MyRankDetailsPage from '@/skills-display/components/rank/MyRankDetailsPage.vue'
 import SubjectDetailsPage from '@/skills-display/components/subjects/SubjectPage.vue'
 import SkillPage from '@/skills-display/components/skill/SkillPage.vue'
+import BadgesDetailsPage from '@/skills-display/components/badges/BadgesDetailsPage.vue'
 
 const createSkillsDisplayChildRoutes = (appendToName) => {
 
@@ -36,6 +37,17 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
       nonAdmin: true,
       announcer: {
         message: 'My Rank'
+      }
+    }
+  }, {
+    name: `BadgesDetailsPage${appendToName}`,
+    path: 'badges',
+    component: BadgesDetailsPage,
+    meta: {
+      requiresAuth: true,
+      nonAdmin: true,
+      announcer: {
+        message: 'Badges'
       }
     }
   }, {

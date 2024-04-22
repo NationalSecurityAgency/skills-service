@@ -21,6 +21,7 @@ import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSki
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useIframeInit } from '@/skills-display/iframe/UseIframeInit.js'
 import NewSoftwareVersion from '@/components/header/NewSoftwareVersion.vue'
+import { usePageVisitService } from '@/components/utils/services/UsePageVisitService.js'
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -45,9 +46,11 @@ const themeHelper = useThemesHelper()
 themeHelper.configureDefaultThemeFileInHeadTag()
 
 const inceptionConfigurer = useInceptionConfigurer()
+const pageVisitService = usePageVisitService()
 watch(() => authState.userInfo, async (newUserInfo) => {
   if (newUserInfo) {
     inceptionConfigurer.configure()
+    pageVisitService.reportPageVisit(route.path, route.fullPath)
   }
 })
 

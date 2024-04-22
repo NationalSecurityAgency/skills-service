@@ -18,8 +18,10 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 
 export const usePageVisitService = () => {
+
+  const appConfig = useAppConfig()
   const reportPageVisit = (path, fullPath) => {
-    if (useAppConfig.enablePageVisitReporting) {
+     if (appConfig.enablePageVisitReporting) {
       const domain = new URL(window.location)
       axios.put(
         '/api/pageVisit',

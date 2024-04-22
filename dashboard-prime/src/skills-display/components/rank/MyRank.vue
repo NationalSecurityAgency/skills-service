@@ -45,7 +45,7 @@ onMounted(() => {
         </strong>
       </span>
   </template>
-  <template #footer>
+  <template #footer v-if="!preferences.isSummaryOnly">
     <router-link
       :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('MyRankDetailsPage') }"
       aria-label="Click to navigate to My Rank page"

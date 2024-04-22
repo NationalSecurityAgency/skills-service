@@ -11,6 +11,7 @@ import SubjectTiles from '@/skills-display/components/subjects/SubjectTiles.vue'
 import ProjectDescription from '@/skills-display/components/home/ProjectDescription.vue'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import MyBadges from '@/skills-display/components/badges/MyBadges.vue'
 
 const skillsDisplayTheme = useSkillsDisplayThemeState()
 const userProgress = useUserProgressSummaryState()
@@ -28,6 +29,9 @@ const showDescription = computed(() =>
   && description.value
   && attributes.displayProjectDescription
 )
+const hasBadges = computed(() => {
+  return userProgress.userProgressSummary && userProgress.userProgressSummary.badges && userProgress.userProgressSummary.badges.enabled;
+})
 </script>
 
 <template>
@@ -44,6 +48,9 @@ const showDescription = computed(() =>
         </div>
         <div class="flex-1 align-items-center">
           <point-progress-chart />
+        </div>
+        <div v-if="hasBadges" class="flex">
+          <my-badges :num-badges-completed="userProgress.userProgressSummary.badges.numBadgesCompleted"></my-badges>
         </div>
       </div>
 
