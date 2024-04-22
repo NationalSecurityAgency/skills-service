@@ -1,13 +1,10 @@
 <script setup>
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
 import SettingsButton from '@/components/header/SettingsButton.vue'
 import HelpButton from '@/components/header/HelpButton.vue'
 import SkillsBreadcrumb from '@/components/header/SkillsBreadcrumb.vue'
 import { usePagePath } from '@/components/utils/UsePageLocation.js'
 import SwitchTheme from '@/components/header/SwitchTheme.vue'
 
-const route = useRoute()
 const pathPath = usePagePath()
 </script>
 

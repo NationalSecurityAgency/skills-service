@@ -20,6 +20,7 @@ import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useIframeInit } from '@/skills-display/iframe/UseIframeInit.js'
+import NewSoftwareVersion from '@/components/header/NewSoftwareVersion.vue'
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -90,6 +91,7 @@ const showHeader = computed(() => {
       <div v-if="!isLoadingApp" class="m-0">
         <div class="">
           <!--          <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap || isOAuthOnlyAndNeedsToBootstrap" role="alert"/>-->
+          <new-software-version class="mb-3"/>
           <dashboard-header v-if="showHeader" role="banner" />
           <div role="main">
             <RouterView

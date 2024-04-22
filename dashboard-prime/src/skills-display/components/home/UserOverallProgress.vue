@@ -50,6 +50,7 @@ const levelStats = computed(() => {
               :completed-before-today-color="beforeTodayColor"
               :incomplete-color="incompleteColor"
               :total-completed-color="userProgress.points === userProgress.totalPoints ? completeColor : earnedTodayColor"
+              data-cy="overallPoints"
               title="Overall Points">
               <template #footer>
                 <p v-if="userProgress.points > 0 && userProgress.points === userProgress.totalPoints">All Points earned</p>
