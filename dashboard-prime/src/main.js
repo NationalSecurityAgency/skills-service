@@ -72,7 +72,7 @@ import '@toast-ui/editor/dist/toastui-editor.css';
 // import 'primevue/resources/themes/lara-light-green/theme.css'
 
 
-log.setLevel('debug')
+log.setLevel('trace')
 
 const pinia = createPinia()
 

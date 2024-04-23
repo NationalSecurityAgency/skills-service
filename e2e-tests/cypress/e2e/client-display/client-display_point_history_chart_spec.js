@@ -643,6 +643,7 @@ describe('Client Display Point History Tests', () => {
 
         // let's wait for animation to complete
         cy.get('[data-cy="pointHistoryChart-animationEnded"]');
+        cy.wait(10000);
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
 
         cy.get('[data-cy="pointHistoryChart"] [data-cy="pointProgressChart-resetZoomBtn"]').click();

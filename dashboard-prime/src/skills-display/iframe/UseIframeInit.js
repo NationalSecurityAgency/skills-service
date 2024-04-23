@@ -13,6 +13,7 @@ export const useIframeInit = () => {
   const displayPreferences = useSkillsDisplayPreferencesState()
   const displayAttributes = useSkillsDisplayAttributesState()
   const log = useLog()
+  const loadedIframe = ref(false)
 
   const handleHandshake =() => {
     log.debug('SkillsDisplayInIframe.vue: tryOnBeforeMount')
@@ -71,6 +72,8 @@ export const useIframeInit = () => {
       // this.loadConfigs();
       displayAttributes.loadingConfig = false
       // this.getCustomIconCss();
+
+      loadedIframe.value = true
     })
   }
 
@@ -96,6 +99,7 @@ export const useIframeInit = () => {
   }
 
   return {
-    handleHandshake
+    handleHandshake,
+    loadedIframe
   }
 }

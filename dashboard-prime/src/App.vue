@@ -22,6 +22,7 @@ import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkil
 import { useIframeInit } from '@/skills-display/iframe/UseIframeInit.js'
 import NewSoftwareVersion from '@/components/header/NewSoftwareVersion.vue'
 import { usePageVisitService } from '@/components/utils/services/UsePageVisitService.js'
+import { invoke, until, useCounter } from '@vueuse/core'
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -61,6 +62,15 @@ onBeforeMount(() => {
 })
 
 onMounted(() => {
+  invoke(async () => {
+    if (skillsDisplayInfo.isSkillsClientPath()) {
+      await until(iframeInit.loadedIframe).toBe(true)
+    }
+    loadConfigs()
+  })
+})
+
+const loadConfigs = () => {
   appConfig.loadConfigState().finally(() => {
     authState.restoreSessionIfAvailable().finally(() => {
       skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
@@ -77,7 +87,7 @@ onMounted(() => {
       })
     })
   })
-})
+}
 
 const showHeader = computed(() => {
   return !skillsDisplayInfo.isSkillsClientPath() && authState.isAuthenticated && !appInfoState.showUa

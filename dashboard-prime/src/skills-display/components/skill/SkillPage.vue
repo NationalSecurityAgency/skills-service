@@ -6,10 +6,12 @@ import { useRoute } from 'vue-router'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillProgress from '@/skills-display/components/progress/SkillProgress.vue'
+import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
 
 const displayPreferences = useSkillsDisplayPreferencesState()
 const skillsDisplayService = useSkillsDisplayService()
 const skillsDisplayInfo = useSkillsDisplayInfo()
+const scrollIntoViewState = useScrollSkillsIntoViewState()
 const route = useRoute()
 
 const skill = ref({})
@@ -27,6 +29,7 @@ const loadSkillSummary = () => {
       if (skillId && skill.value.projectId && !isCrossProject()) {
         skillsDisplayService.updateSkillHistory(skill.value.projectId, skillId)
       }
+      scrollIntoViewState.setLastViewedSkillId(skillId)
     })
 }
 const isDependency = () => {
@@ -54,6 +57,7 @@ const nextButtonClicked = () => {
 }
 
 const isLoading = computed(() => loadingSkill.value)
+
 </script>
 
 <template>

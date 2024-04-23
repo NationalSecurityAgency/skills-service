@@ -11,7 +11,6 @@ const appConfig = useAppConfig()
 const browserLocation = useBrowserLocation()
 const log = useLog()
 
-
 // const clientDisplay = ref(null)
 const skillsVersion = 2147483647 // max int
 
@@ -24,6 +23,8 @@ const options = {
   serviceUrl: serviceUrl,
   autoScrollStrategy: 'top-of-page'
 }
+
+log.info(`Running skills-client in test mode with params ${JSON.stringify(options)}`)
 
 const constructSkillsDisplay = () => {
   let props = {

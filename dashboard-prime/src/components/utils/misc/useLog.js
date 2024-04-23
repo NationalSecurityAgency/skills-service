@@ -8,7 +8,10 @@ export const useLog = () => {
     log.debug(message)
   }
   const info = (message) => {
-    log.error(message)
+    log.info(message)
+  }
+  const warn = (message) => {
+    log.warn(message)
   }
   const error = (message) => {
     log.error(message)
@@ -25,6 +28,7 @@ export const useLog = () => {
     debug,
     isDebugEnabled,
     info,
+    warn,
     error
   }
 }

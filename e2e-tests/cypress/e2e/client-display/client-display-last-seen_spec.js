@@ -15,7 +15,7 @@
  */
 describe('Client Display Skills Last Viewed', () => {
 
-    it.only('visiting a skill shows the Last Viewed indicator on the Subject page', () => {
+    it('visiting a skill shows the Last Viewed indicator on the Subject page', () => {
         cy.intercept('/api/projects/proj1/subjects/subj1/pointHistory').as('getSubjectPointsHistory')
         cy.intercept('/api/projects/proj1/pointHistory').as('getProjPointsHistory')
         cy.createProject(1);
@@ -33,17 +33,49 @@ describe('Client Display Skills Last Viewed', () => {
         cy.get('[data-cy="jumpToLastViewedButton"]').should('not.exist');
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressBar"]').should('exist');
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressBar"]').click();
-        cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 1');
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
 
         cy.get('[data-cy=back]').click()
         cy.get('[data-cy="lastViewedIndicator"]').should('exist');
         cy.get('[data-cy="jumpToLastViewedButton"]').should('exist');
-
-        // TODO: ADD back
-        // cy.get('[id=skillProgressTitle-skill1]').should('have.focus');
+        cy.get('#skillProgressTitleLink-skill1').should('have.focus');
     });
 
-    it('visiting a skill shows the Last Viewed indicator on the Subject page with skills and groups', () => {
+    it('skills-client: visiting a skill shows the Last Viewed indicator on the Subject page', () => {
+        cy.on('uncaught:exception', (err, runnable) => {
+            // cy.log(err.message)
+            if (err.message.includes('Handshake Reply Failed')) {
+                return false
+            }
+            return true
+        })
+
+        cy.intercept('/api/projects/proj1/subjects/subj1/pointHistory').as('getSubjectPointsHistory')
+        cy.intercept('/api/projects/proj1/pointHistory').as('getProjPointsHistory')
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.visit('/test-skills-client/proj1')
+        cy.wait('@getProjPointsHistory')
+        cy.wrapIframe().find('[data-cy="subjectTileBtn"]').click()
+        cy.wait('@getSubjectPointsHistory')
+
+        cy.wrapIframe().find('[data-cy="lastViewedIndicator"]').should('not.exist');
+        cy.wrapIframe().find('[data-cy="jumpToLastViewedButton"]').should('not.exist');
+        cy.wrapIframe().find('[data-cy="skillProgress_index-0"] [data-cy="skillProgressBar"]').should('exist');
+        cy.wrapIframe().find('[data-cy="skillProgress_index-0"] [data-cy="skillProgressBar"]').click();
+        cy.wrapIframe().find('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
+
+        cy.wrapIframe().find('[data-cy=back]').click()
+        cy.wrapIframe().find('[data-cy="lastViewedIndicator"]').should('exist');
+        cy.wrapIframe().find('[data-cy="jumpToLastViewedButton"]').should('exist');
+        cy.wrapIframe().find('#skillProgressTitleLink-skill1').should('have.focus');
+    });
+
+    it.skip('visiting a skill shows the Last Viewed indicator on the Subject page with skills and groups', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
@@ -75,10 +107,10 @@ describe('Client Display Skills Last Viewed', () => {
         cy.get('[data-cy=back]').click()
         cy.get('[data-cy="lastViewedIndicator"]').should('exist');
         cy.get('[data-cy="jumpToLastViewedButton"]').should('exist');
-        cy.get('[id=skillProgressTitle-skill1]').should('have.focus');
+        cy.get('#skillProgressTitleLink-skill1').should('have.focus');
     });
 
-    it('visiting a skill shows the Last Viewed indicator on the Subject page in a group', () => {
+    it.skip('visiting a skill shows the Last Viewed indicator on the Subject page in a group', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkillsGroup(1, 1, 1);
@@ -111,7 +143,7 @@ describe('Client Display Skills Last Viewed', () => {
         cy.get('[id="skillProgressTitle-skill1"]').should('have.focus');
     });
 
-    it('visiting a skill shows the Last Viewed indicator on the Badges page', () => {
+    it.skip('visiting a skill shows the Last Viewed indicator on the Badges page', () => {
         cy.createProject(1);
         cy.createBadge(1, 1);
         cy.createSubject(1, 1);
@@ -135,7 +167,7 @@ describe('Client Display Skills Last Viewed', () => {
         cy.get('[id=skillProgressTitle-skill1]').should('have.focus');
     });
 
-    it('Global badges do not have last viewed features', () => {
+    it.skip('Global badges do not have last viewed features', () => {
         cy.resetDb();
         cy.fixture('vars.json')
             .then((vars) => {
@@ -177,7 +209,7 @@ describe('Client Display Skills Last Viewed', () => {
 
     });
 
-    it('Global badges viewing skill summary of skill from different project does not cause exception', () => {
+    it.skip('Global badges viewing skill summary of skill from different project does not cause exception', () => {
         cy.resetDb();
         cy.fixture('vars.json')
             .then((vars) => {

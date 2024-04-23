@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
 import SkillProgress from '@/skills-display/components/progress/SkillProgress.vue'
+import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
 
 const props = defineProps({
   subject: {
@@ -32,6 +33,8 @@ const props = defineProps({
   }
 })
 
+const scrollIntoViewState = useScrollSkillsIntoViewState()
+
 const searchString = ref('')
 const showDescriptionsInternal = ref(false)
 
@@ -51,10 +54,11 @@ onMounted(() => {
     const res = {
       ...item, subject: props.subject, isSkillsGroupType, isSkillType: !isSkillsGroupType
     }
-
     updateMetaCountsForSkillRes(res)
     return res
   })
+
+  scrollToLastViewedSkill(400)
 })
 const updateMetaCountsForSkillRes = (skillRes) => {
   if (skillRes.isSkillsGroupType) {
@@ -116,21 +120,26 @@ const updateMetaCounts = (meta) => {
 }
 
 const lastViewedButtonDisabled = ref(false)
-const scrollToLastViewedSkill = () => {
-
+const scrollToLastViewedSkill = (timeout = null) => {
+  if (scrollIntoViewState.lastViewedSkillId) {
+    const found = skillsInternal.value.find((skill) => skill.skillId === scrollIntoViewState.lastViewedSkillId)
+    if (found) {
+      scrollIntoViewState.scrollToLastViewedSkill(timeout)
+    }
+  }
 }
 const hasLastViewedSkill = computed(() => {
-  let lastViewedSkill = null;
+  let lastViewedSkill = null
   if (skillsInternal.value) {
     skillsInternal.value.forEach((item) => {
       if (item.isLastViewed === true) {
-        lastViewedSkill = item;
+        lastViewedSkill = item
       } else if (item.type === 'SkillsGroup' && !lastViewedSkill) {
-        lastViewedSkill = item.children.find((childItem) => childItem.isLastViewed === true);
+        lastViewedSkill = item.children.find((childItem) => childItem.isLastViewed === true)
       }
-    });
+    })
   }
-  return lastViewedSkill;
+  return lastViewedSkill
 })
 </script>
 

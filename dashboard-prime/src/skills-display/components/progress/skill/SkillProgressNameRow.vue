@@ -89,6 +89,7 @@ const buildToRoute = () => {
                   <i v-if="skill.copiedFromProjectId" class="fas fa-book text-secondary"></i>
                 </span>
           <router-link
+            :id="`skillProgressTitleLink-${skill.skillId}`"
             v-if="toRoute"
             :to="toRoute"
             class="skill-link"
