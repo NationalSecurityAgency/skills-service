@@ -1,5 +1,5 @@
 <script setup>
-import { useField } from "vee-validate";
+import { useField } from 'vee-validate';
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
 
 const props = defineProps({
@@ -30,7 +30,7 @@ const props = defineProps({
 
 const { value, errorMessage } = useField(() => props.name, undefined, {syncVModel: true});
 const model = defineModel()
-function flipSelected(){
+const flipSelected = () =>{
   if (!props.readOnly){
     value.value = !value.value
   }

@@ -4,6 +4,7 @@ import MyRankDetailsPage from '@/skills-display/components/rank/MyRankDetailsPag
 import SubjectDetailsPage from '@/skills-display/components/subjects/SubjectPage.vue'
 import SkillPage from '@/skills-display/components/skill/SkillPage.vue'
 import BadgesDetailsPage from '@/skills-display/components/badges/BadgesDetailsPage.vue'
+import QuizPage from '@/skills-display/components/skills/QuizPage.vue';
 
 const createSkillsDisplayChildRoutes = (appendToName) => {
 
@@ -67,6 +68,17 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
     name: `skillDetails${appendToName}`,
     meta: {
       title: `${skillPlaceholder} Details`,
+    },
+  }, {
+    name: `quizPage${appendToName}`,
+    path: 'subjects/:subjectId/skills/:skillId/quizzes/:quizId',
+    component: QuizPage,
+    meta: {
+      requiresAuth: true,
+      nonAdmin: true,
+      announcer: {
+        message: 'Quiz or Survey Run'
+      }
     },
   }, {
     name: `SkillsDisplayErrorPage${appendToName}`,
