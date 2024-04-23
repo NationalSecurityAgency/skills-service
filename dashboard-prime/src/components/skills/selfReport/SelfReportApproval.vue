@@ -6,6 +6,7 @@ import SelfReportService from '@/components/skills/selfReport/SelfReportService'
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
+import RejectSkillModal from "@/components/skills/selfReport/RejectSkillModal.vue";
 
 const route = useRoute();
 const props = defineProps({
@@ -29,10 +30,7 @@ const expandedRows = ref({});
 const totalRows = ref(null);
 const emailSubscribed = ref(true);
 const isEmailEnabled = ref(props.emailEnabled);
-const reject = ref({
-  showModal: false,
-  rejectMsg: '',
-});
+const showRejectModal = ref(false);
 
 onMounted(() => {
   loadApprovals();
@@ -91,18 +89,19 @@ const approve = () => {
       });
 };
 
-const doReject = () => {
+const doReject = (rejectedIds) => {
   loading.value = true;
-  const ids = selectedItems.value.map((item) => item.id);
-  SelfReportService.reject(route.params.projectId, ids, reject.value.rejectMsg)
-      .then(() => {
-        loadApprovals().then(() => {
-          setTimeout(() => announcer.polite(`rejected ${ids.length} skill approval request${ids.length > 1 ? 's' : ''}`), 0);
-        });
-        emit('approval-action', 'rejected');
-        reject.value.rejectMsg = '';
-      });
+  loadApprovals().then(() => {
+    setTimeout(() => announcer.polite(`rejected ${rejectedIds.length} skill approval request${rejectedIds.length > 1 ? 's' : ''}`), 0);
+    emit('approval-action', 'rejected');
+    selectedItems.value = [];
+  });
+  closeModal();
 };
+
+const closeModal = () => {
+  showRejectModal.value = false;
+}
 
 const checkEmailSubscriptionStatus = () => {
   SelfReportService.isUserSubscribedToEmails(route.params.projectId).then((respData) => {
@@ -152,7 +151,7 @@ const toggleUnsubscribe = () => {
           <SkillsButton size="small" @click="loadApprovals" aria-label="Sync Records" data-cy="syncApprovalsBtn" class="mr-2 mt-1" icon="fas fa-sync-alt" />
         </div>
         <div class="flex flex-1 justify-content-end">
-          <SkillsButton size="small" @click="reject.showModal=true" data-cy="rejectBtn" class="mt-1 ml-2" :disabled="selectedItems.length === 0" icon="fa fa-times-circle" label="Reject" />
+          <SkillsButton size="small" @click="showRejectModal=true" data-cy="rejectBtn" class="mt-1 ml-2" :disabled="selectedItems.length === 0" icon="fa fa-times-circle" label="Reject" />
           <SkillsButton size="small" @click="approve" data-cy="approveBtn" class="mt-1 ml-2" :disabled="selectedItems.length === 0" icon="fa fa-check" label="Approve" />
         </div>
       </div>
@@ -171,7 +170,7 @@ const toggleUnsubscribe = () => {
                        @page="pageChanged"
                        data-key="id"
                        @sort="sortTable">
-        <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+        <Column selectionMode="multiple" headerStyle="width: 3rem" body-class="row-selection-item"></Column>
         <Column expander style="width: 1rem">
           <template #header>
             <span class="text-primary">Justification</span>
@@ -230,9 +229,14 @@ const toggleUnsubscribe = () => {
         <template #paginatorstart>
           <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
         </template>
+
+        <template #empty>
+          There are no records to show
+        </template>
       </SkillsDataTable>
     </template>
   </Card>
+  <RejectSkillModal v-model="showRejectModal" @do-reject="doReject" @done="closeModal" :selected-items="selectedItems"/>
 </template>
 
 <style scoped>

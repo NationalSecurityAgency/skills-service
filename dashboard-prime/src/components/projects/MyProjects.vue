@@ -70,7 +70,9 @@ const loadProjects = () => {
   isLoading.value = true;
   return ProjectService.getProjects()
       .then((response) => {
-        projects.value = response.map((p) => ({ ...p, description: p.description || '' }))
+        if(response && Object.keys(response).length > 0) {
+          projects.value = response.map((p) => ({...p, description: p.description || ''}))
+        }
       })
       .finally(() => {
         isLoading.value = false;

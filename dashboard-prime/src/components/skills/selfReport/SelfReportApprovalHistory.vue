@@ -96,6 +96,10 @@ const sortTable = (sortContext) => {
   currentPage.value = 1;
   loadApprovalsHistory();
 };
+
+defineExpose( {
+  loadApprovalsHistory
+})
 </script>
 
 <template>
@@ -192,7 +196,10 @@ const sortTable = (sortContext) => {
 
         <template #expansion="slotProps">
           <div>
-            <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-4">
+            <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" class="ml-4">
+              <template #header>
+                <SkillsCardHeader title="Requested points with the following justification:"></SkillsCardHeader>
+              </template>
               <template #content>
                 <markdown-text class="d-inline-block" :text="slotProps.data.requestMsg" data-cy="approvalMessage"/>
               </template>
@@ -207,6 +214,10 @@ const sortTable = (sortContext) => {
 
         <template #paginatorstart>
           <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+        </template>
+
+        <template #empty>
+          There are no records to show
         </template>
       </SkillsDataTable>
     </template>

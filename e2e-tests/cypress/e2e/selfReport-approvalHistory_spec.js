@@ -84,67 +84,67 @@ describe('Self Report Approval History Tests', () => {
         cy.validateTable(approvalHistoryTableSelector, [
             [
                 {
-                    colIndex: 0,
+                    colIndex: 1,
                     value: 'Very Great Skill 2'
                 }, {
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user2'
             },
                 {
-                    colIndex: 1,
+                    colIndex: 2,
                     value: 'Rejected'
                 }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Explanation: Skill was rejected'
             },
                 {
-                    colIndex: 2,
+                    colIndex: 3,
                     value: '2020-09-16 11:00'
                 },
                 {
-                    colIndex: 3,
+                    colIndex: 4,
                     value: 'Today'
                 }
             ],
             [
                 {
-                    colIndex: 0,
+                    colIndex: 1,
                     value: 'Very Great Skill 3'
                 }, {
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user1'
             },
                 {
-                    colIndex: 1,
+                    colIndex: 2,
                     value: 'Approved'
                 },
                 {
-                    colIndex: 2,
+                    colIndex: 3,
                     value: '2020-09-17 11:00'
                 },
                 {
-                    colIndex: 3,
+                    colIndex: 4,
                     value: 'Today'
                 }
             ],
             [
                 {
-                    colIndex: 0,
+                    colIndex: 1,
                     value: 'Very Great Skill 1'
                 }, {
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user0'
             },
                 {
-                    colIndex: 1,
+                    colIndex: 2,
                     value: 'Approved'
                 },
                 {
-                    colIndex: 2,
+                    colIndex: 3,
                     value: '2020-09-18 11:00'
                 },
                 {
-                    colIndex: 3,
+                    colIndex: 4,
                     value: 'Today'
                 }
             ],
@@ -168,48 +168,30 @@ describe('Self Report Approval History Tests', () => {
         cy.wait('@loadHistory');
         cy.get('[data-cy=showMore]')
             .should('have.length', 1);
-        cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Response]')
-            .eq(0)
-            .find('[data-cy=showMoreText] [data-cy=showMore]')
-            .should('be.visible');
+        cy.get('[data-cy="selfReportApprovalHistoryTable"] [data-pc-section="bodyrow"]').first().find('[data-cy="showMoreText"] [data-cy="showMore"]').should('be.visible');
         cy.get('[data-cy=smtText]')
             .eq(0)
             .should('have.text', `${rejectMsg.substr(0, 50)}`);
-        cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Response]')
-            .eq(0)
-            .find('[data-cy=showMoreText] [data-cy=showMore]')
-            .click();
-        cy.get('[data-cy=showMore]')
-            .should('have.length', 0);
-        cy.get('[data-cy=showLess]')
-            .should('have.length', 1);
-        cy.get('[data-cy=smtText]')
-            .eq(0)
-            .should('have.text', `${rejectMsg}`);
-        cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Response]')
-            .eq(0)
-            .find('[data-cy=showMoreText] [data-cy=showLess]')
-            .click();
-        cy.get('[data-cy=selfReportApprovalHistoryTable] [data-label=Response]')
-            .eq(0)
-            .find('[data-cy=showMoreText] [data-cy=showMore]')
-            .should('be.visible');
+        cy.get('[data-cy="selfReportApprovalHistoryTable"] [data-pc-section="bodyrow"]').first().find('[data-cy="showMoreText"] [data-cy="showMore"]').click();
+        cy.get('[data-cy=showMore]').should('have.length', 0);
+        cy.get('[data-cy=showLess]').should('have.length', 1);
+        cy.get('[data-cy=smtText]').eq(0).should('have.text', `${rejectMsg}`);
+        cy.get('[data-cy="selfReportApprovalHistoryTable"] [data-pc-section="bodyrow"]').first().find('[data-cy="showMoreText"] [data-cy="showLess"]').click();
+        cy.get('[data-cy="selfReportApprovalHistoryTable"] [data-pc-section="bodyrow"]').first().find('[data-cy="showMoreText"] [data-cy="showMore"]').should('be.visible');
         cy.get('[data-cy=smtText]')
             .eq(0)
             .should('have.text', `${rejectMsg.substr(0, 50)}`);
 
         cy.log('validating second row');
 
-        cy.get('[data-cy="expandDetailsBtn_skill2"]')
-          .click();
-        cy.get('[data-cy="selfReportApprovalHistoryTable"]')
+        cy.get('[data-cy="selfReportApprovalHistoryTable"] [data-pc-section="bodyrow"]').first().find('[data-pc-section="rowtoggler"]').click();
+        cy.get('[data-cy="selfReportApprovalHistoryTable"] [data-pc-section="rowexpansion"]').first()
           .contains('No Justification supplied')
           .should('exist');
         cy.get('[data-cy="approvalMessage"]')
           .should('not.exist');
-        cy.get('[data-cy="expandDetailsBtn_skill3"]')
-          .click();
-        cy.get('[data-cy="selfReportApprovalHistoryTable"]')
+        cy.get('[data-cy="selfReportApprovalHistoryTable"] [data-pc-section="bodyrow"]').last().find('[data-pc-section="rowtoggler"]').click();
+        cy.get('[data-cy="selfReportApprovalHistoryTable"] [data-pc-section="rowexpansion"]').last()
           .contains('Requested points with the following justification:')
           .should('exist');
         cy.get('[data-cy="approvalMessage"]')
@@ -253,38 +235,38 @@ describe('Self Report Approval History Tests', () => {
         cy.visit('/administrator/projects/proj1/self-report');
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user3'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Rejected'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user0'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user2'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Rejected'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user6'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
         ], 5, true, 7);
@@ -295,38 +277,38 @@ describe('Self Report Approval History Tests', () => {
           .click();
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user4'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user5'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user6'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user2'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Rejected'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user0'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
         ], 5, true, 7);
@@ -336,23 +318,23 @@ describe('Self Report Approval History Tests', () => {
           .click();
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 2,
+                colIndex: 3,
                 value: '2020-09-11 11:00'
             },],
             [{
-                colIndex: 2,
+                colIndex: 3,
                 value: '2020-09-12 11:00'
             },],
             [{
-                colIndex: 2,
+                colIndex: 3,
                 value: '2020-09-13 11:00'
             },],
             [{
-                colIndex: 2,
+                colIndex: 3,
                 value: '2020-09-14 11:00'
             },],
             [{
-                colIndex: 2,
+                colIndex: 3,
                 value: '2020-09-16 11:00'
             },],
         ], 5, true, 7);
@@ -362,23 +344,23 @@ describe('Self Report Approval History Tests', () => {
           .click();
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 2,
+                colIndex: 3,
                 value: '2020-09-18 11:00'
             },],
             [{
-                colIndex: 2,
+                colIndex: 3,
                 value: '2020-09-17 11:00'
             },],
             [{
-                colIndex: 2,
+                colIndex: 3,
                 value: '2020-09-16 11:00'
             },],
             [{
-                colIndex: 2,
+                colIndex: 3,
                 value: '2020-09-14 11:00'
             },],
             [{
-                colIndex: 2,
+                colIndex: 3,
                 value: '2020-09-13 11:00'
             },],
         ], 5, true, 7);
@@ -388,23 +370,23 @@ describe('Self Report Approval History Tests', () => {
           .click();
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Rejected'
             },],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Rejected'
             },],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
         ], 5, true, 7);
@@ -414,23 +396,23 @@ describe('Self Report Approval History Tests', () => {
           .click();
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
         ], 5, true, 7);
@@ -440,23 +422,23 @@ describe('Self Report Approval History Tests', () => {
           .click();
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2'
             }],
         ], 5, true, 7);
@@ -466,23 +448,23 @@ describe('Self Report Approval History Tests', () => {
           .click();
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 3'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2'
             }],
         ], 5, true, 7);
@@ -509,7 +491,7 @@ describe('Self Report Approval History Tests', () => {
         cy.visit('/administrator/projects/proj1/self-report');
         cy.get(`${approvalHistoryTableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '7')
         cy.get(approvalHistoryTableSelector)
-            .get('[data-cy=skillsBTablePaging]')
+            .get('[data-pc-name="paginator"]')
             .contains('2')
             .click();
         cy.get(approvalHistoryTableSelector)
@@ -517,17 +499,17 @@ describe('Self Report Approval History Tests', () => {
             .should('not.exist');
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user5'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user4'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
         ], 5, true, 2, false);
@@ -538,38 +520,38 @@ describe('Self Report Approval History Tests', () => {
             .click();
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user4'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user5'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user6'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user2'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Rejected'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user0'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
         ], 5, true, 7);
@@ -597,52 +579,52 @@ describe('Self Report Approval History Tests', () => {
         // validateTable will page if more than 5 records
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user3'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Rejected'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user0'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user2'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Rejected'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user6'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user5'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user4'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
         ]);
@@ -667,56 +649,59 @@ describe('Self Report Approval History Tests', () => {
         cy.rejectRequest(0);
 
         cy.visit('/administrator/projects/proj1/self-report');
-        cy.get(`${approvalHistoryTableSelector} [data-cy="skillsBTablePageSize"]`)
-            .select('10');
+
+        cy.get(approvalHistoryTableSelector).find('[data-pc-name="rowperpagedropdown"]').click();
+
+        cy.get('.p-dropdown-item-label').contains(10).click();
+
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user3'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Rejected'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user0'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user2'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Rejected'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user6'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user5'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user4'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
         ], 10, true, 7);
@@ -748,10 +733,10 @@ describe('Self Report Approval History Tests', () => {
                 .click();
             cy.validateTable(approvalHistoryTableSelector, [
                 [{
-                    colIndex: 0,
+                    colIndex: 1,
                     value: 'user0'
                 }, {
-                    colIndex: 1,
+                    colIndex: 2,
                     value: 'Approved'
                 },],
             ]);
@@ -767,10 +752,10 @@ describe('Self Report Approval History Tests', () => {
                 .click();
             cy.validateTable(approvalHistoryTableSelector, [
                 [{
-                    colIndex: 0,
+                    colIndex: 1,
                     value: 'user2'
                 }, {
-                    colIndex: 1,
+                    colIndex: 2,
                     value: 'Rejected'
                 },],
             ]);
@@ -824,10 +809,10 @@ describe('Self Report Approval History Tests', () => {
                 .type('sKilL 1{enter}');
             cy.validateTable(approvalHistoryTableSelector, [
                 [{
-                    colIndex: 0,
+                    colIndex: 1,
                     value: 'user0'
                 }, {
-                    colIndex: 1,
+                    colIndex: 2,
                     value: 'Approved'
                 },],
             ]);
@@ -841,10 +826,10 @@ describe('Self Report Approval History Tests', () => {
                 .type('SeR2{enter}');
             cy.validateTable(approvalHistoryTableSelector, [
                 [{
-                    colIndex: 0,
+                    colIndex: 1,
                     value: 'user2'
                 }, {
-                    colIndex: 1,
+                    colIndex: 2,
                     value: 'Rejected'
                 },],
             ]);
@@ -884,67 +869,69 @@ describe('Self Report Approval History Tests', () => {
         cy.get(approvalHistoryTableSelector)
             .contains(('There are no records to show'));
 
-        cy.get('[data-cy="approvalSelect_user2-skill2"]')
-            .click({ force: true });
+        // [data-cy="approvalSelect_user2-skill2"]
+        cy.get('[data-cy="skillsReportApprovalTable"] .row-selection-item .p-checkbox > input').first().click();
         cy.get('[data-cy="approveBtn"]')
             .click();
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user2'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
         ]);
 
-        cy.get('[data-cy="approvalSelect_user4-skill2"]')
-            .click({ force: true });
+        cy.get('[data-cy="skillsReportApprovalTable"] .row-selection-item .p-checkbox > input').first().click();
         cy.get('[data-cy="rejectBtn"]')
             .click();
-        cy.get('[data-cy="confirmRejectionBtn"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user4'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Rejected'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user2'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
         ]);
 
-        cy.get('[data-cy="approvalSelect_user5-skill2"]')
-            .click({ force: true });
+        cy.wait(1000);
+
+        cy.get('[data-cy="skillsReportApprovalTable"] .row-selection-item .p-checkbox > input').first().click();
         cy.get('[data-cy="approveBtn"]')
             .click();
+
+
         cy.validateTable(approvalHistoryTableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user5'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user4'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Rejected'
             },],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'user2'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: 'Approved'
             },],
         ]);
