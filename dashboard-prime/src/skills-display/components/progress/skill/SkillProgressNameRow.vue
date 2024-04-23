@@ -137,9 +137,8 @@ const buildToRoute = () => {
             class="sr-spelled-out mr-1">Watch</span>Video</span>
         </Tag>
         <Tag v-if="skill.isLastViewed" id="lastViewedIndicator" data-cy="lastViewedIndicator" severity="info"
-             style="font-size: 0.9rem"
-             class="ml-2 overflow-hidden">
-          <i class="fas fa-eye"></i> Last Viewed
+             class="ml-2 overflow-hidden text-sm">
+          <i class="fas fa-eye mr-1"></i> Last Viewed
         </Tag>
       </div>
     </div>

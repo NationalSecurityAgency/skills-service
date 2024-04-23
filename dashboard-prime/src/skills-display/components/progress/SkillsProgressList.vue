@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import SkillProgress from '@/skills-display/components/progress/SkillProgress.vue'
 
 const props = defineProps({
@@ -114,65 +114,88 @@ const updateMetaCounts = (meta) => {
     metaCounts.value.video += 1
   }
 }
+
+const lastViewedButtonDisabled = ref(false)
+const scrollToLastViewedSkill = () => {
+
+}
+const hasLastViewedSkill = computed(() => {
+  let lastViewedSkill = null;
+  if (skillsInternal.value) {
+    skillsInternal.value.forEach((item) => {
+      if (item.isLastViewed === true) {
+        lastViewedSkill = item;
+      } else if (item.type === 'SkillsGroup' && !lastViewedSkill) {
+        lastViewedSkill = item.children.find((childItem) => childItem.isLastViewed === true);
+      }
+    });
+  }
+  return lastViewedSkill;
+})
 </script>
 
 <template>
   <Card data-cy="skillsProgressList" v-if="(skillsInternal.length > 0 || searchString || showNoDataMsg)">
     <template #header>
-      <!--      <div class="row" v-if="skillsInternalOrig && skillsInternalOrig.length > 0">-->
-      <!--        <div class="col-md-auto text-left pr-md-0">-->
-      <!--          <div class="d-flex">-->
-      <!--            <b-form-input @input="searchSkills" style="padding-right: 2.3rem;"-->
-      <!--                          v-model="searchString"-->
-      <!--                          :placeholder="`Search ${this.skillDisplayName.toLowerCase()}s`"-->
-      <!--                          :aria-label="`Search ${this.skillDisplayName}s`"-->
-      <!--                          data-cy="skillsSearchInput"></b-form-input>-->
-      <!--            <b-button v-if="searchString && searchString.length > 0" @click="clearSearch"-->
-      <!--                      class="position-absolute skills-theme-btn" variant="outline-info" style="right: 0rem;"-->
-      <!--                      data-cy="clearSkillsSearchInput">-->
-      <!--              <i class="fas fa-times"></i>-->
-      <!--              <span class="sr-only">clear search</span>-->
-      <!--            </b-button>-->
-      <!--          </div>-->
-      <!--        </div>-->
-      <!--        <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">-->
-      <!--          <skills-filter :counts="metaCounts"-->
-      <!--                         :filters="filters"-->
-      <!--                         @filter-selected="filterSkills"-->
-      <!--                         @clear-filter="clearFilters"/>-->
-      <!--          <b-button v-if="!loading.userSkills && isLastViewedScrollSupported && hasLastViewedSkill"-->
-      <!--                    :disabled="lastViewedButtonDisabled"-->
-      <!--                    @click.prevent="scrollToLastViewedSkill"-->
-      <!--                    class="skills-theme-btn ml-2" variant="outline-info"-->
-      <!--                    :aria-label="`Jump to Last Viewed Skill`"-->
-      <!--                    data-cy="jumpToLastViewedButton">-->
-      <!--            <i class="fas fa-eye"></i>-->
-      <!--            Last Viewed-->
-      <!--          </b-button>-->
-      <!--        </div>-->
-      <!--        <div class="col-md-auto text-right skill-details-toggle" data-cy="skillDetailsToggle">-->
-      <!--          <span class="text-muted pr-1">{{ skillDisplayName }} Details:</span>-->
-      <!--          <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"-->
-      <!--                         :color="{ checked: '#007c49', unchecked: '#6b6b6b' }"-->
-      <!--                         :aria-label="`Show ${this.skillDisplayName} Details`"-->
-      <!--                         :labels="{ checked: 'On', unchecked: 'Off' }" data-cy="toggleSkillDetails"/>-->
-      <!--        </div>-->
-      <!--      </div>-->
-      <!--      <div v-if="selectedTagFilters.length > 0" class="row mt-2">-->
-      <!--        <div class="col-md-auto text-left pr-md-0">-->
-      <!--          <b-badge v-for="(tag, index) in selectedTagFilters"-->
-      <!--                   :data-cy="`skillTagFilter-${index}`"-->
-      <!--                   :key="tag.tagId"-->
-      <!--                   variant="light"-->
-      <!--                   class="mx-1 py-1 border-info border selected-filter overflow-hidden">-->
-      <!--            <i :class="'fas fa-tag'" class="ml-1"></i> <span v-html="tag.tagValue"></span>-->
-      <!--            <button type="button" class="btn btn-link p-0" @click="removeTagFilter(tag)" :data-cy="`clearSelectedTagFilter-${tag.tagId}`">-->
-      <!--              <i class="fas fa-times-circle ml-1"></i>-->
-      <!--              <span class="sr-only">clear filter</span>-->
-      <!--            </button>-->
-      <!--          </b-badge>-->
-      <!--        </div>-->
-      <!--      </div>-->
+      <div class="row" v-if="skillsInternal && skillsInternal.length > 0">
+        <!--        <div class="col-md-auto text-left pr-md-0">-->
+        <!--          <div class="d-flex">-->
+        <!--            <b-form-input @input="searchSkills" style="padding-right: 2.3rem;"-->
+        <!--                          v-model="searchString"-->
+        <!--                          :placeholder="`Search ${this.skillDisplayName.toLowerCase()}s`"-->
+        <!--                          :aria-label="`Search ${this.skillDisplayName}s`"-->
+        <!--                          data-cy="skillsSearchInput"></b-form-input>-->
+        <!--            <b-button v-if="searchString && searchString.length > 0" @click="clearSearch"-->
+        <!--                      class="position-absolute skills-theme-btn" variant="outline-info" style="right: 0rem;"-->
+        <!--                      data-cy="clearSkillsSearchInput">-->
+        <!--              <i class="fas fa-times"></i>-->
+        <!--              <span class="sr-only">clear search</span>-->
+        <!--            </b-button>-->
+        <!--          </div>-->
+        <!--        </div>-->
+        <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
+          <!--                <skills-filter :counts="metaCounts"-->
+          <!--                               :filters="filters"-->
+          <!--                               @filter-selected="filterSkills"-->
+          <!--                               @clear-filter="clearFilters"/>-->
+
+          <!--                <b-button v-if="!loading.userSkills && isLastViewedScrollSupported && hasLastViewedSkill"-->
+          <SkillsButton
+            v-if="hasLastViewedSkill"
+            icon="fas fa-eye"
+            label="Last Viewed"
+            :disabled="lastViewedButtonDisabled"
+            @click.prevent="scrollToLastViewedSkill"
+            class="skills-theme-btn"
+            outlined
+            size="small"
+            serverit="info"
+            :aria-label="`Jump to Last Viewed Skill`"
+            data-cy="jumpToLastViewedButton" />
+        </div>
+        <!--        <div class="col-md-auto text-right skill-details-toggle" data-cy="skillDetailsToggle">-->
+        <!--          <span class="text-muted pr-1">{{ skillDisplayName }} Details:</span>-->
+        <!--          <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"-->
+        <!--                         :color="{ checked: '#007c49', unchecked: '#6b6b6b' }"-->
+        <!--                         :aria-label="`Show ${this.skillDisplayName} Details`"-->
+        <!--                         :labels="{ checked: 'On', unchecked: 'Off' }" data-cy="toggleSkillDetails"/>-->
+        <!--        </div>-->
+        <!--      </div>-->
+        <!--      <div v-if="selectedTagFilters.length > 0" class="row mt-2">-->
+        <!--        <div class="col-md-auto text-left pr-md-0">-->
+        <!--          <b-badge v-for="(tag, index) in selectedTagFilters"-->
+        <!--                   :data-cy="`skillTagFilter-${index}`"-->
+        <!--                   :key="tag.tagId"-->
+        <!--                   variant="light"-->
+        <!--                   class="mx-1 py-1 border-info border selected-filter overflow-hidden">-->
+        <!--            <i :class="'fas fa-tag'" class="ml-1"></i> <span v-html="tag.tagValue"></span>-->
+        <!--            <button type="button" class="btn btn-link p-0" @click="removeTagFilter(tag)" :data-cy="`clearSelectedTagFilter-${tag.tagId}`">-->
+        <!--              <i class="fas fa-times-circle ml-1"></i>-->
+        <!--              <span class="sr-only">clear filter</span>-->
+        <!--            </button>-->
+        <!--          </b-badge>-->
+        <!--        </div>-->
+      </div>
     </template>
     <template #content>
       <!--      <skills-spinner :loading="loading"/>-->
@@ -188,9 +211,9 @@ const updateMetaCounts = (meta) => {
                }"
         >
           <div class="p-3 pt-4">
-<!--            :show-group-descriptions="showGroupDescriptions"-->
-<!--            @points-earned="onPointsEarned"-->
-<!--            @add-tag-filter="addTagFilter"-->
+            <!--            :show-group-descriptions="showGroupDescriptions"-->
+            <!--            @points-earned="onPointsEarned"-->
+            <!--            @add-tag-filter="addTagFilter"-->
             <skill-progress
               :id="`skill-${skill.skillId}`"
               :ref="`skillProgress${skill.skillId}`"

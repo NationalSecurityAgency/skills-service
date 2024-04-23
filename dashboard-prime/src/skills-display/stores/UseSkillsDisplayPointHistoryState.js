@@ -39,8 +39,10 @@ export const useSkillsDisplayPointHistoryState = defineStore('skillsDisplayPoint
     return !pointHistoryMap.value.has(mapId)
   }
   const getPointHistory = (subjectId) => {
+    const theMap = pointHistoryMap.value
     const mapId = getMapId(subjectId)
-    return pointHistoryMap.value.get(mapId)
+    const res = theMap.get(mapId)
+    return res
   }
 
   return {

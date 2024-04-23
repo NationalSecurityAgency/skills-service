@@ -1,8 +1,8 @@
-import { useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 export const useSkillsDisplayInfo = () => {
   const route = useRoute()
+  const router = useRouter()
   const skillsClientContextAppend = 'SkillsClient'
   const localContextAppend = 'Local'
   const progressAndRankingsRegex = /\/progress-and-rankings\/projects\/[^/]*/i
@@ -53,6 +53,10 @@ export const useSkillsDisplayInfo = () => {
     return false
   }
 
+  const routerPush = (pageName, params) => {
+    router.push({ name: getContextSpecificRouteName(pageName), params })
+  }
+
   return {
     isSkillsClientPath,
     isSkillsDisplayPath,
@@ -61,6 +65,7 @@ export const useSkillsDisplayInfo = () => {
     localTestContextAppend,
     getContextSpecificRouteName,
     cleanPath,
-    getRootUrl
+    getRootUrl,
+    routerPush
   }
 }
