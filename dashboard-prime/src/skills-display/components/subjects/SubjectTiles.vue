@@ -4,6 +4,7 @@ import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProg
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import SubjectTile from '@/skills-display/components/subjects/SubjectTile.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
+import SearchAllProjectSkills from '@/skills-display/components/subjects/SearchAllProjectSkills.vue'
 
 const userProgress = useUserProgressSummaryState()
 const preferences = useSkillsDisplayPreferencesState()
@@ -20,7 +21,7 @@ const hasData = computed(() => userProgress.userProgressSummary.subjects?.length
           :message="`Please contact this ${preferences.projectDisplayName.toLowerCase()}'s administrator.`" />
       </template>
     </Card>
-<!--    <search-all-project-skills v-if="hasData" />-->
+    <search-all-project-skills v-if="hasData" class="mb-3"/>
     <div v-if="hasData" class="flex flex-wrap gap-2">
       <div v-for="(subject, index) in userProgress.userProgressSummary.subjects"
            :key="`unique-subject-${index}`"
