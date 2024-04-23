@@ -10,7 +10,6 @@ const refresh = () => {
   window.location.reload();
 }
 
-console.log('register interceptor')
 axios.interceptors.response.use(
   (response) => {
     const incomingVersion = response?.headers?.['skills-client-lib-version'];

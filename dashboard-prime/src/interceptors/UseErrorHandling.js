@@ -95,6 +95,7 @@ export const useErrorHandling = () => {
   }
 
   const registerErrorHandling = () => {
+    log.debug('registering error handler')
     axios.interceptors.response.use(
       (response) => response,
       errorResponseHandler,

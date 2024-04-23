@@ -57,13 +57,13 @@ watch(() => authState.userInfo, async (newUserInfo) => {
 const iframeInit = useIframeInit()
 onBeforeMount(() => {
   iframeInit.handleHandshake()
+  errorHandling.registerErrorHandling()
 })
 
 onMounted(() => {
   appConfig.loadConfigState().finally(() => {
     authState.restoreSessionIfAvailable().finally(() => {
       skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
-        errorHandling.registerErrorHandling()
         customGlobalValidators.addValidators()
         inceptionConfigurer.configure()
         globalNavGuards.addNavGuards()

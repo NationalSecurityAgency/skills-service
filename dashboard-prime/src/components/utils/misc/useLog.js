@@ -7,6 +7,12 @@ export const useLog = () => {
   const debug = (message) => {
     log.debug(message)
   }
+  const info = (message) => {
+    log.error(message)
+  }
+  const error = (message) => {
+    log.error(message)
+  }
   const isTraceEnabled = () => {
     return log.getLevel() <= log.levels.TRACE
   }
@@ -17,6 +23,8 @@ export const useLog = () => {
     trace,
     isTraceEnabled,
     debug,
-    isDebugEnabled
+    isDebugEnabled,
+    info,
+    error
   }
 }
