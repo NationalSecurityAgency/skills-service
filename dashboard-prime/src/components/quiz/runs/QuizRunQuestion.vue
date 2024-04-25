@@ -53,15 +53,6 @@ const numberOfStars = computed(() => {
   return props.q?.answerOptions?.length;
 })
 
-watch(answerText, (newValue, oldValue) => {
-  console.log(`answerText changed from ${oldValue} to ${newValue}`)
-  textAnswerChanged();
-})
-watch(() => answerRating.value, (newValue, oldValue) => {
-  console.log(`answerRating changed from ${oldValue} to ${newValue}`)
-  // ratingChanged(newValue)
-})
-
 onMounted(() => {
   answerOptions.value = props.q.answerOptions.map((a) => ({ ...a, selected: a.selected ? a.selected : false }));
   if (isRating.value) {
@@ -101,21 +92,23 @@ const selectionChanged = (currentAnswer) => {
   });
 }
 const ratingChanged = (value) => {
-  const selectedAnswerIds = answerOptions.value.map((a) => a.id);
-  const answerId = selectedAnswerIds[value - 1];
-  const currentAnswer = {
-    questionId: props.q.id,
-    questionType: props.q.questionType,
-    selectedAnswerIds: [answerId],
-    changedAnswerId: answerId,
-    changedAnswerIdSelected: true,
-  };
-  reportAnswer(currentAnswer).then((reportAnswerPromise) => {
-    emit('selected-answer', {
-      ...currentAnswer,
-      reportAnswerPromise,
+  if (value) {
+    const selectedAnswerIds = answerOptions.value.map((a) => a.id);
+    const answerId = selectedAnswerIds[value - 1];
+    const currentAnswer = {
+      questionId: props.q.id,
+      questionType: props.q.questionType,
+      selectedAnswerIds: [answerId],
+      changedAnswerId: answerId,
+      changedAnswerIdSelected: true,
+    };
+    reportAnswer(currentAnswer).then((reportAnswerPromise) => {
+      emit('selected-answer', {
+        ...currentAnswer,
+        reportAnswerPromise,
+      });
     });
-  });
+  }
 }
 const reportAnswer = (answer) => {
   if (!isLoading.value) {
@@ -131,9 +124,9 @@ const reportAnswer = (answer) => {
 <template>
   <div class="flex gap-0 mb-4" :data-cy="`question_${num}`">
     <div class="flex align-items-start pt-2 pr-2">
-      <Tag class="d-inline-block"
+      <Tag class="inline-block"
                :aria-label="questionNumAriaLabel"
-               :severity="`${q.gradedInfo ? (q.gradedInfo.isCorrect ? 'success' : 'danger') : 'default'}`">
+               :severity="`${q.gradedInfo ? (q.gradedInfo.isCorrect ? 'success' : 'danger') : 'secondary'}`">
         {{ num }}
       </Tag>
       <span v-if="q.gradedInfo" class="ml-1 pt-1">
@@ -149,6 +142,7 @@ const reportAnswer = (answer) => {
                 :id="`question-${num}`"
                 data-cy="textInputAnswer"
                 v-model="answerText"
+                @update:modelValue="textAnswerChanged"
                 :name="`questions[${num-1}].answerText`"
                 :aria-label="`Please enter text to answer question number ${num}`"
                 placeholder="Please enter your response here..."

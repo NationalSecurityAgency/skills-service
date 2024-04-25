@@ -23,7 +23,6 @@ const loadQuizInfo = () => {
   loadingQuizInfo.value = true;
   QuizRunService.getQuizInfo(quizId.value)
       .then((res) => {
-        console.log(`returning quiz info: ${JSON.stringify(res)} for quizId: ${quizId.value}`);
         quizInfo.value = res;
       })
       .finally(() => {

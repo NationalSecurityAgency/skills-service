@@ -35,10 +35,11 @@ const splashScreen = ref({
 const currentDate = ref(null);
 const dateTimer = ref(null);
 const scrollDistance = ref(0);
+const isAttemptAlreadyInProgress = ref(false);
 
 
 const atLeastOneSelected = (value) => {
-  return value && (value.findIndex((a) => a.selected) >= 0);
+  return !isAttemptAlreadyInProgress.value || value && (value.findIndex((a) => a.selected) >= 0);
 }
 const ratingSelected = (value) => {
   return  value > 0;
@@ -78,11 +79,8 @@ const schema = object({
           })
       ),
 })
-const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, errors, errorBag } = useForm({
+const { values, meta, handleSubmit, isSubmitting, resetForm, setFieldValue, validate, errors, errorBag, setErrors } = useForm({
   validationSchema: schema,
-  initialValues: {
-    questions: [],
-  }
 })
 // const { remove, push, fields } = useFieldArray('questions');
 
@@ -156,6 +154,7 @@ const setQuizInfo = (quizInfoRes) => {
   const percentToPass = quizInfoRes.minNumQuestionsToPass <= 0 ? 100 : Math.trunc(((quizInfoRes.minNumQuestionsToPass * 100) / quizInfoRes.quizLength));
   quizInfo.value = { ...quizInfoRes, percentToPass };
   if (quizInfoRes.isAttemptAlreadyInProgress) {
+    isAttemptAlreadyInProgress.value = true;
     startQuizAttempt();
   } else {
     splashScreen.value.show = true;
@@ -229,9 +228,10 @@ const initializeFormData = (copy) => {
       answerRating: answerRating ? Number(answerRating.answerOption) : 0,
     }
   })
-  setFieldValue('questions', formQuestions);
+  resetForm({ values: { questions: formQuestions }, errors: {} });
 }
 const updateSelectedAnswers = (questionSelectedAnswer) => {
+  isAttemptAlreadyInProgress.value = true;
   if (questionSelectedAnswer.reportAnswerPromise) {
     reportAnswerPromises.value.push(questionSelectedAnswer.reportAnswerPromise);
   }
