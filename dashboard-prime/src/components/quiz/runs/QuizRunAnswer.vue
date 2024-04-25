@@ -98,18 +98,17 @@ const flipSelected = () => {
     <div class="flex gap-0" :data-cy="`selected_${selected}`">
       <div class="flex">
         <SkillsOverlay v-if="a.isGraded && a.selected !== a.isCorrect" show opacity="0">
-                   opacity="0">
           <template #overlay>
             <i v-if="a.selected" class="fa fa-ban text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1.5rem;" data-cy="wrongSelection" aria-hidden="true"></i>
             <i v-else class="fa fa-check text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1rem;" data-cy="missedSelection" aria-hidden="true"></i>
           </template>
           <span class="checkmark">
-               <i :class="selectionIconObject" aria-hidden="true"/>
-            </span>
+             <i :class="selectionIconObject" aria-hidden="true"/>
+          </span>
         </SkillsOverlay>
         <span v-else class="checkmark">
-               <i :class="selectionIconObject" aria-hidden="true"/>
-            </span>
+           <i :class="selectionIconObject" aria-hidden="true"/>
+        </span>
       </div>
       <div class="flex-1 ml-2">
         <span class="answerText" data-cy="answerText">{{ a.answerOption }}</span>
