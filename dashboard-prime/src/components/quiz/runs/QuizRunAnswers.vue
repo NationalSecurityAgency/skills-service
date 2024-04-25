@@ -15,26 +15,22 @@ const props = defineProps({
   },
 })
 const emit = defineEmits(['input', 'selected-answer'])
-const answerOptionsInternal = ref([])
+const answerOptionsInternal = ref(props.value.map((a) => ({ ...a })))
 
-onMounted(() => {
-  answerOptionsInternal.value = props.value.map((a) => ({ ...a }));
-})
 watch(() => props.value, (newValue, oldValue) => {
-  // console.log(`value changed from ${oldValue} to ${newValue}`)
   answerOptionsInternal.value = newValue ? newValue.map((a) => ({ ...a })) : [];
+  if (oldValue.length) {
+    // do not update value, the prop was updated by vee-validate and value is already set (otherwise it will trigger validation)
+    value.value = answerOptionsInternal.value;
+  }
 })
 watch(() => props.q.gradedInfo, (newValue, oldValue) => {
-  // console.log(`gradedInfo changed from ${oldValue} to ${newValue}`)
   answerOptionsInternal.value = answerOptionsInternal.value.map((answer) => ({ ...answer, isGraded: true, isCorrect: newValue.correctAnswerIds.indexOf(answer.id) >= 0 }));
-})
-watch(answerOptionsInternal, (newValue, oldValue) => {
-  // console.log(`answerOptionsInternal changed from ${oldValue} to ${newValue}, yup value is ${JSON.stringify(value.value)}`)
-  value.value = newValue
+  value.value = answerOptionsInternal.value;
 })
 
 const selectionChanged = (selectedStatus) => {
-  answerOptionsInternal.value = props.value.map((a) => {
+  answerOptionsInternal.value = value.value.map((a) => {
     const isThisId = a.id === selectedStatus.id;
     const isSelected = isThisId && selectedStatus.selected;
     const selectRes = isSelected || (props.q.questionType === QuestionType.MultipleChoice && a.selected && !isThisId);
@@ -43,6 +39,7 @@ const selectionChanged = (selectedStatus) => {
       selected: selectRes,
     };
   });
+  value.value = answerOptionsInternal.value
   const selectedAnswerIds = answerOptionsInternal.value.filter((a) => a.selected).map((a) => a.id);
   const currentAnswer = {
     questionId: props.q.id,
