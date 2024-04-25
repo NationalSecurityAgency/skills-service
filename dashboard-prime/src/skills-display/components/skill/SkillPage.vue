@@ -7,14 +7,15 @@ import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisp
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillProgress from '@/skills-display/components/progress/SkillProgress.vue'
 import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
+import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 
 const displayPreferences = useSkillsDisplayPreferencesState()
 const skillsDisplayService = useSkillsDisplayService()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const scrollIntoViewState = useScrollSkillsIntoViewState()
 const route = useRoute()
-
-const skill = ref({})
+const skillState = useSkillsDisplaySubjectState()
+const skill = computed(() => skillState.skillSummary)
 const loadingSkill = ref(true)
 
 onMounted(() => {
@@ -22,9 +23,8 @@ onMounted(() => {
 })
 const loadSkillSummary = () => {
   const skillId = isDependency() ? route.params.dependentSkillId : route.params.skillId
-  skillsDisplayService.getSkillSummary(skillId, route.params.crossProjectId, route.params.subjectId)
-    .then((res) => {
-      skill.value = res
+  skillState.loadSkillSummary(skillId, route.params.crossProjectId, route.params.subjectId)
+    .then(() => {
       loadingSkill.value = false
       if (skillId && skill.value.projectId && !isCrossProject()) {
         skillsDisplayService.updateSkillHistory(skill.value.projectId, skillId)

@@ -56,8 +56,7 @@ onMounted(() => {
 <!--      @points-earned="refreshHeader"-->
 <!--      @scrollTo="scrollToLastViewedSkill"-->
       <skills-progress-list
-        class="mt-3"
-        :subject="subject.subjectSummary" />
+        class="mt-3" />
 
     </div>
   </div>

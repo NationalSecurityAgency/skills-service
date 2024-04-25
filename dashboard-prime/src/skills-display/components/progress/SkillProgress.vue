@@ -1,8 +1,14 @@
 <script setup>
 import SkillProgressNameRow from '@/skills-display/components/progress/skill/SkillProgressNameRow.vue'
-import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
 import { useRoute } from 'vue-router'
+import { computed } from 'vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import SkillsSummaryCards from '@/skills-display/components/progress/SkillsSummaryCards.vue'
+import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
+import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
+import SkillOverviewFooter from '@/skills-display/components/skill/SkillOverviewFooter.vue'
+import SkillProgressBar from '@/skills-display/components/progress/skill/SkillProgressBar.vue'
+import AchievementDate from '@/skills-display/components/skill/AchievementDate.vue'
 
 const props = defineProps({
   skill: Object,
@@ -48,24 +54,29 @@ const props = defineProps({
 
 const route = useRoute()
 const skillsDisplayInfo = useSkillsDisplayInfo()
+const preferences = useSkillsDisplayPreferencesState()
 
 const buildToRoute = () => {
   if (!props.enableDrillDown || !props.skill.isSkillType) {
     return null
   }
   let name = skillsDisplayInfo.getContextSpecificRouteName('skillDetails')
-  const params = { skillId: props.skill.skillId, projectId: props.skill.projectId };
+  const params = { skillId: props.skill.skillId, projectId: props.skill.projectId }
   if (route.params.subjectId) {
-    params.subjectId = route.params.subjectId;
+    params.subjectId = route.params.subjectId
   } else if (route.params.badgeId) {
-    params.badgeId = route.params.badgeId;
-    name = (props.type === 'global-badge') ? 'globalBadgeSkillDetails' : 'badgeSkillDetails';
+    params.badgeId = route.params.badgeId
+    name = (props.type === 'global-badge') ? 'globalBadgeSkillDetails' : 'badgeSkillDetails'
   } else if (props.skill.crossProject && props.skill.projectId) {
-    params.crossProjectId = props.skill.projectId;
+    params.crossProjectId = props.skill.projectId
   }
   return { name, params }
 }
 const toRoute = buildToRoute()
+
+const locked = computed(() => {
+  return (props.skill && props.skill.isLocked) || props.badgeIsLocked
+})
 </script>
 
 <template>
@@ -88,20 +99,26 @@ const toRoute = buildToRoute()
 
     <skill-progress-name-row
       :skill="skill"
-      :enable-drill-down="enableDrillDown"
       :badge-is-locked="badgeIsLocked"
       :to-route="toRoute"
-      :type="type"/>
-    <div>
+      :type="type" />
+    <div class="mt-1">
       <router-link
         v-if="toRoute"
         :to="toRoute"
         :aria-label="`Navigate to ${skill.skill}`">
-        <vertical-progress-bar
-          class="border-1 border-transparent hover:border-orange-700 border-round"
-          data-cy="skillProgressBar" />
+<!--        <vertical-progress-bar-->
+<!--          class="border-1 border-transparent hover:border-orange-700 border-round"-->
+<!--          data-cy="skillProgressBar" />-->
+        <skill-progress-bar data-cy="skillProgressBar"
+                            class="border-1 border-transparent hover:border-orange-700 border-round"
+                            :skill="skill" />
       </router-link>
-      <vertical-progress-bar v-else data-cy="skillProgressBar" />
+      <skill-progress-bar
+        v-else
+        :skill="skill"
+        data-cy="skillProgressBar" />
+
       <!--        <progress-bar :skill="skill" v-on:progressbar-clicked="skillClicked"-->
       <!--                      :badge-is-locked="badgeIsLocked"-->
       <!--                      :bar-size="skill.groupId ? 12 : 22"-->
@@ -125,41 +142,49 @@ const toRoute = buildToRoute()
     <!--        </span>-->
     <!--      </div>-->
     <!--    </div>-->
-    <!--    <div v-if="showDescription || (skill.type === 'SkillsGroup' && showGroupDescriptions)" :data-cy="`skillDescription-${skill.skillId}`">-->
-    <!--      <div v-if="skill.type === 'SkillsGroup'">-->
-    <!--        <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">-->
-    <!--          <markdown-text v-if="skill.description && skill.description.description" :text="skill.description.description"/>-->
-    <!--        </p>-->
-    <!--      </div>-->
-    <!--      <div v-if="skill.type === 'Skill'">-->
-    <!--        <div v-if="locked && skill.dependencyInfo" class="text-center text-muted locked-text">-->
-    <!--          *** Skill has <b-badge>{{ skill.dependencyInfo.numDirectDependents}}</b-badge> direct prerequisite(s).-->
-    <!--          <span v-if="allowDrillDown">Click <i class="fas fa-lock icon"></i> to see its prerequisites.</span>-->
-    <!--          <span v-else>Please see its prerequisites below.</span>-->
-    <!--          ***-->
-    <!--        </div>-->
-    <!--        <p v-if="skill.subjectName" class="text-secondary mt-3">-->
-    <!--          {{ subjectDisplayName }}: {{ skill.subjectName }}-->
-    <!--        </p>-->
+    <div v-if="showDescription || (skill.type === 'SkillsGroup' && showGroupDescriptions)"
+         :data-cy="`skillDescription-${skill.skillId}`">
 
-    <!--        <achievement-date v-if="skill && skill.achievedOn" :date="skill.achievedOn" class="mt-2"/>-->
+      <div v-if="skill.type === 'SkillsGroup'">
+        <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
+          <markdown-text v-if="skill.description && skill.description.description"
+                         :text="skill.description.description" />
+        </p>
+      </div>
+      <div v-if="skill.type === 'Skill'">
+        <div v-if="locked && skill.dependencyInfo" class="text-center text-muted locked-text">
+          *** Skill has
+          <Tag>{{ skill.dependencyInfo.numDirectDependents }}</Tag>
+          direct prerequisite(s).
+          <span v-if="allowDrillDown">Click <i class="fas fa-lock icon"></i> to see its prerequisites.</span>
+          <span v-else>Please see its prerequisites below.</span>
+          ***
+        </div>
+        <p v-if="skill.subjectName" class="text-secondary mt-3">
+          {{ preferences.subjectDisplayName }}: {{ skill.subjectName }}
+        </p>
 
-    <!--        <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked"/>-->
-    <!--        <skill-summary-cards v-if="!locked" :skill="skill" class="mt-3"></skill-summary-cards>-->
-    <!--        <catalog-import-status :skill="skill" />-->
-    <!--        <skill-video v-if="skillInternal" :skill="skillInternal"-->
-    <!--                     :video-collapsed-by-default="videoCollapsedByDefault"-->
-    <!--                     @points-earned="pointsEarned"-->
-    <!--                     class="mt-2" />-->
-    <!--        <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">-->
-    <!--          <markdown-text v-if="skill.description && skill.description.description" :text="skill.description.description"/>-->
-    <!--        </p>-->
+        <achievement-date
+          v-if="skill && skill.achievedOn"
+          :date="skill.achievedOn" class="mt-2" />
 
-    <!--        <div>-->
-    <!--          <skill-overview-footer :skill="skill" v-on:points-earned="pointsEarned"/>-->
-    <!--        </div>-->
-    <!--      </div>-->
-    <!--    </div>-->
+<!--        <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked" />-->
+        <skills-summary-cards v-if="!locked" :skill="skill" class="mt-3" />
+<!--        <catalog-import-status :skill="skill" />-->
+<!--        <skill-video v-if="skillInternal" :skill="skillInternal"-->
+<!--                     :video-collapsed-by-default="videoCollapsedByDefault"-->
+<!--                     @points-earned="pointsEarned"-->
+<!--                     class="mt-2" />-->
+        <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
+          <markdown-text v-if="skill.description && skill.description.description"
+                         :text="skill.description.description" />
+        </p>
+
+        <div>
+          <skill-overview-footer  :skill="skill"/>
+        </div>
+      </div>
+    </div>
 
     <!--    <div v-if="skill.isSkillsGroupType && childSkillsInternal" class="ml-4 mt-3">-->
     <!--      <div v-for="(childSkill, index) in childSkillsInternal"-->

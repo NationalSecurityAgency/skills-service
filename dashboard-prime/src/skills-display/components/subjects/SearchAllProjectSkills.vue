@@ -92,6 +92,9 @@ const navToSkill = (event) => {
           </div>
         </div>
       </template>
+      <template #empty>
+        <div class="p-3">No Results Found</div>
+      </template>
     </AutoComplete>
   </div>
 </template>

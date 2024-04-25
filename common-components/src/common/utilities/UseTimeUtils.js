@@ -19,8 +19,8 @@ export const useTimeUtils = () => {
     return dayjs().utc().isSame(dayjs(timestamp), 'day');
   }
 
-  const formatDate = (timestamp) => {
-    return dayjs(timestamp).format('YYYY-MM-DD HH:mm');
+  const formatDate = (timestamp, formatter = 'YYYY-MM-DD HH:mm') => {
+    return dayjs(timestamp).format(formatter);
   }
 
   const simpleClockFilter = (valueInMs) => {

@@ -232,7 +232,7 @@ const zoomed = (chartContext, { xaxis, yaxis }) => {
         </div>
 
         <div v-if="!loading">
-          <div v-if="!hasData" class="relative">
+          <div v-if="!hasData" class="relative" data-cy="pointHistoryChartNoData">
             <BlockUI :blocked="true" :auto-z-index="false">
               <point-history-chart-placeholder v-if="!hasData" />
             </BlockUI>

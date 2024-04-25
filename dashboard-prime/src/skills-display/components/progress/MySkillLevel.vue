@@ -1,13 +1,14 @@
 <script setup>
 import { computed } from 'vue'
-import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
-const userProgress = useUserProgressSummaryState()
+const props = defineProps({
+  userProgress: Object,
+})
 const attributes = useSkillsDisplayAttributesState()
 
-const level = computed(() => userProgress.userProgressSummary.skillsLevel)
-const totalLevels = computed(() => userProgress.userProgressSummary.totalLevels)
+const level = computed(() => props.userProgress.skillsLevel)
+const totalLevels = computed(() => props.userProgress.totalLevels)
 </script>
 
 <template>

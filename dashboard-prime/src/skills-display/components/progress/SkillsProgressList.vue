@@ -1,13 +1,16 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import SkillProgress from '@/skills-display/components/progress/SkillProgress.vue'
 import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
+import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
+import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
+import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 
+// subject: {
+//   type: Object,
+//     required: true
+// },
 const props = defineProps({
-  subject: {
-    type: Object,
-    required: true
-  },
   showDescriptions: {
     type: Boolean,
     default: false
@@ -34,7 +37,9 @@ const props = defineProps({
 })
 
 const scrollIntoViewState = useScrollSkillsIntoViewState()
-
+const preferences = useSkillsDisplayPreferencesState()
+const skillsDisplayService = useSkillsDisplayService()
+const subjectAndSkillsState = useSkillsDisplaySubjectState()
 const searchString = ref('')
 const showDescriptionsInternal = ref(false)
 
@@ -43,23 +48,20 @@ let filter = () => true
 if (props.projectId) {
   filter = (s) => s.projectId === props.projectId
 }
-const skillsInternal = ref([])
+const skillsInternal = computed(() => subjectAndSkillsState.subjectSummary.skills)
+const subject = computed(() => subjectAndSkillsState.subjectSummary)
 onMounted(() => {
-  skillsInternal.value = props.subject.skills.filter(filter).map((item) => {
-    const isSkillsGroupType = item.type === 'SkillsGroup'
-    if (isSkillsGroupType) {
-      // eslint-disable-next-line no-param-reassign
-      item.children = item.children.map((child) => ({ ...child, groupId: item.skillId, isSkillType: true }))
-    }
-    const res = {
-      ...item, subject: props.subject, isSkillsGroupType, isSkillType: !isSkillsGroupType
-    }
-    updateMetaCountsForSkillRes(res)
-    return res
-  })
-
+  // skillsInternal.skills.forEach((skill) => {
+  //   updateMetaCountsForSkillRes(res)
+  // })
   scrollToLastViewedSkill(400)
 })
+watch(() => skillsInternal?.value?.skills, () => {
+  skillsInternal.value.skills.forEach((item) => {
+    updateMetaCountsForSkillRes(item)
+  })
+})
+
 const updateMetaCountsForSkillRes = (skillRes) => {
   if (skillRes.isSkillsGroupType) {
     skillRes.children.forEach((childItem) => {
@@ -141,12 +143,56 @@ const hasLastViewedSkill = computed(() => {
   }
   return lastViewedSkill
 })
+
+const descriptionsLoaded = ref(false)
+const loading = ref(false)
+const descriptions = ref([])
+const updateSkillForLoadedDescription = (skills, desc) => {
+  let foundSkill = null;
+  for (let i = 0; i < skills.length; i += 1) {
+    const skill = skills[i];
+    if (desc.skillId === skill.skillId) {
+      foundSkill = skill;
+    } else if (skill.isSkillsGroupType) {
+      foundSkill = skill.children.find((child) => desc.skillId === child.skillId);
+    }
+    if (foundSkill) {
+      break;
+    }
+  }
+
+  if (foundSkill) {
+    foundSkill.description = desc;
+    foundSkill.achievedOn = desc.achievedOn;
+    foundSkill.videoSummary = desc.videoSummary;
+  }
+}
+const onDetailsToggle = () => {
+  if (!descriptionsLoaded.value) {
+    loading.value = true;
+    skillsDisplayService.getDescriptions(subject.value.subjectId || props.subject.badgeId, props.type)
+      .then((res) => {
+        descriptions.value = res;
+        res.forEach((desc) => {
+          updateSkillForLoadedDescription(skillsInternal.value, desc);
+          // updateSkillForLoadedDescription(this.skillsInternalOrig, desc);
+        });
+        descriptionsLoaded.value = true;
+      })
+      .finally(() => {
+        loading.value = false;
+      });
+  }
+}
+
 </script>
 
 <template>
-  <Card data-cy="skillsProgressList" v-if="(skillsInternal.length > 0 || searchString || showNoDataMsg)">
+  <Card data-cy="skillsProgressList"
+        v-if="(skillsInternal && skillsInternal.length > 0 || searchString || showNoDataMsg)">
     <template #header>
-      <div class="row" v-if="skillsInternal && skillsInternal.length > 0">
+      <div class="flex px-4 pt-3"
+           v-if="skillsInternal && skillsInternal.length > 0">
         <!--        <div class="col-md-auto text-left pr-md-0">-->
         <!--          <div class="d-flex">-->
         <!--            <b-form-input @input="searchSkills" style="padding-right: 2.3rem;"-->
@@ -162,7 +208,7 @@ const hasLastViewedSkill = computed(() => {
         <!--            </b-button>-->
         <!--          </div>-->
         <!--        </div>-->
-        <div class="col-md text-left my-2 my-md-0 ml-md-0 pl-md-0">
+        <div class="flex-1">
           <!--                <skills-filter :counts="metaCounts"-->
           <!--                               :filters="filters"-->
           <!--                               @filter-selected="filterSkills"-->
@@ -182,28 +228,30 @@ const hasLastViewedSkill = computed(() => {
             :aria-label="`Jump to Last Viewed Skill`"
             data-cy="jumpToLastViewedButton" />
         </div>
-        <!--        <div class="col-md-auto text-right skill-details-toggle" data-cy="skillDetailsToggle">-->
-        <!--          <span class="text-muted pr-1">{{ skillDisplayName }} Details:</span>-->
-        <!--          <toggle-button class="" v-model="showDescriptionsInternal" @change="onDetailsToggle"-->
-        <!--                         :color="{ checked: '#007c49', unchecked: '#6b6b6b' }"-->
-        <!--                         :aria-label="`Show ${this.skillDisplayName} Details`"-->
-        <!--                         :labels="{ checked: 'On', unchecked: 'Off' }" data-cy="toggleSkillDetails"/>-->
-        <!--        </div>-->
-        <!--      </div>-->
-        <!--      <div v-if="selectedTagFilters.length > 0" class="row mt-2">-->
-        <!--        <div class="col-md-auto text-left pr-md-0">-->
-        <!--          <b-badge v-for="(tag, index) in selectedTagFilters"-->
-        <!--                   :data-cy="`skillTagFilter-${index}`"-->
-        <!--                   :key="tag.tagId"-->
-        <!--                   variant="light"-->
-        <!--                   class="mx-1 py-1 border-info border selected-filter overflow-hidden">-->
-        <!--            <i :class="'fas fa-tag'" class="ml-1"></i> <span v-html="tag.tagValue"></span>-->
-        <!--            <button type="button" class="btn btn-link p-0" @click="removeTagFilter(tag)" :data-cy="`clearSelectedTagFilter-${tag.tagId}`">-->
-        <!--              <i class="fas fa-times-circle ml-1"></i>-->
-        <!--              <span class="sr-only">clear filter</span>-->
-        <!--            </button>-->
-        <!--          </b-badge>-->
-        <!--        </div>-->
+        <div class="" data-cy="skillDetailsToggle">
+          <div class="flex align-content-center">
+            <span class="text-muted pr-1 align-content-center">{{ preferences.skillDisplayName }} Details:</span>
+            <InputSwitch v-model="showDescriptionsInternal"
+                         @change="onDetailsToggle"
+                         :aria-label="`Show ${preferences.skillDisplayName} Details`"
+                         data-cy="toggleSkillDetails"/>
+          </div>
+
+
+          <!--      <div v-if="selectedTagFilters.length > 0" class="row mt-2">-->
+          <!--        <div class="col-md-auto text-left pr-md-0">-->
+          <!--          <b-badge v-for="(tag, index) in selectedTagFilters"-->
+          <!--                   :data-cy="`skillTagFilter-${index}`"-->
+          <!--                   :key="tag.tagId"-->
+          <!--                   variant="light"-->
+          <!--                   class="mx-1 py-1 border-info border selected-filter overflow-hidden">-->
+          <!--            <i :class="'fas fa-tag'" class="ml-1"></i> <span v-html="tag.tagValue"></span>-->
+          <!--            <button type="button" class="btn btn-link p-0" @click="removeTagFilter(tag)" :data-cy="`clearSelectedTagFilter-${tag.tagId}`">-->
+          <!--              <i class="fas fa-times-circle ml-1"></i>-->
+          <!--              <span class="sr-only">clear filter</span>-->
+          <!--            </button>-->
+          <!--          </b-badge>-->
+        </div>
       </div>
     </template>
     <template #content>
@@ -223,12 +271,13 @@ const hasLastViewedSkill = computed(() => {
             <!--            :show-group-descriptions="showGroupDescriptions"-->
             <!--            @points-earned="onPointsEarned"-->
             <!--            @add-tag-filter="addTagFilter"-->
+<!--            :subjectId="subject.subjectId"-->
+<!--            :badgeId="subject.badgeId"-->
+
             <skill-progress
               :id="`skill-${skill.skillId}`"
               :ref="`skillProgress${skill.skillId}`"
               :skill="skill"
-              :subjectId="subject.subjectId"
-              :badgeId="subject.badgeId"
               :type="type"
               :enable-drill-down="true"
               :show-description="showDescriptionsInternal"
@@ -237,6 +286,8 @@ const hasLastViewedSkill = computed(() => {
               :child-skill-highlight-string="searchString"
               :video-collapsed-by-default="true"
             />
+
+<!--            <Divider />-->
           </div>
         </div>
       </div>

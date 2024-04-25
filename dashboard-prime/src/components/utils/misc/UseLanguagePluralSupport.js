@@ -1,13 +1,13 @@
 export const useLanguagePluralSupport = () => {
   const plural = (param) => {
+    let res = ''
     if (param instanceof Array) {
-      return param && param.length > 1 ? 's' : ''
+      res = param && param.length > 1 ? 's' : ''
     }
-    if (param instanceof Number) {
-      return  param > 1 ? 's' : ''
+    if (typeof param === 'number') {
+      res=  param !== 1 ? 's' : ''
     }
-
-    return ''
+    return res
   }
 
   const areOrIs = (numItems) => {

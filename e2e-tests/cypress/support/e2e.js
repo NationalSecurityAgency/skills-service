@@ -50,7 +50,7 @@ before(function () {
         if (!Cypress.env('verifyEmail')) {
             cy.register(vars.defaultUser, vars.defaultPass);
             if (!Cypress.env('oauthMode')) {
-                Cypress.env('proxyUser', 'user0')
+                Cypress.env('proxyUser', 'skills@skills.org')
             } else {
                 Cypress.env('proxyUser', 'foo-hydra')
                 Cypress.env('hydraAuthenticated', false)

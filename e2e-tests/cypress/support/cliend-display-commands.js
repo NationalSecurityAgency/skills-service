@@ -23,9 +23,12 @@ Cypress.Commands.add("validatePoweredBy", () => {
     });
 });
 
-Cypress.Commands.add("cdVisit", (url) => {
+Cypress.Commands.add("cdVisit", (url=null, expectPointHistoryData = false) => {
     cy.visit(`/test-skills-display/proj1${url}`);
     cy.validatePoweredBy();
+    if (!expectPointHistoryData) {
+        cy.get('[data-cy="pointHistoryChartNoData"]')
+    }
 });
 
 Cypress.Commands.add("cdBack", (expectedTitle = 'User Skills') => {
@@ -39,11 +42,15 @@ Cypress.Commands.add("cdBack", (expectedTitle = 'User Skills') => {
     }
 });
 
-Cypress.Commands.add("cdClickSubj", (subjIndex, expectedTitle) => {
+Cypress.Commands.add("cdClickSubj", (subjIndex, expectedTitle = null, expectPointHistoryData = false) => {
     cy.get(`[data-cy="subjectTile"] [data-cy="subjectTileBtn"]`).eq(subjIndex).click();
     cy.validatePoweredBy();
     if (expectedTitle){
         cy.get('[data-cy="skillsTitle"]').contains(expectedTitle);
+    }
+
+    if (!expectPointHistoryData) {
+        cy.get('[data-cy="pointHistoryChartNoData"]')
     }
 });
 

@@ -7,6 +7,7 @@ import AnimatedNumber from '@/skills-display/components/utilities/AnimatedNumber
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useRoute } from 'vue-router'
+import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 
 const props = defineProps({
   skill: Object,
@@ -20,7 +21,6 @@ const numFormat = useNumberFormat()
 const timeUtils = useTimeUtils()
 const appConfig = useAppConfig()
 const route = useRoute()
-const displayPref = useSkillsDisplayPreferencesState()
 
 const isSkillsGroupWithChildren = computed(() => props.skill?.isSkillsGroupType && props.skill?.children && props.skill?.children.length > 0)
 const numSkillsRequired = computed(() => {
@@ -61,21 +61,23 @@ const expirationDate = (includeTime = false) => {
 
 const buildToRoute = () => {
   let name = 'skillDetails'
-  const params = { skillId: props.skill.skillId, projectId: props.skill.projectId };
+  const params = { skillId: props.skill.skillId, projectId: props.skill.projectId }
   if (route.params.subjectId) {
-    params.subjectId = route.params.subjectId;
+    params.subjectId = route.params.subjectId
   } else if (route.params.badgeId) {
-    params.badgeId = route.params.badgeId;
-    name = (props.type === 'global-badge') ? 'globalBadgeSkillDetails' : 'badgeSkillDetails';
+    params.badgeId = route.params.badgeId
+    name = (props.type === 'global-badge') ? 'globalBadgeSkillDetails' : 'badgeSkillDetails'
   } else if (props.skill.crossProject && props.skill.projectId) {
-    params.crossProjectId = props.skill.projectId;
+    params.crossProjectId = props.skill.projectId
   }
   return { name, params }
 }
 </script>
 
 <template>
-  <div class="flex align-content-end" :id="`skillProgressTitle-${skill.skillId}`">
+  <div class="flex align-content-end"
+       :data-cy="`skillProgressTitle-${skill.skillId}`"
+       :id="`skillProgressTitle-${skill.skillId}`">
     <div class="skills-theme-primary-color flex-1 text-2xl"
          :class="{ 'text-success' : skill.isSkillsGroupType,
                        'text-info' : skill.isSkillType && !skill.childSkill,
@@ -143,17 +145,17 @@ const buildToRoute = () => {
         </Tag>
       </div>
     </div>
-    <div class="text-right"
-         :class="{ 'text-success' : isSkillComplete, 'text-primary': !isSkillComplete }"
+    <div class="text-right align-content-end"
+         :class="{ 'text-green-500' : isSkillComplete }"
          data-cy="skillProgress-ptsOverProgressBard">
-        <span v-if="isSkillComplete" :data-cy="`skillCompletedCheck-${skill.skillId}`" class="pr-1"><i
-          class="fa fa-check" /></span>
-      <div v-if="skill.isSkillsGroupType" class="">
+      <div v-if="skill.isSkillsGroupType" class="align-content-end">
         <animated-number :num="numChildSkillsComplete" />
         / {{ numFormat.pretty(numSkillsRequired) }} Skill{{ (numSkillsRequired === 1) ? '' : 's' }}
         {{ someSkillsAreOptional ? 'Required' : '' }}
       </div>
       <div v-else class="">
+        <i class="fa fa-check mr-1" v-if="isSkillComplete" :data-cy="`skillCompletedCheck-${skill.skillId}`"
+           aria-hidden="true" />
         <animated-number :num="skill.points" />
         / {{ numFormat.pretty(skill.totalPoints) }} Points
       </div>
@@ -179,10 +181,11 @@ const buildToRoute = () => {
         </div>
       </div>
 
-      <div v-if="skill.selfReporting && skill.selfReporting.requestedOn && toRoute" data-cy="approvalPending">
-        <span v-if="!skill.selfReporting.rejectedOn"><i class="far fa-clock"
-                                                        aria-hidden="true"></i> Pending Approval</span>
-        <span v-else><i class="fas fa-heart-broken text-danger skills-theme-primary-color" aria-hidden="true"></i> Request Rejected</span>
+      <div v-if="skill.selfReporting && skill.selfReporting.requestedOn"
+           data-cy="approvalPending">
+        <span v-if="!skill.selfReporting.rejectedOn" class="text-orange-500"><i class="far fa-clock"
+                                                        aria-hidden="true" /> Pending Approval</span>
+        <span v-else class="text-red-500"><i class="fas fa-heart-broken skills-theme-primary-color" aria-hidden="true"></i> Request Rejected</span>
       </div>
     </div>
   </div>

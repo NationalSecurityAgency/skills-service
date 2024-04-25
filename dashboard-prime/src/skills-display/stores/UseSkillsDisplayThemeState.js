@@ -33,12 +33,25 @@ export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState',
     }
   }
 
+  const infoCards = () => {
+    const iconColors = theme.value?.infoCards?.iconColors;
+    return {
+      iconColors: [
+        iconColors && iconColors.length > 0 ? iconColors[0] : colors.success,
+        iconColors && iconColors.length > 1 ? iconColors[1] : colors.warning,
+        iconColors && iconColors.length > 2 ? iconColors[2] : colors.info,
+        iconColors && iconColors.length > 3 ? iconColors[3] : colors.danger,
+      ],
+    };
+  }
+
   const landingPageTitle = computed(() => theme.value.landingPageTitle || 'User Skills')
 
   return {
     theme,
     setThemeByKey,
     landingPageTitle,
-    colors
+    colors,
+    infoCards
   }
 })

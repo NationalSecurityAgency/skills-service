@@ -55,9 +55,9 @@ const levelStats = computed(() => {
               <template #footer>
                 <p v-if="userProgress.points > 0 && userProgress.points === userProgress.totalPoints">All Points earned</p>
                 <div v-else>
-                  <div>Earn up to <Tag>{{ numFormat.pretty(userProgress.totalPoints) }}</Tag> points</div>
+                  <div><Tag data-cy="earnedPoints">{{ numFormat.pretty(userProgress.points) }}</Tag> / <Tag severity="secondary" data-cy="totalPoints">{{ numFormat.pretty(userProgress.totalPoints) }}</Tag> Points</div>
                   <div data-cy="overallPointsEarnedToday">
-                    <Tag severity="info">{{ numFormat.pretty(userProgress.todaysPoints) }}</Tag> Points earned Today
+                    <Tag severity="info" data-cy="pointsEarnedToday">{{ numFormat.pretty(userProgress.todaysPoints) }}</Tag> Points earned Today
                   </div>
                 </div>
               </template>
@@ -66,7 +66,7 @@ const levelStats = computed(() => {
 
         </div>
         <div class="flex-1">
-          <skill-level />
+          <skill-level :user-progress="userProgress"/>
         </div>
         <div class="flex-1">
           <circle-progress
@@ -83,11 +83,11 @@ const levelStats = computed(() => {
 
               <div v-if="!isLevelComplete">
                 <div>
-                  <Tag>{{ numFormat.pretty(levelStats.pointsTillNextLevel) }}</Tag>
-                  Point {{ pluralSupport.plural(levelStats.pointsTillNextLevel) }} to {{ attributes.levelDisplayName }} {{levelStats.nextLevel }}
+                  <Tag data-cy="pointsTillNextLevel">{{ numFormat.pretty(levelStats.pointsTillNextLevel) }}</Tag>
+                  Point{{ pluralSupport.plural(levelStats.pointsTillNextLevel) }} to {{ attributes.levelDisplayName }} {{levelStats.nextLevel }}
                 </div>
-                <div  data-cy="pointsEarnedTodayForTheNextLevel">
-                  <Tag severity="info">{{ numFormat.pretty(userProgress.todaysPoints) }}</Tag> Points earned Today
+                <div>
+                  You can do it!
                 </div>
               </div>
             </template>

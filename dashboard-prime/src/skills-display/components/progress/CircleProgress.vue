@@ -1,89 +1,96 @@
 <script setup>
 import { useNumberFormat } from '../../../../../common-components/src/common/filter/UseNumberFormat.js'
+import { computed, watch, ref } from 'vue'
 
 const props = defineProps({
   diameter: {
     type: Number,
-    default: 160,
+    default: 160
   },
   title: {
-    type: String,
+    type: String
   },
   completedBeforeTodayColor: {
     type: String,
-    default: '#14a3d2',
+    default: '#14a3d2'
   },
   totalCompletedColor: {
     type: String,
-    default: '#7ed6f3',
+    default: '#7ed6f3'
   },
   incompleteColor: {
     type: String,
-    default: '#cdcdcd',
+    default: '#cdcdcd'
   },
   strokeWidth: {
     type: Number,
-    default: 12,
+    default: 12
   },
   pointsCompletedToday: {
-    type: Number,
+    type: Number
   },
   totalCompletedPoints: {
-    type: Number,
+    type: Number
   },
   totalPossiblePoints: {
-    type: Number,
-  },
+    type: Number
+  }
 })
 
 const numFormat = useNumberFormat()
 
 // If totalPossiblePoints is -1 it means this is charting Level progress and the user has completed this level
 const isCompleted = props.totalPossiblePoints === -1
-const calcPercentComplete = () => {
+const percentComplete = computed(() => {
   if (isCompleted) {
     return 100
   }
-  if (props.totalPossiblePoints > 0 && props.totalCompletedPoints > 0 ) {
-    return Math.trunc((props.totalCompletedPoints / props.totalPossiblePoints) * 100 )
+  if (props.totalPossiblePoints > 0 && props.totalCompletedPoints > 0) {
+    return Math.trunc((props.totalCompletedPoints / props.totalPossiblePoints) * 100)
   }
   return 0
-}
-const percentComplete = calcPercentComplete()
-const is100Percent = percentComplete === 100
+})
+const is100Percent = percentComplete.value === 100
 
-const series = [percentComplete]
+const series = computed(() => [percentComplete.value])
+// const chart = ref(null)
+// watch(() => percentComplete.value, () => {
+//   chart.value.updateSeries([percentComplete.value])
+//   chart.value.updateOptions(chartOptions)
+// })
 const defaultColor = '#0ea5e9'
 const completedColor = '#22C55E'
-const chartOptions = {
-  chart: {
-    height: 250,
-      type: 'radialBar',
-  },
-  fill: {
-    colors: [completedColor]
-  },
-  plotOptions: {
-    radialBar: {
-      hollow: {
-        size: '67%',
-      },
-      dataLabels: {
-        name: {
-          show: true,
-          fontSize: isCompleted ? '3.5rem' : '1.2rem',
-          color: isCompleted ? completedColor : defaultColor
+const chartOptions = computed(() => {
+  return {
+    chart: {
+      height: 250,
+      type: 'radialBar'
+    },
+    fill: {
+      colors: [completedColor]
+    },
+    plotOptions: {
+      radialBar: {
+        hollow: {
+          size: '67%'
         },
-        value: {
-          show: true,
-          fontSize: is100Percent || isCompleted ? '1.2rem' : '1rem',
-          color: is100Percent || isCompleted ? completedColor : defaultColor
-        },
+        dataLabels: {
+          name: {
+            show: true,
+            fontSize: isCompleted ? '3.5rem' : '1.2rem',
+            color: isCompleted ? completedColor : defaultColor
+          },
+          value: {
+            show: true,
+            fontSize: is100Percent || isCompleted ? '1.2rem' : '1rem',
+            color: is100Percent || isCompleted ? completedColor : defaultColor
+          }
+        }
       }
     },
-  },
-  labels: [isCompleted ? '✓' : `${numFormat.pretty(props.totalCompletedPoints > 0 ? props.totalCompletedPoints : 0)} Points`],
-}
+    labels: [isCompleted ? '✓' : `${numFormat.pretty(props.totalCompletedPoints > 0 ? props.totalCompletedPoints : 0)} Points`]
+  }
+})
 
 
 </script>

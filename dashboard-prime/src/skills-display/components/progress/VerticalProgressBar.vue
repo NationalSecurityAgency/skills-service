@@ -3,7 +3,6 @@ import { computed } from 'vue'
 
 const props = defineProps({
   isLocked: Boolean,
-  isClickable: Boolean,
   totalProgress: {
     type: Number,
     default: 0
