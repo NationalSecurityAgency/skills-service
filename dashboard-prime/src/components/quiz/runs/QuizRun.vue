@@ -7,6 +7,7 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 
 import QuizRunService from '@/common-components/quiz/QuizRunService.js';
 import QuizRunSplashScreen from '@/components/quiz/runs/QuizRunSplashScreen.vue';
+import QuizRunValidationWarnings from '@/components/quiz/runs/QuizRunValidationWarnings.vue';
 import QuestionType from '@/common-components/quiz/QuestionType.js';
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
 import QuizRunQuestion from '@/components/quiz/runs/QuizRunQuestion.vue';
@@ -100,7 +101,7 @@ const isSurveyType = computed(() => {
   return quizInfo.value.quizType === 'Survey';
 })
 const errorsToShow = computed(() => {
-  const values = Object.values(errors).flat().filter((val) => val && val.length > 0);
+  const values = Object.values(errors.value).flat().filter((val) => val && val.length > 0);
   const unique = values.filter((v, i, a) => a.indexOf(v) === i);
   return unique && unique.length > 0 ? unique : null;
 })
@@ -387,7 +388,7 @@ const doneWithThisRun = () => {
             </div>
           </SkillsOverlay>
 
-<!--          <quiz-run-validation-warnings v-if="invalid" :errors-to-show="errorsToShow" />-->
+          <QuizRunValidationWarnings v-if="!meta.valid" :errors-to-show="errorsToShow" />
 
           <div v-if="!quizResult" class="text-left mt-5 flex flex-wrap">
 <!--            <SkillsButton severity="info" outlined-->
@@ -404,7 +405,7 @@ const doneWithThisRun = () => {
                             :label="`Complete ${quizInfo.quizType}`"
                             icon="fas fa-check-double"
                             @click="completeTestRun"
-                            :disabled="isCompleting || !meta.valid"
+                            :disabled="isCompleting"
                             :aria-label="`Done with ${quizInfo.quizType}`"
                             class="text-uppercase font-weight-bold skills-theme-btn"
                             data-cy="completeQuizBtn">

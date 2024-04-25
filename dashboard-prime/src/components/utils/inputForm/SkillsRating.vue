@@ -8,7 +8,7 @@ const props = defineProps({
   },
 })
 const emit = defineEmits(['update:modelValue'])
-const { value, errorMessage } = useField(() => props.name)
+const { value, errorMessage } = useField(() => props.name, undefined, {syncVModel: true})
 const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 </script>
 
@@ -16,7 +16,6 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
   <div v-bind="fallthroughAttributes.rootAttrs.value">
     <Rating
         v-bind="fallthroughAttributes.inputAttrs.value"
-        @update:modelValue="emit('update:modelValue', $event)"
         v-model="value" />
     <small v-if="errorMessage"
            role="alert"
