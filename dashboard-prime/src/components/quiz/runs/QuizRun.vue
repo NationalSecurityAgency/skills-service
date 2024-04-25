@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { object, string, number, array } from 'yup';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
@@ -9,6 +10,7 @@ import QuizRunSplashScreen from '@/components/quiz/runs/QuizRunSplashScreen.vue'
 import QuestionType from '@/common-components/quiz/QuestionType.js';
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
 import QuizRunQuestion from '@/components/quiz/runs/QuizRunQuestion.vue';
+import { useForm } from "vee-validate";
 
 const props = defineProps({
   quizId: String,
@@ -23,7 +25,7 @@ const timeUtils = useTimeUtils()
 
 const isLoading = ref(true);
 const isCompleting = ref(false);
-const quizInfo = ref(null);
+const quizInfo = ref({});
 const quizResult = ref(null);
 const quizAttemptId = ref(null);
 const reportAnswerPromises = ref([]);
@@ -33,6 +35,56 @@ const splashScreen = ref({
 const currentDate = ref(null);
 const dateTimer = ref(null);
 const scrollDistance = ref(0);
+
+
+const atLeastOneSelected = (value) => {
+  return value && (value.findIndex((a) => a.selected) >= 0);
+}
+const ratingSelected = (value) => {
+  return  value > 0;
+}
+const getQuestionNumFromPath = (path) => {
+  return Number(path.split('[').pop().split(']')[0]) + 1;
+}
+const schema = object({
+  'questions': array()
+      .of(
+          object({
+            'questionType': string(),
+            'answerText': string()
+                .when('questionType', {
+                  is: QuestionType.TextInput,
+                  then: (sch)  => sch
+                      .trim()
+                      .required((d) => `Answer to question #${getQuestionNumFromPath(d.path)} is required`)
+                      .customDescriptionValidator(null, false, null, (d) => `Answer to question #${getQuestionNumFromPath(d.path)}`),
+                }),
+            'answerRating': number()
+                .when('questionType', {
+                  is: QuestionType.Rating,
+                  then: (sch)  => sch
+                      .nullable()
+                      .test('ratingSelected', 'A rating must be selected', (value) => ratingSelected(value))
+                      .label('Rating'),
+                }),
+            'quizAnswers': array()
+                .when('questionType', {
+                  is: (questionType) => questionType === QuestionType.SingleChoice || questionType === QuestionType.MultipleChoice,
+                  then: (sch)  => sch
+                      .required()
+                      .test('atLeastOneSelected', 'At least 1 choice must be selected', (value) => atLeastOneSelected(value))
+                      .label('Answers'),
+                })
+          })
+      ),
+})
+const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, errors, errorBag } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    questions: [],
+  }
+})
+// const { remove, push, fields } = useFieldArray('questions');
 
 onMounted(() => {
   if (props.quiz) {
@@ -50,7 +102,7 @@ const isSurveyType = computed(() => {
   return quizInfo.value.quizType === 'Survey';
 })
 const errorsToShow = computed(() => {
-  const values = Object.values(this.$refs.observer.errors).flat().filter((val) => val && val.length > 0);
+  const values = Object.values(errors).flat().filter((val) => val && val.length > 0);
   const unique = values.filter((v, i, a) => a.indexOf(v) === i);
   return unique && unique.length > 0 ? unique : null;
 })
@@ -161,17 +213,30 @@ const startQuizAttempt = () => {
           return ({ ...q, answerOptions });
         });
         quizInfo.value = copy;
+        initializeFormData(copy)
         beginDateTimer();
       }).finally(() => {
     isLoading.value = false;
   });
+}
+const initializeFormData = (copy) => {
+  const formQuestions = copy.questions.map((q) => {
+    const answerRating = q.questionType === QuestionType.Rating ? q.answerOptions.find((a) => a.selected) : 0
+    return {
+      questionType: q.questionType,
+      quizAnswers: q.answerOptions.map((a) => ({ ...a, selected: a.selected ? a.selected : false })),
+      answerText: q.questionType === QuestionType.TextInput ? (q.answerOptions[0]?.answerText || '') : '',
+      answerRating: answerRating ? Number(answerRating.answerOption) : 0,
+    }
+  })
+  setFieldValue('questions', formQuestions);
 }
 const updateSelectedAnswers = (questionSelectedAnswer) => {
   if (questionSelectedAnswer.reportAnswerPromise) {
     reportAnswerPromises.value.push(questionSelectedAnswer.reportAnswerPromise);
   }
 }
-const completeTestRun = () => {
+const completeTestRun = handleSubmit((values) => {
   isCompleting.value = true;
   this.$refs.observer.validate().then((validationResults) => {
     if (validationResults) {
@@ -198,7 +263,7 @@ const completeTestRun = () => {
       isCompleting.value = false;
     }
   });
-}
+})
 const reportTestRunToBackend = () => {
   return QuizRunService.completeQuizAttempt(props.quizId, quizAttemptId.value)
       .then((gradedRes) => {
@@ -252,7 +317,6 @@ const saveAndCloseThisRun = () => {
 const doneWithThisRun = () => {
   emit('testWasTaken', quizResult.value);
 }
-
 </script>
 
 <template>
@@ -324,7 +388,7 @@ const doneWithThisRun = () => {
           </SkillsOverlay>
 
 <!--          <quiz-run-validation-warnings v-if="invalid" :errors-to-show="errorsToShow" />-->
-          
+
           <div v-if="!quizResult" class="text-left mt-5 flex flex-wrap">
 <!--            <SkillsButton severity="info" outlined-->
 <!--                          label="Save and Close"-->
@@ -337,10 +401,10 @@ const doneWithThisRun = () => {
 <!--            </SkillsButton>-->
             <SkillsOverlay :show="isCompleting" opacity="0.6">
               <SkillsButton severity="success" outlined
-                            label="Done"
+                            :label="`Complete ${quizInfo.quizType}`"
                             icon="fas fa-check-double"
-                            @click="handleSubmit(completeTestRun)"
-                            :disabled="isCompleting"
+                            @click="completeTestRun"
+                            :disabled="isCompleting || !meta.valid"
                             :aria-label="`Done with ${quizInfo.quizType}`"
                             class="text-uppercase font-weight-bold skills-theme-btn"
                             data-cy="completeQuizBtn">

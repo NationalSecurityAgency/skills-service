@@ -1,7 +1,5 @@
 <script setup>
 import { computed, watch, onMounted, ref } from 'vue'
-import { object, string, number, array } from 'yup';
-import { useField, useForm } from "vee-validate";
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue';
 import SkillsRating from "@/components/utils/inputForm/SkillsRating.vue";
 import QuizRunAnswers from '@/components/quiz/runs/QuizRunAnswers.vue';
@@ -20,8 +18,6 @@ const emit = defineEmits(['answer-text-changed', 'selected-answer'])
 
 const answerOptions = ref([])
 const answerRating = ref(0)
-// const { answerRating, answerRatingErrorMessage } = useField(() => 'answerRating', undefined, {syncVModel: true});
-// console.log(`answerRating [${answerRating}], answerRatingErrorMessage [${answerRatingErrorMessage}]`)
 const answerText = ref(props.q.questionType === QuestionType.TextInput ? (props.q.answerOptions[0]?.answerText || '') : '')
 
 const isMultipleChoice = computed(() => {
@@ -68,46 +64,16 @@ watch(() => answerRating.value, (newValue, oldValue) => {
 
 onMounted(() => {
   answerOptions.value = props.q.answerOptions.map((a) => ({ ...a, selected: a.selected ? a.selected : false }));
-  setFieldValue('quizAnswers', answerOptions.value)
   if (isRating.value) {
     const selectedAnswer = answerOptions.value.find((a) => a.selected);
     if (selectedAnswer) {
-      console.log(`setting selectedAnswer.answerOption [${selectedAnswer.answerOption}]`)
       answerRating.value = Number(selectedAnswer.answerOption);
-      console.log('calling setField')
-      setFieldValue('answerRating', Number(selectedAnswer.answerOption))
-      console.log('done')
     }
   }
   isLoading.value = false;
-  setupValidation();
 })
 
-
-const setupValidation = () => { 
-  // extend('atLeastOneSelected', {
-  //   message: () => 'At least 1 choice must be selected',
-  //   validate(value) {
-  //     const foundSelected = value && (value.findIndex((a) => a.selected) >= 0);
-  //     return foundSelected;
-  //   },
-  // }, {
-  //   immediate: false,
-  // });
-  //
-  // extend('ratingSelected', {
-  //   message: () => 'A rating must be selected',
-  //   validate(value) {
-  //     if (value > 0) {
-  //       return true;
-  //     }
-  //     return false;
-  //   },
-  // }, {
-  //   immediate: false,
-  // });
-}
-const textAnswerChanged = () => { 
+const textAnswerChanged = () => {
   const selectedAnswerIds = answerOptions.value.map((a) => a.id);
   const isAnswerBlank = !answerText.value || answerText.value.trimEnd() === '';
   const currentAnswer = {
@@ -160,40 +126,6 @@ const reportAnswer = (answer) => {
   });
 }
 
-const schema = object({
-  'answerText': string()
-      .trim()
-      .required()
-      .customDescriptionValidator(`Answer to question #${props.num}`, false)
-      .label(`Answer to question #${props.num}`),
-  'answerRating': number()
-      .nullable()
-      .min(1)
-      .max(numberOfStars.value)
-      .test('ratingSelected', 'A rating must be selected', (value) => ratingSelected(value))
-      .label('Rating'),
-  'quizAnswers': array().required()
-      .test('atLeastOneSelected', 'At least 1 choice must be selected', (value) => atLeastOneSelected(value))
-      .label('Answers'),
-})
-const atLeastOneSelected = (value) => {
-  const found = value && (value.findIndex((a) => a.selected) >= 0)
-  console.log(`checking values, found: ${found}`)
-  return found;
-}
-const ratingSelected = (value) => {
-  const selected = value > 0;
-  console.log(`checking values, selected: ${selected}`)
-  return selected;
-}
-const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, errors } = useForm({
-  validationSchema: schema,
-  initialValues: {
-    answerText: answerText.value,
-    answerRating: answerRating.value,
-    quizAnswers: answerOptions.value,
-  }
-})
 </script>
 
 <template>
@@ -217,18 +149,18 @@ const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, error
                 :id="`question-${num}`"
                 data-cy="textInputAnswer"
                 v-model="answerText"
-                name="answerText"
+                :name="`questions[${num-1}].answerText`"
                 :aria-label="`Please enter text to answer question number ${num}`"
                 placeholder="Please enter your response here..."
                 rows="10" />
         </div>
         <div v-else-if="isRating">
-          <SkillsRating @update:modelValue="ratingChanged" class="flex-initial border-round py-3 px-4" v-model="answerRating" :stars="numberOfStars" :cancel="false" name="answerRating"/>
+          <SkillsRating @update:modelValue="ratingChanged" class="flex-initial border-round py-3 px-4" v-model="answerRating" :stars="numberOfStars" :cancel="false" :name="`questions[${num-1}].answerRating`"/>
         </div>
         <div v-else>
           <div v-if="isMultipleChoice" class="text-secondary font-italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>
           <QuizRunAnswers class="mt-1 pl-1"
-                          name="quizAnswers"
+                          :name="`questions[${num-1}].quizAnswers`"
                           @selected-answer="selectionChanged"
                           :value="answerOptions"
                           :q="q"

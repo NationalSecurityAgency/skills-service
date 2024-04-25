@@ -24,7 +24,7 @@ export const useCustomGlobalValidators = () => {
     return this.test("customNameValidator", null, (value, context) => validateName(value, context));
   }
 
-  function customDescriptionValidator(fieldName = '', enableProjectIdParam = true, useProtectedCommunityValidator = null) {
+  function customDescriptionValidator(fieldName = '', enableProjectIdParam = true, useProtectedCommunityValidator = null, fieldNameFunction = null) {
     const appConfig = useAppConfig()
     const validateName = useDebounceFn((value, context) => {
       if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
@@ -34,10 +34,14 @@ export const useCustomGlobalValidators = () => {
         if (result.valid) {
           return true
         }
-        if (result.msg) {
-          return context.createError({ message: `${fieldName ? `${fieldName} - ` : ''}${result.msg}` })
+        let fieldNameToUse = fieldName ? fieldName : '';
+        if (!fieldNameToUse && fieldNameFunction) {
+          fieldNameToUse = fieldNameFunction(context);
         }
-        return context.createError({ message: `${fieldName || 'Field'} is invalid` })
+        if (result.msg) {
+          return context.createError({ message: `${fieldNameToUse ? `${fieldNameToUse} - ` : ''}${result.msg}` })
+        }
+        return context.createError({ message: `${fieldNameToUse || 'Field'} is invalid` })
       })
     }, appConfig.formFieldDebounceInMs)
 

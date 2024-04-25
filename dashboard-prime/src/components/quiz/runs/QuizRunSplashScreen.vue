@@ -89,7 +89,7 @@ const start = () => {
                 <div class="px-3">
                   <i class="fas fa-business-time text-info" style="font-size: 1.3rem;"></i>
                   <span class="text-color-secondary font-italic ml-1">Time Limit:</span>
-                  <span v-if="quizInfo.quizTimeLimit > 0" class="uppercase ml-1 font-bold">{{quizTimeLimit | formatDuration}}</span>
+                  <span v-if="quizInfo.quizTimeLimit > 0" class="uppercase ml-1 font-bold">{{ timeUtils.formatDuration(quizTimeLimit) }}</span>
                   <span v-else class="uppercase ml-1 font-bold">NONE</span>
                 </div>
               </template>
