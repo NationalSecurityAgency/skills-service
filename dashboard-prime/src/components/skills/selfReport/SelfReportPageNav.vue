@@ -13,19 +13,12 @@ const isSelfReportConfigureRoute = computed(() => {
 <template>
   <div>
     <sub-page-header title="Self Report">
-      <SkillsButton v-if="!isSelfReportConfigureRoute"
-                    :to="{ name: 'SelfReportConfigure' }"
-                    size="small"
-                    data-cy="confApprovalWorkloadConfBtn"
-                    icon="fas fa-cogs"
-                    label="Configure">
-        <i class="fas fa-cogs" aria-hidden="true"/> Configure
-      </SkillsButton>
-      <SkillsButton v-if="isSelfReportConfigureRoute"
-                    :to="{ name: 'SelfReport' }"
-                    size="small"
-                    icon="fas fa-arrow-alt-circle-left"
-                    label="Back" />
+      <router-link :to="{ name: 'SelfReportConfigure' }" v-if="!isSelfReportConfigureRoute">
+        <SkillsButton size="small" icon="fas fa-cogs" label="Configure" data-cy="confApprovalWorkloadConfBtn" />
+      </router-link>
+      <router-link :to="{ name: 'SelfReport' }" v-if="isSelfReportConfigureRoute">
+        <SkillsButton size="small" icon="fas fa-arrow-alt-circle-left" label="Back" />
+      </router-link>
     </sub-page-header>
 
     <div style="width: 99%;">

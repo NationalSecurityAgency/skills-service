@@ -6,13 +6,14 @@ import NoContent2 from "@/components/utils/NoContent2.vue";
 import SelfReportInfoCards from "@/components/skills/selfReport/SelfReportInfoCards.vue";
 import SelfReportApproval from "@/components/skills/selfReport/SelfReportApproval.vue";
 import SelfReportApprovalHistory from "@/components/skills/selfReport/SelfReportApprovalHistory.vue";
+import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 
 const route = useRoute();
-
+const appInfo = useAppInfoState()
 const loading = ref(true);
 const selfReportStats = ref([]);
 const showEmailServiceWarning = ref(false);
-const isEmailEnabled = false;
+const isEmailEnabled = appInfo.emailEnabled;
 
 const selfReportApprovalHistory = ref();
 

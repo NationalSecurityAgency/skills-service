@@ -131,22 +131,16 @@ const toggleUnsubscribe = () => {
 <template>
   <Card>
     <template #header>
-      <SkillsCardHeader title="Self Reported Skills Requiring Approval"></SkillsCardHeader>
-<!--      <div class="col text-right" v-if="isEmailEnabled" data-cy="unsubscribeContainer">-->
-<!--        <b-form-checkbox v-model="emailSubscribed"-->
-<!--                         name="unsubscribe-toggle"-->
-<!--                         class="ml-2 mt-2"-->
-<!--                         style="display: inline-block"-->
-<!--                         v-on:input="toggleUnsubscribe"-->
-<!--                         :aria-label="unsubscribeHelpMsg"-->
-<!--                         data-cy="unsubscribeSwitch"-->
-<!--                         switch>-->
-<!--          {{ emailSubscribed ? 'Subscribed' : 'Unsubscribed' }}-->
-<!--        </b-form-checkbox>-->
-<!--      </div>      -->
+      <SkillsCardHeader title="Self Reported Skills Requiring Approval">
+        <template #headerContent>
+          <div v-if="isEmailEnabled" data-cy="unsubscribeContainer">
+            <InputSwitch v-model="emailSubscribed" @update:modelValue="toggleUnsubscribe" class="mr-2" data-cy="unsubscribeSwitch" /> {{ emailSubscribed ? 'Subscribed' : 'Unsubscribed' }}
+          </div>
+        </template>
+      </SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex px-3 mb-3 mt-2">
+      <div class="flex mb-3">
         <div class="flex flex-1">
           <SkillsButton size="small" @click="loadApprovals" aria-label="Sync Records" data-cy="syncApprovalsBtn" class="mr-2 mt-1" icon="fas fa-sync-alt" />
         </div>
