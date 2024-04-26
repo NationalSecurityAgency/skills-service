@@ -63,7 +63,7 @@ const start = () => {
           </div>
         </Message>
         <slot name="aboveTitle" />
-        <div class="mb-1 mt-4 text-4xl">
+        <div class="mb-1 mt-4 text-3xl">
           <span class="font-bold text-primary skills-page-title-text-color">{{ quizInfo.name }}</span>
         </div>
 
@@ -78,7 +78,7 @@ const start = () => {
             <Card class="skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2' } }" data-cy="quizInfoCard">
               <template #content>
                 <div class="px-3">
-                  <i class="fas fa-question-circle text-info" style="font-size: 1.3rem;" aria-hidden="true"></i>
+                  <i class="fas fa-question-circle text-primary" style="font-size: 1.3rem;" aria-hidden="true"></i>
                   <span class="text-color-secondary font-italic ml-1">Questions:</span>
                   <span class="uppercase ml-1 font-bold" data-cy="numQuestions">{{ numQuestions }}</span>
                 </div>
@@ -87,7 +87,7 @@ const start = () => {
             <Card v-if="!isSurveyType"  class="skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2' } }" data-cy="quizTimeLimitCard">
               <template #content>
                 <div class="px-3">
-                  <i class="fas fa-business-time text-info" style="font-size: 1.3rem;"></i>
+                  <i class="fas fa-business-time text-primary" style="font-size: 1.3rem;"></i>
                   <span class="text-color-secondary font-italic ml-1">Time Limit:</span>
                   <span v-if="quizInfo.quizTimeLimit > 0" class="uppercase ml-1 font-bold">{{ timeUtils.formatDuration(quizTimeLimit) }}</span>
                   <span v-else class="uppercase ml-1 font-bold">NONE</span>
@@ -97,7 +97,7 @@ const start = () => {
             <Card v-if="!isSurveyType"  class="skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2' } }" data-cy="quizInfoCard">
               <template #content>
                 <div class="px-3">
-                  <i class="fas fa-redo-alt text-info" style="font-size: 1.3rem;" aria-hidden="true"></i>
+                  <i class="fas fa-redo-alt text-primary" style="font-size: 1.3rem;" aria-hidden="true"></i>
                   <span class="text-color-secondary font-italic ml-1">Attempts:</span>
                   <span class="uppercase ml-1 font-bold" data-cy="numAttempts"><Tag severity="secondary">{{quizInfo.userNumPreviousQuizAttempts}}</Tag> / <Tag severity="secondary">{{ maxAttemptsDisplay }}</Tag></span>
                 </div>

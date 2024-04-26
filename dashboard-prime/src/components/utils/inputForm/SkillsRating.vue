@@ -7,7 +7,6 @@ const props = defineProps({
     required: true
   },
 })
-const emit = defineEmits(['update:modelValue'])
 const { value, errorMessage } = useField(() => props.name, undefined, {syncVModel: true})
 const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 </script>

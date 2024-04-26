@@ -1,5 +1,5 @@
 <script setup>
-import { watch, onMounted, ref } from 'vue'
+import { watch, ref } from 'vue'
 import { useField } from 'vee-validate';
 import QuizRunAnswer from '@/components/quiz/runs/QuizRunAnswer.vue';
 import QuestionType from '@/common-components/quiz/QuestionType.js';

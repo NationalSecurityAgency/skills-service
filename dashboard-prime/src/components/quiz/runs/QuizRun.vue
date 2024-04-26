@@ -7,6 +7,8 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 
 import QuizRunService from '@/common-components/quiz/QuizRunService.js';
 import QuizRunSplashScreen from '@/components/quiz/runs/QuizRunSplashScreen.vue';
+import SurveyRunCompletionSummary from '@/components/quiz/runs/SurveyRunCompletionSummary.vue';
+import QuizRunCompletionSummary from '@/components/quiz/runs/QuizRunCompletionSummary.vue';
 import QuizRunValidationWarnings from '@/components/quiz/runs/QuizRunValidationWarnings.vue';
 import QuestionType from '@/common-components/quiz/QuestionType.js';
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
@@ -239,31 +241,25 @@ const updateSelectedAnswers = (questionSelectedAnswer) => {
 }
 const completeTestRun = handleSubmit((values) => {
   isCompleting.value = true;
-  this.$refs.observer.validate().then((validationResults) => {
-    if (validationResults) {
-      Promise.all(reportAnswerPromises.value)
-          .then(() => {
-            reportTestRunToBackend()
-                .finally(() => {
-                  destroyDateTimer();
-                  isCompleting.value = false;
-                  if (!isSurveyType.value) {
-                    nextTick(() => {
-                      const element = document.getElementById('quizRunCompletionSummary');
-                      element.scrollIntoView({ behavior: 'smooth' });
-                    });
-                  }
-                  let announceMsg = `Completed ${quizInfo.value.quizType}`;
-                  if (!isSurveyType.value) {
-                    announceMsg = `${announceMsg}. ${!quizResult.value.gradedRes.passed ? 'Failed' : 'Successfully passed'} quiz.`;
-                  }
-                  announcer.polite(announceMsg);
-                });
-          });
-    } else {
-      isCompleting.value = false;
-    }
-  });
+  Promise.all(reportAnswerPromises.value)
+    .then(() => {
+      reportTestRunToBackend()
+        .finally(() => {
+          destroyDateTimer();
+          isCompleting.value = false;
+          if (!isSurveyType.value) {
+            nextTick(() => {
+              const element = document.getElementById('quizRunCompletionSummary');
+              element.scrollIntoView({ behavior: 'smooth' });
+            });
+          }
+          let announceMsg = `Completed ${quizInfo.value.quizType}`;
+          if (!isSurveyType.value) {
+            announceMsg = `${announceMsg}. ${!quizResult.value.gradedRes.passed ? 'Failed' : 'Successfully passed'} quiz.`;
+          }
+          announcer.polite(announceMsg);
+        });
+    });
 })
 const reportTestRunToBackend = () => {
   return QuizRunService.completeQuizAttempt(props.quizId, quizAttemptId.value)
@@ -326,43 +322,37 @@ const doneWithThisRun = () => {
     <div v-if="!isLoading">
       <QuizRunSplashScreen v-if="splashScreen.show" :quiz-info="quizInfo" @cancelQuizAttempt="cancelQuizAttempt" @start="startQuizAttempt">
         <template #aboveTitle>
-          <slot name="splashPageTitle">
-            <span v-if="isSurveyType">Thank you for taking the time to take this survey!</span>
-            <span v-else>You are about to begin the quiz!</span>
-          </slot>
+          <span v-if="isSurveyType">Thank you for taking the time to take this survey!</span>
+          <span v-else>You are about to begin the quiz!</span>
         </template>
       </QuizRunSplashScreen>
 
-<!--      <survey-run-completion-summary-->
-<!--          ref="surveyRunCompletionSummary"-->
-<!--          v-if="isSurveyType && quizResult && !splashScreen.show"-->
-<!--          class="mb-3"-->
-<!--          :quiz-info="quizInfo"-->
-<!--          :quiz-result="quizResult"-->
-<!--          @close="doneWithThisRun">-->
-<!--        <template slot="completeAboveTitle">-->
-<!--          <slot name="completeAboveTitle">-->
-<!--            <i class="fas fa-handshake text-info" aria-hidden="true"></i> Thank you for taking the time to complete the survey!-->
-<!--          </slot>-->
-<!--        </template>-->
-<!--      </survey-run-completion-summary>-->
+      <SurveyRunCompletionSummary
+          ref="surveyRunCompletionSummary"
+          v-if="isSurveyType && quizResult && !splashScreen.show"
+          class="mb-3"
+          :quiz-info="quizInfo"
+          :quiz-result="quizResult"
+          @close="doneWithThisRun">
+        <template #completeAboveTitle>
+          <i class="fas fa-handshake text-primary" aria-hidden="true"></i> Thank you for taking the time to complete the survey!
+        </template>
+      </SurveyRunCompletionSummary>
 
-<!--      <quiz-run-completion-summary-->
-<!--          id="quizRunCompletionSummary"-->
-<!--          ref="quizRunCompletionSummary"-->
-<!--          v-if="!isSurveyType && quizResult && !splashScreen.show"-->
-<!--          class="mb-3"-->
-<!--          :quiz-info="quizInfo"-->
-<!--          :quiz-result="quizResult"-->
-<!--          @close="doneWithThisRun"-->
-<!--          @run-again="tryAgain">-->
-<!--        <template slot="completeAboveTitle">-->
-<!--          <slot name="completeAboveTitle">-->
-<!--            <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>-->
-<!--            <span v-else>Thank you for completing the Quiz!</span>-->
-<!--          </slot>-->
-<!--        </template>-->
-<!--      </quiz-run-completion-summary>-->
+      <QuizRunCompletionSummary
+          id="quizRunCompletionSummary"
+          ref="quizRunCompletionSummary"
+          v-if="!isSurveyType && quizResult && !splashScreen.show"
+          class="mb-3"
+          :quiz-info="quizInfo"
+          :quiz-result="quizResult"
+          @close="doneWithThisRun"
+          @run-again="tryAgain">
+        <template slot="completeAboveTitle">
+          <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
+          <span v-else>Thank you for completing the Quiz!</span>
+        </template>
+      </QuizRunCompletionSummary>
       
       <Card v-if="!splashScreen.show && !(isSurveyType && quizResult) && showQuestions" class="mb-4" data-cy="quizRunQuestions">
         <template #content>
