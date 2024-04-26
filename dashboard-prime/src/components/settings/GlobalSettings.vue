@@ -10,13 +10,12 @@ const navItems = ref([
   { name: 'Preferences', iconClass: 'fa-user-cog skills-color-preferences', page: 'Preferences' },
 ]);
 
-let isRoot = false;
-let isLoading = true;
+const isLoading = ref(true);
 
 const loadSettings = () => {
   SettingsService.hasRoot()
       .then((response) => {
-        isRoot = response;
+        const isRoot = response;
         if (isRoot) {
           navItems.value.push(
             { name: 'Security', iconClass: 'fa-lock skills-color-security', page: 'SecuritySettings' },
@@ -26,7 +25,7 @@ const loadSettings = () => {
         }
       })
       .finally(() => {
-        isLoading = false;
+        isLoading.value = false;
       });
 };
 
@@ -36,7 +35,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <PageHeader :loading="false" :options="{title: 'Settings', icon: 'fas fa-cog skills-color-settings', subTitle: 'Dashboard settings'}" />
+  <PageHeader :loading="isLoading"
+              :options="{title: 'Settings', icon: 'fas fa-cog skills-color-settings', subTitle: 'Dashboard settings'}" />
   <Navigation :nav-items="navItems"/>
 </template>
 

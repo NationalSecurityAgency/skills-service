@@ -59,6 +59,7 @@ const iframeInit = useIframeInit()
 onBeforeMount(() => {
   iframeInit.handleHandshake()
   errorHandling.registerErrorHandling()
+  customGlobalValidators.addValidators()
 })
 
 onMounted(() => {
@@ -74,7 +75,7 @@ const loadConfigs = () => {
   appConfig.loadConfigState().finally(() => {
     authState.restoreSessionIfAvailable().finally(() => {
       skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
-        customGlobalValidators.addValidators()
+
         inceptionConfigurer.configure()
         globalNavGuards.addNavGuards()
         if (authState.isAuthenticated) {
@@ -106,11 +107,10 @@ const showHeader = computed(() => {
           <!--          <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap || isOAuthOnlyAndNeedsToBootstrap" role="alert"/>-->
           <new-software-version class="mb-3"/>
           <dashboard-header v-if="showHeader" role="banner" />
-          <div role="main">
-            <RouterView
-              id="mainContent1"
-              tabindex="-1"
-              aria-label="Main content area, click tab to navigate" />
+          <div role="main" id="mainContent1"
+               tabindex="-1"
+               aria-label="Main content area, click tab to navigate">
+            <RouterView  />
           </div>
         </div>
       </div>

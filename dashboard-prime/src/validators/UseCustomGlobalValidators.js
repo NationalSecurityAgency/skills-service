@@ -3,10 +3,13 @@ import { addMethod, string } from 'yup'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useDebounceFn } from '@vueuse/core'
 import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
+import { useLog } from '@/components/utils/misc/useLog.js'
 
 export const useCustomGlobalValidators = () => {
 
   const descriptionValidatorService = useDescriptionValidatorService()
+  const log = useLog()
+
   function customNameValidator(fieldName = '') {
     const appConfig = useAppConfig()
     const validateName = useDebounceFn((value, context) => {
@@ -90,6 +93,7 @@ export const useCustomGlobalValidators = () => {
   }
 
   const addValidators = () => {
+    log.trace('Adding custom global validators')
     addMethod(string, "customNameValidator", customNameValidator);
     addMethod(string, "nullValueNotAllowed", nullValueNotAllowed);
     addMethod(string, 'customDescriptionValidator', customDescriptionValidator)

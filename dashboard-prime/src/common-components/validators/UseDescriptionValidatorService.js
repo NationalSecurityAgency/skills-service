@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 import axios from 'axios';
-import { useProjectInfo } from '../stores/UseCurrentProjectInfo'
+import { useProjectInfo } from '@/common-components/stores/UseCurrentProjectInfo.js'
 
 export const useDescriptionValidatorService = () => {
 
-  const projectInfo = useProjectInfo
+  const projectInfo = useProjectInfo()
 
   const validateDescription = (description, enableProjectIdParam = true, useProtectedCommunityValidator = null) => {
     const body = {

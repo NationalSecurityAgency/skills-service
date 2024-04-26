@@ -16,7 +16,7 @@ export const useIframeInit = () => {
   const loadedIframe = ref(false)
 
   const handleHandshake =() => {
-    log.debug('SkillsDisplayInIframe.vue: tryOnBeforeMount')
+    log.debug('UseIframeInit.js: handleHandshake')
     const handshake = new Postmate.Model({
       updateAuthenticationToken(authToken) {
         parentState.authToken = authToken
@@ -26,14 +26,14 @@ export const useIframeInit = () => {
       }
     })
     handshake.then((parent) => {
-      log.debug('SkillsDisplayInIframe.vue: handshake.then')
+      log.debug('UseIframeInit.js: handshake.then')
       // Make sure to freeze the parent object so Pinia won't try to make it reactive
       // CORs won't allow this because parent object can't be changed from an iframe
       parentState.parentFrame = Object.freeze(parent)
       const resizeObserver = new ResizeObserver(function(entries) {
         const observedEntry = entries[0].contentRect;
         const newHeight = observedEntry.height + 10;
-        log.debug(`SkillsDisplayInIframe.vue: changing height to [${newHeight}]`)
+        log.debug(`UseIframeInit.js: changing height to [${newHeight}]`)
         parentState.parentFrame.emit('height-changed', newHeight)
       });
       resizeObserver.observe(document.querySelector("body"))
@@ -46,7 +46,7 @@ export const useIframeInit = () => {
 
       displayAttributes.projectId = parent.model.projectId
       displayAttributes.serviceUrl = parent.model.serviceUrl
-      log.debug(`SkillsDisplayInIframe.vue: serviceUrl: [${displayAttributes.serviceUrl}], projectId: [${displayAttributes.projectId}]`)
+      log.debug(`UseIframeInit.js: serviceUrl: [${displayAttributes.serviceUrl}], projectId: [${displayAttributes.projectId}]`)
       parentState.serviceUrl = parent.model.serviceUrl
 
       if (parent.model.options) {
@@ -62,7 +62,7 @@ export const useIframeInit = () => {
       parentState.parentFrame.emit('needs-authentication')
 
       if (parent.model.minHeight) {
-        log.debug(`SkillsDisplayInIframe.vue: parent.model.minHeight: ${parent.model.minHeight}`)
+        log.debug(`UseIframeInit.js: parent.model.minHeight: ${parent.model.minHeight}`)
         appStyleObject.value['min-height'] = parent.model.minHeight
       }
 
