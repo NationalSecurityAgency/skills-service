@@ -54,7 +54,6 @@ const navToQuiz = () => {
       skillInternal: skillInternal.value.subjectId,
       skillId: skillInternal.value.skillId,
       quizId: skillInternal.value.selfReporting.quizId,
-      skill: skillInternal.value
     }
   )
 }

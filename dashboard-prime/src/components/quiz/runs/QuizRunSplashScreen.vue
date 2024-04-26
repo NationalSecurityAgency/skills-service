@@ -64,10 +64,10 @@ const start = () => {
         </Message>
         <slot name="aboveTitle" />
         <div class="mb-1 mt-4 text-3xl">
-          <span class="font-bold text-primary skills-page-title-text-color">{{ quizInfo.name }}</span>
+          <span class="font-bold text-success skills-page-title-text-color">{{ quizInfo.name }}</span>
         </div>
 
-        <Card v-if="!isSurveyType && canStartQuiz" class="mb-1 skills-card-theme-border" data-cy="quizPassInfo">
+        <Card v-if="!isSurveyType && canStartQuiz" class="my-2 text-xl skills-card-theme-border" :pt="{ content: { class: 'p-0' } }" data-cy="quizPassInfo">
           <template #content>
             <i class="fas fa-check-circle text-primary" aria-hidden="true"></i>
             Must get <Tag severity="success">{{ minNumQuestionsToPass }}</Tag> / <Tag severity="secondary">{{ numQuestions }}</Tag> questions <span class="text-color-secondary font-italic">({{ quizInfo.percentToPass }}%)</span> to <span class="text-primary uppercase">pass</span>. Good Luck!
@@ -118,7 +118,7 @@ const start = () => {
           <span class="mx-2 text-2xl">This {{ quizInfo.quizType }} has no questions declared and unfortunately cannot be completed.</span>
         </Message>
 
-        <p v-if="quizInfo.description && !allAttemptsExhausted" class="mt-3" data-cy="quizDescription">
+        <p v-if="quizInfo.description && !allAttemptsExhausted" class="mt-5" data-cy="quizDescription">
           <MarkdownText :text="quizInfo.description" />
         </p>
 

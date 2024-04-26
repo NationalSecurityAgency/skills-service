@@ -4,7 +4,7 @@ import MyRankDetailsPage from '@/skills-display/components/rank/MyRankDetailsPag
 import SubjectDetailsPage from '@/skills-display/components/subjects/SubjectPage.vue'
 import SkillPage from '@/skills-display/components/skill/SkillPage.vue'
 import BadgesDetailsPage from '@/skills-display/components/badges/BadgesDetailsPage.vue'
-import QuizPage from '@/skills-display/components/skills/QuizPage.vue'
+import QuizPage from '@/skills-display/components/skill/QuizPage.vue'
 import GlobalBadgeDetailsPage from '@/skills-display/components/badges/GlobalBadgeDetailsPage.vue'
 
 const createSkillsDisplayChildRoutes = (appendToName) => {

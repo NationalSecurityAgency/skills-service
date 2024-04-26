@@ -322,8 +322,10 @@ const doneWithThisRun = () => {
     <div v-if="!isLoading">
       <QuizRunSplashScreen v-if="splashScreen.show" :quiz-info="quizInfo" @cancelQuizAttempt="cancelQuizAttempt" @start="startQuizAttempt">
         <template #aboveTitle>
-          <span v-if="isSurveyType">Thank you for taking the time to take this survey!</span>
-          <span v-else>You are about to begin the quiz!</span>
+          <slot name="splashPageTitle">
+            <span v-if="isSurveyType">Thank you for taking the time to take this survey!</span>
+            <span v-else>You are about to begin the quiz!</span>
+          </slot>
         </template>
       </QuizRunSplashScreen>
 
@@ -335,7 +337,9 @@ const doneWithThisRun = () => {
           :quiz-result="quizResult"
           @close="doneWithThisRun">
         <template #completeAboveTitle>
-          <i class="fas fa-handshake text-primary" aria-hidden="true"></i> Thank you for taking the time to complete the survey!
+          <slot name="completeAboveTitle">
+            <i class="fas fa-handshake text-primary" aria-hidden="true"></i> Thank you for taking the time to complete the survey!
+          </slot>
         </template>
       </SurveyRunCompletionSummary>
 
@@ -349,8 +353,10 @@ const doneWithThisRun = () => {
           @close="doneWithThisRun"
           @run-again="tryAgain">
         <template slot="completeAboveTitle">
-          <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
-          <span v-else>Thank you for completing the Quiz!</span>
+          <slot name="completeAboveTitle">
+            <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
+            <span v-else>Thank you for completing the Quiz!</span>
+          </slot>
         </template>
       </QuizRunCompletionSummary>
       
