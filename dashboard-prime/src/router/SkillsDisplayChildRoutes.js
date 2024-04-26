@@ -87,6 +87,13 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
       title: `${skillPlaceholder} Details`
     }
   }, {
+    path: 'subjects/:subjectId/skills/:skillId/crossProject/:crossProjectId/:dependentSkillId',
+    component: SkillPage,
+    name: `crossProjectSkillDetails${appendToName}`,
+    meta: {
+      title: `Cross ${projectPlaceholder} ${skillPlaceholder} Details`,
+    },
+  },{
     name: `quizPage${appendToName}`,
     path: 'subjects/:subjectId/skills/:skillId/quizzes/:quizId',
     component: QuizPage,
