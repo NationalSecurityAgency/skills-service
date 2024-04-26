@@ -239,7 +239,11 @@ const updateSelectedAnswers = (questionSelectedAnswer) => {
     reportAnswerPromises.value.push(questionSelectedAnswer.reportAnswerPromise);
   }
 }
-const completeTestRun = handleSubmit((values) => {
+const completeTestRun = () => {
+  isAttemptAlreadyInProgress.value = true;
+  submitTestRun()
+}
+const submitTestRun = handleSubmit((values) => {
   isCompleting.value = true;
   Promise.all(reportAnswerPromises.value)
     .then(() => {
