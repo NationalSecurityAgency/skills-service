@@ -37,7 +37,7 @@ const showHasExpiredMessage = computed(() => {
   return false
 })
 const showMotivationalExpirationMessage = computed(() => {
-  if (props.skill && props.skill.achievedOn && expirationDate() && props.skill.isMotivationalSkill) {
+  if (props.skill && props.skill.achievedOn && props.skill.expirationDate && props.skill.isMotivationalSkill) {
     if (appConfig.motivationalSkillWarningGracePeriod) {
       const mostRecentlyPerformedOn = dayjs(props.skill.mostRecentlyPerformedOn)
       const now = dayjs()
@@ -75,14 +75,14 @@ const buildToRoute = () => {
 </script>
 
 <template>
-  <div class="flex align-content-end"
+  <div class="md:flex flex-wrap align-content-end"
        :data-cy="`skillProgressTitle-${skill.skillId}`"
        :id="`skillProgressTitle-${skill.skillId}`">
-    <div class="skills-theme-primary-color flex-1 text-2xl"
+    <div class="skills-theme-primary-color flex-1 text-2xl w-min-12rem"
          :class="{ 'text-success' : skill.isSkillsGroupType,
                        'text-info' : skill.isSkillType && !skill.childSkill,
                        'text-secondary' : skill.childSkill }">
-      <div class="py-1 flex">
+      <div class="py-1 md:flex">
         <span v-if="skill.isSkillsGroupType"><i class="fas fa-layer-group mr-1 overflow-hidden"></i></span>
         <div class="text-blue-700 font-medium">
                 <span class="mr-1">
@@ -125,7 +125,8 @@ const buildToRoute = () => {
         <!--            skills-->
         <!--          </div>-->
 
-        <Tag v-if="skill.selfReporting && skill.selfReporting.enabled" class="ml-2 self-report-badge">
+        <Tag v-if="skill.selfReporting && skill.selfReporting.enabled"
+             class="self-report-badge ml-2">
           <i
             class="fas fa-user-check mr-1"></i><span class="sr-spelled-out mr-1">Self Reportable:</span>
           <span v-if="skill.selfReporting.type === 'Quiz'" data-cy="selfReportQuizTag"><span
@@ -140,12 +141,13 @@ const buildToRoute = () => {
             class="sr-spelled-out mr-1">Watch</span>Video</span>
         </Tag>
         <Tag v-if="skill.isLastViewed" id="lastViewedIndicator" data-cy="lastViewedIndicator" severity="info"
-             class="ml-2 overflow-hidden text-sm">
+             size="small"
+             class="ml-2 overflow-hidden">
           <i class="fas fa-eye mr-1"></i> Last Viewed
         </Tag>
       </div>
     </div>
-    <div class="text-right align-content-end"
+    <div class="text-right align-content-end w-min-9rem"
          :class="{ 'text-green-500' : isSkillComplete }"
          data-cy="skillProgress-ptsOverProgressBard">
       <div v-if="skill.isSkillsGroupType" class="align-content-end">
@@ -161,21 +163,20 @@ const buildToRoute = () => {
       </div>
 
       <div v-if="skill.points > 0 && expirationDate() && !skill.isMotivationalSkill" data-cy="expirationDate">
-        <div class="my-2">
-          <i class="fas fa-hourglass-end skills-color-expiration mr-2"></i>Points will expire on <span
-          class="font-weight-bold">{{ expirationDate() }}</span>
+        <div class="my-2 text-orange-500">
+          <i class="fas fa-hourglass-end text-orange-600 mr-2" arai-hidden="true"></i>Points will expire on <span
+          class="font-semibold">{{ expirationDate() }}</span>
         </div>
       </div>
-      <div v-if="showMotivationalExpirationMessage" data-cy="expirationDate">
-        <div class="my-2">
-          <i class="fas fa-clock skills-color-expiration mr-2"></i>Expires <span
-          class="font-weight-bold">{{ timeUtils.relativeTime(expirationDate(true)) }}</span>, perform this skill to keep
-          your
-          points!
+      <div v-if="showMotivationalExpirationMessage" data-cy="expirationDate" class="my-2">
+        <div class="my-2 text-orange-500">
+          Expires <span
+          class="font-semibold">{{ timeUtils.relativeTime(expirationDate(true)) }}</span>,
+            perform this skill to keep your points!
         </div>
       </div>
       <div v-if="showHasExpiredMessage" data-cy="hasExpired">
-        <div class="my-2">
+        <div class="my-2 text-orange-500">
           <i class="fas fa-clock skills-color-expiration mr-2"></i>Points expired <span
           class="font-weight-bold">{{ timeUtils.relativeTime(skill.lastExpirationDate) }}</span>
         </div>

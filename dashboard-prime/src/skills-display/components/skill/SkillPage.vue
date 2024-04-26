@@ -42,18 +42,18 @@ const isCrossProject = () => {
 }
 
 const prevButtonClicked = () => {
-  const params = { skillId: this.skill.prevSkillId, projectId: route.params.projectId }
-  skillsDisplayInfo.routerPush({
-    name: 'skillDetails',
+  const params = { skillId: skillState.skillSummary.prevSkillId, projectId: route.params.projectId }
+  skillsDisplayInfo.routerPush(
+    'skillDetails',
     params
-  })
+  )
 }
 const nextButtonClicked = () => {
-  const params = { skillId: this.skill.nextSkillId, projectId: route.params.projectId }
-  skillsDisplayInfo.routerPush({
-    name: 'skillDetails',
+  const params = { skillId: skillState.skillSummary.nextSkillId, projectId: route.params.projectId }
+  skillsDisplayInfo.routerPush(
+    'skillDetails',
     params
-  })
+  )
 }
 
 const isLoading = computed(() => loadingSkill.value)

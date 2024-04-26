@@ -66,13 +66,35 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
         }
       }
     }
+  const nullifyExpirationDate = (skillId) => {
+    let found = false
+    if (skillSummary.value?.skillId === skillId) {
+      skillSummary.value.expirationDate = null
+      found = true
+      return
+    }
+    if (subjectSummary.value?.skills) {
+      const foundSkill = subjectSummary.value.skills.find((item) => item.skillId === skillId)
+      if (foundSkill) {
+        foundSkill.expirationDate = null
+        found = true
+        return
+      }
+    }
+    if (!found) {
+      console.warn(`could not find skill ${skillId}`)
+    }
+  }
+
+
     return {
       loadSubjectSummary,
       loadingSubjectSummary,
       subjectSummary,
       loadSkillSummary,
       skillSummary,
-      addPoints
+      addPoints,
+      nullifyExpirationDate
     }
 
   }

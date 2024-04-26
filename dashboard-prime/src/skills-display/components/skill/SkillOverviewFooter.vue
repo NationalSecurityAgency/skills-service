@@ -115,6 +115,10 @@ const reportSkill = (approvalRequestedMsg) => {
           skillInternal.value.selfReporting.requestedOn = new Date()
         }
         updateEarnedPoints(res)
+        if (res.explanation.includes('Skill Achievement retained')) {
+          // do not show skill expiration warnings after points were just earned
+          skillState.nullifyExpirationDate(skillInternal.value.skillId)
+        }
       }
     }).catch((e) => {
     console.log(e)
@@ -307,11 +311,13 @@ const focusOnId = (elementId) => {
             points<span
             v-if="isCompleted"> and <b>completed</b> the {{ preferences.skillDisplayName.toLowerCase() }}</span>!
           </Message>
-          <div v-if="isPointsEarned && isMotivationalSkill">
-            <i class="fas fa-birthday-cake text-success mr-2" style="font-size: 1.5rem"></i> Congratulations! You just
-            retained your <span
-            class="text-success font-weight-bold">{{ skillInternal.totalPoints }}</span> points!
-          </div>
+          <Message v-if="isPointsEarned && isMotivationalSkill"
+                   severity="success"
+                   icon="fas fa-birthday-cake"
+          >
+            Congratulations! You just
+            retained your <Tag>{{ skillInternal.totalPoints }}</Tag> points!
+          </Message>
           <Message
             v-if="selfReport.res && !isPointsEarned && (isAlreadyPerformed() || !isApprovalRequired)"
             severity="warn"

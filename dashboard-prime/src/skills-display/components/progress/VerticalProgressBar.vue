@@ -27,7 +27,7 @@ const props = defineProps({
 
 const overallProgressColor = computed(() => {
   if (props.totalProgress === 100) {
-    return 'bg-green-500'
+    return 'bg-green-400'
   }
   return props.totalProgressBeforeToday > 0 ? props.totalProgressBarColor : props.beforeTodayBarColor
 })
