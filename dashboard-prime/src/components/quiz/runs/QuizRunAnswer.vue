@@ -1,7 +1,7 @@
 <script setup>
 import { computed, watch, ref } from 'vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useSkillsAnnouncer } from '../../../../../common-components/src/common/utilities/UseSkillsAnnouncer.js'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
 
 const props = defineProps({
