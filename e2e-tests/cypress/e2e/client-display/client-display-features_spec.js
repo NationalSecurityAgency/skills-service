@@ -257,7 +257,7 @@ describe('Client Display Features Tests', () => {
         cy.intercept('GET', '/api/projects/proj1/pointHistory')
             .as('pointHistoryChart');
 
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
 
         cy.get('[data-cy="overallPoints"]').contains('Overall Points');
         cy.get('[data-cy="overallPoints"]').contains('100 Points');
@@ -291,7 +291,7 @@ describe('Client Display Features Tests', () => {
         });
 
         cy.wait('@pointHistoryChart');
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
 
         cy.get('[data-cy="overallPoints"]').contains('Overall Points');
         cy.get('[data-cy="overallPoints"]').contains('100 Points');
