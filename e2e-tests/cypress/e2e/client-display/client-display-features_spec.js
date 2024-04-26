@@ -296,17 +296,7 @@ describe('Client Display Features Tests', () => {
         cy.get('[data-cy="overallPoints"]').contains('Overall Points');
         cy.get('[data-cy="overallPoints"]').contains('100 Points');
         cy.get('[data-cy="overallPoints"]').contains('50%');
-        cy.get('[data-cy="overallPoints"]').contains('Earn up to 200 points');
-
-        cy.get('[data-cy="levelProgress"]').contains('Level Progress')
-        cy.get('[data-cy="levelProgress"]').contains('✓')
-        cy.get('[data-cy="levelProgress"]').contains('100%')
-        cy.get('[data-cy="levelProgress"]').contains('All levels complete')
-
-        cy.get('[data-cy="overallPoints"]').contains('Overall Points');
-        cy.get('[data-cy="overallPoints"]').contains('100 Points');
-        cy.get('[data-cy="overallPoints"]').contains('50%');
-        cy.get('[data-cy="overallPoints"]').contains('Earn up to 200 points');
+        cy.get('[data-cy="overallPoints"]').contains('100 / 200 Points');
 
         cy.get('[data-cy="levelProgress"]').contains('Level Progress')
         cy.get('[data-cy="levelProgress"]').contains('✓')

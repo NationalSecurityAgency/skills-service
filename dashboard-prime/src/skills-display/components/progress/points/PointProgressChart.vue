@@ -247,7 +247,7 @@ const zoomed = (chartContext, { xaxis, yaxis }) => {
               </div>
             </div>
           </div>
-          <div v-if="hasData">
+          <div v-if="hasData" data-cy="pointHistoryChartWithData">
             <apexchart ref="ptChart" id="points-chart"
                        :options="chartOptions"
                        @animationEnd="animationEnded = true"

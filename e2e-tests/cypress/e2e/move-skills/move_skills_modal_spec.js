@@ -56,7 +56,7 @@ describe('Move Skills Modal Tests', () => {
         cy.get('[data-cy="closeButton"]')
             .should('be.enabled');
         cy.get('[data-cy="okButton"]')
-            .should('not.exist');
+            .should('not.be.visible');
 
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
@@ -65,25 +65,23 @@ describe('Move Skills Modal Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('2 selected skills have already been reused');
 
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[ data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[ data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
-            .should('not.exist');
 
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[ data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully moved 2 skills.');
-        cy.get('[data-cy="reuseButton"]')
-            .should('not.exist');
-        cy.get('[data-cy="closeButton"]')
-            .should('not.exist');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
+            .should('not.be.visible');
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
+            .should('not.be.visible');
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .should('not.exist');
@@ -148,11 +146,11 @@ describe('Move Skills Modal Tests', () => {
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
-        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
         cy.get('[data-cy="newSkillButton"]')
             .should('have.focus');
@@ -171,9 +169,9 @@ describe('Move Skills Modal Tests', () => {
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
         cy.get('[data-cy="addSkillToGroupBtn-group11"]')
             .should('have.focus');

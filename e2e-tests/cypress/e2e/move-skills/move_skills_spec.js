@@ -42,22 +42,22 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 
         // step 1
-        cy.get('[ data-cy="reuseSkillsModalStep1"]');
-        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"]');
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
             .click();
-        cy.get('[ data-cy="reuseSkillsModalStep1"]')
-            .should('not.exist');
+        cy.get('[data-cy="reuseSkillsModalStep1"]')
+            .should('not.be.visible');
 
         // step 2
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('2 skills will be moved to the [Subject 3] subject.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully moved 2 skills');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
         cy.get('[data-cy="manageSkillLink_skill1"]')
@@ -118,18 +118,18 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep1"]')
-            .should('not.exist');
+            .should('not.be.visible');
 
         // step 2
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('2 skills will be moved to the [Subject 3] subject.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully moved 2 skills');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
         cy.get('[data-cy="nameCell_group11"] [data-cy="numSkillsInGroup"]')
@@ -194,18 +194,18 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3group12Subj3"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep1"]')
-            .should('not.exist');
+            .should('not.be.visible');
 
         // step 2
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('1 skill will be moved to the [Awesome Group 12 Subj3] group');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully moved 1 skill');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
         cy.get('[data-cy="nameCell_group11"] [data-cy="numSkillsInGroup"]')
@@ -271,18 +271,18 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep1"]')
-            .should('not.exist');
+            .should('not.be.visible');
 
         // step 2
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('3 skills will be moved to the [Subject 1] subject.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully moved 3 skills');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
         cy.get('[data-cy="manageSkillLink_skill1"]');
@@ -338,18 +338,18 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group11"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep1"]')
-            .should('not.exist');
+            .should('not.be.visible');
 
         // step 2
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('2 skills will be moved to the [Awesome Group 11 Subj1] group.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully moved 2 skills');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
         cy.get('[data-cy="manageSkillLink_skill1"]');
@@ -400,18 +400,18 @@ describe('Move Skills Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep1"]')
-            .should('not.exist');
+            .should('not.be.visible');
 
         // step 2
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('2 skills will be moved to the [Subject 3] subject.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully moved 2 skills');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
         cy.get('[data-cy="manageSkillLink_skill1"]')
@@ -467,18 +467,18 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep1"]')
-            .should('not.exist');
+            .should('not.be.visible');
 
         // step 2
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('3 skills will be moved to the [Subject 1] subject.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully moved 3 skills');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
         cy.get('[data-cy="nameCell_group11"] [data-cy="numSkillsInGroup"]')

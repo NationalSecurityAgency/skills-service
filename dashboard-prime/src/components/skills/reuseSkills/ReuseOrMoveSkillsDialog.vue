@@ -200,6 +200,7 @@ const handleFocus = () => {
         <StepperPanel header="Preview">
           <template #content="{ nextCallback }">
             <reuse-or-move-preview
+              v-if="selectedDestination?.groupId || selectedDestination?.subjectId"
               data-cy="reuseSkillsModalStep2"
               :skills="skills"
               :destination="selectedDestination"

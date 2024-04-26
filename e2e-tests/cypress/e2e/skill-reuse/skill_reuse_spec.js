@@ -144,18 +144,18 @@ describe('Skill Reuse Tests', () => {
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
-        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
             .click();
-        cy.get('[ data-cy="reuseSkillsModalStep1"]')
-            .should('not.exist');
+        cy.get('[data-cy="reuseSkillsModalStep1"]')
+            .should('not.be.visible');
 
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('1 skill will be reused in the [Subject 3] subject.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully reused 1 skill.');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
         cy.get('[data-cy="breadcrumb-proj1"]')

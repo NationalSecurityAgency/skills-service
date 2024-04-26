@@ -54,18 +54,18 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[ data-cy="addSkillsToBadgeModalStep1"] [data-cy="selectDest_badge1"]')
           .click();
         cy.get('[ data-cy="addSkillsToBadgeModalStep1"]')
-          .should('not.exist');
+          .should('not.be.visible');
 
         // step 2
-        cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"]')
           .contains('2 skills will be added to the [Badge 1] badge.');
-        cy.get('[data-cy="addSkillsToBadgeButton"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"] [data-cy="addSkillsToBadgeButton"]')
           .click();
 
         // step 3
         cy.get('[data-cy="addSkillsToBadgeModalStep3"]')
           .contains('Successfully added 2 skills to the [Badge 1] badge.');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep3"] [data-cy="okButton"]')
           .click();
 
         for (let i= 0; i < 4 ; i++) {
@@ -121,18 +121,18 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[ data-cy="addSkillsToBadgeModalStep1"] [data-cy="selectDest_badge2"]')
           .click();
         cy.get('[ data-cy="addSkillsToBadgeModalStep1"]')
-          .should('not.exist');
+          .should('not.be.visible');
 
         // step 2
         cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
           .contains('4 skills will be added to the [Badge 2] badge.');
-        cy.get('[data-cy="addSkillsToBadgeButton"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"] [data-cy="addSkillsToBadgeButton"]')
           .click();
 
         // step 3
         cy.get('[data-cy="addSkillsToBadgeModalStep3"]')
           .contains('Successfully added 4 skills to the [Badge 2] badge.');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep3"] [data-cy="okButton"]')
           .click();
 
         // verify badge contains all skills
@@ -185,12 +185,12 @@ describe('Add Multiple Skills to Badge Tests', () => {
         // step 2
         cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
           .contains('2 skills will be added to the [Badge 1] badge.')
-        cy.get('[data-cy="addSkillsToBadgeButton"]').click()
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"] [data-cy="addSkillsToBadgeButton"]').click()
 
         // step 3
         cy.get('[data-cy="addSkillsToBadgeModalStep3"]')
           .contains('Successfully added 2 skills to the [Badge 1] badge.')
-        cy.get('[data-cy="okButton"]').click()
+        cy.get('[data-cy="addSkillsToBadgeModalStep3"] [data-cy="okButton"]').click()
 
         cy.visit('/administrator/projects/proj1/badges/badge1');
         cy.get(`${tableSelector} th`)
@@ -235,20 +235,20 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[ data-cy="addSkillsToBadgeModalStep1"] [data-cy="selectDest_badge1"]')
           .click();
         cy.get('[ data-cy="addSkillsToBadgeModalStep1"]')
-          .should('not.exist');
+          .should('not.be.visible');
 
         // step 2
         cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
           .contains('3 skills will be added to the [Badge 1] badge.');
         cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
           .contains('1 selected skill has already been added to that badge!');
-        cy.get('[data-cy="addSkillsToBadgeButton"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"] [data-cy="addSkillsToBadgeButton"]')
           .click();
 
         // step 3
         cy.get('[data-cy="addSkillsToBadgeModalStep3"]')
           .contains('Successfully added 3 skills to the [Badge 1] badge.');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep3"] [data-cy="okButton"]')
           .click();
     });
 
@@ -277,20 +277,20 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[ data-cy="addSkillsToBadgeModalStep1"] [data-cy="selectDest_badge1"]')
           .click();
         cy.get('[ data-cy="addSkillsToBadgeModalStep1"]')
-          .should('not.exist');
+          .should('not.be.visible');
 
         // step 2
         cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
           .contains('Selected skills can NOT be added to the Badge 1 badge');
         cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
           .contains('Please cancel and select different skills.');
-        cy.get('[data-cy="addSkillsToBadgeButton"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"] [data-cy="addSkillsToBadgeButton"]')
           .should('not.enabled');
         cy.get('[data-cy="closeButton"]')
           .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
-          .should('not.exist');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep3"] [data-cy="okButton"]')
+          .should('not.be.visible');
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"] [data-cy="closeButton"]')
           .click();
         cy.get('[data-cy="addSkillsToBadgeModalStep3"]')
           .should('not.exist');
@@ -341,7 +341,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[ data-cy="addSkillsToBadgeModalStep1"] [data-cy="selectDest_badge5"]')
           .click();
         cy.get('[ data-cy="addSkillsToBadgeModalStep1"]')
-          .should('not.exist');
+          .should('not.be.visible');
 
         // step 2
         cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
@@ -351,13 +351,13 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
           .contains('Unable to add Very Great Skill 2 skill to the badge. Adding this skill would result in a circular/infinite learning path. Please visit project\'s Learning Path page to review.');
 
-        cy.get('[data-cy="addSkillsToBadgeButton"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"] [data-cy="addSkillsToBadgeButton"]')
           .should('not.enabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"] [data-cy="closeButton"]')
           .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
-          .should('not.exist');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep3"] [data-cy="okButton"]')
+          .should('not.be.visible');
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"] [data-cy="closeButton"]')
           .click();
         cy.get('[data-cy="addSkillsToBadgeModalStep3"]')
           .should('not.exist');
@@ -395,22 +395,22 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[ data-cy="addSkillsToBadgeModalStep1"] [data-cy="selectDest_badge2"]')
           .click();
         cy.get('[ data-cy="addSkillsToBadgeModalStep1"]')
-          .should('not.exist');
+          .should('not.be.visible');
 
         // step 2
         cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
           .contains('1 skill will be added to the [Badge 2] badge.');
-        cy.get('[data-cy="addSkillsToBadgeButton"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"] [data-cy="addSkillsToBadgeButton"]')
           .click();
 
         // step 3
         cy.get('[data-cy="learningPathErrMsg"]')
           .contains('Failed to add Very Great Skill 1 skill to the badge. Adding this skill would result in a circular/infinite learning path. Please visit project\'s Learning Path page to review.');
 
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="addSkillsToBadgeModalStep3"] [data-cy="okButton"]')
           .should('be.enabled');
-        cy.get('[data-cy="addSkillsToBadgeButton"]')
-          .should('not.exist');
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"] [data-cy="addSkillsToBadgeButton"]')
+          .should('not.be.visible');
     });
 
     it('focus returned to the Action button if dialog is cancelled', () => {
@@ -462,12 +462,12 @@ describe('Add Multiple Skills to Badge Tests', () => {
         // step 2
         cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
           .contains('4 skills will be added to the [Badge 2] badge.')
-        cy.get('[data-cy="addSkillsToBadgeButton"]').click()
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"] [data-cy="addSkillsToBadgeButton"]').click()
 
         // step 3
         cy.get('[data-cy="addSkillsToBadgeModalStep3"]')
           .contains('Successfully added 4 skills to the [Badge 2] badge.')
-        cy.get('[data-cy="okButton"]').click()
+        cy.get('[data-cy="addSkillsToBadgeModalStep3"] [data-cy="okButton"]').click()
 
         cy.get('[data-cy="newSkillButton"]').should('have.focus')
     })
@@ -523,12 +523,12 @@ describe('Add Multiple Skills to Badge Tests', () => {
         // step 2
         cy.get('[ data-cy="addSkillsToBadgeModalStep2"]')
           .contains('2 skills will be added to the [Badge 1] badge.')
-        cy.get('[data-cy="addSkillsToBadgeButton"]').click()
+        cy.get('[data-cy="addSkillsToBadgeModalStep2"] [data-cy="addSkillsToBadgeButton"]').click()
 
         // step 3
         cy.get('[data-cy="addSkillsToBadgeModalStep3"]')
           .contains('Successfully added 2 skills to the [Badge 1] badge.')
-        cy.get('[data-cy="okButton"]').click()
+        cy.get('[data-cy="addSkillsToBadgeModalStep3"] [data-cy="okButton"]').click()
 
         cy.get('[data-cy="addSkillToGroupBtn-group11"]').should('have.focus')
     })

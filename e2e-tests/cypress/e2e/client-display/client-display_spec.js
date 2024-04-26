@@ -265,8 +265,8 @@ describe('Client Display Tests', () => {
     });
 
     it('clearly represent navigable components', () => {
-        cy.cdVisit('?internalBackButton=true');
-        cy.cdClickSubj(0);
+        cy.cdVisit('?internalBackButton=true', true);
+        cy.cdClickSubj(0, 'Subject 1',true);
 
         // make sure it can navigate into each skill via title
         cy.cdClickSkill(0, false);
@@ -483,7 +483,7 @@ describe('Client Display Tests', () => {
         cy.createSkill(1, 1, 1);
 
         // ensure brand exist
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.get('[data-cy="skillTreePoweredBy"]')
             .contains('powered by');
         cy.get('[data-cy="skillTreePoweredBy"] a')
@@ -831,17 +831,14 @@ describe('Client Display Tests', () => {
             percent: '99',
             'iconClass': 'fas fa-user-ninja',
         });
-        cy.intercept('GET', '/api/projects/proj1/pointHistory')
-            .as('pointHistoryChart');
-        cy.cdVisit('/');
-        cy.wait('@pointHistoryChart');
+        cy.cdVisit('/', true);
         cy.contains('Overall Points');
         cy.get('[data-cy=subjectTile]')
             .eq(0)
             .contains('Subject 1');
         cy.get('[data-cy=subjectTile]')
             .eq(0)
-            .find('[data-cy="subjectStars"] [data-pc-section="officon"]')
+            .find('[data-cy="subjectStars"] .p-rating-item')
             .should('have.length', 6);
         cy.get('[data-cy=subjectTile]')
           .eq(1)
@@ -865,7 +862,7 @@ describe('Client Display Tests', () => {
             projectId: 'proj1'
         }]);
 
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.get('[data-cy="projectDescription"]').contains('I am a description');
         cy.matchSnapshotImageForElement('[data-cy="projectDescription"]', {
             blackout: '[data-cy=pointHistoryChart]'

@@ -516,7 +516,7 @@ const editImportedSkillInfo = ref({
                   :data-cy="`importedBadge-${slotProps.data.skillId}`">
                   <span v-if="slotProps.data.reusedSkill"><i class="fas fa-recycle"
                                                              aria-hidden="true"></i> Reused</span>
-                  <span><i class="fas fa-book" aria-hidden="true"></i> Imported</span>
+                  <span v-else><i class="fas fa-book" aria-hidden="true"></i> Imported</span>
                 </Tag>
                 <Tag
                   v-if="!slotProps.data.enabled"
