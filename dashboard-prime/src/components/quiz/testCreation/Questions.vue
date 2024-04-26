@@ -5,6 +5,7 @@ import { useQuizSummaryState } from '@/stores/UseQuizSummaryState.js';
 import { useQuizConfig } from '@/stores/UseQuizConfig.js';
 import { useFocusState } from '@/stores/UseFocusState.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useElementHelper } from '@/components/utils/inputForm/UseElementHelper.js';
 import Sortable from 'sortablejs';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
@@ -12,13 +13,14 @@ import NoContent2 from '@/components/utils/NoContent2.vue';
 import QuestionCard from '@/components/quiz/testCreation/QuestionCard.vue';
 import EditQuestion from '@/components/quiz/testCreation/EditQuestion.vue';
 import QuizService from '@/components/quiz/QuizService.js';
-import QuestionType from "@/common-components/quiz/QuestionType.js";
+import QuestionType from '@/common-components/quiz/QuestionType.js';
 
 const announcer = useSkillsAnnouncer()
 const route = useRoute()
 const quizSummaryState = useQuizSummaryState()
 const quizConfig = useQuizConfig()
 const focusState = useFocusState()
+const elementHelper = useElementHelper()
 
 const loadingQuestions = ref(false);
 const operationInProgress = ref(false);
@@ -56,19 +58,20 @@ function loadQuestions(quizId) {
 function enableDropAndDrop() {
   if (hasData.value) {
     nextTick(() => {
-      const cards = document.getElementById('questionsCard');
-      // need to check for null because this logic is within the nextTick method
-      // and may actually run after the user moved onto another page
-      if (cards) {
-        Sortable.create(cards, {
-          handle: '.sort-control',
-          animation: 150,
-          ghostClass: 'skills-sort-order-ghost-class',
-          onUpdate(event) {
-            sortOrderUpdate(event);
-          },
-        });
-      }
+      elementHelper.getElementById('questionsCard').then((cards) => {
+        // need to check for null because this logic is within the nextTick method
+        // and may actually run after the user moved onto another page
+        if (cards) {
+          Sortable.create(cards, {
+            handle: '.sort-control',
+            animation: 150,
+            ghostClass: 'skills-sort-order-ghost-class',
+            onUpdate(event) {
+              sortOrderUpdate(event);
+            },
+          });
+        }
+      });
     });
   }
 }

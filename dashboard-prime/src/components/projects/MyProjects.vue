@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onMounted, provide, ref } from 'vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useElementHelper } from '@/components/utils/inputForm/UseElementHelper.js';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import ProjectService from '@/components/projects/ProjectService'
@@ -20,6 +21,7 @@ import LengthyOperationProgressBarModal from "@/components/utils/modal/LengthyOp
 const appConfig = useAppConfig()
 const accessState = useAccessState()
 const announcer = useSkillsAnnouncer()
+const elementHelper = useElementHelper()
 
 onMounted(() => {
   loadProjects();
@@ -138,19 +140,20 @@ const projectEdited = (editedProject) => {
 const enableDropAndDrop = () => {
   if (projects.value && projects.value.length > 0 && projects.value.length < appConfig.numProjectsForTableView) {
     nextTick(() => {
-      const cards = document.getElementById('projectCards');
-      // need to check for null because this logic is within nextTick method
-      // an may actually run after the user moved onto another page
-      if (cards) {
-        Sortable.create(cards, {
-          handle: '.sort-control',
-          animation: 150,
-          ghostClass: 'skills-sort-order-ghost-class',
-          onUpdate(event) {
-            sortOrderUpdate(event);
-          },
-        });
-      }
+      elementHelper.getElementById('projectCards').then((cards) => {
+        // need to check for null because this logic is within nextTick method
+        // an may actually run after the user moved onto another page
+        if (cards) {
+          Sortable.create(cards, {
+            handle: '.sort-control',
+            animation: 150,
+            ghostClass: 'skills-sort-order-ghost-class',
+            onUpdate(event) {
+              sortOrderUpdate(event);
+            },
+          });
+        }
+      });
     });
   }
 };

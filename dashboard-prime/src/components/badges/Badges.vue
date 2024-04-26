@@ -15,6 +15,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import EditBadge from '@/components/badges/EditBadge.vue'
 import { useConfirm } from 'primevue/useconfirm'
+import { useElementHelper } from '@/components/utils/inputForm/UseElementHelper.js';
 
 const announcer = useSkillsAnnouncer()
 const projConfig = useProjConfig();
@@ -23,6 +24,7 @@ const emit = defineEmits(['badge-deleted', 'badges-changed']);
 const appConfig = useAppConfig()
 const route = useRoute();
 const confirm = useConfirm();
+const elementHelper = useElementHelper()
 
 let global = ref(false);
 let isLoadingData = ref(true);
@@ -187,14 +189,15 @@ const handleFocus = () => {
 const enableDragAndDrop = () => {
   if (badges.value && badges.value.length > 0) {
     nextTick(() => {
-      const cards = document.getElementById('badgeCards');
-      Sortable.create(cards, {
-        handle: '.sort-control',
-        animation: 150,
-        ghostClass: 'skills-sort-order-ghost-class',
-        onUpdate(event) {
-          sortOrderUpdate(event);
-        },
+      elementHelper.getElementById('badgeCards').then((cards) => {
+        Sortable.create(cards, {
+          handle: '.sort-control',
+          animation: 150,
+          ghostClass: 'skills-sort-order-ghost-class',
+          onUpdate(event) {
+            sortOrderUpdate(event);
+          },
+        });
       });
     });
   }

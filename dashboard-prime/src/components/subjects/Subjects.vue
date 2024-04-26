@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onMounted, provide, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useElementHelper } from '@/components/utils/inputForm/UseElementHelper.js';
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import Sortable from 'sortablejs'
 import BlockUI from 'primevue/blockui'
@@ -20,6 +21,7 @@ const announcer = useSkillsAnnouncer()
 const appConfig = useAppConfig()
 const emit = defineEmits(['subjects-changed']);
 const route = useRoute();
+const elementHelper = useElementHelper()
 const subjectsState =useSubjectsState()
 const dropAndDragEnabled = ref(false)
 
@@ -147,16 +149,17 @@ const subjectAdded = (subject) => {
 const enableDropAndDrop = () => {
   if (subjectsState.subjects && subjectsState.subjects.length > 1 && !dropAndDragEnabled.value) {
     nextTick(() => {
-      const cards = document.getElementById('subjectCards');
-      Sortable.create(cards, {
-        handle: '.sort-control',
-        animation: 150,
-        ghostClass: 'skills-sort-order-ghost-class',
-        onUpdate(event) {
-          sortOrderUpdate(event);
-        },
+      elementHelper.getElementById('subjectCards').then((cards) => {
+        Sortable.create(cards, {
+          handle: '.sort-control',
+          animation: 150,
+          ghostClass: 'skills-sort-order-ghost-class',
+          onUpdate(event) {
+            sortOrderUpdate(event);
+          },
+        });
+        dropAndDragEnabled.value = true
       });
-      dropAndDragEnabled.value = true
     });
   }
 };

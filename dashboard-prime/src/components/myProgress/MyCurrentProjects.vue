@@ -1,11 +1,13 @@
 <script setup>
 import { nextTick, onMounted, ref } from 'vue'
 import { useMyProgressState } from '@/stores/UseMyProgressState.js'
+import { useElementHelper } from '@/components/utils/inputForm/UseElementHelper.js';
 import ProjectService from '@/components/projects/ProjectService.js'
 import ProjectLinkCard from '@/components/myProgress/ProjectLinkCard.vue'
 import Sortable from 'sortablejs'
 
 const myProgressState = useMyProgressState()
+const elementHelper = useElementHelper()
 const sortOrderLoading = ref(false)
 const sortOrderLoadingProjectId = ref(-1)
 
@@ -47,15 +49,16 @@ onMounted(() => {
 const enableProjectDropAndDrop = () => {
   if (myProgressState.hasProjects) {
     nextTick(() => {
-      const cards = document.getElementById('projectCards')
-      Sortable.create(cards, {
-        handle: '.sort-control',
-        animation: 150,
-        ghostClass: 'skills-sort-order-ghost-class',
-        onUpdate(event) {
-          projectOrderUpdate(event.item.id, event.newIndex)
-        }
-      })
+      elementHelper.getElementById('projectCards').then((cards) => {
+        Sortable.create(cards, {
+          handle: '.sort-control',
+          animation: 150,
+          ghostClass: 'skills-sort-order-ghost-class',
+          onUpdate(event) {
+            projectOrderUpdate(event.item.id, event.newIndex)
+          }
+        })
+      });
     })
   }
 }
