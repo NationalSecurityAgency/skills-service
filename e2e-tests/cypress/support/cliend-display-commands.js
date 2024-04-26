@@ -27,7 +27,7 @@ Cypress.Commands.add('cdVisit', (url = '', expectPointHistoryData = false) => {
     cy.visit(`/test-skills-display/proj1${url}`)
     cy.validatePoweredBy()
 
-    if (!url || url === '') {
+    if (!url || url === '' || url === '/') {
         cy.get(expectPointHistoryData ? '[data-cy="pointHistoryChartWithData"]' : '[data-cy="pointHistoryChartNoData"]')
     }
 })

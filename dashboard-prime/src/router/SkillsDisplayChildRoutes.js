@@ -4,18 +4,19 @@ import MyRankDetailsPage from '@/skills-display/components/rank/MyRankDetailsPag
 import SubjectDetailsPage from '@/skills-display/components/subjects/SubjectPage.vue'
 import SkillPage from '@/skills-display/components/skill/SkillPage.vue'
 import BadgesDetailsPage from '@/skills-display/components/badges/BadgesDetailsPage.vue'
-import QuizPage from '@/skills-display/components/skills/QuizPage.vue';
+import QuizPage from '@/skills-display/components/skills/QuizPage.vue'
+import GlobalBadgeDetailsPage from '@/skills-display/components/badges/GlobalBadgeDetailsPage.vue'
 
 const createSkillsDisplayChildRoutes = (appendToName) => {
 
-  const projectPlaceholder = '##PROJECT##';
-  const projectPlaceholderRegex = new RegExp(projectPlaceholder, 'g');
-  const subjectPlaceholder = '##SUBJECT##';
-  const subjectPlaceholderRegex = new RegExp(subjectPlaceholder, 'g');
-  const groupPlaceholder = '##GROUP##';
-  const groupPlaceholderRegex = new RegExp(groupPlaceholder, 'g');
-  const skillPlaceholder = '##SKILL##';
-  const skillPlaceholderRegex = new RegExp(skillPlaceholder, 'g');
+  const projectPlaceholder = '##PROJECT##'
+  const projectPlaceholderRegex = new RegExp(projectPlaceholder, 'g')
+  const subjectPlaceholder = '##SUBJECT##'
+  const subjectPlaceholderRegex = new RegExp(subjectPlaceholder, 'g')
+  const groupPlaceholder = '##GROUP##'
+  const groupPlaceholderRegex = new RegExp(groupPlaceholder, 'g')
+  const skillPlaceholder = '##SKILL##'
+  const skillPlaceholderRegex = new RegExp(skillPlaceholder, 'g')
 
 
   return [{
@@ -52,6 +53,22 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
       }
     }
   }, {
+    path: '/badges/:badgeId',
+    component: BadgesDetailsPage,
+    name: `badgeDetails${appendToName}`,
+    props: true,
+    meta: {
+      title: 'Badge Details'
+    }
+  }, {
+    path: '/badges/global/:badgeId',
+    component: GlobalBadgeDetailsPage,
+    name: `globalBadgeDetails${appendToName}`,
+    props: true,
+    meta: {
+      title: 'Global Badge Details'
+    }
+  }, {
     name: `SubjectDetailsPage${appendToName}`,
     path: 'subjects/:subjectId',
     component: SubjectDetailsPage,
@@ -67,8 +84,8 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
     component: SkillPage,
     name: `skillDetails${appendToName}`,
     meta: {
-      title: `${skillPlaceholder} Details`,
-    },
+      title: `${skillPlaceholder} Details`
+    }
   }, {
     name: `quizPage${appendToName}`,
     path: 'subjects/:subjectId/skills/:skillId/quizzes/:quizId',
@@ -79,7 +96,7 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
       announcer: {
         message: 'Quiz or Survey Run'
       }
-    },
+    }
   }, {
     name: `SkillsDisplayErrorPage${appendToName}`,
     path: 'error',

@@ -9,6 +9,7 @@ import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSki
 import SkillOverviewFooter from '@/skills-display/components/skill/SkillOverviewFooter.vue'
 import SkillProgressBar from '@/skills-display/components/progress/skill/SkillProgressBar.vue'
 import AchievementDate from '@/skills-display/components/skill/AchievementDate.vue'
+import SkillBadgesAndTags from '@/skills-display/components/progress/skill/SkillBadgesAndTags.vue'
 
 const props = defineProps({
   skill: Object,
@@ -124,24 +125,7 @@ const locked = computed(() => {
       <!--                      :bar-size="skill.groupId ? 12 : 22"-->
       <!--                      :class="{ 'skills-navigable-item' : allowDrillDown }" />-->
     </div>
-    <!--    <div v-if="showBadgesAndTagsRow" class="row" style="padding-top:8px;">-->
-    <!--      <div v-if="skill.badges && skill.badges.length > 0 && !badgeId" class="col-auto pr-0" style="font-size: 0.9rem" data-cy="skillBadges">-->
-    <!--        <i class="fa fa-award"></i> Badges:-->
-    <!--        <span v-for="(badge, index) in skill.badges" :data-cy="`skillBadge-${index}`" class="overflow-hidden"-->
-    <!--              v-bind:key="badge.badgeId">-->
-    <!--          <router-link :to="genLink(badge)" class="skills-theme-primary-color" style="text-decoration:underline;">{{ badge.name }}</router-link>-->
-    <!--          <span v-if="index != (skill.badges.length - 1)">, </span>-->
-    <!--        </span>-->
-    <!--      </div>-->
-    <!--      <div v-if="skill.tags && skill.tags.length > 0" class="col" style="font-size: 0.9rem" data-cy="skillTags">-->
-    <!--        <span v-for="(tag, index) in skill.tags" :data-cy="`skillTag-${index}`" class="overflow-hidden pr-1"-->
-    <!--              v-bind:key="tag.tagId">-->
-    <!--          <b-badge class="py-1 px-2" variant="info" :href="enableDrillDown ? '#' : ''" @click="addTagFilter(tag)">-->
-    <!--              <span>{{ tag.tagValue }} <i class="fas fa-search-plus"></i></span>-->
-    <!--            </b-badge>-->
-    <!--        </span>-->
-    <!--      </div>-->
-    <!--    </div>-->
+    <skill-badges-and-tags :skill="skill" :badge-id="badgeId" :enable-to-add-tag="enableDrillDown"/>
     <div v-if="showDescription || (skill.type === 'SkillsGroup' && showGroupDescriptions)"
          :data-cy="`skillDescription-${skill.skillId}`">
 
