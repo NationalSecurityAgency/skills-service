@@ -44,6 +44,7 @@ import Rating from 'primevue/rating';
 import Textarea from 'primevue/textarea';
 import Listbox from 'primevue/listbox';
 import ProgressBar from 'primevue/progressbar';
+import Chip from 'primevue/chip'
 
 import ConfirmationService from 'primevue/confirmationservice';
 import BadgeDirective from 'primevue/badgedirective';
@@ -120,6 +121,7 @@ app.component('Rating', Rating)
 app.component('Textarea', Textarea)
 app.component('Listbox', Listbox)
 app.component('ProgressBar', ProgressBar)
+app.component('Chip', Chip)
 
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)

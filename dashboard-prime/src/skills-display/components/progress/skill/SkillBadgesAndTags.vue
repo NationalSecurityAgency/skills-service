@@ -40,13 +40,23 @@ const addTagFilter = (tag) => {
               <span v-if="index != (skill.badges.length - 1)">, </span>
             </span>
     </div>
-    <div v-if="skill.tags && skill.tags.length > 0" class="col" style="font-size: 0.9rem" data-cy="skillTags">
-            <span v-for="(tag, index) in skill.tags" :data-cy="`skillTag-${index}`" class="overflow-hidden pr-1"
-                  v-bind:key="tag.tagId">
-              <Tag class="py-1 px-2" severity="info" :href="enableToAddTag ? '#' : ''" @click="addTagFilter(tag)">
-                  <span>{{ tag.tagValue }} <i class="fas fa-search-plus"></i></span>
-                </Tag>
-            </span>
+    <div v-if="skill.tags && skill.tags.length > 0" data-cy="skillTags">
+      <Chip v-for="(tag, index) in skill.tags"
+            :data-cy="`skillTag-${index}`"
+            v-bind:key="tag.tagId"
+            class="py-0 pl-0 pr-3 mr-2">
+        <span class="bg-primary border-circle w-2rem h-2rem flex align-items-center justify-content-center"><i
+          class="fas fa-tag" /></span>
+        <span class="ml-2 font-medium">{{ tag.tagValue }}</span>
+      <SkillsButton
+        icon="fas fa-search-plus"
+        size="small"
+        class="py-1 pl-0 pr-1 text-sm ml-1"
+        severity="secondary"
+        data-cy="addTagBtn"
+        text
+        @click="addTagFilter(tag)" />
+      </Chip>
     </div>
   </div>
 </template>

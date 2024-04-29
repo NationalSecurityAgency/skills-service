@@ -52,7 +52,7 @@ const props = defineProps({
     required: false
   }
 })
-
+const emit = defineEmits(['add-tag-filter'])
 const route = useRoute()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const preferences = useSkillsDisplayPreferencesState()
@@ -78,6 +78,9 @@ const toRoute = buildToRoute()
 const locked = computed(() => {
   return (props.skill && props.skill.isLocked) || props.badgeIsLocked
 })
+const addTagFilter = (tag) => {
+  emit('add-tag-filter', tag)
+}
 </script>
 
 <template>
@@ -107,6 +110,7 @@ const locked = computed(() => {
       <router-link
         v-if="toRoute"
         :to="toRoute"
+        tabindex="-1"
         :aria-label="`Navigate to ${skill.skill}`">
 <!--        <vertical-progress-bar-->
 <!--          class="border-1 border-transparent hover:border-orange-700 border-round"-->
@@ -125,7 +129,7 @@ const locked = computed(() => {
       <!--                      :bar-size="skill.groupId ? 12 : 22"-->
       <!--                      :class="{ 'skills-navigable-item' : allowDrillDown }" />-->
     </div>
-    <skill-badges-and-tags :skill="skill" :badge-id="badgeId" :enable-to-add-tag="enableDrillDown"/>
+    <skill-badges-and-tags :skill="skill" :badge-id="badgeId" :enable-to-add-tag="enableDrillDown" @add-tag-filter="addTagFilter"/>
     <div v-if="showDescription || (skill.type === 'SkillsGroup' && showGroupDescriptions)"
          :data-cy="`skillDescription-${skill.skillId}`">
 

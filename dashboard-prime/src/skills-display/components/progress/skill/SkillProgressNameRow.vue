@@ -5,9 +5,7 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import AnimatedNumber from '@/skills-display/components/utilities/AnimatedNumber.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useRoute } from 'vue-router'
-import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 
 const props = defineProps({
   skill: Object,
