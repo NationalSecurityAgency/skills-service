@@ -41,7 +41,6 @@ const search = (event) => {
 
 const navToSkill = (event) => {
   const skill = event.value
-  console.log(skill)
   skillDisplayInfo.routerPush(
     'skillDetails',
     {

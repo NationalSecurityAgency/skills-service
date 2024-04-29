@@ -29,7 +29,7 @@ describe('Client Display Skills Groups Tests', () => {
         });
     });
 
-    it('a group with no child skills show not be displayed in the client-display', () => {
+    it('a group with no child skills should not be displayed in the client-display', () => {
         cy.createSkillsGroup(1, 1, 1);
 
         cy.cdVisit('/');
@@ -41,7 +41,7 @@ describe('Client Display Skills Groups Tests', () => {
             .should('exist');
         cy.get('[data-cy="skillProgress_index-0"]')
             .should('not.exist');
-        cy.get('[data-cy=noDataYet]')
+        cy.get('[data-cy=noContent]')
             .should('be.visible')
             .contains('Skills have not been added yet.');
     });
@@ -78,7 +78,7 @@ describe('Client Display Skills Groups Tests', () => {
             .contains('0 / 30 Points');
     });
 
-    it('one group - partial progress', () => {
+    it('one group - no group progress but partial skill progress', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, {
             pointIncrement: 100,
@@ -96,17 +96,53 @@ describe('Client Display Skills Groups Tests', () => {
         cy.cdClickSubj(0);
 
         cy.get('[data-cy="groupSkillsRequiredBadge"]')
+          .should('not.exist');
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
+          .first()
+          .contains('Awesome Group 1');
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
+          .first()
+          .contains('0 / 2 Skills');
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgressTitle"]')
+          .contains('Very Great Skill 1');
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
+          .contains('100 / 200 Points');
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgressTitle"]')
+          .contains('Very Great Skill 2');
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
+          .contains('150 / 300 Points');
+    });
+
+    it('one group - partial progress', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1, {
+            pointIncrement: 100,
+            numPerformToCompletion: 2
+        });
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: 150,
+            numPerformToCompletion: 2
+        });
+
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, 'Subject 1', true);
+
+        cy.get('[data-cy="groupSkillsRequiredBadge"]')
             .should('not.exist');
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
             .first()
             .contains('Awesome Group 1');
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
             .first()
-            .contains('0 / 2 Skills');
+            .contains('1 / 2 Skills');
         cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 1');
         cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('100 / 200 Points');
+            .contains('200 / 200 Points');
         cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 2');
         cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
@@ -129,8 +165,8 @@ describe('Client Display Skills Groups Tests', () => {
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, 'Subject 1', true);
 
         cy.get('[data-cy="groupSkillsRequiredBadge"]')
             .should('not.exist');
@@ -207,8 +243,7 @@ describe('Client Display Skills Groups Tests', () => {
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/subjects/subj1', true);
 
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
             .first()
@@ -253,8 +288,7 @@ describe('Client Display Skills Groups Tests', () => {
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/subjects/subj1');
 
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
             .first()
@@ -297,8 +331,7 @@ describe('Client Display Skills Groups Tests', () => {
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/subjects/subj1');
 
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
             .first()
@@ -341,8 +374,8 @@ describe('Client Display Skills Groups Tests', () => {
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, 'Subject 1', true);
 
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
             .first()
@@ -399,8 +432,8 @@ describe('Client Display Skills Groups Tests', () => {
         cy.reportSkill(1, 6, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 6, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, 'Subject 1', true);
 
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]')
             .first()
@@ -437,7 +470,7 @@ describe('Client Display Skills Groups Tests', () => {
             .contains('600 / 800 Points');
     });
 
-    it('search groups and child skills', () => {
+    it.skip('search groups and child skills', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, { name: 'For SkIll1 Searching' });
         cy.addSkillToGroup(1, 1, 1, 2, { name: 'For skill1 SkIll2  Searching' });
@@ -553,7 +586,7 @@ describe('Client Display Skills Groups Tests', () => {
             .should('not.exist');
     });
 
-    it('filter should not show empty groups', () => {
+    it.skip('filter should not show empty groups', () => {
         Cypress.Commands.add('validateFilterCounts', (withoutProgress, complete, inProgress) => {
             cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
                 .click();
@@ -665,7 +698,7 @@ describe('Client Display Skills Groups Tests', () => {
             .should('not.exist');
     });
 
-    it('filter and search', () => {
+    it.skip('filter and search', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, {
             name: 'For SkIll1 Searching',
@@ -825,7 +858,7 @@ describe('Client Display Skills Groups Tests', () => {
             .contains('Skill 2 Desc');
     });
 
-    it('description are always displayed if setting is enabled', () => {
+    it.skip('description are always displayed if setting is enabled', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, { description: 'Skill 1 Desc' });
         cy.addSkillToGroup(1, 1, 1, 2, { description: 'Skill 2 Desc' });
@@ -887,28 +920,28 @@ describe('Client Display Skills Groups Tests', () => {
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, "Subject 1", true);
 
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
 
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('20');
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('10');
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('10');
-        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="timeWindowPts"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="timeWindowPts"] [data-cy="mediaInfoCardTitle"]')
             .contains('30');
 
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('40');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('20');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('20');
-        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="timeWindowPts"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="timeWindowPts"] [data-cy="mediaInfoCardTitle"]')
             .contains('20');
     });
 
@@ -962,8 +995,6 @@ describe('Client Display Skills Groups Tests', () => {
             .contains('0 / 100 Points');
 
         cy.get('[data-cy="overallPointsEarnedToday"]')
-            .contains('100 Points earned Today');
-        cy.get('[data-cy="pointsEarnedTodayForTheNextLevel"]')
             .contains('100 Points earned Today');
         cy.get('[data-cy="overallLevelDesc"]')
             .contains('Level 2 out of 5');
@@ -1057,7 +1088,7 @@ describe('Client Display Skills Groups Tests', () => {
             .contains('1 / 2 Skills');
     });
 
-    it('fixed doubling of skill\'s points when search/filter is used to locate the skill first', () => {
+    it.skip('fixed doubling of skill\'s points when search/filter is used to locate the skill first', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
 

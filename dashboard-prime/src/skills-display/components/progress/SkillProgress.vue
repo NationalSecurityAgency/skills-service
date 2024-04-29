@@ -10,16 +10,13 @@ import SkillOverviewFooter from '@/skills-display/components/skill/SkillOverview
 import SkillProgressBar from '@/skills-display/components/progress/skill/SkillProgressBar.vue'
 import AchievementDate from '@/skills-display/components/skill/AchievementDate.vue'
 import SkillBadgesAndTags from '@/skills-display/components/progress/skill/SkillBadgesAndTags.vue'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 const props = defineProps({
   skill: Object,
   showDescription: {
     type: Boolean,
     default: true
-  },
-  showGroupDescriptions: {
-    type: Boolean,
-    default: false
   },
   enableDrillDown: {
     type: Boolean,
@@ -56,6 +53,7 @@ const emit = defineEmits(['add-tag-filter'])
 const route = useRoute()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const preferences = useSkillsDisplayPreferencesState()
+const attributes = useSkillsDisplayAttributesState()
 
 const buildToRoute = () => {
   if (!props.enableDrillDown || !props.skill.isSkillType) {
@@ -81,6 +79,15 @@ const locked = computed(() => {
 const addTagFilter = (tag) => {
   emit('add-tag-filter', tag)
 }
+
+const isSkillsGroupWithChildren = computed(() => {
+  return props.skill?.isSkillsGroupType && props.skill?.children && props.skill?.children.length > 0
+})
+const childSkillsInternal = computed(() => {
+  return isSkillsGroupWithChildren.value ? props.skill.children.map((item) => ({ ...item, childSkill: true })) : []
+})
+
+
 </script>
 
 <template>
@@ -112,9 +119,9 @@ const addTagFilter = (tag) => {
         :to="toRoute"
         tabindex="-1"
         :aria-label="`Navigate to ${skill.skill}`">
-<!--        <vertical-progress-bar-->
-<!--          class="border-1 border-transparent hover:border-orange-700 border-round"-->
-<!--          data-cy="skillProgressBar" />-->
+        <!--        <vertical-progress-bar-->
+        <!--          class="border-1 border-transparent hover:border-orange-700 border-round"-->
+        <!--          data-cy="skillProgressBar" />-->
         <skill-progress-bar data-cy="skillProgressBar"
                             class="border-1 border-transparent hover:border-orange-700 border-round"
                             :skill="skill" />
@@ -129,14 +136,17 @@ const addTagFilter = (tag) => {
       <!--                      :bar-size="skill.groupId ? 12 : 22"-->
       <!--                      :class="{ 'skills-navigable-item' : allowDrillDown }" />-->
     </div>
-    <skill-badges-and-tags :skill="skill" :badge-id="badgeId" :enable-to-add-tag="enableDrillDown" @add-tag-filter="addTagFilter"/>
-    <div v-if="showDescription || (skill.type === 'SkillsGroup' && showGroupDescriptions)"
+    <skill-badges-and-tags :skill="skill" :badge-id="badgeId" :enable-to-add-tag="enableDrillDown"
+                           @add-tag-filter="addTagFilter" />
+    <div v-if="showDescription || (skill.type === 'SkillsGroup' && attributes.groupDescriptionsOn)"
          :data-cy="`skillDescription-${skill.skillId}`">
 
       <div v-if="skill.type === 'SkillsGroup'">
         <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
-          <markdown-text v-if="skill.description && skill.description.description"
-                         :text="skill.description.description" />
+          <markdown-text
+            :instance-id="`skillDescription-${skill.skillId}`"
+            v-if="skill.description && skill.description.description"
+            :text="skill.description.description" />
         </p>
       </div>
       <div v-if="skill.type === 'Skill'">
@@ -156,49 +166,49 @@ const addTagFilter = (tag) => {
           v-if="skill && skill.achievedOn"
           :date="skill.achievedOn" class="mt-2" />
 
-<!--        <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked" />-->
+        <!--        <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked" />-->
         <skills-summary-cards v-if="!locked" :skill="skill" class="mt-3" />
-<!--        <catalog-import-status :skill="skill" />-->
-<!--        <skill-video v-if="skillInternal" :skill="skillInternal"-->
-<!--                     :video-collapsed-by-default="videoCollapsedByDefault"-->
-<!--                     @points-earned="pointsEarned"-->
-<!--                     class="mt-2" />-->
+        <!--        <catalog-import-status :skill="skill" />-->
+        <!--        <skill-video v-if="skillInternal" :skill="skillInternal"-->
+        <!--                     :video-collapsed-by-default="videoCollapsedByDefault"-->
+        <!--                     @points-earned="pointsEarned"-->
+        <!--                     class="mt-2" />-->
         <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
-          <markdown-text v-if="skill.description && skill.description.description"
-                         :text="skill.description.description" />
+          <markdown-text
+            :instance-id="`skillDescription-${skill.skillId}`"
+            v-if="skill.description && skill.description.description"
+            :text="skill.description.description" />
         </p>
 
         <div>
-          <skill-overview-footer  :skill="skill"/>
+          <skill-overview-footer :skill="skill" />
         </div>
       </div>
     </div>
 
-    <!--    <div v-if="skill.isSkillsGroupType && childSkillsInternal" class="ml-4 mt-3">-->
-    <!--      <div v-for="(childSkill, index) in childSkillsInternal"-->
-    <!--           :key="`group-${skill.skillId}_skill-${childSkill.skillId}`"-->
-    <!--           :id="`skillRow-${childSkill.skillId}`"-->
-    <!--           class="skills-theme-bottom-border-with-background-color"-->
-    <!--           :class="{ 'separator-border-thick' : showDescription }"-->
-    <!--      >-->
-    <!--        <skill-progress2-->
-    <!--          :id="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"-->
-    <!--          class="mb-3"-->
-    <!--          :skill="childSkill"-->
-    <!--          :subjectId="subjectId"-->
-    <!--          :badgeId="badgeId"-->
-    <!--          :type="type"-->
-    <!--          :enable-drill-down="true"-->
-    <!--          :show-description="showDescription"-->
-    <!--          :show-group-descriptions="showGroupDescriptions"-->
-    <!--          :data-cy="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"-->
-    <!--          @points-earned="onChildSkillPointsEarned"-->
-    <!--          @add-tag-filter="addTagFilter"-->
-    <!--        ></skill-progress2>-->
-
-    <!--        <hr v-if="index < (childSkillsInternal.length - 1)"/>-->
-    <!--      </div>-->
-    <!--    </div>-->
+    <div v-if="skill.isSkillsGroupType && childSkillsInternal" class="ml-4 mt-3">
+      <div v-for="(childSkill, index) in childSkillsInternal"
+           :key="`group-${skill.skillId}_skill-${childSkill.skillId}`"
+           :id="`skillRow-${childSkill.skillId}`"
+           class="skills-theme-bottom-border-with-background-color"
+           :class="{ 'separator-border-thick' : showDescription }"
+      >
+        <!--        @points-earned="onChildSkillPointsEarned"-->
+        <skill-progress
+          :id="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
+          class="mb-3"
+          :skill="childSkill"
+          :subjectId="subjectId"
+          :badgeId="badgeId"
+          :type="type"
+          :enable-drill-down="true"
+          :show-description="showDescription"
+          :show-group-descriptions="showGroupDescriptions"
+          :data-cy="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
+          @add-tag-filter="addTagFilter"
+        ></skill-progress>
+      </div>
+    </div>
 
   </div>
 </template>

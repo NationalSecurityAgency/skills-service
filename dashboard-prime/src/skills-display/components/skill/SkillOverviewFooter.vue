@@ -121,7 +121,6 @@ const reportSkill = (approvalRequestedMsg) => {
         }
       }
     }).catch((e) => {
-    console.log(e)
     if (e.response.data && e.response.data.errorCode
       && (e.response.data.errorCode === 'InsufficientProjectPoints' || e.response.data.errorCode === 'InsufficientSubjectPoints')) {
       errNotification.value.msg = e.response.data.explanation

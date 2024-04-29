@@ -47,7 +47,7 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
           updateSingleSkillPoints(skillSummary.value, pts)
         }
         if (subjectSummary.value?.skills) {
-          const foundSkill = subjectSummary.value.skills.find((item) => item.skillId === skillId)
+          const foundSkill = findSkillInSubjectSummary(skillId)
           if (foundSkill) {
             updateSingleSkillPoints(foundSkill, pts)
 
@@ -66,26 +66,51 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
         }
       }
     }
-  const nullifyExpirationDate = (skillId) => {
-    let found = false
-    if (skillSummary.value?.skillId === skillId) {
-      skillSummary.value.expirationDate = null
-      found = true
-      return
-    }
-    if (subjectSummary.value?.skills) {
-      const foundSkill = subjectSummary.value.skills.find((item) => item.skillId === skillId)
-      if (foundSkill) {
-        foundSkill.expirationDate = null
+    const nullifyExpirationDate = (skillId) => {
+      let found = false
+      if (skillSummary.value?.skillId === skillId) {
+        skillSummary.value.expirationDate = null
         found = true
         return
       }
+      if (subjectSummary.value?.skills) {
+        const foundSkill = subjectSummary.value.skills.find((item) => item.skillId === skillId)
+        if (foundSkill) {
+          foundSkill.expirationDate = null
+          found = true
+          return
+        }
+      }
+      if (!found) {
+        console.warn(`could not find skill ${skillId}`)
+      }
     }
-    if (!found) {
-      console.warn(`could not find skill ${skillId}`)
+
+    const findSkillInSubjectSummary = (skillId) => {
+      let foundSkill = null;
+      for (let i = 0; i < subjectSummary.value.skills.length; i += 1) {
+        const skill = subjectSummary.value.skills[i];
+        if (skillId === skill.skillId) {
+          foundSkill = skill;
+        } else if (skill.isSkillsGroupType) {
+          foundSkill = skill.children.find((child) => skillId === child.skillId);
+        }
+        if (foundSkill) {
+          break;
+        }
+      }
+
+      return foundSkill
+    }
+
+  const updateDescription = (desc) => {
+    const foundSkill = findSkillInSubjectSummary(desc.skillId)
+    if (foundSkill) {
+      foundSkill.description = desc;
+      foundSkill.achievedOn = desc.achievedOn;
+      foundSkill.videoSummary = desc.videoSummary;
     }
   }
-
 
     return {
       loadSubjectSummary,
@@ -94,7 +119,8 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
       loadSkillSummary,
       skillSummary,
       addPoints,
-      nullifyExpirationDate
+      nullifyExpirationDate,
+      updateDescription
     }
 
   }

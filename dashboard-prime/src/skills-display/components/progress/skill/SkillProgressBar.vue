@@ -6,9 +6,7 @@ const props = defineProps({
   skill: Object
 })
 
-const isSkillsGroupWithChildren = computed(() => {
-  props.skill?.isSkillsGroupType && props.skill?.children && props.skill?.children.length > 0
-})
+const isSkillsGroupWithChildren = computed(() => props.skill?.isSkillsGroupType)
 const numChildSkillsComplete = computed(() => {
   return isSkillsGroupWithChildren.value ? props.skill.children.filter((childSkill) => childSkill.meta.complete).length : 0
 })

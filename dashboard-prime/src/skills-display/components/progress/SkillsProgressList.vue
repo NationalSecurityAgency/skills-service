@@ -5,6 +5,7 @@ import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollS
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
+import NoContent2 from '@/components/utils/NoContent2.vue'
 
 // subject: {
 //   type: Object,
@@ -41,7 +42,6 @@ const preferences = useSkillsDisplayPreferencesState()
 const skillsDisplayService = useSkillsDisplayService()
 const subjectAndSkillsState = useSkillsDisplaySubjectState()
 const searchString = ref('')
-const showDescriptionsInternal = ref(false)
 
 
 let filter = () => true
@@ -124,7 +124,10 @@ const updateMetaCounts = (meta) => {
 const lastViewedButtonDisabled = ref(false)
 const scrollToLastViewedSkill = (timeout = null) => {
   if (scrollIntoViewState.lastViewedSkillId) {
-    const found = skillsInternal.value.find((skill) => skill.skillId === scrollIntoViewState.lastViewedSkillId)
+    const found = skillsInternal.value.find((skill) => {
+      return skill.skillId === scrollIntoViewState.lastViewedSkillId ||
+        skill.children?.find((childItem) => childItem.skillId === scrollIntoViewState.lastViewedSkillId)
+    })
     if (found) {
       scrollIntoViewState.scrollToLastViewedSkill(timeout)
     }
@@ -147,26 +150,29 @@ const hasLastViewedSkill = computed(() => {
 const descriptionsLoaded = ref(false)
 const loading = ref(false)
 const descriptions = ref([])
-const updateSkillForLoadedDescription = (skills, desc) => {
-  let foundSkill = null
-  for (let i = 0; i < skills.length; i += 1) {
-    const skill = skills[i]
-    if (desc.skillId === skill.skillId) {
-      foundSkill = skill
-    } else if (skill.isSkillsGroupType) {
-      foundSkill = skill.children.find((child) => desc.skillId === child.skillId)
-    }
-    if (foundSkill) {
-      break
-    }
-  }
-
-  if (foundSkill) {
-    foundSkill.description = desc
-    foundSkill.achievedOn = desc.achievedOn
-    foundSkill.videoSummary = desc.videoSummary
-  }
-}
+// const updateSkillForLoadedDescription = (skills, desc) => {
+//   let foundSkill = null
+//   console.log(desc)
+//   for (let i = 0; i < skills.length; i += 1) {
+//     const skill = skills[i]
+//     if (desc.skillId === skill.skillId) {
+//       foundSkill = skill
+//     } else if (skill.isSkillsGroupType) {
+//       foundSkill = skill.children.find((child) => desc.skillId === child.skillId)
+//     }
+//     if (foundSkill) {
+//       break
+//     }
+//   }
+//
+//   console.log(foundSkill)
+//   console.log('----------------------')
+//   if (foundSkill) {
+//     foundSkill.description = desc
+//     foundSkill.achievedOn = desc.achievedOn
+//     foundSkill.videoSummary = desc.videoSummary
+//   }
+// }
 const onDetailsToggle = () => {
   if (!descriptionsLoaded.value) {
     loading.value = true
@@ -174,7 +180,8 @@ const onDetailsToggle = () => {
       .then((res) => {
         descriptions.value = res
         res.forEach((desc) => {
-          updateSkillForLoadedDescription(skillsInternal.value, desc)
+          subjectAndSkillsState.updateDescription(desc)
+          // updateSkillForLoadedDescription(skillsInternal.value, desc)
           // updateSkillForLoadedDescription(this.skillsInternalOrig, desc);
         })
         descriptionsLoaded.value = true
@@ -344,13 +351,6 @@ const skillsToShow = computed(() => {
                 class="fas fa-tag" /></span>
               <span class="ml-2 font-medium">{{ tag.tagValue }}</span>
             </Chip>
-            <!--                <i :class="'fas fa-tag'" class="ml-1"></i> <span v-html="tag.tagValue"></span>-->
-            <!--                <button type="button" class="btn btn-link p-0" @click="removeTagFilter(tag)"-->
-            <!--                        :data-cy="`clearSelectedTagFilter-${tag.tagId}`">-->
-            <!--                  <i class="fas fa-times-circle ml-1"></i>-->
-            <!--                  <span class="sr-only">clear filter</span>-->
-            <!--                </button>-->
-            <!--              </Chip>-->
           </div>
         </div>
       </div>
@@ -381,32 +381,33 @@ const skillsToShow = computed(() => {
               :skill="skill"
               :type="type"
               :enable-drill-down="true"
-              :show-description="showDescriptionsInternal"
               :data-cy="`skillProgress_index-${index}`"
               :badge-is-locked="badgeIsLocked"
               :child-skill-highlight-string="searchString"
               :video-collapsed-by-default="true"
               @add-tag-filter="addTagFilter"
             />
-
-            <!--            <Divider />-->
           </div>
         </div>
       </div>
-      <!--        <no-data-yet v-if="!(skillsInternal && skillsInternal.length > 0) && (searchString || Boolean(this.selectedTagFilters.length))" class="my-5"-->
-      <!--                     icon="fas fa-search-minus fa-5x" title="No results">-->
-      <!--          <span v-if="searchString">-->
-      <!--            Please refine [{{searchString}}] search  <span v-if="filterId || Boolean(this.selectedTagFilters.length)">and/or clear the selected filter</span>-->
-      <!--          </span>-->
-      <!--          <span v-if="!searchString">-->
-      <!--           Please clear selected filters-->
-      <!--          </span>-->
-      <!--        </no-data-yet>-->
 
-      <!--        <no-data-yet v-if="!(skillsInternalOrig && skillsInternalOrig.length > 0) && showNoDataMsg" class="my-5"-->
-      <!--                     :title="`${this.skillDisplayName}s have not been added yet.`"-->
-      <!--                     :sub-title="`Please contact this ${this.projectDisplayName.toLowerCase()}'s administrator.`"/>-->
-      <!--      </div>-->
+<!--      <no-content-2-->
+<!--        v-if="!(skillsInternal && skillsInternal.length > 0) && (searchString || Boolean(selectedTagFilters.length))"-->
+<!--        class="my-5"-->
+<!--        icon="fas fa-search-minus fa-5x" title="No results">-->
+<!--                <span v-if="searchString">-->
+<!--                  Please refine [{{ searchString }}] search  <span-->
+<!--                  v-if="filterId || Boolean(selectedTagFilters.length)">and/or clear the selected filter</span>-->
+<!--                </span>-->
+<!--        <span v-if="!searchString">-->
+<!--                 Please clear selected filters-->
+<!--                </span>-->
+<!--      </no-content-2>-->
+
+      <no-content2
+        v-if="!(skillsInternal && skillsInternal.length > 0) && showNoDataMsg"
+        :title="`${preferences.skillDisplayName}s have not been added yet.`"
+        :message="`Please contact this ${preferences.projectDisplayName.toLowerCase()}'s administrator.`" />
     </template>
   </Card>
 </template>

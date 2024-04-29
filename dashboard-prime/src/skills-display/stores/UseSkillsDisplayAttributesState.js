@@ -46,6 +46,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const displayProjectDescription = computed(() => config.value.displayProjectDescription)
   const levelDisplayName = computed(() => config.value.levelDisplayName || 'Level')
   const maxSelfReportMessageLength = computed(() => config.value.maxSelfReportMessageLength)
+  const groupDescriptionsOn = computed(() => config.value.groupDescriptionsOn)
   return {
     projectId,
     serviceUrl,
@@ -54,6 +55,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     displayProjectDescription,
     levelDisplayName,
     isInIframe,
-    maxSelfReportMessageLength
+    maxSelfReportMessageLength,
+    groupDescriptionsOn
   }
 })

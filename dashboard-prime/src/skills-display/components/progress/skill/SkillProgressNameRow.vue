@@ -6,6 +6,7 @@ import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import AnimatedNumber from '@/skills-display/components/utilities/AnimatedNumber.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useRoute } from 'vue-router'
+import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 
 const props = defineProps({
   skill: Object,
@@ -18,6 +19,7 @@ const props = defineProps({
 const numFormat = useNumberFormat()
 const timeUtils = useTimeUtils()
 const appConfig = useAppConfig()
+const displayPref = useSkillsDisplayPreferencesState()
 const route = useRoute()
 
 const isSkillsGroupWithChildren = computed(() => props.skill?.isSkillsGroupType && props.skill?.children && props.skill?.children.length > 0)
@@ -70,6 +72,10 @@ const buildToRoute = () => {
   }
   return { name, params }
 }
+
+const someSkillsAreOptional = computed(() => {
+  return isSkillsGroupWithChildren.value && props.skill.numSkillsRequired !== -1 && props.skill.numSkillsRequired < props.skill.children.length
+})
 </script>
 
 <template>
@@ -108,20 +114,18 @@ const buildToRoute = () => {
           <span class="font-italic">{{ skill.copiedFromProjectName }}</span>
         </div>
 
-        <!--          <div-->
-        <!--            v-if="skill.isSkillsGroupType && skill.numSkillsRequired > 0 && skill.numSkillsRequired < skill.children.length"-->
-        <!--            v-b-tooltip.hover-->
-        <!--            :title="`A ${displayPref.groupDisplayName} allows a ${displayPref.skillDisplayName} to be defined by the collection ` +-->
-        <!--                    `of other ${displayPref.skillDisplayName}s within a ${displayPref.projectDisplayName}. A ${displayPref.skillDisplayName} Group can require the completion of some or all of the included ${displayPref.skillDisplayName}s before the group be achieved.`"-->
-        <!--            class="ml-2 d-inline-block border rounded p-1 text-primary border-success overflow-hidden"-->
-        <!--            style="font-size: 0.9rem"-->
-        <!--            data-cy="groupSkillsRequiredBadge">-->
-        <!--            <span class="">Requires </span>-->
-        <!--            <b-badge variant="success">{{ skill.numSkillsRequired }}</b-badge>-->
-        <!--            <span class="font-italic">out of</span>-->
-        <!--            <b-badge variant="secondary">{{ skill.children.length }}</b-badge>-->
-        <!--            skills-->
-        <!--          </div>-->
+        <div
+          v-if="skill.isSkillsGroupType && skill.numSkillsRequired > 0 && skill.numSkillsRequired < skill.children.length"
+          :title="`A ${displayPref.groupDisplayName} allows a ${displayPref.skillDisplayName} to be defined by the collection ` +
+                            `of other ${displayPref.skillDisplayName}s within a ${displayPref.projectDisplayName}. A ${displayPref.skillDisplayName} Group can require the completion of some or all of the included ${displayPref.skillDisplayName}s before the group be achieved.`"
+          class="text-sm align-content-center ml-2"
+          data-cy="groupSkillsRequiredBadge">
+          <span class="">Requires </span>
+          <Tag severity="success">{{ skill.numSkillsRequired }}</Tag>
+          <span class="font-italic"> out of </span>
+          <Tag severity="secondary">{{ skill.children.length }}</Tag>
+          skills
+        </div>
 
         <Tag v-if="skill.selfReporting && skill.selfReporting.enabled"
              class="self-report-badge ml-2">
@@ -145,20 +149,22 @@ const buildToRoute = () => {
         </Tag>
       </div>
     </div>
-    <div class="text-right align-content-end w-min-9rem"
+    <div class="text-right align-content-end w-min-9rem flex"
          :class="{ 'text-green-500' : isSkillComplete }"
          data-cy="skillProgress-ptsOverProgressBard">
-      <div v-if="skill.isSkillsGroupType" class="align-content-end">
+      <i class="fa fa-check mr-1 pb-1 align-content-end"
+         v-if="isSkillComplete"
+         :data-cy="`skillCompletedCheck-${skill.skillId}`"
+         aria-hidden="true" />
+      <span v-if="skill.isSkillsGroupType" class="align-content-end">
         <animated-number :num="numChildSkillsComplete" />
         / {{ numFormat.pretty(numSkillsRequired) }} Skill{{ (numSkillsRequired === 1) ? '' : 's' }}
         {{ someSkillsAreOptional ? 'Required' : '' }}
-      </div>
-      <div v-else class="">
-        <i class="fa fa-check mr-1" v-if="isSkillComplete" :data-cy="`skillCompletedCheck-${skill.skillId}`"
-           aria-hidden="true" />
+      </span>
+      <span v-else class="align-content-end">
         <animated-number :num="skill.points" />
         / {{ numFormat.pretty(skill.totalPoints) }} Points
-      </div>
+      </span>
 
       <div v-if="skill.points > 0 && expirationDate() && !skill.isMotivationalSkill" data-cy="expirationDate">
         <div class="my-2 text-orange-500">
@@ -170,7 +176,7 @@ const buildToRoute = () => {
         <div class="my-2 text-orange-500">
           Expires <span
           class="font-semibold">{{ timeUtils.relativeTime(expirationDate(true)) }}</span>,
-            perform this skill to keep your points!
+          perform this skill to keep your points!
         </div>
       </div>
       <div v-if="showHasExpiredMessage" data-cy="hasExpired">
@@ -183,8 +189,9 @@ const buildToRoute = () => {
       <div v-if="skill.selfReporting && skill.selfReporting.requestedOn"
            data-cy="approvalPending">
         <span v-if="!skill.selfReporting.rejectedOn" class="text-orange-500"><i class="far fa-clock"
-                                                        aria-hidden="true" /> Pending Approval</span>
-        <span v-else class="text-red-500"><i class="fas fa-heart-broken skills-theme-primary-color" aria-hidden="true"></i> Request Rejected</span>
+                                                                                aria-hidden="true" /> Pending Approval</span>
+        <span v-else class="text-red-500"><i class="fas fa-heart-broken skills-theme-primary-color"
+                                             aria-hidden="true"></i> Request Rejected</span>
       </div>
     </div>
   </div>
