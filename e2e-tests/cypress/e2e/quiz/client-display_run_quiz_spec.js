@@ -69,7 +69,7 @@ describe('Client Display Quiz Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
         cy.get('[data-cy="title"]').contains('Quiz')
-        cy.get('[data-cy="quizHasNoQuestions"]').contains(' This Quiz has no questions declared ')
+        cy.get('[data-cy="quizHasNoQuestions"]').contains('This Quiz has no questions declared')
         cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
         cy.get('[data-cy="cancelQuizAttempt"]').should('not.exist')
 
@@ -177,7 +177,7 @@ describe('Client Display Quiz Tests', () => {
 
         cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '150')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('150')
     });
 
     it('wrong answers are accurately depicted on the result screen', () => {
@@ -578,7 +578,7 @@ describe('Client Display Quiz Tests', () => {
 
         cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '150')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains( '150')
     });
 
     it('subset of randomized questions is consistent on refresh', () => {

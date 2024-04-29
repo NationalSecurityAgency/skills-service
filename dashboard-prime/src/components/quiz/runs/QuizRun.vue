@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { object, string, number, array } from 'yup';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
+import dayjs from '@/common-components/DayJsCustomizer'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 
 import QuizRunService from '@/common-components/quiz/QuizRunService.js';
@@ -22,7 +23,7 @@ const props = defineProps({
     default: null,
   },
 })
-const emit = defineEmits(['cancelled', 'test-was-taken'])
+const emit = defineEmits(['cancelled', 'testWasTaken'])
 const announcer = useSkillsAnnouncer()
 const timeUtils = useTimeUtils()
 
@@ -372,7 +373,7 @@ const doneWithThisRun = () => {
             </div>
             <div class="flex-1 text-right text-muted">
               <Tag severity="success" data-cy="numQuestions">{{quizInfo.quizLength}}</Tag> <span class="uppercase">questions</span>
-              <span v-if="quizInfo.quizTimeLimit > 0 && dateTimer !== null"> | {{currentDate | duration(quizInfo.deadline, false, true)}}</span>
+              <span v-if="quizInfo.quizTimeLimit > 0 && dateTimer !== null"> | {{ timeUtils.formatDurationDiff(currentDate, quizInfo.deadline, false, true)}}</span>
             </div>
           </div>
 

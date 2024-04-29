@@ -111,7 +111,7 @@ const start = () => {
           </template>
           <span class="mx-2 text-2xl">No more attempts available. This quiz allows <Tag severity="secondary">{{quizInfo.maxAttemptsAllowed}}</Tag> maximum attempt<span v-if="quizInfo.maxAttemptsAllowed > 1">s</span>.</span>
         </Message>
-        <Message v-if="!quizInfo.userQuizPassed && allAttemptsExhausted" severity="error" :closable="false" data-cy="noMoreAttemptsAlert">
+        <Message v-if="numQuestions === 0" severity="error" :closable="false" data-cy="quizHasNoQuestions">
           <template #messageicon>
             <i class="fas fa-exclamation-triangle text-2xl" aria-hidden="true"></i>
           </template>
