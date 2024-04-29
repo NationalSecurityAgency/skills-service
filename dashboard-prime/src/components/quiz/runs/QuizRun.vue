@@ -356,7 +356,7 @@ const doneWithThisRun = () => {
           :quiz-result="quizResult"
           @close="doneWithThisRun"
           @run-again="tryAgain">
-        <template slot="completeAboveTitle">
+        <template #completeAboveTitle>
           <slot name="completeAboveTitle">
             <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
             <span v-else>Thank you for completing the Quiz!</span>
