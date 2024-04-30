@@ -156,12 +156,12 @@ describe('Client Display Skill Tags Visible on Skill Summaries', () => {
     cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
     cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
 
-    cy.get('[data-cy="clearSelectedTagFilter-tag1"]').click()
+    cy.get('[data-cy="skillTagFilter-0"] [data-pc-section="removeicon"]').click()
     cy.get('[data-cy="skillProgress_index-0"]').contains('Awesome Group 1')
     cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
     cy.get('[data-cy="skillProgress_index-2"]').should('not.exist')
 
-    cy.get('[data-cy="clearSelectedTagFilter-tag2"]').click()
+    cy.get('[data-cy="skillTagFilter-0"] [data-pc-section="removeicon"]').click()
     cy.get('[data-cy="skillProgress_index-0"]').contains('Very Great Skill 1')
     cy.get('[data-cy="skillProgress_index-1"]').contains('Awesome Group 1')
     cy.get('[data-cy="skillProgress_index-2"]').contains('Awesome Group 2')
@@ -221,7 +221,7 @@ describe('Client Display Skill Tags Visible on Skill Summaries', () => {
     cy.get('[data-cy="skillTagFilter-1"]').should('not.exist')
   })
 
-  it.only('show tag on skill page', () => {
+  it('show tag on skill page', () => {
     cy.createProject(1)
     cy.createSubject(1, 1)
     cy.createSkill(1, 1, 1)

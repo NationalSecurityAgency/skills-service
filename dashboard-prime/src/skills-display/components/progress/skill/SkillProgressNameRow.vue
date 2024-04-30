@@ -7,6 +7,7 @@ import AnimatedNumber from '@/skills-display/components/utilities/AnimatedNumber
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useRoute } from 'vue-router'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
+import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 
 const props = defineProps({
   skill: Object,
@@ -14,7 +15,11 @@ const props = defineProps({
   type: {
     type: String,
     default: 'subject'
-  }
+  },
+  childSkillHighlightString: {
+    type: String,
+    default: ''
+  },
 })
 const numFormat = useNumberFormat()
 const timeUtils = useTimeUtils()
@@ -101,12 +106,10 @@ const someSkillsAreOptional = computed(() => {
             class="skill-link"
             data-cy="skillProgressTitle"
             :aria-label="`${skill.isSkillType ? `Navigate to ${skill.skill}` : skill.skill }`">
-            <span v-if="!skill.skillHtml">{{ skill.skill }}</span>
-            <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
+            <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
           </router-link>
           <div v-else class="inline-block" data-cy="skillProgressTitle">
-            <span v-if="!skill.skillHtml">{{ skill.skill }}</span>
-            <span v-if="skill.skillHtml" v-html="skill.skillHtml"></span>
+            <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
           </div>
         </div>
         <div v-if="skill.copiedFromProjectId" class="text-truncate d-inline-block ml-2"

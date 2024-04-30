@@ -47,7 +47,7 @@ const props = defineProps({
     type: Boolean,
     default: false,
     required: false
-  }
+  },
 })
 const emit = defineEmits(['add-tag-filter'])
 const route = useRoute()
@@ -112,6 +112,7 @@ const childSkillsInternal = computed(() => {
       :skill="skill"
       :badge-is-locked="badgeIsLocked"
       :to-route="toRoute"
+      :child-skill-highlight-string="childSkillHighlightString"
       :type="type" />
     <div class="mt-1">
       <router-link
@@ -191,7 +192,6 @@ const childSkillsInternal = computed(() => {
            :key="`group-${skill.skillId}_skill-${childSkill.skillId}`"
            :id="`skillRow-${childSkill.skillId}`"
            class="skills-theme-bottom-border-with-background-color"
-           :class="{ 'separator-border-thick' : showDescription }"
       >
         <!--        @points-earned="onChildSkillPointsEarned"-->
         <skill-progress
@@ -203,7 +203,7 @@ const childSkillsInternal = computed(() => {
           :type="type"
           :enable-drill-down="true"
           :show-description="showDescription"
-          :show-group-descriptions="showGroupDescriptions"
+          :child-skill-highlight-string="childSkillHighlightString"
           :data-cy="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
           @add-tag-filter="addTagFilter"
         ></skill-progress>

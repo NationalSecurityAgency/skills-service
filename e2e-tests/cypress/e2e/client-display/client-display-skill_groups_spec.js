@@ -627,8 +627,8 @@ describe('Client Display Skills Groups Tests', () => {
         cy.reportSkill(1, 6, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 7, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, 'Subject 1', true);
 
         cy.validateFilterCounts(5, 1, 1);
         cy.get('[data-cy="filter_complete"] [data-cy="filterCount"]')
@@ -698,7 +698,7 @@ describe('Client Display Skills Groups Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('filter and search', () => {
+    it('filter and search', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, {
             name: 'For SkIll1 Searching',
@@ -728,12 +728,13 @@ describe('Client Display Skills Groups Tests', () => {
         cy.reportSkill(1, 6, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 7, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, 'Subject 1', true);
 
         // multiple skills across more than 1 group
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
+        cy.get('[data-cy="filter_selfReportGroups"]').click()
         cy.get('[data-cy="filter_honorSystem"] [data-cy="filterCount"]')
             .click();
 
@@ -796,7 +797,7 @@ describe('Client Display Skills Groups Tests', () => {
         // no res
         cy.get('[data-cy="skillsSearchInput"]')
             .type('a');
-        cy.get('[data-cy=noDataYet]')
+        cy.get('[data-cy=noContent]')
             .should('be.visible')
             .contains('No results');
     });

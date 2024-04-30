@@ -447,9 +447,7 @@ limitations under the License.
       },
       removeTagFilter(tag) {
         this.selectedTagFilters = this.selectedTagFilters.filter((elem) => elem.tagId !== tag.tagId);
-        this.searchAndFilterSkills();
-      },
-      filterSkills(filterId) {
+        this.searchAndFilterSkil{
         this.filterId = filterId.id;
         this.searchAndFilterSkills();
       },

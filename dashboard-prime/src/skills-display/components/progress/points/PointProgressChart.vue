@@ -238,7 +238,7 @@ const zoomed = (chartContext, { xaxis, yaxis }) => {
             </BlockUI>
             <div class="absolute left-0 right-0" style="top: 4rem;">
               <div class="flex justify-content-center">
-                <div class="bg-primary-reverse py-2 px-3 border-1 border-round" style="z-index: 9990 !important;">
+                <div class="bg-primary-reverse py-2 px-3 border-1 border-round" style="z-index: 1000 !important;">
                   <div class="uppercase text-red-600"><i class="fa fa-lock"></i> Locked
                   </div>
                   <small>*** <b>2 days</b> of usage will unlock this chart!

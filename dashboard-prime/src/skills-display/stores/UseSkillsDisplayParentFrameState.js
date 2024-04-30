@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParentFrameState', () => {
   const authToken = ref('')
@@ -7,11 +7,19 @@ export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParent
   const parentFrame = ref(null)
   const serviceUrl = ref('')
   const options = ref ({})
+  const isLastViewedScrollSupported = computed(() => {
+    if (!parentFrame.value) {
+      return true
+    }
+
+    return options.value && Object.keys(options.value).length > 0;
+  })
   return {
     authToken,
     isAuthenticating,
     parentFrame,
     serviceUrl,
-    options
+    options,
+    isLastViewedScrollSupported
   }
 })
