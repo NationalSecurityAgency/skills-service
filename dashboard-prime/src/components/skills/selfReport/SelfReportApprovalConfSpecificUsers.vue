@@ -6,55 +6,29 @@ import SelfReportService from '@/components/skills/selfReport/SelfReportService'
 import DateCell from "@/components/utils/table/DateCell.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import ExistingUserInput from "@/components/utils/ExistingUserInput.vue";
+import { SkillsReporter } from '@skilltree/skills-client-js'
 
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
 const props = defineProps({
   userInfo: Object,
 });
-const emit = defineEmits(['conf-added']);
+const emit = defineEmits(['conf-added', 'conf-removed']);
 
 
 const currentSelectedUser = ref(null);
 const loading = ref(false);
-const table = ref({
-  items: [],
-      options: {
-    busy: false,
-        bordered: true,
-        outlined: true,
-        stacked: 'md',
-        sortBy: 'updated',
-        sortDesc: true,
-        emptyText: 'You are the only user',
-        tableDescription: 'Configure Approval Workload',
-        fields: [
-      {
-        key: 'userId',
-        label: 'User',
-        sortable: true,
-      },
-      {
-        key: 'updated',
-        label: 'Configured On',
-        sortable: true,
-      },
-    ],
-        pagination: {
-      remove: false,
-          server: false,
-          currentPage: 1,
-          totalRows: 1,
-          pageSize: 4,
-          possiblePageSizes: [4, 10, 15, 20],
-    },
-  },
-});
+const data = ref([]);
+const sortBy = ref('updated');
+const sortOrder = ref(-1);
+
+const pageSize = 4;
+const possiblePageSizes = [4, 10, 15, 20];
 
 onMounted(() => {
   const hasConf = props.userInfo.userConf && props.userInfo.userConf.length > 0;
   if (hasConf) {
-    table.value.items = props.userInfo.userConf.map((u) => ({ ...u }));
+    data.value = props.userInfo.userConf.map((u) => ({ ...u }));
   }
 });
 
@@ -63,15 +37,16 @@ let pkiAuthenticated = computed(() => {
 });
 
 let hadData = computed(() => {
-  return table.value.items && table.value.items.length > 0;
+  return data.value && data.value.length > 0;
 });
 
 const addConf = () => {
+  SkillsReporter.reportSkill('ConfigureSelfApprovalWorkload');
   loading.value = true;
   const currentUserId = currentSelectedUser.value.dn ? currentSelectedUser.value.dn : currentSelectedUser.value.userId;
   SelfReportService.configureApproverForUserId(route.params.projectId, props.userInfo.userId, currentUserId)
       .then((res) => {
-        table.value.items.push(res);
+        data.value.push(res);
         emit('conf-added', res);
         nextTick(() => announcer.polite(`Added workload configuration successfully for ${currentUserId} user.`));
         currentSelectedUser.value = null;
@@ -80,15 +55,21 @@ const addConf = () => {
   });
 };
 
-const removeTagConf = () => {
-
+const removeTagConf = (removedItem) => {
+  data.value = data.value.map((i) => ({ ...i, deleteInProgress: i.id === removedItem.id }));
+  return SelfReportService.removeApproverConfig(route.params.projectId, removedItem.id)
+      .then(() => {
+        data.value = data.value.filter((i) => i.id !== removedItem.id);
+        emit('conf-removed', removedItem);
+        nextTick(() => announcer.polite('Removed workload configuration successfully.'));
+      });
 }
 </script>
 
 <template>
   <Card>
     <template #header>
-      <SkillsCardHeader title=" Split Workload By Specific Users"></SkillsCardHeader>
+      <SkillsCardHeader title="Split Workload By Specific Users"></SkillsCardHeader>
     </template>
     <template #content>
       <div class="flex mx-2">
@@ -105,7 +86,6 @@ const removeTagConf = () => {
           <SkillsButton
               aria-label="Add Specific User"
               data-cy="addUserConfBtn"
-              v-skills="'ConfigureSelfApprovalWorkload'"
               @click="addConf"
               :disabled="!currentSelectedUser"
               variant="outline-primary" icon="fas fa-plus-circle" label="Add">
@@ -115,11 +95,17 @@ const removeTagConf = () => {
 
       <skills-spinner v-if="loading" :is-loading="loading" class="mb-5"/>
       <div v-if="!loading">
-        <skills-data-table v-if="hadData" class="mt-3"
-                        :options="table.options" :value="table.items"
+        <SkillsDataTable v-if="hadData" class="mt-3"
+                        :value="data" paginator
                         tableStoredStateId="skillApprovalConfSpecificUsersTable"
-                        data-cy="skillApprovalConfSpecificUsersTable">
-          <Column field="userId" header="User">
+                        data-cy="skillApprovalConfSpecificUsersTable"
+                        show-gridlines
+                        striped-rows
+                        :rows="pageSize"
+                        :rowsPerPageOptions="possiblePageSizes"
+                        v-model:sort-field="sortBy"
+                        v-model:sort-order="sortOrder">
+          <Column field="userId" header="User" sortable>
             <template #body="slotProps">
               <div class="flex" :data-cy="`userIdCell-${slotProps.data.userId}`">
                 <div class="flex flex-1">
@@ -140,12 +126,12 @@ const removeTagConf = () => {
               </div>
             </template>
           </Column>
-          <Column field="updated" header="Updated On">
+          <Column field="updated" header="Updated On" sortable>
             <template #body="slotProps">
               <date-cell :value="slotProps.data.updated" />
             </template>
           </Column>
-        </skills-data-table>
+        </SkillsDataTable>
 
         <no-content2 v-if="!hadData" title="Not Configured Yet..."
                      class="my-5"

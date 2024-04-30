@@ -10,6 +10,7 @@ import SelfReportApprovalConfUserTag from "@/components/skills/selfReport/SelfRe
 import SelfReportApprovalConfSkill from "@/components/skills/selfReport/SelfReportApprovalConfSkill.vue";
 import SelfReportApprovalConfSpecificUsers
   from "@/components/skills/selfReport/SelfReportApprovalConfSpecificUsers.vue";
+import { SkillsReporter } from '@skilltree/skills-client-js'
 
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
@@ -159,7 +160,7 @@ const removeConf = (removedConf) => {
 };
 
 const handleFallback = (checked, rowItem) => {
-  // v-skills="'ConfigureSelfApprovalWorkload'"
+  SkillsReporter.reportSkill('ConfigureSelfApprovalWorkload');
   const itemToUpdate = data.value.find((i) => i.userId === rowItem.userId);
   itemToUpdate.loading = true;
   if (checked) {
@@ -227,8 +228,8 @@ const collapseRow = (row) => {
     </template>
     <template #content>
       <SkillsSpinner :is-loading="loading" />
-{{ data }}
-      <DataTable v-if="hasMoreThanOneApprover"
+
+      <SkillsDataTable v-if="hasMoreThanOneApprover"
                        :value="data"
                        v-model:expandedRows="expandedRows"
                        dataKey="userId"
@@ -272,7 +273,6 @@ const collapseRow = (row) => {
                 </div>
               </div>
               <div class="flex">
-                {{ slotProps.data.isFallbackConfPresent }} -- {{ slotProps.data.lastOneWithoutConf }}
                 <SkillsButton size="small"
                           :aria-label="`Edit ${slotProps.data.userIdForDisplay} approval workload`"
                           variant="outline-primary"
@@ -307,7 +307,7 @@ const collapseRow = (row) => {
                 class="mt-3"/>
           </div>
         </template>
-      </DataTable>
+      </SkillsDataTable>
 
       <no-content2 v-if="!hasMoreThanOneApprover && !loading" title="Not Available" class="my-5" icon-size="fa-2x" icon="fas fa-cogs" data-cy="approvalConfNotAvailable">
         The ability to split the approval workload is unavailable because there is only <Badge variant="info">1</Badge> Admin for this project.
