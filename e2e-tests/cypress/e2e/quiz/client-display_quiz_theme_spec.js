@@ -59,9 +59,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.get('[data-cy="question_5"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_5"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_5"] [data-cy="answer_3"]').click()
-        cy.get('[data-cy="question_5"] [data-cy="answer_4"]').click()
-
-        cy.get('[data-cy="question_5"] [data-cy="questionsText"]').click()
+        cy.get('[data-cy="question_5"] [data-cy="answer_4"]').click().blur()
 
         cy.matchSnapshotImage();
     });
@@ -183,9 +181,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.get('[data-cy="question_3"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_5"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_5"] [data-cy="answer_2"]').click()
-        cy.get('[data-cy="question_5"] [data-cy="answer_3"]').click()
-
-        cy.get('[data-cy="question_5"] [data-cy="questionsText"]').click()
+        cy.get('[data-cy="question_5"] [data-cy="answer_3"]').click().blur()
 
         cy.matchSnapshotImage();
     });
