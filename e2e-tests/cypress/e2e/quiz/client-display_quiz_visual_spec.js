@@ -68,6 +68,8 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="question_5"] [data-cy="answer_3"]').click()
         cy.get('[data-cy="question_5"] [data-cy="answer_4"]').click()
 
+        cy.get('[data-cy="question_5"] [data-cy="questionsText"]').click()
+
         cy.matchSnapshotImage();
     });
 
@@ -173,6 +175,8 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click()
+
+        cy.get('[data-cy="question_3"] [data-cy="questionsText"]').click()
 
         cy.matchSnapshotImage();
     });
