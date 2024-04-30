@@ -83,7 +83,7 @@ const schema = object({
           })
       ),
 })
-const { values, meta, handleSubmit, isSubmitting, resetForm, setFieldValue, validate, errors, errorBag, setErrors } = useForm({
+const { values, meta, handleSubmit, isSubmitting, resetForm, setFieldValue, validate, validateField, errors, errorBag, setErrors } = useForm({
   validationSchema: schema,
 })
 // const { remove, push, fields } = useFieldArray('questions');
@@ -384,6 +384,7 @@ const doneWithThisRun = () => {
                   :quiz-id="quizId"
                   :quiz-attempt-id="quizAttemptId"
                   :num="index+1"
+                  :validate="validateField"
                   @selected-answer="updateSelectedAnswers"
                   @answer-text-changed="updateSelectedAnswers"/>
             </div>

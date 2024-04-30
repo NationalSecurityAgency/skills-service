@@ -11,6 +11,7 @@ const props = defineProps({
   quizId: String,
   quizAttemptId: Number,
   num: Number,
+  validate: Function,
 })
 
 const isLoading = ref(true);
@@ -51,6 +52,15 @@ const questionNumAriaLabel = computed(() => {
 })
 const numberOfStars = computed(() => {
   return props.q?.answerOptions?.length;
+})
+const fieldName = computed(() => {
+  const num = props.num;
+  if (isTextInput.value) {
+    return `questions[${num-1}].answerText`;
+  } else if (isRating.value) {
+    return `questions[${num-1}].answerRating`;
+  }
+  return `questions[${num-1}].quizAnswers`;
 })
 
 onMounted(() => {
@@ -111,8 +121,13 @@ const ratingChanged = (value) => {
   }
 }
 const reportAnswer = (answer) => {
-  if (!isLoading.value) {
-    return QuizRunService.reportAnswer(props.quizId, props.quizAttemptId, answer.changedAnswerId, answer.changedAnswerIdSelected, answer.answerText);
+  if (!isLoading.value && props.validate) {
+    return props.validate(fieldName.value).then((validationResults) => {
+      if (validationResults.valid) {
+        return QuizRunService.reportAnswer(props.quizId, props.quizAttemptId, answer.changedAnswerId, answer.changedAnswerIdSelected, answer.answerText)
+      }
+      return null;
+    })
   }
   return new Promise((resolve) => {
     resolve(null);
@@ -143,18 +158,18 @@ const reportAnswer = (answer) => {
                 data-cy="textInputAnswer"
                 v-model="answerText"
                 @update:modelValue="textAnswerChanged"
-                :name="`questions[${num-1}].answerText`"
+                :name="fieldName"
                 :aria-label="`Please enter text to answer question number ${num}`"
                 placeholder="Please enter your response here..."
                 rows="10" />
         </div>
         <div v-else-if="isRating">
-          <SkillsRating @update:modelValue="ratingChanged" class="flex-initial border-round py-3 px-4" v-model="answerRating" :stars="numberOfStars" :cancel="false" :name="`questions[${num-1}].answerRating`"/>
+          <SkillsRating @update:modelValue="ratingChanged" class="flex-initial border-round py-3 px-4" v-model="answerRating" :stars="numberOfStars" :cancel="false" :name="fieldName"/>
         </div>
         <div v-else>
           <div v-if="isMultipleChoice" class="text-secondary font-italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>
           <QuizRunAnswers class="mt-1 pl-1"
-                          :name="`questions[${num-1}].quizAnswers`"
+                          :name="fieldName"
                           @selected-answer="selectionChanged"
                           :value="answerOptions"
                           :q="q"
