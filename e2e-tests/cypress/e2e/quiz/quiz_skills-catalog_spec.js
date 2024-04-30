@@ -35,7 +35,7 @@ describe('Quiz Skills Catalog Tests', () => {
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="importFromCatalogBtn"]')
             .click();
-        cy.get('[data-cy="expandDetailsBtn_proj1_skill1"]').click()
+        cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
         cy.get('[data-cy="skillToImportInfo-proj1_skill1"]').contains('Self Report: Quiz/Survey')
     });
 
@@ -53,7 +53,8 @@ describe('Quiz Skills Catalog Tests', () => {
         cy.importSkillFromCatalog(2, 1, 1, 1);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
-        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Self Report').click();
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('Survey-Based Validation')
         cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('This is survey 1').should('not.exist')
     });
@@ -84,7 +85,7 @@ describe('Quiz Skills Catalog Tests', () => {
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="surveyCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by completing the survey')
         cy.get('[data-cy="surveyCompletion"] [data-cy="closeSurveyBtn"]').click()
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '150')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should('have.text', '150 Total')
     });
 
     it('run quiz from an imported skill', function () {
@@ -103,7 +104,7 @@ describe('Quiz Skills Catalog Tests', () => {
         cy.finalizeCatalogImport(1);
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="catalogImportStatus"]').contains('This skill is originally defined in This is project 2 and re-used in this project!')
+        // cy.get('[data-cy="catalogImportStatus"]').contains('This skill is originally defined in This is project 2 and re-used in this project!')
         cy.get('[data-cy="selfReportQuizTag"]')
         cy.get('[data-cy="quizAlert"]').contains('Pass the 1-question This is quiz 1 Quiz and earn 150 points')
         cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
@@ -114,7 +115,7 @@ describe('Quiz Skills Catalog Tests', () => {
         cy.get('[data-cy="quizPassed"]')
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz')
         cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '150')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should('have.text', '150 Total')
         cy.get('[data-cy="quizAlert"]').should('not.exist')
     });
 

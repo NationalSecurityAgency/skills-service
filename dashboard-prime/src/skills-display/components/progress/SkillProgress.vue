@@ -11,6 +11,7 @@ import SkillProgressBar from '@/skills-display/components/progress/skill/SkillPr
 import AchievementDate from '@/skills-display/components/skill/AchievementDate.vue'
 import SkillBadgesAndTags from '@/skills-display/components/progress/skill/SkillBadgesAndTags.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import CatalogImportStatus from '@/skills-display/components/progress/CatalogImportStatus.vue';
 
 const props = defineProps({
   skill: Object,
@@ -169,7 +170,7 @@ const childSkillsInternal = computed(() => {
 
         <!--        <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked" />-->
         <skills-summary-cards v-if="!locked" :skill="skill" class="mt-3" />
-        <!--        <catalog-import-status :skill="skill" />-->
+        <catalog-import-status :skill="skill" />
         <!--        <skill-video v-if="skillInternal" :skill="skillInternal"-->
         <!--                     :video-collapsed-by-default="videoCollapsedByDefault"-->
         <!--                     @points-earned="pointsEarned"-->
