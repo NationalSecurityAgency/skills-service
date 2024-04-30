@@ -19,7 +19,7 @@ const props = defineProps({
   childSkillHighlightString: {
     type: String,
     default: ''
-  },
+  }
 })
 const numFormat = useNumberFormat()
 const timeUtils = useTimeUtils()
@@ -87,29 +87,28 @@ const someSkillsAreOptional = computed(() => {
   <div class="md:flex flex-wrap align-content-end"
        :data-cy="`skillProgressTitle-${skill.skillId}`"
        :id="`skillProgressTitle-${skill.skillId}`">
-    <div class="skills-theme-primary-color flex-1 text-2xl w-min-12rem"
-         :class="{ 'text-success' : skill.isSkillsGroupType,
-                       'text-info' : skill.isSkillType && !skill.childSkill,
-                       'text-secondary' : skill.childSkill }">
+    <div class="skills-theme-primary-color flex-1 text-2xl w-min-12rem">
       <div class="py-1 md:flex">
-        <span v-if="skill.isSkillsGroupType"><i class="fas fa-layer-group mr-1 overflow-hidden"></i></span>
-        <div class="text-blue-700 font-medium">
-                <span class="mr-1">
-                  <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType"
-                     class="fas fa-graduation-cap text-color-secondary"></i>
-                  <i v-if="skill.copiedFromProjectId" class="fas fa-book text-secondary"></i>
-                </span>
-          <router-link
-            :id="`skillProgressTitleLink-${skill.skillId}`"
-            v-if="toRoute"
-            :to="toRoute"
-            class="skill-link"
-            data-cy="skillProgressTitle"
-            :aria-label="`${skill.isSkillType ? `Navigate to ${skill.skill}` : skill.skill }`">
-            <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
-          </router-link>
-          <div v-else class="inline-block" data-cy="skillProgressTitle">
-            <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
+        <div class="text-blue-700 font-medium flex">
+          <div class="mr-1">
+            <i  v-if="skill.isSkillsGroupType" class="fas fa-layer-group"></i>
+            <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType"
+               class="fas fa-graduation-cap text-color-secondary"></i>
+            <i v-if="skill.copiedFromProjectId" class="fas fa-book text-secondary"></i>
+          </div>
+          <div class="">
+            <router-link
+              :id="`skillProgressTitleLink-${skill.skillId}`"
+              v-if="toRoute"
+              :to="toRoute"
+              class="skill-link"
+              data-cy="skillProgressTitle"
+              :aria-label="`${skill.isSkillType ? `Navigate to ${skill.skill}` : skill.skill }`">
+              <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
+            </router-link>
+            <div v-else class="inline-block" data-cy="skillProgressTitle">
+              <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
+            </div>
           </div>
         </div>
         <div v-if="skill.copiedFromProjectId" class="text-truncate d-inline-block ml-2"

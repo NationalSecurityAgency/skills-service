@@ -56,7 +56,7 @@ onMounted(() => {
   scrollToLastViewedSkill(400)
 })
 
-const lastViewedButtonDisabled = ref(false)
+const lastViewedButtonDisabled = computed(() => !findLastViewedSkill(skillsToShow.value))
 const scrollToLastViewedSkill = (timeout = null) => {
   if (scrollIntoViewState.lastViewedSkillId) {
     const found = skillsInternal.value.find((skill) => {
@@ -68,10 +68,11 @@ const scrollToLastViewedSkill = (timeout = null) => {
     }
   }
 }
-const hasLastViewedSkill = computed(() => {
+const hasLastViewedSkill = computed(() => findLastViewedSkill(skillsInternal.value))
+const findLastViewedSkill = (skillsToCheck) => {
   let lastViewedSkill = null
-  if (skillsToShow.value) {
-    skillsToShow.value.forEach((item) => {
+  if (skillsToCheck) {
+    skillsToCheck.forEach((item) => {
       if (item.isLastViewed === true) {
         lastViewedSkill = item
       } else if (item.type === 'SkillsGroup' && !lastViewedSkill) {
@@ -80,7 +81,7 @@ const hasLastViewedSkill = computed(() => {
     })
   }
   return lastViewedSkill
-})
+}
 
 const descriptionsLoaded = ref(false)
 const loading = ref(false)
@@ -133,12 +134,10 @@ const setFilterId = (newFilterId) => {
 const addTagFilter = (tag) => {
   if (!selectedTagFilters.value.find((elem) => elem.tagId === tag.tagId)) {
     selectedTagFilters.value.push(tag)
-    // searchAndFilterSkills()
   }
 }
 const removeTagFilter = (tag) => {
   selectedTagFilters.value = selectedTagFilters.value.filter((elem) => elem.tagId !== tag.tagId)
-  // searchAndFilterSkills()
 }
 
 const skillsToShow = computed(() => {
