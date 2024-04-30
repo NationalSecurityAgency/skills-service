@@ -97,6 +97,17 @@ const sortTable = (sortContext) => {
   loadApprovalsHistory();
 };
 
+const toggleRow = (row) => {
+  if(expandedRows.value[row]) {
+    delete expandedRows.value[row];
+  }
+  else {
+    expandedRows.value[row] = true;
+  }
+
+  expandedRows.value = { ...expandedRows.value };
+}
+
 defineExpose( {
   loadApprovalsHistory
 })
@@ -142,11 +153,6 @@ defineExpose( {
                        @page="pageChanged"
                        data-key="id"
                        @sort="sortTable">
-        <Column expander style="width: 1rem">
-          <template #header>
-            <span class="text-primary">Justification</span>
-          </template>
-        </Column>
         <Column field="skillName" sortable>
           <template #header>
             <span class="text-primary"><i class="fas fa-graduation-cap skills-color-skills" /> Requested</span>
@@ -163,6 +169,12 @@ defineExpose( {
             </div>
             <div class="text-primary">by</div>
             <div class="font-italic"><span v-if="slotProps.data.userIdHtml" v-html="slotProps.data.userIdHtml"></span><span v-else>{{ slotProps.data.userIdForDisplay }}</span></div>
+            <SkillsButton size="small" variant="outline-info"
+                      class="mr-2 py-0 px-1"
+                      @click="toggleRow(slotProps.data.id)"
+                      :aria-label="`Show Justification for ${slotProps.data.name}`"
+                      :data-cy="`expandDetailsBtn_${slotProps.data.skillId}`" :icon="expandedRows[slotProps.data.id] ? 'fa fa-minus-square' : 'fa fa-plus-square'" label="Justification">
+            </SkillsButton>
           </template>
         </Column>
         <Column field="rejectedOn" sortable>

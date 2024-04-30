@@ -6,19 +6,19 @@ import SelfReportService from '@/components/skills/selfReport/SelfReportService'
 import AccessService from '@/components/access/AccessService.js';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
+import SelfReportApprovalConfUserTag from "@/components/skills/selfReport/SelfReportApprovalConfUserTag.vue";
+import SelfReportApprovalConfSkill from "@/components/skills/selfReport/SelfReportApprovalConfSkill.vue";
+import SelfReportApprovalConfSpecificUsers
+  from "@/components/skills/selfReport/SelfReportApprovalConfSpecificUsers.vue";
 
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
 
+const data = ref([]);
 const loading = ref(true);
 const table = ref({
   items: [],
   options: {
-    busy: false,
-        bordered: true,
-        outlined: true,
-        stacked: 'md',
-        detailsTdClass: 'p-0 m-0',
         sortBy: 'requestedOn',
         sortDesc: true,
         emptyText: 'You are the only user',
@@ -57,7 +57,7 @@ onMounted(() => {
 });
 
 const hasMoreThanOneApprover = computed(() => {
-  return table.value.items && table.value.items.length > 1;
+  return data.value && data.value.length > 1;
 });
 
 const userTagConfKey = computed(() => {
@@ -71,7 +71,8 @@ const userTagConfLabel = computed(() => {
 
 const toggleConfDetails = (data) => {
   // eslint-disable-next-line no-underscore-dangle
-  table.value.items = table.value.items.map((item) => ({ ...item, _showDetails: data.item.userId === item.userId ? !item._showDetails : false }));
+  // data.value = data.value.map((item) => ({ ...item, _showDetails: data.item.userId === item.userId ? !item._showDetails : false }));
+  toggleRow(data.userId);
 };
 
 const loadData = () => {
@@ -81,25 +82,23 @@ const loadData = () => {
     page: 1,
     orderBy: 'userId',
   };
-  const roles = ['ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER']; // = [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER];
-  AccessService.getUserRoles(route.params.projectId, roles, pageParams)
-      .then((users) => {
-        SelfReportService.getApproverConf(route.params.projectId)
-            .then((approverConf) => {
-              const basicTableInfo = users.data.map((u) => {
-                const allConf = approverConf.filter((c) => c.approverUserId === u.userId);
-                return {
-                  userIdForDisplay: u.userIdForDisplay,
-                  userId: u.userId,
-                  roleName: u.roleName,
-                  allConf,
-                };
-              });
-              updateTable(basicTableInfo);
-            }).finally(() => {
-          loading.value = false;
-        });
+  const roles = ['ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER'];
+  AccessService.getUserRoles(route.params.projectId, roles, pageParams).then((users) => {
+    SelfReportService.getApproverConf(route.params.projectId).then((approverConf) => {
+      const basicTableInfo = users.data.map((u) => {
+        const allConf = approverConf.filter((c) => c.approverUserId === u.userId);
+        return {
+          userIdForDisplay: u.userIdForDisplay,
+          userId: u.userId,
+          roleName: u.roleName,
+          allConf,
+        };
       });
+      updateTable(basicTableInfo);
+    }).finally(() => {
+      loading.value = false;
+    });
+  });
 };
 
 const updateTable = (basicTableInfo) => {
@@ -109,7 +108,7 @@ const updateTable = (basicTableInfo) => {
     const { allConf } = row;
     let tagConf = allConf.filter((c) => c.userTagKey);
     if (tagConf && tagConf.length > 0) {
-      tagConf = tagConf.map((t) => ({ ...t, userTagKeyLabel: t.userTagKey.toLowerCase() === userTagConfKey?.toLowerCase() ? userTagConfLabel : t.userTagKey }));
+      tagConf = tagConf.map((t) => ({ ...t, userTagKeyLabel: t.userTagKey.toLowerCase() === userTagConfKey.value?.toLowerCase() ? userTagConfLabel : t.userTagKey }));
     }
     const userConf = allConf.filter((c) => c.userId);
     const skillConf = allConf.filter((c) => c.skillId);
@@ -140,7 +139,7 @@ const updateTable = (basicTableInfo) => {
     lastOneWithoutConf: numConfigured >= (res.length - 1) && !item.hasConf,
     hasAnyFallbackConf,
   }));
-  table.value.items = res;
+  data.value = res;
 };
 
 const removeTagConf = (removedConf) => {
@@ -148,27 +147,28 @@ const removeTagConf = (removedConf) => {
 };
 
 const updatedConf = (newConf) => {
-  const itemToUpdate = table.value.items.find((i) => i.userId === newConf.approverUserId);
+  const itemToUpdate = data.value.find((i) => i.userId === newConf.approverUserId);
   itemToUpdate.allConf.push(newConf);
-  updateTable(table.value.items);
+  updateTable(data.value);
 };
 
 const removeConf = (removedConf) => {
-  const itemToUpdate = table.value.items.find((i) => i.userId === removedConf.approverUserId);
+  const itemToUpdate = data.value.find((i) => i.userId === removedConf.approverUserId);
   itemToUpdate.allConf = itemToUpdate.allConf.filter((i) => i.id !== removedConf.id);
-  updateTable(table.value.items);
+  updateTable(data.value);
 };
 
 const handleFallback = (checked, rowItem) => {
-  const itemToUpdate = table.value.items.find((i) => i.userId === rowItem.userId);
+  // v-skills="'ConfigureSelfApprovalWorkload'"
+  const itemToUpdate = data.value.find((i) => i.userId === rowItem.userId);
   itemToUpdate.loading = true;
   if (checked) {
     SelfReportService.configureApproverForFallback(route.params.projectId, rowItem.userId)
         .then((newConf) => {
           itemToUpdate.allConf.push(newConf);
-          updateTable(table.value.items);
+          updateTable(data.value);
           // close expanded child
-          table.value.items = table.value.items.map((i) => ({ ...i, _showDetails: false }));
+          collapseRow(rowItem.userId);
           nextTick(() => announcer.polite(`Assigned ${newConf.approverUserId} as a fallback approver.`));
         })
         .finally(() => {
@@ -178,7 +178,7 @@ const handleFallback = (checked, rowItem) => {
     SelfReportService.removeApproverConfig(route.params.projectId, rowItem.fallbackConf.id)
         .then(() => {
           itemToUpdate.allConf = itemToUpdate.allConf.filter((i) => i.id !== rowItem.fallbackConf.id);
-          updateTable(table.value.items);
+          updateTable(data.value);
           nextTick(() => announcer.polite('Removed workload configuration successfully.'));
         }).finally(() => {
       itemToUpdate.loading = false;
@@ -197,6 +197,27 @@ const handleFallback = (checked, rowItem) => {
 // @page="pageChanged"
 // data-key="id"
 // @sort="sortTable"
+
+let expandedRows = ref([]);
+
+const toggleRow = (row) => {
+  if(expandedRows.value[row]) {
+    delete expandedRows.value[row];
+  }
+  else {
+    expandedRows.value[row] = true;
+  }
+
+  expandedRows.value = { ...expandedRows.value };
+}
+
+const collapseRow = (row) => {
+  if(expandedRows.value[row]) {
+    delete expandedRows.value[row];
+  }
+
+  expandedRows.value = { ...expandedRows.value };
+}
 </script>
 
 <template>
@@ -205,17 +226,90 @@ const handleFallback = (checked, rowItem) => {
       <SkillsCardHeader title="Configure Approval Workload"></SkillsCardHeader>
     </template>
     <template #content>
-
-      <SkillsDataTable v-if="hasMoreThanOneApprover"
-                       :value="table.items"
+      <SkillsSpinner :is-loading="loading" />
+{{ data }}
+      <DataTable v-if="hasMoreThanOneApprover"
+                       :value="data"
+                       v-model:expandedRows="expandedRows"
+                       dataKey="userId"
                        tableStoredStateId="skillApprovalConfTable"
-                       data-cy="skillApprovalConfTable" paginator lazy>
-        <Column field="userIdForDisplay"></Column>
-        <Column field="roleName"></Column>
-        <Column field="workload"></Column>
-      </SkillsDataTable>
+                       data-cy="skillApprovalConfTable">
+        <Column field="userIdForDisplay">
+          <template #header>
+            <span class="text-primary"><i class="fas fa-user skills-color-users" aria-hidden="true"/> Approver</span>
+          </template>
+        </Column>
+        <Column field="roleName">
+          <template #header>
+            <span class="text-primary"><i class="fas fa-id-card text-danger" aria-hidden="true"/> Role</span>
+          </template>
+        </Column>
+        <Column field="workload">
+          <template #header>
+            <span class="text-primary"><i class="fas fa-users skills-color-access" aria-hidden="true"/> Approval Workload</span>
+          </template>
+          <template #body="slotProps">
+            <div class="flex" :data-cy="`workloadCell_${slotProps.data.userId}`">
+              <div class="flex flex-1">
+                <div v-if="!slotProps.data.hasConf">
+                  <InputSwitch class="mr-2"
+                      :name="`Enable and disable fallback for ${slotProps.data.userId} approver`"
+                      @update:modelValue="handleFallback($event, slotProps.data)"
+                      data-cy="fallbackSwitch"
+                      v-model="slotProps.data.isFallbackConfPresent" />
+                    <span v-if="!slotProps.data.hasAnyFallbackConf">Default Fallback - All Unmatched Requests</span>
+                    <span v-if="slotProps.data.hasAnyFallbackConf && !slotProps.data.fallbackConf">Not Handling Approval Workload</span>
+                    <span v-if="slotProps.data.fallbackConf">Assigned Fallback - All Unmatched Requests</span>
+                </div>
+                <div v-if="slotProps.data.tagConf && slotProps.data.tagConf.length > 0">
+                  <div v-for="tConf in slotProps.data.tagConf" :key="tConf.userTagValue">Users in <span class="font-italic text-secondary">{{tConf.userTagKeyLabel}}:</span> <span>{{tConf.userTagValue}}</span></div>
+                </div>
+                <div v-if="slotProps.data.userConf && slotProps.data.userConf.length > 0" >
+                  <Badge variant="success">{{slotProps.data.userConf.length}}</Badge> Specific User{{ slotProps.data.userConf.length > 1 ? 's' : '' }}
+                </div>
+                <div v-if="slotProps.data.skillConf && slotProps.data.skillConf.length > 0" >
+                  <Badge variant="info">{{ slotProps.data.skillConf.length }}</Badge> Specific Skill{{ slotProps.data.skillConf.length  > 1 ? 's' : '' }}
+                </div>
+              </div>
+              <div class="flex">
+                {{ slotProps.data.isFallbackConfPresent }} -- {{ slotProps.data.lastOneWithoutConf }}
+                <SkillsButton size="small"
+                          :aria-label="`Edit ${slotProps.data.userIdForDisplay} approval workload`"
+                          variant="outline-primary"
+                          :disabled="slotProps.data.isFallbackConfPresent || slotProps.data.lastOneWithoutConf"
+                          data-cy="editApprovalBtn"
+                          @click="toggleConfDetails(slotProps.data)"
+                          :icon="expandedRows[slotProps.data.userId] ? 'fas fa-arrow-alt-circle-up' : 'fas fa-edit'"
+                          :label="expandedRows[slotProps.data.userId] ? 'Collapse' : 'Edit'" />
+              </div>
+            </div>
+          </template>
+        </Column>
 
-      <no-content2 v-if="!hasMoreThanOneApprover" title="Not Available" class="my-5" icon-size="fa-2x" icon="fas fa-cogs" data-cy="approvalConfNotAvailable">
+        <template #expansion="slotProps">
+          <div>
+            <self-report-approval-conf-user-tag v-if="userTagConfKey"
+                                                :user-info="slotProps.data"
+                                                :tag-key="userTagConfKey"
+                                                :tag-label="userTagConfLabel"
+                                                @conf-added="updatedConf"
+                                                @conf-removed="removeConf"
+                                                class=""/>
+            <self-report-approval-conf-skill
+                :user-info="slotProps.data"
+                @conf-added="updatedConf"
+                @conf-removed="removeConf"
+                class="mt-3"/>
+            <self-report-approval-conf-specific-users
+                :user-info="slotProps.data"
+                @conf-added="updatedConf"
+                @conf-removed="removeConf"
+                class="mt-3"/>
+          </div>
+        </template>
+      </DataTable>
+
+      <no-content2 v-if="!hasMoreThanOneApprover && !loading" title="Not Available" class="my-5" icon-size="fa-2x" icon="fas fa-cogs" data-cy="approvalConfNotAvailable">
         The ability to split the approval workload is unavailable because there is only <Badge variant="info">1</Badge> Admin for this project.
         Please add <b>Admins</b> or <b>Approvers</b> on the <router-link :to="{ name: 'ProjectAccess' }" style="text-decoration: underline" data-cy="navToAccessPage"><i class="fas fa-shield-alt skills-color-access" aria-hidden="true"/>Access</router-link> page in order to start using this feature.
       </no-content2>

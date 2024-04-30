@@ -125,7 +125,16 @@ const toggleUnsubscribe = () => {
   }
 };
 
-// :icon="data.detailsShowing ? 'fa fa-minus-square' : 'fa fa-plus-square'"
+const toggleRow = (row) => {
+  if(expandedRows.value[row]) {
+    delete expandedRows.value[row];
+  }
+  else {
+    expandedRows.value[row] = true;
+  }
+
+  expandedRows.value = { ...expandedRows.value };
+}
 </script>
 
 <template>
@@ -165,11 +174,6 @@ const toggleUnsubscribe = () => {
                        data-key="id"
                        @sort="sortTable">
         <Column selectionMode="multiple" headerStyle="width: 3rem" body-class="row-selection-item"></Column>
-        <Column expander style="width: 1rem">
-          <template #header>
-            <span class="text-primary">Justification</span>
-          </template>
-        </Column>
         <Column field="request">
           <template #header>
             <span class="text-primary"><i class="fas fa-user-plus skills-color-crossProjects" /> Requested</span>
@@ -186,6 +190,12 @@ const toggleUnsubscribe = () => {
                 </span>
                 <Badge class="ml-2">+ {{ slotProps.data.points }} Points</Badge>
             </div>
+            <SkillsButton size="small" variant="outline-info"
+                      class="mr-2 py-0 px-1 mt-1"
+                      @click="toggleRow(slotProps.data.id)"
+                      :aria-label="`Show Justification for ${slotProps.data.name}`"
+                      :data-cy="`expandDetailsBtn_${slotProps.data.skillId}`" :icon="expandedRows[slotProps.data.id] ? 'fa fa-minus-square' : 'fa fa-plus-square'" label="Justification">
+            </SkillsButton>
           </template>
         </Column>
         <Column field="userId" sortable>
