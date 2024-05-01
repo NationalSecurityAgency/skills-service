@@ -37,13 +37,12 @@ module.exports = defineConfig({
         }
       })
 
+      configureVisualRegression(on);
+
       return require('./cypress/plugins/index.js')(on, config)
     },
     baseUrl: 'http://localhost:8080',
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
-    setupNodeEvents(on, config) {
-      configureVisualRegression(on);
-    }
   },
   env: {
     "type": "actual",
