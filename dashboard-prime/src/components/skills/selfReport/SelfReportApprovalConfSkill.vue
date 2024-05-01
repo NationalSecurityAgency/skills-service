@@ -50,7 +50,7 @@ onMounted(() => {
   loadAvailableSkills();
 });
 
-const loading = computed(() => {
+let loading = computed(() => {
   return loadingMeta.value.skills || loadingMeta.value.subjects || loadingMeta.value.loadingSkillsUnderASubject || loadingMeta.value.numSkillsToProcess > 0;
 });
 
@@ -106,46 +106,47 @@ const addSkillToConf = () => {
   SkillsReporter.reportSkill('ConfigureSelfApprovalWorkload');
   if (selectedSkills.value) {
     const { skillId } = selectedSkills.value;
-    SelfReportService.configureApproverForSkillId(route.params.projectId, props.userInfo.userId, skillId)
-        .then((res) => {
-          data.value.push(res);
-          updatePaging();
-          emit('conf-added', res);
-          availableSkills.value = availableSkills.value.filter((item) => item.skillId !== skillId);
-          selectedSkills.value = null;
-          nextTick(() => announcer.polite(`Added workload configuration successfully for ${skillId} skill.`));
-        });
+    SelfReportService.configureApproverForSkillId(route.params.projectId, props.userInfo.userId, skillId).then((res) => {
+      data.value.push(res);
+      updatePaging();
+      emit('conf-added', res);
+      availableSkills.value = availableSkills.value.filter((item) => item.skillId !== skillId);
+      selectedSkills.value = null;
+      nextTick(() => announcer.polite(`Added workload configuration successfully for ${skillId} skill.`));
+    });
   }
   if (selectedSubject.value) {
     const existingSkills = data.value.map((s) => s.skillId);
     loadingMeta.value.loadingSkillsUnderASubject = true;
     const { subjectId } = selectedSubject.value;
     selectedSubject.value = null;
-    SkillsService.getSubjectSkills(route.params.projectId, subjectId, true)
-        .then((subjectSkills) => {
-          const skillsToAdd = subjectSkills.filter((s) => s.type === 'Skill' && existingSkills.indexOf(s.skillId) < 0);
-          const numSkillsToAdd = skillsToAdd.length;
-          loadingMeta.value.numSkillsToProcess = numSkillsToAdd;
+    SkillsService.getSubjectSkills(route.params.projectId, subjectId, true).then((subjectSkills) => {
+      const skillsToAdd = subjectSkills.filter((s) => s.type === 'Skill' && existingSkills.indexOf(s.skillId) < 0);
+      const numSkillsToAdd = skillsToAdd.length;
+      loadingMeta.value.numSkillsToProcess = numSkillsToAdd;
 
-          addedSubjectSkillsStats.value.addedSubject = true;
-          addedSubjectSkillsStats.value.numSkillsAdded = numSkillsToAdd;
-          addedSubjectSkillsStats.value.numSkillsAlreadyConfigured = subjectSkills.length - numSkillsToAdd;
+      addedSubjectSkillsStats.value.addedSubject = true;
+      addedSubjectSkillsStats.value.numSkillsAdded = numSkillsToAdd;
+      addedSubjectSkillsStats.value.numSkillsAlreadyConfigured = subjectSkills.length - numSkillsToAdd;
 
-          skillsToAdd.forEach((sToAdd) => {
-            SelfReportService.configureApproverForSkillId(route.params.projectId, props.userInfo.userId, sToAdd.skillId)
-                .then((res) => {
-                  data.value.push(res);
-                  updatePaging();
-                  emit('conf-added', res);
-                  availableSkills.value = availableSkills.value.filter((item) => item.skillId !== sToAdd.skillId);
-                  loadingMeta.value.numSkillsToProcess -= 1;
-                  if (loadingMeta.value.numSkillsToProcess === 0) {
-                    nextTick(() => announcer.polite(`Added workload configuration successfully for ${numSkillsToAdd} skills.`));
-                  }
-                });
-          });
-        }).finally(() => {
-      loadingMeta.value.loadingSkillsUnderASubject = false;
+      let addSkillPromises = [];
+      skillsToAdd.forEach((sToAdd) => {
+        let newPromise = SelfReportService.configureApproverForSkillId(route.params.projectId, props.userInfo.userId, sToAdd.skillId)
+        addSkillPromises.push(newPromise);
+      });
+
+      Promise.all(addSkillPromises).then((responses) => {
+        responses.forEach((res) => {
+          data.value.push(res);
+          updatePaging();
+          emit('conf-added', res);
+          availableSkills.value = availableSkills.value.filter((item) => item.skillId !== res.skillId);
+          loadingMeta.value.numSkillsToProcess -= 1;
+        })
+      }).finally(() => {
+        nextTick(() => announcer.polite(`Added workload configuration successfully for ${numSkillsToAdd} skills.`));
+        loadingMeta.value.loadingSkillsUnderASubject = false;
+      });
     });
   }
 };

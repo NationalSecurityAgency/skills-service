@@ -1,5 +1,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
+import AutoComplete from 'primevue/autocomplete';
+import Dropdown from "primevue/dropdown";
 
 const emit = defineEmits(['added', 'removed', 'search-change'])
 const props = defineProps({
@@ -80,6 +82,7 @@ const setOptionsInternal = () => {
     optionsInternal.value = props.options.map((entry) => ({ entryId: `${entry.projectId}_${entry.subjectId}`, ...entry }));
     if (props.selected) {
       // removed already selected items
+      console.log(props.selected);
       optionsInternal.value = optionsInternal.value.filter((el) => !props.selected.some((sel) => `${sel.projectId}_${sel.subjectId}` === el.entryId));
     }
   }
@@ -92,20 +95,47 @@ const removed = (removedItem) => {
 
 const added = (addedItem) => {
   if (multipleSelection.value) {
-    emit('added', addedItem[addedItem.length - 1]);
+    emit('added', addedItem[addedItem.length - 1].value);
   } else {
-    emit('added', addedItem);
+    emit('added', addedItem.value);
   }
 };
 
-const searchChanged = (query, loadingFunction) => {
-  currentSearch.value = query;
-  emit('search-change', query, loadingFunction);
+const searchChanged = (query) => {
+  currentSearch.value = query.query;
+  if(currentSearch.value) {
+    optionsInternal.value = props.options.filter((item) => {
+      return item.name.toLowerCase().startsWith(currentSearch.value.toLowerCase());
+    })
+  }
+  else {
+    optionsInternal.value = props.options.map((entry) => ({  name: entry.name }));
+  }
+  // emit('search-change', query, loadingFunction);
 };
 </script>
 
+<!--:disabled="disabled"-->
+
 <template>
-  test
+  <Dropdown :options="optionsInternal" :placeholder="placeholder" class="st-skills-selector w-full" v-model="selectedInternal" label="name"
+            data-cy="subjectSelector" :class="props.class" :disabled="disabled" :loading="isLoading" filter
+            @filter="searchChanged" @change="added" optionLabel="name" resetFilterOnHide showClear>
+  </Dropdown>
+<!--    -->
+<!--  <AutoComplete :suggestions="optionsInternal"-->
+<!--                dropdown-->
+<!--                :delay="500"-->
+<!--                optionLabel="name"-->
+<!--                :loading="isLoading"-->
+<!--                @complete="searchChanged"-->
+<!--                @item-select="added"-->
+<!--                @item-unselect="removed"-->
+<!--                v-model="selectedInternal"-->
+<!--                :placeholder="placeholder"-->
+<!--                class="st-skills-selector w-full"-->
+<!--                data-cy="subjectSelector">-->
+<!--  </AutoComplete>-->
 </template>
 
 <style scoped>
