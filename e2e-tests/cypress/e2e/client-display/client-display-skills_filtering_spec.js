@@ -879,7 +879,7 @@ describe('Client Display Skills Filtering Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('filter skills on badge catalog page', () => {
+    it('filter skills on badge catalog page', () => {
         cy.createSkill(1, 1, 1, { name: 'a Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'b is a skill 2' });
         cy.createSkill(1, 1, 3, { name: 'c find Blah other skill 3' });
@@ -908,9 +908,8 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.cdClickBadges();
-        cy.contains('Badges');
         cy.get('[data-cy="badgeDetailsLink_badge1"]')
             .click();
 
@@ -946,7 +945,7 @@ describe('Client Display Skills Filtering Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('filter skills on completed badge page', () => {
+    it('filter skills on completed badge page', () => {
         cy.createSkill(1, 1, 1, { name: 'a Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'b is a skill 2' });
         cy.createSkill(1, 1, 3, { name: 'c find Blah other skill 3' });
@@ -968,7 +967,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.cdClickBadges();
         cy.contains('Badges');
         cy.get('[data-cy="earnedBadgeLink_badge1"]')
@@ -1124,7 +1123,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="jumpToLastViewedButton"]').should('be.enabled')
     });
 
-    it('Visual Test skills search and skills filter selected', () => {
+    it.only('Visual Test skills search and skills filter selected', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -1178,7 +1177,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
-    it('Visual Test skills filter open', () => {
+    it.only('Visual Test skills filter open', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -1244,7 +1243,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
     });
 
-    it('Visual Tests filter selected and last viewed button present', () => {
+    it.only('Visual Tests filter selected and last viewed button present', () => {
 
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });

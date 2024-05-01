@@ -1,13 +1,10 @@
 <script setup>
 import { computed } from 'vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useRoute } from 'vue-router'
 
 const props = defineProps({
   skill: Object,
-  badgeId: {
-    type: String,
-    required: false
-  },
   enableToAddTag: {
     type: Boolean,
     default: false
@@ -15,6 +12,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['add-tag-filter'])
 const skillsDisplayInfo = useSkillsDisplayInfo()
+const route = useRoute()
 const showBadgesAndTagsRow = computed(() => {
   return ((props.skill.badges && props.skill.badges.length > 0 && !props.badgeId) || (props.skill.tags && props.skill.tags.length > 0))
 })
@@ -30,7 +28,7 @@ const addTagFilter = (tag) => {
 
 <template>
   <div v-if="showBadgesAndTagsRow" class="row" style="padding-top:8px;">
-    <div v-if="skill.badges && skill.badges.length > 0 && !badgeId" class="col-auto pr-0" style="font-size: 0.9rem"
+    <div v-if="skill.badges && skill.badges.length > 0 && skillsDisplayInfo.isSubjectPage.value" class="col-auto pr-0" style="font-size: 0.9rem"
          data-cy="skillBadges">
       <i class="fa fa-award text-purple-500" aria-hidden="true"></i> Badges:
       <span v-for="(badge, index) in skill.badges" :data-cy="`skillBadge-${index}`" class="overflow-hidden"

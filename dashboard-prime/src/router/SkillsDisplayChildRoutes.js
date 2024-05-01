@@ -4,6 +4,7 @@ import MyRankDetailsPage from '@/skills-display/components/rank/MyRankDetailsPag
 import SubjectDetailsPage from '@/skills-display/components/subjects/SubjectPage.vue'
 import SkillPage from '@/skills-display/components/skill/SkillPage.vue'
 import BadgesDetailsPage from '@/skills-display/components/badges/BadgesDetailsPage.vue'
+import BadgeDetailsPage from '@/skills-display/components/badges/BadgeDetailsPage.vue'
 import QuizPage from '@/skills-display/components/skill/QuizPage.vue'
 import GlobalBadgeDetailsPage from '@/skills-display/components/badges/GlobalBadgeDetailsPage.vue'
 
@@ -53,8 +54,8 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
       }
     }
   }, {
-    path: '/badges/:badgeId',
-    component: BadgesDetailsPage,
+    path: 'badges/:badgeId',
+    component: BadgeDetailsPage,
     name: `badgeDetails${appendToName}`,
     props: true,
     meta: {
@@ -68,6 +69,13 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
     meta: {
       title: 'Global Badge Details'
     }
+  }, {
+    path: '/badges/:badgeId/skills/:skillId',
+    component: SkillPage,
+    name: `badgeSkillDetails${appendToName}`,
+    meta: {
+      title: `Badge ${skillPlaceholder} Details`,
+    },
   }, {
     name: `SubjectDetailsPage${appendToName}`,
     path: 'subjects/:subjectId',

@@ -7,6 +7,7 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
     const skillsDisplayService = useSkillsDisplayService()
 
     const loadingSubjectSummary = ref(true)
+    const loadingBadgeSummary = ref(true)
     const subjectSummary = ref({})
     const loadingSkillSummary = ref(true)
     const skillSummary = ref({})
@@ -20,6 +21,16 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
           loadingSubjectSummary.value = false
         })
     }
+  const loadBadgeSummary = (badgeId, includeSkills = true) => {
+    loadingBadgeSummary.value = true
+    return skillsDisplayService.getBadgeSkills(badgeId, null, includeSkills)
+      .then((badgeSummary) => {
+        subjectSummary.value = badgeSummary
+        return badgeSummary
+      }).finally(() => {
+        loadingBadgeSummary.value = false
+      })
+  }
 
     const loadSkillSummary = (skillId, optionalCrossProjectId, subjectId) => {
       loadingSkillSummary.value = true
@@ -120,7 +131,9 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
       skillSummary,
       addPoints,
       nullifyExpirationDate,
-      updateDescription
+      updateDescription,
+      loadingBadgeSummary,
+      loadBadgeSummary
     }
 
   }

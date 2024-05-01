@@ -32,19 +32,27 @@ const overallProgressColor = computed(() => {
   return props.totalProgressBeforeToday > 0 ? props.totalProgressBarColor : props.beforeTodayBarColor
 })
 const computedTotalProgressBeforeToday = computed(() => props.totalProgress < 100 ? props.totalProgressBeforeToday : 0)
+
+const styleObject = computed(() => {
+  return {
+    height: `${props.barSize}px`
+  }
+})
 </script>
 
 <template>
-  <div class="user-skill-progress-layers">
+  <div class="user-skill-progress-layers" :style="`height: ${props.barSize+2}px`">
     <ProgressBar :value="totalProgress"
                  :pt="{ value: { class: overallProgressColor }}"
                  class="today-progress"
-                 :show-value="false"></ProgressBar>
+                 :show-value="false"
+                 :style="styleObject"></ProgressBar>
     <ProgressBar :value="computedTotalProgressBeforeToday"
                  :pt="{ value: { class: beforeTodayBarColor },
                root: { class: 'opacity-100 remove-background' }}"
                  class="total-progress"
-                 :show-value="false"></ProgressBar>
+                 :show-value="false"
+                 :style="styleObject"></ProgressBar>
   </div>
 </template>
 
@@ -72,7 +80,5 @@ const computedTotalProgressBeforeToday = computed(() => props.totalProgress < 10
 
 .user-skill-progress-layers {
   position: relative;
-  //background-color: #e8e8e8;
-  height: 30px;
 }
 </style>

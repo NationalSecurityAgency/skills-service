@@ -1,4 +1,5 @@
 import { useRoute, useRouter } from 'vue-router'
+import { computed } from 'vue'
 
 export const useSkillsDisplayInfo = () => {
   const route = useRoute()
@@ -57,6 +58,10 @@ export const useSkillsDisplayInfo = () => {
     router.push({ name: getContextSpecificRouteName(pageName), params })
   }
 
+  const isSubjectPage = computed(() => {
+    return route.name === getContextSpecificRouteName('SubjectDetailsPage')
+  })
+
   return {
     isSkillsClientPath,
     isSkillsDisplayPath,
@@ -66,6 +71,7 @@ export const useSkillsDisplayInfo = () => {
     getContextSpecificRouteName,
     cleanPath,
     getRootUrl,
-    routerPush
+    routerPush,
+    isSubjectPage
   }
 }

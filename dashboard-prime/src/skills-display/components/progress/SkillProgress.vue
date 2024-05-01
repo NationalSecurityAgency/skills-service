@@ -60,7 +60,7 @@ const buildToRoute = () => {
   if (!props.enableDrillDown || !props.skill.isSkillType) {
     return null
   }
-  let name = skillsDisplayInfo.getContextSpecificRouteName('skillDetails')
+  let name = 'skillDetails'
   const params = { skillId: props.skill.skillId, projectId: props.skill.projectId }
   if (route.params.subjectId) {
     params.subjectId = route.params.subjectId
@@ -70,6 +70,7 @@ const buildToRoute = () => {
   } else if (props.skill.crossProject && props.skill.projectId) {
     params.crossProjectId = props.skill.projectId
   }
+  name = skillsDisplayInfo.getContextSpecificRouteName(name)
   return { name, params }
 }
 const toRoute = buildToRoute()

@@ -41,6 +41,7 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
         <Button
           label="View"
           icon="far fa-eye"
+          data-cy="myBadgesBtn"
           outlined class="w-full" size="small" />
       </router-link>
     </template>

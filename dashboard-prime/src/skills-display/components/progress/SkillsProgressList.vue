@@ -231,7 +231,6 @@ const isLastViewedScrollSupported = computed(() => {
           <div class="flex-1">
             <div class="flex">
               <div class="">
-                <!--              @input="searchSkills"-->
                 <InputGroup>
                   <InputText
                     v-model="searchString"

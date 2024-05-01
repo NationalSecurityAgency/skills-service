@@ -1,17 +1,14 @@
 <script setup>
-import { nextTick, onMounted, ref, computed } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import PanelMenu from 'primevue/panelmenu'
 import OverlayPanel from 'primevue/overlaypanel'
-import { useElementHelper } from '@/components/utils/inputForm/UseElementHelper.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 
 const preferences = useSkillsDisplayPreferencesState()
+const skillDisplayInfo = useSkillsDisplayInfo()
 const props = defineProps({
-  type: {
-    type: String,
-    default: 'subject'
-  },
   skills: {
     type: Array,
     required: true
@@ -104,7 +101,7 @@ const createAttributeFilterItems = () => {
       }
     }
   ]
-  if (props.type === 'subject') {
+  if (skillDisplayInfo.isSubjectPage.value) {
     res.push({
       icon: 'fas fa-award',
       key: 'belongsToBadge',

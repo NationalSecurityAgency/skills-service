@@ -70,8 +70,8 @@ Cypress.Commands.add("cdClickRank", () => {
 });
 
 Cypress.Commands.add("cdClickBadges", () => {
-    cy.get('[data-cy=myBadges]').click()
-    cy.contains('My Badges');
+    cy.get('[data-cy="myBadgesBtn"]').click()
+    cy.get('[data-cy="title"]').contains('My Badges');
     cy.validatePoweredBy();
 });
 

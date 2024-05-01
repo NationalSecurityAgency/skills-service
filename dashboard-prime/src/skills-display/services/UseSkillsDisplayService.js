@@ -125,6 +125,36 @@ export const useSkillsDisplayService = () => {
     }).then((result) => result.data)
   }
 
+  const getBadgeSummaries = () => {
+    return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/badges/summary`, {
+      params: getUserIdAndVersionParams(),
+    }).then((result) => result.data.map((summary) => addMetaToSummary(summary)));
+  }
+
+  const getBadgeSkills = (badgeId, global = null, includeSkills = true) => {
+    const requestParams = getUserIdAndVersionParams();
+    requestParams.global = global;
+    requestParams.includeSkills = includeSkills;
+    return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/badges/${encodeURIComponent(badgeId)}/summary`, {
+      params: requestParams,
+    }).then((result) => {
+      if (includeSkills) {
+        const res = addMetaToSummary(result.data);
+        if (res.projectLevelsAndSkillsSummaries) {
+          res.projectLevelsAndSkillsSummaries = res.projectLevelsAndSkillsSummaries.map((summary) => addMetaToSummary(summary));
+        }
+        return res;
+      }
+      return result.data;
+    })
+  }
+
+  const getSkillDependencies = (skillId) => {
+    return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skills/${encodeURIComponent(skillId)}/dependencies`, {
+      params: getUserIdAndVersionParams(),
+    }).then((result) => result.data);
+  }
+
   return {
     loadSubjectSummary,
     updateSkillHistory,
@@ -132,6 +162,9 @@ export const useSkillsDisplayService = () => {
     searchSkills,
     getDescriptions,
     reportSkill,
-    removeApprovalRejection
+    removeApprovalRejection,
+    getBadgeSummaries,
+    getBadgeSkills,
+    getSkillDependencies
   }
 }
