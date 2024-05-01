@@ -1123,7 +1123,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="jumpToLastViewedButton"]').should('be.enabled')
     });
 
-    it.only('Visual Test skills search and skills filter selected', () => {
+    it('Visual Test skills search and skills filter selected', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -1177,7 +1177,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
-    it.only('Visual Test skills filter open', () => {
+    it('Visual Test skills filter open', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -1243,7 +1243,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
     });
 
-    it.only('Visual Tests filter selected and last viewed button present', () => {
+    it('Visual Tests filter selected and last viewed button present', () => {
 
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
