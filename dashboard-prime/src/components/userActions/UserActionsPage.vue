@@ -12,6 +12,7 @@ import DateCell from '@/components/utils/table/DateCell.vue';
 import Column from 'primevue/column';
 import SingleUserAction from "@/components/userActions/SingleUserAction.vue";
 import StartRecordingUserActionsDateWarning from "@/components/userActions/StartRecordingUserActionsDateWarning.vue";
+import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
 
 const route = useRoute()
 const userInfo = useUserInfo()
@@ -198,6 +199,7 @@ const tableFilters = ref({
             lazy
             paginator
             data-cy="dashboardActionsForEverything"
+            :expander="true"
             v-model:expandedRows="expandedRows"
             v-model:filters="tableFilters"
             :globalFilterFields="['userIdForDisplay']"
@@ -233,11 +235,6 @@ const tableFilters = ref({
             </span>
             </div>
           </template>
-          <Column expander :class="{'flex': responsive.md.value }">
-            <template #header>
-              <span class="mr-1 lg:mr-0 md:hidden"><i class="fas fa-expand-arrows-alt" aria-hidden="true"></i> Expand Rows</span>
-            </template>
-          </Column>
           <Column field="userIdForDisplay" :showFilterMenu="false" header="User" :sortable="true">
             <template #header>
               <i class="fas fa-user-cog skills-color-skills mr-1" aria-hidden="true"></i>

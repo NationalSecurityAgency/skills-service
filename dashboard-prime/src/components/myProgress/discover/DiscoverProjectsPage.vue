@@ -142,6 +142,7 @@ const contactProject = (name, id) => {
             :value="projects"
             stripedRows
             paginator
+            :expander="true"
             :totalRecords="totalRows"
             :rows="pageSize"
             :rowsPerPageOptions="possiblePageSizes"
@@ -197,13 +198,6 @@ const contactProject = (name, id) => {
                 </div>
               </div>
             </template>
-
-            <Column expander class="lg:w-2rem" :class="{'flex': responsive.lg.value }">
-              <template #header>
-                <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-expand-arrows-alt"
-                                                        aria-hidden="true"></i> Expand Rows</span>
-              </template>
-            </Column>
 
             <Column field="name" header="Project" :sortable="true" :class="{'flex': responsive.md.value }">
               <template #header>

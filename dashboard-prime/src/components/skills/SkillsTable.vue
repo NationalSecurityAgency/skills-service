@@ -386,6 +386,7 @@ const editImportedSkillInfo = ref({
       :globalFilterFields="['name']"
       :exportFilename="`skilltree-${subjectId}-skills`"
       :row-class="disableRow"
+      :expander="true"
       data-cy="skillsTable">
 
       <template #header>
@@ -462,12 +463,6 @@ const editImportedSkillInfo = ref({
         </div>
       </template>
 
-      <Column expander class="lg:w-2rem" :class="{'flex': responsive.lg.value }">
-        <template #header>
-          <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-expand-arrows-alt"
-                                                  aria-hidden="true"></i> Expand Rows</span>
-        </template>
-      </Column>
       <Column selectionMode="multiple" :class="{'flex': responsive.lg.value }">
         <template #header>
           <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-check-double"

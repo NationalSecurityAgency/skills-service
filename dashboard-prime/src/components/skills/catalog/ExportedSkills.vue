@@ -10,6 +10,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import ExportedSkillRemovalValidation from '@/components/skills/catalog/ExportedSkillRemovalValidation.vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
 
 const route = useRoute()
 const responsive = useResponsiveBreakpoints()
@@ -103,6 +104,7 @@ const doRemoveSkill = () => {
             v-if="initialLoadHadData"
             :value="data"
             :loading="reloadData"
+            :expander="true"
             v-model:selection="selectedRows"
             v-model:expandedRows="expandedRows"
             v-model:sort-field="sortInfo.sortBy"
@@ -116,12 +118,6 @@ const doRemoveSkill = () => {
             data-cy="exportedSkillsTable"
             :rowsPerPageOptions="possiblePageSizes">
             <template #header>Exported to Catalog</template>
-
-            <Column expander :class="{'flex': responsive.md.value }">
-              <template #header>
-                <span class="mr-1 lg:mr-0 md:hidden"><i class="fas fa-expand-arrows-alt" aria-hidden="true"></i> Expand Rows</span>
-              </template>
-            </Column>
 
             <Column field="skillName" header="Skill" :sortable="true" :class="{'flex': responsive.md.value }">
               <template #header>

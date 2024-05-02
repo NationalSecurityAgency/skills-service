@@ -156,22 +156,20 @@ const numberOfStars = computed(() => {
               :cancel="false" />
       <span class="text-lg">{{ averageScore }}</span>
     </div>
-
     <SkillsDataTable
       tableStoredStateId="quizQuestionMetrics"
       v-if="!isTextInput && answers"
       v-model:expandedRows="expandedRows"
-      :value="answers">
-      <Column expander
-              style="width: 2rem"
-              :pt="{
+      expander="true"
+      expander-label="Expand Answer History"
+      :expander-pt="{
                 rowToggler: ({ instance: { rowData } }) => ({
                   class: {
                     hidden: !(rowData?.numAnswered && rowData.numAnswered > 0),
                   },
                 }),
               }"
-      />
+      :value="answers">
       <Column v-for="col of tableOptions.fields" :key="col.key" :field="col.key" :sortable="col.sortable">
         <template #header>
           <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
@@ -183,7 +181,7 @@ const numberOfStars = computed(() => {
             {{ slotProps.data[col.key] }}
           </div>
           <div v-else-if="slotProps.field === 'numAnswered'" :data-cy="`row${slotProps.index}-colNumAnswered`">
-            <span data-cy="num">{{ slotProps.data[col.key] }}</span>
+            <span data-cy="num" class="pr-1">{{ slotProps.data[col.key] }}</span>
             <Tag data-cy="percent">{{ slotProps.data.percent }}%</Tag>
           </div>
           <div v-else>

@@ -16,6 +16,7 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import SkillAlreadyExistingWarning from '@/components/skills/catalog/SkillAlreadyExistingWarning.vue'
 import { useFinalizeInfoState } from '@/stores/UseFinalizeInfoState.js'
 import { useFocusState } from '@/stores/UseFocusState.js'
+import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
 
 const model = defineModel()
 const props = defineProps({
@@ -282,14 +283,10 @@ const onUpdateVisible = (newVal) => {
           :rows="pageSize"
           @page="pageChanged"
           :rowClass="rowClass"
+          :expander="true"
           data-cy="importSkillsFromCatalogTable"
           :rowsPerPageOptions="possiblePageSizes">
           <!--      <template #loading> Loading customers data. Please wait. </template>-->
-          <Column expander :class="{'flex': responsive.md.value }">
-            <template #header>
-              <span class="mr-1 lg:mr-0 md:hidden"><i class="fas fa-expand-arrows-alt" aria-hidden="true"></i> Expand Rows</span>
-            </template>
-          </Column>
           <Column selectionMode="multiple" :class="{'flex': responsive.md.value }">
             <template #header>
               <span class="mr-1 lg:mr-0 md:hidden"><i class="fas fa-check-double"
