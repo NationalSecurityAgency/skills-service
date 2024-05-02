@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import BadgeCatalogItem from '@/skills-display/components/badges/BadgeCatalogItem.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 
 
 // badgeRouterLinkGenerator: {
@@ -29,6 +30,7 @@ const props = defineProps({
 const searchString = ref('')
 const shownBadges = computed(() => props.badges)
 const skillsDisplayInfo = useSkillsDisplayInfo()
+const colors = useColors()
 </script>
 
 <template>
@@ -81,7 +83,8 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
           <badge-catalog-item
             :display-project-name="displayBadgeProject"
             :badge="badge"
-            :view-details-btn-to="{ name: skillsDisplayInfo.getContextSpecificRouteName('badgeDetails'), params: { badgeId: badge.badgeId } }"
+            :view-details-btn-to="skillsDisplayInfo.createToBadgeLink(badge)"
+            :icon-color="colors.getTextClass(index)"
             ></badge-catalog-item>
         </div>
 

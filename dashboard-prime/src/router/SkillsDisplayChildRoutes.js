@@ -32,9 +32,9 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
       }
     }
   }, {
-    name: `MyRankDetailsPage${appendToName}`,
     path: 'rank',
     component: MyRankDetailsPage,
+    name: `myRankDetails${appendToName}`,
     meta: {
       requiresAuth: true,
       nonAdmin: true,
@@ -42,6 +42,14 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
         message: 'My Rank'
       }
     }
+  }, {
+    path: 'subjects/:subjectId/rank',
+    component: MyRankDetailsPage,
+    name: `subjectRankDetails${appendToName}`,
+    props: true,
+    meta: {
+      title: `My ${subjectPlaceholder} Rank`,
+    },
   }, {
     name: `BadgesDetailsPage${appendToName}`,
     path: 'badges',
@@ -70,7 +78,7 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
       title: 'Global Badge Details'
     }
   }, {
-    path: '/badges/global/:badgeId/skills/:skillId',
+    path: 'badges/global/:badgeId/skills/:skillId',
     component: SkillPage,
     name: `globalBadgeSkillDetails${appendToName}`,
     meta: {

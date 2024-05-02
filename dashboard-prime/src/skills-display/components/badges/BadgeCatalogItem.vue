@@ -163,7 +163,7 @@ const otherUsersAchieved = computed(() => {
           <markdown-text :text="badge.description" />
         </p>
 
-        <div v-if="viewDetailsBtnTo" class="text-center md:text-left">
+        <div v-if="viewDetailsBtnTo" class="text-center md:text-left mt-3">
           <router-link
             :to="viewDetailsBtnTo"
             class="skills-theme-btn"

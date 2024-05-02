@@ -32,11 +32,6 @@ const badgeAriaLabel = (badge) => {
   }
   return res
 }
-
-const toBadgeLink = (badge) => {
-  const name = badge.global ?  'globalBadgeDetails' : 'badgeDetails'
-  return { name: skillsDisplayInfo.getContextSpecificRouteName(name), params: { badgeId: badge.badgeId } }
-}
 </script>
 
 <template>
@@ -97,7 +92,7 @@ const toBadgeLink = (badge) => {
             </template>
             <template #footer>
               <router-link
-                :to="toBadgeLink(badge)">
+                :to="skillsDisplayInfo.createToBadgeLink(badge)">
                 <Button
                   label="View"
                   icon="far fa-eye"

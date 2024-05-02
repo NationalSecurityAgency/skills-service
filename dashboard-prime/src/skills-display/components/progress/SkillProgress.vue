@@ -11,7 +11,8 @@ import SkillProgressBar from '@/skills-display/components/progress/skill/SkillPr
 import AchievementDate from '@/skills-display/components/skill/AchievementDate.vue'
 import SkillBadgesAndTags from '@/skills-display/components/progress/skill/SkillBadgesAndTags.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
-import CatalogImportStatus from '@/skills-display/components/progress/CatalogImportStatus.vue';
+import CatalogImportStatus from '@/skills-display/components/progress/CatalogImportStatus.vue'
+import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
 
 const props = defineProps({
   skill: Object,
@@ -48,7 +49,7 @@ const props = defineProps({
     type: Boolean,
     default: false,
     required: false
-  },
+  }
 })
 const emit = defineEmits(['add-tag-filter'])
 const route = useRoute()
@@ -70,6 +71,7 @@ const buildToRoute = () => {
   } else if (props.skill.crossProject && props.skill.projectId) {
     params.crossProjectId = props.skill.projectId
   }
+  console.log(`selected name: ${name}`)
   name = skillsDisplayInfo.getContextSpecificRouteName(name)
   return { name, params }
 }
@@ -103,11 +105,13 @@ const childSkillsInternal = computed(() => {
     <!--      </div>-->
     <!--    </div>-->
 
-    <!--    <div v-if="skill.crossProject && !isSkillComplete" class="alert alert-primary text-center" role="alert" data-cy="crossProjAlert">-->
-    <!--      This is a cross-{{ projectDisplayName.toLowerCase() }} {{ skillDisplayName.toLowerCase() }}! In order to complete this {{ skillDisplayName.toLowerCase() }} please visit <strong>{{-->
-    <!--        skill.projectName-->
-    <!--      }}</strong> {{ projectDisplayName.toLowerCase() }}! Happy playing!!-->
-    <!--    </div>-->
+    <Message v-if="skill.crossProject && !isSkillComplete" data-cy="crossProjAlert" :closable="false">
+      This is a cross-{{ preferences.projectDisplayName.toLowerCase() }} {{ preferences.skillDisplayName.toLowerCase()
+      }}! In order to complete
+      this {{ preferences.skillDisplayName.toLowerCase() }} please visit <strong>{{
+        skill.projectName
+      }}</strong> {{ preferences.projectDisplayName.toLowerCase() }}! Happy playing!!
+    </Message>
 
 
     <skill-progress-name-row

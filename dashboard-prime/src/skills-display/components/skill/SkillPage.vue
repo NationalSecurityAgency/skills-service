@@ -22,23 +22,15 @@ onMounted(() => {
   loadSkillSummary()
 })
 const loadSkillSummary = () => {
-  const skillId = isDependency() ? route.params.dependentSkillId : route.params.skillId
+  const skillId = skillsDisplayInfo.isDependency() ? route.params.dependentSkillId : route.params.skillId
   skillState.loadSkillSummary(skillId, route.params.crossProjectId, route.params.subjectId)
     .then(() => {
       loadingSkill.value = false
-      if (skillId && skill.value.projectId && !isCrossProject()) {
+      if (skillId && skill.value.projectId && !skillsDisplayInfo.isCrossProject()) {
         skillsDisplayService.updateSkillHistory(skill.value.projectId, skillId)
       }
       scrollIntoViewState.setLastViewedSkillId(skillId)
     })
-}
-const isDependency = () => {
-  const routeName = route.name
-  return routeName === 'crossProjectSkillDetails' || routeName === 'crossProjectSkillDetailsUnderBadge'
-}
-const isCrossProject = () => {
-  const routeName = route.name
-  return routeName === 'crossProjectSkillDetails' || route.params.crossProjectId
 }
 
 const prevButtonClicked = () => {
@@ -66,7 +58,7 @@ const isLoading = computed(() => loadingSkill.value)
       <skills-title>{{ displayPreferences.skillDisplayName }} Overview</skills-title>
       <Card class="mt-3" :pt="{ content: { class: 'p-0' }}">
         <template #content>
-          <div class="flex mb-4" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !isCrossProject()">
+          <div class="flex mb-4" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !skillsDisplayInfo.isCrossProject()">
             <div>
               <SkillsButton
                 @click="prevButtonClicked" v-if="skill.prevSkillId"

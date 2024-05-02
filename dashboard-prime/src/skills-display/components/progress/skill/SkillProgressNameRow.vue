@@ -9,6 +9,7 @@ import { useRoute } from 'vue-router'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
 
 const props = defineProps({
   skill: Object,
@@ -83,6 +84,12 @@ const buildToRoute = () => {
 const someSkillsAreOptional = computed(() => {
   return isSkillsGroupWithChildren.value && props.skill.numSkillsRequired !== -1 && props.skill.numSkillsRequired < props.skill.children.length
 })
+
+const scrollIntoViewState = useScrollSkillsIntoViewState()
+const showLastViewedIndicator = computed(() => {
+  return props.skill.isLastViewed || props.skill.skillId === scrollIntoViewState.lastViewedSkillId
+})
+
 </script>
 
 <template>
@@ -149,9 +156,10 @@ const someSkillsAreOptional = computed(() => {
           <span v-if="skill.selfReporting.type === 'Video'" data-cy="selfReportApprovalTag"><span
             class="sr-spelled-out mr-1">Watch</span>Video</span>
         </Tag>
-        <Tag v-if="skill.isLastViewed" id="lastViewedIndicator" data-cy="lastViewedIndicator" severity="info"
+        <Tag v-if="showLastViewedIndicator" id="lastViewedIndicator"
+             data-cy="lastViewedIndicator" severity="info"
              size="small"
-             class="ml-2 overflow-hidden">
+             class="ml-2 overflow-hidden max-h-2rem">
           <i class="fas fa-eye mr-1"></i> Last Viewed
         </Tag>
       </div>

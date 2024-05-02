@@ -16,6 +16,14 @@ const position = computed(() => numberFormat.pretty(progress.userRanking.positio
 onMounted(() => {
   progress.loadUserSkillsRanking(route.params.subjectId)
 })
+
+const toRankDetailsPage = computed(() => {
+  if (skillsDisplayInfo.isSubjectPage.value) {
+    return { name: skillsDisplayInfo.getContextSpecificRouteName('subjectRankDetails'), params: { subjectId: route.params.subjectId } }
+  }
+
+  return { name: skillsDisplayInfo.getContextSpecificRouteName('myRankDetails') }
+})
 </script>
 
 <template>
@@ -47,7 +55,7 @@ onMounted(() => {
   </template>
   <template #footer v-if="!preferences.isSummaryOnly">
     <router-link
-      :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('MyRankDetailsPage') }"
+      :to="toRankDetailsPage"
       aria-label="Click to navigate to My Rank page"
       data-cy="myRankBtn">
       <Button

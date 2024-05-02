@@ -66,6 +66,19 @@ const scrollToLastViewedSkill = (timeout = null) => {
     if (found) {
       scrollIntoViewState.scrollToLastViewedSkill(timeout)
     }
+  } else {
+    // set it if backend provided
+    skillsInternal.value.forEach((item) => {
+      if (item.isLastViewed === true) {
+        scrollIntoViewState.setLastViewedSkillId(item.skillId)
+      } else if (item.type === 'SkillsGroup') {
+        item.children.forEach((childItem) => {
+          if (childItem.isLastViewed === true) {
+            scrollIntoViewState.setLastViewedSkillId(childItem.skillId)
+          }
+        })
+      }
+    })
   }
 }
 const hasLastViewedSkill = computed(() => findLastViewedSkill(skillsInternal.value))
@@ -73,10 +86,10 @@ const findLastViewedSkill = (skillsToCheck) => {
   let lastViewedSkill = null
   if (skillsToCheck) {
     skillsToCheck.forEach((item) => {
-      if (item.isLastViewed === true) {
+      if (item.isLastViewed === true || item.skillId === scrollIntoViewState.lastViewedSkillId) {
         lastViewedSkill = item
       } else if (item.type === 'SkillsGroup' && !lastViewedSkill) {
-        lastViewedSkill = item.children.find((childItem) => childItem.isLastViewed === true)
+        lastViewedSkill = item.children.find((childItem) => childItem.isLastViewed === true || childItem.skillId === scrollIntoViewState.lastViewedSkillId)
       }
     })
   }

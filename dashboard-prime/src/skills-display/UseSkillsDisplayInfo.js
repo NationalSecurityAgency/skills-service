@@ -8,7 +8,7 @@ export const useSkillsDisplayInfo = () => {
   const localContextAppend = 'Local'
   const progressAndRankingsRegex = /\/progress-and-rankings\/projects\/[^/]*/i
   const localTestRegex = /\/test-skills-display\/[^/]*/i
-  const clientDisplayRegex =/\/static\/clientPortal\/index\.html/i
+  const clientDisplayRegex = /\/static\/clientPortal\/index\.html/i
   const regexes = [progressAndRankingsRegex, localTestRegex, clientDisplayRegex]
   const localTestContextAppend = 'LocalTest'
 
@@ -27,15 +27,15 @@ export const useSkillsDisplayInfo = () => {
 
   const cleanPath = (path) => {
     let cleanPath = path
-    for(const regex of regexes) {
+    for (const regex of regexes) {
       cleanPath = cleanPath.replace(regex, '')
     }
     return cleanPath
   }
 
   const getRootUrl = () => {
-    for(const regex of regexes) {
-      let found = route.path.match(regex);
+    for (const regex of regexes) {
+      let found = route.path.match(regex)
       if (found) {
         return found[0]
       }
@@ -45,8 +45,8 @@ export const useSkillsDisplayInfo = () => {
 
   const isSkillsDisplayPath = (optionalpath = null) => {
     const pathToCheck = optionalpath || route.path
-    for(const regex of regexes) {
-      let found = pathToCheck.match(regex);
+    for (const regex of regexes) {
+      let found = pathToCheck.match(regex)
       if (found) {
         return true
       }
@@ -61,9 +61,23 @@ export const useSkillsDisplayInfo = () => {
   const isSubjectPage = computed(() => {
     return route.name === getContextSpecificRouteName('SubjectDetailsPage')
   })
-  const isGlobalBadgePage =  computed(() => {
+  const isGlobalBadgePage = computed(() => {
     return route.name === getContextSpecificRouteName('globalBadgeDetails')
   })
+
+  const createToBadgeLink = (badge) => {
+    const name = badge.global ? 'globalBadgeDetails' : 'badgeDetails'
+    return { name: getContextSpecificRouteName(name), params: { badgeId: badge.badgeId } }
+  }
+
+  const isDependency = () => {
+    const routeName = route.name
+    return routeName === getContextSpecificRouteName('crossProjectSkillDetails') || routeName === getContextSpecificRouteName('crossProjectSkillDetailsUnderBadge')
+  }
+  const isCrossProject = () => {
+    const routeName = route.name
+    return routeName === getContextSpecificRouteName('crossProjectSkillDetails') || route.params.crossProjectId
+  }
 
   return {
     isSkillsClientPath,
@@ -76,6 +90,9 @@ export const useSkillsDisplayInfo = () => {
     getRootUrl,
     routerPush,
     isSubjectPage,
-    isGlobalBadgePage
+    isGlobalBadgePage,
+    createToBadgeLink,
+    isDependency,
+    isCrossProject
   }
 }

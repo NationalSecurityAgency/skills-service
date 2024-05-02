@@ -124,7 +124,7 @@ const getContextUrl = (url) => `${skillsDisplayInfo.getRootUrl()}${url}`
 
 <template>
   <div v-if="!disabled"
-       class="skills-theme-breadcrumb-container flex justify-content-center" data-cy="breadcrumb-bar">
+       class="skills-theme-breadcrumb-container flex justify-content-center" data-cy="skillsDisplayBreadcrumbBar">
     <Breadcrumb :model="breadcrumbState.breadcrumbItems" :pt="{ root: { class: 'border-none px-0 py-1' } }">
       <template #item="{ item, props }">
         <router-link
@@ -132,7 +132,7 @@ const getContextUrl = (url) => `${skillsDisplayInfo.getRootUrl()}${url}`
           v-slot="{ href, navigate }"
           :to="getContextUrl(item.url)"
           custom>
-          <a :href="href" v-bind="props.action" @click="navigate">
+          <a :href="href" v-bind="props.action" @click="navigate" :data-cy="`breadcrumbLink-${item.value}`">
             <skills-breadcrumb-item
               :icon="item.icon"
               :label="item.label"

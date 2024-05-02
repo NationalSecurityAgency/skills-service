@@ -17,7 +17,7 @@ defineProps({
   <div :data-cy="`breadcrumb-${value}`">
     <span v-if="icon" :class="[icon, 'text-color']" aria-hidden="true" class="mr-2"/>
     <span v-if="label" class="text-color-secondary mr-1">{{ label }}:</span>
-    <span class="font-semibold" :class="valueCss">{{ value }}</span>
+    <span class="font-semibold" :class="valueCss" data-cy="breadcrumbItemValue">{{ value }}</span>
   </div>
 </template>
 
