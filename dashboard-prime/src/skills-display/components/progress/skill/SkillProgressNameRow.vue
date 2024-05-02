@@ -8,6 +8,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useRoute } from 'vue-router'
 import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 const props = defineProps({
   skill: Object,
@@ -26,6 +27,7 @@ const timeUtils = useTimeUtils()
 const appConfig = useAppConfig()
 const displayPref = useSkillsDisplayPreferencesState()
 const route = useRoute()
+const skillDisplayInfo = useSkillsDisplayInfo()
 
 const isSkillsGroupWithChildren = computed(() => props.skill?.isSkillsGroupType && props.skill?.children && props.skill?.children.length > 0)
 const numSkillsRequired = computed(() => {
@@ -97,6 +99,9 @@ const someSkillsAreOptional = computed(() => {
             <i v-if="skill.copiedFromProjectId" class="fas fa-book text-secondary"></i>
           </div>
           <div class="">
+            <div v-if="skillDisplayInfo.isGlobalBadgePage.value">
+              <span class="font-italic text-color-secondary">Project:</span> {{ skill.projectName }}
+            </div>
             <router-link
               :id="`skillProgressTitleLink-${skill.skillId}`"
               v-if="toRoute"

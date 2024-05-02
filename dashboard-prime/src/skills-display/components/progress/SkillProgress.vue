@@ -66,7 +66,7 @@ const buildToRoute = () => {
     params.subjectId = route.params.subjectId
   } else if (route.params.badgeId) {
     params.badgeId = route.params.badgeId
-    name = (props.type === 'global-badge') ? 'globalBadgeSkillDetails' : 'badgeSkillDetails'
+    name = (skillsDisplayInfo.isGlobalBadgePage.value) ? 'globalBadgeSkillDetails' : 'badgeSkillDetails'
   } else if (props.skill.crossProject && props.skill.projectId) {
     params.crossProjectId = props.skill.projectId
   }

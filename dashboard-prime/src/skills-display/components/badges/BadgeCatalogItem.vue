@@ -7,6 +7,7 @@ import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vu
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useTopPositionsUtils } from '@/skills-display/components/badges/UseTopPositionsUtils.js'
 import PlacementBadge from '@/skills-display/components/badges/PlacementBadge.vue'
+import BadgeHeaderIcons from '@/skills-display/components/badges/BadgeHeaderIcons.vue'
 
 const props = defineProps({
   badge: {
@@ -79,8 +80,7 @@ const otherUsersAchieved = computed(() => {
       <Card class="w-min-10rem max-h-11rem mb-3 md:mb-0" :pt="iconCardPt">
         <template #header v-if="showHeader">
           <div class="pt-2 px-2">
-            <i v-if="badge.gem" class="fas fa-gem text-purple-800" aria-label="This is a gem badge"></i>
-            <i v-if="badge.global" class="fas fa-globe" aria-label="this is a global badge"></i>
+            <badge-header-icons :badge="badge" />
           </div>
         </template>
         <template #content>

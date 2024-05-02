@@ -6,10 +6,12 @@ import { useRoute } from 'vue-router'
 import BadgeCatalogItem from '@/skills-display/components/badges/BadgeCatalogItem.vue'
 import SkillsProgressList from '@/skills-display/components/progress/SkillsProgressList.vue'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 const skillsDisplayService = useSkillsDisplayService()
 const route = useRoute()
 const summaryAndSkillsState = useSkillsDisplaySubjectState()
+const skillsDisplayInfo = useSkillsDisplayInfo()
 
 // const loadingBadge = ref(true)
 const loadingPrerequisites = ref(true)
@@ -19,8 +21,13 @@ const dependencies = ref([])
 const isLoading = computed(() => summaryAndSkillsState.loadingBadgeSummary || loadingPrerequisites.value)
 
 onMounted(() => {
-  summaryAndSkillsState.loadBadgeSummary(route.params.badgeId)
-  loadDependencies()
+  const isGlobalBadge = skillsDisplayInfo.isGlobalBadgePage.value
+  summaryAndSkillsState.loadBadgeSummary(route.params.badgeId, isGlobalBadge)
+  if (!isGlobalBadge) {
+    loadDependencies()
+  } else {
+    loadingPrerequisites.value = false
+  }
 })
 const loadDependencies = () => {
   loadingPrerequisites.value = true

@@ -62,15 +62,22 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
       title: 'Badge Details'
     }
   }, {
-    path: '/badges/global/:badgeId',
-    component: GlobalBadgeDetailsPage,
+    path: 'badges/global/:badgeId',
+    component: BadgeDetailsPage,
     name: `globalBadgeDetails${appendToName}`,
     props: true,
     meta: {
       title: 'Global Badge Details'
     }
   }, {
-    path: '/badges/:badgeId/skills/:skillId',
+    path: '/badges/global/:badgeId/skills/:skillId',
+    component: SkillPage,
+    name: `globalBadgeSkillDetails${appendToName}`,
+    meta: {
+      title: `Global Badge ${skillPlaceholder} Details`,
+    },
+  }, {
+    path: 'badges/:badgeId/skills/:skillId',
     component: SkillPage,
     name: `badgeSkillDetails${appendToName}`,
     meta: {

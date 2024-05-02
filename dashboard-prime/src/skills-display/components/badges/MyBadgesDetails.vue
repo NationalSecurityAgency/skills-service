@@ -4,6 +4,8 @@ import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import PlacementBadge from '@/skills-display/components/badges/PlacementBadge.vue'
+import { computed } from 'vue'
+import BadgeHeaderIcons from '@/skills-display/components/badges/BadgeHeaderIcons.vue'
 
 const props = defineProps({
   badges: {
@@ -19,6 +21,22 @@ const props = defineProps({
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const colors = useColors()
 const timeUtils = useTimeUtils()
+
+const badgeAriaLabel = (badge) => {
+  let res = `You earned badge ${badge.badge}.`
+  if (badge.global) {
+    res += ' This is a global badge.'
+  }
+  if (badge.gem) {
+    res += ' This is a gem badge.'
+  }
+  return res
+}
+
+const toBadgeLink = (badge) => {
+  const name = badge.global ?  'globalBadgeDetails' : 'badgeDetails'
+  return { name: skillsDisplayInfo.getContextSpecificRouteName(name), params: { badgeId: badge.badgeId } }
+}
 </script>
 
 <template>
@@ -29,7 +47,7 @@ const timeUtils = useTimeUtils()
           My Earned Badges
         </div>
         <div v-if="badges && badges.length > 0" class="text-muted float-right">
-          <Tag severity="info">{{ badges.length }}</Tag> Badge<span v-if="badges.length > 1">s</span> Earned
+          <Tag severity="info">{{ badges.length }}</Tag> Badge<span v-if="badges.length !== 1">s</span> Earned
         </div>
       </div>
     </template>
@@ -39,17 +57,14 @@ const timeUtils = useTimeUtils()
 
       <div v-if="badges && badges.length > 0" class="flex justify-content-left">
         <div v-for="(badge, index) in badges" v-bind:key="badge.badgeId" class="">
-          <Card class="skills-card-theme-border w-min-18rem">
+          <Card class="skills-card-theme-border w-min-18rem" :pt="{ content: { class: 'py-0' } }">
             <template #header>
-              <div class="pt-2 px-2 flex">
+              <div class="pt-3 px-3 flex">
                 <div class="flex-1">
                   <i class="fa fa-check-circle position-absolute text-success"
                      v-if="badge.achievementPosition > 3"
                      style="right: 10px; top: 10px;" />
-                  <i v-if="badge.gem" class="fas fa-gem position-absolute"
-                     style="top: 10px; left: 10px; color: purple"></i>
-                  <i v-if="badge.global" class="fas fa-globe position-absolute"
-                     style="top: 10px; left: 10px; color: blue"></i>
+                  <badge-header-icons :badge="badge"/>
                 </div>
                 <placement-badge :badge="badge"  />
               </div>
@@ -58,7 +73,9 @@ const timeUtils = useTimeUtils()
               <!--                :style="{ 'margin-top': !badge.achievedWithinExpiration ? '30px' : '' }"-->
               <div class="earned-badge text-center">
                 <i :class="`${badge.iconClass} ${colors.getTextClass(index)}`" style="font-size: 5em;" />
-                <div class="mb-0 font-bold text-xl">
+                <div class="mb-0 font-bold text-xl"
+                     data-cy="badgeName"
+                      :aria-label="badgeAriaLabel(badge)">
                   {{ badge.badge }}
                 </div>
                 <div v-if="displayBadgeProject && badge.projectName" class="text-muted text-center text-truncate"
@@ -80,7 +97,7 @@ const timeUtils = useTimeUtils()
             </template>
             <template #footer>
               <router-link
-                :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('badgeDetails'), params: { badgeId: badge.badgeId } }">
+                :to="toBadgeLink(badge)">
                 <Button
                   label="View"
                   icon="far fa-eye"

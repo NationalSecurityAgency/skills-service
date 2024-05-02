@@ -61,6 +61,9 @@ export const useSkillsDisplayInfo = () => {
   const isSubjectPage = computed(() => {
     return route.name === getContextSpecificRouteName('SubjectDetailsPage')
   })
+  const isGlobalBadgePage =  computed(() => {
+    return route.name === getContextSpecificRouteName('globalBadgeDetails')
+  })
 
   return {
     isSkillsClientPath,
@@ -72,6 +75,7 @@ export const useSkillsDisplayInfo = () => {
     cleanPath,
     getRootUrl,
     routerPush,
-    isSubjectPage
+    isSubjectPage,
+    isGlobalBadgePage
   }
 }

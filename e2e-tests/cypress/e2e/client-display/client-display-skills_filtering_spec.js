@@ -1006,7 +1006,7 @@ describe('Client Display Skills Filtering Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('filter skills on global badge page', () => {
+    it('filter skills on global badge page', () => {
         cy.resetDb();
         cy.fixture('vars.json')
             .then((vars) => {
@@ -1042,7 +1042,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.cdClickBadges();
         cy.get('[data-cy="earnedBadgeLink_globalBadge1"]')
             .click();

@@ -21,9 +21,9 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
           loadingSubjectSummary.value = false
         })
     }
-  const loadBadgeSummary = (badgeId, includeSkills = true) => {
+  const loadBadgeSummary = (badgeId, isGlobal = false, includeSkills = true) => {
     loadingBadgeSummary.value = true
-    return skillsDisplayService.getBadgeSkills(badgeId, null, includeSkills)
+    return skillsDisplayService.getBadgeSkills(badgeId, isGlobal, includeSkills)
       .then((badgeSummary) => {
         subjectSummary.value = badgeSummary
         return badgeSummary
