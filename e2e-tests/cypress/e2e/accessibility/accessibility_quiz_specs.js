@@ -156,7 +156,7 @@ describe('Accessibility Quiz Tests', () => {
     });
 
 
-    it('results oage', () => {
+    it('results page', () => {
         cy.createSurveyDef(1);
         cy.createSurveyMultipleChoiceQuestionDef(1, 1);
         cy.createSurveyMultipleChoiceQuestionDef(1, 2, { questionType: 'SingleChoice' });
@@ -164,7 +164,7 @@ describe('Accessibility Quiz Tests', () => {
         cy.runQuizForUser(1, 1, [{selectedIndex: [1]}, {selectedIndex: [0]}, {selectedIndex: [0]}])
 
         cy.visit('/administrator/quizzes/quiz1/results')
-        cy.get('[data-cy="metrics-q1"] [data-cy="row1-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtoggler"]').should('be.enabled')
 
         cy.customLighthouse();
         cy.injectAxe();
@@ -182,7 +182,7 @@ describe('Accessibility Quiz Tests', () => {
         cy.customA11y();
     });
 
-    it('quiz access page', () => {
+    it('quiz settings page', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1);
         cy.createQuizQuestionDef(1, 2);

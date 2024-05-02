@@ -67,8 +67,7 @@ const handleOnInput = (event) => {
           :inputId="`input${name}`"
           :class="{ 'p-invalid': errorMessage }"
           :aria-invalid="errorMessage ? null : true"
-          :aria-errormessage="`${name}Error`"
-          :aria-describedby="`${name}Error`" />
+          :aria-errormessage="`${name}Error`" />
         <slot name="addOnAfter"></slot>
     </InputGroup>
     <small v-if="errorMessage"

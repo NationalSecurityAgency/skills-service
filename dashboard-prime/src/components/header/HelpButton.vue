@@ -67,14 +67,16 @@ const toggle = (event) => {
       aria-label="Help Button"
       aria-haspopup="true"
       aria-controls="help_settings_menu" />
-    <Menu ref="menu" id="help_settings_menu" :model="items" :popup="true">
-      <template #item="{ item, props }">
-        <a :href="item.url" target="_blank" v-bind="props.action">
-          <span class="w-1rem"><i :class="item.icon"/></span>
-          <span class="ml-2">{{ item.label }}</span>
-        </a>
-      </template>
-    </Menu>
+    <div id="help_settings_menu">
+      <Menu ref="menu" :model="items" :popup="true">
+        <template #item="{ item, props }">
+          <a :href="item.url" target="_blank" v-bind="props.action">
+            <span class="w-1rem"><i :class="item.icon"/></span>
+            <span class="ml-2">{{ item.label }}</span>
+          </a>
+        </template>
+      </Menu>
+    </div>
   </div>
 </template>
 

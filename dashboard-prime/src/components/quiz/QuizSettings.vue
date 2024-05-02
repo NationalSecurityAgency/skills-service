@@ -282,10 +282,11 @@ const collectAndSave = (values) => {
                     data-cy="noSettingsAvailable"/>
         <div v-if="!isSurveyType && !isLoadingData">
           <div class="field grid align-items-start">
-            <label for="quizNumQuestions" class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary"># of Questions per Quiz Attempt:</label>
+            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary"># of Questions per Quiz Attempt:</div>
             <div class="col-12 md:col-9">
               <SkillsDropDown
                   name="quizLength"
+                  id="quizNumQuestions"
                   data-cy="quizNumQuestions"
                   optionLabel="text"
                   optionValue="value"
@@ -294,10 +295,11 @@ const collectAndSave = (values) => {
             </div>
           </div>
           <div class="field grid align-items-start">
-            <label for="quizPassingReq" class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Passing Requirement:</label>
+            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Passing Requirement:</div>
             <div class="col-12 md:col-9">
               <SkillsDropDown
                   name="quizPassingReq"
+                  id="quizPassingReq"
                   data-cy="quizPassingSelector"
                   optionLabel="text"
                   optionValue="value"
@@ -307,11 +309,10 @@ const collectAndSave = (values) => {
           </div>
 
           <div class="field grid align-items-start">
-            <label for="quizNumberOfAttemptsUnlimited" class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Maximum Number of Attempts:</label>
+            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Maximum Number of Attempts:</div>
             <div class="col-12 md:col-9">
               <div class="flex flex-wrap">
                 <SkillsInputSwitch
-                    id="quizNumberOfAttemptsUnlimited"
                     v-model="settings.numAttempts.unlimited"
                     name="quizNumberOfAttemptsUnlimited"
                     aria-label="Maximum Number of Attempts setting, unlimited number of attempts checkbox"
@@ -321,6 +322,7 @@ const collectAndSave = (values) => {
                     v-if="!settings.numAttempts.unlimited"
                     class="flex-1"
                     name="quizNumberOfAttempts"
+                    aria-label="Maximum Number of Attempts"
                     data-cy="numAttemptsInput"
                     v-model="settings.numAttempts.value"/>
               </div>
@@ -328,7 +330,7 @@ const collectAndSave = (values) => {
           </div>
 
           <div class="field grid align-items-start">
-            <label for="randomizeQuestions" class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Randomize Question Order:</label>
+            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Randomize Question Order:</div>
             <div class="col-12 md:col-9">
               <SkillsInputSwitch
                   v-model="settings.randomizeQuestions.value"
@@ -341,7 +343,7 @@ const collectAndSave = (values) => {
           </div>
 
           <div class="field grid align-items-start">
-            <label for="randomizeAnswers" class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Randomize Answer Order:</label>
+            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Randomize Answer Order:</div>
             <div class="col-12 md:col-9">
               <SkillsInputSwitch
                   v-model="settings.randomizeAnswers.value"
@@ -355,7 +357,7 @@ const collectAndSave = (values) => {
 
 
           <div class="field grid align-items-start">
-            <label for="timeLimitUnlimited" class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Quiz Time Limit:</label>
+            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Quiz Time Limit:</div>
             <div class="col-12 md:col-9">
               <div class="flex flex-wrap">
                 <SkillsInputSwitch v-model="settings.quizTimeLimit.unlimited"
