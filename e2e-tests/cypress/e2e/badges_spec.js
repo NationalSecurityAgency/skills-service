@@ -537,9 +537,6 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="name"]')
             .type('Test Badge');
 
-        cy.gemNextMonth();
-        cy.gemSetDay(1);
-        cy.gemSetDay(15);
 
         // dates should not be in the past
         let msg = 'End date can not be in the past';
