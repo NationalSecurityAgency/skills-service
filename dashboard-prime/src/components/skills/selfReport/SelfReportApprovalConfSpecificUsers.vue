@@ -15,13 +15,11 @@ const props = defineProps({
 });
 const emit = defineEmits(['conf-added', 'conf-removed']);
 
-
 const currentSelectedUser = ref(null);
 const loading = ref(false);
 const data = ref([]);
 const sortBy = ref('updated');
 const sortOrder = ref(-1);
-
 const pageSize = 4;
 const possiblePageSizes = [4, 10, 15, 20];
 
@@ -30,10 +28,6 @@ onMounted(() => {
   if (hasConf) {
     data.value = props.userInfo.userConf.map((u) => ({ ...u }));
   }
-});
-
-let pkiAuthenticated = computed(() => {
-  // return $store.getters.isPkiAuthenticated;
 });
 
 let hadData = computed(() => {
@@ -82,13 +76,13 @@ const removeTagConf = (removedItem) => {
               aria-label="Select User Id"
               data-cy="userIdInput"/>
         </div>
-        <div class="flex px-1">
+        <div>
           <SkillsButton
               aria-label="Add Specific User"
               data-cy="addUserConfBtn"
               @click="addConf"
               :disabled="!currentSelectedUser"
-              variant="outline-primary" icon="fas fa-plus-circle" label="Add">
+              icon="fas fa-plus-circle" label="Add">
           </SkillsButton>
         </div>
       </div>
@@ -119,8 +113,8 @@ const removeTagConf = (removedItem) => {
                             :disabled="slotProps.data.deleteInProgress"
                             data-cy="deleteBtn"
                             icon="fas fa-trash"
-                            size="small">
-<!--                    <SkillsSpinner v-if="slotProps.data.deleteInProgress" :is-loading="slotProps.data.deleteInProgress"></SkillsSpinner>-->
+                            size="small"
+                            :loading="slotProps.data.deleteInProgress">
                   </SkillsButton>
                 </div>
               </div>

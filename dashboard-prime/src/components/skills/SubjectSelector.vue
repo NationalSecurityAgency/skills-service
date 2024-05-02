@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import AutoComplete from 'primevue/autocomplete';
 import Dropdown from "primevue/dropdown";
 
 const emit = defineEmits(['added', 'removed', 'search-change'])
@@ -82,7 +81,6 @@ const setOptionsInternal = () => {
     optionsInternal.value = props.options.map((entry) => ({ entryId: `${entry.projectId}_${entry.subjectId}`, ...entry }));
     if (props.selected) {
       // removed already selected items
-      console.log(props.selected);
       optionsInternal.value = optionsInternal.value.filter((el) => !props.selected.some((sel) => `${sel.projectId}_${sel.subjectId}` === el.entryId));
     }
   }
@@ -114,8 +112,6 @@ const searchChanged = (query) => {
   // emit('search-change', query, loadingFunction);
 };
 </script>
-
-<!--:disabled="disabled"-->
 
 <template>
   <Dropdown :options="optionsInternal" :placeholder="placeholder" class="st-skills-selector w-full" v-model="selectedInternal" label="name"

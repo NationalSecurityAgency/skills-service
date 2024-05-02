@@ -109,6 +109,9 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const motivationalSkillWarningGracePeriod = computed(() => config.value.motivationalSkillWarningGracePeriod)
   const skillsDisplayProjectDescription = computed(() => config.value.skillsDisplayProjectDescription)
   const maxSelfReportRejectionMessageLength = computed(() => config.value.maxSelfReportRejectionMessageLength)
+  const approvalConfUserTagKey = computed(() => config.value.approvalConfUserTagKey)
+  const approvalConfUserTagLabel = computed(() => config.value.approvalConfUserTagLabel)
+
   return {
     loadConfigState,
     refreshConfig,
@@ -175,6 +178,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     activityHistoryStartDate,
     motivationalSkillWarningGracePeriod,
     skillsDisplayProjectDescription,
-    maxSelfReportRejectionMessageLength
+    maxSelfReportRejectionMessageLength,
+    approvalConfUserTagKey,
+    approvalConfUserTagLabel
   }
 })

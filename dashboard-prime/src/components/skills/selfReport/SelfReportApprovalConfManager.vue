@@ -8,50 +8,23 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 import SelfReportApprovalConfUserTag from "@/components/skills/selfReport/SelfReportApprovalConfUserTag.vue";
 import SelfReportApprovalConfSkill from "@/components/skills/selfReport/SelfReportApprovalConfSkill.vue";
-import SelfReportApprovalConfSpecificUsers
-  from "@/components/skills/selfReport/SelfReportApprovalConfSpecificUsers.vue";
+import SelfReportApprovalConfSpecificUsers from "@/components/skills/selfReport/SelfReportApprovalConfSpecificUsers.vue";
 import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import UserRolesUtil from '@/components/utils/UserRolesUtil.js';
 
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
+const appConfig = useAppConfig();
 
 const data = ref([]);
 const loading = ref(true);
-const table = ref({
-  items: [],
-  options: {
-        sortBy: 'requestedOn',
-        sortDesc: true,
-        emptyText: 'You are the only user',
-        tableDescription: 'Configure Approval Workload',
-        fields: [
-      {
-        key: 'userIdForDisplay',
-        label: 'Approver',
-        sortable: true,
-        tdClass: 'p-0 m-0',
-      },
-      {
-        key: 'roleName',
-        label: 'Role',
-        sortable: true,
-      },
-      {
-        key: 'workload',
-        label: 'Approval Workload',
-        sortable: false,
-      },
-    ],
-        pagination: {
-      remove: true,
-          server: true,
-          currentPage: 1,
-          totalRows: 1,
-          pageSize: 5,
-          possiblePageSizes: [5, 10, 15, 20],
-    },
-  },
-});
+const pageSize = ref(5);
+const possiblePageSizes = [5, 10, 15, 20];
+const currentPage = ref(1);
+const totalRows = ref(0);
+const sortBy = ref('userId');
+const sortOrder = ref(-1);
 
 onMounted(() => {
   loadData();
@@ -62,13 +35,12 @@ const hasMoreThanOneApprover = computed(() => {
 });
 
 const userTagConfKey = computed(() => {
-  // return $store.getters.config.approvalConfUserTagKey;
+  return appConfig.approvalConfUserTagKey;
 });
 
 const userTagConfLabel = computed(() => {
-  // return $store.getters.config.approvalConfUserTagLabel ? $store.getters.config.approvalConfUserTagLabel : $store.getters.config.approvalConfUserTagKey;
+  return appConfig.approvalConfUserTagLabel ? appConfig.approvalConfUserTagLabel : appConfig.approvalConfUserTagKey;
 });
-
 
 const toggleConfDetails = (data) => {
   // eslint-disable-next-line no-underscore-dangle
@@ -78,13 +50,15 @@ const toggleConfDetails = (data) => {
 
 const loadData = () => {
   const pageParams = {
-    limit: 200,
-    ascending: true,
-    page: 1,
-    orderBy: 'userId',
+    limit: pageSize.value,
+    ascending: sortOrder.value === 1,
+    page: currentPage.value,
+    orderBy: sortBy.value,
   };
+
   const roles = ['ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER'];
   AccessService.getUserRoles(route.params.projectId, roles, pageParams).then((users) => {
+    totalRows.value = users.totalCount;
     SelfReportService.getApproverConf(route.params.projectId).then((approverConf) => {
       const basicTableInfo = users.data.map((u) => {
         const allConf = approverConf.filter((c) => c.approverUserId === u.userId);
@@ -187,18 +161,6 @@ const handleFallback = (checked, rowItem) => {
   }
 };
 
-// v-model:selection="selectedItems"
-// v-model:expandedRows="expandedRows"
-// :rows="pageSize"
-// :rowsPerPageOptions="possiblePageSizes"
-// :totalRecords="totalRows"
-// :busy="loading"
-// :sort-field="sortBy"
-// :sort-order="sortOrder"
-// @page="pageChanged"
-// data-key="id"
-// @sort="sortTable"
-
 let expandedRows = ref([]);
 
 const toggleRow = (row) => {
@@ -219,6 +181,21 @@ const collapseRow = (row) => {
 
   expandedRows.value = { ...expandedRows.value };
 }
+
+const pageChanged = (pagingInfo) => {
+  currentPage.value = pagingInfo.page + 1;
+  pageSize.value = pagingInfo.rows;
+  loadData();
+};
+
+const sortTable = (sortContext) => {
+  sortBy.value = sortContext.sortField;
+  sortOrder.value = sortContext.sortOrder;
+
+  // set to the first page
+  currentPage.value = 1;
+  loadData();
+};
 </script>
 
 <template>
@@ -233,16 +210,33 @@ const collapseRow = (row) => {
                        :value="data"
                        v-model:expandedRows="expandedRows"
                        dataKey="userId"
+                       show-gridlines
+                       striped-rows
+                       lazy
+                       paginator
+                       :rows="pageSize"
+                       :rowsPerPageOptions="possiblePageSizes"
+                       @page="pageChanged"
+                       @sort="sortTable"
+                       :totalRecords="totalRows"
+                       :sort-field="sortBy"
+                       :sort-order="sortOrder"
                        tableStoredStateId="skillApprovalConfTable"
                        data-cy="skillApprovalConfTable">
-        <Column field="userIdForDisplay">
+        <Column field="userId" sortable>
           <template #header>
             <span class="text-primary"><i class="fas fa-user skills-color-users" aria-hidden="true"/> Approver</span>
           </template>
+          <template #body="slotProps">
+            {{ slotProps.data.userIdForDisplay }}
+          </template>
         </Column>
-        <Column field="roleName">
+        <Column field="roleName" sortable>
           <template #header>
             <span class="text-primary"><i class="fas fa-id-card text-danger" aria-hidden="true"/> Role</span>
+          </template>
+          <template #body="slotProps">
+            {{ UserRolesUtil.userRoleFormatter(slotProps.data.roleName) }}
           </template>
         </Column>
         <Column field="workload">
@@ -272,7 +266,7 @@ const collapseRow = (row) => {
                   <Badge variant="info">{{ slotProps.data.skillConf.length }}</Badge> Specific Skill{{ slotProps.data.skillConf.length  > 1 ? 's' : '' }}
                 </div>
               </div>
-              <div class="flex">
+              <div>
                 <SkillsButton size="small"
                           :aria-label="`Edit ${slotProps.data.userIdForDisplay} approval workload`"
                           variant="outline-primary"

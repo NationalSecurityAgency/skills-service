@@ -3,6 +3,11 @@ import { ref, nextTick, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import SelfReportService from '@/components/skills/selfReport/SelfReportService';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import NoContent2 from "@/components/utils/NoContent2.vue";
+import DateCell from "@/components/utils/table/DateCell.vue";
+import { SkillsReporter } from '@skilltree/skills-client-js';
+import * as yup from "yup";
+import {useForm} from "vee-validate";
 
 const emit = defineEmits(['conf-added', 'conf-removed']);
 const announcer = useSkillsAnnouncer();
@@ -13,58 +18,50 @@ const props = defineProps({
   tagKey: String,
 });
 
+const schema = yup.object({
+  'tagInput': yup.string().required().test('uniqueName', 'There is already an entry for this value.', (value) => {
+    return !data.value.find((i) => value.toLowerCase() === i.userTagValue?.toLowerCase());
+  })
+})
+const { meta } = useForm({
+  validationSchema: schema
+});
+
+const data = ref([]);
 const enteredTag = ref('');
-const table = ref({
-  items: [],
-      options: {
-    busy: false,
-        bordered: true,
-        outlined: true,
-        stacked: 'md',
-        sortBy: 'updated',
-        sortDesc: true,
-        emptyText: 'You are the only user',
-        tableDescription: 'Configure Approval Workload',
-        fields: null,
-        pagination: {
-      remove: false,
-          server: false,
-          currentPage: 1,
-          totalRows: 1,
-          pageSize: 4,
-          possiblePageSizes: [4, 10, 15, 20],
-    },
-  },
+const sortBy = ref('updated');
+const sortOrder = ref(-1);
+const pageSize = 4;
+const possiblePageSizes = [4, 10, 15, 20];
+
+const hadData = computed(() => {
+  return data.value && data.value.length > 0;
 });
 
 onMounted(() => {
   const hasTagConf = props.userInfo.tagConf && props.userInfo.tagConf.length > 0;
   if (hasTagConf) {
-    table.value.items = props.userInfo.tagConf.map((u) => ({ ...u }));
+    data.value = props.userInfo.tagConf.map((u) => ({ ...u }));
   }
 });
 const addTagConf = () => {
+  SkillsReporter.reportSkill('ConfigureSelfApprovalWorkload')
   if (enteredTag.value && enteredTag.value !== '') {
-    // refs.validationProvider.validate()
-    //     .then((validationRes) => {
-    //       if (validationRes.valid) {
-            SelfReportService.configureApproverForUserTag(route.params.projectId, props.userInfo.userId, props.tagKey, enteredTag.value)
-                .then((res) => {
-                  table.value.items.push(res);
-                  enteredTag.value = '';
-                  emit('conf-added', res);
-                  nextTick(() => announcer.polite(`Added workload configuration successfully for ${enteredTag.value} ${props.tagLabel}.`));
-                });
-  //         }
-  //       });
+    SelfReportService.configureApproverForUserTag(route.params.projectId, props.userInfo.userId, props.tagKey, enteredTag.value)
+      .then((res) => {
+        data.value.push(res);
+        enteredTag.value = '';
+        emit('conf-added', res);
+        nextTick(() => announcer.polite(`Added workload configuration successfully for ${enteredTag.value} ${props.tagLabel}.`));
+      });
   }
 };
 
 const removeTagConf = (removedIem) => {
-  table.value.items = table.value.items.map((i) => ({ ...i, deleteInProgress: i.id === removedIem.id }));
+  data.value = data.value.map((i) => ({ ...i, deleteInProgress: i.id === removedIem.id }));
   SelfReportService.removeApproverConfig(route.params.projectId, removedIem.id)
       .then(() => {
-        table.value.items = table.value.items.filter((i) => i.id !== removedIem.id);
+        data.value = data.value.filter((i) => i.id !== removedIem.id);
         emit('conf-removed', removedIem);
         nextTick(() => announcer.polite(`Removed workload configuration successfully for ${removedIem.userTagValue} ${props.tagLabel}.`));
       });
@@ -73,8 +70,74 @@ const removeTagConf = (removedIem) => {
 
 <template>
 <Card>
+  <template #header>
+    <SkillsCardHeader :title="'Split Workload By ' + tagLabel"></SkillsCardHeader>
+  </template>
   <template #content>
-    Test
+    <div class="flex gap-2">
+      <div class="flex flex-1">
+        <SkillsTextInput
+            class="w-full"
+            name="tagInput"
+            :placeholder="`Enter ${tagLabel} value`"
+            v-on:keydown.enter="addTagConf"
+            v-model="enteredTag"
+            data-cy="userTagValueInput" />
+      </div>
+      <div>
+        <SkillsButton size="small"
+            aria-label="Add Tag Value"
+            @click="addTagConf"
+            data-cy="addTagKeyConfBtn"
+            :disabled="!enteredTag || !meta.valid"
+            label="Add"
+            icon="fas fa-plus-circle">
+        </SkillsButton>
+      </div>
+    </div>
+
+    <SkillsDataTable v-if="hadData" class="mt-3" data-cy="tagKeyConfTable"
+                     :rows="pageSize"
+                     :rowsPerPageOptions="possiblePageSizes"
+                     v-model:sort-field="sortBy"
+                     v-model:sort-order="sortOrder"
+                     :value="data"
+                     paginator
+                     tableStoredStateId="skillApprovalConfSpecificUsersTable">
+      <Column :header="tagLabel" field="userTagValue" sortable>
+        <template #body="slotProps">
+          <div class="flex" :data-cy="`tagValue_${slotProps.data.userTagValue}`">
+            <div class="flex flex-1">
+              {{ slotProps.data.userTagValue }}
+            </div>
+            <div class="flex">
+              <SkillsButton title="Delete Skill"
+                        data-cy="deleteBtn"
+                        show-gridlines
+                        striped-rows
+                        :aria-label="`Remove ${slotProps.data.userTagValue} tag.`"
+                        @click="removeTagConf(slotProps.data)"
+                        :disabled="slotProps.data.deleteInProgress"
+                        size="small" icon="fas fa-trash" :loading="slotProps.data.deleteInProgress">
+              </SkillsButton>
+            </div>
+          </div>
+        </template>
+      </Column>
+      <Column header="Configured On" field="updated" sortable>
+        <template #body="slotProps">
+          <date-cell :value="slotProps.data.updated" />
+        </template>
+      </Column>
+    </SkillsDataTable>
+
+    <no-content2 v-if="!hadData" title="Not Configured Yet..."
+                 class="my-5"
+                 icon-size="fa-2x"
+                 data-cy="noTagKeyConf"
+                 icon="fas fa-user-tag">
+      You can split the approval workload by routing approval requests for users with the selected <span class="text-info">{{tagLabel}}</span> to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
+    </no-content2>
   </template>
 </Card>
 </template>

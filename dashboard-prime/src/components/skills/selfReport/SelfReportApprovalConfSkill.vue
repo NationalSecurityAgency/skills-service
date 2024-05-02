@@ -24,7 +24,6 @@ const loadingMeta = ref({
   loadingSkillsUnderASubject: false,
   numSkillsToProcess: 0,
 });
-const currentSelectedUser = ref(null);
 const availableSkills = ref([]);
 const availableSubjects = ref([]);
 const selectedSkills = ref(null);
@@ -52,10 +51,6 @@ onMounted(() => {
 
 let loading = computed(() => {
   return loadingMeta.value.skills || loadingMeta.value.subjects || loadingMeta.value.loadingSkillsUnderASubject || loadingMeta.value.numSkillsToProcess > 0;
-});
-
-const pkiAuthenticated = computed(() => {
-  // return $store.getters.isPkiAuthenticated;
 });
 
 const hadData = computed(() => {
@@ -200,13 +195,14 @@ const removeTagConf = (removedItem) => {
                             :onlySingleSelectedValue="true"
                             :warnBeforeRemoving="false"/>
         </div>
-        <div class="flex mx-1 mt-1 text-center align-self-end">
+        <div class="mx-1 mt-1 text-center align-self-end">
           <SkillsButton
               aria-label="Add Tag Value"
               @click="addSkillToConf"
               data-cy="addSkillConfBtn"
               :disabled="loading || (!selectedSubject && (!selectedSkills || selectedSkills.length === 0))"
-              variant="outline-primary">Add <i class="fas fa-plus-circle" aria-hidden="true" />
+              label="Add"
+              icon="fas fa-plus-circle">
           </SkillsButton>
         </div>
       </div>
@@ -230,15 +226,14 @@ const removeTagConf = (removedItem) => {
               <div class="flex flex-1">
                 {{ slotProps.data.skillName }}
               </div>
-              <div class="flex">
+              <div>
                 <SkillsButton title="Delete Skill"
-                          variant="outline-danger"
                           :aria-label="`Remove ${slotProps.data.skillName} tag.`"
                           data-cy="deleteBtn"
                           @click="removeSkill(slotProps.data)"
                           :disabled="slotProps.data.deleteInProgress"
+                          :loading="slotProps.data.deleteInProgress"
                           size="small" icon="fas fa-trash">
-<!--                  <SkillsSpinner v-if="slotProps.data.deleteInProgress" small></SkillsSpinner>-->
                 </SkillsButton>
               </div>
             </div>
