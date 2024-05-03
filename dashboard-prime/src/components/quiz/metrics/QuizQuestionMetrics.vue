@@ -160,7 +160,7 @@ const numberOfStars = computed(() => {
       tableStoredStateId="quizQuestionMetrics"
       v-if="!isTextInput && answers"
       v-model:expandedRows="expandedRows"
-      expander="true"
+      :expander="true"
       expander-label="Expand Answer History"
       :expander-pt="{
                 rowToggler: ({ instance: { rowData } }) => ({

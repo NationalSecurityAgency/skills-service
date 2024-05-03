@@ -14,10 +14,21 @@ const props = defineProps({
     type: String,
     required: true
   },
-  expander: false,
-  expanderLabel: 'Expand Rows',
-  expanderPt: null,
-
+  expander: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  expanderLabel: {
+    type: String,
+    required: false,
+    default: 'Expand Rows',
+  },
+  expanderPt: {
+    type: Object,
+    required: false,
+    default: null,
+  }
 })
 const slots = useSlots()
 const announcer = useSkillsAnnouncer()
@@ -65,6 +76,7 @@ const onPage = (pageEvent) => {
               :class="{'flex': responsive.md.value }">
         <template #header>
           <span class="mr-1 lg:mr-0 md:hidden"><i class="fas fa-expand-arrows-alt" aria-hidden="true"></i> {{ expanderLabel }}</span>
+          <span class="mr-1 lg:mr-0 hidden md:block" :aria-label="expanderLabel">&#8203;</span>
         </template>
       </Column>
 
