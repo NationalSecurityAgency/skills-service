@@ -35,6 +35,5 @@ const highlightValue = computed(() =>{
 <style scoped>
 .max-wrap {
   word-wrap: break-word;
-  display: inline-block;
 }
 </style>
