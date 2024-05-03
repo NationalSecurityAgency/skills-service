@@ -263,10 +263,10 @@ const deleteRun = () => {
                 </div>
                 <div class="flex flex-grow-1 align-items-start justify-content-end">
                   <router-link :data-cy="`row${slotProps.index}-viewRun`"
-                               :to="{ name: 'QuizSingleRunPage', params: { runId: slotProps.data.attemptId } }"
-                               :aria-label="`View Run Details for user ${slotProps.data.userIdForDisplay}`">
+                               :to="{ name: 'QuizSingleRunPage', params: { runId: slotProps.data.attemptId } }">
                     <SkillsButton icon="fas fa-list-ul"
                                   outlined
+                                  :aria-label="`View Run Details for user ${slotProps.data.userIdForDisplay}`"
                                   size="small" />
                   </router-link>
                 </div>

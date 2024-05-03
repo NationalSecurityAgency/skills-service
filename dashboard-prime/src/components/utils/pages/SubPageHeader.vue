@@ -46,7 +46,7 @@ function addClicked() {
 <template>
   <div class="flex flex-wrap py-2" data-cy="subPageHeader" :class="`mb-${marginBottom}`">
     <div class="flex-1 text-left">
-      <div class="text-2xl uppercase font-normal">{{ title }}</div>
+      <h1 class="text-2xl uppercase font-normal">{{ title }}</h1>
     </div>
     <div class="flex pt-0 text-right" data-cy="subPageHeaderControls">
       <div v-if="!isLoading">

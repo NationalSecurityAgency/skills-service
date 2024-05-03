@@ -15,12 +15,12 @@ const numberFormat = useNumberFormat()
         <div class="mt-2 text-center lg:text-left w-full lg:w-auto">
           <div class="text-2xl">
             <i v-if="options.icon" class="mr-2" :class="options.icon" />
-            <h1 class="text-2xl" data-cy="title">{{ options.title }} Title </h1>
+            <h1 class="text-2xl" data-cy="title">{{ options.title }}</h1>
             <slot name="right-of-header"></slot>
           </div>
           <div v-if="options.subTitle" data-cy="subTitle" class="mt-1 mb-2">
             <slot name="subTitle">
-              <div class="text-xl">{{ options.subTitle }} Subtitle 1</div>
+              <div class="text-xl">{{ options.subTitle }}</div>
             </slot>
           </div>
           <slot name="subSubTitle" data-cy="subSubTitle"></slot>

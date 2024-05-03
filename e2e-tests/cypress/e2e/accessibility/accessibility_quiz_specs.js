@@ -33,7 +33,7 @@ describe('Accessibility Quiz Tests', () => {
         cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
         cy.get('[data-cy="quizName"]').type('hello')
         cy.get('[data-cy="quizDescription"]').type('hi')
-        cy.get('[data-cy="saveQuizButton"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         cy.customLighthouse();
         cy.injectAxe();
@@ -154,7 +154,6 @@ describe('Accessibility Quiz Tests', () => {
         cy.injectAxe();
         cy.customA11y();
     });
-
 
     it('results page', () => {
         cy.createSurveyDef(1);

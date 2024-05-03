@@ -61,6 +61,7 @@ defineExpose( {
           placeholder="Enter an answer"
           v-model="answer.value.answer"
           :initialValue="answer.value.answer"
+          :aria-label="`Enter answer number ${index+1}`"
           data-cy="answerText"
           :id="`answer_${index}`"
           :name="`answers[${index}].answer`"/>
