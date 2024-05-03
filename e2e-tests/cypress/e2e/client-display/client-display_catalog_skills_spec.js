@@ -148,7 +148,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('self report imported skill', () => {
+    it('self report imported skill', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1, {
@@ -224,7 +224,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillProgress"]', 'catalog imported skill visual regression - skill details themed');
     });
 
-    it.skip('catalog imported skill has self-report approval request', () => {
+    it('catalog imported skill has self-report approval request', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1, { selfReportingType: 'Approval', });
@@ -277,7 +277,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('gracefully handle self-reporting for the imported skill which already has pending approval reported another way after the page was loaded', () => {
+    it('gracefully handle self-reporting for the imported skill which already has pending approval reported another way after the page was loaded', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1, { selfReportingType: 'Approval', });
@@ -325,7 +325,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
             .contains('This skill was already submitted for approval and is still pending approval');
     });
 
-    it.skip('gracefully handle self-reporting for the imported skill that was achieved another way after the page was loaded', () => {
+    it('gracefully handle self-reporting for the imported skill that was achieved another way after the page was loaded', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1, {
