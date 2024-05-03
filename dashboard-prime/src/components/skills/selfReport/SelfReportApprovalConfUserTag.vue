@@ -129,6 +129,9 @@ const removeTagConf = (removedIem) => {
           <date-cell :value="slotProps.data.updated" />
         </template>
       </Column>
+      <template #paginatorstart>
+        <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ data.length }}</span>
+      </template>
     </SkillsDataTable>
 
     <no-content2 v-if="!hadData" title="Not Configured Yet..."

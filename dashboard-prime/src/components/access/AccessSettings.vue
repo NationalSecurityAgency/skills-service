@@ -20,7 +20,7 @@ const errMsg = ref(null);
   <div>
     <sub-page-header title="Access Management"/>
 
-    <Card>
+    <Card data-cy="projectAdmins">
       <template #header>
         <SkillsCardHeader title="Project Management Users"></SkillsCardHeader>
       </template>

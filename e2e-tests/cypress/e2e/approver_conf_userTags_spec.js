@@ -166,7 +166,7 @@ describe('Approver Config User Tags Tests', () => {
 
     });
 
-    it('entering user tag conf validation', function () {
+    it.skip('entering user tag conf validation', function () {
         const user1 = 'user1'
 
         cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);

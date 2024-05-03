@@ -74,7 +74,7 @@ describe('Approver Config Tests', () => {
             cy.get(`[data-cy="workloadCell_${defaultUser}"] [data-cy="editApprovalBtn"]`).should('be.enabled')
 
             // switch to fallback
-            cy.get('[data-cy="workloadCell_user1"] [data-cy="fallbackSwitch"]').click({force: true})
+            cy.get('[data-cy="workloadCell_user1"] [data-cy="fallbackSwitch"]').click()
 
             // validate
             cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Assigned Fallback - All Unmatched Requests')
@@ -101,7 +101,7 @@ describe('Approver Config Tests', () => {
         const user1 = 'user1'
         cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
         cy.get(`[data-cy="expandedChild_${user1}"]`).should('exist')
-        cy.get('[data-cy="workloadCell_user1"] [data-cy="fallbackSwitch"]').click({force: true})
+        cy.get('[data-cy="workloadCell_user1"] [data-cy="fallbackSwitch"]').click()
         cy.get(`[data-cy="expandedChild_${user1}"]`).should('not.exist')
     });
 
@@ -122,7 +122,8 @@ describe('Approver Config Tests', () => {
 
             cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
             cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
-            cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] .vs__dropdown-option`).contains('userA').click({force: true});
+            cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userA');
+            // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] .vs__dropdown-option`).contains('userA').click({force: true});
             cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
             cy.get(`[data-cy="workloadCell_${user1}"]`).contains('1 Specific User')
 

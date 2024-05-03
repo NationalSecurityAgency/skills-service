@@ -42,10 +42,13 @@ const userTagConfLabel = computed(() => {
   return appConfig.approvalConfUserTagLabel ? appConfig.approvalConfUserTagLabel : appConfig.approvalConfUserTagKey;
 });
 
-const toggleConfDetails = (data) => {
+const toggleConfDetails = (dataToToggle) => {
   // eslint-disable-next-line no-underscore-dangle
   // data.value = data.value.map((item) => ({ ...item, _showDetails: data.item.userId === item.userId ? !item._showDetails : false }));
-  toggleRow(data.userId);
+  data.value.forEach((item) => {
+    collapseRow(item.userId);
+  })
+  toggleRow(dataToToggle.userId);
 };
 
 const loadData = () => {
@@ -281,7 +284,7 @@ const sortTable = (sortContext) => {
         </Column>
 
         <template #expansion="slotProps">
-          <div>
+          <div :data-cy="`expandedChild_${slotProps.data.userId}`">
             <self-report-approval-conf-user-tag v-if="userTagConfKey"
                                                 :user-info="slotProps.data"
                                                 :tag-key="userTagConfKey"

@@ -213,6 +213,7 @@ const removeTagConf = (removedItem) => {
                          :value="data"
                          show-gridlines
                          striped-rows
+                         paginator
                          tableStoredStateId="skillApprovalConfSpecificUsersTable"
                          data-cy="skillApprovalSkillConfTable"
                          :rows="pageSize"
@@ -245,6 +246,10 @@ const removeTagConf = (removedItem) => {
               <date-cell :value="slotProps.data.updated" />
             </template>
           </Column>
+
+          <template #paginatorstart>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+          </template>
         </SkillsDataTable>
         <no-content2 v-if="!hadData" title="Not Configured Yet..."
                      class="p-2 py-5"

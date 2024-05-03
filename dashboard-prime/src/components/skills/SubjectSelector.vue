@@ -107,7 +107,7 @@ const searchChanged = (query) => {
     })
   }
   else {
-    optionsInternal.value = props.options.map((entry) => ({  name: entry.name }));
+    optionsInternal.value = props.options.map((entry) => ({ name: entry.name, ...entry }));
   }
   // emit('search-change', query, loadingFunction);
 };
