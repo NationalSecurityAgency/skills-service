@@ -1,6 +1,7 @@
 <script setup>
 
 import { computed, onMounted, ref } from 'vue'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import Column from 'primevue/column'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 import CheckSelector from '@/common-components/quiz/CheckSelector.vue'
@@ -11,6 +12,8 @@ const props = defineProps({
   isSurvey: Boolean,
   num: Number
 })
+
+const responsive = useResponsiveBreakpoints()
 
 const averageScore = ref(0)
 const answers = ref([])
@@ -170,7 +173,8 @@ const numberOfStars = computed(() => {
                 }),
               }"
       :value="answers">
-      <Column v-for="col of tableOptions.fields" :key="col.key" :field="col.key" :sortable="col.sortable">
+      <Column v-for="col of tableOptions.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
+              :class="{'flex': responsive.md.value }">
         <template #header>
           <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
         </template>

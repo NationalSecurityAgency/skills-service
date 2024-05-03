@@ -9,6 +9,7 @@ import { useRoute } from 'vue-router'
 import { useUserInfo } from '@/components/utils/UseUserInfo.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import { useFocusState } from '@/stores/UseFocusState.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import QuizAttemptsTimeChart from '@/components/quiz/metrics/QuizAttemptsTimeChart.vue'
 import QuizUserTagsChart from '@/components/quiz/metrics/QuizUserTagsChart.vue'
@@ -29,6 +30,8 @@ const focusState = useFocusState()
 const quizSummaryState = useQuizSummaryState()
 const userTagsUtils = useUserTagsUtils()
 const announcer = useSkillsAnnouncer()
+const responsive = useResponsiveBreakpoints()
+
 const quizType = ref('')
 const runsHistory = ref([])
 const filtering = ref(false)
@@ -245,7 +248,8 @@ const deleteRun = () => {
             </span>
             </div>
           </template>
-          <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable">
+          <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
+                  :class="{'flex': responsive.md.value }">
             <template #header>
               <span v-if="col.key === 'controls'" class="sr-only">Controls Heading - Not sortable</span>
               <span v-else><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>

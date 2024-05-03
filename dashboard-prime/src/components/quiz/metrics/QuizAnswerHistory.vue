@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router'
 import { useTruncateFormatter } from '@/components/utils/UseTruncateFormatter.js'
 import { useUserTagsUtils } from '@/components/utils/UseUserTagsUtils.js'
 import { useUserInfo } from '@/components/utils/UseUserInfo.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import Column from 'primevue/column'
 import QuizService from '@/components/quiz/QuizService.js'
 import DateCell from '@/components/utils/table/DateCell.vue'
@@ -21,6 +22,7 @@ const route = useRoute();
 const truncateFormatter = useTruncateFormatter();
 const userTagsUtils = useUserTagsUtils();
 const userInfo = useUserInfo();
+const responsive = useResponsiveBreakpoints()
 const quizId = ref(route.params.quizId);
 const answerHistory = ref([]);
 const sortInfo = ref({  sortOrder: 1, sortBy: 'updated' })
@@ -163,7 +165,7 @@ const expandLabel = (truncated) => {
               :field="col.key"
               :sortable="col.sortable"
               class="vertical-align-top"
-      >
+              :class="{'flex': responsive.md.value }">
         <template #header>
           <span :data-cy="col.dataCy" ><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
         </template>

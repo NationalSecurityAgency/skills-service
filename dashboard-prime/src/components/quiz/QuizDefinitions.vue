@@ -16,6 +16,7 @@ limitations under the License.
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import { FilterMatchMode } from 'primevue/api'
 import QuizService from '@/components/quiz/QuizService.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
@@ -29,6 +30,8 @@ import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
 
 const announcer = useSkillsAnnouncer()
+const responsive = useResponsiveBreakpoints()
+
 const loading = ref(false);
 const quizzes = ref([]);
 const sortInfo = ref({ sortOrder: 1, sortBy: 'created' })
@@ -170,7 +173,7 @@ defineExpose({
       <SkillsDataTable
         tableStoredStateId="quizDefinitionsTable"
         :value="quizzes"
-        tableStyle="min-width: 50rem"
+        tableStyle="min-width: 25rem"
         data-cy="quizDefinitionsTable"
         v-model:filters="filters"
         :globalFilterFields="['name']"
@@ -222,53 +225,54 @@ defineExpose({
               </span>
           </div>
         </template>
-        <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable">
+        <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
+                :class="{'flex': responsive.md.value }">
           <template #header>
             <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
           </template>
           <template #body="slotProps">
-            <div v-if="slotProps.field === 'name'" class="flex flex-row flex-wrap">
-                <div class="flex align-items-start justify-content-start">
-                  <router-link :data-cy="`managesQuizLink_${slotProps.data.quizId}`"
-                               :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
-                               :aria-label="`Manage Quiz ${slotProps.data.name}`"
-                               tag="a">
-                    <highlighted-value :value="slotProps.data.name" :filter="filters.global.value" />
-                  </router-link>
-                </div>
-                <div class="flex flex-grow-1 align-items-start justify-content-end">
-                  <router-link :data-cy="`managesQuizBtn_${slotProps.data.quizId}`"
-                               :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
-                               :aria-label="`Manage Quiz ${slotProps.data.name}`">
-                    <SkillsButton label="Manage"
-                                  icon="fas fa-arrow-circle-right"
+            <div v-if="slotProps.field === 'name'" class="flex w-full">
+              <div class="flex align-items-start justify-content-start">
+                <router-link :data-cy="`managesQuizLink_${slotProps.data.quizId}`"
+                             :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
+                             :aria-label="`Manage Quiz ${slotProps.data.name}`"
+                             tag="a">
+                  <highlighted-value :value="slotProps.data.name" :filter="filters.global.value" />
+                </router-link>
+              </div>
+              <div class="flex flex-1 flex-nowrap align-items-start justify-content-end">
+                <router-link :data-cy="`managesQuizBtn_${slotProps.data.quizId}`"
+                             :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
+                             :aria-label="`Manage Quiz ${slotProps.data.name}`">
+                  <SkillsButton label="Manage"
+                                icon="fas fa-arrow-circle-right"
                                   class="flex-shrink-1"
-                                  outlined
-                                  size="small"/>
-                  </router-link>
-                  <ButtonGroup class="ml-1">
-                    <SkillsButton @click="showUpdateModal(slotProps.data)"
-                                  icon="fas fa-edit"
-                                  outlined
-                                  :data-cy="`editQuizButton_${slotProps.data.quizId}`"
-                                  :aria-label="`Edit Quiz ${slotProps.data.name}`"
-                                  :ref="`edit_${slotProps.data.quizId}`"
-                                  :id="`edit_${slotProps.data.quizId}`"
-                                  :track-for-focus="true"
-                                  title="Edit Quiz">
-                    </SkillsButton>
-                    <SkillsButton @click="showDeleteWarningModal(slotProps.data)"
-                                  icon="text-warning fas fa-trash"
-                                  outlined
-                                  :data-cy="`deleteQuizButton_${slotProps.data.quizId}`"
-                                  :aria-label="'delete Quiz '+slotProps.data.name"
-                                  :ref="`delete_${slotProps.data.quizId}`"
-                                  :id="`delete_${slotProps.data.quizId}`"
-                                  :track-for-focus="true"
-                                  title="Delete Quiz">
-                    </SkillsButton>
-                  </ButtonGroup>
-                </div>
+                                outlined
+                                size="small"/>
+                </router-link>
+                <ButtonGroup class="ml-1 flex-nowrap">
+                  <SkillsButton @click="showUpdateModal(slotProps.data)"
+                                icon="fas fa-edit"
+                                outlined
+                                :data-cy="`editQuizButton_${slotProps.data.quizId}`"
+                                :aria-label="`Edit Quiz ${slotProps.data.name}`"
+                                :ref="`edit_${slotProps.data.quizId}`"
+                                :id="`edit_${slotProps.data.quizId}`"
+                                :track-for-focus="true"
+                                title="Edit Quiz">
+                  </SkillsButton>
+                  <SkillsButton @click="showDeleteWarningModal(slotProps.data)"
+                                icon="text-warning fas fa-trash"
+                                outlined
+                                :data-cy="`deleteQuizButton_${slotProps.data.quizId}`"
+                                :aria-label="'delete Quiz '+slotProps.data.name"
+                                :ref="`delete_${slotProps.data.quizId}`"
+                                :id="`delete_${slotProps.data.quizId}`"
+                                :track-for-focus="true"
+                                title="Delete Quiz">
+                  </SkillsButton>
+                </ButtonGroup>
+              </div>
             </div>
             <div v-else-if="slotProps.field === 'type'">
               <highlighted-value :value="slotProps.data[col.key]" :filter="filters.global.value" />

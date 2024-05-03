@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router'
 import { useUserInfo } from '@/components/utils/UseUserInfo.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import { useFocusState } from '@/stores/UseFocusState.js'
 import QuizService from '@/components/quiz/QuizService.js'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
@@ -20,6 +21,7 @@ const route = useRoute()
 const userInfo = useUserInfo()
 const appConfig = useAppConfig()
 const focusState = useFocusState()
+const responsive = useResponsiveBreakpoints()
 
 const initialLoad = ref(true)
 const userRoles = ref([])
@@ -162,7 +164,8 @@ const addUserRole = () => {
               }}</span>
             </template>
 
-            <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable">
+            <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
+                    :class="{'flex': responsive.md.value }">
               <template #header>
                 <span class="text-primary"><i class="fas fa-user skills-color-users"
                                               aria-hidden="true"></i> {{ col.label }}</span>

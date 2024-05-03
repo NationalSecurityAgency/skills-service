@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { FilterMatchMode } from 'primevue/api'
 import { useRoute } from 'vue-router'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import { useUserInfo } from '@/components/utils/UseUserInfo.js'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import InputGroupAddon from 'primevue/inputgroupaddon'
@@ -18,6 +19,7 @@ import LoadingContainer from '@/components/utils/LoadingContainer.vue'
 const route = useRoute()
 const userInfo = useUserInfo()
 const appConfig = useAppConfig()
+const responsive = useResponsiveBreakpoints()
 
 const quizType = ref('')
 const skills = ref([])
@@ -161,7 +163,8 @@ const onFilter = (filterEvent) => {
                     </span>
                 </div>
               </template>
-              <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable">
+              <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
+                      :class="{'flex': responsive.md.value }">
                 <template #header>
                   <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
                 </template>
