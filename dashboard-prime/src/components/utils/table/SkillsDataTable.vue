@@ -76,7 +76,7 @@ const onPage = (pageEvent) => {
               :class="{'flex': responsive.md.value }">
         <template #header>
           <span class="mr-1 lg:mr-0 md:hidden"><i class="fas fa-expand-arrows-alt" aria-hidden="true"></i> {{ expanderLabel }}</span>
-          <span class="mr-1 lg:mr-0 hidden md:block" :aria-label="expanderLabel">&#8203;</span>
+          <span class="sr-only hidden md:block">expanderLabel</span>
         </template>
       </Column>
 
