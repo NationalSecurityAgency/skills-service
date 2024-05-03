@@ -41,9 +41,9 @@ const navigateBack = () => {
 
         <div :class="{'mx-5': showBackButton}" class="text-center">
           <SkillsDisplayBreadcrumb></SkillsDisplayBreadcrumb>
-          <div data-cy="title" class="skills-title uppercase text-3xl">
+          <h1 data-cy="title" class="skills-title uppercase text-3xl">
             <slot />
-          </div>
+          </h1>
         </div>
 
         <div v-if="!themeState.theme.disableSkillTreeBrand"
