@@ -9,13 +9,11 @@ import MyRank from '@/skills-display/components/rank/MyRank.vue'
 import PointProgressChart from '@/skills-display/components/progress/points/PointProgressChart.vue'
 import SubjectTiles from '@/skills-display/components/subjects/SubjectTiles.vue'
 import ProjectDescription from '@/skills-display/components/home/ProjectDescription.vue'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import MyBadges from '@/skills-display/components/badges/MyBadges.vue'
 
 const skillsDisplayTheme = useSkillsDisplayThemeState()
 const userProgress = useUserProgressSummaryState()
-const displayPreferences = useSkillsDisplayPreferencesState()
 const attributes = useSkillsDisplayAttributesState()
 const log = useLog()
 
@@ -25,7 +23,7 @@ onMounted(() => {
 })
 const description = computed(() => userProgress.userProgressSummary?.projectDescription)
 const showDescription = computed(() =>
-  !displayPreferences.isSummaryOnly
+  !attributes.isSummaryOnly
   && description.value
   && attributes.displayProjectDescription
 )

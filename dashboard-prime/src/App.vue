@@ -17,12 +17,11 @@ import { useErrorHandling } from '@/interceptors/UseErrorHandling.js'
 import CustomizableHeader from '@/components/customization/CustomizableHeader.vue'
 import CustomizableFooter from '@/components/customization/CustomizableFooter.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useIframeInit } from '@/skills-display/iframe/UseIframeInit.js'
 import NewSoftwareVersion from '@/components/header/NewSoftwareVersion.vue'
 import { usePageVisitService } from '@/components/utils/services/UsePageVisitService.js'
-import { invoke, until, useCounter } from '@vueuse/core'
+import { invoke, until } from '@vueuse/core'
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()

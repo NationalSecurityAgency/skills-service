@@ -1,6 +1,5 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
+import { computed, onMounted, ref } from 'vue'
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
 import { useRoute } from 'vue-router'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
@@ -8,8 +7,9 @@ import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillProgress from '@/skills-display/components/progress/SkillProgress.vue'
 import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
-const displayPreferences = useSkillsDisplayPreferencesState()
+const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const scrollIntoViewState = useScrollSkillsIntoViewState()
@@ -55,7 +55,7 @@ const isLoading = computed(() => loadingSkill.value)
 <template>
   <div>
     <div v-if="!isLoading">
-      <skills-title>{{ displayPreferences.skillDisplayName }} Overview</skills-title>
+      <skills-title>{{ attributes.skillDisplayName }} Overview</skills-title>
       <Card class="mt-3" :pt="{ content: { class: 'p-0' }}">
         <template #content>
           <div class="flex mb-4" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !skillsDisplayInfo.isCrossProject()">
@@ -71,7 +71,7 @@ const isLoading = computed(() => loadingSkill.value)
               </SkillsButton>
             </div>
             <div class="flex-1 text-center " style="font-size: 0.9rem;" data-cy="skillOrder"><span
-              class="font-italic">{{ displayPreferences.skillDisplayName }}</span> <b>{{ skill.orderInGroup
+              class="font-italic">{{ attributes.skillDisplayName }}</span> <b>{{ skill.orderInGroup
               }}</b> <span class="font-italic">of</span> <b>{{ skill.totalSkills }}</b>
             </div>
             <div>

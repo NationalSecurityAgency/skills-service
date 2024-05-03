@@ -11,6 +11,9 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const projectId = ref('')
   const serviceUrl = ref('')
   const isInIframe = ref(false)
+  const isSummaryOnly = ref(false)
+  const internalBackButton = ref(true)
+
   const log = useLog()
   const skillsDisplayInfo = useSkillsDisplayInfo()
   const route = useRoute()
@@ -45,6 +48,12 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
 
   const displayProjectDescription = computed(() => config.value.displayProjectDescription)
   const levelDisplayName = computed(() => config.value.levelDisplayName || 'Level')
+  const projectDisplayName = computed(() => config.value.projectDisplayName || 'Project')
+  const subjectDisplayName = computed(() => config.value.subjectDisplayName || 'Subject')
+  const groupDisplayName = computed(() => config.value.groupDisplayName || 'Group')
+  const skillDisplayName = computed(() => config.value.skillDisplayName || 'Skill')
+
+
   const maxSelfReportMessageLength = computed(() => config.value.maxSelfReportMessageLength)
   const groupDescriptionsOn = computed(() => config.value.groupDescriptionsOn)
   return {
@@ -56,6 +65,12 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     levelDisplayName,
     isInIframe,
     maxSelfReportMessageLength,
-    groupDescriptionsOn
+    groupDescriptionsOn,
+    projectDisplayName,
+    subjectDisplayName,
+    groupDisplayName,
+    skillDisplayName,
+    internalBackButton,
+    isSummaryOnly
   }
 })

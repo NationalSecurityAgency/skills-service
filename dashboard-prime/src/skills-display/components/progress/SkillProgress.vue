@@ -5,14 +5,12 @@ import { computed } from 'vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillsSummaryCards from '@/skills-display/components/progress/SkillsSummaryCards.vue'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import SkillOverviewFooter from '@/skills-display/components/skill/SkillOverviewFooter.vue'
 import SkillProgressBar from '@/skills-display/components/progress/skill/SkillProgressBar.vue'
 import AchievementDate from '@/skills-display/components/skill/AchievementDate.vue'
 import SkillBadgesAndTags from '@/skills-display/components/progress/skill/SkillBadgesAndTags.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import CatalogImportStatus from '@/skills-display/components/progress/CatalogImportStatus.vue'
-import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
 
 const props = defineProps({
   skill: Object,
@@ -54,7 +52,6 @@ const props = defineProps({
 const emit = defineEmits(['add-tag-filter'])
 const route = useRoute()
 const skillsDisplayInfo = useSkillsDisplayInfo()
-const preferences = useSkillsDisplayPreferencesState()
 const attributes = useSkillsDisplayAttributesState()
 
 const buildToRoute = () => {
@@ -106,11 +103,11 @@ const childSkillsInternal = computed(() => {
     <!--    </div>-->
 
     <Message v-if="skill.crossProject && !isSkillComplete" data-cy="crossProjAlert" :closable="false">
-      This is a cross-{{ preferences.projectDisplayName.toLowerCase() }} {{ preferences.skillDisplayName.toLowerCase()
+      This is a cross-{{ attributes.projectDisplayName.toLowerCase() }} {{ attributes.skillDisplayName.toLowerCase()
       }}! In order to complete
-      this {{ preferences.skillDisplayName.toLowerCase() }} please visit <strong>{{
+      this {{ attributes.skillDisplayName.toLowerCase() }} please visit <strong>{{
         skill.projectName
-      }}</strong> {{ preferences.projectDisplayName.toLowerCase() }}! Happy playing!!
+      }}</strong> {{ attributes.projectDisplayName.toLowerCase() }}! Happy playing!!
     </Message>
 
 
@@ -166,7 +163,7 @@ const childSkillsInternal = computed(() => {
           ***
         </div>
         <p v-if="skill.subjectName" class="text-secondary mt-3">
-          {{ preferences.subjectDisplayName }}: {{ skill.subjectName }}
+          {{ attributes.subjectDisplayName }}: {{ skill.subjectName }}
         </p>
 
         <achievement-date

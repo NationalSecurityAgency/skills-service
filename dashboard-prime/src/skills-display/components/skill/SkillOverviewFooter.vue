@@ -1,12 +1,12 @@
 <script setup>
-import { computed, ref, nextTick, onMounted } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import JustificationInput from '@/skills-display/components/skill/JustificationInput.vue'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 const props = defineProps({
   skill: Object
@@ -16,7 +16,7 @@ const numFormat = useNumberFormat()
 const timeUtils = useTimeUtils()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const skillsDisplayService = useSkillsDisplayService()
-const preferences = useSkillsDisplayPreferencesState()
+const attributes = useSkillsDisplayAttributesState()
 const skillState = useSkillsDisplaySubjectState()
 
 const selfReport = ref({
@@ -308,7 +308,7 @@ const focusOnId = (elementId) => {
             Congrats! You just earned
             <Tag>{{ selfReport.res.pointsEarned }}</Tag>
             points<span
-            v-if="isCompleted"> and <b>completed</b> the {{ preferences.skillDisplayName.toLowerCase() }}</span>!
+            v-if="isCompleted"> and <b>completed</b> the {{ attributes.skillDisplayName.toLowerCase() }}</span>!
           </Message>
           <Message v-if="isPointsEarned && isMotivationalSkill"
                    severity="success"
@@ -333,8 +333,8 @@ const focusOnId = (elementId) => {
             v-if="!isAlreadyPerformed() && isApprovalRequired">
             <div>
               <b>Submitted successfully!</b>
-              This {{ preferences.skillDisplayName.toLowerCase() }} <b class="text-info">requires approval</b> from a
-              {{ preferences.projectDisplayName.toLowerCase() }} administrator. Now let's play the waiting game!
+              This {{ attributes.skillDisplayName.toLowerCase() }} <b class="text-info">requires approval</b> from a
+              {{ attributes.projectDisplayName.toLowerCase() }} administrator. Now let's play the waiting game!
             </div>
           </Message>
         </div>

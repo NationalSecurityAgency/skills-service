@@ -6,10 +6,10 @@ import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import AnimatedNumber from '@/skills-display/components/utilities/AnimatedNumber.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useRoute } from 'vue-router'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 const props = defineProps({
   skill: Object,
@@ -26,7 +26,7 @@ const props = defineProps({
 const numFormat = useNumberFormat()
 const timeUtils = useTimeUtils()
 const appConfig = useAppConfig()
-const displayPref = useSkillsDisplayPreferencesState()
+const attributes = useSkillsDisplayAttributesState()
 const route = useRoute()
 const skillDisplayInfo = useSkillsDisplayInfo()
 
@@ -130,8 +130,8 @@ const showLastViewedIndicator = computed(() => {
 
         <div
           v-if="skill.isSkillsGroupType && skill.numSkillsRequired > 0 && skill.numSkillsRequired < skill.children.length"
-          :title="`A ${displayPref.groupDisplayName} allows a ${displayPref.skillDisplayName} to be defined by the collection ` +
-                            `of other ${displayPref.skillDisplayName}s within a ${displayPref.projectDisplayName}. A ${displayPref.skillDisplayName} Group can require the completion of some or all of the included ${displayPref.skillDisplayName}s before the group be achieved.`"
+          :title="`A ${attributes.groupDisplayName} allows a ${attributes.skillDisplayName} to be defined by the collection ` +
+                            `of other ${attributes.skillDisplayName}s within a ${attributes.projectDisplayName}. A ${attributes.skillDisplayName} Group can require the completion of some or all of the included ${attributes.skillDisplayName}s before the group be achieved.`"
           class="text-sm align-content-center ml-2"
           data-cy="groupSkillsRequiredBadge">
           <span class="">Requires </span>

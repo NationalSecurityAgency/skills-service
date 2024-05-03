@@ -1,12 +1,12 @@
 <script setup>
 import { computed } from 'vue'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import SkillsDisplayBreadcrumb from '@/skills-display/components/header/SkillsDisplayBreadcrumb.vue'
 import PoweredBySkilltree from '@/skills-display/components/header/PoweredBySkilltree.vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useSkillsDisplayBreadcrumbState } from '@/skills-display/stores/UseSkillsDisplayBreadcrumbState.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
-const displayPreferences = useSkillsDisplayPreferencesState()
+const attributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
 const breadcrumb = useSkillsDisplayBreadcrumbState()
 
@@ -16,7 +16,7 @@ const props = defineProps({
 })
 
 const showBackButton = computed(() => {
-  return props.backButton && displayPreferences.internalBackButton
+  return props.backButton && attributes.internalBackButton
 })
 const navigateBack = () => {
   breadcrumb.navUpBreadcrumb()

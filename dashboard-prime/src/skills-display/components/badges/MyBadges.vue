@@ -1,6 +1,6 @@
 <script setup>
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 const props = defineProps({
   numBadgesCompleted: {
@@ -8,7 +8,7 @@ const props = defineProps({
     required: true
   }
 })
-const preferences = useSkillsDisplayPreferencesState()
+const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 
 </script>
@@ -33,15 +33,14 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
        </strong>
       </span>
     </template>
-    <template #footer v-if="!preferences.isSummaryOnly">
+    <template #footer v-if="!attributes.isSummaryOnly">
       <router-link
         :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('BadgesDetailsPage') }"
         aria-label="Click to navigate to My Rank page"
-        data-cy="myRankBtn">
+        data-cy="myBadgesBtn">
         <Button
           label="View"
           icon="far fa-eye"
-          data-cy="myBadgesBtn"
           outlined class="w-full" size="small" />
       </router-link>
     </template>

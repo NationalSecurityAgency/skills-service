@@ -1,14 +1,14 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useRoute } from 'vue-router'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import SkillsBreadcrumbItem from '@/components/header/SkillsBreadcrumbItem.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayBreadcrumbState } from '@/skills-display/stores/UseSkillsDisplayBreadcrumbState.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 const themeState = useSkillsDisplayThemeState()
-const displayPreferences = useSkillsDisplayPreferencesState()
+const displayAttributes = useSkillsDisplayAttributesState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const route = useRoute()
 const breadcrumbState = useSkillsDisplayBreadcrumbState()
@@ -104,16 +104,16 @@ const hyphenToCamelCase = (value) => {
 }
 const substituteCustomLabels = (label) => {
   if (label.toLowerCase() === 'project') {
-    return displayPreferences.projectDisplayName
+    return displayAttributes.projectDisplayName
   }
   if (label.toLowerCase() === 'subject') {
-    return displayPreferences.subjectDisplayName
+    return displayAttributes.subjectDisplayName
   }
   if (label.toLowerCase() === 'group') {
-    return displayPreferences.groupDisplayName
+    return displayAttributes.groupDisplayName
   }
   if (label.toLowerCase() === 'skill') {
-    return displayPreferences.skillDisplayName
+    return displayAttributes.skillDisplayName
   }
   return label
 }

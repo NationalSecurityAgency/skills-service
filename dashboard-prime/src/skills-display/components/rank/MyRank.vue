@@ -1,12 +1,12 @@
 <script setup>
 import { computed, onMounted } from 'vue'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useRoute } from 'vue-router'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
-const preferences = useSkillsDisplayPreferencesState()
+const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const progress = useUserProgressSummaryState()
 const numberFormat = useNumberFormat()
@@ -53,7 +53,7 @@ const toRankDetailsPage = computed(() => {
         </strong>
       </span>
   </template>
-  <template #footer v-if="!preferences.isSummaryOnly">
+  <template #footer v-if="!attributes.isSummaryOnly">
     <router-link
       :to="toRankDetailsPage"
       aria-label="Click to navigate to My Rank page"

@@ -1,14 +1,14 @@
 <script setup>
-import { onMounted, ref, computed, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import SkillProgress from '@/skills-display/components/progress/SkillProgress.vue'
 import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 import SkillTypeFilter from '@/skills-display/components/skill/SkillTypeFilter.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 // subject: {
 //   type: Object,
@@ -41,7 +41,7 @@ const props = defineProps({
 })
 
 const scrollIntoViewState = useScrollSkillsIntoViewState()
-const preferences = useSkillsDisplayPreferencesState()
+const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
 const subjectAndSkillsState = useSkillsDisplaySubjectState()
 const parentFrame = useSkillsDisplayParentFrameState()
@@ -250,8 +250,8 @@ const isLastViewedScrollSupported = computed(() => {
                 <InputGroup>
                   <InputText
                     v-model="searchString"
-                    :placeholder="`Search ${preferences.skillDisplayName.toLowerCase()}s`"
-                    :aria-label="`Search ${preferences.skillDisplayName}s`"
+                    :placeholder="`Search ${attributes.skillDisplayName.toLowerCase()}s`"
+                    :aria-label="`Search ${attributes.skillDisplayName}s`"
                     data-cy="skillsSearchInput" />
                   <InputGroupAddon class="p-0 m-0">
                     <SkillsButton
@@ -285,10 +285,10 @@ const isLastViewedScrollSupported = computed(() => {
 
           <div class="" data-cy="skillDetailsToggle">
             <div class="flex align-content-center">
-              <span class="text-muted pr-1 align-content-center">{{ preferences.skillDisplayName }} Details:</span>
+              <span class="text-muted pr-1 align-content-center">{{ attributes.skillDisplayName }} Details:</span>
               <InputSwitch v-model="showDescriptionsInternal"
                            @change="onDetailsToggle"
-                           :aria-label="`Show ${preferences.skillDisplayName} Details`"
+                           :aria-label="`Show ${attributes.skillDisplayName} Details`"
                            data-cy="toggleSkillDetails" />
             </div>
           </div>
@@ -362,8 +362,8 @@ const isLastViewedScrollSupported = computed(() => {
 
       <no-content2
         v-if="!(skillsInternal && skillsInternal.length > 0) && showNoDataMsg"
-        :title="`${preferences.skillDisplayName}s have not been added yet.`"
-        :message="`Please contact this ${preferences.projectDisplayName.toLowerCase()}'s administrator.`" />
+        :title="`${attributes.skillDisplayName}s have not been added yet.`"
+        :message="`Please contact this ${attributes.projectDisplayName.toLowerCase()}'s administrator.`" />
     </template>
   </Card>
 </template>

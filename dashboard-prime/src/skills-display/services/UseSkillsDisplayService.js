@@ -127,31 +127,62 @@ export const useSkillsDisplayService = () => {
 
   const getBadgeSummaries = () => {
     return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/badges/summary`, {
-      params: getUserIdAndVersionParams(),
-    }).then((result) => result.data.map((summary) => addMetaToSummary(summary)));
+      params: getUserIdAndVersionParams()
+    }).then((result) => result.data.map((summary) => addMetaToSummary(summary)))
   }
 
   const getBadgeSkills = (badgeId, global = null, includeSkills = true) => {
-    const requestParams = getUserIdAndVersionParams();
-    requestParams.global = global;
-    requestParams.includeSkills = includeSkills;
+    const requestParams = getUserIdAndVersionParams()
+    requestParams.global = global
+    requestParams.includeSkills = includeSkills
     return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/badges/${encodeURIComponent(badgeId)}/summary`, {
-      params: requestParams,
+      params: requestParams
     }).then((result) => {
       if (includeSkills) {
-        const res = addMetaToSummary(result.data);
+        const res = addMetaToSummary(result.data)
         if (res.projectLevelsAndSkillsSummaries) {
-          res.projectLevelsAndSkillsSummaries = res.projectLevelsAndSkillsSummaries.map((summary) => addMetaToSummary(summary));
+          res.projectLevelsAndSkillsSummaries = res.projectLevelsAndSkillsSummaries.map((summary) => addMetaToSummary(summary))
         }
-        return res;
+        return res
       }
-      return result.data;
+      return result.data
     })
   }
 
   const getSkillDependencies = (skillId) => {
     return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skills/${encodeURIComponent(skillId)}/dependencies`, {
-      params: getUserIdAndVersionParams(),
+      params: getUserIdAndVersionParams()
+    }).then((result) => result.data)
+  }
+
+  const getUserSkillsRankingDistribution = (subjectId) => {
+    const url = subjectId ?
+      `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/subjects/${encodeURIComponent(subjectId)}/rankDistribution` :
+      `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/rankDistribution`
+    const requestParams = getUserIdAndVersionParams()
+    requestParams.subjectId = subjectId
+    return axios.get(url, {
+      params: requestParams
+    }).then((result) => result.data)
+  }
+
+  const getRankingDistributionUsersPerLevel = (subjectId) => {
+    const url = subjectId ?
+      `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/subjects/${encodeURIComponent(subjectId)}/rankDistribution/usersPerLevel` :
+      `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/rankDistribution/usersPerLevel`;
+    return axios.get(url, {
+      params: {
+        subjectId,
+      },
+    }).then((result) => result.data);
+  }
+
+  const getUserSkillsRanking =(subjectId) => {
+    let url = subjectId  ?
+      `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/subjects/${encodeURIComponent(subjectId)}/rank` :
+      `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/rank`;
+    return axios.get(url, {
+      params: getUserIdAndVersionParams()
     }).then((result) => result.data);
   }
 
@@ -165,6 +196,9 @@ export const useSkillsDisplayService = () => {
     removeApprovalRejection,
     getBadgeSummaries,
     getBadgeSkills,
-    getSkillDependencies
+    getSkillDependencies,
+    getUserSkillsRanking,
+    getUserSkillsRankingDistribution,
+    getRankingDistributionUsersPerLevel
   }
 }

@@ -1,13 +1,13 @@
 <script setup>
 import { computed } from 'vue'
 import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import SubjectTile from '@/skills-display/components/subjects/SubjectTile.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import SearchAllProjectSkills from '@/skills-display/components/subjects/SearchAllProjectSkills.vue'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 const userProgress = useUserProgressSummaryState()
-const preferences = useSkillsDisplayPreferencesState()
+const attributes = useSkillsDisplayAttributesState()
 const hasData = computed(() => userProgress.userProgressSummary.subjects?.length > 0)
 </script>
 
@@ -17,8 +17,8 @@ const hasData = computed(() => userProgress.userProgressSummary.subjects?.length
       <template #content>
         <no-content2
           class="my-2 text-center"
-          :title="`${preferences.subjectDisplayName}s have not been added yet.`"
-          :message="`Please contact this ${preferences.projectDisplayName.toLowerCase()}'s administrator.`" />
+          :title="`${attributes.subjectDisplayName}s have not been added yet.`"
+          :message="`Please contact this ${attributes.projectDisplayName.toLowerCase()}'s administrator.`" />
       </template>
     </Card>
     <search-all-project-skills v-if="hasData" class="mb-3"/>

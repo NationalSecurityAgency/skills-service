@@ -1,12 +1,11 @@
 <script setup>
 import { computed, nextTick, ref } from 'vue'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import PanelMenu from 'primevue/panelmenu'
 import OverlayPanel from 'primevue/overlaypanel'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
-
-const preferences = useSkillsDisplayPreferencesState()
+const attributes = useSkillsDisplayAttributesState()
 const skillDisplayInfo = useSkillsDisplayInfo()
 const props = defineProps({
   skills: {
@@ -119,7 +118,7 @@ const filters = computed(() => {
   const filters = [
     {
       key: 'progressGroup',
-      label: `${preferences.skillDisplayName} Progress Filter`,
+      label: `${attributes.skillDisplayName} Progress Filter`,
       items: [
         {
           icon: 'fas fa-battery-empty',
@@ -152,12 +151,12 @@ const filters = computed(() => {
     },
     {
       key: 'attributeGroups',
-      label: `${preferences.skillDisplayName} Attribute Filter`,
+      label: `${attributes.skillDisplayName} Attribute Filter`,
       items: createAttributeFilterItems()
     },
     {
       key: 'selfReportGroups',
-      label: `${preferences.skillDisplayName} Self Reporting Filter`,
+      label: `${attributes.skillDisplayName} Self Reporting Filter`,
       items: [
         {
           icon: 'fas fa-user-check',

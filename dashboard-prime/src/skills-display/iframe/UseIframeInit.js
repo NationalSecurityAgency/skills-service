@@ -1,5 +1,4 @@
 import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
-import { useSkillsDisplayPreferencesState } from '@/skills-display/stores/UseSkillsDisplayPreferencesState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import Postmate from 'postmate'
@@ -10,7 +9,6 @@ import ThemeHelper from '@/skills-display/theme/ThemeHelper.js'
 export const useIframeInit = () => {
 
   const parentState = useSkillsDisplayParentFrameState()
-  const displayPreferences = useSkillsDisplayPreferencesState()
   const displayAttributes = useSkillsDisplayAttributesState()
   const log = useLog()
   const loadedIframe = ref(false)
@@ -39,10 +37,10 @@ export const useIframeInit = () => {
       resizeObserver.observe(document.querySelector("body"))
 
       // will only display summary and component will not be interactive
-      displayPreferences.isSummaryOnly = parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false
+      displayAttributes.isSummaryOnly = parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false
 
       // whether to use an internal back button as opposed to the browser back button
-      // displayPreferences.internalBackButton = parent.model.internalBackButton == null || parent.model.internalBackButton
+      // displayAttributes.internalBackButton = parent.model.internalBackButton == null || parent.model.internalBackButton
 
       displayAttributes.projectId = parent.model.projectId
       displayAttributes.serviceUrl = parent.model.serviceUrl
