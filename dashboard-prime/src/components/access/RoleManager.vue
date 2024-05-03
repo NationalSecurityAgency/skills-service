@@ -232,7 +232,8 @@ function editItem(item) {
   });
 }
 
-function updateUserRole(newRole) {
+function updateUserRole(selectedRole) {
+  const newRole = selectedRole.value;
   const userRoleToUpdate = data.value.find((user) => user.isEdited);
   if (userRoleToUpdate) {
     // mark record as loading
@@ -311,17 +312,25 @@ defineExpose({
           </div>
         </template>
       </Column>
-      <Column header="Role" field="roleName" sortable>
+      <Column header="Role" field="roleName" sortable style="max-width: 10em;">
         <template #header>
           <span class="mr-2"><i class="fas fa-id-card text-danger" aria-hidden="true"></i> </span>
         </template>
         <template #body="slotProps">
           <div v-if="!slotProps.data.isEdited">{{ getRoleDisplay(slotProps.data.roleName) }}</div>
+          <Dropdown v-else v-model="slotProps.data.roleName"
+                         :options="userRole.options"
+                         optionLabel="text"
+                         optionValue="value"
+                         :aria-label="`select new access role for user ${slotProps.data.userId}`"
+                         :data-cy="`roleDropDown_${slotProps.data.userId}`"
+                         @change="updateUserRole">
+          </Dropdown>
         </template>
       </Column>
       <Column header="Controls">
         <template #body="slotProps">
-          <div class="float-right mr-1" :data-cy="`controlsCell_${slotProps.data.userId}`">
+          <div class="float-right mr-1 flex gap-2" :data-cy="`controlsCell_${slotProps.data.userId}`">
 <!--            <i v-if="!notCurrentUser(slotProps.data.userId)"-->
 <!--               data-cy="cannotRemoveWarning"-->
 <!--               class="text-warning fas fa-exclamation-circle mr-1"-->
@@ -337,6 +346,10 @@ defineExpose({
                         :aria-label="`remove access role from user ${slotProps.data.userId}`"
                         data-cy="removeUserBtn" icon="fas fa-trash" label="Delete" size="small">
               </SkillsButton>
+
+            <div v-if="!notCurrentUser(slotProps.data.userId)">
+              (Can't remove or edit yourself)
+            </div>
           </div>
         </template>
       </Column>
