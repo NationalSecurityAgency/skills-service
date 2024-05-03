@@ -54,6 +54,10 @@ export const useSkillsDisplayInfo = () => {
     return false
   }
 
+  const isLocalTestPath = () => {
+    return route.path.startsWith('/test-skills-display/')
+  }
+
   const routerPush = (pageName, params) => {
     router.push({ name: getContextSpecificRouteName(pageName), params })
   }
@@ -93,6 +97,7 @@ export const useSkillsDisplayInfo = () => {
     isGlobalBadgePage,
     createToBadgeLink,
     isDependency,
-    isCrossProject
+    isCrossProject,
+    isLocalTestPath
   }
 }

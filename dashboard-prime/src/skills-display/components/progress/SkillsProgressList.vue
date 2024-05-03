@@ -8,6 +8,7 @@ import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsD
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 import SkillTypeFilter from '@/skills-display/components/skill/SkillTypeFilter.vue'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 // subject: {
 //   type: Object,
@@ -44,6 +45,7 @@ const preferences = useSkillsDisplayPreferencesState()
 const skillsDisplayService = useSkillsDisplayService()
 const subjectAndSkillsState = useSkillsDisplaySubjectState()
 const parentFrame = useSkillsDisplayParentFrameState()
+const skillsDisplayInfo = useSkillsDisplayInfo()
 const searchString = ref('')
 
 let filter = () => true
@@ -236,6 +238,7 @@ const isLastViewedScrollSupported = computed(() => {
 
 <template>
   <Card data-cy="skillsProgressList"
+        :class="{'skills-display-test-link': skillsDisplayInfo.isLocalTestPath()}"
         v-if="(skillsInternal && skillsInternal.length > 0 || searchString || showNoDataMsg)">
     <template #header>
       <div class="px-4 pt-3">
@@ -364,6 +367,12 @@ const isLastViewedScrollSupported = computed(() => {
     </template>
   </Card>
 </template>
+
+<style>
+.skills-display-test-link a {
+  color: #295bac !important;
+}
+</style>
 
 <style scoped>
 

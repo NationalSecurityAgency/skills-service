@@ -123,9 +123,9 @@ const showLastViewedIndicator = computed(() => {
             </div>
           </div>
         </div>
-        <div v-if="skill.copiedFromProjectId" class="text-truncate d-inline-block ml-2"
+        <div v-if="skill.copiedFromProjectId" class="ml-2"
              style="max-width: 15rem;"><span class="text-secondary font-italic"> in </span>
-          <span class="font-italic">{{ skill.copiedFromProjectName }}</span>
+          <span class="font-italic" data-cy="importedFromProj">{{ skill.copiedFromProjectName }}</span>
         </div>
 
         <div
