@@ -67,7 +67,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
 
     beforeEach(() => {
         // so we can see full leaderboard
-        cy.viewport(1200, 1600);
+        cy.viewport(1300, 1600);
     });
 
     it('leaderboard top 10', () => {
@@ -82,7 +82,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
             .as('cyRows');
 
         const date = moment.utc()
-            .format('MM/DD/YYYY');
+            .format('YYYY-MM-DD');
         for (let i = 1; i <= 10; i += 1) {
             cy.get('@cyRows')
                 .eq(i - 1)
@@ -106,53 +106,11 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', { blackout: '[data-cy="userFirstSeen"]' });
     });
 
-    it('leaderboard top 10 - opt out', () => {
-        cy.request('POST', '/app/userInfo/settings', [{
-            'settingGroup': 'user.prefs',
-            'value': true,
-            'setting': 'rank_and_leaderboard_optOut',
-            'lastLoadedValue': '',
-            'dirty': true
-        }]);
-
-        cy.cdVisit('/?loginAsUser=skills@skills.org');
-        cy.get('[data-cy="myRank"]')
-            .contains('Opted-Out');
-        cy.get('[data-cy="myRank"]')
-            .contains('Your position would be 13 if you opt-in');
-        cy.wait(2000)
-        cy.matchSnapshotImageForElement('[data-cy="myRank"]', {
-            name: 'my-rank-opted-out',
-            blackout: '[data-cy="userFirstSeen"]'
-        });
-
-        cy.cdClickRank();
-
-        cy.get(tableSelector)
-            .contains('Loading...')
-            .should('not.exist');
-        cy.get(rowSelector)
-            .should('have.length', 10)
-            .as('cyRows');
-
-        cy.get('[data-cy="myRankPositionStatCard"]')
-            .contains('Opted-Out');
-        cy.get('[data-cy="leaderboard"]')
-            .contains('You selected to opt-out');
-
-        cy.wait(2000)
-        cy.matchSnapshotImage({
-            name: 'rank-overview-leaderboard-opted-out',
-            blackout: '[data-cy="userFirstSeen"]'
-        });
-    });
-
     if (!Cypress.env('oauthMode')) {
         it('leaderboard 10 Around Me', () => {
             cy.cdVisit('/rank');
             cy.get('[data-cy="myRankPositionStatCard"]').contains('13')
-            cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"]')
-                .contains('10 Around Me')
+            cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"] [data-cy="select-tenAroundMe"]')
                 .click();
 
             cy.get(tableSelector)
@@ -163,7 +121,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
                 .as('cyRows');
 
             const date = moment.utc()
-                .format('MM/DD/YYYY');
+                .format('YYYY-MM-DD');
             for (let i = 0; i < 6; i += 1) {
                 cy.get('@cyRows')
                     .eq(i)
@@ -200,8 +158,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
                 .should('have.length', 10)
                 .as('cyRows');
 
-            cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"]')
-                .contains('10 Around Me')
+            cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"] [data-cy="select-tenAroundMe"]')
                 .click();
             cy.get(tableSelector)
                 .contains('Loading...')
@@ -210,8 +167,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
                 .should('have.length', 6)
                 .as('cyRows');
 
-            cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"]')
-                .contains('Top 10')
+            cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"] [data-cy="select-topTen"]')
                 .click();
             cy.get(tableSelector)
                 .contains('Loading...')
@@ -234,8 +190,6 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
                 .should('have.length', 10)
                 .as('cyRows');
 
-            const date = moment.utc()
-                .format('MM/DD/YYYY');
             const usersNums = [10, 11, 12, 9, 8, 7, 6, 5, 4, 3];
             for (let i = 0; i < 10; i += 1) {
                 cy.get('@cyRows')
@@ -265,7 +219,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
                 .as('cyRows');
 
             const date = moment.utc()
-                .format('MM/DD/YYYY');
+                .format('YYYY-MM-DD');
             for (let i = 0; i < 2; i += 1) {
                 cy.get('@cyRows')
                     .eq(i)
@@ -286,4 +240,38 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
             }
         });
     }
+
+    it('leaderboard top 10 - opt out', () => {
+        cy.request('POST', '/app/userInfo/settings', [{
+            'settingGroup': 'user.prefs',
+            'value': true,
+            'setting': 'rank_and_leaderboard_optOut',
+            'lastLoadedValue': '',
+            'dirty': true
+        }]);
+
+        cy.cdVisit('/?loginAsUser=skills@skills.org');
+        cy.get('[data-cy="myRank"]')
+          .contains('Opted-Out');
+        cy.get('[data-cy="myRank"]')
+          .contains('Your position would be 13 if you opt-in');
+        cy.wait(2000)
+        cy.matchSnapshotImageForElement('[data-cy="myRank"]', {
+            name: 'my-rank-opted-out',
+            blackout: '[data-cy="userFirstSeen"]'
+        });
+
+        cy.cdClickRank();
+
+        cy.get('[data-cy="myRankPositionStatCard"]')
+          .contains('Opted-Out');
+        cy.get('[data-cy="leaderboard"]')
+          .contains('You selected to opt-out');
+
+        cy.wait(2000)
+        cy.matchSnapshotImage({
+            name: 'rank-overview-leaderboard-opted-out',
+            blackout: '[data-cy="userFirstSeen"]'
+        });
+    });
 });

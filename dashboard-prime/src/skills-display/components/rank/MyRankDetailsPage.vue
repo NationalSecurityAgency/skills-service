@@ -8,6 +8,7 @@ import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import LevelsBreakdownChart from '@/skills-display/components/rank/LevelsBreakdownChart.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import Leaderboard from '@/skills-display/components/rank/Leaderboard.vue'
 
 const skillsDisplayService = useSkillsDisplayService()
 const route = useRoute()
@@ -49,9 +50,9 @@ const loadData = () => {
 
 const myRankPosition = computed(() => {
   if (!myRank.value) {
-    return -1
+    return 0
   }
-  return myRank.value.optedOut ? -99 : myRank.value.position
+  return myRank.value.optedOut ? 'Opted-Out' : numFormat.pretty(myRank.value.position)
 })
 const totalNumUsers = computed(() => {
   return myRank.value ? myRank.value.numUsers : -1
@@ -72,7 +73,7 @@ const numUsersBehindMe = computed(() => {
 
         <div class="w-min-13rem flex-1">
           <media-info-card
-            :title="`${numFormat.pretty(myRankPosition)}`"
+            :title="myRankPosition"
             class="h-full text-center font-bold"
             :icon-class="`fas fa-users ${colors.getTextClass(0)}`"
             data-cy="myRankPositionStatCard">
@@ -175,26 +176,10 @@ const numUsersBehindMe = computed(() => {
               </div>
             </div>
           </div>
-
-
-          <!--          <my-rank-encouragement-card icon="fa fa-glass-cheers" :icon-color="infoCards().iconColors[2]">-->
-          <!--                        <span v-if="myRank">-->
-          <!--                            <span v-if="numUsersBehindMe <= 0">-->
-          <!--                                <div class="h4 mb-2">Earn those point riches!</div>-->
-          <!--                                <div class="">Earn {{ skillDisplayName }} and you will pass your fellow app users in no time!</div>-->
-          <!--                            </span>-->
-          <!--                            <span v-else>-->
-          <!--                                <div class="h4 mb-2"><strong>{{ numUsersBehindMe | number }}</strong> reasons to celebrate</div>-->
-          <!--                                <div class="">That's how many fellow app users have less points than you. Be Proud!!!</div>-->
-          <!--                            </span>-->
-          <!--                        </span>-->
-          <!--            <span v-else class="text-left" style="width: 4rem;">-->
-          <!--                            <vue-simple-spinner size="medium" line-bg-color="#333" line-fg-color="#17a2b8" message="Get Excited! Results are on their way!"/>-->
-          <!--                        </span>-->
-          <!--          </my-rank-encouragement-card>-->
         </div>
-
       </div>
+
+      <leaderboard class="mt-3"/>
     </div>
   </div>
 </template>

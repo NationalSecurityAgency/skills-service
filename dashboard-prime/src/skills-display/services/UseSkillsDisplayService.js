@@ -186,6 +186,16 @@ export const useSkillsDisplayService = () => {
     }).then((result) => result.data);
   }
 
+  const getLeaderboard = (subjectId, type) => {
+    let url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/subjects/${encodeURIComponent(subjectId)}/leaderboard?type=${type}`;
+    if (!subjectId) {
+      url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/leaderboard?type=${type}`;
+    }
+    return axios.get(url, {
+      params: getUserIdAndVersionParams(),
+    }).then((result) => result.data);
+  }
+
   return {
     loadSubjectSummary,
     updateSkillHistory,
@@ -199,6 +209,7 @@ export const useSkillsDisplayService = () => {
     getSkillDependencies,
     getUserSkillsRanking,
     getUserSkillsRankingDistribution,
-    getRankingDistributionUsersPerLevel
+    getRankingDistributionUsersPerLevel,
+    getLeaderboard
   }
 }

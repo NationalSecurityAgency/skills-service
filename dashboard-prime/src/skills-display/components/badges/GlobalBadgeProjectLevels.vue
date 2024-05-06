@@ -40,14 +40,11 @@ const calculatePercent = (projectLevel) => {
 
 <template>
   <Card>
-    <template #subtitle>
-      <span class="text-2xl">Required Project {{ attributes.levelDisplayName }}s</span>
-    </template>
     <template #content>
       <div v-for="projectSummary in projectSummaries"
            :key="projectSummary.projectId" class="mt-1"
            :data-cy="'gb_'+projectSummary.projectId">
-        <div class="text-2xl">{{ attributes.projectDisplayName }}: {{ projectSummary.projectName }}</div>
+        <div class="text-2xl"><span class="font-italic text-color-secondary">{{ attributes.projectDisplayName }}:</span> {{ projectSummary.projectName }}</div>
         <div class="flex mt-2">
           <div class="text-xl flex-1 mb-1"> Requires {{ attributes.levelDisplayName }} {{ projectSummary.projectLevel.requiredLevel }}</div>
           <div :class="{ 'text-green-600': projectSummary.isFullyComplete }">

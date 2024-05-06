@@ -107,7 +107,7 @@ const showLastViewedIndicator = computed(() => {
           </div>
           <div class="">
             <div v-if="skillDisplayInfo.isGlobalBadgePage.value">
-              <span class="font-italic text-color-secondary">Project:</span> {{ skill.projectName }}
+              <span class="font-italic text-color-secondary">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}
             </div>
             <router-link
               :id="`skillProgressTitleLink-${skill.skillId}`"

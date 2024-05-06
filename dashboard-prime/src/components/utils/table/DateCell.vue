@@ -20,15 +20,16 @@ import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 
 const timeUtils = useTimeUtils();
 
-const props = defineProps(['value']);
+const props = defineProps(['value', 'excludeTime']);
 
 const timeFromNow = computed(() => {
   return timeUtils.timeFromNow(props.value);
 })
-const formattedDate = computed(() => {
-  return timeUtils.formatDate(props.value);
-})
 
+const formattedDate = computed(() => {
+  const formatter = props.excludeTime ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm'
+  return timeUtils.formatDate(props.value, formatter);
+})
 const isToday = (timestamp) => {
   return timeUtils.isToday(timestamp);
 };

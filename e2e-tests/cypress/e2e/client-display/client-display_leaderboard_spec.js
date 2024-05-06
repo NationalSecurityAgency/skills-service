@@ -30,11 +30,11 @@ describe('Client Display Leaderboard Tests', () => {
         cy.cdVisit('/');
         cy.cdClickRank();
 
-        cy.get('[data-cy="noDataYet"]')
+        cy.get('[data-cy="noContent"]')
             .contains('No Users');
     });
 
-    it('no users', () => {
+    it('no users - subject', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
 
@@ -43,7 +43,7 @@ describe('Client Display Leaderboard Tests', () => {
         cy.cdClickSubj(0, 'Subject 1');
         cy.cdClickRank();
 
-        cy.get('[data-cy="noDataYet"]')
+        cy.get('[data-cy="noContent"]')
             .contains('No Users');
         cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', {
             blackout: '[data-cy="userFirstSeen"]'
@@ -65,26 +65,10 @@ describe('Client Display Leaderboard Tests', () => {
         cy.contains('Overall Points');
         cy.cdClickRank();
 
-        cy.get(tableSelector)
-            .contains('Loading...')
-            .should('not.exist');
-        cy.get(rowSelector)
-            .should('have.length', 1)
-            .as('cyRows');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: '#1' }, { colIndex: 1, value: userToValidate }, { colIndex: 2, value: '100 Points' }],
+        ], 5, true, 1, false);
 
-        cy.get('@cyRows')
-            .eq(0)
-            .find('td')
-            .as('row');
-        cy.get('@row')
-            .eq(0)
-            .should('contain.text', `1`);
-        cy.get('@row')
-            .eq(1)
-            .should('contain.text', userToValidate);
-        cy.get('@row')
-            .eq(2)
-            .should('contain.text', '100 Points');
     });
 
     it('nickname displayed in leaderboard', () => {
@@ -112,29 +96,9 @@ describe('Client Display Leaderboard Tests', () => {
         cy.cdClickRank();
         cy.wait('@getLeaderboard');
 
-        cy.get(tableSelector)
-            .contains('Loading...')
-            .should('not.exist');
-        cy.get(rowSelector)
-            .should('have.length', 1)
-            .as('cyRows');
-
-        cy.get('@cyRows')
-            .eq(0)
-            .find('td')
-            .as('row');
-        cy.get('@row')
-            .eq(0)
-            .should('contain.text', `1`);
-        cy.get('@row')
-            .eq(1)
-            .should('contain.text', `John Doe (${userToValidate})`);
-        cy.get('@row')
-            .eq(2)
-            .should('contain.text', '100 Points');
-
-        cy.get('[data-cy="userColumn"]')
-            .contains(`John Doe (${userToValidate})`);
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: '#1' }, { colIndex: 1, value: `John Doe (${userToValidate})` }, { colIndex: 2, value: '100 Points' }],
+        ], 5, true, 1, false);
     });
 
 });
