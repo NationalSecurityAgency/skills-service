@@ -3,8 +3,8 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
-import QuizRunService from '@/common-components/quiz/QuizRunService.js';
-import QuizRun from '@/components/quiz/runs/QuizRun.vue';
+import QuizRunService from '@/skills-display/components/quiz/QuizRunService.js';
+import QuizRun from '@/skills-display/components/quiz/QuizRun.vue';
 
 const router = useRouter()
 const route = useRoute()

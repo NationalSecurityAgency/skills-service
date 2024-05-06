@@ -3,17 +3,17 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { object, string, number, array } from 'yup';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
-import dayjs from '@/common-components/DayJsCustomizer'
+import dayjs from '@/common-components/DayJsCustomizer.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 
-import QuizRunService from '@/common-components/quiz/QuizRunService.js';
-import QuizRunSplashScreen from '@/components/quiz/runs/QuizRunSplashScreen.vue';
-import SurveyRunCompletionSummary from '@/components/quiz/runs/SurveyRunCompletionSummary.vue';
-import QuizRunCompletionSummary from '@/components/quiz/runs/QuizRunCompletionSummary.vue';
-import QuizRunValidationWarnings from '@/components/quiz/runs/QuizRunValidationWarnings.vue';
-import QuestionType from '@/common-components/quiz/QuestionType.js';
+import QuizRunService from '@/skills-display/components/quiz/QuizRunService.js';
+import QuizRunSplashScreen from '@/skills-display/components/quiz/QuizRunSplashScreen.vue';
+import SurveyRunCompletionSummary from '@/skills-display/components/quiz/SurveyRunCompletionSummary.vue';
+import QuizRunCompletionSummary from '@/skills-display/components/quiz/QuizRunCompletionSummary.vue';
+import QuizRunValidationWarnings from '@/skills-display/components/quiz/QuizRunValidationWarnings.vue';
+import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
-import QuizRunQuestion from '@/components/quiz/runs/QuizRunQuestion.vue';
+import QuizRunQuestion from '@/skills-display/components/quiz/QuizRunQuestion.vue';
 import { useForm } from "vee-validate";
 
 const props = defineProps({

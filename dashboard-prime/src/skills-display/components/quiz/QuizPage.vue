@@ -4,8 +4,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js';
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js';
-import QuizRunService from '@/common-components/quiz/QuizRunService.js';
-import QuizRun from '@/components/quiz/runs/QuizRun.vue';
+import QuizRunService from '@/skills-display/components/quiz/QuizRunService.js';
+import QuizRun from '@/skills-display/components/quiz/QuizRun.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue';
 import AnimatedNumber from '@/skills-display/components/utilities/AnimatedNumber.vue';

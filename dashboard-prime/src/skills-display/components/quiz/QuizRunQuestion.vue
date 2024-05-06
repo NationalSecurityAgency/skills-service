@@ -2,9 +2,9 @@
 import { computed, watch, onMounted, ref } from 'vue'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue';
 import SkillsRating from "@/components/utils/inputForm/SkillsRating.vue";
-import QuizRunAnswers from '@/components/quiz/runs/QuizRunAnswers.vue';
-import QuestionType from '@/common-components/quiz/QuestionType.js';
-import QuizRunService from '@/common-components/quiz/QuizRunService.js';
+import QuizRunAnswers from '@/skills-display/components/quiz/QuizRunAnswers.vue';
+import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
+import QuizRunService from '@/skills-display/components/quiz/QuizRunService.js';
 
 const props = defineProps({
   q: Object,

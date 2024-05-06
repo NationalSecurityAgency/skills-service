@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue';
 import { useQuizConfig } from "@/stores/UseQuizConfig.js";
-import QuestionType from '@/common-components/quiz/QuestionType.js';
+import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
 

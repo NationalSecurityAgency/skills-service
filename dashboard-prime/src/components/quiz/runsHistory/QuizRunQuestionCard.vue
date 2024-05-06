@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue';
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
-import QuestionType from '@/common-components/quiz/QuestionType.js';
+import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
 
 const props = defineProps({

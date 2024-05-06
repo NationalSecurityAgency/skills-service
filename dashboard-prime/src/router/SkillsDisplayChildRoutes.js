@@ -5,7 +5,7 @@ import SubjectDetailsPage from '@/skills-display/components/subjects/SubjectPage
 import SkillPage from '@/skills-display/components/skill/SkillPage.vue'
 import BadgesDetailsPage from '@/skills-display/components/badges/BadgesDetailsPage.vue'
 import BadgeDetailsPage from '@/skills-display/components/badges/BadgeDetailsPage.vue'
-import QuizPage from '@/skills-display/components/skill/QuizPage.vue'
+import QuizPage from '@/skills-display/components/quiz/QuizPage.vue'
 
 const createSkillsDisplayChildRoutes = (appendToName) => {
 

@@ -4,7 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import Column from 'primevue/column'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
-import CheckSelector from '@/common-components/quiz/CheckSelector.vue'
+import CheckSelector from '@/skills-display/components/quiz/CheckSelector.vue'
 import QuizAnswerHistory from '@/components/quiz/metrics/QuizAnswerHistory.vue'
 
 const props = defineProps({

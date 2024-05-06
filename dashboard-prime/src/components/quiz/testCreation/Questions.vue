@@ -13,7 +13,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue';
 import QuestionCard from '@/components/quiz/testCreation/QuestionCard.vue';
 import EditQuestion from '@/components/quiz/testCreation/EditQuestion.vue';
 import QuizService from '@/components/quiz/QuizService.js';
-import QuestionType from '@/common-components/quiz/QuestionType.js';
+import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 
 const announcer = useSkillsAnnouncer()
 const route = useRoute()

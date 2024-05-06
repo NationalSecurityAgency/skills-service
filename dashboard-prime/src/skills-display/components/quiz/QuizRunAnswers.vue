@@ -1,8 +1,8 @@
 <script setup>
 import { watch, ref } from 'vue'
 import { useField } from 'vee-validate';
-import QuizRunAnswer from '@/components/quiz/runs/QuizRunAnswer.vue';
-import QuestionType from '@/common-components/quiz/QuestionType.js';
+import QuizRunAnswer from '@/skills-display/components/quiz/QuizRunAnswer.vue';
+import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 
 const props = defineProps({
   value: Array,
