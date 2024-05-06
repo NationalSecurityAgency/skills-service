@@ -87,8 +87,18 @@ const isSkillsGroupWithChildren = computed(() => {
 const childSkillsInternal = computed(() => {
   return isSkillsGroupWithChildren.value ? props.skill.children.map((item) => ({ ...item, childSkill: true })) : []
 })
+const isSkillLocked = computed(() => {
+  let hasBadgeDependency = false;
+  const sk = props.skill;
+  if (sk.badgeDependencyInfo && sk.badgeDependencyInfo.length > 0) {
+    if (sk.badgeDependencyInfo.find((item) => !item.achieved)) {
+      hasBadgeDependency = true;
+    }
+  }
+  return (sk.dependencyInfo && !sk.dependencyInfo.achieved) || hasBadgeDependency;
+})
 
-
+const isSkillComplete = computed(() => props.skill && props.skill.meta && props.skill.meta.complete)
 </script>
 
 <template>
@@ -102,7 +112,7 @@ const childSkillsInternal = computed(() => {
     <!--      </div>-->
     <!--    </div>-->
 
-    <Message v-if="skill.crossProject && !isSkillComplete" data-cy="crossProjAlert" :closable="false">
+    <Message v-if="skill.crossProject && !isSkillComplete && !skillsDisplayInfo.isGlobalBadgePage" data-cy="crossProjAlert" :closable="false">
       This is a cross-{{ attributes.projectDisplayName.toLowerCase() }} {{ attributes.skillDisplayName.toLowerCase()
       }}! In order to complete
       this {{ attributes.skillDisplayName.toLowerCase() }} please visit <strong>{{
@@ -126,9 +136,13 @@ const childSkillsInternal = computed(() => {
         <!--        <vertical-progress-bar-->
         <!--          class="border-1 border-transparent hover:border-orange-700 border-round"-->
         <!--          data-cy="skillProgressBar" />-->
-        <skill-progress-bar data-cy="skillProgressBar"
-                            class="border-1 border-transparent hover:border-orange-700 border-round"
-                            :skill="skill" />
+        <div class="relative">
+          <skill-progress-bar data-cy="skillProgressBar"
+                              :is-locked="isSkillLocked"
+                              class="border-1 border-transparent hover:border-orange-700 border-round"
+                              :skill="skill" />
+
+        </div>
       </router-link>
       <skill-progress-bar
         v-else
@@ -154,11 +168,11 @@ const childSkillsInternal = computed(() => {
         </p>
       </div>
       <div v-if="skill.type === 'Skill'">
-        <div v-if="locked && skill.dependencyInfo" class="text-center text-muted locked-text">
+        <div v-if="isSkillLocked && skill.dependencyInfo" class="text-center text-muted locked-text">
           *** Skill has
           <Tag>{{ skill.dependencyInfo.numDirectDependents }}</Tag>
           direct prerequisite(s).
-          <span v-if="allowDrillDown">Click <i class="fas fa-lock icon"></i> to see its prerequisites.</span>
+          <span v-if="enableDrillDown">Click <i class="fas fa-lock icon"></i> to see its prerequisites.</span>
           <span v-else>Please see its prerequisites below.</span>
           ***
         </div>

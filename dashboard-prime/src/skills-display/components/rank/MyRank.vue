@@ -27,7 +27,7 @@ const toRankDetailsPage = computed(() => {
 </script>
 
 <template>
-<Card class="skills-my-rank w-min-20rem"
+<Card class="skills-my-rank w-min-20rem h-full"
       data-cy="myRank"
       :pt="{ content: { class: 'py-0' } }">
   <template #subtitle>

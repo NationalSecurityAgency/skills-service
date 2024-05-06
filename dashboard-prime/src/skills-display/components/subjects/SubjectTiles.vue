@@ -21,7 +21,7 @@ const hasData = computed(() => userProgress.userProgressSummary.subjects?.length
           :message="`Please contact this ${attributes.projectDisplayName.toLowerCase()}'s administrator.`" />
       </template>
     </Card>
-    <search-all-project-skills v-if="hasData" class="mb-3"/>
+    <search-all-project-skills v-if="hasData && !attributes.isSummaryOnly" class="mb-3"/>
     <div v-if="hasData" class="flex flex-wrap gap-2">
       <div v-for="(subject, index) in userProgress.userProgressSummary.subjects"
            :key="`unique-subject-${index}`"

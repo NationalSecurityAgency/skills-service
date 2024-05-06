@@ -23,7 +23,6 @@ const isLoading = computed(() => summaryAndSkillsState.loadingBadgeSummary || lo
 
 onMounted(() => {
   const isGlobalBadge = skillsDisplayInfo.isGlobalBadgePage.value
-  console.log(`global badge: ${isGlobalBadge}`)
   summaryAndSkillsState.loadBadgeSummary(route.params.badgeId, isGlobalBadge)
   if (!isGlobalBadge) {
     loadDependencies()
@@ -73,7 +72,7 @@ const locked = computed(() => {
 <!--                            @scrollTo="scrollToLastViewedSkill" :badge-is-locked="locked"/>-->
 
       <skills-progress-list
-        v-if="badge"
+        v-if="badge && !(skillsDisplayInfo.isGlobalBadgePage.value && !summaryAndSkillsState.subjectSummary?.skills)"
         :subject="badge"
         type="badge"
         class="mt-3"
@@ -83,9 +82,7 @@ const locked = computed(() => {
 <!--                          :skill-id="$route.params.badgeId"></skill-dependencies>-->
 
 
-      <global-badge-project-levels
-        v-if="badge.projectLevelsAndSkillsSummaries"
-        class="mt-3" :badge="badge"/>
+      <global-badge-project-levels :badge="badge"/>
 
     </div>
   </div>

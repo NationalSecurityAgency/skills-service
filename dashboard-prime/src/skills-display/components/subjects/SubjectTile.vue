@@ -78,6 +78,7 @@ const progress = computed(() => {
         <div>
           <vertical-progress-bar
             :total-progress="progress.total"
+            :aria-label="`Overall progress for ${subject.subject}`"
             :total-progress-before-today="progress.totalBeforeToday"
           />
         </div>
@@ -99,6 +100,7 @@ const progress = computed(() => {
           </div>
           <div class="">
             <vertical-progress-bar
+              :aria-label="`Level progress for ${subject.subject}`"
               :total-progress="progress.level"
               :total-progress-before-today="progress.levelBeforeToday"
             />
@@ -117,7 +119,7 @@ const progress = computed(() => {
         </div>
       </div>
     </template>
-    <template #footer>
+    <template #footer v-if="!attributes.isSummaryOnly">
       <router-link
         :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('SubjectDetailsPage'), params: { subjectId: subject.subjectId } }"
         :aria-label="`Click to navigate to the ${subject.subject} subject page.`"

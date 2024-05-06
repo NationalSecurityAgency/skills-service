@@ -3,7 +3,11 @@ import { computed } from 'vue'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
 
 const props = defineProps({
-  skill: Object
+  skill: Object,
+  isLocked: {
+    type: Boolean,
+    default: false
+  }
 })
 
 const isSkillsGroupWithChildren = computed(() => props.skill?.isSkillsGroupType)
@@ -33,7 +37,7 @@ const progressPercent = computed(() => {
 
 </script>
 <template>
-  <vertical-progress-bar :total-progress="progressPercent">
+  <vertical-progress-bar :total-progress="progressPercent" :is-locked="isLocked">
   </vertical-progress-bar>
 </template>
 

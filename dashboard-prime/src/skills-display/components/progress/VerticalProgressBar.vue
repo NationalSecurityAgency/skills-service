@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  isLocked: Boolean,
   totalProgress: {
     type: Number,
     default: 0
@@ -22,6 +21,14 @@ const props = defineProps({
   barSize: {
     type: Number,
     default: 22
+  },
+  ariaLabel: {
+    type: String,
+    default: 'Progress bar'
+  },
+  isLocked: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -38,6 +45,13 @@ const styleObject = computed(() => {
     height: `${props.barSize}px`
   }
 })
+const ariaLabelFullMsg = computed(() => {
+  let res = props.ariaLabel
+  if (props.isLocked) {
+    res += ' This skill is locked.'
+  }
+  return res
+})
 </script>
 
 <template>
@@ -46,13 +60,22 @@ const styleObject = computed(() => {
                  :pt="{ value: { class: overallProgressColor }}"
                  class="today-progress"
                  :show-value="false"
+                 :ariaLabel="ariaLabelFullMsg"
                  :style="styleObject"></ProgressBar>
     <ProgressBar :value="computedTotalProgressBeforeToday"
                  :pt="{ value: { class: beforeTodayBarColor },
                root: { class: 'opacity-100 remove-background' }}"
                  class="total-progress"
                  :show-value="false"
+                 :ariaLabel="ariaLabelFullMsg"
                  :style="styleObject"></ProgressBar>
+    <div v-if="isLocked" class="absolute left-0 right-0">
+      <div class="flex justify-content-center">
+        <div class="text-center" style="z-index: 1000 !important;">
+          <i class="fas fa-lock" aria-hidden="tue"/>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 

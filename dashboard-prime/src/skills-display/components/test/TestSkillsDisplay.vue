@@ -13,13 +13,17 @@ onMounted(() => {
   skillsDisplayAttributes.projectId = projectId
   skillsDisplayAttributes.serviceUrl = ''
   skillsDisplayAttributes.loadingConfig = false
+
+  if (route.query.isSummaryOnly && route.query.isSummaryOnly === 'true') {
+    skillsDisplayAttributes.isSummaryOnly = true
+  }
 })
 </script>
 
 <template>
-<div class="my-3">
-  <skills-display-home />
-</div>
+  <div class="my-3">
+    <skills-display-home />
+  </div>
 </template>
 
 <style scoped>

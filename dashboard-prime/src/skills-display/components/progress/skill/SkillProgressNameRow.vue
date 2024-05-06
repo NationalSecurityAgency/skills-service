@@ -90,12 +90,19 @@ const showLastViewedIndicator = computed(() => {
   return props.skill.isLastViewed || props.skill.skillId === scrollIntoViewState.lastViewedSkillId
 })
 
+const skillId = computed(() => {
+  let res = props.skill.skillId
+  if (skillDisplayInfo.isGlobalBadgePage.value) {
+    res += `=${route.params.badgeId}`
+  }
+  return res
+})
 </script>
 
 <template>
   <div class="md:flex flex-wrap align-content-end"
-       :data-cy="`skillProgressTitle-${skill.skillId}`"
-       :id="`skillProgressTitle-${skill.skillId}`">
+       :data-cy="`skillProgressTitle-${skillId}`"
+       :id="`skillProgressTitle-${skillId}`">
     <div class="skills-theme-primary-color flex-1 text-2xl w-min-12rem">
       <div class="py-1 md:flex">
         <div class="text-blue-700 font-medium flex">
@@ -110,7 +117,7 @@ const showLastViewedIndicator = computed(() => {
               <span class="font-italic text-color-secondary">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}
             </div>
             <router-link
-              :id="`skillProgressTitleLink-${skill.skillId}`"
+              :id="`skillProgressTitleLink-${skillId}`"
               v-if="toRoute"
               :to="toRoute"
               class="skill-link"
@@ -169,7 +176,7 @@ const showLastViewedIndicator = computed(() => {
          data-cy="skillProgress-ptsOverProgressBard">
       <i class="fa fa-check mr-1 pb-1 align-content-end"
          v-if="isSkillComplete"
-         :data-cy="`skillCompletedCheck-${skill.skillId}`"
+         :data-cy="`skillCompletedCheck-${skillId}`"
          aria-hidden="true" />
       <span v-if="skill.isSkillsGroupType" class="align-content-end">
         <animated-number :num="numChildSkillsComplete" />

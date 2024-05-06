@@ -9,6 +9,7 @@ import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSki
 import SkillTypeFilter from '@/skills-display/components/skill/SkillTypeFilter.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import { useRoute } from 'vue-router'
 
 // subject: {
 //   type: Object,
@@ -46,6 +47,7 @@ const skillsDisplayService = useSkillsDisplayService()
 const subjectAndSkillsState = useSkillsDisplaySubjectState()
 const parentFrame = useSkillsDisplayParentFrameState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
+const route = useRoute()
 const searchString = ref('')
 
 let filter = () => true
@@ -127,7 +129,7 @@ const descriptions = ref([])
 const onDetailsToggle = () => {
   if (!descriptionsLoaded.value) {
     loading.value = true
-    skillsDisplayService.getDescriptions(subject.value.subjectId || props.subject.badgeId, props.type)
+    skillsDisplayService.getDescriptions(subject.value.subjectId || route.params.badgeId, props.type)
       .then((res) => {
         descriptions.value = res
         res.forEach((desc) => {
@@ -202,11 +204,6 @@ const skillsToShow = computed(() => {
       }
       return false
     }).map((item) => ({ ...item, children: item.children?.map((child) => ({ ...child })) }))
-
-    // resultSkills = foundItems.map((item) => {
-    //   const skillHtml = searchStrNormalized ? StringHighlighter.highlight(item.skill, searchStrNormalized) : null
-    //   return skillHtml ? ({ ...item, skillHtml }) : item
-    // })
   }
 
   if (resultSkills && filterId.value && filterId.value.length > 0) {
@@ -329,6 +326,7 @@ const isLastViewedScrollSupported = computed(() => {
             <!--            @add-tag-filter="addTagFilter"-->
             <!--            :subjectId="subject.subjectId"-->
             <!--            :badgeId="subject.badgeId"-->
+
 
             <skill-progress
               :id="`skill-${skill.skillId}`"

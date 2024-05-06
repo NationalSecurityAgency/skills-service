@@ -15,6 +15,7 @@ const log = useLog()
 const skillsVersion = 2147483647 // max int
 
 const projectId = route.params.projectId
+const isSummaryOnly = route.query.isSummaryOnly && route.query.isSummaryOnly === 'true'
 const serviceUrl = browserLocation.value.origin
 const authenticator = appConfig.isPkiAuthenticated ? 'pki' : `${serviceUrl}/api/projects/${encodeURIComponent(projectId)}/token`
 const options = {
@@ -22,6 +23,10 @@ const options = {
   authenticator: authenticator,
   serviceUrl: serviceUrl,
   autoScrollStrategy: 'top-of-page'
+}
+
+if (isSummaryOnly) {
+  options.isSummaryOnly = true
 }
 
 log.info(`Running skills-client in test mode with params ${JSON.stringify(options)}`)
