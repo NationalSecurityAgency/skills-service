@@ -384,7 +384,7 @@ const onBadgeSaved = () => {
 
         <div v-if="limitTimeframe" class="flex justify-content-center gap-4">
           <div>
-            <SkillsCalendarInput selectionMode="range" name="gemDates" v-model="gemDates" label="Date Range" />
+            <SkillsCalendarInput selectionMode="range" inline name="gemDates" v-model="gemDates" label="Date Range" />
           </div>
         </div>
       </div>

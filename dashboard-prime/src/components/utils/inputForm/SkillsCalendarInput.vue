@@ -47,7 +47,7 @@ const handleOnInput = (event) => {
 <template>
   <div class="field" v-bind="fallthroughAttributes.rootAttrs.value">
     <label :for="`input${name}`" class="block"><span v-if="isRequired">*</span> {{ label }} </label>
-    <Calendar v-model="value" inline
+    <Calendar v-model="value"
               v-bind="fallthroughAttributes.inputAttrs.value"
               @keydown.enter="onEnter"
               @input="handleOnInput"
