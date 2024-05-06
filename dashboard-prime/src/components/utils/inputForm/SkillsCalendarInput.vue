@@ -51,7 +51,6 @@ const handleOnInput = (event) => {
               v-bind="fallthroughAttributes.inputAttrs.value"
               @keydown.enter="onEnter"
               @input="handleOnInput"
-              selectionMode="range"
               :inputId="`input${name}`"
               :id="name"
               :data-cy="$attrs['data-cy'] || name" />
