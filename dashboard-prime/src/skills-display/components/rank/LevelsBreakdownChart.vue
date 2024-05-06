@@ -1,49 +1,89 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
+import { useRoute } from 'vue-router'
+import ChartOverlayMsg from '@/skills-display/components/utilities/ChartOverlayMsg.vue'
 
 const props = defineProps({
-  usersPerLevel: Array,
-  myLevel: Number,
+  myLevel: Number
 })
+const skillsDisplayService = useSkillsDisplayService()
+const route = useRoute()
 const attributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
 const animationEnded = ref(false)
 const numFormat = useNumberFormat()
 
 onMounted(() => {
-  if (props.usersPerLevel) {
-    computeChartSeries()
-  }
+  loadData().then(() => {
+    if (usersPerLevel.value) {
+      computeChartSeries()
+    }
+  })
 })
+
+const usersPerLevelLoading = ref(true)
+const usersPerLevel = ref({})
+const loadData = () => {
+  return skillsDisplayService.getRankingDistributionUsersPerLevel(route.params.subjectId)
+    .then((response) => {
+      usersPerLevel.value = response
+    })
+    .finally(() => {
+      usersPerLevelLoading.value = false
+    })
+}
+
+const hasData = computed(() => {
+  const foundMoreThan0 = chartSeries.value.length > 0 && chartSeries.value[0].data.find((item) => item.y > 0)
+  return foundMoreThan0
+})
+
 const chartSeries = ref([{
   name: '# of Users',
-  data: [{ x: `${attributes.levelDisplayName} 1`, y: 0 }, { x: `${attributes.levelDisplayName} 2`, y: 0 }, { x: `${attributes.levelDisplayName} 3`, y: 0 }, { x: `${attributes.levelDisplayName} 4`, y: 0 }, { x: `${attributes.levelDisplayName} 5`, y: 0 }],
+  data: [{ x: `${attributes.levelDisplayName} 1`, y: 0 }, {
+    x: `${attributes.levelDisplayName} 2`,
+    y: 0
+  }, { x: `${attributes.levelDisplayName} 3`, y: 0 }, {
+    x: `${attributes.levelDisplayName} 4`,
+    y: 0
+  }, { x: `${attributes.levelDisplayName} 5`, y: 0 }]
 }])
+
+const createPoint = (level) => {
+  return {
+    x: level,
+    seriesIndex: 0,
+    label: {
+      borderColor: chartLabels().borderColor,
+      offsetY: 0,
+      style: {
+        color: chartLabels().foregroundColor,
+        background: chartLabels().backgroundColor
+      },
+      text: `You are ${level}!`
+    }
+  }
+}
 const computeChartSeries = () => {
   const series = [{
     name: '# of Users',
-    data: [],
-  }];
-  if (props.usersPerLevel) {
-    props.usersPerLevel.forEach((level) => {
-      const datum = { x: `${attributes.levelDisplayName} ${level.level}`, y: level.numUsers };
-      series[0].data.push(datum);
+    data: []
+  }]
+  if (usersPerLevel.value) {
+    usersPerLevel.value.forEach((level) => {
+      const datum = { x: `${attributes.levelDisplayName} ${level.level}`, y: level.numUsers }
+      series[0].data.push(datum)
       if (level.level === props.myLevel) {
-        // const label = {
-        //   x: datum.x,
-        //   text: `You are ${datum.x}!`,
-        // };
-        // this.chartOptions.annotations.points = [label];
-        chartOptions.value.annotations.points[0].x = datum.x;
-        chartOptions.value.annotations.points[0].label.text = `You are ${datum.x}!`;
+        chartOptions.value.annotations.points = [createPoint(datum.x)]
       }
-    });
+    })
   }
-  // chartOptions.value = { ...chartOptions.value }; // Trigger reactivity
-  chartSeries.value = series;
+  chartOptions.value = { ...chartOptions.value }; // Trigger reactivity
+  chartSeries.value = series
 }
 
 const chartLabels = () => {
@@ -58,92 +98,93 @@ const chartLabels = () => {
 const chartOptions = ref({
   chart: {
     toolbar: {
-      offsetY: -38,
-    },
+      offsetY: -38
+    }
   },
   annotations: {
-    points: [{
-      x: `${attributes.levelDisplayName} 1`,
-      seriesIndex: 0,
-      label: {
-        borderColor: chartLabels().borderColor,
-        offsetY: 0,
-        style: {
-          color: chartLabels().foregroundColor,
-          background: chartLabels().backgroundColor,
-        },
-        text: '',
-      },
-    }],
+    points: []
   },
   plotOptions: {
     bar: {
       columnWidth: '50%',
-        borderRadius: 5,
-    },
+      borderRadius: 5
+    }
   },
   dataLabels: {
-    enabled: false,
+    enabled: false
   },
   grid: {
     row: {
-      colors: ['#fff', '#f2f2f2'],
-    },
+      colors: ['#fff', '#f2f2f2']
+    }
   },
   xaxis: {
     labels: {
       rotate: -45,
-        style: {
-        colors: themeState.theme.charts.axisLabelColor,
-      },
-    },
+      style: {
+        colors: themeState.theme.charts.axisLabelColor
+      }
+    }
   },
   yaxis: {
     min: 0,
-      forceNiceScale: true,
-      title: {
+    forceNiceScale: true,
+    title: {
       text: '# of Users',
-        style: {
-        color: themeState.theme.charts.axisLabelColor,
-      },
+      style: {
+        color: themeState.theme.charts.axisLabelColor
+      }
     },
     labels: {
       style: {
-        colors: [themeState.theme.charts.axisLabelColor],
+        colors: [themeState.theme.charts.axisLabelColor]
       },
       formatter: function format(val) {
         if (val === Infinity) {
-          return '0';
+          return '0'
         }
-        return numFormat.pretty(val);
-      },
+        return numFormat.pretty(val)
+      }
     },
     axisTicks: {
-      show: false,
-    },
-  },
+      show: false
+    }
+  }
 })
 </script>
 
 <template>
-<Card data-cy="levelBreakdownChart" :pt="{ content: { class: 'mb-0 pb-0'}}">
-  <template #subtitle>
-    <div class="flex">
-      <div>
-        {{ attributes.levelDisplayName }} Breakdown
+  <Card data-cy="levelBreakdownChart" :pt="{ content: { class: 'mb-0 pb-0'}}">
+    <template #subtitle>
+      <div class="flex">
+        <div>
+          {{ attributes.levelDisplayName }} Breakdown
+        </div>
       </div>
-    </div>
-  </template>
-  <template #content>
-    <apexchart
-      :options="chartOptions"
-      @animationEnd="animationEnded = true"
-      :series="chartSeries"
-      height="330" type="bar"/>
+    </template>
+    <template #content>
+      <BlockUI :blocked="!hasData || usersPerLevelLoading" :auto-z-index="false">
+        <apexchart
+          :options="chartOptions"
+          @animationEnd="animationEnded = true"
+          :series="chartSeries"
+          height="330" type="bar" />
+        <chart-overlay-msg v-if="!hasData && !usersPerLevelLoading" style="top: 8rem;">
+          No one achieved
+          <Tag>{{ attributes.levelDisplayName }} 1</Tag>
+          yet... You could be the <i><strong>first one</strong></i>!
+        </chart-overlay-msg>
+        <chart-overlay-msg v-if="usersPerLevelLoading" style="top: 8rem;">
+          <skills-spinner
+            :is-loading="true"
+            size="small"
+            message="Loading Chart ..." />
+        </chart-overlay-msg>
+      </BlockUI>
 
-    <span v-if="animationEnded" data-cy="levelBreakdownChart-animationEnded"></span>
-  </template>
-</Card>
+      <span v-if="animationEnded" data-cy="levelBreakdownChart-animationEnded"></span>
+    </template>
+  </Card>
 </template>
 
 <style scoped>

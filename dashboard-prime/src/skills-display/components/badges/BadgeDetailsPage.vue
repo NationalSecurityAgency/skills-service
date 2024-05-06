@@ -7,6 +7,7 @@ import BadgeCatalogItem from '@/skills-display/components/badges/BadgeCatalogIte
 import SkillsProgressList from '@/skills-display/components/progress/SkillsProgressList.vue'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import GlobalBadgeProjectLevels from '@/skills-display/components/badges/GlobalBadgeProjectLevels.vue'
 
 const skillsDisplayService = useSkillsDisplayService()
 const route = useRoute()
@@ -22,6 +23,7 @@ const isLoading = computed(() => summaryAndSkillsState.loadingBadgeSummary || lo
 
 onMounted(() => {
   const isGlobalBadge = skillsDisplayInfo.isGlobalBadgePage.value
+  console.log(`global badge: ${isGlobalBadge}`)
   summaryAndSkillsState.loadBadgeSummary(route.params.badgeId, isGlobalBadge)
   if (!isGlobalBadge) {
     loadDependencies()
@@ -79,6 +81,11 @@ const locked = computed(() => {
 
 <!--      <skill-dependencies class="mt-2" v-if="dependencies && dependencies.length > 0" :dependencies="dependencies"-->
 <!--                          :skill-id="$route.params.badgeId"></skill-dependencies>-->
+
+
+      <global-badge-project-levels
+        v-if="badge.projectLevelsAndSkillsSummaries"
+        class="mt-3" :badge="badge"/>
 
     </div>
   </div>

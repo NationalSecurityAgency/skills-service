@@ -6,6 +6,7 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useRoute } from 'vue-router'
 import PointHistoryChartPlaceholder from '@/skills-display/components/progress/points/PointHistoryChartPlaceholder.vue'
+import ChartOverlayMsg from '@/skills-display/components/utilities/ChartOverlayMsg.vue'
 
 const pointHistoryState = useSkillsDisplayPointHistoryState()
 const numFormat = useNumberFormat()
@@ -236,16 +237,12 @@ const zoomed = (chartContext, { xaxis, yaxis }) => {
             <BlockUI :blocked="true" :auto-z-index="false">
               <point-history-chart-placeholder v-if="!hasData" />
             </BlockUI>
-            <div class="absolute left-0 right-0" style="top: 4rem;">
-              <div class="flex justify-content-center">
-                <div class="bg-primary-reverse py-2 px-3 border-1 border-round" style="z-index: 1000 !important;">
-                  <div class="uppercase text-red-600"><i class="fa fa-lock"></i> Locked
-                  </div>
-                  <small>*** <b>2 days</b> of usage will unlock this chart!
-                    ***</small>
-                </div>
+            <chart-overlay-msg  style="top: 4rem;">
+              <div class="uppercase text-red-600"><i class="fa fa-lock"></i> Locked
               </div>
-            </div>
+              <small>*** <b>2 days</b> of usage will unlock this chart!
+                ***</small>
+            </chart-overlay-msg>
           </div>
           <div v-if="hasData" data-cy="pointHistoryChartWithData">
             <apexchart ref="ptChart" id="points-chart"

@@ -18,14 +18,11 @@ const attributes = useSkillsDisplayAttributesState()
 const rankingDistributionLoading = ref(true)
 const rankingDistribution = ref({})
 
-const usersPerLevelLoading = ref(true)
-const usersPerLevel = ref({})
-
 const myRankLoading = ref(true)
 const myRank = ref({})
 
 const loading = computed(() => {
-  return rankingDistributionLoading.value || usersPerLevelLoading.value || myRankLoading.value
+  return rankingDistributionLoading.value || myRankLoading.value
 })
 
 onMounted(() => {
@@ -40,13 +37,6 @@ const loadData = () => {
     })
     .finally(() => {
       rankingDistributionLoading.value = false
-    })
-  skillsDisplayService.getRankingDistributionUsersPerLevel(subjectId)
-    .then((response) => {
-      usersPerLevel.value = response
-    })
-    .finally(() => {
-      usersPerLevelLoading.value = false
     })
   skillsDisplayService.getUserSkillsRanking(subjectId)
     .then((response) => {
@@ -123,8 +113,7 @@ const numUsersBehindMe = computed(() => {
 
       <div class="flex gap-3 flex-wrap mt-3">
         <div class="flex-1 h-full">
-          <levels-breakdown-chart :users-per-level="usersPerLevel"
-                                  :my-level="rankingDistribution.myLevel" />
+          <levels-breakdown-chart :my-level="rankingDistribution.myLevel" />
         </div>
 
         <div class="flex-1" data-cy="encouragementCards">

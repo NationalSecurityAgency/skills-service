@@ -16,7 +16,7 @@
 
 describe('Client Display Custom Label Tests', () => {
 
-    it.only('verify custom labels', () => {
+    it('verify custom labels', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
@@ -169,29 +169,21 @@ describe('Client Display Custom Label Tests', () => {
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .click();
         cy.cdClickSubj(1);
-        cy.get('[data-cy="noDataYet"]')
+        cy.get('[data-cy="noContent"]')
             .contains('Courses have not been added yet');
-        cy.get('[data-cy="noDataYet"]')
+        cy.get('[data-cy="noContent"]')
             .contains('Please contact this work role\'s administrator.');
 
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj2"] [data-cy="breadcrumbItemLabel"]')
           .should('have.text', 'Competency:');
-        // cy.get('[data-cy=breadcrumb-subj2]')
-        //     .contains('Competency: subj2');
 
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .click();
         cy.cdClickSubj(2);
-        // cy.get('[data-cy=breadcrumb-subj3]')
-        //     .contains('Competency: subj3');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj3"] [data-cy="breadcrumbItemLabel"]')
           .should('have.text', 'Competency:');
 
         cy.cdClickSkill(0, true, 'Course');
-        // cy.get('[data-cy=breadcrumb-subj3]')
-        //     .contains('Competency: subj3');
-        // cy.get('[data-cy=breadcrumb-skill1Subj3]')
-        //     .contains('Course: skill1Subj3');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj3"] [data-cy="breadcrumbItemLabel"]')
           .should('have.text', 'Competency:');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-skill1Subj3"] [data-cy="breadcrumbItemLabel"]')
@@ -204,10 +196,6 @@ describe('Client Display Custom Label Tests', () => {
 
         cy.cdBack('Subject 3');
         cy.cdClickSkill(1, true, 'Course');
-        // cy.get('[data-cy=breadcrumb-subj3]')
-        //     .contains('Competency: subj3');
-        // cy.get('[data-cy=breadcrumb-skill2Subj3]')
-        //     .contains('Course: skill2Subj3');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj3"] [data-cy="breadcrumbItemLabel"]')
           .should('have.text', 'Competency:');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-skill2Subj3"] [data-cy="breadcrumbItemLabel"]')
@@ -222,10 +210,6 @@ describe('Client Display Custom Label Tests', () => {
 
         cy.cdBack('Subject 3');
         cy.cdClickSkill(2, true, 'Course');
-        // cy.get('[data-cy=breadcrumb-subj3]')
-        //     .contains('Competency: subj3');
-        // cy.get('[data-cy=breadcrumb-skill3Subj3]')
-        //     .contains('Course: skill3Subj3');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj3"] [data-cy="breadcrumbItemLabel"]')
           .should('have.text', 'Competency:');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-skill3Subj3"] [data-cy="breadcrumbItemLabel"]')
