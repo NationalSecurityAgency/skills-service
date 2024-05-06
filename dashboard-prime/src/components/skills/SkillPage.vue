@@ -42,8 +42,17 @@ const showEdit = ref(false)
 
 const skillsState = useSkillsState()
 
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
+
 onMounted(() => {
-  loadData()
+  if(projConfig.projConfig) {
+    loadData();
+  }
+  else {
+    projConfig.loadProjConfigState({ projectId: route.params.projectId }).then(() => {
+      loadData();
+    });
+  }
 })
 
 // Vue caches components and when re-directed to the same component the path will be pushed
@@ -62,7 +71,7 @@ watch(
 )
 
 const isLoading = computed(() => {
-  return subjectState.isLoadingSubject || projConfig.isReadOnlyProj || skillsState.loadingSkill
+  return subjectState.isLoadingSubject || projConfig.loadingProjConfig || skillsState.loadingSkill
 })
 
 const navItems = ref([])
@@ -87,7 +96,7 @@ const buildNavItems = () => {
   if (isReadOnlyNonSr) {
     msg = 'Skills imported from the catalog can only have events added if they are configured for Self Reporting'
   }
-  if (!isImported?.value && !appConfig.isReadOnlyProj?.value) {
+  if (!isImported?.value && !isReadOnlyProj.value) {
     items.push({
       name: 'Add Event',
       iconClass: 'fa-user-plus skills-color-events',
@@ -114,7 +123,7 @@ const loadData = () => {
   skillsState.loadSkill(route.params.projectId, route.params.subjectId, route.params.skillId)
     .then(() => {
       headerOptions.value = buildHeaderOptions()
-      if (subjectState.subject.value) {
+      if (subjectState.subject) {
         navItems.value = buildNavItems()
       } else {
         subjectState.loadSubjectDetailsState().then(() => {
@@ -175,7 +184,7 @@ const skillId = computed(() => {
       <template #subSubTitle v-if="!isImported">
         <SkillsButton
           id="edidSkillBtn"
-          v-if="skillsState.skill && !projConfig.isReadOnlyProj"
+          v-if="skillsState.skill && !isReadOnlyProj"
           @click="displayEdit"
           size="small"
           outlined

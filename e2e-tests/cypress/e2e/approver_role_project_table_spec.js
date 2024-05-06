@@ -71,19 +71,18 @@ describe('Approver Role Projects Table Tests', () => {
         const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
 
-            cy.get(`[data-cy="manageProjBtn_proj${projNum}"]`).contains(manageButtonTxt)
+            cy.get(`[data-cy="projCard_proj${projNum}_manageBtn"]`).contains(manageButtonTxt)
 
-            cy.get(`[data-cy="editProjectIdproj${projNum}"]`).should(`${chainerPrepend}exist`)
-            cy.get(`[data-cy="deleteProjectButton_proj${projNum}"]`).should(`${chainerPrepend}exist`)
-            cy.get(`[data-cy="deleteProjectButton_proj${projNum}"]`).should(`${chainerPrepend}exist`)
+            cy.get(`[data-cy="projectCard_proj${projNum}"] [data-cy="editProjBtn"]`).should(`${chainerPrepend}exist`)
+            cy.get(`[data-cy="projectCard_proj${projNum}"] [data-cy="deleteProjBtn"]`).should(`${chainerPrepend}exist`)
         }
         runCheck(20)
         runCheck(10,  'View', 'not.')
         runCheck(9,  'View', 'not.')
 
-        cy.get('[data-cy="projCell_proj20"] [data-cy="userRole"]').should('have.text', 'Admin')
-        cy.get('[data-cy="projCell_proj10"] [data-cy="userRole"]').should('have.text', 'Approver')
-        cy.get('[data-cy="projCell_proj9"] [data-cy="userRole"]').should('have.text', 'Approver')
+        cy.get('[data-cy="projectCard_proj20"] [data-cy="userRole"]').should('have.text', 'Admin')
+        cy.get('[data-cy="projectCard_proj10"] [data-cy="userRole"]').should('have.text', 'Approver')
+        cy.get('[data-cy="projectCard_proj9"] [data-cy="userRole"]').should('have.text', 'Approver')
     })
 
 });

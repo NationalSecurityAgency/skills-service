@@ -14,9 +14,11 @@ import { useConfirm } from 'primevue/useconfirm'
 import DependencyTable from "@/components/skills/dependencies/DependencyTable.vue";
 import ShareSkillsWithOtherProjects from "@/components/skills/crossProjects/ShareSkillsWithOtherProjects.vue";
 import SharedSkillsFromOtherProjects from "@/components/skills/crossProjects/SharedSkillsFromOtherProjects.vue";
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 
+const projConfig = useProjConfig();
 const route = useRoute();
-const isReadOnlyProj = false;
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 const confirm = useConfirm();
 
 const isLoading = ref(true);

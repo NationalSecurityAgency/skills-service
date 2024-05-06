@@ -1,12 +1,14 @@
 <script setup>
-import { ref } from 'vue';
+import {computed, ref} from 'vue';
 import Badge from 'primevue/badge';
 import Card from 'primevue/card';
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 
+const projConfig = useProjConfig();
 const props = defineProps(['options', 'disableSortControl']);
 const emit = defineEmits(['sort-changed-requested']);
 
-let isReadOnlyProj = false;
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 let overSortControl = ref(false);
 const sortControl = ref();
 

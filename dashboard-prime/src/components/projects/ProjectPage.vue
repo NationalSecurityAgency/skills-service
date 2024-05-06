@@ -12,6 +12,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert.vue'
 import EditProject from '@/components/projects/EditProject.vue'
 import { useProjDetailsState } from '@/stores/UseProjDetailsState.js'
+import UserRolesUtil from '@/components/utils/UserRolesUtil'
 
 // const props = defineProps(['project'])
 const router = useRouter()
@@ -28,14 +29,14 @@ const shareProjModal = ref(false);
 const shareUrl = ref('');
 const project = computed(() => projectDetailsState.project)
 const isLoadingData = computed(() => projectDetailsState.isLoading);
-let isReadOnlyProj = false;
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
 const isLoading = computed(() => {
-  return isLoadingData.value; // || projConfig.loadingProjConfig;
+  return isLoadingData.value || projConfig.loadingProjConfig;
 });
 
 onMounted(() => {
-  projectDetailsState.loadProjectDetailsState(true)
+  projectDetailsState.loadProjectDetailsState(true);
 });
 
 const navItems = computed(() => {
@@ -46,7 +47,7 @@ const navItems = computed(() => {
     { name: 'Learning Path', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'FullDependencyGraph' },
   ];
 
-  if (!isReadOnlyProj) {
+  if (!isReadOnlyProj.value) {
     items.push({ name: 'Skill Catalog', iconClass: 'fa-book skills-color-skill-catalog', page: 'SkillsCatalog' });
     items.push({ name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'ProjectLevels' });
   }
@@ -54,7 +55,7 @@ const navItems = computed(() => {
   items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'ProjectUsers' });
   items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'ProjectMetrics' });
 
-  if (!isReadOnlyProj) {
+  if (!isReadOnlyProj.value) {
     items.push({ name: 'Contact Users', iconClass: 'fas fa-mail-bulk', page: 'EmailUsers' });
     items.push({ name: 'Issues', iconClass: 'fas fa-exclamation-triangle', page: 'ProjectErrorsPage' });
     items.push({ name: 'Access', iconClass: 'fa-shield-alt skills-color-access', page: 'ProjectAccess' });
@@ -123,7 +124,7 @@ const headerOptions = computed(() => {
     icon: 'fas fa-award skills-color-badges',
   });
 
-  if (!isReadOnlyProj) {
+  if (!isReadOnlyProj.value) {
     stats.push({
       label: 'Issues',
       count: project.value.numErrors,
@@ -257,24 +258,24 @@ const setProject = (newProject) => {
               <!--            v-skills="'PreviewProjectClientDisplay'" -->
             </SkillsButton>
           </router-link>
-<!--          <SkillsButton v-if="isProjConfigDiscoverable"-->
-<!--                    ref="shareProjectButton"-->
-<!--                    size="small"-->
-<!--                    @click="copyAndDisplayShareProjInfo"-->
-<!--                    data-cy="shareProjBtn"-->
-<!--                    class="border-1 border-black-alpha-90"-->
-<!--                    label="Share" icon="fas fa-share-alt"-->
-<!--                    :aria-label="`Share ${project.name} with new users`">-->
+          <SkillsButton v-if="projConfig.isProjConfigDiscoverable"
+                    ref="shareProjectButton"
+                    size="small"
+                    @click="copyAndDisplayShareProjInfo"
+                    data-cy="shareProjBtn"
+                    class="border-1 border-black-alpha-90"
+                    label="Share" icon="fas fa-share-alt"
+                    :aria-label="`Share ${project.name} with new users`">
 <!--&lt;!&ndash;            v-skills="'ShareProject'" &ndash;&gt;-->
-<!--          </SkillsButton>-->
+          </SkillsButton>
         </div>
         <div data-cy="projectCreated" class="mt-3">
           <i class="fas fa-clock text-success mr-1" aria-hidden="true" />
           <ProjectDates :created="project.created" :load-last-reported-date="true"/>
         </div>
-<!--        <div v-if="userProjRole">-->
-<!--          <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span class="text-secondary font-italic small">Role:</span> <span class="small text-primary" data-cy="userRole">{{ userProjRole | userRole }}</span>-->
-<!--        </div>-->
+        <div v-if="projConfig.userProjRole">
+          <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span class="text-secondary font-italic small">Role:</span> <span class="small text-primary" data-cy="userRole">{{ UserRolesUtil.userRoleFormatter(projConfig.userProjRole) }}</span>
+        </div>
       </template>
     </PageHeader>
 

@@ -1,11 +1,10 @@
 <script setup>
-import {ref, nextTick, computed, watch} from 'vue';
+import {ref, computed, watch} from 'vue';
 import { useProjConfig } from '@/stores/UseProjConfig.js'
-import {useRoute, useRouter} from "vue-router";
+import { useRoute } from "vue-router";
 
 const emit = defineEmits(['add-action'])
 const props = defineProps(['title', 'action', 'disabled', 'disabledMsg', 'ariaLabel', 'isLoading', 'marginBottom']);
-const router = useRouter()
 const route = useRoute()
 
 const config = useProjConfig();
@@ -20,6 +19,8 @@ const isAdminPage = computed(() => {
   return route.path?.toLowerCase()?.startsWith('/administrator');
 });
 
+const isReadOnlyProj = computed(() => config.isReadOnlyProj);
+
 const isMetricsPage = computed(() => {
   const projId = route.params?.projectId;
   if (!projId) {
@@ -30,7 +31,7 @@ const isMetricsPage = computed(() => {
 });
 
 const isReadOnlyProjUnderAdminUrl = computed(() => {
-  return config.isReadOnlyProj && isAdminPage && !isAdminProjectsPage && !isMetricsPage;
+  return isReadOnlyProj.value && isAdminPage.value && !isAdminProjectsPage.value && !isMetricsPage.value;
 });
 
 watch(() => props.disabled, (newValue) => {

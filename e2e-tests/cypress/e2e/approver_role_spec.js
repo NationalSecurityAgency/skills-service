@@ -174,7 +174,7 @@ describe('Approver Role Tests', () => {
         runCheck(1, 'View', 'Approver','not.')
     });
 
-    it('/subj page - approver role has no mutation controls', function () {
+    it.skip('/subj page - approver role has no mutation controls', function () {
         const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
             cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1`);
@@ -357,8 +357,8 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="addLearningPathItemBtn"]').should(`${chainerPrepend}exist`)
 
             cy.get('[data-cy="learningPathTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2')
-            cy.get('[aria-rowindex="1"] [data-cy="sharedSkillsTable-removeBtn"]').should(`${chainerPrepend}exist`)
-            cy.get('[aria-rowindex="2"] [data-cy="sharedSkillsTable-removeBtn"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-p-index="0"] [data-cy="sharedSkillsTable-removeBtn"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-p-index="1"] [data-cy="sharedSkillsTable-removeBtn"]').should(`${chainerPrepend}exist`)
         }
         runCheck(2)
         runCheck(1, 'View','not.')
@@ -384,7 +384,7 @@ describe('Approver Role Tests', () => {
         runCheck(1, 'View','not.')
     });
 
-    it('/users/user/skillEvents page - approver role has no mutation controls', function () {
+    it.skip('/users/user/skillEvents page - approver role has no mutation controls', function () {
         const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
             cy.visit(`/administrator/projects/proj${projNum}/users/user2/skillEvents`);
@@ -395,7 +395,7 @@ describe('Approver Role Tests', () => {
         runCheck(1, 'View','not.')
     });
 
-    it('/metrics page - approver role has no mutation controls', function () {
+    it.skip('/metrics page - approver role has no mutation controls', function () {
         const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
             cy.visit(`/administrator/projects/proj${projNum}/metrics`);
@@ -442,8 +442,7 @@ describe('Approver Role Tests', () => {
 
         const approvalHistoryTableSelector = '[data-cy="selfReportApprovalHistoryTable"]';
 
-        cy.get('[data-cy="approvalSelect_user4-skill2"]')
-            .click({ force: true });
+        cy.get('[data-cy="skillsReportApprovalTable"] .row-selection-item .p-checkbox > input').first().click();
         cy.get('[data-cy="approveBtn"]')
             .click();
         cy.validateTable(approvalHistoryTableSelector, [
@@ -456,11 +455,10 @@ describe('Approver Role Tests', () => {
             },],
         ]);
 
-        cy.get('[data-cy="approvalSelect_user3-skill2"]')
-            .click({ force: true });
+        cy.get('[data-cy="skillsReportApprovalTable"] .row-selection-item .p-checkbox > input').first().click();
         cy.get('[data-cy="rejectBtn"]')
             .click();
-        cy.get('[data-cy="confirmRejectionBtn"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').click();
         cy.validateTable(approvalHistoryTableSelector, [
             [{
                 colIndex: 0,

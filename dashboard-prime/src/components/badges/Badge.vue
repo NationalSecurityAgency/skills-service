@@ -4,7 +4,9 @@ import NavCardWithStatsAndControls from '@/components/utils/cards/NavCardWithSta
 import CardNavigateAndEditControls from '@/components/utils/cards/CardNavigateAndEditControls.vue';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import EditBadge from "@/components/badges/EditBadge.vue";
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 
+const projConfig = useProjConfig();
 const props = defineProps({
   badge: Object,
   global: {
@@ -29,7 +31,7 @@ let isDeleteDisabled = ref(false);
 const navCardWithStatsAndControls = ref();
 const cardNavControls = ref(null);
 
-let isReadOnlyProj = false;
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
 onMounted(() => {
   buildCardOptions();

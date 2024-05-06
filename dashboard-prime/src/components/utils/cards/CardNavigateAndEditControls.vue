@@ -1,7 +1,9 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 
+const projConfig = useProjConfig();
 const props = defineProps({
   options: Object,
   to: Object,
@@ -13,7 +15,7 @@ const props = defineProps({
 const emit = defineEmits(['edit', 'delete', 'share', 'unshare'])
 const router = useRouter()
 
-let isReadOnlyProj = false
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
 const shareBtnIcon = computed(() => {
   return props.options?.shareEnabled === true ? 'fas fa-hands-helping' : 'fas fa-handshake-alt-slash'

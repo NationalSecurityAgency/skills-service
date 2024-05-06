@@ -16,7 +16,9 @@ import JumpToSkill from './JumpToSkill.vue'
 import EditSubject from '@/components/subjects/EditSubject.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 
+const projConfig = useProjConfig();
 const announcer = useSkillsAnnouncer()
 const appConfig = useAppConfig()
 const emit = defineEmits(['subjects-changed']);
@@ -38,7 +40,7 @@ watch(
 )
 
 
-let isReadOnlyProj = false;
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
 let isLoadingData = ref(true);
 

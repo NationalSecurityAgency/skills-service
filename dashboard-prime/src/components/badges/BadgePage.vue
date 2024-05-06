@@ -15,7 +15,7 @@ const router = useRouter();
 const projConfig = useProjConfig();
 const badgeState = useBadgeState();
 const { badge } = storeToRefs(badgeState);
-const isReadOnlyProj = projConfig.isReadOnlyProj;
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 const confirm = useConfirm();
 
 const navItems = [

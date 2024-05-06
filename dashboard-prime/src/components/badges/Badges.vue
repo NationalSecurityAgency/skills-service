@@ -37,7 +37,7 @@ let sortOrder = ref({
 });
 const badgeRef = ref([]);
 
-let isReadOnlyProj = false;
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
 onMounted(() => {
   projectId.value = route.params.projectId;

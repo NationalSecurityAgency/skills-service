@@ -1,36 +1,19 @@
 <script setup>
-import { nextTick, onMounted, ref } from 'vue'
+import {computed, nextTick, onMounted, ref} from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsService from '@/components/skills/SkillsService'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import Column from 'primevue/column'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 
+const projConfig = useProjConfig();
 const props = defineProps(['isLoading', 'data'])
 const emit = defineEmits(['update'])
 const announcer = useSkillsAnnouncer()
 const confirm = useConfirm()
 
-const fields = [
-  {
-    key: 'fromItem',
-    label: 'From',
-    sortable: true
-  },
-  {
-    key: 'toItem',
-    label: 'To',
-    sortable: true
-  }
-]
-// if (!isReadOnlyProjMethod()) {
-//   fields.push({
-//     key: 'edit',
-//     label: 'Remove',
-//     sortable: false,
-//   });
-// }
-
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
 const learningPaths = ref([])
 const isProcessing = ref(true)
@@ -120,7 +103,7 @@ const sortTable = (criteria) => {
               <a :href="getUrl(slotProps.data.toNode)">{{ slotProps.data.toItem }}</a>
             </template>
           </Column>
-          <Column field="edit" header="Edit">
+          <Column field="edit" header="Edit" v-if="!isReadOnlyProj">
             <template #body="slotProps">
               <Button @click="removeLearningPath(slotProps.data)"
                       variant="outline-info" size="small" class="text-info"

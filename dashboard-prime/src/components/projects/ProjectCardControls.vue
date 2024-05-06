@@ -65,7 +65,7 @@ const focusOnDelete = () => {
     </SkillsButton>
     <ButtonGroup class="mr-2 p-0 flex" v-if="!readOnlyProject">
       <SkillsButton
-        :id="`editPojBtn${project.projectId}`"
+        :id="`editProjBtn${project.projectId}`"
         :track-for-focus="true"
         ref="editBtn"
         outlined
@@ -79,7 +79,7 @@ const focusOnDelete = () => {
         data-cy="editProjBtn" />
 
       <SkillsButton
-        :id="`copyPojBtn${project.projectId}`"
+        :id="`copyProjBtn${project.projectId}`"
         ref="copyBtn"
         outlined
         severity="info"
@@ -94,7 +94,7 @@ const focusOnDelete = () => {
         data-cy="copyProjBtn" />
 
       <SkillsButton
-        :id="`deletePojBtn${project.projectId}`"
+        :id="`deleteProjBtn${project.projectId}`"
         outlined
         severity="info"
         ref="deleteBtn"

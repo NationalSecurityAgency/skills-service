@@ -21,14 +21,14 @@ const focusState = useFocusState()
 
 let showEditSubject = ref(false)
 
-let isReadOnlyProj = projConfig.isReadOnlyProj;
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
 onMounted(() => {
   loadSubject()
 })
 
 const isLoadingData = computed(() => {
-  return subjectState.isLoadingSubject.value || projConfig.loadingProjConfig.value
+  return subjectState.isLoadingSubject || projConfig.loadingProjConfig
 })
 
 const navItems = computed(() => {
@@ -36,7 +36,7 @@ const navItems = computed(() => {
     { name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'SubjectSkills' }
   ]
 
-  if (!isReadOnlyProj) {
+  if (!isReadOnlyProj.value) {
     items.push({ name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'SubjectLevels' })
   }
   items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SubjectUsers' })
@@ -72,8 +72,8 @@ const headerOptions = computed(() => {
     }, {
       label: 'Points',
       count: subject.totalPoints,
-      warn: subject.totalPoints < minimumPoints,
-      warnMsg: (subject.totalPoints + subject.totalPointsReused) < minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${minimumPoints} points.` : null,
+      warn: subject.totalPoints < minimumPoints.value,
+      warnMsg: (subject.totalPoints + subject.totalPointsReused) < minimumPoints.value ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${minimumPoints.value} points.` : null,
       icon: 'far fa-arrow-alt-circle-up skills-color-points',
       secondaryStats: [{
         label: 'reused',
@@ -123,6 +123,7 @@ const subjectEdited = (updatedSubject) => {
       <template #subSubTitle v-if="!isLoadingData && !isReadOnlyProj">
         <SkillsButton
           id="editSubjectBtn"
+          v-if="!isReadOnlyProj"
           @click="displayEditSubject"
           ref="editSubjectButton"
           label="Edit"
