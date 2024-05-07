@@ -101,7 +101,7 @@ const buildBreadcrumb = () => {
         // treat crossProject as a special case
         if (value === 'crossProject') {
           ignoreNext = true
-          key = 'Dependency'
+          key = 'Prerequisite'
           return
         }
         // treat userTag as a special case

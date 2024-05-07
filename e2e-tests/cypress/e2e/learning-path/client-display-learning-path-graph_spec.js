@@ -53,14 +53,14 @@ describe('Client Display Prerequisites Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
-        cy.clickOnNode(550, 262);
+        cy.clickOnNode(600, 250);
 
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
 
         cy.get('[data-cy="breadcrumb-subj2"]').should('exist')
         cy.get('[data-cy="breadcrumb-skill1"]').should('not.exist')
 
-        cy.clickOnNode(540, 200);
+        cy.clickOnNode(600, 200);
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 4 Subj3')
         cy.get('[data-cy="breadcrumb-subj2"]').should('not.exist')
         cy.get('[data-cy="breadcrumb-subj3"]').should('exist')
@@ -79,7 +79,7 @@ describe('Client Display Prerequisites Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
-        cy.clickOnNode(540, 200);
+        cy.clickOnNode(600, 200);
 
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
         cy.get('[data-cy="breadcrumb-subj2"]').should('exist')
@@ -89,7 +89,7 @@ describe('Client Display Prerequisites Tests', () => {
         cy.get('[data-cy="prevSkill"]').click()
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
 
-        cy.get('[data-cy="breadcrumb-subj2"]').click()
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj2"]').click()
         cy.get('[data-cy="title"]').should('have.text', 'Subject 2');
     })
 
@@ -104,7 +104,7 @@ describe('Client Display Prerequisites Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
-        cy.clickOnNode(525, 200);
+        cy.clickOnNode(600, 200);
 
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3 Subj2')
         cy.get('[data-cy="breadcrumb-subj1"]').should('exist')
@@ -138,7 +138,7 @@ describe('Client Display Prerequisites Tests', () => {
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
-        cy.clickOnNode(190, 335);
+        cy.clickOnNode(240, 335);
         cy.contains('Project: This is project 2');
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
         cy.get('[data-cy="crossProjAlert"]').contains('cross-project skill');
@@ -146,14 +146,14 @@ describe('Client Display Prerequisites Tests', () => {
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
-        cy.clickOnNode(418, 330);
+        cy.clickOnNode(468, 330);
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 2');
 
         // make sure that "this skill" node doesn't navigate away to another page
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
-        cy.clickOnNode(530, 435);
+        cy.clickOnNode(580, 435);
         cy.wait(500);
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1');
     });
@@ -229,38 +229,38 @@ describe('Client Display Prerequisites Tests', () => {
         cy.cdClickSkill(9);
 
         cy.get('[data-cy="skillProgressTitle"]').contains('skill9')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"]').contains('skill0')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"]').contains('skill1')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"]').contains('skill2')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"]').contains('skill3')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="5"]').contains('skill4')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="6"]').should('not.exist')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill0"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill1"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill3"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill4"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill5"]').should('not.exist')
 
-        cy.get('[data-cy="prereqTablePaging"] [aria-label="Go to page 1"]')
-        cy.get('[data-cy="prereqTablePaging"] [aria-label="Go to page 2"]')
-        cy.get('[data-cy="prereqTablePaging"] [aria-label="Go to page 3"]').should('not.exist')
+        cy.get('[data-pc-extend="paginator"] [aria-label="Page 1"]')
+        cy.get('[data-pc-extend="paginator"] [aria-label="Page 2"]')
+        cy.get('[data-pc-extend="paginator"] [aria-label="Page 3"]').should('not.exist')
 
         // page 2
-        cy.get('[data-cy="prereqTablePaging"] [aria-label="Go to page 2"]').click()
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="5"]').should('not.exist')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="6"]').contains('skill5')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="7"]').contains('skill6')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="8"]').contains('skill7')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="9"]').contains('skill8')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="10"]').should('not.exist')
+        cy.get('[data-pc-extend="paginator"] [aria-label="Page 2"]').click()
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill4"]').should('not.exist')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill5"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill6"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill7"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill8"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill9"]').should('not.exist')
 
         cy.get('[data-cy="skillLink-proj1-skill8"]').click()
         cy.get('[data-cy="skillProgressTitle"]').contains('skill8')
-        cy.get('[data-cy="prereqTablePaging"]').should('not.exist')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"]').contains('skill0')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"]').contains('skill1')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"]').contains('skill2')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"]').contains('skill3')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="5"]').contains('skill4')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="6"]').contains('skill5')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="7"]').contains('skill6')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="8"]').contains('skill7')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="9"]').should('not.exist')
+        cy.get('[data-pc-extend="paginator"]').should('not.exist')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill0"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill1"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill3"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill4"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill5"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill6"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill7"]')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill8"]').should('not.exist')
     });
 
     it('navigate to cross-project prerequisite', function () {
@@ -276,10 +276,10 @@ describe('Client Display Prerequisites Tests', () => {
         cy.cdVisit('/subjects/subj1/skills/skill1');
 
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Very Great Skill 1')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Shared From This is project 2')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj2-skill1"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="prereqTable"] [data-p-index="0"]').contains('Shared From This is project 2')
 
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"] [data-cy="skillLink-proj2-skill1"]').click()
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj2-skill1"]').click()
         cy.get('[data-cy="skillProgress"]').contains('Project: This is project 2')
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
         cy.get('[data-cy="crossProjAlert"]')
@@ -314,21 +314,23 @@ describe('Client Display Prerequisites Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill7');
 
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Skill 1')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="1"]').contains('Skill 2')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="1"]').contains('Skill 3')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="1"]').contains('Skill 4')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="5"] [aria-colindex="1"]').contains('Skill 5')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="6"] [aria-colindex="1"]').contains('Skill 6')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="7"]').should('not.exist')
+        cy.get('[data-pc-section="headertitle"]').contains('Prerequisite Name').click()
 
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="3"]').contains('Yes')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="3"]').contains('Not Yet')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="3"]').contains('Not Yet')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="3"]').contains('Yes')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="5"] [aria-colindex="3"]').contains('Not Yet')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="6"] [aria-colindex="3"]').contains('Not Yet')
-        cy.get('[data-cy="prereqTable"] [aria-rowindex="7"]').should('not.exist')
+        cy.get('[data-cy="prereqTable"] [data-p-index="0"] [data-cy="skillLink-proj1-skill1"]').contains('Skill 1')
+        cy.get('[data-cy="prereqTable"] [data-p-index="1"] [data-cy="skillLink-proj1-skill2"]').contains('Skill 2')
+        cy.get('[data-cy="prereqTable"] [data-p-index="2"] [data-cy="skillLink-proj1-skill3"]').contains('Skill 3')
+        cy.get('[data-cy="prereqTable"] [data-p-index="3"] [data-cy="skillLink-proj1-skill4"]').contains('Skill 4')
+        cy.get('[data-cy="prereqTable"] [data-p-index="4"] [data-cy="skillLink-proj1-skill5"]').contains('Skill 5')
+        cy.get('[data-cy="prereqTable"] [data-p-index="5"] [data-cy="skillLink-proj1-skill6"]').contains('Skill 6')
+        cy.get('[data-cy="prereqTable"] [data-p-index="6"]').should('not.exist')
+
+        cy.get('[data-cy="prereqTable"] [data-p-index="0"] [data-cy="achievedCellYes"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [data-p-index="1"] [data-cy="achievedCellNo"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [data-p-index="2"] [data-cy="achievedCellNo"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [data-p-index="3"] [data-cy="achievedCellYes"]').contains('Yes')
+        cy.get('[data-cy="prereqTable"] [data-p-index="4"] [data-cy="achievedCellNo"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [data-p-index="5"] [data-cy="achievedCellNo"]').contains('Not Yet')
+        cy.get('[data-cy="prereqTable"] [data-p-index="6"]').should('not.exist')
 
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('6');

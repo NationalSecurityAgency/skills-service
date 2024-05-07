@@ -11,8 +11,8 @@ export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState',
     success: '#007c49',
     danger: '#290000',
     white: '#fff',
-    pointHistoryGradientStartColor: '#00a4e8',
-  };
+    pointHistoryGradientStartColor: '#00a4e8'
+  }
 
   const theme = ref({
     progressIndicators: {
@@ -34,24 +34,37 @@ export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState',
   }
 
   const infoCards = () => {
-    const iconColors = theme.value?.infoCards?.iconColors;
+    const iconColors = theme.value?.infoCards?.iconColors
     return {
       iconColors: [
         iconColors && iconColors.length > 0 ? iconColors[0] : colors.success,
         iconColors && iconColors.length > 1 ? iconColors[1] : colors.warning,
         iconColors && iconColors.length > 2 ? iconColors[2] : colors.info,
-        iconColors && iconColors.length > 3 ? iconColors[3] : colors.danger,
-      ],
-    };
+        iconColors && iconColors.length > 3 ? iconColors[3] : colors.danger
+      ]
+    }
   }
 
   const landingPageTitle = computed(() => theme.value.landingPageTitle || 'User Skills')
+
+  const graphBadgeColor = computed(() => theme.value?.prerequisites?.badgeColor || 'indigo')
+  const graphSkillColor = computed(() => theme.value?.prerequisites?.skillColor || 'orange')
+  const graphAchievedColor = computed(() => theme.value?.prerequisites?.achievedColor || 'green')
+  const graphThisSkillColor = computed(() => theme.value?.prerequisites?.thisSkillColor || '#00a4e8')
+  const graphNavButtonsColor = computed(() => theme.value?.prerequisites?.navButtonsColor || '')
+  const graphTextPrimaryColor = computed(() => theme.value?.prerequisites?.textPrimaryColor || '')
 
   return {
     theme,
     setThemeByKey,
     landingPageTitle,
     colors,
-    infoCards
+    infoCards,
+    graphBadgeColor,
+    graphSkillColor,
+    graphAchievedColor,
+    graphThisSkillColor,
+    graphNavButtonsColor,
+    graphTextPrimaryColor
   }
 })

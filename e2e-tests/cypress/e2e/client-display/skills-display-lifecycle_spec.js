@@ -1,4 +1,4 @@
-describe('Various Test to verify Skills Display creation lifecyle works properly', () => {
+describe('Various Test to verify Skills Display creation lifecycle works properly', () => {
 
   beforeEach(() => {
 

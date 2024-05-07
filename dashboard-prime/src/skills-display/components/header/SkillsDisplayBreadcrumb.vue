@@ -32,7 +32,7 @@ const build = () => {
         // treat crossProject as a special case
         if (value === 'crossProject') {
           ignoreNext = true
-          key = 'Dependency'
+          key = 'Prerequisite'
           return
         }
         if (key) {

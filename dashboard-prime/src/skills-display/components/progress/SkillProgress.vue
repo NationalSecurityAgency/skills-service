@@ -103,16 +103,17 @@ const isSkillComplete = computed(() => props.skill && props.skill.meta && props.
 
 <template>
   <div class="text-left" data-cy="skillProgress">
-    <!--    <div v-if="skill.crossProject" class="row border-bottom mb-3 text-primary text-center">-->
-    <!--      <div class="col-md-6 text-md-left">-->
-    <!--        <div class="h4"><span class="text-muted">{{ projectDisplayName }}:</span> {{ skill.projectName }}</div>-->
-    <!--      </div>-->
-    <!--      <div class="col-md-6 text-md-right text-success text-uppercase">-->
-    <!--        <div class="h5"><i class="fa fa-vector-square"/> Cross-{{ projectDisplayName }} {{ skillDisplayName }}</div>-->
-    <!--      </div>-->
-    <!--    </div>-->
-
-    <Message v-if="skill.crossProject && !isSkillComplete && !skillsDisplayInfo.isGlobalBadgePage" data-cy="crossProjAlert" :closable="false">
+    <div v-if="skill.crossProject" class="flex gap-3 flex-wrap">
+      <div class="flex-1">
+        <div class="text-xl"><span class="text-color-secondary font-italic">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}</div>
+      </div>
+      <div class="">
+        <div class="text-xl"><i class="fa fa-vector-square" aria-hidden="true"/> Cross-{{ attributes.projectDisplayName }} {{ attributes.skillDisplayName }}</div>
+      </div>
+    </div>
+    <Message v-if="skill.crossProject && !isSkillComplete && !skillsDisplayInfo.isGlobalBadgePage.value"
+             icon="fas fa-hands-helping"
+             data-cy="crossProjAlert" :closable="false">
       This is a cross-{{ attributes.projectDisplayName.toLowerCase() }} {{ attributes.skillDisplayName.toLowerCase()
       }}! In order to complete
       this {{ attributes.skillDisplayName.toLowerCase() }} please visit <strong>{{
@@ -147,6 +148,7 @@ const isSkillComplete = computed(() => props.skill && props.skill.meta && props.
       <skill-progress-bar
         v-else
         :skill="skill"
+        :is-locked="isSkillLocked"
         data-cy="skillProgressBar" />
 
       <!--        <progress-bar :skill="skill" v-on:progressbar-clicked="skillClicked"-->
