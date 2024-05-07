@@ -32,7 +32,7 @@ const isLoadingData = computed(() => projectDetailsState.isLoading);
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
 const isLoading = computed(() => {
-  return isLoadingData.value || projConfig.loadingProjConfig;
+  return isLoadingData.value; // || projConfig.loadingProjConfig;
 });
 
 onMounted(() => {
@@ -171,7 +171,7 @@ const projectSaved = (updatedProject) => {
     if (updatedProject.projectId !== origProjId) {
       router.replace({ name: route.name, params: { ...route.params, projectId: updatedProject.projectId } })
         .then(() =>{
-          // projConfig.loadProjConfigState({ projectId: updatedProject.projectId, updateLoadingVar: false })
+          projConfig.loadProjConfigState({ projectId: updatedProject.projectId, updateLoadingVar: false })
         });
     }
     announcer.polite(`Project ${updatedProject.name} has been edited`);

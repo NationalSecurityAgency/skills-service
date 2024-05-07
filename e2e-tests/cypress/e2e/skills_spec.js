@@ -245,7 +245,7 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
 
-    // cy.get(selectorSkillsRowToggle).click()
+    cy.get('[data-pc-section="rowtoggler"]').first().click();
     cy.get('[ data-cy="childRowDisplay_Skill1Skill"]').contains('1,000 Points')
   })
 
@@ -329,6 +329,7 @@ describe('Skills Tests', () => {
 
     cy.get('#skillName').type('{enter}')
     cy.wait('@postNewSkill')
+    cy.wait('@loadSubject')
 
     cy.get('[data-cy=editSkillButton_testSkill]').focus()
     cy.realPress('Enter')
