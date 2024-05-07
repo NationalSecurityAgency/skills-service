@@ -45,14 +45,6 @@ const skillsState = useSkillsState()
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
 onMounted(() => {
-  if(projConfig.projConfig) {
-    loadData();
-  }
-  else {
-    projConfig.loadProjConfigState({ projectId: route.params.projectId }).then(() => {
-      loadData();
-    });
-  }
 })
 
 // Vue caches components and when re-directed to the same component the path will be pushed
@@ -70,8 +62,17 @@ watch(
   }
 )
 
+watch(
+    () => projConfig.loadingProjConfig,
+    () => {
+      if (!projConfig.loadingProjConfig) {
+        loadData();
+      }
+    }
+)
+
 const isLoading = computed(() => {
-  return subjectState.isLoadingSubject || projConfig.loadingProjConfig || skillsState.loadingSkill
+  return subjectState.isLoadingSubject || skillsState.loadingSkill || projConfig.loadingProjConfig
 })
 
 const navItems = ref([])
