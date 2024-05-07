@@ -695,7 +695,7 @@ Cypress.Commands.add("addCrossProjectLearningPathItem", (projNum, fromSkillNum, 
     cy.request('POST', `/admin/projects/${projectId}/${skill}/prerequisite/${prerequisiteProj}/${prerequisiteSkill}`);
 });
 
-Cypress.Commands.add("doReportSkill", ({project = 1, skill = 1, subjNum = 1, userId = 'skills@skills.org', date = '2020-09-12 11:00', failOnError=true, approvalRequestedMsg=null} = {}) => {
+Cypress.Commands.add("doReportSkill", ({project = 1, skill = 1, subjNum = 1, userId = Cypress.env('proxyUser'), date = '2020-09-12 11:00', failOnError=true, approvalRequestedMsg=null} = {}) => {
     let timestamp = null
     if (Number.isInteger(date)) {
         timestamp = date;

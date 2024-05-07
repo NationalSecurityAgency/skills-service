@@ -18,7 +18,7 @@ const totalLevels = computed(() => props.userProgress.totalLevels)
       <div class="fa-stack skills-icon trophy-stack">
         <i class="fa fa-trophy fa-stack-2x" />
         <i class="fa fa-star fa-stack-1x trophy-star" />
-        <strong class="fa-stack-1x trophy-text">{{ level }}</strong>
+        <strong class="fa-stack-1x trophy-text" data-cy="levelOnTrophy">{{ level }}</strong>
       </div>
     </div>
     <div data-cy="overallLevelDesc" class="mt-3">

@@ -16,8 +16,11 @@ const props = defineProps({
   }
 })
 
-const userProgress = props.isSubject ?
-  useSkillsDisplaySubjectState().subjectSummary : useUserProgressSummaryState().userProgressSummary
+const skillsDisplaySubjectState = useSkillsDisplaySubjectState()
+const userProgressSummaryState = useUserProgressSummaryState()
+const userProgress = computed(() => {
+  return props.isSubject ? skillsDisplaySubjectState.subjectSummary : userProgressSummaryState.userProgressSummary
+})
 const themeState = useSkillsDisplayThemeState()
 const attributes = useSkillsDisplayAttributesState()
 const numFormat = useNumberFormat()
@@ -27,12 +30,12 @@ const beforeTodayColor = computed(() => themeState.theme.progressIndicators.befo
 const earnedTodayColor = computed(() => themeState.theme.progressIndicators.earnedTodayColor)
 const completeColor = computed(() => themeState.theme.progressIndicators.completeColor)
 const incompleteColor = computed(() => themeState.theme.progressIndicators.incompleteColor)
-const isLevelComplete = computed(() => userProgress.levelTotalPoints === -1)
+const isLevelComplete = computed(() => userProgress.value.levelTotalPoints === -1)
 const levelStats = computed(() => {
   return {
-    title: isLevelComplete.value ? `${attributes.levelDisplayName} Progress` : `${attributes.levelDisplayName} ${userProgress.skillsLevel + 1} Progress`,
-    nextLevel: userProgress.skillsLevel + 1,
-    pointsTillNextLevel: userProgress.levelTotalPoints - userProgress.levelPoints,
+    title: isLevelComplete.value ? `${attributes.levelDisplayName} Progress` : `${attributes.levelDisplayName} ${userProgress.value.skillsLevel + 1} Progress`,
+    nextLevel: userProgress.value.skillsLevel + 1,
+    pointsTillNextLevel: userProgress.value.levelTotalPoints - userProgress.value.levelPoints,
   }
 })
 </script>
@@ -82,7 +85,7 @@ const levelStats = computed(() => {
               <p v-if="isLevelComplete">All {{ attributes.levelDisplayName.toLowerCase() }}s complete</p>
 
               <div v-if="!isLevelComplete">
-                <div>
+                <div data-cy="pointsTillNextLevelSubtitle">
                   <Tag data-cy="pointsTillNextLevel">{{ numFormat.pretty(levelStats.pointsTillNextLevel) }}</Tag>
                   Point{{ pluralSupport.plural(levelStats.pointsTillNextLevel) }} to {{ attributes.levelDisplayName }} {{levelStats.nextLevel }}
                 </div>
