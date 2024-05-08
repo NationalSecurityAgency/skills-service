@@ -371,7 +371,7 @@ describe('Client Display Breadcrumb Tests', () => {
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .should('have.attr', 'href');
         cy.get('[data-cy=skillsDisplayBreadcrumbBar]')
-            .contains(new RegExp(/^Overview.*Subject:\s*subj1.*Skill:\s*skill3.*Dependency:\s*skill1$/))
+            .contains(new RegExp(/^Overview.*Subject:\s*subj1.*Skill:\s*skill3.*Prerequisite:\s*skill1$/))
             .should('be.visible');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .its('length')

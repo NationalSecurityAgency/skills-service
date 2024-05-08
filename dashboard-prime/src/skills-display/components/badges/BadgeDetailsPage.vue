@@ -68,9 +68,8 @@ const locked = computed(() => {
           </a>
         </template>
       </Card>
-
       <skills-progress-list
-        v-if="badge && !(skillsDisplayInfo.isGlobalBadgePage.value && !summaryAndSkillsState.subjectSummary?.skills)"
+        v-if="badge && !(skillsDisplayInfo.isGlobalBadgePage.value && !(summaryAndSkillsState.subjectSummary?.skills?.length > 0))"
         :subject="badge"
         type="badge"
         class="mt-3"
