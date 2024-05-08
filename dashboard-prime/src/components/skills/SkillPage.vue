@@ -45,6 +45,9 @@ const skillsState = useSkillsState()
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
 onMounted(() => {
+  if (!projConfig.loadingProjConfig) {
+    loadData();
+  }
 })
 
 // Vue caches components and when re-directed to the same component the path will be pushed

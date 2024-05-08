@@ -28,7 +28,7 @@ onMounted(() => {
 })
 
 const isLoadingData = computed(() => {
-  return subjectState.isLoadingSubject || projConfig.loadingProjConfig
+  return subjectState.isLoadingSubject; // || projConfig.loadingProjConfig
 })
 
 const navItems = computed(() => {
