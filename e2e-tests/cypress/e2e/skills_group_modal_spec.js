@@ -200,7 +200,7 @@ describe('Skills Group Modal Tests', () => {
 
         cy.get('[data-cy="nameCell_group2"]').contains('Updated Group Name')
         // cy.get('[data-cy="expandDetailsBtn_group2"]').click();
-        cy.get('[data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+        // cy.get('[data-p-index="1"] [data-pc-section="rowtoggler"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group2"] [data-cy="description"]').contains('another value');
 
         cy.get('[data-cy="editSkillButton_group2"]').click();
