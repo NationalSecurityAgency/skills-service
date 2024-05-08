@@ -46,9 +46,9 @@ import BadgeSkills from '@/components/badges/BadgeSkills.vue'
 import ErrorPage from '@/components/utils/errors/ErrorPage.vue'
 import createSkillsClientRoutes from '@/router/SkillsDisplaySkillsClientRoutes.js'
 import createSkillsDisplayChildRoutes from '@/router/SkillsDisplayChildRoutes.js'
-import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import TestSkillsClient from '@/skills-display/components/test/TestSkillsClient.vue'
 import TestSkillsDisplay from '@/skills-display/components/test/TestSkillsDisplay.vue'
+import PathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
 
 const routes = [
   {
@@ -537,15 +537,33 @@ routes.push(createAdminRoutes())
 routes.push(createQuizRoutes())
 // skills display routes support local components and skills-client apps
 
-// const skillsDisplayChildRoutes = createSkillsDisplayChildRoutes()
-const skillsDisplayInfo = useSkillsDisplayInfo()
-routes.push(createProgressAndRankingRoutes(createSkillsDisplayChildRoutes(skillsDisplayInfo.localContextAppend)))
-routes.push(createSkillsClientRoutes(createSkillsDisplayChildRoutes(skillsDisplayInfo.skillsClientContextAppend)))
+routes.push(createProgressAndRankingRoutes(createSkillsDisplayChildRoutes(PathAppendValues.Local)))
+routes.push(createSkillsClientRoutes(createSkillsDisplayChildRoutes(PathAppendValues.SkillsClient)))
 
+
+routes.push({
+  path: '/test-skills-client',
+  component: ErrorPage,
+  name: 'TestSkillsClientHomeNoPage',
+  meta: {
+    requiresAuth: true,
+    nonAdmin: true,
+  },
+})
 routes.push({
   path: '/test-skills-client/:projectId',
   component: TestSkillsClient,
   name: 'TestSkillsClient',
+  meta: {
+    requiresAuth: true,
+    nonAdmin: true,
+  },
+})
+
+routes.push({
+  path: '/test-skills-display',
+  component: ErrorPage,
+  name: 'TestSkillsDisplayHomeNoPage',
   meta: {
     requiresAuth: true,
     nonAdmin: true,
@@ -559,7 +577,7 @@ routes.push({
     requiresAuth: true,
     nonAdmin: true,
   },
-  children: createSkillsDisplayChildRoutes(skillsDisplayInfo.localTestContextAppend)
+  children: createSkillsDisplayChildRoutes(PathAppendValues.LocalTest)
 })
 
 const router = createRouter({

@@ -10,6 +10,7 @@ import UserPrerequisitesProgress from '@/skills-display/components/skill/prerequ
 import PrerequisitesTable from '@/skills-display/components/skill/prerequisites/PrerequisitesTable.vue'
 import { useNavToSkillUtil } from '@/skills-display/components/skill/prerequisites/UseNavToSkillUtil.js'
 
+
 const props = defineProps({
   dependencies: Array
 })
@@ -129,7 +130,6 @@ const createGraph = () => {
 
   const data = buildData()
   const container = document.getElementById('dependent-skills-network')
-  console.log(data)
   network.value = new Network(container, data, displayOptions)
   network.value.on('click', (params) => {
     const skillItem = locateSelectedSkill(params)

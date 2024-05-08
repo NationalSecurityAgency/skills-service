@@ -1,16 +1,17 @@
 import { useRoute, useRouter } from 'vue-router'
 import { computed } from 'vue'
+import SkillsDisplayPathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
 
 export const useSkillsDisplayInfo = () => {
   const route = useRoute()
   const router = useRouter()
-  const skillsClientContextAppend = 'SkillsClient'
-  const localContextAppend = 'Local'
+  const skillsClientContextAppend = SkillsDisplayPathAppendValues.SkillsClient
+  const localContextAppend = SkillsDisplayPathAppendValues.Local
   const progressAndRankingsRegex = /\/progress-and-rankings\/projects\/[^/]*/i
   const localTestRegex = /\/test-skills-display\/[^/]*/i
   const clientDisplayRegex = /\/static\/clientPortal\/index\.html/i
   const regexes = [progressAndRankingsRegex, localTestRegex, clientDisplayRegex]
-  const localTestContextAppend = 'LocalTest'
+  const localTestContextAppend = SkillsDisplayPathAppendValues.LocalTest
 
   const isSkillsClientPath = () => {
     return route.path.startsWith('/static/clientPortal/')
