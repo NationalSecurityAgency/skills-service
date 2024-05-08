@@ -8,6 +8,7 @@ import SkillsProgressList from '@/skills-display/components/progress/SkillsProgr
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import GlobalBadgeProjectLevels from '@/skills-display/components/badges/GlobalBadgeProjectLevels.vue'
+import Prerequisites from '@/skills-display/components/skill/prerequisites/Prerequisites.vue'
 
 const skillsDisplayService = useSkillsDisplayService()
 const route = useRoute()
@@ -55,11 +56,11 @@ const locked = computed(() => {
       <Card class="mt-3">
         <template #content>
           <badge-catalog-item :badge="badge"></badge-catalog-item>
-          <div v-if="locked" class="text-center text-muted locked-text">
-            *** Badge has <b>{{ badge.dependencyInfo.numDirectDependents }}</b> direct prerequisite(s).
+          <Message v-if="locked" icon="fas fa-lock" severity="warn" :closable="false">
+            Badge has <Tag>{{ badge.dependencyInfo.numDirectDependents }}</Tag> direct prerequisite(s).
             <span>Please see its prerequisites below.</span>
-            ***
-          </div>
+
+          </Message>
         </template>
         <template #footer v-if="badge.helpUrl">
           <a :href="badge.helpUrl" target="_blank" rel="noopener" class="btn btn-sm btn-outline-info skills-theme-btn">
@@ -68,9 +69,6 @@ const locked = computed(() => {
         </template>
       </Card>
 
-<!--      <skills-progress-list @points-earned="refreshHeader" v-if="badge" :subject="badge" :show-descriptions="showDescriptions" type="badge"-->
-<!--                            @scrollTo="scrollToLastViewedSkill" :badge-is-locked="locked"/>-->
-
       <skills-progress-list
         v-if="badge && !(skillsDisplayInfo.isGlobalBadgePage.value && !summaryAndSkillsState.subjectSummary?.skills)"
         :subject="badge"
@@ -78,10 +76,7 @@ const locked = computed(() => {
         class="mt-3"
         :badge-is-locked="locked"/>
 
-<!--      <skill-dependencies class="mt-2" v-if="dependencies && dependencies.length > 0" :dependencies="dependencies"-->
-<!--                          :skill-id="$route.params.badgeId"></skill-dependencies>-->
-
-
+      <prerequisites />
       <global-badge-project-levels :badge="badge"/>
 
     </div>

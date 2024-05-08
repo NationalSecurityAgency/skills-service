@@ -62,8 +62,6 @@ onMounted(() => {
 })
 
 
-const themeTextPrimaryColor = computed(() => themeState.theme?.prerequisites?.textPrimaryColor || '')
-
 const isDependency = () => {
   const routeName = route.name
   return routeName === 'crossProjectSkillDetails' || routeName === 'crossProjectSkillDetailsUnderBadge'
@@ -72,8 +70,11 @@ const isDependency = () => {
 const loadData = () => {
   loadingData.value = true
   if (!route.params.crossProjectId) {
-    const skillId = isDependency() ? route.params.dependentSkillId : route.params.skillId
-    return skillsDisplayService.getSkillDependencies(skillId)
+    let lookupId = isDependency() ? route.params.dependentSkillId : route.params.skillId
+    if (route.params.badgeId) {
+      lookupId = route.params.badgeId
+    }
+    return skillsDisplayService.getSkillDependencies(lookupId)
       .then((res) => {
         dependenciesInternal.value = res.dependencies
         loadingData.value = false
@@ -246,6 +247,7 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
   if (!createdSkillIds.includes(skill.id)) {
     createdSkillIds.push(skill.id)
     const skillColor = skill.isThisSkill ? themeState.graphThisSkillColor : themeState.graphSkillColor
+    console.log(`skill color for ${skill.id} is ${skillColor}`)
     const isAchieved = achievedIds.includes(skill.id)
     let label = isCrossProject ? `Shared from\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName
     if (skill.isThisSkill) {

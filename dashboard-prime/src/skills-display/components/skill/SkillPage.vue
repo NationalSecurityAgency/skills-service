@@ -8,7 +8,7 @@ import SkillProgress from '@/skills-display/components/progress/SkillProgress.vu
 import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
-import SkillPrerequisites from '@/skills-display/components/skill/prerequisites/SkillPrerequisites.vue'
+import Prerequisites from '@/skills-display/components/skill/prerequisites/Prerequisites.vue'
 
 const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
@@ -95,7 +95,7 @@ const isLoading = computed(() => loadingSkill.value)
         </template>
       </Card>
 
-      <skill-prerequisites />
+      <prerequisites />
     </div>
     <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-5" />
   </div>

@@ -7,6 +7,8 @@ export const useNavToSkillUtil = () => {
   const displayInfo = useSkillsDisplayInfo()
 
   const navigateToSkill = (skillItem) => {
+    console.log(skillItem)
+
     if (skillItem && skillItem.skillId && !skillItem.isThisSkill) {
       if (skillItem.isCrossProject) {
         if (route.params.badgeId) {
@@ -39,7 +41,7 @@ export const useNavToSkillUtil = () => {
         displayInfo.routerPush(
           'badgeDetails',
           {
-            badgeDetails: skillItem.skillId
+            badgeId: skillItem.skillId
           }
         )
       }

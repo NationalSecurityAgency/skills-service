@@ -91,6 +91,13 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
       title: `Badge ${skillPlaceholder} Details`,
     },
   }, {
+    path: '/badges/:badgeId/crossProject/:crossProjectId/:dependentSkillId',
+    component: SkillPage,
+    name: `crossProjectSkillDetailsUnderBadge${appendToName}`,
+    meta: {
+      title: `Cross ${projectPlaceholder} ${skillPlaceholder} Details`,
+    },
+  }, {
     name: `SubjectDetailsPage${appendToName}`,
     path: 'subjects/:subjectId',
     component: SubjectDetailsPage,

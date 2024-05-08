@@ -81,7 +81,9 @@ const getTypeIconColor = (type) => {
           <div class="flex align-items-center gap-1">
             <Avatar :icon="`fas ${getTypeIcon(slotProps.data.type)}`"
                     :style="`color: ${getTypeIconColor(slotProps.data.type)}`" />
-            <div :aria-label="`Prerequisite's type is ${slotProps.data.type}`">{{ slotProps.data.type }}</div>
+            <div :aria-label="`Prerequisite's type is ${slotProps.data.type}`" data-cy="prereqType">
+              {{ slotProps.data.type }}
+            </div>
           </div>
         </template>
       </Column>
@@ -91,14 +93,16 @@ const getTypeIconColor = (type) => {
           <i class="far fa-check-square mr-1" aria-hidden="true"></i>
         </template>
         <template #body="slotProps">
-          <div v-if="slotProps.data.achieved" class="font-weight-bold"
-               data-cy="achievedCellYes"
-               :aria-label="`${slotProps.data.skillName} ${slotProps.data.type} was achieved`"
-               :style="`color: ${themeState.graphAchievedColor}`">✓Yes
-          </div>
-          <div v-else class=""
-               data-cy="achievedCellNo"
-               :aria-label="`${slotProps.data.skillName} ${slotProps.data.type} is not achieved`">Not Yet...
+          <div data-cy="isAchievedCell">
+            <div v-if="slotProps.data.achieved" class="font-weight-bold"
+                 data-cy="achievedCellYes"
+                 :aria-label="`${slotProps.data.skillName} ${slotProps.data.type} was achieved`"
+                 :style="`color: ${themeState.graphAchievedColor}`">✓Yes
+            </div>
+            <div v-else class=""
+                 data-cy="achievedCellNo"
+                 :aria-label="`${slotProps.data.skillName} ${slotProps.data.type} is not achieved`">Not Yet...
+            </div>
           </div>
         </template>
       </Column>
