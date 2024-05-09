@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, nextTick, watch } from 'vue'
+import { computed, onMounted, ref, nextTick } from 'vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import { useSkillsState } from '@/stores/UseSkillsState.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
@@ -9,6 +9,8 @@ import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import ExistingUserInput from '@/components/utils/ExistingUserInput.vue';
 import SkillsCalendarInput from '@/components/utils/inputForm/SkillsCalendarInput.vue'
 import ProjectService from '@/components/projects/ProjectService.js';
+import * as yup from 'yup';
+import { useForm } from 'vee-validate';
 
 const props = defineProps({
   projectId: String,

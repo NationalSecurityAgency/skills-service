@@ -19,6 +19,7 @@ const SUPERVISOR = 'SUPERVISOR';
 const appConfig = useAppConfig();
 const userInfo = useUserInfo();
 const focusState = useFocusState();
+const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 
 const props = defineProps({
   fieldLabel: {
@@ -60,12 +61,14 @@ const props = defineProps({
   }
 });
 
+const { value, errorMessage } = useField(() => props.name)
+
 const emit = defineEmits(['update:modelValue']);
 const selectedSuggestOption = ref(null);
 const userSuggestOptions = ref([]);
-
 const isFetching = ref(false);
 const suggestions = ref([]);
+const currentSelectedUser = ref('');
 
 const hasUserSuggestOptions = computed(() => {
   return userSuggestOptions.value && userSuggestOptions.value.length > 0;
@@ -77,16 +80,36 @@ onMounted(() => {
     selectedSuggestOption.value = userSuggestOptions.value[0];
   }
 });
-
-const onFilter = (event) => {
-  useDebounceFn(suggestUsers, appConfig.formFieldDebounceInMs)(event.value)
-}
-const onBeforeShow = () => {
+const onShowDropdown = () => {
   if (!suggestions.value || suggestions.value.length === 0) {
     suggestUsers()
   }
 }
-
+const onHideDropdown = () => {
+  // if the user clicks off the dropdown without selecting, reset back to the originally selected value
+  if (currentSelectedUser.value !== value.value) {
+    currentSelectedUser.value = value.value;
+  }
+}
+const selectCurrentItem = () => {
+  // when the user presses enter search box (not on an option in the dropdown)
+  if (typeof currentSelectedUser.value === 'string') {
+    let selectedItem = null
+    if (currentSelectedUser.value) {
+      selectedItem = suggestions.value.find((suggestion) => suggestion.userId === currentSelectedUser.value);
+      if (!selectedItem) {
+        // can happen if the user hits enter key before suggestions finish loading
+        selectedItem = { userId: currentSelectedUser.value, label: currentSelectedUser.value, isNewUser: true }
+      }
+    }
+    value.value = selectedItem;
+    emit('update:modelValue', selectedItem);
+  }
+}
+const itemSelected = (event) => {
+  value.value = event.value;
+  emit('update:modelValue', value.value);
+}
 const suggestUrl = computed(() => {
   let suggestUrl;
   if (props.userType === CLIENT) {
@@ -122,7 +145,6 @@ const getUserIdForDisplay = (user) => {
   }
   return user.userIdForDisplay;
 }
-
 const suggestUsersFromEvent = ({query}) => {
   suggestUsers(query)
 }
@@ -130,96 +152,57 @@ const suggestUsers = (query) => {
   isFetching.value = true;
   AccessService.suggestUsers(query, suggestUrl.value)
       .then((suggestedUsers) => {
-        if (query && props.canEnterNewUser) {
-          // suggestedUsers.push({ userId: query, label: query });
-        }
+        let queryMatchesExistingUser = false;
         suggestions.value = suggestedUsers.filter((suggestedUser) => !props.excludedSuggestions.includes(suggestedUser.userId));
         suggestions.value = suggestions.value.map((suggestedUser) => {
+          if (query === suggestedUser.userId) {
+            console.log(`query [${query}] matches existing user: ${suggestedUser.userId}`);
+            queryMatchesExistingUser = true;
+          }
           const label = getUserIdForDisplay(suggestedUser);
-          const sug = {
+          return {
             ...suggestedUser,
             label,
           };
-          return sug;
         })
+        if (query && props.canEnterNewUser && !queryMatchesExistingUser) {
+          suggestions.value.unshift({ userId: query, label: query, isNewUser: true });
+        }
       })
       .finally(() => {
         isFetching.value = false;
       });
 }
-
-const createTagIfNecessary = (userId) => {
-  console.log(`createTagIfNecessary: ${JSON.stringify(userId)}, type [${typeof userId}]`);
-  if (!userId) {
-    value.value = null;
-  } else if (userId && typeof userId === 'string') {
-    console.log(`Before string userId: ${userId}, value[${JSON.stringify(value.value)}]`);
-    value.value = {
-      userId: userId,
-      label: userId,
-    };
-    console.log(`After string userId: ${userId}, value[${JSON.stringify(value.value)}]`);
-  } else {
-    console.log(`Before non-string userId: ${userId}, value[${JSON.stringify(value.value)}]`);
-    value.value = userId;
-    console.log(`After string userId: ${userId}, value[${JSON.stringify(value.value)}]`);
-  }
-  emit('update:modelValue', value.value);
-}
-
-const fallthroughAttributes = useSkillsInputFallthroughAttributes()
-const { value, errorMessage } = useField(() => props.name)
-//     , undefined, {
-//   syncVModel: true,
-// });
-const useDropdown = false;
-const currentSelectedUser = ref('');
 </script>
 
 <template>
-
   <div data-cy="existingUserInput" v-bind="fallthroughAttributes.rootAttrs.value">
     <div class="flex">
-<!--    <InputGroup class="">-->
-<!--      <InputGroupAddon v-if="hasUserSuggestOptions" class="p-0">-->
-        <Dropdown data-cy="userSuggestOptionsDropdown" v-model="selectedSuggestOption" :options="userSuggestOptions"/>
-<!--      </InputGroupAddon>-->
-      <Dropdown v-if="useDropdown"
-                v-model="currentSelectedUser"
-                id="existingUserInput"
-                data-cy="existingUserInputDropdown"
-                class="align-items-center w-full"
-                @update:modelValue="createTagIfNecessary"
-                :options="suggestions"
-                :loading="isFetching"
-                :placeholder="placeholder"
-                :reset-filter-on-clear="false"
-                :reset-filter-on-hide="true"
-                :auto-filter-focus="!canEnterNewUser"
-                :editable="canEnterNewUser"
-                optionLabel="label"
-                show-clear
-                @filter="onFilter"
-                @before-show="onBeforeShow"
-                filter>
-      </Dropdown>
-
-      <AutoComplete v-if="!useDropdown"
-                    v-bind="fallthroughAttributes.inputAttrs.value"
+      <Dropdown v-if="hasUserSuggestOptions" data-cy="userSuggestOptionsDropdown" v-model="selectedSuggestOption" :options="userSuggestOptions"/>
+      <AutoComplete v-bind="fallthroughAttributes.inputAttrs.value"
                     v-model="currentSelectedUser"
                     data-cy="existingUserInputDropdown"
                     class="w-full"
                     :dropdown="true"
                     :suggestions="suggestions"
                     optionLabel="label"
-                    @item-select="(event) => console.log(`item-select: ${JSON.stringify(event)}`)"
-                    @item-unselect="(event) => console.log(`item-unselect: ${JSON.stringify(event)}`)"
-                    @update:modelValue="createTagIfNecessary"
+                    @item-select="itemSelected"
+                    @keydown.enter="selectCurrentItem"
                     @complete="suggestUsersFromEvent"
-                    @dropdownClick="onBeforeShow">
+                    @hide="onHideDropdown"
+                    @dropdownClick="onShowDropdown">
+        <template #option="slotProps">
+          <div v-if="slotProps.option.isNewUser" class="flex flex-wrap align-options-center align-items-center">
+            <div class="flex-1 existing-user-id">{{ slotProps.option.label }}</div>
+            <div class="flex font-light text-sm click-indicator ml-2" style="right: 5px; bottom: 0px;">
+              Enter to Select (new user)
+            </div>
+          </div>
+          <div v-else class="flex align-options-center">
+            <div>{{ slotProps.option.label }}</div>
+          </div>
+        </template>
       </AutoComplete>
-
-<!--    </InputGroup>-->
     </div>
     <small v-if="errorMessage"
            role="alert"
