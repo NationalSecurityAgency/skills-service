@@ -16,7 +16,7 @@ const props = defineProps({
   },
   label: {
     type: String,
-    required: true
+    required: false
   },
   isRequired: {
     type: Boolean,
@@ -46,7 +46,7 @@ const handleOnInput = (event) => {
 
 <template>
   <div class="field" v-bind="fallthroughAttributes.rootAttrs.value">
-    <label :for="`input${name}`" class="block"><span v-if="isRequired">*</span> {{ label }} </label>
+    <label v-if="label" :for="`input${name}`" class="block"><span v-if="isRequired">*</span> {{ label }} </label>
     <Calendar v-model="value"
               v-bind="fallthroughAttributes.inputAttrs.value"
               @keydown.enter="onEnter"
@@ -55,6 +55,7 @@ const handleOnInput = (event) => {
               :id="name"
               :data-cy="$attrs['data-cy'] || name" />
     <small
+        v-if="errorMessage"
         role="alert"
         class="p-error block"
         :data-cy="`${name}Error`"

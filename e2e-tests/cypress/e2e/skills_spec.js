@@ -19,6 +19,8 @@ import dayjs from 'dayjs'
 
 describe('Skills Tests', () => {
 
+  const addButtonSelector = '[data-cy=addSkillEventButton]';
+  
   beforeEach(() => {
     cy.request('POST', '/app/projects/proj1', {
       projectId: 'proj1',
@@ -340,7 +342,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="manageSkillLink_testSkill"]')
   })
 
-  it.skip('Add Skill Event', () => {
+  it('Add Skill Event', () => {
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',
       subjectId: 'subj1',
@@ -349,7 +351,6 @@ describe('Skills Tests', () => {
       pointIncrement: '50',
       numPerformToCompletion: '5'
     })
-
 
     cy.intercept({
       method: 'POST',
@@ -370,36 +371,36 @@ describe('Skills Tests', () => {
 
     cy.contains('ONE').click()
     cy.contains('TWO').click()
-    cy.get('.existingUserInput button').contains('TWO')
+    cy.get('[data-cy="userSuggestOptionsDropdown"]').contains('TWO')
 
     cy.get('[data-cy="userIdInput"]').click().type('foo{enter}')
     cy.wait('@suggestUsers')
-    cy.clickButton('Add')
-    cy.wait('@addSkillEvent')
-    cy.get('.text-success', { timeout: 5 * 1000 }).contains('Added points for')
-    cy.get('.text-success', { timeout: 5 * 1000 }).contains('[foo]')
+    cy.get(addButtonSelector).click();
+    // cy.wait('@addSkillEvent')
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('Added points for')
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('[foo]')
 
-    cy.get('[data-cy="userIdInput"]').click().type('bar{enter}')
+    cy.get('[data-cy="userIdInput"]').click().type('{selectall}bar{enter}')
     cy.wait('@suggestUsers')
-    cy.clickButton('Add')
-    cy.wait('@addSkillEvent')
-    cy.get('.text-success', { timeout: 5 * 1000 }).contains('Added points for')
-    cy.get('.text-success', { timeout: 5 * 1000 }).contains('[bar]')
+    cy.get(addButtonSelector).click();
+    // cy.wait('@addSkillEvent')
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('Added points for')
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('[bar]')
 
-    cy.get('[data-cy="userIdInput"]').click().type('baz{enter}')
+    cy.get('[data-cy="userIdInput"]').click().type('{selectall}baz{enter}')
     cy.wait('@suggestUsers')
-    cy.clickButton('Add')
-    cy.wait('@addSkillEvent')
-    cy.get('.text-success', { timeout: 5 * 1000 }).contains('Added points for')
-    cy.get('.text-success', { timeout: 5 * 1000 }).contains('[baz]')
+    cy.get(addButtonSelector).click();
+    // cy.wait('@addSkillEvent')  // TODO: uncomment this line once add v-skills directive back
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('Added points for')
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('[baz]')
 
-    cy.get('[data-cy="userIdInput"]').click().type('fo{enter}')
+    cy.get('[data-cy="userIdInput"]').click().type('{selectall}fo{enter}')
     cy.wait('@suggestUsers')
     cy.get('[data-cy="userIdInput"]').click()
-    cy.get('[data-cy="userIdInput"] .vs__dropdown-option').contains('foo').click({ force: true })
+    cy.get('.p-autocomplete-item').contains('foo').click({ force: true })
   })
 
-  it.skip('Add Skill Event for days in past correctly does not subtract one day from selected date', () => {
+  it('Add Skill Event for days in past correctly does not subtract one day from selected date', () => {
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',
       subjectId: 'subj1',
@@ -408,7 +409,6 @@ describe('Skills Tests', () => {
       pointIncrement: '50',
       numPerformToCompletion: '5'
     })
-
 
     cy.intercept({
       method: 'POST',
@@ -440,19 +440,20 @@ describe('Skills Tests', () => {
     //need to format year/month/day to match users screen
 
     cy.get('[data-cy="eventDatePicker"]').click()
-    cy.get('.vdp-datepicker__calendar .prev').first().click()
-    cy.get('.vdp-datepicker__calendar').contains('10').click()
+    cy.get('[data-pc-section="previousbutton"]').first().click()
+    cy.get('.p-datepicker-group-container').contains('10').click()
 
-    cy.clickButton('Add')
-    cy.wait('@addSkillEvent')
-    cy.get('.text-success', { timeout: 5 * 1000 }).contains('Added points for')
-    cy.get('.text-success', { timeout: 5 * 1000 }).contains('[foo]')
+    cy.get(addButtonSelector).click();
+    // cy.wait('@addSkillEvent') // TODO: uncomment this line once add v-skills directive back
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('Added points for')
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('[foo]')
     cy.get('[data-cy=nav-Users]').click()
-    cy.contains('foo')
-    cy.get('[data-label="Points Last Earned"]').should('contain.text', formattedStr)
+    cy.validateTable('[data-cy=usersTable]', [
+      [{ colIndex: 0,  value: 'foo' }, { colIndex: 3,  value: formattedStr }],
+    ], 5);
   })
 
-  it.skip('Add Skill Event - suggest user with slash character does not cause error', () => {
+  it('Add Skill Event - suggest user with slash character does not cause error', () => {
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',
       subjectId: 'subj1',
@@ -461,7 +462,6 @@ describe('Skills Tests', () => {
       pointIncrement: '50',
       numPerformToCompletion: '5'
     })
-
 
     cy.intercept({
       method: 'POST',
@@ -478,13 +478,13 @@ describe('Skills Tests', () => {
 
     cy.contains('ONE').click()
     cy.contains('TWO').click()
-    cy.get('.existingUserInput button').contains('TWO')
+    cy.get('[data-cy="userSuggestOptionsDropdown"]').contains('TWO')
 
     cy.get('[data-cy="userIdInput"]').click().type('foo/bar{enter}')
     cy.wait('@suggestUsers')
   })
 
-  it.skip('Add Skill Event User Not Found', () => {
+  it('Add Skill Event User Not Found', () => {
     cy.intercept({
       method: 'PUT',
       path: '/api/projects/*/skills/*'
@@ -515,12 +515,12 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy="userIdInput"]').click().type('foo{enter}')
 
-    cy.clickButton('Add')
+    cy.get(addButtonSelector).click();
     cy.wait('@addUser')
     cy.get('[data-cy="addedUserEventsInfo"]').contains('Unable to add points for')
   })
 
-  it.skip('Add Skill Event - user names cannot have spaces', () => {
+  it('Add Skill Event - user names cannot have spaces', () => {
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',
       subjectId: 'subj1',
@@ -720,7 +720,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=editSkillButton_skill1]').should('have.focus')
   })
 
-  it.skip('skill user details does not break breadcrumb bar', () => {
+  it('skill user details does not break breadcrumb bar', () => {
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',
       subjectId: 'subj1',
@@ -1380,7 +1380,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="descriptionError"]').contains('Mocked up validation failure')
   })
 
-  it.skip('copy skill - run validation on load in case validation improved and existing values fail to validate', () => {
+  it('copy skill - run validation on load in case validation improved and existing values fail to validate', () => {
     cy.intercept('POST', '/api/validation/description*', {
       valid: false,
       msg: 'Mocked up validation failure'

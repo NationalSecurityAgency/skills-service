@@ -270,7 +270,7 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('li.p-dropdown-empty-message').contains('No results')
     });
 
-    it.skip('reporting to quiz-based skill is not allowed', function () {
+    it('reporting to quiz-based skill is not allowed', function () {
         cy.createQuizDef(1, { name: 'Trivia Knowledge' });
         cy.createQuizQuestionDef(1, 1);
 
@@ -279,9 +279,9 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/addSkillEvent');
         cy.get('[data-cy="pageHeader"]').contains('Very Great Skill 1')
-        const userIdSelector = '[data-cy=userIdInput]';
+        const userIdSelector = '[data-cy="userIdInput"] [data-cy="existingUserInputDropdown"]';
         const addButtonSelector = '[data-cy=addSkillEventButton]';
-        cy.get(`${userIdSelector} input`).should('be.enabled')
+        cy.get(`${userIdSelector} [data-pc-section="input"]`).should('be.enabled')
         cy.get(userIdSelector).type('oTHIGHJK{enter}');
         cy.get(addButtonSelector).should('not.be.disabled')
         cy.get(addButtonSelector).click();

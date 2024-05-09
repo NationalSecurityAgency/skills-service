@@ -6,6 +6,9 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import { useUserInfo } from '@/components/utils/UseUserInfo.js';
 import { useFocusState } from '@/stores/UseFocusState.js';
 import AccessService from '@/components/access/AccessService.js';
+import { useField } from 'vee-validate';
+import AutoComplete from 'primevue/autocomplete';
+import { useSkillsInputFallthroughAttributes } from '@/components/utils/inputForm/UseSkillsInputFallthroughAttributes.js';
 
 // user type constants
 const DASHBOARD = 'DASHBOARD';
@@ -46,9 +49,18 @@ const props = defineProps({
     type: Array,
     default: () => ([]),
   },
+  canEnterNewUser: {
+    type: Boolean,
+    default: false,
+  },
+  modelValue: Object,
+  name: {
+    type: String,
+    default: 'userIdInput',
+  }
 });
 
-const model = defineModel()
+const emit = defineEmits(['update:modelValue']);
 const selectedSuggestOption = ref(null);
 const userSuggestOptions = ref([]);
 
@@ -110,10 +122,17 @@ const getUserIdForDisplay = (user) => {
   }
   return user.userIdForDisplay;
 }
+
+const suggestUsersFromEvent = ({query}) => {
+  suggestUsers(query)
+}
 const suggestUsers = (query) => {
   isFetching.value = true;
   AccessService.suggestUsers(query, suggestUrl.value)
       .then((suggestedUsers) => {
+        if (query && props.canEnterNewUser) {
+          // suggestedUsers.push({ userId: query, label: query });
+        }
         suggestions.value = suggestedUsers.filter((suggestedUser) => !props.excludedSuggestions.includes(suggestedUser.userId));
         suggestions.value = suggestions.value.map((suggestedUser) => {
           const label = getUserIdForDisplay(suggestedUser);
@@ -129,39 +148,84 @@ const suggestUsers = (query) => {
       });
 }
 
+const createTagIfNecessary = (userId) => {
+  console.log(`createTagIfNecessary: ${JSON.stringify(userId)}, type [${typeof userId}]`);
+  if (!userId) {
+    value.value = null;
+  } else if (userId && typeof userId === 'string') {
+    console.log(`Before string userId: ${userId}, value[${JSON.stringify(value.value)}]`);
+    value.value = {
+      userId: userId,
+      label: userId,
+    };
+    console.log(`After string userId: ${userId}, value[${JSON.stringify(value.value)}]`);
+  } else {
+    console.log(`Before non-string userId: ${userId}, value[${JSON.stringify(value.value)}]`);
+    value.value = userId;
+    console.log(`After string userId: ${userId}, value[${JSON.stringify(value.value)}]`);
+  }
+  emit('update:modelValue', value.value);
+}
+
+const fallthroughAttributes = useSkillsInputFallthroughAttributes()
+const { value, errorMessage } = useField(() => props.name)
+//     , undefined, {
+//   syncVModel: true,
+// });
+const useDropdown = false;
+const currentSelectedUser = ref('');
 </script>
 
 <template>
 
-  <div data-cy="existingUserInput">
-    <InputGroup class="">
-      <InputGroupAddon v-if="hasUserSuggestOptions" class="p-1">
-        <Dropdown class="" v-model="selectedSuggestOption" :options="userSuggestOptions"/>
-      </InputGroupAddon>
-      <Dropdown id="existingUserInput"
-                class="align-items-center"
-                v-model="model"
+  <div data-cy="existingUserInput" v-bind="fallthroughAttributes.rootAttrs.value">
+    <div class="flex">
+<!--    <InputGroup class="">-->
+<!--      <InputGroupAddon v-if="hasUserSuggestOptions" class="p-0">-->
+        <Dropdown data-cy="userSuggestOptionsDropdown" v-model="selectedSuggestOption" :options="userSuggestOptions"/>
+<!--      </InputGroupAddon>-->
+      <Dropdown v-if="useDropdown"
+                v-model="currentSelectedUser"
+                id="existingUserInput"
+                data-cy="existingUserInputDropdown"
+                class="align-items-center w-full"
+                @update:modelValue="createTagIfNecessary"
                 :options="suggestions"
                 :loading="isFetching"
                 :placeholder="placeholder"
                 :reset-filter-on-clear="false"
                 :reset-filter-on-hide="true"
-                :auto-filter-focus="true"
+                :auto-filter-focus="!canEnterNewUser"
+                :editable="canEnterNewUser"
                 optionLabel="label"
                 show-clear
                 @filter="onFilter"
                 @before-show="onBeforeShow"
                 filter>
-        <template #value="slotProps">
-          <span v-if="slotProps.value">
-            {{ slotProps.value.label }}
-          </span>
-          <span v-else>
-            {{ slotProps.placeholder }}
-        </span>
-        </template>
       </Dropdown>
-    </InputGroup>
+
+      <AutoComplete v-if="!useDropdown"
+                    v-bind="fallthroughAttributes.inputAttrs.value"
+                    v-model="currentSelectedUser"
+                    data-cy="existingUserInputDropdown"
+                    class="w-full"
+                    :dropdown="true"
+                    :suggestions="suggestions"
+                    optionLabel="label"
+                    @item-select="(event) => console.log(`item-select: ${JSON.stringify(event)}`)"
+                    @item-unselect="(event) => console.log(`item-unselect: ${JSON.stringify(event)}`)"
+                    @update:modelValue="createTagIfNecessary"
+                    @complete="suggestUsersFromEvent"
+                    @dropdownClick="onBeforeShow">
+      </AutoComplete>
+
+<!--    </InputGroup>-->
+    </div>
+    <small v-if="errorMessage"
+           role="alert"
+           class="p-error"
+           :data-cy="`${name}Error`"
+           :id="`${name}Error`">{{ errorMessage || '&nbsp;' }}</small>
   </div>
 </template>
 
