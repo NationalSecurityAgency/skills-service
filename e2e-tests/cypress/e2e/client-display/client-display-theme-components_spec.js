@@ -126,6 +126,17 @@ describe('Client Display Theme Components Tests', () => {
             name: 'progressIndicators settings - completeColor'
         });
 
+        cy.cdClickSubj(0, 'Subject 1', true);
+        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"] [data-pc-section="body"]', {
+            name: 'progressIndicators settings - skill list - beforeTodayColor earnedTodayColor and incompleteColor'
+        });
+
+        cy.cdBack();
+        cy.cdClickSubj(2, 'Completed', false);
+        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"] [data-pc-section="body"]', {
+            name: 'progressIndicators settings - skill list - completeColor'
+        });
+
     });
 
     it.skip('point history chart - line, label and gradient', () => {

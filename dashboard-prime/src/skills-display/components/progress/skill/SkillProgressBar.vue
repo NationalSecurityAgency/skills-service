@@ -35,9 +35,13 @@ const progressPercent = computed(() => {
   return totalPts
 })
 
+const progressBeforeToday = computed(() => {
+  return ((props.skill.points - props.skill.todaysPoints) / props.skill.totalPoints) * 100;
+})
+
 </script>
 <template>
-  <vertical-progress-bar :total-progress="progressPercent" :is-locked="isLocked">
+  <vertical-progress-bar :total-progress="progressPercent" :total-progress-before-today="progressBeforeToday" :is-locked="isLocked">
   </vertical-progress-bar>
 </template>
 
