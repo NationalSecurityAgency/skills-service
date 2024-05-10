@@ -239,12 +239,12 @@ const isLastViewedScrollSupported = computed(() => {
         v-if="(skillsInternal && skillsInternal.length > 0 || searchString || showNoDataMsg)">
     <template #header>
       <div class="px-4 pt-3">
-        <div class="flex"
+        <div class="flex flex-wrap gap-3 flex-column md:flex-row"
              v-if="skillsInternal && skillsInternal.length > 0">
           <div class="flex-1">
-            <div class="flex">
+            <div class="flex gap-2">
               <div class="">
-                <InputGroup>
+                <InputGroup class="p-0">
                   <InputText
                     v-model="searchString"
                     :placeholder="`Search ${attributes.skillDisplayName.toLowerCase()}s`"
@@ -256,32 +256,35 @@ const isLastViewedScrollSupported = computed(() => {
                       text
                       outlined
                       @click="searchString = ''"
-                      class="position-absolute skills-theme-btn" variant="outline-info" style="right: 0rem;"
+                      class="position-absolute skills-theme-btn m-0 h-full"
                       data-cy="clearSkillsSearchInput" />
                   </InputGroupAddon>
                 </InputGroup>
               </div>
-              <div class="ml-2">
+              <div class="">
                 <skill-type-filter @filter-selected="setFilterId" :skills="skillsInternal"
                                    @clear-filter="filterId = ''" />
               </div>
+              <div class="w-min-9rem">
                 <SkillsButton
                   v-if="hasLastViewedSkill && isLastViewedScrollSupported"
                   icon="fas fa-eye"
                   label="Last Viewed"
                   :disabled="lastViewedButtonDisabled"
                   @click.prevent="scrollToLastViewedSkill"
-                  class="skills-theme-btn ml-2"
+                  class="skills-theme-btn"
                   outlined
                   size="small"
                   serverit="info"
                   :aria-label="`Jump to Last Viewed Skill`"
                   data-cy="jumpToLastViewedButton" />
+              </div>
             </div>
           </div>
 
+
           <div class="" data-cy="skillDetailsToggle">
-            <div class="flex align-content-center">
+            <div class="flex flex-row align-content-center">
               <span class="text-muted pr-1 align-content-center">{{ attributes.skillDisplayName }} Details:</span>
               <InputSwitch v-model="showDescriptionsInternal"
                            @change="onDetailsToggle"

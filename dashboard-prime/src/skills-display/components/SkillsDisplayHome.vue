@@ -7,7 +7,7 @@ const route = useRoute()
 </script>
 
 <template>
-  <div>
+  <div class="sd-theme-home">
     <skills-spinner :is-loading="displayAttributes.loadingConfig" class="mt-8"/>
     <router-view v-if="!displayAttributes.loadingConfig" :key="route.path"/>
   </div>

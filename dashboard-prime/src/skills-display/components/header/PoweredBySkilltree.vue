@@ -33,8 +33,8 @@ const isHovering = ref(false)
 </script>
 
 <template>
-  <div class="fadein animation-duration-500" data-cy="skillTreePoweredBy">
-    <a :href="appConfig.docsHost" target="_blank" class="skills-page-title-text-color"
+  <div class="fadein animation-duration-500 w-8rem text-left" data-cy="skillTreePoweredBy">
+    <a :href="appConfig.docsHost" target="_blank" class=""
        aria-label="Powered by SkillTree">
       <div
         class="poweredByContainer flex border-1 border-round surface-border py-1 px-2"
@@ -53,11 +53,6 @@ const isHovering = ref(false)
 </template>
 
 <style scoped>
-.poweredByContainer {
-  //width: 7.6rem !important;
-  //cursor: pointer;
-}
-
 .poweredByContainer .poweredByLabel {
   font-size: 0.8rem !important;
   margin-right: -20px !important;

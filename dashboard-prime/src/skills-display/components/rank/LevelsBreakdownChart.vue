@@ -154,7 +154,7 @@ const chartOptions = ref({
 </script>
 
 <template>
-  <Card data-cy="levelBreakdownChart" :pt="{ content: { class: 'mb-0 pb-0'}}">
+  <Card data-cy="levelBreakdownChart" :pt="{ content: { class: 'mb-0 pb-0'}}" class="w-min-15rem">
     <template #subtitle>
       <div class="flex">
         <div>

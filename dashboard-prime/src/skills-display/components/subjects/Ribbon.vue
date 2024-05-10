@@ -54,10 +54,10 @@ const shadowColor1 = tinycolor(props.color).darken(20).toString();
   }
 
   .category-ribbon {
-    width: 75%;
+    width: 80%;
     position: relative;
     text-align: center;
-    padding: 0.25em 0.5em;
+    padding: 0.3em 0.5em;
     margin: 0.5em auto 1em;
   }
   .category-ribbon-content {

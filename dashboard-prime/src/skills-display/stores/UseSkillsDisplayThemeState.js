@@ -1,8 +1,13 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import ThemeHelper from '@/skills-display/theme/ThemeHelper.js'
+import { useLog } from '@/components/utils/misc/useLog.js'
+import UniqueIdGenerator from '@/utils/UniqueIdGenerator.js'
 
 export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState', () => {
 
+  const log = useLog()
+  const themeStyleId = UniqueIdGenerator.uniqueId('custom-theme-style-node-')
   const colors = {
     info: '#146c75',
     primary: '#143740',
@@ -44,6 +49,30 @@ export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState',
       ]
     }
   }
+  const initThemeObjInStyleTag = (theme) =>{
+    if (theme) {
+      const themeResArtifacts = ThemeHelper.build(theme);
+
+      // populate store so JS can subscribe to those values and update styles
+      themeResArtifacts.themeModule.forEach((value, key) => {
+        setThemeByKey(key, value)
+      });
+
+      const style = document.createElement('style');
+
+      style.id = themeStyleId;
+      style['data-cy'] = 'skills-display-custom-theme'
+
+      log.trace(`Adding theme css to style tag: ${themeResArtifacts.css}`)
+      const cssToAdd = document.createTextNode(themeResArtifacts.css)
+      style.appendChild(cssToAdd);
+
+
+      const { body } = document;
+      body.appendChild(style);
+    }
+  }
+
 
   const landingPageTitle = computed(() => theme.value.landingPageTitle || 'User Skills')
 
@@ -65,6 +94,7 @@ export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState',
     graphAchievedColor,
     graphThisSkillColor,
     graphNavButtonsColor,
-    graphTextPrimaryColor
+    graphTextPrimaryColor,
+    initThemeObjInStyleTag
   }
 })

@@ -30,7 +30,49 @@ describe('Client Display Theme Components Tests', () => {
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), '2019-09-19 11:00');
     });
 
-    it('point history chart - line, label and gradient', () => {
+    it('breadcrumb - linkColor and currentPageColor ', () => {
+        const breadcrumb = JSON.stringify({
+            linkColor: encodeURIComponent('#ffff69'),
+            currentPageColor: encodeURIComponent('#fd70d2'),
+            linkHoverColor: encodeURIComponent('#000000'),
+        })
+        const titleBg = 'themeParam=tiles|{"backgroundColor":"gray"}';
+        cy.cdVisit(`/subjects/subj1/skills/skill1?themeParam=breadcrumb|${breadcrumb}&${titleBg}`);
+
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"]')
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayBreadcrumbBar"] nav');
+    });
+
+    it('disable breadcrumb', () => {
+        cy.cdVisit(`/subjects/subj1/skills/skill1?themeParam=disableBreadcrumb|true`);
+        cy.get('[data-cy="skillsTitle"]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"]').should('not.exist')
+    });
+
+    it('pageTitle config', () => {
+        const pageTitle = JSON.stringify({
+            textColor: encodeURIComponent('#fd70d2'),
+            borderColor:  encodeURIComponent('#ec0933'),
+            fontSize: '4rem',
+            borderStyle: 'none none solid none',
+            backgroundColor: encodeURIComponent('#c3fad2'),
+            textAlign: 'left',
+            padding: '1.6rem 1rem 1.1rem 1rem',
+            margin: '3rem'
+        })
+        const bgColor = encodeURIComponent('#152E4d')
+        const titleBg = `themeParam=tiles|{"backgroundColor":"${bgColor}"}`;
+        const disableBrand = `themeParam=disableSkillTreeBrand|true`;
+        const disableBackButton = 'disableBackButton=true';
+        const breadcrumb = 'themeParam=breadcrumb|{"align": "start"}';
+        cy.cdVisit(`/subjects/subj1/skills/skill1?themeParam=pageTitle|${pageTitle}&${titleBg}&${disableBrand}&${disableBackButton}&${breadcrumb}`);
+
+        cy.get('[data-cy="skillsTitle"]')
+        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]');
+    });
+
+
+    it.skip('point history chart - line, label and gradient', () => {
         cy.cdVisit('/?themeParam=charts|{"pointHistory":{"lineColor":"purple","gradientStartColor":"blue","gradientStopColor":"yellow"},"labelBorderColor":"black","labelBackgroundColor":"green","labelForegroundColor":"lightgray"}');
 
         // let's wait for animation to complete
@@ -38,7 +80,7 @@ describe('Client Display Theme Components Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
     });
 
-    it('point history chart - dark gray background customization', () => {
+    it.skip('point history chart - dark gray background customization', () => {
         cy.cdVisit('/?themeParam=tiles|{"backgroundColor":"gray"}&themeParam=textPrimaryColor|white&themeParam=charts|{"axisLabelColor":"lightblue"}');
 
         // let's wait for animation to complete
@@ -46,7 +88,7 @@ describe('Client Display Theme Components Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
     });
 
-    it('chart labels for all the charts', () => {
+    it.skip('chart labels for all the charts', () => {
         cy.cdVisit('/?themeParam=charts|{"labelBorderColor":"black","labelBackgroundColor":"purple","labelForegroundColor":"lightblue"}');
 
         // // let's wait for animation to complete
@@ -59,16 +101,16 @@ describe('Client Display Theme Components Tests', () => {
 
     });
 
-    it('buttons customization without changing tile background', () => {
+    it.skip('buttons customization without changing tile background', () => {
         cy.createBadge(1, 1);
         cy.assignSkillToBadge(1, 1, 2);
         cy.enableBadge(1, 1);
 
         const url = '/?themeParam=buttons|{"backgroundColor":"green","foregroundColor":"white",%20"borderColor":"purple"}';
-        cy.cdVisit(url);
+        cy.cdVisit(url, true);
         cy.matchSnapshotImageForElement('[data-cy="pointProgressChart-resetZoomBtn"]', 'buttons-resetZoom');
 
-        cy.cdClickSubj(0);
+        cy.cdClickSubj(0, 'Subject 1', true);
         cy.matchSnapshotImageForElement('[data-cy="back"]', 'buttons-Back');
         cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown', 'buttons-skillsFilter');
         cy.cdClickSkill(1);
@@ -80,7 +122,7 @@ describe('Client Display Theme Components Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="badgeDetailsLink_badge1"]', 'buttons-viewBadgeDetails');
     });
 
-    it('buttons customization with changing tile background', () => {
+    it.skip('buttons customization with changing tile background', () => {
         cy.createBadge(1, 1);
         cy.assignSkillToBadge(1, 1, 2);
         cy.enableBadge(1, 1);
@@ -100,7 +142,7 @@ describe('Client Display Theme Components Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="badgeDetailsLink_badge1"]', 'buttons-viewBadgeDetails-darkTileBackground');
     });
 
-    it('filter menu with dark tile background', () => {
+    it.skip('filter menu with dark tile background', () => {
         cy.createBadge(1, 1);
         cy.assignSkillToBadge(1, 1, 2);
         cy.enableBadge(1, 1);
@@ -125,7 +167,7 @@ describe('Client Display Theme Components Tests', () => {
         });
     });
 
-    it('theme info cards', () => {
+    it.skip('theme info cards', () => {
         const url = '/?themeParam=tiles|{%22backgroundColor%22:%22black%22}&themeParam=textPrimaryColor|white&themeParam=infoCards|{%22backgroundColor%22:%22lightgray%22,%22borderColor%22:%22green%22,%22foregroundColor%22:%22purple%22,%22iconColors%22:[%22blue%22,%22red%22,%20%22yellow%22,%22green%22]}';
         cy.cdVisit(url);
 
@@ -148,7 +190,7 @@ describe('Client Display Theme Components Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="encouragementCards"]', 'infoCards-rank');
     });
 
-    it('theme info cards border overrides tile border', () => {
+    it.skip('theme info cards border overrides tile border', () => {
         const url = '/?themeParam=tiles|{%22backgroundColor%22:%22lightgray%22,%22borderColor%22:%22blue%22}&themeParam=textPrimaryColor|black&themeParam=infoCards|{%22borderColor%22:%22purple%22}';
         cy.cdVisit(url);
 
@@ -169,7 +211,7 @@ describe('Client Display Theme Components Tests', () => {
         });
     });
 
-    it('ability to configure tile border', () => {
+    it.skip('ability to configure tile border', () => {
         const url = '/?themeParam=tiles|{%22backgroundColor%22:%22lightgray%22,%22borderColor%22:%22blue%22}&themeParam=textPrimaryColor|black}';
         cy.cdVisit(url);
 

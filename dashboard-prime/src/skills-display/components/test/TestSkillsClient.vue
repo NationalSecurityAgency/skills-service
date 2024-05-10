@@ -5,11 +5,13 @@ import { useBrowserLocation } from '@vueuse/core'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useRoute } from 'vue-router'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useTestThemeUtils } from '@/skills-display/components/test/UseTestThemeUtils.js'
 
 const route = useRoute()
 const appConfig = useAppConfig()
 const browserLocation = useBrowserLocation()
 const log = useLog()
+const testThemeUtils = useTestThemeUtils()
 
 // const clientDisplay = ref(null)
 const skillsVersion = 2147483647 // max int
@@ -31,12 +33,17 @@ if (isSummaryOnly) {
 
 log.info(`Running skills-client in test mode with params ${JSON.stringify(options)}`)
 
+
 const constructSkillsDisplay = () => {
   let props = {
     version: skillsVersion,
-    options: options
+    options: options,
   }
 
+  const customTheme = testThemeUtils.constructThemeForTest()
+  if (customTheme) {
+    props.theme = customTheme
+  }
   const clientDisplay = new SkillsDisplayJS(props)
 
   log.debug(`SkillsDisplay.vue: constructSkillsDisplay: ${JSON.stringify(props)}`)

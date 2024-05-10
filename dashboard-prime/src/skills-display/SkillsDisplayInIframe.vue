@@ -8,6 +8,7 @@ const appStyleObject = ref({})
 <template>
   <div
     id="skills-display-app"
+    class="skills-client-app"
     ref="content"
     tabindex="-1"
     role="main"

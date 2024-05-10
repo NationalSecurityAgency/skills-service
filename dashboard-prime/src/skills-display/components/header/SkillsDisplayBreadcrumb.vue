@@ -12,7 +12,6 @@ const displayAttributes = useSkillsDisplayAttributesState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const route = useRoute()
 const breadcrumbState = useSkillsDisplayBreadcrumbState()
-const disabled = computed(() => themeState.theme.disableBreadcrumb)
 
 onMounted(() => {
   build()
@@ -123,8 +122,7 @@ const getContextUrl = (url) => `${skillsDisplayInfo.getRootUrl()}${url}`
 </script>
 
 <template>
-  <div v-if="!disabled"
-       class="skills-theme-breadcrumb-container flex justify-content-center" data-cy="skillsDisplayBreadcrumbBar">
+  <div class="skills-theme-breadcrumb-container flex justify-content-center" data-cy="skillsDisplayBreadcrumbBar">
     <Breadcrumb :model="breadcrumbState.breadcrumbItems" :pt="{ root: { class: 'border-none px-0 py-1' } }">
       <template #item="{ item, props }">
         <router-link

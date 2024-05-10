@@ -24,7 +24,7 @@
     "cy:open:devEST": "TZ=EST cypress open --config baseUrl=http://localhost:5173 --env type=base",
     "cy:open:dev:oauth": "TZ=UTC cypress open --config baseUrl=http://localhost:5173 --env oauthMode=true,type=base",
     "cy:open:dev:verifyEmail": "TZ=UTC cypress open --config baseUrl=http://localhost:5173 --env verifyEmail=true,type=base",
-    "cy:run": "TZ=UTC  cypress run --browser chrome --config video=true --env type=regression",
+    "cy:run": "TZ=UTC  cypress run --browser chrome --config video=true --env type=base",
     "cy:run:oauth": "TZ=UTC  cypress run --browser chrome --env oauthMode=true --config video=true",
     "cy:run:accessibility": "TZ=UTC  cypress run --browser chrome --env enableLighthouse=true,enableAvgLighthouseScore=true --browser chrome --headless --spec \"cypress/e2e/accessibility/*.js\" --config video=true",
     "cy:run:dev": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173  --env type=base",

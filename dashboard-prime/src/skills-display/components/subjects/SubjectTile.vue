@@ -50,7 +50,7 @@ const progress = computed(() => {
 </script>
 
 <template>
-  <Card class="h-full text-center" data-cy="subjectTile">
+  <Card class="h-full text-center" data-cy="subjectTile" :pt="{ body: { class: 'pt-1'}}">
     <template #content>
       <div :data-cy="`subjectTile-${subject.subjectId}`">
         <ribbon :color="ribbonColor" class="subject-tile-ribbon">

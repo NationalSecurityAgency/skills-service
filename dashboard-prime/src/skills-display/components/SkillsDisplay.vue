@@ -40,14 +40,14 @@ const hasBadges = computed(() => {
       <project-description v-if="showDescription" :description="description" class="mt-3"/>
       <user-overall-progress class="mt-3"/>
 
-      <div class="mt-3 flex gap-4 align-items-stretch">
-        <div class="flex align-items-center">
+      <div class="mt-3 flex flex-column lg:flex-row gap-3 align-items-stretch">
+        <div class=" align-items-center">
           <my-rank />
         </div>
         <div class="flex-1 align-items-center">
           <point-progress-chart />
         </div>
-        <div v-if="hasBadges" class="flex">
+        <div v-if="hasBadges" class="">
           <my-badges :num-badges-completed="userProgress.userProgressSummary.badges.numBadgesCompleted"></my-badges>
         </div>
       </div>

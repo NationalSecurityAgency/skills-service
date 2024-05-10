@@ -18,274 +18,289 @@ export default {
   bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor', 'infoCards', 'backgroundColor', 'textPrimaryColor', 'textSecondaryColor', 'tiles'],
   selectorKey: {
     maxWidth: {
-      selector: 'body #app.skills-display-container',
+      selector: 'body #app',
       styleName: 'max-width',
     },
     backgroundColor: [{
-      selector: 'body #app',
+      selector: 'body #app .sd-theme-home',
       styleName: 'background-color',
     }, {
-      selector: 'body #app .skills-theme-bottom-border-with-background-color',
+      selector: 'body #app .sd-theme-home .skills-theme-bottom-border-with-background-color',
       styleName: 'border-bottom-color',
     }],
     trophyIconColor: {
-      selector: 'body #app .fa.fa-trophy',
+      selector: 'body #app .sd-theme-home .fa.fa-trophy',
       styleName: 'color',
     },
     subjectTileIconColor: {
-      selector: 'body #app .subject-tile-icon',
+      selector: 'body #app .sd-theme-home .subject-tile-icon',
       styleName: 'color',
     },
     pageTitleTextColor: [{
-      selector: 'body #app .skills-page-title-text-color',
+      selector: '.sd-theme-home .skills-theme-page-title,' +
+        '.sd-theme-home .skills-theme-page-title .poweredByContainer',
       styleName: 'color',
     }, {
-      selector: 'body #app .skills-badge .skills-badge-icon, body #app .skills-progress-info-card, body #app .skills-card-theme-border, body #app .card.skills-card-theme-border .card-header',
+      selector: 'body #app .sd-theme-home .skills-badge .skills-badge-icon, body #app .sd-theme-home .skills-progress-info-card, body #app .sd-theme-home .skills-card-theme-border, body #app .sd-theme-home .card.skills-card-theme-border .card-header',
       styleName: 'border-color',
     }],
     pageTitle: {
       textColor: [{
-        selector: 'body #app .skills-page-title-text-color',
+        selector: '.sd-theme-home .skills-theme-page-title,' +
+          '.sd-theme-home .skills-theme-page-title .poweredByContainer',
         styleName: 'color',
       }],
       borderColor: {
-        selector: 'body #app .skills-theme-page-title',
+        selector: '.sd-theme-home .skills-theme-page-title',
         styleName: 'border-color',
       },
       borderStyle: {
-        selector: 'body #app .skills-theme-page-title',
+        selector: 'body #app .sd-theme-home .skills-theme-page-title',
         styleName: 'border-style',
       },
       backgroundColor: {
-        selector: 'body #app .skills-theme-page-title .titleBody',
+        selector: 'body #app .sd-theme-home .p-card.p-component.skills-theme-page-title,' +
+          '.sd-theme-home .skills-theme-page-title .p-breadcrumb.p-component',
         styleName: 'background',
       },
       textAlign: {
-        selector: 'body #app .skills-theme-page-title .titleBody',
+        selector: 'body #app .sd-theme-home .skills-theme-page-title .skills-title',
         styleName: 'text-align',
       },
       padding: [{
-        selector: 'body #app .skills-theme-page-title .titleBody',
+        selector: 'body #app .sd-theme-home .skills-theme-page-title .skills-title',
         styleName: 'padding',
       }],
       fontSize: {
-        selector: 'body #app .skills-page-title-text-color .skills-title',
+        selector: '.sd-theme-home .skills-theme-page-title .skills-title',
         styleName: 'font-size',
       },
       margin: {
-        selector: 'body #app .skills-theme-page-title',
+        selector: 'body #app .sd-theme-home .skills-theme-page-title',
         styleName: 'margin',
       },
     },
     circleProgressInteriorTextColor: {
-      selector: 'body #app .circle-number span',
+      selector: 'body #app .sd-theme-home .circle-number span',
       styleName: 'color',
     },
     textPrimaryColor: [{
-      selector: 'body #app .text-primary, body #app, body #app .skills-navigable-item, body #app .skills-theme-primary-color, '
-          + 'body #app table, body #app .skills-theme-menu-primary-color, body #app .skills-theme-menu-primary-color .dropdown-item, '
-          + 'body #app .b-pagination .page-item .page-link',
+      selector: '.sd-theme-home .p-card,' +
+        '.sd-theme-home .p-card-subtitle,' +
+        '.sd-theme-home .text-primary,' +
+        '.sd-theme-home .text-color,' +
+        '.sd-theme-home .skills-display-test-link a,' +
+        '.p-autocomplete-panel.p-component .p-autocomplete-item,' +
+        '.p-autocomplete-panel.p-component .p-autocomplete-item .text-orange-600',
       styleName: 'color',
     }, {
-      selector: 'body #app .skills-theme-menu-primary-color:hover, body #app .skills-theme-menu-primary-color .dropdown-item:hover, '
-          + 'body #app .b-pagination .page-item.active .page-link, '
-          + 'body #app .vs__dropdown-option--highlight',
+      selector: 'todo',
       styleName: 'background-color',
     }, {
-      selector: 'body #app .skills-theme-filter-menu .dropdown-menu',
+      selector: 'body #app .sd-theme-home .todo',
       styleName: 'border-color',
     }, {
-      selector: 'body #app .apexcharts-toolbar svg, body #app .vs__open-indicator',
+      selector: 'body #app .sd-theme-home .apexcharts-toolbar svg, body #app .sd-theme-home .vs__open-indicator',
       styleName: 'fill',
     }],
     textPrimaryMutedColor: [{
-      selector: 'body #app .text-primary .text-muted, body #app .text-primary.text-muted',
+      selector: 'body #app .sd-theme-home .todo',
       styleName: 'color',
     }, {
-      selector: 'body #app .skills-theme-menu:hover, body #app .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover',
+      selector: 'body #app .sd-theme-home .skills-theme-menu:hover, body #app .sd-theme-home .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover',
       styleName: 'background-color',
     }],
     textSecondaryColor: {
-      selector: 'body #app .text-muted, body #app .text-secondary, body #app .text-secondary a, body #app .skills-theme-secondary-color, body #app .skills-theme-menu-secondary-color, body #app .skills-theme-menu-secondary-color .dropdown-item',
+      selector: '.sd-theme-home .text-color-secondary,' +
+        '.sd-theme-home i,' +
+        '.p-autocomplete-panel.p-component i',
       styleName: 'color',
     },
     pageTitleFontSize: {
-      selector: 'body #app .skills-page-title-text-color .skills-title',
+      selector: 'body #app .sd-theme-home .skills-page-title-text-color .skills-title',
       styleName: 'font-size',
     },
     backButton: {
       padding: {
-        selector: 'body #app .skills-page-title-text-color .skills-theme-btn',
+        selector: 'body #app .sd-theme-home .skills-page-title-text-color .skills-theme-btn',
         styleName: 'padding',
       },
       fontSize: {
-        selector: 'body #app .skills-page-title-text-color .skills-theme-btn',
+        selector: 'body #app .sd-theme-home .skills-page-title-text-color .skills-theme-btn',
         styleName: 'font-size',
       },
       lineHeight: {
-        selector: 'body #app .skills-page-title-text-color .skills-theme-btn',
+        selector: 'body #app .sd-theme-home .skills-page-title-text-color .skills-theme-btn',
         styleName: 'line-height',
       },
     },
     tiles: {
       backgroundColor: [{
-        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, '
-            + 'body #app .apexcharts-menu.apexcharts-menu-open, '
-            + 'body #app .dropdown-menu, body #app .b-pagination .page-item .page-link, '
-            + 'body #app .vs__dropdown-toggle, body #app .vs__dropdown-menu',
+        selector: '.sd-theme-home .p-card, '
+            + '.sd-theme-home .p-inputtext,'
+            + '.sd-theme-home .p-inputgroup-addon,'
+            + '.sd-theme-home .p-breadcrumb.p-component,'
+            + '.p-autocomplete-panel.p-component,'
+            + '.sd-theme-home .apexcharts-menu.apexcharts-menu-open',
         styleName: 'background-color',
       }, {
-        selector: 'body #app .skills-no-data-yet .fa-inverse, body #app .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover, body #app .skills-theme-menu-primary-color, body #app .skills-theme-menu-primary-color .dropdown-item:hover, '
-            + 'body #app .b-pagination .page-item.active .page-link, '
-            + 'body #app .vs__dropdown-option--highlight, body #app .vs__dropdown-option--highlight .skills-theme-primary-color',
+        selector: '.p-autocomplete-panel.p-component .p-autocomplete-item:hover,' +
+          '.p-autocomplete-panel.p-component .p-autocomplete-item.p-focus,' +
+          '.p-autocomplete-panel.p-component .p-autocomplete-item.p-focus i,' +
+          '.p-autocomplete-panel.p-component .p-autocomplete-item:hover i,' +
+          '.p-autocomplete-panel.p-component .p-autocomplete-item.p-focus .text-orange-600,' +
+          '.p-autocomplete-panel.p-component .p-autocomplete-item:hover .text-orange-600',
         styleName: 'color',
       }],
       borderColor: [{
-        selector: 'body #app .card, body #app .card-header, body #app .card-body, body #app .card-footer, body #app .apexcharts-menu.apexcharts-menu-open, body #app .dropdown-menu, body #app .vs__dropdown-toggle',
+        selector: '.sd-theme-home .p-card, .sd-theme-home .p-inputtext.p-component, .p-autocomplete-panel.p-component',
         styleName: 'border-color',
       }],
       watermarkIconColor: {
-        selector: 'body #app .card-body .watermark-icon',
+        selector: 'body #app .sd-theme-home .card-body .watermark-icon',
         styleName: 'color',
       },
     },
     stars: {
       unearnedColor: {
-        selector: 'body #app .star-empty',
+        selector: 'body #app .sd-theme-home .star-empty',
         styleName: 'color',
       },
       earnedColor: {
-        selector: 'body #app .star-filled',
+        selector: 'body #app .sd-theme-home .star-filled',
         styleName: 'color',
       },
     },
     graphLegendBorderColor: {
-      selector: 'body #app .graph-legend .card-header, body #app .graph-legend .card-body',
+      selector: 'body #app .sd-theme-home .graph-legend .card-header, body #app .sd-theme-home .graph-legend .card-body',
       styleName: 'border',
     },
     buttons: {
       backgroundColor: [{
-        selector: 'body #app .skills-theme-btn',
+        selector: '.sd-theme-home .p-button.p-component',
         styleName: 'background-color',
       }, {
-        selector: 'body #app .skills-theme-btn:hover, body #app .skills-theme-link a:hover',
+        selector: '.sd-theme-home .p-button.p-component:hover',
         styleName: 'color',
       }, {
-        selector: 'body #app .skills-theme-btn:hover',
+        selector: '.sd-theme-home .p-button.p-component:hover',
         styleName: 'border-color',
       }],
       foregroundColor: [{
-        selector: 'body #app .skills-theme-btn',
+        selector: '.sd-theme-home .p-button.p-component',
         styleName: 'color',
       }, {
-        selector: 'body #app .skills-theme-btn',
+        selector: '.sd-theme-home .p-button.p-component',
         styleName: 'border-color',
       }, {
-        selector: 'body #app .skills-theme-btn:hover, body #app .skills-theme-link a:hover',
+        selector: '.sd-theme-home .p-button.p-component:hover',
         styleName: 'background-color',
       }],
       disabledColor: [{
-        selector: 'body #app .skills-theme-btn .disabled',
+        selector: 'body #app .sd-theme-home .skills-theme-btn .disabled',
         styleName: 'color',
       }],
       borderColor: [{
-        selector: 'body #app .skills-theme-btn',
+        selector: '.sd-theme-home .p-button.p-component',
         styleName: 'border-color',
       }],
     },
     links: {
       foregroundColor: [{
-        selector: 'body #app .skills-theme-link',
+        selector: 'body #app .sd-theme-home .skills-theme-link',
         styleName: 'color',
       }, {
-        selector: 'body #app .skills-theme-link',
+        selector: 'body #app .sd-theme-home .skills-theme-link',
         styleName: 'border-color',
       }, {
-        selector: 'body #app .skills-theme-link a:hover',
+        selector: 'body #app .sd-theme-home .skills-theme-link a:hover',
         styleName: 'background-color',
       }],
       disabledColor: [{
-        selector: 'body #app .skills-theme-link a.disabled',
+        selector: 'body #app .sd-theme-home .skills-theme-link a.disabled',
         styleName: 'color',
       }],
     },
     badges: {
       backgroundColor: [{
-        selector: 'body #app .badge',
+        selector: 'body #app .sd-theme-home .badge',
         styleName: 'background-color',
       }],
       backgroundColorSecondary: [{
-        selector: 'body #app .badge.badge-secondary',
+        selector: 'body #app .sd-theme-home .badge.badge-secondary',
         styleName: 'background-color',
       }],
       foregroundColor: [{
-        selector: 'body #app .badge',
+        selector: 'body #app .sd-theme-home .badge',
         styleName: 'color',
       }],
     },
     progressIndicators: {
       completeColor: [{
-        selector: 'body #app .leaderboard .progress .progress-bar',
+        selector: 'body #app .sd-theme-home .leaderboard .progress .progress-bar',
         styleName: 'background-color',
       }],
       incompleteColor: [{
-        selector: 'body #app .leaderboard .progress',
+        selector: 'body #app .sd-theme-home .leaderboard .progress',
         styleName: 'background-color',
       }],
     },
     breadcrumb: {
       linkColor: [{
-        selector: 'body #app .skills-theme-breadcrumb a',
+        selector: '.sd-theme-home .skills-theme-breadcrumb-container .p-menuitem-link .sd-theme-breadcrumb-item .text-primary,' +
+          '.sd-theme-home .skills-theme-breadcrumb-container .p-menuitem-link .sd-theme-breadcrumb-item .text-color-secondary',
         styleName: 'color',
       }],
       linkHoverColor: [{
-        selector: 'body #app .skills-theme-breadcrumb a:hover',
+        selector: '.sd-theme-home .skills-theme-breadcrumb-container .p-menuitem-link .sd-theme-breadcrumb-item:hover .text-primary,' +
+          '.sd-theme-home .skills-theme-breadcrumb-container .p-menuitem-link .sd-theme-breadcrumb-item:hover .text-color-secondary',
         styleName: 'color',
       }],
       currentPageColor: [{
-        selector: 'body #app .skills-theme-breadcrumb .skills-theme-breadcrumb-current-page',
+        selector: '.sd-theme-home .skills-theme-breadcrumb-container .sd-theme-breadcrumb-item .text-color,' +
+          '.sd-theme-home .skills-theme-breadcrumb-container .sd-theme-breadcrumb-item .text-color-secondary',
         styleName: 'color',
       }],
       align: [{
-        selector: 'body #app .skills-theme-breadcrumb-container',
+        selector: 'body #app .sd-theme-home .skills-theme-breadcrumb-container',
         styleName: '-ms-flex-pack',
       }, {
-        selector: 'body #app .skills-theme-breadcrumb-container',
+        selector: 'body #app .sd-theme-home .skills-theme-breadcrumb-container',
         styleName: 'justify-content',
       }],
     },
     infoCards: {
       backgroundColor: [{
-        selector: 'body #app .skills-theme-info-card, body #app .skills-theme-info-card .card-body',
+        selector: 'body #app .sd-theme-home .skills-theme-info-card, body #app .sd-theme-home .skills-theme-info-card .card-body',
         styleName: 'background-color',
       }],
       foregroundColor: [{
-        selector: 'body #app .skills-theme-info-card .card-body, body #app .skills-theme-info-card .card-body .text-primary',
+        selector: 'body #app .sd-theme-home .skills-theme-info-card .card-body, body #app .sd-theme-home .skills-theme-info-card .card-body .text-primary',
         styleName: 'color',
       }],
       borderColor: [{
-        selector: 'body #app .skills-theme-info-card',
+        selector: 'body #app .sd-theme-home .skills-theme-info-card',
         styleName: 'border-color',
       }],
     },
     skillTreeBrandColor: {
-      selector: 'body #app .poweredByContainer .skills-theme-brand',
+      selector: '.sd-theme-home .poweredByContainer .skills-theme-brand',
       styleName: 'color',
     },
     quiz: {
       incorrectAnswerColor: {
-        selector: 'body #app .skills-theme-quiz-incorrect-answer',
+        selector: 'body #app .sd-theme-home .skills-theme-quiz-incorrect-answer',
         styleName: 'color',
       },
       correctAnswerColor: {
-        selector: 'body #app .skills-theme-quiz-correct-answer',
+        selector: 'body #app .sd-theme-home .skills-theme-quiz-correct-answer',
         styleName: 'color',
       },
       selectedAnswerColor: [{
-        selector: 'body #app .skills-theme-quiz-selected-answer',
+        selector: 'body #app .sd-theme-home .skills-theme-quiz-selected-answer',
         styleName: 'color',
       }, {
-        selector: 'body #app .skills-theme-quiz-selected-answer-row:hover',
+        selector: 'body #app .sd-theme-home .skills-theme-quiz-selected-answer-row:hover',
         styleName: 'border-color',
       }],
     },
@@ -312,10 +327,20 @@ export default {
         throw new Error(`Skills Theme Error! Failed to process provided custom theme due to invalid format! JSON key of [${key}] ${keyMsg}. Theme is ${JSON.stringify(theme)}`);
       }
     };
+    const cssBasedOnKeyPathMapping = {
+      'tiles.borderColor': '.sd-theme-home .p-card, .p-autocomplete-panel.p-component { border-style: solid !important; border-width: 1px !important; }'
+    }
+    const addCssBasedOnKeyPath = (keyPath) => {
+      const cssToAdd = cssBasedOnKeyPathMapping[keyPath]
+      if (cssToAdd) {
+        res.css += cssToAdd
+      }
+    }
 
-    const populateResult = (selectorKey, inputTheme) => {
+    const populateResult = (selectorKey, inputTheme,  parentPath = '') => {
       Object.keys(inputTheme)
         .forEach((key) => {
+          const myPath = parentPath ? parentPath + '.' + key : key
           const isCSSConfig = !this.nonCSSConfig.includes(key);
           const isThemeModule = !isCSSConfig || this.bothCssAndThemModule.includes(key);
           if (isCSSConfig) {
@@ -325,14 +350,23 @@ export default {
             validateInputElement(key, inputThemeElement, 'has empty/undefined value');
 
             const isLeaf = selectorKeyElement.selector || selectorKeyElement.styleName;
+
+
             if (Array.isArray(selectorKeyElement)) {
               selectorKeyElement.forEach((selectorArrayElement) => {
+                // if (myPath === 'tiles.borderColor') {
+                //   console.log(`tiles.borderColor!!!!!!!!!!!!!!!!!!!!!!!!!!!! isLeaf=${isLeaf}`)
+                //   console.log(selectorArrayElement)
+                //   res.css += `.sd-theme-home .p-card { border: solid 1px!important } `;
+                // }
                 appendCSS(selectorArrayElement, inputThemeElement);
               });
+              addCssBasedOnKeyPath(myPath)
             } else if (isLeaf) {
               appendCSS(selectorKeyElement, inputThemeElement);
+              addCssBasedOnKeyPath(myPath)
             } else {
-              populateResult(selectorKeyElement, inputThemeElement);
+              populateResult(selectorKeyElement, inputThemeElement, myPath);
             }
           }
 
@@ -357,13 +391,23 @@ export default {
       }
     };
 
+    const applyDefaults = (themeParam) => {
+      if(!themeParam.skillTreeBrandColor && themeParam.textPrimaryColor) {
+        themeParam.skillTreeBrandColor = themeParam.textPrimaryColor
+      }
+      if(themeParam.pageTitle?.textColor && themeParam.pageTitleTextColor) {
+        // pageTitleTextColor is legacy and should be overriden by pageTitle.textColor
+        delete themeParam.pageTitleTextColor
+      }
+    }
     setDefaultBackgroundIfNotSet(theme);
+    applyDefaults(theme)
     populateResult(this.selectorKey, theme);
 
     // Some CSS may mess up some things, fix those here
     // Apex charts context menu
-    res.css += 'body #app .apexcharts-menu.open { color: black !important; }';
-    res.css += ' body #app .apexcharts-tooltip { color: black !important; }';
+    res.css += 'body #app .sd-theme-home .apexcharts-menu.open { color: black !important; }';
+    res.css += ' body #app .sd-theme-home .apexcharts-tooltip { color: black !important; }';
 
     return res;
   },

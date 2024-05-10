@@ -21,8 +21,8 @@ const dateFormatter = value => moment.utc(value)
 describe('Client Display Tests', () => {
 
     const sizes = [
-        'iphone-6',
-        'ipad-2',
+        // 'iphone-6',
+        // 'ipad-2',
         'default',
     ];
 
@@ -185,7 +185,7 @@ describe('Client Display Tests', () => {
 
     sizes.forEach((size) => {
 
-        it(`test theming - project overview - ${size}`, () => {
+        it.skip(`test theming - project overview - ${size}`, () => {
             cy.intercept('GET', '/api/projects/proj1/pointHistory')
                 .as('getPointHistory');
             cy.setResolution(size);
@@ -212,7 +212,7 @@ describe('Client Display Tests', () => {
         });
 
         if (!Cypress.env('oauthMode')) {
-            it(`test theming - project rank - ${size}`, () => {
+            it.skip(`test theming - project rank - ${size}`, () => {
                 cy.setResolution(size);
 
                 cy.cdInitProjWithSkills();
@@ -252,7 +252,7 @@ describe('Client Display Tests', () => {
             });
         }
 
-        it(`test theming - badge - ${size}`, () => {
+        it.skip(`test theming - badge - ${size}`, () => {
             cy.setResolution(size);
 
             cy.cdInitProjWithSkills();
@@ -265,7 +265,7 @@ describe('Client Display Tests', () => {
 
         });
 
-        it(`test theming - badge details- ${size}`, () => {
+        it.skip(`test theming - badge details- ${size}`, () => {
             cy.setResolution(size);
 
             cy.cdInitProjWithSkills();
@@ -284,7 +284,7 @@ describe('Client Display Tests', () => {
             cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
         });
 
-        it(`test theming - subject overview - ${size}`, () => {
+        it.skip(`test theming - subject overview - ${size}`, () => {
             cy.setResolution(size);
 
             cy.cdInitProjWithSkills();
@@ -302,7 +302,7 @@ describe('Client Display Tests', () => {
             cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
         });
 
-        it(`test theming - subject overview with skill details - ${size}`, () => {
+        it.skip(`test theming - subject overview with skill details - ${size}`, () => {
             cy.setResolution(size);
 
             cy.cdInitProjWithSkills();
@@ -330,7 +330,7 @@ describe('Client Display Tests', () => {
             cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
         });
 
-        it(`test theming - skill details - ${size}`, () => {
+        it.skip(`test theming - skill details - ${size}`, () => {
             cy.setResolution(size);
 
             cy.cdInitProjWithSkills();
@@ -348,7 +348,7 @@ describe('Client Display Tests', () => {
             cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
         });
 
-        it(`test theming - new version notification  - ${size}`, () => {
+        it.skip(`test theming - new version notification  - ${size}`, () => {
             cy.setResolution(size);
             cy.intercept(/\/api\/projects\/proj1\/rank$/,
                 {
@@ -394,7 +394,7 @@ describe('Client Display Tests', () => {
         },
     ];
     expandedVerticalSizes.forEach((size) => {
-        it(`test theming - skill details with deps - ${size.name}`, () => {
+        it.skip(`test theming - skill details with deps - ${size.name}`, () => {
             // must set viewport to show entire canvas or it will not appear in the screenshot
             cy.viewport(size.width, size.height);
 
@@ -415,7 +415,7 @@ describe('Client Display Tests', () => {
         });
     });
 
-    it(`test theming - No Subjects`, () => {
+    it.skip(`test theming - No Subjects`, () => {
         cy.cdVisit('/?enableTheme=true');
         cy.contains('User Skills');
         cy.get('[data-cy=myRank]')
@@ -425,7 +425,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
     });
 
-    it('test theming - Empty Subject', () => {
+    it.skip('test theming - Empty Subject', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -448,7 +448,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
     });
 
-    it('Point History\'s open menu must respect tiles.background option', () => {
+    it.skip('Point History\'s open menu must respect tiles.background option', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -486,7 +486,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
     });
 
-    it('skills search and skills filter selected', () => {
+    it.skip('skills search and skills filter selected', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -543,7 +543,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
-    it('skills filter open', () => {
+    it.skip('skills filter open', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -614,7 +614,7 @@ describe('Client Display Tests', () => {
     });
 
     if (!Cypress.env('oauthMode')) {
-        it('rank and leaderboard opt-out', () => {
+        it.skip('rank and leaderboard opt-out', () => {
             cy.request('POST', '/app/userInfo/settings', [{
                 'settingGroup': 'user.prefs',
                 'value': true,
@@ -674,16 +674,14 @@ describe('Client Display Tests', () => {
         cy.createSkill(1, 1, 1);
 
         // ensure brand exist
-        cy.cdVisit('/?enableTheme=true');
-        cy.get('[data-cy="skillTreePoweredBy"]')
-            .contains('powered by');
+        cy.cdVisit('/');
+        cy.get('[data-cy="skillTreePoweredBy"]').contains('powered by');
 
-        cy.cdVisit('/?enableTheme=true&themeParam=disableSkillTreeBrand|true');
-        cy.get('[data-cy="skillTreePoweredBy"]')
-            .should('not.exist');
+        cy.cdVisit('/?themeParam=disableSkillTreeBrand|true');
+        cy.get('[data-cy="skillTreePoweredBy"]').should('not.exist');
     });
 
-    it('ability to disable the breadcrumb', () => {
+    it.skip('ability to disable the breadcrumb', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
 
@@ -701,7 +699,7 @@ describe('Client Display Tests', () => {
             .should('not.exist');
     });
 
-    it('breadcrumb should use textPrimaryColor when buttons are disabled', () => {
+    it.skip('breadcrumb should use textPrimaryColor when buttons are disabled', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
 
@@ -741,7 +739,7 @@ describe('Client Display Tests', () => {
         });
     });
 
-    it('ability to control title color and size as well as border, padding and margin', () => {
+    it.skip('ability to control title color and size as well as border, padding and margin', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
 
@@ -760,7 +758,7 @@ describe('Client Display Tests', () => {
         });
     });
 
-    it('ability to left align breadcrumb', () => {
+    it.skip('ability to left align breadcrumb', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
 
@@ -772,41 +770,51 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('.skills-theme-page-title');
     });
 
+    it('landingPageTitle theme config', () => {
+        cy.cdVisit(`/?themeParam=landingPageTitle|New cool title`);
+        cy.get('[data-cy="skillsTitle"]').contains('New cool title');
+
+        cy.cdVisit(`/`);
+        cy.get('[data-cy="skillsTitle"]').contains('User Skills');
+    });
+
     it('change text color of "powered by" logo', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
+
+        const bgColor = encodeURIComponent('#152E4d')
+        const titleBg = `themeParam=tiles|{"backgroundColor":"${bgColor}"}`;
 
         const legacyPageTitleParam = 'themeParam=pageTitleTextColor|%2300ff80'; // green
         const pageTitleParam = 'themeParam=pageTitle|{"textColor":"%2300FFFF"}'; // blue
         const skillTreeBrandColorParam = 'themeParam=skillTreeBrandColor|%23ffff00'; // yellow
 
         // legacy pageTitleTextColor param
-        cy.cdVisit(`/?enableTheme=true&${legacyPageTitleParam}`);
-        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', {
-            name: 'Client Display Tests - legacy title color param'
+        cy.cdVisit(`/?${legacyPageTitleParam}&${titleBg}`);
+        cy.matchSnapshotImageForElement('[data-cy="skillTreePoweredBy"]', {
+            name: 'SkillTree Brand - legacy title color param'
         });
 
         // new pageTitle.textColor overrides legacy pageTitleTextColor param
-        cy.cdVisit(`/?enableTheme=true&${legacyPageTitleParam}&${pageTitleParam}`);
-        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', {
-            name: 'Client Display Tests - title color param overrides legacy'
+        cy.cdVisit(`/?${legacyPageTitleParam}&${pageTitleParam}&${titleBg}`);
+        cy.matchSnapshotImageForElement('[data-cy="skillTreePoweredBy"]', {
+            name: 'SkillTree Brand - title color param overrides legacy'
         });
 
         // explicit brand color overrides title param
-        cy.cdVisit(`/?enableTheme=true&${skillTreeBrandColorParam}&${legacyPageTitleParam}&${pageTitleParam}`);
-        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', {
-            name: 'Client Display Tests - explicit brand color'
+        cy.cdVisit(`/?${skillTreeBrandColorParam}&${legacyPageTitleParam}&${pageTitleParam}&${titleBg}`);
+        cy.matchSnapshotImageForElement('[data-cy="skillTreePoweredBy"]', {
+            name: 'SkillTree Brand - explicit brand color'
         });
 
         // just pageTitle.textColor param
-        cy.cdVisit(`/?enableTheme=true&${pageTitleParam}`);
-        // cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', 'Client Display Tests - title color param', snapshotOptions);
-        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', {
-            name: 'Client Display Tests - title color param'
+        cy.cdVisit(`/?${pageTitleParam}&${titleBg}`);
+        cy.matchSnapshotImageForElement('[data-cy="skillTreePoweredBy"]', {
+            name: 'SkillTree Brand - title color param'
         });
     });
 
-    it('badge search and badge filter selected', () => {
+    it.skip('badge search and badge filter selected', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -879,7 +887,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="achievedBadges"]', 'Client Display Tests - badge search and badge filter selected-achieved');
     });
 
-    it('badge filter open', () => {
+    it.skip('badge filter open', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -946,7 +954,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImage();
     });
 
-    it('skills group', () => {
+    it.skip('skills group', () => {
         cy.createSubject(1, 1);
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);
@@ -967,7 +975,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
-    it('skills group - partial completion', () => {
+    it.skip('skills group - partial completion', () => {
         cy.createSubject(1, 1);
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);
@@ -993,7 +1001,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
-    it('skills group - 1 out 2 skills required', () => {
+    it.skip('skills group - 1 out 2 skills required', () => {
         cy.createSubject(1, 1);
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);

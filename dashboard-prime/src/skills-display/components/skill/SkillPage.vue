@@ -60,7 +60,7 @@ const isLoading = computed(() => loadingSkill.value)
       <Card class="mt-3" :pt="{ content: { class: 'p-0' }}">
         <template #content>
           <div class="flex mb-4" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !skillsDisplayInfo.isCrossProject()">
-            <div>
+            <div class="w-7rem">
               <SkillsButton
                 @click="prevButtonClicked" v-if="skill.prevSkillId"
                 outlined
@@ -72,10 +72,10 @@ const isLoading = computed(() => loadingSkill.value)
               </SkillsButton>
             </div>
             <div class="flex-1 text-center " style="font-size: 0.9rem;" data-cy="skillOrder"><span
-              class="font-italic">{{ attributes.skillDisplayName }}</span> <b>{{ skill.orderInGroup
-              }}</b> <span class="font-italic">of</span> <b>{{ skill.totalSkills }}</b>
+              class="font-italic">{{ attributes.skillDisplayName }}</span> <span class="font-semibold">{{ skill.orderInGroup
+              }}</span> <span class="font-italic">of</span> <span class="font-semibold">{{ skill.totalSkills }}</span>
             </div>
-            <div>
+            <div class="w-7rem text-right">
               <SkillsButton
                 @click="nextButtonClicked"
                 v-if="skill.nextSkillId"
