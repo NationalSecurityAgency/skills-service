@@ -1,6 +1,7 @@
 <script setup>
 import { useNumberFormat } from '../../../../../common-components/src/common/filter/UseNumberFormat.js'
 import { computed, watch, ref } from 'vue'
+import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 
 const props = defineProps({
   diameter: {
@@ -38,6 +39,7 @@ const props = defineProps({
 })
 
 const numFormat = useNumberFormat()
+const themeState = useSkillsDisplayThemeState()
 
 // If totalPossiblePoints is -1 it means this is charting Level progress and the user has completed this level
 const isCompleted = props.totalPossiblePoints === -1
@@ -53,13 +55,19 @@ const percentComplete = computed(() => {
 const is100Percent = percentComplete.value === 100
 
 const series = computed(() => [percentComplete.value])
-// const chart = ref(null)
-// watch(() => percentComplete.value, () => {
-//   chart.value.updateSeries([percentComplete.value])
-//   chart.value.updateOptions(chartOptions)
-// })
+
 const defaultColor = '#0ea5e9'
 const completedColor = '#22C55E'
+const dataLabelNameColor = computed(() => {
+  if (themeState.circleProgressInteriorTextColor) {
+    return  themeState.circleProgressInteriorTextColor
+  }
+  if (themeState.textPrimaryColor) {
+    return themeState.textPrimaryColor
+  }
+  return isCompleted ? completedColor : defaultColor
+})
+
 const chartOptions = computed(() => {
   return {
     chart: {
@@ -78,12 +86,12 @@ const chartOptions = computed(() => {
           name: {
             show: true,
             fontSize: isCompleted ? '3.5rem' : '1.2rem',
-            color: isCompleted ? completedColor : defaultColor
+            color: dataLabelNameColor.value
           },
           value: {
             show: true,
             fontSize: is100Percent || isCompleted ? '1.2rem' : '1rem',
-            color: is100Percent || isCompleted ? completedColor : defaultColor
+            color:  dataLabelNameColor.value // is100Percent || isCompleted ? completedColor : defaultColor
           }
         }
       }

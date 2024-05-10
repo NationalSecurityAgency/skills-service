@@ -39,7 +39,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="my-3" :class="{'test-skills-display-theme p-4 border-50 border-round': testThemeUtils.isThemed}">
+  <div class="my-3" :class="{'test-skills-display-theme p-4 border-50 border-round': testThemeUtils.isThemed.value }">
     <skills-display-home />
   </div>
 </template>

@@ -71,6 +71,62 @@ describe('Client Display Theme Components Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]');
     });
 
+    it('circleProgressInteriorTextColor config', () => {
+        const bgColor = encodeURIComponent('#152E4d')
+        const titleBg = `themeParam=tiles|{"backgroundColor":"${bgColor}"}`;
+        const textPrimaryColor = `themeParam=textPrimaryColor|${encodeURIComponent('#fbfbfb')}`;
+        const circleProgressInteriorTextColor = `themeParam=circleProgressInteriorTextColor|${encodeURIComponent('#ec0933')}`;
+
+        // use text primary color
+        cy.cdVisit(`/?${titleBg}&${textPrimaryColor}`);
+
+        cy.get('[data-cy="overallPoints"] .vue-apexcharts')
+        cy.matchSnapshotImageForElement('[data-cy="overallPoints"] .vue-apexcharts', {
+            name: 'circleProgressInteriorTextColor is not present default to textPrimaryColor'
+        });
+
+        cy.cdVisit(`/?${titleBg}&${textPrimaryColor}&${circleProgressInteriorTextColor}`);
+        cy.matchSnapshotImageForElement('[data-cy="overallPoints"] .vue-apexcharts', {
+            name: 'circleProgressInteriorTextColor overrides textPrimaryColor'
+        });
+    });
+
+    it('progressIndicators config', () => {
+        cy.createSkill(1, 1, 3, { numPerformToCompletion: 5});
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), '2019-09-12 11:00');
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), '2019-09-19 11:00');
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
+
+        cy.createSubject(1, 2, { name: 'Unused' })
+
+        cy.createSubject(1, 3, { name: 'Completed' })
+        cy.createSkill(1, 3, 4, { numPerformToCompletion: 1});
+
+        cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: Cypress.env('proxyUser'), date: 'now' })
+
+        const progressIndicators = JSON.stringify({
+            beforeTodayColor: encodeURIComponent('#fd70d2'),
+            earnedTodayColor:  encodeURIComponent('#ec0933'),
+            completeColor: encodeURIComponent('#03270f'),
+            incompleteColor: encodeURIComponent('#ecec05'),
+        })
+
+        cy.cdVisit(`/?themeParam=progressIndicators|${progressIndicators}`, true);
+        cy.get('[data-cy="skillsTitle"]')
+
+        cy.matchSnapshotImageForElement('[data-cy="subjectTile-subj1"]', {
+            name: 'progressIndicators settings - beforeTodayColor earnedTodayColor and incompleteColor'
+        });
+
+        cy.matchSnapshotImageForElement('[data-cy="subjectTile-subj2"]', {
+            name: 'progressIndicators settings - incompleteColor'
+        });
+
+        cy.matchSnapshotImageForElement('[data-cy="subjectTile-subj3"]', {
+            name: 'progressIndicators settings - completeColor'
+        });
+
+    });
 
     it.skip('point history chart - line, label and gradient', () => {
         cy.cdVisit('/?themeParam=charts|{"pointHistory":{"lineColor":"purple","gradientStartColor":"blue","gradientStopColor":"yellow"},"labelBorderColor":"black","labelBackgroundColor":"green","labelForegroundColor":"lightgray"}');

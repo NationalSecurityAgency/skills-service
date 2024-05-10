@@ -20,12 +20,6 @@ export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState',
   }
 
   const theme = ref({
-    progressIndicators: {
-      beforeTodayColor: '#14a3d2',
-      earnedTodayColor: '#7ed6f3',
-      completeColor: '#59ad52',
-      incompleteColor: '#cdcdcd'
-    },
     charts: {
       axisLabelColor: 'black'
     }
@@ -82,7 +76,8 @@ export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState',
   const graphThisSkillColor = computed(() => theme?.value?.prerequisites?.thisSkillColor || '#00a4e8')
   const graphNavButtonsColor = computed(() => theme?.value?.prerequisites?.navButtonsColor || '')
   const graphTextPrimaryColor = computed(() => theme?.value?.prerequisites?.textPrimaryColor || '')
-
+  const textPrimaryColor = computed(() => theme?.value?.textPrimaryColor)
+  const circleProgressInteriorTextColor = computed(() => theme?.value?.circleProgressInteriorTextColor)
   return {
     theme,
     setThemeByKey,
@@ -95,6 +90,8 @@ export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState',
     graphThisSkillColor,
     graphNavButtonsColor,
     graphTextPrimaryColor,
-    initThemeObjInStyleTag
+    initThemeObjInStyleTag,
+    circleProgressInteriorTextColor,
+    textPrimaryColor
   }
 })

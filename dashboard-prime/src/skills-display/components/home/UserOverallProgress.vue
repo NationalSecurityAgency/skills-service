@@ -26,10 +26,10 @@ const attributes = useSkillsDisplayAttributesState()
 const numFormat = useNumberFormat()
 const pluralSupport = useLanguagePluralSupport()
 
-const beforeTodayColor = computed(() => themeState.theme.progressIndicators.beforeTodayColor)
-const earnedTodayColor = computed(() => themeState.theme.progressIndicators.earnedTodayColor)
-const completeColor = computed(() => themeState.theme.progressIndicators.completeColor)
-const incompleteColor = computed(() => themeState.theme.progressIndicators.incompleteColor)
+const beforeTodayColor = computed(() => themeState.theme.progressIndicators?.beforeTodayColor || '#14a3d2')
+const earnedTodayColor = computed(() => themeState.theme.progressIndicators?.earnedTodayColor || '#7ed6f3')
+const completeColor = computed(() => themeState.theme.progressIndicators?.completeColor || '#59ad52')
+const incompleteColor = computed(() => themeState.theme.progressIndicators?.incompleteColor || '#cdcdcd')
 const isLevelComplete = computed(() => userProgress.value.levelTotalPoints === -1)
 const levelStats = computed(() => {
   return {

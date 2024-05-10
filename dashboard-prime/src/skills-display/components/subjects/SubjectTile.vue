@@ -5,6 +5,7 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 
 const props = defineProps({
   subject: {
@@ -21,14 +22,17 @@ const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const numFormat = useNumberFormat()
 const ribbonColor = ['#4472ba', '#c74a41', '#44843E', '#BE5A09', '#A15E9A', '#23806A'][props.tileIndex % 6]
+const themeState = useSkillsDisplayThemeState()
 
 const progress = computed(() => {
   let levelBeforeToday = 0
+  console.log(props.subject)
   if (props.subject.levelPoints > props.subject.todaysPoints) {
     levelBeforeToday = ((props.subject.levelPoints - props.subject.todaysPoints) / props.subject.levelTotalPoints) * 100
   } else {
-    levelBeforeToday = 0
+    levelBeforeToday = (props.subject.levelPoints / props.subject.levelTotalPoints) * 100
   }
+
 
   let level = 0
   if (props.subject.totalPoints > 0) {
@@ -56,7 +60,6 @@ const progress = computed(() => {
         <ribbon :color="ribbonColor" class="subject-tile-ribbon">
           {{ subject.subject }}
         </ribbon>
-
         <i :class="subject.iconClass" class="text-7xl text-400" />
         <div class="text-xl pt-1 font-medium" data-cy="levelTitle">{{ attributes.levelDisplayName }} {{ subject.skillsLevel }}</div>
         <div class="flex justify-content-center mt-2 subject-progress-stars-icons">

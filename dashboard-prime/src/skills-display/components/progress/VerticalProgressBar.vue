@@ -32,13 +32,14 @@ const props = defineProps({
   }
 })
 
+const isCompleted = computed(() => props.totalProgress >= 100)
 const overallProgressColor = computed(() => {
-  if (props.totalProgress === 100) {
+  if (isCompleted.value) {
     return 'bg-green-400'
   }
   return props.totalProgressBeforeToday > 0 ? props.totalProgressBarColor : props.beforeTodayBarColor
 })
-const computedTotalProgressBeforeToday = computed(() => props.totalProgress < 100 ? props.totalProgressBeforeToday : 0)
+const computedTotalProgressBeforeToday = computed(() => !isCompleted.value ? props.totalProgressBeforeToday : 0)
 
 const styleObject = computed(() => {
   return {
@@ -56,9 +57,13 @@ const ariaLabelFullMsg = computed(() => {
 
 <template>
   <div class="user-skill-progress-layers" :style="`height: ${props.barSize+2}px`">
+<!--    <pre> totalProgress:{{ totalProgress }}</pre>-->
+<!--    <pre> totalProgressBeforeToday: {{ totalProgressBeforeToday }}</pre>-->
+<!--    <pre> computedTotalProgressBeforeToday: {{ computedTotalProgressBeforeToday }}</pre>-->
     <ProgressBar :value="totalProgress"
                  :pt="{ value: { class: overallProgressColor }}"
                  class="today-progress"
+                 :class="{ 'is-completed': isCompleted, 'is-not-completed': !isCompleted }"
                  :show-value="false"
                  :ariaLabel="ariaLabelFullMsg"
                  :style="styleObject"></ProgressBar>
@@ -66,6 +71,7 @@ const ariaLabelFullMsg = computed(() => {
                  :pt="{ value: { class: beforeTodayBarColor },
                root: { class: 'opacity-100 remove-background' }}"
                  class="total-progress"
+                 :class="{ 'is-completed': isCompleted, 'is-not-completed': !isCompleted }"
                  :show-value="false"
                  :ariaLabel="ariaLabelFullMsg"
                  :style="styleObject"></ProgressBar>
