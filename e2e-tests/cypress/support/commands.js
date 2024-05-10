@@ -1425,9 +1425,10 @@ Cypress.Commands.add('visitAdmin', () => {
     cy.get('[data-cy="inception-button"]').contains('Level');
 });
 
-Cypress.Commands.add('selectItem', (selector, item, openPicker = true) => {
+Cypress.Commands.add('selectItem', (selector, item, openPicker = true, autoCompleteDropdown = false) => {
     if (openPicker) {
-        let itemToSelect = selector + ' [data-pc-section="trigger"]';
+        const trigger = autoCompleteDropdown ? '[data-pc-name="dropdownbutton"]' : '[data-pc-section="trigger"]';
+        const itemToSelect = `${selector} ${trigger}`;
         cy.get(itemToSelect).click();
     }
     cy.get('[data-pc-section="item"]').contains(item).click();

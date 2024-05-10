@@ -181,10 +181,12 @@ describe('Settings Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.get('#existingUserInput [data-pc-section="trigger"]').first().click();
-        cy.get('[data-pc-section="filterinput"]').type('sk');
+        cy.get('[data-cy="rootrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy="rootrm"] [data-cy="existingUserInputDropdown"]').type('sk');
+
         cy.wait('@getEligibleForRoot');
-        cy.contains('skills@skills.org')
+        cy.get('[data-pc-section="item"]')
+            .contains('skills@skills.org')
             .click({ force: true });
         cy.contains('Add')
             .first()
@@ -339,10 +341,11 @@ describe('Settings Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.get('#existingUserInput [data-pc-section="trigger"]').first().click();
+        cy.get('[data-cy="rootrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
 
         cy.wait('@getEligibleForRoot');
-        cy.contains('skills@skills.org')
+        cy.get('[data-pc-section="item"]')
+            .contains('skills@skills.org')
             .click();
         cy.contains('Add')
             .first()
@@ -416,8 +419,8 @@ describe('Settings Tests', () => {
         cy.wait('@checkRoot');
         cy.clickNav('Security');
 
-        cy.get('[data-cy="supervisorrm"] #existingUserInput [data-pc-section="trigger"]').first().click();
-        cy.get('[data-pc-section="filterinput"]').type('root');
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('root');
 
         cy.wait('@getEligibleForSupervisor');
         cy.get('[data-pc-section="item"]')
@@ -459,8 +462,8 @@ describe('Settings Tests', () => {
 
         cy.visit('/settings/security');
 
-        cy.get('[data-cy="supervisorrm"] #existingUserInput [data-pc-section="trigger"]').first().click();
-        cy.get('[data-pc-section="filterinput"]').type('root');
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('root');
 
         cy.wait('@getEligibleForSupervisor');
         cy.get('[data-pc-section="item"]')
@@ -471,8 +474,8 @@ describe('Settings Tests', () => {
             .click();
         cy.wait('@addSupervisor');
 
-        cy.get('[data-cy="supervisorrm"] #existingUserInput [data-pc-section="trigger"]').first().click();
-        cy.get('[data-pc-section="filterinput"]').type('skills');
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('{selectall}skills');
 
         cy.wait('@getEligibleForSupervisor');
         cy.get('[data-pc-section="item"]')
@@ -563,8 +566,8 @@ describe('Settings Tests', () => {
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
-        cy.get('[data-cy="supervisorrm"] #existingUserInput [data-pc-section="trigger"]').first().click();
-        cy.get('[data-pc-section="filterinput"]').type('blah');
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('blah');
 
         cy.wait('@getEligibleForSupervisor');
         cy.get('[data-pc-section="item"]')
@@ -623,8 +626,8 @@ describe('Settings Tests', () => {
         cy.wait('@checkRoot');
         cy.contains('Security')
             .click();
-        cy.get('[data-cy="supervisorrm"] #existingUserInput [data-pc-section="trigger"]').first().click();
-        cy.get('[data-pc-section="filterinput"]').type('sk/foo');
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('sk/foo');
         cy.wait('@getEligibleForSupervisor');
     });
 

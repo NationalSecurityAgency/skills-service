@@ -63,7 +63,7 @@ describe('Approver Config Users Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.disabled')
 
         // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
-        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userA');
+        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userA', true, true);
         // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] .p-dropdown-option`).contains('userA').click();
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.enabled')
 
@@ -79,7 +79,7 @@ describe('Approver Config Users Tests', () => {
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('1 Specific User')
 
         // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
-        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userB');
+        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userB', true, true);
         // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] .p-dropdown-option`).contains('userB').click();
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.enabled')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
@@ -200,7 +200,7 @@ describe('Approver Config Users Tests', () => {
         const headerSelector = `${tableSelector} thead tr th`;
         cy.get(headerSelector).contains('User').click();
 
-        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userE');
+        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userE', true, true);
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
 
         cy.validateTable(tableSelector, [

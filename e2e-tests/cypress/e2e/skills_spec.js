@@ -547,21 +547,21 @@ describe('Skills Tests', () => {
     cy.contains(expectedErrMsg)
     cy.get(addButtonSelector).should('be.disabled')
 
-    cy.get(userIdSelector).type('userd{enter}')
+    cy.get(userIdSelector).type('{selectall}userd{enter}')
     cy.contains(expectedErrMsg).should('not.exist')
     cy.get(addButtonSelector).should('not.be.disabled')
 
-    cy.get(userIdSelector).type('user d{enter}')
+    cy.get(userIdSelector).type('{selectall}user d{enter}')
     cy.contains(expectedErrMsg)
     cy.get(addButtonSelector).should('be.disabled')
 
-    cy.get(userIdSelector).type('userOK{enter}')
+    cy.get(userIdSelector).type('{selectall}userOK{enter}')
     cy.contains(expectedErrMsg).should('not.exist')
     cy.get(addButtonSelector).should('not.be.disabled')
     cy.get(addButtonSelector).click()
     cy.contains('userOK')
 
-    cy.get(userIdSelector).type('user@#$&*{enter}')
+    cy.get(userIdSelector).type('{selectall}user@#$&*{enter}')
     cy.contains(expectedErrMsg).should('not.exist')
     cy.get(addButtonSelector).should('not.be.disabled')
     cy.get(addButtonSelector).click()

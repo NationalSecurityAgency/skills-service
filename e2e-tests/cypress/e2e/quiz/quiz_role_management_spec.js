@@ -33,7 +33,7 @@ describe('Quiz User Role Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="itemlabel"]').contains('root@skills.org').click();
+        cy.get('[data-pc-section="item"]').contains('root@skills.org').click();
         cy.get('[data-cy="quizAdmin_root@skills.org"]').should('not.exist')
         cy.get('[data-cy="addUserBtn"]').click()
         cy.get('[data-cy="quizAdmin_root@skills.org"]')

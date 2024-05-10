@@ -182,6 +182,7 @@ const suggestUsers = (query) => {
       <AutoComplete v-bind="fallthroughAttributes.inputAttrs.value"
                     v-model="currentSelectedUser"
                     data-cy="existingUserInputDropdown"
+                    id="existingUserInput"
                     class="w-full"
                     :dropdown="true"
                     :suggestions="suggestions"
