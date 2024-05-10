@@ -1,6 +1,6 @@
 <script setup>
 
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useDebounceFn } from '@vueuse/core'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import { useUserInfo } from '@/components/utils/UseUserInfo.js';
@@ -91,8 +91,11 @@ const onHideDropdown = () => {
     currentSelectedUser.value = value.value;
   }
 }
+const onClear = () => {
+  value.value = null;
+}
 const selectCurrentItem = () => {
-  // when the user presses enter search box (not on an option in the dropdown)
+  // when the user presses enter in the search box (not on an option in the dropdown)
   if (typeof currentSelectedUser.value === 'string') {
     let selectedItem = null
     if (currentSelectedUser.value) {
@@ -136,6 +139,9 @@ const suggestUrl = computed(() => {
   }
   return suggestUrl;
 })
+watch(() => props.modelValue, (newValue) => {
+  currentSelectedUser.value = newValue ? newValue.userId : null;
+});
 const getUserIdForDisplay = (user) => {
   if (!user.userIdForDisplay) {
     return user.userId;
@@ -156,7 +162,6 @@ const suggestUsers = (query) => {
         suggestions.value = suggestedUsers.filter((suggestedUser) => !props.excludedSuggestions.includes(suggestedUser.userId));
         suggestions.value = suggestions.value.map((suggestedUser) => {
           if (query === suggestedUser.userId) {
-            console.log(`query [${query}] matches existing user: ${suggestedUser.userId}`);
             queryMatchesExistingUser = true;
           }
           const label = getUserIdForDisplay(suggestedUser);
@@ -191,6 +196,7 @@ const suggestUsers = (query) => {
                     @keydown.enter="selectCurrentItem"
                     @complete="suggestUsersFromEvent"
                     @hide="onHideDropdown"
+                    @clear="onClear"
                     @dropdownClick="onShowDropdown">
         <template #option="slotProps">
           <div v-if="slotProps.option.isNewUser" class="flex flex-wrap align-options-center align-items-center">

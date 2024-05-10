@@ -376,21 +376,21 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="userIdInput"]').click().type('foo{enter}')
     cy.wait('@suggestUsers')
     cy.get(addButtonSelector).click();
-    // cy.wait('@addSkillEvent')
+    cy.wait('@addSkillEvent')
     cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('Added points for')
     cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('[foo]')
 
     cy.get('[data-cy="userIdInput"]').click().type('{selectall}bar{enter}')
     cy.wait('@suggestUsers')
     cy.get(addButtonSelector).click();
-    // cy.wait('@addSkillEvent')
+    cy.wait('@addSkillEvent')
     cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('Added points for')
     cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('[bar]')
 
     cy.get('[data-cy="userIdInput"]').click().type('{selectall}baz{enter}')
     cy.wait('@suggestUsers')
     cy.get(addButtonSelector).click();
-    // cy.wait('@addSkillEvent')  // TODO: uncomment this line once add v-skills directive back
+    cy.wait('@addSkillEvent')
     cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('Added points for')
     cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('[baz]')
 
@@ -444,7 +444,7 @@ describe('Skills Tests', () => {
     cy.get('.p-datepicker-group-container').contains('10').click()
 
     cy.get(addButtonSelector).click();
-    // cy.wait('@addSkillEvent') // TODO: uncomment this line once add v-skills directive back
+    cy.wait('@addSkillEvent')
     cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('Added points for')
     cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('[foo]')
     cy.get('[data-cy=nav-Users]').click()

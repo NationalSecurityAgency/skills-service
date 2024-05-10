@@ -60,7 +60,6 @@ const addButtonIcon = computed(() => {
 });
 
 const newUserObjNoSpacesValidatorInNonPkiMode = (value) => {
-  console.log(`vee-validating value: ${JSON.stringify(value)}`);
   if (pkiAuthenticated.value || !value.userId) {
     return true;
   }
@@ -124,7 +123,7 @@ const addSkill = () => {
           nextTick(() => announcer.polite(`Skill event has been added for ${userId}`));
         }
         usersAdded.value.push(historyObj);
-        // currentSelectedUser.value = null;
+        currentSelectedUser.value = null;
         resetForm();
       })
       .catch((e) => {
@@ -139,7 +138,7 @@ const addSkill = () => {
             key: currentSelectedUser.value.userId + new Date().getTime() + false,
           };
           usersAdded.value.push(historyObj);
-          // currentSelectedUser.value = null;
+          currentSelectedUser.value = null;
           resetForm();
         } else {
           const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
@@ -177,6 +176,7 @@ const addSkill = () => {
             <SkillsButton
                 aria-label="Add Specific User"
                 data-cy="addSkillEventButton"
+                v-skills="'ManuallyAddSkillEvent'"
                 @click="addSkill"
                 :disabled="!meta.valid || disable"
                 :icon="addButtonIcon" label="Add">
@@ -184,13 +184,6 @@ const addSkill = () => {
           </div>
         </div>
         <Message v-if="!isLoading && minPointsTooltip" severity="warn" :closable="false">{{ minPointsTooltip }}</Message>
-<!--        <div>-->
-<!--          <div>Errors: {{ JSON.stringify(errors) }}</div>-->
-<!--          <div>Meta: {{ JSON.stringify(meta) }}</div>-->
-<!--          <div>Values: {{ JSON.stringify(values) }}, disable {{ disable }}</div>-->
-<!--          <div>disable: {{ disable }}</div>-->
-<!--          <div>currentSelectedUser: {{ currentSelectedUser }}</div>-->
-<!--        </div>-->
         <div class="mt-2" v-for="(user) in reversedUsersAdded" v-bind:key="user.key" data-cy="addedUserEventsInfo">
           <div class="">
             <span :class="[user.success ? 'text-green-500' : 'text-red-500']" style="font-weight: bolder">

@@ -64,6 +64,7 @@ import SkillsTextarea from '@/components/utils/inputForm/SkillsTextarea.vue'
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import SkillsCardHeader from '@/components/utils/cards/SkillsCardHeader.vue'
+import { useSkillsReporterDirective } from '@/components/utils/SkillsReporterDirective.js';
 
 import 'primeflex/primeflex.css'
 import '@fortawesome/fontawesome-free/css/all.css'
@@ -135,6 +136,9 @@ app.component('SkillsDropDown', SkillsDropDown)
 app.component('SkillsDataTable', SkillsDataTable)
 app.component('SkillsCardHeader', SkillsCardHeader)
 
+const skillsReporterDirective = useSkillsReporterDirective();
+app.directive('skills', skillsReporterDirective.vSkills);
+app.directive('skills-onMount', skillsReporterDirective.vSkillsOnMounted);
 app.directive('tooltip', Tooltip);
 app.directive('focustrap', FocusTrap);
 app.directive('badge', BadgeDirective);
