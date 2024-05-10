@@ -254,8 +254,8 @@ const setProject = (newProject) => {
               size="small"
               label="Preview"
               icon="fas fa-eye"
+              v-skills="'PreviewProjectClientDisplay'"
               :aria-label="`preview client display for project ${project.name}`">
-              <!--            v-skills="'PreviewProjectClientDisplay'" -->
             </SkillsButton>
           </router-link>
           <SkillsButton v-if="projConfig.isProjConfigDiscoverable"
@@ -265,8 +265,8 @@ const setProject = (newProject) => {
                     data-cy="shareProjBtn"
                     class="border-1 border-black-alpha-90"
                     label="Share" icon="fas fa-share-alt"
+                    v-skills="'ShareProject'"
                     :aria-label="`Share ${project.name} with new users`">
-<!--&lt;!&ndash;            v-skills="'ShareProject'" &ndash;&gt;-->
           </SkillsButton>
         </div>
         <div data-cy="projectCreated" class="mt-3">

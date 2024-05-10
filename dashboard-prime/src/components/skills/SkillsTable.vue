@@ -571,8 +571,8 @@ const editImportedSkillInfo = ref({
                     :aria-label="'copy Skill '+slotProps.data.name"
                     :ref="'copy_'+slotProps.data.skillId"
                     :disabled="addSkillDisabled"
+                    v-skills="'CopySkill'"
                     title="Copy Skill" />
-                  <!--                  v-skills="'CopySkill'" -->
                   <SkillsButton
                     icon="fas fa-trash"
                     :id="`deleteSkillButton_${slotProps.data.skillId}`"
@@ -605,8 +605,8 @@ const editImportedSkillInfo = ref({
                   outlined
                   :disabled="slotProps.data.disabledDownButton"
                   :aria-label="'move '+slotProps.data.name+' down in the display order'"
+                  v-skills="'ChangeSkillDisplayOrder'"
                   :data-cy="`orderMoveDown_${slotProps.data.skillId}`" />
-                <!--                v-skills="'ChangeSkillDisplayOrder'"-->
                 <SkillsButton
                   icon="fas fa-arrow-circle-up"
                   @click="subjSkillsDisplayOrder.moveDisplayOrderUp(slotProps.data)"
@@ -614,8 +614,8 @@ const editImportedSkillInfo = ref({
                   outlined
                   :disabled="slotProps.data.disabledUpButton"
                   :aria-label="'move '+slotProps.data.name+' up in the display order'"
+                  v-skills="'ChangeSkillDisplayOrder'"
                   :data-cy="`orderMoveUp_${slotProps.data.skillId}`" />
-                <!--                v-skills="'ChangeSkillDisplayOrder'"-->
               </ButtonGroup>
             </div>
           </div>
