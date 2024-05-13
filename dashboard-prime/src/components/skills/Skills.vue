@@ -88,6 +88,9 @@ const reportSkills = (createdSkill) => {
   if (createdSkill.helpUrl) {
     SkillsReporter.reportSkill('CreateSkillHelpUrl')
   }
+  if (createdSkill.groupId) {
+    SkillsReporter.reportSkill('CreateSkillGroup')
+  }
 }
 
 const skillCreatedOrUpdated = (skill) => {

@@ -5,6 +5,7 @@ import { useStorage } from '@vueuse/core'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import { FilterMatchMode } from 'primevue/api'
+import { SkillsReporter } from '@skilltree/skills-client-js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjSkillsDisplayOrder } from '@/components/skills/UseSubjSkillsDisplayOrder.js'
 import { useTimeWindowFormatter } from '@/components/skills/UseTimeWindowFormatter.js'
@@ -125,6 +126,7 @@ const displayedColumns = ref(options.value.fields.filter((f) => f.isSticky || ad
 const onToggle = (currentSelection) => {
   additionalSelectedColumnKeys.value = currentSelection.map((c) => c.key)
   displayedColumns.value = options.value.fields.filter((f) => additionalSelectedColumnKeys.value.includes(f.key) || f.isSticky)
+  SkillsReporter.reportSkill('SkillsTableAdditionalColumns')
 }
 
 const tableSkills = computed(() => {

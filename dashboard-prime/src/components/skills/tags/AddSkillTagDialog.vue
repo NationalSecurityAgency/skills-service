@@ -2,12 +2,13 @@
 import { ref } from 'vue'
 import { object, string } from 'yup'
 import { useRoute } from 'vue-router'
-import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
+import { SkillsReporter } from '@skilltree/skills-client-js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
-import SkillsService from '@/components/skills/SkillsService.js'
-import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import { useFocusState } from '@/stores/UseFocusState.js'
+import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
+import SkillsService from '@/components/skills/SkillsService.js'
+import InputSanitizer from '@/components/utils/InputSanitizer.js'
 
 const model = defineModel()
 const emit = defineEmits(['added-tag'])
@@ -68,6 +69,7 @@ const afterSave = (taggedInfo) => {
   toUpdate.forEach((sk) => {
     sk.tags.push({ tagId: taggedInfo.tagId, tagValue: taggedInfo.tagValue })
   })
+  SkillsReporter.reportSkill('AddOrModifyTags')
   emit('added-tag', taggedInfo)
   const focusOn = props.groupId ? `group-${props.groupId}_newSkillBtn` : 'newSkillBtn'
   focusState.setElementId(focusOn)
