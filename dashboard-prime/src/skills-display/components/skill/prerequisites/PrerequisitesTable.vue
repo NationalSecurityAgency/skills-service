@@ -94,7 +94,7 @@ const getTypeIconColor = (type) => {
         </template>
         <template #body="slotProps">
           <div data-cy="isAchievedCell">
-            <div v-if="slotProps.data.achieved" class="font-weight-bold"
+            <div v-if="slotProps.data.achieved" class="font-weight-bold sd-theme-primary-color"
                  data-cy="achievedCellYes"
                  :aria-label="`${slotProps.data.skillName} ${slotProps.data.type} was achieved`"
                  :style="`color: ${themeState.graphAchievedColor}`">✓Yes

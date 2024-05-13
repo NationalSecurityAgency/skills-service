@@ -14,7 +14,7 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 </script>
 
 <template>
-  <Card class="skills-my-rank w-min-18rem"
+  <Card class="skills-my-rank w-min-15rem"
         data-cy="myBadges"
         :pt="{ content: { class: 'py-0' } }">
     <template #subtitle>
@@ -48,6 +48,13 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 </template>
 
 <style scoped>
+
+@media only screen and (min-width: 1200px) {
+  .skills-my-rank {
+    min-width: 18rem !important;
+  }
+}
+
 .skills-my-rank .skills-icon {
   display: inline-block;
   color: #b1b1b1;

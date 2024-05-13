@@ -68,6 +68,21 @@ const dataLabelNameColor = computed(() => {
   return isCompleted ? completedColor : defaultColor
 })
 
+const barColor = computed(() => {
+  if (themeState.theme?.progressIndicators?.beforeTodayColor) {
+    return themeState.theme?.progressIndicators?.beforeTodayColor
+  }
+  return defaultColor
+})
+
+const backgroundBarColor = computed(() => {
+  if (themeState.theme?.progressIndicators?.incompleteColor) {
+    return themeState.theme?.progressIndicators?.incompleteColor
+  }
+  return '#f3f4f6'
+})
+
+
 const chartOptions = computed(() => {
   return {
     chart: {
@@ -75,12 +90,15 @@ const chartOptions = computed(() => {
       type: 'radialBar'
     },
     fill: {
-      colors: [completedColor]
+      colors: [barColor.value]
     },
     plotOptions: {
       radialBar: {
         hollow: {
           size: '67%'
+        },
+        track: {
+          background: backgroundBarColor.value
         },
         dataLabels: {
           name: {

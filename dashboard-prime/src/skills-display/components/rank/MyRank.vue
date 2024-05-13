@@ -27,7 +27,7 @@ const toRankDetailsPage = computed(() => {
 </script>
 
 <template>
-<Card class="skills-my-rank w-min-18rem h-full"
+<Card class="skills-my-rank w-min-15rem h-full"
       data-cy="myRank"
       :pt="{ content: { class: 'py-0' } }">
   <template #subtitle>
@@ -68,6 +68,12 @@ const toRankDetailsPage = computed(() => {
 </template>
 
 <style scoped>
+@media only screen and (min-width: 1200px) {
+  .skills-my-rank {
+    min-width: 18rem !important;
+  }
+}
+
 .skills-my-rank .skills-icon {
   display: inline-block;
   color: #b1b1b1;

@@ -22,7 +22,7 @@ export default {
       styleName: 'max-width'
     },
     backgroundColor: [{
-      selector: 'body #app .sd-theme-home',
+      selector: 'body #app .sd-theme-home, .p-overlaypanel.p-component',
       styleName: 'background-color'
     }, {
       selector: 'body #app .sd-theme-home .skills-theme-bottom-border-with-background-color',
@@ -60,7 +60,7 @@ export default {
       },
       backgroundColor: {
         selector: 'body #app .sd-theme-home .p-card.p-component.skills-theme-page-title,' +
-          '.sd-theme-home .skills-theme-page-title .p-breadcrumb.p-component',
+          '.sd-theme-home .skills-theme-page-title .p-breadcrumb.p-component,',
         styleName: 'background'
       },
       textAlign: {
@@ -82,18 +82,26 @@ export default {
     },
     textPrimaryColor: [{
       selector: '.sd-theme-home .p-card,' +
+        '.sd-theme-home .sd-theme-primary-color,' +
         '.sd-theme-home .p-card-subtitle,' +
         '.sd-theme-home .text-primary,' +
         '.sd-theme-home .text-color,' +
         '.sd-theme-home .skills-display-test-link a,' +
+        'body #app .sd-theme-home .p-datatable .p-datatable-tbody > tr,' +
+        'body #app .sd-theme-home .p-datatable .p-datatable-thead > tr > th,' +
+        'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link,' +
+        'body #app .sd-theme-home .toastui-editor-contents p,' +
         '.p-autocomplete-panel.p-component .p-autocomplete-item,' +
-        '.p-autocomplete-panel.p-component .p-autocomplete-item .text-orange-600',
+        '.p-autocomplete-panel.p-component .p-autocomplete-item .text-orange-600,' +
+        '.p-overlaypanel-content .p-panelmenu.p-component .p-panelmenu-header-content,' +
+        '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link',
       styleName: 'color'
     }, {
       selector: 'todo',
       styleName: 'background-color'
     }, {
-      selector: 'body #app .sd-theme-home .todo',
+      selector: '.sd-theme-home .p-avatar.p-component, ' +
+        '.sd-theme-home .badge-catalog-item',
       styleName: 'border-color'
     }, {
       selector: 'body #app .sd-theme-home .apexcharts-toolbar svg, body #app .sd-theme-home .vs__open-indicator',
@@ -108,7 +116,6 @@ export default {
     }],
     textSecondaryColor: {
       selector: '.sd-theme-home .text-color-secondary,' +
-        '.sd-theme-home i,' +
         '.p-autocomplete-panel.p-component i',
       styleName: 'color'
     },
@@ -136,8 +143,14 @@ export default {
           + '.sd-theme-home .p-inputtext,'
           + '.sd-theme-home .p-inputgroup-addon,'
           + '.sd-theme-home .p-breadcrumb.p-component,'
+          + 'body #app .sd-theme-home .p-datatable .p-datatable-tbody > tr,'
+          + 'body #app .sd-theme-home .p-datatable .p-datatable-thead > tr > th,'
+          + 'body #app .sd-theme-home .p-paginator.p-component,' +
           + '.p-autocomplete-panel.p-component,'
-          + '.sd-theme-home .apexcharts-menu.apexcharts-menu-open',
+          + '.p-overlaypanel-content .p-panelmenu.p-component .p-panelmenu-header-content,'
+          + '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content,'
+          + '.sd-theme-home .apexcharts-menu.apexcharts-menu-open,'
+          + '.sd-theme-home .p-avatar.p-component',
         styleName: 'background-color'
       }, {
         selector: '.p-autocomplete-panel.p-component .p-autocomplete-item:hover,' +
@@ -145,7 +158,10 @@ export default {
           '.p-autocomplete-panel.p-component .p-autocomplete-item.p-focus i,' +
           '.p-autocomplete-panel.p-component .p-autocomplete-item:hover i,' +
           '.p-autocomplete-panel.p-component .p-autocomplete-item.p-focus .text-orange-600,' +
-          '.p-autocomplete-panel.p-component .p-autocomplete-item:hover .text-orange-600',
+          '.p-autocomplete-panel.p-component .p-autocomplete-item:hover .text-orange-600,' +
+          'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link.p-highlight,' +
+          '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link:hover,' +
+          '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-avatar-icon',
         styleName: 'color'
       }],
       borderColor: [{
@@ -153,17 +169,17 @@ export default {
         styleName: 'border-color'
       }],
       watermarkIconColor: {
-        selector: 'body #app .sd-theme-home .card-body .watermark-icon',
+        selector: 'body #app .sd-theme-home .watermark-icon',
         styleName: 'color'
       }
     },
     stars: {
       unearnedColor: {
-        selector: 'body #app .sd-theme-home .star-empty',
+        selector: 'body #app .sd-theme-home .p-rating .p-rating-item .p-icon.p-rating-icon',
         styleName: 'color'
       },
       earnedColor: {
-        selector: 'body #app .sd-theme-home .star-filled',
+        selector: 'body #app .sd-theme-home .p-rating .p-rating-item.p-rating-item-active .p-icon.p-rating-icon',
         styleName: 'color'
       }
     },
@@ -193,7 +209,7 @@ export default {
         styleName: 'background-color'
       }],
       disabledColor: [{
-        selector: 'body #app .sd-theme-home .skills-theme-btn .disabled',
+        selector: 'body #app .sd-theme-home .p-button.p-component.p-disabled',
         styleName: 'color'
       }],
       borderColor: [{
@@ -219,11 +235,11 @@ export default {
     },
     badges: {
       backgroundColor: [{
-        selector: 'body #app .sd-theme-home .badge',
+        selector: 'body #app .p-tag.p-component',
         styleName: 'background-color'
       }],
       backgroundColorSecondary: [{
-        selector: 'body #app .sd-theme-home .badge.badge-secondary',
+        selector: 'body #app .p-tag.p-component.p-tag-secondary',
         styleName: 'background-color'
       }],
       foregroundColor: [{
@@ -275,15 +291,15 @@ export default {
     },
     infoCards: {
       backgroundColor: [{
-        selector: 'body #app .sd-theme-home .skills-theme-info-card, body #app .sd-theme-home .skills-theme-info-card .card-body',
+        selector: 'body #app .sd-theme-home .sd-theme-summary-cards .p-card',
         styleName: 'background-color'
       }],
       foregroundColor: [{
-        selector: 'body #app .sd-theme-home .skills-theme-info-card .card-body, body #app .sd-theme-home .skills-theme-info-card .card-body .text-primary',
+        selector: 'body #app .sd-theme-home .sd-theme-summary-cards .p-card',
         styleName: 'color'
       }],
       borderColor: [{
-        selector: 'body #app .sd-theme-home .skills-theme-info-card',
+        selector: 'body #app .sd-theme-home .sd-theme-summary-cards .p-card',
         styleName: 'border-color'
       }]
     },
@@ -332,7 +348,9 @@ export default {
       }
     }
     const cssBasedOnKeyPathMapping = {
-      'tiles.borderColor': '.sd-theme-home .p-card, .p-autocomplete-panel.p-component { border-style: solid !important; border-width: 1px !important; }'
+      'tiles.borderColor': '.sd-theme-home .p-card, .p-autocomplete-panel.p-component { border-style: solid !important; border-width: 1px !important; }',
+      'tiles.backgroundColor': '.sd-theme-home .sd-theme-summary-cards .p-card.p-component { border-style: solid !important; border-width: 1px !important; } .sd-theme-home .badge-catalog-item .p-card { border-style: solid !important; border-width: 1px !important; }',
+      'textPrimaryColor': '.sd-theme-home .p-avatar.p-component { border-style: solid !important; border-width: 1px !important; }'
     }
     const addCssBasedOnKeyPath = (keyPath) => {
       const cssToAdd = cssBasedOnKeyPathMapping[keyPath]

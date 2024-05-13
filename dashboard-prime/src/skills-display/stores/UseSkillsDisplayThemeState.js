@@ -75,7 +75,7 @@ export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState',
   const graphAchievedColor = computed(() => theme?.value?.prerequisites?.achievedColor || 'green')
   const graphThisSkillColor = computed(() => theme?.value?.prerequisites?.thisSkillColor || '#00a4e8')
   const graphNavButtonsColor = computed(() => theme?.value?.prerequisites?.navButtonsColor || '')
-  const graphTextPrimaryColor = computed(() => theme?.value?.prerequisites?.textPrimaryColor || '')
+  const graphTextPrimaryColor = computed(() => theme?.value?.textPrimaryColor || '')
   const textPrimaryColor = computed(() => theme?.value?.textPrimaryColor)
   const circleProgressInteriorTextColor = computed(() => theme?.value?.circleProgressInteriorTextColor)
   return {

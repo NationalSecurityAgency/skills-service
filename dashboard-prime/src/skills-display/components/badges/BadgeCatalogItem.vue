@@ -75,7 +75,7 @@ const otherUsersAchieved = computed(() => {
 </script>
 
 <template>
-  <div class="" :data-cy="`badge_${badge.badgeId}`">
+  <div  :data-cy="`badge_${badge.badgeId}`" class="badge-catalog-item">
     <div class="md:flex gap-3">
       <Card class="w-min-10rem max-h-11rem mb-3 md:mb-0" :pt="iconCardPt">
         <template #header v-if="showHeader">

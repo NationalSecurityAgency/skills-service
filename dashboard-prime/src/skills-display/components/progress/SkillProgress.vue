@@ -74,9 +74,6 @@ const buildToRoute = () => {
 }
 const toRoute = buildToRoute()
 
-const locked = computed(() => {
-  return (props.skill && props.skill.isLocked) || props.badgeIsLocked
-})
 const addTagFilter = (tag) => {
   emit('add-tag-filter', tag)
 }
@@ -187,7 +184,7 @@ const isSkillComplete = computed(() => props.skill && props.skill.meta && props.
           :date="skill.achievedOn" class="mt-2" />
 
         <!--        <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked" />-->
-        <skills-summary-cards v-if="!locked" :skill="skill" class="mt-3" />
+        <skills-summary-cards v-if="!isSkillLocked" :skill="skill" class="mt-3" />
         <catalog-import-status :skill="skill" />
         <!--        <skill-video v-if="skillInternal" :skill="skillInternal"-->
         <!--                     :video-collapsed-by-default="videoCollapsedByDefault"-->

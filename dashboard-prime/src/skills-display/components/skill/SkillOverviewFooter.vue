@@ -348,15 +348,17 @@ const focusOnId = (elementId) => {
       </div>
     </div>
 
-    <div class="row pt-2">
-      <div class="col-auto text-left">
+    <div class=" pt-2">
         <div class="btn-group" role="group" aria-label="Skills Buttons">
           <a v-if="skillInternal.description && skillInternal.description.href" :href="skillInternal.description.href"
-             target="_blank" rel="noopener" class="btn btn-outline-info skills-theme-btn">
-            <i class="fas fa-question-circle"></i> Learn More <i class="fas fa-external-link-alt"></i>
+             target="_blank" rel="noopener" class="">
+            <Button outlined size="small">
+              <i class="fas fa-question-circle mr-1"></i>
+              Learn More
+              <i class="fas fa-external-link-alt ml-1"></i>
+            </Button>
           </a>
         </div>
-      </div>
     </div>
   </div>
 </template>

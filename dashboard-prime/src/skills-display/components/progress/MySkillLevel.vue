@@ -25,7 +25,7 @@ const totalLevels = computed(() => props.userProgress.totalLevels)
       {{ attributes.levelDisplayName }} <Tag severity="info">{{ level }}</Tag> out of <Tag>{{ totalLevels }}</Tag>
     </div>
     <div class="flex justify-content-center mt-2 overall-progress-stars-icons">
-      <Rating v-model="level" :stars="totalLevels" readonly :cancel="false" />
+      <Rating v-model="level" :stars="totalLevels" readonly :cancel="false" data-cy="overallStars"/>
     </div>
   </div>
 </template>
