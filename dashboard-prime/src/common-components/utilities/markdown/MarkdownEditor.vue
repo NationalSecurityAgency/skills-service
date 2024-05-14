@@ -294,7 +294,7 @@ watch(value, (newValue) =>{
       </div>
     </div>
     </BlockUI>
-    <small role="alert" class="p-error" data-cy="descriptionError">{{ errorMessage || '' }}</small>
+    <small role="alert" class="p-error" :id="`${name}Error`" data-cy="descriptionError">{{ errorMessage || '' }}</small>
 
     <input @change="attachFile"
            type="file"
