@@ -380,7 +380,7 @@ describe('Client Display Theme Components Tests', () => {
   })
 
 
-  it.only('badge settings', () => {
+  it('badge settings', () => {
     const badges = JSON.stringify({
       backgroundColor: 'red',
       foregroundColor: 'blue',
@@ -393,6 +393,44 @@ describe('Client Display Theme Components Tests', () => {
     cy.wait(1111)
     cy.matchSnapshotImageForElement('[data-cy="overallLevelDesc"]')
   })
+
+  it('subjectTileIconColor settings', () => {
+    const subjectTileIconColor = encodeURIComponent('#c3ff4c')
+    const url = `/?themeParam=subjectTileIconColor|${subjectTileIconColor}`
+    cy.cdVisit(url)
+
+    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+    cy.wait(1111)
+    cy.matchSnapshotImageForElement('[data-cy="subjectTile"] .sd-theme-subject-tile-icon')
+  })
+
+  it('trophyIconColor settings', () => {
+    const trophyIconColor = encodeURIComponent('#c3ff4c')
+    const url = `/?themeParam=trophyIconColor|${trophyIconColor}`
+    cy.cdVisit(url)
+
+    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+    cy.wait(1111)
+    cy.matchSnapshotImageForElement('[data-cy="overallLevel"] .trophy-stack')
+  })
+
+
+  it('backButton settings', () => {
+    const backButton = JSON.stringify({
+      padding: '1rem 3rem 4rem 2rem',
+      fontSize: '3rem',
+      lineHeight: '2rem',
+    })
+    const url = `/subjects/subj1?themeParam=backButton|${backButton}`
+    cy.cdVisit(url)
+
+    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+    cy.wait(1111)
+    cy.matchSnapshotImageForElement('[data-cy="back"]')
+  })
+
+
+
 
 })
 

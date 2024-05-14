@@ -33,7 +33,7 @@ export default {
       styleName: 'color'
     },
     subjectTileIconColor: {
-      selector: 'body #app .sd-theme-home .subject-tile-icon',
+      selector: 'body #app .sd-theme-home .sd-theme-subject-tile-icon',
       styleName: 'color'
     },
     pageTitleTextColor: [{
@@ -125,15 +125,15 @@ export default {
     },
     backButton: {
       padding: {
-        selector: 'body #app .sd-theme-home .skills-page-title-text-color .skills-theme-btn',
+        selector: 'body #app .sd-theme-home .skills-theme-page-title .skills-theme-btn',
         styleName: 'padding'
       },
       fontSize: {
-        selector: 'body #app .sd-theme-home .skills-page-title-text-color .skills-theme-btn',
+        selector: 'body #app .sd-theme-home .skills-theme-page-title .skills-theme-btn',
         styleName: 'font-size'
       },
       lineHeight: {
-        selector: 'body #app .sd-theme-home .skills-page-title-text-color .skills-theme-btn',
+        selector: 'body #app .sd-theme-home .skills-theme-page-title .skills-theme-btn',
         styleName: 'line-height'
       }
     },

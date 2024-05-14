@@ -60,7 +60,7 @@ const progress = computed(() => {
         <ribbon :color="ribbonColor" class="subject-tile-ribbon">
           {{ subject.subject }}
         </ribbon>
-        <i :class="subject.iconClass" class="text-7xl text-400" />
+        <i :class="subject.iconClass" class="text-7xl text-400 sd-theme-subject-tile-icon" aria-hidden="true"/>
         <div class="text-xl pt-1 font-medium" data-cy="levelTitle">{{ attributes.levelDisplayName }} {{ subject.skillsLevel }}</div>
         <div class="flex justify-content-center mt-2 subject-progress-stars-icons">
           <Rating v-model="subject.skillsLevel" :stars="subject.totalLevels" readonly :cancel="false"
