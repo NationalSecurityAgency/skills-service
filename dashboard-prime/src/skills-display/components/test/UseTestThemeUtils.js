@@ -53,34 +53,34 @@ export const useTestThemeUtils = () => {
 
   const constructThemeForTest = () => {
     const isThemeInRoute = route.query.enableTheme && route.query.enableTheme.toLocaleLowerCase() === 'true'
+    let themeRes = null
     if (isThemeInRoute || isThemed.value) {
       log.info('Configured custom theme for skills-display in test mode')
       isThemed.value = true
-      return customTheme
+      themeRes = {...customTheme}
     }
 
     const themeParamProvided = route.query.themeParam
     if (themeParamProvided) {
-      const theme = {}
+      if (!themeRes) {
+        themeRes = {}
+      }
       const themeParams = Array.isArray(themeParamProvided) ? themeParamProvided : [themeParamProvided]
       themeParams.forEach((themeParamItem) => {
         const split = themeParamItem.split('|')
         const key = split[0]
         let val = split[1]
         if (val === 'null') {
-          delete theme[key]
+          delete themeRes[key]
         } else {
           if (val.includes('{')) {
             val = JSON.parse(val)
           }
-          theme[key] = val
+          themeRes[key] = val
         }
       })
-
-      return theme
     }
-
-    return null
+    return themeRes
   }
 
   return {

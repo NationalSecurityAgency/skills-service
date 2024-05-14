@@ -51,8 +51,8 @@ const badgeAriaLabel = (badge) => {
                    message="Take a peak at the catalog below to get started!" />
 
       <div v-if="badges && badges.length > 0" class="flex justify-content-left">
-        <div v-for="(badge, index) in badges" v-bind:key="badge.badgeId" class="">
-          <Card class="skills-card-theme-border w-min-18rem" :pt="{ content: { class: 'py-0' } }">
+        <div v-for="(badge, index) in badges" v-bind:key="badge.badgeId" class="w-full md:w-auto skills-earned-badge">
+          <Card class="skills-card-theme-border" :pt="{ content: { class: 'py-0' } }">
             <template #header>
               <div class="pt-3 px-3 flex">
                 <div class="flex-1">
@@ -108,5 +108,9 @@ const badgeAriaLabel = (badge) => {
 </template>
 
 <style scoped>
-
+@media only screen and (min-width: 740px) {
+  .skills-earned-badge {
+    min-width: 18rem !important;
+  }
+}
 </style>

@@ -36,7 +36,7 @@ const isToday = (timestamp) => {
 </script>
 
 <template>
-  <div>
+  <div data-cy="dateCell">
     <div>
       <span>{{ formattedDate }}</span>
       <Badge v-if="isToday(value)" severity="info" class="ml-2">Today</Badge>

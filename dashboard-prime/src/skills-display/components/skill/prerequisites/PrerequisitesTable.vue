@@ -21,9 +21,7 @@ const createPrerequisites = () => {
   const alreadyAddedIds = []
   const res = []
 
-  console.log('hie from createPrerequisites')
   props.items.forEach((link) => {
-    console.log(link)
     const prereq = link.dependsOn
     const lookup = `${prereq.projectId}-${prereq.skillId}`
     if (!alreadyAddedIds.includes(lookup)) {

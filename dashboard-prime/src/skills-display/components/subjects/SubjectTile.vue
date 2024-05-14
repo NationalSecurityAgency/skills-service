@@ -73,7 +73,7 @@ const progress = computed(() => {
           </div>
           <div class="">
             <label class="skill-label text-right" data-cy="pointsProgress">
-              <span class="text-orange-600 font-medium">{{ numFormat.pretty(subject.points) }}</span> /
+              <span class="text-orange-600 font-medium sd-theme-primary-color">{{ numFormat.pretty(subject.points) }}</span> /
               {{ numFormat.pretty(subject.totalPoints) }}
             </label>
           </div>
@@ -93,7 +93,7 @@ const progress = computed(() => {
                 }}</label>
             </div>
             <div v-if="!progress.allLevelsComplete" data-cy="levelProgress">
-                <span class="text-orange-600 font-medium">{{ numFormat.pretty(subject.levelPoints) }}</span> /
+                <span class="text-orange-600 font-medium sd-theme-primary-color">{{ numFormat.pretty(subject.levelPoints) }}</span> /
                 {{ numFormat.pretty(subject.levelTotalPoints) }}
             </div>
           </div>

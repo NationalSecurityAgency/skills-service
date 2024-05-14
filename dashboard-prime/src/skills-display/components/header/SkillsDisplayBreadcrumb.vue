@@ -1,17 +1,17 @@
 <script setup>
 import { computed, onMounted } from 'vue'
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useRoute } from 'vue-router'
 import SkillsBreadcrumbItem from '@/components/header/SkillsBreadcrumbItem.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayBreadcrumbState } from '@/skills-display/stores/UseSkillsDisplayBreadcrumbState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 
-const themeState = useSkillsDisplayThemeState()
 const displayAttributes = useSkillsDisplayAttributesState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const route = useRoute()
 const breadcrumbState = useSkillsDisplayBreadcrumbState()
+const responsive = useResponsiveBreakpoints()
 
 onMounted(() => {
   build()
@@ -117,12 +117,14 @@ const substituteCustomLabels = (label) => {
   return label
 }
 const getContextUrl = (url) => `${skillsDisplayInfo.getRootUrl()}${url}`
-
+const smallScreenMode = computed(() => responsive.sm.value)
 
 </script>
 
 <template>
-  <div class="skills-theme-breadcrumb-container flex justify-content-center" data-cy="skillsDisplayBreadcrumbBar">
+  <div class="skills-theme-breadcrumb-container flex justify-content-center"
+       :class="{'sd-breadcrumb-vertical-mode mb-3': smallScreenMode}"
+       data-cy="skillsDisplayBreadcrumbBar">
     <Breadcrumb :model="breadcrumbState.breadcrumbItems" :pt="{ root: { class: 'border-none px-0 py-1' } }">
       <template #item="{ item, props }">
         <router-link
@@ -131,10 +133,11 @@ const getContextUrl = (url) => `${skillsDisplayInfo.getRootUrl()}${url}`
           :to="getContextUrl(item.url)"
           custom>
           <a :href="href" v-bind="props.action" @click="navigate" :data-cy="`breadcrumbLink-${item.value}`">
-            <skills-breadcrumb-item
+           <skills-breadcrumb-item
               :icon="item.icon"
               :label="item.label"
               :value="item.value"
+              :show-separator="item.url !== '/' && smallScreenMode"
               value-css="text-primary" />
           </a>
         </router-link>
@@ -142,6 +145,7 @@ const getContextUrl = (url) => `${skillsDisplayInfo.getRootUrl()}${url}`
           <skills-breadcrumb-item
             :icon="item.icon"
             :label="item.label"
+            :show-separator="item.url !== '/' && smallScreenMode"
             :value="item.value" />
         </div>
       </template>
@@ -149,6 +153,11 @@ const getContextUrl = (url) => `${skillsDisplayInfo.getRootUrl()}${url}`
   </div>
 </template>
 
-<style scoped>
-
+<style>
+.sd-breadcrumb-vertical-mode ol {
+  display: block
+}
+.sd-breadcrumb-vertical-mode .p-menuitem-separator {
+  display: none
+}
 </style>

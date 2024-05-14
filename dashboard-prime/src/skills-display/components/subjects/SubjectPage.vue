@@ -30,9 +30,9 @@ onMounted(() => {
         <user-overall-progress :is-subject="true"/>
       </div>
 
-      <div class="mt-3 flex gap-4 align-items-stretch">
+      <div class="mt-3 flex flex-column md:flex-row gap-4 ">
         <div class="flex align-items-center">
-          <my-rank />
+          <my-rank class="w-full"/>
         </div>
         <div class="flex-1 align-items-center">
           <point-progress-chart />
@@ -47,10 +47,15 @@ onMounted(() => {
           <markdown-text :text="subject.subjectSummary.description" />
         </template>
         <template #footer v-if="subject.subjectSummary.helpUrl">
-          <a :href="subject.subjectSummary.helpUrl" target="_blank" rel="noopener"
-             class="btn btn-sm btn-outline-info skills-theme-btn">
-            Learn More <i class="fas fa-external-link-alt"></i>
+          <a :href="subject.subjectSummary.helpUrl" target="_blank" rel="noopener">
+            <Button outlined size="small">
+              <i class="fas fa-question-circle mr-1" aria-hidden="true"></i>
+              Learn More
+              <i class="fas fa-external-link-alt ml-1" aria-hidden="true"></i>
+            </Button>
           </a>
+
+
         </template>
       </Card>
 <!--      @points-earned="refreshHeader"-->

@@ -239,10 +239,10 @@ const isLastViewedScrollSupported = computed(() => {
         v-if="(skillsInternal && skillsInternal.length > 0 || searchString || showNoDataMsg)">
     <template #header>
       <div class="px-4 pt-3">
-        <div class="flex flex-wrap gap-3 flex-column md:flex-row"
+        <div class=" flex flex-wrap gap-3 flex-column md:flex-row"
              v-if="skillsInternal && skillsInternal.length > 0">
           <div class="flex-1">
-            <div class="flex gap-2">
+            <div class="flex-column sm:flex-row flex gap-2">
               <div class="">
                 <InputGroup class="p-0">
                   <InputText

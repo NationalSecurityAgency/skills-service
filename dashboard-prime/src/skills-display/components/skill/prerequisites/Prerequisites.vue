@@ -247,7 +247,6 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
   if (!createdSkillIds.includes(skill.id)) {
     createdSkillIds.push(skill.id)
     const skillColor = skill.isThisSkill ? themeState.graphThisSkillColor : themeState.graphSkillColor
-    console.log(`skill color for ${skill.id} is ${skillColor}`)
     const isAchieved = achievedIds.includes(skill.id)
     let label = isCrossProject ? `Shared from\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName
     if (skill.isThisSkill) {

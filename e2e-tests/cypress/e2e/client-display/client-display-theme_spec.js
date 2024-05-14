@@ -20,13 +20,6 @@ const dateFormatter = value => moment.utc(value)
 
 describe('Client Display Tests', () => {
 
-    const sizes = [
-        // 'iphone-6',
-        // 'ipad-2',
-        'default',
-    ];
-
-    const renderWait = 4000;
 
     before(() => {
         Cypress.Commands.add('cdInitProjWithSkills', () => {
@@ -183,249 +176,17 @@ describe('Client Display Tests', () => {
         });
     });
 
-    sizes.forEach((size) => {
-
-        it.skip(`test theming - project overview - ${size}`, () => {
-            cy.intercept('GET', '/api/projects/proj1/pointHistory')
-                .as('getPointHistory');
-            cy.setResolution(size);
-
-            cy.cdInitProjWithSkills();
-
-            cy.cdVisit('/?enableTheme=true');
-            // hex #626d7d = rgb(98, 109, 125)
-            cy.get('#app')
-                .should('have.css', 'background-color')
-                .and('equal', 'rgb(98, 109, 125)');
-
-            cy.wait('@getPointHistory');
-            cy.get('[data-cy=pointHistoryChart]');
-
-            cy.contains('Subject 3');
-            cy.get('.user-skill-subject-tile:nth-child(1)')
-                .contains('Subject 1');
-            cy.get('[data-cy=myRank]')
-                .contains('1');
-            cy.get('[data-cy=myBadges]')
-                .contains('1 Badge');
-            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
-        });
-
-        if (!Cypress.env('oauthMode')) {
-            it.skip(`test theming - project rank - ${size}`, () => {
-                cy.setResolution(size);
-
-                cy.cdInitProjWithSkills();
-
-                const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
-                for (let i = 0; i < 5; i += 1) {
-                    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-                        userId: `uniqueUser${i}`,
-                        timestamp: m.clone()
-                          .add(1, 'day')
-                          .format('x')
-                    });
-                    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-                        userId: `uniqueUser${i}`,
-                        timestamp: m.clone()
-                          .add(2, 'day')
-                          .format('x')
-                    });
-                }
-
-                cy.cdVisit('/?enableTheme=true&internalBackButton=true');
-
-                // back button - border color
-                cy.cdClickRank();
-                // THEME: "pageTitleTextColor": "#fdfbfb",
-                cy.get('[data-cy=back]')
-                  .should('have.css', 'border-color')
-                  .and('equal', 'rgb(253, 251, 251)');
-                cy.get('[data-cy=back]')
-                  .should('have.css', 'color')
-                  .and('equal', 'rgb(253, 251, 251)');
-
-                cy.contains('You are Level 2!');
-                // wait for the bar (on the bar chart) to render
-                cy.get('[data-cy="levelBreakdownChart-animationEnded"]');
-                cy.matchSnapshotImage({blackout: '[data-cy=userFirstSeen]'});
-            });
-        }
-
-        it.skip(`test theming - badge - ${size}`, () => {
-            cy.setResolution(size);
-
-            cy.cdInitProjWithSkills();
-
-            cy.cdVisit('/?enableTheme=true');
-
-            cy.cdClickBadges();
-            cy.contains('Badge 3');
-            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
-
-        });
-
-        it.skip(`test theming - badge details- ${size}`, () => {
-            cy.setResolution(size);
-
-            cy.cdInitProjWithSkills();
-
-            cy.cdVisit('/?enableTheme=true');
-
-            cy.cdClickBadges();
-            cy.contains('Badge 3');
-
-            cy.contains('View Details')
-                .click();
-            cy.contains('Badge 1');
-            cy.contains('This is 3');
-            cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
-            cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
-            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
-        });
-
-        it.skip(`test theming - subject overview - ${size}`, () => {
-            cy.setResolution(size);
-
-            cy.cdInitProjWithSkills();
-
-            cy.cdVisit('/?enableTheme=true');
-
-            cy.cdClickSubj(0);
-            cy.contains('Subject 1');
-            cy.get('[data-cy=myRank]')
-                .contains('1');
-            cy.contains('This is 4');
-            cy.contains('Earn up to 1,400 points');
-            cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
-            cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
-            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
-        });
-
-        it.skip(`test theming - subject overview with skill details - ${size}`, () => {
-            cy.setResolution(size);
-
-            cy.cdInitProjWithSkills();
-
-            cy.cdVisit('/?enableTheme=true');
-
-            cy.cdClickSubj(0);
-            cy.contains('Subject 1');
-            cy.get('[data-cy=myRank]')
-                .contains('1');
-            cy.contains('This is 4');
-            cy.contains('Earn up to 1,400 points');
-
-            cy.get('[data-cy=toggleSkillDetails]')
-                .click();
-            cy.get('[data-cy=myRank]')
-                .contains('1');
-            cy.contains('Lorem ipsum dolor sit amet');
-            cy.contains('Skill has 1 direct prerequisite(s).');
-            cy.contains('Earn up to 1,400 points');
-            cy.contains('Description');
-
-            cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
-            cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
-            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
-        });
-
-        it.skip(`test theming - skill details - ${size}`, () => {
-            cy.setResolution(size);
-
-            cy.cdInitProjWithSkills();
-
-            cy.cdVisit('/?enableTheme=true');
-
-            cy.cdClickSubj(0);
-            cy.contains('Subject 1');
-
-            cy.cdClickSkill(0);
-            cy.contains('Skill Overview');
-            cy.contains('This is 1');
-            cy.contains('Lorem ipsum dolor sit amet');
-            cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '200')
-            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
-        });
-
-        it.skip(`test theming - new version notification  - ${size}`, () => {
-            cy.setResolution(size);
-            cy.intercept(/\/api\/projects\/proj1\/rank$/,
-                {
-                    statusCode: 200,
-                    body: {
-                        'numUsers': 1,
-                        'position': 1
-                    },
-                    headers: {
-                        'skills-client-lib-version': dateFormatter(new Date())
-                    },
-                })
-                .as('getRank');
-
-            cy.cdVisit('/?enableTheme=true');
-            cy.contains('User Skills');
-
-            cy.cdClickRank();
-            cy.wait('@getRank');
-            cy.wait(renderWait);
-
-            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
-        });
-
-    });
-
-    // sizes came from https://docs.cypress.io/api/commands/viewport#Syntax
-    const expandedVerticalSizes = [
-        {
-            name: 'iphone-6',
-            width: 375,
-            height: 667 * 3,
-        },
-        {
-            name: 'ipad-2',
-            width: 768,
-            height: 1024 * 2,
-        },
-        {
-            name: 'default',
-            width: 1000,
-            height: 660 * 2,
-        },
-    ];
-    expandedVerticalSizes.forEach((size) => {
-        it.skip(`test theming - skill details with deps - ${size.name}`, () => {
-            // must set viewport to show entire canvas or it will not appear in the screenshot
-            cy.viewport(size.width, size.height);
-
-            cy.cdInitProjWithSkills();
-
-            cy.cdVisit('/?enableTheme=true');
-
-            cy.cdClickSubj(0);
-            cy.contains('Subject 1');
-
-            cy.cdClickSkill(3);
-            cy.contains('Skill Overview');
-            cy.contains('This is 4');
-            cy.contains('Lorem ipsum dolor sit amet');
-            cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
-            cy.wait(4000);
-            cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
-        });
-    });
-
-    it.skip(`test theming - No Subjects`, () => {
+    it(`test theming - No Subjects`, () => {
         cy.cdVisit('/?enableTheme=true');
         cy.contains('User Skills');
         cy.get('[data-cy=myRank]')
             .contains('1');
         cy.contains('0 Points earned Today');
         cy.contains('Subjects have not been added yet.');
-        cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
+        cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
     });
 
-    it.skip('test theming - Empty Subject', () => {
+    it('test theming - Empty Subject', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -435,20 +196,17 @@ describe('Client Display Tests', () => {
             description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
         });
 
-        cy.cdVisit('/?enableTheme=true');
-        cy.contains('User Skills');
-
-        cy.cdClickSubj(0);
+        cy.cdVisit('/subjects/subj1/?enableTheme=true');
         cy.contains('Subject 1');
         cy.contains('Skills have not been added yet.');
         cy.get('[data-cy=myRank]')
             .contains('1');
         cy.contains('0 Points earned Today');
         cy.contains('Description');
-        cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
+        cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
     });
 
-    it.skip('Point History\'s open menu must respect tiles.background option', () => {
+    it('Point History\'s open menu must respect tiles.background option', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -486,7 +244,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
     });
 
-    it.skip('skills search and skills filter selected', () => {
+    it('skills search and skills filter selected', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -514,8 +272,7 @@ describe('Client Display Tests', () => {
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/?enableTheme=true');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/subjects/subj1/?enableTheme=true');
 
         cy.get('[data-cy="skillsSearchInput"]')
             .type('blah');
@@ -543,7 +300,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
-    it.skip('skills filter open', () => {
+    it('skills filter open', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -573,8 +330,7 @@ describe('Client Display Tests', () => {
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/?enableTheme=true');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/subjects/subj1/?enableTheme=true');
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
 
@@ -610,7 +366,7 @@ describe('Client Display Tests', () => {
 
         cy.get('[data-cy="skillProgress_index-6"]')
             .should('not.exist');
-        cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
+        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
     if (!Cypress.env('oauthMode')) {
@@ -681,81 +437,22 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="skillTreePoweredBy"]').should('not.exist');
     });
 
-    it.skip('ability to disable the breadcrumb', () => {
+    it('ability to control title color and size as well as border, padding and margin', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
 
-        // ensure brand exist
-        cy.cdVisit('/?enableTheme=true');
-        cy.contains('Overall Points');
-        cy.get('[data-cy=breadcrumb-Overview]')
-            .should('exist');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains('Overview')
-            .should('be.visible');
-
-        cy.cdVisit('/?enableTheme=true&themeParam=disableBreadcrumb|true');
-        cy.get('[data-cy=breadcrumb-Overview]')
-            .should('not.exist');
-    });
-
-    it.skip('breadcrumb should use textPrimaryColor when buttons are disabled', () => {
-        cy.createSubject(1, 1);
-        cy.createSkill(1, 1, 1);
-
-        // test without buttons & breadcrumb configured
-        cy.cdVisit('/?enableTheme=true&themeParam=buttons|null');
-        cy.cdClickSubj(0);
-        cy.cdClickSkill(0);
-        cy.get('[data-cy="breadcrumb-bar"]')
-            .contains('Skill: skill1');
-        cy.contains('powered by');
-        cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol', {
-            name: 'Client Display Tests - breadcrumb default'
-        });
-
-        // // make sure buttons color doesn't affect breadcrumb
-        const buttonsParam = 'buttons|{"backgroundColor":"pink","foregroundColor":"purple","disabledColor":"purple"}';
-        cy.cdVisit(`/?enableTheme=true&themeParam=${buttonsParam}`);
-        cy.cdClickSubj(0);
-        cy.cdClickSkill(0);
-        cy.get('[data-cy="breadcrumb-bar"]')
-            .contains('Skill: skill1');
-        cy.contains('powered by');
-        cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol',  {
-            name: 'Client Display Tests - breadcrumb with buttons themed'
-        });
-
-        // test breadcrumb theme
-        const breadcrumbParam = 'breadcrumb|{"linkColor":"pink","linkHoverColor":"purple","currentPageColor":"green"}';
-        cy.cdVisit(`/?enableTheme=true&themeParam=${breadcrumbParam}`);
-        cy.cdClickSubj(0);
-        cy.cdClickSkill(0);
-        cy.get('[data-cy="breadcrumb-bar"]')
-            .contains('Skill: skill1');
-        cy.contains('powered by');
-        cy.matchSnapshotImageForElement('[data-cy="breadcrumb-bar"] ol', {
-            name: 'Client Display Tests - breadcrumb with breadcrumb themed'
-        });
-    });
-
-    it.skip('ability to control title color and size as well as border, padding and margin', () => {
-        cy.createSubject(1, 1);
-        cy.createSkill(1, 1, 1);
-
-        const pageTitle = 'pageTitle|{"' +
-            'textAlign":"left", ' +
-            '"textColor":"%239cfd00", ' +
-            '"margin": "-10px -15px 30px -15px", ' +
-            '"padding": "10px 0px 10px 0px", ' +
-            '"fontSize": "24px", ' +
-            '"borderColor": "%23f2ff35", ' +
-            '"borderStyle": "none none solid none", ' +
-            '"backgroundColor": "%230374ff" }';
-        cy.cdVisit(`/?enableTheme=true&themeParam=${pageTitle}`);
-        cy.matchSnapshotImage({
-            blackout: '[data-cy=pointHistoryChart]'
-        });
+        const pageTitle = JSON.stringify({
+            textAlign: 'left',
+            textColor: encodeURIComponent('#9cfd00'),
+            margin: '-10px -15px 30px -15px',
+            padding: '10px 0px 10px 0px',
+            fontSize: '24px',
+            borderColor: encodeURIComponent('#f2ff35'),
+            borderStyle: 'none none solid none',
+            backgroundColor: encodeURIComponent('#0374ff')
+        })
+        cy.cdVisit(`/?enableTheme=true&themeParam=pageTitle|${pageTitle}|true&themeParam=disableBreadcrumb|true&themeParam=skillTreeBrandColor|null`);
+        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]');
     });
 
     it.skip('ability to left align breadcrumb', () => {
@@ -954,7 +651,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImage();
     });
 
-    it.skip('skills group', () => {
+    it('skills group', () => {
         cy.createSubject(1, 1);
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);
@@ -975,7 +672,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
-    it.skip('skills group - partial completion', () => {
+    it('skills group - partial completion', () => {
         cy.createSubject(1, 1);
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);
@@ -987,8 +684,7 @@ describe('Client Display Tests', () => {
 
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday');
 
-        cy.cdVisit('/?enableTheme=true');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/subjects/subj1/?enableTheme=true');
         cy.get('[data-cy=skillCompletedCheck-group1')
             .should('not.exist'); // completed checkbox should not exist
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
@@ -1001,7 +697,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
-    it.skip('skills group - 1 out 2 skills required', () => {
+    it.only('skills group - 1 out 2 skills required', () => {
         cy.createSubject(1, 1);
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);
@@ -1016,8 +712,7 @@ describe('Client Display Tests', () => {
 
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday');
 
-        cy.cdVisit('/?enableTheme=true');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/subjects/subj1/?enableTheme=true');
         cy.get('[data-cy=skillCompletedCheck-group1')
             .should('exist'); // completed checkbox should exist
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
@@ -1030,6 +725,4 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
-//   http://localhost:8083/?themeParam=buttons|{%22backgroundColor%22:%22green%22,%22foregroundColor%22:%22white%22,%20%22borderColor%22:%22purple%22}&themeParam=textPrimaryColor|blue&themeParam=textSecondaryColor|purple&themeParam=tiles|{%22backgroundColor%22:%20%22yellow%22}&themeParam=badges|{%22backgroundColor%22:%22blue%22}
-//     http://localhost:8083/?themeParam=charts|{%22lineColor%22:%22purple%22,%22labelBorderColor%22:%22green%22,%22labelBackgroundColor%22:%22neon%22,%22labelForegroundColor%22:%22gray%22,%22gradientStartColor%22:%22blue%22,%22gradientStopColor%22:%22yellow%22}
 });

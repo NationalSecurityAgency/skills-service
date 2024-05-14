@@ -26,7 +26,7 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
     <span class="fa-stack skills-icon user-rank-stack text-blue-300">
         <i class="fa fa-award fa-stack-2x watermark-icon" />
 
-       <strong class="fa-stack-1x text-primary user-rank-text">
+       <strong class="fa-stack-1x text-primary user-rank-text sd-theme-primary-color">
                   {{
            numBadgesCompleted
          }} <span>Badge{{ (numBadgesCompleted > 1 || numBadgesCompleted == 0) ? 's' : '' }}</span>

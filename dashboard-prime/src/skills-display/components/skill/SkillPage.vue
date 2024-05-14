@@ -59,7 +59,7 @@ const isLoading = computed(() => loadingSkill.value)
       <skills-title>{{ attributes.skillDisplayName }} Overview</skills-title>
       <Card class="mt-3" :pt="{ content: { class: 'p-0' }}">
         <template #content>
-          <div class="flex mb-4" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !skillsDisplayInfo.isCrossProject()">
+          <div class="flex-column sm:flex-row align-items-center flex gap-2 mb-4" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !skillsDisplayInfo.isCrossProject()">
             <div class="w-7rem">
               <SkillsButton
                 @click="prevButtonClicked" v-if="skill.prevSkillId"

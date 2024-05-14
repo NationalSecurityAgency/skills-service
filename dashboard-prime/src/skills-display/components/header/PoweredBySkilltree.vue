@@ -13,22 +13,7 @@ defineProps({
 const appConfig = useAppConfig()
 const themeState = useSkillsDisplayThemeState()
 
-const logoFillThemeColor = computed(() => {
-  //  1. if skillTreeBrandColor is provided
-  //  2. pageTitle.textColor
-  //  3. pageTitleTextColor (backward compat)
-
-  if (themeState.theme.skillTreeBrandColor) {
-    return themeState.theme.skillTreeBrandColor
-  }
-  const color = themeState.theme.pageTitle && themeState.theme.pageTitle.textColor
-    ? themeState.theme.pageTitle.textColor : null
-  if (color) {
-    return color
-  }
-  return themeState.theme.pageTitleTextColor
-})
-
+const logoFillThemeColor = computed(() => themeState.theme.skillTreeBrandColor)
 const isHovering = ref(false)
 </script>
 

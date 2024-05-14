@@ -7,7 +7,6 @@ export const useNavToSkillUtil = () => {
   const displayInfo = useSkillsDisplayInfo()
 
   const navigateToSkill = (skillItem) => {
-    console.log(skillItem)
 
     if (skillItem && skillItem.skillId && !skillItem.isThisSkill) {
       if (skillItem.isCrossProject) {

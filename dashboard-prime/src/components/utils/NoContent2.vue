@@ -48,18 +48,18 @@ function refresh() {
   <div class="text-color-secondary text-center" data-cy="noContent" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="grid justify-content-center text-center">
       <div class="col">
-        <span class="fa-stack text-center" :class="iconSize" style="vertical-align: top;">
+        <span class="fa-stack text-center" :class="iconSize" style="vertical-align: top;" aria-hidden="true">
           <i class="fas fa-circle fa-stack-2x" :class="iconColor"></i>
           <i class="fa-stack-1x fa-inverse" :class="icon"></i>
         </span>
       </div>
       <div class="w-full"></div>
       <div class="col pt-2">
-        <div class="text-3xl no-content text-center">{{ title }}</div>
+        <div class="text-3xl no-content text-center sd-theme-primary-color">{{ title }}</div>
       </div>
     </div>
     <div class="grid justify-content-center">
-      <div class="col md:col-8 lg:col-7 xl:col-5 no-content">
+      <div class="col md:col-8 lg:col-7 xl:col-5 no-content sd-theme-primary-color">
         <slot>
           {{ message }}
         </slot>

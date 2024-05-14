@@ -112,7 +112,7 @@ const numUsersBehindMe = computed(() => {
         </div>
       </div>
 
-      <div class="flex gap-3 flex-wrap mt-3">
+      <div class="flex-column md:flex-row flex gap-3 flex-wrap mt-3">
         <div class="flex-1 h-full">
           <levels-breakdown-chart :my-level="rankingDistribution.myLevel" />
         </div>

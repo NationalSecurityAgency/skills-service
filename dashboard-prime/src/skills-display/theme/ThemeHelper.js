@@ -46,8 +46,8 @@ export default {
     }],
     pageTitle: {
       textColor: [{
-        selector: '.sd-theme-home .skills-theme-page-title,' +
-          '.sd-theme-home .skills-theme-page-title .poweredByContainer',
+        selector: '.sd-theme-home .p-card.p-component.skills-theme-page-title,' +
+          '.sd-theme-home .p-card.p-component.skills-theme-page-title .poweredByContainer',
         styleName: 'color'
       }],
       borderColor: {
@@ -59,9 +59,9 @@ export default {
         styleName: 'border-style'
       },
       backgroundColor: {
-        selector: 'body #app .sd-theme-home .p-card.p-component.skills-theme-page-title,' +
-          '.sd-theme-home .skills-theme-page-title .p-breadcrumb.p-component,',
-        styleName: 'background'
+        selector: '.sd-theme-home .p-card.p-component.skills-theme-page-title,' +
+          '.sd-theme-home .p-card.p-component.skills-theme-page-title .p-breadcrumb.p-component',
+        styleName: 'background-color'
       },
       textAlign: {
         selector: 'body #app .sd-theme-home .skills-theme-page-title .skills-title',
@@ -91,6 +91,8 @@ export default {
         'body #app .sd-theme-home .p-datatable .p-datatable-thead > tr > th,' +
         'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link,' +
         'body #app .sd-theme-home .toastui-editor-contents p,' +
+        'body #app .sd-theme-home .p-chip.p-component,' +
+        'body #app .sd-theme-home .p-inputtext.p-component,' +
         '.p-autocomplete-panel.p-component .p-autocomplete-item,' +
         '.p-autocomplete-panel.p-component .p-autocomplete-item .text-orange-600,' +
         '.p-overlaypanel-content .p-panelmenu.p-component .p-panelmenu-header-content,' +
@@ -101,7 +103,8 @@ export default {
       styleName: 'background-color'
     }, {
       selector: '.sd-theme-home .p-avatar.p-component, ' +
-        '.sd-theme-home .badge-catalog-item',
+        '.sd-theme-home .badge-catalog-item,' +
+        'body #app .sd-theme-home .p-chip.p-component',
       styleName: 'border-color'
     }, {
       selector: 'body #app .sd-theme-home .apexcharts-toolbar svg, body #app .sd-theme-home .vs__open-indicator',
@@ -145,7 +148,8 @@ export default {
           + '.sd-theme-home .p-breadcrumb.p-component,'
           + 'body #app .sd-theme-home .p-datatable .p-datatable-tbody > tr,'
           + 'body #app .sd-theme-home .p-datatable .p-datatable-thead > tr > th,'
-          + 'body #app .sd-theme-home .p-paginator.p-component,' +
+          + 'body #app .sd-theme-home .p-paginator.p-component,'
+          + 'body #app .sd-theme-home .p-chip.p-component,'
           + '.p-autocomplete-panel.p-component,'
           + '.p-overlaypanel-content .p-panelmenu.p-component .p-panelmenu-header-content,'
           + '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content,'
@@ -161,7 +165,8 @@ export default {
           '.p-autocomplete-panel.p-component .p-autocomplete-item:hover .text-orange-600,' +
           'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link.p-highlight,' +
           '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link:hover,' +
-          '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-avatar-icon',
+          '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-avatar-icon,' +
+          'body #app .sd-theme-home .fa-stack .fa-stack-1x.fa-inverse',
         styleName: 'color'
       }],
       borderColor: [{
@@ -192,7 +197,8 @@ export default {
         selector: '.sd-theme-home .p-button.p-component',
         styleName: 'background-color'
       }, {
-        selector: '.sd-theme-home .p-button.p-component:hover',
+        selector: '.sd-theme-home .p-button.p-component:hover,' +
+          'body #app .sd-theme-home .p-button.p-component.p-highlight',
         styleName: 'color'
       }, {
         selector: '.sd-theme-home .p-button.p-component:hover',
@@ -205,7 +211,8 @@ export default {
         selector: '.sd-theme-home .p-button.p-component',
         styleName: 'border-color'
       }, {
-        selector: '.sd-theme-home .p-button.p-component:hover',
+        selector: '.sd-theme-home .p-button.p-component:hover,' +
+          'body #app .sd-theme-home .p-button.p-component.p-highlight',
         styleName: 'background-color'
       }],
       disabledColor: [{
@@ -350,7 +357,7 @@ export default {
     const cssBasedOnKeyPathMapping = {
       'tiles.borderColor': '.sd-theme-home .p-card, .p-autocomplete-panel.p-component { border-style: solid !important; border-width: 1px !important; }',
       'tiles.backgroundColor': '.sd-theme-home .sd-theme-summary-cards .p-card.p-component { border-style: solid !important; border-width: 1px !important; } .sd-theme-home .badge-catalog-item .p-card { border-style: solid !important; border-width: 1px !important; }',
-      'textPrimaryColor': '.sd-theme-home .p-avatar.p-component { border-style: solid !important; border-width: 1px !important; }'
+      'textPrimaryColor': '.sd-theme-home .p-avatar.p-component { border-style: solid !important; border-width: 1px !important; } body #app .sd-theme-home .p-chip.p-component  { border-style: solid !important; border-width: 1px !important; }  body #app .sd-theme-home .skills-card-theme-border { border-style: solid !important; border-width: 1px !important; }'
     }
     const addCssBasedOnKeyPath = (keyPath) => {
       const cssToAdd = cssBasedOnKeyPathMapping[keyPath]
@@ -414,8 +421,19 @@ export default {
     }
 
     const applyDefaults = (themeParam) => {
-      if (!themeParam.skillTreeBrandColor && themeParam.textPrimaryColor) {
-        themeParam.skillTreeBrandColor = themeParam.textPrimaryColor
+
+      //  1. if skillTreeBrandColor is provided
+      //  2. pageTitle.textColor
+      //  3. pageTitleTextColor (backward compat)
+
+      if (!themeParam.skillTreeBrandColor) {
+        if (themeParam.pageTitle?.textColor) {
+          themeParam.skillTreeBrandColor = themeParam.pageTitle.textColor
+        } else if (themeParam.textPrimaryColor) {
+          themeParam.skillTreeBrandColor = themeParam.textPrimaryColor
+        } else if (themeParam.pageTitleTextColor) {
+          themeParam.skillTreeBrandColor = themeParam.pageTitleTextColor
+        }
       }
       if (themeParam.pageTitle?.textColor && themeParam.pageTitleTextColor) {
         // pageTitleTextColor is legacy and should be overriden by pageTitle.textColor

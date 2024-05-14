@@ -1,16 +1,18 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useClientDisplayPath } from '@/stores/UseClientDisplayPath.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import SettingsService from '@/components/settings/SettingsService.js'
 import SkillsBreadcrumbItem from '@/components/header/SkillsBreadcrumbItem.vue'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 
 const route = useRoute()
 const clientDisplayPath = useClientDisplayPath()
 const appConfig = useAppConfig()
+const responsive = useResponsiveBreakpoints()
 const items = ref([])
-
+const smallScreenMode = computed(() => responsive.sm.value)
 
 const idsToExcludeFromPath = ['subjects', 'skills', 'projects', 'crossProject', 'dependency', 'global']
 const keysToExcludeFromPath = []
@@ -229,8 +231,9 @@ const isQuizzesValueUnderProgressAndRanking = (value, items) => {
 
 <template>
   <div class="card">
-<!--    <pre>{{ items }}</pre>-->
-    <Breadcrumb :model="items" data-cy="breadcrumb-bar">
+    <Breadcrumb :model="items"
+                :class="{'dashboard-breadcrumb-vertical-mode': smallScreenMode}"
+                data-cy="breadcrumb-bar">
       <template #item="{ item, props }">
         <router-link
           v-if="!item.isLast"
@@ -242,6 +245,7 @@ const isQuizzesValueUnderProgressAndRanking = (value, items) => {
               :icon="item.icon"
               :label="item.label"
               :value="item.value"
+              :show-separator="item.label && smallScreenMode"
               value-css="text-primary" />
           </a>
         </router-link>
@@ -249,11 +253,19 @@ const isQuizzesValueUnderProgressAndRanking = (value, items) => {
           <skills-breadcrumb-item
             :icon="item.icon"
             :label="item.label"
+            :show-separator="item.label && smallScreenMode"
             :value="item.value" />
         </div>
       </template>
     </Breadcrumb>
   </div>
 </template>
-
+<style>
+.dashboard-breadcrumb-vertical-mode ol {
+  display: block
+}
+.dashboard-breadcrumb-vertical-mode .p-menuitem-separator {
+  display: none
+}
+</style>
 <style scoped></style>

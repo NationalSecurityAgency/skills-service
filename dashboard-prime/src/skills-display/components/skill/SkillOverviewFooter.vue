@@ -353,9 +353,9 @@ const focusOnId = (elementId) => {
           <a v-if="skillInternal.description && skillInternal.description.href" :href="skillInternal.description.href"
              target="_blank" rel="noopener" class="">
             <Button outlined size="small">
-              <i class="fas fa-question-circle mr-1"></i>
+              <i class="fas fa-question-circle mr-1" aria-hidden="true"></i>
               Learn More
-              <i class="fas fa-external-link-alt ml-1"></i>
+              <i class="fas fa-external-link-alt ml-1" aria-hidden="true"></i>
             </Button>
           </a>
         </div>

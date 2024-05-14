@@ -271,6 +271,7 @@ const focusOnProgressGroup = () => {
         <Chip :label="filteredSelection.label"
               :icon="filteredSelection.icon"
               @remove="clearSelection"
+              class="white-space-nowrap"
               removable
               data-cy="selectedFilter"/>
       </div>

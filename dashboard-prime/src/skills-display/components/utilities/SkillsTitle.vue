@@ -24,7 +24,7 @@ const navigateBack = () => {
 
 const disableBreadcrumb = computed(() => themeState.theme.disableBreadcrumb)
 const backButtonOrBrandPresent = computed(() => showBackButton.value || !themeState.theme.disableSkillTreeBrand)
-
+const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
 </script>
 
 <template>
@@ -33,7 +33,7 @@ const backButtonOrBrandPresent = computed(() => showBackButton.value || !themeSt
     <template #content>
       <div class="flex flex-wrap flex-column md:flex-row align-content-center gap-2">
         <div v-if="backButtonOrBrandPresent"
-             class="text-center md:text-left md:w-8rem">
+             :class="{'text-center md:text-left md:w-8rem': !isThemeAligned}">
           <SkillsButton
             v-if="showBackButton"
             @click="navigateBack"
