@@ -96,7 +96,9 @@ export default {
         '.p-autocomplete-panel.p-component .p-autocomplete-item,' +
         '.p-autocomplete-panel.p-component .p-autocomplete-item .text-orange-600,' +
         '.p-overlaypanel-content .p-panelmenu.p-component .p-panelmenu-header-content,' +
-        '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link',
+        '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link,' +
+        '.sd-theme-home .editor-help-footer,' +
+        '.sd-theme-home .editor-help-footer i',
       styleName: 'color'
     }, {
       selector: 'todo',
@@ -104,7 +106,8 @@ export default {
     }, {
       selector: '.sd-theme-home .p-avatar.p-component, ' +
         '.sd-theme-home .badge-catalog-item,' +
-        'body #app .sd-theme-home .p-chip.p-component',
+        'body #app .sd-theme-home .p-chip.p-component,' +
+        '.sd-theme-home .editor-help-footer',
       styleName: 'border-color'
     }, {
       selector: 'body #app .sd-theme-home .apexcharts-toolbar svg, body #app .sd-theme-home .vs__open-indicator',
@@ -154,7 +157,10 @@ export default {
           + '.p-overlaypanel-content .p-panelmenu.p-component .p-panelmenu-header-content,'
           + '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content,'
           + '.sd-theme-home .apexcharts-menu.apexcharts-menu-open,'
-          + '.sd-theme-home .p-avatar.p-component',
+          + '.sd-theme-home .p-avatar.p-component,'
+          + '.sd-theme-home .toastui-editor-ww-container,'
+          + '.sd-theme-home .toastui-editor-defaultUI-toolbar,'
+          + '.sd-theme-home .editor-help-footer',
         styleName: 'background-color'
       }, {
         selector: '.p-autocomplete-panel.p-component .p-autocomplete-item:hover,' +
@@ -356,7 +362,10 @@ export default {
     }
     const cssBasedOnKeyPathMapping = {
       'tiles.borderColor': '.sd-theme-home .p-card, .p-autocomplete-panel.p-component { border-style: solid !important; border-width: 1px !important; }',
-      'tiles.backgroundColor': '.sd-theme-home .sd-theme-summary-cards .p-card.p-component { border-style: solid !important; border-width: 1px !important; } .sd-theme-home .badge-catalog-item .p-card { border-style: solid !important; border-width: 1px !important; }',
+      'tiles.backgroundColor': '.sd-theme-home .sd-theme-summary-cards .p-card.p-component { border-style: solid !important; border-width: 1px !important; } ' +
+        '.sd-theme-home .badge-catalog-item .p-card { border-style: solid !important; border-width: 1px !important; } ' +
+        '.sd-theme-home .toastui-editor-toolbar-group button { background-color: #f5f5f5 !important; color: #454545 !important; } ' +
+        '.sd-theme-home .attachment-button.toastui-editor-toolbar-icons { color: #454545 !important; }',
       'textPrimaryColor': '.sd-theme-home .p-avatar.p-component { border-style: solid !important; border-width: 1px !important; } body #app .sd-theme-home .p-chip.p-component  { border-style: solid !important; border-width: 1px !important; }  body #app .sd-theme-home .skills-card-theme-border { border-style: solid !important; border-width: 1px !important; }'
     }
     const addCssBasedOnKeyPath = (keyPath) => {

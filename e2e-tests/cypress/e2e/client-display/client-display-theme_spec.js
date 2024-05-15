@@ -725,4 +725,13 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
+    it('theme self report rich text editor', () => {
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', });
+        cy.cdVisit('/subjects/subj1/skills/skill1/?enableTheme=true');
+
+        cy.get('[data-cy="requestApprovalBtn"]').click()
+        cy.get('[data-cy="selfReportMsgInput"]').type('ok hello there')
+        cy.matchSnapshotImageForElement('[data-cy="selfReportMsgInput"]');
+    })
 });
