@@ -142,7 +142,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
             }
 
             cy.wait(2000)
-            cy.matchSnapshotImage({
+            cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
                 blackout: '[data-cy="userFirstSeen"]'
             });
         });
@@ -269,7 +269,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
           .contains('You selected to opt-out');
 
         cy.wait(2000)
-        cy.matchSnapshotImage({
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
             name: 'rank-overview-leaderboard-opted-out',
             blackout: '[data-cy="userFirstSeen"]'
         });

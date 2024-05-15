@@ -648,7 +648,7 @@ describe('Client Display Tests', () => {
         cy.get('.skills-badge')
             .eq(1)
             .contains('Badge 3');
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('skills group', () => {

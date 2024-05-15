@@ -137,7 +137,7 @@ describe('Prerequisite tests', () => {
 
     cy.wait(4000);
     cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
-    cy.matchSnapshotImage({
+    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
       blackout: '[data-cy=pointHistoryChart]'
     });
   });

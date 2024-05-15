@@ -151,7 +151,7 @@ describe('Last Achieved date tests', () => {
     cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
     cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('500');
 
-    cy.matchSnapshotImage({
+    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
       name: 'Skill-Overview-Achieved',
       blackout: '[data-cy=pointHistoryChart]'
     });
@@ -179,7 +179,7 @@ describe('Last Achieved date tests', () => {
     cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
       .contains('500');
 
-    cy.matchSnapshotImage({
+    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
       name: 'Skill-Overview-Achieved-Themed',
       blackout: '[data-cy=pointHistoryChart]'
     });
@@ -209,7 +209,7 @@ describe('Last Achieved date tests', () => {
     cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
       .contains('500');
 
-    cy.matchSnapshotImage({
+    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
       name: 'Skill-Overview-Achieved-iphone6',
       blackout: '[data-cy=pointHistoryChart]'
     });
@@ -239,7 +239,7 @@ describe('Last Achieved date tests', () => {
     cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
       .contains('500');
 
-    cy.matchSnapshotImage({
+    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
       name: 'Skill-Overview-Achieved-ipad2',
       blackout: '[data-cy=pointHistoryChart]'
     });

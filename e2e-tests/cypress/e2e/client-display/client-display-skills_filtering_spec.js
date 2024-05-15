@@ -1240,7 +1240,7 @@ describe('Client Display Skills Filtering Tests', () => {
 
         cy.get('[data-cy="skillProgress_index-6"]')
             .should('not.exist');
-        cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', { blackout: '[data-cy=pointHistoryChart]' });
     });
 
     it('Visual Tests filter selected and last viewed button present', () => {
