@@ -103,7 +103,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
         }
 
         cy.wait(2000)
-        cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', { blackout: '[data-cy="userFirstSeen"]' });
+        cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', { blackout: '[data-cy="dateCell"]' });
     });
 
     if (!Cypress.env('oauthMode')) {
@@ -143,7 +143,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
 
             cy.wait(2000)
             cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
-                blackout: '[data-cy="userFirstSeen"]'
+                blackout: '[data-cy="dateCell"]'
             });
         });
 
@@ -258,7 +258,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
         cy.wait(2000)
         cy.matchSnapshotImageForElement('[data-cy="myRank"]', {
             name: 'my-rank-opted-out',
-            blackout: '[data-cy="userFirstSeen"]'
+            blackout: '[data-cy="dateCell"]'
         });
 
         cy.cdClickRank();
@@ -271,7 +271,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
         cy.wait(2000)
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
             name: 'rank-overview-leaderboard-opted-out',
-            blackout: '[data-cy="userFirstSeen"]'
+            blackout: '[data-cy="dateCell"]'
         });
     });
 });

@@ -37,9 +37,9 @@ describe('Badges Tests', () => {
             cy.wait(150);
         });
         Cypress.Commands.add('gemSetDay', (dayNum) => {
-            cy.get('[data-cy="gemDates"] [data-pc-section="day"]')
-                .contains(dayNum)
-                .click({force: true});
+            cy.get(`[data-cy="gemDates"] [data-pc-section="table"] [aria-label="${dayNum}"]`)
+              .not('[data-p-other-month="true"]')
+                .click();
         });
 
         Cypress.Commands.add('selectSkill', (skillIndex=0, retry=true) => {
@@ -552,6 +552,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
 
         // fix the errors and save
+        cy.gemNextMonth();
         cy.gemNextMonth();
         cy.gemNextMonth();
         cy.gemSetDay(1);

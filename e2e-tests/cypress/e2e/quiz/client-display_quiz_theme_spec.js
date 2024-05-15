@@ -36,7 +36,7 @@ describe('Client Display Quiz Theme Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1');
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - quiz questions', () => {
@@ -61,7 +61,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.get('[data-cy="question_5"] [data-cy="answer_3"]').click()
         cy.get('[data-cy="question_5"] [data-cy="answer_4"]').click().blur()
 
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - quiz results - passed quiz - all correct', () => {
@@ -92,7 +92,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.wait('@completeSurvey')
         cy.get('[data-cy="quizPassed"]').should('exist')
         cy.get('[data-cy="quizCompletion"]').contains('You just earned 150 points')
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - quiz results - passed quiz - some correct', () => {
@@ -126,7 +126,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.wait('@completeSurvey')
         cy.get('[data-cy="quizPassed"]').should('exist')
         cy.get('[data-cy="quizCompletion"]').contains('You just earned 150 points')
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - quiz results - failed', () => {
@@ -145,7 +145,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="quizFailed"]').should('exist')
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - survey splash screen', () => {
@@ -158,7 +158,7 @@ describe('Client Display Quiz Theme Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1');
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - survey questions', () => {
@@ -183,7 +183,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.get('[data-cy="question_5"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_5"] [data-cy="answer_3"]').click().blur()
 
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - survey complete', () => {
@@ -209,7 +209,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.wait('@completeSurvey')
         cy.get('[data-cy="surveyCompletion"]').contains('You just earned 150 points')
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
 });
