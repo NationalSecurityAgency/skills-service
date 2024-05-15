@@ -68,7 +68,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.cdClickSkill(1);
 
         cy.wait(5000)
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('skill prerequisite graph - with paging', () => {
@@ -89,7 +89,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.cdClickSkill(9);
 
         cy.wait(5000)
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('skill prerequisite graph on badge page', () => {
@@ -129,19 +129,13 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
 
         cy.cdVisit('/badges/badge1?enableTheme=true');
 
-        // cy.get('[data-cy="prereqTable"] [aria-rowindex="1"] [aria-colindex="1"]').contains('Badge 2')
-        // cy.get('[data-cy="prereqTable"] [aria-rowindex="2"] [aria-colindex="1"]').contains('Badge 3')
         cy.get('[data-cy="prereqTable"] [data-p-index="0"] [data-cy="skillLink-proj1-badge2"]')
         cy.get('[data-cy="prereqTable"] [data-p-index="1"] [data-cy="skillLink-proj1-badge3"]')
         cy.get('[data-cy="prereqTable"] [data-p-index="2"] [data-cy="skillLink-proj1-skill1"]')
         cy.get('[data-cy="prereqTable"] [data-p-index="3"] [data-cy="skillLink-proj1-skill2"]')
         cy.get('[data-cy="prereqTable"] [data-p-index="4"] [data-cy="skillLink-proj1-skill3"]')
-        // cy.get('[data-cy="prereqTable"] [aria-rowindex="3"] [aria-colindex="1"]').contains('Skill 1')
-        // cy.get('[data-cy="prereqTable"] [aria-rowindex="4"] [aria-colindex="1"]').contains('Skill 2')
-        // cy.get('[data-cy="prereqTable"] [aria-rowindex="5"] [aria-colindex="1"]').contains('Skill 3')
-
         cy.wait(5000)
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
 });

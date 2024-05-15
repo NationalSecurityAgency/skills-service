@@ -11,6 +11,7 @@ import AchievementDate from '@/skills-display/components/skill/AchievementDate.v
 import SkillBadgesAndTags from '@/skills-display/components/progress/skill/SkillBadgesAndTags.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import CatalogImportStatus from '@/skills-display/components/progress/CatalogImportStatus.vue'
+import PartialPointsAlert from '@/skills-display/components/skill/PartialPointsAlert.vue'
 
 const props = defineProps({
   skill: Object,
@@ -183,7 +184,7 @@ const isSkillComplete = computed(() => props.skill && props.skill.meta && props.
           v-if="skill && skill.achievedOn"
           :date="skill.achievedOn" class="mt-2" />
 
-        <!--        <partial-points-alert v-if="!allowDrillDown" :skill="skill" :is-locked="locked" />-->
+        <partial-points-alert v-if="!enableDrillDown" :skill="skill" :is-locked="isSkillLocked" />
         <skills-summary-cards v-if="!isSkillLocked" :skill="skill" class="mt-3" />
         <catalog-import-status :skill="skill" />
         <!--        <skill-video v-if="skillInternal" :skill="skillInternal"-->
