@@ -415,14 +415,19 @@ const collectAndSave = (values) => {
                             data-cy="saveSettingsBtn">
               </SkillsButton>
 
-              <span v-if="hasChanged" class="text-warning ml-2" data-cy="unsavedChangesAlert">
-                  <i class="fa fa-exclamation-circle"
-                     aria-label="Settings have been changed, do not forget to save"/> Unsaved Changes
-                </span>
-              <span v-if="!meta.valid && showSavedMsg" class="text-success ml-2" data-cy="settingsSavedAlert">
-                  <i class="fa fa-check" />
-                  Settings Updated!
-                </span>
+              <InlineMessage v-if="hasChanged"
+                             severity="warn"
+                             class="ml-2"
+                             data-cy="unsavedChangesAlert"
+                             aria-label="Settings have been changed, do not forget to save">
+                Unsaved Changes
+              </InlineMessage>
+              <InlineMessage v-if="!hasChanged && showSavedMsg"
+                             severity="success"
+                             class="ml-2"
+                             data-cy="settingsSavedAlert">
+                Settings Updated!
+              </InlineMessage>
             </div>
           </div>
 
