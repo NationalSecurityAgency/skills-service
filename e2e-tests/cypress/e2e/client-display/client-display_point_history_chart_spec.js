@@ -703,7 +703,7 @@ describe('Client Display Point History Tests', () => {
     cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
   })
 
-  it.only('achievement after initial rapid growth and then flat-line', () => {
+  it('achievement after initial rapid growth and then flat-line', () => {
     const data = {
       'pointsHistory': [{
         'dayPerformed': '2020-12-01T00:00:00.000+00:00',

@@ -216,7 +216,7 @@ describe('Last Achieved date tests', () => {
 
   });
 
-  it.only('ipad resolution: display achieved date on skill overview page', () => {
+  it('ipad resolution: display achieved date on skill overview page', () => {
     const m = dayjs('2020-09-12 11', 'YYYY-MM-DD HH');
     const orig = m.clone();
 

@@ -697,7 +697,7 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
     });
 
-    it.only('skills group - 1 out 2 skills required', () => {
+    it('skills group - 1 out 2 skills required', () => {
         cy.createSubject(1, 1);
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);

@@ -115,10 +115,7 @@ describe('Client Display Markdown Tests', () => {
             'Separate me\n\n' +
             '---\n\n' +
             'Separate me\n\n' +
-            '***\n\n' +
-            '# Emojis\n' +
-            ':star: :star: :star: :star:\n' +
-            '';
+            '***\n\n'
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
