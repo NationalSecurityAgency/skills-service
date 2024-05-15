@@ -298,12 +298,12 @@ describe('Client Display Theme Components Tests', () => {
   })
 
   it('theme info cards', () => {
-    const infoCards = JSON.stringify({
+    const infoCards = encodeURIComponent(JSON.stringify({
       backgroundColor: 'lightgray',
       borderColor: 'green',
       foregroundColor: 'purple',
       iconColors: ['blue', 'red', 'yellow', 'green']
-    })
+    }))
     const tiles = JSON.stringify({ backgroundColor : encodeURIComponent('#f6dedd')})
     const theme = `/?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|white&themeParam=infoCards|${infoCards}`
     const url = `/subjects/subj1/skills/skill1${theme}`
