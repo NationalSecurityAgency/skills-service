@@ -311,7 +311,7 @@ const saveSettings = handleSubmit((values) => {
                                  name="expirationType"
                                  data-cy="expirationNeverRadio"
                                  :value="NEVER" />
-                    <label for="yearlyRadio" class="ml-2 font-bold">Never</label>
+                    <label for="expirationTypeNone" class="ml-2 font-bold">Never</label>
                   </div>
                 </div>
               </div>
@@ -335,7 +335,7 @@ const saveSettings = handleSubmit((values) => {
 
               <div class="flex flex-wrap md:flex-nowrap ml-5 gap-2" :class="{ 'text-color-secondary' : expirationType !== YEARLY}" data-cy="yearlyFormGroup">
                 <div class="flex align-items-baseline gap-2">
-                  <label for="yearlyYears" class="">Skills will expire every</label>
+                  <label for="inputyearlyYears" class="">Skills will expire every</label>
                   <SkillsNumberInput
                       id="yearlyYears-sb"
                       data-cy="yearlyYears-sb"
@@ -388,7 +388,7 @@ const saveSettings = handleSubmit((values) => {
 
               <div class="flex flex-wrap md:flex-nowrap ml-5 gap-2" :class="{ 'text-color-secondary' : expirationType !== MONTHLY}">
                 <div class="flex align-items-baseline gap-2">
-                  <label for="monthlyMonths-sb" class="">Skills will expire every</label>
+                  <label for="inputmonthlyMonths" class="">Skills will expire every</label>
                   <SkillsNumberInput
                       id="monthlyMonths-sb"
                       data-cy="monthlyMonths-sb"
@@ -460,13 +460,6 @@ const saveSettings = handleSubmit((values) => {
 
             <Divider />
 
-<!--            <div>isDirty: {{isDirty}}</div>-->
-<!--            <div>meta.dirty: {{meta.dirty}}</div>-->
-<!--            <div>meta.touched: {{meta.touched}}</div>-->
-<!--            <div>meta.pending: {{meta.pending}}</div>-->
-<!--            <div>meta.valid: {{meta.valid}}</div>-->
-<!--            <div>errors: {{ JSON.stringify(errors)}}</div>-->
-<!--            <div>errorBag: {{ JSON.stringify(errorBag)}}</div>-->
             <div class="flex flex-row">
               <div class="">
                 <SkillsButton variant="outline-success"

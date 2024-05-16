@@ -341,7 +341,7 @@ describe('Accessibility Tests', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configExpiration');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-expiration');
         cy.injectAxe();
 
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
