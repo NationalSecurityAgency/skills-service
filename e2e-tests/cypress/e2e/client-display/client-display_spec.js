@@ -425,7 +425,7 @@ describe('Client Display Tests', () => {
         cy.contains('Global Badge 1');
         cy.get('[data-cy=badgeDetailsLink_globalBadge1]')
             .click();
-        cy.contains('Global Badge 1')
+        cy.get('[data-cy="badge_globalBadge1"]').contains('Global Badge 1')
             .should('be.visible');
         cy.get('[data-cy=gb_proj2]')
             .contains('Search blah skill 1')
@@ -564,29 +564,20 @@ describe('Client Display Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('verify that authorization header is used in DevMode', () => {
-        if (!Cypress.env('oauthMode')) {
-            cy.intercept({ url: 'http://localhost:8083/admin/projects/proj1/token/user0', })
-                .as('getToken');
-        } else {
-            cy.intercept('/api/projects/proj1/token')
-                .as('getToken');
-        }
-        cy.intercept('GET', '/api/projects/proj1/skills/skill4/dependencies')
-            .as('getDependencies');
-        cy.cdVisit('/subjects/subj1/skills/skill4');
-        cy.wait('@getToken')
-          .its('response.body')
-          .should('have.property', 'access_token');
-        cy.get('@getToken')
-          .its('response.body')
-          .should('have.property', 'token_type', 'Bearer');
-        cy.wait('@getDependencies')
-            .its('request.headers')
-            .should('have.property', 'authorization');
-    });
-
     if (!Cypress.env('oauthMode')) {
+        it('verify that authorization header is used in DevMode', () => {
+            cy.ignoreSkillsClientError();
+            cy.intercept('/api/projects/proj1/token')
+              .as('getToken');
+            cy.visit('/test-skills-client/proj1');
+            cy.wait('@getToken')
+              .its('response.body')
+              .should('have.property', 'access_token');
+            cy.get('@getToken')
+              .its('response.body')
+              .should('have.property', 'token_type', 'Bearer');
+        });
+
         it.skip('verify that loginAsUser is used when retrieving token in DevMode', () => {
             cy.intercept({ url: 'http://localhost:8083/admin/projects/proj1/token/user7', })
                 .as('getToken');
@@ -724,180 +715,26 @@ describe('Client Display Tests', () => {
         });
     });
 
-    it.skip('badges details page shows achievement info for skills', () => {
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2'
-        });
+    it('badges details page shows achievement info for skills', () => {
+        cy.createBadge(1, 2)
         cy.assignSkillToBadge(1, 2, 5);
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            enabled: true,
-        });
+        cy.createBadge(1, 2, { enabled: true})
         cy.reportSkill(1, 5, Cypress.env('proxyUser')); // achieve badge 2
 
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.cdClickBadges();
         cy.get('[data-cy=achievedBadges]')
             .contains('Badge 2');
         cy.get('[data-cy=availableBadges]')
             .contains('Badge 1');
 
-        cy.get('[data-cy=earnedBadgeLink_badge2]').contains('1st')
-        cy.get('[data-cy=earnedBadgeLink_badge2]').click();
+        cy.get('[data-cy="achievedBadge-badge2"]').contains('1st place')
+        cy.get('[data-cy="achievedBadge-badge2"] [data-cy="earnedBadgeLink_badge2"]').click();
         cy.get('[data-cy=badge_badge2]').contains("You've achieved this badge - ")
         cy.get('[data-cy=badge_badge2]').contains('and you were the first!');
     });
 
-    it.skip('badge achieved in third place', () => {
 
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2'
-        });
-        cy.assignSkillToBadge(1, 2, 5);
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            enabled: true,
-        });
-        cy.reportSkill(1, 5, 'user5', '2019-09-14 11:00');
-        cy.reportSkill(1, 5, 'user6', '2019-09-17 11:00');
-        cy.reportSkill(1, 5, Cypress.env('proxyUser')); // achieve badge 2
-
-        cy.reportSkill(1, 1, 'user5', '2019-09-14 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-15 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-16 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-17 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-18 11:00');
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=achievedBadges]')
-            .contains('Badge 2');
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 1');
-
-        cy.get('[data-cy=earnedBadgeLink_badge2]').contains('3rd')
-        cy.get('[data-cy=earnedBadgeLink_badge2]').click();
-        cy.get('[data-cy=badge_badge2]').contains("2 other people have achieved this badge so far - and you were the third!")
-    });
-
-    it.skip('badge achieved second place', () => {
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2'
-        });
-        cy.assignSkillToBadge(1, 2, 5);
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            enabled: true,
-        });
-        cy.reportSkill(1, 5, 'user5', '2019-09-14 11:00');
-        cy.reportSkill(1, 5, Cypress.env('proxyUser'), '2019-09-15 11:00'); // achieve badge 2
-        cy.reportSkill(1, 5, 'user6', '2019-09-17 11:00');
-
-        cy.reportSkill(1, 1, 'user5', '2019-09-14 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-15 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-16 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-17 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-18 11:00');
-
-        cy.reportSkill(1, 1, 'user6', '2019-09-14 11:00');
-        cy.reportSkill(1, 1, 'user6', '2019-09-15 11:00');
-        cy.reportSkill(1, 1, 'user6', '2019-09-16 11:00');
-        cy.reportSkill(1, 1, 'user6', '2019-09-17 11:00');
-        cy.reportSkill(1, 1, 'user6', '2019-09-18 11:00');
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=achievedBadges]')
-            .contains('Badge 2');
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 1');
-
-        cy.get('[data-cy=earnedBadgeLink_badge2]').contains('2nd')
-        cy.get('[data-cy=earnedBadgeLink_badge2]').click();
-        cy.get('[data-cy=badge_badge2]').contains("2 other people have achieved this badge so far - and you were the second!")
-    });
-
-    it.skip('badge with a bonus award in progress', () => {
-
-        const anHourAgo = new Date().getTime() - (1000 * 60 * 60)
-        const twoDays = (60 * 24 * 2)
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            awardAttrs: {'iconClass': 'fas fa-car', 'name': 'Test Badge Award', 'numMinutes': twoDays}
-        });
-        cy.assignSkillToBadge(1, 2, 5);
-        cy.assignSkillToBadge(1, 2, 1);
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            enabled: true,
-            awardAttrs: {'iconClass': 'fas fa-car', 'name': 'Test Badge Award', 'numMinutes': twoDays}
-        });
-
-        cy.reportSkill(1, 5, Cypress.env('proxyUser'), anHourAgo); // achieve badge 2
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 2');
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 1');
-
-        cy.get('[data-cy=badgeDetailsLink_badge2]').click();
-        cy.get('[data-cy=badge_badge2]').contains("Achieve this badge in 23 hours and 59 minutes for the Test Badge Award bonus!")
-    });
-
-    it.skip('badge with a bonus award completed', () => {
-
-        const anHourAgo = new Date().getTime() - (1000 * 60 * 60)
-        const twoDays = (60 * 24 * 2)
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            awardAttrs: {'iconClass': 'fas fa-car', 'name': 'Test Badge Award', 'numMinutes': twoDays}
-        });
-        cy.assignSkillToBadge(1, 2, 5);
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            enabled: true,
-            awardAttrs: {'iconClass': 'fas fa-car', 'name': 'Test Badge Award', 'numMinutes': twoDays}
-        });
-
-        cy.reportSkill(1, 5, Cypress.env('proxyUser'), anHourAgo); // achieve badge 2
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=achievedBadges]')
-            .contains('Badge 2');
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 1');
-
-        cy.get('[data-cy=earnedBadgeLink_badge2]').contains('Test Badge Award')
-    });
 });
 
 

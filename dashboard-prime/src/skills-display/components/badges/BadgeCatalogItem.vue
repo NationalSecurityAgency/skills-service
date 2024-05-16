@@ -1,13 +1,13 @@
 <script setup>
 import { computed } from 'vue'
+import dayjs from 'dayjs'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
-import { useTimestamp } from '@vueuse/core'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
-import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useTopPositionsUtils } from '@/skills-display/components/badges/UseTopPositionsUtils.js'
 import PlacementBadge from '@/skills-display/components/badges/PlacementBadge.vue'
 import BadgeHeaderIcons from '@/skills-display/components/badges/BadgeHeaderIcons.vue'
+import ExtraBadgeAward from '@/skills-display/components/badges/ExtraBadgeAward.vue'
 
 const props = defineProps({
   badge: {
@@ -48,9 +48,8 @@ const iconCardPt = computed(() => {
   }
 })
 
-const timestamp = useTimestamp({ interval: 5000 })
 const currentTime = computed(() => {
-  return timestamp
+  return dayjs().utc().valueOf()
 })
 
 const positionNames = ['first', 'second', 'third']
@@ -77,7 +76,7 @@ const otherUsersAchieved = computed(() => {
 <template>
   <div  :data-cy="`badge_${badge.badgeId}`" class="badge-catalog-item">
     <div class="md:flex gap-3">
-      <Card class="w-min-10rem max-h-11rem mb-3 md:mb-0" :pt="iconCardPt">
+      <Card class="w-min-10rem mb-3 md:mb-0" :pt="iconCardPt" :data-cy="`badge_${badge.badgeId}`">
         <template #header v-if="showHeader">
           <div class="pt-2 px-2">
             <badge-header-icons :badge="badge" />
@@ -97,12 +96,10 @@ const otherUsersAchieved = computed(() => {
               <small>Proj<span class="d-md-none d-xl-inline">ect</span>: {{ badge.projectName }}</small>
             </div>
 
-            <div v-if="badge.achievedWithinExpiration" class="mt-2">
-              <div class="award-icon"><i :class="badge.awardAttrs.iconClass + ' skills-color-orange'"></i></div>
-              <span class="sr-only">You got the </span>
-              <div style="font-size: .4em;">{{ badge.awardAttrs.name }}</div>
-              <span class="sr-only"> bonus</span>
-            </div>
+            <extra-badge-award v-if="badge.achievedWithinExpiration"
+                               :icon-class="badge.awardAttrs.iconClass"
+                               :name="badge.awardAttrs.name"
+                               class="mt-3"/>
           </div>
         </template>
       </Card>
@@ -142,6 +139,7 @@ const otherUsersAchieved = computed(() => {
 
           <Message v-if="bonusAwardTimerActive"
                    :closable="false"
+                   data-cy="achieveThisBadgeMsg"
                    icon="fas fa-clock">
             Achieve this badge in
             <span class="time-style">

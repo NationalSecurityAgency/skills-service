@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+Cypress.Commands.add("ignoreSkillsClientError", () => {
+    cy.on('uncaught:exception', (err, runnable) => {
+        // cy.log(err.message)
+        if (err.message.includes('Handshake Reply Failed')) {
+            return false
+        }
+        return true
+    })
+});
+
 Cypress.Commands.add("validatePoweredBy", () => {
     cy.url().then(url => {
         cy.log(`url: ${url}`);
