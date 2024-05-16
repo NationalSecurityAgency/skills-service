@@ -679,7 +679,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.wait('@reportSkill');
     });
 
-    it.skip('clearly indicate which skills are self reportable', () => {
+    it('clearly indicate which skills are self reportable', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3, { selfReportingType: 'HonorSystem' });
@@ -699,7 +699,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', 'Self_Reportable Label - Themed');
     });
 
-    it.skip('clearly indicate on the skill overview whether skill is self reportable', () => {
+    it('clearly indicate on the skill overview whether skill is self reportable', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3, { selfReportingType: 'HonorSystem' });

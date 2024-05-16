@@ -470,7 +470,7 @@ describe('Client Display Skills Groups Tests', () => {
             .contains('600 / 800 Points');
     });
 
-    it.skip('search groups and child skills', () => {
+    it('search groups and child skills', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, { name: 'For SkIll1 Searching' });
         cy.addSkillToGroup(1, 1, 1, 2, { name: 'For skill1 SkIll2  Searching' });
@@ -586,7 +586,7 @@ describe('Client Display Skills Groups Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('filter should not show empty groups', () => {
+    it('filter should not show empty groups', () => {
         Cypress.Commands.add('validateFilterCounts', (withoutProgress, complete, inProgress) => {
             cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
                 .click();
@@ -647,9 +647,9 @@ describe('Client Display Skills Groups Tests', () => {
         cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgressTitle"]')
             .should('not.exist');
 
-        cy.get('[data-cy="clearSelectedFilter"]')
+        cy.get('[data-cy="selectedFilter"] [data-pc-section="removeicon"]')
             .click();
-        cy.get('[data-cy="selectedFilter"]')
+        cy.get('[data-cy="selectedFilter"] [data-pc-section="removeicon"]')
             .should('not.exist');
 
         // 2 skills under the same group
@@ -667,14 +667,15 @@ describe('Client Display Skills Groups Tests', () => {
         cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgressTitle"]')
             .should('not.exist');
 
-        cy.get('[data-cy="clearSelectedFilter"]')
+        cy.get('[data-cy="selectedFilter"] [data-pc-section="removeicon"]')
             .click();
-        cy.get('[data-cy="selectedFilter"]')
+        cy.get('[data-cy="selectedFilter"] [data-pc-section="removeicon"]')
             .should('not.exist');
 
         // multiple skills across more than 1 group
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
+        cy.get('[data-cy="filter_selfReportGroups"]').click()
         cy.get('[data-cy="filter_honorSystem"] [data-cy="filterCount"]')
             .click();
 
@@ -859,7 +860,7 @@ describe('Client Display Skills Groups Tests', () => {
             .contains('Skill 2 Desc');
     });
 
-    it.skip('description are always displayed if setting is enabled', () => {
+    it('description are always displayed if setting is enabled', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, { description: 'Skill 1 Desc' });
         cy.addSkillToGroup(1, 1, 1, 2, { description: 'Skill 2 Desc' });
@@ -1089,7 +1090,7 @@ describe('Client Display Skills Groups Tests', () => {
             .contains('1 / 2 Skills');
     });
 
-    it.skip('fixed doubling of skill\'s points when search/filter is used to locate the skill first', () => {
+    it('fixed doubling of skill\'s points when search/filter is used to locate the skill first', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
 

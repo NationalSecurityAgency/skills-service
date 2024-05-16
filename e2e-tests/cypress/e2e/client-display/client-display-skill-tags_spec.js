@@ -109,7 +109,7 @@ describe('Client Display Skill Tags Visible on Skill Summaries', () => {
     cy.get('[data-cy="skillProgress_index-2"]').contains('Very Great Skill 3')
   })
 
-  it.skip('filter on skill tags in skill groups', () => {
+  it('filter on skill tags in skill groups', () => {
     cy.createProject(1)
     cy.createSubject(1, 1)
     cy.createSkill(1, 1, 1)

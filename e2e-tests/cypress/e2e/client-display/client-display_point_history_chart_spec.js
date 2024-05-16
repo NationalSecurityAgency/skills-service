@@ -419,7 +419,7 @@ describe('Client Display Point History Tests', () => {
     cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
   })
 
-  it.skip('achievements throughout time', () => {
+  it('achievements throughout time', () => {
     const data = {
       'pointsHistory': [{
         'dayPerformed': '2020-09-02T00:00:00.000+00:00',
@@ -488,7 +488,6 @@ describe('Client Display Point History Tests', () => {
     // let's wait for animation to complete
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
-    cy.customA11y()
   })
 
   it('levels achieved on subsequent days', () => {

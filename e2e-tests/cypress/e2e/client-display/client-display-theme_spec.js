@@ -370,7 +370,7 @@ describe('Client Display Tests', () => {
     });
 
     if (!Cypress.env('oauthMode')) {
-        it.skip('rank and leaderboard opt-out', () => {
+        it('rank and leaderboard opt-out', () => {
             cy.request('POST', '/app/userInfo/settings', [{
                 'settingGroup': 'user.prefs',
                 'value': true,
@@ -455,12 +455,12 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]');
     });
 
-    it.skip('ability to left align breadcrumb', () => {
+    it('ability to left align breadcrumb', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
 
         const breadcrumbParam = 'breadcrumb|{"align":"start"}';
-        cy.cdVisit(`/?enableTheme=true&themeParam=${breadcrumbParam}`);
+        cy.cdVisit(`/?enableTheme=true&themeParam=${breadcrumbParam}&disableBackButton=true`);
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 

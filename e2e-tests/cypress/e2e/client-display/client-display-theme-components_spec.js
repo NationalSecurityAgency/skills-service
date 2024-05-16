@@ -277,22 +277,19 @@ describe('Client Display Theme Components Tests', () => {
     cy.assignSkillToBadge(1, 1, 2)
     cy.enableBadge(1, 1)
 
-    const url = '/?themeParam=tiles|{"backgroundColor":"black"}&themeParam=textPrimaryColor|white&themeParam=textSecondaryColor|yellow'
-    cy.cdVisit(url, true)
-    cy.cdClickSubj(0, 'Subject 1', true);
+    const url = '/subjects/subj1/?themeParam=tiles|{"backgroundColor":"black"}&themeParam=textPrimaryColor|white&themeParam=textSecondaryColor|yellow'
+    cy.cdVisit(url)
 
-    cy.get('[data-cy="filterMenu"] .dropdown')
-      .click()
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
 
-    cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', {
+    cy.matchSnapshotImageForElement('[data-pc-name="panelmenu"]', {
       name: 'filterMenu-skills'
     })
 
     cy.cdBack()
     cy.cdClickBadges()
-    cy.get('[data-cy="filterMenu"] .dropdown')
-      .click()
-    cy.matchSnapshotImageForElement('[data-cy="filterMenu"] .dropdown-menu.show', {
+    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.matchSnapshotImageForElement('[data-pc-name="panelmenu"]', {
       name: 'filterMenu-badges'
     })
   })

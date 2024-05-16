@@ -15,7 +15,7 @@
  */
 export default {
   nonCSSConfig: ['charts', 'landingPageTitle', 'disableSkillTreeBrand', 'disableBreadcrumb', 'iconColors', 'prerequisites', 'circleProgressInteriorTextColor'],
-  bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor', 'infoCards', 'backgroundColor', 'textPrimaryColor', 'textSecondaryColor', 'tiles'],
+  bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor', 'infoCards', 'backgroundColor', 'textPrimaryColor', 'textSecondaryColor', 'tiles', 'breadcrumb'],
   selectorKey: {
     maxWidth: {
       selector: 'body #app',
