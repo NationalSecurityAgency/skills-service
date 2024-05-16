@@ -10,6 +10,7 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjSkillsDisplayOrder } from '@/components/skills/UseSubjSkillsDisplayOrder.js'
 import { useTimeWindowFormatter } from '@/components/skills/UseTimeWindowFormatter.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import dayjs from '@/common-components/DayJsCustomizer'
 import Column from 'primevue/column'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import DateCell from '@/components/utils/table/DateCell.vue'
@@ -29,6 +30,11 @@ import AddSkillTagDialog from '@/components/skills/tags/AddSkillTagDialog.vue'
 import RemoveSkillTagDialog from '@/components/skills/tags/RemoveSkillTagDialog.vue'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { useLog } from '@/components/utils/misc/useLog.js'
+
+const YEARLY = 'YEARLY';
+const MONTHLY = 'MONTHLY';
+const DAILY = 'DAILY';
+const LAST_DAY_OF_MONTH = 'LAST_DAY_OF_MONTH';
 
 const props = defineProps({
   groupId: String
@@ -362,6 +368,30 @@ const editImportedSkillInfo = ref({
   skill: {}
 })
 
+const getExpirationDescription = (skill) => {
+  if (skill.expirationType === YEARLY) {
+    const d = dayjs(skill.nextExpirationDate);
+    const plural = skill.every > 1;
+    return `Every${plural ? ` ${skill.every}` : ''} year${plural ? 's' : ''} on ${d.format('MMMM')} ${d.format('Do')}`;
+  }
+  if (skill.expirationType === MONTHLY) {
+    const d = dayjs(skill.nextExpirationDate);
+    const plural = skill.every > 1;
+    const date = skill.monthlyDay === LAST_DAY_OF_MONTH ? 'last' : d.format('Do');
+    return `Every${plural ? ` ${skill.every}` : ''} month${plural ? 's' : ''} on the ${date} day of the month`;
+  }
+  if (skill.expirationType === DAILY) {
+    const plural = skill.every > 1;
+    return `After ${skill.every} day${plural ? 's' : ''} of inactivity`;
+  }
+  return '';
+}
+const getNextExpirationDate = (skill) => {
+  if (skill.nextExpirationDate) {
+    return `Expires next on ${dayjs(skill.nextExpirationDate).format('YYYY-MM-DD')}`;
+  }
+  return '';
+}
 
 </script>
 
@@ -623,6 +653,17 @@ const editImportedSkillInfo = ref({
           </div>
           <div v-else-if="slotProps.field === 'created'">
             <DateCell :value="slotProps.data[col.key]" />
+          </div>
+          <div v-else-if="slotProps.field === 'expiration'">
+            <div v-if="slotProps.data.expirationType && slotProps.data.expirationType !== 'NEVER'">
+              {{ getExpirationDescription(slotProps.data) }}
+              <div v-if="getNextExpirationDate(slotProps.data)" class="font-light text-sm">
+                {{ getNextExpirationDate(slotProps.data) }}
+              </div>
+            </div>
+            <div v-else class="text-secondary">
+              None
+            </div>
           </div>
           <div v-else-if="slotProps.field === 'timeWindow'">
             <div v-if="slotProps.data.isSkillType">
