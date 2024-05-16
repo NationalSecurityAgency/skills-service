@@ -87,6 +87,12 @@ const someSkillsAreOptional = computed(() => {
 
 const scrollIntoViewState = useScrollSkillsIntoViewState()
 const showLastViewedIndicator = computed(() => {
+  if (skillDisplayInfo.isGlobalBadgePage.value) {
+    return false
+  }
+  if (!props.toRoute) {
+    return false
+  }
   return props.skill.isLastViewed || props.skill.skillId === scrollIntoViewState.lastViewedSkillId
 })
 
@@ -171,7 +177,7 @@ const skillId = computed(() => {
         </Tag>
       </div>
     </div>
-    <div class="text-right align-content-end w-min-9rem flex"
+    <div class="text-right align-content-end flex"
          :class="{ 'text-green-500' : isSkillComplete }"
          data-cy="skillProgress-ptsOverProgressBard">
       <i class="fa fa-check mr-1 pb-1 align-content-end"

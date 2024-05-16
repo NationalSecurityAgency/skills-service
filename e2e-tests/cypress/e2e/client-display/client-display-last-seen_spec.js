@@ -75,7 +75,7 @@ describe('Client Display Skills Last Viewed', () => {
         cy.wrapIframe().find('#skillProgressTitleLink-skill1').should('have.focus');
     });
 
-    it.skip('visiting a skill shows the Last Viewed indicator on the Subject page with skills and groups', () => {
+    it('visiting a skill shows the Last Viewed indicator on the Subject page with skills and groups', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
@@ -100,8 +100,8 @@ describe('Client Display Skills Last Viewed', () => {
 
         cy.get('[data-cy="lastViewedIndicator"]').should('not.exist');
         cy.get('[data-cy="jumpToLastViewedButton"]').should('not.exist');
-        cy.get('[data-cy="skillProgress_index-0"]').should('exist');
-        cy.get('[data-cy="skillProgress_index-0"]').click();
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').should('exist');
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').click();
         cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 1');
 
         cy.get('[data-cy=back]').click()
@@ -110,7 +110,7 @@ describe('Client Display Skills Last Viewed', () => {
         cy.get('#skillProgressTitleLink-skill1').should('have.focus');
     });
 
-    it.skip('visiting a skill shows the Last Viewed indicator on the Subject page in a group', () => {
+    it('visiting a skill shows the Last Viewed indicator on the Subject page in a group', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkillsGroup(1, 1, 1);
@@ -134,16 +134,16 @@ describe('Client Display Skills Last Viewed', () => {
 
         cy.get('[data-cy="lastViewedIndicator"]').should('not.exist');
         cy.get('[data-cy="jumpToLastViewedButton"]').should('not.exist');
-        cy.get('[data-cy="group-group1_skillProgress-skill1"]').should('exist');
-        cy.get('[data-cy="group-group1_skillProgress-skill1"]').click();
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgressTitle"]').should('exist');
+        cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgressTitle"]').click();
 
         cy.get('[data-cy=back]').click()
         cy.get('[data-cy="lastViewedIndicator"]').should('exist');
         cy.get('[data-cy="jumpToLastViewedButton"]').should('exist');
-        cy.get('[id="skillProgressTitle-skill1"]').should('have.focus');
+        cy.get('#skillProgressTitleLink-skill1').should('have.focus');
     });
 
-    it.skip('visiting a skill shows the Last Viewed indicator on the Badges page', () => {
+    it('visiting a skill shows the Last Viewed indicator on the Badges page', () => {
         cy.createProject(1);
         cy.createBadge(1, 1);
         cy.createSubject(1, 1);
@@ -157,17 +157,17 @@ describe('Client Display Skills Last Viewed', () => {
 
         cy.get('[data-cy="lastViewedIndicator"]').should('not.exist');
         cy.get('[data-cy="jumpToLastViewedButton"]').should('not.exist');
-        cy.get('[data-cy="skillProgress_index-0"]').should('exist');
-        cy.get('[data-cy="skillProgress_index-0"]').click();
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').should('exist');
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').click();
         cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 1');
 
         cy.get('[data-cy=back]').click()
         cy.get('[data-cy="lastViewedIndicator"]').should('exist');
         cy.get('[data-cy="jumpToLastViewedButton"]').should('exist');
-        cy.get('[id=skillProgressTitle-skill1]').should('have.focus');
+        cy.get('#skillProgressTitleLink-skill1').should('have.focus');
     });
 
-    it.skip('Global badges do not have last viewed features', () => {
+    it('Global badges do not have last viewed features', () => {
         cy.resetDb();
         cy.fixture('vars.json')
             .then((vars) => {
@@ -198,12 +198,12 @@ describe('Client Display Skills Last Viewed', () => {
             .click();
         cy.contains('Global Badge 1')
             .should('be.visible');
-        cy.get('[id="skillProgressTitle-skill1"]').should('exist');
         cy.get('[data-cy="lastViewedIndicator"]').should('not.exist');
         cy.get('[data-cy="jumpToLastViewedButton"]').should('not.exist');
-        cy.get('[id="skillProgressTitle-skill1"]').click();
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProgressTitle"]').click();
 
         cy.get('[data-cy=back]').click()
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProgressTitle"]')
         cy.get('[data-cy="lastViewedIndicator"]').should('not.exist');
         cy.get('[data-cy="jumpToLastViewedButton"]').should('not.exist');
 
@@ -247,11 +247,11 @@ describe('Client Display Skills Last Viewed', () => {
         cy.contains('Global Badge 1');
         cy.get('[data-cy=badgeDetailsLink_globalBadge1]')
             .click();
-        cy.contains('Global Badge 1')
-            .should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
+          .eq(2)
+          .should('have.text', 'globalBadge1')
 
-
-        cy.get('[data-cy="skillProgressTitle"]').eq(0).click();
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProgressTitle"]').eq(0).click();
         cy.get('[data-cy="crossProjAlert"]').should('be.visible');
         cy.get('[data-cy="back"]').click();
         cy.get('[data-cy="skillProgressTitle"]').eq(1).click();

@@ -67,7 +67,7 @@ const scrollToLastViewedSkill = (timeout = null) => {
       return skill.skillId === scrollIntoViewState.lastViewedSkillId ||
         skill.children?.find((childItem) => childItem.skillId === scrollIntoViewState.lastViewedSkillId)
     })
-    if (found) {
+    if (found && !skillsDisplayInfo.isGlobalBadgePage.value) {
       scrollIntoViewState.scrollToLastViewedSkill(timeout)
     }
   } else {
@@ -267,7 +267,7 @@ const isLastViewedScrollSupported = computed(() => {
               </div>
               <div class="w-min-9rem">
                 <SkillsButton
-                  v-if="hasLastViewedSkill && isLastViewedScrollSupported"
+                  v-if="hasLastViewedSkill && isLastViewedScrollSupported && !skillsDisplayInfo.isGlobalBadgePage.value"
                   icon="fas fa-eye"
                   label="Last Viewed"
                   :disabled="lastViewedButtonDisabled"
