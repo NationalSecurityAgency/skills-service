@@ -236,6 +236,7 @@ describe('Client Display Tests', () => {
                 cy.contains('You are Level 2!');
                 // wait for the bar (on the bar chart) to render
                 cy.get('[data-cy="levelBreakdownChart-animationEnded"]');
+                cy.wait(5000)
                 cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', {blackout: '[data-cy="dateCell"]'});
             });
         }
