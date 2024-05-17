@@ -192,7 +192,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
             .contains('200 / 200 Points');
     });
 
-    it.skip('catalog imported skill visual regression', () => {
+    it('catalog imported skill visual regression', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);

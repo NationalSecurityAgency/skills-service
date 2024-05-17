@@ -157,7 +157,7 @@ describe('Last Achieved date tests', () => {
     });
   });
 
-  it.skip('theme: display achieved date on skill overview page', () => {
+  it('theme: display achieved date on skill overview page', () => {
     const m = dayjs('2020-09-12 11', 'YYYY-MM-DD HH');
     const orig = m.clone();
 
@@ -185,7 +185,7 @@ describe('Last Achieved date tests', () => {
     });
   });
 
-  it.skip('iphone resolution: display achieved date on skill overview page', () => {
+  it('iphone resolution: display achieved date on skill overview page', () => {
     const m = dayjs('2020-09-12 11', 'YYYY-MM-DD HH');
     const orig = m.clone();
 

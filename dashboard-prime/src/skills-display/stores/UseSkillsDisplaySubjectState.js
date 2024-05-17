@@ -66,13 +66,19 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
             subjectSummary.value.points += pts
 
             // calculating next level is outside the UIs scope, need to delegate
-            skillsDisplayService.loadSubjectSummary(subjectSummary.value.subjectId, false)
-              .then((res) => {
-                subjectSummary.value.skillsLevel = res.skillsLevel
-                subjectSummary.value.levelPoints = res.levelPoints
-                subjectSummary.value.levelTotalPoints = res.levelTotalPoints
-                subjectSummary.value.totalLevels = res.totalLevels
-              })
+            if (subjectSummary.value.subjectId) {
+              skillsDisplayService.loadSubjectSummary(subjectSummary.value.subjectId, false)
+                .then((res) => {
+                  subjectSummary.value.skillsLevel = res.skillsLevel
+                  subjectSummary.value.levelPoints = res.levelPoints
+                  subjectSummary.value.levelTotalPoints = res.levelTotalPoints
+                  subjectSummary.value.totalLevels = res.totalLevels
+                })
+            } else if (subjectSummary.value.badgeId) {
+              if (foundSkill.meta.complete) {
+                subjectSummary.value.numSkillsAchieved += 1
+              }
+            }
           }
         }
       }

@@ -7,6 +7,7 @@ import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisp
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import JustificationInput from '@/skills-display/components/skill/JustificationInput.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import { useLog } from '@/components/utils/misc/useLog.js'
 
 const props = defineProps({
   skill: Object
@@ -18,6 +19,7 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 const skillsDisplayService = useSkillsDisplayService()
 const attributes = useSkillsDisplayAttributesState()
 const skillState = useSkillsDisplaySubjectState()
+const log = useLog()
 
 const selfReport = ref({
   res: null,
@@ -146,6 +148,7 @@ const reportSkill = (approvalRequestedMsg) => {
 // },
 const updateEarnedPoints = (res) => {
   if (res.pointsEarned > 0 || isMotivationalSkill.value) {
+    log.trace(`Skill ${skillInternal.value.skillId} earned ${res.pointsEarned} points`)
     skillState.addPoints(skillInternal.value.skillId, res.pointsEarned)
   }
 }

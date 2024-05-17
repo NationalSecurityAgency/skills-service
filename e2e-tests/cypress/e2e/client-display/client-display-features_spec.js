@@ -310,7 +310,7 @@ describe('Client Display Features Tests', () => {
         cy.get('[data-cy="subjectTile-subj1"] [data-cy="levelProgress"]').should("not.exist")
     });
 
-    it.skip('custom icon for badge must display after a refresh', () => {
+    it('custom icon for badge must display after a refresh', () => {
         cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj1/icons/upload');
 
         cy.createBadge(1, 1);

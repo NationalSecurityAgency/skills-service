@@ -238,7 +238,7 @@ describe('Skills Display Badge Bonus Tests', () => {
     cy.get('[data-cy="badge_badge2"]').contains('Test Badge Award')
   });
 
-  it.only('two badges and one has a bonus', () => {
+  it('two badges and one has a bonus', () => {
     const anHourAgo = new Date().getTime() - (1000 * 60 * 60)
     const twoDays = (60 * 24 * 2)
 

@@ -633,7 +633,7 @@ describe('Client Display Tests', () => {
             .contains('Badge 1');
     });
 
-    it.skip('self report skills update badge progress in my badges display', () => {
+    it('self report skills update badge progress in my badges display', () => {
         cy.createSkill(1, 1, 1, {
             selfReportingType: 'Approval',
             pointIncrement: 50,
@@ -643,7 +643,7 @@ describe('Client Display Tests', () => {
             selfReportingType: 'HonorSystem',
             pointIncrement: 50,
             pointIncrementInterval: 0,
-            numPerformToCompletion: 1
+            numPerformToCompletion: 2
         });
         cy.createSkill(1, 1, 3);
 
@@ -657,19 +657,18 @@ describe('Client Display Tests', () => {
         cy.assignSkillToBadge(1, 2, 3);
         cy.enableBadge(1, 2);
 
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.cdClickBadges();
-        cy.get('[data-cy=badgeDetailsLink_badge2]')
-            .click();
+        cy.get('[data-cy=badgeDetailsLink_badge2]').click();
 
-        cy.get('.skills-badge')
-            .contains('66% Complete');
-        cy.get('[data-cy=toggleSkillDetails]')
-            .click();
-        cy.get('[data-cy=claimPointsBtn]')
-            .click();
-        cy.get('.skills-badge')
-            .contains('100% Complete');
+        cy.get('[data-cy="title"]').contains('Badge Details')
+        cy.get('[data-cy="badgePercentCompleted"]').contains('66% Complete');
+        cy.get('[data-cy=toggleSkillDetails]').click();
+        cy.get('[data-cy=claimPointsBtn]').click();
+        cy.get('[data-cy="skillDescription-skill2"] [data-cy="selfReportAlert"]').contains('You just earned 50 points');
+        cy.get('[data-cy="badgePercentCompleted"]').contains('66% Complete');
+        cy.get('[data-cy=claimPointsBtn]').click();
+        cy.get('[data-cy="badgePercentCompleted"]').contains('100% Complete');
     });
 
     it('verify correct # of stars on subject card', () => {

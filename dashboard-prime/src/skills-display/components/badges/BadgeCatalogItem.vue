@@ -109,7 +109,7 @@ const otherUsersAchieved = computed(() => {
             <div>{{ badge.badge }}</div>
           </div>
           <div class="align-content-end">
-            <div class="float-right text-navy" :class="{ 'text-success': percent === 100 }">
+            <div class="float-right text-navy" :class="{ 'text-success': percent === 100 }" data-cy="badgePercentCompleted">
               <i v-if="percent === 100" class="fa fa-check" /> {{ percent }}% Complete
             </div>
           </div>
