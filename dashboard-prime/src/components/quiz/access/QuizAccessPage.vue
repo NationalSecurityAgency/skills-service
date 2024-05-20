@@ -97,7 +97,7 @@ const notCurrentUser = (userId) => {
 const addUserRole = () => {
   options.value.busy = true
   const { userIdForDisplay, userId, dn } = selectedUser.value
-  const pkiAuthenticated = appConfig.isPkiAuthenticated.value
+  const pkiAuthenticated = appConfig.isPkiAuthenticated
   const userIdParam = pkiAuthenticated ? dn : userId
   QuizService.addQuizAdmin(route.params.quizId, userIdParam)
     .then(() => {
