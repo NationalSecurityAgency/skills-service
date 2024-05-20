@@ -272,7 +272,7 @@ describe('Client Display Theme Components Tests', () => {
     // cy.matchSnapshotImageForElement('[data-cy="filterMenu"]', 'buttons-badgesFilter-darkTileBackground')
   })
 
-  it.skip('filter menu with dark tile background', () => {
+  it('filter menu with dark tile background', () => {
     cy.createBadge(1, 1)
     cy.assignSkillToBadge(1, 1, 2)
     cy.enableBadge(1, 1)

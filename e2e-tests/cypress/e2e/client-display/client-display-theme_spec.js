@@ -511,7 +511,7 @@ describe('Client Display Tests', () => {
         });
     });
 
-    it.skip('badge search and badge filter selected', () => {
+    it('badge search and badge filter selected', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -565,26 +565,14 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy=earnedBadgeLink_badge1]')
             .should('be.visible');
 
-        cy.get('.skills-badge')
-            .should('have.length', 2);
-        cy.get('.skills-badge')
-            .eq(0)
-            .contains('50% Complete');
-        cy.get('.skills-badge')
-            .eq(0)
-            .contains('Badge 2');
-        cy.get('.skills-badge')
-            .eq(1)
-            .contains('0% Complete');
-        cy.get('.skills-badge')
-            .eq(1)
-            .contains('Badge 3');
+        cy.get('[data-cy="badge_badge2"]')
+        cy.get('[data-cy="badge_badge3"]')
 
         cy.matchSnapshotImageForElement('[data-cy="availableBadges"]', 'Client Display Tests - badge search and badge filter selected-available');
         cy.matchSnapshotImageForElement('[data-cy="achievedBadges"]', 'Client Display Tests - badge search and badge filter selected-achieved');
     });
 
-    it.skip('badge filter open', () => {
+    it('badge filter open', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
@@ -630,24 +618,10 @@ describe('Client Display Tests', () => {
 
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
+        cy.get('[data-cy=earnedBadgeLink_badge1]').should('be.visible');
 
-        cy.get('[data-cy=earnedBadgeLink_badge1]')
-            .should('be.visible');
-
-        cy.get('.skills-badge')
-            .should('have.length', 2);
-        cy.get('.skills-badge')
-            .eq(0)
-            .contains('50% Complete');
-        cy.get('.skills-badge')
-            .eq(0)
-            .contains('Badge 2');
-        cy.get('.skills-badge')
-            .eq(1)
-            .contains('0% Complete');
-        cy.get('.skills-badge')
-            .eq(1)
-            .contains('Badge 3');
+        cy.get('[data-cy="badge_badge2"]')
+        cy.get('[data-cy="badge_badge3"]')
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 

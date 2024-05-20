@@ -67,19 +67,19 @@ const expirationDate = (includeTime = false) => {
   return ''
 }
 
-const buildToRoute = () => {
-  let name = 'skillDetails'
-  const params = { skillId: props.skill.skillId, projectId: props.skill.projectId }
-  if (route.params.subjectId) {
-    params.subjectId = route.params.subjectId
-  } else if (route.params.badgeId) {
-    params.badgeId = route.params.badgeId
-    name = (props.type === 'global-badge') ? 'globalBadgeSkillDetails' : 'badgeSkillDetails'
-  } else if (props.skill.crossProject && props.skill.projectId) {
-    params.crossProjectId = props.skill.projectId
-  }
-  return { name, params }
-}
+// const buildToRoute = () => {
+//   let name = 'skillDetails'
+//   const params = { skillId: props.skill.skillId, projectId: props.skill.projectId }
+//   if (route.params.subjectId) {
+//     params.subjectId = route.params.subjectId
+//   } else if (route.params.badgeId) {
+//     params.badgeId = route.params.badgeId
+//     name = (props.type === 'global-badge') ? 'globalBadgeSkillDetails' : 'badgeSkillDetails'
+//   } else if (props.skill.crossProject && props.skill.projectId) {
+//     params.crossProjectId = props.skill.projectId
+//   }
+//   return { name, params }
+// }
 
 const someSkillsAreOptional = computed(() => {
   return isSkillsGroupWithChildren.value && props.skill.numSkillsRequired !== -1 && props.skill.numSkillsRequired < props.skill.children.length

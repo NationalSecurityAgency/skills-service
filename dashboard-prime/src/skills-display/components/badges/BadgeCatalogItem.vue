@@ -4,10 +4,10 @@ import dayjs from 'dayjs'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
-import { useTopPositionsUtils } from '@/skills-display/components/badges/UseTopPositionsUtils.js'
 import PlacementBadge from '@/skills-display/components/badges/PlacementBadge.vue'
 import BadgeHeaderIcons from '@/skills-display/components/badges/BadgeHeaderIcons.vue'
 import ExtraBadgeAward from '@/skills-display/components/badges/ExtraBadgeAward.vue'
+import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 
 const props = defineProps({
   badge: {
@@ -25,11 +25,14 @@ const props = defineProps({
   viewDetailsBtnTo: {
     type: Object,
     default: null
-  }
+  },
+  searchString: {
+    type: String,
+    default: ''
+  },
 })
 
 const timeUtils = useTimeUtils()
-const topPositions = useTopPositionsUtils()
 const iconCss = computed(() => `${props.badge.iconClass} ${props.iconColor}`)
 const percent = computed(() => {
   if (props.badge.numTotalSkills === 0) {
@@ -106,7 +109,7 @@ const otherUsersAchieved = computed(() => {
       <div class="flex-1">
         <div class="flex align-content-end">
           <div class="flex-1 text-2xl font-medium" data-cy="badgeTitle">
-            <div>{{ badge.badge }}</div>
+            <highlighted-value :value="badge.badge" :filter="searchString" />
           </div>
           <div class="align-content-end">
             <div class="float-right text-navy" :class="{ 'text-success': percent === 100 }" data-cy="badgePercentCompleted">

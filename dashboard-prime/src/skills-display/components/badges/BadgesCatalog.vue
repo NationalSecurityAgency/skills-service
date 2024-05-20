@@ -4,6 +4,7 @@ import BadgeCatalogItem from '@/skills-display/components/badges/BadgeCatalogIte
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import BadgeTypeFilter from '@/skills-display/components/badges/BadgeTypeFilter.vue'
 
 
 // badgeRouterLinkGenerator: {
@@ -28,9 +29,38 @@ const props = defineProps({
 })
 
 const searchString = ref('')
-const shownBadges = computed(() => props.badges)
+const badgesWithTypes = computed(() => {
+  return props.badges.map((badge) => {
+    const badgeTypes = []
+    if (badge.global) {
+      badgeTypes.push('globalBadges')
+    } else if (badge.projectId) {
+      badgeTypes.push('projectBadges')
+      if (badge.startDate && badge.endDate) {
+        badgeTypes.push('gems')
+      }
+    }
+    return {...badge, badgeTypes }
+  })
+})
+const shownBadges = computed(() => {
+  return badgesWithTypes.value.filter((badge) => {
+    if(filterId.value && !badge.badgeTypes.includes(filterId.value)) {
+      return false
+    }
+    if (searchString.value && !badge.badge.toLowerCase().includes(searchString.value.toLowerCase())) {
+      return false
+    }
+    return true
+  })
+})
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const colors = useColors()
+
+const filterId = ref('')
+const setFilterId = (newFilterId) => {
+  filterId.value = newFilterId
+}
 </script>
 
 <template>
@@ -55,23 +85,14 @@ const colors = useColors()
             </InputGroupAddon>
           </InputGroup>
 
-
-<!--          <div class="">-->
-<!--            <b-form-input @input="searchBadges" style="padding-right: 2.3rem;"-->
-<!--                          v-model="searchString"-->
-<!--                          placeholder="Search Available Badges"-->
-<!--                          aria-label="Search badges"-->
-<!--                          data-cy="badgeSearchInput"></b-form-input>-->
-<!--            <b-button v-if="searchString && searchString.length > 0" @click="clearSearch"-->
-<!--                      class="position-absolute skills-theme-btn" variant="outline-info" style="right: 0rem;"-->
-<!--                      data-cy="clearBadgesSearchInput">-->
-<!--              <i class="fas fa-times"></i>-->
-<!--              <span class="sr-only">clear search</span>-->
-<!--            </b-button>-->
-<!--          </div>-->
         </div>
         <div class="">
-<!--          <badges-filter :counts="metaCounts" :filters="filters" @filter-selected="filterSelected" @clear-filter="clearFilters"/>-->
+          <badge-type-filter
+            :badges="badgesWithTypes"
+            @filter-selected="setFilterId"
+            @clear-filter="filterId = ''"
+            class="ml-2"
+          />
         </div>
       </div>
     </template>
@@ -79,18 +100,18 @@ const colors = useColors()
     <template #content>
       <div class="">
         <div class="mb-5" v-for="(badge, index) in shownBadges" v-bind:key="badge.badgeId">
-<!--          :badgeRouterLinkGenerator="badgeRouterLinkGenerator"-->
           <badge-catalog-item
             :display-project-name="displayBadgeProject"
             :badge="badge"
+            :search-string="searchString"
             :view-details-btn-to="skillsDisplayInfo.createToBadgeLink(badge)"
             :icon-color="colors.getTextClass(index)"
             ></badge-catalog-item>
         </div>
 
         <no-content2 v-if="!(shownBadges && shownBadges.length > 0) && searchString.length > 0" class="my-5"
-                     icon="fas fa-search-minus fa-5x"
-                     title="No results" :message="`Please refine [${searchString}] search${(this.filter) ? ' and/or clear the selected filter' : ''}`"/>
+                     icon="fas fa-search-minus"
+                     title="No results" :message="`Please refine [${searchString}] search${(filterId) ? ' and/or clear the selected filter' : ''}`"/>
 
         <no-content2 v-if="!(badges && badges.length > 0) && searchString.length === 0" class="my-5"
                      data-cy="badge-catalog_no-badges"
