@@ -280,7 +280,8 @@ describe('Client Display Theme Components Tests', () => {
     const url = '/subjects/subj1/?themeParam=tiles|{"backgroundColor":"black"}&themeParam=textPrimaryColor|white&themeParam=textSecondaryColor|yellow'
     cy.cdVisit(url)
 
-    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="clearSkillsSearchInput"]').tab().type('{enter}')
+    // cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
 
     cy.matchSnapshotImageForElement('[data-pc-name="panelmenu"]', {
       name: 'filterMenu-skills'
@@ -288,7 +289,8 @@ describe('Client Display Theme Components Tests', () => {
 
     cy.cdBack()
     cy.cdClickBadges()
-    cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    // cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+    cy.get('[data-cy="clearSkillsSearchInput"]').tab().type('{enter}')
     cy.matchSnapshotImageForElement('[data-pc-name="panelmenu"]', {
       name: 'filterMenu-badges'
     })

@@ -800,7 +800,7 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="pageHeader"]').contains('ID: skill2')
     });
 
-    it.only('More than 10 skills are visible in the group', () => {
+    it('More than 10 skills are visible in the group', () => {
         cy.createSkillsGroup(1, 1, 1)
         for (let step = 1; step < 25; step++) {
             cy.addSkillToGroup(1, 1, 1, step, { pointIncrement: 11, numPerformToCompletion: 2 })

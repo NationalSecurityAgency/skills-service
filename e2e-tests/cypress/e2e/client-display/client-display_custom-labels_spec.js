@@ -120,6 +120,8 @@ describe('Client Display Custom Label Tests', () => {
 
         cy.get('[data-cy=breadcrumb-Overview]')
             .click();
+        cy.get('[data-cy="title"]').contains('User Skills')
+        cy.get('[data-cy="subjectTileBtn"]').should('have.length', 3).should('be.visible');
         cy.cdClickSubj(0);
         cy.contains('Stage 3 Progress');
         cy.contains('My Stage');
@@ -146,6 +148,7 @@ describe('Client Display Custom Label Tests', () => {
 
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-subj1]')
             .click();
+        cy.get('[data-cy="skillProgressTitle-skill1"]')
         cy.cdClickSkill(0, true, 'Course');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj1"] [data-cy="breadcrumbItemLabel"]')
           .should('have.text', 'Competency:');
@@ -154,6 +157,8 @@ describe('Client Display Custom Label Tests', () => {
 
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .click();
+        cy.get('[data-cy="title"]').contains('User Skills')
+        cy.get('[data-cy="subjectTileBtn"]').should('have.length', 3).should('be.visible');
         cy.cdClickBadges();
         cy.cdVisit('/badges/global/globalBadge1');
         cy.get('[data-cy="gb_proj1"]')
@@ -168,6 +173,8 @@ describe('Client Display Custom Label Tests', () => {
 
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .click();
+        cy.get('[data-cy="title"]').contains('User Skills')
+        cy.get('[data-cy="subjectTileBtn"]').should('have.length', 3).should('be.visible');
         cy.cdClickSubj(1);
         cy.get('[data-cy="noContent"]')
             .contains('Courses have not been added yet');
@@ -179,6 +186,8 @@ describe('Client Display Custom Label Tests', () => {
 
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .click();
+        cy.get('[data-cy="title"]').contains('User Skills')
+        cy.get('[data-cy="subjectTileBtn"]').should('have.length', 3).should('be.visible');
         cy.cdClickSubj(2);
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj3"] [data-cy="breadcrumbItemLabel"]')
           .should('have.text', 'Competency:');

@@ -37,6 +37,9 @@ Cypress.Commands.add('cdVisit', (url = '', expectPointHistoryData = false) => {
     cy.visit(`/test-skills-display/proj1${url}`)
     cy.validatePoweredBy()
 
+    // wait for the loader to go way
+    cy.get('[data-pc-name="progressspinner"]').should('not.exist')
+
     if (!url || url === '' || url === '/' || url === '/?internalBackButton=true') {
         cy.get(expectPointHistoryData ? '[data-cy="pointHistoryChartWithData"]' : '[data-cy="pointHistoryChartNoData"]')
     }
@@ -46,6 +49,9 @@ Cypress.Commands.add("cdBack", (expectedTitle = 'User Skills') => {
     cy.get('[data-cy=back]').click()
     cy.validatePoweredBy();
     cy.contains(expectedTitle);
+
+    // wait for the loader to go way
+    cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
     // back button should not exist on the home page, whose title is the default value
     if (expectedTitle === 'User Skills'){
@@ -59,11 +65,14 @@ Cypress.Commands.add('cdClickSubj', (subjIndex, expectedTitle = null, expectPoin
   if (expectedTitle) {
     cy.get('[data-cy="skillsTitle"]').contains(expectedTitle)
   }
+  // wait for the loader to go way
+  cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
   cy.get(expectPointHistoryData ? '[data-cy="pointHistoryChartWithData"]' : '[data-cy="pointHistoryChartNoData"]')
 })
 
 Cypress.Commands.add("cdClickSkill", (skillIndex, useProgressBar = true, skillLabel = 'Skill') => {
+
     if (useProgressBar) {
         cy.get(`[data-cy="skillProgress_index-${skillIndex}"] [data-cy="skillProgressBar"]`).click();
     } else {
@@ -71,11 +80,15 @@ Cypress.Commands.add("cdClickSkill", (skillIndex, useProgressBar = true, skillLa
     }
     cy.contains(`${skillLabel} Overview`)
     cy.validatePoweredBy();
+    // wait for the loader to go way
+    cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 });
 
 Cypress.Commands.add("cdClickRank", () => {
     cy.get('[data-cy=myRankBtn]').click();
     cy.get('[data-cy="title"]').contains('My Rank');
+    // wait for the loader to go way
+    cy.get('[data-pc-name="progressspinner"]').should('not.exist')
     cy.validatePoweredBy();
 });
 
