@@ -292,7 +292,7 @@ const saveSettings = handleSubmit((values) => {
     <SubPageHeader title="Configure Expiration" />
     <SkillsOverlay :show="loading || skillsState.loadingSkill">
 <!--      :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"-->
-      <Card v-if="!loading && !skillsState.loadingSkill">
+      <Card>
         <template #content>
           <Message v-if="isReadOnly" severity="info" icon="fas fa-exclamation-triangle" data-cy="readOnlyAlert" :closable="false">
             Expiration attributes of
