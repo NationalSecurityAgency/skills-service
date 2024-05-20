@@ -39,6 +39,7 @@ const monthlyDayOption = ref(FIRST_DAY_OF_MONTH);
 const dailyDays = ref(90);
 const expirationType = ref(NEVER);
 const loading = ref(true);
+const saving = ref(false);
 const showSavedMsg = ref(false);
 const loadedSettings = ref({});
 const overallErrMsg = ref(null);
@@ -213,6 +214,7 @@ const schema = yup.object().shape({
 
 const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ validationSchema: schema, })
 const saveSettings = handleSubmit((values) => {
+  saving.value = true;
   loading.value = true;
   const expirationSettings = {
     expirationType: expirationType.value,
@@ -268,6 +270,7 @@ const saveSettings = handleSubmit((values) => {
         })
         .finally(() => {
           loading.value = false;
+          saving.value = false;
         });
   } else {
     // expirationType changed to NEVER so delete existing settings
@@ -282,6 +285,7 @@ const saveSettings = handleSubmit((values) => {
         })
         .finally(() => {
           loading.value = false;
+          saving.value = false;
         });
   }
 });
@@ -292,7 +296,7 @@ const saveSettings = handleSubmit((values) => {
     <SubPageHeader title="Configure Expiration" />
     <SkillsOverlay :show="loading || skillsState.loadingSkill">
 <!--      :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"-->
-      <Card>
+      <Card v-if="saving || (!loading && !skillsState.loadingSkill)">
         <template #content>
           <Message v-if="isReadOnly" severity="info" icon="fas fa-exclamation-triangle" data-cy="readOnlyAlert" :closable="false">
             Expiration attributes of
