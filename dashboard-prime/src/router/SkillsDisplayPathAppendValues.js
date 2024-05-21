@@ -1,5 +1,6 @@
 export default {
   Local: 'Local',
   SkillsClient: 'SkillsClient',
-  LocalTest: 'LocalTest'
+  LocalTest: 'LocalTest',
+  Inception: 'Inception',
 };

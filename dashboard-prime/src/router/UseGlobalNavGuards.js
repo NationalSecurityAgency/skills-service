@@ -37,7 +37,7 @@ export const useGlobalNavGuards = () => {
 
   const log = useLog()
 
-  const isAdminPage = (route) => route.path.startsWith('/administrator')
+  const isAdminPage = (route) => route.path.startsWith('/administrator') && !route.path.startsWith('/administrator/skills')
   const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId
   const isLoggedIn = () => authState.isAuthenticated
   const isPki = () => appConfig.isPkiAuthenticated

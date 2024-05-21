@@ -13,11 +13,13 @@ import ProjectDescriptionRow from '@/components/myProgress/discover/ProjectDescr
 import { useMyProgressState } from '@/stores/UseMyProgressState.js'
 import NoProjectsInCatalogMsg from '@/components/myProgress/discover/NoProjectsInCatalogMsg.vue'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 
 const responsive = useResponsiveBreakpoints()
 const announcer = useSkillsAnnouncer()
 const appInfoState = useAppInfoState()
 const myProgressState = useMyProgressState()
+const colors = useColors()
 
 const isLoading = ref(true)
 const searchValue = ref('')
@@ -193,19 +195,19 @@ const contactProject = (name, id) => {
                   <media-info-card :title="countsAll"
                                    sub-title="ALL PROJECTS"
                                    class="flex-1"
-                                   icon-class="fas fa-globe"
+                                   :icon-class="`fas fa-globe ${colors.getTextClass(1)}`"
                                    data-cy="allProjectsCount">
                   </media-info-card>
                   <media-info-card :title="countsMyProjects"
                                    sub-title="MY PROJECTS"
                                    class="flex-1"
-                                   icon-class="fas fa-heart"
+                                   :icon-class="`fas fa-heart ${colors.getTextClass(2)}`"
                                    data-cy="myProjectCount">
                   </media-info-card>
                   <media-info-card :title="countsDiscoverProjects"
                                    sub-title="DISCOVER NEW"
                                    class="flex-1"
-                                   icon-class="fas fa-search"
+                                   :icon-class="`fas fa-search ${colors.getTextClass(3)}`"
                                    data-cy="discoverNewProjCount">
                   </media-info-card>
                 </div>

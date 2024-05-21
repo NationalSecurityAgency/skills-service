@@ -4,6 +4,7 @@ import HelpButton from '@/components/header/HelpButton.vue'
 import SkillsBreadcrumb from '@/components/header/SkillsBreadcrumb.vue'
 import { usePagePath } from '@/components/utils/UsePageLocation.js'
 import SwitchTheme from '@/components/header/SwitchTheme.vue'
+import InceptionButton from '@/components/inception /InceptionButton.vue'
 
 const pathPath = usePagePath()
 </script>
@@ -37,12 +38,14 @@ const pathPath = usePagePath()
                 src="@/assets/img/skilltree_logo_v1.png"
                 alt="skilltree logo" />
             </router-link>
-            <div v-if="pathPath.isAdminPage" ref="adminStamp" class="skills-stamp">ADMIN</div>
+            <div v-if="pathPath.isAdminPage.value" ref="adminStamp" class="skills-stamp">ADMIN</div>
           </div>
         </div>
         <div class="flex-none">
           <div class="flex flex-row">
-          <!--          <inception-button v-if="pathPath.isAdminPage" class="mr-2" data-cy="inception-button"></inception-button>-->
+            <inception-button v-if="pathPath.isAdminPage.value"
+                              class="mr-2"
+                              data-cy="inception-button" />
             <switch-theme />
             <settings-button data-cy="settings-button" class="ml-2" />
             <help-button data-cy="help-button" class="ml-2" />

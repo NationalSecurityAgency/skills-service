@@ -21,6 +21,7 @@ export const useUserProgressSummaryState = defineStore('userProgressSummaryState
     return {}
   }
   const loadUserProgressSummary = () => {
+    console.log(`loadUserProgressSummary for ${attributes.projectId}`)
     return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/summary`, {
       params: getUserIdAndVersionParams()
     }).then((result) => {

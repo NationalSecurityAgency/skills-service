@@ -161,7 +161,7 @@ const otherUsersAchieved = computed(() => {
         </div>
 
         <p v-if="badge && badge.description">
-          <markdown-text :text="badge.description" />
+          <markdown-text :text="badge.description" :instance-id="badge.badgeId" />
         </p>
 
         <div v-if="viewDetailsBtnTo" class="text-center md:text-left mt-3">

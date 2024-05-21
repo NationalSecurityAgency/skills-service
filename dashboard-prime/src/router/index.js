@@ -49,6 +49,7 @@ import createSkillsDisplayChildRoutes from '@/router/SkillsDisplayChildRoutes.js
 import TestSkillsClient from '@/skills-display/components/test/TestSkillsClient.vue'
 import TestSkillsDisplay from '@/skills-display/components/test/TestSkillsDisplay.vue'
 import PathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
+import InceptionSkills from '@/components/inception /InceptionSkills.vue'
 
 const routes = [
   {
@@ -84,6 +85,19 @@ const routes = [
         message: 'Error Page',
       },
     },
+  },
+  {
+    path: '/administrator/skills/:projectId',
+    name: 'InceptionSkills',
+    component: InceptionSkills,
+    meta: {
+      requiresAuth: true,
+      reportSkillId: 'VisitDashboardSkills',
+      announcer: {
+        message: 'Dashboard Skills',
+      },
+    },
+    children: createSkillsDisplayChildRoutes(PathAppendValues.Inception)
   },
   {
     path: '/settings',

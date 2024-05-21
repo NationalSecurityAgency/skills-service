@@ -23,6 +23,9 @@ export const useSkillsDisplayInfo = () => {
     if (route.path.startsWith('/progress-and-rankings')) {
       return `${name}${localContextAppend}`
     }
+    if (route.path.startsWith('/administrator/skills')) {
+      return `${name}${SkillsDisplayPathAppendValues.Inception}`
+    }
     return `${name}${localTestContextAppend}`
   }
 
