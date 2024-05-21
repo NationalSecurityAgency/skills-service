@@ -111,6 +111,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxSelfReportRejectionMessageLength = computed(() => config.value.maxSelfReportRejectionMessageLength)
   const approvalConfUserTagKey = computed(() => config.value.approvalConfUserTagKey)
   const approvalConfUserTagLabel = computed(() => config.value.approvalConfUserTagLabel)
+  const projectMetricsTagCharts = computed(() => config.value.projectMetricsTagCharts)
+  const maxDailyUserEvents = computed(() => config.value.maxDailyUserEvents)
 
   return {
     loadConfigState,
@@ -180,6 +182,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     skillsDisplayProjectDescription,
     maxSelfReportRejectionMessageLength,
     approvalConfUserTagKey,
-    approvalConfUserTagLabel
+    approvalConfUserTagLabel,
+    projectMetricsTagCharts,
+    maxDailyUserEvents
   }
 })
