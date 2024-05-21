@@ -11,6 +11,8 @@ import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import ContactOwnersDialog from '@/components/myProgress/ContactOwnersDialog.vue'
 import ProjectDescriptionRow from '@/components/myProgress/discover/ProjectDescriptionRow.vue'
 import { useMyProgressState } from '@/stores/UseMyProgressState.js'
+import NoProjectsInCatalogMsg from '@/components/myProgress/discover/NoProjectsInCatalogMsg.vue'
+import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 
 const responsive = useResponsiveBreakpoints()
 const announcer = useSkillsAnnouncer()
@@ -60,7 +62,7 @@ const updateCounts = () => {
 }
 
 const hasProjects = computed(() => originalProjects.value.length > 0)
-const sortInfo = ref({ sortOrder: -1, sortBy: 'name' })
+const sortInfo = ref({ sortOrder: 1, sortBy: 'name' })
 const clearFilter = () => {
   firstRow.value = 0
   filters.value.global.value = null
@@ -135,6 +137,7 @@ const contactProject = (name, id) => {
       <skills-spinner :is-loading="isLoading" class="mt-8" />
       <div v-if="!isLoading">
         <div v-if="!hasProjects">
+          <no-projects-in-catalog-msg />
         </div>
         <div v-if="hasProjects">
           <SkillsDataTable
@@ -155,8 +158,13 @@ const contactProject = (name, id) => {
             data-cy="discoverProjectsTable"
             tableStoredStateId="projectCatalogTable">
 
+            <template #empty>
+              <p>
+                No results found! Please modify your search string: <span class="text-primary">[{{ filters['global'].value }}]</span>
+              </p>
+            </template>
             <template #header>
-              <div class="flex gap-3 align-items-end">
+              <div class="flex flex-column xl:flex-row gap-3 flex-wrap">
                 <div class="flex-1">
                   <label for="projectFilter">Project Name Search:</label>
                   <InputGroup class="mt-2">
@@ -167,7 +175,7 @@ const contactProject = (name, id) => {
                       id="projectFilter"
                       class="flex flex-grow-1"
                       v-model="filters['global'].value"
-                      data-cy="skillsTable-skillFilter"
+                      data-cy="searchInput"
                       placeholder="Project Search" />
                     <InputGroupAddon class="p-0 m-0">
                       <SkillsButton
@@ -181,17 +189,22 @@ const contactProject = (name, id) => {
                     </InputGroupAddon>
                   </InputGroup>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-column md:flex-row gap-2">
                   <media-info-card :title="countsAll"
                                    sub-title="ALL PROJECTS"
+                                   class="flex-1"
                                    icon-class="fas fa-globe"
                                    data-cy="allProjectsCount">
                   </media-info-card>
-                  <media-info-card :title="countsMyProjects" sub-title="MY PROJECTS"
+                  <media-info-card :title="countsMyProjects"
+                                   sub-title="MY PROJECTS"
+                                   class="flex-1"
                                    icon-class="fas fa-heart"
                                    data-cy="myProjectCount">
                   </media-info-card>
-                  <media-info-card :title="countsDiscoverProjects" sub-title="DISCOVER NEW"
+                  <media-info-card :title="countsDiscoverProjects"
+                                   sub-title="DISCOVER NEW"
+                                   class="flex-1"
                                    icon-class="fas fa-search"
                                    data-cy="discoverNewProjCount">
                   </media-info-card>
@@ -206,7 +219,7 @@ const contactProject = (name, id) => {
               <template #body="slotProps">
                 <div class="flex align-items-center">
                   <div class="flex-1">
-                    {{ slotProps.data.name }}
+                    <highlighted-value :value="slotProps.data.name" :filter="filters['global'].value || ''" />
                   </div>
                   <div v-if="appInfoState.emailEnabled">
                     <SkillsButton
@@ -236,7 +249,7 @@ const contactProject = (name, id) => {
                   outlined
                   class="fadein animation-duration-300"
                   size="small"
-                  data-cy="addButton"
+                  :data-cy="`addButton-${slotProps.data.projectId}`"
                   :loading="slotProps.data.loading"
                   :aria-label="`add project ${slotProps.data.projectId} to my projects`" />
                 <div v-if="slotProps.data.isMyProject" class="flex align-items-center">
@@ -251,7 +264,7 @@ const contactProject = (name, id) => {
                     class="ml-2"
                     size="small"
                     severity="warning"
-                    data-cy="removeBtn"
+                    :data-cy="`removeBtn-${slotProps.data.projectId}`"
                     :loading="slotProps.data.loading"
                     :aria-label="`remove project ${slotProps.data.projectId} from my projects`" />
                 </div>
@@ -262,24 +275,20 @@ const contactProject = (name, id) => {
                 <i class="fas fa-graduation-cap mr-1" aria-hidden="true"></i>
               </template>
             </Column>
-            <Column field="numSubjects" header="Subjects" :sortable="true" :class="{'flex': responsive.md.value }">
-              <template #header>
-                <i class="fas fa-cubes mr-1" aria-hidden="true"></i>
-              </template>
-            </Column>
-            <Column field="numBadges" header="Badges" :sortable="true" :class="{'flex': responsive.md.value }">
-              <template #header>
-                <i class="fas fa-arrow-alt-circle-up mr-1" aria-hidden="true"></i>
-              </template>
-            </Column>
-            <Column field="totalPoints" header="Points" :sortable="true" :class="{'flex': responsive.md.value }">
-              <template #header>
-                <i class="fas fa-award mr-1" aria-hidden="true"></i>
-              </template>
-            </Column>
 
             <template #expansion="slotProps">
-              <project-description-row :project-id="slotProps.data.projectId" />
+              <div>
+                <p>
+                  <Tag>{{slotProps.data.numSubjects}}</Tag> Subjects
+                </p>
+                <p>
+                  <Tag>{{slotProps.data.numBadges}}</Tag> Badges
+                </p>
+                <p>
+                  <Tag>{{slotProps.data.totalPoints}}</Tag> Points
+                </p>
+                <project-description-row :project-id="slotProps.data.projectId" />
+              </div>
             </template>
             <template #paginatorstart>
               <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
