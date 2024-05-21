@@ -7,6 +7,7 @@ import { useLog } from '@/components/utils/misc/useLog.js'
 export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
   const subjectSkills = ref([])
   const groupSkills = ref(new Map())
+  const loadingGroupSkills = ref(new Map())
   const loadingSubjectSkills = ref(false)
   const route = useRoute()
   const log = useLog()
@@ -32,6 +33,15 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
 
   function setLoadingSubjectSkills(value) {
     loadingSubjectSkills.value = value
+  }
+
+  function setLoadingGroupSkills(groupId, value) {
+    loadingGroupSkills.value.set(groupId, value)
+  }
+
+  function getLoadingGroupSkills(groupId) {
+    const res = loadingGroupSkills.value.get(groupId)
+    return res || false
   }
 
   const hasSkills = computed(() => {
@@ -78,6 +88,7 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
   }
 
   function loadGroupSkills(projectId, groupId) {
+    setLoadingGroupSkills(groupId, true)
     return SkillsService.getGroupSkills(projectId, groupId)
       .then((loadedSkills) => {
         const updatedSkills = loadedSkills.map((loadedSkill) => ({
@@ -89,6 +100,8 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
         if(foundGroup) {
           foundGroup.numSkillsInGroup = updatedSkills.length
         }
+      }).finally(() => {
+        setLoadingGroupSkills(groupId, false)
       })
   }
 
@@ -107,6 +120,8 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
     getGroupSkills,
     loadGroupSkills,
     groupSkills,
+    setLoadingGroupSkills,
+    getLoadingGroupSkills
   }
 
 })

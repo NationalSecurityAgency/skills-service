@@ -306,11 +306,13 @@ describe('Client Display Breadcrumb Tests', () => {
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]')
             .click();
         cy.contains('Subject 1');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to Overview page
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .click();
         cy.contains('Overall Points');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
     });
 
     it('test breadcrumbs starting on Subject Rank page', () => {
@@ -346,11 +348,13 @@ describe('Client Display Breadcrumb Tests', () => {
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]')
             .click();
         cy.contains('Subject 1');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to Overview page
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .click();
         cy.contains('Overall Points');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
     });
 
@@ -394,16 +398,19 @@ describe('Client Display Breadcrumb Tests', () => {
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill3]')
             .click();
         cy.contains('This is 3');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to subject page
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]')
             .click();
         cy.contains('Subject 1');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to Overview page
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .click();
         cy.contains('Overall Points');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
     });
 
     it('test breadcrumbs with badge', () => {
@@ -505,16 +512,19 @@ describe('Client Display Breadcrumb Tests', () => {
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-badge1]')
             .click();
         cy.contains('Badge 1');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to badges page
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Badges]')
             .click();
         cy.contains('Badges');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to Overview page
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .click();
         cy.contains('Overall Points');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
     });
 
     it('test breadcrumbs with global badge', () => {
@@ -591,16 +601,19 @@ describe('Client Display Breadcrumb Tests', () => {
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-globalBadge1]')
             .click();
         cy.contains('Badge 1');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to badges page
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Badges]')
             .click();
         cy.contains('Badges');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to Overview page
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .click();
         cy.contains('Overall Points');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
     });
 
 });

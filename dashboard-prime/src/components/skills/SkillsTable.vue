@@ -393,6 +393,14 @@ const getNextExpirationDate = (skill) => {
   return '';
 }
 
+const isLoading = computed(() => {
+  if (props.groupId) {
+    return skillsState.getLoadingGroupSkills(props.groupId)
+  }
+
+  return skillsState.loadingSubjectSkills
+})
+
 </script>
 
 <template>
@@ -400,7 +408,7 @@ const getNextExpirationDate = (skill) => {
     <SkillsDataTable
       :id="tableId"
       :tableStoredStateId="tableId"
-      :loading="skillsState.loadingSubjectSkills"
+      :loading="isLoading"
       :value="tableSkills"
       dataKey="skillId"
       :reorderableColumns="true"
@@ -689,8 +697,6 @@ const getNextExpirationDate = (skill) => {
                 }} repetitions
               </div>
               <div v-if="slotProps.data.isGroupType" class="text-color-secondary">from
-                <Tag>{{ numberFormat.pretty(slotProps.data.totalPoints) }}</Tag>
-                skills in
                 <Tag>{{ slotProps.data.numSkillsInGroup }}</Tag>
                 skill{{ slotProps.data.numSkillsInGroup !== 1 ? 's' : '' }}
               </div>

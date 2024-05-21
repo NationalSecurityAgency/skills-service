@@ -44,7 +44,7 @@ onMounted(() => {
           <div class="h6 card-title mb-0 float-left">Description</div>
         </template>
         <template #content>
-          <markdown-text :text="subject.subjectSummary.description" />
+          <markdown-text :text="subject.subjectSummary.description" data-cy="subjectDescription"/>
         </template>
         <template #footer v-if="subject.subjectSummary.helpUrl">
           <a :href="subject.subjectSummary.helpUrl" target="_blank" rel="noopener">

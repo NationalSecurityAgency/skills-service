@@ -20,7 +20,11 @@ export const useSubjSkillsDisplayOrder = () => {
   }
 
   const moveDisplayOrder = (row, actionToSubmit, displayIndexIncrement) => {
-    skillsState.setLoadingSubjectSkills(true)
+    if (!row.groupId) {
+      skillsState.setLoadingSubjectSkills(true)
+    } else {
+      skillsState.setLoadingGroupSkills(row.groupId, true)
+    }
     return SkillsService.updateSkill(row, actionToSubmit)
       .then(() => {
         const skills = row.groupId ? skillsState.getGroupSkills(row.groupId) : skillsState.subjectSkills
@@ -41,7 +45,11 @@ export const useSubjSkillsDisplayOrder = () => {
           skillsState.setGroupSkills(row.groupId, skills)
         }
 
-        skillsState.setLoadingSubjectSkills(false)
+        if (!row.groupId) {
+          skillsState.setLoadingSubjectSkills(false)
+        } else {
+          skillsState.setLoadingGroupSkills(row.groupId, false)
+        }
       })
   }
   const disableFirstAndLastButtons = (groupId) => {

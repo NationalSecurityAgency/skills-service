@@ -400,14 +400,7 @@ describe('Client Display Tests', () => {
 
             cy.cdClickRank();
 
-            const tableSelector = '[data-cy="leaderboardTable"]';
-            const rowSelector = `${tableSelector} tbody tr`;
-            cy.get(tableSelector)
-                .contains('Loading...')
-                .should('not.exist');
-            cy.get(rowSelector)
-                .should('have.length', 1)
-                .as('cyRows');
+            cy.get('[data-cy="leaderboardTable"]').should('not.exist')
 
             cy.get('[data-cy="myRankPositionStatCard"]')
                 .contains('Opted-Out');
