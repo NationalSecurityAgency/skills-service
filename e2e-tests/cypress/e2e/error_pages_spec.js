@@ -111,7 +111,7 @@ describe('Error Pages Tests', () => {
 
         cy.intercept({
             method: 'GET',
-            url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+            url: '/admin/projects/proj1/*'
         })
             .as('loadSkill');
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
