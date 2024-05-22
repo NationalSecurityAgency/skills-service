@@ -8,9 +8,13 @@ import ProgressBar from 'primevue/progressbar'
 import UsersService from './UsersService.js'
 import DateCell from '@/components/utils/table/DateCell.vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
+const responsive = useResponsiveBreakpoints()
+const colors = useColors()
 
 let filters = ref({
   user: '',
@@ -18,16 +22,16 @@ let filters = ref({
   minimumPoints: 0
 })
 
-let data = ref([])
-let isLoading = ref(true)
-let totalPoints = ref(0)
-let currentPage = ref(1)
-let totalRows = ref(1)
-let pageSize = ref(5)
+const data = ref([])
+const isLoading = ref(true)
+const totalPoints = ref(0)
+const currentPage = ref(1)
+const totalRows = ref(1)
+const pageSize = ref(5)
 const possiblePageSizes = [5, 10, 15, 20]
-let ascending = ref(false)
-let sortBy = ref('lastUpdated')
-let showUserTagColumn = ref(true)
+const ascending = ref(false)
+const sortBy = ref('lastUpdated')
+const showUserTagColumn = ref(true)
 
 onMounted(() => {
   loadData()
@@ -173,35 +177,40 @@ const sortField = (column) => {
 
 <template>
   <div class="w-full">
-    <div class="flex gap-4 my-2">
-      <div class="flex flex-column flex-1">
-        <label for="userFilter">User Filter</label>
+    <div class="flex flex-column lg:flex-row gap-4 my-2">
+      <div class="flex-1">
+        <div>
+          <label for="userFilter">User Filter</label>
+        </div>
         <InputText id="userFilter" v-model="filters.user" v-on:keydown.enter="applyFilters"
+                   class="w-full mt--3"
                    data-cy="users-skillIdFilter" aria-label="user filter" />
       </div>
-      <div class="flex flex-column flex-1">
+      <div class="flex-1">
         <div class="flex gap-2">
-          <label for="minimumProgress">Minimum User Progress</label>
-          <div class="flex flex-1" style="padding-top: 12px;">
-            <span>0%</span>
-            <div class="flex flex-1 flex-column" style="padding-top: 6px;">
-              <Slider v-model="filters.progress" v-on:keydown.enter="applyFilters" :min="0" :max="100"
-                      data-cy="users-progress-range" aria-label="user progress range filter" />
+          <div class="flex-1">
+            <label for="minimumProgress">Minimum User Progress</label>
+            <div class="flex mt-3 align-items-center">
+              <span class="mr-3">0%</span>
+              <div class="flex flex-1 flex-column">
+                <Slider v-model="filters.progress" v-on:keydown.enter="applyFilters" :min="0" :max="100"
+                        data-cy="users-progress-range" aria-label="user progress range filter" />
+              </div>
+              <span class="ml-3">100%</span>
             </div>
-            <span style="margin-right:8px;">100%</span>
           </div>
-          <div class="flex flex-1">
+          <div class="flex">
             <InputText v-model.number="filters.progress" v-on:keydown.enter="applyFilters" :min="0" :max="100"
                        data-cy="users-progress-input" aria-label="user progress input filter"
-                       style="width: 80px; margin-right: 6px;" />
+                       class="w-4rem" />
           </div>
         </div>
       </div>
     </div>
 
-    <div class="flex gap-2 my-2">
-      <SkillsButton icon="fa fa-filter" label="Filter" @click="applyFilters" data-cy="users-filterBtn" />
-      <SkillsButton icon="fa fa-times" label="Reset" @click="reset" class="ml-1" data-cy="users-resetBtn" />
+    <div class="flex gap-2 mt-2 mb-4">
+      <SkillsButton icon="fa fa-filter" label="Filter" outlined @click="applyFilters" data-cy="users-filterBtn" size="small" />
+      <SkillsButton icon="fa fa-times" label="Reset" outlined @click="reset" class="ml-1" data-cy="users-resetBtn" size="small" />
     </div>
 
     <div>
@@ -210,9 +219,9 @@ const sortField = (column) => {
         :totalRecords="totalRows" :rows="pageSize" @page="pageChanged"
         tableStoredStateId="usersTable" data-cy="usersTable"
         :rowsPerPageOptions="possiblePageSizes" @sort="sortField">
-        <Column field="userId" header="User" :sortable="true">
+        <Column field="userId" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
-            <i class="fas fa-user skills-color-users" aria-hidden="true"></i>
+            <i class="fas fa-user skills-color-users mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
           </template>
           <template #body="slotProps">
             {{ slotProps.data.userId }}
@@ -227,13 +236,17 @@ const sortField = (column) => {
             <!--            </SkillsButton>-->
           </template>
         </Column>
-        <Column v-if="showUserTagColumn" field="userTag" header="User Tag"></Column>
-        <Column field="totalPoints" header="Progress" :sortable="true">
+        <Column v-if="showUserTagColumn" field="userTag" header="User Tag" :class="{'flex': responsive.md.value }">
           <template #header>
-            <i class="far fa-arrow-alt-circle-up skills-color-points" aria-hidden="true"></i>
+            <i class="fas fa-tag mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
+          </template>
+        </Column>
+        <Column field="totalPoints" header="Progress" :sortable="true" :class="{'flex': responsive.md.value }">
+          <template #header>
+            <i class="far fa-arrow-alt-circle-up mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
           </template>
           <template #body="slotProps">
-            <div :data-cy="`usr_progress-${slotProps.data.userId}`">
+            <div :data-cy="`usr_progress-${slotProps.data.userId}`" class="w-full">
               <div class="flex">
                 <div class="flex flex-auto">
                   <span class="font-weight-bold text-primary"
@@ -261,9 +274,9 @@ const sortField = (column) => {
             </div>
           </template>
         </Column>
-        <Column field="lastUpdated" header="Points Last Earned" :sortable="true">
+        <Column field="lastUpdated" header="Points Last Earned" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
-            <i class="far fa-clock skills-color-events" aria-hidden="true"></i>
+            <i class="far fa-clock mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
           </template>
           <template #body="slotProps">
             <date-cell :value="slotProps.data.lastUpdated" />
