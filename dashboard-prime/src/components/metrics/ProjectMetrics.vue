@@ -28,11 +28,10 @@ const buildTagCharts = () => {
         <num-users-per-day />
       </div>
     </div>
-    <div v-if="tagCharts" class="flex gap-4 mt-4 mb-4" data-cy="userTagCharts">
-      <div class="flex flex-1" v-for="(tagChart, index) in tagCharts" :key="`${tagChart.key}-${index}`">
-<!--        <div v-if="index > 0 && index % 2 == 0" class="w-100"></div>-->
+    <div v-if="tagCharts" class="flex flex-wrap gap-4 mt-4 mb-4" data-cy="userTagCharts">
+      <div class="flex flex-grow-1 flex-wrap" v-for="(tagChart, index) in tagCharts" :key="`${tagChart.key}-${index}`" style="min-width: 30vw;">
         <user-tag-table v-if="tagChart.type === 'table'"
-                        class="h-100"
+                        class="h-100 w-full"
                         :tag-chart="tagChart"
                         tabindex="0" />
         <user-tag-chart v-if="tagChart.type !== 'table'"

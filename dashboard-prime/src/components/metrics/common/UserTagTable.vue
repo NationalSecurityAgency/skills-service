@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
+import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 
 const props = defineProps({
   tagChart: Object
@@ -21,23 +22,8 @@ const table = ref({
   items: [],
   options: {
     busy: false,
-    bordered: true,
-    outlined: true,
-    stacked: 'md',
     sortBy: 'count',
     sortDesc: true,
-    fields: [
-      {
-        key: 'value',
-        label: props.tagChart.tagLabel ? props.tagChart.tagLabel : 'Tag',
-        sortable: true,
-      },
-      {
-        key: 'count',
-        label: '# Users',
-        sortable: true,
-      },
-    ],
     pagination: {
       server: true,
       currentPage: 1,
@@ -57,17 +43,16 @@ const tagKey = computed(() => {
   return props.tagChart.key;
 });
 
-
+const pageChanged = (pagingInfo) => {
+  table.value.options.pagination.pageSize = pagingInfo.rows
+  table.value.options.pagination.currentPage = pagingInfo.page + 1
+  loadData()
+}
 const sortTable = (sortContext) => {
-  table.value.options.sortDesc = sortContext.sortDesc;
-
+  table.value.options.sortDesc = sortContext.sortOrder === -1;
+  table.value.options.sortBy = sortContext.sortField;
   // set to the first page
   table.value.options.pagination.currentPage = 1;
-  loadData();
-};
-
-const pageChanged = (pageNum) => {
-  table.value.options.pagination.currentPage = pageNum;
   loadData();
 };
 
@@ -116,7 +101,49 @@ const loadData = (shouldHighlight = false) => {
       <SkillsCardHeader :title="titleInternal"></SkillsCardHeader>
     </template>
     <template #content>
-      test
+      <skills-spinner :is-loading="isLoading" class="mb-5"/>
+      <div v-if="!isLoading">
+        <div class="flex gap-2">
+          <div class="flex">
+            <SkillsTextInput label="Filter" v-model="filters.tag" v-on:keydown.enter="filter" id="userTagTable-tagFilter" name="userTagTable-tagFilter"/>
+          </div>
+          <div class="mt-5">
+            <SkillsButton size="small" @click="filter" data-cy="userTagTable-filterBtn" title="search by tag">
+              <i class="fa fa-search"/><span class="sr-only">filter tags</span>
+            </SkillsButton>
+            <SkillsButton size="small" severity="danger" class="ml-2" @click="clearFilter" data-cy="userTagTable-clearBtn" title="clear filter">
+              <i class="fas fa-eraser"></i><span class="sr-only">clear filter</span>
+            </SkillsButton>
+          </div>
+        </div>
+        <SkillsDataTable :value="table.items"
+                         :loading="table.options.busy"
+                         show-gridlines
+                         striped-rows
+                         paginator
+                         lazy
+                         @page="pageChanged"
+                         @sort="sortTable"
+                         :rows="table.options.pagination.pageSize"
+                         :rowsPerPageOptions="table.options.pagination.possiblePageSizes"
+                         :total-records="table.options.pagination.totalRows"
+                         tableStoredStateId="userTagsTable"
+                         data-cy="userTagsTable">
+          <Column field="value" :header="tagChart.tagLabel ? tagChart.tagLabel : 'Tag'" sortable>
+            <template #body="slotProps">
+              <span :data-cy="`cell_tagValue-${slotProps.data.value}`">
+                <span v-if="slotProps.data.htmlValue" v-html="slotProps.data.htmlValue"></span><span v-else>{{ slotProps.data.value }}</span>
+                <router-link :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: slotProps.data.value } }">
+                  <SkillsButton size="small" :aria-label="`View metrics for ${slotProps.data.value}`" data-cy="userTagTable_viewMetricsBtn">
+                    <i class="fa fa-chart-bar"/><span class="sr-only">view user tag metrics</span>
+                  </SkillsButton>
+                </router-link>
+              </span>
+            </template>
+          </Column>
+          <Column field="count" header="# Users" sortable></Column>
+        </SkillsDataTable>
+      </div>
     </template>
   </Card>
 </template>

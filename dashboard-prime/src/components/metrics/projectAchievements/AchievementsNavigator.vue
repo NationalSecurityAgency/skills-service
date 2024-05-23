@@ -54,7 +54,6 @@ const pageChanged = (pagingInfo) => {
 };
 
 const sortTable = (sortContext) => {
-  console.log('Changing sort');
   sortBy.value = sortContext.sortField;
   sortOrder.value = sortContext.sortOrder;
 
@@ -62,26 +61,6 @@ const sortTable = (sortContext) => {
   currentPage.value = 1;
   reloadTable();
 };
-
-// const customValidation = () => {
-//   const self = this;
-//   extend('dateOrder', {
-//     message: 'From Date must come before To Date',
-//     validate() {
-//       let valid = true;
-//       if (self.fromDayFilter && self.toDayFilter) {
-//         valid = dayjs(self.fromDayFilter).isBefore(dayjs(self.toDayFilter));
-//         if (valid) {
-//           // manually clear errors in case the orig error occurred when setting startDate,
-//           // but was fixed by updating endDate (or vise-versa)
-//           resetProvider(self.$refs.fromDateValidationProvider);
-//           resetProvider(self.$refs.toDateValidationProvider);
-//         }
-//       }
-//       return valid;
-//     },
-//   });
-// };
 
 const reset = () => {
   usernameFilter.value = '';
@@ -149,7 +128,7 @@ const reloadTable = () => {
         </div>
         <div class="flex flex-1 flex-column gap-2 border-right-1 pl-2 pr-2">
           <SkillsCalendarInput v-model="fromDayFilter" id="from-date-filter" data-cy="achievementsNavigator-fromDateInput"
-                               label="From Date:" name="fromDayFilter" input-class="w-full" />
+                               label="From Date:" name="fromDayFilter" input-class="w-full" :max-date="toDayFilter" />
 
           <SkillsDropDown
               label="Minimum Level (Subject & Skill Only)"
@@ -161,14 +140,10 @@ const reloadTable = () => {
               optionValue="value"
               v-model="levels.selected"
               :options="levels.available" />
-
-<!--          <ValidationProvider rules="dateOrder" v-slot="{errors}" name="From Date"-->
-<!--                              ref="fromDateValidationProvider">-->
-<!--          </ValidationProvider>-->
         </div>
         <div class="flex flex-1 flex-column gap-2 pl-2">
           <SkillsCalendarInput v-model="toDayFilter" id="to-date-filter" data-cy="achievementsNavigator-toDateInput"
-                               label="To Date:" name="toDayFilter" input-class="w-full" />
+                               label="To Date:" name="toDayFilter" input-class="w-full" :min-date="fromDayFilter" />
 
           <label for="name-filter">Name (Subject, Skill and Badge Only):</label>
           <InputText class="w-full"
@@ -176,15 +151,9 @@ const reloadTable = () => {
                      id="name-filter"
                      data-cy="achievementsNavigator-nameInput"
                      @keydown.enter="reloadTable" />
-
-
-<!--          <ValidationProvider rules="dateOrder" v-slot="{errors}" name="To Date"-->
-<!--                              ref="toDateValidationProvider">-->
-<!--          </ValidationProvider>-->
         </div>
       </div>
       <div class="flex pl-3 mb-3 mt-3">
-<!--        :disabled="invalid" -->
         <SkillsButton size="small" @click="reloadTable" data-cy="achievementsNavigator-filterBtn" icon="fa fa-filter" label="Filter" />
         <SkillsButton size="small" @click="reset" class="ml-1" data-cy="achievementsNavigator-resetBtn" icon="fa fa-times" label="Reset" />
       </div>
