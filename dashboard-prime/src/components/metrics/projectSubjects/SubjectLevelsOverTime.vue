@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import SubjectsService from "@/components/subjects/SubjectsService.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
+import NumberFormatter from '@/components/utils/NumberFormatter.js'
 
 const route = useRoute();
 
@@ -31,7 +32,7 @@ const chartOptions = ref({
     },
     labels: {
       formatter(val) {
-        // return numberFormatter(val);
+        return NumberFormatter.format(val);
       },
     },
   },

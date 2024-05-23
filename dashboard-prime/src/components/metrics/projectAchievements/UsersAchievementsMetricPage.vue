@@ -1,5 +1,6 @@
 <script setup>
 import LevelBreakdownMetric from "@/components/metrics/common/LevelBreakdownMetric.vue";
+import AchievementsNavigator from "@/components/metrics/projectAchievements/AchievementsNavigator.vue";
 </script>
 
 <template>
@@ -9,7 +10,7 @@ import LevelBreakdownMetric from "@/components/metrics/common/LevelBreakdownMetr
         <level-breakdown-metric />
       </div>
     </div>
-<!--    <achievements-navigator />-->
+    <achievements-navigator />
   </div>
 </template>
 

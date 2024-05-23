@@ -33,6 +33,7 @@
     "loglevel": "1.9.1",
     "material-icons": "0.7.6",
     "node-emoji": "2.1.3",
+    "number-format.js": "2.0.9",
     "pinia": "2.1.7",
     "postmate": "1.5.2",
     "primeflex": "3.3.1",

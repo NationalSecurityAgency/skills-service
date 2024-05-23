@@ -31,11 +31,6 @@ const totalRows = ref(1);
 const tableOptions = ref({
   sortBy: 'timestamp',
   sortDesc: true,
-  bordered: true,
-  outlined: true,
-  rowDetailsControls: false,
-  stacked: 'md',
-  tableDescription: 'Skill Metrics',
 });
 const items = ref([]);
 const originalItems = ref([]);

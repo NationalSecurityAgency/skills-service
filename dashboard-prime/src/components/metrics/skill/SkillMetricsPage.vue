@@ -9,6 +9,9 @@ import PostAchievementUsersPieChart from "@/components/metrics/skill/PostAchieve
 import BinnedPostAchievementUsage from "@/components/metrics/skill/BinnedPostAchievementUsage.vue";
 import PostAchievementUsersTable from "@/components/metrics/skill/PostAchievementUsersTable.vue";
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
+import SkillEventsOverTime from "@/components/metrics/skill/SkillEventsOverTime.vue";
+import SkillAchievedByUsersOverTime from "@/components/metrics/skill/SkillAchievedByUsersOverTime.vue";
+import UsersByTagChart from "@/components/metrics/skill/UsersByTagChart.vue";
 
 const appConfig = useAppConfig();
 const route = useRoute();
@@ -50,31 +53,24 @@ onMounted(() => {
     <!-- on FF charts end up pushing column to the next row; this is a workaround -->
     <div v-if="!loading" style="width: 99%;">
       <div class="flex mb-3 gap-4">
-        <div class="flex">
-          <stats-card title="Achieved" :statNum="numUsersAchieved" icon="fa fa-trophy text-info" data-cy="numUserAchievedStatCard">
-            Number of users that achieved this skill
-          </stats-card>
-        </div>
-        <div class="flex">
-          <stats-card title="In Progress" :statNum="numUsersInProgress" icon="fa fa-running text-primary" data-cy="inProgressStatCard">
-            Number of Users with some points earned toward the skill
-          </stats-card>
-        </div>
-        <div class="flex">
-          <stats-card title="Last Achieved" :statNum="lastAchieved" :calculate-time-from-now="true"
-                      icon="fa fa-clock text-warning"  data-cy="lastAchievedStatCard">
-            <span v-if="lastAchieved">This skill was last achieved on <span class="text-success">{{ timeUtils.formatDate(lastAchieved) }}</span></span>
-            <span v-else>This skill was <span class="text-info">never</span> achieved.</span>
-          </stats-card>
-        </div>
-
+        <stats-card class="flex flex-1" title="Achieved" :statNum="numUsersAchieved" icon="fa fa-trophy text-info" data-cy="numUserAchievedStatCard">
+          Number of users that achieved this skill
+        </stats-card>
+        <stats-card class="flex flex-1" title="In Progress" :statNum="numUsersInProgress" icon="fa fa-running text-primary" data-cy="inProgressStatCard">
+          Number of Users with some points earned toward the skill
+        </stats-card>
+        <stats-card class="flex flex-1" title="Last Achieved" :statNum="lastAchieved" :calculate-time-from-now="true"
+                    icon="fa fa-clock text-warning"  data-cy="lastAchievedStatCard">
+          <span v-if="lastAchieved">This skill was last achieved on <span class="text-success">{{ timeUtils.formatDate(lastAchieved) }}</span></span>
+          <span v-else>This skill was <span class="text-info">never</span> achieved.</span>
+        </stats-card>
       </div>
 
-<!--      <skill-achieved-by-users-over-time class="mb-3"/>-->
-<!--      <skill-events-over-time class="mb-3"/>-->
-<!--      <div v-for="tag of tags" :key="tag.key">-->
-<!--        <users-by-tag-chart :tag="tag" class="mb-3" />-->
-<!--      </div>-->
+      <skill-achieved-by-users-over-time class="mb-3"/>
+      <skill-events-over-time class="mb-3"/>
+      <div v-for="tag of tags" :key="tag.key">
+        <users-by-tag-chart :tag="tag" class="mb-3" />
+      </div>
 
       <Card data-cy="postAchievementContainers">
         <template #header>

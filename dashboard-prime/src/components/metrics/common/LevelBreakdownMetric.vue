@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import { useRoute } from 'vue-router';
+import NumberFormatter from '@/components/utils/NumberFormatter.js'
 
 const route = useRoute();
 const props = defineProps({
@@ -46,7 +47,7 @@ const chartOptions = ref({
       fontWeight: 'bold',
     },
     formatter(val, opt) {
-      // return `${opt.w.globals.labels[opt.dataPointIndex]}: ${numberFormatter(val)} users`;
+      return `${opt.w.globals.labels[opt.dataPointIndex]}: ${NumberFormatter.format(val)} users`;
     },
     offsetX: 0,
       dropShadow: {
@@ -74,7 +75,7 @@ const chartOptions = ref({
     categories: [],
     labels: {
       formatter(val) {
-        // return numberFormatter(val);
+        return NumberFormatter.format(val);
       },
     },
   },
@@ -96,7 +97,7 @@ const chartOptions = ref({
   tooltip: {
     y: {
       formatter(val) {
-        // return numberFormatter(val);
+        return NumberFormatter.format(val);
       },
     },
   },

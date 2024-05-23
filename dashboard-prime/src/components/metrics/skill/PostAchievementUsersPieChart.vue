@@ -11,22 +11,22 @@ const series = ref([]);
 const chartOptions = ref({
   chart: {
     height: 250,
-        width: 250,
-        type: 'pie',
-        toolbar: {
+    width: 250,
+    type: 'pie',
+    toolbar: {
       show: true,
-          offsetX: 0,
-          offsetY: -60,
+      offsetX: 0,
+      offsetY: -60,
     },
   },
   colors: ['#17a2b8', '#28a745'],
-      labels: ['stopped after achieving', 'performed Skill at least once after achieving'],
-      dataLabels: {
+  labels: ['stopped after achieving', 'performed Skill at least once after achieving'],
+  dataLabels: {
     enabled: false,
   },
   legend: {
     position: 'top',
-        horizontalAlign: 'left',
+    horizontalAlign: 'left',
   },
 });
 const loading = ref(true);

@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import MetricsService from "@/components/metrics/MetricsService.js";
 import TimeLengthSelector from "@/components/metrics/common/TimeLengthSelector.vue";
+import NumberFormatter from '@/components/utils/NumberFormatter.js'
 
 const appConfig = useAppConfig();
 const route = useRoute();
@@ -81,7 +82,7 @@ const chartOptions = ref({
   yaxis: {
     labels: {
       formatter(val) {
-        // return numberFormatter(val);
+        return NumberFormatter.format(val);
       },
     },
     title: {
@@ -95,7 +96,7 @@ const chartOptions = ref({
     shared: false,
         y: {
       formatter(val) {
-        // return numberFormatter(val);
+        return NumberFormatter.format(val);
       },
     },
   },

@@ -9,10 +9,15 @@ export const useSkillsInputFallthroughAttributes = () => {
     )
   }
   const inputAttrs = computed(() => {
-    return filterAttrs(attrs, ['class', 'data-cy'])
+    let newAttrs = filterAttrs(attrs, ['class', 'data-cy']);
+    if(newAttrs['input-class']) {
+      newAttrs.class = newAttrs['input-class'];
+      delete newAttrs['input-class'];
+    }
+    return newAttrs;
   })
   const rootAttrs = computed(() => {
-    return filterAttrs(attrs, ['data-cy'])
+    return filterAttrs(attrs, ['data-cy', 'input-class'])
   })
 
   return {

@@ -6,10 +6,9 @@ defineProps(['navCards'])
 
 <template>
   <div class="flex gap-3 flex-row">
-    <div v-for="(navItem) in navCards" :key="navItem.title" class="flex">
-      <metric-nav-card :title="navItem.title" :subtitle="navItem.subtitle" :description="navItem.description"
+      <metric-nav-card v-for="(navItem) in navCards" :key="navItem.title" class="flex flex-1"
+                       :title="navItem.title" :subtitle="navItem.subtitle" :description="navItem.description"
                        :path-name="navItem.pathName" :icon="navItem.icon" />
-    </div>
   </div>
 </template>
 
