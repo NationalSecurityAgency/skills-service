@@ -269,7 +269,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
             .contains('Very Great Skill 3');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '2')
         cy.wait(4000);
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', `InProjectDependency-parent`);
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"] [data-cy="prerequisitesCard"]', `InProjectDependency-parent`);
 
         // Go to child dependency page
         cy.clickOnNode(600, 262);
@@ -278,7 +278,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         // should render Prerequisites section
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '1')
         cy.wait(4000);
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', `InProjectDependency-child`);
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"] [data-cy="prerequisitesCard"]', `InProjectDependency-child`);
     });
 
     it('cross-project skill dep is shown when skill ids match', function () {

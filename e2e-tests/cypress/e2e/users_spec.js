@@ -48,8 +48,7 @@ describe('Users Tests', () => {
             }
         }
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Users');
+        cy.visit('/administrator/projects/proj1/users');
 
         // default sort order is 'Points Last Earned' desc
         cy.validateTable(tableSelector, [

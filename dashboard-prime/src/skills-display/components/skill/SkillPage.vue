@@ -52,7 +52,7 @@ const nextButtonClicked = () => {
   )
 }
 
-const isLoading = computed(() => loadingSkill.value)
+const isLoading = computed(() => loadingSkill.value || skillState.loadingSkillSummary)
 
 </script>
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Network } from 'vis-network'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
@@ -54,13 +54,21 @@ const displayOptions = {
 }
 
 onMounted(() => {
+  loadAllDataForPrereq()
+})
+
+watch( () => route.params.skillId, () => {
+  loadAllDataForPrereq()
+});
+
+const loadAllDataForPrereq  = () => {
   loadData().then(() => {
     if (dependenciesInternal.value?.length > 0) {
       initInternalDeps()
       createGraph()
     }
   })
-})
+}
 
 
 const isDependency = () => {

@@ -107,14 +107,14 @@ describe('My Progress Breadcrumb Tests', () => {
     });
 
     it('test breadcrumbs starting on Rank page', function () {
-        cy.visit('/administrator/skills/inception/rank');
+        cy.visit('/administrator/skills/Inception/rank');
 
+        cy.get('[data-cy="levelBreakdownChart-animationEnded"]')
         cy.get('[data-cy="title"]').contains('My Rank');
         cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"] [data-cy="breadcrumb-Projects"]')
         cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"] [data-cy="breadcrumb-Dashboard Skills"]')
         cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"]').should('have.length', 2)
         cy.get('[data-pc-name="breadcrumb"] [data-cy="breadcrumb-Rank"]')
-
 
         cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"] [data-cy="breadcrumb-Dashboard Skills"]').click()
         cy.get('[data-cy="title"]').contains('Dashboard Skills');

@@ -135,6 +135,7 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
       subjectSummary,
       loadSkillSummary,
       skillSummary,
+      loadingSkillSummary,
       addPoints,
       nullifyExpirationDate,
       updateDescription,

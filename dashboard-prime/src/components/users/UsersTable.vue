@@ -129,15 +129,11 @@ const pageChanged = (pagingInfo) => {
   loadData()
 }
 
-
-// const sortField = (column) => {
-//   sortBy.value = column.sortField
-//   ascending.value = column.sortOrder === 1
-//
-//   // set to the first page
-//   currentPage.value = 1
-//   loadData()
-// }
+const sortField = () => {
+  // set to the first page
+  currentPage.value = 1
+  loadData()
+}
 </script>
 
 <template>
@@ -187,7 +183,7 @@ const pageChanged = (pagingInfo) => {
         :rowsPerPageOptions="possiblePageSizes"
         v-model:sort-field="sortInfo.sortBy"
         v-model:sort-order="sortInfo.sortOrder"
-        @sort="loadData"
+        @sort="sortField"
       >
         <Column field="userId" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
