@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
 import { useRoute } from 'vue-router'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
@@ -22,6 +22,9 @@ const loadingSkill = ref(true)
 onMounted(() => {
   loadSkillSummary()
 })
+watch( () => route.params.skillId, () => {
+  loadSkillSummary()
+});
 const loadSkillSummary = () => {
   const skillId = skillsDisplayInfo.isDependency() ? route.params.dependentSkillId : route.params.skillId
   skillState.loadSkillSummary(skillId, route.params.crossProjectId, route.params.subjectId)

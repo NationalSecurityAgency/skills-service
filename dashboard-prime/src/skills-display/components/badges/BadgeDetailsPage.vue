@@ -1,6 +1,6 @@
 <script setup>
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import { useRoute } from 'vue-router'
 import BadgeCatalogItem from '@/skills-display/components/badges/BadgeCatalogItem.vue'
@@ -23,6 +23,13 @@ const dependencies = ref([])
 const isLoading = computed(() => summaryAndSkillsState.loadingBadgeSummary || loadingPrerequisites.value)
 
 onMounted(() => {
+  loadBadgeInfo()
+})
+watch( () => route.params.badgeId, () => {
+  loadingPrerequisites.value = true
+  loadBadgeInfo()
+});
+const loadBadgeInfo = () => {
   const isGlobalBadge = skillsDisplayInfo.isGlobalBadgePage.value
   summaryAndSkillsState.loadBadgeSummary(route.params.badgeId, isGlobalBadge)
   if (!isGlobalBadge) {
@@ -30,7 +37,7 @@ onMounted(() => {
   } else {
     loadingPrerequisites.value = false
   }
-})
+}
 const loadDependencies = () => {
   loadingPrerequisites.value = true
   return skillsDisplayService.getSkillDependencies(route.params.badgeId)

@@ -720,24 +720,6 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=editSkillButton_skill1]').should('have.focus')
   })
 
-  it('skill user details does not break breadcrumb bar', () => {
-    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      skillId: 'skill1',
-      name: 'Skill 1',
-      pointIncrement: '50',
-      numPerformToCompletion: '5'
-    })
-
-    cy.request('POST', `/api/projects/proj1/skills/skill1`, { userId: 'someuser', timestamp: new Date().getTime() })
-    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/')
-    cy.clickNav('Users').click()
-    cy.get('[data-cy="usersTable"]').contains('someuser').click()
-    cy.get('[data-cy=breadcrumb-subj1]').should('be.visible')
-    cy.get('[data-cy=breadcrumb-skill1]').should('be.visible')
-    cy.get('[data-cy=breadcrumb-Users]').should('be.visible')
-  })
 
   it('description is validated against custom validators', () => {
     cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject')

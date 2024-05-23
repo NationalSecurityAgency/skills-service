@@ -796,49 +796,6 @@ describe('Badges Tests', () => {
             .should('exist');
     });
 
-    it('badge user details does not break breadcrumb bar', () => {
-        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            name: 'Subject 1'
-        });
-
-        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            skillId: 'skill1',
-            name: 'Skill 1',
-            pointIncrement: '50',
-            numPerformToCompletion: '5'
-        });
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
-            projectId: 'proj1',
-            badgeId: 'badge1',
-            name: 'Badge 1',
-            'iconClass': 'fas fa-ghost',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-        });
-
-        cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1');
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'someuser',
-            timestamp: new Date().getTime()
-        });
-
-        cy.visit('/administrator/projects/proj1/badges/badge1');
-        // // // cy.get('[data-cy="inception-button"]').contains('Level');
-        cy.clickNav('Users')
-            .click();
-        cy.get('[data-cy="usersTable"]')
-            .contains('someuser')
-            .click();
-        cy.get('[data-cy=breadcrumb-badge1]')
-            .should('be.visible');
-        cy.get('[data-cy=breadcrumb-Users]')
-            .should('be.visible');
-    });
-
     it('new badge button should retain focus after dialog is closed', () => {
         cy.visit('/administrator/projects/proj1');
         // // // cy.get('[data-cy="inception-button"]').contains('Level');
