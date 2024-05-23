@@ -13,6 +13,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const isInIframe = ref(false)
   const isSummaryOnly = ref(false)
   const internalBackButton = ref(true)
+  const userId = ref(null)
 
   const log = useLog()
   const skillsDisplayInfo = useSkillsDisplayInfo()
@@ -71,6 +72,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     groupDisplayName,
     skillDisplayName,
     internalBackButton,
-    isSummaryOnly
+    isSummaryOnly,
+    userId
   }
 })

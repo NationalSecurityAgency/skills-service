@@ -55,7 +55,6 @@ const loadData = () => {
 
   MetricsService.loadChart(route.params.projectId, 'numUsersPerTagBuilder', params)
       .then((dataFromServer) => {
-        console.log(dataFromServer);
         if (dataFromServer) {
           const localSeries = [];
           const labels = [];

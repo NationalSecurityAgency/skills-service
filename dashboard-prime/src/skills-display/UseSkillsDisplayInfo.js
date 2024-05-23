@@ -10,7 +10,9 @@ export const useSkillsDisplayInfo = () => {
   const progressAndRankingsRegex = /\/progress-and-rankings\/projects\/[^/]*/i
   const localTestRegex = /\/test-skills-display\/[^/]*/i
   const clientDisplayRegex = /\/static\/clientPortal\/index\.html/i
-  const regexes = [progressAndRankingsRegex, localTestRegex, clientDisplayRegex]
+  const inceptionRegex = /\/administrator\/skills\/.*/i
+  const skillDisplayPreviewRegex = /\/administrator\/projects\/.*\/users\/.*/i
+  const regexes = [progressAndRankingsRegex, localTestRegex, clientDisplayRegex, inceptionRegex, skillDisplayPreviewRegex]
   const localTestContextAppend = SkillsDisplayPathAppendValues.LocalTest
 
   const isSkillsClientPath = () => {
@@ -23,8 +25,11 @@ export const useSkillsDisplayInfo = () => {
     if (route.path.startsWith('/progress-and-rankings')) {
       return `${name}${localContextAppend}`
     }
-    if (route.path.startsWith('/administrator/skills')) {
+    if (route.path.match(inceptionRegex)) {
       return `${name}${SkillsDisplayPathAppendValues.Inception}`
+    }
+    if (route.path.match(skillDisplayPreviewRegex)) {
+      return `${name}${SkillsDisplayPathAppendValues.SkillsDisplayPreview}`
     }
     return `${name}${localTestContextAppend}`
   }

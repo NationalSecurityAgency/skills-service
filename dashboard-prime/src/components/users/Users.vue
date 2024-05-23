@@ -6,7 +6,7 @@ import UsersTable from './UsersTable.vue';
 <template>
   <div class="usersTable">
     <sub-page-header title="Users"/>
-    <Card>
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
         <UsersTable />
       </template>

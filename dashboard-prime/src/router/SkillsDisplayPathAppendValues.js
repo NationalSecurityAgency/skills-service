@@ -3,4 +3,5 @@ export default {
   SkillsClient: 'SkillsClient',
   LocalTest: 'LocalTest',
   Inception: 'Inception',
+  SkillsDisplayPreview: 'SkillsDisplayPreviewProject',
 };

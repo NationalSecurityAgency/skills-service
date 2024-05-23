@@ -122,7 +122,6 @@ const buildBreadcrumb = () => {
 
         if (key) {
           if (!shouldExcludeKey(key)) {
-            console.log(`key: ${key}, value: ${value}`)
             if (key?.toLowerCase() === 'skills' && value?.toLowerCase() === 'inception') {
               newItems.push(buildResItem(null, 'Dashboard Skills', res, index))
             } else {

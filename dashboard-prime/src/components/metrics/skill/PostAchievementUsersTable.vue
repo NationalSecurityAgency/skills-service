@@ -56,7 +56,6 @@ const loadData = () => {
     sortBy: sortField.value ? sortField.value : 'userId',
     sortDesc: sortOrder.value !== 1,
   };
-  console.log(queryParams);
   MetricsService.loadChart(route.params.projectId, chartToLoad.value, queryParams).then((dataFromServer) => {
         if (dataFromServer) {
           hasData.value = true;

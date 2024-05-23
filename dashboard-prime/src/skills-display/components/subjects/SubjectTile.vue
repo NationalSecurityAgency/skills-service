@@ -26,7 +26,6 @@ const themeState = useSkillsDisplayThemeState()
 
 const progress = computed(() => {
   let levelBeforeToday = 0
-  console.log(props.subject)
   if (props.subject.levelPoints > props.subject.todaysPoints) {
     levelBeforeToday = ((props.subject.levelPoints - props.subject.todaysPoints) / props.subject.levelTotalPoints) * 100
   } else {

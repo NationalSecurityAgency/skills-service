@@ -50,6 +50,10 @@ import TestSkillsClient from '@/skills-display/components/test/TestSkillsClient.
 import TestSkillsDisplay from '@/skills-display/components/test/TestSkillsDisplay.vue'
 import PathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
 import InceptionSkills from '@/components/inception /InceptionSkills.vue'
+import UserPage from '@/components/users/UserPage.vue'
+import SkillsDisplayPreview from '@/components/users/SkillsDisplayPreview.vue'
+import UserSkillsPerformed from '@/components/users/UserSkillsPerformed.vue'
+import createSkillsDisplayPreviewRoutes from '@/router/SkillsDisplayPreviewRoutes.js'
 
 const routes = [
   {
@@ -392,7 +396,35 @@ const routes = [
           },
         },
       }],
-    }]
+    },]
+  },{
+    path: '/administrator/projects/:projectId/users/:userId',
+    component: UserPage,
+    meta: { requiresAuth: true },
+    children: [{
+      name: 'ClientDisplayPreview',
+      path: '',
+      component: SkillsDisplayPreview,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitClientDisplay',
+        announcer: {
+          message: 'Client Display Preview for user',
+        },
+      },
+      children: createSkillsDisplayChildRoutes(PathAppendValues.SkillsDisplayPreview)
+    }, {
+      name: 'UserSkillEvents',
+      path: 'skillEvents',
+      component: UserSkillsPerformed,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitUserPerformedSkills',
+        announcer: {
+          message: 'User\'s Skill Events',
+        },
+      },
+    }],
   },
   {
     path: '/administrator/projects/:projectId/subjects/:subjectId/skills/:skillId',

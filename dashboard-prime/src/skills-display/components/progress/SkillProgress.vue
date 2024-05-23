@@ -69,7 +69,6 @@ const buildToRoute = () => {
   } else if (props.skill.crossProject && props.skill.projectId) {
     params.crossProjectId = props.skill.projectId
   }
-  console.log(`selected name: ${name}`)
   name = skillsDisplayInfo.getContextSpecificRouteName(name)
   return { name, params }
 }

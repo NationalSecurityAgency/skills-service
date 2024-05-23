@@ -358,7 +358,7 @@ describe('Users Tests', () => {
         ], 5, true, 6);
     });
 
-    it.skip('navigate to user details', () => {
+    it('navigate to user details', () => {
         cy.intercept('/admin/projects/proj1/users?query=*')
             .as('getProjectUsers');
 
@@ -389,9 +389,10 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'userb@skills.org' }],
         ], 5, true);
 
-        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
-        cy.contains("Client Display");
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
+        cy.get('[data-cy="subPageHeader"]').contains("User's Display");
         cy.contains("ID: usera@skills.org");
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]')
 
         // validate from subject
         cy.intercept('/admin/projects/proj1/subjects/subj1/users?query=*')
@@ -404,9 +405,11 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'userb@skills.org' }],
         ], 5, true);
 
-        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
-        cy.contains("Client Display");
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
+        cy.get('[data-cy="subPageHeader"]').contains("User's Display");
         cy.contains("ID: usera@skills.org");
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]')
+
 
         // validate from skill
         cy.intercept('/admin/projects/proj1/skills/skill1/users?query=*')
@@ -419,9 +422,10 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'userb@skills.org' }],
         ], 5, true);
 
-        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
-        cy.contains("Client Display");
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
+        cy.get('[data-cy="subPageHeader"]').contains("User's Display");
         cy.contains("ID: usera@skills.org");
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]')
 
         // validate from badge
         cy.intercept('/admin/projects/proj1/badges/badge1/users?query=*')
@@ -434,10 +438,51 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'userb@skills.org' }],
         ], 5, true);
 
-        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
-        cy.contains("Client Display");
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
+        cy.get('[data-cy="subPageHeader"]').contains("User's Display");
         cy.contains("ID: usera@skills.org");
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]')
+
     });
+
+    it('navigate around user Skills Display', () => {
+        for (let i = 0; i < 2; i += 1) {
+            const charToAdd = String.fromCharCode(97 + i);
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                userId: `user${charToAdd}@skills.org`,
+                timestamp: m.clone().add(i, 'day').format('x')
+            });
+        }
+
+        cy.visit('/administrator/projects/proj1/users');
+        cy.get(`${tableSelector}`).contains('User').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
+            [{ colIndex: 0,  value: 'userb@skills.org' }],
+        ], 5, true);
+
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
+        cy.get('[data-cy="subPageHeader"]').contains("User's Display");
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="earnedPoints"]').should('have.text', '1,500')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').should('have.length', 4)
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(0).contains('Projects')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(1).contains('proj1')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(2).contains('Users')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(3).contains('usera@skills.org')
+
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]').click()
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains("Interesting Subject 1");
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').should('have.length', 5)
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(0).contains('Projects')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(1).contains('proj1')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(2).contains('Users')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(3).contains('usera@skills.org')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(4).contains('subj1')
+
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillProgressTitle-skill1"]')
+
+    })
 
     it('view users from badge and skill', () => {
         cy.intercept('users')

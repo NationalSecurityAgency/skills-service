@@ -35,12 +35,12 @@ export const useProjConfig = defineStore('projConfig', () => {
     })
   }
 
-  function afterProjConfigStateLoaded({ state }) {
+  function afterProjConfigStateLoaded() {
     return new Promise((resolve) => {
       (function waitForProjConfig() {
-        if (!state.loadingProjConfig) return resolve(state.projConfig)
+        if (!loadingProjConfig.value) return resolve(projConfig.value)
         setTimeout(waitForProjConfig, 100)
-        return state.projConfig
+        return projConfig.value
       }())
     })
   }

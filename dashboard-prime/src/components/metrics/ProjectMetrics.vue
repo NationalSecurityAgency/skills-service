@@ -13,7 +13,6 @@ onMounted(() => {
 });
 
 const buildTagCharts = () => {
-  console.log(appConfig.projectMetricsTagCharts);
   if (appConfig.projectMetricsTagCharts) {
     const json = appConfig.projectMetricsTagCharts;
     tagCharts.value = JSON.parse(json);

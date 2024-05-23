@@ -11,8 +11,30 @@ export const useSkillsDisplayService = () => {
     // const params = this.getUserIdParams();
     // params.version = this.version;
     //
-    // return params;
+    if (attributes.userId) {
+      return { userId: attributes.userId }
+    }
     return {}
+  }
+
+  const loadUserProjectSummary = () => {
+    return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/summary`, {
+      params: getUserIdAndVersionParams()
+    }).then((result) => {
+      return result.data
+    })
+  }
+
+  const loadUserSkillsRanking = (subjectId) => {
+    let url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/subjects/${encodeURIComponent(subjectId)}/rank`
+    if (!subjectId) {
+      url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/rank`
+    }
+    return axios.get(url, {
+      params: getUserIdAndVersionParams()
+    }).then((result) => {
+      return result.data
+    })
   }
 
   const loadSubjectSummary = (subjectId, includeSkills = true) => {
@@ -197,7 +219,9 @@ export const useSkillsDisplayService = () => {
   }
 
   return {
+    loadUserProjectSummary,
     loadSubjectSummary,
+    loadUserSkillsRanking,
     updateSkillHistory,
     getSkillSummary,
     searchSkills,

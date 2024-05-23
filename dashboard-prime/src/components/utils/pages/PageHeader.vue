@@ -1,9 +1,11 @@
 <script setup>
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 
 const props = defineProps(['loading', 'options'])
 const numberFormat = useNumberFormat()
+const colors = useColors()
 </script>
 
 <template>
@@ -13,9 +15,9 @@ const numberFormat = useNumberFormat()
       <slot name="banner"></slot>
       <div class="flex w-full flex-wrap">
         <div class="mt-2 text-center lg:text-left w-full lg:w-auto">
-          <div class="text-2xl">
-            <i v-if="options.icon" class="mr-2" :class="options.icon" />
-            <h1 class="text-2xl" data-cy="title">{{ options.title }}</h1>
+          <div class="text-2xl flex">
+            <Avatar v-if="options.icon" class="mr-2" :icon="options.icon" />
+            <div class="text-2xl" data-cy="title">{{ options.title }}</div>
             <slot name="right-of-header"></slot>
           </div>
           <div v-if="options.subTitle" data-cy="subTitle" class="mt-1 mb-2">
@@ -27,7 +29,7 @@ const numberFormat = useNumberFormat()
         </div>
         <div class="flex-1">
           <div class="flex justify-content-center lg:justify-content-end flex-wrap">
-            <div v-for="(stat) in options.stats" :key="stat.label" data-cy="pageHeaderStat" class="w-full md:w-6 lg:w-auto mb-1">
+            <div v-for="(stat, index) in options.stats" :key="stat.label" data-cy="pageHeaderStat" class="w-full md:w-6 lg:w-auto mb-1">
               <Card class="ml-3 mt-2 h-full" :pt="{ body: { class: 'p-3' }, content: { class: 'p-0' } }">
                 <template #content>
                   <div class="flex">
@@ -46,7 +48,7 @@ const numberFormat = useNumberFormat()
                           </span>
                     </div>
                     <div class="ml-3 flex-1 text-right">
-                      <i :class="stat.icon" style="font-size: 2.2rem;"></i>
+                      <i :class="`${stat.icon} ${colors.getTextClass(index)}`" style="font-size: 2.2rem;" aria-hidden="true"></i>
                     </div>
                   </div>
                   <div class="text-left" style="font-size:0.9rem;" v-if="stat.secondaryPreformatted"

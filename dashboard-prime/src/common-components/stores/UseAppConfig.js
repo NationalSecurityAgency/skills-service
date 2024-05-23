@@ -113,7 +113,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const approvalConfUserTagLabel = computed(() => config.value.approvalConfUserTagLabel)
   const projectMetricsTagCharts = computed(() => config.value.projectMetricsTagCharts)
   const maxDailyUserEvents = computed(() => config.value.maxDailyUserEvents)
-
+  const userPageTagsToDisplay = computed(() => config.value.userPageTagsToDisplay)
   return {
     loadConfigState,
     refreshConfig,
@@ -184,6 +184,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     approvalConfUserTagKey,
     approvalConfUserTagLabel,
     projectMetricsTagCharts,
-    maxDailyUserEvents
+    maxDailyUserEvents,
+    userPageTagsToDisplay
   }
 })
