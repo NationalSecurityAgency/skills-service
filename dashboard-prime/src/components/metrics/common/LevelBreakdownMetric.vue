@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import { useRoute } from 'vue-router';
 import NumberFormatter from '@/components/utils/NumberFormatter.js'
+import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 
 const route = useRoute();
 const props = defineProps({
@@ -134,13 +135,9 @@ onMounted(() => {
       <SkillsCardHeader :title="title"></SkillsCardHeader>
     </template>
     <template #content>
-<!--      <metrics-spinner v-if="isLoading"/>-->
-      <apexchart v-if="!isLoading" type="bar" height="350" :options="chartOptions" :series="series" class="-mt-5" />
-      <div v-if="!isLoading && isEmpty" class="card-img-overlay d-flex">
-        <div class="my-auto mx-auto text-center">
-          <div class="alert alert-info"><i class="fa fa-info-circle"/> No one reached <Badge>Level 1</Badge> yet...</div>
-        </div>
-      </div>
+      <metrics-overlay :loading="isLoading" :has-data="!isLoading && !isEmpty" no-data-icon="fa fa-info-circle" no-data-msg="No one reached Level 1 yet...">
+        <apexchart v-if="!isLoading" type="bar" height="350" :options="chartOptions" :series="series" class="-mt-5" />
+      </metrics-overlay>
     </template>
   </Card>
 </template>
