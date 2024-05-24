@@ -461,26 +461,71 @@ describe('Users Tests', () => {
         ], 5, true);
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
-        cy.get('[data-cy="subPageHeader"]').contains("User's Display");
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="earnedPoints"]').should('have.text', '1,500')
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').should('have.length', 4)
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(0).contains('Projects')
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(1).contains('proj1')
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(2).contains('Users')
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(3).contains('usera@skills.org')
+        const validateProject = ()=> {
+            cy.get('[data-cy="subPageHeader"]').contains("User's Display");
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]')
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="earnedPoints"]').should('have.text', '1,500')
+            cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').should('have.length', 4)
+            cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(0).contains('Projects')
+            cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(1).contains('proj1')
+            cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(2).contains('Users')
+            cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(3).contains('usera@skills.org')
+        }
+        validateProject()
 
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]').click()
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains("Interesting Subject 1");
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').should('have.length', 5)
+        const validateSubject = ()=> {
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains("Interesting Subject 1");
+            cy.get('[data-cy="pointHistoryChartNoData"]')
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillProgressTitle-skill1"]')
+            cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').should('have.length', 5)
+            cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(0).contains('Projects')
+            cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(1).contains('proj1')
+            cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(2).contains('Users')
+            cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(3).contains('usera@skills.org')
+            cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(4).contains('subj1')
+        }
+        validateSubject()
+
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').click()
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains("Skill Overview");
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains("1,500 / 15,000 Points");
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').should('have.length', 6)
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(0).contains('Projects')
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(1).contains('proj1')
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(2).contains('Users')
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(3).contains('usera@skills.org')
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(4).contains('subj1')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(5).contains('skill1')
 
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillProgressTitle-skill1"]')
+        cy.get('[data-cy="breadcrumb-subj1"]').click()
+        validateSubject()
 
+        cy.get('[data-cy="myRankBtn"]').click()
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains("My Rank");
+        cy.get('[data-cy="leaderboard"]').contains('1,500 Points')
+        cy.get('[data-cy="levelBreakdownChart-animationEnded"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').should('have.length', 6)
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(0).contains('Projects')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(1).contains('proj1')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(2).contains('Users')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(3).contains('usera@skills.org')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(4).contains('subj1')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(5).contains('Rank')
+
+        cy.get('[data-cy="breadcrumb-usera@skills.org"]').click()
+        validateProject()
+
+        cy.get('[data-cy="myRankBtn"]').click()
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains("My Rank");
+        cy.get('[data-cy="leaderboard"]').contains('1,500 Points')
+        cy.get('[data-cy="levelBreakdownChart-animationEnded"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').should('have.length', 5)
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(0).contains('Projects')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(1).contains('proj1')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(2).contains('Users')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(3).contains('usera@skills.org')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(4).contains('Rank')
     })
 
     it('view users from badge and skill', () => {

@@ -285,29 +285,29 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"] [data-pc-section="input"]').should('be.checked')
         cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').should('have.value', '90 days')
 
-        cy.get('[data-cy="dailyDays-sb"]').clear()
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').clear()
 
         cy.get('[data-cy=dailyDaysError]')
           .contains('Expiration Days is a required field')
           .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="dailyDays-sb"]').clear().type('a')
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').clear().type('a')
 
-        cy.get('[data-cy="dailyDays-sb"]').clear().type('0')
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').clear().type('0')
         cy.get('[data-cy=dailyDaysError]')
           .contains('Expiration Days must be greater than or equal to 1')
           .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="dailyDays-sb"]').clear().type('1000')
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').clear().type('1000')
         cy.get('[data-cy=dailyDaysError]')
           .contains('Expiration Days must be less than or equal to 999')
           .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="dailyDays-sb"]').clear()
-        cy.get('[data-cy="dailyDays-sb"]').clear().type('30')
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').clear()
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').clear().type('30')
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
