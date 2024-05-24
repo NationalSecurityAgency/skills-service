@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import { useRoute } from 'vue-router';
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
+import NumberFormatter from '@/components/utils/NumberFormatter.js';
 
 const props = defineProps(['tag']);
 const route = useRoute();
@@ -45,13 +46,13 @@ const chartOptions = ref({
   },
   yaxis: {
     title: {
-      text: tag.label,
+      text: props.tag.label,
     },
   },
   tooltip: {
     y: {
       formatter(val) {
-        return numberFormatter(val);
+        return NumberFormatter.format(val);
       },
     },
   },
@@ -66,7 +67,7 @@ const chartOptions = ref({
           fontWeight: 'bold',
     },
     formatter(val, opt) {
-      return `${opt.w.globals.seriesNames[opt.seriesIndex]}: ${numberFormatter(val)} users`;
+      return `${opt.w.globals.seriesNames[opt.seriesIndex]}: ${NumberFormatter.format(val)} users`;
     },
     dropShadow: {
       enabled: true,
@@ -104,7 +105,7 @@ const chartHeight = computed(() => {
 
 const loadData = () => {
   loading.value = true;
-  MetricsService.loadChart(route.params.projectId, 'achievementsByTagPerLevelMetricsBuilder', { subjectId: route.params.subjectId, userTagKey: tag.key })
+  MetricsService.loadChart(route.params.projectId, 'achievementsByTagPerLevelMetricsBuilder', { subjectId: route.params.subjectId, userTagKey: props.tag.key })
       .then((dataFromServer) => {
         if (dataFromServer && Object.keys(dataFromServer.data).length > 0) {
           const userData = dataFromServer.data;
@@ -112,7 +113,7 @@ const loadData = () => {
 
           if (tags) {
             const categories = userData.map((a) => a.tag);
-            chartOptions.xaxis.categories = categories;
+            chartOptions.value.xaxis.categories = categories;
             const numberOfLevels = dataFromServer.totalLevels;
             const localSeries = [];
 

@@ -32,7 +32,7 @@ const modeSelectorOptions = ref([
 const loading = ref(true);
 const hasData = ref(false);
 const currentPage = ref(1);
-const totalRows = ref(1);
+const totalRows = ref(0);
 const pageSize = ref(5);
 const sortField = ref('userId');
 const sortOrder = ref(-1);
@@ -115,9 +115,11 @@ const calculateClientDisplayRoute = (props) => {
                          striped-rows
                          show-gridlines
                          paginator
+                         lazy
                          @page="pageChanged"
                          @sort="sortTable"
                          :rows="pageSize"
+                         :totalRecords="totalRows"
                          :rowsPerPageOptions="possiblePageSizes"
                          v-model:sort-field="sortField"
                          v-model:sort-order="sortOrder">
@@ -142,6 +144,10 @@ const calculateClientDisplayRoute = (props) => {
               <date-cell :value="slotProps.data.date" />
             </template>
           </Column>
+
+          <template #paginatorstart>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+          </template>
         </SkillsDataTable>
       </metrics-overlay>
     </template>

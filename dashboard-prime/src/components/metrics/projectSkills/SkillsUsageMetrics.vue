@@ -171,6 +171,17 @@ const loadData = () => {
             </div>
           </template>
         </Column>
+
+        <template #paginatorstart>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+        </template>
+
+        <template #empty>
+          <div class="flex justify-content-center flex-wrap" data-cy="emptyTable">
+            <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+            <span class="flex align-items-center justify-content-center">There are no records to show</span>
+          </div>
+        </template>
       </SkillsDataTable>
     </template>
   </Card>

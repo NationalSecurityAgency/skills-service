@@ -1,3 +1,5 @@
+import NumberFormatter from '@/components/utils/NumberFormatter.js';
+
 export function useUserTagChartConfig() {
 
     const pieChartOptions = {
@@ -52,7 +54,7 @@ export function useUserTagChartConfig() {
                 fontWeight: 'bold',
             },
             formatter(val, opt) {
-                // return `${opt.w.globals.labels[opt.dataPointIndex]}: ${numberFormatter(val)} users`;
+                return `${opt.w.globals.labels[opt.dataPointIndex]}: ${NumberFormatter.format(val)} users`;
             },
             offsetX: 0,
                 dropShadow: {
@@ -80,7 +82,7 @@ export function useUserTagChartConfig() {
             categories: [],
             labels: {
                 formatter(val) {
-                    // return numberFormatter(val);
+                    return NumberFormatter.format(val);
                 },
             },
         },
@@ -102,7 +104,7 @@ export function useUserTagChartConfig() {
         tooltip: {
             y: {
                 formatter(val) {
-                    // return numberFormatter(val);
+                    return NumberFormatter.format(val);
                 },
             },
         },

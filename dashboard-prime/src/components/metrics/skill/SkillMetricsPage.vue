@@ -12,6 +12,7 @@ import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import SkillEventsOverTime from "@/components/metrics/skill/SkillEventsOverTime.vue";
 import SkillAchievedByUsersOverTime from "@/components/metrics/skill/SkillAchievedByUsersOverTime.vue";
 import UsersByTagChart from "@/components/metrics/skill/UsersByTagChart.vue";
+import NumberFormatter from '@/components/utils/NumberFormatter.js'
 
 const appConfig = useAppConfig();
 const route = useRoute();
@@ -37,9 +38,9 @@ onMounted(() => {
   tags.value = localTags;
   MetricsService.loadChart(route.params.projectId, 'singleSkillCountsChartBuilder', { skillId: route.params.skillId })
       .then((dataFromServer) => {
-        numUsersAchieved.value = dataFromServer.numUsersAchieved;
+        numUsersAchieved.value = NumberFormatter.format(dataFromServer.numUsersAchieved);
         lastAchieved.value = dataFromServer.lastAchieved;
-        numUsersInProgress.value = dataFromServer.numUsersInProgress;
+        numUsersInProgress.value = NumberFormatter.format(dataFromServer.numUsersInProgress);
         loading.value = false;
       });
 })
