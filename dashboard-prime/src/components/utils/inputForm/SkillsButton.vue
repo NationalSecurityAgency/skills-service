@@ -16,6 +16,10 @@ const props = defineProps({
   trackForFocus: {
     type: Boolean,
     default: false
+  },
+  outlined: {
+    type: Boolean,
+    default: true
   }
 })
 const emit = defineEmits(['click'])
@@ -34,7 +38,7 @@ const onClick = (event) =>{
 </script>
 
 <template>
-  <Button :disabled="disabled || loading" @click="onClick" role="button">
+  <Button :disabled="disabled || loading" @click="onClick" role="button" outlined>
     <slot>
       <span v-if="label">{{ label }}</span>
       <i v-if="!loading && icon && icon.trim().length > 0" class="ml-1" :class="icon" aria-hidden="true" style="width: 0.9rem; height: 0.9rem;"></i>

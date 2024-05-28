@@ -72,7 +72,7 @@ const progress = computed(() => {
           </div>
           <div class="">
             <label class="skill-label text-right" data-cy="pointsProgress">
-              <span class="text-orange-600 font-medium sd-theme-primary-color">{{ numFormat.pretty(subject.points) }}</span> /
+              <span class="text-orange-700 font-medium sd-theme-primary-color">{{ numFormat.pretty(subject.points) }}</span> /
               {{ numFormat.pretty(subject.totalPoints) }}
             </label>
           </div>
@@ -92,19 +92,19 @@ const progress = computed(() => {
                 }}</label>
             </div>
             <div v-if="!progress.allLevelsComplete" data-cy="levelProgress">
-                <span class="text-orange-600 font-medium sd-theme-primary-color">{{ numFormat.pretty(subject.levelPoints) }}</span> /
+                <span class="text-orange-700 font-medium sd-theme-primary-color">{{ numFormat.pretty(subject.levelPoints) }}</span> /
                 {{ numFormat.pretty(subject.levelTotalPoints) }}
             </div>
           </div>
           <div v-if="progress.allLevelsComplete" data-cy="allLevelsComplete">
-            <label class="skill-label text-center uppercase"><i class="fas fa-check text-green-500" /> All
+            <label class="skill-label text-center uppercase"><i class="fas fa-check text-green-800" /> All
               {{ attributes.levelDisplayName.toLowerCase() }}s complete</label>
           </div>
           <div class="">
             <vertical-progress-bar
               :aria-label="`Level progress for ${subject.subject}`"
-              :total-progress="progress.level"
-              :total-progress-before-today="progress.levelBeforeToday"
+              :total-progress="progress.level || 0"
+              :total-progress-before-today="progress.levelBeforeToday || 0"
             />
             <!--          <progress-bar-->
             <!--            v-if="progress.allLevelsComplete"-->

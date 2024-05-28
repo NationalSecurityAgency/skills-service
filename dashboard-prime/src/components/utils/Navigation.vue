@@ -3,11 +3,13 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 
 const router = useRouter();
 defineProps(['navItems']);
 const collapsed = useStorage('navigationCollapsed', false)
 const responsive = useResponsiveBreakpoints()
+const colors = useColors()
 const showCollapsed = computed(() => collapsed.value || responsive.lg.value)
 
 function flipCollapsed() {
@@ -57,12 +59,11 @@ const navOnSmallScreen = (changeEvent) => {
               </div>
             </div>
             <ul class="list-none p-0 text-color">
-              <router-link v-for="(navItem) of navItems"
+              <router-link v-for="(navItem, index) of navItems"
                            :key="navItem.name"
                            :to="{ name: navItem.page }"
                            v-slot="{ href, navigate, isActive, isExactActive }"
                            custom>
-<!--                v-b-tooltip="{ title: navItem.msg ? navItem.msg : navItem.name, placement: 'right', variant: 'primary', disabled: !collapsed && !navItem.isDisabled }"-->
                 <li>
                   <Button link
                           :disabled="navItem.isDisabled"
@@ -73,9 +74,9 @@ const navOnSmallScreen = (changeEvent) => {
                           :aria-current="isExactActive ? 'page' : false"
                           :data-cy="`nav-${navItem.name}`">
                     <div class="" :class="{'mr-4': !showCollapsed}">
-                      <i :class="navItem.iconClass"
+                      <i :class="`${navItem.iconClass} ${colors.getTextClass(index)}${isExactActive ? ' bg-primary-reverse border-round border-1 py-1' : ''}`"
                          v-tooltip="{ value: navItem.name, autoHide: false, disabled: !responsive.lg.value }"
-                         class="fas text-base mr-2 w-2rem"
+                         class="fas mr-2 w-2rem"
                          aria-hidden="true" /> <span v-if="!showCollapsed" class="font-medium">{{ navItem.name }}</span>
                       <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-red-500 ml-1" />
                     </div>

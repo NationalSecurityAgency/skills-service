@@ -95,6 +95,7 @@ export default {
         'body #app .sd-theme-home .p-inputtext.p-component,' +
         '.p-autocomplete-panel.p-component .p-autocomplete-item,' +
         '.p-autocomplete-panel.p-component .p-autocomplete-item .text-orange-600,' +
+        '.p-autocomplete-panel.p-component .p-autocomplete-item .text-orange-700,' +
         '.p-overlaypanel-content .p-panelmenu.p-component .p-panelmenu-header-content,' +
         '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link,' +
         '.sd-theme-home .editor-help-footer,' +
@@ -169,6 +170,8 @@ export default {
           '.p-autocomplete-panel.p-component .p-autocomplete-item:hover i,' +
           '.p-autocomplete-panel.p-component .p-autocomplete-item.p-focus .text-orange-600,' +
           '.p-autocomplete-panel.p-component .p-autocomplete-item:hover .text-orange-600,' +
+          '.p-autocomplete-panel.p-component .p-autocomplete-item.p-focus .text-orange-700,' +
+          '.p-autocomplete-panel.p-component .p-autocomplete-item:hover .text-orange-700,' +
           'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link.p-highlight,' +
           '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link:hover,' +
           '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-avatar-icon,' +

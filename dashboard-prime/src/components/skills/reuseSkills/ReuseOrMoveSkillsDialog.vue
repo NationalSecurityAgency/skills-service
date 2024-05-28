@@ -119,6 +119,7 @@ const handleFocus = () => {
     :close-on-escape="true"
     class="w-11 xl:w-8"
     v-model:visible="model"
+    :pt="{ maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }"
   >
     <div data-cy="reuseOrMoveDialog">
       <skills-spinner :is-loading="isLoadingData" class="my-8" />

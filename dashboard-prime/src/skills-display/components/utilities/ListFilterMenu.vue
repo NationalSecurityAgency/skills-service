@@ -73,8 +73,8 @@ const focusOnProgressGroup = () => {
         outlined
         severity="info"
         data-cy="filterBtn"
-        aria-haspopup="true"
-        aria-controls="overlay_menu" />
+        aria-label="Open type filter"
+        aria-haspopup="true" />
       <div v-if="filteredSelection?.label" class="ml-2 align-content-center">
         <Chip :label="filteredSelection.label"
               :icon="filteredSelection.icon"
@@ -84,7 +84,7 @@ const focusOnProgressGroup = () => {
               data-cy="selectedFilter"/>
       </div>
     </div>
-    <OverlayPanel ref="menu" @show="focusOnProgressGroup">
+    <OverlayPanel id="typeSelectorPanel" ref="menu" @show="focusOnProgressGroup">
       <div>
         <PanelMenu :model="filtersInternal" class="w-full md:w-20rem" v-model:expandedKeys="expandedKeys">
           <template #item="{ item, props, root, active }">

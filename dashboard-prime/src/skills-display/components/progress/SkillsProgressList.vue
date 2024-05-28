@@ -257,6 +257,7 @@ const isLastViewedScrollSupported = computed(() => {
                       outlined
                       @click="searchString = ''"
                       class="position-absolute skills-theme-btn m-0 h-full"
+                      aria-label="clear search input"
                       data-cy="clearSkillsSearchInput" />
                   </InputGroupAddon>
                 </InputGroup>

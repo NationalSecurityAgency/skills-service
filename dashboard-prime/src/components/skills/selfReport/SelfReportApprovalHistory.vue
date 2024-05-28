@@ -7,9 +7,13 @@ import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import ShowMore from "@/components/skills/selfReport/ShowMore.vue";
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
+const colors = useColors()
+const responsive = useResponsiveBreakpoints()
 
 const loading = ref(true);
 const pageSize = ref(5);
@@ -114,12 +118,12 @@ defineExpose( {
 </script>
 
 <template>
-  <Card>
+  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #header>
       <SkillsCardHeader title="Approval History"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex gap-2">
+      <div class="flex flex-column md:flex-row gap-2 pt-3 px-3">
         <div class="w-full">
           <label for="skill-filter" class="ml-1">Skill Name</label>
           <InputText type="text" class="w-full mt-2" placeholder="Skill Name" v-model="filters.skill" id="skill-filter"
@@ -136,7 +140,7 @@ defineExpose( {
                      v-on:keydown.enter="loadApprovalsHistory" data-cy="selfReportApprovalHistory-approverUserIdFilter" />
         </div>
       </div>
-      <div class="flex gap-2 mt-4 mb-4">
+      <div class="flex gap-2 mt-4 mb-4 px-3">
         <SkillsButton size="small" @click="loadApprovalsHistory" data-cy="selfReportApprovalHistory-filterBtn" icon="fa fa-filter" label="Filter" />
         <SkillsButton size="small" @click="reset" class="ml-1" data-cy="selfReportApprovalHistory-resetBtn" label="Reset" icon="fa fa-times" />
       </div>
@@ -153,9 +157,9 @@ defineExpose( {
                        @page="pageChanged"
                        data-key="id"
                        @sort="sortTable">
-        <Column field="skillName" sortable>
+        <Column field="skillName" sortable :class="{'flex': responsive.md.value }">
           <template #header>
-            <span class="text-primary"><i class="fas fa-graduation-cap skills-color-skills" /> Requested</span>
+            <span class=""><i class="fas fa-graduation-cap mr-1" :class="colors.getTextClass(1)"/> Requested</span>
           </template>
           <template #body="slotProps">
             <div>
@@ -177,9 +181,9 @@ defineExpose( {
             </SkillsButton>
           </template>
         </Column>
-        <Column field="rejectedOn" sortable>
+        <Column field="rejectedOn" sortable :class="{'flex': responsive.md.value }">
           <template #header>
-            <span class="text-primary"><i class="fas fa-question-circle skills-color-access"></i> Response</span>
+            <span class=""><i class="fas fa-question-circle mr-1" :class="colors.getTextClass(2)"></i> Response</span>
           </template>
           <template #body="slotProps">
             <div v-if="slotProps.data.rejectedOn"><Badge variant="danger"><i class="fas fa-thumbs-down"></i> <span class="text-uppercase">Rejected</span></Badge></div>
@@ -189,17 +193,17 @@ defineExpose( {
             <div v-if="slotProps.data.rejectionMsg"><span class="text-primary text-break">Explanation:</span> <show-more :text="slotProps.data.rejectionMsg"/></div>
           </template>
         </Column>
-        <Column field="requestedOn" sortable>
+        <Column field="requestedOn" sortable :class="{'flex': responsive.md.value }">
           <template #header>
-            <span class="text-primary"><i class="fas fa-user-clock skills-color-crossProjects"></i> Requested On</span>
+            <span class=""><i class="fas fa-user-clock mr-1" :class="colors.getTextClass(3)"></i> Requested On</span>
           </template>
           <template #body="slotProps">
             <date-cell :value="slotProps.data.requestedOn" />
           </template>
         </Column>
-        <Column field="approverActionTakenOn" sortable>
+        <Column field="approverActionTakenOn" sortable :class="{'flex': responsive.md.value }">
           <template #header>
-            <span class="text-primary"><i class="fas fa-stopwatch skills-color-access"></i> Response On</span>
+            <span class=""><i class="fas fa-stopwatch mr-1" :class="colors.getTextClass(4)"></i> Response On</span>
           </template>
           <template #body="slotProps">
             <date-cell :value="slotProps.data.approverActionTakenOn" />

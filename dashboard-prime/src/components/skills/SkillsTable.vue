@@ -579,11 +579,6 @@ const isLoading = computed(() => {
             </div>
             <div class="flex-none">
               <div class="flex">
-                <router-link
-                  :to="{ name:'SkillOverview', params: { projectId: slotProps.data.projectId, subjectId, skillId: slotProps.data.skillId }}"
-                >
-                </router-link>
-
                 <ButtonGroup v-if="!projConfig.isReadOnlyProj" class="mt-2 ml-1">
                   <SkillsButton
                     :id="`editSkillButton_${slotProps.data.skillId}`"

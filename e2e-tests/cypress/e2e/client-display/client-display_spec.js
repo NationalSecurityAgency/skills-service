@@ -150,7 +150,7 @@ describe('Client Display Tests', () => {
         cy.enableBadge(1, 1);
     });
 
-    it.skip('visit home page', () => {
+    it('visit home page', () => {
 
         cy.request('POST', '/admin/projects/proj1/badges/badge1', {
             projectId: 'proj1',
@@ -171,7 +171,7 @@ describe('Client Display Tests', () => {
         cy.customA11y();
     });
 
-    it.skip('ability to expand skill details from subject page', () => {
+    it('ability to expand skill details from subject page', () => {
         cy.cdVisit('/', true);
         cy.injectAxe();
         cy.cdClickSubj(0, 'Subject 1', true);
@@ -183,8 +183,7 @@ describe('Client Display Tests', () => {
         cy.customA11y();
     });
 
-
-    it.skip('internal back button', () => {
+    it('internal back button', () => {
 
         cy.intercept('GET', '/api/projects/proj1/pointHistory')
             .as('pointHistoryChart');

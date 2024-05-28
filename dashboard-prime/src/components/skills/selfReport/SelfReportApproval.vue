@@ -7,6 +7,8 @@ import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 import RejectSkillModal from "@/components/skills/selfReport/RejectSkillModal.vue";
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 
 const route = useRoute();
 const props = defineProps({
@@ -17,6 +19,8 @@ const props = defineProps({
 });
 const emit = defineEmits(['approval-action']);
 const announcer = useSkillsAnnouncer();
+const colors = useColors()
+const responsive = useResponsiveBreakpoints()
 
 const approvals = ref([]);
 const loading = ref(true);
@@ -138,24 +142,28 @@ const toggleRow = (row) => {
 </script>
 
 <template>
-  <Card>
+  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #header>
       <SkillsCardHeader title="Self Reported Skills Requiring Approval">
         <template #headerContent>
-          <div v-if="isEmailEnabled" data-cy="unsubscribeContainer">
-            <InputSwitch v-model="emailSubscribed" @update:modelValue="toggleUnsubscribe" class="mr-2" data-cy="unsubscribeSwitch" /> {{ emailSubscribed ? 'Subscribed' : 'Unsubscribed' }}
+          <div v-if="isEmailEnabled" data-cy="unsubscribeContainer" class="flex align-content-center align-items-center">
+            {{ emailSubscribed ? 'Subscribed' : 'Unsubscribed' }} <InputSwitch v-model="emailSubscribed"
+                                                                               @update:modelValue="toggleUnsubscribe"
+                                                                               aria-label="Enable to receive Skill Approval request emails"
+                                                                               class="ml-2"
+                                                                               data-cy="unsubscribeSwitch" />
           </div>
         </template>
       </SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex mb-3">
+      <div class="flex p-3">
         <div class="flex flex-1">
-          <SkillsButton size="small" @click="loadApprovals" aria-label="Sync Records" data-cy="syncApprovalsBtn" class="mr-2 mt-1" icon="fas fa-sync-alt" />
+          <SkillsButton size="small" @click="loadApprovals" aria-label="Sync Records" data-cy="syncApprovalsBtn" class="" icon="fas fa-sync-alt" />
         </div>
         <div class="flex flex-1 justify-content-end">
-          <SkillsButton size="small" @click="showRejectModal=true" data-cy="rejectBtn" class="mt-1 ml-2" :disabled="selectedItems.length === 0" icon="fa fa-times-circle" label="Reject" />
-          <SkillsButton size="small" @click="approve" data-cy="approveBtn" class="mt-1 ml-2" :disabled="selectedItems.length === 0" icon="fa fa-check" label="Approve" />
+          <SkillsButton size="small" @click="showRejectModal=true" data-cy="rejectBtn" class="" :disabled="selectedItems.length === 0" icon="fa fa-times-circle" label="Reject" />
+          <SkillsButton size="small" @click="approve" data-cy="approveBtn" class="ml-2" :disabled="selectedItems.length === 0" icon="fa fa-check" label="Approve" />
         </div>
       </div>
 
@@ -173,10 +181,15 @@ const toggleRow = (row) => {
                        @page="pageChanged"
                        data-key="id"
                        @sort="sortTable">
-        <Column selectionMode="multiple" headerStyle="width: 3rem" body-class="row-selection-item"></Column>
-        <Column field="request">
+        <Column selectionMode="multiple" :class="{'flex': responsive.md.value }">
           <template #header>
-            <span class="text-primary"><i class="fas fa-user-plus skills-color-crossProjects" /> Requested</span>
+            <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-check-double"
+                                                    aria-hidden="true"></i> Select Rows:</span>
+          </template>
+        </Column>
+        <Column field="request" :class="{'flex': responsive.md.value }">
+          <template #header>
+            <span class="mr-1"><i class="fas fa-user-plus" :class="colors.getTextClass(1)"/> Requested</span>
           </template>
           <template #body="slotProps">
             <div>
@@ -191,24 +204,24 @@ const toggleRow = (row) => {
                 <Badge class="ml-2">+ {{ slotProps.data.points }} Points</Badge>
             </div>
             <SkillsButton size="small" variant="outline-info"
-                      class="mr-2 py-0 px-1 mt-1"
+                      class="mr-2 py-0 px-1 mt-1 ml-2 lg:ml-0"
                       @click="toggleRow(slotProps.data.id)"
                       :aria-label="`Show Justification for ${slotProps.data.name}`"
                       :data-cy="`expandDetailsBtn_${slotProps.data.skillId}`" :icon="expandedRows[slotProps.data.id] ? 'fa fa-minus-square' : 'fa fa-plus-square'" label="Justification">
             </SkillsButton>
           </template>
         </Column>
-        <Column field="userId" sortable>
+        <Column field="userId" sortable :class="{'flex': responsive.md.value }">
           <template #header>
-            <span class="text-primary"><i class="fas fa-hand-pointer skills-color-skills" /> For User</span>
+            <span class="mr-1"><i class="fas fa-hand-pointer" :class="colors.getTextClass(2)"/> For User</span>
           </template>
           <template #body="slotProps">
             {{ slotProps.data.userIdForDisplay }}
           </template>
         </Column>
-        <Column field="requestedOn" sortable>
+        <Column field="requestedOn" sortable :class="{'flex': responsive.md.value }">
           <template #header>
-            <span class="text-primary"><i class="fas fa-clock skills-color-access" /> Requested On</span>
+            <span class="mr-1"><i class="fas fa-clock" :class="colors.getTextClass(3)" /> Requested On</span>
           </template>
           <template #body="slotProps">
             <date-cell :value="slotProps.data.requestedOn" />

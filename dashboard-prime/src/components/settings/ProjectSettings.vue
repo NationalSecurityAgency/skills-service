@@ -597,7 +597,7 @@ const saveSettings = ((dirtyChanges) => {
 
           <div class="flex flex-row">
             <div class="md:col-5 xl:col-3 text-secondary" id="groupDescriptions">
-              Always Show Group Descriptions:
+              <span id="groupDescriptionsLabel">Always Show Group Descriptions:</span>
               <inline-help
                   target-id="groupDescriptionsHelp"
                   msg="Toggle this setting to always show the group's descriptions in this project"/>

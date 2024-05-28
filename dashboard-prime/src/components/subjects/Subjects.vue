@@ -186,10 +186,10 @@ const sortOrderUpdate = (updateEvent) => {
                        :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
                        :aria-label="'new subject'"/>
       <jump-to-skill />
-      <div v-if="subjectsState.subjects && subjectsState.subjects.length" class="flex flex-wrap align-items-center justify-content-center" id="subjectCards" data-cy="subjectCards">
-        <div v-for="(subject) of subjectsState.subjects" :key="subject.subjectId" :id="subject.subjectId" class="lg:col-4 mb-3" style="min-width: 23rem;" :data-cy="`${subject.subjectId}_card`">
+      <div v-if="subjectsState.subjects && subjectsState.subjects.length" class="flex flex-wrap gap-3 align-items-stretch justify-content-center" id="subjectCards" data-cy="subjectCards">
+        <div v-for="(subject) of subjectsState.subjects" :key="subject.subjectId" :id="subject.subjectId" class="flex align-items-stretch" style="min-width: 23rem;" :data-cy="`${subject.subjectId}_card`">
           <div>
-            <BlockUI :blocked="sortOrder.loading">
+            <BlockUI :blocked="sortOrder.loading" class="flex align-items-stretch h-full">
                 <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${subject.subjectId}_overlayShown`">
                   <div v-if="subject.subjectId===sortOrder.loadingSubjectId" data-cy="updatingSortMsg">
                     <div class="text-info uppercase mb-1">Updating sort order!</div>
@@ -200,6 +200,7 @@ const sortOrderUpdate = (updateEvent) => {
               <subject :subject="subject"
                        :ref="(el) => (subjRef[subject.subjectId] = el)"
                        @subject-deleted="deleteSubject"
+                       class="flex"
                        @sort-changed-requested="updateSortAndReloadSubjects"
                        :disable-sort-control="subjectsState.subjects.length === 1"/>
             </BlockUI>

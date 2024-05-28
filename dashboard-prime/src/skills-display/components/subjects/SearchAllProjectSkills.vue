@@ -71,7 +71,7 @@ const navToSkill = (event) => {
               class="flex-1 flex align-items-center"
               data-cy="skillName"
               :aria-label="`Selected ${slotProps.option.skillName} skill from ${slotProps.option.subjectName} subject. You have earned ${slotProps.option.userCurrentPoints} points out of ${slotProps.option.totalPoints} for this skill. Click to navigate to the skill. Type to search for a skill across all subjects.`">
-              <i class="fas fa-graduation-cap skills-theme-primary-color mr-1 text-xl text-green-500"
+              <i class="fas fa-graduation-cap skills-theme-primary-color mr-1 text-xl text-green-800"
                  aria-hidden="true" />
               <highlighted-value :value="slotProps.option.skillName" :filter="query" class="text-xl" />
             </div>

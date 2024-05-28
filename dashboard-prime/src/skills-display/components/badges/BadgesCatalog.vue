@@ -81,6 +81,7 @@ const setFilterId = (newFilterId) => {
                 outlined
                 @click="searchString = ''"
                 class="position-absolute skills-theme-btn" variant="outline-info" style="right: 0rem;"
+                aria-label="clear search input"
                 data-cy="clearSkillsSearchInput" />
             </InputGroupAddon>
           </InputGroup>

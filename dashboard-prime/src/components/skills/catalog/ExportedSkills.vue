@@ -155,6 +155,9 @@ const doRemoveSkill = () => {
               </template>
             </Column>
             <Column class="md:w-2rem" :class="{'flex': responsive.md.value }">
+              <template #header>
+                <span class="sr-only">Controls Heading - Not sortable</span>
+              </template>
               <template #body="slotProps">
                 <SkillsButton
                   :id="`deleteSkillButton_${slotProps.data.skillId}`"

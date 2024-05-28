@@ -8,7 +8,7 @@ defineProps({
 <template>
   <div>
     <Avatar :icon="iconClass" size="large" v-badge.success="'✔'" aria-hidden="true"></Avatar>
-    <div class="text-green-500 font-semibold"
+    <div class="text-green-800 font-semibold"
          :aria-label="`You got the ${name} bonus`"
     >{{ name }}</div>
   </div>

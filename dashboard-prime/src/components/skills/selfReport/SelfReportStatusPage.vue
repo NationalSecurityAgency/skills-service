@@ -49,13 +49,13 @@ const hasSkillsWithApprovals = () => {
     <skills-spinner :is-loading="loading" />
 
     <div v-if="!loading">
-      <self-report-info-cards :self-report-stats="selfReportStats"/>
+      <self-report-info-cards :self-report-stats="selfReportStats" class="mb-3"/>
       <Message v-if="showEmailServiceWarning" severity="warn" icon="fa fa-exclamation-triangle" data-cy="selfReport_emailServiceWarning" :closable="false">
         Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
       </Message>
       <div v-if="hasSkillsWithApprovals()">
         <self-report-approval @approval-action="handleApprovalAction" :email-enabled="!showEmailServiceWarning"/>
-        <self-report-approval-history ref="selfReportApprovalHistory" />
+        <self-report-approval-history ref="selfReportApprovalHistory" class="mt-3"/>
       </div>
       <no-content2 v-else title="No Skills Require Approval" data-cy="noApprovalTableMsg"
                    message="Currently there are no skills that require approval. Self Reporting type of 'Approval' can be configured when creating or editing a skill."

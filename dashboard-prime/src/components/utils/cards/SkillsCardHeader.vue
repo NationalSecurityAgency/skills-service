@@ -4,7 +4,7 @@ defineProps(['title']);
 
 <template>
   <div class="border-bottom-1 p-3 surface-border surface-100 flex">
-    <span class="font-bold">{{ title }}</span>
+    <span class="font-bold flex-1">{{ title }}</span>
     <slot name="headerContent" />
   </div>
 </template>
