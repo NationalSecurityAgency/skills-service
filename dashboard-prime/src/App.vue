@@ -95,7 +95,7 @@ const showHeader = computed(() => {
 </script>
 
 <template>
-  <div role="presentation" class="surface-ground m-0">
+  <div role="presentation" class="m-0">
     <VueAnnouncer class="sr-only" />
 
     <customizable-header role="region" aria-label="dynamic customizable header"></customizable-header>

@@ -191,6 +191,7 @@ const suggestUsers = (query) => {
                     :dropdown="true"
                     :suggestions="suggestions"
                     optionLabel="label"
+                    aria-label="Type to select a user"
                     @item-select="itemSelected"
                     @keydown.enter="selectCurrentItem"
                     @complete="suggestUsersFromEvent"

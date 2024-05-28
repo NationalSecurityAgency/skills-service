@@ -86,6 +86,7 @@ defineExpose({
           :maximizable="true"
           :header="header"
           :class="dialogClass"
+          :pt="{ maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }"
   >
     <skills-spinner :is-loading="loading" />
 
