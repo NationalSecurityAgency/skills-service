@@ -328,7 +328,7 @@ describe('Accessibility Tests', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-video');
         cy.injectAxe();
 
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')

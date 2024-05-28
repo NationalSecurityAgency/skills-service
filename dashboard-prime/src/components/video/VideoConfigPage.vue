@@ -442,11 +442,11 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
           <div data-cy="videoCaptionsInputFields">
             <div class="flex mb-2">
               <div class="flex-1 align-content-end">
-                <label for="videoCaptionsInput">Captions:</label>
+                <label for="videoCaptions">Captions:</label>
               </div>
               <div v-if="!videoConf.captions && !isReadOnly" class="flex">
                 <SkillsButton
-                    data-cy="fillInCaptionsExampleBtn"
+                    data-cy="fillCaptionsExamples"
                     size="small"
                     severity="info"
                     outlined
@@ -472,7 +472,7 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
           <div data-cy="videoTranscriptInput">
             <div class="flex mb-2">
               <div class="flex-1 align-content-end">
-                <label for="videoTranscriptInput">Transcript:</label>
+                <label for="videoTranscript">Transcript:</label>
               </div>
             </div>
             <SkillsTextarea

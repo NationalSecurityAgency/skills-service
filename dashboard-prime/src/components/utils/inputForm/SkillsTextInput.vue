@@ -49,7 +49,7 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 
 <template>
   <div class="field text-left" v-bind="fallthroughAttributes.rootAttrs.value">
-    <label :for="name"><span v-if="isRequired">*</span> {{ label }} </label>
+    <label v-if="label" :for="name"><span v-if="isRequired">*</span> {{ label }} </label>
     <InputText
       class="w-full"
       type="text"

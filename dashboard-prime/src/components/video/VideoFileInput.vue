@@ -91,7 +91,7 @@ const openFileDialog = (event) => {
                          name="videoFileInput"
                          :disabled="true"/>
         <SkillsButton
-            data-cy="showFileUploadBtn"
+            data-cy="resetBtn"
             size="small"
             style="height: 1%; padding: 0.8rem"
             outlined
