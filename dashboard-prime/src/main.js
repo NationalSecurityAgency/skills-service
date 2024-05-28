@@ -72,6 +72,7 @@ import 'material-icons/css/material-icons.css';
 import 'material-icons/iconfont/material-icons.css';
 import '@toast-ui/editor/dist/toastui-editor.css';
 // import 'primevue/resources/themes/lara-light-green/theme.css'
+import 'video.js/dist/video-js.css'
 
 
 log.setLevel('trace')

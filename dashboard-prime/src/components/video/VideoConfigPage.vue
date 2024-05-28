@@ -1,8 +1,592 @@
 <script setup>
+import { computed, nextTick, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { useConfirm } from 'primevue/useconfirm';
+import * as yup from 'yup';
+import { string } from 'yup';
+import { useForm } from 'vee-validate';
+import { useByteFormat } from '@/common-components/filter/UseByteFormat.js';
+import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js';
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
+import { useSkillsState } from '@/stores/UseSkillsState.js';
+import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js';
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js';
+import FileUploadService from '@/common-components/utilities/FileUploadService.js';
+import VideoService from '@/components/video/VideoService.js';
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
+import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
+import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar.vue';
+import Message from 'primevue/message';
+import VideoPlayer from '@/common-components/video/VideoPlayer.vue';
+import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue';
+import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue';
+import VideoFileInput from '@/components/video/VideoFileInput.vue';
+
+const skillsState = useSkillsState();
+const communityLabels = useCommunityLabels()
+const route = useRoute();
+const appConfig = useAppConfig()
+const timeUtils = useTimeUtils()
+const announcer = useSkillsAnnouncer()
+const confirm = useConfirm();
+const byteFormat = useByteFormat()
+
+const videoConf = ref({
+  file: null,
+  url: '',
+  captions: '',
+  transcript: '',
+  isInternallyHosted: false,
+  hostedFileName: '',
+})
+
+const watchedProgress = ref(null);
+const isDurationAvailable = ref(true);
+const preview = ref(false);
+const refreshingPreview = ref(false);
+const loading = ref({
+  video: true,
+  skill: true,
+});
+const showSavedMsg = ref(false);
+const overallErrMsg = ref(null);
+const showFileUpload = ref(true);
+const savedAtLeastOnce = ref(false);
+const computedVideoConf = computed(() => {
+  const captionsUrl = videoConf.value.captions && videoConf.value.captions.trim().length > 0
+      ? `/api/projects/${route.params.projectId}/skills/${route.params.skillId}/videoCaptions`
+      : null;
+  return {
+    url: videoConf.value.url,
+    videoType: videoConf.value.videoType,
+    captionsUrl,
+  };
+});
+const lengthyOperationLoadingBarTimeout = computed(() => {
+  const { file } = videoConf.value;
+  if (!file || !file.size) {
+    return 500;
+  }
+  const timeoutRatio = appConfig?.videoUploadLoadingBarLengthyCalculationTimeoutRatio || 75001;
+  let timeout = Math.trunc(file.size / timeoutRatio);
+  timeout = Math.min(1000, timeout);
+  timeout = Math.max(100, timeout);
+  return timeout;
+});
+const hasVideoUrl = computed(() => {
+  return videoConf.value.url && videoConf.value.url.trim().length > 0;
+});
+const formHasAnyData = computed(() => {
+  return videoConf.value.url || videoConf.value.captions || videoConf.value.transcript;
+});
+const isImported = computed(() => {
+  return skillsState.skill && skillsState.skill.copiedFromProjectId && skillsState.skill.copiedFromProjectId.length > 0 && !skillsState.skill.reusedSkill;
+});
+const isReused = computed(() => {
+  return skillsState.skill && skillsState.skill.reusedSkill;
+});
+const isReadOnly = computed(() => {
+  return isReused.value || isImported.value;
+});
+const videoUploadWarningMessage = computed(() => {
+  const communityProjDescriptor = /\{\{\s?community.project.descriptor\s?\}\}/gi;
+  const projCommunityValue = communityLabels.projectConfiguredUserCommunity;
+  const warningMessageValue = appConfig?.videoUploadWarningMessage;
+  let result = warningMessageValue;
+  if (warningMessageValue) {
+    const found = warningMessageValue.match(communityProjDescriptor);
+    if (found && !projCommunityValue) {
+      const errorMessage = `projId=[${route.params.projectId}], skillId=[${route.params.skillId}] config.videoUploadWarningMessage contained {{community.project.descriptor}} property but failed to load [project_community_value] configuration for the replacement.`;
+      MsgLogService.log('ERROR', errorMessage);
+      handlePush({ name: 'ErrorPage', query: { errorMessage } });
+    }
+    result = result.replace(communityProjDescriptor, projCommunityValue);
+  }
+  return result;
+});
+
+onMounted(() => {
+  loadSettings();
+});
+
+const setupPreview = () => {
+  if (preview.value) {
+    refreshingPreview.value = true;
+  } else {
+    preview.value = true;
+    announcer.polite('Opened video preview card below. Navigate down to it.');
+  }
+}
+const turnOffRefresh = () => {
+  refreshingPreview.value = false;
+}
+const submitSaveSettingsForm = () => {
+  // this.$refs.observer.validate()
+  validate().then(({valid}) => {
+    if (!valid) {
+      overallErrMsg.value = 'Form did NOT pass validation, please fix and try to Save again';
+    } else {
+      saveSettings();
+    }
+  })
+}
+const onFileSelectedEvent = (selectFileEvent) => {
+  const newFile = selectFileEvent.file
+  videoConf.value.file = newFile;
+  showFileUpload.value = false;
+  videoConf.value.isInternallyHosted = true;
+  videoConf.value.hostedFileName = newFile.name;
+  // basically a placeholder
+  videoConf.value.url = `/${newFile.name}`;
+  validate();
+}
+const switchToFileUploadOption = () => {
+  showFileUpload.value = true;
+  clearVideoOptions();
+}
+const switchToExternalUrlOption = () => {
+  showFileUpload.value = false;
+  clearVideoOptions();
+}
+const clearVideoOptions = () => {
+  videoConf.value.isInternallyHosted = false;
+  videoConf.value.hostedFileName = '';
+  videoConf.value.url = '';
+  videoConf.value.file = null;
+  validate();
+}
+const saveSettings = () => {
+  isDurationAvailable.value = true;
+  preview.value = false;
+  loading.value.video = true;
+  const data = new FormData();
+  if (videoConf.value.file) {
+    data.append('file', videoConf.value.file);
+  } else if (videoConf.value.url) {
+    if (videoConf.value.isInternallyHosted) {
+      data.append('isAlreadyHosted', videoConf.value.isInternallyHosted);
+    } else {
+      data.append('videoUrl', videoConf.value.url);
+    }
+  }
+  if (videoConf.value.captions) {
+    data.append('captions', videoConf.value.captions);
+  }
+  if (videoConf.value.transcript) {
+    data.append('transcript', videoConf.value.transcript);
+  }
+
+  const endpoint = `/admin/projects/${route.params.projectId}/skills/${route.params.skillId}/video`;
+  FileUploadService.upload(endpoint, data, (response) => {
+    savedAtLeastOnce.value = true;
+    updateVideoSettings(response.data);
+    showSavedMsg.value = true;
+    loading.value.video = false;
+    setTimeout(() => {
+      showSavedMsg.value = false;
+    }, 3500);
+    announcer.polite('Video settings were saved');
+    setupPreview();
+  }, () => {
+    // console.log(err);
+    loading.value.video = false;
+  });
+}
+const confirmClearSettings = () => {
+  confirm.require({
+    message: 'Video settings will be permanently cleared. Are you sure you want to proceed?',
+    header: 'Please Confirm!',
+    acceptLabel: 'Yes, Do clear',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      clearSettings();
+    }
+  });
+}
+const clearSettings = () => {
+  loading.value.video = true;
+  videoConf.value.url = '';
+  videoConf.value.videoType = '';
+  videoConf.value.captions = '';
+  videoConf.value.transcript = '';
+  preview.value = false;
+  isDurationAvailable.value = true;
+  switchToFileUploadOption();
+  VideoService.deleteVideoSettings(route.params.projectId, route.params.skillId)
+      .finally(() => {
+        loading.value.video = false;
+        validate();
+        announcer.polite('Video settings were cleared');
+      });
+}
+const discardChanges = () => {
+  videoConf.value.file = null;
+  loadSettings()
+      .then(() => {
+        validate();
+      });
+}
+const loadSettings = () => {
+  loading.value.video = true;
+  return VideoService.getVideoSettings(route.params.projectId, route.params.skillId)
+      .then((settingRes) => {
+        updateVideoSettings(settingRes);
+      }).finally(() => {
+        loading.value.video = false;
+      });
+}
+const updateVideoSettings = (settingRes) => {
+  videoConf.value.url = settingRes.videoUrl;
+  videoConf.value.videoType = settingRes.videoType;
+  videoConf.value.captions = settingRes.captions;
+  videoConf.value.transcript = settingRes.transcript;
+  videoConf.value.isInternallyHosted = settingRes.isInternallyHosted;
+  videoConf.value.hostedFileName = settingRes.internallyHostedFileName;
+  if (videoConf.value.url) {
+    showFileUpload.value = videoConf.value.isInternallyHosted;
+    savedAtLeastOnce.value = true;
+  } else {
+    showFileUpload.value = true;
+  }
+  setFieldValues();
+}
+const setFieldValues = () => {
+  resetForm({
+    values: {
+      // videoFileInput: videoConf.value.hostedFileName,
+      videoUrl: videoConf.value.url,
+      videoCaptions: videoConf.value.captions,
+      videoTranscript: videoConf.value.transcript,
+    }
+  });
+}
+const updatedWatchProgress = (progress) => {
+  watchedProgress.value = progress;
+  if (watchedProgress.value.videoDuration === Infinity) {
+    isDurationAvailable.value = false;
+  }
+}
+const fillInCaptionsExample = () => {
+  if (!videoConf.value.captions) {
+    videoConf.value.captions = 'WEBVTT\n'
+        + '\n'
+        + '1\n'
+        + '00:00:00.500 --> 00:00:04.000\n'
+        + 'This is the very first caption!\n'
+        + '\n'
+        + '2\n'
+        + '00:00:04.100 --> 00:00:08.000\n'
+        + 'Enjoying this captions example?\n'
+        + '\n'
+        + '3\n'
+        + '00:00:08.100 --> 00:00:12.500\n'
+        + 'Last caption';
+    announcer.polite('Example captions were added');
+    nextTick(() => validate());
+  }
+}
+
+const videoUrlMustBePresent = (value) => {
+  if (!value) {
+    return true;
+  }
+  const toValidate = videoConf.value.url ? videoConf.value.url.trim() : null;
+  const hasUrl = toValidate !== null && toValidate.length > 0;
+  const hasFile = videoConf.value.file;
+  return Boolean(hasUrl || hasFile);
+}
+
+const videoMimeTypesValidation = (value, context) => {
+  const supportedFileTypes = appConfig.allowedVideoUploadMimeTypes;
+  const { file } = videoConf.value;
+  if (!file) {
+    return true;
+  }
+  const res = supportedFileTypes.includes(file.type);
+  if (res) {
+    return true;
+  }
+  return context.createError({
+    message: `Unsupported [${file.type}] file type, supported types: [${supportedFileTypes}]`,
+  });
+}
+const videoMaxSizeValidation = (value, context) => {
+  const { file } = videoConf.value;
+  const maxSize = appConfig.maxAttachmentSize ? Number(appConfig.maxAttachmentSize) : 0;
+  // const { file } = self.videoConf;
+  if (!file) {
+    return true;
+  }
+  const res = maxSize > file.size;
+  if (res) {
+    return true;
+  }
+  return context.createError({
+    message: `File exceeds maximum size of ${byteFormat.prettyBytes(maxSize)}`,
+  });
+}
+const schema = yup.object().shape({
+  'videoUrl': string()
+      .nullable()
+      .urlValidator()
+      .label('Video URL'),
+  'videoFileInput': yup.object()
+      .nullable()
+      // .required()
+      .test('videoMimeTypesValidation', (value, context) => videoMimeTypesValidation(value, context))
+      .test('videoMaxSizeValidation', (value, context) => videoMaxSizeValidation(value, context))
+      .label('File'),
+  'videoCaptions': yup.string()
+      .nullable()
+      .max(appConfig.maxVideoCaptionsLength)
+      .test('videoUrlMustBePresent', 'Captions is not valid without Video field',(value) => videoUrlMustBePresent(value))
+      .label('Captions'),
+  'videoTranscript': string()
+      .nullable()
+      .max(appConfig.descriptionMaxLength)
+      .test('videoUrlMustBePresent', 'Transcript is not valid without Video field',(value) => videoUrlMustBePresent(value))
+      .customDescriptionValidator('Video Transcript')
+      .label('Video Transcript'),
+})
+
+const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ validationSchema: schema, })
 </script>
 
 <template>
-  <div>Video Config Page</div>
+  <div>
+    <SubPageHeader title="Configure Video" />
+    <SkillsOverlay :show="loading.video || skillsState.loadingSkill || appConfig.isLoadingConfig">
+      <template v-if="videoConf.file" #overlay>
+        <div class="text-center text-success pt-5">
+          <div class="text-2xl mb-3"><i class="fas fa-video" aria-hidden="true"/> Uploading Video</div>
+          <div class="w-9 mx-auto">
+            <lengthy-operation-progress-bar :timeout="lengthyOperationLoadingBarTimeout" />
+          </div>
+        </div>
+      </template>
+      <!--      :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"-->
+      <Card>
+        <template #content>
+          <Message v-if="isReadOnly" severity="info" icon="fas fa-exclamation-triangle" data-cy="readOnlyAlert" :closable="false">
+            Video attributes of
+            <span v-if="isImported"><Tag severity="success"><i class="fas fa-book mr-1" aria-hidden="true"/> Imported</Tag></span>
+            <span v-if="isReused"><Tag severity="success"><i class="fas fa-recycle mr-1" aria-hidden="true"/> Reused</Tag></span>
+            skills are read-only.
+          </Message>
+          <div v-if="!isReadOnly && savedAtLeastOnce && skillsState.skill && hasVideoUrl" data-cy="videoSelfReportAlert">
+            <Message v-if="skillsState.skill.selfReportingType === 'Video'" severity="success" icon="fas fa-file-video" class="alert alert-success" :closable="false">
+              Users are required to watch this video in order to earn the skill and its points.
+            </Message>
+            <Message v-else severity="info" icon="fas fa-exclamation-triangle" :closable="false">
+              Optionally set <i>Self Reporting</i> type to <Tag>Video</Tag> in order to award the skill for watching this video. Click the <i>Edit</i> button above to update the <i>Self Reporting</i> type.
+            </Message>
+          </div>
+
+          <div data-cy="videoInputFields" class="mb-4">
+            <div class="flex mb-2">
+              <div class="flex-1 align-content-end">
+                <label>* Video:</label>
+              </div>
+              <div class="flex">
+                <SkillsButton
+                    v-if="!showFileUpload"
+                    data-cy="showFileUploadBtn"
+                    size="small"
+                    severity="info"
+                    outlined
+                    aria-label="Switch to Video Upload input option"
+                    @click="switchToFileUploadOption"
+                    icon="fas fa-arrow-circle-up"
+                    label="Switch to Upload">
+                </SkillsButton>
+                <SkillsButton
+                    v-if="showFileUpload"
+                    data-cy="showExternalUrlBtn"
+                    size="small"
+                    severity="info"
+                    outlined
+                    aria-label="Switch to External Link input option"
+                    @click="switchToExternalUrlOption"
+                    icon="fas fa-globe"
+                    label="Switch to External Link">
+                </SkillsButton>
+              </div>
+            </div>
+
+            <!-- upload file input component -->
+            <VideoFileInput @file-selected="onFileSelectedEvent"
+                            @reset="switchToFileUploadOption"
+                            name="selectedFile"
+                            :showFileUpload="showFileUpload"
+                            :hostedFileName="videoConf.hostedFileName"
+                            :isInternallyHosted="videoConf.isInternallyHosted"
+                            data-cy="videoFileInput"/>
+
+            <Message v-if="videoConf.file && videoUploadWarningMessage" severity="error" icon="fas fa-exclamation-circle" :closable="false">
+              {{ videoUploadWarningMessage }}
+            </Message>
+
+            <!-- external URL input component-->
+            <div v-if="!showFileUpload && !videoConf.isInternallyHosted">
+              <SkillsTextInput id="videoUrlInput"
+                               v-model="videoConf.url"
+                               name="videoUrl"
+                               data-cy="videoUrl"
+                               @input="validate"
+                               placeholder="Please enter video external URL"
+                               :disabled="isReadOnly"
+              />
+            </div>
+          </div>
+
+          <div data-cy="videoCaptionsInputFields">
+            <div class="flex mb-2">
+              <div class="flex-1 align-content-end">
+                <label for="videoCaptionsInput">Captions:</label>
+              </div>
+              <div v-if="!videoConf.captions && !isReadOnly" class="flex">
+                <SkillsButton
+                    data-cy="fillInCaptionsExampleBtn"
+                    size="small"
+                    severity="info"
+                    outlined
+                    aria-label="Click to fill in sample captions using The Web Video Text Tracks (WEBVTT) format"
+                    @click="fillInCaptionsExample"
+                    icon="fas fa-plus"
+                    label="Add Example">
+                </SkillsButton>
+              </div>
+            </div>
+            <SkillsTextarea
+                id="videoCaptionsInput"
+                v-model="videoConf.captions"
+                placeholder="Enter captions using The Web Video Text Tracks (WebVTT) format (optional)"
+                rows="6"
+                max-rows="6"
+                name="videoCaptions"
+                data-cy="videoCaptions"
+                :disabled="isReadOnly"
+            />
+          </div>
+
+          <div data-cy="videoTranscriptInput">
+            <div class="flex mb-2">
+              <div class="flex-1 align-content-end">
+                <label for="videoTranscriptInput">Transcript:</label>
+              </div>
+            </div>
+            <SkillsTextarea
+                id="videoTranscriptInput"
+                v-model="videoConf.transcript"
+                placeholder="Please enter video's transcript here. Video transcript will be available for download (optional)"
+                rows="6"
+                max-rows="6"
+                name="videoTranscript"
+                data-cy="videoTranscript"
+                :disabled="isReadOnly"
+            />
+          </div>
+
+          <div v-if="overallErrMsg" class="alert alert-danger">
+            {{ overallErrMsg }}
+          </div>
+
+          <div v-if="!isReadOnly" data-cy="updateButtons" class="my-3 flex">
+            <div class="flex-1">
+              <SkillsButton
+                  severity="success"
+                  outlined
+                  :disabled="!hasVideoUrl || !meta.valid"
+                  data-cy="saveVideoSettingsBtn"
+                  aria-label="Save video settings"
+                  @click="submitSaveSettingsForm"
+                  icon="fas fa-save"
+                  label="Save and Preview" />
+              <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success" data-cy="savedMsg"><i class="fas fa-check" /> Saved</span>
+            </div>
+            <div class="flex">
+              <SkillsButton
+                  severity="secondary"
+                  class="mr-2"
+                  outlined
+                  data-cy="discardChangesBtn"
+                  aria-label="Discard Unsaved"
+                  @click="discardChanges"
+                  icon="fas fa-sync"
+                  label="Discard Changes" />
+              <SkillsButton
+                  severity="danger"
+                  outlined
+                  :disabled="!formHasAnyData"
+                  data-cy="clearVideoSettingsBtn"
+                  aria-label="Clear video settings"
+                  @click="confirmClearSettings"
+                  icon="fas fa-trash-alt"
+                  label="Clear" />
+            </div>
+          </div>
+
+          <!-- Video Preview -->
+          <Card v-if="preview" class="mt-3" data-cy="videoPreviewCard" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+            <template #header>
+              <div class="border-1 surface-border border-round-top bg-gray-100 p-3">Video Preview</div>
+            </template>
+            <template #content>
+              <VideoPlayer v-if="!refreshingPreview"
+                           :options="computedVideoConf"
+                           @player-destroyed="turnOffRefresh"
+                           @watched-progress="updatedWatchProgress"
+              />
+
+              <div v-if="watchedProgress" class="p-3 pt-4">
+                <div v-if="!isDurationAvailable" class="alert alert-danger" data-cy="noDurationWarning">
+                  <i class="fas fa-exclamation-triangle" aria-hidden="true"/> Browser cannot derive the duration of this video. Percentage will only be updated after the video is fully watched.
+                </div>
+                <div class="grid">
+                  <div class="col-6 lg:col-3 xl:col-2">Total Duration:</div>
+                  <div class="col">
+                    <span v-if="watchedProgress.videoDuration === Infinity" class="text-danger" data-cy="videoTotalDuration">N/A</span>
+                    <span v-else class="text-primary" data-cy="videoTotalDuration">{{ timeUtils.formatDuration(Math.trunc(watchedProgress.videoDuration * 1000), true) }}</span>
+                  </div>
+                </div>
+                <div class="grid">
+                  <div class="col-6 lg:col-3 xl:col-2">Time Watched:</div>
+                  <div class="col"><span class="text-primary" data-cy="videoTimeWatched">{{ timeUtils.formatDuration(Math.trunc(watchedProgress.totalWatchTime * 1000), true) }}</span></div>
+                </div>
+                <div class="grid">
+                  <div class="col-6 lg:col-3 xl:col-2">% Watched:</div>
+                  <div class="col">
+                    <span v-if="watchedProgress.videoDuration === Infinity" class="text-danger" data-cy="percentWatched">N/A</span>
+                    <span v-else class="text-primary" data-cy="percentWatched">{{ watchedProgress.percentWatched }}%</span>
+                  </div>
+                </div>
+                <div class="grid">
+                  <div class="col-6 lg:col-3 xl:col-2">Current Position:</div>
+                  <div class="col"><span class="text-primary">{{ watchedProgress.currentPosition.toFixed(2) }}</span> <span class="font-italic">Seconds</span></div>
+                </div>
+                <div class="grid">
+                  <div class="col-6 lg:col-3 xl:col-2">Watched Segments:</div>
+                  <div class="col">
+                    <div v-if="watchedProgress.currentStart !== null && watchedProgress.lastKnownStopPosition"> <span class="text-primary">{{ watchedProgress.currentStart.toFixed(2) }}</span>
+                      <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/>
+                      <span class="text-primary">{{ watchedProgress.lastKnownStopPosition.toFixed(2) }}</span> <span class="font-italic">Seconds</span>
+                    </div>
+                    <div v-for="segment in watchedProgress.watchSegments" :key="segment.start"><span class="text-primary">{{ segment.start.toFixed(2) }}</span>
+                      <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/><span class="text-primary">{{ segment.stop.toFixed(2) }}</span> <span class="font-italic">Seconds</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </template>
+          </Card>
+
+
+        </template>
+
+      </Card>
+    </SkillsOverlay>
+  </div>
 </template>
 
 <style scoped></style>

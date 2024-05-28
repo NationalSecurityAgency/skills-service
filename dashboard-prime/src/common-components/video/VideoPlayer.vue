@@ -13,88 +13,83 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue'
+import videojs from 'video.js';
+import WatchedSegmentsUtil from '@/common-components/video/WatchedSegmentsUtil';
+
+const props = defineProps({
+  options: Object,
+})
+const emit = defineEmits(['player-destroyed', 'watched-progress'])
+const player = ref(null)
+const videoPlayer = ref(null)
+const videoOptions = ref({
+  autoplay: false,
+  controls: true,
+  responsive: true,
+  playbackRates: [0.5, 1, 1.5, 2],
+  sources: [
+    {
+      src: props.options.url,
+      type: props.options.videoType,
+    },
+  ],
+  captionsUrl: props.options.captionsUrl,
+})
+const watchProgress = ref({
+  watchSegments: [],
+  currentStart: null,
+  lastKnownStopPosition: null,
+  totalWatchTime: 0,
+  videoDuration: 0,
+  percentWatched: 0,
+  currentPosition: 0,
+})
+
+onMounted(() => {
+  player.value = videojs(videoPlayer.value, videoOptions.value, () => {
+    const thePlayer = player.value;
+    thePlayer.on('durationchange', () => {
+      watchProgress.value.videoDuration = thePlayer.duration();
+      updateProgress(thePlayer.currentTime());
+    });
+    thePlayer.on('loadedmetadata', () => {
+      watchProgress.value.videoDuration = thePlayer.duration();
+      emit('watched-progress', watchProgress.value);
+    });
+    thePlayer.on('timeupdate', () => {
+      updateProgress(thePlayer.currentTime());
+    });
+    if (props.options.captionsUrl) {
+      thePlayer.addRemoteTextTrack({
+        src: props.options.captionsUrl,
+        kind: 'subtitles',
+        srclang: 'en',
+        label: 'English',
+      });
+    }
+  });
+})
+onBeforeUnmount(() => {
+  if (player.value) {
+    player.value.dispose()
+  }
+})
+onUnmounted(() => {
+  emit('player-destroyed', true)
+})
+const updateProgress = (currentTime) => {
+  WatchedSegmentsUtil.updateProgress(watchProgress.value, currentTime)
+  emit('watched-progress', watchProgress.value)
+}
+</script>
+
 <template>
   <div data-cy="videoPlayer">
     <video ref="videoPlayer" class="video-js vjs-fluid"></video>
   </div>
 </template>
-
-<script>
-  import videojs from 'video.js';
-  import WatchedSegmentsUtil from '@/common-components/video/WatchedSegmentsUtil';
-
-  export default {
-    name: 'VideoPlayer',
-    props: {
-      options: Object,
-    },
-    data() {
-      return {
-        player: null,
-        videoOptions: {
-          autoplay: false,
-          controls: true,
-          responsive: true,
-          playbackRates: [0.5, 1, 1.5, 2],
-          sources: [
-            {
-              src: this.options.url,
-              type: this.options.videoType,
-            },
-          ],
-          captionsUrl: this.options.captionsUrl,
-        },
-        watchProgress: {
-          watchSegments: [],
-          currentStart: null,
-          lastKnownStopPosition: null,
-          totalWatchTime: 0,
-          videoDuration: 0,
-          percentWatched: 0,
-          currentPosition: 0,
-        },
-      };
-    },
-    mounted() {
-      this.player = videojs(this.$refs.videoPlayer, this.videoOptions, () => {
-        const thePlayer = this.player;
-        thePlayer.on('durationchange', () => {
-          this.watchProgress.videoDuration = thePlayer.duration();
-          this.updateProgress(thePlayer.currentTime());
-        });
-        thePlayer.on('loadedmetadata', () => {
-          this.watchProgress.videoDuration = thePlayer.duration();
-          this.$emit('watched-progress', this.watchProgress);
-        });
-        thePlayer.on('timeupdate', () => {
-          this.updateProgress(thePlayer.currentTime());
-        });
-        if (this.options.captionsUrl) {
-          thePlayer.addRemoteTextTrack({
-            src: this.options.captionsUrl,
-            kind: 'subtitles',
-            srclang: 'en',
-            label: 'English',
-          });
-        }
-      });
-    },
-    beforeDestroy() {
-      if (this.player) {
-        this.player.dispose();
-      }
-    },
-    destroyed() {
-      this.$emit('player-destroyed', true);
-    },
-    methods: {
-      updateProgress(currentTime) {
-        WatchedSegmentsUtil.updateProgress(this.watchProgress, currentTime);
-        this.$emit('watched-progress', this.watchProgress);
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

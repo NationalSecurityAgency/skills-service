@@ -113,7 +113,11 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const approvalConfUserTagLabel = computed(() => config.value.approvalConfUserTagLabel)
   const projectMetricsTagCharts = computed(() => config.value.projectMetricsTagCharts)
   const maxDailyUserEvents = computed(() => config.value.maxDailyUserEvents)
+  const allowedVideoUploadMimeTypes = computed(() => config.value.allowedVideoUploadMimeTypes)
+  const videoUploadWarningMessage = computed(() => config.value.videoUploadWarningMessage)
+  const maxVideoCaptionsLength = computed(() => config.value.maxVideoCaptionsLength)
   const userPageTagsToDisplay = computed(() => config.value.userPageTagsToDisplay)
+
   return {
     loadConfigState,
     refreshConfig,
@@ -185,6 +189,9 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     approvalConfUserTagLabel,
     projectMetricsTagCharts,
     maxDailyUserEvents,
+    allowedVideoUploadMimeTypes,
+    videoUploadWarningMessage,
+    maxVideoCaptionsLength,
     userPageTagsToDisplay
   }
 })
