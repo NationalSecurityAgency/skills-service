@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref, defineAsyncComponent } from 'vue';
 import { useRoute } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import * as yup from 'yup';
@@ -17,10 +17,13 @@ import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
 import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar.vue';
 import Message from 'primevue/message';
-import VideoPlayer from '@/common-components/video/VideoPlayer.vue';
 import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue';
 import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue';
 import VideoFileInput from '@/components/video/VideoFileInput.vue';
+
+const VideoPlayer = defineAsyncComponent(() =>
+  import('@/common-components/video/VideoPlayer.vue')
+)
 
 const skillsState = useSkillsState();
 const communityLabels = useCommunityLabels()

@@ -59,7 +59,7 @@
     "jsdom": "24.0.0",
     "license-checker": "25.0.1",
     "prettier": "3.2.5",
-    "vite": "5.2.11",
+    "vite": "5.2.12",
     "vitest": "1.6.0"
   }
 }
