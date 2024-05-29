@@ -13,12 +13,14 @@ import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert
 import EditProject from '@/components/projects/EditProject.vue'
 import { useProjDetailsState } from '@/stores/UseProjDetailsState.js'
 import UserRolesUtil from '@/components/utils/UserRolesUtil'
+import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js';
 
 // const props = defineProps(['project'])
 const router = useRouter()
 const route = useRoute();
 const projConfig = useProjConfig()
 const appConfig = useAppConfig()
+const communityLabels = useCommunityLabels()
 const announcer = useSkillsAnnouncer()
 const projectDetailsState = useProjDetailsState();
 
@@ -214,9 +216,9 @@ const setProject = (newProject) => {
         <div v-if="project.userCommunity" class="mb-3" data-cy="userCommunity">
           <span class="border p-1 border-danger rounded"><i
               class="fas fa-shield-alt text-danger" aria-hidden="true"/></span> <span
-            class="text-secondary font-italic ml-1">{{ beforeCommunityLabel }}</span> <span
+            class="text-secondary font-italic ml-1">{{ communityLabels.beforeCommunityLabel }}</span> <span
             class="font-weight-bold text-primary">{{ project.userCommunity }}</span> <span
-            class="text-secondary font-italic">{{ afterCommunityLabel }}</span>
+            class="text-secondary font-italic">{{ communityLabels.afterCommunityLabel }}</span>
         </div>
         <div class="">
           <span class="border-1 border-round px-1 mr-2">
