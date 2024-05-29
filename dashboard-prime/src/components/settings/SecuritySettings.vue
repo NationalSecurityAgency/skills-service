@@ -36,35 +36,26 @@ const handleRoleDeleted = (event) => {
 
 <template>
   <div>
-    <sub-page-header title="Security Settings"/>
+    <sub-page-header title="Security Settings" />
 
-    <Card>
-      <template #header>
-        <SkillsCardHeader title="Root Users Management"></SkillsCardHeader>
-      </template>
-      <template #content>
-        <role-manager id="add-root-user" ref="rootUserRoleManager"
-                      :roles="['ROLE_SUPER_DUPER_USER']"
-                      @role-added="handleRootRoleChanged"
-                      @role-deleted="handleRootRoleChanged"
-                      data-cy="rootrm" :user-type="root.userType" :role-description="root.roleDescription" />
-      </template>
-    </Card>
+    <role-manager id="add-root-user"
+                  title="Root Users Management"
+                  ref="rootUserRoleManager"
+                  :roles="['ROLE_SUPER_DUPER_USER']"
+                  @role-added="handleRootRoleChanged"
+                  @role-deleted="handleRootRoleChanged"
+                  data-cy="rootrm" :user-type="root.userType" :role-description="root.roleDescription" />
 
-    <Card>
-      <template #header>
-        <SkillsCardHeader title="Supervisor Users Management"></SkillsCardHeader>
-      </template>
-      <template #content>
-        <role-manager id="add-supervisor-user" ref="supervisorRoleManager"
-                      data-cy="supervisorrm"
-                      :roles="['ROLE_SUPERVISOR']"
-                      :user-type="supervisor.userType"
-                      :role-description="supervisor.roleDescription"
-                      @role-added="handleRoleAdded"
-                      @role-deleted="handleRoleDeleted"/>
-      </template>
-    </Card>
+    <role-manager id="add-supervisor-user"
+                  title="Supervisor Users Management"
+                  ref="supervisorRoleManager"
+                  data-cy="supervisorrm"
+                  class="mt-3"
+                  :roles="['ROLE_SUPERVISOR']"
+                  :user-type="supervisor.userType"
+                  :role-description="supervisor.roleDescription"
+                  @role-added="handleRoleAdded"
+                  @role-deleted="handleRoleDeleted" />
   </div>
 </template>
 

@@ -1,12 +1,12 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
-import SettingsService from "@/components/settings/SettingsService.js";
+import { computed, onMounted, ref } from 'vue'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import SettingsService from '@/components/settings/SettingsService.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
-// import { useAuthState } from '@/stores/UseAuthState.js'
-import { useAppInfoState } from '@/stores/UseAppInfoState.js'
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 
 const appConfig = useAppConfig();
+const colors = useColors()
 
 const isLoading = ref(true);
 const settings = ref({
@@ -120,23 +120,23 @@ function rankAndLeaderboardOptOutPrefChanged() {
   <Card v-if="!isLoading">
     <template #content>
       <div data-cy="defaultHomePageSetting" v-if="isProgressAndRankingEnabled()">
-        <i class="fas fa-home" aria-hidden="true"></i> Default Home Page:
+        <i class="fas fa-home mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i> Default Home Page:
         <div class="pt-2 pl-2">
           <RadioButton v-model="settings.homePage.value" data-cy="admin" value="admin" inputId="admin" @change="homePagePrefChanged" />
-          <label for="admin">Project Admin</label>
+          <label for="admin" class="ml-2">Project Admin</label>
         </div>
         <div class="pt-2 pl-2">
           <RadioButton v-model="settings.homePage.value" data-cy="progress" value="progress" inputId="progress" @change="homePagePrefChanged"/>
-          <label for="progress">Progress and Rankings</label>
+          <label for="progress" class="ml-2">Progress and Rankings</label>
         </div>
       </div>
-      <div data-cy="rankOptOut" class="pt-4 pb-2">
-        <i class="fas fa-users-slash" aria-hidden="true"></i> <span id="rankAndLeaderboardOptOutLabel">Rank and Leaderboard Opt-Out:</span>
+      <div data-cy="rankOptOut" class="pt-4 pb-2 flex align-content-center align-items-center">
+        <i class="fas fa-users-slash mr-2" :class="colors.getTextClass(2)" aria-hidden="true"></i> <span id="rankAndLeaderboardOptOutLabel">Rank and Leaderboard Opt-Out:</span>
         <InputSwitch v-model="settings.rankAndLeaderboardOptOut.value" data-cy="rankAndLeaderboardOptOutSwitch" class="ml-2"
+                     aria-labelledby="rankAndLeaderboardOptOutLabel"
                      @change="rankAndLeaderboardOptOutPrefChanged" />
         <span class="ml-2">{{ settings.rankAndLeaderboardOptOut.value ? 'Yes' : 'No'}}</span>
       </div>
-      <hr />
       <SkillsButton label="Save" icon="fas fa-arrow-circle-right" @click.stop="save" size="small" :disabled="!isDirty" data-cy="userPrefsSettingsSave"/>
       <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">
               <i class="fa fa-exclamation-circle" /> Unsaved Changes

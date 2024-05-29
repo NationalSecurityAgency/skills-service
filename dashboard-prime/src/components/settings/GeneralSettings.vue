@@ -72,7 +72,7 @@ function updateUserInfo() {
       <SkillsTextInput name="lastName" label="Last Name" is-required :initialValue="lastName" v-if="!pkiAuthenticated" />
       <SkillsTextInput name="nickname" label="Primary Name" :initialValue="nickname" />
 
-      <Button @click="updateUserInfo" :disabled="!meta.valid || !meta.dirty" data-cy="generalSettingsSave">Save</Button>
+      <SkillsButton label="Save" icon="fas fa-arrow-circle-right" @click="updateUserInfo" :disabled="!meta.valid || !meta.dirty" data-cy="generalSettingsSave" />
     </template>
   </Card>
 </template>

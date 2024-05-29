@@ -105,7 +105,7 @@ describe('Import From Catalog Table Tests', () => {
         Cypress.env('disableResetDb', false);
     });
 
-    it('select a couple skills', () => {
+    it.only('select a couple skills', () => {
         cy.visit('/administrator/projects/proj3/subjects/subj1');
         cy.get('[data-cy="importFromCatalogBtn"]')
             .click();

@@ -199,7 +199,6 @@ const tableFilters = ref({
             lazy
             paginator
             data-cy="dashboardActionsForEverything"
-            :expander="true"
             v-model:expandedRows="expandedRows"
             v-model:filters="tableFilters"
             :globalFilterFields="['userIdForDisplay']"
@@ -235,6 +234,15 @@ const tableFilters = ref({
             </span>
             </div>
           </template>
+
+          <Column expander style="width: 20rem" :showFilterMenu="false">
+            <template #header>
+              <span class="sr-only">Rows expand and collapse control - Not sortable</span>
+            </template>
+            <template #filter>
+              <span class="sr-only">Rows expand and collapse control - No filtering</span>
+            </template>>
+          </Column>
           <Column field="userIdForDisplay" :showFilterMenu="false" header="User" :sortable="true">
             <template #header>
               <i class="fas fa-user-cog skills-color-skills mr-1" aria-hidden="true"></i>
@@ -345,10 +353,13 @@ const tableFilters = ref({
                          placeholder="Search by Quiz ID" />
             </template>
           </Column>
-          <Column field="created" header="Performed" :sortable="false">
+          <Column field="created" header="Performed" :sortable="false" :showFilterMenu="false">
             <template #header>
               <i class="fas fa-clock text-warning mr-1" aria-hidden="true"></i>
             </template>
+            <template #filter>
+              <span class="sr-only">Rows expand and collapse control - No filtering</span>
+            </template>>
             <template #body="slotProps">
               <DateCell :value="slotProps.data.created" />
             </template>

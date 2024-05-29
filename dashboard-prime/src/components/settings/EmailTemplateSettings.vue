@@ -165,22 +165,12 @@ const loadEmailSettings = () => {
 
 <template>
   <div data-cy="emailTemplateSettings">
-    <TabView>
-      <TabPanel :header="htmlHeaderText">
-        <SkillsTextarea name="htmlHeader" />
-      </TabPanel>
-      <TabPanel :header="plainTextHeaderText">
-        <SkillsTextarea name="plainTextHeader" />
-      </TabPanel>
-    </TabView>
-    <TabView>
-      <TabPanel :header="htmlFooterText">
-        <SkillsTextarea name="htmlFooter" />
-      </TabPanel>
-      <TabPanel :header="plainTextFooterText">
-        <SkillsTextarea name="plainTextFooter" />
-      </TabPanel>
-    </TabView>
+
+    <SkillsTextarea name="htmlHeader" label="HTML Header" />
+    <SkillsTextarea name="plainTextHeader" label="Plain Text Header" />
+
+    <SkillsTextarea name="htmlFooter" label="HTML Footer" />
+    <SkillsTextarea name="plainTextFooter" label="Plain Text Footer" />
 
     <Message v-if="saveMessage" :sticky="false" :life="10000">{{saveMessage}}</Message>
 

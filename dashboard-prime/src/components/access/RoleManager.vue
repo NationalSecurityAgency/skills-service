@@ -9,6 +9,8 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import { useUserInfo } from '@/components/utils/UseUserInfo.js';
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 
 // role constants
 const ROLE_APP_USER = 'ROLE_APP_USER';
@@ -22,12 +24,18 @@ const confirm = useConfirm();
 const appConfig = useAppConfig();
 const announcer = useSkillsAnnouncer();
 const userInfo = useUserInfo();
+const colors = useColors()
+const responsive = useResponsiveBreakpoints()
 
 const emit = defineEmits(['role-added', 'role-deleted']);
 const props = defineProps({
   projectId: {
     type: String,
     default: null,
+  },
+  title: {
+    type: String,
+    required: true,
   },
   roles: {
     type: Array,
@@ -277,90 +285,104 @@ defineExpose({
 </script>
 
 <template>
-  <div>
-    <div>
-      <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
-                           v-model="selectedUser" data-cy="existingUserInput"/>
-    </div>
-    <div class="mt-3 mb-3 flex gap-2">
-      <div v-if="!isOnlyOneRole" class="flex-1">
-        <Dropdown class="w-full" v-model="userRole.selected" :options="userRole.options" data-cy="userRoleSelector"
-                  placeholder="Please select user's Role" optionLabel="text" optionValue="value" />
-      </div>
+  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <template #header>
+      <SkillsCardHeader :title="title"></SkillsCardHeader>
+    </template>
+    <template #content>
       <div>
-        <SkillsButton variant="outline-hc" @click="addUserRole" :disabled="addUsrBtnDisabled" data-cy="addUserBtn"
-                      label="Add User" :icon="isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right'">
-        </SkillsButton>
-      </div>
-    </div>
-
-    <Message v-if="errNotification.enable" severity="error" data-cy="error-msg">
-      <strong>Error!</strong> Request could not be completed! {{ errNotification.msg }}
-    </Message>
-
-    <DataTable :value="data" :rowsPerPageOptions="[5, 10, 15, 20]" data-cy="roleManagerTable" striped-rows
-               v-model:sort-field="table.options.sortBy"
-               v-model:sort-order="table.options.sortDesc"
-               paginator :rows="5">
-      <Column :header="roleDescription" field="userId" sortable>
-        <template #header>
-          <span class="mr-2"><i class="fas fa-user skills-color-users" aria-hidden="true"></i> </span>
-        </template>
-        <template #body="slotProps">
-          <div :data-cy="`userCell_${slotProps.data.userId}`">
-            {{ getUserDisplay(slotProps.data) }}
+        <div class="p-3">
+          <div>
+            <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
+                                 v-model="selectedUser" data-cy="existingUserInput" />
           </div>
-        </template>
-      </Column>
-      <Column header="Role" field="roleName" sortable style="max-width: 10em;">
-        <template #header>
-          <span class="mr-2"><i class="fas fa-id-card text-danger" aria-hidden="true"></i> </span>
-        </template>
-        <template #body="slotProps">
-          <div v-if="!slotProps.data.isEdited">{{ getRoleDisplay(slotProps.data.roleName) }}</div>
-          <Dropdown v-else v-model="slotProps.data.roleName"
-                         :options="userRole.options"
-                         optionLabel="text"
-                         optionValue="value"
-                         :aria-label="`select new access role for user ${slotProps.data.userId}`"
-                         :data-cy="`roleDropDown_${slotProps.data.userId}`"
-                         @change="updateUserRole">
-          </Dropdown>
-        </template>
-      </Column>
-      <Column header="Controls">
-        <template #body="slotProps">
-          <div class="float-right mr-1 flex gap-2" :data-cy="`controlsCell_${slotProps.data.userId}`">
-<!--            <i v-if="!notCurrentUser(slotProps.data.userId)"-->
-<!--               data-cy="cannotRemoveWarning"-->
-<!--               class="text-warning fas fa-exclamation-circle mr-1"-->
-<!--               aria-hidden="true"/>-->
-
-              <SkillsButton v-if="!isOnlyOneRole" @click="editItem(slotProps.data)"
-                        :disabled="!notCurrentUser(slotProps.data.userId)"
-                        :aria-label="`edit access role from user ${slotProps.data.userId}`"
-                        data-cy="editUserBtn" icon="fas fa-edit" label="Edit" size="small">
+          <div class="mt-3 mb-3 flex gap-2">
+            <div v-if="!isOnlyOneRole" class="flex-1">
+              <Dropdown class="w-full" v-model="userRole.selected" :options="userRole.options" data-cy="userRoleSelector"
+                        placeholder="Please select user's Role" optionLabel="text" optionValue="value" />
+            </div>
+            <div>
+              <SkillsButton variant="outline-hc" @click="addUserRole" :disabled="addUsrBtnDisabled" data-cy="addUserBtn"
+                            label="Add User"
+                            :icon="isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right'">
               </SkillsButton>
-              <SkillsButton @click="deleteUserRoleConfirm(slotProps.data)"
-                        :disabled="!notCurrentUser(slotProps.data.userId)"
-                        :aria-label="`remove access role from user ${slotProps.data.userId}`"
-                        data-cy="removeUserBtn" icon="fas fa-trash" label="Delete" size="small">
-              </SkillsButton>
-
-            <div v-if="!notCurrentUser(slotProps.data.userId)">
-              (Can't remove or edit yourself)
             </div>
           </div>
-        </template>
-      </Column>
-      <template #paginatorstart>
-        <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ data.length }}</span>
-      </template>
-      <template #empty>
-        <span class="flex align-items-center justify-content-center">There are no records to show</span>
-      </template>
-    </DataTable>
-  </div>
+
+          <Message v-if="errNotification.enable" severity="error" data-cy="error-msg">
+            <strong>Error!</strong> Request could not be completed! {{ errNotification.msg }}
+          </Message>
+        </div>
+        <DataTable :value="data" :rowsPerPageOptions="[5, 10, 15, 20]" data-cy="roleManagerTable" striped-rows
+                   v-model:sort-field="table.options.sortBy"
+                   v-model:sort-order="table.options.sortDesc"
+                   paginator :rows="5">
+          <Column :header="roleDescription" field="userId" sortable :class="{'flex': responsive.md.value }">
+            <template #header>
+              <span class="mr-2"><i class="fas fa-user skills-color-users" :class="colors.getTextClass(0)" aria-hidden="true"></i> </span>
+            </template>
+            <template #body="slotProps">
+              <div :data-cy="`userCell_${slotProps.data.userId}`">
+                {{ getUserDisplay(slotProps.data) }}
+              </div>
+            </template>
+          </Column>
+          <Column header="Role" field="roleName" sortable :class="{'flex': responsive.md.value }">
+            <template #header>
+              <span class="mr-2"><i class="fas fa-id-card text-danger" :class="colors.getTextClass(1)" aria-hidden="true"></i> </span>
+            </template>
+            <template #body="slotProps">
+              <div v-if="!slotProps.data.isEdited">{{ getRoleDisplay(slotProps.data.roleName) }}</div>
+              <Dropdown v-else v-model="slotProps.data.roleName"
+                        :options="userRole.options"
+                        optionLabel="text"
+                        optionValue="value"
+                        :aria-label="`select new access role for user ${slotProps.data.userId}`"
+                        :data-cy="`roleDropDown_${slotProps.data.userId}`"
+                        @change="updateUserRole">
+              </Dropdown>
+            </template>
+          </Column>
+          <Column :class="{'flex': responsive.md.value }">
+            <template #header>
+              <span class="sr-only">Controls - Not sortable</span>
+            </template>
+            <template #body="slotProps">
+              <div>
+                <div class="float-right mr-1 flex gap-2" :data-cy="`controlsCell_${slotProps.data.userId}`">
+                  <!--            <i v-if="!notCurrentUser(slotProps.data.userId)"-->
+                  <!--               data-cy="cannotRemoveWarning"-->
+                  <!--               class="text-warning fas fa-exclamation-circle mr-1"-->
+                  <!--               aria-hidden="true"/>-->
+
+                  <SkillsButton v-if="!isOnlyOneRole" @click="editItem(slotProps.data)"
+                                :disabled="!notCurrentUser(slotProps.data.userId)"
+                                :aria-label="`edit access role from user ${slotProps.data.userId}`"
+                                data-cy="editUserBtn" icon="fas fa-edit" label="Edit" size="small">
+                  </SkillsButton>
+                  <SkillsButton @click="deleteUserRoleConfirm(slotProps.data)"
+                                :disabled="!notCurrentUser(slotProps.data.userId)"
+                                :aria-label="`remove access role from user ${slotProps.data.userId}`"
+                                data-cy="removeUserBtn" icon="fas fa-trash" label="Delete" size="small">
+                  </SkillsButton>
+
+                </div>
+                <InlineMessage v-if="!notCurrentUser(slotProps.data.userId)" class="mt-1" severity="info">
+                  Can't remove or edit yourself
+                </InlineMessage>
+              </div>
+            </template>
+          </Column>
+          <template #paginatorstart>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ data.length }}</span>
+          </template>
+          <template #empty>
+            <span class="flex align-items-center justify-content-center">There are no records to show</span>
+          </template>
+        </DataTable>
+      </div>
+    </template>
+  </Card>
 </template>
 
 <style scoped>

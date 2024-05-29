@@ -1465,21 +1465,16 @@ describe('Settings Tests', () => {
             .click()
             .type('aaaaa');
         cy.get('[data-cy=htmlHeaderError]').should('have.text', 'Plaintext Header is also required');
-        // cy.get('[data-cy=ptHeaderTitle] span.text-danger')
-        //     .should('be.visible');
+        cy.get('[data-cy=plainTextHeaderError]')
+          .should('be.visible');
+        cy.get('[data-cy=plainTextHeaderError]')
+          .should('have.text', 'Plaintext Header is required');
         cy.get('[data-cy=emailTemplateSettingsSave]')
             .should('be.disabled');
 
-        cy.get('[data-pc-section=headertitle]').contains('Plaintext Header').click();
-        cy.get('[data-cy=plainTextHeaderError]')
-            .should('be.visible');
-        cy.get('[data-cy=plainTextHeaderError]')
-            .should('have.text', 'Plaintext Header is required');
 
-        cy.get('[data-pc-section=headertitle]').contains('HTML Header').click();
         cy.get('[data-cy=htmlHeader]')
             .clear();
-        cy.get('[data-pc-section=headertitle]').contains('Plaintext Header').click();
         cy.get('[data-cy=plainTextHeader]')
             .click()
             .type('aaaa');
@@ -1488,7 +1483,6 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=emailTemplateSettingsSave]')
             .should('be.disabled');
 
-        cy.get('[data-pc-section=headertitle]').contains('HTML Header').click();
         cy.get('[data-cy=htmlHeaderError]')
             .should('be.visible');
         cy.get('[data-cy=htmlHeaderError]')
@@ -1506,15 +1500,12 @@ describe('Settings Tests', () => {
             .type('aaaaa');
         cy.get('[data-cy=emailTemplateSettingsSave]')
             .should('be.disabled');
-        cy.get('[data-pc-section=headertitle]').contains('Plaintext Footer').click();
         cy.get('[data-cy=plainTextFooterError]')
             .should('be.visible');
         cy.get('[data-cy=plainTextFooterError]')
             .should('have.text', 'Plaintext Footer is required');
-        cy.get('[data-pc-section=headertitle]').contains('HTML Footer').click();
         cy.get('[data-cy=htmlFooter]')
             .clear();
-        cy.get('[data-pc-section=headertitle]').contains('Plaintext Footer').click();
         cy.get('[data-cy=plainTextFooter]')
             .click()
             .type('aaaa');
@@ -1522,7 +1513,6 @@ describe('Settings Tests', () => {
             .should('have.text', 'HTML Footer is also required');
         cy.get('[data-cy=emailTemplateSettingsSave]')
             .should('be.disabled');
-        cy.get('[data-pc-section=headertitle]').contains('HTML Footer').click();
         cy.get('[data-cy=htmlFooterError]')
             .should('be.visible');
         cy.get('[data-cy=htmlFooterError]')

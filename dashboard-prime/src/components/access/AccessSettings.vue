@@ -18,16 +18,12 @@ const errMsg = ref(null);
 
 <template>
   <div>
-    <sub-page-header title="Access Management"/>
+    <sub-page-header title="Access Management" />
 
-    <Card data-cy="projectAdmins">
-      <template #header>
-        <SkillsCardHeader title="Project Management Users"></SkillsCardHeader>
-      </template>
-      <template #content>
-        <role-manager :project-id="route.params.projectId" :add-role-confirmation="privateProject"/>
-      </template>
-    </Card>
+    <role-manager :project-id="route.params.projectId"
+                  title="Project Management Users"
+                  data-cy="projectAdmins"
+                  :add-role-confirmation="privateProject" />
   </div>
 </template>
 
