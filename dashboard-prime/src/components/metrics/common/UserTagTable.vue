@@ -23,7 +23,7 @@ const table = ref({
   options: {
     busy: false,
     sortBy: 'count',
-    sortDesc: true,
+    sortOrder: -1,
     pagination: {
       server: true,
       currentPage: 1,
@@ -49,7 +49,7 @@ const pageChanged = (pagingInfo) => {
   loadData()
 }
 const sortTable = (sortContext) => {
-  table.value.options.sortDesc = sortContext.sortOrder === -1;
+  table.value.options.sordOrder = sortContext.sortOrder;
   table.value.options.sortBy = sortContext.sortField;
   // set to the first page
   table.value.options.pagination.currentPage = 1;
@@ -72,7 +72,7 @@ const loadData = (shouldHighlight = false) => {
     tagKey: props.tagChart.key,
     currentPage: table.value.options.pagination.currentPage,
     pageSize: table.value.options.pagination.pageSize,
-    sortDesc: table.value.options.sortDesc,
+    sortDesc: table.value.options.sortOrder === -1,
     tagFilter: filters.value.tag,
     sortBy: table.value.options.sortBy === 'count' ? 'numUsers' : 'tag',
   };
@@ -124,6 +124,8 @@ const loadData = (shouldHighlight = false) => {
                          lazy
                          @page="pageChanged"
                          @sort="sortTable"
+                         v-model:sort-field="table.options.sortBy"
+                         v-model:sort-order="table.options.sortOrder"
                          :rows="table.options.pagination.pageSize"
                          :rowsPerPageOptions="table.options.pagination.possiblePageSizes"
                          :total-records="table.options.pagination.totalRows"
@@ -132,16 +134,24 @@ const loadData = (shouldHighlight = false) => {
           <Column field="value" :header="tagChart.tagLabel ? tagChart.tagLabel : 'Tag'" sortable>
             <template #body="slotProps">
               <span :data-cy="`cell_tagValue-${slotProps.data.value}`">
-                <span v-if="slotProps.data.htmlValue" v-html="slotProps.data.htmlValue"></span><span v-else>{{ slotProps.data.value }}</span>
-                <router-link :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: slotProps.data.value } }">
-                  <SkillsButton size="small" :aria-label="`View metrics for ${slotProps.data.value}`" data-cy="userTagTable_viewMetricsBtn">
-                    <i class="fa fa-chart-bar"/><span class="sr-only">view user tag metrics</span>
-                  </SkillsButton>
+                <router-link :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: slotProps.data.value } }" data-cy="userTagTable_viewMetricsLink">
+                  <span v-if="slotProps.data.htmlValue" v-html="slotProps.data.htmlValue"></span><span v-else>{{ slotProps.data.value }}</span>
                 </router-link>
               </span>
             </template>
           </Column>
           <Column field="count" header="# Users" sortable></Column>
+
+          <template #paginatorstart>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ table.options.pagination.totalRows }}</span>
+          </template>
+
+          <template #empty>
+            <div class="flex justify-content-center flex-wrap" data-cy="emptyTable">
+              <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+              <span class="flex align-items-center justify-content-center">There are no records to show</span>
+            </div>
+          </template>
         </SkillsDataTable>
       </div>
     </template>

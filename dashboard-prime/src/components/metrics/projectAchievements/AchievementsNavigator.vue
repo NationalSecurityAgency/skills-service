@@ -14,8 +14,8 @@ const route = useRoute();
 
 const isLoading = ref(true);
 const usernameFilter = ref('');
-const fromDayFilter = ref('');
-const toDayFilter = ref('');
+const fromDayFilter = ref(null);
+const toDayFilter = ref(null);
 const nameFilter = ref('');
 const levels = {
   selected: '',
@@ -65,8 +65,8 @@ const sortTable = (sortContext) => {
 const reset = () => {
   usernameFilter.value = '';
   currentPage.value = 1;
-  fromDayFilter.value = '';
-  toDayFilter.value = '';
+  fromDayFilter.value = null;
+  toDayFilter.value = null;
   nameFilter.value = '';
   levels.selected = '';
   achievementTypes.value.selected = achievementTypes.value.available;

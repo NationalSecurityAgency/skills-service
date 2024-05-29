@@ -49,12 +49,12 @@ describe('Metrics Using User Tags Tests', () => {
         cy.wait('@getConfig');
 
         cy.clickNav('Metrics');
-        cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]')
+        cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]')
             .contains('Many Values');
         cy.get('[data-cy="userTagTableCard"]')
             .contains('There are no records to show');
 
-        cy.get('[data-cy="userTagChart"] [data-cy="metricsCard-header"]')
+        cy.get('[data-cy="userTagChart"] [data-pc-section="header"]')
             .contains('Some Values');
         cy.get('[data-cy="userTagChart"]')
             .contains('No data yet');

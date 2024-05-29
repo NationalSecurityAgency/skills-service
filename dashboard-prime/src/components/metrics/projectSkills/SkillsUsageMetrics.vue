@@ -5,6 +5,7 @@ import MetricsService from "@/components/metrics/MetricsService.js";
 import SkillsUsageHelper from "@/components/metrics/projectSkills/SkillsUsageHelper.js";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import InputText from "primevue/inputtext";
+import NumberFormatter from '@/components/utils/NumberFormatter.js'
 
 const route = useRoute();
 
@@ -26,7 +27,6 @@ const loading = ref(false);
 
 const pageSize = 5;
 const possiblePageSizes = [5, 10, 15, 20, 50];
-const totalRows = ref(1);
 
 const tableOptions = ref({
   sortBy: 'timestamp',
@@ -59,7 +59,6 @@ const loadData = () => {
         items.value = SkillsUsageHelper.addTags(dataFromServer.skills);
         tags.value = dataFromServer.tags;
         originalItems.value = items.value;
-        totalRows.value = items.value.length;
         loading.value = false;
       });
 };
@@ -84,18 +83,18 @@ const loadData = () => {
         <div class="flex flex-1 flex-column gap-2" data-cy="skillsNavigator-filters">
           <label>Skill Usage Filters</label>
           <div class="flex gap-2">
-            <ToggleButton onLabel="Overlooked Skill" offLabel="Overlooked Skill" v-model="filters.overlookedTag" />
-            <ToggleButton onLabel="Top Skill" offLabel="Top Skill" v-model="filters.topSkillTag" />
-            <ToggleButton onLabel="High Activity" offLabel="High Activity" v-model="filters.highActivityTag" />
-            <ToggleButton onLabel="Never Achieved" offLabel="Never Achieved" v-model="filters.neverAchieved" />
-            <ToggleButton onLabel="Never Reported" offLabel="Never Reported" v-model="filters.neverReported" />
+            <ToggleButton onLabel="Overlooked Skill" offLabel="Overlooked Skill" v-model="filters.overlookedTag" data-cy="overlookedFilterButton" />
+            <ToggleButton onLabel="Top Skill" offLabel="Top Skill" v-model="filters.topSkillTag" data-cy="topSkillFilterButton" />
+            <ToggleButton onLabel="High Activity" offLabel="High Activity" v-model="filters.highActivityTag" data-cy="highActivityFilterButton" />
+            <ToggleButton onLabel="Never Achieved" offLabel="Never Achieved" v-model="filters.neverAchieved" data-cy="neverAchievedFilterButton" />
+            <ToggleButton onLabel="Never Reported" offLabel="Never Reported" v-model="filters.neverReported" data-cy="neverReportedFilterButton" />
           </div>
             <div class="font-light text-sm">Please Note: These filters become more meaningful with extensive usage</div>
         </div>
       </div>
       <div class="flex flex-1 flex-column gap-2 px-3" v-if="tags.length > 0">
         <label>Skill Tags</label>
-        <div class="flex gap-2">
+        <div class="flex gap-2" data-cy="skillTag-filters">
           <div v-for="tag in tags" :key="tag.tagId">
             <Checkbox v-model="filters.skillTags" :value="tag.tagId" :name="tag.tagId" :inputId="tag.tagId"></Checkbox>
             <label :for="tag.tagId">
@@ -117,7 +116,6 @@ const loadData = () => {
                        paginator
                        show-grid-lines
                        striped-rows
-                       :totalRecords="totalRows"
                        :rows="pageSize"
                        :rowsPerPageOptions="possiblePageSizes">
         <Column field="skillName" header="Skill" sortable>
@@ -125,7 +123,7 @@ const loadData = () => {
             <div class="flex">
               <div class="flex flex-1 flex-column">
                 {{ slotProps.data.skillName }} <Badge v-if="slotProps.data.isReusedSkill" variant="success" class="text-uppercase"><i class="fas fa-recycle"></i> Reused</Badge>
-                <div v-if="slotProps.data.skillTags.length > 0">
+                <div v-if="slotProps.data.skillTags && slotProps.data.skillTags.length > 0">
                   <Badge v-for="tag in slotProps.data.skillTags" :key="tag.tagId" variant="info" class="mr-2 mt-1">
                     <i :class="'fas fa-tag'" class="ml-1" style="margin-left: 0 !important;" aria-hidden="true"></i> {{ tag.tagValue }}
                   </Badge>
@@ -144,23 +142,15 @@ const loadData = () => {
         </Column>
         <Column field="numUserAchieved" header="# Users Achieved" sortable>
           <template #body="slotProps">
-            <span class="ml-2">{{ slotProps.data.numUserAchieved }}</span>
+            <span class="ml-2">{{ NumberFormatter.format(slotProps.data.numUserAchieved) }}</span>
             <Badge v-if="slotProps.data.isOverlookedTag" variant="danger" class="ml-2">Overlooked Skill</Badge>
             <Badge v-if="slotProps.data.isTopSkillTag" variant="info" class="ml-2">Top Skill</Badge>
           </template>
         </Column>
         <Column field="numUsersInProgress" header="# Users In Progress" sortable>
           <template #body="slotProps">
-            <span class="ml-2">{{ slotProps.data.numUsersInProgress }}</span>
+            <span class="ml-2">{{ NumberFormatter.format(slotProps.data.numUsersInProgress) }}</span>
             <Badge v-if="slotProps.data.isHighActivityTag" variant="success" class="ml-2">High Activity</Badge>
-          </template>
-        </Column>
-        <Column field="lastAchievedTimestamp" header="Last Achieved" sortable>
-          <template #body="slotProps">
-            <Badge v-if="slotProps.data.isNeverAchievedTag" variant="warning" class="ml-2">Never</Badge>
-            <div v-else>
-              <date-cell :value="slotProps.data.lastAchievedTimestamp" />
-            </div>
           </template>
         </Column>
         <Column field="lastReportedTimestamp" header="Last Reported" sortable>
@@ -171,9 +161,17 @@ const loadData = () => {
             </div>
           </template>
         </Column>
+        <Column field="lastAchievedTimestamp" header="Last Achieved" sortable>
+          <template #body="slotProps">
+            <Badge v-if="slotProps.data.isNeverAchievedTag" variant="warning" class="ml-2">Never</Badge>
+            <div v-else>
+              <date-cell :value="slotProps.data.lastAchievedTimestamp" />
+            </div>
+          </template>
+        </Column>
 
         <template #paginatorstart>
-          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ items.length }}</span>
         </template>
 
         <template #empty>
