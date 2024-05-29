@@ -13,6 +13,7 @@ import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEdito
 import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import { useSkillYupValidators } from '@/components/skills/UseSkillYupValidators.js'
+import SettingsService from '@/components/settings/SettingsService.js';
 
 const show = defineModel()
 const route = useRoute()
@@ -37,29 +38,53 @@ const asyncLoadData = () => {
     if (props.isEdit || props.isCopy) {
       return SkillsService.getSkillDetails(route.params.projectId, route.params.subjectId, props.skill.skillId)
         .then((resSkill) => {
-          return {
+          const skillDetails = {
             ...resSkill,
             'description': resSkill.description || '',
             skillName: props.isCopy ? `Copy of ${resSkill.name}` : resSkill.name,
             skillId: props.isCopy ? `copy_of_${resSkill.skillId}` : resSkill.skillId,
+            selfReportingType: props.isCopy && resSkill.selfReportingType === 'Video' ? 'Approval' : resSkill.selfReportingType,
           }
+          initialSkillData.hasVideoConfigured = resSkill.hasVideoConfigured;
+          return skillDetails;
         })
     }
-
     return Promise.resolve({})
   }
 
   return loadSkillDetails().then((skillRes) => {
-    return SkillsService.getLatestSkillVersion(route.params.projectId)
-      .then((latestVersion) => {
-        latestSkillVersion.value = latestVersion
-        maxSkillVersion.value = Math.min(latestVersion + 1, appConfig.maxSkillVersion)
-        return {
-          ...skillRes,
-          skipTheseAttrsWhenValidatingOnInit: ['version'],
-          version: latestVersion
-        }
-      })
+    if (!props.isEdit && !props.isCopy) {
+      return SkillsService.getLatestSkillVersion(route.params.projectId).then((latestVersion) => {
+          latestSkillVersion.value = latestVersion
+          maxSkillVersion.value = Math.min(latestVersion + 1, appConfig.maxSkillVersion)
+          return {
+            ...skillRes,
+            skipTheseAttrsWhenValidatingOnInit: ['version'],
+            version: latestVersion
+          }
+        }).then((skillResWithVersion) => {
+          return SettingsService.getSettingsForProject(route.params.projectId).then((settings) => {
+            if (settings) {
+              const selfReportingTypeSetting = settings.find((item) => item.setting === 'selfReport.type');
+              if (selfReportingTypeSetting) {
+                skillResWithVersion.selfReportingType = selfReportingTypeSetting.value;
+                skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('selfReportingType');
+                if (selfReportingTypeSetting.value !== 'Disabled') {
+                  skillResWithVersion.selfReportingEnabled = true;
+                  skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('selfReportingEnabled');
+                }
+              }
+              const selfReportingJustificationSetting = settings.find((item) => item.setting === 'selfReport.justificationRequired');
+              if (selfReportingJustificationSetting) {
+                skillResWithVersion.justificationRequired = selfReportingJustificationSetting.value && selfReportingJustificationSetting.value !== 'false';
+                skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('justificationRequired');
+              }
+            }
+            return skillResWithVersion;
+          })
+        })
+    }
+    return skillRes;
   })
 }
 

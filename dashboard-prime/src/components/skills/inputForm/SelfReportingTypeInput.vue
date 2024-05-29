@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, ref } from 'vue'
+import { computed, inject, onMounted, ref } from 'vue'
 import { useFieldValue } from 'vee-validate'
 import QuizSelector from "@/components/skills/selfReport/QuizSelector.vue";
 
@@ -14,12 +14,12 @@ const honorKey = 'HonorSystem'
 const quizKey = 'Quiz'
 const videoKey = 'Video'
 
-const enabled = ref(props.initialSkillData.selfReportingEnabled)
+// const enabled = ref(props.initialSkillData.selfReportingEnabled)
 const categories = ref([
   { name: 'Approval Queue', key: approvalKey },
   { name: 'Honor System', key: honorKey },
   { name: 'Quiz/Survey', key: quizKey },
-  { name: 'Video', key: videoKey, disabled: true }
+  { name: 'Video', key: videoKey }
 ])
 const setFieldValue = inject('setFieldValue')
 const onEnabledChanged = (newVal) => {
@@ -29,7 +29,8 @@ const onEnabledChanged = (newVal) => {
 }
 const onTypeChanged = (newType) => {
   if (newType !== approvalKey) {
-    justificationRequired.value = false
+    // justificationRequired.value = false
+    setFieldValue('justificationRequired', false)
   }
   if (newType === quizKey || newType === videoKey) {
     setFieldValue('numPerformToCompletion', 1)
@@ -42,9 +43,12 @@ const quizIdSelected = (quizId) => {
   emit('quizIdChanged', quizId)
 }
 
-const justificationRequired = ref(false)
+const justificationRequired = useFieldValue('justificationRequired');
 const selfReportingType = useFieldValue('selfReportingType');
+const enabled = useFieldValue('selfReportingEnabled');
 const quizSelected = computed(() => selfReportingType.value === quizKey)
+const isVideoChoiceDisabled = computed(() => !enabled.value || !props.isEdit || (props.isEdit && !props.initialSkillData.hasVideoConfigured))
+const isVideoConfigured = computed(() => props.initialSkillData.hasVideoConfigured )
 </script>
 
 <template>
@@ -66,32 +70,35 @@ const quizSelected = computed(() => selfReportingType.value === quizKey)
         <div v-for="category in categories" :key="category.key" class="flex align-items-start">
           <SkillsRadioButtonInput
             @update:modelValue="onTypeChanged"
-            :disabled="!enabled || category.disabled"
+            :disabled="!enabled || (category.key === videoKey && isVideoChoiceDisabled)"
             :inputId="category.key"
             severity="info"
             name="selfReportingType"
             :data-cy="`${category.key.toLowerCase()}Radio`"
             :value="category.key" />
           <label :for="category.key" class="ml-2 flex w-full">
-            <span>{{ category.name }}</span>
+            <span :class="{ 'text-color-secondary' : !enabled || (category.key === videoKey && isVideoChoiceDisabled) }">{{ category.name }}</span>
             <div v-if="category.key === approvalKey" class="ml-2">
               |
                <SkillsCheckboxInput
                  class="ml-2"
                  :binary="true"
                  :disabled="!enabled || selfReportingType !== 'Approval'"
-                 v-model="justificationRequired"
                  inputId="selfReportJustificationRequired"
                  name="justificationRequired"
                  :value="true" />
                 <label
                   for="selfReportJustificationRequired"
+                  :class="{ 'text-color-secondary' : !enabled || selfReportingType !== 'Approval' }"
                   class="ml-2 font-italic">Justification Required</label>
             </div>
             <div v-if="category.key === quizKey" class="pl-2 w-full">
-              <QuizSelector v-if="category.key === quizKey && enabled && quizSelected" :initiallySelectedQuizId="initialSkillData.quizId" @changed="quizIdSelected" />
+              <QuizSelector class="mb-0" v-if="category.key === quizKey && enabled && quizSelected" :initiallySelectedQuizId="initialSkillData.quizId" @changed="quizIdSelected" />
             </div>
-            <span v-if="category.key === videoKey" class="ml-2 font-italic">(Please create skill and configure video settings first)</span>
+            <span v-if="category.key === videoKey && !isVideoConfigured" class="ml-2 font-italic" :class="{ 'text-color-secondary' : !enabled || (category.key === videoKey && isVideoChoiceDisabled) }" data-cy="videoSelectionMsg">
+                  <span v-if="!isEdit">(Please create skill and configure video settings first)</span>
+                  <span v-else>(Please configure video settings first)</span>
+                </span>
           </label>
         </div>
       </div>

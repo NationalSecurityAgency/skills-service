@@ -1,18 +1,19 @@
 <script setup>
 import { computed, nextTick, onMounted, ref, defineAsyncComponent } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import * as yup from 'yup';
 import { string } from 'yup';
 import { useForm } from 'vee-validate';
 import { useByteFormat } from '@/common-components/filter/UseByteFormat.js';
-import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js';
+import { useProjConfig } from '@/stores/UseProjConfig.js';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import { useSkillsState } from '@/stores/UseSkillsState.js';
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js';
 import FileUploadService from '@/common-components/utilities/FileUploadService.js';
 import VideoService from '@/components/video/VideoService.js';
+import MsgLogService from '@/common-components/utilities/MsgLogService.js';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
 import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar.vue';
@@ -26,9 +27,10 @@ const VideoPlayer = defineAsyncComponent(() =>
 )
 
 const skillsState = useSkillsState();
-const communityLabels = useCommunityLabels()
 const route = useRoute();
+const router = useRouter()
 const appConfig = useAppConfig()
+const projConfig = useProjConfig()
 const timeUtils = useTimeUtils()
 const announcer = useSkillsAnnouncer()
 const confirm = useConfirm();
@@ -93,7 +95,7 @@ const isReadOnly = computed(() => {
 });
 const videoUploadWarningMessage = computed(() => {
   const communityProjDescriptor = /\{\{\s?community.project.descriptor\s?\}\}/gi;
-  const projCommunityValue = communityLabels.projectConfiguredUserCommunity;
+  const projCommunityValue = projConfig.getProjectCommunityValue()
   const warningMessageValue = appConfig?.videoUploadWarningMessage;
   let result = warningMessageValue;
   if (warningMessageValue) {
@@ -101,7 +103,7 @@ const videoUploadWarningMessage = computed(() => {
     if (found && !projCommunityValue) {
       const errorMessage = `projId=[${route.params.projectId}], skillId=[${route.params.skillId}] config.videoUploadWarningMessage contained {{community.project.descriptor}} property but failed to load [project_community_value] configuration for the replacement.`;
       MsgLogService.log('ERROR', errorMessage);
-      handlePush({ name: 'ErrorPage', query: { errorMessage } });
+      router.push({ name: 'ErrorPage', query: { errorMessage } });
     }
     result = result.replace(communityProjDescriptor, projCommunityValue);
   }
@@ -425,7 +427,7 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
                             :isInternallyHosted="videoConf.isInternallyHosted"
                             data-cy="videoFileInput"/>
 
-            <Message v-if="videoConf.file && videoUploadWarningMessage" severity="error" icon="fas fa-exclamation-circle" :closable="false">
+            <Message v-if="videoConf.file && videoUploadWarningMessage" data-cy="videoUploadWarningMessage" severity="error" icon="fas fa-exclamation-circle" :closable="false">
               {{ videoUploadWarningMessage }}
             </Message>
 
