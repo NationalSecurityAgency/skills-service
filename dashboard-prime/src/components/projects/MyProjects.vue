@@ -209,14 +209,16 @@ const saveProject = (values, isEdit, projectId) => {
                 return {...projRes, originalProjectId: projectId}
               })
         }
-        return {...projRes, originalProjectId: projectId}
-      }).finally(() => {
-        if (!isEdit) {
-          projectAdded(projToSave);
-        } else {
-          projectEdited(projToSave);
-        }
-      });
+        return ProjectService.getProject(projRes.projectId)
+          .then((retrievedProj) => {
+            if (!isEdit) {
+              projectAdded(retrievedProj);
+            } else {
+              projectEdited(retrievedProj);
+            }
+            return {...retrievedProj, originalProjectId: projectId}
+          })
+      })
 }
 
 const focusOnProjectCard = (projectId) => {

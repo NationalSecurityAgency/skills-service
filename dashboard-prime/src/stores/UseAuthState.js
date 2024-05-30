@@ -206,6 +206,13 @@ export const useAuthState = defineStore('authState', () => {
         )
     })
 
+    const currentUserCommunity = computed(() => {
+        return userInfo.value?.userCommunity
+    })
+    const showUserCommunityInfo = computed(() => {
+        return Boolean(currentUserCommunity.value)
+    })
+
     return {
         signup,
         login,
@@ -216,6 +223,8 @@ export const useAuthState = defineStore('authState', () => {
         isAuthenticated,
         userInfo,
         restoringSession,
-        clearAuthData
+        clearAuthData,
+        currentUserCommunity,
+        showUserCommunityInfo
     }
 })

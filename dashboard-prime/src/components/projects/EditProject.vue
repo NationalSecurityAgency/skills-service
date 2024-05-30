@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { object, string } from 'yup'
+import { boolean, object, string, ValidationError } from 'yup'
 import { useDebounceFn } from '@vueuse/core'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import ProjectService from '@/components/projects/ProjectService.js'
@@ -9,8 +9,9 @@ import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
-import SettingsService from '@/components/settings/SettingsService.js'
 import { useAccessState } from '@/stores/UseAccessState.js'
+import CommunityProtectionControls from '@/components/projects/CommunityProtectionControls.vue'
+import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
 
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
@@ -54,6 +55,46 @@ const checkProjIdUnique = useDebounceFn((value) => {
 
 }, appConfig.formFieldDebounceInMs)
 
+const descriptionValidatorService = useDescriptionValidatorService()
+const checkDescription = useDebounceFn((value, testContext) => {
+  if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
+    return true
+  }
+  return descriptionValidatorService.validateDescription(value, false, enableProtectedUserCommunity.value).then((result) => {
+    if (result.valid) {
+      return true
+    }
+    let fieldNameToUse = 'Project Description'
+    if (result.msg) {
+      return testContext.createError({ message: `${fieldNameToUse ? `${fieldNameToUse} - ` : ''}${result.msg}` })
+    }
+    return testContext.createError({ message: `${fieldNameToUse || 'Field'} is invalid` })
+  })
+
+}, appConfig.formFieldDebounceInMs)
+
+
+const checkProjectCommunityRequirements =(value, testContext) => {
+  if (!value || !props.isEdit) {
+    return true;
+  }
+  return ProjectService.validateProjectForEnablingCommunity(props.project.projectId).then((result) => {
+    if (result.isAllowed) {
+      return true;
+    }
+    if (result.unmetRequirements) {
+      // return `<ul><li>${result.unmetRequirements.join('</li><li>')}</li></ul>`;
+      const errors = result.unmetRequirements.map((req) => {
+        return testContext.createError({ message: `${req}` })
+      })
+      return new ValidationError(errors)
+    }
+    // return testContext.createError({ message: `${fieldNameToUse ? `${fieldNameToUse} - ` : ''}${result.msg}` })
+    // return '{_field_} is invalid.';
+    return true
+  });
+}
+
 const schema = object({
   'projectName': string()
     .trim()
@@ -72,11 +113,16 @@ const schema = object({
     .nullValueNotAllowed()
     .test('uniqueId', 'Project ID already exists', (value) => checkProjIdUnique(value))
     .label('Project ID'),
+  'enableProtectedUserCommunity': boolean()
+    .test('communityReqValidation', 'Unmet community requirements', (value, testContext) => checkProjectCommunityRequirements(value, testContext))
+    .label('Enable Protected User Community'),
   'description': string()
     .max(appConfig.descriptionMaxLength)
-    .customDescriptionValidator('Project Description', false, enableProtectedUserCommunity.value)
+    .test('descriptionValidation', 'Description is invalid', (value, testContext) => checkDescription(value, testContext))
     .label('Project Description')
 })
+
+
 const initialProjData = {
   projectId: props.project.projectId || '',
   projectName: props.project.name || '',
@@ -101,6 +147,10 @@ const saveProject = (values) => {
     name: InputSanitizer.sanitize(values.projectName),
     projectId: InputSanitizer.sanitize(values.projectId)
   };
+
+  if (initialValueForEnableProtectedUserCommunity) {
+    projToSave.enableProtectedUserCommunity = initialValueForEnableProtectedUserCommunity
+  }
 
   emit('project-saved', projToSave, props.isEdit, props.project.projectId)
   return Promise.resolve();
@@ -132,65 +182,17 @@ const onSavedProject = () => {
         :id-label="`${props.isCopy ? 'New Project ID' : 'Project ID'}`"
         id-field-name="projectId"
         :name-to-id-sync-enabled="!props.isEdit" />
+
+      <community-protection-controls
+        v-model:enable-protected-user-community="enableProtectedUserCommunity"
+        :project="project"
+        :is-edit="isEdit"
+        :is-copy="isCopy" />
+      <pre>{{communityLabels.showManageUserCommunity.value }}</pre>
       <markdown-editor
         class="mt-5"
+        :allow-attachments="isEdit || !communityLabels.showManageUserCommunity.value"
         name="description" />
-
-      <!--      <div v-if="showManageUserCommunity" class="border rounded p-2 mt-3 mb-2" data-cy="restrictCommunityControls">-->
-      <!--        <div v-if="isCopyAndCommunityProtected">-->
-      <!--          <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Copying project whose access is restricted to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only and <b>cannot</b> be lifted/disabled-->
-      <!--        </div>-->
-      <!--        <div v-if="isEditAndCommunityProtected">-->
-      <!--          <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Access is restricted to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only and <b>cannot</b> be lifted/disabled-->
-      <!--        </div>-->
-      <!--        <div v-if="!isEditAndCommunityProtected && !isCopyAndCommunityProtected">-->
-      <!--          <ValidationObserver v-slot="{ pending, invalid }">-->
-      <!--            <div class="row">-->
-      <!--              <div class="col-lg">-->
-      <!--                <ValidationProvider rules="projectCommunityRequirements"-->
-      <!--                                    name="Failed Minimum Requirement" v-slot="{ errors }">-->
-      <!--                  <b-form-checkbox v-model="internalProject.enableProtectedUserCommunity"-->
-      <!--                                   @change="userCommunityChanged"-->
-      <!--                                   name="check-button" inline switch data-cy="restrictCommunity">-->
-      <!--                    Restrict <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Access to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only-->
-      <!--                  </b-form-checkbox>-->
-
-      <!--                  <div v-if="invalid" class="alert alert-danger mb-3 mt-1" data-cy="communityValidationErrors" role="alert">-->
-      <!--                    <div>-->
-      <!--                      <i class="fas fa-exclamation-triangle text-danger mr-1" aria-hidden="true" />-->
-      <!--                      <span>Unable to restrict access to {{ userCommunityRestrictedDescriptor }} users only:</span>-->
-      <!--                    </div>-->
-      <!--                    <span v-html="errors[0]"/>-->
-      <!--                  </div>-->
-      <!--                </ValidationProvider>-->
-      <!--              </div>-->
-      <!--              <div v-if="userCommunityDocsLink" class="col-lg-auto" data-cy="userCommunityDocsLink">-->
-      <!--                <a :href="userCommunityDocsLink" target="_blank" style="text-decoration: underline">{{ userCommunityDocsLabel }}</a>-->
-      <!--                <i class="fas fa-external-link-alt ml-1" aria-hidden="true" style="font-size: 0.9rem;"/>-->
-      <!--              </div>-->
-      <!--            </div>-->
-      <!--            <div v-if="!pending">-->
-      <!--              <div v-if="internalProject.enableProtectedUserCommunity && !invalid" class="alert-warning alert mb-0 mt-1" data-cy="communityRestrictionWarning">-->
-      <!--                <i class="fas fa-exclamation-triangle text-danger" aria-hidden="true" /> Please note that once the restriction is enabled it <b>cannot</b> be lifted/disabled.-->
-      <!--              </div>-->
-      <!--            </div>-->
-      <!--          </ValidationObserver>-->
-      <!--        </div>-->
-      <!--      </div>-->
-      <!--      <div class="row">-->
-      <!--        <div class="mt-2 col-12">-->
-      <!--          <ValidationProvider rules="maxDescriptionLength|customProjectDescriptionValidator" :debounce="250" v-slot="{errors}"-->
-      <!--                              name="Project Description">-->
-      <!--            <markdown-editor v-if="!isEdit || descriptionLoaded"-->
-      <!--                             v-model="internalProject.description"-->
-      <!--                             :project-id="internalProject.projectId"-->
-      <!--                             :allow-attachments="isEdit || !showManageUserCommunity"-->
-      <!--                             @input="updateDescription" />-->
-      <!--            <small role="alert" class="form-text text-danger mb-3" data-cy="projectDescriptionError">{{ errors[0] }}</small>-->
-      <!--          </ValidationProvider>-->
-      <!--        </div>-->
-      <!--      </div>-->
-      <!--      <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2" aria-live="polite"><small>***{{ overallErrMsg }}***</small></p>-->
 
     </template>
   </SkillsInputFormDialog>

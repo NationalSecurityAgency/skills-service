@@ -17,12 +17,10 @@ import { useAccessState } from '@/stores/UseAccessState.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import ReminderMessage from '@/components/utils/misc/ReminderMessage.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
-import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js';
 
 const props = defineProps(['project', 'disableSortControl'])
 const appConfig = useAppConfig()
 const accessState = useAccessState()
-const communityLabels = useCommunityLabels()
 const emit = defineEmits(['project-deleted', 'copy-project', 'pin-removed', 'sort-changed-requested'])
 const numberFormat = useNumberFormat()
 const announcer = useSkillsAnnouncer()
@@ -211,11 +209,11 @@ defineExpose({
               <span class="text-2xl font-bold ml-2">{{ projectInternal.name }}</span>
             </router-link>
             <div v-if="projectInternal.userCommunity" class="my-2" data-cy="userCommunity">
-              <span class="border p-1 border-danger rounded"><i
-                  class="fas fa-shield-alt text-danger" aria-hidden="true"/></span> <span
-                class="text-secondary font-italic ml-1">{{ communityLabels.beforeCommunityLabel }}</span> <span
+              <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
+              <span
+                class="text-secondary font-italic ml-1">{{ appConfig.userCommunityBeforeLabel }}</span> <span
                 class="font-weight-bold text-primary">{{ projectInternal.userCommunity }}</span> <span
-                class="text-secondary font-italic">{{ communityLabels.afterCommunityLabel }}</span>
+                class="text-secondary font-italic">{{ appConfig.userCommunityAfterLabel }}</span>
             </div>
           </div>
           <div class="flex-1">

@@ -13,102 +13,107 @@ import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert
 import EditProject from '@/components/projects/EditProject.vue'
 import { useProjDetailsState } from '@/stores/UseProjDetailsState.js'
 import UserRolesUtil from '@/components/utils/UserRolesUtil'
-import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js';
+import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
+import Avatar from 'primevue/avatar'
 
 // const props = defineProps(['project'])
 const router = useRouter()
-const route = useRoute();
+const route = useRoute()
 const projConfig = useProjConfig()
 const appConfig = useAppConfig()
 const communityLabels = useCommunityLabels()
 const announcer = useSkillsAnnouncer()
-const projectDetailsState = useProjDetailsState();
+const projectDetailsState = useProjDetailsState()
 
 
-const cancellingExpiration = ref(false);
-const editProject = ref(false);
-const shareProjModal = ref(false);
-const shareUrl = ref('');
+const cancellingExpiration = ref(false)
+const editProject = ref(false)
+const shareProjModal = ref(false)
+const shareUrl = ref('')
 const project = computed(() => projectDetailsState.project)
-const isLoadingData = computed(() => projectDetailsState.isLoading);
-const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
+const isLoadingData = computed(() => projectDetailsState.isLoading)
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj)
 
 const isLoading = computed(() => {
-  return isLoadingData.value; // || projConfig.loadingProjConfig;
-});
+  return isLoadingData.value // || projConfig.loadingProjConfig;
+})
 
 onMounted(() => {
-  projectDetailsState.loadProjectDetailsState(true);
-});
+  projectDetailsState.loadProjectDetailsState(true)
+})
 
 const navItems = computed(() => {
   const items = [
     { name: 'Subjects', iconClass: 'fa-cubes skills-color-subjects', page: 'Subjects' },
     { name: 'Badges', iconClass: 'fa-award skills-color-badges', page: 'Badges' },
     { name: 'Self Report', iconClass: 'fa-laptop skills-color-selfreport', page: 'SelfReport' },
-    { name: 'Learning Path', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'FullDependencyGraph' },
-  ];
+    { name: 'Learning Path', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'FullDependencyGraph' }
+  ]
 
   if (!isReadOnlyProj.value) {
-    items.push({ name: 'Skill Catalog', iconClass: 'fa-book skills-color-skill-catalog', page: 'SkillsCatalog' });
-    items.push({ name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'ProjectLevels' });
+    items.push({ name: 'Skill Catalog', iconClass: 'fa-book skills-color-skill-catalog', page: 'SkillsCatalog' })
+    items.push({ name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'ProjectLevels' })
   }
 
-  items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'ProjectUsers' });
-  items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'ProjectMetrics' });
+  items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'ProjectUsers' })
+  items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'ProjectMetrics' })
 
   if (!isReadOnlyProj.value) {
-    items.push({ name: 'Contact Users', iconClass: 'fas fa-mail-bulk', page: 'EmailUsers' });
-    items.push({ name: 'Issues', iconClass: 'fas fa-exclamation-triangle', page: 'ProjectErrorsPage' });
-    items.push({ name: 'Access', iconClass: 'fa-shield-alt skills-color-access', page: 'ProjectAccess' });
-    items.push({ name: 'Admin Activity', iconClass: 'fa-users-cog text-success', page: 'ProjectActivityHistory' });
-    items.push({ name: 'Skill Expiration History', iconClass: 'fa-clock skills-color-expiration', page: 'ExpirationHistory' });
-    items.push({ name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'ProjectSettings' });
+    items.push({ name: 'Contact Users', iconClass: 'fas fa-mail-bulk', page: 'EmailUsers' })
+    items.push({ name: 'Issues', iconClass: 'fas fa-exclamation-triangle', page: 'ProjectErrorsPage' })
+    items.push({ name: 'Access', iconClass: 'fa-shield-alt skills-color-access', page: 'ProjectAccess' })
+    items.push({ name: 'Admin Activity', iconClass: 'fa-users-cog text-success', page: 'ProjectActivityHistory' })
+    items.push({
+      name: 'Skill Expiration History',
+      iconClass: 'fa-clock skills-color-expiration',
+      page: 'ExpirationHistory'
+    })
+    items.push({ name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'ProjectSettings' })
   }
 
-  return items;
-});
+  return items
+})
 
 const headerOptions = computed(() => {
   if (!project.value || !projConfig.projConfig) {
-    return {};
+    return {}
   }
-  let visibilityLabel = 'Project Catalog';
-  let visibilityIcon = 'fas fa-eye-slash text-warning';
-  let visibilityDescription = '';
-  let visibilityType = 'Hidden';
+  let visibilityLabel = 'Project Catalog'
+  let visibilityIcon = 'fas fa-eye-slash text-warning'
+  let visibilityDescription = ''
+  let visibilityType = 'Hidden'
   if (projConfig.isProjConfigInviteOnly) {
-    visibilityLabel = 'Protection';
-    visibilityDescription = 'Invite Only';
-    visibilityIcon = 'fas fa-user-lock text-danger';
-    visibilityType = 'PRIVATE';
+    visibilityLabel = 'Protection'
+    visibilityDescription = 'Invite Only'
+    visibilityIcon = 'fas fa-user-lock text-danger'
+    visibilityType = 'PRIVATE'
   } else if (projConfig.isProjConfigDiscoverable) {
-    visibilityType = 'Discoverable';
-    visibilityIcon = 'fas fa-search-plus text-success';
-    visibilityDescription = '';
+    visibilityType = 'Discoverable'
+    visibilityIcon = 'fas fa-search-plus text-success'
+    visibilityDescription = ''
   }
 
-  const stats = [];
+  const stats = []
   stats.push({
     label: visibilityLabel,
     preformatted: `<div class="h5 font-weight-bold mb-0">${visibilityType}</div>`,
     secondaryPreformatted: `<div class="text-secondary text-uppercase text-truncate" style="font-size:0.8rem;margin-top:0.1em;">${visibilityDescription}</div>`,
-    icon: `${visibilityIcon} skills-color-visibility`,
-  });
+    icon: `${visibilityIcon} skills-color-visibility`
+  })
   stats.push({
     label: 'Skills',
     count: project.value.numSkills,
     secondaryStats: [{
       label: 'reused',
       count: project.value.numSkillsReused,
-      badgeVariant: 'info',
+      badgeVariant: 'info'
     }, {
       label: 'disabled',
       count: project.value.numSkillsDisabled,
-      badgeVariant: 'warning',
+      badgeVariant: 'warning'
     }],
-    icon: 'fas fa-graduation-cap skills-color-skills',
-  });
+    icon: 'fas fa-graduation-cap skills-color-skills'
+  })
   stats.push({
     label: 'Points',
     count: project.value.totalPoints,
@@ -117,81 +122,84 @@ const headerOptions = computed(() => {
     secondaryStats: [{
       label: 'reused',
       count: project.value.totalPointsReused,
-      badgeVariant: 'info',
-    }],
-  });
+      badgeVariant: 'info'
+    }]
+  })
   stats.push({
     label: 'Badges',
     count: project.value.numBadges,
-    icon: 'fas fa-award skills-color-badges',
-  });
+    icon: 'fas fa-award skills-color-badges'
+  })
 
   if (!isReadOnlyProj.value) {
     stats.push({
       label: 'Issues',
       count: project.value.numErrors,
-      icon: 'fas fa-exclamation-triangle',
-    });
+      icon: 'fas fa-exclamation-triangle'
+    })
   }
 
   return {
     icon: 'fas fa-list-alt skills-color-projects',
     title: `PROJECT: ${project.value.name}`,
     subTitle: `ID: ${project.value.projectId}`,
-    stats,
-  };
-});
+    stats
+  }
+})
 
 const minimumPoints = computed(() => {
-  return appConfig.minimumProjectPoints;
-});
+  return appConfig.minimumProjectPoints
+})
 const expirationDate = computed(() => {
   if (!project.value.expiring) {
-    return '';
+    return ''
   }
-  const gracePeriodInDays = appConfig.expirationGracePeriod.value;
-  const expires = dayjs(project.value.expirationTriggered).add(gracePeriodInDays, 'day').startOf('day');
-  return expires.format('YYYY-MM-DD HH:mm');
-});
+  const gracePeriodInDays = appConfig.expirationGracePeriod.value
+  const expires = dayjs(project.value.expirationTriggered).add(gracePeriodInDays, 'day').startOf('day')
+  return expires.format('YYYY-MM-DD HH:mm')
+})
 
 
 const copyAndDisplayShareProjInfo = () => {
-  const host = window.location.origin;
-  shareUrl.value = `${host}/progress-and-rankings/projects/${project.value.projectId}?invited=true`;
+  const host = window.location.origin
+  shareUrl.value = `${host}/progress-and-rankings/projects/${project.value.projectId}?invited=true`
   navigator.clipboard.writeText(shareUrl).then(() => {
-    shareProjModal.value = true;
-  });
-};
+    shareProjModal.value = true
+  })
+}
 
 const fromExpirationDate = () => {
-  return dayjs().startOf('day').to(dayjs(expirationDate));
-};
+  return dayjs().startOf('day').to(dayjs(expirationDate))
+}
 const projectSaved = (updatedProject) => {
-  const origProjId = project.value.projectId;
+  const origProjId = project.value.projectId
   ProjectService.saveProject(updatedProject).then(() => {
-    setProject(updatedProject);
+    ProjectService.getProject(updatedProject.projectId)
+      .then((retrievedProject) => {
+        setProject(retrievedProject)
+      })
     if (updatedProject.projectId !== origProjId) {
       router.replace({ name: route.name, params: { ...route.params, projectId: updatedProject.projectId } })
-        .then(() =>{
+        .then(() => {
           projConfig.loadProjConfigState({ projectId: updatedProject.projectId, updateLoadingVar: false })
-        });
+        })
     }
-    announcer.polite(`Project ${updatedProject.name} has been edited`);
-  });
-};
+    announcer.polite(`Project ${updatedProject.name} has been edited`)
+  })
+}
 
 const keepIt = () => {
-  cancellingExpiration.value = true;
+  cancellingExpiration.value = true
   ProjectService.cancelUnusedProjectDeletion(route.params.projectId).then(() => {
     // loadProjects();
   }).finally(() => {
-    cancellingExpiration.value= false;
-  });
-};
+    cancellingExpiration.value = false
+  })
+}
 
 const setProject = (newProject) => {
   projectDetailsState.project = newProject
-};
+}
 
 </script>
 
@@ -209,22 +217,23 @@ const setProject = (newProject) => {
           </span>
         </div>
         <SkillsButton @click="keepIt" data-cy="keepIt" size="small" variant="alert"
-                  :aria-label="'Keep Project '+ project.value.name" label="Keep It" :icon="!cancellingExpiration ? 'fas fa-shield-alt' : ''">
+                      :aria-label="'Keep Project '+ project.value.name" label="Keep It"
+                      :icon="!cancellingExpiration ? 'fas fa-shield-alt' : ''">
         </SkillsButton>
       </template>
       <template #subTitle v-if="project">
         <div v-if="project.userCommunity" class="mb-3" data-cy="userCommunity">
-          <span class="border p-1 border-danger rounded"><i
-              class="fas fa-shield-alt text-danger" aria-hidden="true"/></span> <span
-            class="text-secondary font-italic ml-1">{{ communityLabels.beforeCommunityLabel }}</span> <span
-            class="font-weight-bold text-primary">{{ project.userCommunity }}</span> <span
-            class="text-secondary font-italic">{{ communityLabels.afterCommunityLabel }}</span>
+          <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
+          <span
+            class="text-secondary font-italic ml-1">{{ appConfig.userCommunityBeforeLabel }}</span> <span
+          class="font-weight-bold text-primary">{{ project.userCommunity }}</span> <span
+          class="text-secondary font-italic">{{ appConfig.userCommunityAfterLabel }}</span>
         </div>
         <div class="">
           <span class="border-1 border-round px-1 mr-2">
-           <i class="fas fa-fingerprint" aria-hidden="true"/>
+           <i class="fas fa-fingerprint" aria-hidden="true" />
           </span>
-            <span class="font-italic text-color-secondary">Project ID</span>: {{ project.projectId }}
+          <span class="font-italic text-color-secondary">Project ID</span>: {{ project.projectId }}
         </div>
       </template>
       <template #subSubTitle v-if="project">
@@ -261,29 +270,32 @@ const setProject = (newProject) => {
             </SkillsButton>
           </router-link>
           <SkillsButton v-if="projConfig.isProjConfigDiscoverable"
-                    ref="shareProjectButton"
-                    size="small"
-                    @click="copyAndDisplayShareProjInfo"
-                    data-cy="shareProjBtn"
-                    class="border-1 border-black-alpha-90"
-                    label="Share" icon="fas fa-share-alt"
-                    v-skills="'ShareProject'"
-                    :aria-label="`Share ${project.name} with new users`">
+                        ref="shareProjectButton"
+                        size="small"
+                        @click="copyAndDisplayShareProjInfo"
+                        data-cy="shareProjBtn"
+                        class="border-1 border-black-alpha-90"
+                        label="Share" icon="fas fa-share-alt"
+                        v-skills="'ShareProject'"
+                        :aria-label="`Share ${project.name} with new users`">
           </SkillsButton>
         </div>
         <div data-cy="projectCreated" class="mt-3">
           <i class="fas fa-clock text-success mr-1" aria-hidden="true" />
-          <ProjectDates :created="project.created" :load-last-reported-date="true"/>
+          <ProjectDates :created="project.created" :load-last-reported-date="true" />
         </div>
         <div v-if="projConfig.userProjRole">
-          <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span class="text-secondary font-italic small">Role:</span> <span class="small text-primary" data-cy="userRole">{{ UserRolesUtil.userRoleFormatter(projConfig.userProjRole) }}</span>
+          <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span
+          class="text-secondary font-italic small">Role:</span> <span class="small text-primary"
+                                                                      data-cy="userRole">{{ UserRolesUtil.userRoleFormatter(projConfig.userProjRole)
+          }}</span>
         </div>
       </template>
     </PageHeader>
 
     <import-finalize-alert />
 
-    <Navigation  :nav-items="navItems">
+    <Navigation :nav-items="navItems">
     </Navigation>
 
     <edit-project
@@ -293,11 +305,11 @@ const setProject = (newProject) => {
       :id="`editProjectModal${project.projectId}`"
       :project="project"
       :enable-return-focus="true"
-      @project-saved="projectSaved"/>
+      @project-saved="projectSaved" />
 
-<!--    <project-share-modal v-if="shareProjModal" v-model="shareProjModal"-->
-<!--                         :share-url="shareUrl"-->
-<!--                         @hidden="focusOnShareButton"/>-->
+    <!--    <project-share-modal v-if="shareProjModal" v-model="shareProjModal"-->
+    <!--                         :share-url="shareUrl"-->
+    <!--                         @hidden="focusOnShareButton"/>-->
   </div>
 
 </template>
