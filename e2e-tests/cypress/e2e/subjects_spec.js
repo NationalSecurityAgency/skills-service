@@ -742,7 +742,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="btn_Subjects"]').click();
         cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
 
-        const textDecorationMatch = 'line-through solid rgb(16, 185, 129)';
+        const textDecorationMatch = 'line-through solid rgb(9, 113, 81)';
 
         // strike-through when url starts with http:// or https://
         cy.get('[data-cy="skillHelpUrl"]').type('https:/');
