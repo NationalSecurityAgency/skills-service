@@ -38,7 +38,7 @@
     "cy:run:dev:learningPath": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173 --env type=base --spec \"cypress/e2e/learning-path/*.js\"",
     "cy:run:dev:quiz": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173 --env customSnapshotsDir=./cypress/snapshots/quiz --spec \"cypress/e2e/quiz/client-display_quiz_visual_spec.js\"",
     "cy:run:dev:updateQuizSnapshots": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173 --env type=base --spec \"cypress/e2e/quiz/client-display_quiz_visual_spec.js,cypress/e2e/quiz/client-display_quiz_theme_spec.js\"",
-    "cy:run:dev:updateSnapshots": "npm run cy:run:dev:updateClientDisplaySnapshots && npm run cy:run:dev:updateLearningPathSnapshots",
+    "cy:run:dev:updateSnapshots": "npm run cy:run:dev:updateClientDisplaySnapshots && npm run cy:run:dev:updateLearningPathSnapshots && npm run cy:run:dev:updateQuizSnapshots",
     "cy:run:dev:accessibility": "TZ=UTC cypress run --browser chrome --env enableLighthouse=true --headless --config baseUrl=http://localhost:5173 --spec cypress/e2e/accessibility/accessibility_quiz_specs.js",
     "cy:run:dev:oauth": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173 --env oauthMode=true",
     "cy:verify": "cypress verify",

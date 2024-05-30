@@ -168,6 +168,7 @@ describe('Client Display Tests', () => {
             .should('have.css', 'background-color')
             .and('equal', 'rgba(0, 0, 0, 0)');
         cy.wait('@pointHistoryChart');
+        cy.wait(5000)
         cy.customA11y();
     });
 
