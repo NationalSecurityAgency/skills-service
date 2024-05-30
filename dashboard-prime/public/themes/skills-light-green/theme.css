@@ -3274,8 +3274,8 @@
   }
   .p-button.p-button-danger, .p-button-group.p-button-danger > .p-button, .p-splitbutton.p-button-danger > .p-button {
     color: #ffffff;
-    background: #EF4444;
-    border: 1px solid #EF4444;
+    background: #c60000;
+    border: 1px solid #c60000;
   }
   .p-button.p-button-danger:not(:disabled):hover, .p-button-group.p-button-danger > .p-button:not(:disabled):hover, .p-splitbutton.p-button-danger > .p-button:not(:disabled):hover {
     background: #DC2626;
@@ -3292,33 +3292,33 @@
   }
   .p-button.p-button-danger.p-button-outlined, .p-button-group.p-button-danger > .p-button.p-button-outlined, .p-splitbutton.p-button-danger > .p-button.p-button-outlined {
     background-color: transparent;
-    color: #EF4444;
+    color: #c60000;
     border: 1px solid;
   }
   .p-button.p-button-danger.p-button-outlined:not(:disabled):hover, .p-button-group.p-button-danger > .p-button.p-button-outlined:not(:disabled):hover, .p-splitbutton.p-button-danger > .p-button.p-button-outlined:not(:disabled):hover {
-    background: rgba(239, 68, 68, 0.04);
-    color: #EF4444;
+    background: rgba(198, 0, 0, 0.04);
+    color: #c60000;
     border: 1px solid;
   }
   .p-button.p-button-danger.p-button-outlined:not(:disabled):active, .p-button-group.p-button-danger > .p-button.p-button-outlined:not(:disabled):active, .p-splitbutton.p-button-danger > .p-button.p-button-outlined:not(:disabled):active {
-    background: rgba(239, 68, 68, 0.16);
-    color: #EF4444;
+    background: rgba(198, 0, 0, 0.16);
+    color: #c60000;
     border: 1px solid;
   }
   .p-button.p-button-danger.p-button-text, .p-button-group.p-button-danger > .p-button.p-button-text, .p-splitbutton.p-button-danger > .p-button.p-button-text {
     background-color: transparent;
-    color: #EF4444;
+    color: #c60000;
     border-color: transparent;
   }
   .p-button.p-button-danger.p-button-text:not(:disabled):hover, .p-button-group.p-button-danger > .p-button.p-button-text:not(:disabled):hover, .p-splitbutton.p-button-danger > .p-button.p-button-text:not(:disabled):hover {
-    background: rgba(239, 68, 68, 0.04);
+    background: rgba(198, 0, 0, 0.04);
     border-color: transparent;
-    color: #EF4444;
+    color: #c60000;
   }
   .p-button.p-button-danger.p-button-text:not(:disabled):active, .p-button-group.p-button-danger > .p-button.p-button-text:not(:disabled):active, .p-splitbutton.p-button-danger > .p-button.p-button-text:not(:disabled):active {
-    background: rgba(239, 68, 68, 0.16);
+    background: rgba(198, 0, 0, 0.16);
     border-color: transparent;
-    color: #EF4444;
+    color: #c60000;
   }
   .p-button.p-button-contrast, .p-button-group.p-button-contrast > .p-button, .p-splitbutton.p-button-contrast > .p-button {
     color: #ffffff;
@@ -8309,7 +8309,7 @@
     color: #9a6917;
   }
   .p-inline-message.p-inline-message-warn .p-inline-message-icon {
-    color: #cc8925;
+    color: #9a6917;
   }
   .p-inline-message.p-inline-message-error {
     background: rgba(255, 231, 230, 0.7);
@@ -8441,10 +8441,10 @@
     color: #9a6917;
   }
   .p-message.p-message-warn .p-message-icon {
-    color: #cc8925;
+    color: #9a6917;
   }
   .p-message.p-message-warn .p-message-close {
-    color: #cc8925;
+    color: #9a6917;
   }
   .p-message.p-message-error {
     background: rgba(255, 231, 230, 0.7);
@@ -8625,7 +8625,7 @@
   }
   .p-toast .p-toast-message.p-toast-message-warn .p-toast-message-icon,
   .p-toast .p-toast-message.p-toast-message-warn .p-toast-icon-close {
-    color: #cc8925;
+    color: #9a6917;
   }
   .p-toast .p-toast-message.p-toast-message-error {
     background: rgba(255, 231, 230, 0.7);
@@ -9218,7 +9218,7 @@
     color: #ffffff;
   }
   .p-badge.p-badge-danger {
-    background-color: #EF4444;
+    background-color: #c60000;
     color: #ffffff;
   }
   .p-badge.p-badge-secondary {
@@ -9743,7 +9743,7 @@
     color: #ffffff;
   }
   .p-tag.p-tag-danger {
-    background-color: #EF4444;
+    background-color: #c60000;
     color: #ffffff;
   }
   .p-tag.p-tag-secondary {
@@ -9837,7 +9837,7 @@
     box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #d4aafb, 0 1px 2px 0 rgb(0, 0, 0);
   }
   .p-button.p-button-danger:enabled:focus {
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #f7a2a2, 0 1px 2px 0 rgb(0, 0, 0);
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #ff6363, 0 1px 2px 0 rgb(0, 0, 0);
   }
   .p-datatable .p-datatable-tbody > tr.p-datatable-dragpoint-top > td {
     box-shadow: inset 0 2px 0 0 #097151;

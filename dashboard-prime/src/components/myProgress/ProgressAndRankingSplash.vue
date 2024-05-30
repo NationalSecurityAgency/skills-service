@@ -71,6 +71,7 @@
                 icon="fas fa-tasks"
                 size="large"
                 severity="info"
+                :outlined="false"
                 data-cy="manageMyProjsBtnInNoContent"
                 class="fadein animation-duration-500" />
             </router-link>

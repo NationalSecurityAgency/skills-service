@@ -45,7 +45,7 @@ const runAgain = () => {
       </div>
       
       <div class="flex column-gap-4 pt-2">
-        <Card class="text-center bg-gray-100 skills-card-theme-border flex-1" data-cy="numCorrectInfoCard">
+        <Card class="text-center surface-50 skills-card-theme-border flex-1" data-cy="numCorrectInfoCard">
           <template #content>
             <div class="text-2xl" data-cy="numCorrect" v-if="!quizResult.outOfTime">
               <Tag class="text-xl p-2" severity="success">{{ quizResult.numCorrect }}</Tag> out of <Tag class="text-xl p-2" severity="secondary">{{ quizResult.numTotal }}</Tag>
@@ -61,7 +61,7 @@ const runAgain = () => {
             </div>
           </template>
         </Card>
-        <Card  class="text-center bg-gray-100 skills-card-theme-border flex-1" data-cy="percentCorrectInfoCard">
+        <Card  class="text-center surface-50 skills-card-theme-border flex-1" data-cy="percentCorrectInfoCard">
           <template #content>        
           <div v-if="!quizResult.outOfTime">
             <div class="text-2xl">
@@ -82,7 +82,7 @@ const runAgain = () => {
           </template>
         </Card>
         
-        <Card v-if="quizResult.gradedRes.passed" class="text-center bg-gray-100 skills-card-theme-border flex-1" data-cy="quizRuntime">
+        <Card v-if="quizResult.gradedRes.passed" class="text-center surface-50 skills-card-theme-border flex-1" data-cy="quizRuntime">
           <template #content>
             <div class="text-2xl" data-cy="title">
               {{ timeUtils.formatDurationDiff(quizResult.gradedRes.started, quizResult.gradedRes.completed) }}
@@ -93,7 +93,7 @@ const runAgain = () => {
           </template>
         </Card>
 
-        <Card v-if="!quizResult.gradedRes.passed" class="text-center bg-gray-100 skills-card-theme-border flex-1" data-cy="numAttemptsInfoCard">
+        <Card v-if="!quizResult.gradedRes.passed" class="text-center surface-50 skills-card-theme-border flex-1" data-cy="numAttemptsInfoCard">
           <template #content>
             <div class="text-2xl" data-cy="title">
               <span v-if="unlimitedAttempts" class=""><i class="fas fa-infinity" aria-hidden="true"></i> Attempts</span>

@@ -47,11 +47,12 @@ describe('Skip To Content Tests', () => {
         cy.createSkill(1, 1, 4);
 
         cy.visit('/progress-and-rankings/projects/proj1');
-        cy.dashboardCd().contains('Earn up to 800 points');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="totalPoints"]').should('have.text', '800');
         cy.skipToContentAndValidate('#mainContent2')
 
-        cy.visit('/progress-and-rankings/projects/proj1?skillsClientDisplayPath=%2Fsubjects%2Fsubj1')
-        cy.dashboardCd().contains('Earn up to 800 points');
+        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1')
+        cy.get('[data-cy="skillsTitle"]').contains('Subject 1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="totalPoints"]').should('have.text', '800');
         cy.skipToContentAndValidate('#mainContent2')
     });
 
@@ -132,10 +133,8 @@ describe('Skip To Content Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1,1,1)
         cy.visit('/administrator/');
-        cy.get('[data-cy="projCard_proj1_manageBtn"]')
 
         cy.wait(1500)
-        cy.get('[data-cy="preSkipToContentPlaceholder"]').should('have.focus')
         cy.get('body').tab()
         cy.get('[data-cy="skipToContentButton"]').should('have.focus')
 

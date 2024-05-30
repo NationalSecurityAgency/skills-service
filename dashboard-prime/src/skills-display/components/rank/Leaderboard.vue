@@ -90,7 +90,7 @@ const getProgressPercent = (item) => {
                         :options="options"
                         @update:modelValue="onOptionChange"
                         data-cy="badge-selector"
-                        aria-labely="Select Top 10 or 10 Around Me">
+                        aria-label="Select Top 10 or 10 Around Me">
             <template #option="slotProps">
               <span :data-cy="`select-${slotProps.option.value}`">{{ slotProps.option.label }}</span>
             </template>

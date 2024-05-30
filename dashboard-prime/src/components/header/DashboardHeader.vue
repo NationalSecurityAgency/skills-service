@@ -5,20 +5,15 @@ import SkillsBreadcrumb from '@/components/header/SkillsBreadcrumb.vue'
 import { usePagePath } from '@/components/utils/UsePageLocation.js'
 import SwitchTheme from '@/components/header/SwitchTheme.vue'
 import InceptionButton from '@/components/inception /InceptionButton.vue'
+import SkipToContent from '@/components/header/SkipToContent.vue'
 
 const pathPath = usePagePath()
 </script>
 
 <template>
   <div class="header">
-    <!--  see usage of preSkipToContentPlaceholder in main.js  -->
-    <!--    <span id="preSkipToContentPlaceholder" tabindex="-1" aria-hidden="true" data-cy="preSkipToContentPlaceholder"/>-->
-    <!--    <a-->
-    <!--        class="skip-main btn btn-primary"-->
-    <!--        @click="focusOnMainContent"-->
-    <!--        @keydown.prevent.enter="focusOnMainContent"-->
-    <!--        tabindex="0"-->
-    <!--        data-cy="skipToContentButton">Skip to content</a>-->
+    <skip-to-content></skip-to-content>
+
     <!--    <div v-if="isUpgradeInProgress" class="container-fluid p-3 text-center bg-warning mb-1" data-cy="upgradeInProgressWarning">-->
     <!--      <span class="fa-stack fa-2x" style="vertical-align: middle; font-size:1em;">-->
     <!--        <i class="fas fa-circle fa-stack-2x"></i>-->

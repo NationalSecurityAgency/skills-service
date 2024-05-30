@@ -88,7 +88,9 @@ const navOnSmallScreen = (changeEvent) => {
       </div>
 
       <div class="flex-1" ref="content">
-        <div class="md:pl-3" id="mainContent2" aria-label="Main content area, click tab to navigate">
+        <div class="md:pl-3" id="mainContent2"
+             tabindex="-1"
+             aria-label="Main content area, click tab to navigate">
 <!--          <router-view id="mainContent2" -->
 <!--                       tabindex="-1" -->
 <!--                       aria-label="Main content area, click tab to navigate"></router-view>-->

@@ -38,7 +38,7 @@ const onClick = (event) =>{
 </script>
 
 <template>
-  <Button :disabled="disabled || loading" @click="onClick" role="button" outlined>
+  <Button :disabled="disabled || loading" @click="onClick" role="button" :outlined="outlined">
     <slot>
       <span v-if="label">{{ label }}</span>
       <i v-if="!loading && icon && icon.trim().length > 0" class="ml-1" :class="icon" aria-hidden="true" style="width: 0.9rem; height: 0.9rem;"></i>
