@@ -187,7 +187,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for Divine Dragon")
     });
 
-    it.skip('video upload warning message uses community.descriptor after project\'s UC protection is raised', () => {
+    it.only('video upload warning message uses community.descriptor after project\'s UC protection is raised', () => {
         cy.intercept('/admin/projects/proj1/settings').as('getProj1Settings')
         cy.fixture('vars.json')
             .then((vars) => {
@@ -239,7 +239,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for Divine Dragon")
     });
 
-    it.skip('video upload warning message uses community.descriptor for a brand new project with UC protection', () => {
+    it.only('video upload warning message uses community.descriptor for a brand new project with UC protection', () => {
         cy.intercept('/admin/projects/proj1/settings').as('getProj1Settings')
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1Skill/video').as('getVideoProps1')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1Subject/skills/skill1Skill').as('getSkillInfo1')
