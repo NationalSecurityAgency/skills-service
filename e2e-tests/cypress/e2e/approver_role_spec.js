@@ -442,7 +442,7 @@ describe('Approver Role Tests', () => {
 
         const approvalHistoryTableSelector = '[data-cy="selfReportApprovalHistoryTable"]';
 
-        cy.get('[data-cy="skillsReportApprovalTable"] .row-selection-item .p-checkbox > input').first().click();
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="approveBtn"]')
             .click();
         cy.validateTable(approvalHistoryTableSelector, [
@@ -455,7 +455,7 @@ describe('Approver Role Tests', () => {
             },],
         ]);
 
-        cy.get('[data-cy="skillsReportApprovalTable"] .row-selection-item .p-checkbox > input').first().click();
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="rejectBtn"]')
             .click();
         cy.get('[data-cy="saveDialogBtn"]').click();
