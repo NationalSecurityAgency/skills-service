@@ -234,7 +234,7 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
 
     <InputGroup class="mt-3">
       <InputGroupAddon>
-        <div class="input-group-text"><i class="fas fa-link mr-1" aria-hidden="true" /> Help URL:</div>
+        <div class="input-group-text text-700"><i class="fas fa-link mr-1" aria-hidden="true" /> Help URL:</div>
       </InputGroupAddon>
       <div class="p-inputtext p-component">
         <div v-if="helpUrl">

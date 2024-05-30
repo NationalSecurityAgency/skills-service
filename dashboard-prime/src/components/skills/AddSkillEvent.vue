@@ -170,7 +170,7 @@ const addSkill = () => {
           </div>
           <div class="flex">
             <SkillsCalendarInput class="mx-2 my-0" selectionMode="single" name="eventDatePicker" v-model="dateAdded" data-cy="eventDatePicker"
-                                 :max-date="new Date()" aria-required="true" aria-label="event date" ref="eventDatePicker" />
+                                 :max-date="new Date()" aria-label="event date" ref="eventDatePicker" />
           </div>
           <div class="flex">
             <SkillsButton
@@ -184,9 +184,9 @@ const addSkill = () => {
           </div>
         </div>
         <Message v-if="!isLoading && minPointsTooltip" severity="warn" :closable="false">{{ minPointsTooltip }}</Message>
-        <div class="mt-2" v-for="(user) in reversedUsersAdded" v-bind:key="user.key" data-cy="addedUserEventsInfo">
+        <div class="mt-5" v-for="(user) in reversedUsersAdded" v-bind:key="user.key" data-cy="addedUserEventsInfo">
           <div class="">
-            <span :class="[user.success ? 'text-green-500' : 'text-red-500']" style="font-weight: bolder">
+            <span :class="[user.success ? 'text-primary' : 'text-red-800']" style="font-weight: bolder">
               <i :class="[user.success ? 'fa fa-check' : 'fa fa-info-circle']" aria-hidden="true"/>
               <span v-if="user.success">
                 Added points for

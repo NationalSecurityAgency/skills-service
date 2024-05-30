@@ -12,10 +12,14 @@ import SelfReportApprovalConfSpecificUsers from "@/components/skills/selfReport/
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import UserRolesUtil from '@/components/utils/UserRolesUtil.js';
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
 const appConfig = useAppConfig();
+const colors = useColors()
+const responsive = useResponsiveBreakpoints()
 
 const data = ref([]);
 const loading = ref(true);
@@ -202,7 +206,7 @@ const sortTable = (sortContext) => {
 </script>
 
 <template>
-  <Card>
+  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #header>
       <SkillsCardHeader title="Configure Approval Workload"></SkillsCardHeader>
     </template>
@@ -226,32 +230,32 @@ const sortTable = (sortContext) => {
                        :sort-order="sortOrder"
                        tableStoredStateId="skillApprovalConfTable"
                        data-cy="skillApprovalConfTable">
-        <Column field="userId" sortable>
+        <Column field="userId" sortable :class="{'flex': responsive.md.value }">
           <template #header>
-            <span class="text-primary"><i class="fas fa-user skills-color-users" aria-hidden="true"/> Approver</span>
+            <span class=""><i class="fas fa-user" :class="colors.getTextClass(0)" aria-hidden="true"/> Approver</span>
           </template>
           <template #body="slotProps">
             {{ slotProps.data.userIdForDisplay }}
           </template>
         </Column>
-        <Column field="roleName" sortable>
+        <Column field="roleName" sortable :class="{'flex': responsive.lg.value }">
           <template #header>
-            <span class="text-primary"><i class="fas fa-id-card text-danger" aria-hidden="true"/> Role</span>
+            <span class=""><i class="fas fa-id-card" :class="colors.getTextClass(1)" aria-hidden="true"/> Role</span>
           </template>
           <template #body="slotProps">
             {{ UserRolesUtil.userRoleFormatter(slotProps.data.roleName) }}
           </template>
         </Column>
-        <Column field="workload">
+        <Column field="workload" :class="{'flex': responsive.lg.value }">
           <template #header>
-            <span class="text-primary"><i class="fas fa-users skills-color-access" aria-hidden="true"/> Approval Workload</span>
+            <span class=""><i class="fas fa-users" :class="colors.getTextClass(2)" aria-hidden="true"/> Approval Workload</span>
           </template>
           <template #body="slotProps">
             <div class="flex" :data-cy="`workloadCell_${slotProps.data.userId}`">
               <div class="flex flex-1">
                 <div v-if="!slotProps.data.hasConf">
                   <InputSwitch class="mr-2"
-                      :name="`Enable and disable fallback for ${slotProps.data.userId} approver`"
+                      :aria-label="`Enable and disable fallback for ${slotProps.data.userId} approve`"
                       @update:modelValue="handleFallback($event, slotProps.data)"
                       data-cy="fallbackSwitch"
                       v-model="slotProps.data.isFallbackConfPresent" />

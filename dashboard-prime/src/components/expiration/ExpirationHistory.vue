@@ -216,9 +216,12 @@ const calculateClientDisplayRoute = (props) => {
                        placeholder="Search by User" />
           </template>
         </Column>
-        <Column field="expiredOn" header="Expired On" :sortable="false">
+        <Column field="expiredOn" header="Expired On" :sortable="false" :show-filter-menu="false">
           <template #header>
             <i class="fas fa-clock text-warning mr-1" aria-hidden="true"></i>
+          </template>
+          <template #filter>
+            <span class="sr-only">No filter for this column</span>
           </template>
           <template #body="slotProps">
             <DateCell :value="slotProps.data.expiredOn" />

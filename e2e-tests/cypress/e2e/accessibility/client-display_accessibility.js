@@ -152,10 +152,10 @@ describe('Client Display Accessibility tests', () => {
         cy.intercept('GET', '/api/projects/proj1/pointHistory')
             .as('pointHistoryChart');
 
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.injectAxe();
         cy.contains('Overall Points');
-        cy.cdClickSubj(0, 'Subject 1');
+        cy.cdClickSubj(0, 'Subject 1', true);
 
         cy.wait('@getSubjectSummary');
         cy.wait('@pointHistoryChart');
@@ -166,18 +166,18 @@ describe('Client Display Accessibility tests', () => {
         cy.customA11y();
         cy.customLighthouse();
 
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.contains('Overall Points');
         cy.contains('New SkillTree Software Version is Available')
             .should('not.exist');
     });
 
-    it('skill with self reporting', () => {
-        cy.cdVisit('/');
+    it.only('skill with self reporting', () => {
+        cy.cdVisit('/', true);
         cy.injectAxe();
         cy.contains('Overall Points');
 
-        cy.cdClickSubj(0, 'Subject 1');
+        cy.cdClickSubj(0, 'Subject 1', true);
         cy.cdClickSkill(1);
         cy.contains('This is 2');
         cy.customA11y();

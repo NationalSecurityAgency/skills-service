@@ -80,6 +80,7 @@ const removeTagConf = (removedIem) => {
             class="w-full"
             name="tagInput"
             :placeholder="`Enter ${tagLabel} value`"
+            aria-label="Enter Tag Label"
             v-on:keydown.enter="addTagConf"
             v-model="enteredTag"
             data-cy="userTagValueInput" />

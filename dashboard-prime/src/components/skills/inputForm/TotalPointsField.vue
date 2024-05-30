@@ -12,10 +12,10 @@ const totalPoints = computed(() => {
 
 <template>
   <div class="field w-full lg:w-auto">
-    <label for="totalPoints">Total Points</label>
+    <label id="totalPointsLabel" for="totalPoints">Total Points</label>
     <InputGroup>
       <InputGroupAddon><i class="fas fa-equals"></i></InputGroupAddon>
-      <InputNumber id="totalPoints" :model-value="totalPoints" :disabled="true" />
+      <InputNumber id="totalPoints" :model-value="totalPoints" :disabled="true" aria-labelledby="totalPointsLabel"/>
     </InputGroup>
   </div>
 </template>

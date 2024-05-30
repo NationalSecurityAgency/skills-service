@@ -200,7 +200,7 @@ const suggestUsers = (query) => {
                     @dropdownClick="onShowDropdown">
         <template #option="slotProps">
           <div v-if="slotProps.option.isNewUser" class="flex flex-wrap align-options-center align-items-center">
-            <div class="flex-1 existing-user-id">{{ slotProps.option.label }}</div>
+            <div class="flex-1 existing-user-id" data-cy="existingUserId">{{ slotProps.option.label }}</div>
             <div class="flex font-light text-sm click-indicator ml-2" style="right: 5px; bottom: 0px;">
               Enter to Select (new user)
             </div>

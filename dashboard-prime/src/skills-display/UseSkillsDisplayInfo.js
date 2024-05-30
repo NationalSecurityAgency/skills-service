@@ -71,6 +71,9 @@ export const useSkillsDisplayInfo = () => {
     router.push({ name: getContextSpecificRouteName(pageName), params })
   }
 
+  const isHomePage = computed(() => {
+    return route.name === getContextSpecificRouteName('SkillsDisplay')
+  })
   const isSubjectPage = computed(() => {
     return route.name === getContextSpecificRouteName('SubjectDetailsPage')
   })
@@ -107,6 +110,7 @@ export const useSkillsDisplayInfo = () => {
     createToBadgeLink,
     isDependency,
     isCrossProject,
-    isLocalTestPath
+    isLocalTestPath,
+    isHomePage
   }
 }

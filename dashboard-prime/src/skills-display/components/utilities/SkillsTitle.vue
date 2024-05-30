@@ -5,10 +5,12 @@ import PoweredBySkilltree from '@/skills-display/components/header/PoweredBySkil
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useSkillsDisplayBreadcrumbState } from '@/skills-display/stores/UseSkillsDisplayBreadcrumbState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 const attributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
 const breadcrumb = useSkillsDisplayBreadcrumbState()
+const skillsDisplayInfo = useSkillsDisplayInfo()
 
 const props = defineProps({
   backButton: { type: Boolean, default: true },
@@ -58,7 +60,7 @@ const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
         <div v-if="renderDivWhereBrandResides" class="md:w-8rem">
           <div v-if="!themeState.theme.disableSkillTreeBrand"
                class="flex align-items-center justify-content-center" >
-            <powered-by-skilltree :animate-power-by-label="animatePowerByLabel" />
+            <powered-by-skilltree :animate-power-by-label="animatePowerByLabel && skillsDisplayInfo.isHomePage.value" />
           </div>
         </div>
       </div>

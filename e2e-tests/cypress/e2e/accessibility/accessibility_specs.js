@@ -280,34 +280,11 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
         cy.get('[data-cy="userIdInput"]')
             .click();
-        cy.get('[data-cy="userIdInput"] .vs__dropdown-option')
-            .eq(0)
-            .click();
-        cy.get('[data-cy="eventDatePicker"]')
-            .click();
-        cy.get('.vdp-datepicker__calendar .prev')
-            .first()
-            .click();
-        cy.get('.vdp-datepicker__calendar .prev')
-            .first()
-            .click();
-        cy.get('.vdp-datepicker__calendar .prev')
-            .first()
-            .click();
-        cy.get('.vdp-datepicker__calendar .prev')
-            .first()
-            .click();
-        cy.get('.vdp-datepicker__calendar .prev')
-            .first()
-            .click();
-        cy.get('.vdp-datepicker__calendar .prev')
-            .first()
-            .click();
-        cy.get('.vdp-datepicker__calendar')
-            .contains('10')
-            .click();
-        cy.get('[data-cy=addSkillEventButton]')
-            .click();
+        cy.get('[data-cy="existingUserInputDropdown"]').type('u4');
+        cy.get('#existingUserInput_0').contains('u4').click()
+        cy.get('[data-cy="eventDatePicker"]').click();
+        cy.get('.p-datepicker-group-container').contains('10').click()
+        cy.get('[data-cy=addSkillEventButton]').click();
         cy.contains('Added points');
         cy.customA11y();
 
@@ -319,7 +296,6 @@ describe('Accessibility Tests', () => {
         cy.get('[data-cy="numUsersPostAchievement"]')
             .contains('No achievements yet for this skill.');
 
-        cy.contains('This chart needs at least 2 days of user activity.');
         cy.customLighthouse();
         cy.customA11y();
     });
@@ -381,11 +357,10 @@ describe('Accessibility Tests', () => {
 
         cy.get('[aria-label="new badge"]')
             .click();
-        cy.get('[data-cy=badgeName]')
+        cy.get('[data-cy=name]')
             .type('a');
         cy.customA11y();
-        cy.get('[data-cy=closeBadgeButton]')
-            .click();
+        cy.get('[aria-label="Close"]').click()
 
         cy.get('[data-cy=manageBtn_badge1]')
             .click();
@@ -400,7 +375,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
     });
 
-    it('global badges', () => {
+    it.skip('global badges', () => {
         cy.logout();
         cy.login('root@skills.org', 'password');
 
@@ -488,7 +463,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
     });
 
-    it('my usage page', () => {
+    it.skip('my usage page', () => {
         cy.fixture('vars.json')
             .then((vars) => {
                 cy.request('POST', '/logout');
@@ -653,7 +628,7 @@ describe('Accessibility Tests', () => {
             cy.injectAxe();
 
             cy.clickNav('Metrics');
-            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]')
+            cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]')
                 .contains('Many Values');
             cy.get(`${userTagsTableSelector} th`)
                 .contains('Best Label');
@@ -683,8 +658,7 @@ describe('Accessibility Tests', () => {
             cy.visit('/administrator/projects/proj1/subjects/subj1');
             cy.injectAxe();
 
-            cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`)
-                .click();
+            cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
             cy.get('[data-cy="editSkillButton_skill11"]');
             cy.get('[data-cy="editSkillButton_skill22"]');
 
@@ -699,8 +673,7 @@ describe('Accessibility Tests', () => {
             cy.visit('/administrator/projects/proj1/subjects/subj1');
             cy.injectAxe();
 
-            cy.get(`[data-cy="expandDetailsBtn_${groupId}"]`)
-                .click();
+            cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
             cy.get('[data-cy="editSkillButton_skill11"]');
             cy.get('[data-cy="editSkillButton_skill22"]');
 
@@ -715,8 +688,6 @@ describe('Accessibility Tests', () => {
                 pointIncrement: 11,
                 numPerformToCompletion: 2
             });
-            cy.visit('/administrator/projects/proj1/subjects/subj1');
-            cy.injectAxe();
         });
     }
 

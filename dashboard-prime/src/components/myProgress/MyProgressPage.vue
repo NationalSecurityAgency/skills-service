@@ -26,7 +26,7 @@ onMounted(() => {
           <template #content>
             <div class="flex">
               <div class="flex-1">
-                <span class="text-2xl uppercase">My Projects</span>
+                <span class="text-2xl uppercase" role="heading" aria-level="1">My Projects</span>
               </div>
               <div>
                 <router-link :to="{ name: 'DiscoverProjectsPage' }">
