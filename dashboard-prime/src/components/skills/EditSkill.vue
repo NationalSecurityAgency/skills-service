@@ -191,6 +191,7 @@ const initialSkillData = {
   version: props.skill.verison || 0,
   pointIncrement: props.skill.pointIncrement || 100,
   numPerformToCompletion: props.skill.numPerformToCompletion || 1,
+  timeWindowEnabled: props.skill.timeWindowEnabled || false,
   pointIncrementIntervalHrs: props.skill.pointIncrementIntervalHrs || 8,
   pointIncrementIntervalMins: props.skill.pointIncrementIntervalMins || 0,
   numMaxOccurrencesIncrementInterval: props.skill.numMaxOccurrencesIncrementInterval || 1,
@@ -229,7 +230,7 @@ const onSkillSaved = (skill) => {
   emit('skill-saved', skill)
 }
 
-const occurrencesToCompletionDisabled = computed(() => {
+const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
   return (selfReportingType.value === 'Quiz' || selfReportingType.value === 'Video')
 })
 
@@ -284,16 +285,14 @@ const occurrencesToCompletionDisabled = computed(() => {
         showButtons
         :min="0"
         :is-required="true"
-        :disabled="occurrencesToCompletionDisabled"
+        :disabled="occurrencesToCompletionAndTimeWindowDisabled"
         label="Occurrences to Completion"
         name="numPerformToCompletion" />
 
       <total-points-field class="lg:ml-2" />
     </div>
 
-    <time-window-input
-      :time-window-enabled-default="skill.timeWindowEnabled"
-      class="mb-3"/>
+    <time-window-input :disabled="occurrencesToCompletionAndTimeWindowDisabled" class="mb-3"/>
 
     <self-reporting-type-input @self-reporting-type-changed="selfReportingType = $event" :initial-skill-data="initialSkillData" :is-edit="isEdit" class="mt-1"/>
 

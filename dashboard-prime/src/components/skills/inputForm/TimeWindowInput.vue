@@ -1,20 +1,33 @@
 <script setup>
-import { ref } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useField } from 'vee-validate';
+import { inject, watch } from 'vue';
 
 const props = defineProps({
-  timeWindowEnabledDefault: {
+  disabled: {
     type: Boolean,
     default: false
   }
 })
 const appConfig = useAppConfig()
 const timeWindowCollapsed = useStorage('editSkillTimeWindowCollapsed', true)
+const setFieldValue = inject('setFieldValue')
+const { value, errorMessage } = useField(() => 'timeWindowEnabled')
+
+watch(() => value.value, (newValue) => {
+  resetTimeWindow(newValue)
+})
 const updateCollapsed = (newState) => {
   timeWindowCollapsed.value = newState
 }
-const timeWindowEnabled = ref(props.timeWindowEnabledDefault)
+const resetTimeWindow = (checked) => {
+  if (!checked) {
+    setFieldValue('pointIncrementIntervalHrs', 8)
+    setFieldValue('pointIncrementIntervalMins', 0)
+    setFieldValue('numPointIncrementMaxOccurrences', 1)
+  }
+}
 </script>
 
 <template>
@@ -29,37 +42,41 @@ const timeWindowEnabled = ref(props.timeWindowEnabledDefault)
       <SkillsCheckboxInput
         class="mb-2"
         :binary="true"
-        v-model="timeWindowEnabled"
+        v-model="value"
+        :disabled="disabled"
         inputId="timeWindowEnabled"
         name="timeWindowEnabled"
         data-cy="timeWindowCheckbox"
         :value="true" />
-      <label for="timeWindowEnabled" class="ml-2 font-italic">Time Window Enabled</label>
+      <label for="timeWindowEnabled" class="ml-2 font-italic" :class="{ 'text-color-secondary' : disabled }">Time Window Enabled</label>
     </div>
     <div class="flex m-0 flex-wrap">
       <SkillsNumberInput
         class="flex-1 mx-2"
+        :class="{ 'text-color-secondary' : disabled }"
         style="min-width: 14rem"
         showButtons
-        :disabled="!timeWindowEnabled"
+        :disabled="!value"
         label="Hours"
         name="pointIncrementIntervalHrs" />
 
       <SkillsNumberInput
         class="flex-1 mx-2"
+        :class="{ 'text-color-secondary' : disabled }"
         style="min-width: 14rem"
         showButtons
         :min="0"
-        :disabled="!timeWindowEnabled"
+        :disabled="!value"
         label="Minutes"
         name="pointIncrementIntervalMins" />
 
       <SkillsNumberInput
         class="flex-1 mx-2"
+        :class="{ 'text-color-secondary' : disabled }"
         style="min-width: 16rem"
         :min="1"
         showButtons
-        :disabled="!timeWindowEnabled"
+        :disabled="!value"
         label="Window's Max Occurrences"
         name="numPointIncrementMaxOccurrences" />
 

@@ -58,7 +58,6 @@ const isVideoConfigured = computed(() => props.initialSkillData.hasVideoConfigur
       <SkillsCheckboxInput
         @update:modelValue="onEnabledChanged"
         :binary="true"
-        v-model="enabled"
         inputId="selfReport"
         name="selfReportingEnabled"
         data-cy=selfReportEnableCheckbox />
