@@ -3,6 +3,7 @@ import { ref, onMounted, computed, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import ProjectService from '@/components/projects/ProjectService'
 import SkillsService from '@/components/skills/SkillsService.js';
 import SkillsShareService from '@/components/skills/crossProjects/SkillsShareService';
@@ -15,6 +16,7 @@ const route = useRoute();
 const projectId = route.params.projectId;
 const announcer = useSkillsAnnouncer();
 const communityLabels = useCommunityLabels();
+const appConfig = useAppConfig()
 
 const allProjectsConstant = 'ALL_SKILLS_PROJECTS';
 const loading = ref({
@@ -24,7 +26,6 @@ const loading = ref({
   projInfo: true,
 });
 const restrictedUserCommunity = ref(false);
-const isLoading = ref(true);
 const allSkills = ref([]);
 const selectedSkills = ref([]);
 const sharedSkills = ref([]);
@@ -162,7 +163,7 @@ const onShareWithAllProjects = (checked) => {
         <no-content2 v-if="restrictedUserCommunity" title="Cannot Be Added" icon="fas fa-shield-alt"
                      class="my-5" data-cy="restrictedUserCommunityWarning">
           This project's access is
-          restricted to <b class="text-primary">{{ communityLabels.userCommunityRestrictedDescriptor }}</b> users
+          restricted to <b class="text-primary">{{ appConfig.userCommunityRestrictedDescriptor }}</b> users
           only and its skills <b class="text-primary">cannot</b> be added as dependencies in other Projects.
         </no-content2>
         <div v-if="!restrictedUserCommunity">

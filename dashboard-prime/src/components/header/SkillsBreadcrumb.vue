@@ -150,7 +150,9 @@ const buildBreadcrumb = () => {
     }
   })
 
-  newItems[newItems.length-1].isLast = true
+  if (newItems.length > 0) {
+    newItems[newItems.length-1].isLast = true
+  }
   items.value = newItems
 }
 const buildResItem = (key, item, res, index) => {

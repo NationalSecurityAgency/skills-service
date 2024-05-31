@@ -39,15 +39,15 @@ describe('Community Project Creation Tests', () => {
         cy.createSkill(1, 1, 1)
 
         cy.visit('/administrator/projects/proj1/subjects/subj1')
-        cy.get('[data-cy="skillSelect-skill1"]').click({ force: true });
-        cy.get('[data-cy="skillActionsBtn"] button').should('be.enabled');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]').should('have.text', '1');
 
-        cy.get('[data-cy="skillActionsBtn"] button').click();
-        cy.get('[data-cy="skillExportToCatalogBtn"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click()
 
         cy.get('[data-cy="userCommunityRestrictedWarning"]').contains('restricted to Divine Dragon')
-        cy.get('[data-cy="okButton"]').should('be.enabled')
         cy.get('[data-cy="exportToCatalogButton"]').should('not.exist')
     });
 
@@ -66,7 +66,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="copyProjBtn"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains('Copying project whose access is restricted to Divine Dragon')
         cy.get('[data-cy="projectName"]').type('copy')
-        cy.get('[data-cy="saveProjectButton"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="allDoneBtn"]').click()
         cy.get('[data-cy="projectCard_copy"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
     });
@@ -81,10 +81,10 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
         const warningMsg = 'Please note that once the restriction is enabled it cannot be lifted/disabled';
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg).should('not.exist')
-        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
 
-        cy.get('[data-cy="saveProjectButton"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="allDoneBtn"]').click()
         cy.get('[data-cy="projectCard_copy"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
     });

@@ -61,10 +61,11 @@ const userCommunityRestrictedDescriptor = computed(() => {
         :pt="{ body: { class: 'p-0' }, content: { class: 'py-3 px-3' } }"
         data-cy="restrictCommunityControls">
     <template #content>
-      <Message v-if="isCopyAndCommunityProtected" severity="error" :closable="false">
+      <div v-if="isCopyAndCommunityProtected" severity="error" :closable="false">
+        <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
         Copying project whose access is restricted to <b
         class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only and <b>cannot</b> be lifted/disabled
-      </Message>
+      </div>
       <div v-if="isEditAndCommunityProtected" severity="error" :closable="false">
         <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
         Access is restricted to <b class="text-primary">{{ userCommunityRestrictedDescriptor
@@ -78,31 +79,10 @@ const userCommunityRestrictedDescriptor = computed(() => {
               data-cy="restrictCommunity"
               class="mr-2"
               v-model="value" />
-
-            <!--            <SkillsInputSwitch-->
-            <!--              v-model="enableProtectedUserCommunity"-->
-            <!--              name="enableProtectedUserCommunity"-->
-            <!--              aria-labelledby="restrictMsg"-->
-            <!--              class="mr-2"-->
-            <!--              data-cy="restrictCommunity" />-->
             <label id="restrictMsg">Restrict <i class="fas fa-shield-alt text-red-500" aria-hidden="true" /> Access to
               <b
                 class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only
             </label>
-
-            <!--              <b-form-checkbox v-model="internalProject.enableProtectedUserCommunity"-->
-            <!--                               @change="userCommunityChanged"-->
-            <!--                               name="check-button" inline switch data-cy="restrictCommunity">-->
-            <!--                Restrict <i class="fas fa-shield-alt text-danger" aria-hidden="true" /> Access to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only-->
-            <!--              </b-form-checkbox>-->
-
-            <!--              <div v-if="invalid" class="alert alert-danger mb-3 mt-1" data-cy="communityValidationErrors" role="alert">-->
-            <!--                <div>-->
-            <!--                  <i class="fas fa-exclamation-triangle text-danger mr-1" aria-hidden="true" />-->
-            <!--                  <span>Unable to restrict access to {{ userCommunityRestrictedDescriptor }} users only:</span>-->
-            <!--                </div>-->
-            <!--                <span v-html="errors[0]"/>-->
-            <!--              </div>-->
           </div>
           <div v-if="appConfig.userCommunityDocsLink" class="col-lg-auto" data-cy="userCommunityDocsLink">
             <a :href="appConfig.userCommunityDocsLink" target="_blank"

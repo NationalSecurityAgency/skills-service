@@ -183,6 +183,8 @@ const projectSaved = (updatedProject) => {
         .then(() => {
           projConfig.loadProjConfigState({ projectId: updatedProject.projectId, updateLoadingVar: false })
         })
+    } else {
+      projConfig.loadProjConfigState({ projectId: updatedProject.projectId, updateLoadingVar: false })
     }
     announcer.polite(`Project ${updatedProject.name} has been edited`)
   })

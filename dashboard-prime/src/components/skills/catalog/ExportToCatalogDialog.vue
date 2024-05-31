@@ -3,7 +3,6 @@ import { computed, onMounted, ref, toRaw } from 'vue'
 import { useFocusState } from '@/stores/UseFocusState.js'
 import CatalogService from '@/components/skills/catalog/CatalogService.js'
 import { useRoute } from 'vue-router'
-import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue'
@@ -25,7 +24,6 @@ const props = defineProps({
 const emit = defineEmits(['on-exported', 'on-nothing-to-export'])
 const focusState = useFocusState()
 const route = useRoute()
-const communityLabels = useCommunityLabels()
 const appConfig = useAppConfig()
 
 const handleOkBtn = () => {
@@ -142,7 +140,7 @@ const isExportable = computed(() => {
         :closable="false"
         severity="warn"
         data-cy="userCommunityRestrictedWarning">This project's access is restricted to <b
-        class="text-primary">{{ communityLabels.userCommunityRestrictedDescriptor }}</b> users only and its skills <b
+        class="text-primary">{{ appConfig.userCommunityRestrictedDescriptor }}</b> users only and its skills <b
         class="text-primary">cannot</b> be exported to the Skills Catalog.
       </Message>
       <div v-if="!isUserCommunityRestricted">

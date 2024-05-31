@@ -50,18 +50,18 @@ describe('Community Project Creation Tests', () => {
 
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
         cy.wait('@validateDescription');
-        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible')
-        cy.get('[data-cy="saveProjectButton"]').should('be.enabled')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
         cy.wait('@validateDescription');
-        cy.get('[data-cy="projectDescriptionError"]').contains('Project Description - May not contain divinedragon word.');
-        cy.get('[data-cy="saveProjectButton"]').should('be.disabled');
+        cy.get('[data-cy="descriptionError"]').contains('Project Description - May not contain divinedragon word');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
 
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
         cy.wait('@validateDescription');
-        cy.get('[data-cy="saveProjectButton"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
     });
 
     it('subject description is validated against custom validators', () => {
@@ -75,22 +75,22 @@ describe('Community Project Creation Tests', () => {
         cy.visit('/administrator/projects/proj1');
         cy.wait('@loadSubjects');
 
-        cy.clickButton('Subject');
+        cy.get('[data-cy="btn_Subjects"]').click();
 
-        cy.get('[data-cy="subjectNameInput"]').type('Great Name');
-        cy.get('[data-cy="saveSubjectButton"]').should('be.enabled');
+        cy.get('[data-cy="subjectName"]').type('Great Name');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
 
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
-        cy.get('[data-cy="subjectDescError"]').should('not.be.visible')
-        cy.get('[data-cy="saveSubjectButton"]').should('be.enabled')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
-        cy.get('[data-cy="subjectDescError"]').contains('Subject Description - May not contain divinedragon word.');
-        cy.get('[data-cy="saveSubjectButton"]').should('be.disabled');
+        cy.get('[data-cy="descriptionError"]').contains('Subject Description - May not contain divinedragon word');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
 
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
-        cy.get('[data-cy="saveSubjectButton"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
     });
 
     it('skill description is validated against custom validators', () => {
@@ -106,19 +106,19 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="newSkillButton"]').click();
 
         cy.get('[data-cy="skillName"]').type('Great Name');
-        cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
 
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
-        cy.get('[data-cy="skillDescriptionError"]').should('not.be.visible')
-        cy.get('[data-cy="saveSkillButton"]').should('be.enabled')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
-        cy.get('[data-cy="skillDescriptionError"]').contains('Skill Description - May not contain divinedragon word.');
-        cy.get('[data-cy="saveSkillButton"]').should('be.disabled');
+        cy.get('[data-cy="descriptionError"]').contains('Skill Description - May not contain divinedragon word');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
 
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
-        cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
     });
 
     it('description validates multiple paragraphs', () => {
@@ -134,11 +134,11 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="newSkillButton"]').click();
 
         cy.get('[data-cy="skillName"]').type('Great Name');
-        cy.get('[data-cy="saveSkillButton"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
 
         cy.get('[data-cy="markdownEditorInput"]').type('first\n\nsecond\n\nthird has divinedragon yes');
-        cy.get('[data-cy="skillDescriptionError"]').contains('Skill Description - May not contain divinedragon word.');
-        cy.get('[data-cy="saveSkillButton"]').should('be.disabled');
+        cy.get('[data-cy="descriptionError"]').contains('Skill Description - May not contain divinedragon word');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
     });
 
     it('badge description is validated against custom validators', () => {
@@ -152,22 +152,22 @@ describe('Community Project Creation Tests', () => {
 
         cy.visit('/administrator/projects/proj1/badges');
         cy.wait('@loadBadges');
-        cy.clickButton('Badge');
+        cy.get('[data-cy="btn_Badges"]').click();
 
-        cy.get('[data-cy=badgeName]').type('Great Name');
-        cy.get('[data-cy="saveBadgeButton"]').should('be.enabled');
+        cy.get('[data-cy=name]').type('Great Name');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
 
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
-        cy.get('[data-cy="badgeDescriptionError"]').should('not.be.visible')
-        cy.get('[data-cy="saveBadgeButton"]').should('be.enabled')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
-        cy.get('[data-cy="badgeDescriptionError"]').contains('Badge Description - May not contain divinedragon word.');
-        cy.get('[data-cy="saveBadgeButton"]').should('be.disabled');
+        cy.get('[data-cy="descriptionError"]').contains('Badge Description - May not contain divinedragon word');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
 
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
-        cy.get('[data-cy="saveBadgeButton"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
     });
 
     it('self report reject messages are validated against custom validators', () => {
@@ -186,50 +186,78 @@ describe('Community Project Creation Tests', () => {
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'user0'
             }],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'user1'
             }],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'user2'
             }],
         ]);
 
         cy.get('[data-cy="approveBtn"]').should('be.disabled');
         cy.get('[data-cy="rejectBtn"]').should('be.disabled');
-        cy.get('[data-cy="approvalSelect_user1-skill3"]').click({ force: true });
+        // cy.get('[data-cy="approvalSelect_user1-skill3"]').click({ force: true });
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="approveBtn"]').should('be.enabled');
         cy.get('[data-cy="rejectBtn"]').should('be.enabled');
 
         cy.get('[data-cy="rejectBtn"]').click();
         cy.get('[data-cy="rejectionTitle"]').contains('This will reject user\'s request(s) to get points');
         cy.get('[data-cy="rejectionInputMsg"]').type('ldkj aljdl aj\n\njabberwocky');
-        cy.get('[data-cy="rejectionInputMsgError"]').should('not.be.visible')
-        cy.get('[data-cy="confirmRejectionBtn"]').should('be.enabled')
+        cy.get('[data-cy="approvalRequiredMsgError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         cy.get('[data-cy="rejectionInputMsg"]').clear().type('ldkj aljdl aj\n\ndivinedragon');
-        cy.get('[data-cy="rejectionInputMsgError"]').contains('Rejection Message - May not contain divinedragon word.');
-        cy.get('[data-cy="confirmRejectionBtn"]').should('be.disabled');
+        cy.get('[data-cy="approvalRequiredMsgError"]').contains('Rejection Message - May not contain divinedragon word');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
 
         cy.get('[data-cy="rejectionInputMsg"]').type('{backspace}');
-        cy.get('[data-cy="confirmRejectionBtn"]').should('be.enabled');
-        cy.get('[data-cy="confirmRejectionBtn"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click();
 
         cy.wait('@reject');
 
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'user0'
             }],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'user2'
             }],
         ]);
+    });
+
+    it('self report justification is validated against custom validators', () => {
+        cy.intercept('POST', '/admin/projects/proj1/approvals/reject').as('reject');
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="requestApprovalBtn"]').click()
+        cy.get('[data-cy="selfReportSubmitBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="selfReportSubmitBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="descriptionError"]').contains('Skill Description - May not contain divinedragon word');
+        cy.get('[data-cy="selfReportSubmitBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="selfReportSubmitBtn"]').should('be.enabled');
     });
 });

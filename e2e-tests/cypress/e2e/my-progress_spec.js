@@ -1030,10 +1030,10 @@ describe('Navigation Tests', () => {
         cy.contains('Contact This is project 1').should('be.visible');
         cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Submit');
         cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.disabled');
-        cy.get('[data-cy="charactersRemaining"]').should('contain.text', '2,500 characters remaining');
+        cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,500 characters remaining');
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill(invalidMsg);
         cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.disabled');
-        cy.get('[data-cy="charactersRemaining"]').should('contain.text', '-500 characters remaining');
+        cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '-500 characters remaining');
 
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('message message jabberwocky jabberwocky message message');
         cy.wait('@validate');
@@ -1041,7 +1041,7 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy="contactOwnersInput_errMsg"]').should('be.visible');
         cy.get('[data-cy="contactOwnersInput_errMsg"]').should('contain.text', 'paragraphs may not contain jabberwocky');
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
-        cy.get('[data-cy="charactersRemaining"]').should('contain.text', '2,475 characters remaining');
+        cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,475 characters remaining');
         cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.enabled');
         cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
         cy.wait('@contact');
@@ -1064,7 +1064,7 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy="contactOwnerBtn_proj3"]').should('be.visible').click();
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
-        cy.get('[data-cy="charactersRemaining"]').should('contain.text', '2,475 characters remaining');
+        cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,475 characters remaining');
         cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.enabled');
         cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
         cy.wait('@contact');
