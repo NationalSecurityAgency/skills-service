@@ -52,39 +52,50 @@ const asyncLoadData = () => {
     return Promise.resolve({})
   }
 
-  return loadSkillDetails().then((skillRes) => {
-    if (!props.isEdit && !props.isCopy) {
+  const findLatestSkillVersion = (skillRes) => {
+    if (!props.isEdit) {
       return SkillsService.getLatestSkillVersion(route.params.projectId).then((latestVersion) => {
-          latestSkillVersion.value = latestVersion
-          maxSkillVersion.value = Math.min(latestVersion + 1, appConfig.maxSkillVersion)
-          return {
-            ...skillRes,
-            skipTheseAttrsWhenValidatingOnInit: ['version'],
-            version: latestVersion
-          }
-        }).then((skillResWithVersion) => {
-          return SettingsService.getSettingsForProject(route.params.projectId).then((settings) => {
-            if (settings) {
-              const selfReportingTypeSetting = settings.find((item) => item.setting === 'selfReport.type');
-              if (selfReportingTypeSetting) {
-                skillResWithVersion.selfReportingType = selfReportingTypeSetting.value;
-                skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('selfReportingType');
-                if (selfReportingTypeSetting.value !== 'Disabled') {
-                  skillResWithVersion.selfReportingEnabled = true;
-                  skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('selfReportingEnabled');
-                }
-              }
-              const selfReportingJustificationSetting = settings.find((item) => item.setting === 'selfReport.justificationRequired');
-              if (selfReportingJustificationSetting) {
-                skillResWithVersion.justificationRequired = selfReportingJustificationSetting.value && selfReportingJustificationSetting.value !== 'false';
-                skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('justificationRequired');
-              }
-            }
-            return skillResWithVersion;
-          })
-        })
+        latestSkillVersion.value = latestVersion
+        maxSkillVersion.value = Math.min(latestVersion + 1, appConfig.maxSkillVersion)
+        return {
+          ...skillRes,
+          skipTheseAttrsWhenValidatingOnInit: ['version'],
+          version: latestVersion
+        }
+      })
     }
-    return skillRes;
+    return Promise.resolve(skillRes)
+  }
+
+  const getProjectDefaults = (skillResWithVersion) => {
+    if (!props.isEdit && !props.copy) {
+      return SettingsService.getSettingsForProject(route.params.projectId).then((settings) => {
+        if (settings) {
+          const selfReportingTypeSetting = settings.find((item) => item.setting === 'selfReport.type');
+          if (selfReportingTypeSetting) {
+            skillResWithVersion.selfReportingType = selfReportingTypeSetting.value;
+            skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('selfReportingType');
+            if (selfReportingTypeSetting.value !== 'Disabled') {
+              skillResWithVersion.selfReportingEnabled = true;
+              skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('selfReportingEnabled');
+            }
+          }
+          const selfReportingJustificationSetting = settings.find((item) => item.setting === 'selfReport.justificationRequired');
+          if (selfReportingJustificationSetting) {
+            skillResWithVersion.justificationRequired = selfReportingJustificationSetting.value && selfReportingJustificationSetting.value !== 'false';
+            skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('justificationRequired');
+          }
+        }
+        return skillResWithVersion;
+      })
+    }
+    return Promise.resolve(skillResWithVersion)
+  }
+
+  return loadSkillDetails().then((skillRes) => {
+    return findLatestSkillVersion(skillRes).then((skillResWithVersion) => {
+      return getProjectDefaults(skillResWithVersion)
+    })
   })
 }
 
@@ -171,7 +182,7 @@ const schema = object({
     .test(
       'maxNextVersion',
       ({ label }) => `${label} ${latestSkillVersion.value} is the latest; max supported version is 1 (latest + 1)`,
-      async (value) => (latestSkillVersion.value + 1) >= value
+      async (value) => props.isEdit || (latestSkillVersion.value + 1) >= value
     )
     .label('Version'),
   'helpUrl': string()
@@ -264,6 +275,7 @@ const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
       <div class="lg:max-w-10rem lg:ml-3 w-full">
         <SkillsNumberInput
           showButtons
+          :disabled="isEdit"
           :min="latestSkillVersion"
           label="Version"
           name="version" />
