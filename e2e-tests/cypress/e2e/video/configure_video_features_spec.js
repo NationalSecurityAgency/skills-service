@@ -222,10 +222,10 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="breadcrumb-proj1"]').click()
         cy.get('[data-cy="btn_edit-project"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
-        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click({force: true})
         cy.get('[data-cy="restrictCommunityControls"]').contains('Please note that once the restriction is enabled it cannot be lifted/disabled')
-        cy.get('[data-cy="saveProjectButton"]').click()
-        cy.get('[data-cy="saveProjectButton"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
         cy.wait('@getProj1Settings')
         cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
 
@@ -235,11 +235,11 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.wait('@getVideoProps')
         cy.wait('@getSkillInfo')
         cy.get('.spinner-border').should('not.exist')
-        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
         cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for Divine Dragon")
     });
 
-    it.skip('video upload warning message uses community.descriptor for a brand new project with UC protection', () => {
+    it('video upload warning message uses community.descriptor for a brand new project with UC protection', () => {
         cy.intercept('/admin/projects/proj1/settings').as('getProj1Settings')
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1Skill/video').as('getVideoProps1')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1Subject/skills/skill1Skill').as('getSkillInfo1')
@@ -268,21 +268,21 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]').type('proj1')
         cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
-        cy.get('[data-cy="restrictCommunity"]').click({force: true})
+        cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click({force: true})
         cy.get('[data-cy="restrictCommunityControls"]').contains('Please note that once the restriction is enabled it cannot be lifted/disabled')
-        cy.get('[data-cy="saveProjectButton"]').should('be.enabled').click()
-        cy.get('[data-cy="saveProjectButton"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
 
         cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
         cy.wait('@getProj1Settings')
         cy.get('[data-cy="btn_Subjects"]').click()
-        cy.get('[data-cy="subjectNameInput"]').type('subj1')
-        cy.get('[data-cy="saveSubjectButton"]').should('be.enabled').click()
+        cy.get('[data-cy="subjectName"]').type('subj1')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
         cy.get('[data-cy="manageBtn_subj1Subject"]').click()
 
         cy.get('[data-cy="newSkillButton"]').click()
         cy.get('[data-cy="skillName"]').type('skill1')
-        cy.get('[data-cy="saveSkillButton"]').should('be.enabled').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
         cy.get('[data-cy="manageSkillLink_skill1Skill"]').click()
         cy.get('[data-cy="nav-Video"]').click()
         cy.wait('@getVideoProps1')
