@@ -116,6 +116,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const allowedVideoUploadMimeTypes = computed(() => config.value.allowedVideoUploadMimeTypes)
   const videoUploadWarningMessage = computed(() => config.value.videoUploadWarningMessage)
   const maxVideoCaptionsLength = computed(() => config.value.maxVideoCaptionsLength)
+  const maxVideoTranscriptLength = computed(() => config.value.maxVideoTranscriptLength)
   const userPageTagsToDisplay = computed(() => config.value.userPageTagsToDisplay)
 
   return {
@@ -192,6 +193,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     allowedVideoUploadMimeTypes,
     videoUploadWarningMessage,
     maxVideoCaptionsLength,
+    maxVideoTranscriptLength,
     userPageTagsToDisplay
   }
 })

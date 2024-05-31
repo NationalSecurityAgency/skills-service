@@ -348,9 +348,9 @@ const schema = yup.object().shape({
       .label('Captions'),
   'videoTranscript': string()
       .nullable()
-      .max(appConfig.descriptionMaxLength)
-      .test('videoUrlMustBePresent', 'Transcript is not valid without Video field',(value) => videoUrlMustBePresent(value))
+      .max(appConfig.maxVideoTranscriptLength)
       .customDescriptionValidator('Video Transcript')
+      .test('videoUrlMustBePresent', 'Transcript is not valid without Video field',(value) => videoUrlMustBePresent(value))
       .label('Video Transcript'),
 })
 
