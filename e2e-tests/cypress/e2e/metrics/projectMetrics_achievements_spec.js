@@ -36,6 +36,13 @@ describe('Metrics Tests - Achievements', () => {
                 .not('[data-p-other-month="true"]')
                 .click();
         });
+        Cypress.Commands.add('filterSetYear', (yearNum) => {
+            cy.get('.p-datepicker-year').click()
+            cy.get('.p-yearpicker-year').contains(yearNum).click()
+        })
+        Cypress.Commands.add('filterSetMonth', (month) => {
+            cy.get('.p-monthpicker-month').contains(month).click()
+        })
 
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -485,62 +492,24 @@ describe('Metrics Tests - Achievements', () => {
             });
         }
 
+        // const m = moment.utc(new Date(), 'YYYY-MM-DD'); //.format('YYYY-MM-DD HH');
         const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
 
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'user0Good@skills.org',
-            timestamp: m.clone()
-                .add(1, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'user0Good@skills.org',
-            timestamp: m.clone()
-                .add(2, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'user0Good@skills.org',
-            timestamp: m.clone()
-                .add(3, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'user0Good@skills.org',
-            timestamp: m.clone()
-                .add(4, 'day')
-                .format('x')
-        });
+        for( let i = 1; i <= 8; i += 1 ) {
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                userId: 'user0Good@skills.org',
+                timestamp: m.clone()
+                    .add(i, 'day')
+                    .format('x')
+            });
+        }
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
             userId: 'user0Good@skills.org',
             timestamp: m.clone()
                 .add(5, 'day')
                 .format('x')
         });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'user0Good@skills.org',
-            timestamp: m.clone()
-                .add(6, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'user0Good@skills.org',
-            timestamp: m.clone()
-                .add(7, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'user0Good@skills.org',
-            timestamp: m.clone()
-                .add(8, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'user0Good@skills.org',
-            timestamp: m.clone()
-                .add(5, 'day')
-                .format('x')
-        });
+
         for (let i = 1; i <= 10; i += 1) {
             cy.request('POST', `/api/projects/proj1/skills/skill2`, {
                 userId: 'user0Good@skills.org',
@@ -556,42 +525,16 @@ describe('Metrics Tests - Achievements', () => {
             });
         }
 
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'another@skills.org',
-            timestamp: m.clone()
-                .add(3, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: 'another@skills.org',
-            timestamp: m.clone()
-                .add(4, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'another@skills.org',
-            timestamp: m.clone()
-                .add(5, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: 'another@skills.org',
-            timestamp: m.clone()
-                .add(6, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'another@skills.org',
-            timestamp: m.clone()
-                .add(7, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: 'another@skills.org',
-            timestamp: m.clone()
-                .add(8, 'day')
-                .format('x')
-        });
+        for( let i = 3; i <= 8; i += 1 ) {
+            let skillNumber = (i % 2 === 0) ? '2' : '1';
+            cy.request('POST', `/api/projects/proj1/skills/skill${skillNumber}`, {
+                userId: 'another@skills.org',
+                timestamp: m.clone()
+                    .add(i, 'day')
+                    .format('x')
+            });
+        }
+
         cy.request('POST', `/api/projects/proj1/skills/skill3`, {
             userId: 'another@skills.org',
             timestamp: m.clone()
@@ -605,24 +548,14 @@ describe('Metrics Tests - Achievements', () => {
                 .format('x')
         });
 
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'thereYouGo@skills.org',
-            timestamp: m.clone()
-                .add(6, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'thereYouGo@skills.org',
-            timestamp: m.clone()
-                .add(7, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: 'thereYouGo@skills.org',
-            timestamp: m.clone()
-                .add(8, 'day')
-                .format('x')
-        });
+        for( let i = 6; i <= 8; i += 1 ) {
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                userId: 'thereYouGo@skills.org',
+                timestamp: m.clone()
+                    .add(i, 'day')
+                    .format('x')
+            });
+        }
 
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
@@ -634,11 +567,6 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('[data-cy=achievementsNavigator-filterBtn]')
             .should('be.enabled');
 
-        const today = moment.utc();//.format('YYYY-MM-DD');
-        const todayStr = today.format('YYYY-MM-DD');
-
-        const future = today.add(1, 'M');
-        const futureStr = future.format('YYYY-MM-DD');
         cy.get('[data-cy=achievementsNavigator-fromDateInput]')
             .click();
         cy.wait(200);
@@ -652,9 +580,9 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('.p-datepicker [data-pc-section="table"] [aria-label="14"] > [data-pc-section="daylabel"]').should('have.class', 'p-disabled')
         cy.wait(100);
 
-
         cy.get('[data-cy=achievementsNavigator-fromDateInput]').click();
         cy.wait(200);
+
         cy.filterPrevMonth();
         cy.filterSetDay(15);
         cy.wait(100);
@@ -667,7 +595,7 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('[data-cy=achievementsNavigator-resetBtn]').click();
         cy.wait('@userAchievementsChartBuilder');
 
-        // default is descending by date
+        // // default is descending by date
         const tableSelector = '[data-cy=achievementsNavigator-table]';
 
         cy.get('[data-cy=achievementsNavigator-usernameInput]')
@@ -905,11 +833,12 @@ describe('Metrics Tests - Achievements', () => {
             .click();
         cy.wait('@userAchievementsChartBuilder');
 
-        const now = new Date(2020, 8, 12).getTime();
-        cy.clock(now);
-        cy.get('[data-cy=achievementsNavigator-fromDateInput]').type('{selectall}09/18/2020');
-        //     .click();
-        // cy.filterSetDay(18);
+        // const now = new Date(2020, 8, 12).getTime();
+        // cy.clock(now);
+        cy.get('[data-cy=achievementsNavigator-fromDateInput]').click()
+        cy.filterSetYear(2020);
+        cy.filterSetMonth('Sep');
+        cy.filterSetDay(18);
 
         cy.get('[data-cy=achievementsNavigator-filterBtn]')
             .click();
@@ -953,9 +882,11 @@ describe('Metrics Tests - Achievements', () => {
             }],
         ]);
 
-        cy.get('[data-cy=achievementsNavigator-toDateInput]').type('{selectall}09/19/2020');
-        //     .click();
-        // cy.filterSetDay(19);
+        cy.get('[data-cy=achievementsNavigator-toDateInput]').click()
+        cy.filterSetYear(2020);
+        cy.filterSetMonth('Sep');
+        cy.filterSetDay(19);
+
         cy.get('[data-cy=achievementsNavigator-filterBtn]')
             .click();
         cy.wait('@userAchievementsChartBuilder');
@@ -987,7 +918,7 @@ describe('Metrics Tests - Achievements', () => {
             .contains('Badge')
             .click();
         cy.get('[data-cy=achievementsNavigator-nameInput]')
-            .type('subject');
+            .type('subject', {force: true});
         cy.selectItem('[data-cy=achievementsNavigator-levelsInput]', 'Level 1');
         cy.get('[data-cy=achievementsNavigator-usernameInput]')
             .type('another@skill');

@@ -14,8 +14,8 @@ const route = useRoute();
 
 const isLoading = ref(true);
 const usernameFilter = ref('');
-const fromDayFilter = ref(null);
-const toDayFilter = ref(null);
+const fromDayFilter = ref();
+const toDayFilter = ref();
 const nameFilter = ref('');
 const levels = {
   selected: '',
@@ -104,7 +104,7 @@ const reloadTable = () => {
       <SkillsCardHeader title="Achievements"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex pb-2">
+      <div class="flex pb-2 flex-wrap">
         <div class="flex flex-1 flex-column border-right-1 pr-3 gap-2">
           <label for="user-name-filter">User Name Filter:</label>
           <InputText class="w-full"
@@ -178,7 +178,9 @@ const reloadTable = () => {
           <template #body="slotProps">
             <div class="flex">
               <div class="flex flex-1">
-                <span>{{ slotProps.data.userName }}</span>
+                <span>
+                  {{ slotProps.data.userName }}
+                </span>
               </div>
               <div class="flex">
 <!--                <router-link :to="{ name: 'ClientDisplayPreview', params: { projectId: projectId, userId: data.item.userId } }">-->
