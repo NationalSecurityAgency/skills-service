@@ -7,6 +7,9 @@ const accessState = useAccessState()
 const isRoot = computed(() => {
   return accessState.isRoot;
 });
+const isSupervisor = computed(() => {
+  return accessState.isSupervisor;
+});
 
 const itemsTmp = [];
 itemsTmp.push({
@@ -20,19 +23,19 @@ itemsTmp.push({
   page: 'QuizzesAndSurveys',
 });
 
-// if (this.isSupervisor || this.isRoot) {
+if (isSupervisor.value || isRoot.value) {
 //   items.push({
 //     name: 'Global Badges',
 //     iconClass: 'fa-globe-americas skills-color-badges',
 //     page: 'GlobalBadges',
 //   });
-//   items.push({
-//     name: 'Metrics',
-//     iconClass: 'fa-chart-bar skills-color-metrics',
-//     page: 'MultipleProjectsMetricsPage',
-//   });
-// }
-//
+  itemsTmp.push({
+    name: 'Metrics',
+    iconClass: 'fa-chart-bar skills-color-metrics',
+    page: 'MultipleProjectsMetricsPage',
+  });
+}
+
 if (isRoot.value) {
 //   items.push({
 //     name: 'Contact Admins',

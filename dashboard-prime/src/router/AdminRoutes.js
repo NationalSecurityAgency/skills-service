@@ -3,6 +3,7 @@ import MyProjects from '@/components/projects/MyProjects.vue'
 import QuizDefinitionsPage from '@/components/quiz/QuizDefinitionsPage.vue'
 import UserActionsPage from '@/components/userActions/UserActionsPage.vue';
 import InceptionSkills from '@/components/inception /InceptionSkills.vue'
+import MultipleProjectsMetricsPage from "@/components/metrics/multipleProjects/MultipleProjectsMetricsPage.vue";
 
 const createAdminRoutes = () => {
   return {
@@ -45,7 +46,17 @@ const createAdminRoutes = () => {
             message: 'User Actions History',
           },
         },
-      }
+      }, {
+        name: 'MultipleProjectsMetricsPage',
+        path: 'metrics',
+        component: MultipleProjectsMetricsPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'All Projects Metrics',
+          },
+        },
+      },
     ]
   }
 }
