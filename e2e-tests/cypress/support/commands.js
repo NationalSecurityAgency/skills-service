@@ -195,7 +195,7 @@ Cypress.Commands.add("saveVideoAttrs", (projNum, skillNum, videoAttrs) => {
     let requestDone = false;
     if (videoAttrs.file) {
         const fileType = videoAttrs.file.endsWith('mp4') ? 'video/mp4' : 'video/webm';
-        cy.fixture(videoAttrs.file, 'binary')
+        cy.readFile(`cypress/fixtures/${videoAttrs.file}`, 'binary')
             .then((binaryFile) => {
                 const blob = Cypress.Blob.binaryStringToBlob(binaryFile, fileType);
                 formData.set('file', blob, videoAttrs.file);

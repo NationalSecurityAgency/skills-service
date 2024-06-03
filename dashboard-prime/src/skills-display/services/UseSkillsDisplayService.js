@@ -218,6 +218,11 @@ export const useSkillsDisplayService = () => {
     }).then((result) => result.data);
   }
 
+  const getVideoTranscript = (skillId) => {
+    return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skills/${skillId}/videoTranscript`)
+      .then((result) => result.data);
+  }
+
   return {
     loadUserProjectSummary,
     loadSubjectSummary,
@@ -234,6 +239,7 @@ export const useSkillsDisplayService = () => {
     getUserSkillsRanking,
     getUserSkillsRankingDistribution,
     getRankingDistributionUsersPerLevel,
-    getLeaderboard
+    getLeaderboard,
+    getVideoTranscript
   }
 }

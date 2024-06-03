@@ -369,7 +369,6 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
           </div>
         </div>
       </template>
-      <!--      :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"-->
       <Card>
         <template #content>
           <Message v-if="isReadOnly" severity="info" icon="fas fa-exclamation-triangle" data-cy="readOnlyAlert" :closable="false">
@@ -492,9 +491,9 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
             />
           </div>
 
-          <div v-if="overallErrMsg" class="alert alert-danger">
+          <Message severity="error" v-if="overallErrMsg">
             {{ overallErrMsg }}
-          </div>
+          </Message>
 
           <div v-if="!isReadOnly" data-cy="updateButtons" class="my-3 flex">
             <div class="flex-1">
@@ -544,9 +543,9 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
               />
 
               <div v-if="watchedProgress" class="p-3 pt-4">
-                <div v-if="!isDurationAvailable" class="alert alert-danger" data-cy="noDurationWarning">
-                  <i class="fas fa-exclamation-triangle" aria-hidden="true"/> Browser cannot derive the duration of this video. Percentage will only be updated after the video is fully watched.
-                </div>
+                <Message v-if="!isDurationAvailable" severity="warn" icon="fas fa-exclamation-triangle" :closable="false" data-cy="noDurationWarning">
+                  Browser cannot derive the duration of this video. Percentage will only be updated after the video is fully watched.
+                </Message>
                 <div class="grid">
                   <div class="col-6 lg:col-3 xl:col-2">Total Duration:</div>
                   <div class="col">

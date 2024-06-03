@@ -158,6 +158,10 @@ const focusOnId = (elementId) => {
     element.focus()
   })
 }
+
+defineExpose({
+  updateEarnedPoints
+})
 </script>
 
 <template>

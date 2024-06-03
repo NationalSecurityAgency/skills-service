@@ -1,7 +1,7 @@
 <script setup>
 import SkillProgressNameRow from '@/skills-display/components/progress/skill/SkillProgressNameRow.vue'
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillsSummaryCards from '@/skills-display/components/progress/SkillsSummaryCards.vue'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
@@ -12,6 +12,8 @@ import SkillBadgesAndTags from '@/skills-display/components/progress/skill/Skill
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import CatalogImportStatus from '@/skills-display/components/progress/CatalogImportStatus.vue'
 import PartialPointsAlert from '@/skills-display/components/skill/PartialPointsAlert.vue'
+import SkillVideo from '@/skills-display/components/progress/SkillVideo.vue';
+import dayjs from 'dayjs';
 
 const props = defineProps({
   skill: Object,
@@ -50,10 +52,12 @@ const props = defineProps({
     required: false
   }
 })
-const emit = defineEmits(['add-tag-filter'])
+const emit = defineEmits(['add-tag-filter', 'points-earned'])
 const route = useRoute()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const attributes = useSkillsDisplayAttributesState()
+
+const skillOverviewFooter = ref(null)
 
 const buildToRoute = () => {
   if (!props.enableDrillDown || !props.skill.isSkillType) {
@@ -94,6 +98,11 @@ const isSkillLocked = computed(() => {
   }
   return (sk.dependencyInfo && !sk.dependencyInfo.achieved) || hasBadgeDependency;
 })
+const pointsEarned = (pts) => {
+  props.skill.mostRecentlyPerformedOn = dayjs()
+  skillOverviewFooter.value.updateEarnedPoints({pointsEarned: pts})
+  emit('points-earned', pts);
+}
 
 const isSkillComplete = computed(() => props.skill && props.skill.meta && props.skill.meta.complete)
 </script>
@@ -186,10 +195,10 @@ const isSkillComplete = computed(() => props.skill && props.skill.meta && props.
         <partial-points-alert v-if="!enableDrillDown" :skill="skill" :is-locked="isSkillLocked" />
         <skills-summary-cards v-if="!isSkillLocked" :skill="skill" class="mt-3" />
         <catalog-import-status :skill="skill" />
-        <!--        <skill-video v-if="skillInternal" :skill="skillInternal"-->
-        <!--                     :video-collapsed-by-default="videoCollapsedByDefault"-->
-        <!--                     @points-earned="pointsEarned"-->
-        <!--                     class="mt-2" />-->
+        <skill-video v-if="skill" :skill="skill"
+                     :video-collapsed-by-default="videoCollapsedByDefault"
+                     @points-earned="pointsEarned"
+                     class="mt-2" />
         <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
           <markdown-text
             :instance-id="`skillDescription-${skill.skillId}`"
@@ -198,7 +207,7 @@ const isSkillComplete = computed(() => props.skill && props.skill.meta && props.
         </p>
 
         <div>
-          <skill-overview-footer :skill="skill" />
+          <skill-overview-footer ref="skillOverviewFooter" :skill="skill" />
         </div>
       </div>
     </div>
