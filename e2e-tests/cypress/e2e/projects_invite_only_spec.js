@@ -172,8 +172,8 @@ describe('Projects Invite-Only Tests', () => {
                         cy.get('[data-pc-name="acceptbutton"]').click()
                         cy.wait('@removeAccess');
                         cy.wait('@getApprovedUsers');
-                        cy.get('[data-cy=privateProjectUsersTable]')
-                            .should('not.exist');
+                        cy.get('[data-cy=privateProjectUsersTable] [data-cy="skillsBTableTotalRows"]')
+                            .should('have.text', '0');
                         cy.logout();
                         cy.login('uuuuuu', 'password');
 
