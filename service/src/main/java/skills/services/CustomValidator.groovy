@@ -78,11 +78,11 @@ class CustomValidator {
     private static final Pattern BOLD_AND_ITALICS = ~/^(\s*)[*_]{1,3}([^*_]+)[*_]{1,3}/
     private static final Pattern HTML = ~/(?s)<[\/]?\w+(?: .+?)*>/
     private static final Pattern CODEBLOCK = ~/(?ms)(^[`]{3}$.*?^[`]{3}$)/
+    private static final Pattern TABLE_BLOCK = ~/(?ms)(^[|].+?[|]$)/
 
     private static final Pattern TABLE_FIX = ~/(?m)(^\n)(^[|].+[|]$\n^[|].*[-]{3,}.*[|]$)/
     private static final Pattern CODEBLOCK_FIX = ~/(?m)(^\n)(^[`]{3}$)/
     private static final Pattern LIST_FIX = ~/(?m)(^\n)(\s*\d\. |\* |- .*$)/
-    private static final Pattern HEADING_FIX = ~/(?m)([(].+[)].*$)\n(\n.*$)/
 
     @PostConstruct
     CustomValidator init() {
@@ -246,12 +246,19 @@ class CustomValidator {
         // treat all linebreaks and separators as newlines
         toValidate = toValidate.replaceAll(/(?m)(^\s*[-_*]{3,}\s*$)|(^\s*<br>\s*$)/, '\n')
 
+        toValidate = prepareTableBlocks(toValidate)
+
         // remove a single new line above a table and/or codeblock
         toValidate = TABLE_FIX.matcher(toValidate).replaceAll('$2')
         toValidate = CODEBLOCK_FIX.matcher(toValidate).replaceAll('$2')
         toValidate = LIST_FIX.matcher(toValidate).replaceAll('$2')
-        toValidate = HEADING_FIX.matcher(toValidate).replaceAll('$1$2')
 
+        toValidate = prepareCodeBlocks(toValidate)
+
+        return toValidate.trim()
+    }
+
+    String prepareCodeBlocks(String toValidate) {
         // remove two+ newlines from codeblocks so we do not split
         StringBuilder out = new StringBuilder()
         Matcher matcher = CODEBLOCK.matcher(toValidate)
@@ -259,9 +266,17 @@ class CustomValidator {
             matcher.appendReplacement(out, matcher.group(1).replaceAll(/[\n]{2,}+/, '\n'))
         }
         matcher.appendTail(out)
-        toValidate = out.toString()
-
-        return toValidate.trim()
+        return out.toString()
+    }
+    String prepareTableBlocks(String toValidate) {
+        // remove all newlines from table blocks so we do not split
+        StringBuilder out = new StringBuilder()
+        Matcher matcher = TABLE_BLOCK.matcher(toValidate)
+        while(matcher.find()) {
+            matcher.appendReplacement(out, matcher.group(1).replaceAll(/[\n]{1,}+/, ''))
+        }
+        matcher.appendTail(out)
+        return out.toString()
     }
 
     private String adjustForMarkdownSupport(String s) {
