@@ -82,7 +82,6 @@ class CustomValidator {
     private static final Pattern TABLE_FIX = ~/(?m)(^\n)(^[|].+[|]$\n^[|].*[-]{3,}.*[|]$)/
     private static final Pattern CODEBLOCK_FIX = ~/(?m)(^\n)(^[`]{3}$)/
     private static final Pattern LIST_FIX = ~/(?m)(^\n)(\s*\d\. |\* |- .*$)/
-    private static final Pattern HEADING_FIX = ~/(?m)([(].+[)].*$)\n(\n.*$)/
 
     @PostConstruct
     CustomValidator init() {
@@ -250,7 +249,6 @@ class CustomValidator {
         toValidate = TABLE_FIX.matcher(toValidate).replaceAll('$2')
         toValidate = CODEBLOCK_FIX.matcher(toValidate).replaceAll('$2')
         toValidate = LIST_FIX.matcher(toValidate).replaceAll('$2')
-        toValidate = HEADING_FIX.matcher(toValidate).replaceAll('$1$2')
 
         // remove two+ newlines from codeblocks so we do not split
         StringBuilder out = new StringBuilder()
