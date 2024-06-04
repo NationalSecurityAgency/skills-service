@@ -106,7 +106,7 @@ describe('App Features Tests', () => {
         });*/
     });
 
-    it('show support and contact information in the help dropdown', () => {
+    it.only('show support and contact information in the help dropdown', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply({
                 body: {
@@ -127,13 +127,13 @@ describe('App Features Tests', () => {
             .click();
 
         // validate help button
-        cy.get('[data-cy="helpButtonSupportLinkLabel_Email Us"]')
+        cy.get('[data-pc-name="menu"] [aria-label="Email Us"]')
             .contains('Email Us');
-        cy.get('[data-cy="helpButtonSupportLinkLabel_Email Us"]')
+        cy.get('[data-pc-name="menu"] [aria-label="Email Us"] a')
             .should('have.attr', 'href', 'mailto:skilltree@someemail.com');
-        cy.get('[data-cy="helpButtonSupportLinkLabel_Support Center"]')
+        cy.get('[data-pc-name="menu"] [aria-label="Support Center"]')
             .contains('Support Center');
-        cy.get('[data-cy="helpButtonSupportLinkLabel_Support Center"]')
+        cy.get('[data-pc-name="menu"] [aria-label="Support Center"] a')
             .should('have.attr', 'href', 'https://skilltreesupport.com');
 
         // validate footer

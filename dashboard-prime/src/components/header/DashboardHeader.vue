@@ -22,8 +22,8 @@ const pathPath = usePagePath()
     <!--      <span class="pl-1">An upgrade is currently in process. Please note that no changes will be permitted until the upgrade is complete.-->
     <!--      Any reported skills will be queued for application once the upgrade has completed.</span>-->
     <!--    </div>-->
-    <div class="">
-      <div class="flex flex-wrap mt-3 justify-content-center mb-3">
+    <div class="bg-primary-reverse">
+      <div class="flex flex-wrap pt-3 px-3 justify-content-center mb-3 border-bottom-1 border-200">
         <div class="flex-1 justify-content-center">
           <div class="flex">
             <router-link data-cy="skillTreeLogo" class="" to="/">
@@ -48,7 +48,7 @@ const pathPath = usePagePath()
         </div>
       </div>
     </div>
-    <skills-breadcrumb></skills-breadcrumb>
+    <skills-breadcrumb class="px-3"></skills-breadcrumb>
   </div>
 </template>
 

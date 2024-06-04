@@ -119,6 +119,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxVideoTranscriptLength = computed(() => config.value.maxVideoTranscriptLength)
   const userPageTagsToDisplay = computed(() => config.value.userPageTagsToDisplay)
   const maxProjectInviteEmails = computed(() => config.value.maxProjectInviteEmails)
+  const artifactBuildTimestamp = computed(() => config.value.artifactBuildTimestamp)
   return {
     loadConfigState,
     refreshConfig,
@@ -195,6 +196,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxVideoCaptionsLength,
     maxVideoTranscriptLength,
     userPageTagsToDisplay,
-    maxProjectInviteEmails
+    maxProjectInviteEmails,
+    artifactBuildTimestamp,
   }
 })

@@ -66,6 +66,7 @@ const toggle = (event) => {
       @click="toggle"
       aria-label="Help Button"
       aria-haspopup="true"
+      data-cy="helpButton"
       aria-controls="help_settings_menu" />
     <div id="help_settings_menu">
       <Menu ref="menu" :model="items" :popup="true">

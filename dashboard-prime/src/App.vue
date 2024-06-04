@@ -22,6 +22,7 @@ import { useIframeInit } from '@/skills-display/iframe/UseIframeInit.js'
 import NewSoftwareVersion from '@/components/header/NewSoftwareVersion.vue'
 import { usePageVisitService } from '@/components/utils/services/UsePageVisitService.js'
 import { invoke, until } from '@vueuse/core'
+import DashboardFooter from '@/components/header/DashboardFooter.vue'
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -99,27 +100,31 @@ const showHeader = computed(() => {
     <VueAnnouncer class="sr-only" />
 
     <customizable-header role="region" aria-label="dynamic customizable header"></customizable-header>
-    <div id="app" :class="{ 'px-3': !skillsDisplayInfo.isSkillsClientPath() }">
+    <div id="app">
       <skills-spinner :is-loading="isLoadingApp" class="mt-8 text-center" />
       <div v-if="!isLoadingApp" class="m-0">
-        <div class="">
+        <div class="overall-container">
           <!--          <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap || isOAuthOnlyAndNeedsToBootstrap" role="alert"/>-->
-          <new-software-version class="mb-3"/>
+          <new-software-version class="mb-3" />
           <dashboard-header v-if="showHeader" role="banner" />
           <div role="main" id="mainContent1"
+               :class="{ 'px-3': !skillsDisplayInfo.isSkillsClientPath() }"
                tabindex="-1"
                aria-label="Main content area, click tab to navigate">
-            <RouterView  />
+            <RouterView />
           </div>
         </div>
       </div>
     </div>
     <ConfirmDialog></ConfirmDialog>
-    <!--    <dashboard-footer />-->
+    <dashboard-footer />
     <customizable-footer role="region" aria-label="dynamic customizable footer"></customizable-footer>
     <!--    <scroll-to-top v-if="!isScrollToTopDisabled" />-->
   </div>
 </template>
 
 <style scoped>
+.overall-container {
+  min-height: calc(100vh - 100px);
+}
 </style>
