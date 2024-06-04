@@ -105,7 +105,7 @@ const showHeader = computed(() => {
       <div v-if="!isLoadingApp" class="m-0">
         <div class="overall-container">
           <!--          <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap || isOAuthOnlyAndNeedsToBootstrap" role="alert"/>-->
-          <new-software-version class="mb-3" />
+          <new-software-version  />
           <dashboard-header v-if="showHeader" role="banner" />
           <div role="main" id="mainContent1"
                :class="{ 'px-3': !skillsDisplayInfo.isSkillsClientPath() }"
@@ -117,7 +117,7 @@ const showHeader = computed(() => {
       </div>
     </div>
     <ConfirmDialog></ConfirmDialog>
-    <dashboard-footer />
+    <dashboard-footer role="region" />
     <customizable-footer role="region" aria-label="dynamic customizable footer"></customizable-footer>
     <!--    <scroll-to-top v-if="!isScrollToTopDisabled" />-->
   </div>
