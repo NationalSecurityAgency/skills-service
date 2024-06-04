@@ -53,6 +53,7 @@ const contactProjectAdmins = (values) => {
     saveButtonLabel="Save"
     :validation-schema="schema"
     :enable-return-focus="true"
+    :initialValues="{}"
     :close-on-success="false"
     data-cy="contactProjectOwnerDialog"
   >

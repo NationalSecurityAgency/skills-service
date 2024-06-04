@@ -68,7 +68,7 @@ export const useErrorHandling = () => {
         ({ explanation, errorCode: ec, projectId } = error.response.data);
       }
       if (explanation && ec === 'private_project') {
-        router.push({ name: 'PrivateProjectAccessRequestPage', params: { explanation, projectId } });
+        router.push({ name: 'PrivateProjectAccessRequestPage', params: { projectId } });
       } else {
         errorState.setErrorParams('User Not Authorized', explanation, 'fas fa-shield-alt')
         // router.push({ name: 'ErrorPage'});

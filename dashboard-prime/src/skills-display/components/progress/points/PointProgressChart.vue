@@ -90,7 +90,7 @@ const loadPointsHistory = () => {
   pointHistoryState.loadPointHistory(route.params.subjectId)
     .then(() => {
       const pointHistoryRes = pointHistoryState.getPointHistory(route.params.subjectId)
-      const seriesData = pointHistoryRes.pointsHistory.map((value) => ({
+      const seriesData = pointHistoryRes.pointsHistory?.map((value) => ({
         x: new Date(value.dayPerformed).getTime(),
         y: value.points
       }))

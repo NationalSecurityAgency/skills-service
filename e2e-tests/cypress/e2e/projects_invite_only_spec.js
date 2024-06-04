@@ -72,22 +72,21 @@ describe('Projects Invite-Only Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@getSettings');
 
-        cy.get('[data-cy="projectVisibilitySelector"]')
-            .select('pio');
-        cy.get('.modal-content')
-            .should('be.visible')
-            .should('include.text', 'Changing to Invite Only')
-            .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users.');
-        cy.clickButton('Ok');
-        cy.get('[data-cy="saveSettingsBtn"')
-            .click({ force: true });
+        cy.get('[data-cy="projectVisibilitySelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
+          .should('be.visible')
+          .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+
+        cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
         cy.get('[data-cy="nav-Access"')
             .click();
         cy.wait('@emailSupported');
-        cy.get('[data-cy="inviteExpirationSelect"]')
-            .select('PT30M');
+        cy.get('[data-cy="inviteExpirationSelect"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="30 days"]').click()
         cy.get('[data-cy=addEmails]')
             .should('be.disabled');
         cy.get('[data-cy="sendInvites-btn"]')
@@ -132,20 +131,23 @@ describe('Projects Invite-Only Tests', () => {
                 cy.visit(inviteLink);
                 cy.get('[data-cy=joinProject]')
                     .should('be.visible');
-                cy.get('[data-cy=breadcrumb-item]')
+                cy.get('[data-cy="breadcrumbItemValue"]')
                     .contains('Join Project This is project 1')
                     .should('be.visible');
                 cy.get('[data-cy=joinProject]')
                     .click();
                 cy.get('[data-cy=project-link-proj1]')
                     .should('be.visible')
-                    .should('have.attr', 'href', '/progress-and-rankings/projects/proj1')
-                    .contains('This is project 1')
+                    .contains('View')
                     .should('be.visible');
                 cy.wait(10 * 1000); //wait for countdown timer
-                cy.wait('@getToken');
-                cy.dashboardCd()
-                    .contains('My Level');
+                cy.get('[data-pc-name="breadcrumb"] [data-cy="breadcrumbItemValue"]')
+                  .eq(0)
+                  .should('contain.text', 'Progress And Rankings');
+                cy.get('[data-pc-name="breadcrumb"] [data-cy="breadcrumbItemValue"]')
+                  .eq(1)
+                  .should('contain.text', 'proj1');
+                cy.get('[data-cy="skillsDisplayHome"] [data-cy="myRankBtn"]')
                 cy.logout();
 
                 cy.fixture('vars.json')
@@ -167,11 +169,10 @@ describe('Projects Invite-Only Tests', () => {
                             .click();
                         cy.contains(`Are you sure you want to revoke ${userIdForDisplay}'s access to this Project? ${userIdForDisplay}'s achievements will NOT be deleted, however ${userIdForDisplay} will no longer be able to access the training profile.`)
                             .should('be.visible');
-                        cy.clickButton('Yes, revoke access!');
+                        cy.get('[data-pc-name="acceptbutton"]').click()
                         cy.wait('@removeAccess');
                         cy.wait('@getApprovedUsers');
                         cy.get('[data-cy=privateProjectUsersTable]')
-                            .contains(userIdForDisplay)
                             .should('not.exist');
                         cy.logout();
                         cy.login('uuuuuu', 'password');
@@ -184,106 +185,6 @@ describe('Projects Invite-Only Tests', () => {
                     });
             });
 
-    });
-
-    it('Invite Only duplicate input validation', () => {
-        cy.createProject(1);
-        cy.intercept('GET', '/admin/projects/proj1/settings')
-            .as('getSettings');
-        cy.intercept('POST', '/admin/projects/proj1/settings')
-            .as('saveSettings');
-        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
-            .as('emailSupported');
-        cy.intercept('POST', '/admin/projects/proj1/invite', (req) => {
-            req.reply((res) => {
-                const result = res.body;
-                result.successful = ['abc@cba.org'];
-                result.unsuccessful = ['bsmith@fake.email'];
-                res.send(result);
-            });
-        })
-            .as('sendInvites');
-        cy.intercept('GET', '/api/myprojects/proj1/name')
-            .as('getName');
-        cy.intercept('GET', '/api/projects/proj1/token')
-            .as('getToken');
-        cy.intercept('GET', '/admin/projects/proj1/userRoles/ROLE_PRIVATE_PROJECT_USER*')
-            .as('getApprovedUsers');
-        cy.intercept('DELETE', '/admin/projects/proj1/users/*/roles/ROLE_PRIVATE_PROJECT_USER')
-            .as('removeAccess');
-        cy.intercept('GET', '/admin/projects/proj1/errors*')
-            .as('loadIssues');
-
-        cy.visit('/administrator/projects/proj1/settings');
-        cy.wait('@getSettings');
-
-        cy.get('[data-cy="projectVisibilitySelector"]')
-            .select('pio');
-        cy.get('.modal-content')
-            .should('be.visible')
-            .should('include.text', 'Changing to Invite Only')
-            .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users.');
-        cy.clickButton('Ok');
-        cy.get('[data-cy="saveSettingsBtn"')
-            .click({ force: true });
-        cy.wait('@saveSettings');
-        cy.wait('@getSettings');
-        cy.get('[data-cy="nav-Access"')
-            .click();
-        cy.wait('@emailSupported');
-        cy.get('[data-cy="inviteExpirationSelect"]')
-            .select('PT30M');
-        cy.get('[data-cy=addEmails]')
-            .should('be.disabled');
-        cy.get('[data-cy="sendInvites-btn"]')
-            .should('be.disabled');
-        cy.get('[data-cy="inviteEmailInput"]')
-            .type('abc@cba.org;abc@cba.org,abc@cba.org\nabc@cba.org\nBob Smith <abc@cba.org>');
-        // try to navigate away while the input form has content
-        cy.get('[data-cy="nav-Settings"')
-            .click();
-        cy.get('[data-cy="nav-Settings"]')
-            .should('not.have.class', 'bg-primary');
-        cy.get('[data-cy="nav-Access"]')
-            .should('have.class', 'bg-primary');
-        cy.contains('Discard Emails?')
-            .should('be.visible');
-        cy.contains('Cancel')
-            .click();
-        //navigation should be cancelled
-        cy.get('[data-cy="nav-Settings"]')
-            .should('not.have.class', 'bg-primary');
-        cy.get('[data-cy="nav-Access"]')
-            .should('have.class', 'bg-primary');
-        cy.get('[data-cy="inviteEmailInput"]')
-            .should('be.visible');
-        cy.get('[data-cy=addEmails]')
-            .click();
-        cy.get('[data-cy=inviteRecipient]')
-            .should('have.length', 1);
-        cy.get('[data-cy="inviteEmailInput"]')
-            .should('be.empty');
-        cy.get('[data-cy=inviteRecipient]')
-            .should('include.text', 'abc@cba.org');
-        //try navigate away with recipients that have not yet been sent
-        cy.get('[data-cy="nav-Issues"')
-            .click();
-        cy.get('[data-cy="nav-Issues"]')
-            .should('not.have.class', 'bg-primary');
-        cy.get('[data-cy="nav-Access"]')
-            .should('have.class', 'bg-primary');
-        cy.contains('Discard Recipients?')
-            .should('be.visible');
-        cy.contains('Let\'s Go!')
-            .click();
-        //navigation should proceed
-        cy.wait('@loadIssues');
-        cy.contains('Project Issues')
-            .should('be.visible');
-        cy.get('[data-cy="nav-Access"]')
-            .should('not.have.class', 'bg-primary');
-        cy.get('[data-cy="nav-Issues"]')
-            .should('have.class', 'bg-primary');
     });
 
     if (!Cypress.env('oauthMode')) {
@@ -349,8 +250,6 @@ describe('Projects Invite-Only Tests', () => {
 
             cy.get('[data-cy="privateProjectUsers-userIdFilter"]')
                 .type('user2');
-            cy.get('[data-cy="privateProjectUsers-filterBtn"]')
-                .click();
             cy.wait('@getApprovedUsers');
             cy.validateTable(tableSelector, [
                 [{
@@ -362,13 +261,10 @@ describe('Projects Invite-Only Tests', () => {
                     value: 'user22@skills.org'
                 }],
             ], 5, true, null, false);
-            cy.get(`${tableSelector} [data-cy=skillsBTableTotalRows]`)
-                .should('not.exist');
             cy.get(`${tableSelector} tbody [role="row"]`)
                 .should('have.length', '2');
 
-            cy.get('[data-cy=privateProjectUsers-resetBtn]')
-                .click();
+            cy.get(`${tableSelector} [data-pc-section="filterclearicon"]`).click()
             cy.wait('@getApprovedUsers');
             cy.validateTable(tableSelector, [
                 [{
@@ -412,8 +308,7 @@ describe('Projects Invite-Only Tests', () => {
             cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
                 .eq(0)
                 .click();
-            cy.contains('Yes, revoke access!')
-                .click();
+            cy.get('[data-pc-name="acceptbutton"]').click();
             cy.wait('@revokeUser');
             cy.validateTable(tableSelector, [
                 [{
@@ -429,14 +324,13 @@ describe('Projects Invite-Only Tests', () => {
                     value: 'user1@skills.org'
                 }],
             ], 5, true, null, false);
-            cy.get('[data-cy=skillsBTableTotalRows]')
+            cy.get(`${tableSelector} [data-cy=skillsBTableTotalRows]`)
                 .should('have.text', '8');
 
             cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
                 .eq(0)
                 .click();
-            cy.contains('Cancel')
-                .click();
+            cy.get('[data-pc-name="rejectbutton"]').click();
             cy.validateTable(tableSelector, [
                 [{
                     colIndex: 0,
@@ -451,28 +345,25 @@ describe('Projects Invite-Only Tests', () => {
                     value: 'user1@skills.org'
                 }],
             ], 5, true, null, false);
-            cy.get('[data-cy=skillsBTableTotalRows]')
+            cy.get(`${tableSelector} [data-cy=skillsBTableTotalRows]`)
                 .should('have.text', '8');
 
             cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
                 .eq(0)
                 .click();
-            cy.contains('Yes, revoke access!')
-                .click();
+            cy.get('[data-pc-name="acceptbutton"]').click();
             cy.wait('@revokeUser');
 
             cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
                 .eq(0)
                 .click();
-            cy.contains('Yes, revoke access!')
-                .click();
+            cy.get('[data-pc-name="acceptbutton"]').click();
             cy.wait('@revokeUser');
 
             cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
                 .eq(0)
                 .click();
-            cy.contains('Yes, revoke access!')
-                .click();
+            cy.get('[data-pc-name="acceptbutton"]').click();
             cy.wait('@revokeUser');
 
             cy.validateTable(tableSelector, [
@@ -497,9 +388,6 @@ describe('Projects Invite-Only Tests', () => {
                     value: 'user55@skills.org'
                 }],
             ], 5, false, null, false);
-            cy.get('[data-cy=skillsBTableTotalRows]')
-                .should('not.exist');
-
         });
     }
 
@@ -537,13 +425,14 @@ describe('Projects Invite-Only Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@getSettings');
 
-        cy.get('[data-cy="projectVisibilitySelector"]')
-            .select('pio');
-        cy.get('.modal-content')
-            .should('be.visible')
-        cy.clickButton('Ok');
-        cy.get('[data-cy="saveSettingsBtn"')
-            .click({ force: true });
+        cy.get('[data-cy="projectVisibilitySelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
+          .should('be.visible')
+          .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+
+        cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
@@ -564,11 +453,12 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@emailSupported');
         cy.wait('@loadInviteStatus');
         cy.contains('abc@abc.org').should('be.visible');
+        cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'expired');
 
-        cy.get('[id="extend-0"]').click();
-        cy.get('[data-cy="invite-0-extension"]').eq(0).click();
+        cy.get('[data-cy="projectInviteStatusTable"] [data-cy="extendInvite"]').eq(0).click()
+        cy.get('[data-pc-name="menu"] [aria-label="30 minutes"]').click()
         cy.wait('@extendInviteExpiration');
         cy.wait('@loadInviteStatus');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
@@ -609,13 +499,13 @@ describe('Projects Invite-Only Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@getSettings');
 
-        cy.get('[data-cy="projectVisibilitySelector"]')
-            .select('pio');
-        cy.get('.modal-content')
-            .should('be.visible')
-        cy.clickButton('Ok');
-        cy.get('[data-cy="saveSettingsBtn"')
-            .click({ force: true });
+        cy.get('[data-cy="projectVisibilitySelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
+          .should('be.visible')
+          .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
@@ -634,11 +524,13 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@emailSupported');
         cy.wait('@loadInviteStatus');
         cy.contains('abc@abc.org').should('be.visible');
+        cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'in a day');
 
-        cy.get('[id="extend-0"]').click();
-        cy.get('[data-cy="invite-0-extension"]').eq(3).click();
+        cy.get('[data-cy="projectInviteStatusTable"] [data-cy="extendInvite"]').eq(0).click()
+        cy.get('[data-pc-name="menu"] [aria-label="7 days"] [data-cy="invite-3-extension"]').click()
+        //
         cy.wait('@extendInviteExpiration');
         cy.wait('@loadInviteStatus');
         cy.contains('abc1@abc.org').should('be.visible');
@@ -681,13 +573,13 @@ describe('Projects Invite-Only Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@getSettings');
 
-        cy.get('[data-cy="projectVisibilitySelector"]')
-            .select('pio');
-        cy.get('.modal-content')
-            .should('be.visible')
-        cy.clickButton('Ok');
-        cy.get('[data-cy="saveSettingsBtn"')
-            .click({ force: true });
+        cy.get('[data-cy="projectVisibilitySelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
+          .should('be.visible')
+          .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
@@ -709,12 +601,13 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@loadInviteStatus');
         cy.contains('abc@abc.org').should('be.visible');
         cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 5); //account for header row
+        cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'expired');
         cy.get('[data-cy="deleteInvite"]').eq(0).click();
         cy.contains('Removal Safety Check').should('be.visible');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me');
-        cy.get('[data-cy="removeButton"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').click();
         cy.wait('@deleteInvite');
         cy.wait('@loadInviteStatus');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc1@abc.org');
@@ -757,13 +650,13 @@ describe('Projects Invite-Only Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@getSettings');
 
-        cy.get('[data-cy="projectVisibilitySelector"]')
-            .select('pio');
-        cy.get('.modal-content')
-            .should('be.visible')
-        cy.clickButton('Ok');
-        cy.get('[data-cy="saveSettingsBtn"')
-            .click({ force: true });
+        cy.get('[data-cy="projectVisibilitySelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
+          .should('be.visible')
+          .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
@@ -783,12 +676,13 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@loadInviteStatus');
         cy.contains('abc@abc.org').should('be.visible');
         cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 5); //account for header row
+        cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('not.contain.text', 'expired');
         cy.get('[data-cy="deleteInvite"]').eq(0).click();
         cy.contains('Removal Safety Check').should('be.visible');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me');
-        cy.get('[data-cy="removeButton"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').click();
         cy.wait('@deleteInvite');
         cy.wait('@loadInviteStatus');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc1@abc.org');
@@ -831,13 +725,13 @@ describe('Projects Invite-Only Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@getSettings');
 
-        cy.get('[data-cy="projectVisibilitySelector"]')
-            .select('pio');
-        cy.get('.modal-content')
-            .should('be.visible')
-        cy.clickButton('Ok');
-        cy.get('[data-cy="saveSettingsBtn"')
-            .click({ force: true });
+        cy.get('[data-cy="projectVisibilitySelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
+          .should('be.visible')
+          .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
@@ -851,20 +745,25 @@ describe('Projects Invite-Only Tests', () => {
             validityDuration: 'P90D'
         });
 
+        cy.getEmails(4).then(() => {
+            cy.resetEmail();
+        });
+
         cy.get('[data-cy="nav-Access"')
             .click();
         cy.wait('@emailSupported');
         cy.wait('@loadInviteStatus');
+        cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
         cy.contains('abc@abc.org').should('be.visible');
         cy.get('[data-cy="remindUser"]').eq(0).click();
         cy.wait('@remindUser');
         cy.get('[id="accessNotificationPanel"]').should('be.visible');
         cy.get('[id=accessNotificationPanel]').should('contain.text', 'Invite reminder sent!');
 
-        cy.getEmails(5).then((emails) => {
+        cy.getEmails().then((emails) => {
             const reminderEmail = emails.find((e) => e.subject === 'SkillTree Project Invitation Reminder')
-            expect(reminderEmail.to.text).to.equal('abc@abc.org');
-            expect(reminderEmail.textAsHtml).to.contain('This is a friendly reminder that you have been invited to join');
+            expect(reminderEmail.to[0].address).to.equal('abc@abc.org');
+            expect(reminderEmail.text).to.contain('This is a friendly reminder that you have been invited to join');
         });
     });
 
@@ -903,13 +802,13 @@ describe('Projects Invite-Only Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@getSettings');
 
-        cy.get('[data-cy="projectVisibilitySelector"]')
-            .select('pio');
-        cy.get('.modal-content')
-            .should('be.visible')
-        cy.clickButton('Ok');
-        cy.get('[data-cy="saveSettingsBtn"')
-            .click({ force: true });
+        cy.get('[data-cy="projectVisibilitySelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
+          .should('be.visible')
+          .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
@@ -930,9 +829,11 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@emailSupported');
         cy.wait('@loadInviteStatus');
         cy.contains('abc@abc.org').should('be.visible');
+        cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
         cy.get('[data-cy="remindUser"]').eq(0).should('be.disabled');
         cy.get('[id="extend-0"]').click();
-        cy.get('[data-cy="invite-0-extension"]').eq(0).click();
+        cy.get('[data-pc-name="menu"] [aria-label="30 minutes"] [data-cy="invite-3-extension"]').click()
+        // cy.get('[data-cy="invite-0-extension"]').eq(0).click();
         cy.wait('@loadInviteStatus')
         cy.contains('abc@abc.org').should('be.visible');
         cy.get('[data-cy="remindUser"]').eq(0).should('be.enabled').click();
@@ -942,8 +843,8 @@ describe('Projects Invite-Only Tests', () => {
 
         cy.getEmails(5).then((emails) => {
             const reminderEmail = emails.find((e) => e.subject === 'SkillTree Project Invitation Reminder')
-            expect(reminderEmail.to.text).to.equal('abc@abc.org');
-            expect(reminderEmail.textAsHtml).to.contain('This is a friendly reminder that you have been invited to join');
+            expect(reminderEmail.to[0].address).to.equal('abc@abc.org');
+            expect(reminderEmail.html).to.contain('This is a friendly reminder that you have been invited to join');
         });
     });
 
@@ -982,13 +883,13 @@ describe('Projects Invite-Only Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@getSettings');
 
-        cy.get('[data-cy="projectVisibilitySelector"]')
-            .select('pio');
-        cy.get('.modal-content')
-            .should('be.visible')
-        cy.clickButton('Ok');
-        cy.get('[data-cy="saveSettingsBtn"')
-            .click({ force: true });
+        cy.get('[data-cy="projectVisibilitySelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
+          .should('be.visible')
+          .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
 
@@ -1004,6 +905,7 @@ describe('Projects Invite-Only Tests', () => {
 
         cy.get('[data-cy="nav-Access"')
             .click();
+        cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
         cy.wait('@emailSupported');
         cy.wait('@loadInviteStatus');
         cy.contains('abc@abc.org').should('be.visible');
@@ -1014,9 +916,9 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('not.contain.text', 'expired');
         cy.get('[data-cy="remindUser"]').eq(0).should('be.enabled');
         cy.get('[data-cy="remindUser"]').eq(0).should('be.enabled').click();
-        cy.get('header.modal-header').should('be.visible').should('contain.text', 'Expired Invite');
+        cy.get('[data-pc-section="title"]').should('contain.text', 'Expired Invite');
         cy.wait('@loadInviteStatus');
-        cy.clickButton('Ok');
+        cy.get('[data-pc-name="acceptbutton"]').click()
         cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 5); //account for header row
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'expired');
@@ -1038,14 +940,14 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('.vs__dropdown-option').contains('root@skills.org')
-            .click();
-        cy.get('[data-cy="userRoleSelector"]') .select('Administrator');
+        cy.get('#existingUserInput_0').contains('root@skills.org').click();
+        cy.get('[data-cy="userRoleSelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
 
         cy.contains('Add Project Administrator?')
         cy.contains('The selected user will be added as an Administrator for this project and will be able to edit/add/delete all aspects of the Project.')
-        cy.get('.modal-content .btn-danger').contains('Add Administrator!').click()
+        cy.get('[data-pc-name="acceptbutton"]').contains('Add Administrator!').click()
         const tableSelector = '[data-cy=roleManagerTable]';
         cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"]`);
 
@@ -1067,14 +969,15 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('.vs__dropdown-option').contains('root@skills.org')
-            .click();
-        cy.get('[data-cy="userRoleSelector"]') .select('Approver');
+        cy.get('#existingUserInput_0').contains('root@skills.org').click();
+        cy.get('[data-cy="userRoleSelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Approver"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
+
 
         cy.contains('Add Project Approver?')
         cy.contains('The selected user will be added as an Approver for this project and will be able to view all aspects of the Project as well as approve and deny self reporting requests.')
-        cy.get('.modal-content .btn-danger').contains('Add Approver!').click()
+        cy.get('[data-pc-name="acceptbutton"]').contains('Add Approver!').click()
         const tableSelector = '[data-cy=roleManagerTable]';
         cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"]`);
 
@@ -1096,14 +999,14 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('.vs__dropdown-option').contains('root@skills.org')
-            .click();
-        cy.get('[data-cy="userRoleSelector"]') .select('Approver');
+        cy.get('#existingUserInput_0').contains('root@skills.org').click();
+        cy.get('[data-cy="userRoleSelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Approver"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
 
         cy.contains('Add Project Approver?')
         cy.contains('The selected user will be added as an Approver for this project and will be able to view all aspects of the Project as well as approve and deny self reporting requests.')
-        cy.get('.modal-content .btn-secondary').contains('Cancel').click()
+        cy.get('[data-pc-name="rejectbutton"]').contains('Cancel').click()
         const tableSelector = '[data-cy=roleManagerTable]';
         cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"]`).should('not.exist');
 

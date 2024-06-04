@@ -118,7 +118,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxVideoCaptionsLength = computed(() => config.value.maxVideoCaptionsLength)
   const maxVideoTranscriptLength = computed(() => config.value.maxVideoTranscriptLength)
   const userPageTagsToDisplay = computed(() => config.value.userPageTagsToDisplay)
-
+  const maxProjectInviteEmails = computed(() => config.value.maxProjectInviteEmails)
   return {
     loadConfigState,
     refreshConfig,
@@ -194,6 +194,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     videoUploadWarningMessage,
     maxVideoCaptionsLength,
     maxVideoTranscriptLength,
-    userPageTagsToDisplay
+    userPageTagsToDisplay,
+    maxProjectInviteEmails
   }
 })

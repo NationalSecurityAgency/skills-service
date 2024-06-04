@@ -54,6 +54,8 @@ import UserPage from '@/components/users/UserPage.vue'
 import SkillsDisplayPreview from '@/components/users/SkillsDisplayPreview.vue'
 import UserSkillsPerformed from '@/components/users/UserSkillsPerformed.vue'
 import createSkillsDisplayPreviewRoutes from '@/router/SkillsDisplayPreviewRoutes.js'
+import PrivateProjectAccessRequestPage from '@/components/access/invite-only/PrivateProjectAccessRequestPage.vue'
+import JoinProjectPage from '@/components/access/invite-only/JoinProjectPage.vue'
 
 const routes = [
   {
@@ -576,7 +578,36 @@ const routes = [
         },
       },
     }],
-  }
+  }, {
+    path: '/join-project/:pid/:inviteToken',
+    name: 'JoinProject',
+    component: JoinProjectPage,
+    props: (route) => ({ ...route.params, projectName: route.query.pn }),
+    meta: {
+      requiresAuth: true,
+      nonAdmin: true,
+      breadcrumb: (route) => [{
+        value: `Join Project ${route.query.pn}`,
+        url: `/join-project/${route.params.pid}/${route.params.inviteToken}?pn=${route.query.pn}`,
+      }],
+      announcer: {
+        message: 'Join Project',
+      },
+    },
+  },
+  {
+    path: '/request-access/:projectId',
+    name: 'PrivateProjectAccessRequestPage',
+    component: PrivateProjectAccessRequestPage,
+    props: true,
+    meta: {
+      requiresAuth: true,
+      announcer: {
+        message: 'Request Access to Private Project',
+      },
+    },
+  },
+
 ]
 
 routes.push(createAdminRoutes())

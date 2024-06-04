@@ -47,8 +47,8 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
     name: `subjectRankDetails${appendToName}`,
     props: true,
     meta: {
-      title: `My ${subjectPlaceholder} Rank`,
-    },
+      title: `My ${subjectPlaceholder} Rank`
+    }
   }, {
     name: `BadgesDetailsPage${appendToName}`,
     path: 'badges',
@@ -81,22 +81,22 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
     component: SkillPage,
     name: `globalBadgeSkillDetails${appendToName}`,
     meta: {
-      title: `Global Badge ${skillPlaceholder} Details`,
-    },
+      title: `Global Badge ${skillPlaceholder} Details`
+    }
   }, {
     path: 'badges/:badgeId/skills/:skillId',
     component: SkillPage,
     name: `badgeSkillDetails${appendToName}`,
     meta: {
-      title: `Badge ${skillPlaceholder} Details`,
-    },
+      title: `Badge ${skillPlaceholder} Details`
+    }
   }, {
     path: 'badges/:badgeId/crossProject/:crossProjectId/:dependentSkillId',
     component: SkillPage,
     name: `crossProjectSkillDetailsUnderBadge${appendToName}`,
     meta: {
-      title: `Cross ${projectPlaceholder} ${skillPlaceholder} Details`,
-    },
+      title: `Cross ${projectPlaceholder} ${skillPlaceholder} Details`
+    }
   }, {
     name: `SubjectDetailsPage${appendToName}`,
     path: 'subjects/:subjectId',
@@ -120,9 +120,9 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
     component: SkillPage,
     name: `crossProjectSkillDetails${appendToName}`,
     meta: {
-      title: `Cross ${projectPlaceholder} ${skillPlaceholder} Details`,
-    },
-  },{
+      title: `Cross ${projectPlaceholder} ${skillPlaceholder} Details`
+    }
+  }, {
     name: `quizPage${appendToName}`,
     path: 'subjects/:subjectId/skills/:skillId/quizzes/:quizId',
     component: QuizPage,
