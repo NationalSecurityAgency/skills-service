@@ -43,7 +43,7 @@ onMounted(() => {
                     data-cy="projectAdmins"
                     :add-role-confirmation="privateProject" />
 
-      <private-invite-only-proj-management />
+      <private-invite-only-proj-management v-if="privateProject"/>
     </div>
   </div>
 </template>

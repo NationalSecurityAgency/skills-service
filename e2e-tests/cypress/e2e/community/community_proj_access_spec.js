@@ -90,7 +90,11 @@ describe('Community Project Creation Tests', () => {
           .contains('Error! Request could not be completed! User [allDragons@email.org] is not allowed to be assigned [Approver] user role');
     });
 
-    it.skip('cannot join invite only community protected project if user non community member', () => {
+    it('cannot join invite only community protected project if user non community member', () => {
+        cy.on('uncaught:exception', (err, runnable) => {
+            return false
+        })
+
         cy.createProject(1, {enableProtectedUserCommunity: true})
         cy.intercept('GET', '/admin/projects/proj1/settings')
           .as('getSettings');
@@ -132,23 +136,21 @@ describe('Community Project Creation Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@getSettings');
 
-        // cy.get('[data-cy="projectVisibilitySelector"]')
-        //   .select('pio');
         cy.get('[data-cy="projectVisibilitySelector"]').click()
         cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
         cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
-        cy.get('[data-cy="saveSettingsBtn"')
-          .click({ force: true });
+        cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
+
         cy.get('[data-cy="nav-Access"')
           .click();
         cy.wait('@emailSupported');
-        cy.get('[data-cy="inviteExpirationSelect"]')
-          .select('PT30M');
+        cy.get('[data-cy="inviteExpirationSelect"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="30 minutes"]').click()
         cy.get('[data-cy=addEmails]')
           .should('be.disabled');
         cy.get('[data-cy="sendInvites-btn"]')
@@ -181,7 +183,7 @@ describe('Community Project Creation Tests', () => {
               cy.get('[data-cy="contactOwnersMsgInput"]').should('be.visible');
 
               cy.visit(inviteLink);
-              cy.url().should('include', '/not-authorized');
+              cy.url().should('include', '/error');
               cy.contains('User Not Authorized').should('be.visible');
           });
 
