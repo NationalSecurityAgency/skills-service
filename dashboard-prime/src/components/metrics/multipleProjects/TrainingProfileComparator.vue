@@ -6,7 +6,6 @@ import AutoComplete from "primevue/autocomplete";
 
 const props = defineProps(['availableProjects']);
 
-const filterQuery = ref('');
 const loading = ref(true);
 const projects = ref({
   selected: [],
