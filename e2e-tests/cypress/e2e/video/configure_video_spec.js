@@ -17,6 +17,7 @@
 describe('Configure Video Tests', () => {
 
     const testVideo = '/static/videos/create-quiz.mp4'
+    const videoFile = 'create-subject.webm';
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
@@ -60,9 +61,7 @@ describe('Configure Video Tests', () => {
 
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        const videoFile = 'create-subject.webm';
-        cy.fixture(videoFile, null).as('videoFile');
-        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile(`cypress/fixtures/${videoFile}`,  { force: true })
         // cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
         cy.get('[data-cy="videoCaptions"]').type('captions', {delay: 0})
         cy.get('[data-cy="videoTranscript"]').type('transcript', {delay: 0})
@@ -181,9 +180,7 @@ describe('Configure Video Tests', () => {
 
         // modify
         cy.get('[data-cy="showFileUploadBtn"]').click();
-        const videoFile = 'create-subject.webm';
-        cy.fixture(videoFile, null).as('videoFile');
-        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile(`cypress/fixtures/${videoFile}`,  { force: true })
         // cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
         cy.get('[data-cy="videoCaptions"]').type('captions', {delay: 0})
         cy.get('[data-cy="videoTranscript"]').type('transcript', {delay: 0})
@@ -203,7 +200,7 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="showFileUploadBtn"]').should('exist')
     });
 
-    it.only('discard changes - Video uploaded, captions and transcript are configured', () => {
+    it('discard changes - Video uploaded, captions and transcript are configured', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)

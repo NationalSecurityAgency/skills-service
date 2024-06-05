@@ -1334,7 +1334,7 @@ describe('Skills Tests', () => {
     cy.contains('Verylongandinterestingskill;Verylongandintere... >> more')
   })
 
-  it.only('edit skill with version greater than 1', () => {
+  it('edit skill with version greater than 1', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2, { version: 1 })
     cy.createSkill(1, 1, 3, { version: 2 })
