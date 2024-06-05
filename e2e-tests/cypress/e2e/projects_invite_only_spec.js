@@ -391,6 +391,24 @@ describe('Projects Invite-Only Tests', () => {
         });
     }
 
+    it('cannot manage expirations when email is disabled', () => {
+        cy.intercept('/public/isFeatureSupported?feature=emailservice', 'false');
+        cy.createProject(1)
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            {
+                value: 'true',
+                setting: 'invite_only',
+                projectId: 'proj1',
+            },
+        ]);
+        cy.visit('/administrator/projects/proj1/access')
+        cy.get('[data-cy=contactUsers_emailServiceWarning]')
+          .should('be.visible');
+        cy.contains('Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.')
+          .should('be.visible');
+    });
+
+
     it('Extend expired invite', () => {
         cy.createProject(1);
         cy.intercept('GET', '/admin/projects/proj1/settings')

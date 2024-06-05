@@ -1,10 +1,12 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import SkillsCardHeader from '@/components/utils/cards/SkillsCardHeader.vue'
 import InviteUsersToProject from '@/components/access/invite-only/InviteUsersToProject.vue'
 import InviteStatuses from '@/components/access/invite-only/InviteStatuses.vue'
 import RevokeUserAccess from '@/components/access/invite-only/RevokeUserAccess.vue'
+import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 
+const appInfo = useAppInfoState()
 
 const privateProject = ref(true)
 
@@ -12,6 +14,8 @@ const inviteStatuses = ref(null)
 const handleInviteSent = () => {
   inviteStatuses.value.loadData()
 }
+
+const emailFeatureConfigured = computed(() => { return appInfo.emailEnabled });
 
 </script>
 
@@ -28,10 +32,13 @@ const handleInviteSent = () => {
         </SkillsCardHeader>
       </template>
       <template #content>
-        <!--    <b-overlay :show="!isEmailEnabled">-->
-        <!--      <div slot="overlay" class="alert alert-warning mt-2" data-cy="inviteUsers_emailServiceWarning">-->
-        <!--        <i class="fa fa-exclamation-triangle" aria-hidden="true"/> Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.-->
-        <!--      </div>-->
+        <Message severity="warn"
+                 class="mx-2"
+                 data-cy="contactUsers_emailServiceWarning" v-if="!emailFeatureConfigured" :closable="false">
+          Please note that email notifications are currently disabled. Email configuration has not been performed on this instance of SkillTree. Please contact the root administrator.
+        </Message>
+
+        <BlockUI :blocked="!emailFeatureConfigured" :class="{'p-3': !emailFeatureConfigured}">
         <Card>
           <template #subtitle>Invite Users</template>
           <template #content>
@@ -48,7 +55,7 @@ const handleInviteSent = () => {
           </template>
         </Card>
 
-        <!--    </b-overlay>-->
+        </BlockUI>
       </template>
     </Card>
 
