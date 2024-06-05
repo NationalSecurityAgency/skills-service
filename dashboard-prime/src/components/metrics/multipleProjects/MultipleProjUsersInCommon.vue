@@ -24,7 +24,7 @@ const resultsLoaded = ref(false);
 const resultTableOptions = ref({
   busy: false,
   sortBy: 'userId',
-  sortDesc: false,
+  sortOrder: -1,
   bordered: true,
   outlined: true,
   rowDetailsControls: false,
@@ -76,19 +76,14 @@ onMounted(() => {
   loadProjects();
 });
 
-const pageChanged = (pageNum) => {
-  resultTableOptions.value.pagination.currentPage = pageNum;
-  locateUsers();
-};
-
-const pageSizeChanged = (newSize) => {
-  resultTableOptions.value.pagination.pageSize = newSize;
-  locateUsers();
-};
-
+const pageChanged = (pagingInfo) => {
+  resultTableOptions.value.pagination.pageSize = pagingInfo.rows
+  resultTableOptions.value.pagination.currentPage = pagingInfo.page + 1
+  locateUsers()
+}
 const sortTable = (sortContext) => {
-  resultTableOptions.value.sortDesc = sortContext.sortDesc;
-
+  resultTableOptions.value.sortOrder = sortContext.sortOrder;
+  resultTableOptions.value.sortBy = sortContext.sortField;
   // set to the first page
   resultTableOptions.value.pagination.currentPage = 1;
   locateUsers();
@@ -140,7 +135,7 @@ const locateUsers = () => {
   const params = {
     pageSize: resultTableOptions.value.pagination.pageSize,
     currentPage: resultTableOptions.value.pagination.currentPage,
-    sortDesc: resultTableOptions.value.sortDesc,
+    sortDesc: resultTableOptions.value.sortOrder === -1,
     projIdsAndLevel: projects.value.selected.map((item) => `${item.projectId}AndLevel${item.minLevel}`).join(','),
   };
   MetricsService.loadGlobalMetrics('findExpertsForMultipleProjectsChartBuilder', params)
@@ -200,6 +195,7 @@ const filterProjects = (event) => {
               :suggestions="projects.available"
               :loading="projects.loading"
               :delay="500"
+              :completeOnFocus="true"
               dropdown
               @item-unselect="projRemoved"
               @item-select="projAdded"
@@ -238,23 +234,26 @@ const filterProjects = (event) => {
             </Column>
             <Column field="minLevel" header="Min Level">
               <template #body="slotProps">
-                <Dropdown :options="slotProps.data.availableLevels"
-                          v-if="!slotProps.data.loadingLevels"
-                          v-model="slotProps.data.minLevel"
-                          data-cy="minLevelSelector">
-                </Dropdown>
-                <SkillsButton variant="outline-info"
-                              aria-label="Sync other levels"
-                              @click="syncOtherLevels(slotProps.data.minLevel)"
-                              data-cy="syncLevelButton"
-                              size="small"
-                              class="fas fa-sync">
-                </SkillsButton>
+                <div class="flex gap-4">
+                  <Dropdown :options="slotProps.data.availableLevels"
+                            v-if="!slotProps.data.loadingLevels"
+                            v-model="slotProps.data.minLevel"
+                            data-cy="minLevelSelector">
+                  </Dropdown>
+                  <SkillsButton variant="outline-info"
+                                aria-label="Sync other levels"
+                                @click="syncOtherLevels(slotProps.data.minLevel)"
+                                data-cy="syncLevelButton"
+                                size="small"
+                                icon="fas fa-sync"
+                                label="Sync Levels">
+                  </SkillsButton>
+                </div>
               </template>
             </Column>
           </SkillsDataTable>
         </div>
-        <div>
+        <div class="flex justify-content-center">
           <SkillsButton :disabled="!atLeast2Proj"
                         @click="locateUsers"
                         label="Find Users"
@@ -266,6 +265,14 @@ const filterProjects = (event) => {
           <SkillsDataTable v-if="hasResults || resultsLoaded"
                            :value="results"
                            class="w-full"
+                           @page="pageChanged"
+                           @sort="sortTable"
+                           :totalRecords="results.length"
+                           :rows="resultTableOptions.pagination.pageSize"
+                           :sort-field="resultTableOptions.sortBy"
+                           :sort-order="resultTableOptions.sortOrder"
+                           :rowsPerPageOptions="resultTableOptions.pagination.possiblePageSizes"
+                           paginator
                            lazy
                            striped-rows
                            show-gridlines

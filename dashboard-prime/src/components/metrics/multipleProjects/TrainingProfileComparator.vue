@@ -94,6 +94,7 @@ const filter = (event) => {
             v-model="projects.selected"
             :suggestions="projects.available"
             :delay="500"
+            :completeOnFocus="true"
             dropdown
             @item-unselect="genDataForCharts"
             @item-select="genDataForCharts"
