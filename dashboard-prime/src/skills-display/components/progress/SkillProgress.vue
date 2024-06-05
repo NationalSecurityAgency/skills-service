@@ -195,7 +195,9 @@ const isSkillComplete = computed(() => props.skill && props.skill.meta && props.
         <partial-points-alert v-if="!enableDrillDown" :skill="skill" :is-locked="isSkillLocked" />
         <skills-summary-cards v-if="!isSkillLocked" :skill="skill" class="mt-3" />
         <catalog-import-status :skill="skill" />
-        <skill-video v-if="skill" :skill="skill"
+        <skill-video v-if="skill"
+                     :skill="skill"
+                     :is-locked="isSkillLocked"
                      :video-collapsed-by-default="videoCollapsedByDefault"
                      @points-earned="pointsEarned"
                      class="mt-2" />

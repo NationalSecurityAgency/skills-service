@@ -21,6 +21,7 @@ const props = defineProps({
     default: false,
     required: false,
   },
+  isLocked: Boolean,
 })
 
 const emit = defineEmits(['points-earned'])
@@ -153,7 +154,7 @@ const loadTranscript = () => {
         </div>
       </template>
     </Message>
-    <SkillsOverlay v-if="!videoCollapsed && skill.isLocked" :show="true" :no-fade="true">
+    <SkillsOverlay v-if="!videoCollapsed && isLocked" :show="true" :no-fade="true">
       <template #overlay>
         <div class="text-center text-primary" style="color: #143740 !important;" data-cy="videoIsLockedMsg">
           <i class="fas fa-lock" style="font-size: 1.2rem;"></i>
@@ -170,7 +171,7 @@ const loadTranscript = () => {
         </div>
       </div>
     </SkillsOverlay>
-    <div v-if="!videoCollapsed && !skill.isLocked">
+    <div v-if="!videoCollapsed && !isLocked">
       <video-player :options="videoConf" @watched-progress="updateVideoProgress" />
       <Message v-if="isSelfReportTypeVideo && (!isAlreadyAchieved || justAchieved)"
            class="mt-2"
