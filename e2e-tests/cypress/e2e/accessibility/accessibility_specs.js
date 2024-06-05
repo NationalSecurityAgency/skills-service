@@ -283,7 +283,7 @@ describe('Accessibility Tests', () => {
         cy.get('[data-cy="existingUserInputDropdown"]').type('u4');
         cy.get('#existingUserInput_0').contains('u4').click()
         cy.get('[data-cy="eventDatePicker"]').click();
-        cy.get('.p-datepicker-group-container').contains('10').click()
+        cy.get('[aria-label="Choose Date"] [aria-label="1"]').not('[data-p-other-month="true"]').click()
         cy.get('[data-cy=addSkillEventButton]').click();
         cy.contains('Added points');
         cy.customA11y();
