@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, nextTick } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
@@ -13,15 +13,14 @@ import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert
 import EditProject from '@/components/projects/EditProject.vue'
 import { useProjDetailsState } from '@/stores/UseProjDetailsState.js'
 import UserRolesUtil from '@/components/utils/UserRolesUtil'
-import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import Avatar from 'primevue/avatar'
+import ProjectShareDialog from '@/components/projects/ProjectShareDialog.vue'
 
 // const props = defineProps(['project'])
 const router = useRouter()
 const route = useRoute()
 const projConfig = useProjConfig()
 const appConfig = useAppConfig()
-const communityLabels = useCommunityLabels()
 const announcer = useSkillsAnnouncer()
 const projectDetailsState = useProjDetailsState()
 
@@ -163,7 +162,7 @@ const expirationDate = computed(() => {
 const copyAndDisplayShareProjInfo = () => {
   const host = window.location.origin
   shareUrl.value = `${host}/progress-and-rankings/projects/${project.value.projectId}?invited=true`
-  navigator.clipboard.writeText(shareUrl).then(() => {
+  navigator.clipboard.writeText(shareUrl.value).then(() => {
     shareProjModal.value = true
   })
 }
@@ -263,7 +262,6 @@ const setProject = (newProject) => {
               v-if="project"
               outlined
               severity="info"
-
               size="small"
               label="Preview"
               icon="fas fa-eye"
@@ -271,15 +269,19 @@ const setProject = (newProject) => {
               :aria-label="`preview client display for project ${project.name}`">
             </SkillsButton>
           </router-link>
-          <SkillsButton v-if="projConfig.isProjConfigDiscoverable"
-                        ref="shareProjectButton"
-                        size="small"
-                        @click="copyAndDisplayShareProjInfo"
-                        data-cy="shareProjBtn"
-                        class="border-1 border-black-alpha-90"
-                        label="Share" icon="fas fa-share-alt"
-                        v-skills="'ShareProject'"
-                        :aria-label="`Share ${project.name} with new users`">
+          <SkillsButton
+            id="projectShareBtn"
+            v-if="projConfig.isProjConfigDiscoverable"
+            ref="shareProjectButton"
+            size="small"
+            severity="info"
+            @click="copyAndDisplayShareProjInfo"
+            data-cy="shareProjBtn"
+            class=" ml-1"
+            label="Share" icon="fas fa-share-alt"
+            :track-for-focus="true"
+            v-skills="'ShareProject'"
+            :aria-label="`Share ${project.name} with new users`">
           </SkillsButton>
         </div>
         <div data-cy="projectCreated" class="mt-3">
@@ -309,9 +311,10 @@ const setProject = (newProject) => {
       :enable-return-focus="true"
       @project-saved="projectSaved" />
 
-    <!--    <project-share-modal v-if="shareProjModal" v-model="shareProjModal"-->
-    <!--                         :share-url="shareUrl"-->
-    <!--                         @hidden="focusOnShareButton"/>-->
+    <project-share-dialog
+      v-if="shareProjModal"
+      v-model="shareProjModal"
+      :share-url="shareUrl" />
   </div>
 
 </template>

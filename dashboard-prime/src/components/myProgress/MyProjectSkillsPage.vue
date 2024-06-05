@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import SkillsDisplayHome from '@/skills-display/components/SkillsDisplayHome.vue'
+import ProjectService from '@/components/projects/ProjectService.js'
 
 const route = useRoute()
 const projectId = route.params.projectId
@@ -13,7 +14,15 @@ onMounted(() => {
   skillsDisplayAttributes.projectId = projectId
   skillsDisplayAttributes.serviceUrl = ''
   skillsDisplayAttributes.loadingConfig = false
+  handleProjInvitation()
 })
+
+const handleProjInvitation = () => {
+  const isInvited = route.query.invited;
+  if (isInvited) {
+    ProjectService.addToMyProjects(projectId);
+  }
+}
 </script>
 
 <template>
