@@ -65,7 +65,7 @@ const search = (query) => {
       </template>
       <template #option="slotProps">
         <div>
-          <div class="h6 project-name">{{ slotProps.option.name }}</div>
+          <div class="h6 project-name" data-cy="projectSelector-projectName">{{ slotProps.option.name }}</div>
           <div class="text-secondary project-id">ID: {{ slotProps.option.projectId }}</div>
         </div>
       </template>

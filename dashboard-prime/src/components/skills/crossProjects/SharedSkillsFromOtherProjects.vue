@@ -24,7 +24,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card style="margin-bottom:10px;">
+  <Card class="mb-3"
+        :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"
+        data-cy="skillsSharedWithMeCard">
     <template #header>
       <SkillsCardHeader title="Available skills from other projects for use as prerequisites"></SkillsCardHeader>
     </template>
