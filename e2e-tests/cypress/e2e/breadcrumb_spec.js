@@ -209,7 +209,7 @@ describe('Breadcrumb Navigation Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('Subject Navigation', () => {
+    it('Subject Navigation', () => {
         cy.intercept({
             method: 'GET',
             url: '/admin/projects/proj1/subjects/subj1/skills'
@@ -273,7 +273,7 @@ describe('Breadcrumb Navigation Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('Badge Navigation', () => {
+    it('Badge Navigation', () => {
         cy.visit('/administrator/projects/proj1/badges/badge1/');
         cy.wait('@loadBadge');
         cy.get('[data-cy=breadcrumb-Badges]')
@@ -306,7 +306,7 @@ describe('Breadcrumb Navigation Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('Self Report', () => {
+    it('Self Report', () => {
         cy.visit('/administrator/projects/proj1/self-report');
         cy.contains('No Skills Require Approval');
         cy.get('[data-cy=breadcrumb-proj1]')
@@ -320,7 +320,7 @@ describe('Breadcrumb Navigation Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('Skill Learning Path', () => {
+    it('Skill Learning Path', () => {
         cy.visit('/administrator/projects/proj1/learning-path');
         cy.intercept('GET', '/admin/projects/proj1/dependency/graph')
             .as('loadGraph');
@@ -336,7 +336,7 @@ describe('Breadcrumb Navigation Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('Cross Project', () => {
+    it('Cross Project', () => {
         cy.intercept('GET', '/admin/projects/proj1/shared')
             .as('loadSharedSkills');
         cy.visit('/administrator/projects/proj1/learning-path');
@@ -352,7 +352,7 @@ describe('Breadcrumb Navigation Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('Levels', () => {
+    it('Levels', () => {
         cy.intercept('GET', '/admin/projects/proj1/levels')
             .as('loadLevels');
         cy.visit('/administrator/projects/proj1/levels');
@@ -368,7 +368,7 @@ describe('Breadcrumb Navigation Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('Users', () => {
+    it('Users', () => {
         cy.intercept('GET', '/administrator/projects/proj1/users')
             .as('loadUsers');
         cy.visit('/administrator/projects/proj1/users');
@@ -384,7 +384,7 @@ describe('Breadcrumb Navigation Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('Metrics', () => {
+    it('Metrics', () => {
         cy.intercept('GET', '/admin/projects/proj1/metrics/distinctUsersOverTimeForProject*')
             .as('loadMetrics');
         cy.visit('/administrator/projects/proj1/metrics');
@@ -400,7 +400,7 @@ describe('Breadcrumb Navigation Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('Issues', () => {
+    it('Issues', () => {
         cy.intercept('GET', '/admin/projects/proj1/errors*')
             .as('loadErrors');
         cy.visit('/administrator/projects/proj1/issues');
@@ -416,7 +416,7 @@ describe('Breadcrumb Navigation Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('Access', () => {
+    it('Access', () => {
         cy.intercept('GET', '/admin/projects/proj1/userRoles**')
             .as('loadUserRoles');
         cy.visit('/administrator/projects/proj1/access');
@@ -432,7 +432,7 @@ describe('Breadcrumb Navigation Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('Settings', () => {
+    it('Settings', () => {
         cy.intercept('GET', '/admin/projects/proj1/settings')
             .as('loadSettings');
         cy.visit('/administrator/projects/proj1/settings');
