@@ -56,9 +56,9 @@ describe('Contact Project Admins Specs', () => {
     });
 
     it('only visible to root users', () => {
-        cy.visit('/administrator');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPER_DUPER_USER')
             .as('isRoot');
+        cy.visit('/administrator');
         cy.wait('@isRoot');
         cy.get('[data-cy="nav-Contact Admins"]')
             .should('be.visible');
@@ -69,8 +69,12 @@ describe('Contact Project Admins Specs', () => {
         cy.wait('@isRoot');
         cy.get('[data-cy="nav-Contact Admins"]')
             .should('not.exist');
+
+        cy.on('uncaught:exception', (err, runnable) => {
+            return false
+        })
         cy.visit('/administrator/contactAdmins');
-        cy.get('[data-cy=notAuthorizedExplanation]')
+        cy.get('[data-cy="errorPage"]').contains('User Not Authorized')
             .should('be.visible');
     });
 
@@ -110,16 +114,10 @@ describe('Contact Project Admins Specs', () => {
         cy.fixture('vars.json')
             .then((vars) => {
                 cy.login(vars.rootUser, vars.defaultPass);
-                cy.visit('/administrator/');
-
                 cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPER_DUPER_USER')
                     .as('isRoot');
-                cy.intercept('POST', '/root/users/contactAllProjectAdmins', {
-                    statusCode: 200,
-                    body: {
-                        success: true
-                    }
-                });
+
+                cy.visit('/administrator/');
                 cy.get('[data-cy="nav-Contact Admins"]')
                     .click();
                 cy.wait('@isRoot');
@@ -132,13 +130,17 @@ describe('Contact Project Admins Specs', () => {
                 cy.get('[data-cy=emailUsers_subject]')
                     .type('foooo');
                 cy.get('[data-cy="markdownEditorInput"]')
-                    .type('body');
+                    .type('thisbody');
                 cy.get('[data-cy=emailUsers-submitBtn]')
                     .should('be.enabled');
                 cy.get('[data-cy=emailUsers-submitBtn]')
                     .click();
                 cy.get('[data-cy=emailSent]')
                     .should('be.visible');
+
+                cy.getEmails().then((emails) => {
+                    expect(emails[0].text).to.contain('thisbody');
+                })
             });
 
     });
@@ -155,7 +157,7 @@ describe('Contact Project Admins Specs', () => {
             .should('be.visible');
     });
 
-    it('preview email button', () => {
+    it('preview email', () => {
         cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
             .as('emailSupported');
         cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPER_DUPER_USER')
@@ -163,14 +165,7 @@ describe('Contact Project Admins Specs', () => {
         cy.intercept('POST', '/api/validation/description')
           .as('validateDescription');
 
-
-        cy.intercept('POST', '/root/users/previewEmail', {
-            statusCode: 200,
-            body: {
-                success: true
-            }
-        });
-
+        cy.resetEmail()
         cy.visit('/administrator/');
 
         cy.get('[data-cy="nav-Contact Admins"]')
@@ -185,7 +180,7 @@ describe('Contact Project Admins Specs', () => {
         cy.get('[data-cy=previewAdminEmail]')
             .should('be.disabled');
         cy.get('[data-cy="markdownEditorInput"]')
-            .type('Test Body');
+            .type('Test Body Preview');
         cy.wait('@validateDescription');
         cy.get('[data-cy=previewAdminEmail]')
             .should('be.enabled');
@@ -193,6 +188,10 @@ describe('Contact Project Admins Specs', () => {
             .click();
         cy.get('[data-cy=emailSent]')
             .should('be.visible');
+
+        cy.getEmails().then((emails) => {
+            expect(emails[0].text).to.contain('TestBodyPreview');
+        })
     });
 
     it('attachments are not enabled', () => {
@@ -273,12 +272,12 @@ describe('Contact Project Admins Specs', () => {
 
         cy.get('[data-cy="emailUsers_subject"]').type('jabberwocky');
         cy.get('[data-cy="emailUsers-submitBtn"]').should('be.disabled');
-        cy.get('#emailSubjectError').contains('paragraphs may not contain jabberwocky')
+        cy.get('#subjectLineError').contains('paragraphs may not contain jabberwocky')
 
         cy.get('[data-cy="emailUsers_subject"]').clear();
         cy.get('[data-cy="emailUsers_subject"]').type('test');
         cy.get('[data-cy="emailUsers-submitBtn"]').should('be.enabled');
-        cy.get('#emailSubjectError').should('be.empty');
+        cy.get('#subjectLineError').should('be.empty');
 
         cy.get('[data-cy="emailUsers_body"]').type('jabberwocky');
         cy.wait('@validateDescription');

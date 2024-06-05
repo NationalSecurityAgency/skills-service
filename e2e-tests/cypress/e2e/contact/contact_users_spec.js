@@ -545,7 +545,7 @@ describe('Contact Project Users Specs', () => {
         cy.get('#emailBodyError').should('be.empty');
     });
 
-    it.skip('email body and subject validation for community-protected project still uses non-community validator', () => {
+    it('email body and subject validation for community-protected project still uses non-community validator', () => {
         cy.fixture('vars.json')
             .then((vars) => {
                 cy.logout();
