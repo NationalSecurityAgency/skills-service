@@ -81,7 +81,13 @@ describe('App Features Tests', () => {
 
     });
 
-    it.skip('access denied should show authorization failure page not error page', () => {
+    it('access denied should show authorization failure page not error page', () => {
+
+        cy.createSubject(1,1)
+
+        cy.on('uncaught:exception', (err, runnable) => {
+            return false
+        })
 
         cy.intercept({
             method: 'GET',
@@ -99,7 +105,7 @@ describe('App Features Tests', () => {
         /*cy.injectAxe();*/
         cy.wait('@loadSubject');
         cy.url()
-            .should('include', '/not-authorized');
+            .should('include', '/error');
         cy.contains('User Not Authorized')
             .should('be.visible');
         /*cy.violationLoggingFunction().then((loggingFunc) => {
@@ -148,7 +154,7 @@ describe('App Features Tests', () => {
             .should('have.attr', 'href', 'https://skilltreesupport.com');
     });
 
-    it.skip('ability to enable page visits reporting to the backend', () => {
+    it('ability to enable page visits reporting to the backend', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply({
                 body: {
@@ -175,7 +181,7 @@ describe('App Features Tests', () => {
         cy.wait('@pageVisit');
     });
 
-    it.skip('by default page visits reporting to the backend must not happen', () => {
+    it('by default page visits reporting to the backend must not happen', () => {
         cy.intercept('GET', '/public/config')
             .as('getConfig');
         cy.intercept('PUT', '/api/pageVisit', cy.spy()

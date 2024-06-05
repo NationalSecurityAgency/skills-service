@@ -890,7 +890,7 @@ describe('Users Tests', () => {
 
         cy.get(`${tableSelector} th`).should('have.length', 4)
 
-        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
         cy.wait('@getUserTags')
         cy.contains("Client Display");
         cy.contains("Org: tagA");
@@ -927,7 +927,7 @@ describe('Users Tests', () => {
 
         cy.get(`${tableSelector} th`).should('have.length', 4)
 
-        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsBtn"]`).first().click();
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
         cy.contains("Client Display");
         cy.get('.h5').should('not.have.text', "Org: tagA");
     });

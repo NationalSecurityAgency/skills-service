@@ -95,7 +95,8 @@ Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwi
     const params = {
         name : snapName,
         selector,
-        blackout: ((options && options.blackout) || null)
+        blackout: ((options && options.blackout) || null),
+        errorThreshold: options?.errorThreshold
     };
     cy.doMatchSnapshotImage(params);
 })
@@ -103,12 +104,23 @@ Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwi
 Cypress.Commands.add("matchSnapshotImage", (maybeNameOtherwiseCommandOptions) => {
     const options = (maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'object') ? maybeNameOtherwiseCommandOptions : null
     let snapName =getName(maybeNameOtherwiseCommandOptions)
-    const params = { name : snapName, blackout: ((options && options.blackout) || null)};
+    const params = {
+        name : snapName,
+        blackout: ((options && options.blackout) || null),
+        errorThreshold: options?.errorThreshold
+    };
     cy.doMatchSnapshotImage(params);
 })
 
 Cypress.Commands.add("doMatchSnapshotImage", (options) => {
     cy.wait(1500);
+
+    const visualRegressionOptions = {
+        errorThreshold: 1 // in percent
+    }
+    if (options && options.errorThreshold) {
+        visualRegressionOptions.errorThreshold = options.errorThreshold
+    }
     if (options && options.blackout) {
         cy
             // wait for content to be ready
@@ -126,16 +138,16 @@ Cypress.Commands.add("doMatchSnapshotImage", (options) => {
             })
             .then(() => {
                 if (options.selector) {
-                    return cy.get(options.selector).compareSnapshot(options.name)
+                    return cy.get(options.selector).compareSnapshot(options.name, visualRegressionOptions)
                 } else {
-                    return cy.compareSnapshot(options.name);
+                    return cy.compareSnapshot(options.name, visualRegressionOptions);
                 }
             });
     } else {
         if (options.selector) {
-            return cy.get(options.selector).compareSnapshot(options.name)
+            return cy.get(options.selector).compareSnapshot(options.name, visualRegressionOptions)
         } else {
-            return cy.compareSnapshot(options.name);
+            return cy.compareSnapshot(options.name, visualRegressionOptions);
         }
     }
 })

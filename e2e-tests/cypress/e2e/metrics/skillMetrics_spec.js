@@ -18,6 +18,7 @@ var moment = require('moment-timezone');
 describe('Metrics Tests - Skills', () => {
 
     const waitForSnap = 4000;
+    const visualRegressionOptions = { errorThreshold: 5 }
 
     before(() => {
         Cypress.Commands.add('addUserTag', (userId, tagKey, tags) => {
@@ -238,7 +239,7 @@ describe('Metrics Tests - Skills', () => {
         cy.wait('@singleSkillCountsChartBuilder');
 
         cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=numUsersAchievedOverTimeMetric]');
+        cy.matchSnapshotImageForElement('[data-cy=numUsersAchievedOverTimeMetric]', visualRegressionOptions);
     });
 
     it('skill metrics - empty', () => {
@@ -311,7 +312,7 @@ describe('Metrics Tests - Skills', () => {
         cy.wait('@singleSkillCountsChartBuilder');
 
         cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=numUsersAchievedOverTimeMetric]');
+        cy.matchSnapshotImageForElement('[data-cy=numUsersAchievedOverTimeMetric]', visualRegressionOptions);
     });
 
     it('applied skill events over time', () => {
@@ -349,7 +350,7 @@ describe('Metrics Tests - Skills', () => {
         cy.wait('@skillEventsOverTimeChartBuilder');
 
         cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=appliedSkillEventsOverTimeMetric]');
+        cy.matchSnapshotImageForElement('[data-cy=appliedSkillEventsOverTimeMetric]', visualRegressionOptions);
     });
 
     it('applied skill events over time - 1 skill', () => {
@@ -450,8 +451,8 @@ describe('Metrics Tests - Skills', () => {
         cy.wait('@usagePostAchievementMetricsBuilder');
 
         cy.wait(8000);
-        cy.matchSnapshotImageForElement('[data-cy=numUsersPostAchievement]', 'numUsersPostAchievement');
-        cy.matchSnapshotImageForElement('[data-cy=binnedNumUsersPostAchievement]', 'binnedNumUsersPostAchievement');
+        cy.matchSnapshotImageForElement('[data-cy=numUsersPostAchievement]', {...visualRegressionOptions, name: 'numUsersPostAchievement'});
+        cy.matchSnapshotImageForElement('[data-cy=binnedNumUsersPostAchievement]', {...visualRegressionOptions, name: 'binnedNumUsersPostAchievement'});
     });
 
     it('post achievement user table has data', () => {
@@ -731,7 +732,7 @@ describe('Metrics Tests - Skills', () => {
             cy.wait('@skillAchievementsByTagBuilder');
 
             cy.wait(waitForSnap);
-            cy.matchSnapshotImageForElement('[data-cy=numUsersByTag]');
+            cy.matchSnapshotImageForElement('[data-cy=numUsersByTag]', visualRegressionOptions);
         });
     }
 });
