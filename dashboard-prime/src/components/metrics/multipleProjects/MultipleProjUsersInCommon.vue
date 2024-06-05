@@ -212,7 +212,7 @@ const filterProjects = (event) => {
               placeholder="Select option">
           </AutoComplete>
         </div>
-        <div class="flex">
+        <div class="flex mb-4">
           <no-content2 v-if="!atLeast1Proj" title="No Projects Selected" class="w-full"
                        message="Please select at least 2 projects using search above then click 'Find Users' button below"></no-content2>
 
@@ -262,7 +262,7 @@ const filterProjects = (event) => {
                         data-cy="findUsersBtn">
           </SkillsButton>
         </div>
-        <div class="flex">
+        <div class="flex mt-4">
           <SkillsDataTable v-if="hasResults || resultsLoaded"
                            :value="results"
                            class="w-full"

@@ -53,7 +53,7 @@ const loadData = () => {
     skillId: route.params.skillId,
     page: currentPage.value,
     pageSize: pageSize.value,
-    sortBy: sortField.value ? sortField.value : 'userId',
+    sortBy: sortField.value,
     sortDesc: sortOrder.value !== 1,
   };
   MetricsService.loadChart(route.params.projectId, chartToLoad.value, queryParams).then((dataFromServer) => {

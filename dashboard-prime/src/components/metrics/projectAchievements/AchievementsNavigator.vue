@@ -84,7 +84,7 @@ const reloadTable = () => {
     nameFilter: nameFilter.value,
     minLevel: levels.selected,
     achievementTypes: achievementTypes.value.selected,
-    sortBy: sortBy.value ? sortBy.value : 'achievedOn',
+    sortBy: sortBy.value,
     sortDesc: sortOrder.value !== 1,
   };
 
