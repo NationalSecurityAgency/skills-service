@@ -46,7 +46,7 @@ const toRankDetailsPage = computed(() => {
             </div>
 
             <span v-else>
-              <span class="text-blue-700 sd-theme-primary-color">{{ position }}</span>
+              <span class="text-blue-700 sd-theme-primary-color" data-cy="myRankPosition">{{ position }}</span>
             </span>
           </div>
           <skills-spinner :is-loading="progress.loadingUserSkillsRanking"/>

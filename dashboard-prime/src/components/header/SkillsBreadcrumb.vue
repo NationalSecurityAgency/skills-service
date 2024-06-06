@@ -6,6 +6,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import SettingsService from '@/components/settings/SettingsService.js'
 import SkillsBreadcrumbItem from '@/components/header/SkillsBreadcrumbItem.vue'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 const route = useRoute()
 const clientDisplayPath = useClientDisplayPath()
@@ -13,6 +14,7 @@ const appConfig = useAppConfig()
 const responsive = useResponsiveBreakpoints()
 const items = ref([])
 const smallScreenMode = computed(() => responsive.sm.value)
+const skillsDisplayInfo = useSkillsDisplayInfo()
 
 const idsToExcludeFromPath = ['subjects', 'skills', 'projects', 'crossProject', 'dependency', 'global']
 const keysToExcludeFromPath = []
@@ -39,11 +41,11 @@ const skillDisplayName = ref('Skill')
 const currentProjectId = ref('')
 const handleCustomLabels = () => {
   return new Promise((resolve) => {
-    const isProgressAndRankingsProject = route.name === 'MyProjectSkills'
+    const isProgressAndRankingsProject = skillsDisplayInfo.isSkillsDisplayPath()
     if (isProgressAndRankingsProject) {
       const currentProjectIdParam = route.params.projectId
       if (currentProjectId.value !== currentProjectIdParam) {
-        SettingsService.getClientDisplayConfig(currentProjectId).then((response) => {
+        SettingsService.getClientDisplayConfig(currentProjectIdParam).then((response) => {
           projectDisplayName.value = response.projectDisplayName
           subjectDisplayName.value = response.subjectDisplayName
           groupDisplayName.value = response.groupDisplayName
@@ -246,7 +248,7 @@ const isQuizzesValueUnderProgressAndRanking = (value, items) => {
           v-slot="{ href, navigate }"
           :to="item.url"
           custom>
-          <a :href="href" v-bind="props.action" @click="navigate">
+          <a :href="href" v-bind="props.action" @click="navigate" :data-cy="`breadcrumb-${item.value}`">
             <skills-breadcrumb-item
               :icon="item.icon"
               :label="item.label"
@@ -255,7 +257,7 @@ const isQuizzesValueUnderProgressAndRanking = (value, items) => {
               value-css="text-primary" />
           </a>
         </router-link>
-        <div v-else>
+        <div v-else :data-cy="`breadcrumb-${item.value}`">
           <skills-breadcrumb-item
             :icon="item.icon"
             :label="item.label"

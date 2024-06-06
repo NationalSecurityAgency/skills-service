@@ -18,7 +18,7 @@ defineProps({
 </script>
 
 <template>
-  <div :data-cy="`breadcrumb-${value}`" class="sd-theme-breadcrumb-item">
+  <div  class="sd-theme-breadcrumb-item" data-cy="breadcrumb-item">
     <i v-if="showSeparator"
        class="fas fa-angle-right ml-1 mr-1"
        aria-hidden="true"/>
