@@ -97,7 +97,7 @@ const loadData = () => {
     </template>
     <template #content>
       <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">
-        <apexchart type="area" height="350" :options="chartOptions" :series="series" class="-mt-4"></apexchart>
+        <apexchart type="area" height="350" :options="chartOptions" :series="series" class="mt-4"></apexchart>
       </metrics-overlay>
     </template>
   </Card>

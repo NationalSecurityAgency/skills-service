@@ -135,7 +135,7 @@ const updateTimeRange = (timeEvent) => {
     </template>
     <template #content>
       <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="This chart needs at least 2 days of user activity.">
-        <apexchart type="line" height="350" :options="chartOptions" :series="series" class="-mt-4"></apexchart>
+        <apexchart type="line" height="350" :options="chartOptions" :series="series" class="mt-4"></apexchart>
       </metrics-overlay>
       <div class="font-light text-sm">Please Note: Only 'applied' events contribute to users' points and achievements. An event will not be applied if that skill has already reached its maximum points or has unfulfilled dependencies.</div>
     </template>

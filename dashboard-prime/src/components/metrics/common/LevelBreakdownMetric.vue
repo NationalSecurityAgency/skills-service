@@ -136,7 +136,7 @@ onMounted(() => {
     </template>
     <template #content>
       <metrics-overlay :loading="isLoading" :has-data="!isLoading && !isEmpty" no-data-icon="fa fa-info-circle" no-data-msg="No one reached Level 1 yet...">
-        <apexchart v-if="!isLoading" type="bar" height="350" :options="chartOptions" :series="series" class="-mt-5" />
+        <apexchart v-if="!isLoading" type="bar" height="350" :options="chartOptions" :series="series" class="mt-5" />
       </metrics-overlay>
     </template>
   </Card>

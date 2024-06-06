@@ -143,13 +143,12 @@ const loadData = () => {
     <template #header>
       <SkillsCardHeader :title="mutableTitle">
         <template #headerContent>
-          <span class="text-muted ml-2">|</span>
           <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
         </template>
       </SkillsCardHeader>
     </template>
     <template #content>
-      <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity." class="-mt-4">
+      <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity." class="mt-4">
         <apexchart type="area" height="350" :options="chartOptions" :series="distinctUsersOverTime" data-cy="apexchart"></apexchart>
       </metrics-overlay>
     </template>

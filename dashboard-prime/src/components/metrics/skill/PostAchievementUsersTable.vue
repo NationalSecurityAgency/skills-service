@@ -101,7 +101,6 @@ const calculateClientDisplayRoute = (props) => {
       <SkillsCardHeader title="Users that Achieved this Skill">
         <template #headerContent>
           <div class="d-block d-lg-inline-block">
-            <span class="text-muted ml-2 d-none d-lg-inline-block">|</span>
             <mode-selector :options="modeSelectorOptions" @mode-selected="updateMode"/>
           </div>
         </template>

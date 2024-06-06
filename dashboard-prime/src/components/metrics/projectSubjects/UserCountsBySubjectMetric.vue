@@ -107,10 +107,10 @@ const updateChart = (res) => {
     </template>
     <template #content>
       <BlockUI :blocked="loading" opacity=".5">
-        <apexchart v-if="loading" type="bar" height="350" :options="{}" :series="[]" class="-mt-4"></apexchart>
+        <apexchart v-if="loading" type="bar" height="350" :options="{}" :series="[]" class="mt-4"></apexchart>
       </BlockUI>
       <BlockUI :blocked="loading" opacity=".5">
-        <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series" class="-mt-4"></apexchart>
+        <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series" class="mt-4"></apexchart>
         <div class="alert alert-info" v-if="!loading && series.length === 0">
           <i class="fas fa-user-clock"></i> Users have not achieved any levels, yet...
         </div>
