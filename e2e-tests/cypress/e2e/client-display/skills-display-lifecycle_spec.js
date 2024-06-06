@@ -37,7 +37,7 @@ describe('Various Test to verify Skills Display creation lifecycle works properl
       cy.logout()
       cy.visit('/test-skills-display/proj1')
       cy.get('#username').type(Cypress.env('proxyUser'));
-      cy.get('#password').type('password');
+      cy.get('#inputPassword').type('password');
       cy.get('[data-cy=login]').click();
 
       validateProgress()
