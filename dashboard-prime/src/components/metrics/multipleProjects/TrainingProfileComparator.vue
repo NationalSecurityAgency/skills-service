@@ -56,6 +56,7 @@ onMounted(() => {
 })
 
 const genDataForCharts = (filter) => {
+
   numSkillsChart.value.labels = projects.value.selected.map((proj) => proj.name);
   numSkillsChart.value.series = projects.value.selected.map((proj) => proj.numSkills);
 

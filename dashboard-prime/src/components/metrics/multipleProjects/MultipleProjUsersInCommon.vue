@@ -24,7 +24,7 @@ const resultsLoaded = ref(false);
 const resultTableOptions = ref({
   busy: false,
   sortBy: 'userId',
-  sortOrder: -1,
+  sortOrder: 1,
   bordered: true,
   outlined: true,
   rowDetailsControls: false,
@@ -204,7 +204,7 @@ const filterProjects = (event) => {
               inputClass="w-full"
               class="w-full mb-4"
               @complete="filterProjects"
-              data-cy="trainingProfileComparatorProjectSelector"
+              data-cy="projectSelector"
               placeholder="Select option">
           </AutoComplete>
         </div>
@@ -267,7 +267,8 @@ const filterProjects = (event) => {
                            class="w-full"
                            @page="pageChanged"
                            @sort="sortTable"
-                           :totalRecords="results.length"
+                           :totalRecords="resultTableOptions.
+                           pagination.totalRows"
                            :rows="resultTableOptions.pagination.pageSize"
                            :sort-field="resultTableOptions.sortBy"
                            :sort-order="resultTableOptions.sortOrder"
@@ -279,21 +280,20 @@ const filterProjects = (event) => {
                            tableStoredStateId="usersInCommonResultTable"
                            data-cy="usersInCommonResultTable">
 
-            <ColumnGroup type="header">
-              <Row>
-                <Column field="userId" header="User" rowspan="2"></Column>
-                <Column header="Levels by Project" :colspan="projects.selected.length"></Column>
-              </Row>
-              <Row>
-                <Column v-for="project in projects.selected" v-bind:key="project.projectId" :header="project.name"></Column>
-              </Row>
-            </ColumnGroup>
-            <Column field="userId" ></Column>
-            <Column v-for="project in projects.selected" v-bind:key="project.projectId" field="levels">
+            <Column field="userId" header="User" sortable></Column>
+            <Column v-for="project in projects.selected" v-bind:key="project.projectId" :header="project.name" field="levels">
               <template #body="slotProps">
                 <level-badge :level="slotProps.data[project.projectId]"></level-badge>
               </template>
             </Column>
+
+            <template #paginatorstart>
+              <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ resultTableOptions.pagination.totalRows }}</span>
+            </template>
+
+            <template #empty>
+              <span class="flex align-items-center justify-content-center">There are no records to show</span>
+            </template>
           </SkillsDataTable>
         </div>
       </div>

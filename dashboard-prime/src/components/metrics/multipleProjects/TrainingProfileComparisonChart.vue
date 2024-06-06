@@ -28,6 +28,7 @@ const props = defineProps({
 
 
 const chartId = ref(props.title.replace(/\s+/g, ''));
+const chartRef = ref();
 const loading = ref(true);
 const hasData = ref(false);
 const seriesInternal = ref([]);
@@ -85,14 +86,11 @@ watch(() => props.series, () => {
 });
 
 watch(() => props.labels, () => {
-  // chartId.value.updateOptions({
-  //   xaxis: {
-  //     categories: props.labels,
-  //   },
-  // })
-  // this.$refs[this.chartId].updateOptions({
-
-  // });
+  chartRef.value.updateOptions({
+    xaxis: {
+      categories: props.labels,
+    },
+  })
 })
 </script>
 
@@ -103,7 +101,7 @@ watch(() => props.labels, () => {
         <span class="font-weight-bold"><i :class="titleIcon" class="mr-2 text-secondary"></i>{{ title }}</span>
         <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="Selected projects don't have any data">
           <apexchart v-if="!loading"
-                     :ref="chartId"
+                     ref="chartRef"
                      type="bar" height="350"
                      :options="options"
                      :series="seriesInternal"/>
