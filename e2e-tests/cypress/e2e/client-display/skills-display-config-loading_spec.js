@@ -98,7 +98,7 @@ describe('Skills Display Config Loading in various scenarios', () => {
     cy.get('[data-cy="overallLevelTitle"]').contains('My Life')
   })
 
-  it.only('project settings are loaded in iframe', () => {
+  it('project settings are loaded in iframe', () => {
     for (let i = 1; i <= 3; i++) {
       cy.createProject(i);
       cy.enableProdMode(i);
