@@ -288,10 +288,13 @@ watch(value, (newValue) =>{
           </a>
         </div>
       </div>
-      <div v-if="attachmentWarningMessage && hasNewAttachment"
-           class="p-error text-sm pt-2">
-        <i class="fas fa-exclamation-triangle" aria-hidden="true" /> {{ attachmentWarningMessage }}
-      </div>
+      <Message
+        v-if="attachmentWarningMessage && hasNewAttachment"
+        severity="error"
+        data-cy="attachmentWarningMessage"
+        class="m-0 mt-2">
+        {{ attachmentWarningMessage }}
+      </Message>
     </div>
     </BlockUI>
     <small role="alert" class="p-error" :id="`${name}Error`" data-cy="descriptionError">{{ errorMessage || '' }}</small>
@@ -304,7 +307,7 @@ watch(value, (newValue) =>{
            :accept="allowedAttachmentFileTypes"
            hidden />
     <Message severity="error" v-if="attachmentError"
-             class="m-0"
+             class="m-0 mt-2"
              @close="attachmentError = ''"
              role="alert"
              data-cy="attachmentError"
