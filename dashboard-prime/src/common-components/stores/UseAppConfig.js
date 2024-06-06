@@ -120,6 +120,9 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const userPageTagsToDisplay = computed(() => config.value.userPageTagsToDisplay)
   const maxProjectInviteEmails = computed(() => config.value.maxProjectInviteEmails)
   const artifactBuildTimestamp = computed(() => config.value.artifactBuildTimestamp)
+  const minUsernameLength = computed(() => config.value.minUsernameLength)
+  const minPasswordLength = computed(() => config.value.minPasswordLength)
+  const maxPasswordLength = computed(() => config.value.maxPasswordLength)
   return {
     loadConfigState,
     refreshConfig,
@@ -198,5 +201,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     userPageTagsToDisplay,
     maxProjectInviteEmails,
     artifactBuildTimestamp,
+    minUsernameLength,
+    minPasswordLength,
+    maxPasswordLength,
   }
 })
