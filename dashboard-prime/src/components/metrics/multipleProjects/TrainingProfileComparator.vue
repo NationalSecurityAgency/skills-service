@@ -40,13 +40,6 @@ const enoughProjectsSelected = computed(() => {
   return projects.value.selected && projects.value.selected.length >= 2;
 });
 
-const beforeListSlotText = computed(() => {
-  if (projects.value.selected.length >= 5) {
-    return 'Maximum of 5 options selected. First remove a selected option to select another.';
-  }
-  return '';
-});
-
 onMounted(() => {
   projects.value.available = props.availableProjects.map((proj) => ({ ...proj }));
   const numProjectsToSelect = Math.min(props.availableProjects.length, 4);
@@ -69,11 +62,15 @@ const genDataForCharts = (filter) => {
   numSubjectsChart.value.labels = projects.value.selected.map((proj) => proj.name);
   numSubjectsChart.value.series = projects.value.selected.map((proj) => proj.numSubjects);
 
-  projects.value.available = props.availableProjects.map((proj) => ({ ...proj }));
-  projects.value.available = projects.value.available.filter((el) => !projects.value.selected.some((sel) => sel.projectId === el.projectId));
+  if(projects.value.selected.length < 5) {
+    projects.value.available = props.availableProjects.map((proj) => ({...proj}));
+    projects.value.available = projects.value.available.filter((el) => !projects.value.selected.some((sel) => sel.projectId === el.projectId));
 
-  if( filter ) {
-    projects.value.available = projects.value.available.filter((el) => el.name.toLowerCase().includes(filter));
+    if( filter ) {
+      projects.value.available = projects.value.available.filter((el) => el.name.toLowerCase().includes(filter));
+    }
+  } else {
+    projects.value.available = [];
   }
 
   loading.value = false;
@@ -106,6 +103,14 @@ const filter = (event) => {
             @complete="filter"
             data-cy="trainingProfileComparatorProjectSelector"
             placeholder="Select option">
+          <template #empty>
+            <div v-if="projects.selected.length === 5" class="ml-4" data-cy="trainingProfileMaximumReached">
+              Maximum of 5 options selected. First remove a selected option to select another.
+            </div>
+            <div v-else class="ml-4">
+              No results found
+            </div>
+          </template>
         </AutoComplete>
       </div>
       <div v-if="!loading && enoughProjectsSelected">

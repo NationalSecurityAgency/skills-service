@@ -154,17 +154,22 @@ const locateUsers = () => {
 };
 
 const loadProjects = (filter) => {
-  projects.value.available = props.availableProjects.map((proj) => ({
-    loadingLevels: true,
-    minLevel: 1,
-    ...proj,
-  }));
+  if( projects.value.selected.length < 5 ) {
+    projects.value.available = props.availableProjects.map((proj) => ({
+      loadingLevels: true,
+      minLevel: 1,
+      ...proj,
+    }));
 
-  projects.value.available = projects.value.available.filter((el) => !projects.value.selected.some((sel) => sel.projectId === el.projectId));
+    projects.value.available = projects.value.available.filter((el) => !projects.value.selected.some((sel) => sel.projectId === el.projectId));
 
-  if( filter ) {
-    projects.value.available = projects.value.available.filter((el) => el.name.toLowerCase().includes(filter));
+    if (filter) {
+      projects.value.available = projects.value.available.filter((el) => el.name.toLowerCase().includes(filter));
+    }
+  } else {
+    projects.value.available = [];
   }
+
   projects.value.loading = false;
 };
 
@@ -206,6 +211,14 @@ const filterProjects = (event) => {
               @complete="filterProjects"
               data-cy="projectSelector"
               placeholder="Select option">
+            <template #empty>
+              <div v-if="projects.selected.length === 5" class="ml-4" data-cy="projectSelectorMaximumReached">
+                Maximum of 5 options selected. First remove a selected option to select another.
+              </div>
+              <div v-else class="ml-4">
+                No results found
+              </div>
+            </template>
           </AutoComplete>
         </div>
         <div class="flex mb-4">
