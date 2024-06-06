@@ -50,15 +50,30 @@ describe('Resource Not Found Tests', () => {
             .contains('Subject [fooo] doesn\'t exist');
     });
 
-    it('invalid skill results in not found page', () => {
+    it('invalid route in not found page', () => {
         cy.intercept('GET', '/api/myProgressSummary')
             .as('loadProgress');
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skillFooo');
+        cy.visit('/administrator/doesnotexist');
 
-        cy.url().should('include', '/error')
-        cy.get('[data-cy=errExplanation]')
+        cy.url().should('include', '/not-found')
+        cy.get('[data-cy=notFoundExplanation]')
             .should('be.visible')
-            .contains('Skill [skillFooo] doesn\'t exist');
+            .contains('The resource you requested cannot be located.');
+
+        cy.get('[data-cy="breadcrumb-bar"]').should('have.text', 'Not Found');
+    });
+
+    it('invalid "old" routes in not found page with redirect message and link', () => {
+        cy.intercept('GET', '/api/myProgressSummary')
+          .as('loadProgress');
+        cy.visit('/projects');
+
+        cy.url().should('include', '/not-found')
+        cy.get('[data-cy=notFoundExplanation]')
+          .should('be.visible')
+          .contains('It looks like you may have followed an old link. You will be forwarded to /administrator');
+
+        cy.get('[data-cy="breadcrumb-bar"]').should('have.text', 'Not Found');
     });
 
 });

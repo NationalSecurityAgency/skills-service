@@ -16,11 +16,11 @@ const newLinkValue = ref('');
 onMounted(() => {
   if (route && route.redirectedFrom) {
     const { redirectedFrom } = route;
-    if (redirectedFrom.startsWith('/projects') || redirectedFrom.startsWith('/metrics') || redirectedFrom.startsWith('/globalBadges')) {
-      if (redirectedFrom === '/projects/' || redirectedFrom === '/projects') {
+    if (redirectedFrom.path.startsWith('/projects') || redirectedFrom.path.startsWith('/metrics') || redirectedFrom.path.startsWith('/globalBadges')) {
+      if (redirectedFrom.path === '/projects/' || redirectedFrom.path === '/projects') {
         newLinkValue.value = '/administrator/';
       } else {
-        newLinkValue.value = `/administrator${redirectedFrom}`;
+        newLinkValue.value = `/administrator${redirectedFrom.fullPath}`;
       }
       isOldLink.value = true;
     }
