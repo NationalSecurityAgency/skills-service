@@ -56,6 +56,7 @@ import UserSkillsPerformed from '@/components/users/UserSkillsPerformed.vue'
 import createSkillsDisplayPreviewRoutes from '@/router/SkillsDisplayPreviewRoutes.js'
 import PrivateProjectAccessRequestPage from '@/components/access/invite-only/PrivateProjectAccessRequestPage.vue'
 import JoinProjectPage from '@/components/access/invite-only/JoinProjectPage.vue'
+import NotFoundPage from '@/components/utils/NotFoundPage.vue';
 
 const routes = [
   {
@@ -607,7 +608,29 @@ const routes = [
       },
     },
   },
-
+  {
+    path: '/not-found',
+    name: 'NotFoundPage',
+    component: NotFoundPage,
+    props: true,
+    meta: {
+      requiresAuth: false,
+      announcer: {
+        message: 'Not Found',
+      },
+    },
+  },
+  { path: '/:pathMatch(.*)*',
+    name: '404',
+    redirect: {
+      name: 'NotFoundPage',
+    },
+    meta: {
+      requiresAuth: false,
+      announcer: {
+        message: 'Page Not Found',
+      },
+    }, },
 ]
 
 routes.push(createAdminRoutes())
