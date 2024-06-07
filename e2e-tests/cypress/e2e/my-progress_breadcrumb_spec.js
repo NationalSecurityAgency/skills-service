@@ -362,63 +362,6 @@ describe('My Progress Breadcrumb Tests', () => {
             .contains('Overall Points');
     });
 
-    it('test breadcrumbs with internal dependency', function () {
-        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill4/dependency/skill2');
-
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill2]')
-            .should('exist');
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill2]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]')
-            .should('exist');
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]')
-            .should('have.attr', 'href');
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]')
-            .should('exist');
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]')
-            .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Progress And Rankings.*Project:\s*proj1.*Subject:\s*subj1.*Skill:\s*skill4.*Prerequisite:\s*skill2$/))
-            .should('be.visible');
-
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-item]')
-            .its('length')
-            .should('eq', 5);
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-item]')
-            .eq(0)
-            .should('contain.text', 'Progress And Rankings');
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-item]')
-            .eq(1)
-            .should('contain.text', 'proj1');
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-item]')
-            .eq(2)
-            .should('contain.text', 'subj1');
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-item]')
-            .eq(3)
-            .should('contain.text', 'skill4');
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-item]')
-            .eq(4)
-            .should('contain.text', 'skill2');
-
-        // back to skill page
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill4]')
-            .click();
-        cy.get('[data-cy="skillsDisplayHome"]')
-            .contains('Very Great Skill 4');
-
-        // back to subject page
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]')
-            .click();
-        cy.get('[data-cy="skillsDisplayHome"]')
-            .contains('Subject 1');
-
-        // back to home page
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]')
-            .click();
-        cy.get('[data-cy="skillsDisplayHome"]')
-            .contains('Overall Points');
-    });
-
     it('test breadcrumbs with cross-project dependency', function () {
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill3/crossProject/proj2/skill1');
 

@@ -133,11 +133,12 @@ const smallScreenMode = computed(() => responsive.sm.value)
           :to="getContextUrl(item.url)"
           custom>
           <a :href="href" v-bind="props.action" @click="navigate" :data-cy="`breadcrumbLink-${item.value}`">
-           <skills-breadcrumb-item
+            <skills-breadcrumb-item
               :icon="item.icon"
               :label="item.label"
               :value="item.value"
               :show-separator="item.url !== '/' && smallScreenMode"
+              :data-cy="`breadcrumb-${item.value}`"
               value-css="text-primary" />
           </a>
         </router-link>
@@ -146,7 +147,8 @@ const smallScreenMode = computed(() => responsive.sm.value)
             :icon="item.icon"
             :label="item.label"
             :show-separator="item.url !== '/' && smallScreenMode"
-            :value="item.value" />
+            :value="item.value"
+            :data-cy="`breadcrumb-${item.value}`"/>
         </div>
       </template>
     </Breadcrumb>

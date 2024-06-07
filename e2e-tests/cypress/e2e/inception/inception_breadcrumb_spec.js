@@ -111,15 +111,15 @@ describe('My Progress Breadcrumb Tests', () => {
 
         cy.get('[data-cy="levelBreakdownChart-animationEnded"]')
         cy.get('[data-cy="title"]').contains('My Rank');
-        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"] [data-cy="breadcrumb-Projects"]')
-        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"] [data-cy="breadcrumb-Dashboard Skills"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Projects"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Dashboard Skills"]')
         cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"]').should('have.length', 2)
         cy.get('[data-pc-name="breadcrumb"] [data-cy="breadcrumb-Rank"]')
 
-        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"] [data-cy="breadcrumb-Dashboard Skills"]').click()
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Dashboard Skills"]').click()
         cy.get('[data-cy="title"]').contains('Dashboard Skills');
 
-        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"] [data-cy="breadcrumb-Projects"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Projects"]')
         cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"]').should('have.length', 1)
         cy.get('[data-pc-name="breadcrumb"] [data-cy="breadcrumb-Dashboard Skills"]')
     });
@@ -128,17 +128,17 @@ describe('My Progress Breadcrumb Tests', () => {
         cy.visit('/administrator/skills/Inception/subjects/Dashboard/skills/VisitDashboardSkills');
 
         cy.get('[data-cy="title"]').contains('Skill Overview');
-        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"] [data-cy="breadcrumb-Projects"]')
-        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"] [data-cy="breadcrumb-Dashboard Skills"]')
-        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"] [data-cy="breadcrumb-Dashboard"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Projects"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Dashboard Skills"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Dashboard"]')
         cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"]').should('have.length', 3)
         cy.get('[data-pc-name="breadcrumb"] [data-cy="breadcrumb-VisitDashboardSkills"]')
 
 
-        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"] [data-cy="breadcrumb-Dashboard"]').click()
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Dashboard"]').click()
         cy.get('[data-cy="title"]').contains('Dashboard');
-        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"] [data-cy="breadcrumb-Projects"]')
-        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"] [data-cy="breadcrumb-Dashboard Skills"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Projects"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Dashboard Skills"]')
         cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"]').should('have.length', 2)
         cy.get('[data-pc-name="breadcrumb"] [data-cy="breadcrumb-Dashboard"]')
     });
