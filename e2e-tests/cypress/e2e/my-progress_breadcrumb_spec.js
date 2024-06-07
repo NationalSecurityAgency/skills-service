@@ -413,12 +413,14 @@ describe('My Progress Breadcrumb Tests', () => {
             .click();
         cy.get('[data-cy="skillsDisplayHome"]')
             .contains('Subject 1');
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
 
         // back to home page
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]')
             .click();
         cy.get('[data-cy="skillsDisplayHome"]')
             .contains('Overall Points');
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     });
 
     it('test breadcrumbs with badge', function () {
