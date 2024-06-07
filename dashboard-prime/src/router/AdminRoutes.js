@@ -4,6 +4,7 @@ import QuizDefinitionsPage from '@/components/quiz/QuizDefinitionsPage.vue'
 import UserActionsPage from '@/components/userActions/UserActionsPage.vue'
 import MultipleProjectsMetricsPage from '@/components/metrics/multipleProjects/MultipleProjectsMetricsPage.vue'
 import EmaillProjectAdmins from '@/components/projects/EmaillProjectAdmins.vue'
+import GlobalBadges from '@/components/badges/global/GlobalBadges.vue'
 
 const createAdminRoutes = () => {
   return {
@@ -34,6 +35,16 @@ const createAdminRoutes = () => {
           requiresAuth: true,
           announcer: {
             message: 'Quizzes and Surveys',
+          },
+        },
+      }, {
+        name: 'GlobalBadges',
+        path: 'globalBadges',
+        component: GlobalBadges,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Global Badges',
           },
         },
       }, {

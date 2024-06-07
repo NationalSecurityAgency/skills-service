@@ -57,6 +57,9 @@ import createSkillsDisplayPreviewRoutes from '@/router/SkillsDisplayPreviewRoute
 import PrivateProjectAccessRequestPage from '@/components/access/invite-only/PrivateProjectAccessRequestPage.vue'
 import JoinProjectPage from '@/components/access/invite-only/JoinProjectPage.vue'
 import NotFoundPage from '@/components/utils/NotFoundPage.vue';
+import GlobalBadgePage from "@/components/badges/global/GlobalBadgePage.vue";
+import GlobalBadgeSkills from "@/components/badges/global/GlobalBadgeSkills.vue";
+import GlobalBadgeLevels from "@/components/levels/global/GlobalBadgeLevels.vue";
 
 const routes = [
   {
@@ -607,6 +610,37 @@ const routes = [
         message: 'Request Access to Private Project',
       },
     },
+  },
+  {
+    path: '/administrator/globalBadges/:badgeId',
+    component: GlobalBadgePage,
+    meta: {
+      requiresAuth: true,
+      announcer: {
+        message: 'Global Badge Overview',
+      },
+    },
+    children: [{
+      name: 'GlobalBadgeSkills',
+      path: '',
+      component: GlobalBadgeSkills,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Global Badge Skills',
+        },
+      },
+    }, {
+      name: 'GlobalBadgeLevels',
+      path: 'levels',
+      component: GlobalBadgeLevels,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Global Badge Levels',
+        },
+      },
+    }],
   },
   {
     path: '/not-found',
