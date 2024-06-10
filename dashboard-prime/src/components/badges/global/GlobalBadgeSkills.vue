@@ -27,11 +27,16 @@ const loading = ref({
 const badgeSkills = ref([]);
 const availableSkills = ref([]);
 const badgeId = ref(null);
-// const badge = ref(null);
 const afterListSlotText = ref('');
 const search = ref('');
 
 onMounted(() => {
+  badgeId.value = route.params.badgeId;
+  loadBadge();
+  loadAssignedBadgeSkills();
+})
+
+watch(() => route.params.badgeId, async () => {
   badgeId.value = route.params.badgeId;
   loadBadge();
   loadAssignedBadgeSkills();

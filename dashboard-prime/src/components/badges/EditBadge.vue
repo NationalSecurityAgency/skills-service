@@ -238,7 +238,7 @@ const updateBadge = (values) => {
 
   if(props.global) {
     return GlobalBadgeService.saveBadge(badgeToSave).then((resp) => {
-      console.log(resp);
+      badgeInternal.value = resp;
     })
   }
   return BadgesService.saveBadge(badgeToSave).then((resp) => {
