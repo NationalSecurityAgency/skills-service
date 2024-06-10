@@ -133,7 +133,7 @@ const projectsNotContributedToYet = computed(() => myProjects.value.length - myP
           projects!
         </div>
         <div class="flex-1 text-right">
-          <!--            <router-link :to="{ name: 'MyUsagePage', params: { projects } }">-->
+        <router-link :to="{ name: 'MyUsagePage' }">
           <SkillsButton
             label="Usage"
             icon="fas fa-chart-line"
@@ -141,8 +141,7 @@ const projectsNotContributedToYet = computed(() => myProjects.value.length - myP
             size="small"
             variant="outline-info"
             data-cy="viewUsageBtn" />
-
-          <!--            </router-link>-->
+          </router-link>
         </div>
       </div>
     </template>

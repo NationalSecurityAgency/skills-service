@@ -3,6 +3,7 @@ import MyProgressPage from '@/components/myProgress/MyProgressPage.vue'
 import MyProjectSkillsPage from '@/components/myProgress/MyProjectSkillsPage.vue'
 import QuizRun from '@/components/quiz/QuizRunInDashboard.vue';
 import DiscoverProjectsPage from '@/components/myProgress/discover/DiscoverProjectsPage.vue'
+import MyUsagePage from '@/components/myProgress/usage/MyUsagePage.vue'
 
 const createProgressAndRankingRoutes = (skillsDisplayChildRoutes) => {
   return {
@@ -50,8 +51,18 @@ const createProgressAndRankingRoutes = (skillsDisplayChildRoutes) => {
             message: 'My Test Run',
           },
         },
-      },
-      {
+      }, {
+        name: 'MyUsagePage',
+        path: 'my-usage',
+        component: MyUsagePage,
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'My Usage',
+          },
+        },
+      }, {
         name: 'DiscoverProjectsPage',
         path: 'manage-my-projects',
         component: DiscoverProjectsPage,
