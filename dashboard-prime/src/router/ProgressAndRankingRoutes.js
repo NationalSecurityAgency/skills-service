@@ -4,8 +4,14 @@ import MyProjectSkillsPage from '@/components/myProgress/MyProjectSkillsPage.vue
 import QuizRun from '@/components/quiz/QuizRunInDashboard.vue';
 import DiscoverProjectsPage from '@/components/myProgress/discover/DiscoverProjectsPage.vue'
 import MyUsagePage from '@/components/myProgress/usage/MyUsagePage.vue'
+import MyBadges from '@/components/myProgress/badges/MyBadges.vue'
+import BadgeDetailsPage from '@/skills-display/components/badges/BadgeDetailsPage.vue'
+import SkillPage from '@/components/skills/SkillPage.vue'
 
 const createProgressAndRankingRoutes = (skillsDisplayChildRoutes) => {
+
+  const skillPlaceholder = '##SKILL##'
+
   return {
     path: '/progress-and-rankings',
     component: MyProgress,
@@ -73,7 +79,18 @@ const createProgressAndRankingRoutes = (skillsDisplayChildRoutes) => {
             message: 'Discover Projects',
           },
         },
-      }
+      }, {
+        name: 'MyBadges',
+        path: 'my-badges',
+        component: MyBadges,
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'My Badges',
+          },
+        },
+      },
     ]
   }
 }

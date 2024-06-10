@@ -76,7 +76,7 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
 
 <template>
   <Card :pt="{ content: { class: 'p-0' }, body: { class: 'p-0 pb-2' } }"
-
+        :data-cy="`project-link-card-${proj.projectId}`"
         class="conic"
         :class="{ 'proj-link-card' : !overSortControl }">
     <template #content>

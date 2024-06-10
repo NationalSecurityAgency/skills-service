@@ -93,7 +93,6 @@ const revokeAccess = (userId, userIdForDisplay) => {
   const msg = `Are you sure you want to revoke ${userIdForDisplay}'s access to this Project? ${userIdForDisplay}'s achievements will NOT be deleted,
         however ${userIdForDisplay} will no longer be able to access the training profile.`;
   dialogMessages.msgConfirm(msg, 'Revoke Access', (val) => {
-    console.log(val)
       tableIsBusy.value = true;
       AccessService.deleteUserRole(route.params.projectId, userId, 'ROLE_PRIVATE_PROJECT_USER').then(() => {
         loadData();

@@ -21,14 +21,22 @@ const myProgress = computed(() => myProgressState.myProgress)
           data-cy="numBadgesAvailable">/ {{ myProgress.totalBadges
           }}</span>
       </div>
-      <div v-if="myProgress.totalGlobalBadges > 0">
-        <Tag severity="info" data-cy="numAchievedGlobalBadges">Global Badges: {{ myProgress.numAchievedGlobalBadges
-          }} / {{ myProgress.totalGlobalBadges }}
+      <div v-if="myProgress.globalBadgeCount > 0">
+        <Tag
+          severity="secondary"
+          class="mt-1"
+          data-cy="numAchievedGlobalBadges">Global Badges:
+          {{ myProgress.numAchievedGlobalBadges
+          }} / {{ myProgress.globalBadgeCount }}
         </Tag>
       </div>
-      <div v-if="myProgress.totalGems > 0">
-        <Tag severity="info" data-cy="numAchievedGemBadges">Gems: {{ myProgress.numAchievedGemBadges }} /
-          {{ myProgress.totalGems }}
+      <div v-if="myProgress.gemCount > 0">
+        <Tag
+          severity="warning"
+          class="mt-1"
+          data-cy="numAchievedGemBadges">Gems:
+          {{ myProgress.numAchievedGemBadges }} /
+          {{ myProgress.gemCount }}
         </Tag>
       </div>
     </template>
@@ -36,7 +44,7 @@ const myProgress = computed(() => myProgressState.myProgress)
       <div style="font-size: 3.5rem;" class="mt-2">
       <span class="fa-stack">
             <i class="fas fa-circle fa-stack-2x text-bluegray-600"></i>
-            <i class="fas fa-trophy fa-stack-1x text-primary"></i>
+            <i class="fas fa-trophy fa-stack-1x text-green-500"></i>
           </span>
       </div>
     </template>
@@ -45,13 +53,14 @@ const myProgress = computed(() => myProgressState.myProgress)
         <div data-cy="badges-num-footer" class="flex-1">
           Be proud to earn those badges!!
         </div>
-        <!--          :to="{ name: 'MyBadges' }"-->
-        <SkillsButton
-          label="My Badges"
-          icon="fas fa-award"
-          outlined
-          size="small"
-          data-cy="viewBadges" />
+        <router-link :to="{ name: 'MyBadges' }">
+          <SkillsButton
+            label="My Badges"
+            icon="fas fa-award"
+            outlined
+            size="small"
+            data-cy="viewBadges" />
+        </router-link>
       </div>
     </template>
   </my-progress-info-card-util>
