@@ -110,7 +110,7 @@ const getUrl = (item) => {
 }
 const calculateClientDisplayRoute = (props) => {
   return {
-    name: 'ClientDisplayPreview',
+    name: 'SkillsDisplaySkillsDisplayPreviewProject',
     params: {
       projectId: projectId,
       userId: props.userId,
@@ -167,7 +167,7 @@ const calculateClientDisplayRoute = (props) => {
             </span>
           </div>
         </template>
-        <Column field="skillName" header="Skill Name" :showFilterMenu="false" :sortable="true">
+        <Column field="skillName" header="Skill Name" :showFilterMenu="false" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="fas fa-graduation-cap skills-color-skills mr-1" aria-hidden="true"></i>
           </template>
@@ -184,27 +184,28 @@ const calculateClientDisplayRoute = (props) => {
                        placeholder="Search by Skill Name" />
           </template>
         </Column>
-        <Column field="userIdForDisplay" :showFilterMenu="false" header="User" :sortable="true">
+        <Column field="userIdForDisplay" :showFilterMenu="false" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="fas fa-user-cog skills-color-skills mr-1" aria-hidden="true"></i>
           </template>
           <template #body="slotProps">
-            <span :data-cy="`row${slotProps.index}-userId`">{{ userInfo.getUserDisplay(slotProps.data, true) }}</span>
-
-            <!--            <router-link-->
-            <!--                class="ml-1"-->
-            <!--                data-cy="ViewUserDetailsBtn"-->
-            <!--                :to="calculateClientDisplayRoute(slotProps.data)"-->
-            <!--                target="_blank" rel="noopener">-->
-            <!--              <SkillsButton-->
-            <!--                  target="_blank"-->
-            <!--                  outlined-->
-            <!--                  severity="info"-->
-            <!--                  size="small"-->
-            <!--                  icon="fa fa-user-alt"-->
-            <!--                  :aria-label="`View details for user ${userInfo.getUserDisplay(slotProps.data, true)}`">-->
-            <!--              </SkillsButton>-->
-            <!--            </router-link>-->
+            <div class="flex gap-1">
+              <span class="flex-1" :data-cy="`row${slotProps.index}-userId`">{{ userInfo.getUserDisplay(slotProps.data, true) }}</span>
+              <router-link
+                  class="ml-1 flex"
+                  data-cy="ViewUserDetailsBtn"
+                  :to="calculateClientDisplayRoute(slotProps.data)"
+                  target="_blank" rel="noopener">
+                <SkillsButton
+                    target="_blank"
+                    outlined
+                    severity="info"
+                    size="small"
+                    icon="fa fa-user-alt"
+                    :aria-label="`View details for user ${userInfo.getUserDisplay(slotProps.data, true)}`">
+                </SkillsButton>
+              </router-link>
+            </div>
           </template>
           <template #filter="{ filterModel, filterCallback }">
             <InputText v-model="filterModel.value"
@@ -216,7 +217,7 @@ const calculateClientDisplayRoute = (props) => {
                        placeholder="Search by User" />
           </template>
         </Column>
-        <Column field="expiredOn" header="Expired On" :sortable="false" :show-filter-menu="false">
+        <Column field="expiredOn" header="Expired On" :sortable="false" :show-filter-menu="false" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="fas fa-clock text-warning mr-1" aria-hidden="true"></i>
           </template>
