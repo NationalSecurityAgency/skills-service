@@ -223,8 +223,10 @@ describe('Client Display Features Tests', () => {
     cy.cdVisit('/')
     cy.get('[data-cy="overallPoints"]').contains('Overall Points')
     cy.get('[data-cy="newSoftwareVersion"]').should('not.exist')
+    cy.get('[data-cy="pointHistoryChartNoData"]')
 
     cy.cdClickSubj(0, 'Subject 1')
+    cy.get('[data-cy="pointHistoryChartNoData"]')
     cy.wait('@getSubjectSummary')
     cy.wait('@getRank')
     cy.wait('@getPointHistory')
@@ -323,6 +325,7 @@ describe('Client Display Features Tests', () => {
     cy.enableBadge(1, 1, { iconClass: 'proj1-validiconpng' })
 
     cy.cdVisit('/')
+    cy.get('[data-cy="pointHistoryChartNoData"]')
     cy.cdClickBadges()
     cy.get('[data-cy="badge_badge1"] .proj1-validiconpng')
 
