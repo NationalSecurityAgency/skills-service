@@ -8,11 +8,13 @@ import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDis
 import { useWindowSize } from '@vueuse/core'
 import ResponsiveBreakpoints from '@/components/utils/misc/ResponsiveBreakpoints.js'
 import ContactOwnersDialog from '@/components/myProgress/ContactOwnersDialog.vue'
+import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 
 const route = useRoute()
 const projectId = route.params.projectId
 const skillsDisplayAttributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
+const appInfo = useAppInfoState()
 
 const windowSize = useWindowSize()
 const currentWidth = ref(windowSize.width)
@@ -70,7 +72,7 @@ const handleProjInvitation = () => {
 
 <template>
   <div style="position: relative">
-    <div :class="{
+    <div v-if="appInfo.emailEnabled" :class="{
       'contact-button-inline': isContactButtonInline,
       'text-center': !isContactButtonInline
     }">

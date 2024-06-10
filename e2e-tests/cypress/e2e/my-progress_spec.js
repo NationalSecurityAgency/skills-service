@@ -684,6 +684,15 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
     });
 
+    it('do not show contact project admins button if email service is diabled', () => {
+        cy.intercept('/public/isFeatureSupported?feature=emailservice', 'false').as('isEmailServiceSupported');
+        cy.visit('/progress-and-rankings/projects/proj1');
+        cy.wait('@isEmailServiceSupported')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="pointHistoryChartWithData"]')
+        cy.wait(3000)
+        cy.get('[data-cy="contactOwnerBtn"]').should('not.exist');
+    })
+
     it('Send email to project owner', () => {
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
         cy.intercept('POST', '/api/validation/description*').as('validate');
