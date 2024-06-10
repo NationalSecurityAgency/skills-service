@@ -10,6 +10,7 @@ import { useUserInfo } from '@/components/utils/UseUserInfo.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import { useFocusState } from '@/stores/UseFocusState.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
+import { useColors } from '@/skills-display/components/utilities/UseColors.js';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import QuizAttemptsTimeChart from '@/components/quiz/metrics/QuizAttemptsTimeChart.vue'
 import QuizUserTagsChart from '@/components/quiz/metrics/QuizUserTagsChart.vue'
@@ -31,6 +32,7 @@ const quizSummaryState = useQuizSummaryState()
 const userTagsUtils = useUserTagsUtils()
 const announcer = useSkillsAnnouncer()
 const responsive = useResponsiveBreakpoints()
+const colors = useColors()
 
 const quizType = ref('')
 const runsHistory = ref([])
@@ -248,11 +250,11 @@ const deleteRun = () => {
             </span>
             </div>
           </template>
-          <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
+          <Column v-for="(col, index) in options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
                   :class="{'flex': responsive.md.value }">
             <template #header>
               <span v-if="col.key === 'controls'" class="sr-only">Controls Heading - Not sortable</span>
-              <span v-else><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
+              <span v-else><i :class="[col.imageClass, colors.getTextClass(index + 1)]" aria-hidden="true"></i> {{ col.label }}</span>
             </template>
             <template #body="slotProps">
               <div v-if="slotProps.field === 'userIdForDisplay'" class="flex flex-row flex-wrap"
@@ -265,6 +267,7 @@ const deleteRun = () => {
                   <router-link :data-cy="`row${slotProps.index}-viewRun`"
                                :to="{ name: 'QuizSingleRunPage', params: { runId: slotProps.data.attemptId } }">
                     <SkillsButton icon="fas fa-list-ul"
+                                  class="ml-2"
                                   outlined
                                   :aria-label="`View Run Details for user ${slotProps.data.userIdForDisplay}`"
                                   size="small" />
