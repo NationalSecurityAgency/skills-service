@@ -199,11 +199,9 @@ describe('Metrics Tests - Achievements', () => {
 
     });
 
-    it.skip('achievements table - validate the link to user client display', () => {
+    it('achievements table - validate the link to user client display', () => {
         cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
-
-        cy.intercept('/admin/projects/proj1/token/**').as('getToken');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
@@ -292,11 +290,10 @@ describe('Metrics Tests - Achievements', () => {
             .find('[data-cy=achievementsNavigator-clientDisplayBtn]')
             .click();
 
-        cy.wait('@getToken');
         cy.url()
             .should('include', '/users/user0good@skills.org');
         cy.get('[data-cy=subPageHeader]')
-            .contains('Client Display');
+            .contains('User\'s Display');
         // userId has lowercase "g" while userIdForDisplay has uppercase "G"; this must be userId
         cy.get('[data-cy=pageHeader]')
             .contains('user0good@skills.org');
