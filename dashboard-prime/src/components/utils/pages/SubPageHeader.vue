@@ -42,6 +42,13 @@ function addClicked() {
   emit('add-action');
 }
 
+function focusOnActionButton() {
+  actionButton.value.focus();
+}
+
+defineExpose({
+  focusOnActionButton,
+});
 </script>
 
 <template>

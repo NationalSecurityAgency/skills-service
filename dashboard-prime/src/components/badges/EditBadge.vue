@@ -236,6 +236,11 @@ const updateBadge = (values) => {
     badgeToSave.endDate = null;
   }
 
+  if(props.global) {
+    return GlobalBadgeService.saveBadge(badgeToSave).then((resp) => {
+      console.log(resp);
+    })
+  }
   return BadgesService.saveBadge(badgeToSave).then((resp) => {
     badgeInternal.value = resp;
   });

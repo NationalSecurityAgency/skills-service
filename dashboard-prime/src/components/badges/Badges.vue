@@ -26,6 +26,7 @@ const route = useRoute();
 const confirm = useConfirm();
 const elementHelper = useElementHelper()
 
+const subPageHeader = ref();
 let global = ref(false);
 let isLoadingData = ref(true);
 let badges = ref([]);
@@ -182,7 +183,7 @@ const handleHidden = (e) => {
 
 const handleFocus = () => {
   nextTick(() => {
-    // $refs.subPageHeader.$refs.actionButton.focus();
+    subPageHeader.value.focusOnActionButton();
   });
 };
 
@@ -278,8 +279,7 @@ const toDate = (value) => {
 <!--      <transition name="projectContainer" enter-active-class="animated fadeIn">-->
         <div>
           <div v-if="badges && badges.length" id="badgeCards" class="flex flex-wrap align-items-center justify-content-center">
-            <div v-for="(badge) of badges" :id="badge.badgeId"
-                 :key="badge.badgeId" class="lg:col-4 mb-3"  style="min-width: 23rem;">
+            <div v-for="(badge) of badges" :id="badge.badgeId" :key="badge.badgeId" class="lg:col-4 mb-3"  style="min-width: 23rem;">
               <BlockUI :blocked="sortOrder.loading">
                 <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${badge.badgeId}_overlayShown`">
                   <div v-if="badge.badgeId===sortOrder.loadingBadgeId" data-cy="updatingSortMsg">

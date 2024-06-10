@@ -7,6 +7,7 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import EditBadge from "@/components/badges/EditBadge.vue";
 import LoadingContainer from "@/components/utils/LoadingContainer.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
+import SkillsBadge from '@/components/badges/Badge.vue'
 
 const announcer = useSkillsAnnouncer();
 const emit = defineEmits(['badge-deleted', 'badge-changed', 'global-badges-changed']);
@@ -18,6 +19,8 @@ const sortOrder = ref({
   loading: false,
   loadingBadgeId: '-1',
 });
+
+const subPageHeader = ref();
 
 const emptyNewBadge = computed(() => {
   return {
@@ -74,8 +77,8 @@ const saveBadge = (badge) => {
   const requiredIds = badge.requiredSkills.map((item) => item.skillId);
   const badgeReq = { requiredSkillsIds: requiredIds, ...badge };
   const { isEdit } = badge;
-  GlobalBadgeService.saveBadge(badgeReq)
-      .then(() => {
+  // GlobalBadgeService.saveBadge(badgeReq)
+  //     .then(() => {
         let afterLoad = null;
         if (isEdit) {
           afterLoad = () => {
@@ -87,10 +90,11 @@ const saveBadge = (badge) => {
           };
         }
         loadBadges(afterLoad).then(() => {
+        // loadBadges().then(() => {
           nextTick(() => announcer.polite(`a global badge has been ${isEdit ? 'saved' : 'created'}`));
         });
         emit('global-badges-changed', badge.badgeId);
-      });
+  //     });
 };
 
 const newBadge = () => {
@@ -105,7 +109,7 @@ const handleHidden = (event) => {
 
 const handleFocus = () => {
   nextTick(() => {
-    // $refs.subPageHeader.$refs.actionButton.focus();
+    subPageHeader.value.focusOnActionButton();
   });
 };
 
@@ -140,13 +144,11 @@ const sortOrderUpdate = (updateEvent) => {
   <div>
     <sub-page-header ref="subPageHeader" title="Global Badges" action="Badge" @add-action="newBadge" aria-label="new global badge"/>
     <loading-container v-bind:is-loading="isLoading">
-      <transition name="projectContainer" enter-active-class="animated fadeIn">
+<!--      <transition name="projectContainer" enter-active-class="animated fadeIn">-->
         <div>
-          <div v-if="badges && badges.length" id="badgeCards"
-               class="row justify-content-center">
-            <div v-for="(badge) of badges" :id="badge.badgeId"
-                 :key="badge.badgeId" class="col-lg-4 mb-3"  style="min-width: 23rem;">
-              <BlockUI :blocked="sortOrder.loading" rounded="sm" opacity="0.4">
+          <div v-if="badges && badges.length" id="badgeCards" class="flex flex-wrap align-items-center justify-content-center">
+            <div v-for="(badge) of badges" :id="badge.badgeId" :key="badge.badgeId" class="lg:col-4 mb-3"  style="min-width: 23rem;">
+              <BlockUI :blocked="sortOrder.loading">
 <!--                <template #overlay>-->
 <!--                  <div class="text-center" :data-cy="`${badge.badgeId}_overlayShown`">-->
 <!--                    <div v-if="badge.badgeId===sortOrder.loadingBadgeId" data-cy="updatingSortMsg">-->
@@ -156,7 +158,7 @@ const sortOrderUpdate = (updateEvent) => {
 <!--                  </div>-->
 <!--                </template>-->
 
-                <badge :badge="badge" :global="true"
+                <SkillsBadge :badge="badge" :global="true"
                        @badge-updated="saveBadge"
                        @badge-deleted="deleteBadge"
                        :ref="`badge_${badge.badgeId}`"
@@ -168,7 +170,7 @@ const sortOrderUpdate = (updateEvent) => {
           <no-content2 v-else title="No Badges Yet" class="mt-4"
                        message="Global Badges are a special kind of badge that is made up of a collection of skills and/or levels that span across project boundaries."/>
         </div>
-      </transition>
+<!--      </transition>-->
     </loading-container>
 
     <edit-badge v-if="displayNewBadgeModal" v-model="displayNewBadgeModal" :badge="emptyNewBadge"
