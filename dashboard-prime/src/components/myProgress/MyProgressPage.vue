@@ -25,7 +25,7 @@ onMounted(() => {
       <div v-if="myProgressState.hasProjects">
         <my-progress-title title="My Progress">
           <template #rightContent>
-            <router-link :to="{ name: 'DiscoverProjectsPage' }">
+            <router-link :to="{ name: 'DiscoverProjectsPage' }" tabindex="-1">
               <SkillsButton
                 label="Projects Catalog"
                 outlined

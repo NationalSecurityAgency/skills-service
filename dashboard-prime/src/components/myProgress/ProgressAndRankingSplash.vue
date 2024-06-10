@@ -65,7 +65,7 @@
         <div class="text-center mt-5">
           <div class="mb-3 uppercase text-2xl text-primary">Get Started Now</div>
           <div>
-            <router-link :to="{ name: 'DiscoverProjectsPage' }">
+            <router-link :to="{ name: 'DiscoverProjectsPage' }" tabindex="-1">
               <SkillsButton
                 label="Projects Catalog"
                 icon="fas fa-tasks"

@@ -53,7 +53,7 @@ const myProgress = computed(() => myProgressState.myProgress)
         <div data-cy="badges-num-footer" class="flex-1">
           Be proud to earn those badges!!
         </div>
-        <router-link :to="{ name: 'MyBadges' }">
+        <router-link :to="{ name: 'MyBadges' }" tabindex="-1">
           <SkillsButton
             label="My Badges"
             icon="fas fa-award"

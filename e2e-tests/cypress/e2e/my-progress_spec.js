@@ -323,7 +323,7 @@ describe('My Progress Tests', () => {
             .contains('Project: This is project 1')
     });
 
-    it.skip('My Progress page - contributed to all projects', function () {
+    it('My Progress page - contributed to all projects', function () {
         // // add a skill to Inception to have contributed to all projects
         cy.loginAsRootUser();
         cy.request('POST', `/api/projects/proj2/skills/skill1`, {
@@ -342,7 +342,7 @@ describe('My Progress Tests', () => {
             .contains('Great job, you have contributed to all projects!');
     });
 
-    it.skip('My Progress page - not contributed to more than one project', function () {
+    it('My Progress page - not contributed to more than one project', function () {
         cy.createProject(3);
         cy.enableProdMode(3);
         cy.addToMyProjects(3);
@@ -358,7 +358,7 @@ describe('My Progress Tests', () => {
             .contains('You still have 2 projects to explore.');
     });
 
-    it.skip('mySkills page - projects that do not have "production mode" enabled are not included', function () {
+    it('mySkills page - projects that do not have "production mode" enabled are not included', function () {
         cy.createProject(3);
         cy.addToMyProjects(3);
 
@@ -403,7 +403,7 @@ describe('My Progress Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('mySkills page - projects that are not added to My Projects are not included', function () {
+    it('mySkills page - projects that are not added to My Projects are not included', function () {
         cy.createProject(3);
         cy.enableProdMode(3);
 
@@ -448,7 +448,7 @@ describe('My Progress Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('no projects added to My Projects', function () {
+    it('no projects added to My Projects', function () {
         cy.removeFromMyProjects(1);
         cy.removeFromMyProjects(2);
         cy.visit('/progress-and-rankings');
@@ -463,7 +463,7 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy="backToProgressAndRankingBtn"]');
     });
 
-    it.skip('My Progress page - no projects with production mode enabled', function () {
+    it('My Progress page - no projects with production mode enabled', function () {
         // remove production mode from all projects
         cy.loginAsRootUser();
         cy.request('POST', '/admin/projects/proj1/settings/production.mode.enabled', {
@@ -483,7 +483,7 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
     });
 
-    it.skip('change sort order using keyboard', function () {
+    it('change sort order using keyboard', function () {
         cy.createProject(3);
         cy.enableProdMode(3);
         cy.addToMyProjects(3);
@@ -494,52 +494,57 @@ describe('My Progress Tests', () => {
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 3', 'This is project 2', 'This is project 1']);
 
         // move down
-        cy.get('[data-cy="project-link-proj3"]')
-            .tab()
-            .type('{downArrow}');
+        cy.get('[data-cy="project-link-proj3"] button')
+          .should('be.visible')
+          .tab({ shift: true })
+          .type('{downArrow}')
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 3', 'This is project 1']);
-        cy.get('[data-cy="project-link-proj3"] [data-cy="sortControlHandle"]')
+        cy.get('[data-cy="project-link-card-proj3"] [data-cy="sortControlHandle"]')
             .should('have.focus');
 
         // move down
-        cy.get('[data-cy="project-link-proj3"]')
-            .tab()
+        cy.wait(1000)
+        cy.get('[data-cy="project-link-proj3"] button')
+            .tab({ shift: true })
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
-        cy.get('[data-cy="project-link-proj3"] [data-cy="sortControlHandle"]')
+        cy.get('[data-cy="project-link-card-proj3"] [data-cy="sortControlHandle"]')
             .should('have.focus');
 
         // move down - last item already; no action
-        cy.get('[data-cy="project-link-proj3"]')
-            .tab()
+        cy.wait(1000)
+        cy.get('[data-cy="project-link-proj3"] button')
+            .tab({ shift: true })
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
-        cy.get('[data-cy="project-link-proj3"] [data-cy="sortControlHandle"]')
+        cy.get('[data-cy="project-link-card-proj3"] [data-cy="sortControlHandle"]')
             .should('have.focus');
 
         cy.visit('/progress-and-rankings');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
-        cy.get('[data-cy="project-link-proj3"] [data-cy="sortControlHandle"]')
+        cy.get('[data-cy="project-link-card-proj3"] [data-cy="sortControlHandle"]')
             .should('not.have.focus');
 
         // move up
-        cy.get('[data-cy="project-link-proj1"]')
-            .tab()
+        cy.wait(1000)
+        cy.get('[data-cy="project-link-proj1"] button')
+            .tab({ shift: true })
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 1', 'This is project 2', 'This is project 3']);
-        cy.get('[data-cy="project-link-proj1"] [data-cy="sortControlHandle"]')
+        cy.get('[data-cy="project-link-card-proj1"] [data-cy="sortControlHandle"]')
             .should('have.focus');
 
         // move up; first item already - no action
-        cy.get('[data-cy="project-link-proj1"]')
-            .tab()
+        cy.wait(1000)
+        cy.get('[data-cy="project-link-proj1"] button')
+            .tab({ shift: true })
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 1', 'This is project 2', 'This is project 3']);
-        cy.get('[data-cy="project-link-proj1"] [data-cy="sortControlHandle"]')
+        cy.get('[data-cy="project-link-card-proj1"] [data-cy="sortControlHandle"]')
             .should('have.focus');
     });
 
-    it.skip('sort my projects', function () {
+    it('sort my projects', function () {
         cy.createProject(3);
         cy.enableProdMode(3);
         cy.addToMyProjects(3);
@@ -580,6 +585,7 @@ describe('My Progress Tests', () => {
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
 
         // navigate to My Projects and then return
+        cy.wait(2000)
         cy.get('[data-cy="manageMyProjsBtn"]')
             .click();
         cy.get('[data-cy="backToProgressAndRankingBtn"]')
@@ -587,7 +593,7 @@ describe('My Progress Tests', () => {
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
     });
 
-    it.skip('My Progress page - verify custom level on ProjectLinkCard', function () {
+    it('My Progress page - verify custom level on ProjectLinkCard', function () {
         // set custom level display name for proj1
         cy.loginAsRootUser();
         cy.request('POST', '/admin/projects/proj1/settings', [{
@@ -614,7 +620,7 @@ describe('My Progress Tests', () => {
             .contains('Level');
     });
 
-    it.skip('My Progress page - verify custom project label', function () {
+    it('My Progress page - verify custom project label', function () {
         // set custom level display name for proj1
         cy.loginAsRootUser();
         cy.request('POST', '/admin/projects/proj1/settings', [{
@@ -625,60 +631,60 @@ describe('My Progress Tests', () => {
 
         cy.loginAsProxyUser();
         cy.visit('/progress-and-rankings/');
-        cy.get('[data-cy=project-link-card-proj1]')
+        cy.get('[data-cy=project-link-proj1]')
             .click();
 
         // proj1 has custom level name ("Work Role")
-        cy.dashboardCd()
+        cy.get('[data-cy="skillsDisplayHome"]')
             .find('[data-cy=title]')
-            .contains('WORK ROLE: This is project 1');
+            .contains('Work Role: This is project 1');
     });
 
-    it.skip('Contact project owner', () => {
+    it('Contact project owner', () => {
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
         cy.intercept('POST', '/api/validation/description*').as('validate');
 
-        const invalidMsg = new Array(3000).fill('a').join('');
+        const invalidMsg = new Array(3001).fill('a').join('');
         cy.loginAsProxyUser();
         cy.visit('/progress-and-rankings/');
-        cy.get('[data-cy=project-link-card-proj1]').click();
+        cy.get('[data-cy=project-link-proj1]').click();
         cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
         cy.get('[aria-label="Close"]').click();
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
         cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
-        cy.get('[data-cy="cancelBtn"]').click();
+        cy.get('[data-cy="closeDialogBtn"]').click();
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
 
         cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
         cy.contains('Contact This is project 1').should('be.visible');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Submit');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.disabled');
+        cy.get('[data-cy="saveDialogBtn"]').should('contain.text', 'Submit');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,500 characters remaining');
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill(invalidMsg);
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.disabled');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '-500 characters remaining');
 
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('message message jabberwocky jabberwocky message message');
         cy.wait('@validate');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.disabled');
-        cy.get('[data-cy="contactOwnersInput_errMsg"]').should('be.visible');
-        cy.get('[data-cy="contactOwnersInput_errMsg"]').should('contain.text', 'paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="messageError"]').should('be.visible');
+        cy.get('[data-cy="messageError"]').should('contain.text', 'paragraphs may not contain jabberwocky');
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,475 characters remaining');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.enabled');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click();
         cy.wait('@contact');
-        cy.get('[data-cy="cancelBtn"]').should('not.exist');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Ok');
+        cy.get('[data-cy="saveDialogBtn"]').should('not.exist');
+        cy.get('[data-cy="closeDialogBtn"]').should('contain.text', 'OK');
         cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'Message sent!');
         cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'The Project Administrator(s) of This is project 1 will be notified of your question via email.');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
+        cy.get('[data-cy="closeDialogBtn"]').click();
         cy.wait(500); //wait for animations to complete
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
     });
 
-    it.skip('Send email to project owner', () => {
+    it('Send email to project owner', () => {
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
         cy.intercept('POST', '/api/validation/description*').as('validate');
         cy.loginAsAdminUser();
@@ -689,16 +695,16 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,475 characters remaining');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.enabled');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click();
         cy.wait('@contact');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Ok');
+        cy.get('[data-cy="closeDialogBtn"]').should('contain.text', 'OK');
         cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'Message sent!');
         cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'The Project Administrator(s) of This is project 3 will be notified of your question via email.');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
+        cy.get('[data-cy="closeDialogBtn"]').click();
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
         cy.getEmails().then((emails) => {
-                expect(emails[0].textAsHtml).to.contain('aaa bbb this is a message');
+                expect(emails[0].html).to.contain('aaa bbb this is a message');
         });
     });
 });
