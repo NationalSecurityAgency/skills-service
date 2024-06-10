@@ -35,7 +35,7 @@ const headerOptions = computed(() => {
 
 const navItems = computed(() => {
   return [
-    { name: 'Client Display', iconClass: 'fa-user skills-color-skills', page: 'ClientDisplayPreview' },
+    { name: 'Client Display', iconClass: 'fa-user skills-color-skills', page: 'SkillsDisplaySkillsDisplayPreviewProject' },
     { name: 'Performed Skills', iconClass: 'fa-award skills-color-events', page: 'UserSkillEvents' },
   ];
 })
