@@ -60,7 +60,7 @@ describe('Performed Skills Table Tests', () => {
     it('sort by date', () => {
         cy.createSkills(1);
         cy.report(12);
-        cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents');
         // default sort by date desc
         cy.validateTable(tableSelector, [
             [{
@@ -332,7 +332,7 @@ describe('Performed Skills Table Tests', () => {
     it('sort by skill id', () => {
         cy.createSkills(12);
         cy.report(12, false);
-        cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents');
 
         cy.get('[data-cy="skillsBTableTotalRows"]')
             .should('have.text', '12');
@@ -448,7 +448,7 @@ describe('Performed Skills Table Tests', () => {
     it('filter by skill id', () => {
         cy.createSkills(12);
         cy.report(12, false);
-        cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents');
 
         cy.get('[data-cy="skillsBTableTotalRows"]')
             .should('have.text', '12')
@@ -507,7 +507,7 @@ describe('Performed Skills Table Tests', () => {
     it('filter by skill name', () => {
         cy.createSkills(12);
         cy.report(12, false);
-        cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents');
 
         cy.get('[data-cy="skillsBTableTotalRows"]')
             .should('have.text', '12')
@@ -527,7 +527,7 @@ describe('Performed Skills Table Tests', () => {
     it('filter by using search icon', () => {
         cy.createSkills(12);
         cy.report(12, false);
-        cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents');
 
         cy.get('[data-cy="skillsBTableTotalRows"]')
             .should('have.text', '12')
@@ -562,7 +562,7 @@ describe('Performed Skills Table Tests', () => {
                 },
             })
             .as('getPerformedSkills');
-        cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents');
         cy.wait('@getPerformedSkills');
 
         cy.validateTable(tableSelector, [
@@ -586,7 +586,7 @@ describe('Performed Skills Table Tests', () => {
     it('delete skill event', () => {
         cy.createSkills(3);
         cy.report(3, false);
-        cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents');
 
         cy.intercept('DELETE', '/admin/projects/proj1/skills/skill2/users/*/events/**')
             .as('delete');
@@ -644,7 +644,7 @@ describe('Performed Skills Table Tests', () => {
         cy.importSkillFromCatalog(1, 1, 2, 1);
         cy.finalizeCatalogImport(1);
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/users/user6Good@skills.org/skillEvents');
+        cy.visit('/administrator/projects/proj1/users/user6Good@skills.org/skillEvents');
         cy.get('[data-cy="deleteEventBtn"]')
             .should('not.exist');
     });
@@ -652,7 +652,7 @@ describe('Performed Skills Table Tests', () => {
     it('delete all skill events', () => {
         cy.createSkills(3);
         cy.report(3, false);
-        cy.visit('/administrator/projects/proj1/subjects/subj1/users/user1@skills.org/skillEvents');
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents');
 
         cy.validateTable(tableSelector, [
             [{
@@ -672,8 +672,8 @@ describe('Performed Skills Table Tests', () => {
         cy.get('[data-cy="performedSkills-deleteAll"]').click()
         cy.contains('This will delete all skill events for user1@skills.org.');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me')
-        cy.get('[data-cy="removeButton"]').click();
-        cy.get('[data-cy="removeButton"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
 
         cy.get(tableSelector).contains('There are no records to show').should('exist')
 
