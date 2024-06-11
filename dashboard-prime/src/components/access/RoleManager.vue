@@ -11,6 +11,8 @@ import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import { useRouter } from 'vue-router'
+import { userErrorState } from '@/stores/UserErrorState.js'
 
 // role constants
 const ROLE_APP_USER = 'ROLE_APP_USER';
@@ -26,6 +28,8 @@ const announcer = useSkillsAnnouncer();
 const userInfo = useUserInfo();
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
+const router = useRouter()
+const errorState = userErrorState()
 
 const emit = defineEmits(['role-added', 'role-deleted']);
 const props = defineProps({
@@ -191,7 +195,7 @@ function handleError(e) {
     errNotification.value.enable = true;
   } else {
     const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
-    // this.handlePush({ name: 'ErrorPage', query: { errorMessage } });
+    errorState.navToErrorPage('Failed to add User Role', errorMessage)
   }
 }
 

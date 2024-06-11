@@ -101,18 +101,6 @@ const newBadge = () => {
   displayNewBadgeModal.value = true;
 };
 
-const handleHidden = (event) => {
-  if (!event || !event.update) {
-    handleFocus();
-  }
-};
-
-const handleFocus = () => {
-  nextTick(() => {
-    subPageHeader.value.focusOnActionButton();
-  });
-};
-
 const enableDropAndDrop = () => {
   if (badges.value && badges.value.length > 0) {
     nextTick(() => {
@@ -174,8 +162,7 @@ const sortOrderUpdate = (updateEvent) => {
     </loading-container>
 
     <edit-badge v-if="displayNewBadgeModal" v-model="displayNewBadgeModal" :badge="emptyNewBadge"
-                :global="true" @badge-updated="saveBadge"
-                @hidden="handleHidden"></edit-badge>
+                :global="true" @badge-updated="saveBadge"></edit-badge>
   </div>
 </template>
 
