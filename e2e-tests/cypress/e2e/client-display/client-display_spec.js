@@ -232,6 +232,7 @@ describe('Client Display Tests', () => {
         cy.cdBack('Subject 1');
         cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(3, false);
+        cy.get('[data-cy="prerequisitesCard"] [data-cy="skillLink-proj1-skill2"]')
         cy.cdBack('Subject 1');
         cy.get('[data-cy="pointHistoryChartWithData"]')
 
@@ -246,6 +247,7 @@ describe('Client Display Tests', () => {
         cy.cdBack('Subject 1');
         cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(3);
+        cy.get('[data-cy="prerequisitesCard"] [data-cy="skillLink-proj1-skill2"]')
         cy.cdBack('Subject 1');
         cy.get('[data-cy="pointHistoryChartWithData"]')
     });
