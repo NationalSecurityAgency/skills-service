@@ -8,7 +8,6 @@ const props = defineProps(['title', 'action', 'disabled', 'disabledMsg', 'ariaLa
 const route = useRoute()
 
 const config = useProjConfig();
-const actionButton = ref(null)
 const disabledInternal = ref(props.disabled);
 
 const isAdminProjectsPage = computed(() => {
@@ -42,13 +41,6 @@ function addClicked() {
   emit('add-action');
 }
 
-function focusOnActionButton() {
-  actionButton.value.focus();
-}
-
-defineExpose({
-  focusOnActionButton,
-});
 </script>
 
 <template>

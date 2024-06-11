@@ -47,10 +47,6 @@ const inviteExtensionMenuItems = ref([
       {
         label: '30 minutes',
         value: 'PT30M',
-        command: (event, second) => {
-          console.log(event)
-          console.log(second)
-        }
       },
       {
         label: '8 hours',

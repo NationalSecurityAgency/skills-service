@@ -7,6 +7,7 @@ import PlacementBadge from '@/skills-display/components/badges/PlacementBadge.vu
 import { computed } from 'vue'
 import BadgeHeaderIcons from '@/skills-display/components/badges/BadgeHeaderIcons.vue'
 import ExtraBadgeAward from '@/skills-display/components/badges/ExtraBadgeAward.vue'
+import { useRoute } from 'vue-router'
 
 const props = defineProps({
   badges: {
@@ -22,6 +23,7 @@ const props = defineProps({
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const colors = useColors()
 const timeUtils = useTimeUtils()
+const route = useRoute()
 
 const badgeAriaLabel = (badge) => {
   let res = `You earned badge ${badge.badge}.`
@@ -32,6 +34,14 @@ const badgeAriaLabel = (badge) => {
     res += ' This is a gem badge.'
   }
   return res
+}
+
+const buildBadgeLink = (badge) => {
+  let globalBadgeUnderProjectId = null
+  if (!route.params.projectId) {
+    globalBadgeUnderProjectId = props.badges.find((b) => b.projectId).projectId
+  }
+  return skillsDisplayInfo.createToBadgeLink(badge, globalBadgeUnderProjectId)
 }
 </script>
 
@@ -75,9 +85,9 @@ const badgeAriaLabel = (badge) => {
                         :aria-label="badgeAriaLabel(badge)">
                     {{ badge.badge }}
                   </div>
-                  <div v-if="displayBadgeProject && badge.projectName" class="text-muted text-center text-truncate"
+                  <div v-if="badge.projectName" class="text-center text-color-secondary mb-2"
                        data-cy="badgeProjectName">
-                    <small>Proj<span class="d-md-none d-xl-inline">ect</span>: {{ badge.projectName }}</small>
+                    <small>Project: {{ badge.projectName }}</small>
                   </div>
                   <div data-cy="dateBadgeAchieved" class="text-muted mb-2">
                     <i class="far fa-clock text-secondary" aria-hidden="true"></i>
@@ -91,7 +101,7 @@ const badgeAriaLabel = (badge) => {
                 </div>
                 <div>
                   <router-link
-                    :to="skillsDisplayInfo.createToBadgeLink(badge)">
+                    :to="buildBadgeLink(badge)">
                     <Button
                       label="View"
                       icon="far fa-eye"

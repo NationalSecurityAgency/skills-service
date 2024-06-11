@@ -1,10 +1,13 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
+import { useRoute } from 'vue-router'
+import GlobalBadgeService from '@/components/badges/global/GlobalBadgeService.js'
 
 export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectState', () => {
 
     const skillsDisplayService = useSkillsDisplayService()
+    const route = useRoute()
 
     const loadingSubjectSummary = ref(true)
     const loadingBadgeSummary = ref(true)
@@ -23,7 +26,10 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
     }
   const loadBadgeSummary = (badgeId, isGlobal = false, includeSkills = true) => {
     loadingBadgeSummary.value = true
-    return skillsDisplayService.getBadgeSkills(badgeId, isGlobal, includeSkills)
+    const isGlobalAndIndependentOfProject = isGlobal && route.name === 'globalBadgeDetails'
+
+    const dataLoader =  () => isGlobalAndIndependentOfProject ? GlobalBadgeService.getBadge(badgeId) : skillsDisplayService.getBadgeSkills(badgeId, isGlobal, includeSkills)
+    return dataLoader()
       .then((badgeSummary) => {
         subjectSummary.value = badgeSummary
         return badgeSummary

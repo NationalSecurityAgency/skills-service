@@ -30,7 +30,7 @@ const timeFromNowFormatter = (value) => dayjs(value)
 const testTime = new Date().getTime();
 const yesterday = new Date().getTime() - (1000 * 60 * 60 * 24);
 
-describe('Navigation Tests', () => {
+describe('My Progress Tests', () => {
 
     beforeEach(() => {
         cy.log(`--------> ${testTime}`);
@@ -128,19 +128,6 @@ describe('Navigation Tests', () => {
 
     it('visit My Progress page', function () {
 
-        const getIframeBody = () => {
-            // get the iframe > document > body
-            // and retry until the body element is not empty
-            return cy
-                .get('iframe')
-                .its('0.contentDocument.body')
-                .should('not.be.empty')
-                // wraps "body" DOM element to allow
-                // chaining more Cypress commands, like ".find(...)"
-                // https://on.cypress.io/wrap
-                .then(cy.wrap);
-        };
-
         cy.loginAsRootUser();
         cy.request('PUT', `/supervisor/badges/globalBadge1`, {
             badgeId: `globalBadge1`,
@@ -176,7 +163,7 @@ describe('Navigation Tests', () => {
             .contains('So many skills... so little time! Good luck!');
 
         cy.get('[data-cy=mostRecentAchievedSkill]')
-            .contains(`Last Achieved skill ${timeFromNowFormatter(testTime)}`);
+            .contains(`Last Achieved skill${timeFromNowFormatter(testTime)}`);
         cy.get('[data-cy=numAchievedSkillsLastWeek]')
             .contains('2 skills in the last week');
         cy.get('[data-cy=numAchievedSkillsLastMonth]')
@@ -195,38 +182,34 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy=numAchievedGemBadges]')
             .contains('Gems: 0');
 
-        cy.get('[data-cy=project-link-proj2]')
+        cy.get('[data-cy=project-link-card-proj2]')
             .should('be.visible');
-        cy.get('[data-cy=project-link-proj2]')
+        cy.get('[data-cy=project-link-card-proj2]')
             .find('[data-cy=project-card-project-name]')
             .contains('This is project 2');
 
-        cy.get('[data-cy=project-link-proj1]')
+        cy.get('[data-cy=project-link-card-proj1]')
             .should('be.visible');
-        cy.get('[data-cy=project-link-proj1]')
+        cy.get('[data-cy=project-link-card-proj1]')
             .find('[data-cy=project-card-project-name]')
             .contains('This is project 1');
-        cy.get('[data-cy=project-link-proj1]')
+        cy.get('[data-cy=project-link-card-proj1]')
             .find('[data-cy=project-card-project-level]')
             .contains('3');
-        cy.get('[data-cy=project-link-proj1]')
-            .find('[data-cy=project-card-project-rank]')
-            .contains(new RegExp(/^Rank: 1 \/ 1$/));
-        cy.get('[data-cy=project-link-proj1]')
-            .find('[data-cy=project-card-project-points]')
-            .contains(new RegExp(/^400 \/ 800$/));
+        cy.get('[data-cy=project-link-card-proj1] [data-cy=project-card-project-rank]')
+            .contains('Rank: 1 / 1');
+        cy.get('[data-cy=project-link-card-proj1] [data-cy=project-card-project-points]')
+            .contains('400/800');
 
         cy.get('[data-cy=inception-button]')
             .should('not.exist');
 
         cy.get('[data-cy=project-link-proj1]')
             .click();
-        cy.dashboardCd()
+        cy.get('[data-cy="skillsDisplayHome"]')
             .contains('Overall Points');
-        getIframeBody()
-            .find('[data-cy=skillsTitle]')
-            .contains('PROJECT: This is project 1')
-            .should('be.visible');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy=skillsTitle]')
+            .contains('Project: This is project 1')
         cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
             .should('be.visible');
         cy.get('[data-cy=breadcrumb-proj1]')
@@ -243,46 +226,37 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy=earnedBadgeLink_badge1]')
             .should('be.visible');
 
-        cy.get('.myBadges .earned-badge')
-            .eq(0)
-            .contains('Badge 1');
-        cy.get('.row .skills-badge')
+        cy.get('[data-cy="achievedBadge-badge1"] [data-cy="badgeName"]')
+            .should( 'have.text', 'Badge 1');
+        cy.get('[data-cy="availableBadges"] [data-cy="badgeTitle"]')
             .eq(0)
             .contains('Gem Badge');
-        cy.get('.row .skills-badge')
+        cy.get('[data-cy="availableBadges"] [data-cy="badgeTitle"]')
             .eq(1)
             .contains('Global Badge 1');
 
-        cy.intercept('/api/projects/proj1/rank')
-            .as('loadRank');
         cy.get('[data-cy=badgeDetailsLink_globalBadge1]')
             .click();
         cy.get('[data-cy=breadcrumb-globalBadge1]')
             .should('be.visible');
         cy.get('[data-cy=breadcrumb-proj1]')
             .should('be.visible');
-        cy.wait('@loadRank');
-        getIframeBody()
-            .find('.skills-title')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
             .contains('Global Badge Details');
-        getIframeBody()
-            .find('.skills-text-description')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="badgeTitle"]')
             .contains('Global Badge 1')
             .should('be.visible');
-        getIframeBody()
-            .find('[data-cy="gb_proj1"]')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillProgressTitle-skill2=globalBadge1"]')
             .contains('Project: This is project 1')
-            .should('be.visible');
-        getIframeBody()
-            .find('[data-cy=skillProgressTitle]')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillProgressTitle-skill2=globalBadge1"] [data-cy=skillProgressTitle]')
             .click();
-        getIframeBody()
+        cy.get('[data-cy="skillsDisplayHome"]')
             .find('[data-cy=title]')
             .contains('Skill Overview');
-        getIframeBody()
+        cy.get('[data-cy="skillsDisplayHome"]')
             .find('[data-cy=skillProgressTitle]')
             .contains('Very Great Skill 2');
-        getIframeBody()
+        cy.get('[data-cy="skillsDisplayHome"]')
             .find('[data-cy=overallPointsEarnedCard]')
             .should('be.visible');
         cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
@@ -296,25 +270,23 @@ describe('Navigation Tests', () => {
             .should('be.visible');
         cy.get('[data-cy=breadcrumb-proj1]')
             .should('be.visible');
-        cy.wait('@loadRank');
-        getIframeBody()
+        cy.get('[data-cy="skillsDisplayHome"]')
             .find('.skills-title')
             .contains('Badge Details');
-        getIframeBody()
-            .find('.skills-text-description')
+         cy.get('[data-cy="skillsDisplayHome"] [data-cy="badge_badge1"]')
             .contains('Badge 1')
             .should('be.visible');
-        getIframeBody()
+         cy.get('[data-cy="skillsDisplayHome"]')
             .find('[data-cy=skillProgressTitle]')
             .contains('Very Great Skill 1')
             .click();
-        getIframeBody()
+         cy.get('[data-cy="skillsDisplayHome"]')
             .find('[data-cy=title]')
             .contains('Skill Overview');
-        getIframeBody()
+         cy.get('[data-cy="skillsDisplayHome"]')
             .find('[data-cy=skillProgressTitle]')
             .contains('Very Great Skill 1');
-        getIframeBody()
+         cy.get('[data-cy="skillsDisplayHome"]')
             .find('[data-cy=overallPointsEarnedCard]')
             .should('be.visible');
 
@@ -345,358 +317,10 @@ describe('Navigation Tests', () => {
             .should('be.visible');
 
         cy.visit('/progress-and-rankings/projects/proj1');
-        cy.intercept('/api/myprojects/proj1/name')
-            .as('getName');
-        cy.dashboardCd()
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallPoints"]')
             .contains('Overall Points');
-        cy.wait('@getName');
-        getIframeBody()
-            .find('[data-cy=skillsTitle]')
-            .contains('PROJECT: This is project 1')
-            .should('be.visible');
-    });
-
-    it('project name should be visible on badges in badge catalog', () => {
-        cy.visit('/progress-and-rankings/');
-        cy.get('[data-cy=viewBadges]')
-            .click();
-        cy.get('[data-cy=badgeProjectName]')
-            .eq(0)
-            .should('be.visible')
-            .should('have.text', 'Project: This is project 1');
-        cy.get('[data-cy=badgeProjectName]')
-            .eq(1)
-            .should('be.visible')
-            .should('have.text', 'Project: This is project 1');
-    });
-
-
-    it('My Badges filtering', () => {
-        cy.loginAsRootUser();
-        const globalBadge1 = {
-            badgeId: `globalBadge1`,
-            isEdit: false,
-            name: `Global Badge One`,
-            originalBadgeId: '',
-            iconClass: 'fas fa-award',
-            enabled: true,
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-        };
-        cy.request('PUT', `/supervisor/badges/globalBadge1`, globalBadge1);
-        cy.assignSkillToGlobalBadge(1, 2);
-        cy.enableGlobalBadge(1, globalBadge1);
-
-        cy.request('PUT', `/supervisor/badges/globalBadge2`, {
-            badgeId: `globalBadge2`,
-            isEdit: false,
-            name: `Global Badge two`,
-            originalBadgeId: '',
-            iconClass: 'fas fa-award',
-            enabled: true,
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-        });
-        cy.assignSkillToGlobalBadge(2, 3);
-        cy.enableGlobalBadge(2);
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge two',
-            enabled: 'true',
-        });
-        cy.assignSkillToBadge(1, 2, 1);
-        cy.enableBadge(1, 2);
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge11', {
-            projectId: 'proj1',
-            badgeId: 'badge11',
-            name: 'Badge one one',
-            enabled: 'true',
-        });
-        cy.assignSkillToBadge(1, 11, 1);
-        cy.enableBadge(1, 11);
-
-        const gemBadge2 = {
-            projectId: 'proj1',
-            badgeId: 'gemBadge2',
-            name: 'Gem Badge Two',
-            enabled: 'true',
-            startDate: dateFormatter(dayjs()
-                .subtract(5, 'day')),
-            endDate: dateFormatter(dayjs()
-                .add(7, 'day')),
-        };
-        cy.request('POST', '/admin/projects/proj1/badges/gemBadge2', gemBadge2);
-        cy.request('POST', `/admin/projects/proj1/badge/gemBadge2/skills/skill4`);
-        cy.enableBadge(1, 'gemBadge2', gemBadge2);
-
-        cy.loginAsProxyUser();
-        cy.visit('/progress-and-rankings/');
-        cy.get('[data-cy=viewBadges]')
-            .click();
-        cy.get('[data-cy=filterBtn]')
-            .click();
-        cy.get('[data-cy=filter_projectBadges]').contains('Project Badges');
-        cy.get('[data-cy=filter_projectBadges] [data-cy=filterCount]')
-            .contains('2');
-        cy.get('[data-cy=filter_gems] [data-cy=filterCount]')
-            .contains('2');
-        cy.get('[data-cy=filter_gems]') .contains('Gems');
-        cy.get('[data-cy=filter_globalBadges] [data-cy=filterCount]')
-            .contains('1');
-        cy.get('[data-cy=filter_globalBadges]').contains('Global Badges');
-
-        cy.get('[data-cy=filter_projectBadges] [data-cy=filterCount]')
-            .click();
-        cy.get('[data-cy=selectedFilter]')
-            .should('be.visible');
-        cy.get('.row .skills-badge')
-            .should('have.length', 2);
-        cy.get('.row .skills-badge')
-            .eq(0)
-            .contains('Gem Badge');
-        cy.get('.row .skills-badge')
-            .eq(1)
-            .contains('Gem Badge Two');
-        cy.get('[data-cy=clearSelectedFilter]')
-            .click();
-        cy.get('.row .skills-badge')
-            .should('have.length', 3);
-
-        cy.get('[data-cy=filterBtn]')
-            .click();
-        cy.get('[data-cy=filter_gems] [data-cy=filterCount]')
-            .click();
-        cy.get('[data-cy=selectedFilter]')
-            .should('be.visible');
-        cy.get('.row .skills-badge')
-            .should('have.length', 2);
-        cy.get('.row .skills-badge')
-            .eq(0)
-            .contains('Gem Badge');
-        cy.get('.row .skills-badge')
-            .eq(1)
-            .contains('Gem Badge Two');
-        cy.get('[data-cy=clearSelectedFilter]')
-            .click();
-        cy.get('.row .skills-badge')
-            .should('have.length', 3);
-
-        cy.get('[data-cy=filterBtn]')
-            .click();
-        cy.get('[data-cy=filter_globalBadges] [data-cy=filterCount]')
-            .click();
-        cy.get('[data-cy=selectedFilter]')
-            .should('be.visible');
-        cy.get('.row .skills-badge')
-            .should('have.length', 1);
-        cy.get('.row .skills-badge')
-            .eq(0)
-            .contains('Global Badge One');
-        cy.get('[data-cy=clearSelectedFilter]')
-            .click();
-        cy.get('.row .skills-badge')
-            .should('have.length', 3);
-
-        cy.get('[data-cy=badgeSearchInput]')
-            .type('two');
-        cy.get('.row .skills-badge')
-            .should('have.length', 3);
-        cy.get('.row .skills-badge')
-            .eq(1)
-            .contains('Gem Badge Two');
-        cy.get('[data-cy=filterBtn]')
-            .click();
-        cy.get('[data-cy=filter_projectBadges] [data-cy=filterCount]')
-            .contains('1');
-        cy.get('[data-cy=filter_gems] [data-cy=filterCount]')
-            .contains('1');
-        cy.get('[data-cy=filter_globalBadges] [data-cy=filterCount]')
-            .contains('0');
-        cy.get('[data-cy=filter_gems] [data-cy=filterCount]')
-            .click();
-        cy.get('.row .skills-badge')
-            .should('have.length', 1);
-        cy.get('.row .skills-badge')
-            .eq(0)
-            .contains('Gem Badge Two');
-        cy.get('[data-cy=clearSelectedFilter]')
-            .click();
-        cy.get('.row .skills-badge')
-            .should('have.length', 1);
-        cy.get('.row .skills-badge')
-            .eq(0)
-            .contains('Gem Badge Two');
-
-        cy.get('[data-cy=clearBadgesSearchInput]')
-            .click();
-        cy.get('.row .skills-badge')
-            .should('have.length', 3);
-
-        cy.get('[data-cy=badgeSearchInput]')
-            .type('fffffffffffffffffffff');
-        cy.get('[data-cy=noDataYet]')
-            .should('be.visible')
-            .contains('No results');
-    });
-
-    it('badges card - gems and not global badges', function () {
-        cy.visit('/progress-and-rankings/');
-
-        cy.get('[data-cy=numAchievedGlobalBadges]')
-            .should('not.exist');
-        cy.get('[data-cy=numAchievedGemBadges]')
-            .contains('Gems: 0 / 1');
-    });
-
-    it('badges card - global badges and not gems', function () {
-        cy.intercept({
-            method: 'GET',
-            path: '/api/myProgressSummary',
-        }, {
-            statusCode: 200,
-            body: {
-                'projectSummaries': [{
-                    'projectId': 'Inception',
-                    'projectName': 'Inception',
-                    'points': 0,
-                    'totalPoints': 2695,
-                    'level': 0,
-                    'totalUsers': 1,
-                    'rank': 1
-                }, {
-                    'projectId': 'proj1',
-                    'projectName': 'Project 1',
-                    'points': 0,
-                    'totalPoints': 1400,
-                    'level': 0,
-                    'totalUsers': 2,
-                    'rank': 2
-                }],
-                'totalProjects': 2,
-                'numProjectsContributed': 0,
-                'totalSkills': 56,
-                'numAchievedSkills': 0,
-                'numAchievedSkillsLastMonth': 0,
-                'numAchievedSkillsLastWeek': 0,
-                'mostRecentAchievedSkill': null,
-                'totalBadges': 2,
-                'gemCount': 0,
-                'globalBadgeCount': 2,
-                'numAchievedBadges': 0,
-                'numAchievedGemBadges': 0,
-                'numAchievedGlobalBadges': 1
-            }
-        })
-            .as('getMyProgress');
-
-        cy.visit('/progress-and-rankings/');
-        cy.wait('@getMyProgress');
-
-        cy.get('[data-cy=numAchievedGlobalBadges]')
-            .contains('Global Badges: 1 / 2');
-        cy.get('[data-cy=numAchievedGemBadges]')
-            .should('not.exist');
-    });
-
-    it('badges card - global badges and gems', function () {
-        cy.intercept({
-            method: 'GET',
-            path: '/api/myProgressSummary',
-        }, {
-            statusCode: 200,
-            body: {
-                'projectSummaries': [{
-                    'projectId': 'Inception',
-                    'projectName': 'Inception',
-                    'points': 0,
-                    'totalPoints': 2695,
-                    'level': 0,
-                    'totalUsers': 1,
-                    'rank': 1
-                }, {
-                    'projectId': 'proj1',
-                    'projectName': 'Project 1',
-                    'points': 0,
-                    'totalPoints': 1400,
-                    'level': 0,
-                    'totalUsers': 2,
-                    'rank': 2
-                }],
-                'totalProjects': 2,
-                'numProjectsContributed': 0,
-                'totalSkills': 56,
-                'numAchievedSkills': 0,
-                'numAchievedSkillsLastMonth': 0,
-                'numAchievedSkillsLastWeek': 0,
-                'mostRecentAchievedSkill': null,
-                'totalBadges': 2,
-                'gemCount': 5,
-                'globalBadgeCount': 2,
-                'numAchievedBadges': 0,
-                'numAchievedGemBadges': 2,
-                'numAchievedGlobalBadges': 1
-            }
-        })
-            .as('getMyProgress');
-
-        cy.visit('/progress-and-rankings/');
-        cy.wait('@getMyProgress');
-
-        cy.get('[data-cy=numAchievedGlobalBadges]')
-            .contains('Global Badges: 1 / 2');
-        cy.get('[data-cy=numAchievedGemBadges]')
-            .contains('Gems: 2 / 5');
-    });
-
-    it('badges card - no global badges and no gems', function () {
-        cy.intercept({
-            method: 'GET',
-            path: '/api/myProgressSummary',
-        }, {
-            statusCode: 200,
-            body: {
-                'projectSummaries': [{
-                    'projectId': 'Inception',
-                    'projectName': 'Inception',
-                    'points': 0,
-                    'totalPoints': 2695,
-                    'level': 0,
-                    'totalUsers': 1,
-                    'rank': 1
-                }, {
-                    'projectId': 'proj1',
-                    'projectName': 'Project 1',
-                    'points': 0,
-                    'totalPoints': 1400,
-                    'level': 0,
-                    'totalUsers': 2,
-                    'rank': 2
-                }],
-                'totalProjects': 2,
-                'numProjectsContributed': 0,
-                'totalSkills': 56,
-                'numAchievedSkills': 0,
-                'numAchievedSkillsLastMonth': 0,
-                'numAchievedSkillsLastWeek': 0,
-                'mostRecentAchievedSkill': null,
-                'totalBadges': 2,
-                'gemCount': 0,
-                'globalBadgeCount': 0,
-                'numAchievedBadges': 0,
-                'numAchievedGemBadges': 0,
-                'numAchievedGlobalBadges': 0
-            }
-        })
-            .as('getMyProgress');
-
-        cy.visit('/progress-and-rankings/');
-        cy.wait('@getMyProgress');
-
-        cy.get('[data-cy=numAchievedGlobalBadges]')
-            .should('not.exist');
-        cy.get('[data-cy=numAchievedGemBadges]')
-            .should('not.exist');
+         cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
+            .contains('Project: This is project 1')
     });
 
     it('My Progress page - contributed to all projects', function () {
@@ -763,19 +387,19 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy=numBadgesAvailable]')
             .contains(new RegExp(/^\/ 2$/));
 
-        cy.get('[data-cy=project-link-proj1]')
+        cy.get('[data-cy=project-link-card-proj1]')
             .should('be.visible');
-        cy.get('[data-cy=project-link-proj1]')
+        cy.get('[data-cy=project-link-card-proj1]')
             .find('[data-cy=project-card-project-name]')
             .contains('This is project 1');
 
-        cy.get('[data-cy=project-link-proj2]')
+        cy.get('[data-cy=project-link-card-proj2]')
             .should('be.visible');
-        cy.get('[data-cy=project-link-proj2]')
+        cy.get('[data-cy=project-link-card-proj2]')
             .find('[data-cy=project-card-project-name]')
             .contains('This is project 2');
 
-        cy.get('[data-cy=project-link-proj3]')
+        cy.get('[data-cy=project-link-card-proj3]')
             .should('not.exist');
     });
 
@@ -808,19 +432,19 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy=numBadgesAvailable]')
             .contains(new RegExp(/^\/ 2$/));
 
-        cy.get('[data-cy=project-link-proj1]')
+        cy.get('[data-cy=project-link-card-proj1]')
             .should('be.visible');
-        cy.get('[data-cy=project-link-proj1]')
+        cy.get('[data-cy=project-link-card-proj1]')
             .find('[data-cy=project-card-project-name]')
             .contains('This is project 1');
 
-        cy.get('[data-cy=project-link-proj2]')
+        cy.get('[data-cy=project-link-card-proj2]')
             .should('be.visible');
-        cy.get('[data-cy=project-link-proj2]')
+        cy.get('[data-cy=project-link-card-proj2]')
             .find('[data-cy=project-card-project-name]')
             .contains('This is project 2');
 
-        cy.get('[data-cy=project-link-proj3]')
+        cy.get('[data-cy=project-link-card-proj3]')
             .should('not.exist');
     });
 
@@ -870,48 +494,53 @@ describe('Navigation Tests', () => {
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 3', 'This is project 2', 'This is project 1']);
 
         // move down
-        cy.get('[data-cy="project-link-proj3"]')
-            .tab()
-            .type('{downArrow}');
+        cy.get('[data-cy="project-link-proj3"] button')
+          .should('be.visible')
+          .tab({ shift: true })
+          .type('{downArrow}')
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 3', 'This is project 1']);
-        cy.get('[data-cy="project-link-proj3"] [data-cy="sortControlHandle"]')
+        cy.get('[data-cy="project-link-card-proj3"] [data-cy="sortControlHandle"]')
             .should('have.focus');
 
         // move down
-        cy.get('[data-cy="project-link-proj3"]')
-            .tab()
+        cy.wait(1000)
+        cy.get('[data-cy="project-link-proj3"] button')
+            .tab({ shift: true })
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
-        cy.get('[data-cy="project-link-proj3"] [data-cy="sortControlHandle"]')
+        cy.get('[data-cy="project-link-card-proj3"] [data-cy="sortControlHandle"]')
             .should('have.focus');
 
         // move down - last item already; no action
-        cy.get('[data-cy="project-link-proj3"]')
-            .tab()
+        cy.wait(1000)
+        cy.get('[data-cy="project-link-proj3"] button')
+            .tab({ shift: true })
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
-        cy.get('[data-cy="project-link-proj3"] [data-cy="sortControlHandle"]')
+        cy.get('[data-cy="project-link-card-proj3"] [data-cy="sortControlHandle"]')
             .should('have.focus');
 
         cy.visit('/progress-and-rankings');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
-        cy.get('[data-cy="project-link-proj3"] [data-cy="sortControlHandle"]')
+        cy.get('[data-cy="project-link-card-proj3"] [data-cy="sortControlHandle"]')
             .should('not.have.focus');
 
         // move up
-        cy.get('[data-cy="project-link-proj1"]')
-            .tab()
+        cy.wait(1000)
+        cy.get('[data-cy="project-link-proj1"] button')
+            .tab({ shift: true })
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 1', 'This is project 2', 'This is project 3']);
-        cy.get('[data-cy="project-link-proj1"] [data-cy="sortControlHandle"]')
+        cy.get('[data-cy="project-link-card-proj1"] [data-cy="sortControlHandle"]')
             .should('have.focus');
 
         // move up; first item already - no action
-        cy.get('[data-cy="project-link-proj1"]')
-            .tab()
+        cy.wait(1000)
+        cy.get('[data-cy="project-link-proj1"] button')
+            .tab({ shift: true })
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 1', 'This is project 2', 'This is project 3']);
-        cy.get('[data-cy="project-link-proj1"] [data-cy="sortControlHandle"]')
+        cy.get('[data-cy="project-link-card-proj1"] [data-cy="sortControlHandle"]')
             .should('have.focus');
     });
 
@@ -924,9 +553,9 @@ describe('Navigation Tests', () => {
 
         cy.visit('/progress-and-rankings');
 
-        const proj1Selector = '[data-cy=project-link-proj1] [data-cy="sortControlHandle"]';
-        const proj2Selector = '[data-cy=project-link-proj2] [data-cy="sortControlHandle"]';
-        const proj3Selector = '[data-cy=project-link-proj3] [data-cy="sortControlHandle"]';
+        const proj1Selector = '[data-cy=project-link-card-proj1] [data-cy="sortControlHandle"]';
+        const proj2Selector = '[data-cy=project-link-card-proj2] [data-cy="sortControlHandle"]';
+        const proj3Selector = '[data-cy=project-link-card-proj3] [data-cy="sortControlHandle"]';
 
         cy.intercept('/api/myprojects/proj1')
             .as('updateMyProj1');
@@ -956,6 +585,7 @@ describe('Navigation Tests', () => {
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
 
         // navigate to My Projects and then return
+        cy.wait(2000)
         cy.get('[data-cy="manageMyProjsBtn"]')
             .click();
         cy.get('[data-cy="backToProgressAndRankingBtn"]')
@@ -976,16 +606,16 @@ describe('Navigation Tests', () => {
         cy.visit('/progress-and-rankings/');
 
         // proj1 has custom level name ("Stage")
-        cy.get('[data-cy=project-link-proj1]')
+        cy.get('[data-cy=project-link-card-proj1]')
             .find('[data-cy=project-card-project-level]')
             .contains('Stage');
-        cy.get('[data-cy=project-link-proj1]')
+        cy.get('[data-cy=project-link-card-proj1]')
             .find('[data-cy=project-card-project-level]')
             .contains('Level')
             .should('not.exist');
 
         // proj2 has default level name ("Level")
-        cy.get('[data-cy=project-link-proj2]')
+        cy.get('[data-cy=project-link-card-proj2]')
             .find('[data-cy=project-card-project-level]')
             .contains('Level');
     });
@@ -1005,16 +635,16 @@ describe('Navigation Tests', () => {
             .click();
 
         // proj1 has custom level name ("Work Role")
-        cy.dashboardCd()
+        cy.get('[data-cy="skillsDisplayHome"]')
             .find('[data-cy=title]')
-            .contains('WORK ROLE: This is project 1');
+            .contains('Work Role: This is project 1');
     });
 
     it('Contact project owner', () => {
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
         cy.intercept('POST', '/api/validation/description*').as('validate');
 
-        const invalidMsg = new Array(3000).fill('a').join('');
+        const invalidMsg = new Array(3001).fill('a').join('');
         cy.loginAsProxyUser();
         cy.visit('/progress-and-rankings/');
         cy.get('[data-cy=project-link-proj1]').click();
@@ -1023,36 +653,45 @@ describe('Navigation Tests', () => {
         cy.get('[aria-label="Close"]').click();
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
         cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
-        cy.get('[data-cy="cancelBtn"]').click();
+        cy.get('[data-cy="closeDialogBtn"]').click();
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
 
         cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
         cy.contains('Contact This is project 1').should('be.visible');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Submit');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.disabled');
+        cy.get('[data-cy="saveDialogBtn"]').should('contain.text', 'Submit');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,500 characters remaining');
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill(invalidMsg);
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.disabled');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '-500 characters remaining');
 
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('message message jabberwocky jabberwocky message message');
         cy.wait('@validate');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.disabled');
-        cy.get('[data-cy="contactOwnersInput_errMsg"]').should('be.visible');
-        cy.get('[data-cy="contactOwnersInput_errMsg"]').should('contain.text', 'paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="messageError"]').should('be.visible');
+        cy.get('[data-cy="messageError"]').should('contain.text', 'paragraphs may not contain jabberwocky');
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,475 characters remaining');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.enabled');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click();
         cy.wait('@contact');
-        cy.get('[data-cy="cancelBtn"]').should('not.exist');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Ok');
+        cy.get('[data-cy="saveDialogBtn"]').should('not.exist');
+        cy.get('[data-cy="closeDialogBtn"]').should('contain.text', 'OK');
         cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'Message sent!');
         cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'The Project Administrator(s) of This is project 1 will be notified of your question via email.');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
+        cy.get('[data-cy="closeDialogBtn"]').click();
         cy.wait(500); //wait for animations to complete
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
     });
+
+    it('do not show contact project admins button if email service is diabled', () => {
+        cy.intercept('/public/isFeatureSupported?feature=emailservice', 'false').as('isEmailServiceSupported');
+        cy.visit('/progress-and-rankings/projects/proj1');
+        cy.wait('@isEmailServiceSupported')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="pointHistoryChartWithData"]')
+        cy.wait(3000)
+        cy.get('[data-cy="contactOwnerBtn"]').should('not.exist');
+    })
 
     it('Send email to project owner', () => {
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
@@ -1065,16 +704,16 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,475 characters remaining');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.enabled');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click();
         cy.wait('@contact');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Ok');
+        cy.get('[data-cy="closeDialogBtn"]').should('contain.text', 'OK');
         cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'Message sent!');
         cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'The Project Administrator(s) of This is project 3 will be notified of your question via email.');
-        cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
+        cy.get('[data-cy="closeDialogBtn"]').click();
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
         cy.getEmails().then((emails) => {
-                expect(emails[0].textAsHtml).to.contain('aaa bbb this is a message');
+                expect(emails[0].html).to.contain('aaa bbb this is a message');
         });
     });
 });

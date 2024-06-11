@@ -53,6 +53,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const subjectDisplayName = computed(() => config.value.subjectDisplayName || 'Subject')
   const groupDisplayName = computed(() => config.value.groupDisplayName || 'Group')
   const skillDisplayName = computed(() => config.value.skillDisplayName || 'Skill')
+  const projectName = computed(() => config.value.projectName || route.params.projectId)
 
 
   const maxSelfReportMessageLength = computed(() => config.value.maxSelfReportMessageLength)
@@ -73,6 +74,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     skillDisplayName,
     internalBackButton,
     isSummaryOnly,
-    userId
+    userId,
+    projectName
   }
 })

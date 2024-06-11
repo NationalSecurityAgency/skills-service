@@ -17,6 +17,7 @@ import { useAccessState } from '@/stores/UseAccessState.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import ReminderMessage from '@/components/utils/misc/ReminderMessage.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import ProjectExpirationWarning from '@/components/projects/ProjectExpirationWarning.vue'
 
 const props = defineProps(['project', 'disableSortControl'])
 const appConfig = useAppConfig()
@@ -54,24 +55,11 @@ const minimumPoints = computed(() => {
 const isRootUser = computed(() => {
   return accessState.isRoot;
 });
-const expirationDate = computed(() => {
-  if (!projectInternal.value.expiring) {
-    return '';
-  }
-  const gracePeriodInDays = appConfig.expirationGracePeriod;
-  const expires = dayjs(projectInternal.value.expirationTriggered).add(gracePeriodInDays, 'day').startOf('day');
-  return expires.format('YYYY-MM-DD HH:mm');
-});
 const isReadOnlyProj = computed(() => {
   return UserRolesUtil.isReadOnlyProjRole(projectInternal.value.userRole);
 });
 
 // methods
-const fromExpirationDate = () => {
-  return dayjs()
-      .startOf('day')
-      .to(dayjs(expirationDate));
-};
 const createCardOptions = () => {
   stats.value = [{
     label: 'Subjects',
@@ -153,16 +141,6 @@ const unpin = () => {
         projectInternal.value.pinned = false;
         pinned.value = false;
         emit('pin-removed', projectInternal);
-      });
-};
-const keepIt = () => {
-  cancellingExpiration.value = true;
-  ProjectService.cancelUnusedProjectDeletion(projectInternal.value.projectId)
-      .then(() => {
-        projectInternal.value.expiring = false;
-      })
-      .finally(() => {
-        cancellingExpiration.value = false;
       });
 };
 const moveDown = () => {
@@ -265,13 +243,7 @@ defineExpose({
           <ProjectCardFooter class="mt-4" :project="projectInternal"/>
         </div>
 
-        <div v-if="projectInternal.expiring" data-cy="projectExpiration" class="w-100 text-center alert-danger p-2 mt-2">
-              <span class="mr-2" v-tooltip="'This Project has not been used recently, ' +
-               'it will  be deleted unless you explicitly retain it'">Project has not been used in over <b>{{appConfig.expireUnusedProjectsOlderThan}} days</b> and will be deleted <b>{{ fromExpirationDate() }}</b>.</span>
-          <Button @click="keepIt" data-cy="keepIt" size="sm" variant="alert" :aria-label="'Keep Project '+ projectInternal.name">
-            <span class="d-none d-sm-inline">Keep It</span> <SkillsSpinner v-if="cancellingExpiration" small style="font-size:1rem"/><i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
-          </Button>
-        </div>
+        <project-expiration-warning :project="projectInternal" @extended="projectInternal.expiring = false" />
         <ReminderMessage
           v-if="warningMsgAboutPoints"
           :id="`projectCardWarning_${projectInternal.projectId}`"

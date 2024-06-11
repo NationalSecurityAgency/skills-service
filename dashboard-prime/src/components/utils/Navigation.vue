@@ -28,6 +28,7 @@ const navOnSmallScreen = (changeEvent) => {
         :options="navItems"
         @change="navOnSmallScreen"
         optionLabel="name"
+        data-cy="navSmallScreenExpandMenu"
         placeholder="Navigation"
         class="w-full md:w-14rem">
         <template #option="slotProps">

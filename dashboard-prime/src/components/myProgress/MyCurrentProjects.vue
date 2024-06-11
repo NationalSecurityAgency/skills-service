@@ -1,10 +1,11 @@
 <script setup>
 import { nextTick, onMounted, ref } from 'vue'
 import { useMyProgressState } from '@/stores/UseMyProgressState.js'
-import { useElementHelper } from '@/components/utils/inputForm/UseElementHelper.js';
+import { useElementHelper } from '@/components/utils/inputForm/UseElementHelper.js'
 import ProjectService from '@/components/projects/ProjectService.js'
 import ProjectLinkCard from '@/components/myProgress/ProjectLinkCard.vue'
 import Sortable from 'sortablejs'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 
 const myProgressState = useMyProgressState()
 const elementHelper = useElementHelper()
@@ -12,34 +13,15 @@ const sortOrderLoading = ref(false)
 const sortOrderLoadingProjectId = ref(-1)
 
 const updateSortAndReloadProjects = (updateInfo) => {
-  const currentIndex = myProgressState.myProjects.sort((a, b) => {
-    if (a.displayOrder > b.displayOrder) {
-      return 1
-    }
-    if (b.displayOrder > a.displayOrder) {
-      return -1
-    }
-    return 0
-  })
-    .findIndex((item) => item.projectId === updateInfo.projectId)
+  const currentIndex = myProgressState.myProjects.findIndex((item) => item.projectId === updateInfo.projectId)
   const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1
-  projectOrderUpdate(updateInfo.projectId, newIndex)
-    .then(() => {
-
-    })
-  // if (newIndex >= 0 && (newIndex) < this.myProjects.length) {
-  //   this.loading = true
-  //   ProjectService.moveMyProject(updateInfo.projectId, newIndex)
-    // .finally(() => {
-    //   this.loadSummaryAndEnableSummary()
-    //     .then(() => {
-    //       const foundRef = this.$refs[`proj${updateInfo.projectId}`];
-    //       this.$nextTick(() => {
-    //         foundRef[0].focusSortControl();
-    //       });
-    //     });
-    // });
-  // }
+  if (newIndex >= 0 && newIndex < myProgressState.myProjects.length) {
+    projectOrderUpdate(updateInfo.projectId, newIndex)
+      .finally(() => {
+        const idToFocusOn = `sortControlHandle-${updateInfo.projectId}`
+        nextTick(() => document.getElementById(idToFocusOn)?.focus())
+      })
+  }
 }
 
 onMounted(() => {
@@ -58,50 +40,67 @@ const enableProjectDropAndDrop = () => {
             projectOrderUpdate(event.item.id, event.newIndex)
           }
         })
-      });
+      })
     })
   }
 }
 
 const projectOrderUpdate = (projectId, newIndex) => {
-  sortOrderLoadingProjectId.value = projectId;
-  sortOrderLoading.value = true;
+  sortOrderLoadingProjectId.value = projectId
+  sortOrderLoading.value = true
+
+  const currentProjects = myProgressState.myProjects
+  const currentIndex = currentProjects.findIndex((item) => item.projectId === projectId)
+
+  const itemToMove = currentProjects[currentIndex]
+  const updatedProjects = [...currentProjects]
+
+  updatedProjects.splice(currentIndex, 1)
+  updatedProjects.splice(newIndex, 0, itemToMove)
+
   return ProjectService.moveMyProject(projectId, newIndex)
     .finally(() => {
-      sortOrderLoading.value = false;
-    });
+      sortOrderLoading.value = false
+      myProgressState.myProjects = updatedProjects
+    })
 }
 
 </script>
 
 <template>
-  <div class="grid" id="projectCards">
-    <div v-for="(proj, index) in myProgressState.myProjects"
-         :key="proj.projectName"
-         :id="proj.projectId"
-         class="col">
-      <!--      <b-overlay :show="sortOrderLoading" rounded="sm" opacity="0.4">-->
-      <!--        <template #overlay>-->
-      <!--          <div class="text-center">-->
-      <!--            <div v-if="proj.projectId===sortOrderLoadingProjectId">-->
-      <!--              <div class="text-info text-uppercase mb-1">Updating sort order!</div>-->
-      <!--              <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info" />-->
-      <!--            </div>-->
-      <!--          </div>-->
-      <!--        </template>-->
+  <BlockUI :blocked="sortOrderLoading">
+    <skills-spinner :is-loading="true"
+                    v-if="sortOrderLoading"
+                    aria-label="Updating sort order"
+                    class="loading-indicator" />
+    <div class="grid" id="projectCards">
 
-      <project-link-card
-
-        :ref="`proj${proj.projectId}`"
-        :display-order="index"
-        @sort-changed-requested="updateSortAndReloadProjects"
-        :proj="proj"
-        class="fadein animation-duration-500" />
-      <!--      </b-overlay>-->
+      <div v-for="(proj, index) in myProgressState.myProjects"
+           :key="proj.projectName"
+           :id="proj.projectId"
+           class="col">
+        <project-link-card
+          :ref="`proj${proj.projectId}`"
+          :display-order="index"
+          @sort-changed-requested="updateSortAndReloadProjects"
+          :proj="proj"
+          class="fadein animation-duration-500" />
+      </div>
     </div>
-  </div>
+  </BlockUI>
 </template>
 
 <style scoped>
-
+.loading-indicator {
+  position: absolute;
+  z-index: 999;
+  height: 2em;
+  width: 2em;
+  overflow: show;
+  margin: auto;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
 </style>

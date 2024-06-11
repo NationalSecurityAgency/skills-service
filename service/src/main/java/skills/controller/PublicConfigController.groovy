@@ -31,6 +31,7 @@ import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
 import skills.services.FeatureService
 import skills.services.SystemSettingsService
+import skills.services.admin.ProjAdminService
 import skills.services.admin.UserCommunityService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
@@ -67,6 +68,9 @@ class PublicConfigController {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    ProjAdminService projAdminService
 
     @Autowired
     FeatureService featureService
@@ -177,6 +181,8 @@ class PublicConfigController {
                 res["displayProjectDescription"] = false
             }
 
+            String name = projAdminService.lookupProjectName(projectId)
+            res["projectName"] = name
         }
         res['enablePageVisitReporting'] = enablePageVisitReporting
         return res

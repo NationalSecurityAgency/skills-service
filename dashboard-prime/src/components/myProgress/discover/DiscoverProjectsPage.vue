@@ -124,7 +124,7 @@ const contactProject = (name, id) => {
           <span class="text-2xl uppercase" role="heading" aria-level="1">Projects Catalog</span>
         </div>
         <div>
-          <router-link :to="{ name: 'MyProgressPage' }">
+          <router-link :to="{ name: 'MyProgressPage' }" tabindex="-1">
             <SkillsButton
               label="Back to My Progress"
               icon="fas fa-arrow-alt-circle-left"

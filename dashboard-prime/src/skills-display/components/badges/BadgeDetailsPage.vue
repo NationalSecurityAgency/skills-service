@@ -1,7 +1,6 @@
 <script setup>
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
-import { ref, onMounted, computed, watch } from 'vue'
-import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
+import { computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import BadgeCatalogItem from '@/skills-display/components/badges/BadgeCatalogItem.vue'
 import SkillsProgressList from '@/skills-display/components/progress/SkillsProgressList.vue'
@@ -10,47 +9,28 @@ import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import GlobalBadgeProjectLevels from '@/skills-display/components/badges/GlobalBadgeProjectLevels.vue'
 import Prerequisites from '@/skills-display/components/skill/prerequisites/Prerequisites.vue'
 
-const skillsDisplayService = useSkillsDisplayService()
 const route = useRoute()
 const summaryAndSkillsState = useSkillsDisplaySubjectState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 
-// const loadingBadge = ref(true)
-const loadingPrerequisites = ref(true)
 const badge = computed(() => summaryAndSkillsState.subjectSummary)
-const dependencies = ref([])
-
-const isLoading = computed(() => summaryAndSkillsState.loadingBadgeSummary || loadingPrerequisites.value)
+const isLoading = computed(() => summaryAndSkillsState.loadingBadgeSummary)
 
 onMounted(() => {
   loadBadgeInfo()
 })
 watch( () => route.params.badgeId, () => {
-  loadingPrerequisites.value = true
   loadBadgeInfo()
 });
 const loadBadgeInfo = () => {
   const isGlobalBadge = skillsDisplayInfo.isGlobalBadgePage.value
   summaryAndSkillsState.loadBadgeSummary(route.params.badgeId, isGlobalBadge)
-  if (!isGlobalBadge) {
-    loadDependencies()
-  } else {
-    loadingPrerequisites.value = false
-  }
-}
-const loadDependencies = () => {
-  loadingPrerequisites.value = true
-  return skillsDisplayService.getSkillDependencies(route.params.badgeId)
-    .then((res) => {
-      dependencies.value = res.dependencies
-    }).finally(() => {
-      loadingPrerequisites.value = false
-    })
 }
 
 const locked = computed(() => {
   return badge.value.dependencyInfo && !badge.value.dependencyInfo.achieved;
 })
+const badgeTitle = computed(() => skillsDisplayInfo.isGlobalBadgePage.value ? 'Global Badge Details' : 'Badge Details')
 </script>
 
 <template>
@@ -58,7 +38,7 @@ const locked = computed(() => {
     <skills-spinner :is-loading="isLoading" class="mt-8" />
 
     <div v-if="!isLoading">
-      <skills-title>Badge Details</skills-title>
+      <skills-title>{{ badgeTitle }}</skills-title>
 
       <Card class="mt-3">
         <template #content>
