@@ -65,14 +65,18 @@ describe('Project and Ranking Views are disabled Tests', () => {
           .should('not.exist');
     });
 
-    it.skip('Project level enable prod-mode setting must NOT be shown', () => {
+    it('Project level enable prod-mode setting must NOT be shown', () => {
         cy.createProject(1);
 
-        const addToCatalogLabel = 'Add to the Project Catalog'
+        const addToCatalogLabel = '[aria-label="Add to the Project Catalog"]'
+        const notInCatalogLabel = '[aria-label="Not in the Project Catalog"]'
+        const notEnabledLabel = '[aria-label="Not Enabled"]'
 
         cy.visit('/administrator/projects/proj1/settings');
-        cy.contains('[data-cy=projectVisibilitySelector]', addToCatalogLabel)
-            .should('exist');
+        cy.get('[data-cy="projectVisibilitySelector"]').click()
+        cy.get(`[data-pc-section="panel"] ${addToCatalogLabel}`).should('exist')
+        cy.get(`[data-pc-section="panel"] ${notInCatalogLabel}`).should('exist')
+        cy.get(`[data-pc-section="panel"] ${notEnabledLabel}`).should('not.exist')
         // cy.get('[ data-cy="productionModeSetting"]').should('exist');
         cy.intercept('GET', '/public/config', (req) => {
             req.reply({
@@ -85,23 +89,24 @@ describe('Project and Ranking Views are disabled Tests', () => {
 
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@getConfig');
-        cy.contains('[data-cy=projectVisibilitySelector]', addToCatalogLabel)
-            .should('not.exist');
-
+        cy.get('[data-cy="projectVisibilitySelector"]').click()
+        cy.get(`[data-pc-section="panel"] ${addToCatalogLabel}`).should('not.exist')
+        cy.get(`[data-pc-section="panel"] ${notInCatalogLabel}`).should('not.exist')
+        cy.get(`[data-pc-section="panel"] ${notEnabledLabel}`).should('exist')
     });
 
-    it.skip('do not show Progress and Ranking in the breadcrumb when those views are disabled', function () {
+    it('do not show Progress and Ranking in the breadcrumb when those views are disabled', function () {
         cy.createProject(1);
         cy.visit('/progress-and-rankings/projects/proj1/');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="breadcrumbItemValue"]')
             .its('length')
             .should('eq', 2);
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="breadcrumbItemValue"]')
             .eq(0)
             .should('contain.text', 'Progress And Rankings');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="breadcrumbItemValue"]')
             .eq(1)
-            .should('contain.text', 'Project: proj1');
+            .should('contain.text', 'proj1');
 
         cy.intercept('GET', '/public/config', (req) => {
             req.reply({
@@ -112,61 +117,13 @@ describe('Project and Ranking Views are disabled Tests', () => {
         })
             .as('getConfig');
         cy.visit('/progress-and-rankings/projects/proj1/');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="breadcrumbItemValue"]')
             .its('length')
             .should('eq', 1);
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="breadcrumbItemValue"]')
             .eq(0)
-            .should('contain.text', 'Project: proj1');
+            .should('contain.text', 'proj1');
     });
 
-    it.skip('Provide clear instructions how to create a new project - root user', function () {
-        cy.intercept('GET', '/public/config', (req) => {
-            req.reply({
-                body: {
-                    rankingAndProgressViewsEnabled: 'false',
-                },
-            });
-        })
-            .as('getConfig');
-
-        cy.logout();
-        cy.fixture('vars.json')
-            .then((vars) => {
-                cy.login(vars.rootUser, vars.defaultPass);
-            });
-        cy.visit('/administrator/');
-        cy.contains('No Projects Yet...');
-        cy.contains('A Project represents a gamified training profile that consists of skills divided into subjects');
-        cy.get('[data-cy="firstNewProjectButton"]')
-            .click();
-        cy.get('[data-cy="projectName"]')
-            .type('one');
-        cy.get('[data-cy="saveProjectButton"]')
-            .click();
-        cy.get('[data-cy="projCard_one_manageBtn"]');
-    });
-
-    it.skip('Provide clear instructions how to create a new project - regular user', function () {
-        cy.intercept('GET', '/public/config', (req) => {
-            req.reply({
-                body: {
-                    rankingAndProgressViewsEnabled: 'false',
-                },
-            });
-        })
-            .as('getConfig');
-
-        cy.visit('/administrator/');
-        cy.contains('No Projects Yet...');
-        cy.contains('A Project represents a gamified training profile that consists of skills divided into subjects');
-        cy.get('[data-cy="firstNewProjectButton"]')
-            .click();
-        cy.get('[data-cy="projectName"]')
-            .type('one');
-        cy.get('[data-cy="saveProjectButton"]')
-            .click();
-        cy.get('[data-cy="projCard_one_manageBtn"]');
-    });
 });
 

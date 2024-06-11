@@ -15,6 +15,7 @@ import { useProjDetailsState } from '@/stores/UseProjDetailsState.js'
 import UserRolesUtil from '@/components/utils/UserRolesUtil'
 import Avatar from 'primevue/avatar'
 import ProjectShareDialog from '@/components/projects/ProjectShareDialog.vue'
+import ProjectExpirationWarning from '@/components/projects/ProjectExpirationWarning.vue'
 
 // const props = defineProps(['project'])
 const router = useRouter()
@@ -149,15 +150,6 @@ const headerOptions = computed(() => {
 const minimumPoints = computed(() => {
   return appConfig.minimumProjectPoints
 })
-const expirationDate = computed(() => {
-  if (!project.value.expiring) {
-    return ''
-  }
-  const gracePeriodInDays = appConfig.expirationGracePeriod.value
-  const expires = dayjs(project.value.expirationTriggered).add(gracePeriodInDays, 'day').startOf('day')
-  return expires.format('YYYY-MM-DD HH:mm')
-})
-
 
 const copyAndDisplayShareProjInfo = () => {
   const host = window.location.origin
@@ -167,9 +159,6 @@ const copyAndDisplayShareProjInfo = () => {
   })
 }
 
-const fromExpirationDate = () => {
-  return dayjs().startOf('day').to(dayjs(expirationDate))
-}
 const projectSaved = (updatedProject) => {
   const origProjId = project.value.projectId
   ProjectService.saveProject(updatedProject).then(() => {
@@ -189,15 +178,6 @@ const projectSaved = (updatedProject) => {
   })
 }
 
-const keepIt = () => {
-  cancellingExpiration.value = true
-  ProjectService.cancelUnusedProjectDeletion(route.params.projectId).then(() => {
-    // loadProjects();
-  }).finally(() => {
-    cancellingExpiration.value = false
-  })
-}
-
 const setProject = (newProject) => {
   projectDetailsState.project = newProject
 }
@@ -208,19 +188,7 @@ const setProject = (newProject) => {
   <div ref="mainFocus">
     <PageHeader :loading="isLoading" :options="headerOptions">
       <template #banner v-if="project && project.expiring && !isReadOnlyProj">
-        <div data-cy="projectExpiration" class="w-100 text-center alert-danger p-2 mb-3">
-          <span class="mr-2"
-                aria-label="This Project has not been used recently, it will  be deleted unless you explicitly retain it"
-                v-tooltip="'This Project has not been used recently, it will  be deleted unless you explicitly retain it'">
-            Project has not been used in over <b>{{ appConfig.expireUnusedProjectsOlderThan }} days</b> and will be deleted <b>{{
-              fromExpirationDate()
-            }}</b>.
-          </span>
-        </div>
-        <SkillsButton @click="keepIt" data-cy="keepIt" size="small" variant="alert"
-                      :aria-label="'Keep Project '+ project.value.name" label="Keep It"
-                      :icon="!cancellingExpiration ? 'fas fa-shield-alt' : ''">
-        </SkillsButton>
+        <project-expiration-warning :project="project" @extended="project.expiring = false" />
       </template>
       <template #subTitle v-if="project">
         <div v-if="project.userCommunity" class="mb-3" data-cy="userCommunity">
