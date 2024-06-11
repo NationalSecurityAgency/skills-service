@@ -182,10 +182,10 @@ const reloadTable = () => {
                   {{ slotProps.data.userName }}
                 </span>
               </div>
-              <div class="flex">
-<!--                <router-link :to="{ name: 'ClientDisplayPreview', params: { projectId: projectId, userId: data.item.userId } }">-->
+              <div class="flex ml-2">
+                <router-link :to="{ name: 'SkillsDisplaySkillsDisplayPreviewProject', params: { projectId: route.paramsprojectId, userId: slotProps.data.userId } }">
                   <SkillsButton size="small" data-cy="achievementsNavigator-clientDisplayBtn"><i class="fa fa-eye"/></SkillsButton>
-<!--                </router-link>-->
+                </router-link>
               </div>
             </div>
           </template>

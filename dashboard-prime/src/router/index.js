@@ -53,7 +53,6 @@ import InceptionSkills from '@/components/inception /InceptionSkills.vue'
 import UserPage from '@/components/users/UserPage.vue'
 import SkillsDisplayPreview from '@/components/users/SkillsDisplayPreview.vue'
 import UserSkillsPerformed from '@/components/users/UserSkillsPerformed.vue'
-import createSkillsDisplayPreviewRoutes from '@/router/SkillsDisplayPreviewRoutes.js'
 import PrivateProjectAccessRequestPage from '@/components/access/invite-only/PrivateProjectAccessRequestPage.vue'
 import JoinProjectPage from '@/components/access/invite-only/JoinProjectPage.vue'
 import NotFoundPage from '@/components/utils/NotFoundPage.vue';

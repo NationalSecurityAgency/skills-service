@@ -19,7 +19,7 @@ const props = defineProps({
   },
   itemType: {
     type: String,
-    required: true,
+    required: false,
   },
   validationText: {
     type: String,
@@ -106,7 +106,7 @@ const hasSlot = computed(() => {
       <div data-cy="removalSafetyCheckMsg">
         <div v-if="!removalNotAvailable">
           {{ removalTextPrefix }} <span
-          class="font-bold text-primary">{{ itemName }}</span> {{ itemType}}.
+          class="font-bold text-primary">{{ itemName }}</span><span v-if="itemType"> {{ itemType }}</span>.
         </div>
         <Message v-if="hasSlot" severity="warn" :closable="false">
           <div class="pl-2"><slot /></div>
