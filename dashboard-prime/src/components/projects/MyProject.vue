@@ -28,7 +28,7 @@ const announcer = useSkillsAnnouncer()
 
 // data items
 const pinned = ref(false);
-const projectInternal = ref({ ...props.project });
+const projectInternal = computed(() => props.project );
 const stats = ref([]);
 const showEditProjectModal = ref(false);
 const showCopyProjectModal = ref(false);

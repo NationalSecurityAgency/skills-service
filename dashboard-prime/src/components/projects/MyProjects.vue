@@ -118,23 +118,26 @@ const openProjectModal = (project = {}, isEdit = false) => {
 provide('createOrUpdateProject', openProjectModal)
 
 const projectAdded = (project) => {
+
   const existingIndex = projects.value.findIndex((item) => item.projectId === project.originalProjectId)
   if (existingIndex >= 0) {
+    console.log(`edit: ${existingIndex} project at this indeex`)
     projects.value.splice(existingIndex, 1, project)
+    announcer.polite(`Project ${project.name} has been updated`);
   } else {
     projects.value.push(project)
     SkillsReporter.reportSkill('CreateProject');
+    announcer.polite(`Project ${project.name} has been created`);
   }
-  announcer.polite(`Project ${project.name} has been created`);
 };
 const projectEdited = (editedProject) => {
   // ProjectService.saveProject(editedProject).then(() => {
-    loadProjects().then(() => {
+  //   loadProjects().then(() => {
       // this.$refs.projectsTable.focusOnEditButton(editedProject.projectId);
-      nextTick(() => {
-        announcer.polite(`Project ${editedProject.name} has been edited`);
-      });
-    });
+      // nextTick(() => {
+      //   announcer.polite(`Project ${editedProject.name} has been edited`);
+      // });
+    // });
   // });
 };
 const enableDropAndDrop = () => {
@@ -211,12 +214,9 @@ const saveProject = (values, isEdit, projectId) => {
         }
         return ProjectService.getProject(projRes.projectId)
           .then((retrievedProj) => {
-            if (!isEdit) {
-              projectAdded(retrievedProj);
-            } else {
-              projectEdited(retrievedProj);
-            }
-            return {...retrievedProj, originalProjectId: projectId}
+            const projWithOriginalId = { ...retrievedProj, originalProjectId: projectId }
+            projectAdded(projWithOriginalId)
+            return projWithOriginalId
           })
       })
 }

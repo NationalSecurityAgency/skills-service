@@ -44,13 +44,13 @@ describe('Projects Modal Validation Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
 
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]')
             .type('My New test Project');
         cy.get('[data-cy=projectNameError]')
-            .contains('The value for the Project Name is already taken')
+            .contains('Project Name already exists')
             .should('be.visible');
-        cy.get('[data-cy=saveProjectButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
     });
 
@@ -67,19 +67,18 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]')
             .type('Other Project Name');
-        cy.get('[data-cy="enableIdInput"]')
-            .click({force: true});
+        cy.get('[data-cy="enableIdInput"] input').click();
         cy.getIdField()
             .clear()
             .type('MyNewtestProject');
 
         cy.get('[data-cy=idError]')
-            .contains('The value for the Project ID is already taken')
+            .contains('Project ID already exists')
             .should('be.visible');
-        cy.get('[data-cy=saveProjectButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
     });
 
@@ -98,7 +97,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]')
             .type(providedName);
         cy.getIdField()
@@ -107,15 +106,15 @@ describe('Projects Modal Validation Tests', () => {
         cy.clickSave();
         cy.wait('@postNewProject');
 
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]')
             .type(providedName.toLowerCase());
 
         cy.get('[data-cy=projectNameError')
-            .contains('The value for the Project Name is already taken')
+            .contains('Project Name already exists')
             .should('be.visible');
 
-        cy.get('[data-cy=saveProjectButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
     });
 
@@ -128,13 +127,13 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-        cy.clickButton('Project');
-        cy.get('[data-cy="enableIdInput"]')
-            .click({force: true});
+        cy.get('[data-cy="newProjectButton"]').click()
+        cy.get('[data-cy="enableIdInput"] input')
+            .click();
         cy.getIdField()
             .type('InitValue');
 
-        cy.get('[data-cy=saveProjectButton')
+        cy.get('[data-cy=saveDialogBtn')
             .should('be.disabled');
     });
 
@@ -147,18 +146,18 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
         ;
         cy.get('[data-cy="projectName"]')
             .type('New Project');
-        cy.get('[data-cy="enableIdInput"]')
-            .click({force: true});
+        cy.get('[data-cy="enableIdInput"] input')
+            .click();
         cy.getIdField()
             .clear();
         cy.get('[data-cy=idError]')
-            .contains('Project ID is required')
+            .contains('Project ID is a required field')
             .should('be.visible');
-        cy.get('[data-cy=saveProjectButton')
+        cy.get('[data-cy=saveDialogBtn')
             .should('be.disabled');
     });
 
@@ -171,34 +170,34 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
 
         cy.get('[data-cy="projectName"]')
           .type('Great Name');
 
         cy.get('[data-cy="projectNameError"]')
           .should('not.be.visible');
-        cy.get('[data-cy="saveProjectButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
           .should('be.enabled');
 
         cy.get('[data-cy="projectName"]')
           .type('{selectall}(A) Updated Project Name');
         cy.get('[data-cy="projectNameError"]')
           .contains('Project Name - names may not contain (A)');
-        cy.get('[data-cy="saveProjectButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
           .should('be.disabled');
 
         cy.get('[data-cy="projectName"]')
           .type('{selectall}(B) A Updated Project Name');
         cy.get('[data-cy="projectNameError"]')
           .should('not.be.visible');
-        cy.get('[data-cy="saveProjectButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
           .should('be.enabled')
     });
 
     it('Project name must be > 3 chars < 50 chars', () => {
-        const minLenMsg = 'Project Name cannot be less than 3 characters.';
-        const maxLenMsg = 'Project Name cannot exceed 50 characters.';
+        const minLenMsg = 'Project Name must be at least 3 characters';
+        const maxLenMsg = 'Project Name must be at most 50 characters';
         const projId = 'ProjectId';
         cy.intercept('POST', `/app/projects/${projId}`)
             .as('postNewProject');
@@ -211,10 +210,10 @@ describe('Projects Modal Validation Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
 
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
 
-        cy.get('[data-cy="enableIdInput"]')
-            .click({force: true});
+        cy.get('[data-cy="enableIdInput"] input')
+            .click();
         cy.getIdField()
             .type('ProjectId');
         cy.get('[data-cy="projectName"]')
@@ -261,9 +260,9 @@ describe('Projects Modal Validation Tests', () => {
             });
         })
             .as('loadConfig');
-        const minLenMsg = 'Project ID cannot be less than 3 characters.';
-        const maxLenMsg = 'Project ID cannot exceed 50 characters.';
-        const requiredMsg = 'Project ID is required';
+        const minLenMsg = 'Project ID must be at least 3 characters';
+        const maxLenMsg = 'Project ID must be at most 50 characters';
+        const requiredMsg = 'Project ID is a required field';
         const projName = 'Project Name';
 
         const longInvalid = Array(51)
@@ -282,10 +281,10 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
 
-        cy.get('[data-cy="enableIdInput"]')
-            .click({force: true});
+        cy.get('[data-cy="enableIdInput"] input')
+            .click();
 
         cy.getIdField()
             .type('12');
@@ -339,7 +338,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.get('[data-cy="editProjBtn"]').click()
         cy.wait('@validateDesc')
-        cy.get('[data-cy="projectDescriptionError"]').contains('Mocked up validation failure')
+        cy.get('[data-cy="descriptionError"]').contains('Mocked up validation failure')
     });
 
     it('null word is not allowed for project ID or project name', () => {
@@ -348,12 +347,12 @@ describe('Projects Modal Validation Tests', () => {
         cy.get('[data-cy="projectName"]')
             .type('null');
         cy.get('[data-cy=projectNameError]')
-            .contains('Null is not allowed for Project Name')
+            .contains('Null value is not allowed')
             .should('be.visible');
         cy.get('[data-cy="idError"]')
-            .contains('Null is not allowed for Project ID')
+            .contains('Null value is not allowed')
             .should('be.visible');
-        cy.get('[data-cy=saveProjectButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
         cy.get('[data-cy="projectName"]').clear().type('one')
         cy.get('[data-cy=projectNameError]').should('not.be.visible')
@@ -363,12 +362,12 @@ describe('Projects Modal Validation Tests', () => {
         cy.get('[data-cy="projectName"]').clear()
             .type(' NUlL ');
         cy.get('[data-cy=projectNameError]')
-            .contains('Null is not allowed for Project Name')
+            .contains('Null value is not allowed')
             .should('be.visible');
         cy.get('[data-cy="idError"]')
-            .contains('Null is not allowed for Project ID')
+            .contains('Null value is not allowed')
             .should('be.visible');
-        cy.get('[data-cy=saveProjectButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
     });
 

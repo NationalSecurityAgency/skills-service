@@ -73,6 +73,10 @@ const initialLevelData = {
   points: props.level.points,
 };
 
+if (!props.isEdit) {
+  initialLevelData.percent = props.allLevels.reduce((max, level) => Math.max(max, level.percent), 0) +1;
+}
+
 const boundsValidator = (value) => {
   const gte = (value, compareTo) => value >= compareTo;
   const lte = (value, compareTo) => value <= compareTo;

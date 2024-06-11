@@ -233,7 +233,7 @@ describe('Projects Modal Management Tests', () => {
             .should('have.focus');
     });
 
-    it.skip('focus should be returned to project edit button', () => {
+    it('focus should be returned to project edit button', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -277,7 +277,7 @@ describe('Projects Modal Management Tests', () => {
         // cy.get(proj1EditBtn).should('have.focus');
     });
 
-    it.skip('new level dialog should return focus to new level button', () => {
+    it('new level dialog should return focus to new level button', () => {
 
         cy.intercept('GET', '/admin/projects/MyNewtestProject')
             .as('loadProject');
@@ -301,7 +301,7 @@ describe('Projects Modal Management Tests', () => {
             .click();
         cy.get('[data-cy=addLevel]')
             .click();
-        cy.get('[data-cy=cancelLevel]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy=addLevel]')
             .should('have.focus');
@@ -312,8 +312,7 @@ describe('Projects Modal Management Tests', () => {
 
         cy.get('[data-cy=addLevel]')
             .click();
-        cy.get('[aria-label=Close]')
-            .filter('.text-light')
+        cy.get('[data-pc-section="closebuttonicon"]')
             .click();
         cy.get('[data-cy=addLevel]')
             .should('have.focus');
@@ -321,7 +320,7 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .eq(0)
             .click();
-        cy.get('[data-cy=cancelLevel]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(0)
@@ -334,8 +333,7 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .eq(0)
             .click();
-        cy.get('[aria-label=Close]')
-            .filter('.text-light')
+        cy.get('[data-pc-section="closebuttonicon"]')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(0)
@@ -351,7 +349,7 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .eq(3)
             .click();
-        cy.get('[data-cy=cancelLevel]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(3)
@@ -364,8 +362,7 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .eq(3)
             .click();
-        cy.get('[aria-label=Close]')
-            .filter('.text-light')
+        cy.get('[data-pc-section="closebuttonicon"]')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(3)
@@ -379,7 +376,7 @@ describe('Projects Modal Management Tests', () => {
         // cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
     });
 
-    it.skip('project users input field submits on enter', () => {
+    it('project users input field submits on enter', () => {
         cy.createProject(1)
         cy.createSubject(1, 1)
         cy.createSkill(1, 1, 1)
