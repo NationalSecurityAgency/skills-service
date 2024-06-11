@@ -247,6 +247,7 @@ defineExpose({
         <ReminderMessage
           v-if="warningMsgAboutPoints"
           :id="`projectCardWarning_${projectInternal.projectId}`"
+          data-cy="projectCardWarning"
           severity="info">{{ warningMsgAboutPoints}}</ReminderMessage>
 
         <div v-if="!disableSortControl"
