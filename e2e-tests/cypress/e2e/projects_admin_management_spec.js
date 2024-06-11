@@ -137,7 +137,7 @@ describe('Projects Admin Management Tests', () => {
             .contains('Failed to add User Role');
     });
 
-    it.skip('Add Admin No Query', () => {
+    it('Add Admin No Query', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -157,13 +157,12 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProject');
 
-        cy.get('[data-cy="existingUserInput"]')
-            .type('{enter}');
+        cy.get('[data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click()
         cy.wait('@suggest');
         cy.wait(500);
-        cy.contains('root@skills.org')
-            .click();
-        cy.get('[data-cy="userRoleSelector"]') .select('Administrator');
+        cy.get('#existingUserInput_0').contains('root@skills.org').click();
+        cy.get('[data-cy="userRoleSelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdmin');
 
@@ -205,7 +204,7 @@ describe('Projects Admin Management Tests', () => {
         }
     });
 
-    it.skip('Add and Remove Admin', () => {
+    it('Add and Remove Admin', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -229,9 +228,9 @@ describe('Projects Admin Management Tests', () => {
             .type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('.vs__dropdown-option').contains('root@skills.org')
-            .click();
-        cy.get('[data-cy="userRoleSelector"]') .select('Administrator');
+        cy.get('#existingUserInput_0').contains('root').click();
+        cy.get('[data-cy="userRoleSelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdmin');
 
@@ -254,7 +253,7 @@ describe('Projects Admin Management Tests', () => {
             .as('cyRows1');
     });
 
-    it.skip('Add Admin - forward slash character does not cause error', () => {
+    it('Add Admin - forward slash character does not cause error', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -280,7 +279,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@suggest');
     });
 
-    it.skip('Add Approver role then upgrade to Admin', () => {
+    it('Add Approver role then upgrade to Admin', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -306,9 +305,9 @@ describe('Projects Admin Management Tests', () => {
             .type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('.vs__dropdown-menu').contains('root@skills.org')
-            .click();
-        cy.get('[data-cy="userRoleSelector"]').select('Approver');
+        cy.get('#existingUserInput_0').contains('root').click();
+        cy.get('[data-cy="userRoleSelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Approver"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addApprover');
 
@@ -332,15 +331,17 @@ describe('Projects Admin Management Tests', () => {
         ], 5, true, null, false);
 
         cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`).click();
-        cy.get('[data-cy="roleDropDown_root@skills.org"]').select('Administrator');
+        cy.get('[data-cy="roleDropDown_root@skills.org"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="itemlabel"]').contains('Administrator').click();
         cy.wait('@addAdmin')
+        cy.get(`${tableSelector} thead th`).contains('User').click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Administrator' }],
             [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Administrator' }],
+            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Administrator' }],
         ], 5, true, null, false);
     });
 
-    it.skip('Existing projects are not suggested', () => {
+    it('Existing users are not suggested', () => {
         cy.register('newuser', 'password', false, 'some display name')
         cy.fixture('vars.json').then((vars) => {
             cy.logout()
@@ -370,17 +371,21 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('some');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('.vs__dropdown-menu').contains('some display name')
+        cy.get('[data-pc-section="list"] [data-pc-section="item"]').should('have.length', 1)
+        cy.get('[data-pc-section="list"]').contains('some display name')
             .click();
-        cy.get('[data-cy="userRoleSelector"]').select('Approver');
+        cy.get('[data-cy="userRoleSelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Approver"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
+
+
         cy.wait('@addApprover');
 
         cy.get('[data-cy="userCell_newuser"]').should("exist");
         cy.get('[data-cy="existingUserInput"]').type('some');
         cy.wait('@suggest');
         cy.wait(1500);
-        cy.get('.vs__dropdown-menu').contains('some display name').should('not.exist')
+        cy.get('[data-pc-section="list"] [data-pc-section="item"]').should('have.length', 0)
     });
 
 })

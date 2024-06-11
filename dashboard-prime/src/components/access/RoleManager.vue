@@ -70,25 +70,25 @@ onMounted(() => {
   loadData();
 });
 
+
+const sortInfo = ref({ sortOrder: 1, sortBy: 'userId' })
+const possiblePageSizes = [ 5, 10, 15, 20]
+const pageSize = ref(5)
 let table = ref({
   options: {
     busy: true,
-    sortBy: 'userId',
-    sortDesc: 1,
     pagination: {
       hideUnnecessary: true,
       server: false,
       currentPage: 1,
       totalRows: 1,
-      pageSize: 5,
-      possiblePageSizes: [5, 10, 15, 20],
     },
     tableDescription: `${props.roleDescription} table`,
   },
 });
 
-let data = ref([]);
-let userIds = ref([]);
+const data = ref([]);
+const userIds = computed(() => data.value.map((d) => d.userId));
 const selectedUser = ref(null);
 const isSaving = ref(false);
 const errNotification = ref({
@@ -130,19 +130,18 @@ function getRoleDisplay(roleName) {
   return 'Unknown';
 }
 
-function loadData() {
+const loadData = () => {
   table.value.options.busy = true;
   const pageParams = {
     limit: 200,
-    ascending: table.value.options.sortDesc === 1,
     page: 1,
-    orderBy: table.value.options.sortBy,
+    ascending: sortInfo.value.sortOrder === 1,
+    orderBy: sortInfo.value.sortBy
   };
   AccessService.getUserRoles(props.projectId, props.roles, pageParams).then((result) => {
     table.value.options.busy = false;
     data.value = result.data;
     table.value.options.pagination.totalRows = result.totalCount;
-    // userIds.value = result.data.map((u) => [u.userId, u.userIdForDisplay]).flatten();
   });
 }
 
@@ -225,7 +224,7 @@ function deleteUserRole(row) {
   table.value.options.busy = true;
   AccessService.deleteUserRole(row.projectId, row.userId, row.roleName).then(() => {
     data.value = data.value.filter((item) => item.userId !== row.userId);
-    userIds.value = userIds.value.filter((userId) => userId !== row.userId && userId !== row.userIdForDisplay);
+    userIds.value = userIds.value.filter((userId) => userId !== row.userId);
     emit('role-deleted', { userId: row.userId, role: row.roleName });
     table.value.options.busy = false;
     table.value.options.pagination.totalRows = data.value.length;
@@ -317,13 +316,20 @@ defineExpose({
             <strong>Error!</strong> Request could not be completed! {{ errNotification.msg }}
           </Message>
         </div>
-        <DataTable :value="data" :rowsPerPageOptions="[5, 10, 15, 20]" data-cy="roleManagerTable" striped-rows
-                   v-model:sort-field="table.options.sortBy"
-                   v-model:sort-order="table.options.sortDesc"
-                   paginator :rows="5">
+        <SkillsDataTable
+          :value="data"
+          :rowsPerPageOptions="possiblePageSizes"
+          data-cy="roleManagerTable"
+          tableStoredStateId="roleManagerTableSort"
+          striped-rows
+          paginator
+          v-model:sort-field="sortInfo.sortBy"
+          v-model:sort-order="sortInfo.sortOrder"
+          :rows="pageSize">
           <Column :header="roleDescription" field="userId" sortable :class="{'flex': responsive.md.value }">
             <template #header>
-              <span class="mr-2"><i class="fas fa-user skills-color-users" :class="colors.getTextClass(0)" aria-hidden="true"></i> </span>
+              <span class="mr-2"><i class="fas fa-user skills-color-users" :class="colors.getTextClass(0)"
+                                    aria-hidden="true"></i> </span>
             </template>
             <template #body="slotProps">
               <div :data-cy="`userCell_${slotProps.data.userId}`">
@@ -333,7 +339,8 @@ defineExpose({
           </Column>
           <Column header="Role" field="roleName" sortable :class="{'flex': responsive.md.value }">
             <template #header>
-              <span class="mr-2"><i class="fas fa-id-card text-danger" :class="colors.getTextClass(1)" aria-hidden="true"></i> </span>
+              <span class="mr-2"><i class="fas fa-id-card text-danger" :class="colors.getTextClass(1)"
+                                    aria-hidden="true"></i> </span>
             </template>
             <template #body="slotProps">
               <div v-if="!slotProps.data.isEdited">{{ getRoleDisplay(slotProps.data.roleName) }}</div>
@@ -383,7 +390,7 @@ defineExpose({
           <template #empty>
             <span class="flex align-items-center justify-content-center">There are no records to show</span>
           </template>
-        </DataTable>
+        </SkillsDataTable>
       </div>
     </template>
   </Card>

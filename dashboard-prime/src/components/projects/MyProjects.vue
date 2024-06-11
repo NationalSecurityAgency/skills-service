@@ -118,24 +118,17 @@ const openProjectModal = (project = {}, isEdit = false) => {
 provide('createOrUpdateProject', openProjectModal)
 
 const projectAdded = (project) => {
+
   const existingIndex = projects.value.findIndex((item) => item.projectId === project.originalProjectId)
   if (existingIndex >= 0) {
+    console.log(`edit: ${existingIndex} project at this indeex`)
     projects.value.splice(existingIndex, 1, project)
+    announcer.polite(`Project ${project.name} has been updated`);
   } else {
     projects.value.push(project)
     SkillsReporter.reportSkill('CreateProject');
+    announcer.polite(`Project ${project.name} has been created`);
   }
-  announcer.polite(`Project ${project.name} has been created`);
-};
-const projectEdited = (editedProject) => {
-  // ProjectService.saveProject(editedProject).then(() => {
-    loadProjects().then(() => {
-      // this.$refs.projectsTable.focusOnEditButton(editedProject.projectId);
-      nextTick(() => {
-        announcer.polite(`Project ${editedProject.name} has been edited`);
-      });
-    });
-  // });
 };
 const enableDropAndDrop = () => {
   if (projects.value && projects.value.length > 0 && projects.value.length < appConfig.numProjectsForTableView) {
@@ -211,12 +204,9 @@ const saveProject = (values, isEdit, projectId) => {
         }
         return ProjectService.getProject(projRes.projectId)
           .then((retrievedProj) => {
-            if (!isEdit) {
-              projectAdded(retrievedProj);
-            } else {
-              projectEdited(retrievedProj);
-            }
-            return {...retrievedProj, originalProjectId: projectId}
+            const projWithOriginalId = { ...retrievedProj, originalProjectId: projectId }
+            projectAdded(projWithOriginalId)
+            return projWithOriginalId
           })
       })
 }
@@ -276,12 +266,14 @@ const hasData = computed(() => {
       <div v-for="project of projects" :key="project.projectId" class="mb-3"
            :id="project.projectId">
         <BlockUI :blocked="sortOrder.loading">
-          <div class="text-center" :data-cy="`${project.projectId}_overlayShown`">
-            <div v-if="project.projectId===sortOrder.loadingProjectId && sortOrder.loading"
-                 data-cy="updatingSortMsg">
-              <div class="text-info text-uppercase mb-1">Updating sort order!</div>
-              <SkillsSpinner :is-loading="sortOrder.loading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info" />
-            </div>
+          <div v-if="sortOrder.loading"
+               class="text-center loading-indicator"
+               :data-cy="`${project.projectId}_overlayShown`">
+            <SkillsSpinner
+              v-if="project.projectId === sortOrder.loadingProjectId"
+              :is-loading="true"
+              data-cy="overlaySpinner"
+              aria-label="Updating sort order" />
           </div>
           <MyProject :id="`proj${project.projectId}`" tabindex="-1"
                      :project="project" :disable-sort-control="projects.length === 1"
@@ -319,4 +311,17 @@ const hasData = computed(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.loading-indicator {
+  position: absolute;
+  z-index: 999;
+  height: 2em;
+  width: 2em;
+  overflow: show;
+  margin: auto;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+</style>
