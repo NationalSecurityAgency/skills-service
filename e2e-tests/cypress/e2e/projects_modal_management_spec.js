@@ -227,7 +227,8 @@ describe('Projects Modal Management Tests', () => {
 
         cy.get('[data-cy=newProjectButton]')
             .click();
-        cy.get('[aria-label=Close]')
+        cy.get('[data-cy="projectName"]')
+        cy.get('[data-pc-group-section="headericon"][data-pc-section="closebutton"]')
             .click();
         cy.get('[data-cy=newProjectButton]')
             .should('have.focus');
@@ -269,12 +270,12 @@ describe('Projects Modal Management Tests', () => {
         cy.wait(600)
         cy.get(proj1EditBtn).should('have.focus');
 
-        // cy.get(proj1EditBtn).click();
-        // cy.get('[data-cy=projectName]').should('be.visible');
-        // cy.get('[aria-label=Close]').click();
-        // cy.get('[data-cy=projectName]').should('not.exist');
-        // cy.wait(600)
-        // cy.get(proj1EditBtn).should('have.focus');
+        cy.get(proj1EditBtn).click();
+        cy.get('[data-cy=projectName]').should('be.visible');
+        cy.get('[data-pc-group-section="headericon"][data-pc-section="closebutton"]').click()
+        cy.get('[data-cy=projectName]').should('not.exist');
+        cy.wait(600)
+        cy.get(proj1EditBtn).should('have.focus');
     });
 
     it('new level dialog should return focus to new level button', () => {
