@@ -217,27 +217,37 @@ describe('Client Display Tests', () => {
 
     it('clearly represent navigable components', () => {
         cy.cdVisit('?internalBackButton=true', true);
+        cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSubj(0, 'Subject 1',true);
+        cy.get('[data-cy="pointHistoryChartWithData"]')
 
         // make sure it can navigate into each skill via title
         cy.cdClickSkill(0, false);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(1, false);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(2, false);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(3, false);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
 
         // make sure it can navigate into each skill via progress bar
         cy.cdClickSkill(0);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(1);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(2);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(3);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
     });
 
     it('components should not be clickable in the summary only option', () => {
