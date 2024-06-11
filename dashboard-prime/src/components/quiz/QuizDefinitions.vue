@@ -166,7 +166,7 @@ defineExpose({
     <SkillsSpinner :is-loading="loading" class="my-5" />
     <NoContent2 v-if="!loading && !hasData"
                 title="No Quiz or Survey Definitions"
-                class="mt-5"
+                class="py-8"
                 message="Create a Survey or a Quiz to run independently or to associate to a skill in one of the existing SkillTree projects."
                 data-cy="noQuizzesYet"/>
     <div v-if="!loading && hasData">

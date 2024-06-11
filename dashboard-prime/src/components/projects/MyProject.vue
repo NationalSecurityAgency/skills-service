@@ -18,12 +18,14 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import ReminderMessage from '@/components/utils/misc/ReminderMessage.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import ProjectExpirationWarning from '@/components/projects/ProjectExpirationWarning.vue'
+import { useAdminProjectsState } from '@/stores/UseAdminProjectsState.js'
 
 const props = defineProps(['project', 'disableSortControl'])
 const appConfig = useAppConfig()
 const accessState = useAccessState()
 const emit = defineEmits(['project-deleted', 'copy-project', 'pin-removed', 'sort-changed-requested'])
 const numberFormat = useNumberFormat()
+const projectsState = useAdminProjectsState()
 const announcer = useSkillsAnnouncer()
 
 // data items
@@ -169,7 +171,11 @@ defineExpose({
   <div data-cy="projectCard" class="h-100">
     <Card :data-cy="`projectCard_${projectInternal.projectId}`" class="relative">
       <template #content>
-        <div class="flex flex-wrap">
+        <div class="flex flex-wrap"
+             :class="{
+            'flex-column gap-1 justify-content-left': projectsState.shouldTileProjectsCards,
+            '': !projectsState.shouldTileProjectsCards
+          }">
           <div class="text-truncate">
             <router-link
                 :to="{ name:'Subjects', params: { projectId: projectInternal.projectId }}"
@@ -317,8 +323,6 @@ defineExpose({
 }
 
 .sort-control:hover, .sort-control i:hover {
-  cursor: grab !important;
-  color: $info !important;
   font-size: 1.5rem;
 }
 </style>
