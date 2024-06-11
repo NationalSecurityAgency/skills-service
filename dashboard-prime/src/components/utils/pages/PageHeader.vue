@@ -11,8 +11,9 @@ const colors = useColors()
 <template>
   <div data-cy="pageHeader" class="border-1 border-round-md surface-border font-medium surface-0 mt-2 px-3 py-3">
     <skills-spinner v-if="loading" :is-loading="loading" />
-    <div v-if="!loading" class="flex py-1 px-1 w-full">
+    <div v-if="!loading">
       <slot name="banner"></slot>
+    <div  class="flex py-1 px-1 w-full">
       <div class="flex w-full flex-wrap">
         <div class="mt-2 text-center lg:text-left w-full lg:w-auto">
           <div class="text-2xl flex">
@@ -74,6 +75,7 @@ const colors = useColors()
         </div>
       </div>
       <slot name="footer"/>
+    </div>
     </div>
   </div>
 </template>

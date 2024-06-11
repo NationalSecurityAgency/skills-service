@@ -18,6 +18,10 @@ const props = defineProps({
   projectId: {
     type: String,
     required: true
+  },
+  saveButtonLabel: {
+    type: String,
+    default: 'Save'
   }
 })
 const schema = object({
@@ -26,6 +30,7 @@ const schema = object({
     .required()
     .min(10)
     .max(appConfig.maxContactOwnersMessageLength)
+    .customDescriptionValidator('Message')
     .label('Message')
 })
 const sent = ref(false)
@@ -50,7 +55,7 @@ const contactProjectAdmins = (values) => {
     :show-save-button="!sent"
     :save-data-function="contactProjectAdmins"
     :header="`Contact ${props.projectName ? props.projectName : 'Project'}`"
-    saveButtonLabel="Save"
+    :saveButtonLabel="saveButtonLabel"
     :validation-schema="schema"
     :enable-return-focus="true"
     :initialValues="{}"

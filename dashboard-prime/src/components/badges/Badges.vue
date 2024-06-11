@@ -26,7 +26,6 @@ const route = useRoute();
 const confirm = useConfirm();
 const elementHelper = useElementHelper()
 
-const subPageHeader = ref();
 let global = ref(false);
 let isLoadingData = ref(true);
 let badges = ref([]);
@@ -176,15 +175,6 @@ const newBadge = () => {
 
 const handleHidden = (e) => {
   displayNewBadgeModal.value = false;
-  if (!e || !e.update) {
-    handleFocus();
-  }
-};
-
-const handleFocus = () => {
-  nextTick(() => {
-    subPageHeader.value.focusOnActionButton();
-  });
 };
 
 const enableDragAndDrop = () => {

@@ -463,7 +463,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
     });
 
-    it.skip('my usage page', () => {
+    it('my usage page', () => {
         cy.fixture('vars.json')
             .then((vars) => {
                 cy.request('POST', '/logout');

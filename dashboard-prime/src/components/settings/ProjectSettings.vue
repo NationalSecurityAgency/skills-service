@@ -215,11 +215,12 @@ const usePointsForLevelsLabel = computed(() => {
 });
 
 const projectVisibilityOptions = computed(() => {
-  const opts = [
-    { value: publicNotDiscoverable, text: 'Not in the Project Catalog' },
-  ];
+  const opts = [];
   if (isProgressAndRankingEnabled.value) {
     opts.push({ value: discoverableProgressAndRanking, text: 'Add to the Project Catalog' });
+    opts.push({ value: publicNotDiscoverable, text: 'Not in the Project Catalog' });
+  } else {
+    opts.push({ value: publicNotDiscoverable, text: 'Not Enabled' });
   }
   opts.push({ value: privateInviteOnly, text: 'Private Invite Only' });
   return opts;

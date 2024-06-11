@@ -7,6 +7,7 @@ import NumSkills from '@/components/myProgress/NumSkills.vue'
 import LastEarnedCard from '@/components/myProgress/LastEarnedCard.vue'
 import BadgeNumCard from '@/components/myProgress/BadgeNumCard.vue'
 import MyCurrentProjects from '@/components/myProgress/MyCurrentProjects.vue'
+import MyProgressTitle from '@/components/myProgress/MyProgressTitle.vue'
 
 const myProgressState = useMyProgressState()
 
@@ -22,25 +23,18 @@ onMounted(() => {
     <div v-if="!myProgressState.isLoadingMyProgressSummary">
       <progress-and-ranking-splash v-if="!myProgressState.hasProjects" />
       <div v-if="myProgressState.hasProjects">
-        <Card :pt="{ content: { class: 'p-0' }, body: { class: 'p-3' } }">
-          <template #content>
-            <div class="flex">
-              <div class="flex-1">
-                <span class="text-2xl uppercase" role="heading" aria-level="1">My Projects</span>
-              </div>
-              <div>
-                <router-link :to="{ name: 'DiscoverProjectsPage' }">
-                  <SkillsButton
-                    label="Projects Catalog"
-                    outlined
-                    icon="fas fa-tasks"
-                    data-cy="manageMyProjsBtn"
-                    variant="outline-primary" />
-                </router-link>
-              </div>
-            </div>
+        <my-progress-title title="My Progress">
+          <template #rightContent>
+            <router-link :to="{ name: 'DiscoverProjectsPage' }" tabindex="-1">
+              <SkillsButton
+                label="Projects Catalog"
+                outlined
+                icon="fas fa-tasks"
+                data-cy="manageMyProjsBtn"
+                variant="outline-primary" />
+            </router-link>
           </template>
-        </Card>
+        </my-progress-title>
 
         <div class="flex gap-3 flex-wrap mt-3">
           <div class="flex-1">

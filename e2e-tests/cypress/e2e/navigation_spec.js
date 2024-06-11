@@ -33,7 +33,7 @@ describe('Navigation Tests', () => {
         cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
             .contains('Dashboard Skills')
             .should('be.visible');
-        cy.dashboardCd()
+        cy.get('[data-cy="skillsDisplayHome"]')
             .contains('Overall Points');
     });
 
@@ -141,7 +141,7 @@ describe('Navigation Tests', () => {
         cy.visit('/administrator/projects/proj1');
         cy.contains('ID: subj1');
         cy.get('[data-cy=navCollapseOrExpand]')
-            .should('not.exist');
+            .should('not.be.visible');
         cy.get('[data-cy=nav-Subjects]')
             .should('not.visible');
         cy.get('[data-cy=nav-Badges]')
@@ -150,13 +150,11 @@ describe('Navigation Tests', () => {
         // expand menu
         cy.get('[data-cy=navSmallScreenExpandMenu]')
             .click();
-        cy.get('[data-cy=nav-Subjects]')
-            .contains('Subjects');
-        cy.get('[data-cy=nav-Badges]')
-            .contains('Badges');
+        cy.get('[data-pc-section="panel"] [aria-label="Option List"] [aria-label="Subjects"]')
+        cy.get('[data-pc-section="panel"] [aria-label="Option List"] [aria-label="Badges"]')
 
         // navigate and make sure menu is collapsed again
-        cy.get('[data-cy=nav-Badges]')
+        cy.get('[data-pc-section="panel"] [aria-label="Option List"] [aria-label="Badges"]')
             .click();
         cy.contains('No Badges Yet');
         cy.get('[data-cy=nav-Subjects]')

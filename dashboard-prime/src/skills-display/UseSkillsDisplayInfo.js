@@ -78,12 +78,32 @@ export const useSkillsDisplayInfo = () => {
     return route.name === getContextSpecificRouteName('SubjectDetailsPage')
   })
   const isGlobalBadgePage = computed(() => {
-    return route.name === getContextSpecificRouteName('globalBadgeDetails')
+    return route.name === getContextSpecificRouteName('globalBadgeDetails') ||
+      route.name === 'globalBadgeDetails'
   })
 
-  const createToBadgeLink = (badge) => {
-    const name = badge.global ? 'globalBadgeDetails' : 'badgeDetails'
-    return { name: getContextSpecificRouteName(name), params: { badgeId: badge.badgeId } }
+  const createToBadgeLink = (badge, globalBadgeUnderProjectId = null) => {
+    let name = ''
+    const params = { badgeId: badge.badgeId }
+
+    if (badge.global) {
+      name = getContextSpecificRouteName('globalBadgeDetails')
+      if (!route.params.projectId) {
+        if (!globalBadgeUnderProjectId) {
+          throw new Error(`globalBadgeUnderProjectId is required for global badges, badgeId: [${badge.badgeId}]`)
+        }
+        params.projectId = globalBadgeUnderProjectId
+      }
+    } else {
+      name = getContextSpecificRouteName('badgeDetails')
+    }
+
+    if (badge.projectId) {
+      params.projectId = badge.projectId
+    }
+
+    const res = { name, params }
+    return res
   }
 
   const isDependency = () => {

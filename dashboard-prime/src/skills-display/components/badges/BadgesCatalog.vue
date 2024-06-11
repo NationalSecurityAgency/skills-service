@@ -5,6 +5,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import BadgeTypeFilter from '@/skills-display/components/badges/BadgeTypeFilter.vue'
+import { useRoute } from 'vue-router'
 
 
 // badgeRouterLinkGenerator: {
@@ -27,6 +28,8 @@ const props = defineProps({
     default: false,
   },
 })
+
+const route = useRoute()
 
 const searchString = ref('')
 const badgesWithTypes = computed(() => {
@@ -61,6 +64,15 @@ const filterId = ref('')
 const setFilterId = (newFilterId) => {
   filterId.value = newFilterId
 }
+
+const buildBadgeLink = (badge) => {
+  let globalBadgeUnderProjectId = null
+  if (!route.params.projectId) {
+    globalBadgeUnderProjectId = badgesWithTypes.value.find((b) => b.projectId).projectId
+  }
+  return skillsDisplayInfo.createToBadgeLink(badge, globalBadgeUnderProjectId)
+}
+
 </script>
 
 <template>
@@ -105,7 +117,7 @@ const setFilterId = (newFilterId) => {
             :display-project-name="displayBadgeProject"
             :badge="badge"
             :search-string="searchString"
-            :view-details-btn-to="skillsDisplayInfo.createToBadgeLink(badge)"
+            :view-details-btn-to="buildBadgeLink(badge)"
             :icon-color="colors.getTextClass(index)"
             ></badge-catalog-item>
         </div>

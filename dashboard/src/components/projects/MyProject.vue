@@ -88,7 +88,8 @@ limitations under the License.
           <project-card-footer class="mt-4" :project="projectInternal"/>
         </div>
 
-        <div v-if="projectInternal.expiring" data-cy="projectExpiration" class="w-100 text-center alert-danger p-2 mt-2">
+        <div
+          v-if="projectInternal.expiring" data-cy="projectExpiration" class="w-100 text-center alert-danger p-2 mt-2">
               <span class="mr-2" v-b-tooltip.hover="'This Project has not been used recently, ' +
                'it will  be deleted unless you explicitly retain it'">Project has not been used in over <b>{{this.$store.getters.config.expireUnusedProjectsOlderThan}} days</b> and will be deleted <b>{{ fromExpirationDate() }}</b>.</span>
           <b-button @click="keepIt" data-cy="keepIt" size="sm" variant="alert" :aria-label="'Keep Project '+ projectInternal.name">

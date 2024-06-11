@@ -110,7 +110,6 @@ const sendInvites = () => {
     recipients: toRaw(inviteRecipients.value)
   }
 
-  console.log(inviteRequest)
   AccessService.sendProjectInvites(route.params.projectId, inviteRequest).then((resp) => {
     inviteRecipients.value = []
     if (resp.unsuccessful) {

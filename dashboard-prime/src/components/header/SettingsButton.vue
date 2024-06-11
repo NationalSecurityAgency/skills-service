@@ -36,16 +36,15 @@ if (appConfig.rankingAndProgressViewsEnabled) {
     },
     disabled: pagePath.isProgressAndRankingPage
   })
+  allItems.push({
+    label: 'Project Admin',
+    icon: 'fas fa-user-edit',
+    command: () => {
+      router.push({ path: pagePath.adminHomePage })
+    },
+    disabled: pagePath.isAdminPage
+  })
 }
-
-allItems.push({
-  label: 'Project Admin',
-  icon: 'fas fa-user-edit',
-  command: () => {
-    router.push({ path: pagePath.adminHomePage })
-  },
-  disabled: pagePath.isAdminPage
-})
 allItems.push({
   label: 'Settings',
   icon: 'fas fa-cog',

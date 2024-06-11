@@ -407,6 +407,8 @@ describe('My Progress Breadcrumb Tests', () => {
             .click();
         cy.get('[data-cy="skillsDisplayHome"]')
             .contains('Very Great Skill 3');
+        cy.get('[data-cy="depsProgress"]')
+        cy.get('[data-cy="skillLink-proj2-skill1"]')
 
         // back to subject page
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]')

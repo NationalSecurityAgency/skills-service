@@ -80,7 +80,7 @@ const loadData = () => {
   loadingData.value = true
   if (!route.params.crossProjectId) {
     let lookupId = isDependency() ? route.params.dependentSkillId : route.params.skillId
-    if (route.params.badgeId) {
+    if (!route.params.skillId && route.params.badgeId) {
       lookupId = route.params.badgeId
     }
     return skillsDisplayService.getSkillDependencies(lookupId)

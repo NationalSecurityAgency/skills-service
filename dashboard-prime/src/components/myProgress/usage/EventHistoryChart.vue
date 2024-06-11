@@ -132,21 +132,12 @@ const beforeListSlotText = computed(() => {
 watch(() => projects.value.selected, () => {
   timeProps.value.projIds = projects.value.selected.map((project) => project.projectId);
   loadData();
-  projects.value.available = props.availableProjects.map((proj) => ({ ...proj })).filter((el) => !projects.value.selected.some((sel) => sel.projectId === el.projectId));
-})
-
-const filter = (event) => {
   if(projects.value.selected.length < 5) {
-    const query = event.query.toLowerCase();
-    projects.value.available = props.availableProjects.map((proj) => ({...proj}));
-    projects.value.available = projects.value.available.filter((el) => !projects.value.selected.some((sel) => sel.projectId === el.projectId));
-    if (query) {
-      projects.value.available = projects.value.available.filter((el) => el.projectName.toLowerCase().includes(query));
-    }
+    projects.value.available = props.availableProjects.map((proj) => ({...proj})).filter((el) => !projects.value.selected.some((sel) => sel.projectId === el.projectId));
   } else {
     projects.value.available = [];
   }
-}
+})
 
 const updateTimeRange = (timeEvent) => {
   if (appConfig.maxDailyUserEvents) {
@@ -202,19 +193,18 @@ const notAllZeros = (data) => {
     </template>
     <template #content>
       <div class="flex w-full mb-2">
-        <AutoComplete
+        <MultiSelect
             v-model="projects.selected"
-            :suggestions="projects.available"
-            :delay="500"
-            :completeOnFocus="true"
-            dropdown
-            multiple
+            :options="projects.available"
+            display="chip"
             optionLabel="projectName"
             aria-label="Select projects"
             class="w-full"
-            @complete="filter"
-            data-cy="eventHistoryChartProjectSelector"
-            placeholder="Select option">
+            :selection-limit="5"
+            data-cy="eventHistoryChartProjectSelector">
+          <template #chip="slotProps">
+            {{ slotProps.value.projectName }}
+          </template>
           <template #empty>
             <div v-if="projects.selected.length === 5" class="ml-4" data-cy="trainingProfileMaximumReached">
               Maximum of 5 options selected. First remove a selected option to select another.
@@ -223,7 +213,7 @@ const notAllZeros = (data) => {
               No results found
             </div>
           </template>
-        </AutoComplete>
+        </MultiSelect>
       </div>
       <MetricsOverlay :loading="loading" :has-data="hasData" :no-data-msg="noDataMessage">
         <apexchart type="line" height="350"

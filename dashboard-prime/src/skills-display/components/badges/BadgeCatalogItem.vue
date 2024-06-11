@@ -90,7 +90,7 @@ const otherUsersAchieved = computed(() => {
             <i :class="iconCss" style="font-size: 5rem;" />
             <placement-badge :badge="badge" class="mt-2" />
             <div v-if="badge.gem" class="text-muted text-orange-800">
-              <small>Expires {{ timeUtils.relativeTime(badge.endDate) }}</small>
+              <small aria-label="`This is a gem badge and it expires in ${timeUtils.relativeTime(badge.endDate)}`">Expires {{ timeUtils.relativeTime(badge.endDate) }}</small>
             </div>
             <div v-if="badge.global" class="text-muted">
               <small><b>Global Badge</b></small>
@@ -109,6 +109,9 @@ const otherUsersAchieved = computed(() => {
       <div class="flex-1">
         <div class="flex align-content-end">
           <div class="flex-1 text-2xl font-medium" data-cy="badgeTitle">
+            <div v-if="badge.projectName" class="text-color-secondary text-base" data-cy="badgeProjectName">
+              <span class="font-italic">Project:</span> {{ badge.projectName}}
+            </div>
             <highlighted-value :value="badge.badge" :filter="searchString" />
           </div>
           <div class="align-content-end">

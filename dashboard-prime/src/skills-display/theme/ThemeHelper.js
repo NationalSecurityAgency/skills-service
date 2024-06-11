@@ -395,11 +395,6 @@ export default {
 
             if (Array.isArray(selectorKeyElement)) {
               selectorKeyElement.forEach((selectorArrayElement) => {
-                // if (myPath === 'tiles.borderColor') {
-                //   console.log(`tiles.borderColor!!!!!!!!!!!!!!!!!!!!!!!!!!!! isLeaf=${isLeaf}`)
-                //   console.log(selectorArrayElement)
-                //   res.css += `.sd-theme-home .p-card { border: solid 1px!important } `;
-                // }
                 appendCSS(selectorArrayElement, inputThemeElement)
               })
               addCssBasedOnKeyPath(myPath)
