@@ -160,8 +160,10 @@ describe('Client Display Features Tests', () => {
     cy.visit('/progress-and-rankings/projects/proj1')
     cy.get('[data-cy="overallPoints"]').contains('Overall Points')
     cy.get('[data-cy="newSoftwareVersion"]').should('not.exist')
-    cy.cdClickSubj(0, 'Subject 1')
+    cy.get('[data-cy="skillsDisplayHome"] [data-cy="pointHistoryChartNoData"]')
+    cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]').first().click()
 
+    cy.get('[data-cy="skillsDisplayHome"] [data-cy="pointHistoryChartNoData"]')
     cy.wait('@getSubjectSummary')
     cy.wait('@pointHistoryChart')
 
@@ -169,7 +171,7 @@ describe('Client Display Features Tests', () => {
 
     cy.get('[data-cy="newSoftwareVersionReload"]').click()
     cy.wait('@getSubjRank')
-    cy.get('[data-cy="overallPoints"]').contains('Overall Points')
+    cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallPoints"]').contains('Overall Points')
     cy.get('[data-cy="newSoftwareVersion"]').should('not.exist')
   })
 
