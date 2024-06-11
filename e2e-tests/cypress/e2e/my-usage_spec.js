@@ -49,29 +49,29 @@ describe('My Usage Tests', () => {
             .click();
 
         // validate 4 projects are loaded by default
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-autocomplete-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
             .contains('project 2')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-autocomplete-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
             .contains('project 3')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-autocomplete-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
             .contains('project 4')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-autocomplete-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
             .contains('project 5')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="dropdownbutton"]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]')
             .click();
-        cy.get('.p-autocomplete-item').contains('project 6')
-        cy.get('.p-autocomplete-item').contains('project 7')
+        cy.get('.p-multiselect-item').contains('project 6')
+        cy.get('.p-multiselect-item').contains('project 7')
     });
 
     it('point history chart - remove project', () => {
         cy.visit('/progress-and-rankings');
         cy.get('[data-cy="viewUsageBtn"]') .click();
 
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-autocomplete-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
           .should('have.length', 4)
           .as('selected');
         cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="removetokenicon"]')
@@ -80,32 +80,32 @@ describe('My Usage Tests', () => {
         cy.get('@removeBtns')
             .eq(2)
             .click();
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-autocomplete-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
             .contains('project 2')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-autocomplete-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
             .contains('project 3')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-autocomplete-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
             .contains('project 5')
             .should('be.visible');
 
-        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="dropdownbutton"]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]')
             .click();
-        cy.get('.p-autocomplete-item').should('contain.text', 'project 4')
-        cy.get('.p-autocomplete-item').should('contain.text', 'project 6')
-        cy.get('.p-autocomplete-item').should('not.contain.text', 'project 2')
-        cy.get('.p-autocomplete-item').should('not.contain.text', 'project 3')
-        cy.get('.p-autocomplete-item').should('not.contain.text', 'project 5')
+        cy.get('.p-multiselect-item').should('contain.text', 'project 4')
+        cy.get('.p-multiselect-item').should('contain.text', 'project 6')
+        cy.get('.p-multiselect-item').should('not.contain.text', 'project 2')
+        cy.get('.p-multiselect-item').should('not.contain.text', 'project 3')
+        cy.get('.p-multiselect-item').should('not.contain.text', 'project 5')
     });
 
     it('point history chart - add project', () => {
         cy.visit('/progress-and-rankings/my-usage');
 
-        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="dropdownbutton"]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]')
             .click();
-        // cy.get('.p-autocomplete-item').should('contain.text', 'project 6')
-        cy.get('.p-autocomplete-items > [aria-label="This is project 6"]')
+        // cy.get('.p-multiselect-item').should('contain.text', 'project 6')
+        cy.get('.p-multiselect-items > [aria-label="This is project 6"]')
             .as('project6');
         cy.get('@project6')
             .click();
@@ -141,28 +141,28 @@ describe('My Usage Tests', () => {
     it('point history chart - only up to 5 projects can be selected', () => {
         cy.visit('/progress-and-rankings/my-usage');
 
-        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="dropdownbutton"]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]')
             .click();
 
-        cy.get('.p-autocomplete-item').should('contain.text', 'project 6')
-        cy.get('.p-autocomplete-items > [aria-label="This is project 6"]').click()
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-autocomplete-token')
+        cy.get('.p-multiselect-item').should('contain.text', 'project 6')
+        cy.get('.p-multiselect-items > [aria-label="This is project 6"]').click()
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
             .contains('project 2')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-autocomplete-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
             .contains('project 3')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-autocomplete-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
             .contains('project 4')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-autocomplete-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
             .contains('project 5')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-autocomplete-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
             .contains('project 6')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="dropdownbutton"]')
-          .click();
+        // cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]')
+        //   .click();
         cy.get('[data-cy=trainingProfileMaximumReached]')
             .contains('Maximum of 5 options selected')
             .should('be.visible');
@@ -171,10 +171,10 @@ describe('My Usage Tests', () => {
     it('point history chart - all projects removed', () => {
         cy.visit('/progress-and-rankings/my-usage');
 
-        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="This is project 2"] [data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="This is project 3"] [data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="This is project 4"] [data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="This is project 5"] [data-pc-section="removetokenicon"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 2").find('[data-pc-section="removetokenicon"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 3").find('[data-pc-section="removetokenicon"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 4").find('[data-pc-section="removetokenicon"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 5").find('[data-pc-section="removetokenicon"]').click()
         cy.get('[data-cy=eventHistoryChart]')
             .contains('Please select at least one project from the list above.');
 
@@ -183,26 +183,26 @@ describe('My Usage Tests', () => {
     it('point history chart - projects with no user events', () => {
         cy.visit('/progress-and-rankings/my-usage');
 
-        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="This is project 2"] [data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="This is project 3"] [data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="This is project 4"] [data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy="eventHistoryChartProjectSelector"] [aria-label="This is project 5"] [data-pc-section="removetokenicon"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 2").find('[data-pc-section="removetokenicon"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 3").find('[data-pc-section="removetokenicon"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 4").find('[data-pc-section="removetokenicon"]').click()
+        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 5").find('[data-pc-section="removetokenicon"]').click()
         cy.get('[data-cy=eventHistoryChart]')
             .contains('Please select at least one project from the list above.');
 
         // select just project 2 (which has no user events yet)
-        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="dropdownbutton"]').click();
-        cy.get('.p-autocomplete-items > [aria-label="This is project 2"]').click()
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]').click();
+        cy.get('.p-multiselect-items > [aria-label="This is project 2"]').click()
 
         cy.get('[data-cy=eventHistoryChartProjectSelector]')
             .contains('project 2')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]').click();
         cy.get('[data-cy=eventHistoryChartProjectSelector]')
-        cy.get('.p-autocomplete-item').should('contain.text', 'project 3')
-        cy.get('.p-autocomplete-item').should('contain.text', 'project 4')
+        cy.get('.p-multiselect-item').should('contain.text', 'project 3')
+        cy.get('.p-multiselect-item').should('contain.text', 'project 4')
         cy.get('[data-cy=eventHistoryChartProjectSelector]')
-        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="dropdownbutton"]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]')
             .click();
         cy.get('[data-cy=eventHistoryChart]')
             .contains('There are no events for the selected project(s) and time period.');
