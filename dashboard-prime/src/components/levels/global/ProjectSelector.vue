@@ -56,7 +56,6 @@ const added = (addedItem) => {
 };
 
 const inputChanged = (inputItem) => {
-  console.log(inputItem);
   if (inputItem.value != null) {
     added(inputItem.value);
   } else {
@@ -64,34 +63,31 @@ const inputChanged = (inputItem) => {
   }
 };
 
-const searchChanged = (query, loadingFunction) => {
-  emit('search-change', query, loadingFunction);
+const searchChanged = (query) => {
+  emit('search-change', query.value);
 };
 </script>
 
-<!--:filterable="internalSearch"-->
-<!--label="name"-->
-<!--v-on:search="searchChanged"-->
 <template>
   <div id="project-selector">
     <Dropdown :options="projects"
               v-model="selectedInternal"
+              :filter="internalSearch"
+              @filter="searchChanged"
               placeholder="Select Project..."
               class="w-full"
               optionLabel="name"
               @change="inputChanged"
               :loading="isLoading">
-<!--      <template #option="{ name, projectId }">-->
-<!--        <div :data-cy="`${projectId}_option`">-->
-<!--          <div class="h6">{{ name }}</div>-->
-<!--          <div class="text-secondary">ID: {{ projectId }}</div>-->
-<!--        </div>-->
-<!--      </template>-->
-<!--      <template v-if="afterListSlotText" #list-footer>-->
-<!--        <li>-->
-<!--          <div class="h6 ml-1" data-cy="projectSelectorCountMsg"> {{ afterListSlotText }}</div>-->
-<!--        </li>-->
-<!--      </template>-->
+      <template #option="slotProps">
+        <div :data-cy="`${slotProps.option.projectId}_option`">
+          <div class="h6">{{ slotProps.option.name }}</div>
+          <div class="text-400 text-sm">ID: {{ slotProps.option.projectId }}</div>
+        </div>
+      </template>
+      <template #footer v-if="afterListSlotText">
+        <div class="h6 ml-1" data-cy="projectSelectorCountMsg">{{ afterListSlotText }}</div>
+      </template>
     </Dropdown>
   </div>
 </template>

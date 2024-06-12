@@ -6,16 +6,27 @@ import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import LoadingContainer from "@/components/utils/LoadingContainer.vue";
 import ProjectSelector from "@/components/levels/global/ProjectSelector.vue";
 import LevelSelector from "@/components/levels/global/LevelSelector.vue";
+import SimpleLevelsTable from "@/components/levels/global/SimpleLevelsTable.vue";
+import NoContent2 from "@/components/utils/NoContent2.vue";
+import { useConfirm } from 'primevue/useconfirm';
+import {useBadgeState} from "@/stores/UseBadgeState.js";
+import {storeToRefs} from "pinia";
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import ChangeProjectLevel from "@/components/levels/global/ChangeProjectLevel.vue";
 
+const announcer = useSkillsAnnouncer();
+const confirm = useConfirm();
 const route = useRoute();
 const emit = defineEmits(['global-badge-levels-changed']);
+const badgeState = useBadgeState();
 
+const { badge } = storeToRefs(badgeState);
 const selectedProject = ref( null);
 const selectedLevel = ref( null);
 const isLoading = ref( true);
 const loadingAvailableProjects = ref( false);
 const levelPlaceholder = ref( 'First choose a Project');
-const badge = ref( null);
+// const badge = ref( null);
 const badgeId = ref( null);
 const badgeLevels = ref( []);
 const showChangeLevel = ref( false);
@@ -66,10 +77,10 @@ const addLevel = () => {
         };
         badgeLevels.value.push(newLevel);
         selectedLevel.value = null;
-        // const selectedProject = selectedProject.value.name;
-        // const { selectedLevel } = this;
-        // loadGlobalBadgeDetailsState({ badgeId: badgeId.value }).then(() => $announcer.polite(`added ${selectedProject} level ${selectedLevel} to global badge`));
-        // selectedProject = null;
+        badgeState.loadGlobalBadgeDetailsState(badgeId.value).finally(() => {
+          announcer.polite(`added ${selectedProject.value} level ${selectedLevel.value} to global badge`)
+          badge.value = badgeState.badge;
+        });
         loadProjectsForBadge();
         emit('global-badge-levels-changed', newLevel);
       });
@@ -78,18 +89,25 @@ const addLevel = () => {
 const deleteLevel = (deletedLevel) => {
   const msg = `Removing this level will award this badge to users that fulfill all of the remaining requirements.
         Are you sure you want to remove Level "${deletedLevel.level}" for project "${deletedLevel.projectName}" from Badge "${badge.value.name}"?`;
-  // msgConfirm(msg, 'WARNING: Remove Required Level').then((res) => {
-  //   if (res) {
-  //     levelDeleted(deletedLevel);
-  //   }
-  // });
+  confirm.require({
+    message: msg,
+    header: 'WARNING: Remove Required Level!',
+    acceptLabel: 'Yes, Delete!',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      levelDeleted(deletedLevel);
+    }
+  })
 };
 
 const levelDeleted = (deletedItem) => {
   GlobalBadgeService.removeProjectLevelFromBadge(badgeId.value, deletedItem.projectId, deletedItem.level)
       .then(() => {
         badgeLevels.value = badgeLevels.value.filter((item) => `${item.projectId}${item.level}` !== `${deletedItem.projectId}${deletedItem.level}`);
-        // loadGlobalBadgeDetailsState({ badgeId: badgeId.value }).then(() => $announcer.polite('project level removed from global badge'));
+        badgeState.loadGlobalBadgeDetailsState(badgeId.value).finally(() => {
+          announcer.polite('project level removed from global badge')
+          badge.value = badgeState.badge;
+        });
         loadProjectsForBadge();
         emit('global-badge-levels-changed', deletedItem);
       });
@@ -165,6 +183,10 @@ const searchChanged = (query) => {
   projectSearch.value = query;
   loadProjectsForBadge();
 };
+
+const selectLevel = (level) => {
+  selectedLevel.value = level;
+}
 </script>
 
 <template>
@@ -175,38 +197,42 @@ const searchChanged = (query) => {
       <template #content>
         <loading-container v-model="isLoading">
           <div class="mb-4 m-3">
-            <div class="row p-0">
-              <div class="col-md">
+            <div class="flex gap-2">
+              <div class="flex-1">
                 <project-selector ref="projectSelectorRef" v-model="selectedProject"
                                   :projects="availableProjects"
                                   :after-list-slot-text="afterListSlotText"
                                   @added="projectAdded"
                                   :is-loading="loadingAvailableProjects"
-                                  :internal-search="false"
+                                  :internal-search="true"
                                   @search-change="searchChanged"
                                   @removed="projectRemoved"></project-selector>
               </div>
-              <div class="col-md my-3 m-md-0">
-                <level-selector v-model="selectedLevel" :project-id="selectedProjectId" :disabled="!selectedProject" :placeholder="levelPlaceholder"></level-selector>
+              <div class="flex-1">
+                <level-selector v-model="selectedLevel" @input="selectLevel" :project-id="selectedProjectId" :disabled="!selectedProject" :placeholder="levelPlaceholder"></level-selector>
               </div>
-              <div class="col-md-auto">
-              <span>
+              <div>
                 <SkillsButton :disabled="!(selectedProject && selectedLevel)" type="button" class="btn btn-outline-primary"
                         @click="addLevel" data-cy="addGlobalBadgeLevel" aria-label="add project level requirement to global badge" label="Add" icon="fas fa-plus-circle">
                 </SkillsButton>
-              </span>
               </div>
             </div>
           </div>
-<!--          <simple-levels-table ref="globalLevelsTable" v-if="badgeLevels && badgeLevels.length > 0"-->
-<!--                               @change-level="changeLevel"-->
-<!--                               :levels="badgeLevels" @level-removed="deleteLevel"></simple-levels-table>-->
-<!--          <no-content2 v-else title="No Levels Added Yet..." icon="fas fa-trophy" class="mb-5"-->
-<!--                       message="Please select a project and level from drop-down menus above to start adding levels to this badge!"></no-content2>-->
+          <simple-levels-table ref="globalLevelsTable" v-if="badgeLevels && badgeLevels.length > 0"
+                               @change-level="changeLevel" :levels="badgeLevels" @level-removed="deleteLevel"></simple-levels-table>
+          <no-content2 v-else title="No Levels Added Yet..." icon="fas fa-trophy" class="mb-5"
+                       message="Please select a project and level from drop-down menus above to start adding levels to this badge!"></no-content2>
 
         </loading-container>
       </template>
     </Card>
+
+    <change-project-level @level-changed="saveLevelChange"
+                          @hidden="changeLevelClosed"
+                          v-if="showChangeLevel"
+                          :title="`Change Required Level for ${projectLevelName}`"
+                          :current-level="projectLevel"
+                          :project-id="projectLevelId"/>
   </div>
 </template>
 
