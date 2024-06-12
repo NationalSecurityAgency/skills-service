@@ -24,25 +24,27 @@ describe('Save State Tests', () => {
     cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
     cy.visit('/administrator/projects/proj1/badges');
     cy.wait('@loadBadges');
-    cy.clickButton('Badge');
+    cy.get('[data-cy="btn_Badges"]').click()
 
-    cy.get('#badgeName').type('New Badge');
+    cy.get('[data-cy="name"]').type('New Badge');
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
+    cy.wait(2000)
+    cy.get('[data-cy="markdownEditorInput"]').contains( 'test description');
 
     cy.visit('/administrator/projects/proj1/badges');
     cy.wait('@loadBadges');
-    cy.clickButton('Badge');
+    cy.get('[data-cy="btn_Badges"]').click()
 
-    cy.get('#badgeName').should('have.value', 'New Badge');
-    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
-    cy.get('[data-cy=closeBadgeButton]').click();
+    cy.get('[data-cy="name"]').should('have.value', 'New Badge');
+    cy.get('[data-cy="markdownEditorInput"]').contains( 'test description');
+    cy.get('[data-cy=closeDialogBtn]').click();
     cy.wait(250);
 
     cy.visit('/administrator/projects/proj1/badges');
     cy.wait('@loadBadges');
-    cy.clickButton('Badge');
+    cy.get('[data-cy="btn_Badges"]').click()
 
-    cy.get('#badgeName').should('have.value', '');
+    cy.get('[data-cy="name"]').should('have.value', '');
     cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
   })
 
@@ -50,21 +52,21 @@ describe('Save State Tests', () => {
     cy.intercept('GET', '/admin/projects/proj1/badges').as('loadBadges');
     cy.visit('/administrator/projects/proj1/badges');
     cy.wait('@loadBadges');
-    cy.clickButton('Badge');
+    cy.get('[data-cy="btn_Badges"]').click()
 
     cy.intercept('POST', '/admin/projects/proj1/badges/NewBadgeBadge').as('saveBadge');
 
-    cy.get('#badgeName').type('New Badge');
+    cy.get('[data-cy="name"]').type('New Badge');
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
-    cy.get('[data-cy=saveBadgeButton]').click();
+    cy.get('[data-cy=saveDialogBtn]').click();
     cy.wait('@saveBadge');
 
     cy.visit('/administrator/projects/proj1/badges');
     cy.wait('@loadBadges');
 
     cy.get('[data-cy="editBtn"]').click()
-    cy.get('#badgeName').should('have.value', 'New Badge');
-    cy.get('#badgeName').type(' Edit');
+    cy.get('[data-cy="name"]').should('have.value', 'New Badge');
+    cy.get('[data-cy="name"]').type(' Edit');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
     cy.get('[data-cy="markdownEditorInput"]').type(' edit');
     cy.wait(250);
@@ -73,16 +75,16 @@ describe('Save State Tests', () => {
     cy.wait('@loadBadges');
 
     cy.get('[data-cy="editBtn"]').click()
-    cy.get('#badgeName').should('have.value', 'New Badge Edit');
+    cy.get('[data-cy="name"]').should('have.value', 'New Badge Edit');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description edit');
-    cy.get('[data-cy=closeBadgeButton]').click();
+    cy.get('[data-cy=closeDialogBtn]').click();
     cy.wait(250);
 
     cy.visit('/administrator/projects/proj1/badges');
     cy.wait('@loadBadges');
 
     cy.get('[data-cy="editBtn"]').click()
-    cy.get('#badgeName').should('have.value', 'New Badge');
+    cy.get('[data-cy="name"]').should('have.value', 'New Badge');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
   })
 
@@ -104,7 +106,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="newProjectButton"]').click();
     cy.get('[data-cy="projectName"]').should('have.value', 'Test Project');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
-    cy.get('[data-cy=closeProjectButton]').click();
+    cy.get('[data-cy=closeDialogBtn]').click();
 
     cy.get('[data-cy="newProjectButton"]').click();
     cy.get('[data-cy="projectName"]').should('have.value', '');
@@ -129,7 +131,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="editProjBtn"]').click();
     cy.get('[data-cy="projectName"]').should('have.value', 'proj1 With Edits');
     cy.get('[data-cy="markdownEditorInput"]').contains('description with edits');
-    cy.get('[data-cy=closeProjectButton]').click();
+    cy.get('[data-cy=closeDialogBtn]').click();
 
     cy.get('[data-cy="editProjBtn"]').click();
     cy.get('[data-cy="projectName"]').should('have.value', 'proj1');
@@ -154,13 +156,12 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
     cy.get('[data-cy="projectName"]').should('have.value', 'Copy Proj With Edits');
     cy.get('[data-cy="markdownEditorInput"]').contains('description with edits');
-    cy.get('[data-cy=closeProjectButton]').click();
+    cy.get('[data-cy=closeDialogBtn]').click();
 
     cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
     cy.get('[data-cy="projectName"]').should('have.value', '');
     cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
   })
-
 
   it('Saves and discards new skill state', () => {
     cy.intercept({
@@ -174,13 +175,14 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="newSkillButton"]').click();
     cy.get('[data-cy="skillName"]').type('Skill One')
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
-    cy.get('[data-cy="skillPointIncrement"]').type('{selectall}11');
+    cy.get('[data-cy="pointIncrement"]').type('{selectall}11');
     cy.get('[data-cy="numPerformToCompletion"]').type('{selectall}11');
-    cy.get('[data-cy=timeWindowCheckbox]').click({force: true});
-    cy.get('[data-cy="timeWindowHours"]').type('{selectall}11');
-    cy.get('[data-cy="timeWindowMinutes"]').type('{selectall}11');
-    cy.get('[data-cy="maxOccurrences"]').type('{selectall}11');
-    cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
+    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
+    cy.get('[data-cy=timeWindowCheckbox').click()
+    cy.get('[data-cy="pointIncrementIntervalHrs"] input').type('{selectall}11');
+    cy.get('[data-cy="pointIncrementIntervalMins"] input').type('{selectall}11');
+    cy.get('[data-cy="numPointIncrementMaxOccurrences"] input').type('{selectall}11');
+    cy.get('[data-cy=selfReportEnableCheckbox]').click()
 
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
@@ -188,23 +190,23 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="newSkillButton"]').click();
     cy.get('[data-cy="skillName"]').should('have.value', 'Skill One');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
-    cy.get('[data-cy="skillPointIncrement"]').should('have.value', '11');
-    cy.get('[data-cy="numPerformToCompletion"]').should('have.value', '11');
-    cy.get('[data-cy="timeWindowHours"]').should('have.value', '11');
-    cy.get('[data-cy="timeWindowMinutes"]').should('have.value', '11');
-    cy.get('[data-cy="maxOccurrences"]').should('have.value', '11');
-    cy.get('[data-cy="selfReportEnableCheckbox"]').should('be.checked');
-    cy.get('[data-cy=closeSkillButton]').click();
+    cy.get('[data-cy="pointIncrement"] [data-pc-name="input"]').should('have.value', '11');
+    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', '11');
+    cy.get('[data-cy="pointIncrementIntervalHrs"] [data-pc-name="input"]').should('have.value', '11');
+    cy.get('[data-cy="pointIncrementIntervalMins"] [data-pc-name="input"]').should('have.value', '11');
+    cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('have.value', '11');
+    cy.get('[data-cy="selfReportEnableCheckbox"] input').should('be.checked');
+    cy.get('[data-cy=closeDialogBtn]').click();
 
     cy.get('[data-cy="newSkillButton"]').click();
     cy.get('[data-cy="skillName"]').should('have.value', '');
     cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
-    cy.get('[data-cy="skillPointIncrement"]').should('have.value', '100');
-    cy.get('[data-cy="numPerformToCompletion"]').should('have.value', '1');
-    cy.get('[data-cy="timeWindowHours"]').should('have.value', '8');
-    cy.get('[data-cy="timeWindowMinutes"]').should('have.value', '0');
-    cy.get('[data-cy="maxOccurrences"]').should('have.value', '1');
-    cy.get('[data-cy="selfReportEnableCheckbox"]').should('not.be.checked');
+    cy.get('[data-cy="pointIncrement"] [data-pc-name="input"]').should('have.value', '100');
+    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', '1');
+    cy.get('[data-cy="pointIncrementIntervalHrs"] [data-pc-name="input"]').should('have.value', '8');
+    cy.get('[data-cy="pointIncrementIntervalMins"] [data-pc-name="input"]').should('have.value', '0');
+    cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('have.value', '1');
+    cy.get('[data-cy="selfReportEnableCheckbox"]  input').should('not.be.checked');
   })
 
   it('Saves and discards edit skill state', () => {
@@ -221,14 +223,15 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="newSkillButton"]').click();
     cy.get('[data-cy="skillName"]').type('Skill One')
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
-    cy.get('[data-cy="skillPointIncrement"]').type('{selectall}11');
+    cy.get('[data-cy="pointIncrement"]').type('{selectall}11');
     cy.get('[data-cy="numPerformToCompletion"]').type('{selectall}11');
-    cy.get('[data-cy=timeWindowCheckbox]').click({force: true});
-    cy.get('[data-cy="timeWindowHours"]').type('{selectall}11');
-    cy.get('[data-cy="timeWindowMinutes"]').type('{selectall}11');
-    cy.get('[data-cy="maxOccurrences"]').type('{selectall}11');
-    cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
-    cy.get('[data-cy=saveSkillButton]').click();
+    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
+    cy.get('[data-cy=timeWindowCheckbox').click()
+    cy.get('[data-cy="pointIncrementIntervalHrs"]').type('{selectall}11');
+    cy.get('[data-cy="pointIncrementIntervalMins"]').type('{selectall}11');
+    cy.get('[data-cy="numPointIncrementMaxOccurrences"]').type('{selectall}11');
+    cy.get('[data-cy="selfReportEnableCheckbox"]').click();
+    cy.get('[data-cy=saveDialogBtn]').click();
     cy.wait('@saveSkill');
 
     cy.visit('/administrator/projects/proj1/subjects/subj1');
@@ -239,11 +242,11 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="skillName"]').type(' Two Three')
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
     cy.get('[data-cy="markdownEditorInput"]').type(' for storage');
-    cy.get('[data-cy="skillPointIncrement"]').type('22');
+    cy.get('[data-cy="pointIncrement"]').type('22');
     cy.get('[data-cy="numPerformToCompletion"]').type('22');
-    cy.get('[data-cy="timeWindowHours"]').type('22');
-    cy.get('[data-cy="timeWindowMinutes"]').type('22');
-    cy.get('[data-cy="maxOccurrences"]').type('22');
+    cy.get('[data-cy="pointIncrementIntervalHrs"]').type('22');
+    cy.get('[data-cy="pointIncrementIntervalMins"]').type('22');
+    cy.get('[data-cy="numPointIncrementMaxOccurrences"]').type('22');
 
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
@@ -251,22 +254,22 @@ describe('Save State Tests', () => {
     cy.get('[data-cy=editSkillButton_SkillOneSkill]').click();
     cy.get('[data-cy="skillName"]').should('have.value', 'Skill One Two Three');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description for storage');
-    cy.get('[data-cy="skillPointIncrement"]').should('have.value', '1122');
-    cy.get('[data-cy="numPerformToCompletion"]').should('have.value', '1122');
-    cy.get('[data-cy="timeWindowHours"]').should('have.value', '1122');
-    cy.get('[data-cy="timeWindowMinutes"]').should('have.value', '1122');
-    cy.get('[data-cy="maxOccurrences"]').should('have.value', '1122');
+    cy.get('[data-cy="pointIncrement"] input').should('have.value', '1,122');
+    cy.get('[data-cy="numPerformToCompletion"] input').should('have.value', '1,122');
+    cy.get('[data-cy="pointIncrementIntervalHrs"] input').should('have.value', '1,122');
+    cy.get('[data-cy="pointIncrementIntervalMins"] input').should('have.value', '1,122');
+    cy.get('[data-cy="numPointIncrementMaxOccurrences"] input').should('have.value', '1,122');
 
-    cy.get('[data-cy=closeSkillButton]').click();
+    cy.get('[data-cy=closeDialogBtn]').click();
 
     cy.get('[data-cy=editSkillButton_SkillOneSkill]').click();
     cy.get('[data-cy="skillName"]').should('have.value', 'Skill One');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
-    cy.get('[data-cy="skillPointIncrement"]').should('have.value', '11');
-    cy.get('[data-cy="numPerformToCompletion"]').should('have.value', '11');
-    cy.get('[data-cy="timeWindowHours"]').should('have.value', '11');
-    cy.get('[data-cy="timeWindowMinutes"]').should('have.value', '11');
-    cy.get('[data-cy="maxOccurrences"]').should('have.value', '11');
+    cy.get('[data-cy="pointIncrement"] input').should('have.value', '11');
+    cy.get('[data-cy="numPerformToCompletion"] input').should('have.value', '11');
+    cy.get('[data-cy="pointIncrementIntervalHrs"] input').should('have.value', '11');
+    cy.get('[data-cy="pointIncrementIntervalMins"] input').should('have.value', '11');
+    cy.get('[data-cy="numPointIncrementMaxOccurrences"] input').should('have.value', '11');
   })
 
   it('Saves and discards copy skill state', () => {
@@ -282,7 +285,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="newSkillButton"]').click();
     cy.get('[data-cy="skillName"]').type('Skill One')
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
-    cy.get('[data-cy=saveSkillButton]').click();
+    cy.get('[data-cy=saveDialogBtn]').click();
     cy.wait('@saveSkill');
 
     cy.visit('/administrator/projects/proj1/subjects/subj1');
@@ -301,7 +304,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="skillName"]').should('have.value', 'Copy of Skill One Two Three');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description for storage');
 
-    cy.get('[data-cy=closeSkillButton]').click();
+    cy.get('[data-cy=closeDialogBtn]').click();
 
     cy.get('[data-cy=copySkillButton_SkillOneSkill]').click();
     cy.get('[data-cy="skillName"]').should('have.value', 'Copy of Skill One');
@@ -313,10 +316,13 @@ describe('Save State Tests', () => {
     cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.get('[data-cy="newSkillButton"]').click()
-    cy.get('[data-cy="skillName"]').type('save')
+    const valToType = 'Yckd'
+    cy.get('[data-cy="skillName"]').type(valToType)
+    cy.get('[data-cy="skillName"]').should('have.value', valToType)
 
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.get('[data-cy="copySkillButton_skill1"]').click()
+    cy.get('[data-cy="skillName"]').should('not.have.value', valToType)
     cy.get('[data-cy="quizSelected-quiz1"]')
   });
 
@@ -324,18 +330,20 @@ describe('Save State Tests', () => {
     cy.visit('/administrator/projects/proj1/');
 
     cy.get('[data-cy=btn_Subjects]').click();
-    cy.get('[data-cy="subjectNameInput"]').type('Subject One')
+    cy.get('[data-cy="subjectName"]').type('Subject One')
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
+    cy.wait(2000)
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description');
 
     cy.visit('/administrator/projects/proj1/');
 
     cy.get('[data-cy=btn_Subjects]').click();
-    cy.get('[data-cy="subjectNameInput"]').should('have.value', 'Subject One');
+    cy.get('[data-cy="subjectName"]').should('have.value', 'Subject One');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
-    cy.get('[data-cy=closeSubjectButton]').click();
+    cy.get('[data-cy=closeDialogBtn]').click();
 
     cy.get('[data-cy=btn_Subjects]').click();
-    cy.get('[data-cy="subjectNameInput"]').should('have.value', '');
+    cy.get('[data-cy="subjectName"]').should('have.value', '');
     cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
   })
 
@@ -349,22 +357,24 @@ describe('Save State Tests', () => {
     cy.wait('@loadSubject');
 
     cy.get('[data-cy=btn_edit-subject]').click();
-    cy.get('[data-cy="subjectNameInput"]').should('have.value', 'Subject 1');
-    cy.get('[data-cy="subjectNameInput"]').type(' Two Three')
+    cy.get('[data-cy="subjectName"]').should('have.value', 'Subject 1');
+    cy.get('[data-cy="subjectName"]').type(' Two Three')
     cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
     cy.get('[data-cy="markdownEditorInput"]').type('test description for storage');
+    cy.wait(2000)
+    cy.get('[data-cy="markdownEditorInput"]').contains('test description for storage');
 
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
 
     cy.get('[data-cy=btn_edit-subject]').click();
-    cy.get('[data-cy="subjectNameInput"]').should('have.value', 'Subject 1 Two Three');
+    cy.get('[data-cy="subjectName"]').should('have.value', 'Subject 1 Two Three');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description for storage');
 
-    cy.get('[data-cy=closeSubjectButton]').click();
+    cy.get('[data-cy=closeDialogBtn]').click();
 
     cy.get('[data-cy=btn_edit-subject]').click();
-    cy.get('[data-cy="subjectNameInput"]').should('have.value', 'Subject 1');
+    cy.get('[data-cy="subjectName"]').should('have.value', 'Subject 1');
     cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
   })
 
@@ -391,28 +401,26 @@ describe('Save State Tests', () => {
     cy.contains('Discard Changes').should('not.exist');
   })
 
-
   it('Saves and discards new quiz state', () => {
     cy.visit('/administrator/quizzes/')
     cy.get('[data-cy="noQuizzesYet"]')
 
     cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
-    cy.get('.modal-title').contains('New Quiz/Survey')
-
     cy.get('[data-cy="quizName"]').type('My First Quiz')
     cy.get('[data-cy="idInputValue"]').should('have.value', 'MyFirstQuiz')
 
     cy.get('[data-cy="quizDescription"]').type('Some cool Description')
+    cy.wait(2000)
+    cy.get('[data-cy="quizDescription"]').contains('Some cool Description')
 
     cy.visit('/administrator/quizzes/')
 
     cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
-    cy.get('.modal-title').contains('New Quiz/Survey')
 
     cy.get('[data-cy="idInputValue"]').should('have.value', 'MyFirstQuiz')
     cy.get('[data-cy="quizDescription"]').contains('Some cool Description')
 
-    cy.get('[data-cy="closeQuizButton"]').click()
+    cy.get('[data-cy="closeDialogBtn"]').click()
     cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
 
     cy.get('[data-cy="idInputValue"]').should('have.value', '')
@@ -428,8 +436,8 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1')
     cy.get('[data-cy="idInputValue"]').should('have.value', 'quiz1')
     cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
-    cy.get('[data-cy="quizTypeSelector"]').should('have.value','Quiz')
-    cy.get('[data-cy="quizTypeSelector"]').should('be.disabled')
+    cy.get('[data-cy="quizTypeSelector"]').contains('Quiz')
+    cy.get('[data-cy="quizTypeSelector"]').should('have.class', 'p-disabled')
     cy.get('[data-cy="quizTypeSection"]').contains('Can only be modified for a new quiz/survey')
 
     cy.get('[data-cy="quizName"]').type(' with edits')
@@ -440,7 +448,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1 with edits')
     cy.get('[data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it! with edits')
 
-    cy.get('[data-cy="closeQuizButton"]').click()
+    cy.get('[data-cy="closeDialogBtn"]').click()
     cy.get('[data-cy="editQuizButton_quiz1"]').click()
 
     cy.get('[data-cy="quizName"]').should('have.value','This is quiz 1')
@@ -452,7 +460,6 @@ describe('Save State Tests', () => {
     cy.visit('/administrator/quizzes/quiz1/')
 
     cy.get('[data-cy="btn_Questions"]').click()
-    cy.get('.modal-title').contains('New Question')
 
     cy.get('[data-cy="questionText"]').type('My new quiz question')
     cy.get('[data-cy="answer-0"]').type('Answer One')
@@ -467,7 +474,6 @@ describe('Save State Tests', () => {
     cy.visit('/administrator/quizzes/quiz1/')
 
     cy.get('[data-cy="btn_Questions"]').click()
-    cy.get('.modal-title').contains('New Question')
 
     cy.get('[data-cy="questionText"]').contains('My new quiz question')
     cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'Answer One')
@@ -476,7 +482,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="answer-3"] [data-cy="answerText"]').should('have.value', '')
     cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('exist');
 
-    cy.get('[data-cy="closeQuestionBtn"]').click()
+    cy.get('[data-cy="closeDialogBtn"]').click()
     cy.get('[data-cy="btn_Questions"]').click()
 
     cy.get('[data-cy="questionText"]').should('have.value', '')
@@ -493,7 +499,6 @@ describe('Save State Tests', () => {
     cy.visit('/administrator/quizzes/quiz1/')
 
     cy.get('[data-cy="btn_Questions"]').click()
-    cy.get('.modal-title').contains('New Question')
 
     cy.get('[data-cy="questionText"]').type('My new quiz question')
     cy.get('[data-cy="answer-0"]').type('Answer One')
@@ -502,12 +507,12 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="addNewAnswer"]').last().click();
     cy.get('[data-cy="answer-2"]').type('Answer Three')
     cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click();
-    cy.get('[data-cy="saveQuestionBtn"]').click();
+    cy.get('[data-cy="saveDialogBtn"]').click();
+    cy.get('[data-cy="editQuestionButton_1"]')
 
     cy.visit('/administrator/quizzes/quiz1/')
 
     cy.get('[data-cy="editQuestionButton_1"]').click()
-    cy.get('.modal-title').contains('Editing Existing Question')
 
     cy.get('[data-cy="questionText"]').type(' with edit')
     cy.get('[data-cy="answer-0"]').type(' with edit')
@@ -526,7 +531,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('exist');
     cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('exist');
 
-    cy.get('[data-cy="closeQuestionBtn"]').click()
+    cy.get('[data-cy="closeDialogBtn"]').click()
     cy.get('[data-cy="editQuestionButton_1"]').click()
 
     cy.get('[data-cy="questionText"]').contains('My new quiz question')
