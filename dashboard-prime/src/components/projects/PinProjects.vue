@@ -111,15 +111,17 @@ watch(searchValue, (newValue) => {
 
 <template>
   <SkillsDialog v-model="model"
+                :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"
                 header="Pin Projects"
                 :show-ok-button="false"
                 @on-cancel="done"
+                footer-class="p-3"
                 cancel-button-label="Done"
                 cancel-button-icon=""
                 cancel-button-severity="success">
     <div data-cy="pinProjects">
-      <div class="flex gap-4 mb-4">
-        <InputGroup>
+      <div class="flex gap-4 mb-4 p-3 align-items-center">
+        <InputGroup class="flex-1">
           <InputText v-model="searchValue"
                      placeholder="Search projects to pin"
                      data-cy="pinProjectsSearchInput"
@@ -132,8 +134,15 @@ watch(searchValue, (newValue) => {
         <SkillsButton label="Load All" size="small" @click="loadAll" data-cy="pinProjectsLoadAllButton" icon="fas fa-weight-hanging"/>
       </div>
       <div>
-        <SkillsDataTable :value="result.values" :rowsPerPageOptions="[5, 10, 15, 20]" data-cy="pinProjectsSearchResults"
-                         striped-rows paginator :rows="5" :table-stored-state-id="tableStoredStateId">
+        <SkillsDataTable
+          :value="result.values"
+          :rowsPerPageOptions="[5, 10, 15, 20]"
+          data-cy="pinProjectsSearchResults"
+          striped-rows
+          paginator
+          :nullSortOrder="-1"
+          :rows="5"
+          :table-stored-state-id="tableStoredStateId">
           <Column field="name" header="Name" style="width: 50%;" sortable>
             <template #body="slotProps">
               <div class="flex">

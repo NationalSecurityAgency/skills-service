@@ -69,6 +69,9 @@ const projectUnpinned = (project) => {
   loadProjects().then(() => {
     nextTick(() => {
       announcer.polite(`Project ${project.name} has been unpinned from the root user projects view`)
+      nextTick(() => {
+        document.getElementById('pinProjectsButton').focus()
+      })
     })
   })
 }
@@ -237,6 +240,7 @@ const hasData = computed(() => {
         aria-label="Pin projects to your Project page"
         role="button"
         size="small"
+        data-cy="pinProjectsButton"
         class="mr-2 bg-primary-reverse" />
       <SkillsButton
         label="Project"

@@ -68,9 +68,16 @@ onMounted(() => {
       await until(iframeInit.loadedIframe).toBe(true)
     }
     loadConfigs()
+    loadUserRoles()
   })
 })
 
+const loadUserRoles = () => {
+  accessState.loadIsSupervisor().then(() => {
+    addCustomIconCSS()
+  })
+  accessState.loadIsRoot()
+}
 const loadConfigs = () => {
   appConfig.loadConfigState().finally(() => {
     authState.restoreSessionIfAvailable().finally(() => {
@@ -79,10 +86,7 @@ const loadConfigs = () => {
         inceptionConfigurer.configure()
         globalNavGuards.addNavGuards()
         if (authState.isAuthenticated) {
-          accessState.loadIsSupervisor().then(() => {
-            addCustomIconCSS()
-          })
-          accessState.loadIsRoot()
+          loadUserRoles()
           appInfoState.loadEmailEnabled()
         }
       })
