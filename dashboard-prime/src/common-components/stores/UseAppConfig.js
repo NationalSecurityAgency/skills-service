@@ -85,7 +85,6 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const expireUnusedProjectsOlderThan = computed(() => config.value.expireUnusedProjectsOlderThan)
   const minimumProjectPoints = computed(() => config.value.minimumProjectPoints)
   const maxProjectsPerAdmin = computed(() => config.value.maxProjectsPerAdmin)
-  const numProjectsForTableView = computed(() => config.value.numProjectsForTableView)
   const minimumSubjectPoints = computed(() => config.value.minimumSubjectPoints)
   const maxSubjectsPerProject = computed(() => config.value.maxSubjectsPerProject)
   const userCommunityBeforeLabel = computed(() => config.value.userCommunityBeforeLabel || '')
@@ -123,6 +122,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const minUsernameLength = computed(() => config.value.minUsernameLength)
   const minPasswordLength = computed(() => config.value.minPasswordLength)
   const maxPasswordLength = computed(() => config.value.maxPasswordLength)
+  const numProjectsToStartShowingAsCards = computed(() => config.value.numProjectsToStartShowingAsCards)
   return {
     loadConfigState,
     refreshConfig,
@@ -166,7 +166,6 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     expireUnusedProjectsOlderThan,
     minimumProjectPoints,
     maxProjectsPerAdmin,
-    numProjectsForTableView,
     minimumSubjectPoints,
     maxSubjectsPerProject,
     userCommunityBeforeLabel,
@@ -204,5 +203,6 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     minUsernameLength,
     minPasswordLength,
     maxPasswordLength,
+    numProjectsToStartShowingAsCards,
   }
 })
