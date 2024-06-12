@@ -14,6 +14,8 @@ export const useAdminProjectsState = defineStore('adminProjectsState', () => {
       .then((response) => {
         if(response && Object.keys(response).length > 0) {
           projects.value = response.map((p) => ({...p, description: p.description || ''}))
+        } else {
+          projects.value = []
         }
       })
       .finally(() => {
