@@ -74,53 +74,58 @@ const handleChangePassword = handleSubmit((values) => {
         </div>
         <Card class="mt-3 text-left">
           <template #content>
-            <div class="w-full">
-              <SkillsTextInput
-                  label="Email Address"
-                  size="small"
-                  :is-required="true"
-                  :disabled="resetInProgress"
-                  @keyup.enter="handleChangePassword"
-                  placeholder="Enter email"
-                  v-model="resetFields.email"
-                  data-cy="resetPasswordEmail"
-                  id="email"
-                  name="email"/>
-              <SkillsTextInput
-                  label="New Password"
-                  size="small"
-                  type="password"
-                  :is-required="true"
-                  :disabled="resetInProgress"
-                  @keyup.enter="handleChangePassword"
-                  placeholder="Enter new password"
-                  v-model="resetFields.password"
-                  data-cy="resetPasswordNewPassword"
-                  id="password"
-                  name="password"/>
-              <SkillsTextInput
-                  label="Confirm New Password"
-                  size="small"
-                  type="password"
-                  :is-required="true"
-                  :disabled="resetInProgress"
-                  @keyup.enter="handleChangePassword"
-                  placeholder="Confirm new password"
-                  v-model="resetFields.passwordConfirmation"
-                  data-cy="resetPasswordConfirm"
-                  id="passwordConfirmation"
-                  name="passwordConfirmation"/>
-            </div>
-            <small class="text-danger text-red-500" v-if="remoteError" data-cy="resetError" role="alert">{{ remoteError }}</small>
-            <div class="flex justify-content-end mt-2">
-              <SkillsButton variant="outline-success"
-                            label="Reset Password"
-                            icon="fas fa-arrow-circle-right"
-                            @click="handleChangePassword"
-                            :disabled="!meta.valid || resetInProgress || remoteError"
-                            data-cy="resetPasswordSubmit">
-              </SkillsButton>
-            </div>
+            <form @submit="handleChangePassword">
+              <div class="w-full">
+                <SkillsTextInput
+                    label="Email Address"
+                    size="small"
+                    autocomplete="username"
+                    :is-required="true"
+                    :disabled="resetInProgress"
+                    @keyup.enter="handleChangePassword"
+                    placeholder="Enter email"
+                    v-model="resetFields.email"
+                    data-cy="resetPasswordEmail"
+                    id="email"
+                    name="email"/>
+                <SkillsTextInput
+                    label="New Password"
+                    size="small"
+                    type="password"
+                    autocomplete="current-password"
+                    :is-required="true"
+                    :disabled="resetInProgress"
+                    @keyup.enter="handleChangePassword"
+                    placeholder="Enter new password"
+                    v-model="resetFields.password"
+                    data-cy="resetPasswordNewPassword"
+                    id="password"
+                    name="password"/>
+                <SkillsTextInput
+                    label="Confirm New Password"
+                    size="small"
+                    type="password"
+                    autocomplete="new-password"
+                    :is-required="true"
+                    :disabled="resetInProgress"
+                    @keyup.enter="handleChangePassword"
+                    placeholder="Confirm new password"
+                    v-model="resetFields.passwordConfirmation"
+                    data-cy="resetPasswordConfirm"
+                    id="passwordConfirmation"
+                    name="passwordConfirmation"/>
+              </div>
+              <small class="text-danger text-red-500" v-if="remoteError" data-cy="resetError" role="alert">{{ remoteError }}</small>
+              <div class="flex justify-content-end mt-2">
+                <SkillsButton variant="outline-success"
+                              type="submit"
+                              label="Reset Password"
+                              icon="fas fa-arrow-circle-right"
+                              :disabled="!meta.valid || resetInProgress || remoteError"
+                              data-cy="resetPasswordSubmit">
+                </SkillsButton>
+              </div>
+            </form>
           </template>
         </Card>
       </div>
