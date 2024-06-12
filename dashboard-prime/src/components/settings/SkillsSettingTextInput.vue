@@ -20,10 +20,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  helpMessage: {
-    type: String,
-    default: ''
-  },
   placeholder: {
     type: String,
     default: ''
@@ -49,7 +45,6 @@ const inputClass = computed(() => {
       <label :for="name">
         {{ label }}
       </label>
-      <inline-help :target-id="`${name}Help`" :msg='helpMessage'/>
     </div>
     <div :class="inputClass">
       <InputText v-model="value"
