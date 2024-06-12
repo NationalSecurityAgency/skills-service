@@ -1,12 +1,12 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useForm } from 'vee-validate';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import * as yup from 'yup';
+import { string } from 'yup';
 import Logo1 from '@/components/brand/Logo1.vue';
 import AccessService from '@/components/access/AccessService.js';
-import { string } from 'yup';
 
 const route = useRoute()
 const router = useRouter()
@@ -15,13 +15,13 @@ const appConfig = useAppConfig()
 const resetToken = ref(route.params.resetToken);
 const resetFields = ref({
   email: '',
-      password: '',
+  password: '',
+  passwordConfirmation: '',
 });
 const resetInProgress = ref(false);
 const resetFailed = ref(false);
 const resetSuccessful = ref(false);
 const remoteError = ref(null);
-const passwordConfirmation = ref('');
 
 const changePassword = (email, password) => {
   resetInProgress.value = true;
