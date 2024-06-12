@@ -485,21 +485,21 @@ describe('Self Report Skills Management Tests', () => {
     const tableSelector = '[data-cy="skillsReportApprovalTable"]';
     const expected = [
       [{
-        colIndex: 3,
+        colIndex: 2,
         value: 'user3Good@skills.org'
       }, {
         colIndex: 1,
         value: '180'
       }],
       [{
-        colIndex: 3,
+        colIndex: 2,
         value: 'user2Good@skills.org'
       }, {
         colIndex: 1,
         value: '220'
       }],
       [{
-        colIndex: 3,
+        colIndex: 2,
         value: 'user1Good@skills.org'
       }, {
         colIndex: 1,
