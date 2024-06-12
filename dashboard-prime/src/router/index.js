@@ -59,6 +59,11 @@ import NotFoundPage from '@/components/utils/NotFoundPage.vue';
 import GlobalBadgePage from "@/components/badges/global/GlobalBadgePage.vue";
 import GlobalBadgeSkills from "@/components/badges/global/GlobalBadgeSkills.vue";
 import GlobalBadgeLevels from "@/components/levels/global/GlobalBadgeLevels.vue";
+import RequestPasswordReset from '@/components/access/RequestPasswordReset.vue';
+import ResetPassword from '@/components/access/ResetPassword.vue';
+import RequestResetConfirmation from '@/components/access/RequestResetConfirmation.vue';
+import ResetConfirmation from '@/components/access/ResetConfirmation.vue';
+import ResetNotSupportedPage from '@/components/access/ResetNotSupportedPage.vue';
 
 const routes = [
   {
@@ -82,6 +87,64 @@ const routes = [
         message: 'Login'
       }
     }
+  },
+  {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: RequestPasswordReset,
+    meta: {
+      requiresAuth: false,
+      announcer: {
+        message: 'Forgot Password',
+      },
+    },
+  },
+  {
+    path: '/reset-password/:resetToken',
+    name: 'ResetPassword',
+    component: ResetPassword,
+    props: true,
+    meta: {
+      requiresAuth: false,
+      announcer: {
+        message: 'Reset Password',
+      },
+    },
+  },
+  {
+    path: '/forgot-password-confirmation/:email',
+    name: 'RequestResetConfirmation',
+    component: RequestResetConfirmation,
+    props: true,
+    meta: {
+      requiresAuth: false,
+      announcer: {
+        message: 'Request Password Reset',
+      },
+    },
+  },
+  {
+    path: '/reset-password-confirmation',
+    name: 'ResetConfirmation',
+    component: ResetConfirmation,
+    props: true,
+    meta: {
+      requiresAuth: false,
+      announcer: {
+        message: 'Password Reset Confirmation',
+      },
+    },
+  },
+  {
+    path: '/reset-not-supported',
+    name: 'ResetNotSupportedPage',
+    component: ResetNotSupportedPage,
+    meta: {
+      requiresAuth: false,
+      announcer: {
+        message: 'Reset Not Supported',
+      },
+    },
   },
   {
     path: '/error',

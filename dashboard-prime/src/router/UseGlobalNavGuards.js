@@ -181,9 +181,10 @@ export const useGlobalNavGuards = () => {
       }
     })
 
-    if (!isLoggedIn() && router.currentRoute.value.name !== 'Login') {
-      router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
-    }
+    // this is handled in beforeEachNavGuard
+    // if (!isLoggedIn() && router.currentRoute.value.name !== 'Login') {
+    //   router.push({ name: 'Login', query: { redirect: router.currentRoute.value.fullPath } })
+    // }
 
     const navTo = (navItem) => {
       if (navItem) {
