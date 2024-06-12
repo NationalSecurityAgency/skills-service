@@ -52,6 +52,7 @@ watch(() => authState.userInfo, async (newUserInfo) => {
   if (newUserInfo) {
     inceptionConfigurer.configure()
     pageVisitService.reportPageVisit(route.path, route.fullPath)
+    loadUserRoles()
   }
 })
 
@@ -68,7 +69,6 @@ onMounted(() => {
       await until(iframeInit.loadedIframe).toBe(true)
     }
     loadConfigs()
-    loadUserRoles()
   })
 })
 
