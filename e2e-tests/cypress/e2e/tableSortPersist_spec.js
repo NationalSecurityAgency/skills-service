@@ -33,7 +33,7 @@ describe('Test persistence of table sorting', () => {
         const expected = [];
         for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
             const skillName = `Skill # ${skillsCounter}`;
-            expected.push([{ colIndex: 0,  value: skillName }, { colIndex: 1,  value: skillsCounter }])
+            expected.push([{ colIndex: 2,  value: skillName }, { colIndex: 3,  value: skillsCounter }])
             cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
                 projectId: 'proj1',
                 subjectId: 'subj1',
@@ -66,7 +66,7 @@ describe('Test persistence of table sorting', () => {
         const expected = [];
         for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
             const skillName = `Skill # ${skillsCounter}`;
-            expected.push([{ colIndex: 0,  value: skillName }, { colIndex: 1,  value: skillsCounter }])
+            expected.push([{ colIndex: 2,  value: skillName }, { colIndex: 3,  value: skillsCounter }])
             cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
                 projectId: 'proj1',
                 subjectId: 'subj1',
