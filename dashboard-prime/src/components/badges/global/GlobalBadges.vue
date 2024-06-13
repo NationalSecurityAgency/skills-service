@@ -22,7 +22,7 @@ const sortOrder = ref({
   loading: false,
   loadingBadgeId: '-1',
 });
-
+const badgeRef = ref([]);
 const subPageHeader = ref();
 
 const emptyNewBadge = computed(() => {
@@ -77,27 +77,12 @@ const deleteBadge = (badge) => {
 
 const saveBadge = (badge) => {
   isLoading.value = true;
-  const requiredIds = badge.requiredSkills.map((item) => item.skillId);
-  const badgeReq = { requiredSkillsIds: requiredIds, ...badge };
+
   const { isEdit } = badge;
-  // GlobalBadgeService.saveBadge(badgeReq)
-  //     .then(() => {
-        let afterLoad = null;
-        if (isEdit) {
-          afterLoad = () => {
-            const refKey = `badge_${badgeReq.badgeId}`;
-            // const ref = $refs[refKey];
-            // if (ref) {
-            //   ref[0].handleFocus();
-            // }
-          };
-        }
-        loadBadges(afterLoad).then(() => {
-        // loadBadges().then(() => {
-          nextTick(() => announcer.polite(`a global badge has been ${isEdit ? 'saved' : 'created'}`));
-        });
-        emit('global-badges-changed', badge.badgeId);
-  //     });
+  loadBadges().then(() => {
+    nextTick(() => announcer.polite(`a global badge has been ${isEdit ? 'saved' : 'created'}`));
+  });
+  emit('global-badges-changed', badge.badgeId);
 };
 
 const newBadge = () => {
@@ -127,6 +112,13 @@ const sortOrderUpdate = (updateEvent) => {
   GlobalBadgeService.updateBadgeDisplaySortOrder(id, updateEvent.newIndex)
       .finally(() => {
         sortOrder.value.loading = false;
+        loadBadges().then(() => {
+          // isLoadingData.value = false;
+          const foundRef = badgeRef.value[id];
+          nextTick(() => {
+            foundRef.focusSortControl();
+          });
+        });
       });
 };
 
@@ -180,6 +172,12 @@ const toDate = (value) => {
 const canPublish = (badge) => {
   return badge.numSkills > 0 || badge.requiredProjectLevels.length > 0;
 };
+
+const handleFocus = () => {
+  nextTick(() => {
+
+  })
+}
 </script>
 
 <template>
@@ -201,8 +199,9 @@ const canPublish = (badge) => {
                 <SkillsBadge :badge="badge" :global="true"
                        @badge-updated="saveBadge"
                        @badge-deleted="deleteBadge"
-                             @publish-badge="publishBadge"
-                       :ref="`badge_${badge.badgeId}`"
+                       @publish-badge="publishBadge"
+                       @sort-changed-requested="sortOrderUpdate"
+                       :ref="(el) => (badgeRef[badge.badgeId] = el)"
                        :disable-sort-control="badges.length === 1"/>
               </BlockUI>
             </div>
@@ -215,7 +214,7 @@ const canPublish = (badge) => {
     </loading-container>
 
     <edit-badge v-if="displayNewBadgeModal" v-model="displayNewBadgeModal" :badge="emptyNewBadge"
-                :global="true" @badge-updated="saveBadge"></edit-badge>
+                :global="true" @badge-updated="saveBadge" @hidden="handleFocus"></edit-badge>
   </div>
 </template>
 
