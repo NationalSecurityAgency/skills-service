@@ -8,7 +8,10 @@ import EditBadge from "@/components/badges/EditBadge.vue";
 import LoadingContainer from "@/components/utils/LoadingContainer.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import SkillsBadge from '@/components/badges/Badge.vue'
+import { useConfirm } from 'primevue/useconfirm';
+import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 
+const confirm = useConfirm();
 const announcer = useSkillsAnnouncer();
 const emit = defineEmits(['badge-deleted', 'badge-changed', 'global-badges-changed']);
 
@@ -126,6 +129,57 @@ const sortOrderUpdate = (updateEvent) => {
         sortOrder.value.loading = false;
       });
 };
+
+const publishBadge = (badge) => {
+  if (canPublish(badge)) {
+    const msg = `While this Badge is disabled, user's cannot see the Badge or achieve it. Once the Badge is live, it will be visible to users.
+        Please note that once the badge is live, it cannot be disabled.`;
+    confirm.require({
+      message: msg,
+      header: 'Please Confirm!',
+      acceptLabel: 'Yes, Go Live!',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        badge.enabled = 'true';
+        const toSave = { ...badge };
+        if (!toSave.originalBadgeId) {
+          toSave.originalBadgeId = toSave.badgeId;
+        }
+        toSave.startDate = toDate(toSave.startDate);
+        toSave.endDate = toDate(toSave.endDate);
+
+        const requiredIds = badge.requiredSkills.map((item) => item.skillId);
+        const badgeReq = { requiredSkillsIds: requiredIds, ...badge };
+        GlobalBadgeService.saveBadge(badgeReq).then(() => {
+          saveBadge(toSave);
+        });
+      }
+    });
+  } else {
+    confirm.require({
+      message: getNoPublishMsg(),
+      header: 'Empty Badge',
+      rejectClass: 'hidden',
+      acceptLabel: 'OK',
+    })
+  }
+}
+
+const getNoPublishMsg = () => {
+    return 'This Global Badge has no assigned Skills or Project Levels. A Global Badge cannot be published without at least one Skill or Project Level.';
+};
+
+const toDate = (value) => {
+  let dateVal = value;
+  if (value && !(value instanceof Date)) {
+    dateVal = new Date(Date.parse(value.replace(/-/g, '/')));
+  }
+  return dateVal;
+};
+
+const canPublish = (badge) => {
+  return badge.numSkills > 0 || badge.requiredProjectLevels.length > 0;
+};
 </script>
 
 <template>
@@ -137,18 +191,17 @@ const sortOrderUpdate = (updateEvent) => {
           <div v-if="badges && badges.length" id="badgeCards" class="flex flex-wrap align-items-center justify-content-center">
             <div v-for="(badge) of badges" :id="badge.badgeId" :key="badge.badgeId" class="lg:col-4 mb-3"  style="min-width: 23rem;">
               <BlockUI :blocked="sortOrder.loading">
-<!--                <template #overlay>-->
-<!--                  <div class="text-center" :data-cy="`${badge.badgeId}_overlayShown`">-->
-<!--                    <div v-if="badge.badgeId===sortOrder.loadingBadgeId" data-cy="updatingSortMsg">-->
-<!--                      <div class="text-info text-uppercase mb-1">Updating sort order!</div>-->
-<!--                      <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>-->
-<!--                    </div>-->
-<!--                  </div>-->
-<!--                </template>-->
+                <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${badge.badgeId}_overlayShown`">
+                  <div v-if="badge.badgeId===sortOrder.loadingBadgeId" data-cy="updatingSortMsg">
+                    <div class="text-info text-uppercase mb-1">Updating sort order!</div>
+                    <skills-spinner :is-loading="sortOrder.loading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
+                  </div>
+                </div>
 
                 <SkillsBadge :badge="badge" :global="true"
                        @badge-updated="saveBadge"
                        @badge-deleted="deleteBadge"
+                             @publish-badge="publishBadge"
                        :ref="`badge_${badge.badgeId}`"
                        :disable-sort-control="badges.length === 1"/>
               </BlockUI>

@@ -85,7 +85,7 @@ const inputChanged = (inputItem) => {
 <template>
   <div id="level-selector">
     <Dropdown v-model="selectedInternal" :disabled="disabled" optionLabel="level" optionValue="level"
-              optionDisabled="disabled" :options="projectLevels" :placeholder="placeholder"
+              optionDisabled="disabled" :options="projectLevels" :placeholder="placeholder" filter
               class="w-full" :loading="isLoading" @change="inputChanged">
     </Dropdown>
   </div>

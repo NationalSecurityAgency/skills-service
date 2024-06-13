@@ -92,7 +92,7 @@ const deleteLevel = (deletedLevel) => {
   confirm.require({
     message: msg,
     header: 'WARNING: Remove Required Level!',
-    acceptLabel: 'Yes, Delete!',
+    acceptLabel: 'YES, Delete It!',
     rejectLabel: 'Cancel',
     accept: () => {
       levelDeleted(deletedLevel);
