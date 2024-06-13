@@ -99,13 +99,15 @@ const asyncLoadData = () => {
   })
 }
 
-const formId = props.isEdit ? `editSkillDialog-${props.skill.projectId}-${props.skill.skillId}` : 'newSkillDialog'
+let formId = 'newSkillDialog'
 let modalTitle = 'New Skill'
 if (props.isEdit) {
   modalTitle = 'Edit Skill'
+  formId = `editSkillDialog-${props.skill.projectId}-${props.skill.skillId}`
 }
 if (props.isCopy) {
   modalTitle = 'Copy Skill'
+  formId = `copySkillDialog-${props.skill.projectId}-${props.skill.skillId}`
 }
 
 const schema = object({

@@ -124,7 +124,7 @@ const oAuth2Login = (registrationId) => {
                     <label for="inputPassword" class="flex">Password</label>
                     <div class="flex-1 text-right">
                       <small class="text-muted">
-                        <router-link data-cy="forgotPassword" to="/">Forgot Password?</router-link>
+                        <router-link data-cy="forgotPassword" :to="{ name:'ForgotPassword' }">Forgot Password?</router-link>
                         <!--                      <b-link tabindex="0" @click="forgotPassword" data-cy="forgotPassword"-->
                         <!--                        >Forgot Password?</b-link-->
                         <!--                      >-->

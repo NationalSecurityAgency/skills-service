@@ -16,28 +16,24 @@ limitations under the License.
 <script setup>
 import { computed } from 'vue'
 import { useAccessState } from '@/stores/UseAccessState.js'
+import { useAdminProjectsState } from '@/stores/UseAdminProjectsState.js'
 
 const accessState = useAccessState()
+const projectsState = useAdminProjectsState()
+
 const props = defineProps(['project', 'isDeleteDisabled', 'deleteDisabledText', 'readOnlyProject'])
 const emit = defineEmits(['edit-project', 'unpin-project', 'copy-project', 'delete-project'])
 
 const isRootUser = computed(() => accessState.isRoot)
 
-const focusOnEdit = () => {
-  this.$refs.editBtn.focus();
-};
-
-const focusOnCopy = () => {
-  this.$refs.copyBtn.focus();
-};
-
-const focusOnDelete = () => {
-  this.$nextTick(() => this.$refs.deleteBtn.focus());
-};
 </script>
 
 <template>
-  <div class="flex justify-content-end flex-wrap">
+  <div class="flex flex-wrap"
+    :class="{
+      'justify-content-left': projectsState.shouldTileProjectsCards,
+      'justify-content-end': !projectsState.shouldTileProjectsCards
+    }">
     <router-link :to="{ name:'Subjects', params: { projectId: project.projectId }}">
       <SkillsButton
           size="small"

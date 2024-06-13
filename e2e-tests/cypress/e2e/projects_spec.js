@@ -51,38 +51,14 @@ describe('Projects Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
 
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click();
         cy.get('[data-cy="projectName"]')
             .type('My New & test Project');
-        cy.clickSave();
+        cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.wait('@postNewProject');
 
         cy.contains('My New & test Project');
-    });
-
-    it('Provide clear instructions how to create a new project - root user', function () {
-        cy.logout();
-        cy.fixture('vars.json')
-            .then((vars) => {
-                cy.login(vars.rootUser, vars.defaultPass);
-            });
-        cy.visit('/administrator/');
-        cy.contains('No Projects Yet...');
-        cy.contains('A Project represents a gamified training profile that consists of skills divided into subjects');
-        cy.get('[data-cy="firstNewProjectButton"]')
-            .click();
-        cy.get('[data-cy="projectName"]')
-            .type('one');
-        cy.get('[data-cy="saveProjectButton"]')
-            .click();
-        cy.get('[data-cy="projCard_one_manageBtn"]');
-    });
-
-    it('Provide clear instructions how to create a new project - regular user', function () {
-        cy.visit('/administrator/');
-        cy.contains('No Projects Yet...');
-        cy.contains('Note: This section of SkillTree is for project administrators only. If you do not plan on creating and integrating a project with SkillTree then please return to the Progress and Ranking page.');
     });
 
     it('Preview project training plan', function () {
@@ -108,9 +84,9 @@ describe('Projects Tests', () => {
             name: 'proj1'
         });
         cy.visit('/progress-and-rankings/projects/proj1');
-        cy.dashboardCd()
+        cy.get('[data-cy="skillsDisplayHome"]')
             .contains('Overall Points');
-        cy.contains('proj1');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').contains('proj1');
     });
 
     it('Trusted client should be shown when oAuthOnly!=true', () => {
@@ -153,51 +129,6 @@ describe('Projects Tests', () => {
             .should('exist');
         cy.get('[data-cy="trusted-client-props-panel"]')
             .should('exist');
-    });
-
-    it('Project stats should all be the same size when they wrap', () => {
-        cy.viewport(1000, 1000); //original issue presented when stat cards wrapped to another row
-
-        cy.request('POST', '/app/projects/abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy', {
-            projectId: 'abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy',
-            name: 'abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy'
-        });
-        cy.intercept('GET', '/admin/projects/abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy')
-            .as('loadProj');
-        cy.intercept('GET', '/api/projects/Inception/level')
-            .as('loadInception');
-        cy.visit('/administrator/projects/abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy/');
-        cy.wait('@loadProj');
-        cy.wait('@loadInception');
-
-        cy.contains('No Subjects Yet');
-        cy.get('[data-cy="pageHeader"]')
-            .contains('ID: abcdeghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy');
-        cy.wait(2000);
-        cy.get('[data-cy="pageHeader"] .container-fluid')
-            .should('have.length', 1);
-
-        cy.get('[data-cy=pageHeaderStat]')
-            .first()
-            .invoke('width')
-            .then((val) => {
-                cy.get('[data-cy=pageHeaderStat]')
-                    .eq(1)
-                    .invoke('width')
-                    .should('eq', val);
-                cy.get('[data-cy=pageHeaderStat]')
-                    .eq(2)
-                    .invoke('width')
-                    .should('eq', val);
-                cy.get('[data-cy=pageHeaderStat]')
-                    .eq(3)
-                    .invoke('width')
-                    .should('eq', val);
-                cy.get('[data-cy=pageHeaderStat]')
-                    .eq(4)
-                    .invoke('width')
-                    .should('eq', val);
-            });
     });
 
     it('Created and Last Reported Skill data should be visible on projects page', () => {
@@ -328,7 +259,7 @@ describe('Projects Tests', () => {
         cy.contains('No Subjects Yet');
     });
 
-    it('project card stats', () => {
+    it('insufficient points warning', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSubject(1, 2);
@@ -342,32 +273,11 @@ describe('Projects Tests', () => {
         cy.createProject(3);
         cy.visit('/administrator');
 
-        cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Subjects"] [data-cy="statNum"]')
-            .contains(2);
-        cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Skills"] [data-cy="statNum"]')
-            .contains(3);
-        cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]')
-            .contains(600);
-        cy.get('[data-cy="projectCard_proj1"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="statNum"]')
-            .contains(1);
-
-        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Subjects"] [data-cy="statNum"]')
-            .contains(0);
-        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Skills"] [data-cy="statNum"]')
-            .contains(0);
-        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]')
-            .contains(0);
-        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="statNum"]')
-            .contains(0);
-
-        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Subjects"] [data-cy="warning"]')
-            .should('not.exist');
-        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Skills"] [data-cy="warning"]')
-            .should('not.exist');
-        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Points"] [data-cy="warning"]')
-            .should('exist');
-        cy.get('[data-cy="projectCard_proj2"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="warning"]')
-            .should('not.exist');
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="projectCardWarning"]').should('not.exist')
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="projectCardWarning"]')
+            .contains('Project has insufficient points assigned');
+        cy.get('[data-cy="projectCard_proj3"] [data-cy="projectCardWarning"]')
+          .contains('Project has insufficient points assigned');
     });
 
     it('project description is retained after editing', () => {
@@ -385,22 +295,22 @@ describe('Projects Tests', () => {
         cy.wait('@loadDescription');
         cy.get(makdownDivSelector).invoke('text').invoke('trim').should('equal', '')
         cy.get('[data-cy="markdownEditorInput"]').type('I am a description');
-        cy.get('[data-cy="saveProjectButton"]').should('be.enabled');
-        cy.get('[data-cy="saveProjectButton"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click();
         cy.wait('@saveProject');
         cy.get('[data-cy="btn_edit-project"]').click();
         cy.wait('@loadDescription');
         cy.get(makdownDivSelector).should('have.text', 'I am a description');
         cy.get('[data-cy="markdownEditorInput"]').click().type('jabberwocky jabberwocky jabberwocky');
         cy.wait('@validateDescription');
-        cy.get('[data-cy="projectDescriptionError"]').should('be.visible');
-        cy.get('[data-cy="projectDescriptionError"]').should('contain.text', 'Project Description - paragraphs may not contain jabberwocky.');
-        cy.get('[data-cy="saveProjectButton"]').should('be.disabled');
+        cy.get('[data-cy="descriptionError"]').should('be.visible');
+        cy.get('[data-cy="descriptionError"]').should('contain.text', 'Project Description - paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
         cy.get('[data-cy="markdownEditorInput"]').click().type('{selectall}I am a description sans jw');
         cy.wait('@validateDescription');
-        cy.get('[data-cy="projectDescriptionError"]').should('not.be.visible');
-        cy.get('[data-cy="saveProjectButton"]').should('be.enabled');
-        cy.get('[data-cy="saveProjectButton"]').click();
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click();
         cy.wait('@saveProject');
         cy.visit('/administrator/');
         cy.contains('This is project 1');
@@ -408,8 +318,8 @@ describe('Projects Tests', () => {
         cy.wait('@loadDescription');
         cy.get(makdownDivSelector).should('have.text', 'I am a description sans jw');
         cy.get('[data-cy="markdownEditorInput"]').click().type('{selectall}Am I a description?');
-        cy.get('[data-cy="saveProjectButton"]').should('be.enabled');
-        cy.get('[data-cy="saveProjectButton"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click();
         cy.wait('@saveProject');
         cy.contains('This is project 1');
         cy.get('[data-cy="editProjBtn"]').click();

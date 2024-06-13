@@ -52,6 +52,8 @@ watch(() => authState.userInfo, async (newUserInfo) => {
   if (newUserInfo) {
     inceptionConfigurer.configure()
     pageVisitService.reportPageVisit(route.path, route.fullPath)
+    loadUserRoles()
+    appInfoState.loadEmailEnabled()
   }
 })
 
@@ -71,6 +73,12 @@ onMounted(() => {
   })
 })
 
+const loadUserRoles = () => {
+  accessState.loadIsSupervisor().then(() => {
+    addCustomIconCSS()
+  })
+  accessState.loadIsRoot()
+}
 const loadConfigs = () => {
   appConfig.loadConfigState().finally(() => {
     authState.restoreSessionIfAvailable().finally(() => {
@@ -79,10 +87,7 @@ const loadConfigs = () => {
         inceptionConfigurer.configure()
         globalNavGuards.addNavGuards()
         if (authState.isAuthenticated) {
-          accessState.loadIsSupervisor().then(() => {
-            addCustomIconCSS()
-          })
-          accessState.loadIsRoot()
+          loadUserRoles()
           appInfoState.loadEmailEnabled()
         }
       })

@@ -100,16 +100,12 @@ describe('Projects Sort Order Tests', () => {
             .dragAndDrop(proj2Card);
 
         // overlay over both cards but loading message only on project 1
-        cy.get('[data-cy="proj1_overlayShown"] [data-cy="updatingSortMsg"]')
-            .contains('Updating sort order');
+        cy.get('[data-cy="proj1_overlayShown"] [data-cy="overlaySpinner"]')
         cy.get('[data-cy="proj2_overlayShown"]');
-        cy.get('[data-cy="proj2_overlayShown"] [data-cy="updatingSortMsg"]')
-            .should('not.exist');
+        cy.get('[data-cy="proj2_overlayShown"] [data-cy="overlaySpinner"]').should('not.exist');
         cy.wait('@proj1Async');
-        cy.get('[data-cy="proj1_overlayShown"]')
-            .should('not.exist');
-        cy.get('[data-cy="proj2_overlayShown"]')
-            .should('not.exist');
+        cy.get('[data-cy="proj1_overlayShown"]').should('not.exist');
+        cy.get('[data-cy="proj2_overlayShown"]').should('not.exist');
     });
 
     it('change sort order using keyboard', () => {
@@ -118,19 +114,19 @@ describe('Projects Sort Order Tests', () => {
         cy.createProject(3);
         cy.visit('/administrator/');
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 1', 'This is project 2', 'This is project 3']);
-        cy.get('[data-cy="projectCard_proj1"] [data-cy="deleteProjBtn"]')
+        cy.get('[data-cy="projectCard_proj1"] [data-pc-section="closebutton"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 2', 'This is project 1', 'This is project 3']);
         cy.get('[data-cy="projectCard_proj1"] [data-cy="sortControlHandle"]')
             .should('have.focus');
-        cy.get('[data-cy="projectCard_proj1"] [data-cy="deleteProjBtn"]')
+        cy.get('[data-cy="projectCard_proj1"] [data-pc-section="closebutton"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 2', 'This is project 3', 'This is project 1']);
         cy.get('[data-cy="projectCard_proj1"] [data-cy="sortControlHandle"]')
             .should('have.focus');
-        cy.get('[data-cy="projectCard_proj1"] [data-cy="deleteProjBtn"]')
+        cy.get('[data-cy="projectCard_proj1"] [data-pc-section="closebutton"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 2', 'This is project 3', 'This is project 1']);
@@ -142,13 +138,13 @@ describe('Projects Sort Order Tests', () => {
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 2', 'This is project 3', 'This is project 1']);
 
         // now let's move up
-        cy.get('[data-cy="projectCard_proj3"] [data-cy="deleteProjBtn"]')
+        cy.get('[data-cy="projectCard_proj3"] [data-pc-section="closebutton"]')
             .tab()
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 3', 'This is project 2', 'This is project 1']);
         cy.get('[data-cy="projectCard_proj3"] [data-cy="sortControlHandle"]')
             .should('have.focus');
-        cy.get('[data-cy="projectCard_proj3"] [data-cy="deleteProjBtn"]')
+        cy.get('[data-cy="projectCard_proj3"] [data-pc-section="closebutton"]')
             .tab()
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 3', 'This is project 2', 'This is project 1']);

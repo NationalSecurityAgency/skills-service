@@ -198,14 +198,14 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
           class="h-full"
           icon-class="fas fa-laptop skills-color-selfreport"
           data-cy="selfReportMediaCard">
-          <div v-if="skillInfo.selfReportingType">Users can <i>self report</i> this skill
+          <div v-if="skillInfo.selfReportingType && skillInfo.selfReportingType !== 'Disabled'">Users can <i>self report</i> this skill
             <span v-if="skillInfo.selfReportingType === 'Approval'">and will go into an <b
               class="text-primary">approval</b> queue.</span>
             <span v-if="skillInfo.selfReportingType === 'HonorSystem'">and will apply <b class="text-primary">immediately</b>.</span>
             <span v-if="skillInfo.selfReportingType === 'Quiz'">and points will be awarded after the
               <router-link
                 :to="{ name:'Questions', params: { quizId: skillInfo.quizId } }"
-                tag="a">{{ skillInfo.quizName }}</router-link> {{ skillInfo.quizType
+              >{{ skillInfo.quizName }}</router-link> {{ skillInfo.quizType
               }} is {{ skillInfo.quizType === 'Survey' ? 'completed' : 'passed' }}!
             </span>
           </div>

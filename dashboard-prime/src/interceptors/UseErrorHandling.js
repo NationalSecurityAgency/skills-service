@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthState } from '@/stores/UseAuthState.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { userErrorState } from '@/stores/UserErrorState.js'
@@ -8,6 +8,7 @@ import { useLog } from '@/components/utils/misc/useLog.js'
 
 export const useErrorHandling = () => {
 
+  const route = useRoute()
   const router = useRouter()
   const authState = useAuthState()
   const appConfig = useAppConfig()
@@ -53,7 +54,7 @@ export const useErrorHandling = () => {
     const path = window.location.pathname;
     if (errorCode === 401) {
       authState.clearAuthData()
-      if (path !== '/skills-login') {
+      if (path !== '/skills-login' && route.meta.requiresAuth) {
         let loginRoute = path !== '/' ? { name: 'Login', query: { redirect: path } } : { name: 'Login' };
         if (appConfig.isPkiAuthenticated) {
           loginRoute = path !== '/' ? { name: 'LandingPage', query: { redirect: path } } : { name: 'LandingPage' };

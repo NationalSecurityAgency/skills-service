@@ -103,7 +103,7 @@ const schema = object({
     .max(appConfig.maxProjectNameLength)
     .nullValueNotAllowed()
     .test('uniqueName', 'Project Name already exists', (value) => checkProjNameUnique(value))
-    .customNameValidator()
+    .customNameValidator('Project Name')
     .label('Project Name'),
   'projectId': string()
     .required()

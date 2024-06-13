@@ -20,18 +20,20 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import ProjectExpirationWarning from '@/components/projects/ProjectExpirationWarning.vue'
 import {useConfirm} from "primevue/useconfirm";
 import GlobalBadgeService from "@/components/badges/global/GlobalBadgeService.js";
+import { useAdminProjectsState } from '@/stores/UseAdminProjectsState.js'
 
 const props = defineProps(['project', 'disableSortControl'])
 const appConfig = useAppConfig()
 const accessState = useAccessState()
 const emit = defineEmits(['project-deleted', 'copy-project', 'pin-removed', 'sort-changed-requested'])
 const numberFormat = useNumberFormat()
+const projectsState = useAdminProjectsState()
 const announcer = useSkillsAnnouncer()
 const confirm = useConfirm();
 
 // data items
 const pinned = ref(false);
-const projectInternal = ref({ ...props.project });
+const projectInternal = computed(() => props.project );
 const stats = ref([]);
 const showEditProjectModal = ref(false);
 const showCopyProjectModal = ref(false);
@@ -177,7 +179,11 @@ defineExpose({
   <div data-cy="projectCard" class="h-100">
     <Card :data-cy="`projectCard_${projectInternal.projectId}`" class="relative">
       <template #content>
-        <div class="flex flex-wrap">
+        <div class="flex flex-wrap"
+             :class="{
+            'flex-column gap-1 justify-content-left': projectsState.shouldTileProjectsCards,
+            '': !projectsState.shouldTileProjectsCards
+          }">
           <div class="text-truncate">
             <router-link
                 :to="{ name:'Subjects', params: { projectId: projectInternal.projectId }}"
@@ -255,6 +261,7 @@ defineExpose({
         <ReminderMessage
           v-if="warningMsgAboutPoints"
           :id="`projectCardWarning_${projectInternal.projectId}`"
+          data-cy="projectCardWarning"
           severity="info">{{ warningMsgAboutPoints}}</ReminderMessage>
 
         <div v-if="!disableSortControl"
@@ -324,8 +331,6 @@ defineExpose({
 }
 
 .sort-control:hover, .sort-control i:hover {
-  cursor: grab !important;
-  color: $info !important;
   font-size: 1.5rem;
 }
 </style>

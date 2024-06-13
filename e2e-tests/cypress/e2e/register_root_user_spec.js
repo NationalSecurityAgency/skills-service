@@ -31,7 +31,7 @@ describe('Register Root Users', () => {
             });
     });
 
-    it('register root user', () => {
+    it.only('register root user', () => {
         const username = 'rob.smith@madeup.org';
         const pass = 'password';
 

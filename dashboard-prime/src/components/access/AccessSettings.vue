@@ -1,12 +1,17 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import RoleManager from "@/components/access/RoleManager.vue";
 import PrivateInviteOnlyProjManagement from '@/components/access/invite-only/PrivateInviteOnlyProjManagement.vue'
 import SettingsService from '@/components/settings/SettingsService.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import TrustedClientProps from '@/components/access/TrustedClientProps.vue'
 
 const route = useRoute();
+const appConfig = useAppConfig()
+
+const showTrustedClientProps = computed(() => (!appConfig.isPkiAuthenticated));
 
 const isLoading = ref(true);
 const privateProject = ref(false);
@@ -44,6 +49,8 @@ onMounted(() => {
                     :add-role-confirmation="privateProject" />
 
       <private-invite-only-proj-management v-if="privateProject"/>
+
+      <trusted-client-props v-if="showTrustedClientProps" class="my-4"/>
     </div>
   </div>
 </template>

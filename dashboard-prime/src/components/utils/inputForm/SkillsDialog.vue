@@ -47,6 +47,10 @@ const props = defineProps({
     type: String,
     default: 'w-11 xl:w-10'
   },
+  footerClass: {
+    type: String,
+    default: ''
+  },
 })
 const emit = defineEmits(['on-ok', 'on-cancel'])
 const focusState = useFocusState()
@@ -93,7 +97,7 @@ defineExpose({
     <div v-if="!loading" v-focustrap>
       <slot></slot>
 
-      <div class="text-right">
+      <div :class="`text-right ${footerClass}`">
         <SkillsButton
           :label="cancelButtonLabel"
           :icon="cancelButtonIcon"
