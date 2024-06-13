@@ -9,14 +9,17 @@ import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vu
 import RejectSkillModal from "@/components/skills/selfReport/RejectSkillModal.vue";
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import { useAppInfoState } from '@/stores/UseAppInfoState.js'
+
 
 const route = useRoute();
-const props = defineProps({
-  emailEnabled: {
-    type: Boolean,
-    required: false
-  }
-});
+const appInfo = useAppInfoState()
+// const props = defineProps({
+//   emailEnabled: {
+//     type: Boolean,
+//     required: false
+//   }
+// });
 const emit = defineEmits(['approval-action']);
 const announcer = useSkillsAnnouncer();
 const colors = useColors()
@@ -33,7 +36,7 @@ const selectedItems = ref([]);
 const expandedRows = ref({});
 const totalRows = ref(null);
 const emailSubscribed = ref(true);
-const isEmailEnabled = ref(props.emailEnabled);
+const isEmailEnabled = computed(() => appInfo.emailEnabled)
 const showRejectModal = ref(false);
 
 onMounted(() => {
@@ -195,6 +198,7 @@ const toggleRow = (row) => {
             <div>
                 <span>
                   <router-link class="ml-1" target="_blank" rel="noopener"
+                               :data-cy="`viewSkillLink_${slotProps.data.skillId}`"
                       :to="{ name:'SkillOverview', params: { projectId: slotProps.data.projectId,
                                                              subjectId: slotProps.data.subjectId,
                                                              skillId: slotProps.data.skillId }}">

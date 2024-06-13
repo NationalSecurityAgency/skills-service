@@ -53,6 +53,7 @@ watch(() => authState.userInfo, async (newUserInfo) => {
     inceptionConfigurer.configure()
     pageVisitService.reportPageVisit(route.path, route.fullPath)
     loadUserRoles()
+    appInfoState.loadEmailEnabled()
   }
 })
 
