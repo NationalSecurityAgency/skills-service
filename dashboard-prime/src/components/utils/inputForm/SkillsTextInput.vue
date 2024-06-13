@@ -50,23 +50,26 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 <template>
   <div class="field text-left" v-bind="fallthroughAttributes.rootAttrs.value">
     <label v-if="label" :for="name"><span v-if="isRequired">*</span> {{ label }} </label>
-    <InputText
-      class="w-full"
-      type="text"
-      v-model="value"
-      v-bind="fallthroughAttributes.inputAttrs.value"
-      @input="emit('input', $event.target.value)"
-      @keydown.enter="onEnter"
-      :data-cy="$attrs['data-cy'] || name"
-      :autofocus="autofocus"
-      :id="name"
-      :disabled="disabled"
-      :placeholder="placeholder"
-      :class="{ 'p-invalid': errorMessage }"
-      :aria-invalid="errorMessage ? null : true"
-      :aria-errormessage="`${name}Error`"
-      :aria-describedby="`${name}Error`" />
-      <slot name="footer" />
+    <InputGroup>
+      <slot name="addOnBefore"></slot>
+      <InputText
+          class="w-full"
+          type="text"
+          v-model="value"
+          v-bind="fallthroughAttributes.inputAttrs.value"
+          @input="emit('input', $event.target.value)"
+          @keydown.enter="onEnter"
+          :data-cy="$attrs['data-cy'] || name"
+          :autofocus="autofocus"
+          :id="name"
+          :disabled="disabled"
+          :placeholder="placeholder"
+          :class="{ 'p-invalid': errorMessage }"
+          :aria-invalid="errorMessage ? null : true"
+          :aria-errormessage="`${name}Error`"
+          :aria-describedby="`${name}Error`"/>
+      <slot name="footer"/>
+    </InputGroup>
       <small
         role="alert"
         class="p-error"

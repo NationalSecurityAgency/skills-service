@@ -64,6 +64,7 @@ import ResetPassword from '@/components/access/ResetPassword.vue';
 import RequestResetConfirmation from '@/components/access/RequestResetConfirmation.vue';
 import ResetConfirmation from '@/components/access/ResetConfirmation.vue';
 import ResetNotSupportedPage from '@/components/access/ResetNotSupportedPage.vue';
+import RequestAccount from '@/components/access/RequestAccount.vue';
 
 const routes = [
   {
@@ -87,6 +88,29 @@ const routes = [
         message: 'Login'
       }
     }
+  },
+  {
+    path: '/request-account',
+    name: 'RequestAccount',
+    component: RequestAccount,
+    meta: {
+      requiresAuth: false,
+      announcer: {
+        message: 'Request New Account',
+      },
+    },
+  },
+  {
+    path: '/request-root-account',
+    name: 'RequestRootAccount',
+    component: RequestAccount,
+    meta: {
+      requiresAuth: false,
+      isRootAccount: true,
+      announcer: {
+        message: 'Request Root Account',
+      },
+    },
   },
   {
     path: '/forgot-password',

@@ -75,7 +75,7 @@ export const useAuthState = defineStore('authState', () => {
           .then((result) => {
               if (result) {
                   handleLogin(result)
-                  fetchUser().then(() => {
+                  return fetchUser().then(() => {
                       if (authData.isRootAccount) {
                           // when creating root account for the first time, reload the config state
                           // at a minimum it will update the flag indicating whether root user needs to be created
