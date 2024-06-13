@@ -283,7 +283,6 @@ const selfReportingTypeChanged = ((value) => {
 });
 
 const justificationRequiredChanged = ((value) => {
-  console.log(value);
   settings.value.selfReportJustificationRequired.dirty = `${value}` !== `${settings.value.selfReportJustificationRequired.lastLoadedValue}`;
 });
 

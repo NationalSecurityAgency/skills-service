@@ -66,7 +66,6 @@ const approvals = ref( {
   newSelfReportingType: null,
 })
 const handleSelfReportingWarning =() => {
-  console.log(`handleSelfReportingWarning ${props.isEdit}`)
   if (props.isEdit) {
     approvals.value.showWarning = false;
     if (originalSelfReportingType.value === 'Approval' &&

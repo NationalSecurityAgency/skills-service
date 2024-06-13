@@ -23,6 +23,7 @@ import NewSoftwareVersion from '@/components/header/NewSoftwareVersion.vue'
 import { usePageVisitService } from '@/components/utils/services/UsePageVisitService.js'
 import { invoke, until } from '@vueuse/core'
 import DashboardFooter from '@/components/header/DashboardFooter.vue'
+import { useUserAgreementInterceptor } from '@/interceptors/UseUserAgreementInterceptor.js'
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -30,6 +31,7 @@ const appConfig = useAppConfig()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const accessState = useAccessState()
 const errorHandling = useErrorHandling()
+const userAgreementInterceptor = useUserAgreementInterceptor()
 const route = useRoute()
 
 const customGlobalValidators = useCustomGlobalValidators()
@@ -61,6 +63,7 @@ const iframeInit = useIframeInit()
 onBeforeMount(() => {
   iframeInit.handleHandshake()
   errorHandling.registerErrorHandling()
+  userAgreementInterceptor.register()
   customGlobalValidators.addValidators()
 })
 
@@ -96,7 +99,7 @@ const loadConfigs = () => {
 }
 
 const showHeader = computed(() => {
-  return !skillsDisplayInfo.isSkillsClientPath() && authState.isAuthenticated && !appInfoState.showUa
+  return !skillsDisplayInfo.isSkillsClientPath() && authState.isAuthenticated
 })
 </script>
 
