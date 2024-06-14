@@ -26,7 +26,7 @@ export const useMyProgressState = defineStore('myProgressState', () => {
     return Promise.resolve()
   }
 
-  const hasProjects = computed(() => myProjects.value.length > 0)
+  const hasProjects = computed(() => myProjects.value && myProjects.value?.length > 0)
 
 
   return {

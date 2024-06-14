@@ -32,7 +32,7 @@ describe('User Agreement Specs', ()=> {
    it('user must acknowledge user agreement after logging in', () => {
        cy.request('POST', '/root/saveSystemSettings', {
            publicUrl: 'http://foo.bar',
-           userAgreement: '#This is a user agreement\n* one \n * two \n * 3\n more text'
+           userAgreement: '# This is a user agreement\n* one \n * two \n * 3\n more text'
        });
 
        cy.intercept('GET', '/app/userAgreement').as('loadUserAgreement');
@@ -48,7 +48,7 @@ describe('User Agreement Specs', ()=> {
        cy.get('[data-cy=login]').click();
        cy.wait('@loadUserAgreement');
        cy.contains('User Agreement');
-       cy.get('[data-cy="breadcrumb-User Agreement"]').should('not.exist');
+       cy.get('[data-cy="breadcrumb-User Agreement"]')
        cy.get('[data-cy=userAgreement]').should('be.visible');
        cy.get('[data-cy=rejectUserAgreement]').should('be.visible');
        cy.get('[data-cy=acknowledgeUserAgreement]').should('be.visible').click();
@@ -85,7 +85,7 @@ describe('User Agreement Specs', ()=> {
         cy.visit('/');
         cy.wait('@loadUserAgreement');
         cy.contains('User Agreement').should('be.visible');
-        cy.get('[data-cy="breadcrumb-User Agreement"]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-User Agreement"]')
         cy.get('[data-cy=userAgreement]').should('be.visible');
 
         cy.visit('/settings/');

@@ -193,7 +193,6 @@ const saveSettings = () => {
     announcer.polite('Video settings were saved');
     setupPreview();
   }, () => {
-    // console.log(err);
     loading.value.video = false;
   });
 }

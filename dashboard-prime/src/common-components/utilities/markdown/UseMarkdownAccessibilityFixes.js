@@ -166,7 +166,6 @@ export const useMarkdownAccessibilityFixes = () => {
   }
 
   function handleHeaderButtonKeydown(event) {
-    console.log(`handling header button keydown: ${event.key}`)
     if (event.key === 'ArrowDown') {
       const menu = commonMarkdownOptions.getMenuItem()
       const firstItem = menu.querySelector('[data-level="1"]')

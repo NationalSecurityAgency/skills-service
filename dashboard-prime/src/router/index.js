@@ -65,6 +65,7 @@ import RequestResetConfirmation from '@/components/access/RequestResetConfirmati
 import ResetConfirmation from '@/components/access/ResetConfirmation.vue';
 import ResetNotSupportedPage from '@/components/access/ResetNotSupportedPage.vue';
 import RequestAccount from '@/components/access/RequestAccount.vue';
+import UserAgreement from '@/components/access/UserAgreement.vue'
 
 const routes = [
   {
@@ -750,7 +751,19 @@ const routes = [
       announcer: {
         message: 'Page Not Found',
       },
-    }, },
+    },
+  },
+  {
+    path: '/user-agreement',
+    component: UserAgreement,
+    name: 'UserAgreement',
+    meta: {
+      requiresAuth: true,
+      announcer: {
+        message: 'User Agreement',
+      },
+    },
+  }
 ]
 
 routes.push(createAdminRoutes())
