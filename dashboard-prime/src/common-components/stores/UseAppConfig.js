@@ -122,6 +122,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const minUsernameLength = computed(() => config.value.minUsernameLength)
   const minPasswordLength = computed(() => config.value.minPasswordLength)
   const maxPasswordLength = computed(() => config.value.maxPasswordLength)
+  const maxFirstNameLength = computed(() => config.value.maxFirstNameLength)
+  const maxLastNameLength = computed(() => config.value.maxLastNameLength)
   const numProjectsToStartShowingAsCards = computed(() => config.value.numProjectsToStartShowingAsCards)
   return {
     loadConfigState,
@@ -203,6 +205,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     minUsernameLength,
     minPasswordLength,
     maxPasswordLength,
+    maxFirstNameLength,
+    maxLastNameLength,
     numProjectsToStartShowingAsCards,
   }
 })

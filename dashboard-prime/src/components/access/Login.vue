@@ -124,10 +124,7 @@ const oAuth2Login = (registrationId) => {
                     <label for="inputPassword" class="flex">Password</label>
                     <div class="flex-1 text-right">
                       <small class="text-muted">
-                        <router-link data-cy="forgotPassword" :to="{ name:'ForgotPassword' }">Forgot Password?</router-link>
-                        <!--                      <b-link tabindex="0" @click="forgotPassword" data-cy="forgotPassword"-->
-                        <!--                        >Forgot Password?</b-link-->
-                        <!--                      >-->
+                        <router-link data-cy="forgotPassword" :to="{ name:'ForgotPassword', query: route.query }">Forgot Password?</router-link>
                       </small>
                     </div>
                   </div>
@@ -165,10 +162,8 @@ const oAuth2Login = (registrationId) => {
 
               <Divider />
               <p class="text-center">
-                <small
-                >Don't have a SkillTree account?
-                  <router-link data-cy="signUpButton" to="/">Sign up</router-link>
-                  <!--              <strong><b-link data-cy="signUpButton" @click="requestAccountPage">Sign up</b-link></strong>-->
+                <small>
+                  Don't have a SkillTree account? <router-link data-cy="signUpButton" :to="{ name: 'RequestAccount', query: route.query }">Sign up</router-link>
                 </small>
               </p>
             </template>

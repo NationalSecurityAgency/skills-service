@@ -6,8 +6,10 @@ import { usePagePath } from '@/components/utils/UsePageLocation.js'
 import SwitchTheme from '@/components/header/SwitchTheme.vue'
 import InceptionButton from '@/components/inception /InceptionButton.vue'
 import SkipToContent from '@/components/header/SkipToContent.vue'
+import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 
 const pathPath = usePagePath()
+const appInfoState = useAppInfoState()
 </script>
 
 <template>
@@ -37,7 +39,7 @@ const pathPath = usePagePath()
           </div>
         </div>
         <div class="flex-none">
-          <div class="flex flex-row">
+          <div v-if="!appInfoState.showUa" class="flex flex-row">
             <inception-button v-if="pathPath.isAdminPage.value"
                               class="mr-2"
                               data-cy="inception-button" />

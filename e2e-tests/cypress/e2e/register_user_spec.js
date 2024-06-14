@@ -33,15 +33,15 @@ describe('Register Dashboard Users', () => {
     it('register dashboard user', () => {
         cy.visit('/request-account');
         cy.contains('New Account');
-        cy.get('#firstName')
+        cy.get('[data-cy="requestAccountFirstName"]')
             .type('Robert');
-        cy.get('#lastName')
+        cy.get('[data-cy="requestAccountLastName"]')
             .type('Smith');
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .type('rob.smith@madeup.org');
-        cy.get('#password')
+        cy.get('[data-cy="requestAccountPassword"]')
             .type('password');
-        cy.get('#password_confirmation')
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
             .type('password');
         cy.contains('Create Account')
             .click();
@@ -56,15 +56,15 @@ describe('Register Dashboard Users', () => {
         cy.get('[data-cy="signUpButton"]')
             .click();
         cy.contains('New Account');
-        cy.get('#firstName')
+        cy.get('[data-cy="requestAccountFirstName"]')
             .type('Robert');
-        cy.get('#lastName')
+        cy.get('[data-cy="requestAccountLastName"]')
             .type('Smith');
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .type('rob.smith@madeup.org');
-        cy.get('#password')
+        cy.get('[data-cy="requestAccountPassword"]')
             .type('password');
-        cy.get('#password_confirmation')
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
             .type('password');
         cy.get('[data-cy="createAccountButton"]')
             .click();
@@ -76,60 +76,60 @@ describe('Register Dashboard Users', () => {
     it('register dashboard validation', () => {
         cy.visit('/request-account');
         cy.contains('New Account');
-        cy.get('#firstName')
+        cy.get('[data-cy="requestAccountFirstName"]')
             .type('Robert');
-        cy.get('#lastName')
+        cy.get('[data-cy="requestAccountLastName"]')
             .type('Smith');
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .type('rob.smith@madeup.org');
-        cy.get('#password')
+        cy.get('[data-cy="requestAccountPassword"]')
             .type('password');
-        cy.get('#password_confirmation')
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
             .type('password');
 
         // password mismatch via confirmation pass
-        cy.get('#password_confirmation')
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
             .clear()
             .type('password1');
         cy.contains('Create Account')
             .should('be.disabled');
-        cy.contains('Password confirmation does not match');
-        cy.get('#password_confirmation')
+        cy.contains('Passwords must match');
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
             .clear()
             .type('password');
         cy.contains('Create Account')
             .should('be.enabled');
-        cy.contains('Password confirmation does not match')
+        cy.contains('Passwords must match')
             .should('not.exist');
 
         // password mismatch via main pass
-        cy.get('#password')
+        cy.get('[data-cy="requestAccountPassword"]')
             .clear()
             .type('password1');
         cy.contains('Create Account')
             .should('be.disabled');
-        cy.contains('Password confirmation does not match');
-        cy.get('#password')
+        cy.contains('Passwords must match');
+        cy.get('[data-cy="requestAccountPassword"]')
             .clear()
             .type('password');
         cy.contains('Create Account')
             .should('be.enabled');
-        cy.contains('Password confirmation does not match')
+        cy.contains('Passwords must match')
             .should('not.exist');
 
         // password must be at least 8 chars
-        cy.get('#password')
+        cy.get('[data-cy="requestAccountPassword"]')
             .clear()
             .type('passwor');
         cy.contains('Create Account')
             .should('be.disabled');
-        cy.contains('Password cannot be less than 8 characters');
-        cy.get('#password')
+        cy.contains('Password must be at least 8 characters');
+        cy.get('[data-cy="requestAccountPassword"]')
             .clear()
             .type('password');
         cy.contains('Create Account')
             .should('be.enabled');
-        cy.contains('Password cannot be less than 8 characters')
+        cy.contains('Password must be at least 8 characters')
             .should('not.exist');
 
         // password must not exceed 40 characters
@@ -139,32 +139,32 @@ describe('Register Dashboard Users', () => {
         const validPassword = Array(40)
             .fill('a')
             .join('');
-        cy.get('#password')
+        cy.get('[data-cy="requestAccountPassword"]')
             .clear()
             .type(invalidPassword);
-        cy.get('#password_confirmation')
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
             .clear()
             .type(invalidPassword);
-        cy.contains('Password cannot exceed 40 characters');
+        cy.contains('Password must be at most 40 characters');
         cy.contains('Create Account')
             .should('be.disabled');
-        cy.get('#password')
+        cy.get('[data-cy="requestAccountPassword"]')
             .type('{backspace}');
-        cy.get('#password_confirmation')
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
             .type('{backspace}');
-        cy.contains('Password cannot exceed 40 characters')
+        cy.contains('Password must be at most 40 characters')
             .should('not.exist');
         cy.contains('Create Account')
             .should('be.enabled');
 
         // email must be at least 5 chars
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .clear()
             .type('1234');
         cy.contains('Email must be a valid email');
         cy.contains('Create Account')
             .should('be.disabled');
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .clear()
             .type('rob.smith@madeup.org');
         cy.contains('Create Account')
@@ -177,38 +177,38 @@ describe('Register Dashboard Users', () => {
         // email must not exceed 73 chars
         const invalidEmail = Array(74-9).fill('a').join('');
         const validEmail = Array(73-9).fill('a').join('');
-        cy.get('#email').clear().type(`${invalidEmail}@mail.org`)
+        cy.get('[data-cy="requestAccountEmail"]').clear().type(`${invalidEmail}@mail.org`)
         cy.contains('The Email field must be a valid email').should('be.visible')
         cy.contains('Create Account').should('be.disabled');
-        cy.get('#email').clear().type(`${validEmail}@mail.org`)
+        cy.get('[data-cy="requestAccountEmail"]').clear().type(`${validEmail}@mail.org`)
         cy.contains('Create Account').should('be.enabled');
         cy.contains('The Email field must be a valid email').should('not.exist')
          */
 
         // email already taken
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .clear()
             .type('skills@skills.org');
-        cy.contains('The email address is already used for another account');
+        cy.contains('This email address is already used for another account');
         cy.contains('Create Account')
             .should('be.disabled');
 
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .clear()
             .type('skills1@skills.org');
         cy.contains('Create Account')
             .should('be.enabled');
-        cy.contains('The email address is already used for another account')
+        cy.contains('This email address is already used for another account')
             .should('not.exist');
 
         // valid email
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .clear()
             .type('rob.smithmadeup.org');
         cy.contains('Email must be a valid email');
         cy.contains('Create Account')
             .should('be.disabled');
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .clear()
             .type('rob.smith@madeup.org');
         cy.contains('Email must be a valid email')
@@ -217,29 +217,29 @@ describe('Register Dashboard Users', () => {
             .should('be.enabled');
 
         // first name must  not be empty
-        cy.get('#firstName')
+        cy.get('[data-cy="requestAccountFirstName"]')
             .clear();
-        cy.contains('First Name is required');
+        cy.contains('First Name is a required field');
         cy.contains('Create Account')
             .should('be.disabled');
-        cy.get('#firstName')
+        cy.get('[data-cy="requestAccountFirstName"]')
             .type('Robert');
         cy.contains('Create Account')
             .should('be.enabled');
-        cy.contains('First Name is required')
+        cy.contains('First Name is a required field')
             .should('not.exist');
 
         // first name must not exceed 30 characters
         const thirtyOneChars = Array(31)
             .fill('a')
             .join('');
-        cy.get('#firstName')
+        cy.get('[data-cy="requestAccountFirstName"]')
             .clear()
             .type(thirtyOneChars);
-        cy.contains('First Name cannot exceed 30 characters');
+        cy.contains('First Name must be at most 30 characters');
         cy.contains('Create Account')
             .should('be.disabled');
-        cy.get('#firstName')
+        cy.get('[data-cy="requestAccountFirstName"]')
             .type('{backspace}');
         cy.contains('First Name exceed 30 characters')
             .should('not.exist');
@@ -247,28 +247,28 @@ describe('Register Dashboard Users', () => {
             .should('be.enabled');
 
         // last name must  not be empty
-        cy.get('#lastName')
+        cy.get('[data-cy="requestAccountLastName"]')
             .clear();
-        cy.contains('Last Name is required');
+        cy.contains('Last Name is a required field');
         cy.contains('Create Account')
             .should('be.disabled');
-        cy.get('#lastName')
+        cy.get('[data-cy="requestAccountLastName"]')
             .type('Smith');
         cy.contains('Create Account')
             .should('be.enabled');
-        cy.contains('Last Name is required')
+        cy.contains('Last Name is a required field')
             .should('not.exist');
 
         // last name must not exceed 30 characters
-        cy.get('#lastName')
+        cy.get('[data-cy="requestAccountLastName"]')
             .clear()
             .type(thirtyOneChars);
-        cy.contains('Last Name cannot exceed 30 characters');
+        cy.contains('Last Name must be at most 30 characters');
         cy.contains('Create Account')
             .should('be.disabled');
-        cy.get('#lastName')
+        cy.get('[data-cy="requestAccountLastName"]')
             .type('{backspace}');
-        cy.contains('Last Name cannot exceed 30 characters')
+        cy.contains('Last Name must be at most 30 characters')
             .should('not.exist');
         cy.contains('Create Account')
             .should('be.enabled');

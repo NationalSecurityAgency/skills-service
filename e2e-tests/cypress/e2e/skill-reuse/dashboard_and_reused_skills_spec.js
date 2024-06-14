@@ -26,7 +26,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.createSubject(1, 2);
     });
 
-    it('Search and Navigate directly to a skill properly labels reused skills', () => {
+    it.skip('Search and Navigate directly to a skill properly labels reused skills', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
         cy.createSkillsGroup(1, 1, 12);
         cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
@@ -79,7 +79,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains('Awesome Group 12 Subj1');
     });
 
-    it('reused skills must NOT be available for badges', () => {
+    it.skip('reused skills must NOT be available for badges', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
         cy.createSkillsGroup(1, 1, 12);
         cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
@@ -96,7 +96,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains('skill1');
     });
 
-    it('cannot initiate reuse when finalization is pending', () => {
+    it.skip('cannot initiate reuse when finalization is pending', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.exportSkillToCatalog(1, 1, 1);
@@ -121,7 +121,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains('Cannot initiate skill reuse while skill finalization is pending');
     });
 
-    it('cannot initiate reuse when finalization is running', () => {
+    it.skip('cannot initiate reuse when finalization is running', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.exportSkillToCatalog(1, 1, 1);

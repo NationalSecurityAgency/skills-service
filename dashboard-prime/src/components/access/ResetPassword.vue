@@ -13,11 +13,6 @@ const router = useRouter()
 const appConfig = useAppConfig()
 
 const resetToken = ref(route.params.resetToken);
-const resetFields = ref({
-  email: '',
-  password: '',
-  passwordConfirmation: '',
-});
 const resetInProgress = ref(false);
 const resetFailed = ref(false);
 const resetSuccessful = ref(false);
@@ -59,7 +54,7 @@ const { values, meta, handleSubmit, validate, errors } = useForm({
     passwordConfirmation: '',
   }
 })
-const handleChangePassword = handleSubmit((values) => {
+const onSubmit = handleSubmit((values) => {
   changePassword(values.email, values.password);
 });
 </script>
@@ -74,7 +69,7 @@ const handleChangePassword = handleSubmit((values) => {
         </div>
         <Card class="mt-3 text-left">
           <template #content>
-            <form @submit="handleChangePassword">
+            <form @submit="onSubmit">
               <div class="w-full">
                 <SkillsTextInput
                     label="Email Address"
@@ -82,9 +77,8 @@ const handleChangePassword = handleSubmit((values) => {
                     autocomplete="username"
                     :is-required="true"
                     :disabled="resetInProgress"
-                    @keyup.enter="handleChangePassword"
+                    @keyup.enter="onSubmit"
                     placeholder="Enter email"
-                    v-model="resetFields.email"
                     data-cy="resetPasswordEmail"
                     id="email"
                     name="email"/>
@@ -92,12 +86,11 @@ const handleChangePassword = handleSubmit((values) => {
                     label="New Password"
                     size="small"
                     type="password"
-                    autocomplete="current-password"
+                    autocomplete="new-password"
                     :is-required="true"
                     :disabled="resetInProgress"
-                    @keyup.enter="handleChangePassword"
+                    @keyup.enter="onSubmit"
                     placeholder="Enter new password"
-                    v-model="resetFields.password"
                     data-cy="resetPasswordNewPassword"
                     id="password"
                     name="password"/>
@@ -108,9 +101,8 @@ const handleChangePassword = handleSubmit((values) => {
                     autocomplete="new-password"
                     :is-required="true"
                     :disabled="resetInProgress"
-                    @keyup.enter="handleChangePassword"
+                    @keyup.enter="onSubmit"
                     placeholder="Confirm new password"
-                    v-model="resetFields.passwordConfirmation"
                     data-cy="resetPasswordConfirm"
                     id="passwordConfirmation"
                     name="passwordConfirmation"/>

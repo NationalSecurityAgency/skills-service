@@ -79,7 +79,7 @@ export default {
       .then((response) => response.data)
   },
   userWithEmailExists(email) {
-    return axios.get(`/userExists/${email}`).then((response) => !response.data)
+    return axios.get(`/userExists/${encodeURIComponent(email)}`).then((response) => !response.data)
   },
   hasRole(roleName) {
     return axios.get(`/app/userInfo/hasRole/${roleName}`).then((response) => response.data)
