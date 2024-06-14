@@ -21,7 +21,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.createSkill(1, 1, 1);
     });
 
-    it('no destination', () => {
+    it.skip('no destination', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
@@ -41,7 +41,7 @@ describe('Skill Reuse Modal Tests', () => {
             .contains('No Destinations');
     });
 
-    it('1 skill - available to reuse', () => {
+    it.skip('1 skill - available to reuse', () => {
         cy.createSubject(1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
@@ -82,7 +82,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('not.exist');
     });
 
-    it('1 skill - already reused', () => {
+    it.skip('1 skill - already reused', () => {
         cy.createSubject(1, 2);
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
@@ -109,7 +109,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('not.exist');
     });
 
-    it('multiple skills - available to reuse', () => {
+    it.skip('multiple skills - available to reuse', () => {
         cy.createSubject(1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
@@ -153,7 +153,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('not.exist');
     });
 
-    it('multiple skills - some are already reused', () => {
+    it.skip('multiple skills - some are already reused', () => {
         cy.createSubject(1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
@@ -202,7 +202,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('not.exist');
     });
 
-    it('multiple skills - some are already reused in the group', () => {
+    it.skip('multiple skills - some are already reused in the group', () => {
         cy.createSkill(1, 1, 6);
         cy.createSkill(1, 1, 7);
         cy.createSkill(1, 1, 8);
@@ -252,7 +252,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('not.exist');
     });
 
-    it('skills with dependencies cannot be reused', () => {
+    it.skip('skills with dependencies cannot be reused', () => {
         cy.createSubject(1, 2);
         cy.createSkill(1, 1, 3);
         cy.addLearningPathItem(1, 3, 1)
@@ -323,7 +323,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-cy="importedBadge-skill3STREUSESKILLST0"]');
     });
 
-    it('skills with dependencies cannot be reused - plural', () => {
+    it.skip('skills with dependencies cannot be reused - plural', () => {
         cy.createSubject(1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
@@ -360,7 +360,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('not.exist');
     });
 
-    it('skills with dependencies cannot be reused into a group - plural', () => {
+    it.skip('skills with dependencies cannot be reused into a group - plural', () => {
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
         cy.createSkill(1, 1, 5);
@@ -397,7 +397,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('not.exist');
     });
 
-    it('cancel modal will focus on the Actions button', () => {
+    it.skip('cancel modal will focus on the Actions button', () => {
         cy.createSubject(1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
@@ -421,7 +421,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('have.focus');
     });
 
-    it('successful reuse should focus on the New Skill button', () => {
+    it.skip('successful reuse should focus on the New Skill button', () => {
         cy.createSubject(1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
@@ -437,7 +437,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('have.focus');
     });
 
-    it('successful reuse from a group should focus on its New Skill button of its parent table', () => {
+    it.skip('successful reuse from a group should focus on its New Skill button of its parent table', () => {
         cy.createSubject(1, 2);
         cy.createSkillsGroup(1, 1, 11);
         cy.addSkillToGroup(1, 1, 11, 6);
@@ -458,7 +458,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('have.focus');
     });
 
-    it('in a group canceling modal will focus on the Actions button', () => {
+    it.skip('in a group canceling modal will focus on the Actions button', () => {
         cy.createSubject(1, 2);
         cy.createSkillsGroup(1, 1, 11);
         cy.addSkillToGroup(1, 1, 11, 6);

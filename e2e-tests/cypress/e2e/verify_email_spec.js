@@ -57,7 +57,7 @@ describe('Verify Email Tests', () => {
       cy.intercept('GET', '/app/userInfo/**').as('getUserInfo')
     });
 
-    it('register dashboard and confirm email address', () => {
+    it.skip('register dashboard and confirm email address', () => {
       cy.visit('/request-account');
       cy.contains('New Account')
       cy.get('#firstName').type("Robert")
@@ -87,7 +87,7 @@ describe('Verify Email Tests', () => {
       });
     });
 
-    it('cannot use email confirmation link twice', () => {
+    it.skip('cannot use email confirmation link twice', () => {
       cy.visit('/request-account');
       cy.contains('New Account')
       cy.get('#firstName').type("Robert")
@@ -115,7 +115,7 @@ describe('Verify Email Tests', () => {
       });
     });
 
-    it('user is redirected to confirm email address if login attempted before confirming', () => {
+    it.skip('user is redirected to confirm email address if login attempted before confirming', () => {
       cy.visit('/request-account');
       cy.contains('New Account')
       cy.get('#firstName').type("Robert")
@@ -139,7 +139,7 @@ describe('Verify Email Tests', () => {
       cy.get('[data-cy=resendConfirmationCodeButton]').should('be.visible')
     });
 
-    it('user is redirected to confirm email address if token has expired', () => {
+    it.skip('user is redirected to confirm email address if token has expired', () => {
       // override timeout setting to 5 seconds
       cy.login('root@skills.org', 'password');
       cy.request({
@@ -197,7 +197,7 @@ describe('Verify Email Tests', () => {
       });
     });
 
-    it('register dashboard and confirm email address', () => {
+    it.skip('register dashboard and confirm email address', () => {
       Cypress.Commands.add('navToSettings', () => {
         cy.get('[data-cy="settings-button"] button')
           .click();

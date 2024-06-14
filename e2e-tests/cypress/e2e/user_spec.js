@@ -57,10 +57,10 @@ describe('User Tests', () => {
     cy.visit('/administrator/projects/proj1/users/user1/skillEvents');
     cy.wait('@loadUserSkills');
 
-    cy.get('.skills-b-table tbody tr').should('have.length', 2);
+    cy.get('[data-cy="performedSkillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', 2);
     cy.get('[data-cy=performedSkills-skillIdFilter]').type('mediocre{enter}');
     cy.wait('@loadUserSkills');
-    cy.get('.skills-b-table tbody tr').should('have.length', 1);
+    cy.get('[data-cy="performedSkillsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', 1);
   });
 
 

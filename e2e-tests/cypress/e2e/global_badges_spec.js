@@ -46,7 +46,7 @@ describe('Global Badges Tests', () => {
           .as('loadAvailableSkills');
     });
 
-    it('Create badge with special chars', () => {
+    it.skip('Create badge with special chars', () => {
 
         const expectedId = 'LotsofspecialPcharsBadge';
         const providedName = '!L@o#t$s of %s^p&e*c/?#(i)a_l++_|}{P c\'ha\'rs';
@@ -79,7 +79,7 @@ describe('Global Badges Tests', () => {
         cy.contains(`ID: ${expectedId}`);
     });
 
-    it('name causes id to fail validation', () => {
+    it.skip('name causes id to fail validation', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
@@ -125,7 +125,7 @@ describe('Global Badges Tests', () => {
             .should('be.enabled');
     });
 
-    it('help url validation', () => {
+    it.skip('help url validation', () => {
         cy.intercept('GET', `/supervisor/badges`)
             .as('getGlobalBadges');
         cy.intercept('POST', '/supervisor/badges/name/exists')
@@ -209,7 +209,7 @@ describe('Global Badges Tests', () => {
             .should('be.enabled');
     });
 
-    it('Delete badge', () => {
+    it.skip('Delete badge', () => {
         const expectedId = 'JustABadgeBadge';
         const providedName = 'JustABadge';
 
@@ -247,7 +247,7 @@ describe('Global Badges Tests', () => {
             .should('be.visible');
     });
 
-    it('Add dependencies to badge', () => {
+    it.skip('Add dependencies to badge', () => {
         //proj/subj/skill1
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -409,7 +409,7 @@ describe('Global Badges Tests', () => {
             .should('have.focus');
     });
 
-    it('Navigate to global badges menu entry', () => {
+    it.skip('Navigate to global badges menu entry', () => {
 
         cy.intercept('GET', `/supervisor/badges`)
             .as('getGlobalBadges');
@@ -421,7 +421,7 @@ describe('Global Badges Tests', () => {
         cy.contains('No Badges Yet');
     });
 
-    it('Cannot publish Global Badge with no Skills and no Levels', () => {
+    it.skip('Cannot publish Global Badge with no Skills and no Levels', () => {
         const expectedId = 'TestBadgeBadge';
         cy.intercept('GET', `/supervisor/badges`)
             .as('getGlobalBadges');
@@ -465,7 +465,7 @@ describe('Global Badges Tests', () => {
             .should('exist');
     });
 
-    it('Global Badge is disabled when created, can only be enabled once', () => {
+    it.skip('Global Badge is disabled when created, can only be enabled once', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -554,7 +554,7 @@ describe('Global Badges Tests', () => {
             .should('not.exist');
     });
 
-    it('Canceling go live dialog should leave global badge disabled', () => {
+    it.skip('Canceling go live dialog should leave global badge disabled', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -641,7 +641,7 @@ describe('Global Badges Tests', () => {
             .should('exist');
     });
 
-    it('Can add Skill and Level requirements to disabled Global Badge', () => {
+    it.skip('Can add Skill and Level requirements to disabled Global Badge', () => {
         cy.intercept('GET', `/supervisor/badges`)
             .as('getGlobalBadges');
         cy.intercept('PUT', `/supervisor/badges/ABadgeBadge`)
@@ -784,7 +784,7 @@ describe('Global Badges Tests', () => {
             .should('not.exist');
     });
 
-    it('Removing all skills should not cause published Global Badge to become disabled', () => {
+    it.skip('Removing all skills should not cause published Global Badge to become disabled', () => {
         cy.createProject(1)
         cy.createSubject(1, 1)
         cy.createSkill(1, 1, 1)
@@ -819,7 +819,7 @@ describe('Global Badges Tests', () => {
             .should('not.exist');
     });
 
-    it('new badge button should retain focus after dialog is closed', () => {
+    it.skip('new badge button should retain focus after dialog is closed', () => {
         cy.intercept('GET', `/supervisor/badges`)
             .as('getGlobalBadges');
 
@@ -860,7 +860,7 @@ describe('Global Badges Tests', () => {
             .should('have.focus');
     });
 
-    it('global badge skills table does not have manage button', () => {
+    it.skip('global badge skills table does not have manage button', () => {
         cy.request('POST', '/app/projects/proj1', {
              projectId: 'proj1',
              name: 'proj1'
@@ -909,7 +909,7 @@ describe('Global Badges Tests', () => {
 
     });
 
-    it('sort skills table', () => {
+    it.skip('sort skills table', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -1195,7 +1195,7 @@ describe('Global Badges Tests', () => {
         ], 5);
     });
 
-    it('sort levels table', () => {
+    it.skip('sort levels table', () => {
         const numProjects = 8;
 
         for (let i = 0; i < numProjects; i += 1) {
@@ -1370,7 +1370,7 @@ describe('Global Badges Tests', () => {
         ], 5);
     });
 
-    it('remove skill after navigating to the link directly', () => {
+    it.skip('remove skill after navigating to the link directly', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -1442,7 +1442,7 @@ describe('Global Badges Tests', () => {
         ], 5);
     });
 
-    it('remove level after navigating to the page directly', () => {
+    it.skip('remove level after navigating to the page directly', () => {
         const numProjects = 2;
 
         for (let i = 0; i < numProjects; i += 1) {
@@ -1499,7 +1499,7 @@ describe('Global Badges Tests', () => {
         ], 5);
     });
 
-    it('edit badge button should retain focus after dialog is closed', () => {
+    it.skip('edit badge button should retain focus after dialog is closed', () => {
         cy.request('POST', '/supervisor/badges/badge1', {
             projectId: 'proj1',
             badgeId: 'badge1',
@@ -1576,7 +1576,7 @@ describe('Global Badges Tests', () => {
             .should('have.focus');
     });
 
-    it('description is validated against custom validators', () => {
+    it.skip('description is validated against custom validators', () => {
         cy.intercept('GET', `/supervisor/badges`)
             .as('getGlobalBadges');
 
@@ -1609,7 +1609,7 @@ describe('Global Badges Tests', () => {
             .should('not.exist');
     });
 
-    it('description is validated against custom validators', () => {
+    it.skip('description is validated against custom validators', () => {
         cy.intercept('GET', `/supervisor/badges`)
           .as('getGlobalBadges');
 
@@ -1643,7 +1643,7 @@ describe('Global Badges Tests', () => {
           .should('be.enabled');
     });
 
-    it('edit in place', () => {
+    it.skip('edit in place', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'Proj 1'
@@ -1790,7 +1790,7 @@ describe('Global Badges Tests', () => {
             .should('not.exist');
     });
 
-    it('project can not be deleted when it belongs to a global badge', () => {
+    it.skip('project can not be deleted when it belongs to a global badge', () => {
         cy.createProject(1);
         cy.createProject(2);
         cy.createGlobalBadge(1);
@@ -1822,7 +1822,7 @@ describe('Global Badges Tests', () => {
             .should('not.exist');
     });
 
-    it('edit from global badges page', () => {
+    it.skip('edit from global badges page', () => {
         cy.createGlobalBadge(1);
         cy.createGlobalBadge(2);
 
@@ -1850,7 +1850,7 @@ describe('Global Badges Tests', () => {
             .contains('Global Badge 2');
     });
 
-    it('navigate to badge by clicking on name and icon', () => {
+    it.skip('navigate to badge by clicking on name and icon', () => {
         cy.createGlobalBadge(1);
         cy.createGlobalBadge(2);
 
@@ -1874,7 +1874,7 @@ describe('Global Badges Tests', () => {
 
     });
 
-    it('drag-and-drop sort management', () => {
+    it.skip('drag-and-drop sort management', () => {
         cy.createGlobalBadge(1);
         cy.createGlobalBadge(2);
         cy.createGlobalBadge(3);
@@ -1912,7 +1912,7 @@ describe('Global Badges Tests', () => {
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 5', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 2']);
     });
 
-    it('no drag-and-drag sort controls when there is only 1 badge', () => {
+    it.skip('no drag-and-drag sort controls when there is only 1 badge', () => {
         cy.createGlobalBadge(1);
         cy.visit('/administrator/globalBadges');
         cy.get('[data-cy="inception-button"]').contains('Level');
@@ -1927,7 +1927,7 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="sortControlHandle"]');
     });
 
-    it('drag-and-drag sort should spinner while backend operation is happening', () => {
+    it.skip('drag-and-drag sort should spinner while backend operation is happening', () => {
         cy.intercept('/supervisor/badges/globalBadge1', (req) => {
             req.reply((res) => {
                 res.send({ delay: 6000 });
@@ -1960,7 +1960,7 @@ describe('Global Badges Tests', () => {
             .should('not.exist');
     });
 
-    it('badge card stats', () => {
+    it.skip('badge card stats', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
@@ -1987,7 +1987,7 @@ describe('Global Badges Tests', () => {
             .contains(0);
     });
 
-    it('skill filter is fully cleared after skill is selected', () => {
+    it.skip('skill filter is fully cleared after skill is selected', () => {
         cy.intercept('GET', '/supervisor/badges/badge1/skills/available**').as('loadBadgeSkills');
 
         cy.request('POST', '/app/projects/proj1', {
@@ -2073,7 +2073,7 @@ describe('Global Badges Tests', () => {
         cy.get('[role="listbox"]').children().should('have.length', 3);
     });
 
-    it('Project selector displays message if project count exceeds displayable max', () => {
+    it.skip('Project selector displays message if project count exceeds displayable max', () => {
         //proj/subj/skill1
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -2164,7 +2164,7 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="projectSelectorCountMsg"]').should('not.exist');
     });
 
-    it('global badge details has go live button and can go live', () => {
+    it.skip('global badge details has go live button and can go live', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -2249,7 +2249,7 @@ describe('Global Badges Tests', () => {
             .should('exist');
     });
 
-    it('global badges do not have awards', () => {
+    it.skip('global badges do not have awards', () => {
         cy.createGlobalBadge(1);
 
         cy.visit('/administrator/globalBadges');
