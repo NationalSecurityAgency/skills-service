@@ -76,6 +76,7 @@ const addLevel = () => {
         };
         badgeLevels.value.push(newLevel);
         selectedLevel.value = null;
+        selectedProject.value = null;
         badgeState.loadGlobalBadgeDetailsState(badgeId.value).finally(() => {
           announcer.polite(`added ${selectedProject.value} level ${selectedLevel.value} to global badge`)
           badge.value = badgeState.badge;
@@ -131,8 +132,7 @@ const changeLevel = (level) => {
   showChangeLevel.value = true;
 };
 
-const changeLevelClosed = (e) => {
-  const { projectId } = e;
+const changeLevelClosed = () => {
   showChangeLevel.value = false;
   projectLevelId.value = null;
   projectLevel.value = null;
