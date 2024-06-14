@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import NavCardWithStatsAndControls from '@/components/utils/cards/NavCardWithStatsAndControls.vue';
 import CardNavigateAndEditControls from '@/components/utils/cards/CardNavigateAndEditControls.vue';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
@@ -32,6 +32,11 @@ const navCardWithStatsAndControls = ref();
 const cardNavControls = ref(null);
 
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
+
+watch(() => props.badge, () => {
+  badgeInternal.value = props.badge;
+  buildCardOptions();
+});
 
 onMounted(() => {
   buildCardOptions();
