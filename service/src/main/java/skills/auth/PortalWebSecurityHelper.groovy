@@ -53,7 +53,7 @@ class PortalWebSecurityHelper {
 
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
 
-        http.csrf().disable()
+//        http.csrf().disable()
 
         if (publiclyExposePrometheusMetrics) {
             http.authorizeHttpRequests().requestMatchers(HttpMethod.GET, "${managementPath}/${prometheusPath}").permitAll()
