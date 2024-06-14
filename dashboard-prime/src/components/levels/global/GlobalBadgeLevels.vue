@@ -26,7 +26,6 @@ const selectedLevel = ref( null);
 const isLoading = ref( true);
 const loadingAvailableProjects = ref( false);
 const levelPlaceholder = ref( 'First choose a Project');
-// const badge = ref( null);
 const badgeId = ref( null);
 const badgeLevels = ref( []);
 const showChangeLevel = ref( false);
@@ -134,9 +133,6 @@ const changeLevel = (level) => {
 
 const changeLevelClosed = (e) => {
   const { projectId } = e;
-  setTimeout(() => {
-    handleFocus({ projectId });
-  }, 0);
   showChangeLevel.value = false;
   projectLevelId.value = null;
   projectLevel.value = null;
@@ -148,19 +144,6 @@ const saveLevelChange = (e) => {
       .then(() => loadBadgeLevels());
 };
 
-const handleFocus = (e) => {
-  if (e && e.projectId) {
-    const refName = `edit_${e.projectId}`;
-    // const ref = $refs.globalLevelsTable.$refs[refName];
-    // nextTick(() => {
-    //   if (ref) {
-    //     ref.focus();
-    //   }
-    // });
-  }
-};
-
-// const loadProjectsForBadge = debounce(function loadProjects() {
 const loadProjectsForBadge = () => {
   loadingAvailableProjects.value = true;
   GlobalBadgeService.suggestProjectsForPage(badgeId.value, projectSearch.value)
@@ -177,7 +160,6 @@ const loadProjectsForBadge = () => {
     loadingAvailableProjects.value = false;
   });
 };
-// }, 250);
 
 const searchChanged = (query) => {
   projectSearch.value = query;
