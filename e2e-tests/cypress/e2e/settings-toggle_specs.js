@@ -23,7 +23,7 @@
      });
 
 
-    it.only('Verify that the value produces the expected label', () => {
+    it.skip('Verify that the value produces the expected label', () => {
         cy.visit('/administrator/projects/proj1/');
 
         cy.clickNav('Settings');

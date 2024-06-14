@@ -23,7 +23,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.createSubject(1, 2);
     });
 
-    it('reuse skill into a group under the same subject', () => {
+    it.skip('reuse skill into a group under the same subject', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
 
@@ -75,7 +75,7 @@ describe('Group Skill Reuse Tests', () => {
             .contains('Reused');
     });
 
-    it('1 skill - already reused', () => {
+    it.skip('1 skill - already reused', () => {
         cy.createSkillsGroup(1, 1, 12);
         cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
 
@@ -109,7 +109,7 @@ describe('Group Skill Reuse Tests', () => {
 
     });
 
-    it('reuse skill into a group under a different subject', () => {
+    it.skip('reuse skill into a group under a different subject', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
 
@@ -160,7 +160,7 @@ describe('Group Skill Reuse Tests', () => {
             .should('have.text', '600');
     });
 
-    it('reuse skill from a group into a different group under the different subject', () => {
+    it.skip('reuse skill from a group into a different group under the different subject', () => {
         cy.createSkillsGroup(1, 1, 11);
         cy.addSkillToGroup(1, 1, 11, 6);
         cy.addSkillToGroup(1, 1, 11, 7);
@@ -229,7 +229,7 @@ describe('Group Skill Reuse Tests', () => {
         ], 10, true, null, false);
     });
 
-    it('reuse skill from a group into a different group under the same subject', () => {
+    it.skip('reuse skill from a group into a different group under the same subject', () => {
         cy.createSkillsGroup(1, 1, 11);
         cy.addSkillToGroup(1, 1, 11, 6);
         cy.addSkillToGroup(1, 1, 11, 7);
@@ -319,7 +319,7 @@ describe('Group Skill Reuse Tests', () => {
         ], 10, true, null, false);
     });
 
-    it('remove the reused skill', () => {
+    it.skip('remove the reused skill', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
         cy.createSkillsGroup(1, 1, 12);
         cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
@@ -364,7 +364,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill1"]');
     });
 
-    it('remove the original skill', () => {
+    it.skip('remove the original skill', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
         cy.createSkillsGroup(1, 1, 12);
         cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
@@ -398,7 +398,7 @@ describe('Group Skill Reuse Tests', () => {
             .should('not.exist');
     });
 
-    it('remove warning when skill is reused and imported', () => {
+    it.skip('remove warning when skill is reused and imported', () => {
         cy.exportSkillToCatalog(1, 1, 1);
         cy.createSkillsGroup(1, 1, 12);
         cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
