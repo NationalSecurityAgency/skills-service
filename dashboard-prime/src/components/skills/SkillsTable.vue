@@ -223,7 +223,7 @@ const doDeleteSkill = () => {
       }
       if (skill.groupId) {
         skillsState.setGroupSkills(skill.groupId, skills)
-        const parentGroup = skillsState.subjectSkills.find((item) => item.skillId = skill.groupId)
+        const parentGroup = skillsState.subjectSkills.find((item) => item.skillId === skill.groupId)
         parentGroup.totalPoints = skills
           .map((item) => item.totalPoints)
           .reduce((accumulator, currentValue) => {
@@ -316,9 +316,9 @@ const disableRow = (row) => {
   return (row.isGroupType || row.isCatalogImportedSkills) ? 'remove-checkbox' : ''
 }
 
-const onMoved = (movedInfo) => {
+const onMovedOrReused = (movedInfo, isMoved = true) => {
   if (log.isTraceEnabled()) {
-    log.trace(`onMoved ${JSON.stringify(movedInfo)}`)
+    log.trace(`onMovedOrReused ${JSON.stringify(movedInfo)}`)
   }
   const movedSkillIds = movedInfo.moved.map((sk) => sk.skillId)
   const groupSkill = movedInfo.moved.find((sk) => sk.groupId)
@@ -329,7 +329,7 @@ const onMoved = (movedInfo) => {
     skillsState.pushIntoSubjectSkills(toRaw(movedSkills))
   }
   const aMovedSkills = movedInfo.moved[0]
-  if (route.params.subjectId === aMovedSkills.subjectId && !aMovedSkills.groupId) {
+  if (isMoved && route.params.subjectId === aMovedSkills.subjectId && !aMovedSkills.groupId) {
     skillsState.removeSubjectSkillsBySkillIds(movedSkillIds)
   }
   if (movedInfo.destination.groupId) {
@@ -489,7 +489,7 @@ const isLoading = computed(() => {
                 data-cy="skillActionsBtn">
                 <i class="fas fa-tools mr-1" aria-hidden="true"></i>
                 <span>Action</span>
-                <Badge :value="selectedSkills.length" data-cy="skillActionsNumSelected"></Badge>
+                <Tag data-cy="skillActionsNumSelected" class="ml-1" severity="info">{{ selectedSkills.length }}</Tag>
                 <i class="fas fa-caret-down ml-2"></i>
               </SkillsButton>
               <Menu ref="skillsActionsMenu"
@@ -775,7 +775,7 @@ const isLoading = computed(() => {
       v-if="showMoveSkillsInfoModal"
       v-model="showMoveSkillsInfoModal"
       :skills="selectedSkills"
-      @on-moved="onMoved"
+      @on-moved="onMovedOrReused"
     />
     <reuse-or-move-skills-dialog
       id="reuseSkillsModal"
@@ -783,7 +783,7 @@ const isLoading = computed(() => {
       v-if="showSkillsReuseModal"
       v-model="showSkillsReuseModal"
       :skills="selectedSkills"
-      @on-moved="onMoved"
+      @on-moved="onMovedOrReused($event, false)"
     />
     <edit-imported-skill-dialog
       v-if="editImportedSkillInfo.show"

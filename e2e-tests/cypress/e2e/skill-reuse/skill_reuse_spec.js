@@ -66,18 +66,24 @@ describe('Skill Reuse Tests', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
         cy.visit('/administrator/projects/proj1/subjects/subj2');
+        cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: subj2')
+        cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]')
         cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]').contains('Original Skill')
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"] [data-cy="linkToTheOriginalSkill"]')
             .click();
         cy.get('[data-cy="breadcrumb-subj1"]')
             .contains('subj1');
         cy.get('[data-cy="pageHeader"] [data-cy="skillId"] [data-cy="smtText"]')
             .should('have.text', 'ID: skill1');
+        cy.get('[data-cy="skillOverviewTotalpoints"] [data-cy="mediaInfoCardTitle"]').should('have.text', '200 Points')
 
         // from the skill page by navigating down to the skill page
         cy.visit('/administrator/projects/proj1/subjects/subj2');
-        cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]')
-            .click();
+        cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: subj2')
+        cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]').click();
+        cy.get('[data-cy="breadcrumb-skill1STREUSESKILLST0"]')
+        cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]').contains('Original Skill')
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"] [data-cy="linkToTheOriginalSkill"]')
             .click();
         cy.get('[data-cy="breadcrumb-subj1"]')
@@ -87,6 +93,7 @@ describe('Skill Reuse Tests', () => {
 
         // from the skill page directly
         cy.visit('/administrator/projects/proj1/subjects/subj2/skills/skill1STREUSESKILLST0/');
+        cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]').contains('Original Skill')
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"] [data-cy="linkToTheOriginalSkill"]')
             .click();
         cy.get('[data-cy="breadcrumb-subj1"]')

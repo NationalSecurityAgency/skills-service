@@ -21,7 +21,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.createSkill(1, 1, 1);
     });
 
-    it.skip('no destination', () => {
+    it('no destination', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
@@ -41,7 +41,7 @@ describe('Skill Reuse Modal Tests', () => {
             .contains('No Destinations');
     });
 
-    it.skip('1 skill - available to reuse', () => {
+    it('1 skill - available to reuse', () => {
         cy.createSubject(1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
@@ -52,28 +52,28 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-cy="closeButton"]')
             .should('be.enabled');
         cy.get('[data-cy="okButton"]')
-            .should('not.exist');
+            .should('not.be.visible');
 
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('1 skill will be reused in the [Subject 2] subject.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="okButton"]')
             .should('not.exist');
 
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully reused 1 skill.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="reuseButton"]')
             .should('not.exist');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="closeButton"]')
             .should('not.exist');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .should('be.enabled');
 
         cy.get('[data-cy="okButton"]')
@@ -82,7 +82,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('1 skill - already reused', () => {
+    it('1 skill - already reused', () => {
         cy.createSubject(1, 2);
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
@@ -90,26 +90,26 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="reuseButton"]')
             .should('be.disabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="okButton"]')
             .should('not.exist');
 
-        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('Selected skills can NOT be reused in the Subject 2 subject');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .should('be.disabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="okButton"]')
             .should('not.exist');
     });
 
-    it.skip('multiple skills - available to reuse', () => {
+    it('multiple skills - available to reuse', () => {
         cy.createSubject(1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
@@ -118,42 +118,42 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="reuseButton"]')
             .should('be.disabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="okButton"]')
             .should('not.exist');
 
-        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('4 skills will be reused in the [Subject 2] subject.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="okButton"]')
             .should('not.exist');
 
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully reused 4 skills.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="reuseButton"]')
             .should('not.exist');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="closeButton"]')
             .should('not.exist');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .should('not.exist');
     });
 
-    it.skip('multiple skills - some are already reused', () => {
+    it('multiple skills - some are already reused', () => {
         cy.createSubject(1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
@@ -164,45 +164,45 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="reuseButton"]')
             .should('be.disabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="okButton"]')
             .should('not.exist');
 
-        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('2 skills will be reused in the [Subject 2] subject.');
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('2 selected skills have already been reused');
 
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="okButton"]')
             .should('not.exist');
 
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully reused 2 skills.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="reuseButton"]')
             .should('not.exist');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="closeButton"]')
             .should('not.exist');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .should('not.exist');
     });
 
-    it.skip('multiple skills - some are already reused in the group', () => {
+    it('multiple skills - some are already reused in the group', () => {
         cy.createSkill(1, 1, 6);
         cy.createSkill(1, 1, 7);
         cy.createSkill(1, 1, 8);
@@ -214,45 +214,45 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="reuseButton"]')
             .should('be.disabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="okButton"]')
             .should('not.exist');
 
-        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group12"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group12"]')
             .click();
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('3 skills will be reused in the [Awesome Group 12 Subj1] group.');
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('2 selected skills have already been reused');
 
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="okButton"]')
             .should('not.exist');
 
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully reused 3 skills.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="reuseButton"]')
             .should('not.exist');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="closeButton"]')
             .should('not.exist');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .should('not.exist');
     });
 
-    it.skip('skills with dependencies cannot be reused', () => {
+    it('skills with dependencies cannot be reused', () => {
         cy.createSubject(1, 2);
         cy.createSkill(1, 1, 3);
         cy.addLearningPathItem(1, 3, 1)
@@ -263,30 +263,30 @@ describe('Skill Reuse Modal Tests', () => {
 
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('1 skill will be reused in the [Subject 2] subject.');
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('1 selected skill has other skill dependencies');
 
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="okButton"]')
             .should('not.exist');
 
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully reused 1 skill.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="reuseButton"]')
             .should('not.exist');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="closeButton"]')
             .should('not.exist');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .should('not.exist');
@@ -296,34 +296,34 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
 
-        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('Selected skills can NOT be reused in the Subject 2 subject');
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('1 selected skill has already been reused in that subject');
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('1 selected skill has other skill dependencies');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .should('not.enabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="okButton"]')
             .should('not.exist');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .should('not.exist');
 
         // validate skill was actually reused
-        cy.get('[data-cy="breadcrumb-proj1"]')
+        cy.get(' [data-cy="breadcrumb-proj1"]')
             .click();
         cy.get('[data-cy="manageBtn_subj2"]')
             .click();
         cy.get('[data-cy="importedBadge-skill3STREUSESKILLST0"]');
     });
 
-    it.skip('skills with dependencies cannot be reused - plural', () => {
+    it('skills with dependencies cannot be reused - plural', () => {
         cy.createSubject(1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
@@ -340,27 +340,27 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
 
-        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('Selected skills can NOT be reused in the Subject 2 subject');
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('2 selected skills have already been reused in that subject');
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('2 selected skills have other skill dependencies');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .should('not.enabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="okButton"]')
             .should('not.exist');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .should('not.exist');
     });
 
-    it.skip('skills with dependencies cannot be reused into a group - plural', () => {
+    it('skills with dependencies cannot be reused into a group - plural', () => {
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
         cy.createSkill(1, 1, 5);
@@ -377,27 +377,27 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
 
-        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group12"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group12"]')
             .click();
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('Selected skills can NOT be reused in the Awesome Group 12 Subj1 group');
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('2 selected skills have already been reused in that group');
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('2 selected skills have other skill dependencies');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .should('not.enabled');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
             .should('be.enabled');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="okButton"]')
             .should('not.exist');
-        cy.get('[data-cy="closeButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .should('not.exist');
     });
 
-    it.skip('cancel modal will focus on the Actions button', () => {
+    it('cancel modal will focus on the Actions button', () => {
         cy.createSubject(1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
@@ -421,23 +421,23 @@ describe('Skill Reuse Modal Tests', () => {
             .should('have.focus');
     });
 
-    it.skip('successful reuse should focus on the New Skill button', () => {
+    it('successful reuse should focus on the New Skill button', () => {
         cy.createSubject(1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
-        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
         cy.get('[data-cy="newSkillButton"]')
             .should('have.focus');
     });
 
-    it.skip('successful reuse from a group should focus on its New Skill button of its parent table', () => {
+    it('successful reuse from a group should focus on its New Skill button of its parent table', () => {
         cy.createSubject(1, 2);
         cy.createSkillsGroup(1, 1, 11);
         cy.addSkillToGroup(1, 1, 11, 6);
@@ -448,17 +448,17 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
 
-        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
         cy.get('[data-cy="addSkillToGroupBtn-group11"]')
             .should('have.focus');
     });
 
-    it.skip('in a group canceling modal will focus on the Actions button', () => {
+    it('in a group canceling modal will focus on the Actions button', () => {
         cy.createSubject(1, 2);
         cy.createSkillsGroup(1, 1, 11);
         cy.addSkillToGroup(1, 1, 11, 6);
@@ -470,7 +470,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
 
         // cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]').click();
-        cy.get('[data-cy="closeButton"]').click();
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="closeButton"]').click();
         cy.get('[data-cy="closeButton"]').should('not.exist')
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
           .should('have.focus');
