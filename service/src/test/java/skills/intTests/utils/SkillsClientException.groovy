@@ -28,7 +28,7 @@ class SkillsClientException extends RuntimeException {
     def res
 
     SkillsClientException(String message, String url, HttpStatus httpStatus) {
-        super(message)
+        super((String)message)
         this.url = url
         this.httpStatus = httpStatus
     }
