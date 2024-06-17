@@ -56,7 +56,7 @@ const doRemove = (event) => {
           This will <span class="font-bold">PERMANENTLY</span> remove <span
           class="text-primary font-weight-bold">[{{ skill.name }}]</span> Skill from the catalog.
           This skill is currently imported by
-          <Tag severity="info" :value="loadedStats.users.length" />
+          <Tag severity="info">{{ loadedStats.users.length }}</Tag>
           project{{ loadedStats.users.length === 1 ? '' : 's' }}.
         </p>
         <p>

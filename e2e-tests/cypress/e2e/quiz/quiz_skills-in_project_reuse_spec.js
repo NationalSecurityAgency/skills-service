@@ -63,6 +63,8 @@ describe('Quiz-skills in-project reuse Tests', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="skillsTable"] thead tr th`).contains('Skill').click()
+        cy.get(`[data-cy="skillsTable"] thead tr th`).contains('Skill').click()
         cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
@@ -83,11 +85,11 @@ describe('Quiz-skills in-project reuse Tests', () => {
 
         cy.get('[data-cy="nameCell_group3"] [data-cy="numSkillsInGroup"]').contains('1 skill')
 
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
 
-        // cy.get('[data-cy="ChildRowSkillGroupDisplay_group3"] [data-cy="skillsTable-additionalColumns"]').contains('Self Report').click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group3"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
         cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="closeicon"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group3"] [data-cy="selfReportCell-skill1STREUSESKILLST0-quiz"]').contains('Survey-Based Validation')
     });
 

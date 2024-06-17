@@ -164,10 +164,10 @@ defineExpose({
       <slot name="dropdown-item" :option="slotProps">
         <div :data-cy="`skillsSelectionItem-${slotProps.option.projectId}-${slotProps.option.skillId}`">
           <div class="text-xl text-info skills-option-name" data-cy="skillsSelector-skillName"><span v-if="showType">{{ slotProps.option.type }}:</span> {{ slotProps.option.name }}
-            <Badge v-if="slotProps.option.isReused" variant="success" size="sm" class="uppercase"
+            <Tag v-if="slotProps.option.isReused" variant="success" size="sm" class="uppercase"
                      data-cy="reusedBadge"
                      style="font-size: 0.85rem !important;"><i class="fas fa-recycle"></i> reused
-            </Badge>
+            </Tag>
           </div>
           <div style="font-size: 0.8rem;">
               <span class="skills-option-id">
