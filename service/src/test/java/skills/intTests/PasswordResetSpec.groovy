@@ -21,12 +21,14 @@ import org.apache.commons.lang3.time.DurationFormatUtils
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.HttpClientErrorException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
+import skills.intTests.utils.RestTemplateWrapper
 import skills.intTests.utils.SkillsService
 import skills.utils.WaitFor
 import spock.lang.IgnoreIf
@@ -39,6 +41,7 @@ class PasswordResetSpec extends DefaultIntSpec {
 
     GreenMail greenMail = new GreenMail(ServerSetupTest.SMTP)
     SkillsService rootSkillsService
+    RestTemplate template = new RestTemplate()
 
     def setup() {
         greenMail.start()
@@ -57,6 +60,8 @@ class PasswordResetSpec extends DefaultIntSpec {
                 "publicUrl"  : "http://localhost:${localPort}/".toString(),
                 "fromEmail"  : "resetspec@skilltreetests"
         ])
+        template.interceptors.add(new RestTemplateWrapper.StatefulRestTemplateInterceptor())
+        template.getForEntity("http://localhost:${localPort}/app/users/validExistingDashboardUserId/randomuser@skills.org", String.class)
     }
 
     def cleanup(){
@@ -69,7 +74,6 @@ class PasswordResetSpec extends DefaultIntSpec {
 
         when:
         //post request with an unauthenticated client to ensure that the url is publicly available
-        RestTemplate template = new RestTemplate()
         HttpHeaders headers = new HttpHeaders()
         headers.setContentType(MediaType.MULTIPART_FORM_DATA)
         MultiValueMap body = new LinkedMultiValueMap<>()
@@ -95,7 +99,6 @@ class PasswordResetSpec extends DefaultIntSpec {
     def "reset password with token from email"() {
         SkillsService aUser = createService("randomuser@skills.org", "somepassword")
         //post request with an unauthenticated client to ensure that the url is publicly available
-        RestTemplate template = new RestTemplate()
         HttpHeaders headers = new HttpHeaders()
         headers.setContentType(MediaType.MULTIPART_FORM_DATA)
         MultiValueMap body = new LinkedMultiValueMap<>()
@@ -131,7 +134,6 @@ class PasswordResetSpec extends DefaultIntSpec {
     def "reset password with invalid token fails"() {
         SkillsService aUser = createService("randomuser@skills.org", "somepassword")
         //post request with an unauthenticated client to ensure that the url is publicly available
-        RestTemplate template = new RestTemplate()
         HttpHeaders headers = new HttpHeaders()
         headers.setContentType(MediaType.MULTIPART_FORM_DATA)
         MultiValueMap body = new LinkedMultiValueMap<>()
@@ -164,7 +166,6 @@ class PasswordResetSpec extends DefaultIntSpec {
 
         SkillsService aUser = createService("randomuser@skills.org", "somepassword")
         //post request with an unauthenticated client to ensure that the url is publicly available
-        RestTemplate template = new RestTemplate()
         HttpHeaders headers = new HttpHeaders()
         headers.setContentType(MediaType.MULTIPART_FORM_DATA)
         MultiValueMap body = new LinkedMultiValueMap<>()
