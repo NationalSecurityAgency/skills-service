@@ -41,6 +41,7 @@ import org.springframework.web.socket.sockjs.client.SockJsClient
 import org.springframework.web.socket.sockjs.client.Transport
 import org.springframework.web.socket.sockjs.client.WebSocketTransport
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.RestTemplateWrapper
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.TestUtils
 import skills.services.events.CompletionItem
@@ -303,6 +304,7 @@ class WebsocketSpecs extends DefaultIntSpec {
             } else {
                 xhrTransport = new RestTemplateXhrTransport()
             }
+            ((RestTemplate) xhrTransport.getRestTemplate()).interceptors.add(new RestTemplateWrapper.StatefulRestTemplateInterceptor())
             xhrTransport.xhrStreamingDisabled = xhrPolling
             transports.add(xhrTransport)
         } else {
@@ -471,6 +473,8 @@ class WebsocketSpecs extends DefaultIntSpec {
                 .setConnectionManager(connectionManager)
                 .build()
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(client)
-        return new RestTemplate(requestFactory)
+        RestTemplate restTemplate = new RestTemplate(requestFactory)
+        restTemplate.getInterceptors().add(new RestTemplateWrapper.StatefulRestTemplateInterceptor())
+        return restTemplate
     }
 }
