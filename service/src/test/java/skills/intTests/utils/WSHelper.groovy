@@ -34,6 +34,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.FileSystemResource
 import org.springframework.core.io.Resource
 import org.springframework.http.*
+import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.http.client.support.BasicAuthenticationInterceptor
 import org.springframework.util.LinkedMultiValueMap
@@ -101,7 +102,9 @@ class WSHelper {
     }
 
     void setProxyCredentials(String clientId, String secretCode) {
-        oAuthRestTemplate.setInterceptors([new BasicAuthenticationInterceptor(clientId, secretCode)])
+        List<ClientHttpRequestInterceptor> existingInterceptors = oAuthRestTemplate.getInterceptors()
+        existingInterceptors.add(new BasicAuthenticationInterceptor(clientId, secretCode))
+        oAuthRestTemplate.setInterceptors(existingInterceptors)
     }
 
     def appPut(String endpoint, def params) {
