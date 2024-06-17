@@ -69,18 +69,36 @@ class RestTemplateWrapper extends RestTemplate {
      * Need for load balancer support as it uses cookies to keep track which server currently connected to
      */
     static class StatefulRestTemplateInterceptor implements ClientHttpRequestInterceptor {
-        private String cookie;
+        private List<String> cookies;
+        private String xsrfToken;
 
         @Override
         public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
-            if (cookie != null) {
-                request.getHeaders().add(HttpHeaders.COOKIE, cookie);
+
+            HttpHeaders requstHeaders = request.getHeaders()
+            if (cookies) {
+                requstHeaders.addAll(HttpHeaders.COOKIE, cookies);
             }
+            if (xsrfToken != null) {
+                requstHeaders.add("X-XSRF-TOKEN" , xsrfToken);
+            }
+            log.debug("REQUEST: [{}], headers [{}]", request.URI, request.headers)
             ClientHttpResponse response = execution.execute(request, body);
 
-            if (cookie == null) {
-                cookie = response.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
-                log.debug("Setting cookie to [{}]", cookie)
+            HttpHeaders headers = response.getHeaders();
+
+            List<String> returnedCookies = headers.getOrEmpty(HttpHeaders.SET_COOKIE)
+            if (returnedCookies && cookies == null) {
+                cookies = returnedCookies
+                log.info("Setting cookies to {}", returnedCookies)
+                printf "Setting cookies to ${returnedCookies}"
+            }
+            if (returnedCookies && !xsrfToken) {
+                String cookieXSRF  = returnedCookies.find { it.startsWith("XSRF-TOKEN=") }
+                if (cookieXSRF) {
+                    xsrfToken = (cookieXSRF =~ /XSRF-TOKEN=([^;]*)/)[0][1]
+                    log.debug("Response: [{}], set xsrfToken to [{}]", request.URI, xsrfToken)
+                }
             }
             return response;
         }
@@ -177,7 +195,7 @@ class RestTemplateWrapper extends RestTemplate {
 
             ResponseEntity response = putForEntity(skillsServiceUrl + '/createAccount', userInfo)
             if ( response.statusCode != HttpStatus.OK) {
-                throw new SkillsClientException(response.body, skillsServiceUrl, response.statusCode)
+                throw new SkillsClientException((String)response.body, skillsServiceUrl, (HttpStatus)response.statusCode)
             }
             accountCreated = true
         }
