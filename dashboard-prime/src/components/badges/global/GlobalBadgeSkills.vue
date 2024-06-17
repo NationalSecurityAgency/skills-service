@@ -148,7 +148,7 @@ const searchChanged = (query) => {
             <SkillsDataTable
                 tableStoredStateId="badgeSkillsTable"
                 :value="badgeSkills"
-                :paginator="badgeSkills.length > 5"
+                paginator
                 :rows="5"
                 :totalRecords="badgeSkills.length"
                 :rowsPerPageOptions="[5, 10, 15, 20]"

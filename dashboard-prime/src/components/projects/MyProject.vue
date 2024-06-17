@@ -18,6 +18,8 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import ReminderMessage from '@/components/utils/misc/ReminderMessage.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import ProjectExpirationWarning from '@/components/projects/ProjectExpirationWarning.vue'
+import {useConfirm} from "primevue/useconfirm";
+import GlobalBadgeService from "@/components/badges/global/GlobalBadgeService.js";
 import { useAdminProjectsState } from '@/stores/UseAdminProjectsState.js'
 
 const props = defineProps(['project', 'disableSortControl'])
@@ -27,6 +29,7 @@ const emit = defineEmits(['project-deleted', 'copy-project', 'pin-removed', 'sor
 const numberFormat = useNumberFormat()
 const projectsState = useAdminProjectsState()
 const announcer = useSkillsAnnouncer()
+const confirm = useConfirm();
 
 // data items
 const pinned = ref(false);
@@ -117,7 +120,12 @@ const doDeleteProject = () => {
       .then((belongsToGlobal) => {
         if (belongsToGlobal) {
           const msg = 'Cannot delete this project as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
-          // msgOk(msg, 'Unable to delete');
+          confirm.require({
+            message: msg,
+            header: 'Unable to delete',
+            acceptLabel: 'Ok',
+            rejectClass: 'hidden',
+          });
         } else {
           emit('project-deleted', projectInternal.value);
         }

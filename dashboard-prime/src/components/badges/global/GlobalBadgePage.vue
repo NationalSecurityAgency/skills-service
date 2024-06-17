@@ -7,9 +7,11 @@ import PageHeader from "@/components/utils/pages/PageHeader.vue";
 import GlobalBadgeService from "@/components/badges/global/GlobalBadgeService.js";
 import {useBadgeState} from "@/stores/UseBadgeState.js";
 import {storeToRefs} from "pinia";
+import {useConfirm} from "primevue/useconfirm";
 
 const route = useRoute();
 const router = useRouter();
+const confirm = useConfirm();
 
 const isLoading = ref(true);
 const badgeId = ref(route.params.badgeId);
@@ -69,7 +71,9 @@ const loadBadge = () => {
 const badgeEdited = (editedBadge) => {
   GlobalBadgeService.saveBadge(editedBadge).then((resp) => {
     const origId = badge.badgeId;
-    badgeState.value = editedBadge;
+    badgeState.loadGlobalBadgeDetailsState(badgeId.value).finally(() => {
+      badge.value = badgeState.badge;
+    });
     if (origId !== resp.badgeId) {
       router.replace({ name: route.name, params: { ...route.params, badgeId: resp.badgeId } });
       badgeId.value = resp.badgeId;
@@ -98,26 +102,35 @@ const handlePublish = () => {
   if (canPublish()) {
     const msg = `While this Badge is disabled, user's cannot see the Badge or achieve it. Once the Badge is live, it will be visible to users.
         Please note that once the badge is live, it cannot be disabled.`;
-    // msgConfirm(msg, 'Please Confirm!', 'Yes, Go Live!')
-    //     .then((res) => {
-    //       if (res) {
-    //         badge.enabled = 'true';
-    //         const toSave = { ...badge };
-    //         if (!toSave.originalBadgeId) {
-    //           toSave.originalBadgeId = toSave.badgeId;
-    //         }
-    //         toSave.startDate = toDate(toSave.startDate);
-    //         toSave.endDate = toDate(toSave.endDate);
-    //         badgeEdited(toSave);
-    //       }
-    //     });
+
+    confirm.require({
+      message: msg,
+      header: 'Please Confirm!',
+      acceptLabel: 'Yes, Go Live!',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        badge.value.enabled = 'true';
+        const toSave = { ...badge.value };
+        if (!toSave.originalBadgeId) {
+          toSave.originalBadgeId = toSave.badgeId;
+        }
+        toSave.startDate = toDate(toSave.startDate);
+        toSave.endDate = toDate(toSave.endDate);
+        badgeEdited(toSave);
+      }
+    });
   } else {
-    // msgOk(getNoPublishMsg(), 'Empty Badge!');
+    confirm.require({
+      message: getNoPublishMsg(),
+      header: 'Empty Badge',
+      rejectClass: 'hidden',
+      acceptLabel: 'OK',
+    })
   }
 };
 
 const canPublish = () => {
-  return badge.numSkills > 0 || badge.requiredProjectLevels.length > 0;
+  return badge.value.numSkills > 0 || badge.value.requiredProjectLevels.length > 0;
 };
 
 const getNoPublishMsg = () => {
@@ -142,15 +155,16 @@ const toDate = (value) => {
         <i v-if="badge && badge.endDate" class="fas fa-gem ml-2" style="font-size: 1.6rem; color: purple;"></i>
       </template>
       <template #subSubTitle v-if="badge">
-<!--        <b-button-group class="mb-3" size="sm">-->
         <ButtonGroup>
           <SkillsButton @click="displayEditBadge"
                     ref="editBadgeButton"
                     class="btn btn-outline-primary"
                     size="small"
+                    id="editBadgeButton"
                     data-cy="btn_edit-badge"
                     :aria-label="'edit Badge '+badge.badgeId"
                     label="Edit"
+                    :track-for-focus="true"
                     icon="fas fa-edit">
           </SkillsButton>
           <SkillsButton v-if="badge.enabled !== 'true'"
@@ -161,7 +175,6 @@ const toDate = (value) => {
                     data-cy="goLive" label="Go Live">
           </SkillsButton>
         </ButtonGroup>
-<!--        </b-button-group>-->
       </template>
     </page-header>
 

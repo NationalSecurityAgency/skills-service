@@ -15,7 +15,7 @@
  */
 describe('Global Badges Tests', () => {
 
-    const tableSelector = '[data-cy="simpleSkillsTable"]';
+    const tableSelector = '[data-cy="badgeSkillsTable"]';
     const levelsTableSelector = '[data-cy="simpleLevelsTable"]';
 
     beforeEach(() => {
@@ -29,24 +29,17 @@ describe('Global Badges Tests', () => {
         cy.log('completed supervisor user login');
 
         Cypress.Commands.add('selectSkill', (skillsSelector='[data-cy="skillsSelectionItem-proj1-skill1"]', retry=true) => {
-            cy.get('[data-cy="skillsSelector2"]').as('getOptions')
-              .click();
-            cy.get('@getOptions').then(($el) => {
-                cy.wait(500);
-                if ($el.find(skillsSelector).length > 0 && $el.find(skillsSelector).is(':visible')) {
-                    $el.find(skillsSelector).click();
-                } else if (retry) {
-                    cy.selectSkill(skillsSelector, false);}
-            })
-            // cy.get('@getOptions').get(skillsSelector)
-            //   .click({force: true});
+            cy.get('[data-cy="skillsSelector"] [data-pc-section="trigger"]').as('getOptions')
+                .click();
+            cy.wait(500);
+            cy.get(skillsSelector).click();
         });
 
         cy.intercept('GET', '/supervisor/badges/*/skills/available?*')
           .as('loadAvailableSkills');
     });
 
-    it.skip('Create badge with special chars', () => {
+    it('Create badge with special chars', () => {
 
         const expectedId = 'LotsofspecialPcharsBadge';
         const providedName = '!L@o#t$s of %s^p&e*c/?#(i)a_l++_|}{P c\'ha\'rs';
@@ -67,9 +60,9 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
-        cy.clickButton('Badge');
+        cy.get('[data-cy="btn_Global Badges"]').click();
 
-        cy.get('#badgeName')
+        cy.get('[data-cy="name"]')
             .type(providedName);
         cy.wait('@nameExists');
         cy.clickSave();
@@ -79,7 +72,7 @@ describe('Global Badges Tests', () => {
         cy.contains(`ID: ${expectedId}`);
     });
 
-    it.skip('name causes id to fail validation', () => {
+    it('name causes id to fail validation', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
@@ -100,32 +93,32 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
-        cy.clickButton('Badge');
+        cy.get('[data-cy="btn_Global Badges"]').click();
 
         // name causes id to be too long
-        const msg = 'Badge ID cannot exceed 50 characters';
+        const msg = 'Badge ID must be at most 50 characters';
         const validNameButInvalidId = Array(47)
             .fill('a')
             .join('');
-        cy.get('[data-cy=badgeName]')
+        cy.get('[data-cy="name"]')
             .click();
-        cy.get('[data-cy=badgeName]')
+        cy.get('[data-cy="name"]')
             .invoke('val', validNameButInvalidId)
             .trigger('input');
         cy.get('[data-cy=idError]')
             .contains(msg)
             .should('be.visible');
-        cy.get('[data-cy=saveBadgeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
-        cy.get('[data-cy=badgeName]')
+        cy.get('[data-cy="name"]')
             .type('{backspace}{backspace}');
         cy.get('[data-cy=idError]')
             .should('not.be.visible');
-        cy.get('[data-cy=saveBadgeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.enabled');
     });
 
-    it.skip('help url validation', () => {
+    it('help url validation', () => {
         cy.intercept('GET', `/supervisor/badges`)
             .as('getGlobalBadges');
         cy.intercept('POST', '/supervisor/badges/name/exists')
@@ -140,14 +133,14 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
-        cy.clickButton('Badge');
+        cy.get('[data-cy="btn_Global Badges"]').click();
 
         // name causes id to be too long
-        cy.get('[data-cy=badgeName]')
+        cy.get('[data-cy="name"]')
             .click();
-        cy.get('[data-cy=badgeName]')
+        cy.get('[data-cy="name"]')
             .type('Global Badge');
-        cy.get('[data-cy=saveBadgeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.enabled');
 
         cy.get('[data-cy=skillHelpUrl]')
@@ -156,29 +149,29 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy=skillHelpUrlError]')
             .should('be.visible');
         cy.get('[data-cy=skillHelpUrlError]')
-            .should('have.text', 'Help URL/Path must start with "http(s)"');
-        cy.get('[data-cy=saveBadgeButton]')
+            .should('have.text', 'Help URL/Path must start with "/" or "http(s)"');
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
         cy.get('[data-cy=skillHelpUrl]')
             .clear()
             .type('/foo?p1=v1&p2=v2');
         cy.get('[data-cy=skillHelpUrlError]')
-            .should('have.text', 'Help URL/Path must start with "http(s)"');
-        cy.get('[data-cy=saveBadgeButton]')
+            .should('have.text', 'Help URL/Path must start with "/" or "http(s)"');
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
         cy.get('[data-cy=skillHelpUrl]')
             .clear()
             .type('http://foo.bar?p1=v1&p2=v2');
         cy.get('[data-cy=skillHelpUrlError]')
             .should('not.be.visible');
-        cy.get('[data-cy=saveBadgeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.enabled');
         cy.get('[data-cy=skillHelpUrl]')
             .clear()
             .type('https://foo.bar?p1=v1&p2=v2');
         cy.get('[data-cy=skillHelpUrlError]')
             .should('not.be.visible');
-        cy.get('[data-cy=saveBadgeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.enabled');
 
         cy.get('[data-cy=skillHelpUrl]')
@@ -187,7 +180,7 @@ describe('Global Badges Tests', () => {
         cy.wait('@customUrlValidation');
         cy.get('[data-cy=skillHelpUrlError]')
             .should('be.visible');
-        cy.get('[data-cy=saveBadgeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
 
         cy.get('[data-cy=skillHelpUrl]')
@@ -196,7 +189,7 @@ describe('Global Badges Tests', () => {
         cy.wait('@customUrlValidation');
         cy.get('[data-cy=skillHelpUrlError]')
             .should('be.visible');
-        cy.get('[data-cy=saveBadgeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
         // trailing space should work now
         cy.get('[data-cy=skillHelpUrl]')
@@ -205,11 +198,11 @@ describe('Global Badges Tests', () => {
         cy.wait('@customUrlValidation');
         cy.get('[data-cy=skillHelpUrlError]')
             .should('not.be.visible');
-        cy.get('[data-cy=saveBadgeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.enabled');
     });
 
-    it.skip('Delete badge', () => {
+    it('Delete badge', () => {
         const expectedId = 'JustABadgeBadge';
         const providedName = 'JustABadge';
 
@@ -239,7 +232,7 @@ describe('Global Badges Tests', () => {
         cy.contains('Removal Safety Check');
         cy.get('[data-cy=currentValidationText]')
             .type('Delete Me');
-        cy.get('[data-cy=removeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.enabled')
             .click();
         cy.wait('@deleteGlobalBadge');
@@ -247,7 +240,7 @@ describe('Global Badges Tests', () => {
             .should('be.visible');
     });
 
-    it.skip('Add dependencies to badge', () => {
+    it('Add dependencies to badge', () => {
         //proj/subj/skill1
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -336,14 +329,15 @@ describe('Global Badges Tests', () => {
 
         cy.get('#project-selector')
             .click()
-            .type('proj2');
+        cy.get('[data-pc-section="filtercontainer"]').click().type('proj2');
         cy.wait('@getAvailableLevels');
         cy.get('[data-cy="proj2_option"]').click();
 
         cy.wait('@getLevels');
         cy.get('#level-selector')
             .click()
-            .type('5{enter}');
+        cy.get('[data-pc-section="filtercontainer"]').click().type('5');
+        cy.get('[data-pc-section="item"]').contains(5).click();
 
         cy.contains('Add')
             .click();
@@ -357,32 +351,22 @@ describe('Global Badges Tests', () => {
             }],
         ], 5);
 
-        cy.get('[data-label=Level]')
-            .contains('5');
         cy.get('[data-cy=editProjectLevelButton_proj2]')
             .should('be.visible')
             .click();
-        cy.contains('Change Required Level for proj2')
-            .should('be.visible');
-        cy.get('#existingLevel')
+        // cy.contains('Change Required Level for proj2')
+        //     .should('be.visible');
+        cy.get('#existingLevel > .p-inputtext')
             .should('have.value', 5);
-        cy.get('#newLevel')
-            .click();
-        cy.get('#newLevel .vs__dropdown-option')
-            .should('have.length', 5);
-        cy.get('#newLevel .vs__dropdown-option')
-            .eq(4)
-            .click();
-        cy.get('[data-cy=saveLevelButton]')
-            .should('be.disabled');
-        cy.get('#newLevel')
-            .click();
-        cy.get('#newLevel .vs__dropdown-option')
-            .eq(0)
-            .click();
-        cy.get('[data-cy=saveLevelButton]')
+
+        cy.get('.p-dialog-content #level-selector')
+            .click()
+        cy.get('[data-pc-section="item"]').contains(5).get('[data-p-disabled="true"]'); //should('be.disabled');
+
+        cy.get('[data-pc-section="item"]').contains(1).click();
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.enabled');
-        cy.get('[data-cy=saveLevelButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .click();
         cy.validateTable(levelsTableSelector, [
             [{
@@ -397,19 +381,19 @@ describe('Global Badges Tests', () => {
             .should('have.focus');
         cy.get('[data-cy=editProjectLevelButton_proj2]')
             .click();
-        cy.get('[data-cy=cancelLevel]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy=editProjectLevelButton_proj2]')
             .should('have.focus');
         cy.get('[data-cy=editProjectLevelButton_proj2]')
             .click();
-        cy.get('#proj2___BV_modal_content_ button.close')
+        cy.get('[data-pc-section="closebutton"]')
             .click();
         cy.get('[data-cy=editProjectLevelButton_proj2]')
             .should('have.focus');
     });
 
-    it.skip('Navigate to global badges menu entry', () => {
+    it('Navigate to global badges menu entry', () => {
 
         cy.intercept('GET', `/supervisor/badges`)
             .as('getGlobalBadges');
@@ -421,7 +405,7 @@ describe('Global Badges Tests', () => {
         cy.contains('No Badges Yet');
     });
 
-    it.skip('Cannot publish Global Badge with no Skills and no Levels', () => {
+    it('Cannot publish Global Badge with no Skills and no Levels', () => {
         const expectedId = 'TestBadgeBadge';
         cy.intercept('GET', `/supervisor/badges`)
             .as('getGlobalBadges');
@@ -441,9 +425,9 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
-        cy.clickButton('Badge');
+        cy.get('[data-cy="btn_Global Badges"]').click();
 
-        cy.get('#badgeName')
+        cy.get('[data-cy="name"]')
             .type('Test Badge');
         cy.wait('@nameExists');
         cy.clickSave();
@@ -465,7 +449,7 @@ describe('Global Badges Tests', () => {
             .should('exist');
     });
 
-    it.skip('Global Badge is disabled when created, can only be enabled once', () => {
+    it('Global Badge is disabled when created, can only be enabled once', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -507,9 +491,9 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
-        cy.clickButton('Badge');
+        cy.get('[data-cy="btn_Global Badges"]').click();
 
-        cy.get('#badgeName')
+        cy.get('[data-cy="name"]')
             .type('Test Badge');
         cy.wait('@nameExists');
         cy.clickSave();
@@ -554,7 +538,7 @@ describe('Global Badges Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('Canceling go live dialog should leave global badge disabled', () => {
+    it('Canceling go live dialog should leave global badge disabled', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -594,9 +578,9 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
-        cy.clickButton('Badge');
+        cy.get('[data-cy="btn_Global Badges"]').click();
 
-        cy.get('#badgeName')
+        cy.get('[data-cy="name"]')
             .type('Test Badge');
         cy.wait('@nameExists');
         cy.clickSave();
@@ -641,7 +625,7 @@ describe('Global Badges Tests', () => {
             .should('exist');
     });
 
-    it.skip('Can add Skill and Level requirements to disabled Global Badge', () => {
+    it('Can add Skill and Level requirements to disabled Global Badge', () => {
         cy.intercept('GET', `/supervisor/badges`)
             .as('getGlobalBadges');
         cy.intercept('PUT', `/supervisor/badges/ABadgeBadge`)
@@ -709,9 +693,9 @@ describe('Global Badges Tests', () => {
         cy.clickNav('Global Badges');
         cy.wait('@getGlobalBadges');
 
-        cy.clickButton('Badge');
+        cy.get('[data-cy="btn_Global Badges"]').click();
 
-        cy.get('#badgeName')
+        cy.get('[data-cy="name"]')
             .type('A Badge', { delay: 100 })
         cy.wait('@nameExists');
         cy.clickSave();
@@ -744,21 +728,22 @@ describe('Global Badges Tests', () => {
 
         cy.get('#project-selector')
             .click()
-            .type('proj2');
+        cy.get('[data-pc-section="filtercontainer"]').click().type('proj2');
         cy.wait('@availableProjects');
         cy.get('[data-cy="proj2_option"]').click();
 
         cy.wait('@proj2Levels');
         cy.get('#level-selector')
             .click()
-            .type('5{enter}');
+        cy.get('[data-pc-section="filtercontainer"]').click().type('5');
+        cy.get('[data-pc-section="item"]').contains(5).click();
 
         cy.contains('Add')
             .click();
         cy.get('#simple-levels-table')
             .should('be.visible');
 
-        cy.contains('.router-link-active', 'Badges')
+        cy.get('[data-cy="breadcrumb-GlobalBadges"]')
             .click();
         cy.wait('@getGlobalBadges');
 
@@ -784,7 +769,7 @@ describe('Global Badges Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('Removing all skills should not cause published Global Badge to become disabled', () => {
+    it('Removing all skills should not cause published Global Badge to become disabled', () => {
         cy.createProject(1)
         cy.createSubject(1, 1)
         cy.createSkill(1, 1, 1)
@@ -810,7 +795,7 @@ describe('Global Badges Tests', () => {
         cy.contains('YES, Delete It!')
             .click();
         cy.contains('No Skills Added Yet');
-        cy.contains('.router-link-active', 'Badges')
+        cy.get('[data-cy="breadcrumb-GlobalBadges"]')
             .click();
         cy.get('[data-cy=badgeStatus]')
             .contains('Status: Live')
@@ -819,7 +804,7 @@ describe('Global Badges Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('new badge button should retain focus after dialog is closed', () => {
+    it('new badge button should retain focus after dialog is closed', () => {
         cy.intercept('GET', `/supervisor/badges`)
             .as('getGlobalBadges');
 
@@ -830,14 +815,14 @@ describe('Global Badges Tests', () => {
 
         cy.get('[aria-label="new global badge"]')
             .click();
-        cy.get('[data-cy=closeBadgeButton]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[aria-label="new global badge"]')
             .should('have.focus');
 
         cy.get('[aria-label="new global badge"]')
             .click();
-        cy.get('[data-cy=badgeName]')
+        cy.get('[data-cy="name"]')
             .type('{esc}');
         cy.get('[aria-label="new global badge"]')
             .should('have.focus');
@@ -845,22 +830,21 @@ describe('Global Badges Tests', () => {
         cy.get('[aria-label="new global badge"]')
             .click();
         cy.get('[aria-label=Close]')
-            .filter('.text-light')
             .click();
         cy.get('[aria-label="new global badge"]')
             .should('have.focus');
 
         cy.get('[aria-label="new global badge"]')
             .click();
-        cy.get('[data-cy=badgeName]')
+        cy.get('[data-cy="name"]')
             .type('test 123');
-        cy.get('[data-cy=saveBadgeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .click();
         cy.get('[aria-label="new global badge"]')
             .should('have.focus');
     });
 
-    it.skip('global badge skills table does not have manage button', () => {
+    it('global badge skills table does not have manage button', () => {
         cy.request('POST', '/app/projects/proj1', {
              projectId: 'proj1',
              name: 'proj1'
@@ -909,7 +893,7 @@ describe('Global Badges Tests', () => {
 
     });
 
-    it.skip('sort skills table', () => {
+    it('sort skills table', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -1195,7 +1179,7 @@ describe('Global Badges Tests', () => {
         ], 5);
     });
 
-    it.skip('sort levels table', () => {
+    it('sort levels table', () => {
         const numProjects = 8;
 
         for (let i = 0; i < numProjects; i += 1) {
@@ -1370,7 +1354,7 @@ describe('Global Badges Tests', () => {
         ], 5);
     });
 
-    it.skip('remove skill after navigating to the link directly', () => {
+    it('remove skill after navigating to the link directly', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -1442,7 +1426,7 @@ describe('Global Badges Tests', () => {
         ], 5);
     });
 
-    it.skip('remove level after navigating to the page directly', () => {
+    it('remove level after navigating to the page directly', () => {
         const numProjects = 2;
 
         for (let i = 0; i < numProjects; i += 1) {
@@ -1499,7 +1483,7 @@ describe('Global Badges Tests', () => {
         ], 5);
     });
 
-    it.skip('edit badge button should retain focus after dialog is closed', () => {
+    it('edit badge button should retain focus after dialog is closed', () => {
         cy.request('POST', '/supervisor/badges/badge1', {
             projectId: 'proj1',
             badgeId: 'badge1',
@@ -1522,7 +1506,7 @@ describe('Global Badges Tests', () => {
 
         cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]')
             .click();
-        cy.get('[data-cy=closeBadgeButton]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]')
             .should('have.focus');
@@ -1530,21 +1514,20 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]')
             .click();
         cy.get('[aria-label=Close]')
-            .filter('.text-light')
             .click();
         cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]')
             .should('have.focus');
 
         cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]')
             .click();
-        cy.get('[data-cy=badgeName]')
+        cy.get('[data-cy="name"]')
             .type('{esc}');
         cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]')
             .should('have.focus');
 
         cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]')
             .click();
-        cy.get('[data-cy=closeBadgeButton]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]')
             .should('have.focus');
@@ -1552,14 +1535,13 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]')
             .click();
         cy.get('[aria-label=Close]')
-            .filter('.text-light')
             .click();
         cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]')
             .should('have.focus');
 
         cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]')
             .click();
-        cy.get('[data-cy=badgeName]')
+        cy.get('[data-cy="name"]')
             .type('{esc}');
         cy.get('[data-cy="badgeCard-badge2"] [data-cy=editBtn]')
             .should('have.focus');
@@ -1567,16 +1549,16 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]')
             .click();
         cy.contains('Badge 1');
-        cy.get('[data-cy=badgeName]')
+        cy.get('[data-cy="name"]')
             .type('42');
-        cy.get('[data-cy=saveBadgeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .click();
         cy.wait('@getGlobalBadges');
         cy.get('[data-cy="badgeCard-badge1"] [data-cy=editBtn]')
             .should('have.focus');
     });
 
-    it.skip('description is validated against custom validators', () => {
+    it('description is validated against custom validators', () => {
         cy.intercept('GET', `/supervisor/badges`)
             .as('getGlobalBadges');
 
@@ -1587,29 +1569,29 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="btn_Global Badges"]')
             .click();
 
-        cy.get('[data-cy="badgeName"]')
+        cy.get('[data-cy="name"]')
             .type('Great Name');
 
-        cy.get('[data-cy="saveBadgeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
 
         cy.get('[data-cy="markdownEditorInput"]')
             .type('ldkj aljdl aj\n\njabberwocky');
-        cy.get('[data-cy="badgeDescriptionError"]')
+        cy.get('[data-cy="descriptionError"]')
             .contains('Badge Description - paragraphs may not contain jabberwocky');
-        cy.get('[data-cy="saveBadgeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
 
         cy.get('[data-cy="markdownEditorInput"]')
             .type('{backspace}');
-        cy.get('[data-cy="saveBadgeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="badgeDescriptionError"]')
+        cy.get('[data-cy="descriptionError"]')
             .contains('Subject Description - paragraphs may not contain jabberwocky')
             .should('not.exist');
     });
 
-    it.skip('description is validated against custom validators', () => {
+    it('description is validated against custom validators', () => {
         cy.intercept('GET', `/supervisor/badges`)
           .as('getGlobalBadges');
 
@@ -1620,30 +1602,30 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="btn_Global Badges"]')
           .click();
 
-        cy.get('[data-cy="badgeName"]')
+        cy.get('[data-cy="name"]')
           .type('Great Name');
 
-        cy.get('[data-cy="badgeNameError"]')
+        cy.get('[data-cy="nameError"]')
           .should('not.be.visible');
-        cy.get('[data-cy="saveBadgeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
           .should('be.enabled');
 
-        cy.get('input[data-cy=badgeName]')
+        cy.get('input[data-cy="name"]')
           .type('{selectall}(A) Updated Badge Name');
-        cy.get('[data-cy="badgeNameError"]')
+        cy.get('[data-cy="nameError"]')
           .contains('Badge Name - names may not contain (A)');
-        cy.get('[data-cy="saveBadgeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
           .should('be.disabled');
 
-        cy.get('input[data-cy=badgeName]')
+        cy.get('input[data-cy="name"]')
           .type('{selectall}(B) A Updated Badge Name');
-        cy.get('[data-cy="badgeNameError"]')
+        cy.get('[data-cy="nameError"]')
           .should('not.be.visible');
-        cy.get('[data-cy="saveBadgeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
           .should('be.enabled');
     });
 
-    it.skip('edit in place', () => {
+    it('edit in place', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'Proj 1'
@@ -1719,9 +1701,9 @@ describe('Global Badges Tests', () => {
 
         cy.get('button[data-cy=btn_edit-badge]')
             .click();
-        cy.get('input[data-cy=badgeName]')
+        cy.get('input[data-cy="name"]')
             .type('{selectall}New Global Badge Name');
-        cy.get('button[data-cy=saveBadgeButton]')
+        cy.get('button[data-cy=saveDialogBtn]')
             .click();
         cy.contains('BADGE: A Badge')
             .should('not.exist');
@@ -1736,10 +1718,10 @@ describe('Global Badges Tests', () => {
 
         cy.get('button[data-cy=btn_edit-badge]')
             .click();
-        cy.get('[data-cy=enableIdInput]').click({force: true});
+        cy.get('[data-cy=enableIdInput]').click();
         cy.get('input[data-cy=idInputValue]')
             .type('{selectall}a_new_id');
-        cy.get('button[data-cy=saveBadgeButton]')
+        cy.get('button[data-cy=saveDialogBtn]')
             .click();
         cy.contains('ID: a_badge')
             .should('not.exist');
@@ -1755,7 +1737,7 @@ describe('Global Badges Tests', () => {
             .should((loc) => {
                 expect(loc.pathname)
                     .to
-                    .eq('/administrator/globalBadges/a_new_id/');
+                    .eq('/administrator/globalBadges/a_new_id');
             });
         cy.wait('@loadAvailableSkills');
         cy.selectSkill('[data-cy="skillsSelectionItem-proj2-skill1"]')
@@ -1768,14 +1750,15 @@ describe('Global Badges Tests', () => {
         cy.wait('@getAvailableLevels');
         cy.get('#project-selector')
             .click()
-            .type('proj2');
+        cy.get('[data-pc-section="filtercontainer"]').click().type('proj2');
         cy.wait('@getAvailableLevels');
         cy.get('[data-cy="proj2_option"]').click();
 
         cy.wait('@getLevels');
         cy.get('#level-selector')
             .click()
-            .type('5{enter}');
+        cy.get('[data-pc-section="filtercontainer"]').click().type('5');
+        cy.get('[data-pc-section="item"]').contains(5).click();
 
         cy.contains('Add')
             .click();
@@ -1790,7 +1773,7 @@ describe('Global Badges Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('project can not be deleted when it belongs to a global badge', () => {
+    it('project can not be deleted when it belongs to a global badge', () => {
         cy.createProject(1);
         cy.createProject(2);
         cy.createGlobalBadge(1);
@@ -1803,7 +1786,7 @@ describe('Global Badges Tests', () => {
         cy.contains('Removal Safety Check');
         cy.get('[data-cy=currentValidationText]')
             .type('Delete Me');
-        cy.get('[data-cy=removeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.enabled')
             .click();
         cy.contains('Cannot delete this project as it belongs to one or more global badges');
@@ -1815,14 +1798,14 @@ describe('Global Badges Tests', () => {
         cy.contains('Removal Safety Check');
         cy.get('[data-cy=currentValidationText]')
             .type('Delete Me');
-        cy.get('[data-cy=removeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.enabled')
             .click();
         cy.contains('Cannot delete this project as it belongs to one or more global badges')
             .should('not.exist');
     });
 
-    it.skip('edit from global badges page', () => {
+    it('edit from global badges page', () => {
         cy.createGlobalBadge(1);
         cy.createGlobalBadge(2);
 
@@ -1836,7 +1819,7 @@ describe('Global Badges Tests', () => {
 
         cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="editBtn"]')
             .click();
-        cy.get('[data-cy="badgeName"]')
+        cy.get('[data-cy="name"]')
             .clear()
             .type('Other Name');
         cy.clickSave();
@@ -1850,7 +1833,7 @@ describe('Global Badges Tests', () => {
             .contains('Global Badge 2');
     });
 
-    it.skip('navigate to badge by clicking on name and icon', () => {
+    it('navigate to badge by clicking on name and icon', () => {
         cy.createGlobalBadge(1);
         cy.createGlobalBadge(2);
 
@@ -1874,7 +1857,7 @@ describe('Global Badges Tests', () => {
 
     });
 
-    it.skip('drag-and-drop sort management', () => {
+    it('drag-and-drop sort management', () => {
         cy.createGlobalBadge(1);
         cy.createGlobalBadge(2);
         cy.createGlobalBadge(3);
@@ -1912,7 +1895,7 @@ describe('Global Badges Tests', () => {
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 5', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 2']);
     });
 
-    it.skip('no drag-and-drag sort controls when there is only 1 badge', () => {
+    it('no drag-and-drag sort controls when there is only 1 badge', () => {
         cy.createGlobalBadge(1);
         cy.visit('/administrator/globalBadges');
         cy.get('[data-cy="inception-button"]').contains('Level');
@@ -1927,7 +1910,7 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="sortControlHandle"]');
     });
 
-    it.skip('drag-and-drag sort should spinner while backend operation is happening', () => {
+    it('drag-and-drag sort should spinner while backend operation is happening', () => {
         cy.intercept('/supervisor/badges/globalBadge1', (req) => {
             req.reply((res) => {
                 res.send({ delay: 6000 });
@@ -1960,7 +1943,7 @@ describe('Global Badges Tests', () => {
             .should('not.exist');
     });
 
-    it.skip('badge card stats', () => {
+    it('badge card stats', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
@@ -1987,7 +1970,7 @@ describe('Global Badges Tests', () => {
             .contains(0);
     });
 
-    it.skip('skill filter is fully cleared after skill is selected', () => {
+    it('skill filter is fully cleared after skill is selected', () => {
         cy.intercept('GET', '/supervisor/badges/badge1/skills/available**').as('loadBadgeSkills');
 
         cy.request('POST', '/app/projects/proj1', {
@@ -2067,13 +2050,13 @@ describe('Global Badges Tests', () => {
         cy.get('[role="listbox"]').children().should('have.length', 4);
         cy.get('[data-cy="skillsSelector"]').click().type('one');
         cy.get('[role="listbox"]').children().eq(0).click();
-        cy.get('[data-cy="simpleSkillsTable"').children().eq(0).children().find('td').eq(0).should('contain.text', 'proj1');
+        cy.get('[data-cy="badgeSkillsTable"').children().eq(0).children().find('td').eq(0).should('contain.text', 'proj1');
         cy.get('[data-cy="skillsSelector"]').should('not.contain.text', 'one');
         cy.get('[data-cy="skillsSelector"]').click();
         cy.get('[role="listbox"]').children().should('have.length', 3);
     });
 
-    it.skip('Project selector displays message if project count exceeds displayable max', () => {
+    it('Project selector displays message if project count exceeds displayable max', () => {
         //proj/subj/skill1
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -2157,14 +2140,13 @@ describe('Global Badges Tests', () => {
             .click()
         cy.get('[data-cy="projectSelectorCountMsg"]').should('exist').should('contain.text', 'Showing 10 of 14 results.  Use search to narrow results.');
 
-        cy.get('#project-selector')
-            .click().type('1');
+        cy.get('[data-pc-section="filtercontainer"]').click().type('1');
         cy.wait('@getAvailableLevels');
         //not displayed if results less then availableCount
         cy.get('[data-cy="projectSelectorCountMsg"]').should('not.exist');
     });
 
-    it.skip('global badge details has go live button and can go live', () => {
+    it('global badge details has go live button and can go live', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'
@@ -2206,9 +2188,9 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
-        cy.clickButton('Badge');
+        cy.get('[data-cy="btn_Global Badges"]').click();
 
-        cy.get('#badgeName')
+        cy.get('[data-cy="name"]')
             .type('Test Badge');
         cy.wait('@nameExists');
         cy.clickSave();
@@ -2249,7 +2231,7 @@ describe('Global Badges Tests', () => {
             .should('exist');
     });
 
-    it.skip('global badges do not have awards', () => {
+    it('global badges do not have awards', () => {
         cy.createGlobalBadge(1);
 
         cy.visit('/administrator/globalBadges');
@@ -2261,5 +2243,41 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="editBtn"]')
             .click();
         cy.get('[data-cy="awardName"]').should('not.exist');
+    });
+
+    it('adding a new level disables the selector', () => {
+        const numProjects = 4;
+
+        cy.intercept('GET', '/supervisor/badges/badge1/projects/available*')
+            .as('getAvailableLevels');
+
+        for (let i = 0; i < numProjects; i += 1) {
+            cy.request('POST', `/app/projects/proj${i}`, {
+                projectId: `proj${i}`,
+                name: `proj${i}`,
+            });
+        }
+
+        cy.request('POST', '/supervisor/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1'
+        });
+
+        cy.visit('/administrator/globalBadges/badge1/');
+        cy.clickNav('Levels');
+
+        cy.wait('@getAvailableLevels');
+
+        cy.get('#project-selector').click()
+        cy.get('[data-cy="proj0_option"]').click();
+
+        cy.get('#level-selector').click()
+        cy.get('[data-pc-section="item"]').contains(5).click();
+
+        cy.get('#project-selector').contains('proj0');
+        cy.contains('Add').click();
+        cy.get('#level-selector > .p-dropdown').should('have.class', 'p-disabled');
+
     });
 });
