@@ -35,7 +35,6 @@ let hadData = computed(() => {
 });
 
 const addConf = () => {
-  SkillsReporter.reportSkill('ConfigureSelfApprovalWorkload');
   loading.value = true;
   const currentUserId = currentSelectedUser.value.dn ? currentSelectedUser.value.dn : currentSelectedUser.value.userId;
   SelfReportService.configureApproverForUserId(route.params.projectId, props.userInfo.userId, currentUserId)
@@ -81,6 +80,7 @@ const removeTagConf = (removedItem) => {
               aria-label="Add Specific User"
               data-cy="addUserConfBtn"
               @click="addConf"
+              v-skills="'ConfigureSelfApprovalWorkload'"
               :disabled="!currentSelectedUser"
               icon="fas fa-plus-circle" label="Add">
           </SkillsButton>

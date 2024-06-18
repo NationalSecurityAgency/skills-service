@@ -28,7 +28,6 @@ const isSaving = ref(false);
 const isLoading = ref(true);
 const currentSelectedUser = ref(null);
 const projectTotalPoints = ref(0);
-const pkiAuthenticated = ref(false);
 
 const reversedUsersAdded = computed(() => {
   return usersAdded.value.map((e) => e)
@@ -38,7 +37,7 @@ const minimumPoints = computed(() => {
   return appConfig.minimumProjectPoints;
 });
 const disable = computed(() => {
-  return (!currentSelectedUser || !currentSelectedUser.value || !currentSelectedUser.value.userId || currentSelectedUser.value.userId.length === 0)
+  return (!currentSelectedUser.value || !currentSelectedUser.value || !currentSelectedUser.value.userId || currentSelectedUser.value.userId.length === 0)
       || projectTotalPoints.value < minimumPoints.value
       || (skillsState?.groupId && !skillsState?.enabled);
 });
@@ -60,7 +59,7 @@ const addButtonIcon = computed(() => {
 });
 
 const newUserObjNoSpacesValidatorInNonPkiMode = (value) => {
-  if (pkiAuthenticated.value || !value.userId) {
+  if (appConfig.isPkiAuthenticated || !value.userId) {
     return true;
   }
   const hasSpaces = value.userId.indexOf(' ') >= 0;
@@ -95,7 +94,6 @@ const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, error
 onMounted(() => {
   isLoading.value = true;
   loadProject()
-  pkiAuthenticated.value = appConfig.isPkiAuthenticated.value;
 });
 
 const loadProject = () => {
@@ -106,7 +104,7 @@ const loadProject = () => {
 }
 const addSkill = () => {
   isSaving.value = true;
-  SkillsService.saveSkillEvent(route.params.projectId, route.params.skillId, currentSelectedUser.value, dateAdded.value.getTime(), pkiAuthenticated.value)
+  SkillsService.saveSkillEvent(route.params.projectId, route.params.skillId, currentSelectedUser.value, dateAdded.value.getTime(), appConfig.isPkiAuthenticated)
       .then((data) => {
         isSaving.value = false;
         const historyObj = {
@@ -161,7 +159,7 @@ const addSkill = () => {
             <existing-user-input class="w-full"
                                  :project-id="projectId"
                                  v-model="currentSelectedUser"
-                                 :can-enter-new-user="!pkiAuthenticated"
+                                 :can-enter-new-user="!appConfig.isPkiAuthenticated"
                                  name="userIdInput"
                                  aria-errormessage="userIdInputError"
                                  aria-describedby="userIdInputError"

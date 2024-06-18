@@ -199,7 +199,7 @@ export const useAuthState = defineStore('authState', () => {
     const isAuthenticated = computed(() => {
         return (
           (token.value !== null ||
-            appConfig.isPkiAuthenticated.value ||
+            appConfig.isPkiAuthenticated ||
             localAuth.value ||
             oAuthAuth.value) &&
           userInfoState.value !== null

@@ -24,6 +24,7 @@ import { usePageVisitService } from '@/components/utils/services/UsePageVisitSer
 import { invoke, until } from '@vueuse/core'
 import DashboardFooter from '@/components/header/DashboardFooter.vue'
 import { useUserAgreementInterceptor } from '@/interceptors/UseUserAgreementInterceptor.js'
+import PkiAppBootstrap from '@/components/access/PkiAppBootstrap.vue'
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -101,18 +102,24 @@ const loadConfigs = () => {
 const showHeader = computed(() => {
   return !skillsDisplayInfo.isSkillsClientPath() && authState.isAuthenticated
 })
+const isPkiAndNeedsToBootstrap = computed(() => {
+  return appConfig.isPkiAuthenticated && appConfig.needToBootstrap;
+})
+const inBootstrapMode = computed(() => {
+  return isPkiAndNeedsToBootstrap.value
+})
 </script>
 
 <template>
   <div role="presentation" class="m-0">
     <VueAnnouncer class="sr-only" />
 
-    <customizable-header role="region" aria-label="dynamic customizable header"></customizable-header>
+    <customizable-header v-if="!isLoadingApp && !inBootstrapMode" role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="app">
       <skills-spinner :is-loading="isLoadingApp" class="mt-8 text-center" />
       <div v-if="!isLoadingApp" class="m-0">
-        <div class="overall-container">
-          <!--          <pki-app-bootstrap v-if="isPkiAndNeedsToBootstrap || isOAuthOnlyAndNeedsToBootstrap" role="alert"/>-->
+        <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
+        <div v-if="!inBootstrapMode" class="overall-container">
           <new-software-version  />
           <dashboard-header v-if="showHeader" role="banner" />
           <div role="main" id="mainContent1"
@@ -125,9 +132,9 @@ const showHeader = computed(() => {
       </div>
     </div>
     <ConfirmDialog></ConfirmDialog>
-    <dashboard-footer role="region" />
-    <customizable-footer role="region" aria-label="dynamic customizable footer"></customizable-footer>
-    <!--    <scroll-to-top v-if="!isScrollToTopDisabled" />-->
+    <dashboard-footer v-if="!isLoadingApp && !inBootstrapMode" role="region" />
+    <customizable-footer v-if="!isLoadingApp && !inBootstrapMode" role="region" aria-label="dynamic customizable footer"></customizable-footer>
+    <!--    <scroll-to-top v-if="!isScrollToTopDisabled && !inBootstrapMode" />-->
   </div>
 </template>
 
