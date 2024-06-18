@@ -10,7 +10,7 @@ defineProps(['navItems']);
 const collapsed = useStorage('navigationCollapsed', false)
 const responsive = useResponsiveBreakpoints()
 const colors = useColors()
-const showCollapsed = computed(() => collapsed.value || responsive.lg.value)
+const showCollapsed = computed(() => collapsed.value)
 
 function flipCollapsed() {
   collapsed.value = !collapsed.value;
@@ -49,7 +49,7 @@ const navOnSmallScreen = (changeEvent) => {
         <div class="border-1 border-300 border-round-md surface-border font-medium surface-0" style="min-height: calc(100vh - 20rem); !important">
             <div class="text-900 font-semibold flex">
               <div v-if="!showCollapsed" class="pt-3 px-3">Navigate</div>
-              <div class="flex-1 hidden lg:block" :class="{ 'text-right': !showCollapsed, 'text-center': showCollapsed}">
+              <div class="flex-1" :class="{ 'text-right': !showCollapsed, 'text-center': showCollapsed}">
                 <Button size="small" text
                         data-cy="navCollapseOrExpand"
                         @click="flipCollapsed"
@@ -63,7 +63,7 @@ const navOnSmallScreen = (changeEvent) => {
               <router-link v-for="(navItem, index) of navItems"
                            :key="navItem.name"
                            :to="{ name: navItem.page }"
-                           v-slot="{ href, navigate, isActive, isExactActive }"
+                           v-slot="{ navigate, isExactActive }"
                            custom>
                 <li>
                   <Button link

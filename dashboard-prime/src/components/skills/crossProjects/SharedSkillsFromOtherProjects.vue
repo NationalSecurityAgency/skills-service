@@ -36,6 +36,7 @@ onMounted(() => {
       </div>
       <div v-else>
         <no-content2 title="No Skills Available Yet..." icon="far fa-handshake"
+                     class="p-5"
                      message="Coordinate with other projects to share skills with this project."></no-content2>
       </div>
     </template>

@@ -200,8 +200,8 @@ function validate(value, ctx) {
       <SkillsCardHeader title="Add a new item to the learning path"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex gap-2">
-        <div class="flex-1">
+      <div class="flex gap-2 flex-wrap flex-column lg:flex-row lg:align-items-end">
+        <div class="flex-1 field">
           <label for="learningItemFromInput">From:</label>
           <skills-selector :options="allSkills"
                            ref="fromSelector"
@@ -217,7 +217,7 @@ function validate(value, ctx) {
                            :showType=true
                            :onlySingleSelectedValue="true" />
         </div>
-        <div class="flex-1">
+        <div class="flex-1 field">
           <label for="learningItemToInput">To:</label>
           <skills-selector :options="allPotentialSkills"
                            ref="toSelector"
@@ -233,7 +233,7 @@ function validate(value, ctx) {
                            :showType=true
                            :onlySingleSelectedValue="true" />
         </div>
-        <div>
+        <div class="field text-center">
           <Button @click="onAddPath"
                   class="mt-3"
                   data-cy="addLearningPathItemBtn"
