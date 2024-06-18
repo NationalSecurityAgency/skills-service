@@ -34,6 +34,9 @@ import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler
 import org.springframework.security.web.csrf.CsrfTokenRequestHandler
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher
+import org.springframework.security.web.util.matcher.OrRequestMatcher
+import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
 import org.springframework.util.StringUtils
 import org.springframework.web.filter.OncePerRequestFilter
@@ -68,6 +71,7 @@ class PortalWebSecurityHelper {
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
 
         http.csrf((csrf) -> csrf
+                .requireCsrfProtectionMatcher(new MultipartRequestMatcher())
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
@@ -154,5 +158,22 @@ final class CsrfCookieFilter extends OncePerRequestFilter {
         csrfToken.getToken()
 
         filterChain.doFilter(request, response)
+    }
+}
+
+final class MultipartRequestMatcher implements RequestMatcher {
+
+    private final HashSet<String> allowedMethods = new HashSet<>(Arrays.asList("GET", "HEAD", "TRACE", "OPTIONS"))
+    private final OrRequestMatcher pathMatcher = new OrRequestMatcher(
+            new AntPathRequestMatcher("/api/upload"),
+            new AntPathRequestMatcher("/admin/projects/*/icons/upload"),
+            new AntPathRequestMatcher("/supervisor/icons/upload"),
+            new AntPathRequestMatcher("/admin/projects/*/skills/*/video"),
+    )
+
+    @Override
+    boolean matches(HttpServletRequest request) {
+        Boolean matches = (pathMatcher.matches(request) && !this.allowedMethods.contains(request.getMethod()))
+        return matches
     }
 }
