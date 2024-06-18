@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router';
 import ProjectService from '@/components/projects/ProjectService';
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
@@ -7,6 +7,8 @@ import DateCell from "@/components/utils/table/DateCell.vue";
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 import { useConfirm } from 'primevue/useconfirm'
 import {useProjDetailsState} from "@/stores/UseProjDetailsState.js";
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import Column from 'primevue/column'
 
 const route = useRoute();
 
@@ -95,6 +97,9 @@ function loadErrors() {
     loading.value = false;
   });
 }
+
+const responsive = useResponsiveBreakpoints()
+const isFlex = computed(() => responsive.md.value)
 </script>
 
 <template>
@@ -110,7 +115,7 @@ function loadErrors() {
       </div>
     </sub-page-header>
 
-    <Card>
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
         <SkillsDataTable :busy="loading"
                          :value="errors"
@@ -123,7 +128,7 @@ function loadErrors() {
                          :sort-field="sortBy"
                          :sort-order="sortOrder"
                          :rowsPerPageOptions="possiblePageSizes">
-          <Column header="Error" field="typeAndError" sortable>
+          <Column header="Error" field="typeAndError" sortable  :class="{'flex': isFlex }">
             <template #body="slotProps">
               <div class="pl-3">
                 <div class="mb-2">
@@ -135,18 +140,18 @@ function loadErrors() {
               </div>
             </template>
           </Column>
-          <Column header="First Seen" field="created" sortable>
+          <Column header="First Seen" field="created" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
               <date-cell :value="slotProps.data.created" />
             </template>
           </Column>
-          <Column header="Last Seen" field="lastSeen" sortable>
+          <Column header="Last Seen" field="lastSeen" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
               <date-cell :value="slotProps.data.lastSeen" />
             </template>
           </Column>
-          <Column header="Times Seen" field="count" sortable></Column>
-          <Column header="Delete">
+          <Column header="Times Seen" field="count" sortable :class="{'flex': isFlex }"></Column>
+          <Column header="Delete" :class="{'flex': isFlex }">
             <template #body="slotProps">
               <SkillsButton :ref="`delete_${slotProps.data.error}`" @click="removeError(slotProps.data)" variant="outline-info" size="small"
                         :data-cy="`deleteErrorButton_${encodeURI(slotProps.data.error)}`"
