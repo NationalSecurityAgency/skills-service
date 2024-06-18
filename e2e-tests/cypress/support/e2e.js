@@ -29,7 +29,7 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import './commands'
+import { xsrfToken } from './commands'
 import 'cypress-axe';
 import 'cypress-plugin-tab';
 import "cypress-real-events/support";
@@ -73,6 +73,8 @@ beforeEach(function () {
         }
     })
 
+    cy.wrap(xsrfToken).as('XSRF-TOKEN');
+
     clear();
 
     let disable = Cypress.env('disableResetDb');
@@ -83,22 +85,31 @@ beforeEach(function () {
         cy.log('Disabled [cy.resetDb()] in beforeEach')
     }
     cy.resetEmail();
+    cy.log(`configuring email before fixture`, Cypress.env('XSRF-TOKEN'), xsrfToken.value);
     cy.fixture('vars.json').then((vars) => {
         cy.logout()
         cy.login(vars.rootUser, vars.defaultPass);
-        cy.log('configuring email');
-        cy.request({
-            method: 'POST',
-            url: '/root/saveEmailSettings',
-            body: {
-                publicUrl: 'http://localhost:8082/',
-                fromEmail: 'noreploy@skilltreeemail.org',
-                host: 'localhost',
-                port: 1026,
-                'protocol': 'smtp'
-            },
-        });
-        cy.logout();
+        cy.log('configuring email in fixture', Cypress.env('XSRF-TOKEN'), xsrfToken.value);
+        cy.get('@XSRF-TOKEN').then((token) => {
+          cy.log(`token from alias: ${token.value}`);
+            cy.log('configuring email in fixture 2', Cypress.env('XSRF-TOKEN'), xsrfToken.value);
+          // expect(token).to.eql('red')
+          // cy.debug()
+            cy.request({
+                method: 'POST',
+                url: '/root/saveEmailSettings',
+                // headers: {'X-XSRF-TOKEN': Cypress.env('XSRF-TOKEN')},
+                headers: {'X-XSRF-TOKEN': token.value, blah : 'de-dah'},
+                body: {
+                    publicUrl: 'http://localhost:8082/',
+                    fromEmail: 'noreploy@skilltreeemail.org',
+                    host: 'localhost',
+                    port: 1026,
+                    'protocol': 'smtp'
+                },
+            });
+            cy.logout();
+        })
 
         if (!Cypress.env('verifyEmail')) {
             cy.loginAsAdminUser()

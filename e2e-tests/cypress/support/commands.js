@@ -48,6 +48,7 @@ const compareSnapshotCommand = require('cypress-visual-regression/dist/command')
 compareSnapshotCommand({
     errorThreshold: 0.01
 });
+export const xsrfToken = { value: null };
 
 function terminalLog(violations) {
     violations = violations || { length: 0 };
@@ -225,33 +226,53 @@ Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = nu
     let requestStatus = 0;
     cy.request(`/app/users/validExistingDashboardUserId/${user}`)
         .then((response) => {
+            // let xsrf = Cypress.env('XSRF-TOKEN');
+            // if (!xsrf && response.headers['set-cookie']) {
+            //     xsrf = response.headers['set-cookie'].find((cookie) => cookie.includes('XSRF-TOKEN')).match(/XSRF\-TOKEN=([^;]*)/)[1];
+            //     Cypress.env('XSRF-TOKEN', xsrf);
+            //     cy.log(`REGISTER! settings xsrf token to ${Cypress.env('XSRF-TOKEN')}`);
+            // }
+            const xsrf = extractXsrfToken(response)
             if (response.body !== true) {
                 if (grantRoot) {
-                    cy.log(`Creating root user [${user}]`)
-                    cy.request('PUT', '/createRootAccount', {
-                        firstName: 'Firstname',
-                        lastName: 'LastName',
-                        email: user,
-                        password: pass,
-                        usernameForDisplay,
+                    cy.log(`Creating root user [${user}], xsrf: ${xsrf}`)
+                    cy.request({
+                        method: 'PUT',
+                        url: '/createRootAccount',
+                        headers: {'X-XSRF-TOKEN': xsrf},
+                        body: {
+                            firstName: 'Firstname',
+                            lastName: 'LastName',
+                            email: user,
+                            password: pass,
+                            usernameForDisplay,
+                        }
                     }).then((innerResponse) => {
                         requestStatus = innerResponse.status;
                     });
                 } else {
-                    cy.log(`Creating app user [${user}]`)
-                    cy.request('PUT', '/createAccount', {
-                        firstName: 'Firstname',
-                        lastName: 'LastName',
-                        email: user,
-                        password: pass,
-                        usernameForDisplay,
+                    cy.log(`Creating app user [${user}], xsrf: ${xsrf}`)
+                    cy.request({
+                        method: 'PUT',
+                        url: '/createAccount',
+                        headers: {'X-XSRF-TOKEN': xsrf},
+                        body: {
+                            firstName: 'Firstname',
+                            lastName: 'LastName',
+                            email: user,
+                            password: pass,
+                            usernameForDisplay,
+                        }
                     }).then((innerResponse) => {
                         requestStatus = innerResponse.status;
                     });
                 }
-                cy.request('POST', '/logout');
+                // cy.request({ method: 'POST', headers: {'X-XSRF-TOKEN': xsrf}, url:'/logout'});
+                // Cypress.env('XSRF-TOKEN', null)
+                cy.logout();
+                cy.log(`logged out, clearing token [${Cypress.env('XSRF-TOKEN')}]`)
             } else {
-                cy.log(`User [${user}] already exist`)
+                cy.log(`User [${user}] already exist, xsrf: ${xsrf}`);
                 requestStatus = response.status;
             }
         });
@@ -265,26 +286,57 @@ Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = nu
 
 Cypress.Commands.add("login", (user, pass) => {
     cy.log(`Logging in as [${user}] with [${pass}]`);
+    cy.request(`/app/users/validExistingDashboardUserId/${user}`)
+      .then((response) => {
+          // let xsrf = Cypress.env('XSRF-TOKEN');
+          // if (!xsrf && response.headers['set-cookie']) {
+          //     xsrf = response.headers['set-cookie'].find((cookie) => cookie.includes('XSRF-TOKEN')).match(/XSRF\-TOKEN=([^;]*)/)[1];
+          //     Cypress.env('XSRF-TOKEN', xsrf)
+          //     cy.wrap(xsrf).as('XSRF-TOKEN')
+          //     cy.log(`LOGIN! settings xsrf token to ${Cypress.env('XSRF-TOKEN')}`);
+          // }
+          const xsrf = extractXsrfToken(response)
+          let requestStatus = 0;
+          cy.request( {
+              method: 'POST',
+              url: '/performLogin',
+              body: {
+                  username: user,
+                  password: pass,
+                  // _csrf: xsrf,
+              },
+              headers: {'X-XSRF-TOKEN': xsrf},
+              form: true,
+          }).then((response) => {
+              requestStatus = response.status;
+          })
 
-    let requestStatus = 0;
-    cy.request( {
-        method: 'POST',
-        url: '/performLogin',
-        body: {
-            username: user,
-            password: pass
-        },
-        form: true,
-    }).then((response) => {
-        requestStatus = response.status;
-    })
-
-    cy.log('Will wait for up to 30 seconds for user creation');
-    cy.waitUntil(() => requestStatus === 200, {
-        timeout: 30000, // waits up to 30 seconds, default is 5 seconds
-    });
-    cy.log(`Logged in as [${user}] with [${pass}]`);
+          cy.log('Will wait for up to 30 seconds for user creation');
+          cy.waitUntil(() => requestStatus === 200, {
+              timeout: 30000, // waits up to 30 seconds, default is 5 seconds
+          });
+          cy.log(`Logged in as [${user}] with [${pass}]`);
+          cy.request('/app/userInfo').then((response) => {
+              cy.wrap(response.body).as('userInfo');
+              console.log(`User info: ${JSON.stringify(response.body)}`);
+              extractXsrfToken(response)
+          })
+      });
 });
+
+const extractXsrfToken = (response) => {
+    if (response.headers['set-cookie']) {
+        const xsrf = response.headers['set-cookie'].find((cookie) => cookie.includes('XSRF-TOKEN')).match(/XSRF\-TOKEN=([^;]*)/)[1];
+        Cypress.env('XSRF-TOKEN', xsrf)
+        // cy.wrap(xsrf).as('XSRF-TOKEN')
+        xsrfToken.value = xsrf;
+        cy.log(`LOGIN! settings xsrf token to ${Cypress.env('XSRF-TOKEN')}`);
+        return xsrf;
+    } else {
+        cy.log(`No xsrf token in response headers, using existing setXsrfToken: [${xsrfToken.value}]`)
+        return xsrfToken.value
+    }
+}
 
 Cypress.Commands.add("resetEmail", () => {
     cy.request({
@@ -294,62 +346,103 @@ Cypress.Commands.add("resetEmail", () => {
 });
 
 Cypress.Commands.add("createQuizDef", (quizNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/app/quiz-definitions/quiz${quizNum}`, Object.assign({
-        quizId: `quizId${quizNum}`,
-        name: `This is quiz ${quizNum}`,
-        type: 'Quiz',
-        description: `What a cool quiz #${quizNum}! Thank you for taking it!`
-    }, overrideProps));
+    cy.request({
+        method: 'POST',
+        url: `/app/quiz-definitions/quiz${quizNum}`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body: Object.assign({
+            quizId: `quizId${quizNum}`,
+            name: `This is quiz ${quizNum}`,
+            type: 'Quiz',
+            description: `What a cool quiz #${quizNum}! Thank you for taking it!`
+        }, overrideProps)
+    });
 });
 
 Cypress.Commands.add("createSurveyDef", (surveyNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/app/quiz-definitions/quiz${surveyNum}`, Object.assign({
-        quizId: `quiz${surveyNum}`,
-        name: `This is survey ${surveyNum}`,
-        type: 'Survey',
-        description: `What a cool survey #${surveyNum}! Thank you for taking it!`
-    }, overrideProps));
+    cy.request({
+        method: 'POST',
+        url: `/app/quiz-definitions/quiz${surveyNum}`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body: Object.assign({
+            quizId: `quiz${surveyNum}`,
+            name: `This is survey ${surveyNum}`,
+            type: 'Survey',
+            description: `What a cool survey #${surveyNum}! Thank you for taking it!`
+        }, overrideProps)
+    });
 });
 
 Cypress.Commands.add("setQuizMaxNumAttempts", (quizNum = 1, numAttemps) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
-        setting: 'quizNumberOfAttempts',
-        value: `${numAttemps}`
-    }]);
+    cy.request({
+        method: 'POST',
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        url: `/admin/quiz-definitions/quiz${quizNum}/settings`,
+        body: [{
+            setting: 'quizNumberOfAttempts',
+            value: `${numAttemps}`
+        }]
+    });
 });
 Cypress.Commands.add("setMinNumQuestionsToPass", (quizNum = 1, numQuestions) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
-        setting: 'quizPassingReq',
-        value: `${numQuestions}`
-    }]);
+    cy.request({
+        method: 'POST',
+        url: `/admin/quiz-definitions/quiz${quizNum}/settings`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body: [{
+            setting: 'quizPassingReq',
+            value: `${numQuestions}`
+        }]
+    });
 });
 
 Cypress.Commands.add("setNumQuestionsForQuiz", (quizNum = 1, numQuestions) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
-        setting: 'quizLength',
-        value: `${numQuestions}`
-    }]);
+    cy.request({
+        method: 'POST',
+        url: `/admin/quiz-definitions/quiz${quizNum}/settings`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body:
+          [{
+              setting: 'quizLength',
+              value: `${numQuestions}`
+          }]
+    });
 });
 
 Cypress.Commands.add("setRandomizedQuestions", (quizNum = 1, enabled) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
-        setting: 'quizRandomizeQuestions',
-        value: `${enabled}`
-    }]);
+    cy.request({
+        method: 'POST',
+        url: `/admin/quiz-definitions/quiz${quizNum}/settings`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body: [{
+            setting: 'quizRandomizeQuestions',
+            value: `${enabled}`
+        }]
+    });
 });
 
 Cypress.Commands.add("setRandomizedAnswers", (quizNum = 1, enabled) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
-        setting: 'quizRandomizeAnswers',
-        value: `${enabled}`
-    }]);
+    cy.request({
+        method: 'POST',
+        url: `/admin/quiz-definitions/quiz${quizNum}/settings`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body: [{
+            setting: 'quizRandomizeAnswers',
+            value: `${enabled}`
+        }]
+    });
 });
 
 Cypress.Commands.add("setQuizTimeLimit", (quizNum = 1, timeLimit) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
-        setting: 'quizTimeLimit',
-        value: `${timeLimit}`
-    }]);
+    cy.request({
+        method: 'POST',
+        url: `/admin/quiz-definitions/quiz${quizNum}/settings`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body: [{
+            setting: 'quizTimeLimit',
+            value: `${timeLimit}`
+        }]
+    });
 });
 
 Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAttemptInfo, shouldComplete = true, userAnswerTxt = null) => {
@@ -402,109 +495,157 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldCom
 
             // cy.log(JSON.stringify(questionAnswers, null, 2));
 
-            cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt`)
+            cy.request({
+                method: 'POST',
+                url: `/admin/quiz-definitions/${quizId}/users/${userId}/attempt`,
+                headers: {'X-XSRF-TOKEN': xsrfToken.value},
+            })
                 .then((response) => {
                     const attemptId = response.body.id;
 
                     questionAnswers.forEach((answer) => {
-                            answer.answerIds.forEach((answerId) => {
-                                cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, { isSelected: true, answerText: answer.answerText });
+                        answer.answerIds.forEach((answerId) => {
+                            cy.request({
+                                method: 'POST',
+                                url: `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`,
+                                headers: {'X-XSRF-TOKEN': xsrfToken.value},
+                                body: {isSelected: true, answerText: answer.answerText}
                             });
-                        })
+                        });
+                    })
                     if (shouldComplete) {
-                        cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/complete`);
+                        cy.request({
+                            method: 'POST',
+                            headers: {'X-XSRF-TOKEN': xsrfToken.value},
+                            url: `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/complete`
+                        });
                     }
                 });
         });
 });
 
 Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
-        quizId: `quizId${quizNum}`,
-        question: `This is a question # ${questionNum}`,
-        questionType: 'SingleChoice',
-        answers: [{
-            answer: `Question ${questionNum} - First Answer`,
-            isCorrect: questionNum == 1 || questionNum > 3 ? true : false,
-        }, {
-            answer: `Question ${questionNum} - Second Answer`,
-            isCorrect: questionNum == 2 ? true : false,
-        }, {
-            answer: `Question ${questionNum} - Third Answer`,
-            isCorrect: questionNum == 3 ? true : false,
-        }],
-    }, overrideProps));
+    cy.request({
+        method: 'POST',
+        url: `/admin/quiz-definitions/quiz${quizNum}/create-question`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body: Object.assign({
+            quizId: `quizId${quizNum}`,
+            question: `This is a question # ${questionNum}`,
+            questionType: 'SingleChoice',
+            answers: [{
+                answer: `Question ${questionNum} - First Answer`,
+                isCorrect: questionNum == 1 || questionNum > 3 ? true : false,
+            }, {
+                answer: `Question ${questionNum} - Second Answer`,
+                isCorrect: questionNum == 2 ? true : false,
+            }, {
+                answer: `Question ${questionNum} - Third Answer`,
+                isCorrect: questionNum == 3 ? true : false,
+            }],
+        }, overrideProps)
+    });
 });
 
 Cypress.Commands.add("createQuizMultipleChoiceQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
-        quizId: `quizId${quizNum}`,
-        question: `This is a question # ${questionNum}`,
-        questionType: 'MultipleChoice',
-        answers: [{
-            answer: 'First Answer',
-            isCorrect: true,
-        }, {
-            answer: 'Second Answer',
-            isCorrect: false,
-        }, {
-            answer: 'Third Answer',
-            isCorrect: true,
-        }, {
-            answer: 'Fourth Answer',
-            isCorrect: false,
-        }],
-    }, overrideProps));
+    cy.request({
+        method: 'POST',
+        url: `/admin/quiz-definitions/quiz${quizNum}/create-question`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body: Object.assign({
+            quizId: `quizId${quizNum}`,
+            question: `This is a question # ${questionNum}`,
+            questionType: 'MultipleChoice',
+            answers: [{
+                answer: 'First Answer',
+                isCorrect: true,
+            }, {
+                answer: 'Second Answer',
+                isCorrect: false,
+            }, {
+                answer: 'Third Answer',
+                isCorrect: true,
+            }, {
+                answer: 'Fourth Answer',
+                isCorrect: false,
+            }],
+        }, overrideProps)
+    });
 });
 
 Cypress.Commands.add("createSurveyMultipleChoiceQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
-        quizId: `quizId${quizNum}`,
-        question: `This is a question # ${questionNum}`,
-        questionType: 'MultipleChoice',
-        answers: [{
-            answer: `Question ${questionNum} - First Answer`,
-            isCorrect: false,
-        }, {
-            answer: `Question ${questionNum} - Second Answer`,
-            isCorrect: false,
-        }, {
-            answer: `Question ${questionNum} - Third Answer`,
-            isCorrect: false,
-        }],
-    }, overrideProps));
+    cy.request({
+        method: 'POST',
+        url: `/admin/quiz-definitions/quiz${quizNum}/create-question`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body: Object.assign({
+            quizId: `quizId${quizNum}`,
+            question: `This is a question # ${questionNum}`,
+            questionType: 'MultipleChoice',
+            answers: [{
+                answer: `Question ${questionNum} - First Answer`,
+                isCorrect: false,
+            }, {
+                answer: `Question ${questionNum} - Second Answer`,
+                isCorrect: false,
+            }, {
+                answer: `Question ${questionNum} - Third Answer`,
+                isCorrect: false,
+            }],
+        }, overrideProps)
+    });
 });
 
 Cypress.Commands.add("createTextInputQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
-        quizId: `quizId${quizNum}`,
-        question: `This is a question # ${questionNum}`,
-        questionType: 'TextInput',
-    }, overrideProps));
+    cy.request({
+        method: 'POST',
+        url: `/admin/quiz-definitions/quiz${quizNum}/create-question`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body: Object.assign({
+            quizId: `quizId${quizNum}`,
+            question: `This is a question # ${questionNum}`,
+            questionType: 'TextInput',
+        }, overrideProps)
+    });
 });
 
 Cypress.Commands.add("createRatingQuestionDef", (quizNum = 1, questionNum = 1, questionScale = 5, overrideProps = {}) => {
-    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
-        quizId: `quizId${quizNum}`,
-        question: `This is a question # ${questionNum}`,
-        questionType: 'Rating',
-        questionScale: questionScale,
-    }, overrideProps));
+    cy.request({
+        method: 'POST',
+        url: `/admin/quiz-definitions/quiz${quizNum}/create-question`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body: Object.assign({
+            quizId: `quizId${quizNum}`,
+            question: `This is a question # ${questionNum}`,
+            questionType: 'Rating',
+            questionScale: questionScale,
+        }, overrideProps)
+    });
 });
 
 Cypress.Commands.add("createProject", (projNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/app/projects/proj${projNum}`, Object.assign({
-        projectId: `proj${projNum}`,
-        name: `This is project ${projNum}`
-    }, overrideProps));
+    cy.request({
+        method: 'POST',
+        url: `/app/projects/proj${projNum}`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body: Object.assign({
+            projectId: `proj${projNum}`,
+            name: `This is project ${projNum}`
+        }, overrideProps)
+    });
 });
 
 Cypress.Commands.add("createSubject", (projNum = 1, subjNum = 1, overrideProps = {}) => {
-    cy.request('POST', `/admin/projects/proj${projNum}/subjects/subj${subjNum}`, Object.assign({
-        projectId: `proj${projNum}`,
-        subjectId: `subj${subjNum}`,
-        name: `Subject ${subjNum}`
-    }, overrideProps));
+    cy.request({
+        method: 'POST',
+        url: `/admin/projects/proj${projNum}/subjects/subj${subjNum}`,
+        headers: {'X-XSRF-TOKEN': xsrfToken.value},
+        body: Object.assign({
+            projectId: `proj${projNum}`,
+            subjectId: `subj${subjNum}`,
+            name: `Subject ${subjNum}`
+        }, overrideProps)
+    });
 });
 
 Cypress.Commands.add("exportSkillToCatalog", (projNum = 1, subjNum = 1, skillNum = 1) => {
@@ -546,7 +687,7 @@ Cypress.Commands.add('bulkImportSkillFromCatalogAndFinalize', (projNum = 2, subj
 
 Cypress.Commands.add('finalizeCatalogImportWithoutWaiting', (projNum = 1) => {
     const url = `/admin/projects/proj${projNum}/catalog/finalize`;
-    cy.request('POST', url);
+    cy.request({method: 'POST', url, headers: {'X-XSRF-TOKEN': xsrfToken.value},});
 });
 
 Cypress.Commands.add("finalizeCatalogImport", (projNum = 1) => {
@@ -913,15 +1054,26 @@ Cypress.Commands.add('customA11y', ()=> {
 
 Cypress.Commands.add("logout", () => {
     let requestStatus= 0;
-    cy.request('POST', '/logout')
-        .then((response) => {
-            requestStatus = response.status;
-        })
+    cy.log(`logging out xsrf token: ${Cypress.env('XSRF-TOKEN')}, xsrf token value: ${xsrfToken.value}`)
+    // cy.getCookie('XSRF-TOKEN').should('exist')
+    // cy.getCookie('XSRF-TOKEN').then((c) => {   cy.log(c.value) })
+    // cy.request({method: 'POST', headers: {'X-XSRF-TOKEN': Cypress.env('XSRF-TOKEN')}, url:'/logout'})
+    if (xsrfToken.value) {
+        cy.request({method: 'POST', headers: {'X-XSRF-TOKEN': xsrfToken.value}, url:'/logout', failOnStatusCode: false})
+            .then((response) => {
+                requestStatus = response.status;
+            })
 
-    cy.log('Will wait for up to 30 seconds for user creation');
-    cy.waitUntil(() => requestStatus === 200, {
-        timeout: 30000, // waits up to 30 seconds, default is 5 seconds
-    });
+        cy.log('Will wait for up to 30 seconds for user creation');
+        cy.waitUntil(() => requestStatus === 200, {
+            timeout: 30000, // waits up to 30 seconds, default is 5 seconds
+        });
+    }
+
+    Cypress.env('XSRF-TOKEN', null)
+    cy.log('clearing xsrf token', Cypress.env('XSRF-TOKEN'))
+    xsrfToken.value = null
+    cy.clearAllCookies()
     cy.log('Logged out')
 });
 
@@ -1116,21 +1268,24 @@ Cypress.Commands.add('loginBySingleSignOn', (projId = 'proj1') => {
 
 Cypress.Commands.add("loginAsRootUser", () => {
     cy.fixture('vars.json').then((vars) => {
-        cy.request('POST', '/logout');
+        // cy.request('POST', '/logout');
+        cy.logout();
         cy.login(vars.rootUser, vars.defaultPass);
     });
 })
 
 Cypress.Commands.add("loginAsDefaultUser", () => {
     cy.fixture('vars.json').then((vars) => {
-        cy.request('POST', '/logout');
+        // cy.request('POST', '/logout');
+        cy.logout();
         cy.login(vars.defaultUser, vars.defaultPass);
     });
 })
 
 Cypress.Commands.add("loginAsAdminUser", () => {
     cy.fixture('vars.json').then((vars) => {
-        cy.request('POST', '/logout');
+        // cy.request('POST', '/logout');
+        cy.logout();
         if (!Cypress.env('oauthMode')) {
             cy.log('NOT in oauthMode, using form login')
             cy.login(vars.defaultUser, vars.defaultPass);
@@ -1144,7 +1299,8 @@ Cypress.Commands.add("loginAsAdminUser", () => {
 Cypress.Commands.add("loginAsProxyUser", () => {
     cy.fixture('vars.json')
         .then((vars) => {
-            cy.request('POST', '/logout');
+            // cy.request('POST', '/logout');
+            cy.logout();
             if (!Cypress.env('oauthMode')) {
                 cy.log('NOT in oauthMode, using form login')
                 cy.login(Cypress.env('proxyUser'), vars.defaultPass);
