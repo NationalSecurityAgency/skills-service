@@ -195,7 +195,7 @@ const sortField = () => {
               aria-label="View user details"
               data-cy="usersTable_viewDetailsLink"
             >
-              {{ slotProps.data.userId }}
+              {{ slotProps.data.userIdForDisplay || slotProps.data.userId }}
             </router-link>
           </template>
         </Column>

@@ -45,7 +45,6 @@ onMounted(() => {
   }
 });
 const addTagConf = () => {
-  SkillsReporter.reportSkill('ConfigureSelfApprovalWorkload')
   if (enteredTag.value && enteredTag.value !== '') {
     SelfReportService.configureApproverForUserTag(route.params.projectId, props.userInfo.userId, props.tagKey, enteredTag.value)
       .then((res) => {
@@ -82,6 +81,7 @@ const removeTagConf = (removedIem) => {
             :placeholder="`Enter ${tagLabel} value`"
             aria-label="Enter Tag Label"
             v-on:keydown.enter="addTagConf"
+            v-skills="'ConfigureSelfApprovalWorkload'"
             v-model="enteredTag"
             data-cy="userTagValueInput" />
       </div>
@@ -89,6 +89,7 @@ const removeTagConf = (removedIem) => {
         <SkillsButton size="small"
             aria-label="Add Tag Value"
             @click="addTagConf"
+            v-skills="'ConfigureSelfApprovalWorkload'"
             data-cy="addTagKeyConfBtn"
             :disabled="!enteredTag || !meta.valid"
             label="Add"

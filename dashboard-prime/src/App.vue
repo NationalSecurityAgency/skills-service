@@ -107,7 +107,7 @@ const showHeader = computed(() => {
   <div role="presentation" class="m-0">
     <VueAnnouncer class="sr-only" />
 
-    <customizable-header role="region" aria-label="dynamic customizable header"></customizable-header>
+    <customizable-header v-if="!isLoadingApp" role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="app">
       <skills-spinner :is-loading="isLoadingApp" class="mt-8 text-center" />
       <div v-if="!isLoadingApp" class="m-0">
@@ -125,8 +125,8 @@ const showHeader = computed(() => {
       </div>
     </div>
     <ConfirmDialog></ConfirmDialog>
-    <dashboard-footer role="region" />
-    <customizable-footer role="region" aria-label="dynamic customizable footer"></customizable-footer>
+    <dashboard-footer v-if="!isLoadingApp" role="region" />
+    <customizable-footer v-if="!isLoadingApp" role="region" aria-label="dynamic customizable footer"></customizable-footer>
     <!--    <scroll-to-top v-if="!isScrollToTopDisabled" />-->
   </div>
 </template>

@@ -98,7 +98,7 @@ const resetSubjAddedInfo = () => {
 
 const addSkillToConf = () => {
   resetSubjAddedInfo();
-  SkillsReporter.reportSkill('ConfigureSelfApprovalWorkload');
+
   if (selectedSkills.value) {
     const { skillId } = selectedSkills.value;
     SelfReportService.configureApproverForSkillId(route.params.projectId, props.userInfo.userId, skillId).then((res) => {
@@ -199,6 +199,7 @@ const removeTagConf = (removedItem) => {
           <SkillsButton
               aria-label="Add Tag Value"
               @click="addSkillToConf"
+              v-skills="'ConfigureSelfApprovalWorkload'"
               data-cy="addSkillConfBtn"
               :disabled="loading || (!selectedSubject && (!selectedSkills || selectedSkills.length === 0))"
               label="Add"

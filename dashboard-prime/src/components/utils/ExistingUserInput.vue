@@ -115,7 +115,7 @@ const itemSelected = (event) => {
 const suggestUrl = computed(() => {
   let suggestUrl;
   if (props.userType === CLIENT) {
-    if (appConfig.isPkiAuthenticated.value) {
+    if (appConfig.isPkiAuthenticated) {
       suggestUrl = '/app/users/suggestPkiUsers';
     } else if (props.projectId) {
       suggestUrl = `/app/users/projects/${encodeURIComponent(props.projectId)}/suggestClientUsers`;
@@ -129,7 +129,7 @@ const suggestUrl = computed(() => {
   } else {
     // userType === DASHBOARD
     suggestUrl = '/app/users/suggestDashboardUsers';
-    if (appConfig.isPkiAuthenticated.value) {
+    if (appConfig.isPkiAuthenticated) {
       suggestUrl = '/app/users/suggestPkiUsers';
     }
   }

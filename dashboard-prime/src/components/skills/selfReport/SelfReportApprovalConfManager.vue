@@ -141,7 +141,6 @@ const removeConf = (removedConf) => {
 };
 
 const handleFallback = (checked, rowItem) => {
-  SkillsReporter.reportSkill('ConfigureSelfApprovalWorkload');
   const itemToUpdate = data.value.find((i) => i.userId === rowItem.userId);
   itemToUpdate.loading = true;
   if (checked) {
@@ -152,6 +151,7 @@ const handleFallback = (checked, rowItem) => {
           // close expanded child
           collapseRow(rowItem.userId);
           nextTick(() => announcer.polite(`Assigned ${newConf.approverUserId} as a fallback approver.`));
+          SkillsReporter.reportSkill('ConfigureSelfApprovalWorkload');
         })
         .finally(() => {
           itemToUpdate.loading = false;
@@ -162,6 +162,7 @@ const handleFallback = (checked, rowItem) => {
           itemToUpdate.allConf = itemToUpdate.allConf.filter((i) => i.id !== rowItem.fallbackConf.id);
           updateTable(data.value);
           nextTick(() => announcer.polite('Removed workload configuration successfully.'));
+          SkillsReporter.reportSkill('ConfigureSelfApprovalWorkload');
         }).finally(() => {
       itemToUpdate.loading = false;
     });
