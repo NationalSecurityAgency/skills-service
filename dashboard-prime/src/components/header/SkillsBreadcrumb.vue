@@ -261,7 +261,7 @@ const isQuizzesValueUnderProgressAndRanking = (value, items) => {
           <skills-breadcrumb-item
             :icon="item.icon"
             :label="item.label"
-            :show-separator="item.label && smallScreenMode"
+            :show-separator="item.value && smallScreenMode"
             :value="item.value" />
         </div>
       </template>

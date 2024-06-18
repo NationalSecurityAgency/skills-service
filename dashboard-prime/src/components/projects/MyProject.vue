@@ -106,15 +106,6 @@ const warningMsgAboutPoints = computed(() => {
   return `Project has insufficient points assigned. Skills cannot be achieved until project has at least ${minimumPoints.value} points.`
 })
 
-const checkIfProjectBelongsToGlobalBadge = () => {
-  ProjectService.checkIfProjectBelongsToGlobalBadge(projectInternal.value.projectId)
-      .then((res) => {
-        if (res) {
-          deleteProjectDisabled.value = true;
-          deleteProjectToolTip.value = 'Cannot delete this project as it belongs to one or more global badges. Please contact a Supervisor to remove this dependency.';
-        }
-      });
-};
 const doDeleteProject = () => {
   ProjectService.checkIfProjectBelongsToGlobalBadge(projectInternal.value.projectId)
       .then((belongsToGlobal) => {
@@ -179,7 +170,7 @@ defineExpose({
   <div data-cy="projectCard" class="h-100">
     <Card :data-cy="`projectCard_${projectInternal.projectId}`" class="relative">
       <template #content>
-        <div class="flex flex-wrap"
+        <div class="flex flex-column sm:flex-row flex-wrap"
              :class="{
             'flex-column gap-1 justify-content-left': projectsState.shouldTileProjectsCards,
             '': !projectsState.shouldTileProjectsCards
