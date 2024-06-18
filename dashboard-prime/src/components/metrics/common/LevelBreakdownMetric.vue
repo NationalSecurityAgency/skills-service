@@ -130,7 +130,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card data-cy="levelsChart" >
+  <Card data-cy="levelsChart" :pt="{ body: { class: 'p-0 pt-2 pr-2' }, content: { class: 'p-0' } }">
     <template #header>
       <SkillsCardHeader :title="title"></SkillsCardHeader>
     </template>

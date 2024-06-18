@@ -40,7 +40,7 @@ const buildTagCharts = () => {
 <template>
   <div>
     <div class="flex mb-3">
-      <div class="col-12">
+      <div class="">
         <level-breakdown-metric :title="`Overall Levels for ${metricTitle}`" />
       </div>
     </div>

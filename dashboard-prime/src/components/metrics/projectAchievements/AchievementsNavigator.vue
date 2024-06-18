@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router';
 import dayjs from 'dayjs';
 import MetricsService from "@/components/metrics/MetricsService.js";
@@ -9,8 +9,12 @@ import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 import InputText from "primevue/inputtext";
 import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
 import SkillsDropDown from "@/components/utils/inputForm/SkillsDropDown.vue";
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import Column from 'primevue/column'
 
 const route = useRoute();
+const responsive = useResponsiveBreakpoints()
+const isFlex = computed(() => responsive.md.value)
 
 const isLoading = ref(true);
 const usernameFilter = ref('');
@@ -99,82 +103,98 @@ const reloadTable = () => {
 </script>
 
 <template>
-  <Card data-cy="achievementsNavigator">
+  <Card data-cy="achievementsNavigator" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #header>
       <SkillsCardHeader title="Achievements"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex pb-2 flex-wrap">
-        <div class="flex flex-1 flex-column border-right-1 pr-3 gap-2">
-          <label for="user-name-filter">User Name Filter:</label>
-          <InputText class="w-full"
-                     v-model="usernameFilter"
-                     id="user-name-filter"
-                     data-cy="achievementsNavigator-usernameInput"
-                     @keydown.enter="reloadTable"
-                     aria-label="Skill name filter" />
+      <div class="p-3">
+        <div class="flex pb-2 flex-column lg:flex-row">
+          <div class="flex flex-1 flex-column lg:border-right-1 lg:surface-border lg:pr-3 gap-2">
+            <div class="field">
+              <label for="user-name-filter">User Name Filter:</label>
+              <InputText class="w-full"
+                         v-model="usernameFilter"
+                         id="user-name-filter"
+                         data-cy="achievementsNavigator-usernameInput"
+                         @keydown.enter="reloadTable"
+                         aria-label="Skill name filter" />
+            </div>
+            <div class="field">
+              <label>Types: </label>
+              <div class="flex gap-2 mt-2" data-cy="achievementsNavigator-typeInput">
+                <span v-for="tag in achievementTypes.available" :key="tag">
+                  <Checkbox v-model="achievementTypes.selected" :value="tag" :name="tag" :inputId="tag"></Checkbox>
+                  <label :for="tag" class="ml-2">
+                    {{ tag }}
+                  </label>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-1 flex-column gap-2 lg:border-right-1 lg:surface-border lg:pl-2 lg:pr-2">
+            <SkillsCalendarInput
+              v-model="fromDayFilter"
+              id="from-date-filter"
+              data-cy="achievementsNavigator-fromDateInput"
+              label="From Date:"
+              name="fromDayFilter"
+              input-class="w-full"
+              :max-date="toDayFilter" />
 
-          <div class="mt-4">
-            <label>Types: </label>
-            <div class="flex gap-2 mt-2" data-cy="achievementsNavigator-typeInput">
-              <span v-for="tag in achievementTypes.available" :key="tag">
-                <Checkbox v-model="achievementTypes.selected" :value="tag" :name="tag" :inputId="tag"></Checkbox>
-                <label :for="tag" class="ml-2">
-                  {{ tag }}
-                </label>
-              </span>
+            <SkillsDropDown
+                label="Minimum Level (Subject & Skill Only)"
+                name="levels-input-group"
+                id="levels-input-group"
+                data-cy="achievementsNavigator-levelsInput"
+                placeholder="Optionally select level"
+                optionLabel="text"
+                optionValue="value"
+                v-model="levels.selected"
+                :options="levels.available" />
+          </div>
+          <div class="flex flex-1 flex-column lg:gap-2 lg:pl-2">
+            <SkillsCalendarInput
+              v-model="toDayFilter"
+              id="to-date-filter"
+              data-cy="achievementsNavigator-toDateInput"
+              label="To Date:"
+              name="toDayFilter"
+              input-class="w-full"
+              :min-date="fromDayFilter" />
+
+            <div class="field">
+              <label for="name-filter">Name (Subject, Skill and Badge Only):</label>
+              <InputText class="w-full"
+                         v-model="nameFilter"
+                         id="name-filter"
+                         data-cy="achievementsNavigator-nameInput"
+                         @keydown.enter="reloadTable" />
             </div>
           </div>
         </div>
-        <div class="flex flex-1 flex-column gap-2 border-right-1 pl-2 pr-2">
-          <SkillsCalendarInput v-model="fromDayFilter" id="from-date-filter" data-cy="achievementsNavigator-fromDateInput"
-                               label="From Date:" name="fromDayFilter" input-class="w-full" :max-date="toDayFilter" />
-
-          <SkillsDropDown
-              label="Minimum Level (Subject & Skill Only)"
-              name="levels-input-group"
-              id="levels-input-group"
-              data-cy="achievementsNavigator-levelsInput"
-              placeholder="Optionally select level"
-              optionLabel="text"
-              optionValue="value"
-              v-model="levels.selected"
-              :options="levels.available" />
-        </div>
-        <div class="flex flex-1 flex-column gap-2 pl-2">
-          <SkillsCalendarInput v-model="toDayFilter" id="to-date-filter" data-cy="achievementsNavigator-toDateInput"
-                               label="To Date:" name="toDayFilter" input-class="w-full" :min-date="fromDayFilter" />
-
-          <label for="name-filter">Name (Subject, Skill and Badge Only):</label>
-          <InputText class="w-full"
-                     v-model="nameFilter"
-                     id="name-filter"
-                     data-cy="achievementsNavigator-nameInput"
-                     @keydown.enter="reloadTable" />
-        </div>
-      </div>
-      <div class="flex pl-3 mb-3 mt-3">
+        <div class="flex lg:pl-3 mb-3 lg:mt-3">
         <SkillsButton size="small" @click="reloadTable" data-cy="achievementsNavigator-filterBtn" icon="fa fa-filter" label="Filter" />
         <SkillsButton size="small" @click="reset" class="ml-1" data-cy="achievementsNavigator-resetBtn" icon="fa fa-times" label="Reset" />
       </div>
-
-      <SkillsDataTable class="mb-5"
-                       data-cy="achievementsNavigator-table"
-                       :value="items"
-                       show-gridlines
-                       striped-rows
-                       lazy
-                       :loading="loadingTable"
-                       :total-records="totalRows"
-                       :rows="pageSize"
-                       :rowsPerPageOptions="possiblePageSizes"
-                       v-model:sort-field="sortBy"
-                       v-model:sort-order="sortOrder"
-                       @page="pageChanged"
-                       @sort="sortTable"
-                       paginator
-                       tableStoredStateId="achievementsNavigator-table">
-        <Column field="userName" header="Username" sortable>
+      </div>
+      <SkillsDataTable
+        data-cy="achievementsNavigator-table"
+        :value="items"
+        show-gridlines
+        striped-rows
+        lazy
+        :loading="loadingTable"
+        :total-records="totalRows"
+        :rows="pageSize"
+        :rowsPerPageOptions="possiblePageSizes"
+        v-model:sort-field="sortBy"
+        v-model:sort-order="sortOrder"
+        @page="pageChanged"
+        @sort="sortTable"
+        paginator
+        tableStoredStateId="achievementsNavigator-table">
+        <Column field="userName" header="Username" sortable :class="{'flex': isFlex }">
           <template #body="slotProps">
             <div class="flex">
               <div class="flex flex-1">
@@ -190,12 +210,12 @@ const reloadTable = () => {
             </div>
           </template>
         </Column>
-        <Column field="type" header="Type">
+        <Column field="type" header="Type" :class="{'flex': isFlex }">
           <template #body="slotProps">
             <achievement-type :type="slotProps.data.type" />
           </template>
         </Column>
-        <Column field="name" header="Name">
+        <Column field="name" header="Name" :class="{'flex': isFlex }">
           <template #body="slotProps">
             <span v-if="slotProps.data.name === 'Overall'" class="font-light text-sm">
               N/A
@@ -205,7 +225,7 @@ const reloadTable = () => {
             </span>
           </template>
         </Column>
-        <Column field="level" header="Level">
+        <Column field="level" header="Level" :class="{'flex': isFlex }">
           <template #body="slotProps">
             <span v-if="!slotProps.data.level" class="font-light text-sm">
               N/A
@@ -215,7 +235,7 @@ const reloadTable = () => {
             </span>
           </template>
         </Column>
-        <Column field="achievedOn" header="Date" sortable>
+        <Column field="achievedOn" header="Date" sortable :class="{'flex': isFlex }">
           <template #body="slotProps">
             <date-cell :value="slotProps.data.achievedOn" />
           </template>

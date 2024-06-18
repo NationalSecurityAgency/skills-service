@@ -1,13 +1,17 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import SkillsUsageHelper from "@/components/metrics/projectSkills/SkillsUsageHelper.js";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import InputText from "primevue/inputtext";
 import NumberFormatter from '@/components/utils/NumberFormatter.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import Column from 'primevue/column'
 
 const route = useRoute();
+const responsive = useResponsiveBreakpoints()
+const isFlex = computed(() => responsive.lg.value)
 
 onMounted(() => {
   loadData();
@@ -65,49 +69,57 @@ const loadData = () => {
 </script>
 
 <template>
-  <Card data-cy="skillsNavigator">
+  <Card data-cy="skillsNavigator"  :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #header>
       <SkillsCardHeader title="Skills"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex gap-3">
-        <div class="flex flex-1 flex-column border-right-1 px-3 pt-3 gap-2">
-          <label for="skillFilter">Skill Name Filter</label>
-          <InputText class="w-full"
-                     v-model="filters.name"
-                     id="skillFilter"
-                     data-cy="skillsNavigator-skillNameFilter"
-                     @keydown.enter="applyFilters"
-                     aria-label="Skill name filter" />
-        </div>
-        <div class="flex flex-1 flex-column gap-2" data-cy="skillsNavigator-filters">
-          <label>Skill Usage Filters</label>
-          <div class="flex gap-2">
-            <ToggleButton onLabel="Overlooked Skill" offLabel="Overlooked Skill" v-model="filters.overlookedTag" data-cy="overlookedFilterButton" />
-            <ToggleButton onLabel="Top Skill" offLabel="Top Skill" v-model="filters.topSkillTag" data-cy="topSkillFilterButton" />
-            <ToggleButton onLabel="High Activity" offLabel="High Activity" v-model="filters.highActivityTag" data-cy="highActivityFilterButton" />
-            <ToggleButton onLabel="Never Achieved" offLabel="Never Achieved" v-model="filters.neverAchieved" data-cy="neverAchievedFilterButton" />
-            <ToggleButton onLabel="Never Reported" offLabel="Never Reported" v-model="filters.neverReported" data-cy="neverReportedFilterButton" />
+      <div class="p-3">
+        <div class="flex gap-3 flex-column xl:flex-row">
+          <div class="field flex-1 xl:border-right-1 xl:px-3 xl:pt-3 gap-2">
+            <label for="skillFilter">Skill Name Filter</label>
+            <InputText class="w-full"
+                       v-model="filters.name"
+                       id="skillFilter"
+                       data-cy="skillsNavigator-skillNameFilter"
+                       @keydown.enter="applyFilters"
+                       aria-label="Skill name filter" />
           </div>
-            <div class="font-light text-sm">Please Note: These filters become more meaningful with extensive usage</div>
-        </div>
-      </div>
-      <div class="flex flex-1 flex-column gap-2 px-3" v-if="tags.length > 0">
-        <label>Skill Tags</label>
-        <div class="flex gap-2" data-cy="skillTag-filters">
-          <div v-for="tag in tags" :key="tag.tagId">
-            <Checkbox v-model="filters.skillTags" :value="tag.tagId" :name="tag.tagId" :inputId="tag.tagId"></Checkbox>
-            <label :for="tag.tagId">
-              <Badge severity="info" class="ml-2">
-                <i :class="'fas fa-tag'" class="ml-1" style="margin-left: 0 !important;" aria-hidden="true"></i> {{tag.tagValue}}
-              </Badge>
-            </label>
+          <div class="field flex-1 " data-cy="skillsNavigator-filters">
+            <label>Skill Usage Filters</label>
+            <div class="flex gap-2">
+              <ToggleButton onLabel="Overlooked Skill" offLabel="Overlooked Skill" v-model="filters.overlookedTag"
+                            data-cy="overlookedFilterButton" />
+              <ToggleButton onLabel="Top Skill" offLabel="Top Skill" v-model="filters.topSkillTag"
+                            data-cy="topSkillFilterButton" />
+              <ToggleButton onLabel="High Activity" offLabel="High Activity" v-model="filters.highActivityTag"
+                            data-cy="highActivityFilterButton" />
+              <ToggleButton onLabel="Never Achieved" offLabel="Never Achieved" v-model="filters.neverAchieved"
+                            data-cy="neverAchievedFilterButton" />
+              <ToggleButton onLabel="Never Reported" offLabel="Never Reported" v-model="filters.neverReported"
+                            data-cy="neverReportedFilterButton" />
+            </div>
+            <div class="font-light text-sm mt-1">Please Note: These filters become more meaningful with extensive usage
+            </div>
           </div>
         </div>
-      </div>
-      <div class="flex pl-3 mb-3 mt-3">
+        <div class="flex flex-1 flex-column gap-2 px-3" v-if="tags.length > 0">
+          <label>Skill Tags</label>
+          <div class="flex gap-2" data-cy="skillTag-filters">
+            <div v-for="tag in tags" :key="tag.tagId">
+              <Checkbox v-model="filters.skillTags" :value="tag.tagId" :name="tag.tagId" :inputId="tag.tagId"></Checkbox>
+              <label :for="tag.tagId">
+                <Badge severity="info" class="ml-2">
+                  <i :class="'fas fa-tag'" class="ml-1" style="margin-left: 0 !important;" aria-hidden="true"></i> {{tag.tagValue}}
+                </Badge>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="flex xl:pl-3 mb-3 xl:mt-3">
         <SkillsButton variant="outline-info" @click="applyFilters" data-cy="skillsNavigator-filterBtn" icon="fa fa-filter" label="Filter" />
         <SkillsButton variant="outline-info" @click="reset" class="ml-1" data-cy="skillsNavigator-resetBtn" icon="fa fa-times" label="Reset" />
+      </div>
       </div>
 
       <SkillsDataTable :value="items"
@@ -118,11 +130,12 @@ const loadData = () => {
                        striped-rows
                        :rows="pageSize"
                        :rowsPerPageOptions="possiblePageSizes">
-        <Column field="skillName" header="Skill" sortable>
+        <Column field="skillName" header="Skill" sortable :class="{'flex': isFlex }">
           <template #body="slotProps">
-            <div class="flex">
+            <div class="flex gap-2 flex-wrap">
               <div class="flex flex-1 flex-column">
-                {{ slotProps.data.skillName }} <Badge v-if="slotProps.data.isReusedSkill" variant="success" class="text-uppercase"><i class="fas fa-recycle"></i> Reused</Badge>
+                {{ slotProps.data.skillName }}
+                <Badge v-if="slotProps.data.isReusedSkill" variant="success" class="text-uppercase"><i class="fas fa-recycle"></i> Reused</Badge>
                 <div v-if="slotProps.data.skillTags && slotProps.data.skillTags.length > 0">
                   <Badge v-for="tag in slotProps.data.skillTags" :key="tag.tagId" variant="info" class="mr-2 mt-1">
                     <i :class="'fas fa-tag'" class="ml-1" style="margin-left: 0 !important;" aria-hidden="true"></i> {{ tag.tagValue }}
@@ -140,20 +153,20 @@ const loadData = () => {
             </div>
           </template>
         </Column>
-        <Column field="numUserAchieved" header="# Users Achieved" sortable>
+        <Column field="numUserAchieved" header="# Users Achieved" sortable :class="{'flex': isFlex }">
           <template #body="slotProps">
             <span class="ml-2">{{ NumberFormatter.format(slotProps.data.numUserAchieved) }}</span>
             <Badge v-if="slotProps.data.isOverlookedTag" variant="danger" class="ml-2">Overlooked Skill</Badge>
             <Badge v-if="slotProps.data.isTopSkillTag" variant="info" class="ml-2">Top Skill</Badge>
           </template>
         </Column>
-        <Column field="numUsersInProgress" header="# Users In Progress" sortable>
+        <Column field="numUsersInProgress" header="# Users In Progress" sortable :class="{'flex': isFlex }">
           <template #body="slotProps">
             <span class="ml-2">{{ NumberFormatter.format(slotProps.data.numUsersInProgress) }}</span>
             <Badge v-if="slotProps.data.isHighActivityTag" variant="success" class="ml-2">High Activity</Badge>
           </template>
         </Column>
-        <Column field="lastReportedTimestamp" header="Last Reported" sortable>
+        <Column field="lastReportedTimestamp" header="Last Reported" sortable :class="{'flex': isFlex }">
           <template #body="slotProps">
             <Badge v-if="slotProps.data.isNeverReportedTag" variant="warning" class="ml-2">Never</Badge>
             <div v-else>
@@ -161,7 +174,7 @@ const loadData = () => {
             </div>
           </template>
         </Column>
-        <Column field="lastAchievedTimestamp" header="Last Achieved" sortable>
+        <Column field="lastAchievedTimestamp" header="Last Achieved" sortable :class="{'flex': isFlex }">
           <template #body="slotProps">
             <Badge v-if="slotProps.data.isNeverAchievedTag" variant="warning" class="ml-2">Never</Badge>
             <div v-else>
