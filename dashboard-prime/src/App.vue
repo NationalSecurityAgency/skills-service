@@ -105,11 +105,8 @@ const showHeader = computed(() => {
 const isPkiAndNeedsToBootstrap = computed(() => {
   return appConfig.isPkiAuthenticated && appConfig.needToBootstrap;
 })
-const isOAuthOnlyAndNeedsToBootstrap = computed(() => {
-  return appConfig.oAuthOnly && appConfig.needToBootstrap;
-})
 const inBootstrapMode = computed(() => {
-  return isPkiAndNeedsToBootstrap.value || isOAuthOnlyAndNeedsToBootstrap.value
+  return isPkiAndNeedsToBootstrap.value
 })
 </script>
 
