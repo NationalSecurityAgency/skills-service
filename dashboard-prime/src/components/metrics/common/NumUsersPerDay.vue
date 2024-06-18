@@ -139,7 +139,7 @@ const loadData = () => {
 </script>
 
 <template>
-  <Card data-cy="distinctNumUsersOverTime">
+  <Card data-cy="distinctNumUsersOverTime" class="w-full">
     <template #header>
       <SkillsCardHeader :title="mutableTitle">
         <template #headerContent>

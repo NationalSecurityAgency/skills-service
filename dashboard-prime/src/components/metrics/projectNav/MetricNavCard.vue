@@ -3,7 +3,7 @@ defineProps(['title', 'subtitle', 'description', 'icon', 'pathName']);
 </script>
 
 <template>
-  <Card class="mt-4">
+  <Card>
     <template #content>
       <div>
         <div class="flex">
@@ -28,7 +28,7 @@ defineProps(['title', 'subtitle', 'description', 'icon', 'pathName']);
     <template #footer>
       <div class="text-center">
         <router-link :to="{ name: pathName }" :data-cy="`metricsNav-${title}`">
-          <SkillsButton size="small" :label="`Explore ${title}`" icon="fas fa-arrow-right" />
+          <SkillsButton size="small" :label="`${title}`" icon="fas fa-arrow-right" />
         </router-link>
       </div>
     </template>
