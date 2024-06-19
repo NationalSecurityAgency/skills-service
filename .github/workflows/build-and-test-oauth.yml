@@ -141,7 +141,7 @@ jobs:
     - name: Check running containers
       run: docker ps -a
 
-    - name: Caputre Hydra Oauth Service logs
+    - name: Capture Hydra Oauth Service logs
       run: |
         mkdir -p ./e2e-tests/logs
         docker logs hydra > ./e2e-tests/logs/hydra.out &
@@ -166,7 +166,6 @@ jobs:
         npm install
         npm run backend:dropAllDBTables
         npm run cyServices:start:skills-service:oauth
-        npm run cyServices:start:client-display:oauth
         cd ..
 
     - name: Run Cypress tests

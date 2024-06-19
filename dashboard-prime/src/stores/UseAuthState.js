@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { SkillsConfiguration } from '@skilltree/skills-client-js'
@@ -17,6 +17,7 @@ export const useAuthState = defineStore('authState', () => {
     const oAuthAuth = ref(false)
 
     const router = useRouter()
+    const route = useRoute()
     const appConfig = useAppConfig()
     const appInfoState = useAppInfoState()
 
@@ -95,8 +96,9 @@ export const useAuthState = defineStore('authState', () => {
     }
     const oAuth2Login = (oAuthId) => {
         setOauth2AuthUser()
-        const { redirect } = router.currentRoute.query
-        window.location = `/oauth2/authorization/${encodeURIComponent(oAuthId)}${redirect ? `?skillsRedirectUri=${redirect}` : ''}`
+        const redirect = route.query.redirect
+        const newLocation = `/oauth2/authorization/${encodeURIComponent(oAuthId)}${redirect ? `?skillsRedirectUri=${redirect}` : ''}`
+        window.location = newLocation
     }
     const restoreSessionIfAvailable = () => {
         setRestoringSession(true)

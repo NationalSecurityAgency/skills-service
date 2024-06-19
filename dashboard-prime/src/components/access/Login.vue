@@ -81,7 +81,7 @@ onBeforeMount(() => {
   }
 })
 const oAuth2Login = (registrationId) => {
-  // this.$store.dispatch('oAuth2Login', registrationId);
+  authState.oAuth2Login(registrationId)
 }
 </script>
 
