@@ -604,8 +604,10 @@
                 <configuration>
                     <header>${basedir}/../license-add/LICENSE-HEADER.txt</header>
                     <validHeaders>
+                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2020.txt</validHeader>
                         <validHeader>${basedir}/../license-add/LICENSE-HEADER_2021.txt</validHeader>
                         <validHeader>${basedir}/../license-add/LICENSE-HEADER_2022.txt</validHeader>
+                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2023.txt</validHeader>
                     </validHeaders>
                     <excludes>
                         <exclude>**/*.xml</exclude>
