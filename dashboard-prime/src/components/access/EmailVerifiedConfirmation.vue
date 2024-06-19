@@ -62,7 +62,7 @@ watch(() => timer.value, (newValue) => {
 </script>
 
 <template>
-  <loading-container :is-loading="loading" class="container-fluid">
+  <loading-container :is-loading="loading">
     <div class="flex justify-content-center text-center" data-cy="emailConfirmation">
       <div class="" style="min-width: 20rem;">
         <div class="mt-5">

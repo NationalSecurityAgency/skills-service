@@ -7,7 +7,7 @@ const emailVerificationInfo = useEmailVerificationInfo()
 </script>
 
 <template>
-  <div class="container-fluid">
+  <div>
     <div class="flex justify-content-center text-center" data-cy="emailVerificationSentConfirmation">
       <div class="" style="min-width: 20rem;">
         <div class="mt-5">
