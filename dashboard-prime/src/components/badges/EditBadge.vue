@@ -104,8 +104,8 @@ const schema = object({
         otherwise: (sch) => sch.max(maximumDays.value)
       }),
   'gemDates': tuple([
-      date().label('Start date'),
-      date().label('End date')
+      date().label('Start date').required('You must select a start date'),
+      date().label('End date').required('You must select an end date')
   ]).label('Gem Date').test('notInPast', 'End date can not be in the past', (value) => {
     let valid = true;
     // only trigger this validation on new badge entry, not edits
