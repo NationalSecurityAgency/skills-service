@@ -62,6 +62,9 @@ class PortalWebSecurityHelper {
     @Value('#{"${management.endpoints.web.path-mapping.prometheus:prometheus}"}')
     String prometheusPath
 
+    @Value('#{"${skills.config.disableCsrfProtection:false}"}')
+    Boolean disableCsrfProtection
+
     @Autowired
     InviteOnlyProjectAuthorizationManager inviteOnlyProjectAuthorizationManager
 
@@ -69,12 +72,15 @@ class PortalWebSecurityHelper {
     UserCommunityAuthorizationManager userCommunityAuthorizationManager
 
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
-
-        http.csrf((csrf) -> csrf
-                .requireCsrfProtectionMatcher(new MultipartRequestMatcher())
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
-                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+        if (disableCsrfProtection) {
+            http.csrf().disable()
+        } else {
+            http.csrf((csrf) -> csrf
+                    .requireCsrfProtectionMatcher(new MultipartRequestMatcher())
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
+                    .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+        }
 
         if (publiclyExposePrometheusMetrics) {
             http.authorizeHttpRequests().requestMatchers(HttpMethod.GET, "${managementPath}/${prometheusPath}").permitAll()
