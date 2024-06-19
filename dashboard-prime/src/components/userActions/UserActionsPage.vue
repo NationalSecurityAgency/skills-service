@@ -1,22 +1,22 @@
 <script setup>
 
-import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useUserInfo } from '@/components/utils/UseUserInfo.js'
-import { FilterMatchMode } from 'primevue/api';
-import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
-import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
-import UserActionsService from '@/components/userActions/UserActionsService.js';
-import InputText from 'primevue/inputtext';
-import DateCell from '@/components/utils/table/DateCell.vue';
-import Column from 'primevue/column';
-import SingleUserAction from "@/components/userActions/SingleUserAction.vue";
-import StartRecordingUserActionsDateWarning from "@/components/userActions/StartRecordingUserActionsDateWarning.vue";
-import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
+import { FilterMatchMode } from 'primevue/api'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import UserActionsService from '@/components/userActions/UserActionsService.js'
+import InputText from 'primevue/inputtext'
+import DateCell from '@/components/utils/table/DateCell.vue'
+import Column from 'primevue/column'
+import SingleUserAction from '@/components/userActions/SingleUserAction.vue'
+import StartRecordingUserActionsDateWarning from '@/components/userActions/StartRecordingUserActionsDateWarning.vue'
+import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
+import { useContentMaxWidthState } from '@/stores/UseContentMaxWidthState.js'
 
 const route = useRoute()
 const userInfo = useUserInfo()
-const responsive = useResponsiveBreakpoints()
+const contentMaxWidthState = useContentMaxWidthState()
 
 const filters = ref({
   user: '',
@@ -190,7 +190,8 @@ const tableFilters = ref({
 
     <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
-        <SkillsDataTable
+        <div :style="contentMaxWidthState.main2ContentMaxWidthStyleObj">
+            <SkillsDataTable
             :tableStoredStateId="`${route.name}-eventsTable`"
             :value="items" tableStyle="min-width: 50rem"
             :loading="tableOptions.busy"
@@ -370,6 +371,7 @@ const tableFilters = ref({
                               :action-id="slotProps.data.id" :item="slotProps.data.item" :action="slotProps.data.action" />
           </template>
         </SkillsDataTable>
+        </div>
       </template>
     </Card>
   </div>
