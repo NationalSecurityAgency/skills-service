@@ -62,7 +62,7 @@
     "client-display:waitToStart": "npx wait-on -t 160000 http://localhost:8083",
     "cyServices:start:skills-service": "npm run backend:start:ci && npm run backend:waitToStart",
     "cyServices:start:skills-service:verifyEmail": "npm run fake-smtp:start:ci &&  npm run backend:start:verifyEmail:ci && npm run backend:waitToStart",
-    "cyServices:start:skills-service:oauth": "npm run fake-smtp:start:ci &&  npm run backend:start:oauth && npm run backend:waitToStart",
+    "cyServices:start:skills-service:oauth": "npm run fake-smtp:start:ci &&  npm run backend:start:oauth:ci && npm run backend:waitToStart",
     "cyServices:start:skills-service:rabbitmq": "npm run fake-smtp:start:ci &&  npm run backend:start:rabbitmq:ci && npm run backend:waitToStart",
     "cyServices:start:client-display": "npm run client-display:serve:ci && npm run client-display:waitToStart",
     "cyServices:start:client-display:oauth": "npm run client-display:serve:ci:oauth && npm run client-display:waitToStart",
