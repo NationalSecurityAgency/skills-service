@@ -66,6 +66,9 @@ import ResetConfirmation from '@/components/access/ResetConfirmation.vue';
 import ResetNotSupportedPage from '@/components/access/ResetNotSupportedPage.vue';
 import RequestAccount from '@/components/access/RequestAccount.vue';
 import UserAgreement from '@/components/access/UserAgreement.vue'
+import EmailVerificationSent from "@/components/access/EmailVerificationSent.vue";
+import EmailVerifiedConfirmation from "@/components/access/EmailVerifiedConfirmation.vue";
+import RequestEmailVerification from "@/components/access/RequestEmailVerification.vue";
 
 const routes = [
   {
@@ -168,6 +171,42 @@ const routes = [
       requiresAuth: false,
       announcer: {
         message: 'Reset Not Supported',
+      },
+    },
+  },
+  {
+    path: '/email-verification-sent',
+    name: 'EmailVerificationSent',
+    component: EmailVerificationSent,
+    props: true,
+    meta: {
+      requiresAuth: false,
+      announcer: {
+        message: 'Email Verification Sent',
+      },
+    },
+  },
+  {
+    path: '/verify-email/:token/:email',
+    name: 'EmailVerifiedConfirmation',
+    component: EmailVerifiedConfirmation,
+    props: true,
+    meta: {
+      requiresAuth: false,
+      announcer: {
+        message: 'Email Verification Confirmation',
+      },
+    },
+  },
+  {
+    path: '/request-email-verification',
+    name: 'RequestEmailVerification',
+    component: RequestEmailVerification,
+    props: true,
+    meta: {
+      requiresAuth: false,
+      announcer: {
+        message: 'Request Email Verification',
       },
     },
   },
