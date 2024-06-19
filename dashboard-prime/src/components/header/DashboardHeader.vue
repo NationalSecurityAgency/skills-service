@@ -25,12 +25,12 @@ const appInfoState = useAppInfoState()
     <!--      Any reported skills will be queued for application once the upgrade has completed.</span>-->
     <!--    </div>-->
     <div class="bg-primary-reverse">
-      <div class="flex flex-wrap pt-3 px-3 justify-content-center mb-3 border-bottom-1 border-200">
+      <div class="flex flex-wrap pt-3 px-3 pb-2 justify-content-center mb-3 border-bottom-1 border-200">
         <div class="flex-1 justify-content-center">
           <div class="flex">
             <router-link data-cy="skillTreeLogo" class="" to="/">
               <img
-                class="mb-5"
+                class="mb-3"
                 ref="skillTreeLogo"
                 src="@/assets/img/skilltree_logo_v1.png"
                 alt="skilltree logo" />

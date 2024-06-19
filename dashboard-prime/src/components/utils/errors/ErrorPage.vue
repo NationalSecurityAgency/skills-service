@@ -1,7 +1,15 @@
 <script setup>
 import { userErrorState } from '@/stores/UserErrorState.js'
+import { useRouter } from 'vue-router'
 
 const errorState = userErrorState()
+const router = useRouter()
+
+const goHomeAndRefresh = () => {
+  router.replace({ path: '/'}).then(() => {
+    window.location.reload();
+  })
+}
 </script>
 
 <template>
@@ -20,16 +28,15 @@ const errorState = userErrorState()
           {{ errorState.explanation }}
         </p>
 
-        <router-link to="/">
-          <SkillsButton
-            label="Take Me Home"
-            icon="fas fa-home"
-            outlined
-            size="medium"
-            severity="info"
-            data-cy=takeMeHome
-            class="mt-5" />
-        </router-link>
+        <SkillsButton
+          label="Take Me Home"
+          icon="fas fa-home"
+          outlined
+          size="medium"
+          severity="info"
+          data-cy=takeMeHome
+          @click="goHomeAndRefresh"
+          class="mt-5" />
       </div>
     </template>
   </Card>

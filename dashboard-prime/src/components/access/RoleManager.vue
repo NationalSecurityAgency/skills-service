@@ -172,7 +172,7 @@ function addUserRole() {
 function doAddUserRole() {
   isSaving.value = true;
   table.value.options.busy = true;
-  const pkiAuthenticated = appConfig.isPkiAuthenticated.value;
+  const pkiAuthenticated = appConfig.isPkiAuthenticated;
 
   const role = isOnlyOneRole.value ? props.roles[0] : userRole.value.selected;
   AccessService.saveUserRole(props.projectId, selectedUser.value, role, pkiAuthenticated).then(() => {
@@ -258,7 +258,7 @@ function updateUserRole(selectedRole) {
       return user;
     });
 
-    const pkiAuthenticated = appConfig.isPkiAuthenticated.value;
+    const pkiAuthenticated = appConfig.isPkiAuthenticated;
     AccessService.saveUserRole(props.projectId, userRoleToUpdate, newRole, pkiAuthenticated)
         .then(() => {
           data.value = data.value.map((user) => {

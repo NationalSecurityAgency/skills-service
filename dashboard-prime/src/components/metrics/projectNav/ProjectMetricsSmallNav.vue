@@ -7,23 +7,19 @@ const route = useRoute();
 </script>
 
 <template>
-  <ButtonGroup>
+  <div class="flex gap-1">
     <router-link :to="{ name: navItem.pathName }" v-for="navItem in navCards" :key="navItem.title">
-      <SkillsButton class="skill-nav-button"
+      <SkillsButton class=""
                     :aria-label="`${navItem.title} metrics`"
                     :data-cy="`${navItem.title}-metrics-link`"
-                    :class="{'bg-primary' : route.name === navItem.pathName, 'skills-white-text' : route.name === navItem.pathName}"
-                    variant="outline-info"> <i :class="navItem.icon"/><span class="sr-only">{{navItem.title}}</span></SkillsButton>
+                    :class="{
+                      'bg-primary' : route.name === navItem.pathName,
+                      'text-white' : route.name === navItem.pathName
+                    }"> <i :class="navItem.icon"/><span class="sr-only">{{navItem.title}}</span></SkillsButton>
     </router-link>
-  </ButtonGroup>
+  </div>
 </template>
 
 <style scoped>
-.skills-white-text i {
-  color: white !important;
-}
 
-.skill-nav-button:hover i {
-  color: white !important;
-}
 </style>

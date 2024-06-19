@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import InputText from 'primevue/inputtext'
 import Slider from 'primevue/slider'
@@ -13,11 +13,13 @@ import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillsDisplayPathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
 const responsive = useResponsiveBreakpoints()
 const colors = useColors()
+const appConfig = useAppConfig()
 
 let filters = ref({
   user: '',
@@ -34,7 +36,9 @@ const pageSize = ref(5)
 const possiblePageSizes = [5, 10, 15, 20]
 const sortInfo = ref({ sortOrder: -1, sortBy: 'lastUpdated' })
 
-const showUserTagColumn = ref(true)
+const showUserTagColumn = computed(() => {
+ return !!(appConfig.usersTableAdditionalUserTagKey && appConfig.usersTableAdditionalUserTagLabel);
+})
 
 onMounted(() => {
   loadData()
@@ -195,11 +199,14 @@ const sortField = () => {
               aria-label="View user details"
               data-cy="usersTable_viewDetailsLink"
             >
-              {{ slotProps.data.userId }}
+              {{ slotProps.data.userIdForDisplay || slotProps.data.userId }}
             </router-link>
           </template>
         </Column>
-        <Column v-if="showUserTagColumn" field="userTag" header="User Tag" :class="{'flex': responsive.md.value }">
+        <Column v-if="showUserTagColumn"
+                :field="appConfig.usersTableAdditionalUserTagKey"
+                :header="appConfig.usersTableAdditionalUserTagLabel"
+                :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="fas fa-tag mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
           </template>

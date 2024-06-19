@@ -1,13 +1,15 @@
 <script setup>
-import {computed, nextTick, onMounted, ref} from 'vue';
-import {useRoute} from 'vue-router';
-import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
-import {useSkillsAnnouncer} from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SettingService from '@/components/settings/SettingsService.js'
-import LevelService from './LevelService.js';
-import Column from "primevue/column";
-import {useConfirm} from "primevue/useconfirm";
-import NewLevel from './NewLevel.vue';
+import LevelService from './LevelService.js'
+import Column from 'primevue/column'
+import { useConfirm } from 'primevue/useconfirm'
+import NewLevel from './NewLevel.vue'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import { useFocusState } from '@/stores/UseFocusState.js'
 
 const confirm = useConfirm();
 const announcer = useSkillsAnnouncer();
@@ -18,6 +20,7 @@ const props = defineProps({
     default: 25,
   },
 });
+const focusState = useFocusState()
 
 onMounted(() => {
   SettingService.getSetting(route.params.projectId, 'level.points.enabled')
@@ -146,14 +149,12 @@ const loadLevels = () => {
         .then((response) => {
           levels.value = response;
           table.value.options.busy = false;
-          handleFocusOnNextTick();
         });
   }
   return LevelService.getLevelsForProject(route.params.projectId)
       .then((response) => {
         levels.value = response;
         table.value.options.busy = false;
-        handleFocusOnNextTick();
       });
 };
 
@@ -168,7 +169,6 @@ const removeLastItem = () => {
                 msg: `Cannot remove level: [${lastLevel}].  This project level belongs to one or more global badges. Please contact a Supervisor to remove this dependency.`,
                 header: 'Unable to Delete'
               });
-              // msgOk(`Cannot remove level: [${lastLevel}].  This project level belongs to one or more global badges. Please contact a Supervisor to remove this dependency.`, 'Unable to delete');
             } else {
               confirmAndRemoveLastItem();
             }
@@ -190,6 +190,7 @@ const confirmAndRemoveLastItem = () => {
           table.value.options.busy = true;
           doRemoveLastItem().then(() => {
             loadLevels().then(() => {
+              focusState.focusOnLastElement()
               announcer.polite('Level has been removed');
             });
           }).catch((error) => {
@@ -246,31 +247,8 @@ const editLevel = (existingLevel) => {
   displayLevelModal.value = true;
 };
 
-const handleHidden = (e) => {
-  if (!e || !e.saved) {
-    handleFocus(e);
-  }
-};
-
-const handleFocusOnNextTick = () => {
-  if (currentlyFocusedLevelId.value) {
-    nextTick(() => handleFocus({ edit: true }));
-  }
-};
-
-const handleFocus = (e) => {
-  let ref = $refs.addLevel;
-  if (e && e.edit) {
-    const refName = `edit_${currentlyFocusedLevelId.value}`;
-    ref = $refs[refName];
-  }
-  currentlyFocusedLevelId.value = '';
-  nextTick(() => {
-    if (ref) {
-      ref.focus();
-    }
-  });
-};
+const responsive = useResponsiveBreakpoints()
+const isFlex = computed(() => responsive.sm.value)
 </script>
 
 <template>
@@ -278,11 +256,16 @@ const handleFocus = (e) => {
     <sub-page-header title="Levels">
       <div class="row">
         <div class="col">
-<!--          <b-tooltip target="remove-button" title="You must retain at least one level." :disabled="!onlyOneLevelLeft"></b-tooltip>-->
           <span id="remove-button" class="mr-2">
-            <SkillsButton ref="removeNextLevel" @click="removeLastItem" :disabled="onlyOneLevelLeft" size="small"
-                      data-cy="removeLevel" icon="fas fa-trash-alt" label="Remove Highest">
-<!--              <span class="d-none d-sm-inline">Remove</span> Highest <i class="text-warning fas fa-trash-alt" aria-hidden="true"/>-->
+            <SkillsButton
+              id="removeHighestBtn"
+              ref="removeNextLevel"
+              @click="removeLastItem"
+              :disabled="onlyOneLevelLeft"
+              size="small"
+              :track-for-focus="true"
+              data-cy="removeLevel"
+              icon="fas fa-trash-alt" label="Remove Highest">
             </SkillsButton>
           </span>
 <!--          <b-tooltip target="add-button" title="Reached maximum limit of levels." :disabled="!reachedMaxLevels"></b-tooltip>-->
@@ -296,11 +279,11 @@ const handleFocus = (e) => {
       </div>
     </sub-page-header>
 
-    <Card>
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
         <SkillsDataTable tableStoredStateId="levels" v-if="!loading" :options="table.options" :loading="loading" :value="levels"
-                   data-cy="levelsTable" size="small" stripedRows>
-          <Column field="level" header="Level">
+                   data-cy="levelsTable" striped-rows>
+          <Column field="level" header="Level" :class="{'flex': isFlex }">
             <template #body="slotProps">
               {{ slotProps.data.level }}
               <span v-if="slotProps.data.achievable === false" class="icon-warning text-sm">
@@ -310,10 +293,10 @@ const handleFocus = (e) => {
               </span>
             </template>
           </Column>
-          <Column field="percent" header="Percent">
+          <Column field="percent" header="Percent" :class="{'flex': isFlex }">
             {{ slotProps.data.percent }}
           </Column>
-          <Column field="points" header="Points">
+          <Column field="points" header="Points" :class="{'flex': isFlex }">
             <template #body="slotProps">
                 <span v-if="slotProps.data.pointsFrom !== null && slotProps.data.pointsFrom !== undefined">
                   {{ slotProps.data.pointsFrom }} to
@@ -325,7 +308,7 @@ const handleFocus = (e) => {
                 </span>
             </template>
           </Column>
-          <Column field="edit" header="Edit">
+          <Column field="edit" header="Edit" :class="{'flex': isFlex }">
             <template #body="slotProps">
               <SkillsButton :ref="`edit_${ slotProps.data.level}`" @click="editLevel(slotProps.data)" size="small" data-cy="editLevelButton" icon="fas fa-edit" label="Edit" :track-for-focus="true" :id="`editLevelButton_${slotProps.data.level}`" />
             </template>
@@ -340,8 +323,7 @@ const handleFocus = (e) => {
                :level="levelToEdit"
                :level-as-points="levelsAsPoints"
                :is-edit="isEdit"
-               :all-levels="levels"
-               @hidden="handleHidden"></new-level>
+               :all-levels="levels"></new-level>
   </div>
 </template>
 

@@ -135,7 +135,7 @@ describe('Quiz-skills in-project reuse Tests', () => {
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should('have.text', '150 Total')
     });
 
-    it('client display - reused survey-based skills - take survey through subject-rused skill', function () {
+    it('client display - reused survey-based skills - take survey through subject-reused skill', function () {
         cy.createSurveyDef(1);
         cy.createSurveyMultipleChoiceQuestionDef(1, 1);
 

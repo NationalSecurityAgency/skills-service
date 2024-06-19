@@ -49,7 +49,7 @@ onMounted(() => {
 const loadUserInfo = () => {
   userTitle.value = route.params.userId;
   userIdForDisplay.value =route.params.userId;
-  let userTags;
+  let userTags = Promise.resolve();
 
   if (appConfig.userPageTagsToDisplay) {
     userTags = UsersService.getUserTags(route.params.userId).then((response) => {
@@ -57,14 +57,13 @@ const loadUserInfo = () => {
     });
   }
 
-  const userDetails = () => {
-    return UsersService.getUserInfo(route.params.projectId, route.params.userId)
-      .then((result) => {
-        userIdForDisplay.value = result.userIdForDisplay;
-        userTitle.value = result.first && result.last ? `${result.first} ${result.last}` : result.userIdForDisplay;
-        return projectUserState.loadUserDetailsState(route.params.projectId, route.params.userId)
-      });
-  }
+  const userDetails = UsersService.getUserInfo(route.params.projectId, route.params.userId)
+    .then((result) => {
+      userIdForDisplay.value = result.userIdForDisplay
+      userTitle.value = result.first && result.last ? `${result.first} ${result.last}` : result.userIdForDisplay
+      return projectUserState.loadUserDetailsState(route.params.projectId, route.params.userId)
+    })
+
 
   Promise.all([userTags, userDetails]).finally(() => {
     isLoading.value = false;

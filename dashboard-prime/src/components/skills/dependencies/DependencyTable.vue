@@ -6,6 +6,7 @@ import SkillsService from '@/components/skills/SkillsService'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import Column from 'primevue/column'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 
 const projConfig = useProjConfig();
 const props = defineProps(['isLoading', 'data'])
@@ -73,10 +74,13 @@ const sortTable = (criteria) => {
   sortField.value = criteria.sortField
   sortOrder.value = criteria.sortOrder
 }
+
+const responsive = useResponsiveBreakpoints()
+const isFlex = computed(() => responsive.sm.value)
 </script>
 
 <template>
-  <Card style="margin-bottom:10px;">
+  <Card class="mb-3" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #header>
       <SkillsCardHeader title="Learning Path Routes"></SkillsCardHeader>
     </template>
@@ -93,17 +97,17 @@ const sortTable = (criteria) => {
           :sortOrder="sortOrder"
           @sort="sortTable"
           striped-rows>
-          <Column field="fromItem" header="From" sortable>
+          <Column field="fromItem" header="From" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
               <a :href="getUrl(slotProps.data.fromNode)">{{ slotProps.data.fromItem }}</a>
             </template>
           </Column>
-          <Column field="toItem" header="To" sortable>
+          <Column field="toItem" header="To" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
               <a :href="getUrl(slotProps.data.toNode)">{{ slotProps.data.toItem }}</a>
             </template>
           </Column>
-          <Column field="edit" header="Edit" v-if="!isReadOnlyProj">
+          <Column field="edit" header="Edit" v-if="!isReadOnlyProj" :class="{'flex': isFlex }">
             <template #body="slotProps">
               <Button @click="removeLearningPath(slotProps.data)"
                       variant="outline-info" size="small" class="text-info"

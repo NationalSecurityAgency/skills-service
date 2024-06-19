@@ -162,15 +162,15 @@ const onShareWithAllProjects = (checked) => {
     <template #content>
       <!--      <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills || loading.projInfo">-->
       <no-content2 v-if="restrictedUserCommunity" title="Cannot Be Added" icon="fas fa-shield-alt"
-                   class="my-5" data-cy="restrictedUserCommunityWarning">
+                   class="my-5 mx-4" data-cy="restrictedUserCommunityWarning">
         This project's access is
         restricted to <b class="text-primary">{{ appConfig.userCommunityRestrictedDescriptor }}</b> users
         only and its skills <b class="text-primary">cannot</b> be added as dependencies in other Projects.
       </no-content2>
       <div v-if="!restrictedUserCommunity">
         <div class="p-3">
-          <div class="flex gap-4">
-            <div class="flex flex-1">
+          <div class="flex gap-4 flex-wrap flex-column lg:flex-row">
+            <div class="flex flex-1 ">
               <skills-selector :options="allSkills"
                                v-on:removed="onDeselectedSkill"
                                v-on:added="onSelectedSkill"
@@ -216,7 +216,7 @@ const onShareWithAllProjects = (checked) => {
                                v-on:skill-removed="deleteSharedSkill"></shared-skills-table>
         </div>
         <div v-else>
-          <no-content2 title="Not Selected Yet..." icon="fas fa-share-alt" class="my-5"
+          <no-content2 title="Not Selected Yet..." icon="fas fa-share-alt" class="p-5"
                        message="To make your project's skills eligible please select a skill and then the project that you want to share this skill with." />
         </div>
         <!--          </loading-container>-->

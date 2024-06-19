@@ -1,20 +1,26 @@
 import axios from 'axios'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useRoute } from 'vue-router'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 export const useSkillsDisplayService = () => {
   const servicePath = '/api/projects'
   const attributes = useSkillsDisplayAttributesState()
   const route = useRoute()
+  const appConfig = useAppConfig()
 
   const getUserIdAndVersionParams = () => {
     // const params = this.getUserIdParams();
     // params.version = this.version;
     //
+    let config = {}
     if (attributes.userId) {
-      return { userId: attributes.userId }
+      config.userId = attributes.userId
     }
-    return {}
+    if (appConfig.isPkiAuthenticated) {
+      config.idType = 'ID'
+    }
+    return config
   }
 
   const loadUserProjectSummary = () => {

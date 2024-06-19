@@ -81,8 +81,10 @@ const deleteUserRoleConfirm = (user) => {
 }
 const doDeleteUserRole = () => {
   options.value.busy = true
-  const { userIdForDisplay, userId } = removeRoleInfo.value.userInfo
-  QuizService.deleteQuizAdmin(route.params.quizId, userId)
+  const { userIdForDisplay, userId, dn } = removeRoleInfo.value.userInfo
+  const pkiAuthenticated = appConfig.isPkiAuthenticated
+  const userIdParam = pkiAuthenticated ? dn : userId
+  QuizService.deleteQuizAdmin(route.params.quizId, userIdParam)
     .then(() => {
       loadData()
         .finally(() => {

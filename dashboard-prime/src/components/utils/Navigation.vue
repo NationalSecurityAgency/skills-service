@@ -1,19 +1,24 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import { useContentMaxWidthState } from '@/stores/UseContentMaxWidthState.js'
 
 const router = useRouter();
 defineProps(['navItems']);
 const collapsed = useStorage('navigationCollapsed', false)
 const responsive = useResponsiveBreakpoints()
+const mainContentWidth = useContentMaxWidthState()
 const colors = useColors()
-const showCollapsed = computed(() => collapsed.value || responsive.lg.value)
+const showCollapsed = computed(() => collapsed.value)
 
 function flipCollapsed() {
   collapsed.value = !collapsed.value;
+  nextTick(() => {
+    mainContentWidth.updateWidth()
+  })
 }
 
 const navOnSmallScreen = (changeEvent) => {
@@ -22,7 +27,7 @@ const navOnSmallScreen = (changeEvent) => {
 </script>
 
 <template>
-  <div class="mt-3" data-cy="nav">
+  <div class="mt-3" data-cy="nav" >
     <div class="sticky top-0 z-5 mb-3 md:hidden">
       <Dropdown
         :options="navItems"
@@ -45,11 +50,11 @@ const navOnSmallScreen = (changeEvent) => {
     </div>
 
     <div class="flex">
-      <div class="flex-none hidden md:flex" data-cy="nav-col">
+      <div id="skillsNavigation" class="flex-none hidden md:flex" data-cy="nav-col">
         <div class="border-1 border-300 border-round-md surface-border font-medium surface-0" style="min-height: calc(100vh - 20rem); !important">
             <div class="text-900 font-semibold flex">
               <div v-if="!showCollapsed" class="pt-3 px-3">Navigate</div>
-              <div class="flex-1 hidden lg:block" :class="{ 'text-right': !showCollapsed, 'text-center': showCollapsed}">
+              <div class="flex-1" :class="{ 'text-right': !showCollapsed, 'text-center': showCollapsed}">
                 <Button size="small" text
                         data-cy="navCollapseOrExpand"
                         @click="flipCollapsed"
@@ -63,7 +68,7 @@ const navOnSmallScreen = (changeEvent) => {
               <router-link v-for="(navItem, index) of navItems"
                            :key="navItem.name"
                            :to="{ name: navItem.page }"
-                           v-slot="{ href, navigate, isActive, isExactActive }"
+                           v-slot="{ navigate, isExactActive }"
                            custom>
                 <li>
                   <Button link
