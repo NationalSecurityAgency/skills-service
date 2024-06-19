@@ -335,10 +335,14 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-pc-section="panel"] [data-pc-section="itemlabel"]').contains('Administrator').click();
         cy.wait('@addAdmin')
         cy.get(`${tableSelector} thead th`).contains('User').click();
+
+        const compare = (a, b) => {
+            return a[0].value?.localeCompare(b[0].value)
+        }
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Administrator' }],
             [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Administrator' }],
-        ], 5, true, null, false);
+        ].sort(compare), 5, true, null, false);
     });
 
     it('Existing users are not suggested', () => {

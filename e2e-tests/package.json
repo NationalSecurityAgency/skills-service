@@ -50,7 +50,7 @@
     "backend:start:verifyEmail:ci": "mkdir -p ./logs && npm run backend:start:verifyEmail > ./logs/skills-service.out &",
     "backend:start:oauth:ci": "mkdir -p ./logs && npm run backend:start:oauth > ./logs/skills-service.out &",
     "backend:start:rabbitmq:ci": "mkdir -p ./logs && npm run backend:start:rabbitmq > ./logs/skills-service.out &",
-    "backend:waitToStart": "npx wait-on -t 160000 http://localhost:8080",
+    "backend:waitToStart": "echo \"Started waiting for skills-service at [$(date)]\" && npx wait-on -t 160000 http://localhost:8080",
     "backend:resetDb": "export PGPASSWORD=skillsPassword && psql -U postgres -h $npm_package_config_dbHost -d $npm_package_config_dbName -f ./cypress/db/reset.sql",
     "backend:clearDb": "export PGPASSWORD=skillsPassword && psql -U postgres -h $npm_package_config_dbHost -d $npm_package_config_dbName -f ./cypress/db/clear.sql",
     "backend:setupInviteOnly": "export PGPASSWORD=skillsPassword && psql -U postgres -h $npm_package_config_dbHost -d $npm_package_config_dbName -f ./cypress/db/createInviteOnlyProject.sql",

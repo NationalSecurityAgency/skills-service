@@ -63,7 +63,7 @@ describe('Approver Config Users Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.disabled')
 
         // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
-        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userA', true, true);
+        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'usera', true, true);
         // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] .p-dropdown-option`).contains('userA').click();
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.enabled')
 
@@ -79,7 +79,7 @@ describe('Approver Config Users Tests', () => {
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('1 Specific User')
 
         // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
-        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userB', true, true);
+        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userb', true, true);
         // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] .p-dropdown-option`).contains('userB').click();
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.enabled')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
@@ -200,15 +200,23 @@ describe('Approver Config Users Tests', () => {
         const headerSelector = `${tableSelector} thead tr th`;
         cy.get(headerSelector).contains('User').click();
 
-        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userE', true, true);
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
 
-        cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'userA' }],
-            [{ colIndex: 0, value: 'userB' }],
-            [{ colIndex: 0, value: 'userC' }],
-            [{ colIndex: 0, value: 'userD' }],
-            [{ colIndex: 0, value: 'userE' }],
-        ], 4);
+        cy.fixture('vars.json').then((vars) => {
+            const defaultUser = Cypress.env('oauthMode') ? 'foo' : vars.defaultUser
+            cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, defaultUser, true, true);
+            cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
+
+            const compare = (a, b) => {
+                return a[0].value?.localeCompare(b[0].value)
+            }
+            const expected = [
+                [{ colIndex: 0, value: 'userA' }],
+                [{ colIndex: 0, value: 'userB' }],
+                [{ colIndex: 0, value: 'userC' }],
+                [{ colIndex: 0, value: 'userD' }],
+                [{ colIndex: 0, value: defaultUser }],
+            ].sort(compare)
+            cy.validateTable(tableSelector, expected, 4);
+        })
     })
 });

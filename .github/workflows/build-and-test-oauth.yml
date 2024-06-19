@@ -25,6 +25,7 @@ on:
   schedule:
    - cron: '0 6 * * *'
   workflow_dispatch:
+  push:
 #  pull_request:
 #    paths-ignore:
 #      - 'README.md'
@@ -38,7 +39,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '20.11.0'
 
       - uses: actions/setup-java@v3
         with:
@@ -114,7 +115,7 @@ jobs:
 
     - uses: actions/setup-node@v3
       with:
-        node-version: '14'
+        node-version: '20.11.0'
 
     - uses: actions/setup-java@v3
       with:
@@ -140,7 +141,7 @@ jobs:
     - name: Check running containers
       run: docker ps -a
 
-    - name: Caputre Hydra Oauth Service logs
+    - name: Capture Hydra Oauth Service logs
       run: |
         mkdir -p ./e2e-tests/logs
         docker logs hydra > ./e2e-tests/logs/hydra.out &
@@ -162,15 +163,13 @@ jobs:
     - name: Start services for Cypress tests
       run: |
         cd e2e-tests
-        npm install
-        npm run backend:dropAllDBTables
         npm run cyServices:start:skills-service:oauth
-        npm run cyServices:start:client-display:oauth
         cd ..
 
     - name: Run Cypress tests
       run: |
         cd e2e-tests
+        npm install
         ../.github/scripts/runSubsetOfCypressTests.sh -t 20 -c ${{ matrix.container }}
         cd ..
       env:
