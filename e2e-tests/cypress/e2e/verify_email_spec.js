@@ -57,14 +57,14 @@ describe('Verify Email Tests', () => {
       cy.intercept('GET', '/app/userInfo/**').as('getUserInfo')
     });
 
-    it.skip('register dashboard and confirm email address', () => {
+    it('register dashboard and confirm email address', () => {
       cy.visit('/request-account');
       cy.contains('New Account')
       cy.get('#firstName').type("Robert")
       cy.get('#lastName').type("Smith")
       cy.get('#email').type("rob.smith@madeup.org")
       cy.get('#password').type("password")
-      cy.get('#password_confirmation').type("password")
+      cy.get('#passwordConfirmation').type("password")
       cy.contains('Create Account').click()
 
       cy.get('[data-cy="emailVerificationSentConfirmation"]').should('be.visible')
@@ -87,14 +87,14 @@ describe('Verify Email Tests', () => {
       });
     });
 
-    it.skip('cannot use email confirmation link twice', () => {
+    it('cannot use email confirmation link twice', () => {
       cy.visit('/request-account');
       cy.contains('New Account')
       cy.get('#firstName').type("Robert")
       cy.get('#lastName').type("Smith")
       cy.get('#email').type("rob.smith@madeup.org")
       cy.get('#password').type("password")
-      cy.get('#password_confirmation').type("password")
+      cy.get('#passwordConfirmation').type("password")
       cy.contains('Create Account').click()
 
       cy.get('[data-cy="emailVerificationSentConfirmation"]').should('be.visible')
@@ -115,14 +115,14 @@ describe('Verify Email Tests', () => {
       });
     });
 
-    it.skip('user is redirected to confirm email address if login attempted before confirming', () => {
+    it('user is redirected to confirm email address if login attempted before confirming', () => {
       cy.visit('/request-account');
       cy.contains('New Account')
       cy.get('#firstName').type("Robert")
       cy.get('#lastName').type("Smith")
       cy.get('#email').type("rob.smith@madeup.org")
       cy.get('#password').type("password")
-      cy.get('#password_confirmation').type("password")
+      cy.get('#passwordConfirmation').type("password")
       cy.contains('Create Account').click()
 
       cy.get('[data-cy="emailVerificationSentConfirmation"]').should('be.visible')
@@ -139,7 +139,7 @@ describe('Verify Email Tests', () => {
       cy.get('[data-cy=resendConfirmationCodeButton]').should('be.visible')
     });
 
-    it.skip('user is redirected to confirm email address if token has expired', () => {
+    it('user is redirected to confirm email address if token has expired', () => {
       // override timeout setting to 5 seconds
       cy.login('root@skills.org', 'password');
       cy.request({
@@ -159,7 +159,7 @@ describe('Verify Email Tests', () => {
       cy.get('#lastName').type("Smith")
       cy.get('#email').type("rob.smith@madeup.org")
       cy.get('#password').type("password")
-      cy.get('#password_confirmation').type("password")
+      cy.get('#passwordConfirmation').type("password")
       cy.contains('Create Account').click()
 
       cy.get('[data-cy="emailVerificationSentConfirmation"]').should('be.visible')
@@ -197,13 +197,13 @@ describe('Verify Email Tests', () => {
       });
     });
 
-    it.skip('register dashboard and confirm email address', () => {
+    it('register dashboard and confirm email address', () => {
       Cypress.Commands.add('navToSettings', () => {
         cy.get('[data-cy="settings-button"] button')
           .click();
-        cy.get('[data-cy="settingsButton-navToSettings"]')
+        cy.get('[data-pc-section="menuitem"]').contains('Settings')
           .should('not.be.disabled');
-        cy.get('[data-cy="settingsButton-navToSettings"]')
+        cy.get('[data-pc-section="menuitem"]').contains('Settings')
           .click();
       });
       cy.intercept({
@@ -216,12 +216,12 @@ describe('Verify Email Tests', () => {
         cy.navToSettings();
         cy.get('[data-cy="nav-Email"]').click();
         cy.wait('@loadTemplateSettings');
-        cy.get('[data-cy=htmlEmailHeader]').click().type('For {{}{{} community.descriptor {}}{}} Only');
-        cy.get('[data-cy=ptHeaderTitle]').click();
-        cy.get('[data-cy=plaintextEmailHeader]').click().type('For {{}{{}community.descriptor {}}{}} Only');
-        cy.get('[data-cy=htmlEmailFooter]').click().type('For {{}{{} community.descriptor {}}{}} Only');
-        cy.get('[data-cy=ptFooterTitle]').click();
-        cy.get('[data-cy=plaintextEmailFooter]').click().type('For {{}{{}community.descriptor {}}{}} Only');
+        cy.get('[data-cy=htmlHeader]').click().type('For {{}{{} community.descriptor {}}{}} Only');
+
+        cy.get('[data-cy=plainTextHeader]').click().type('For {{}{{}community.descriptor {}}{}} Only');
+        cy.get('[data-cy=htmlFooter]').click().type('For {{}{{} community.descriptor {}}{}} Only');
+
+        cy.get('[data-cy=plainTextFooter]').click().type('For {{}{{}community.descriptor {}}{}} Only');
         cy.get('[data-cy=emailTemplateSettingsSave]').click();
         cy.logout();
 
@@ -231,7 +231,7 @@ describe('Verify Email Tests', () => {
         cy.get('#lastName').type("Smith")
         cy.get('#email').type("rob.smith@madeup.org")
         cy.get('#password').type("password")
-        cy.get('#password_confirmation').type("password")
+        cy.get('#passwordConfirmation').type("password")
         cy.contains('Create Account').click()
         cy.getHeaderFromEmail()
           .then((header) => {

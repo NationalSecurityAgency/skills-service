@@ -9,8 +9,10 @@ import Logo1 from '@/components/brand/Logo1.vue'
 import AccessService from '@/components/access/AccessService.js'
 import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
+import { useEmailVerificationInfo } from '@/components/access/UseEmailVerificationInfo.js'
 
 const appConfig = useAppConfig()
+const emailVerificationInfo = useEmailVerificationInfo()
 
 const schema = object({
   username: string().required().email().min(appConfig.minUsernameLength).label('Email Address'),
@@ -61,7 +63,9 @@ const onSubmit = handleSubmit((values) => {
   if (appConfig.verifyEmailAddresses) {
     AccessService.userEmailIsVerified(values.username).then((result) => {
       if (!result) {
-        router.push({ name: 'RequestEmailVerification', params: { email: values.username } })
+        emailVerificationInfo.setEmail(values.username)
+        emailVerificationInfo.setReason('NotVerified')
+        router.push({ name: 'RequestEmailVerification' })
       } else {
         performFormLogin(values)
       }

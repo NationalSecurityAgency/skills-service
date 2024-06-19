@@ -10,11 +10,13 @@ import { string } from 'yup';
 import Logo1 from '@/components/brand/Logo1.vue';
 import AccessService from '@/components/access/AccessService.js';
 import InputGroupAddon from 'primevue/inputgroupaddon';
+import {useEmailVerificationInfo} from "@/components/access/UseEmailVerificationInfo.js";
 
 const authState = useAuthState()
 const route = useRoute()
 const router = useRouter()
 const appConfig = useAppConfig()
+const emailVerificationInfo = useEmailVerificationInfo()
 
 const isRootAccount = route.meta.isRootAccount;
 const createInProgress = ref(false);
@@ -45,7 +47,8 @@ const login = (firstName, lastName, email, password) => {
     authState.configureSkillsClientForInception()
         .then(() => {
           if (verifyEmailAddresses.value) {
-            router.push({name: 'EmailVerificationSent', params: {email}});
+            emailVerificationInfo.setEmail(email)
+            router.push({name: 'EmailVerificationSent'});
           } else if (route.query.redirect) {
             router.push(route.query.redirect);
           } else if (!isProgressAndRankingEnabled.value) {
