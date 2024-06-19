@@ -163,8 +163,7 @@ jobs:
     - name: Start services for Cypress tests
       run: |
         cd e2e-tests
-        npm install
-        npm run backend:dropAllDBTables
+#        npm run backend:dropAllDBTables
         npm run cyServices:start:skills-service:oauth
         cd ..
 
