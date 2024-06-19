@@ -32,18 +32,16 @@ describe('Skill Reuse Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.get('[data-cy="importedBadge-skill1STREUSESKILLST0"]')
             .contains('Reused');
-        cy.get('[data-cy="nameCell_skill1STREUSESKILLST0"] [data-cy="smtText"]')
+        cy.get('[data-cy="nameCell_skill1STREUSESKILLST0"] [data-cy="highlightedValue"]')
             .should('have.text', 'Very Great Skill 1');
 
-        cy.get('[data-cy="expandDetailsBtn_skill1STREUSESKILLST0"]')
-            .click();
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]');
 
         // navigate down to a skill page
-        cy.get('[data-cy="manageSkillBtn_skill1STREUSESKILLST0"]')
-            .contains('View');
-        cy.get('[data-cy="manageSkillBtn_skill1STREUSESKILLST0"]')
-            .click();
+        cy.get('[data-cy="copySkillButton_skill1STREUSESKILLST0]').should('not.exist')
+        cy.get('[data-cy="editSkillButton_skill1STREUSESKILLST0"]').should('not.exist')
+        cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]').click()
 
         cy.get('[data-cy="pageHeader"] [data-cy="importedBadge"]')
             .contains('Reused');
@@ -68,19 +66,24 @@ describe('Skill Reuse Tests', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
         cy.visit('/administrator/projects/proj1/subjects/subj2');
-        cy.get('[data-cy="expandDetailsBtn_skill1STREUSESKILLST0"]')
-            .click();
+        cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: subj2')
+        cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]')
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]').contains('Original Skill')
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"] [data-cy="linkToTheOriginalSkill"]')
             .click();
         cy.get('[data-cy="breadcrumb-subj1"]')
             .contains('subj1');
         cy.get('[data-cy="pageHeader"] [data-cy="skillId"] [data-cy="smtText"]')
             .should('have.text', 'ID: skill1');
+        cy.get('[data-cy="skillOverviewTotalpoints"] [data-cy="mediaInfoCardTitle"]').should('have.text', '200 Points')
 
         // from the skill page by navigating down to the skill page
         cy.visit('/administrator/projects/proj1/subjects/subj2');
-        cy.get('[data-cy="manageSkillBtn_skill1STREUSESKILLST0"]')
-            .click();
+        cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: subj2')
+        cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]').click();
+        cy.get('[data-cy="breadcrumb-skill1STREUSESKILLST0"]')
+        cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]').contains('Original Skill')
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"] [data-cy="linkToTheOriginalSkill"]')
             .click();
         cy.get('[data-cy="breadcrumb-subj1"]')
@@ -90,6 +93,7 @@ describe('Skill Reuse Tests', () => {
 
         // from the skill page directly
         cy.visit('/administrator/projects/proj1/subjects/subj2/skills/skill1STREUSESKILLST0/');
+        cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]').contains('Original Skill')
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"] [data-cy="linkToTheOriginalSkill"]')
             .click();
         cy.get('[data-cy="breadcrumb-subj1"]')
@@ -111,7 +115,7 @@ describe('Skill Reuse Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill3STREUSESKILLST0"]');
 
         cy.get('[data-cy="skillsTable-skillFilter"]')
-            .type('skill1{enter}');
+            .type('skill 1');
         cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]');
         cy.get('[data-cy="manageSkillLink_skill2STREUSESKILLST0"]')
             .should('not.exist');
@@ -120,7 +124,7 @@ describe('Skill Reuse Tests', () => {
 
         cy.get('[data-cy="skillsTable-skillFilter"]')
             .clear()
-            .type('Skill 2 {enter}');
+            .type('Skill 2');
         cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]')
             .should('not.exist');
         cy.get('[data-cy="manageSkillLink_skill2STREUSESKILLST0"]');
@@ -143,26 +147,22 @@ describe('Skill Reuse Tests', () => {
         cy.createSkillsGroup(1, 3, 16);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill3"]')
-            .click({ force: true });
+        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillReuseBtn"]')
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
             .click();
-        cy.get('[data-cy="destListPagingControl"] [aria-label="Go to page 2"]')
-            .click();
-        cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
-            .click();
-        cy.get('[ data-cy="reuseSkillsModalStep1"]')
-            .should('not.exist');
+        cy.get('[data-cy="reuseSkillsModalStep1"]')
+            .should('not.be.visible');
 
-        cy.get('[ data-cy="reuseSkillsModalStep2"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
             .contains('1 skill will be reused in the [Subject 3] subject.');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully reused 1 skill.');
-        cy.get('[data-cy="okButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
         cy.get('[data-cy="breadcrumb-proj1"]')
@@ -182,7 +182,7 @@ describe('Skill Reuse Tests', () => {
             .contains('this action will only remove the reused skill');
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="noContent"]')
             .contains('No Skills Yet');
@@ -202,6 +202,7 @@ describe('Skill Reuse Tests', () => {
 
     it('remove the original skill', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
+
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="deleteSkillButton_skill1"]')
             .click();
@@ -209,7 +210,7 @@ describe('Skill Reuse Tests', () => {
             .contains('Deleting this skill will also remove its reused copies');
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="noContent"]')
             .contains('No Skills Yet');

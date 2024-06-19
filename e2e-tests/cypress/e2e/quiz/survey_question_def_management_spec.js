@@ -38,7 +38,9 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '0')
 
         // multiple choice question
+        cy.get('[data-cy="btn_Questions"]').should('be.enabled')
         cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="btn_Questions"]').click({force: true})
         cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
@@ -51,7 +53,8 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').should('not.exist')
         cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"]').should('not.exist')
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('What is 2 + 2?')
 
@@ -78,7 +81,8 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"]').should('not.exist')
         cy.get('[data-cy="answer-3"] [data-cy="selectCorrectAnswer"]').should('not.exist')
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').click()
 
         // q2
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('What is 1 + 2?')
@@ -102,7 +106,8 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('not.exist')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('not.exist')
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '3')
         cy.get('[data-cy="newQuestionOnBottomBtn"]').should('have.focus')
 
@@ -132,7 +137,8 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_Rating"]').click()
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('How is this quiz?')
 
@@ -170,25 +176,25 @@ describe('Survey Question CRUD Tests', () => {
         cy.createSurveyDef(1);
         cy.visit('/administrator/quizzes/quiz1');
         cy.get('[data-cy="btn_Questions"]').click()
-        cy.get('[data-cy="questionTextErr"]').should('not.be.visible')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
         cy.get('[data-cy="questionText"]').type('a')
 
         cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').should('not.exist')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
 
-        cy.get('[data-cy="editQuestionsErrs"]').should('not.exist')
-        cy.get('[data-cy="saveQuestionBtn"]').click()
-        cy.get('[data-cy="editQuestionsErrs"]').contains('Must have at least 2 answers')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="answersError"]').contains('Must have at least 2 answers')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('2')
-        cy.get('[data-cy="editQuestionsErrs"]').should('not.exist')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
     });
 
     it('empty answers are ignored', function () {
         cy.createSurveyDef(1);
         cy.visit('/administrator/quizzes/quiz1');
         cy.get('[data-cy="btn_Questions"]').click()
-        cy.get('[data-cy="questionTextErr"]').should('not.be.visible')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
         cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
 
@@ -200,7 +206,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answer-2"] [data-cy="answerText"]').type('4')
         cy.get('[data-cy="answer-4"] [data-cy="answerText"]').type('5')
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('What is 2 + 2?')
         cy.validateChoiceAnswer(1, 0, '1', false)
         cy.validateChoiceAnswer(1, 1, '4', false)
@@ -211,7 +217,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.createSurveyDef(1);
         cy.visit('/administrator/quizzes/quiz1');
         cy.get('[data-cy="btn_Questions"]').click()
-        cy.get('[data-cy="questionTextErr"]').should('not.be.visible')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
         cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
 
@@ -240,9 +246,9 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answer-4"] [data-cy="removeAnswer"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="removeAnswer"]').click()
 
-        cy.get('[data-cy="questionText"]').clear().type('All diff?')
+        cy.get('[data-cy="questionText"] div.toastui-editor-contents[contenteditable="true"]').clear().type('All diff?')
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('All diff?')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-0_displayText"]').should('have.text', '1a-2')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-1_displayText"]').should('have.text', '1b-3')
@@ -262,16 +268,16 @@ describe('Survey Question CRUD Tests', () => {
 
         cy.get('[data-cy="editQuestionButton_2"]').click();
         cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'Question 2 - Second Answer')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').should('have.value', 'Question 2 - Third Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"]').should('have.value', 'Question 2 - Second Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"]').should('have.value', 'Question 2 - Third Answer')
 
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').type('-more')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').clear().type('b')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').clear().type('c')
         cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').type('-more')
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('This is a question # 2-more')
         cy.validateChoiceAnswer(2, 0, 'Question 2 - First Answer-more', false)
         cy.validateChoiceAnswer(2, 1, 'b', false)
@@ -280,9 +286,9 @@ describe('Survey Question CRUD Tests', () => {
 
         cy.get('[data-cy="editQuestionButton_2"]').click();
         cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2-more')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer-more')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'b')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').should('have.value', 'c')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer-more')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"]').should('have.value', 'b')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"]').should('have.value', 'c')
     });
 
     it('edit a question - change the scale of a rating', function () {
@@ -298,22 +304,23 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_Rating"]').click()
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('How is this quiz?')
-        cy.get('[data-cy="questionDisplayCard-1"]').find('.b-rating-star').should('have.length', 5)
+        cy.get('[data-cy="questionDisplayCard-1"] [data-pc-name="rating"]').find('.p-rating-item').should('have.length', 5)
 
         cy.get('[data-cy="editQuestionButton_1"]').click();
         cy.get('[data-cy="questionText"]').type(' With more description')
-        cy.get('[data-cy="ratingScaleSelect"]').select(5);
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="ratingScaleSelect"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('8').click();
+        cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('How is this quiz? With more description')
-        cy.get('[data-cy="questionDisplayCard-1"]').find('.b-rating-star').should('have.length', 8)
+        cy.get('[data-cy="questionDisplayCard-1"] [data-pc-name="rating"]').find('.p-rating-item').should('have.length', 8)
 
         cy.visit('/administrator/quizzes/quiz1');
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('How is this quiz? With more description')
-        cy.get('[data-cy="questionDisplayCard-1"]').find('.b-rating-star').should('have.length', 8)
+        cy.get('[data-cy="questionDisplayCard-1"] [data-pc-name="rating"]').find('.p-rating-item').should('have.length', 8)
     });
 
     it('edit a question - will change question type from MultipleChoice to SingleChoice', function () {
@@ -327,7 +334,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.validateChoiceAnswer(2, 0, 'Question 2 - First Answer', true)
         cy.validateChoiceAnswer(2, 1, 'Question 2 - Second Answer', true)
         cy.validateChoiceAnswer(2, 2, 'Question 2 - Third Answer', true)
@@ -344,7 +351,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_MultipleChoice"]').click()
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.validateChoiceAnswer(3, 0, 'Question 3 - First Answer', false)
         cy.validateChoiceAnswer(3, 1, 'Question 3 - Second Answer', false)
         cy.validateChoiceAnswer(3, 2, 'Question 3 - Third Answer', false)
@@ -365,7 +372,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('not.exist')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('not.exist')
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="answerTypeSelector"]').should('not.exist')
         cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '3')
 
@@ -389,7 +396,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('not.exist')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('not.exist')
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="answerTypeSelector"]').should('not.exist')
         cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '3')
 
@@ -413,7 +420,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('a')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('b')
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.validateChoiceAnswer(1, 0, 'a', true)
         cy.validateChoiceAnswer(1, 1, 'b', true)
     });
@@ -433,7 +440,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('a')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('b')
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.validateChoiceAnswer(1, 0, 'a', false)
         cy.validateChoiceAnswer(1, 1, 'b', false)
     });
@@ -449,7 +456,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').type( 'new')
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.validateChoiceAnswer(3, 0, 'Question 3 - First Answer', true)
         cy.validateChoiceAnswer(3, 1, 'Question 3 - Second Answer', true)
         cy.validateChoiceAnswer(3, 2, 'new', true)
@@ -466,7 +473,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="editQuestionButton_3"]').click();
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="removeAnswer"]').click()
 
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.validateChoiceAnswer(3, 0, 'Question 3 - Second Answer', true)
         cy.validateChoiceAnswer(3, 1, 'Question 3 - Third Answer', true)
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="answer-2_displayText"]').should('not.exist')
@@ -485,7 +492,7 @@ describe('Survey Question CRUD Tests', () => {
 
         cy.get('[data-cy="deleteQuestionButton_2"]').click()
         cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
-        cy.get('[data-cy="removeButton"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.get(q1Card).should('not.exist')
         cy.get(q2Card).should('not.exist')
@@ -497,7 +504,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="noQuestionsYet"]').should('not.exist')
         cy.get('[data-cy="deleteQuestionButton_1"]').click()
         cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
-        cy.get('[data-cy="removeButton"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.get('[data-cy="deleteQuestionButton_2"]').should('not.exist')
         cy.get('[data-cy="deleteQuestionButton_1"]').should('not.exist')
@@ -538,7 +545,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="questionText"]').type('question # 1')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.get(q1Card).should('not.exist')
         cy.get(q2Card).should('not.exist')
@@ -548,7 +555,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="questionText"]').type('question # 2')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_TextInput"]').click()
-        cy.get('[data-cy="saveQuestionBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.get(q1Card).should('exist')
         cy.get(q2Card).should('exist')
@@ -568,6 +575,7 @@ describe('Survey Question CRUD Tests', () => {
 
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 1', 'question # 2', 'question # 3']);
         cy.log("Operation: 1")
+        cy.wait(1000)
         cy.get('[data-cy="btn_Questions"]')
             .tab()
             .type('{downArrow}');
@@ -575,7 +583,9 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('.spinner-border').should('not.exist')
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 1', 'question # 3']);
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="sortControlHandle"]').should('have.focus');
+
         cy.log("Operation: 2")
+        cy.wait(1000)
         cy.get('[data-cy="deleteQuestionButton_1"]')
             .tab()
             .type('{downArrow}');
@@ -585,12 +595,14 @@ describe('Survey Question CRUD Tests', () => {
 
         // attempt to move the lowest item - should not change anything
         cy.log("Operation: 3")
+        cy.wait(1000)
         cy.get('[data-cy="deleteQuestionButton_2"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 3', 'question # 1']);
 
         cy.log("Operation: 4")
+        cy.wait(1000)
         cy.get('[data-cy="deleteQuestionButton_1"]')
             .tab()
             .type('{upArrow}');
@@ -600,6 +612,7 @@ describe('Survey Question CRUD Tests', () => {
 
         // attempt to move the top item - should not change anything
         cy.log("Operation: 5")
+        cy.wait(1000)
         cy.get('[data-cy="btn_Questions"]')
             .tab()
             .type('{upArrow}');

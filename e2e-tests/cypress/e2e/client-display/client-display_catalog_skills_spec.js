@@ -120,7 +120,8 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         // check single pages
         cy.cdClickSkill(0);
         cy.get('[data-cy="skillProgressTitle"]')
-            .contains('Very Great Skill 1 in This is project 2');
+            .contains('Very Great Skill 1');
+        cy.get('[data-cy="importedFromProj"]').should('have.text', 'This is project 2');
         cy.get('[data-cy="catalogImportStatus"]')
             .contains('This skill is originally defined in This is project 2 and re-used in this project! Navigate to This is project 2 project to perform Very Great Skill 1 skill.');
         cy.get('[data-cy="claimPointsBtn"]')
@@ -129,7 +130,8 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.cdBack('Subject 1');
         cy.cdClickSkill(1);
         cy.get('[data-cy="skillProgressTitle"]')
-            .contains('Very Great Skill 2 in This is project 2');
+            .contains('Very Great Skill 2');
+        cy.get('[data-cy="importedFromProj"]').should('have.text', 'This is project 2');
         cy.get('[data-cy="catalogImportStatus"]')
             .contains('This skill is originally defined in This is project 2 and re-used in this project! This skill can be self-reported via the button below.');
         cy.get('[data-cy="claimPointsBtn"]')
@@ -139,6 +141,7 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.cdClickSkill(2);
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 3');
+        cy.get('[data-cy="importedFromProj"]').should('not.exist');
         cy.get('[data-cy="catalogImportStatus"]')
             .should('not.exist');
         cy.get('[data-cy="claimPointsBtn"]')

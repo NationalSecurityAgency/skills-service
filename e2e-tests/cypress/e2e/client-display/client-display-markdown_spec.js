@@ -115,10 +115,7 @@ describe('Client Display Markdown Tests', () => {
             'Separate me\n\n' +
             '---\n\n' +
             'Separate me\n\n' +
-            '***\n\n' +
-            '# Emojis\n' +
-            ':star: :star: :star: :star:\n' +
-            '';
+            '***\n\n'
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
@@ -160,7 +157,7 @@ describe('Client Display Markdown Tests', () => {
         // check subject
         cy.cdClickSubj(0, 'Subject 1');
         cy.contains('Emphasis');
-        cy.matchSnapshotImage({
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"] [data-cy="subjectDescription"] [data-cy="markdownViewer"]', {
             name: 'Markdown-subject',
             blackout: '[data-cy=pointHistoryChart]'
         });
@@ -169,7 +166,7 @@ describe('Client Display Markdown Tests', () => {
         cy.cdClickSkill(0);
         cy.contains('This is 1');
         cy.contains('Emphasis');
-        cy.matchSnapshotImage({
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"] [data-cy="markdownViewer"]', {
             name: 'Markdown-skill',
             blackout: '[data-cy=pointHistoryChart]'
         });
@@ -179,7 +176,7 @@ describe('Client Display Markdown Tests', () => {
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
         cy.contains('Overall Points Earned');
-        cy.matchSnapshotImage({
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"] [data-cy="skillDescription-skill1"] [data-cy="markdownViewer"]', {
             name: 'Markdown-Skill-Preview',
             blackout: '[data-cy=pointHistoryChart]'
         });
@@ -191,7 +188,7 @@ describe('Client Display Markdown Tests', () => {
         cy.cdClickBadges();
         cy.contains('Badges');
         cy.contains('Emphasis');
-        cy.matchSnapshotImage({
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"] [data-cy="markdownViewer"]', {
             name: 'Markdown-Badge',
             blackout: '[data-cy=pointHistoryChart]'
         });

@@ -34,7 +34,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
         cy.get('[data-cy=newProjectButton]').click()
         cy.get('[data-cy="projectName"]').should('have.focus')
 
-        cy.get('[data-cy="projectName"]').tab().tab().tab().type('{enter}{downArrow}')
+        cy.get('[data-cy="projectName"]').tab().tab().type('{enter}{downArrow}')
         cy.get('.toastui-editor-popup-body #headerChoicesId [data-level="1"]').should('have.focus')
         cy.validateHeaderTabIndex(['0', '-1', '-1', '-1', '-1', '-1', '-1'])
 
@@ -61,7 +61,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
         cy.get('[data-cy=newProjectButton]').click()
         cy.get('[data-cy="projectName"]').should('have.focus')
 
-        cy.get('[data-cy="projectName"]').tab().tab().tab().type('{enter}{downArrow}')
+        cy.get('[data-cy="projectName"]').tab().tab().type('{enter}{downArrow}')
         cy.get('.toastui-editor-popup-body #headerChoicesId [data-level="1"]').should('have.focus')
         cy.validateHeaderTabIndex(['0', '-1', '-1', '-1', '-1', '-1', '-1'])
 
@@ -106,7 +106,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
         cy.get('[data-cy=newProjectButton]').click()
         cy.get('[data-cy="projectName"]').should('have.focus')
 
-        cy.get('[data-cy="projectName"]').tab().tab().tab().type('{enter}{downArrow}')
+        cy.get('[data-cy="projectName"]').tab().tab().type('{enter}{downArrow}')
         cy.get('.toastui-editor-popup-body #headerChoicesId [data-level="1"]').should('have.focus')
         cy.validateHeaderTabIndex(['0', '-1', '-1', '-1', '-1', '-1', '-1'])
 

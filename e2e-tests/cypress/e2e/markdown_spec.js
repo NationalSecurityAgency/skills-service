@@ -60,7 +60,7 @@ describe('Markdown Tests', () => {
         cy.get('a[href="https://google.com"]')
             .should('have.attr', 'target', '_blank');
         cy.clickSave();
-        cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
+        cy.get('[data-cy="manageSkillLink_skill1Skill"]')
             .click();
         cy.get('a[href="https://google.com"]')
             .should('have.attr', 'target', '_blank');
@@ -78,9 +78,9 @@ describe('Markdown Tests', () => {
 
         cy.get(markdownInput).get('a[href^="/api/download/"]:contains(test-pdf.pdf)')
           .should('have.attr', 'target', '_blank');
-        cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', ' Only upload attachments that are safe!')
+        cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', 'Only upload attachments that are safe!')
         cy.clickSave();
-        cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
+        cy.get('[data-cy="manageSkillLink_skill1Skill"]')
           .click();
         cy.get('a[href^="/api/download/"]:contains(test-pdf.pdf)')
           .should('have.attr', 'target', '_blank');
@@ -96,15 +96,15 @@ describe('Markdown Tests', () => {
         cy.get(markdownInput).focus().selectFile('cypress/attachments/test-file.invalid', { action: 'drag-drop' })
         cy.get('[data-cy="attachmentError"]').contains('Unable to upload attachment - File type is not supported.')
         cy.get(markdownInput).get('a[href^="/api/download/"]').should('not.exist')
-        cy.get('[data-cy="saveSkillButton"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get(markdownInput).type('k')
         cy.get('[data-cy="attachmentError"]').should('not.exist')
 
         cy.get(markdownInput).focus().selectFile('cypress/attachments/test-file.invalid', { action: 'drag-drop' })
         cy.get('[data-cy="attachmentError"]').contains('Unable to upload attachment - File type is not supported.')
         cy.get(markdownInput).get('a[href^="/api/download/"]').should('not.exist')
-        cy.get('[data-cy="saveSkillButton"]').should('be.enabled')
-        cy.get('[data-cy="saveSkillButton"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.get('[data-cy="editSkillButton_sk1Skill"]').click()
         cy.get(markdownInput).contains('k')
@@ -122,9 +122,9 @@ describe('Markdown Tests', () => {
 
         cy.get('a[href^="/api/download/"]:contains(test-pdf.pdf)')
           .should('have.attr', 'target', '_blank');
-        cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', ' Only upload attachments that are safe!')
+        cy.get('[data-cy="attachmentWarningMessage"]').should('have.text', 'Only upload attachments that are safe!')
         cy.clickSave();
-        cy.get('[data-cy="manageSkillBtn_skill1Skill"]')
+        cy.get('[data-cy="manageSkillLink_skill1Skill"]')
           .click();
         cy.get('a[href^="/api/download/"]:contains(test-pdf.pdf)')
           .should('have.attr', 'target', '_blank');
@@ -149,7 +149,7 @@ describe('Markdown Tests', () => {
 
         cy.get(markdownInput).get('a[href^="/api/download/"]')
           .should('not.exist');
-        cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+        cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
         cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - File size [7.25 KB] exceeds maximum file size [5 B]');
     });
 
@@ -191,7 +191,7 @@ describe('Markdown Tests', () => {
 
         cy.get(markdownInput).get('a[href^="/api/download/"]')
           .should('not.exist');
-        cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+        cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
         cy.get('[data-cy=attachmentError]').contains('Unable to upload attachment - File type is not supported. Supported file types are [.xlsx,.docx,.pptx,.doc,.odp,.ods,.odt,.pdf,.ppt,.xls]');
     });
 
@@ -219,10 +219,10 @@ describe('Markdown Tests', () => {
             cy.get(markdownInput).get(`a[href^="/api/download/"]:contains(${file})`).should('exist');
             cy.get(markdownInput).type('\n\n')
         });
-        cy.get('[data-cy=saveSkillButton]').should('be.enabled');
+        cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
         cy.get('[data-cy=attachmentError]').should('not.exist');
         cy.clickSave();
-        cy.get('[data-cy="manageSkillBtn_skill1Skill"]').click();
+        cy.get('[data-cy="manageSkillLink_skill1Skill"]').click();
 
         attachmentFiles.forEach((file) => {
             cy.get('[data-cy="skillOverviewDescription"]').get(`a[href^="/api/download/"]:contains(${file})`).should('exist');
@@ -230,6 +230,7 @@ describe('Markdown Tests', () => {
     });
 
     it('keyboard navigation', () => {
+        cy.viewport(800, 1280);
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -420,9 +421,10 @@ describe('Markdown Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@inceptionLevel');
         cy.contains('Level');
-        const selectorSkillsRowToggle = '[data-cy="expandDetailsBtn_skill1"]';
-        cy.get(selectorSkillsRowToggle)
-            .click();
+        // const selectorSkillsRowToggle = '[data-cy="expandDetailsBtn_skill1"]';
+        // cy.get(selectorSkillsRowToggle)
+        //     .click();
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         cy.contains('Description');
         cy.contains('Emojis');
         cy.contains('👍 👍 👍 👍');

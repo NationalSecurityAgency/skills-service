@@ -43,7 +43,7 @@ interface UserAttrsRepo extends CrudRepository<UserAttrs, Integer> {
     @Query(value='''select attrs.email from user_attrs attrs where attrs.user_id = ?1''', nativeQuery = true)
     String findEmailByUserId(String userId)
 
-    @Query("SELECT DISTINCT(ua.userIdForDisplay) from UserAttrs ua where lower(ua.userIdForDisplay) LIKE %?1% order by ua.userIdForDisplay asc" )
+    @Query("SELECT DISTINCT(ua.userId) from UserAttrs ua where lower(ua.userId) LIKE %?1% order by ua.userId asc" )
     List<String> findDistinctUserIdForDisplay(String userUserIdForDisplayQuery, Pageable pageable)
 
 }

@@ -26,7 +26,7 @@ describe('Client Display Skills Navigation', () => {
         cy.cdClickSubj(0);
 
         cy.get('[data-cy="skillProgress_index-0"]').should('exist');
-        cy.get('[data-cy="skillProgress_index-0"]').click();
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"').click();
         cy.get('[data-cy="skillProgressTitle"').contains('Very Great Skill 1');
         cy.get('[data-cy="skillOrder"]').contains('Skill 1 of 3');
         cy.get('[data-cy="prevSkill"]').should('not.exist');
@@ -143,7 +143,7 @@ describe('Client Display Skills Navigation', () => {
         cy.addLearningPathItem(2, 2, 1)
 
         // Go to cross-project dependency page
-        cy.cdVisit('/subjects/subj1/skills/skill3/crossProject/proj2/skill1');
+        cy.cdVisit('/subjects/subj1/skills/skill1/crossProject/proj2/skill1');
         cy.get('[data-cy="prevSkill"]').should('not.exist');
         cy.get('[data-cy="nextSkill"]').should('not.exist');
     });

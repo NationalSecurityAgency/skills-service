@@ -20,7 +20,7 @@ describe('Handle Video without duration Tests', () => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
         Cypress.Commands.add("visitVideoConfPage", (projNum) => {
-            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-video');
             cy.wait('@getVideoProps')
             cy.wait('@getSkillInfo')
             cy.get('.spinner-border').should('not.exist')
@@ -33,11 +33,12 @@ describe('Handle Video without duration Tests', () => {
         cy.createSkill(1, 1, 1)
         cy.visitVideoConfPage();
         const videoFile = 'create-project-noDuration.webm';
-        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.fixture(videoFile, null).as('videoFile');
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
         cy.get('[data-cy="saveVideoSettingsBtn"]').click()
         cy.get('[data-cy="savedMsg"]')
 
-        cy.get('[data-cy="videoUrl"]').should('have.value', videoFile)
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', videoFile)
         cy.get('[data-cy="noDurationWarning"]')
         cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTotalDuration"]').should('have.text', 'N/A')
         cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', 'N/A')
@@ -61,15 +62,16 @@ describe('Handle Video without duration Tests', () => {
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="viewTranscriptBtn"]')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('not.exist')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('not.exist')
 
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
         cy.wait(8000) // video is 8 seconds
         cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 100 points')
-        cy.get('[data-cy="watchVideoAlert"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="viewTranscriptBtn"]')
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('not.exist')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('not.exist')
         cy.wait('@reportSkill1')
     });
+
 });

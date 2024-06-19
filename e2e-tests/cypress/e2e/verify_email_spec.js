@@ -31,7 +31,7 @@ describe('Verify Email Tests', () => {
         url: '/root/saveEmailSettings',
         body: {
           host: 'localhost',
-          port: 1026,
+          port: 1025,
           'protocol': 'smtp',
           publicUrl: 'http://localhost:8082/',
           fromEmail: 'noreploy@skilltreeemail.org',
@@ -64,7 +64,7 @@ describe('Verify Email Tests', () => {
       cy.get('#lastName').type("Smith")
       cy.get('#email').type("rob.smith@madeup.org")
       cy.get('#password').type("password")
-      cy.get('#password_confirmation').type("password")
+      cy.get('#passwordConfirmation').type("password")
       cy.contains('Create Account').click()
 
       cy.get('[data-cy="emailVerificationSentConfirmation"]').should('be.visible')
@@ -94,7 +94,7 @@ describe('Verify Email Tests', () => {
       cy.get('#lastName').type("Smith")
       cy.get('#email').type("rob.smith@madeup.org")
       cy.get('#password').type("password")
-      cy.get('#password_confirmation').type("password")
+      cy.get('#passwordConfirmation').type("password")
       cy.contains('Create Account').click()
 
       cy.get('[data-cy="emailVerificationSentConfirmation"]').should('be.visible')
@@ -122,7 +122,7 @@ describe('Verify Email Tests', () => {
       cy.get('#lastName').type("Smith")
       cy.get('#email').type("rob.smith@madeup.org")
       cy.get('#password').type("password")
-      cy.get('#password_confirmation').type("password")
+      cy.get('#passwordConfirmation').type("password")
       cy.contains('Create Account').click()
 
       cy.get('[data-cy="emailVerificationSentConfirmation"]').should('be.visible')
@@ -159,7 +159,7 @@ describe('Verify Email Tests', () => {
       cy.get('#lastName').type("Smith")
       cy.get('#email').type("rob.smith@madeup.org")
       cy.get('#password').type("password")
-      cy.get('#password_confirmation').type("password")
+      cy.get('#passwordConfirmation').type("password")
       cy.contains('Create Account').click()
 
       cy.get('[data-cy="emailVerificationSentConfirmation"]').should('be.visible')
@@ -201,9 +201,9 @@ describe('Verify Email Tests', () => {
       Cypress.Commands.add('navToSettings', () => {
         cy.get('[data-cy="settings-button"] button')
           .click();
-        cy.get('[data-cy="settingsButton-navToSettings"]')
+        cy.get('[data-pc-section="menuitem"]').contains('Settings')
           .should('not.be.disabled');
-        cy.get('[data-cy="settingsButton-navToSettings"]')
+        cy.get('[data-pc-section="menuitem"]').contains('Settings')
           .click();
       });
       cy.intercept({
@@ -216,12 +216,12 @@ describe('Verify Email Tests', () => {
         cy.navToSettings();
         cy.get('[data-cy="nav-Email"]').click();
         cy.wait('@loadTemplateSettings');
-        cy.get('[data-cy=htmlEmailHeader]').click().type('For {{}{{} community.descriptor {}}{}} Only');
-        cy.get('[data-cy=ptHeaderTitle]').click();
-        cy.get('[data-cy=plaintextEmailHeader]').click().type('For {{}{{}community.descriptor {}}{}} Only');
-        cy.get('[data-cy=htmlEmailFooter]').click().type('For {{}{{} community.descriptor {}}{}} Only');
-        cy.get('[data-cy=ptFooterTitle]').click();
-        cy.get('[data-cy=plaintextEmailFooter]').click().type('For {{}{{}community.descriptor {}}{}} Only');
+        cy.get('[data-cy=htmlHeader]').click().type('For {{}{{} community.descriptor {}}{}} Only');
+
+        cy.get('[data-cy=plainTextHeader]').click().type('For {{}{{}community.descriptor {}}{}} Only');
+        cy.get('[data-cy=htmlFooter]').click().type('For {{}{{} community.descriptor {}}{}} Only');
+
+        cy.get('[data-cy=plainTextFooter]').click().type('For {{}{{}community.descriptor {}}{}} Only');
         cy.get('[data-cy=emailTemplateSettingsSave]').click();
         cy.logout();
 
@@ -231,7 +231,7 @@ describe('Verify Email Tests', () => {
         cy.get('#lastName').type("Smith")
         cy.get('#email').type("rob.smith@madeup.org")
         cy.get('#password').type("password")
-        cy.get('#password_confirmation').type("password")
+        cy.get('#passwordConfirmation').type("password")
         cy.contains('Create Account').click()
         cy.getHeaderFromEmail()
           .then((header) => {

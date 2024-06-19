@@ -90,7 +90,7 @@ describe('Metrics Using User Tags Tests', () => {
             cy.wait('@getConfig');
 
             cy.clickNav('Metrics');
-            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]')
+            cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]')
                 .contains('Many Values');
             cy.get(`${userTagsTableSelector} th`)
                 .contains('Best Label');
@@ -120,7 +120,7 @@ describe('Metrics Using User Tags Tests', () => {
             cy.wait('@getConfig');
 
             cy.clickNav('Metrics');
-            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]')
+            cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]')
               .contains('Many Values');
 
             cy.get(`${userTagsTableSelector} th`)
@@ -141,20 +141,6 @@ describe('Metrics Using User Tags Tests', () => {
             cy.get(`${userTagsTableSelector} th`)
               .contains('Best Label')
               .click();
-            const expected1 = [];
-            for (let i = 0; i < 10; i += 1) {
-                expected1.push([
-                    {
-                        colIndex: 0,
-                        value: `tag${24 - i}`
-                    },
-                ]);
-            }
-            cy.validateTable(userTagsTableSelector, expected1, 10, true, 25);
-
-            cy.get(`${userTagsTableSelector} th`)
-              .contains('Best Label')
-              .click();
             const expected2 = [
                 [{
                     colIndex: 0,
@@ -166,35 +152,35 @@ describe('Metrics Using User Tags Tests', () => {
                 }],
                 [{
                     colIndex: 0,
-                    value: 'tag2'
+                    value: 'tag10'
                 }],
                 [{
                     colIndex: 0,
-                    value: 'tag3'
+                    value: 'tag11'
                 }],
                 [{
                     colIndex: 0,
-                    value: 'tag4'
+                    value: 'tag12'
                 }],
                 [{
                     colIndex: 0,
-                    value: 'tag5'
+                    value: 'tag13'
                 }],
                 [{
                     colIndex: 0,
-                    value: 'tag6'
+                    value: 'tag14'
                 }],
                 [{
                     colIndex: 0,
-                    value: 'tag7'
+                    value: 'tag15'
                 }],
                 [{
                     colIndex: 0,
-                    value: 'tag8'
+                    value: 'tag16'
                 }],
                 [{
                     colIndex: 0,
-                    value: 'tag9'
+                    value: 'tag17'
                 }],
             ];
             cy.validateTable(userTagsTableSelector, expected2, 10, true, 25);
@@ -205,7 +191,7 @@ describe('Metrics Using User Tags Tests', () => {
             cy.wait('@getConfig');
 
             cy.clickNav('Metrics');
-            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]')
+            cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]')
                 .contains('Many Values');
             cy.get('[data-cy="userTagTable-tagFilter"]')
                 .type('aG2');
@@ -246,7 +232,7 @@ describe('Metrics Using User Tags Tests', () => {
             cy.wait('@getConfig');
 
             cy.clickNav('Metrics');
-            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]')
+            cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]')
                 .contains('Many Values');
             cy.get('[data-cy="userTagTable-tagFilter"]')
                 .type('aG2{enter}');
@@ -285,7 +271,7 @@ describe('Metrics Using User Tags Tests', () => {
             cy.wait('@getConfig');
 
             cy.clickNav('Metrics');
-            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]')
+            cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]')
                 .contains('Many Values');
             cy.get('[data-cy="userTagTable-tagFilter"]')
                 .type('aG2{enter}');
@@ -303,7 +289,7 @@ describe('Metrics Using User Tags Tests', () => {
             cy.wait('@getConfig');
 
             cy.clickNav('Metrics');
-            cy.get('[data-cy="userTagChart"] [data-cy="metricsCard-header"]')
+            cy.get('[data-cy="userTagChart"] [data-pc-section="header"]')
                 .contains('Some Values (Top 20)');
             cy.get('[data-cy="userTagChart"]')
                 .contains('tag0: 21 users');
@@ -361,11 +347,11 @@ describe('Metrics Using User Tags Tests', () => {
             cy.wait('@getConfig');
 
             cy.clickNav('Metrics');
-            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsCard-header"]').contains('Many Values');
+            cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]').contains('Many Values');
             cy.get(`${userTagsTableSelector} th`).contains('Best Label');
             cy.get(`${userTagsTableSelector} th`).contains('# Users');
 
-            cy.get(`${userTagsTableSelector} [data-cy="userTagTable_viewMetricsBtn"]`).first().click();
+            cy.get(`${userTagsTableSelector} [data-cy="userTagTable_viewMetricsLink"]`).first().click();
 
             cy.get('[data-cy=levelsChart]')
               .contains('Level 5: 0 users');
@@ -382,8 +368,8 @@ describe('Metrics Using User Tags Tests', () => {
             cy.get(`${usersTableSelector}`).contains('User').click();
             cy.wait('@getUsers')
 
-            cy.get('[data-cy="levelsChart"] [data-cy="metricsCard-header"]').contains('Overall Levels for Best Label: tag0')
-            cy.get('[data-cy="usersTableMetric"] [data-cy="metricsCard-header"]').contains('Users for Best Label: tag0')
+            cy.get('[data-cy="levelsChart"] [data-pc-section="header"]').contains('Overall Levels for Best Label: tag0')
+            cy.get('[data-cy="usersTableMetric"] [data-pc-section="header"]').contains('Users for Best Label: tag0')
 
             cy.get('[data-cy="usr_progress-user0"] [data-cy="progressPercent"]').should('have.text', '50%')
             cy.get('[data-cy="usr_progress-user0"] [data-cy="progressCurrentPoints"]').should('have.text', '100')
@@ -391,7 +377,7 @@ describe('Metrics Using User Tags Tests', () => {
             cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '25')
 
             cy.get('[data-cy="breadcrumb-Metrics"]').click()
-            cy.get('[data-cy="cell_tagValue-tag5"] [data-cy="userTagTable_viewMetricsBtn"]').click()
+            cy.get('[data-cy="cell_tagValue-tag5"] [data-cy="userTagTable_viewMetricsLink"]').click()
             cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '20')
         });
     }

@@ -26,6 +26,8 @@ describe('App Features Tests', () => {
         });
     });
 
+    const upgradeMsg = 'New SkillTree Software Version is Available'
+
     it('display new version banner when software is updated', () => {
         cy.intercept('/admin/projects/proj1/subjects', (req) => {
             req.reply((res) => {
@@ -40,7 +42,7 @@ describe('App Features Tests', () => {
          });*/
         cy.get('[data-cy=subPageHeader]')
             .contains('Projects');
-        cy.contains('New Software Version is Available')
+        cy.contains(upgradeMsg)
             .should('not.exist');
         cy.get('[data-cy=projectCard]')
             .last()
@@ -48,39 +50,44 @@ describe('App Features Tests', () => {
             .click();
         cy.wait('@getSubjects');
 
-        cy.contains('New Software Version is Available');
+        cy.contains(upgradeMsg);
 
         cy.contains('Here')
             .click();
-        cy.contains('New Software Version is Available')
+        cy.contains(upgradeMsg)
             .should('not.exist');
     });
 
     it('do not display new version banner if lib version in headers is older than lib version in local storage', () => {
+        cy.visit('/administrator/');
+        cy.get('[data-cy=subPageHeader]').contains('Projects');
+
         cy.intercept('/admin/projects/proj1/subjects', (req) => {
             req.reply((res) => {
-                res.send(200, [], { 'skills-client-lib-version': dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 30) });
+                res.send(200, [], { 'skills-client-lib-version': dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 500) });
             });
         }).as('getSubjects');
 
-        cy.visit('/administrator/');
-        cy.get('[data-cy=subPageHeader]')
-            .contains('Projects');
-        cy.get('[data-cy=projectCard]')
-            .last()
-            .contains('Manage')
-            .click();
-        cy.wait('@getSubjects');
-        /*cy.injectAxe();
-        cy.violationLoggingFunction().then((loggingFunc) => {
-            cy.checkA11y(null, null, loggingFunc);
-        });*/
+        cy.contains(upgradeMsg)
+          .should('not.exist');
 
-        cy.contains('New Software Version is Available')
-            .should('not.exist');
+        cy.get('[data-cy="projCard_proj1_manageLink"]').click()
+        cy.wait('@getSubjects');
+
+
+        cy.contains(upgradeMsg)
+          .should('not.exist');
+
+
     });
 
     it('access denied should show authorization failure page not error page', () => {
+
+        cy.createSubject(1,1)
+
+        cy.on('uncaught:exception', (err, runnable) => {
+            return false
+        })
 
         cy.intercept({
             method: 'GET',
@@ -98,7 +105,7 @@ describe('App Features Tests', () => {
         /*cy.injectAxe();*/
         cy.wait('@loadSubject');
         cy.url()
-            .should('include', '/not-authorized');
+            .should('include', '/error');
         cy.contains('User Not Authorized')
             .should('be.visible');
         /*cy.violationLoggingFunction().then((loggingFunc) => {
@@ -127,13 +134,13 @@ describe('App Features Tests', () => {
             .click();
 
         // validate help button
-        cy.get('[data-cy="helpButtonSupportLinkLabel_Email Us"]')
+        cy.get('[data-pc-name="menu"] [aria-label="Email Us"]')
             .contains('Email Us');
-        cy.get('[data-cy="helpButtonSupportLinkLabel_Email Us"]')
+        cy.get('[data-pc-name="menu"] [aria-label="Email Us"] a')
             .should('have.attr', 'href', 'mailto:skilltree@someemail.com');
-        cy.get('[data-cy="helpButtonSupportLinkLabel_Support Center"]')
+        cy.get('[data-pc-name="menu"] [aria-label="Support Center"]')
             .contains('Support Center');
-        cy.get('[data-cy="helpButtonSupportLinkLabel_Support Center"]')
+        cy.get('[data-pc-name="menu"] [aria-label="Support Center"] a')
             .should('have.attr', 'href', 'https://skilltreesupport.com');
 
         // validate footer

@@ -152,7 +152,7 @@ describe('Login Tests', () => {
         cy.get('[data-cy=login]')
             .should('be.disabled');
 
-        const expectedText = 'Password cannot be less than 8 characters.';
+        const expectedText = 'Password must be at least 8 characters';
 
         cy.get('#username')
             .type('validEmail@skills.org');
@@ -177,7 +177,7 @@ describe('Login Tests', () => {
         cy.get('[data-cy=login]')
             .should('be.disabled');
 
-        const expectedText = 'Password cannot exceed 40 characters';
+        const expectedText = 'Password must be at most 40 characters';
         const invalidPassword = Array(41)
             .fill('a')
             .join('');
@@ -208,7 +208,7 @@ describe('Login Tests', () => {
         cy.get('[data-cy=login]')
             .should('be.disabled');
 
-        const expectedText = 'Email Address cannot be less than 5 characters.';
+        const expectedText = 'Email Address must be at least 5 characters';
 
         cy.get('#username')
             .type('v@s');
@@ -246,7 +246,7 @@ describe('Login Tests', () => {
         cy.get('#username')
             .clear();
         cy.get('#username')
-            .type('almost@dkda');
+            .type('almost@');
         cy.get('[data-cy=login]')
             .should('be.disabled');
         cy.contains(expectedText);

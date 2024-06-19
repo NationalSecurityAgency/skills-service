@@ -106,267 +106,44 @@ describe('My Progress Breadcrumb Tests', () => {
         cy.loginAsDefaultUser();
     });
 
-    it('test breadcrumbs starting on Admin page', function () {
-        cy.visit('/administrator');
-        cy.get('[data-cy=inception-button]')
-            .click();
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .contains('Dashboard Skills')
-            .should('be.visible');
-
-        cy.dashboardCd()
-            .contains('Overall Points');
-        cy.get('[data-cy="breadcrumb-Projects"]')
-            .should('be.visible');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('be.visible');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('exist');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains('Dashboard Skills')
-            .should('be.visible');
-    });
-
-    it('test breadcrumbs starting on Project Overview page', function () {
-        cy.visit('/administrator/skills?skillsClientDisplayPath=/');
-
-        cy.dashboardCd()
-            .contains('Overall Points');
-        cy.get('[data-cy="breadcrumb-Projects"]')
-            .should('be.visible');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('be.visible');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('exist');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains('Dashboard Skills')
-            .should('be.visible');
-    });
-
     it('test breadcrumbs starting on Rank page', function () {
-        cy.visit('/administrator/skills?skillsClientDisplayPath=/rank');
+        cy.visit('/administrator/skills/Inception/rank');
 
-        cy.dashboardCd()
-            .contains('My Rank');
-        cy.get('[data-cy="breadcrumb-Projects"]')
-            .should('be.visible');
+        cy.get('[data-cy="levelBreakdownChart-animationEnded"]')
+        cy.get('[data-cy="title"]').contains('My Rank');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Projects"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Dashboard Skills"]')
+        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"]').should('have.length', 2)
+        cy.get('[data-pc-name="breadcrumb"] [data-cy="breadcrumb-Rank"]')
 
-        cy.get('[data-cy=breadcrumb-Rank]')
-            .should('exist');
-        cy.get('[data-cy=breadcrumb-Rank]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('exist');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Projects.*Dashboard Skills.*Rank.*$/))
-            .should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Dashboard Skills"]').click()
+        cy.get('[data-cy="title"]').contains('Dashboard Skills');
 
-        cy.get('[data-cy=breadcrumb-item]')
-            .its('length')
-            .should('eq', 3);
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(0)
-            .should('contain.text', 'Projects');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(1)
-            .should('contain.text', 'Dashboard Skills');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(2)
-            .should('contain.text', 'Rank');
-
-        // back to home page
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .click();
-        cy.dashboardCd()
-            .contains('Overall Points');
-    });
-
-    it('test breadcrumbs starting on Subject page', function () {
-        cy.visit('/administrator/skills?skillsClientDisplayPath=/subjects/Dashboard');
-
-        cy.dashboardCd()
-            .contains('Dashboard');
-        cy.get('[data-cy="breadcrumb-Projects"]')
-            .should('be.visible');
-
-        cy.get('[data-cy=breadcrumb-Dashboard]')
-            .should('exist');
-        cy.get('[data-cy=breadcrumb-Dashboard]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('exist');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Projects.*Dashboard Skills.*Subject:\s+Dashboard.*$/))
-            .should('be.visible');
-
-        cy.get('[data-cy=breadcrumb-item]')
-            .its('length')
-            .should('eq', 3);
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(0)
-            .should('contain.text', 'Projects');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(1)
-            .should('contain.text', 'Dashboard Skills');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(2)
-            .should('contain.text', 'Subject: Dashboard');
-
-        // back to home page
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .click();
-        cy.dashboardCd()
-            .contains('Overall Points');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Projects"]')
+        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"]').should('have.length', 1)
+        cy.get('[data-pc-name="breadcrumb"] [data-cy="breadcrumb-Dashboard Skills"]')
     });
 
     it('test breadcrumbs starting on Skill page', function () {
-        cy.visit('/administrator/skills?skillsClientDisplayPath=/subjects/Dashboard/skills/VisitDashboardSkills');
+        cy.visit('/administrator/skills/Inception/subjects/Dashboard/skills/VisitDashboardSkills');
 
-        cy.dashboardCd()
-            .contains('Visit Dashboard Skills');
-        cy.get('[data-cy="breadcrumb-Projects"]')
-            .should('be.visible');
+        cy.get('[data-cy="title"]').contains('Skill Overview');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Projects"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Dashboard Skills"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Dashboard"]')
+        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"]').should('have.length', 3)
+        cy.get('[data-pc-name="breadcrumb"] [data-cy="breadcrumb-VisitDashboardSkills"]')
 
-        cy.get('[data-cy=breadcrumb-VisitDashboardSkills]')
-            .should('exist');
-        cy.get('[data-cy=breadcrumb-VisitDashboardSkills]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Dashboard]')
-            .should('exist');
-        cy.get('[data-cy=breadcrumb-Dashboard]')
-            .should('have.attr', 'href');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('exist');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Projects.*Dashboard Skills.*Subject:\s+Dashboard.*Skill:\s+VisitDashboardSkills$/))
-            .should('be.visible');
 
-        cy.get('[data-cy=breadcrumb-item]')
-            .its('length')
-            .should('eq', 4);
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(0)
-            .should('contain.text', 'Projects');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(1)
-            .should('contain.text', 'Dashboard Skills');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(2)
-            .should('contain.text', 'Subject: Dashboard');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(3)
-            .should('contain.text', 'Skill: VisitDashboardSkills');
-
-        // back to home page
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .click();
-        cy.dashboardCd()
-            .contains('Overall Points');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Dashboard"]').click()
+        cy.get('[data-cy="title"]').contains('Dashboard');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Projects"]')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy="breadcrumb-Dashboard Skills"]')
+        cy.get('[data-pc-name="breadcrumb"] [data-pc-section="action"]').should('have.length', 2)
+        cy.get('[data-pc-name="breadcrumb"] [data-cy="breadcrumb-Dashboard"]')
     });
 
-    it('test breadcrumbs starting on Skill page', function () {
-        cy.visit('/administrator/skills?skillsClientDisplayPath=/subjects/Dashboard/skills/VisitDashboardSkills');
 
-        cy.dashboardCd()
-            .contains('Visit Dashboard Skill');
-        cy.get('[data-cy="breadcrumb-Projects"]')
-            .should('be.visible');
-
-        cy.get('[data-cy=breadcrumb-VisitDashboardSkills]')
-            .should('exist');
-        cy.get('[data-cy=breadcrumb-VisitDashboardSkills]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Dashboard]')
-            .should('exist');
-        cy.get('[data-cy=breadcrumb-Dashboard]')
-            .should('have.attr', 'href');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('exist');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Projects.*Dashboard Skills.*Subject:\s+Dashboard.*Skill:\s+VisitDashboardSkills$/))
-            .should('be.visible');
-
-        cy.get('[data-cy=breadcrumb-item]')
-            .its('length')
-            .should('eq', 4);
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(0)
-            .should('contain.text', 'Projects');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(1)
-            .should('contain.text', 'Dashboard Skills');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(2)
-            .should('contain.text', 'Subject: Dashboard');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(3)
-            .should('contain.text', 'Skill: VisitDashboardSkills');
-
-        // back to home page
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .click();
-        cy.dashboardCd()
-            .contains('Overall Points');
-    });
-
-    it('test breadcrumbs starting on Subject Rank page', function () {
-        cy.visit('/administrator/skills?skillsClientDisplayPath=/subjects/Dashboard/rank');
-
-        cy.dashboardCd()
-            .contains('My Rank');
-        cy.get('[data-cy="breadcrumb-Projects"]')
-            .should('be.visible');
-
-        cy.get('[data-cy=breadcrumb-Rank]')
-            .should('exist');
-        cy.get('[data-cy=breadcrumb-Rank]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Dashboard]')
-            .should('exist');
-        cy.get('[data-cy=breadcrumb-Dashboard]')
-            .should('have.attr', 'href');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('exist');
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Projects.*Dashboard Skills.*Subject:\s+Dashboard.*Rank$/))
-            .should('be.visible');
-
-        cy.get('[data-cy=breadcrumb-item]')
-            .its('length')
-            .should('eq', 4);
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(0)
-            .should('contain.text', 'Projects');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(1)
-            .should('contain.text', 'Dashboard Skills');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(2)
-            .should('contain.text', 'Subject: Dashboard');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(3)
-            .should('contain.text', 'Rank');
-
-        // back to home page
-        cy.get('[data-cy="breadcrumb-Dashboard Skills"]')
-            .click();
-        cy.dashboardCd()
-            .contains('Overall Points');
-    });
 
 });
 

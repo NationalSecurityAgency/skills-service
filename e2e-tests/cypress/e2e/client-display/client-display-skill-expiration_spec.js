@@ -62,11 +62,11 @@ describe('Client Display Expiration Tests', () => {
 
         cy.get('[data-cy="selfReportAlert"]')
             .contains('You just earned 50 points!');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
-        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
-        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('50 / 100 Points');
@@ -81,11 +81,11 @@ describe('Client Display Expiration Tests', () => {
 
         cy.get('[data-cy="selfReportAlert"]')
           .contains('You just earned 50 points!');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
           .contains('50');
-        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
           .contains('50');
-        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
           .contains('50');
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
           .contains('50 / 100 Points');
@@ -114,8 +114,8 @@ describe('Client Display Expiration Tests', () => {
 
         cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: Cypress.env('proxyUser'), date: moment.utc().format('YYYY-MM-DD HH:mm') })
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, 'Subject 1', true);
 
         cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
           .should('exist');
@@ -123,11 +123,11 @@ describe('Client Display Expiration Tests', () => {
           .should('not.exist');
         cy.cdClickSkill(0);
 
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
           .contains('100');
-        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
           .contains('0');
-        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
           .contains('50');
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
           .contains('100 / 100 Points');
@@ -140,11 +140,11 @@ describe('Client Display Expiration Tests', () => {
 
         cy.get('[data-cy="selfReportAlert"]')
           .contains('You just retained your 100 points!');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
           .contains('100');
-        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
           .contains('0');
-        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
           .contains('50');
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
           .contains('100 / 100 Points');
@@ -158,11 +158,11 @@ describe('Client Display Expiration Tests', () => {
 
         cy.get('[data-cy="selfReportAlert"]')
           .contains('You just earned 50 points!');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
           .contains('50');
-        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
           .contains('50');
-        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
           .contains('50');
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
           .contains('50 / 100 Points');
@@ -175,8 +175,8 @@ describe('Client Display Expiration Tests', () => {
         cy.get(`[data-cy="expirationDate"]`).should('exist');
         cy.get(`[data-cy="expirationDate"]`).contains('perform this skill to keep your points!')
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, 'Subject 1', true);
 
         cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
           .should('not.exist');
@@ -192,8 +192,8 @@ describe('Client Display Expiration Tests', () => {
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: outsideTheGracePeriod.format('YYYY-MM-DD HH:mm') })
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: outsideTheGracePeriod.add(1, 'day').format('YYYY-MM-DD HH:mm') })
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, 'Subject 1', true);
 
         cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
           .should('exist');
@@ -210,8 +210,8 @@ describe('Client Display Expiration Tests', () => {
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: withinTheGracePeriod.format('YYYY-MM-DD HH:mm') })
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: Cypress.env('proxyUser'), date: withinTheGracePeriod.add(1, 'day').format('YYYY-MM-DD HH:mm') })
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, 'Subject 1', true);
 
         cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
           .should('not.exist');
@@ -242,8 +242,8 @@ describe('Client Display Expiration Tests', () => {
         const thirdRuntime = moment.utc().add(incrementStartDays+2, 'day').hour(hourOfRun).minute(0).second(0).millisecond(0)
         cy.log(`currentHourOfDay [${currentHourOfDay}], firstRuntime [${firstRuntime}], from now [${firstRuntime.fromNow()}]`);
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, 'Subject 1', true);
 
         cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
           .should('exist');

@@ -59,8 +59,8 @@ describe('Metrics Tests', () => {
             .contains('Generate')
             .should('be.disabled');
 
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]')
-            .select('Subject 1');
+         // cy.selectItem('[data-cy="filterSelector"]', 'Project');
+        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate')
             .should('not.be.disabled');
@@ -121,8 +121,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]')
-            .select('Subject 1');
+        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate')
             .click();
@@ -195,8 +194,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]')
-            .select('Subject 1');
+        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate')
             .click();
@@ -273,8 +271,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]')
-            .select('Subject 1');
+        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate')
             .click();
@@ -335,8 +332,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]')
-            .select('Subject 1');
+        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate')
             .click();
@@ -389,8 +385,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]')
-            .select('Subject 1');
+        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate')
             .click();
@@ -442,8 +437,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]')
-            .select('Subject 1');
+        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate')
             .click();

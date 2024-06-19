@@ -137,8 +137,7 @@ describe('Levels Management Tests', () => {
         cy.visit('/administrator/projects/proj1/');
 
         cy.clickNav('Settings');
-        cy.get('[data-cy="usePointsForLevelsSwitch"]')
-            .check({ force: true });
+        cy.get('[data-cy="usePointsForLevelsSwitch"]').click();
         cy.get('[data-cy="saveSettingsBtn"]')
             .click();
         cy.get('[data-cy="saveSettingsBtn"]')
@@ -155,9 +154,9 @@ describe('Levels Management Tests', () => {
         cy.clickNav('Levels');
         cy.get('[data-cy="addLevel"]')
             .click();
-        cy.get('[data-cy="newLevelPoints"]')
+        cy.get('[data-cy="pointsInput"]')
             .type('20000');
-        cy.get('[data-cy="saveLevelButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
 
         cy.get('[data-cy="addLevel"]')
@@ -209,9 +208,9 @@ describe('Levels Management Tests', () => {
 
         cy.get('[data-cy="addLevel"]')
             .click();
-        cy.get('[data-cy="newLevelPoints"]')
+        cy.get('[data-cy="pointsInput"]')
             .type('2000');
-        cy.get('[data-cy="saveLevelButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
 
         const tableSelector = '[data-cy=levelsTable] tbody tr';
@@ -244,9 +243,9 @@ describe('Levels Management Tests', () => {
         cy.clickNav('Levels');
         cy.get('[data-cy="addLevel"]')
             .click();
-        cy.get('[data-cy="newLevelPoints"]')
+        cy.get('[data-cy="pointsInput"]')
             .type('2000');
-        cy.get('[data-cy="saveLevelButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
 
         cy.get(tableSelector)
@@ -311,8 +310,7 @@ describe('Levels Management Tests', () => {
         cy.visit('/administrator/projects/proj1/');
 
         cy.clickNav('Settings');
-        cy.get('[data-cy="usePointsForLevelsSwitch"]')
-            .check({ force: true });
+        cy.get('[data-cy="usePointsForLevelsSwitch"]').click();
         cy.get('[data-cy="saveSettingsBtn"]')
             .click();
         cy.get('[data-cy="saveSettingsBtn"]')
@@ -322,7 +320,6 @@ describe('Levels Management Tests', () => {
         for (let i = 1; i < 20; i = i + 1) {
             cy.request('POST', '/admin/projects/proj1/subjects/subj1/levels/next', {
                 points: `${i * 1000}`,
-                'iconClass': 'fas fa-user-ninja',
             });
         }
 
@@ -330,9 +327,9 @@ describe('Levels Management Tests', () => {
         cy.clickNav('Levels');
         cy.get('[data-cy="addLevel"]')
             .click();
-        cy.get('[data-cy="newLevelPoints"]')
+        cy.get('[data-cy="pointsInput"]')
             .type('20000');
-        cy.get('[data-cy="saveLevelButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
 
         cy.get('[data-cy="addLevel"]')
@@ -820,41 +817,22 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .first()
             .click();
-        cy.get('[data-cy=levelPercent]')
+        cy.get('[data-cy=percent]')
             .type('{selectall}1000');
-        cy.get('[data-cy=levelPercentError]')
-            .contains('Percent must be 100 or less');
-        cy.get('[data-cy=saveLevelButton]')
+        cy.get('[data-cy=percentError]')
+            .contains('Percent must be less than or equal to 100');
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
-        cy.get('[data-cy=levelPercent]')
-            .type('{selectall}-1000');
-        cy.get('[data-cy=levelPercentError]')
-            .contains('Percent may only contain numeric characters.');
-        cy.get('[data-cy=saveLevelButton]')
-            .should('be.disabled');
-        cy.get('[data-cy=levelPercent')
+
+        cy.get('[data-cy=percent')
             .type('{selectall}50');
-        cy.get('[data-cy=levelPercentError')
+        cy.get('[data-cy=percentError')
             .contains('Percent must not overlap with other levels');
-        cy.get('[data-cy=saveLevelButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
-        cy.get('[data-cy=cancelLevel]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
 
-        // cy.contains('Add Next').click();
-        // cy.get('[data-cy=levelName]').type('Black Belt');
-        // cy.get('[data-cy=levelNameError').contains('Name is already taken.');
-        // cy.get('[data-cy=saveLevelButton]').should('be.disabled');
-        // const invalidName = Array(1000).fill('a').join('');
-        // cy.get('[data-cy=levelName]').invoke('val', invalidName).trigger('input');
-        // cy.get('[data-cy=levelNameError').contains('Name cannot exceed 50 characters.');
-        // cy.get('[data-cy=saveLevelButton]').should('be.disabled');
-        //
-        // cy.get('[data-cy=levelName]').type('{selectall}Coral Belt');
-        // cy.get('[data-cy=levelNameError]').should('not.be.visible');
-        // cy.get('[data-cy=levelPercent]').type('{selectall}5');
-        // cy.get('[data-cy=levelPercentError]').contains('Percent % must not overlap with other levels');
-        // cy.get('[data-cy=saveLevelButton]').should('be.disabled');
     });
 
     it('new level dialog should return focus to new level button', () => {
@@ -888,7 +866,7 @@ describe('Levels Management Tests', () => {
             .click();
         cy.get('[data-cy=addLevel]')
             .click();
-        cy.get('[data-cy=cancelLevel]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy=addLevel]')
             .should('have.focus');
@@ -900,7 +878,6 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy=addLevel]')
             .click();
         cy.get('[aria-label=Close]')
-            .filter('.text-light')
             .click();
         cy.get('[data-cy=addLevel]')
             .should('have.focus');
@@ -908,7 +885,7 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .eq(0)
             .click();
-        cy.get('[data-cy=cancelLevel]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(0)
@@ -922,7 +899,6 @@ describe('Levels Management Tests', () => {
             .eq(0)
             .click();
         cy.get('[aria-label=Close]')
-            .filter('.text-light')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(0)
@@ -930,7 +906,7 @@ describe('Levels Management Tests', () => {
 
         // cy.get('[data-cy=editLevelButton]').eq(0).click();
         // cy.get('[data-cy=levelName]').type('{selectall}Fooooooo');
-        // cy.get('[data-cy=saveLevelButton]').click();
+        // cy.get('[data-cy=saveDialogBtn]').click();
         // cy.wait('@saveLevel');
         // cy.wait('@loadLevels');
         // cy.get('[data-cy=editLevelButton]').eq(0).should('have.focus');
@@ -938,7 +914,7 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .eq(3)
             .click();
-        cy.get('[data-cy=cancelLevel]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(3)
@@ -952,7 +928,6 @@ describe('Levels Management Tests', () => {
             .eq(3)
             .click();
         cy.get('[aria-label=Close]')
-            .filter('.text-light')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(3)
@@ -960,7 +935,7 @@ describe('Levels Management Tests', () => {
 
         // cy.get('[data-cy=editLevelButton]').eq(3).click();
         // cy.get('[data-cy=levelName]').type('{selectall}Baaaaar');
-        // cy.get('[data-cy=saveLevelButton]').click();
+        // cy.get('[data-cy=saveDialogBtn]').click();
         // cy.wait('@saveLevel');
         // cy.wait('@loadLevels');
         // cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');

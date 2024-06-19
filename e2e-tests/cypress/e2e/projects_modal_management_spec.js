@@ -49,7 +49,7 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=deleteProjBtn]')
             .eq(0)
             .click();
-        cy.get('[data-cy=closeRemovalSafetyCheck]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.wait(200);
         cy.get('[data-cy=deleteProjBtn]')
@@ -67,7 +67,7 @@ describe('Projects Modal Management Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
         cy.get('[data-cy="inception-button"]').contains('Level');
-        cy.get('[data-cy="noContent"]').contains('No Projects Yet');
+        cy.get('[data-cy="noProjectsYet"]').contains('No Projects Yet');
         cy.get('[data-cy=newProjectButton]').should('be.enabled')
         cy.get('[data-cy=newProjectButton]')
             .focus()
@@ -76,7 +76,7 @@ describe('Projects Modal Management Tests', () => {
             .should('have.value', '');
         cy.get('[data-cy="projectNameError"]')
             .should('have.value', '');
-        cy.get('[data-cy=closeProjectButton]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy="projectName"]')
             .should('not.exist');
@@ -96,7 +96,7 @@ describe('Projects Modal Management Tests', () => {
         cy.wait('@loadProjects');
         cy.get('[data-cy="inception-button"]').contains('Level');
 
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click();
         cy.get('[data-cy="projectName"]')
             .type('test');
         cy.get('[data-cy="projectName"]')
@@ -114,7 +114,7 @@ describe('Projects Modal Management Tests', () => {
             .should('have.value', 'test');
         cy.get('[data-cy="projectNameError"]')
             .should('have.value', '');
-        cy.get('[data-cy=closeProjectButton]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.contains('test');
     });
@@ -133,8 +133,8 @@ describe('Projects Modal Management Tests', () => {
         cy.wait('@loadProjects');
         cy.get('[data-cy="inception-button"]').contains('Level');
 
-        cy.clickButton('Project');
-        cy.get('[data-cy=closeProjectButton]')
+        cy.get('[data-cy="newProjectButton"]').click()
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy="projectName"]')
             .should('not.exist');
@@ -157,7 +157,7 @@ describe('Projects Modal Management Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
         cy.get('[data-cy="inception-button"]').contains('Level');
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]')
             .type(providedName);
         cy.wait('@projectExists');
@@ -179,14 +179,13 @@ describe('Projects Modal Management Tests', () => {
         cy.wait('@loadProjects');
         cy.get('[data-cy="inception-button"]').contains('Level');
 
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]')
             .type('InitValue');
         cy.getIdField()
             .should('have.value', 'InitValue');
 
-        cy.get('[data-cy="enableIdInput"]')
-            .click({force: true});
+        cy.get('[data-cy="enableIdInput"] input').click();
 
         cy.get('[data-cy="projectName"]')
             .type('MoreValue');
@@ -212,7 +211,7 @@ describe('Projects Modal Management Tests', () => {
 
         cy.get('[data-cy=newProjectButton]')
             .click();
-        cy.get('[data-cy=closeProjectButton]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy=newProjectButton]')
             .should('have.focus');
@@ -221,14 +220,15 @@ describe('Projects Modal Management Tests', () => {
             .click();
         cy.get('[data-cy=projectName]')
             .type('test 123');
-        cy.get('[data-cy=saveProjectButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .click();
         cy.get('[data-cy=newProjectButton]')
             .should('have.focus');
 
         cy.get('[data-cy=newProjectButton]')
             .click();
-        cy.get('[aria-label=Close]')
+        cy.get('[data-cy="projectName"]')
+        cy.get('[data-pc-group-section="headericon"][data-pc-section="closebutton"]')
             .click();
         cy.get('[data-cy=newProjectButton]')
             .should('have.focus');
@@ -249,31 +249,31 @@ describe('Projects Modal Management Tests', () => {
 
         cy.get(proj1EditBtn)
             .click();
-        cy.get('.modal-body [data-cy=projectName]').should('be.visible');
+        cy.get('[data-cy=projectName]').should('be.visible');
         cy.wait(250);
         cy.realPress('Escape');
-        cy.get('.modal-body [data-cy=projectName]').should('not.exist');
+        cy.get('[data-cy=projectName]').should('not.exist');
         cy.wait(600)
         cy.get(proj1EditBtn).should('have.focus');
 
         cy.get(proj1EditBtn).click();
-        cy.get('.modal-body [data-cy=projectName]').should('be.visible');
-        cy.get('.modal-footer [data-cy=closeProjectButton]').click();
-        cy.get('.modal-body [data-cy=projectName]').should('not.exist');
+        cy.get('[data-cy=projectName]').should('be.visible');
+        cy.get('[data-cy=closeDialogBtn]').click();
+        cy.get('[data-cy=projectName]').should('not.exist');
         cy.wait(600)
         cy.get(proj1EditBtn).should('have.focus');
 
         cy.get(proj1EditBtn).click();
-        cy.get('.modal-body [data-cy=projectName]').type('test 123');
-        cy.get('.modal-footer [data-cy=saveProjectButton]').click();
-        cy.get('.modal-body [data-cy=projectName]').should('not.exist');
+        cy.get('[data-cy=projectName]').type('test 123');
+        cy.get('[data-cy=saveDialogBtn]').click();
+        cy.get('[data-cy=projectName]').should('not.exist');
         cy.wait(600)
         cy.get(proj1EditBtn).should('have.focus');
 
         cy.get(proj1EditBtn).click();
-        cy.get('.modal-body [data-cy=projectName]').should('be.visible');
-        cy.get('.modal-header [aria-label=Close]').click();
-        cy.get('.modal-body [data-cy=projectName]').should('not.exist');
+        cy.get('[data-cy=projectName]').should('be.visible');
+        cy.get('[data-pc-group-section="headericon"][data-pc-section="closebutton"]').click()
+        cy.get('[data-cy=projectName]').should('not.exist');
         cy.wait(600)
         cy.get(proj1EditBtn).should('have.focus');
     });
@@ -302,7 +302,7 @@ describe('Projects Modal Management Tests', () => {
             .click();
         cy.get('[data-cy=addLevel]')
             .click();
-        cy.get('[data-cy=cancelLevel]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy=addLevel]')
             .should('have.focus');
@@ -313,8 +313,7 @@ describe('Projects Modal Management Tests', () => {
 
         cy.get('[data-cy=addLevel]')
             .click();
-        cy.get('[aria-label=Close]')
-            .filter('.text-light')
+        cy.get('[data-pc-section="closebuttonicon"]')
             .click();
         cy.get('[data-cy=addLevel]')
             .should('have.focus');
@@ -322,7 +321,7 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .eq(0)
             .click();
-        cy.get('[data-cy=cancelLevel]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(0)
@@ -335,8 +334,7 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .eq(0)
             .click();
-        cy.get('[aria-label=Close]')
-            .filter('.text-light')
+        cy.get('[data-pc-section="closebuttonicon"]')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(0)
@@ -352,7 +350,7 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .eq(3)
             .click();
-        cy.get('[data-cy=cancelLevel]')
+        cy.get('[data-cy=closeDialogBtn]')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(3)
@@ -365,8 +363,7 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .eq(3)
             .click();
-        cy.get('[aria-label=Close]')
-            .filter('.text-light')
+        cy.get('[data-pc-section="closebuttonicon"]')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(3)

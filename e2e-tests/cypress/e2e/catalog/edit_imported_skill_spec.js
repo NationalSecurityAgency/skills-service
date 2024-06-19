@@ -41,29 +41,29 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
         cy.contains('You can change the Point Increment');
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"] input')
             .should('have.value', '100');
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"]')
             .type('1');
-        cy.get('[data-cy="saveSkillButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
 
-        cy.get(`[data-cy="skillsTable-additionalColumns"]`)
-            .contains('Points')
-            .click();
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
+        cy.get('[data-pc-section="closebutton"]').click()
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 2'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '200'
             }],
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 1'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '2,002'
             }],
         ], 5, false, null, false);
@@ -73,8 +73,8 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
         cy.contains('You can change the Point Increment');
-        cy.get('[data-cy="skillPointIncrement"]')
-            .should('have.value', '1001');
+        cy.get('[data-cy="pointIncrement"] input')
+            .should('have.value', '1,001');
 
         // refresh re-validate
         cy.visit('/administrator/projects/proj2/subjects/subj1');
@@ -84,17 +84,17 @@ describe('Edit Imported Skill Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 2'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '200'
             }],
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 1'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '2,002'
             }],
         ], 5, false, null, false);
@@ -104,8 +104,8 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
         cy.contains('You can change the Point Increment');
-        cy.get('[data-cy="skillPointIncrement"]')
-            .should('have.value', '1001');
+        cy.get('[data-cy="pointIncrement"] input')
+            .should('have.value', '1,001');
     });
 
     it('point increment input validation', () => {
@@ -123,36 +123,35 @@ describe('Edit Imported Skill Tests', () => {
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"] input')
             .should('have.value', '100');
 
-        cy.get('[data-cy="skillPointIncrement"]')
+        // input won't allow chars
+        cy.get('[data-cy="pointIncrement"]')
             .type('a');
-        cy.get('[data-cy="skillPointIncrementError"]')
-            .contains('Point Increment may only contain numeric characters.');
-        cy.get('[data-cy="saveSkillButton"]')
-            .should('be.disabled');
+        cy.get('[data-cy="pointIncrement"] input')
+          .should('have.value', '100');
 
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"] input')
             .clear();
-        cy.get('[data-cy="skillPointIncrementError"]')
-            .contains('Point Increment is required');
-        cy.get('[data-cy="saveSkillButton"]')
+        cy.get('[data-cy="pointIncrementError"]')
+            .contains('Point Increment is a required field');
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
 
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"]')
             .type('10001');
-        cy.get('[data-cy="skillPointIncrementError"]')
-            .contains('Point Increment cannot exceed 10000');
-        cy.get('[data-cy="saveSkillButton"]')
+        cy.get('[data-cy="pointIncrementError"]')
+            .contains('Point Increment must be less than or equal to 10000');
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
 
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"] input')
             .clear()
             .type('10000');
-        cy.get('[data-cy="skillPointIncrementError"]')
-            .should('have.value', '');
-        cy.get('[data-cy="saveSkillButton"]')
+        cy.get('[data-cy="pointIncrementError"]')
+            .should('not.exist');
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
     });
 
@@ -172,26 +171,26 @@ describe('Edit Imported Skill Tests', () => {
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"]')
             .type('1');
-        cy.get('[data-cy="closeSkillButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .click();
-        cy.get(`[data-cy="skillsTable-additionalColumns"]`)
-            .contains('Points')
-            .click();
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
+        cy.get('[data-pc-section="closebutton"]').click()
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 2'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '200'
             }],
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 1'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '200'
             }],
         ], 5, false, null, false);
@@ -200,23 +199,23 @@ describe('Edit Imported Skill Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"]')
             .type('1');
-        cy.get('[class="modal-content"] [aria-label="Close"]')
+        cy.get(' [aria-label="Close"]')
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 2'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '200'
             }],
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 1'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '200'
             }],
         ], 5, false, null, false);
@@ -243,29 +242,29 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
         cy.contains('You can change the Point Increment');
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"] input')
             .should('have.value', '100');
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"]')
             .type('1');
-        cy.get('[data-cy="saveSkillButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
 
-        cy.get(`[data-cy="skillsTable-additionalColumns"]`)
-            .contains('Points')
-            .click();
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
+        cy.get('[data-pc-section="closebutton"]').click()
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 2'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '200'
             }],
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 1'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '2,002'
             }],
         ], 5, false, null, false);
@@ -274,13 +273,13 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
         cy.contains('You can change the Point Increment');
-        cy.get('[data-cy="skillPointIncrement"]')
-            .should('have.value', '1001');
+        cy.get('[data-cy="pointIncrement"] input')
+            .should('have.value', '1,001');
 
         // drill-down and validate the points
-        cy.get('[data-cy="closeSkillButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .click();
-        cy.get('[data-cy="manageSkillBtn_skill1"]')
+        cy.get('[data-cy="manageSkillLink_skill1"]')
             .click();
         cy.get('[data-cy="skillOverviewTotalpoints"]')
             .contains('2,002');
@@ -305,12 +304,12 @@ describe('Edit Imported Skill Tests', () => {
             .should('have.text', '400');
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"] input')
             .should('have.value', '100');
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"]')
             .clear()
             .type('33');
-        cy.get('[data-cy="saveSkillButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '266');
@@ -337,12 +336,12 @@ describe('Edit Imported Skill Tests', () => {
             .should('have.text', '200');
         cy.get('[data-cy="editSkillButton_skill2"]')
             .click();
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"] input')
             .should('have.value', '100');
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"]')
             .clear()
             .type('33');
-        cy.get('[data-cy="saveSkillButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.wait('@updateImportedSkill');
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')

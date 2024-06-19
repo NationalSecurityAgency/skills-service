@@ -44,8 +44,8 @@ import './cliend-display-commands';
 import 'cypress-file-upload';
 import 'cypress-wait-until';
 var moment = require('moment-timezone');
-const compareSnapshotCommand = require('cypress-visual-regression/dist/command');
-compareSnapshotCommand({
+const { addCompareSnapshotCommand } = require('cypress-visual-regression/dist/command')
+addCompareSnapshotCommand({
     errorThreshold: 0.01
 });
 
@@ -95,7 +95,8 @@ Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwi
     const params = {
         name : snapName,
         selector,
-        blackout: ((options && options.blackout) || null)
+        blackout: ((options && options.blackout) || null),
+        errorThreshold: options?.errorThreshold
     };
     cy.doMatchSnapshotImage(params);
 })
@@ -103,12 +104,23 @@ Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwi
 Cypress.Commands.add("matchSnapshotImage", (maybeNameOtherwiseCommandOptions) => {
     const options = (maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'object') ? maybeNameOtherwiseCommandOptions : null
     let snapName =getName(maybeNameOtherwiseCommandOptions)
-    const params = { name : snapName, blackout: ((options && options.blackout) || null)};
+    const params = {
+        name : snapName,
+        blackout: ((options && options.blackout) || null),
+        errorThreshold: options?.errorThreshold
+    };
     cy.doMatchSnapshotImage(params);
 })
 
 Cypress.Commands.add("doMatchSnapshotImage", (options) => {
     cy.wait(1500);
+
+    const visualRegressionOptions = {
+        errorThreshold: 1 // in percent
+    }
+    if (options && options.errorThreshold) {
+        visualRegressionOptions.errorThreshold = options.errorThreshold
+    }
     if (options && options.blackout) {
         cy
             // wait for content to be ready
@@ -126,16 +138,16 @@ Cypress.Commands.add("doMatchSnapshotImage", (options) => {
             })
             .then(() => {
                 if (options.selector) {
-                    return cy.get(options.selector).compareSnapshot(options.name)
+                    return cy.get(options.selector).compareSnapshot(options.name, visualRegressionOptions)
                 } else {
-                    return cy.compareSnapshot(options.name);
+                    return cy.compareSnapshot(options.name, visualRegressionOptions);
                 }
             });
     } else {
         if (options.selector) {
-            return cy.get(options.selector).compareSnapshot(options.name)
+            return cy.get(options.selector).compareSnapshot(options.name, visualRegressionOptions)
         } else {
-            return cy.compareSnapshot(options.name);
+            return cy.compareSnapshot(options.name, visualRegressionOptions);
         }
     }
 })
@@ -195,7 +207,7 @@ Cypress.Commands.add("saveVideoAttrs", (projNum, skillNum, videoAttrs) => {
     let requestDone = false;
     if (videoAttrs.file) {
         const fileType = videoAttrs.file.endsWith('mp4') ? 'video/mp4' : 'video/webm';
-        cy.fixture(videoAttrs.file, 'binary')
+        cy.readFile(`cypress/fixtures/${videoAttrs.file}`, 'binary')
             .then((binaryFile) => {
                 const blob = Cypress.Blob.binaryStringToBlob(binaryFile, fileType);
                 formData.set('file', blob, videoAttrs.file);
@@ -289,7 +301,7 @@ Cypress.Commands.add("login", (user, pass) => {
 Cypress.Commands.add("resetEmail", () => {
     cy.request({
        method: "DELETE",
-       url: "http://localhost:1081/api/emails"
+       url: "http://localhost:1080/email/all"
     });
 });
 
@@ -561,8 +573,8 @@ Cypress.Commands.add("finalizeCatalogImport", (projNum = 1) => {
 Cypress.Commands.add("acceptRemovalSafetyCheck", () => {
     cy.contains('Delete Action CANNOT be undone');
     cy.get('[data-cy="currentValidationText"]').type('Delete Me')
-    cy.get('[data-cy="removeButton"]').click();
-    cy.get('[data-cy="removeButton"]').should('not.exist')
+    cy.get('[data-cy="saveDialogBtn"]').click();
+    cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
 });
 
 Cypress.Commands.add("discardChanges", () => {
@@ -695,7 +707,7 @@ Cypress.Commands.add("addCrossProjectLearningPathItem", (projNum, fromSkillNum, 
     cy.request('POST', `/admin/projects/${projectId}/${skill}/prerequisite/${prerequisiteProj}/${prerequisiteSkill}`);
 });
 
-Cypress.Commands.add("doReportSkill", ({project = 1, skill = 1, subjNum = 1, userId = 'user@skills.org', date = '2020-09-12 11:00', failOnError=true, approvalRequestedMsg=null} = {}) => {
+Cypress.Commands.add("doReportSkill", ({project = 1, skill = 1, subjNum = 1, userId = Cypress.env('proxyUser'), date = '2020-09-12 11:00', failOnError=true, approvalRequestedMsg=null} = {}) => {
     let timestamp = null
     if (Number.isInteger(date)) {
         timestamp = date;
@@ -801,7 +813,7 @@ Cypress.Commands.add("getFooterFromEmail", (wait=true) => {
 });
 
 Cypress.Commands.add("getEmails", (expectAtLeastNumEmails = 1) => {
-    const emailUrl = 'http://localhost:1081/api/emails';
+    const emailUrl = 'http://localhost:1080/email';
     cy.waitUntil(() => cy.request(emailUrl).then((response) => response.body && response.body.length >= expectAtLeastNumEmails), {
         errorMsg: `Timed out after 2 minutes while attempting to find at least ${expectAtLeastNumEmails} emails in the test SMTP server (${emailUrl}).`,
         timeout: 120000, // waits up to 2 minutes
@@ -942,7 +954,7 @@ Cypress.Commands.add("clickManageSubject", (subjId) => {
 
 
 Cypress.Commands.add("getIdField", () => {
-    return cy.get("#idInput");
+    return cy.get('[data-cy="idInputValue"]');
 });
 
 
@@ -970,8 +982,9 @@ Cypress.Commands.add('get$', (selector) => {
 });
 
 Cypress.Commands.add('resetDb', () => {
+    // TODO: hopefully `npm version` is not needed anymore and can be removed
     // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
-    cy.exec('npm version', {failOnNonZeroExit: false})
+    // cy.exec('npm version', {failOnNonZeroExit: false})
     cy.exec('npm run backend:resetDb')
     cy.log('reset postgres db')
 });
@@ -1192,7 +1205,7 @@ Cypress.Commands.add('reportHistoryOfEvents', (projId, user, numDays=10, skipWee
 });
 
 Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, onlyVisiblePage = false, numRowsParam = null, validateTotalRows = true, sortColumnName = null) => {
-    cy.get(tableSelector).contains('Loading...').should('not.exist')
+    cy.get(`${tableSelector} [data-pc-section="loadingicon"]`).should('not.exist')
     cy.get(tableSelector).contains('There are no records to show').should('not.exist')
     const rowSelector = `${tableSelector} tbody tr`
     const numRows =  numRowsParam ? numRowsParam : expected.length;
@@ -1218,7 +1231,7 @@ Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, on
             const nextPage = (i / pageSize) + 1;
             const nextPageSize = (i + pageSize <= numRows) ? pageSize : (numRows % pageSize);
             cy.log(`Going to the next page #${nextPage}, next page size is [${nextPageSize}]`);
-            cy.get(tableSelector).get('[data-cy=skillsBTablePaging]').contains(nextPage).click();
+            cy.get(`${tableSelector} [data-pc-name="paginator"] [aria-label="Page ${nextPage}"]`).click();
             cy.get(tableSelector).contains('Loading...').should('not.exist')
             cy.get(rowSelector).should('have.length', nextPageSize).as('cyRows');
         }
@@ -1423,3 +1436,18 @@ Cypress.Commands.add('visitAdmin', () => {
     cy.visit('/administrator');
     cy.get('[data-cy="inception-button"]').contains('Level');
 });
+
+Cypress.Commands.add('selectItem', (selector, item, openPicker = true, autoCompleteDropdown = false) => {
+    if (openPicker) {
+        const trigger = autoCompleteDropdown ? '[data-pc-name="dropdownbutton"]' : '[data-pc-section="trigger"]';
+        const itemToSelect = `${selector} ${trigger}`;
+        cy.get(itemToSelect).click();
+    }
+    cy.get('[data-pc-section="item"]').contains(item).click();
+})
+
+Cypress.Commands.add('filterSelection', (selector, filter) => {
+    let itemToSelect = selector + ' [data-pc-section="trigger"]';
+    cy.get(itemToSelect).click();
+    cy.get('[data-pc-section="filterinput"]').type(filter);
+})

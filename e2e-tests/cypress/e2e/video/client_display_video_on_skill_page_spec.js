@@ -56,7 +56,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
 
         cy.get('@getSkill1VideoCaptionsWithSpy').should('have.been.called');
-        cy.get('[data-cy="breadcrumb-subj1"]').click()
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj1"]').click()
         cy.cdClickSkill(1)
         cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.wait(5000)
@@ -75,7 +75,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
 
-        cy.get('[data-cy="breadcrumb-subj1"]').click()
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj1"]').click()
         cy.cdClickSkill(1)
         cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="viewTranscriptBtn"]').should('not.exist')
@@ -93,7 +93,7 @@ describe('Display Video on Skill Page Tests', () => {
 
         cy.get('[data-cy="videoTranscript"]').should('not.exist')
         cy.get('[data-cy="viewTranscriptBtn"]').click()
-        cy.get('[data-cy="videoTranscript"]').should('have.value', 'another')
+        cy.get('[data-cy="videoTranscript"]').should('have.text', 'another')
         cy.get('[data-cy="certifyTranscriptReadCheckbox"]').should('not.exist')
         cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').should('not.exist')
     });
@@ -113,7 +113,7 @@ describe('Display Video on Skill Page Tests', () => {
 
         cy.get('[data-cy="videoTranscript"]').should('not.exist')
         cy.get('[data-cy="viewTranscriptBtn"]').click()
-        cy.get('[data-cy="videoTranscript"]').should('have.value', 'another')
+        cy.get('[data-cy="videoTranscript"]').should('have.text', 'another')
         cy.get('[data-cy="certifyTranscriptReadCheckbox"]').should('not.exist')
         cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').should('not.exist')
     });
@@ -134,10 +134,10 @@ describe('Display Video on Skill Page Tests', () => {
 
         cy.get('[data-cy="videoTranscript"]').should('not.exist')
         cy.get('[data-cy="viewTranscriptBtn"]').click()
-        cy.get('[data-cy="videoTranscript"]').should('have.value', 'read me')
+        cy.get('[data-cy="videoTranscript"]').should('have.text', 'read me')
         cy.get('[data-cy="certifyTranscriptReadCheckbox"]').should('not.be.checked')
         cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').should('be.disabled')
-        cy.get('[data-cy="certifyTranscriptReadCheckbox"]').click({force: true})
+        cy.get('[data-cy="certifyTranscriptReadCheckbox"] input').click({force: true})
         cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').should('be.enabled')
 
         cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').click()
@@ -150,7 +150,7 @@ describe('Display Video on Skill Page Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="viewTranscriptBtn"]').click()
-        cy.get('[data-cy="videoTranscript"]').should('have.value', 'read me')
+        cy.get('[data-cy="videoTranscript"]').should('have.text', 'read me')
         cy.get('[data-cy="watchVideoAlert"]').should('not.exist')
         cy.get('[data-cy="certifyTranscriptReadCheckbox"]').should('not.exist')
         cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').should('not.exist')
@@ -173,7 +173,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
 
-        cy.get('[data-cy="breadcrumb-subj1"]').click()
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj1"]').click()
         cy.cdClickSkill(1)
         cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="viewTranscriptBtn"]').should('not.exist')
@@ -243,7 +243,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
         cy.wait(18000) // 15-second video but just to be sure added extra 3 seconds
         cy.get('[data-cy="watchVideoMsg"]').should('not.exist')
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '0')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should('have.text', '0 Total')
     });
 
     it('skill with unmet prerequisites will not allow to play the video', () => {

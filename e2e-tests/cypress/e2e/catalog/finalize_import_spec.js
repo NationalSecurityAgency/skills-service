@@ -47,12 +47,12 @@ describe('Finalize Imported Skills Tests', () => {
         cy.visit('/administrator/projects/proj1');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -97,12 +97,12 @@ describe('Finalize Imported Skills Tests', () => {
         cy.visit('/administrator/projects/proj1');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -155,12 +155,12 @@ describe('Finalize Imported Skills Tests', () => {
         cy.visit('/administrator/projects/proj1');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -211,12 +211,12 @@ describe('Finalize Imported Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -255,12 +255,12 @@ describe('Finalize Imported Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Finalizing 2 imported skills');
@@ -307,12 +307,12 @@ describe('Finalize Imported Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -403,12 +403,12 @@ describe('Finalize Imported Skills Tests', () => {
 
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -456,12 +456,12 @@ describe('Finalize Imported Skills Tests', () => {
 
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -507,7 +507,7 @@ describe('Finalize Imported Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -555,12 +555,12 @@ describe('Finalize Imported Skills Tests', () => {
 
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -577,8 +577,7 @@ describe('Finalize Imported Skills Tests', () => {
 
         cy.get('[data-cy="importFromCatalogBtn"]')
             .click();
-        cy.get('[data-cy="skillSelect_proj2-skill3"]')
-            .check({ force: true });
+                cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="importBtn"]')
@@ -590,11 +589,11 @@ describe('Finalize Imported Skills Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="disabledBadge-skill1"]')
             .should('not.exist');
-        cy.get('[data-cy="manageSkillBtn_skill3"]')
+        cy.get('[data-cy="manageSkillLink_skill3"]')
             .should('exist');
-        cy.get('[data-cy="manageSkillBtn_skill2"]')
+        cy.get('[data-cy="manageSkillLink_skill2"]')
             .should('exist');
-        cy.get('[data-cy="manageSkillBtn_skill3"]')
+        cy.get('[data-cy="manageSkillLink_skill3"]')
             .should('exist');
 
         cy.get('[data-cy="importFinalizeAlert"]')
@@ -609,7 +608,7 @@ describe('Finalize Imported Skills Tests', () => {
             .click();
 
         cy.contains('There is 1 skill to finalize.');
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -654,11 +653,11 @@ describe('Finalize Imported Skills Tests', () => {
         cy.get('[data-cy="no-finalize"]')
             .should('exist')
             .contains('Finalization cannot be performed until This is project 1 has at least 100 points. Finalizing currently imported Skills would only bring This is project 1 to 40 points.');
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .click();
 
         cy.createSubject(1, 2);
@@ -671,12 +670,12 @@ describe('Finalize Imported Skills Tests', () => {
         cy.get('[data-cy="no-finalize"]')
             .should('exist')
             .contains('Finalization cannot be performed until Subject 1 has at least 100 points. Finalizing the currently imported skills would only result in Subject 1: 40 points.');
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="finalizeCancelButton"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .click();
 
         cy.createSkill(1, 1, 3, { pointIncrement: 15 });
@@ -686,7 +685,7 @@ describe('Finalize Imported Skills Tests', () => {
         cy.wait('@loadPendingPoints');
         cy.get('[data-cy="no-finalize"]')
             .should('not.exist');
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
     });
 
@@ -734,62 +733,20 @@ describe('Finalize Imported Skills Tests', () => {
             .click();
 
         const tableSelector = '[data-cy="skillsWithOutOfBoundsPoints"]';
-        cy.validateTable(tableSelector, [
-            [{
-                colIndex: 0,
-                value: 'Skill 6'
-            }, {
-                colIndex: 1,
-                value: '20 ( less than 104 )'
-            }],
-            [{
-                colIndex: 0,
-                value: 'Skill 7'
-            }, {
-                colIndex: 1,
-                value: '2,000 ( more than 1,346 )'
-            }],
-            [{
-                colIndex: 0,
-                value: 'Skill 8'
-            }, {
-                colIndex: 1,
-                value: '2,000 ( more than 1,346 )'
-            }],
-        ], 3, true, 4);
+        cy.get(`${tableSelector} [data-p-index="0"]`).contains('Skill 6')
+        cy.get(`${tableSelector} [data-p-index="0"]`).contains('20 ( less than 104 )')
 
-        cy.get('[data-cy="skillsBTablePageSize"]')
-            .select('5');
-        cy.validateTable(tableSelector, [
-            [{
-                colIndex: 0,
-                value: 'Skill 6'
-            }, {
-                colIndex: 1,
-                value: '20 ( less than 104 )'
-            }],
-            [{
-                colIndex: 0,
-                value: 'Skill 7'
-            }, {
-                colIndex: 1,
-                value: '2,000 ( more than 1,346 )'
-            }],
-            [{
-                colIndex: 0,
-                value: 'Skill 8'
-            }, {
-                colIndex: 1,
-                value: '2,000 ( more than 1,346 )'
-            }],
-            [{
-                colIndex: 0,
-                value: 'Skill 9'
-            }, {
-                colIndex: 1,
-                value: '2,000 ( more than 1,346 )'
-            }],
-        ], 5);
+        cy.get(`${tableSelector} [data-p-index="1"]`).contains('Skill 7')
+        cy.get(`${tableSelector} [data-p-index="1"]`).contains('2,000 ( more than 1,346 )')
+
+        cy.get(`${tableSelector} [data-p-index="2"]`).contains('Skill 8')
+        cy.get(`${tableSelector} [data-p-index="2"]`).contains('2,000 ( more than 1,346 )')
+
+        cy.get(`${tableSelector} [data-p-index="3"]`).contains('Skill 9')
+        cy.get(`${tableSelector} [data-p-index="3"]`).contains('2,000 ( more than 1,346 )')
+
+        cy.get(`${tableSelector} [data-p-index="4"]`).should('not.exist')
+
     });
 
     it('Check the point system and warn users when finalizing skills catalog if imported points are outside of the exiting point scheme - no warning', () => {

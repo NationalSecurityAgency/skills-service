@@ -17,11 +17,12 @@
 describe('Configure Video Tests', () => {
 
     const testVideo = '/static/videos/create-quiz.mp4'
+    const videoFile = 'create-subject.webm';
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
         Cypress.Commands.add("visitVideoConfPage", (projNum) => {
-            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-video');
             cy.wait('@getVideoProps')
             cy.wait('@getSkillInfo')
             cy.get('.spinner-border').should('not.exist')
@@ -60,14 +61,14 @@ describe('Configure Video Tests', () => {
 
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        const videoFile = 'create-subject.webm';
-        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile(`cypress/fixtures/${videoFile}`,  { force: true })
+        // cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
         cy.get('[data-cy="videoCaptions"]').type('captions', {delay: 0})
         cy.get('[data-cy="videoTranscript"]').type('transcript', {delay: 0})
         cy.get('[data-cy="saveVideoSettingsBtn"]').click()
         cy.get('[data-cy="savedMsg"]')
 
-        cy.get('[data-cy="videoUrl"]').should('have.value', videoFile)
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', videoFile)
         cy.get('[data-cy="videoCaptions"]').should('have.value','captions')
         cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
         cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTotalDuration"]').should('have.text', '7 seconds')
@@ -80,7 +81,7 @@ describe('Configure Video Tests', () => {
 
         // refresh and re-validate
         cy.visitVideoConfPage();
-        cy.get('[data-cy="videoUrl"]').should('have.value', videoFile)
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', videoFile)
         cy.get('[data-cy="videoCaptions"]').should('have.value','captions')
         cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
         cy.get('[data-cy="saveVideoSettingsBtn"]').click()
@@ -109,7 +110,7 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
 
         cy.get('[data-cy="clearVideoSettingsBtn"]').click()
-        cy.get('footer .btn-danger').contains('Yes, Do clear').click()
+        cy.get('.p-dialog-footer').contains('Yes, Do clear').click()
 
         cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
         cy.get('[data-cy="showExternalUrlBtn"]').should('be.visible')
@@ -179,12 +180,12 @@ describe('Configure Video Tests', () => {
 
         // modify
         cy.get('[data-cy="showFileUploadBtn"]').click();
-        const videoFile = 'create-subject.webm';
-        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile(`cypress/fixtures/${videoFile}`,  { force: true })
+        // cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
         cy.get('[data-cy="videoCaptions"]').type('captions', {delay: 0})
         cy.get('[data-cy="videoTranscript"]').type('transcript', {delay: 0})
 
-        cy.get('[data-cy="videoUrl"]').should('have.value', videoFile)
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', videoFile)
         cy.get('[data-cy="videoCaptions"]').should('have.value','captions')
         cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
@@ -207,7 +208,7 @@ describe('Configure Video Tests', () => {
         cy.saveVideoAttrs(1, 1, vid)
         cy.visitVideoConfPage();
 
-        cy.get('[data-cy="videoUrl"]').should('have.value', vid.file)
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', vid.file)
         cy.get('[data-cy="videoCaptions"]').should('have.value', vid.captions)
         cy.get('[data-cy="videoTranscript"]').should('have.value', vid.transcript)
 
@@ -223,7 +224,7 @@ describe('Configure Video Tests', () => {
 
         // discard changes
         cy.get('[data-cy="discardChangesBtn"]').click()
-        cy.get('[data-cy="videoUrl"]').should('have.value', vid.file)
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', vid.file)
         cy.get('[data-cy="videoCaptions"]').should('have.value', vid.captions)
         cy.get('[data-cy="videoTranscript"]').should('have.value', vid.transcript)
         cy.get('[data-cy="showExternalUrlBtn"]').should('exist')

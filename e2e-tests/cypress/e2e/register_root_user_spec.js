@@ -37,15 +37,15 @@ describe('Register Root Users', () => {
 
         cy.visit('/administrator/');
         cy.contains('New Root Account');
-        cy.get('#firstName')
+        cy.get('[data-cy="requestAccountFirstName"]')
             .type('Robert');
-        cy.get('#lastName')
+        cy.get('[data-cy="requestAccountLastName"]')
             .type('Smith');
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .type(username);
         cy.get('#password')
             .type(pass);
-        cy.get('#password_confirmation')
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
             .type('password');
         cy.contains('Create Account')
             .click();
@@ -75,15 +75,15 @@ describe('Register Root Users', () => {
         cy.wait('@getOauthProviders');
         cy.contains('New Root Account');
 
-        cy.get('#firstName')
+        cy.get('[data-cy="requestAccountFirstName"]')
             .should('not.exist');
-        cy.get('#lastName')
+        cy.get('[data-cy="requestAccountLastName"]')
             .should('not.exist');
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .should('not.exist');
         cy.get('#password')
             .should('not.exist');
-        cy.get('#password_confirmation')
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
             .should('not.exist');
         cy.contains('Create Account')
             .should('not.exist');
@@ -93,16 +93,14 @@ describe('Register Root Users', () => {
     });
 
     it('register root user when Progress and Ranking views are disabled', () => {
-
         cy.intercept('GET', '/public/config', (req) => {
-            req.reply({
-                body: {
-                    rankingAndProgressViewsEnabled: 'false',
-                    needToBootstrap: true,
-                },
+            req.reply((res) => {
+                const result = res.body;
+                result.rankingAndProgressViewsEnabled = 'false';
+                result.needToBootstrap = true;
+                res.send(result);
             });
-        })
-            .as('getConfig');
+        }).as('getConfig');
 
         const username = 'rob.smith@madeup.org';
         const pass = 'password';
@@ -111,15 +109,15 @@ describe('Register Root Users', () => {
         cy.wait('@getConfig');
         cy.contains('New Root Account');
 
-        cy.get('#firstName')
+        cy.get('[data-cy="requestAccountFirstName"]')
             .type('Robert');
-        cy.get('#lastName')
+        cy.get('[data-cy="requestAccountLastName"]')
             .type('Smith');
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .type(username);
         cy.get('#password')
             .type(pass);
-        cy.get('#password_confirmation')
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
             .type('password');
         cy.contains('Create Account')
             .click();
@@ -132,7 +130,7 @@ describe('Register Root Users', () => {
             .click();
         cy.get('[data-cy="projectName"]')
             .type('New Project');
-        cy.get('[data-cy="saveProjectButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="projCard_NewProject_manageLink"]');
     });
@@ -140,15 +138,14 @@ describe('Register Root Users', () => {
     it('register root user when default home page configured - progress and ranking', () => {
 
         cy.intercept('GET', '/public/config', (req) => {
-            req.reply({
-                body: {
-                    rankingAndProgressViewsEnabled: 'true',
-                    defaultLandingPage: 'progress',
-                    needToBootstrap: true,
-                },
+            req.reply((res) => {
+                const result = res.body;
+                result.rankingAndProgressViewsEnabled = 'true';
+                result.defaultLandingPage = 'progress';
+                result.needToBootstrap = true;
+                res.send(result);
             });
-        })
-            .as('getConfig');
+        }).as('getConfig');
 
         const username = 'rob.smith@madeup.org';
         const pass = 'password';
@@ -157,15 +154,15 @@ describe('Register Root Users', () => {
         cy.wait('@getConfig');
         cy.contains('New Root Account');
 
-        cy.get('#firstName')
+        cy.get('[data-cy="requestAccountFirstName"]')
             .type('Robert');
-        cy.get('#lastName')
+        cy.get('[data-cy="requestAccountLastName"]')
             .type('Smith');
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .type(username);
         cy.get('#password')
             .type(pass);
-        cy.get('#password_confirmation')
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
             .type('password');
         cy.contains('Create Account')
             .click();
@@ -179,15 +176,14 @@ describe('Register Root Users', () => {
     it('register root user when default home page configured - admin', () => {
 
         cy.intercept('GET', '/public/config', (req) => {
-            req.reply({
-                body: {
-                    rankingAndProgressViewsEnabled: 'true',
-                    defaultLandingPage: 'admin',
-                    needToBootstrap: true,
-                },
+            req.reply((res) => {
+                const result = res.body;
+                result.rankingAndProgressViewsEnabled = 'true';
+                result.defaultLandingPage = 'admin';
+                result.needToBootstrap = true;
+                res.send(result);
             });
-        })
-            .as('getConfig');
+        }).as('getConfig');
 
         const username = 'rob.smith@madeup.org';
         const pass = 'password';
@@ -196,15 +192,15 @@ describe('Register Root Users', () => {
         cy.wait('@getConfig');
         cy.contains('New Root Account');
 
-        cy.get('#firstName')
+        cy.get('[data-cy="requestAccountFirstName"]')
             .type('Robert');
-        cy.get('#lastName')
+        cy.get('[data-cy="requestAccountLastName"]')
             .type('Smith');
-        cy.get('#email')
+        cy.get('[data-cy="requestAccountEmail"]')
             .type(username);
         cy.get('#password')
             .type(pass);
-        cy.get('#password_confirmation')
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
             .type('password');
         cy.contains('Create Account')
             .click();

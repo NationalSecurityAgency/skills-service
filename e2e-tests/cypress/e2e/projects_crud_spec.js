@@ -43,14 +43,14 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
 
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]')
             .type('My New test Project');
-        cy.clickSave();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
 
         cy.wait('@postNewProject');
 
-        cy.contains('My New test Project');
+        cy.get('[data-cy="projCard_MyNewtestProject_manageLink"]');
     });
 
     it('Edit in place', () => {
@@ -71,13 +71,14 @@ describe('Projects Admin Management Tests', () => {
             .should('be.visible');
         cy.contains('ID: proj1')
             .should('be.visible');
-        cy.get('[data-cy=breadcrumb-proj1]')
+        cy.get('[data-cy="projectPreview"]')
             .should('be.visible');
         cy.get('[data-cy=btn_edit-project]')
             .click();
         cy.get('input[data-cy=projectName]')
             .type('{selectall}Edited Name');
-        cy.get('button[data-cy=saveProjectButton]')
+        cy.get('button[data-cy=saveDialogBtn]')
+          .should('be.enabled')
             .click();
         cy.contains('PROJECT: Proj 1')
             .should('not.exist');
@@ -86,11 +87,12 @@ describe('Projects Admin Management Tests', () => {
 
         cy.get('[data-cy=btn_edit-project]')
             .click();
-        cy.get('[data-cy=enableIdInput]').click({force: true});
+        cy.get('[data-cy=enableIdInput]').click();
         cy.get('input[data-cy=idInputValue]')
             .type('{selectall}editedProjectId');
-        cy.get('button[data-cy=saveProjectButton]')
-            .click();
+        cy.get('button[data-cy="saveDialogBtn"]')
+          .should('be.enabled')
+          .click();
         cy.wait('@newIdSubjects');
         cy.contains('ID: proj1')
             .should('not.exist');
@@ -98,9 +100,10 @@ describe('Projects Admin Management Tests', () => {
             .should('not.exist');
         cy.contains('ID: editedProjectId')
             .should('be.visible');
+
         cy.get('[data-cy=breadcrumb-editedProjectId]')
             .should('be.visible');
-        cy.get('a[data-cy=projectPreview]')
+        cy.get('[data-cy="projectPreview"]')
             .should('have.attr', 'href')
             .and('include', '/projects/editedProjectId');
 
@@ -108,29 +111,29 @@ describe('Projects Admin Management Tests', () => {
             .should((loc) => {
                 expect(loc.pathname)
                     .to
-                    .eq('/administrator/projects/editedProjectId/');
+                    .eq('/administrator/projects/editedProjectId');
             });
-        cy.contains('Subject 1')
-            .should('be.visible');
+        cy.get('[data-cy=btn_edit-project]').should('be.focused')
+
         cy.get('[data-cy="manageBtn_subj1"]')
             .click();
         cy.contains('SUBJECT: Subject 1')
             .should('be.visible');
         cy.get('[data-cy=breadcrumb-editedProjectId]')
             .click();
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]')
-            .click();
-        cy.get('input[data-cy=subjectNameInput]')
+        cy.wait('@newIdSubjects')
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
+        cy.get('input[data-cy=subjectName]')
             .type('{selectall}I Am A Changed Subject');
-        cy.get('button[data-cy=saveSubjectButton]')
+        cy.get('button[data-cy=saveDialogBtn]')
             .click();
         cy.contains('I Am A Changed Subject')
             .should('be.visible');
         cy.get('button[data-cy=btn_Subjects]')
             .click();
-        cy.get('input[data-cy=subjectNameInput]')
+        cy.get('input[data-cy=subjectName]')
             .type('A new subject');
-        cy.get('button[data-cy=saveSubjectButton]')
+        cy.get('button[data-cy=saveDialogBtn]')
             .click();
         cy.contains('A new subject')
             .should('be.visible');
@@ -149,7 +152,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
 
-        cy.clickButton('Project');
+        cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-cy="projectName"]')
             .type('My New test Project');
         cy.get('[data-cy="projectName"]')
@@ -157,7 +160,7 @@ describe('Projects Admin Management Tests', () => {
 
         cy.wait('@postNewProject');
 
-        cy.contains('My New test Project');
+        cy.get('[data-cy="projCard_MyNewtestProject_manageLink"]');
     });
 
     it('delete project', () => {
@@ -170,7 +173,7 @@ describe('Projects Admin Management Tests', () => {
         cy.contains('Removal Safety Check');
         cy.get('[data-cy=currentValidationText]')
             .type('Delete Me');
-        cy.get('[data-cy=removeButton]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled')
             .click();
 
@@ -184,7 +187,7 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="projectCard_proj2"] [data-cy="deleteProjBtn"]')
             .click();
         cy.contains('Removal Safety Check');
-        cy.get('[data-cy=closeRemovalSafetyCheck]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .click();
         cy.get('[data-cy="projectCard_proj2"]')
             .should('exist');

@@ -33,34 +33,8 @@ describe('Navigation Tests', () => {
 
     });
 
-    it('ability to enable theme on project Skills Display', function () {
-        cy.visit('/progress-and-rankings/projects/proj1?enableTheme=true');
-        cy.dashboardCd()
-            .contains('powered by');
-
-        cy.visit('/progress-and-rankings/projects/proj1?enableTheme=false');
-        cy.dashboardCd()
-            .contains('Overall Points');
-        cy.dashboardCd()
-            .contains('powered by')
-            .should('not.exist');
-    });
-
-    it('ability to enable classic look on project Skills Display', function () {
-        cy.visit('/progress-and-rankings/projects/proj1?classicSkillsDisplay=true');
-        cy.dashboardCd()
-            .contains('powered by');
-
-        cy.visit('/progress-and-rankings/projects/proj1?classicSkillsDisplay=false');
-        cy.dashboardCd()
-            .contains('Overall Points');
-        cy.dashboardCd()
-            .contains('powered by')
-            .should('not.exist');
-    });
-
     if (!Cypress.env('oauthMode')) {
-        it('Browser back button works in Skills Display', function () {
+        it.only('Browser back button works in Skills Display', function () {
             cy.createSkill(1, 1, 1);
             cy.createSkill(1, 1, 2);
             cy.createSkill(1, 1, 3);
@@ -77,10 +51,11 @@ describe('Navigation Tests', () => {
             cy.get('[data-cy=project-link-proj1]')
                 .click();
             cy.wait('@pointHistoryChart');
-            cy.dashboardCd()
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="pointHistoryChartNoData"]')
+            cy.get('[data-cy="skillsDisplayHome"]')
                 .contains('Overall Points');
-            cy.dashboardCd()
-                .contains('Earn up to 800 points');
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="totalPoints"]')
+                .contains('800');
 
             cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
                 .should('be.visible');
@@ -89,38 +64,45 @@ describe('Navigation Tests', () => {
             cy.get('[data-cy=breadcrumb-projects]')
                 .should('not.exist');
 
-            cy.dashboardCd()
+            cy.get('[data-cy="skillsDisplayHome"]')
                 .find('[data-cy=back]')
                 .should('not.exist');
-            cy.dashboardCd()
-                .contains('PROJECT: This is project 1');
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
+                .contains('Project: This is project 1');
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="pointHistoryChartNoData"]')
 
             // to subject page
-            cy.dashboardCdClickSubj(0, 'Subject 1');
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]').first().click();
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
+              .contains('Subject 1');
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="pointHistoryChartNoData"]')
             cy.wait(1000);
 
             // navigate to Rank Overview and that it does NOT contains the internal back button
-            cy.dashboardCd()
-                .find('[data-cy=myRank]')
+            cy.get('[data-cy="skillsDisplayHome"]')
+                .find('[data-cy=myRankBtn]')
                 .click();
-            cy.dashboardCd()
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
                 .contains('My Rank');
-            cy.dashboardCd()
+            cy.get('[data-cy="skillsDisplayHome"]')
                 .find('[data-cy=back]')
                 .should('not.exist');
+            cy.get('[data-cy="levelBreakdownChart"] [data-cy="levelBreakdownChart-animationEnded"]')
 
             // click the browser back button and verify that we are still in the
             // client display (Subject page)
             cy.go('back');  // browser back button
             cy.wait(1000);
-            cy.dashboardCd()
-                .contains('Subject 1');
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
+              .contains('Subject 1');
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="pointHistoryChartNoData"]')
 
             // then back one more time and we should be back on the client display home page
             cy.go('back');  // browser back button
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
+              .contains('Project: This is project 1');
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="pointHistoryChartNoData"]')
             cy.wait(1000);
-            cy.dashboardCd()
-                .contains('PROJECT: This is project 1');
 
             // finally back one more time and we should be back on the my progress page
             cy.go('back');  // browser back button
@@ -128,6 +110,7 @@ describe('Navigation Tests', () => {
             cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
                 .contains('Progress And Rankings')
                 .should('be.visible');
+            cy.get('[data-cy=project-link-proj1]')
         });
     }
 });

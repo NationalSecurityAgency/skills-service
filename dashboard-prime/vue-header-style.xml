@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<additionalHeaders>
+    <vue_style>
+        <firstLine>/*</firstLine>
+<!--        <beforeEachLine></beforeEachLine>-->
+        <endLine>*/</endLine>
+<!--        <afterEachLine></afterEachLine>-->
+        <!--skipLine></skipLine-->
+        <firstLineDetectionPattern>(\s|\t)*/\*.*$</firstLineDetectionPattern>
+        <lastLineDetectionPattern>.*\*/(\s|\t)*$</lastLineDetectionPattern>
+        <allowBlankLines>true</allowBlankLines>
+        <multiLine>true</multiLine>
+        <padLines>false</padLines>
+        <isMultiline>true</isMultiline>
+    </vue_style>
+</additionalHeaders>

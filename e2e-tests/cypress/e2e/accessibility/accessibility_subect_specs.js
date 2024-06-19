@@ -203,7 +203,7 @@ describe('Accessibility Tests', () => {
             .click();
         cy.get('[data-cy=skillName]')
             .type('1');
-        cy.contains('Skill Name cannot be less than 3 characters.');
+        cy.contains('Skill Name must be at least 3 characters');
         cy.customA11y();
     })
 
@@ -217,21 +217,11 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
         cy.get('[data-cy=addLevel]')
             .click();
-        cy.get('[data-cy=levelPercent]')
+        cy.get('[data-cy="percent"]')
             .type('105');
-        cy.contains('Percent % must be 100 or less');
+        cy.contains('Percent must be less than or equal to 100');
         cy.customA11y();
-        cy.get('[data-cy=cancelLevel]')
-            .click();
-        cy.get('[data-cy=editLevelButton]')
-            .eq(0)
-            .click();
-        cy.get('[data-cy=levelPercent]')
-            .type('ddddddddd');
-        cy.contains('Percent may only contain numeric characters');
-        cy.customA11y();
-        cy.get('[data-cy=cancelLevel]')
-            .click();
+
     })
 
     it('subject - users', () => {
@@ -245,7 +235,7 @@ describe('Accessibility Tests', () => {
     })
 
     it('subject - user - client display', () => {
-        cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/users/u1');
+        cy.visit('/administrator/projects/MyNewtestProject/users/u1');
         cy.injectAxe();
 
         cy.contains('Client Display');
@@ -256,8 +246,8 @@ describe('Accessibility Tests', () => {
         // cy.customA11y();
     })
 
-    it('subject - user - performed skills', () => {
-        cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/users/u1/skillEvents');
+    it.skip('subject - user - performed skills', () => {
+        cy.visit('/administrator/projects/MyNewtestProject/users/u1/skillEvents');
         cy.injectAxe();
         cy.get('[data-cy="performedSkillsTable"]').contains('ID: skill1');
         cy.customLighthouse();

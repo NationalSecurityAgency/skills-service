@@ -50,3 +50,5 @@ service/src/main/resources/public/**
 /dashboard/build/
 
 .run
+/dashboard-prime/.vite/
+/service/config/application.properties

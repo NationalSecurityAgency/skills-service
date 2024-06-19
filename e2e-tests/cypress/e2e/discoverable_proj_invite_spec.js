@@ -50,8 +50,8 @@ describe('Copy Invite URL Tests', () => {
                 .realClick()
 
             cy.get('[data-cy="projShareUrl"]')
-                .should('have.value', expectedProj1URL)
-            cy.get('[data-cy="shareProjOkBtn"]')
+                .should('have.text', expectedProj1URL)
+            cy.get('[data-cy="closeDialogBtn"]')
                 .click();
 
             cy.get('[data-cy="projShareUrl"]')
@@ -72,9 +72,9 @@ describe('Copy Invite URL Tests', () => {
                 .realClick();
             cy.contains('URL was copied!')
             cy.get('[data-cy="projShareUrl"]')
-                .should('have.value', expectedProj2URL)
+                .should('have.text', expectedProj2URL)
 
-            cy.get('[data-cy="shareProjOkBtn"]')
+            cy.get('[data-cy="closeDialogBtn"]')
                 .click();
             cy.get('[data-cy="projShareUrl"]')
                 .should('not.exist')
@@ -105,7 +105,7 @@ describe('Copy Invite URL Tests', () => {
                 .realClick()
 
             cy.get('[data-cy="projShareUrl"]')
-                .should('have.value', expectedProj1URL)
+                .should('have.text', expectedProj1URL)
             cy.window().its('navigator.clipboard')
                 .then((clip) => clip.readText())
                 .should('equal', expectedProj1URL)
@@ -137,30 +137,28 @@ describe('Copy Invite URL Tests', () => {
         cy.contains('No Subjects Yet')
 
         cy.get('[data-cy="shareProjBtn"]').realClick()
-        cy.get('[data-cy="shareProjOkBtn"]').click();
+        cy.get('[data-cy="closeDialogBtn"]').click();
         cy.get('[data-cy="shareProjBtn"]').should('have.focus')
 
         cy.get('[data-cy="shareProjBtn"]').realClick()
-        cy.get('[data-cy="shareProjOkBtn"]').type('{esc}');
+        cy.get('[data-cy="closeDialogBtn"]').type('{esc}');
         cy.get('[data-cy="shareProjBtn"]').should('have.focus')
 
         cy.get('[data-cy="shareProjBtn"]').realClick()
-        cy.get('[class="modal-content"] [aria-label="Close"]').click()
+        cy.get('[data-pc-section="closebuttonicon"]').click()
         cy.get('[data-cy="shareProjBtn"]').should('have.focus')
     });
 
     it('shared url adds project to My Projects', ()  => {
        cy.visit(proj1Share);
-       cy.dashboardCd()
-            .contains('My Level');
+       cy.get('[data-cy="skillsDisplayHome"]').contains('My Level');
        cy.get('[data-cy="breadcrumb-Progress And Rankings"]').click()
        cy.get('[data-cy="project-card-project-name"]').should('exist')
     });
 
     it('regular project url does NOT add project to My Projects', ()  => {
         cy.visit(proj1Url);
-        cy.dashboardCd()
-            .contains('My Level');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('My Level');
         cy.get('[data-cy="breadcrumb-Progress And Rankings"]').click()
         cy.get('[data-cy="project-card-project-name"]').should('not.exist')
     });

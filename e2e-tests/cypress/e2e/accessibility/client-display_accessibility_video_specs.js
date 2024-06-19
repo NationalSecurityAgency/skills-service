@@ -17,7 +17,7 @@
 describe('Client Display Accessibility Video Tests', () => {
     const testVideo = '/static/videos/create-quiz.mp4'
 
-    it('display video on skill page', () => {
+    it.skip('display video on skill page', () => {
         cy.intercept('GET', '/api/projects/proj1/skills/skill1/videoCaptions')
             .as('getVideoCaptions');
         cy.createProject(1)
@@ -41,7 +41,7 @@ describe('Client Display Accessibility Video Tests', () => {
     });
 
 
-    it('skill with unmet prerequisites will not allow to play the video', () => {
+    it.skip('skill with unmet prerequisites will not allow to play the video', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})

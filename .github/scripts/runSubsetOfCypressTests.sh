@@ -1,8 +1,8 @@
 #!/bin/bash
-usage() { echo "Usage runSubsetOfCypressTests.sh -c <current_run> -t <total_concurrent_runs>" 1>&2; exit 1; }
+usage() { echo "Usage runSubsetOfCypressTests.sh -c <current_run> -t <total_concurrent_runs> -f <test_name:test_name>" 1>&2; exit 1; }
 
 additionalTestVars=""
-while getopts ":c:t:d:" flag;
+while getopts ":c:t:d:f:" flag;
 do
     case "${flag}" in
         c)
@@ -14,6 +14,9 @@ do
         d)
           additionalTestVars=${OPTARG}
           ;;
+        f)
+          filterByTestsName=${OPTARG}
+          ;;
         *)
           usage
           ;;
@@ -22,18 +25,20 @@ done
 if [ -z "${currentRun}" ] || [ -z "${totalConcurrent}" ]; then
     usage
 fi
+if [ -z "${filterByTestsName}" ]; then
+    filterByTestsName=' '
+fi
 
-baseSkillTreeUrl="http://localhost:8082"
 echo "Running subset of service tests"
 echo "Current Run: $currentRun";
 echo "Additional Vars: $additionalTestVars";
 echo "Total Concurrent: $totalConcurrent";
-echo "Base SkillTree URL: $baseSkillTreeUrl"
+echo "Test names filters: [$filterByTestsName"]
 
 cd ./cypress/e2e
 IFS=$'\n'
 # locate all of the tests files then "shuffle" in a repetitive order by sorting using md5sum
-allTests=($(find . -type f -exec md5sum {} + | grep -i -E 'spec[s]?\.js' | sort | cut -d " " -f 3))
+allTests=($(find . -type f -exec md5sum {} + | grep -i -E 'spec[s]?\.js' | grep -E $filterByTestsName | sort | cut -d " " -f 3))
 #allTests=($(find . | grep -i -E 'spec[s]?\.js' | sort | cut -d " " -f 3))
 unset IFS
 cd ../../

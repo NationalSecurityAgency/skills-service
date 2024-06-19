@@ -34,22 +34,19 @@ describe('Export Group Skills to the Catalog Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="expandDetailsBtn_group20"]')
-            .click();
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillActionsBtn"] button')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillActionsBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
             .should('have.text', '0');
 
-        cy.get('[data-cy="skillSelect-skill22"]')
-            .click({ force: true });
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillActionsBtn"] button')
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillExportToCatalogBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click()
 
         cy.contains('This will export [Very Great Skill 22] Skill to the SkillTree Catalog');
         cy.get('[data-cy="exportToCatalogButton"]')
@@ -61,11 +58,11 @@ describe('Export Group Skills to the Catalog Tests', () => {
             .should('exist');
         cy.get('[data-cy="exportedBadge-skill21"]')
             .should('not.exist');
+        cy.get('[data-cy="addSkillToGroupBtn-group20"]').should('have.focus')
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="expandDetailsBtn_group20"]')
-            .click();
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="exportedBadge-skill22"]')
             .should('exist');
         cy.get('[data-cy="exportedBadge-skill21"]')
@@ -77,12 +74,12 @@ describe('Export Group Skills to the Catalog Tests', () => {
         cy.clickNav('Skill Catalog');
         cy.validateTable('[data-cy="exportedSkillsTable"]', [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 22'
             }],
         ], 5);
         cy.get('[data-cy="nameCell_skill22"]')
-            .contains('Group: Awesome Group 20 Subj1');
+            .contains('Awesome Group 20 Subj1');
     });
 
 });

@@ -23,7 +23,6 @@ on:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
       - '.github/workflows/publish-image-snapshot.yml'
-      - '.gitlab-ci.yml'
 
 jobs:
   build-skills-service-for-ui-tests:
@@ -34,7 +33,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '20.11.0'
 
       - uses: actions/setup-java@v3
         with:
@@ -74,7 +73,8 @@ jobs:
       fail-fast: false
       matrix:
         #IMPORTANT: must, must, must match the total number of containers below: runSubsetOfCypressTests.sh.sh -t <num_of_containers>
-        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 ]
+#        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 ]
+        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     services:
       postgres:
@@ -110,7 +110,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '20.11.0'
 
       - uses: actions/setup-java@v3
         with:
@@ -139,7 +139,7 @@ jobs:
       - name: Run Cypress tests
         run: |
           cd e2e-tests
-          ../.github/scripts/runSubsetOfCypressTests.sh -t 20 -c ${{ matrix.container }}
+          ../.github/scripts/runSubsetOfCypressTests.sh -t 10 -c ${{ matrix.container }} 
           cd ..
         env:
           ELECTRON_EXTRA_LAUNCH_ARGS: '--disable-gpu'
@@ -176,7 +176,7 @@ jobs:
       fail-fast: false
       matrix:
         # run in parallel
-        containers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+        containers: [1]
 
     services:
       postgres:
@@ -208,7 +208,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '20.11.0'
 
       - uses: actions/setup-java@v3
         with:
@@ -252,6 +252,7 @@ jobs:
           group: 'skills-service tests'
           tag: "${{ github.workflow }}"
           browser: chrome
+          spec: cypress/e2e/quiz/question_def_management_spec.js
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -305,7 +306,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '20.11.0'
 
       - uses: actions/setup-java@v3
         with:

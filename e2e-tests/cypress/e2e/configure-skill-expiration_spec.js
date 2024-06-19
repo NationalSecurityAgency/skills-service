@@ -21,7 +21,7 @@ describe('Configure Skill Expiration Tests', () => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/expiration').as('getExpirationProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
         Cypress.Commands.add("visitExpirationConfPage", (projNum) => {
-            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configExpiration');
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-expiration');
             cy.wait('@getExpirationProps')
             cy.wait('@getSkillInfo')
             cy.get('.spinner-border').should('not.exist')
@@ -37,9 +37,9 @@ describe('Configure Skill Expiration Tests', () => {
         cy.visitExpirationConfPage();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="expirationNeverRadio"]').should('be.checked')
-        cy.get('[data-cy="yearlyFormGroup"]').should('be.disabled')
-        cy.get('[data-cy="monthlyFormGroup"]').should('be.disabled')
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="expirationNeverRadio"] [data-pc-section="input"]').should('be.checked')
+        cy.get('[data-cy="yearlyFormGroup"]').find('input').should('be.disabled')
+        cy.get('[data-cy="monthlyFormGroup"]').find('input').should('be.disabled')
     });
 
     it('expiration type of YEARLY defaults to current date', () => {
@@ -51,16 +51,16 @@ describe('Configure Skill Expiration Tests', () => {
 
         const today = moment.utc();
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').check({ force: true });
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').click();
 
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').should('be.checked')
-        cy.get('[data-cy="yearlyYears-sb"]').contains('1')
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"] [data-pc-section="input"]').should('be.checked')
+        cy.get('[data-cy="yearlyYears-sb"] [data-pc-name="input"]').should('have.value', '1 year')
         cy.get('[data-cy="yearlyMonth"]').contains(today.format('MMMM'))
-        cy.get('[data-cy="yearlyDayOfMonth"]').contains(today.day())
+        cy.get('[data-cy="yearlyDayOfMonth"]').contains(today.date())
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings').then((xhr) => {
@@ -87,17 +87,17 @@ describe('Configure Skill Expiration Tests', () => {
         const today = moment.utc();
         const startOfNextMonth = today.add(1, 'M').startOf('month');
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').check({ force: true });
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').click()
 
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').should('be.checked')
-        cy.get('[data-cy="monthlyMonths-sb"]').contains('1')
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"] [data-pc-section="input"]').should('be.checked')
+        cy.get('[data-cy="monthlyMonths-sb"] [data-pc-name="input"]').should('have.value', '1 month')
 
         cy.get('[data-cy="monthlyDayOption"] [value="FIRST_DAY_OF_MONTH"]').should('be.checked');
-        cy.get('[data-cy="monthlyDay"]').should('be.disabled')
+        cy.get('[data-cy="monthlyDay"] [data-pc-section="input"]').should('have.attr', 'aria-disabled').and('eq', 'true'); // disabled because of data
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings').then((xhr) => {
@@ -124,17 +124,17 @@ describe('Configure Skill Expiration Tests', () => {
         const today = moment.utc();
         const endOfThisMonth = today.endOf('month');
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').check({ force: true });
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').click();
 
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').should('be.checked')
-        cy.get('[data-cy="monthlyMonths-sb"]').contains('1')
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"] [data-pc-section="input"]').should('be.checked')
+        cy.get('[data-cy="monthlyMonths-sb"] [data-pc-name="input"]').should('have.value', '1 month')
 
-        cy.get('[data-cy="monthlyDayOption"] [value="LAST_DAY_OF_MONTH"]').check({ force: true });
-        cy.get('[data-cy="monthlyDay"]').should('be.disabled')
+        cy.get('[data-cy="monthlyDayOption"] [value="LAST_DAY_OF_MONTH"]').click();
+        cy.get('[data-cy="monthlyDay"] [data-pc-section="input"]').should('have.attr', 'aria-disabled').and('eq', 'true'); // disabled because of data
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings').then((xhr) => {
@@ -164,18 +164,19 @@ describe('Configure Skill Expiration Tests', () => {
             theFifteenth.add(1, 'M')
         }
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').check({ force: true });
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').click();
 
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').should('be.checked')
-        cy.get('[data-cy="monthlyMonths-sb"]').contains('1')
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"] [data-pc-section="input"]').should('be.checked')
+        cy.get('[data-cy="monthlyMonths-sb"] [data-pc-name="input"]').should('have.value', '1 month')
 
-        cy.get('[data-cy="monthlyDayOption"] [value="SET_DAY_OF_MONTH"]').check({ force: true });
-        cy.get('[data-cy="monthlyDay"]').should('be.enabled')
-        cy.get('[data-cy="monthlyDay"]').select('15')
+        cy.get('[data-cy="monthlyDayOption"] [value="SET_DAY_OF_MONTH"]').click();
+        cy.get('[data-cy="monthlyDay"] [data-pc-section="input"]').should('have.attr', 'aria-disabled').and('eq', 'false');
+        cy.get('[data-cy="monthlyDay"]').click()
+        cy.get('[data-pc-section="itemlabel"]').contains('15').click()
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings').then((xhr) => {
@@ -199,14 +200,14 @@ describe('Configure Skill Expiration Tests', () => {
         cy.visitExpirationConfPage();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').check({ force: true });
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').click();
 
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').should('be.checked')
-        cy.get('[data-cy="dailyDays-sb"]').should('have.value', 90)
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"] [data-pc-section="input"]').should('be.checked')
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').should('have.value', '90 days')
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings').then((xhr) => {
@@ -230,16 +231,16 @@ describe('Configure Skill Expiration Tests', () => {
 
         const today = moment.utc();
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').check({ force: true });
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').click();
 
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').should('be.checked')
-        cy.get('[data-cy="yearlyYears-sb"]').contains('1')
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"] [data-pc-section="input"]').should('be.checked')
+        cy.get('[data-cy="yearlyYears-sb"] [data-pc-name="input"]').should('have.value', '1 year')
         cy.get('[data-cy="yearlyMonth"]').contains(today.format('MMMM'))
-        cy.get('[data-cy="yearlyDayOfMonth"]').contains(today.day())
+        cy.get('[data-cy="yearlyDayOfMonth"]').contains(today.date())
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings').then((xhr) => {
@@ -255,7 +256,7 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="expirationNeverRadio"]').check({ force: true });
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="expirationNeverRadio"]').click();
 
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
@@ -275,42 +276,38 @@ describe('Configure Skill Expiration Tests', () => {
         cy.visitExpirationConfPage();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').check({ force: true });
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').click();
 
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
 
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').should('be.checked')
-        cy.get('[data-cy="dailyDays-sb"]').should('have.value', 90)
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"] [data-pc-section="input"]').should('be.checked')
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').should('have.value', '90 days')
 
-        cy.get('[data-cy="dailyDays-sb"]').clear()
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').clear()
 
         cy.get('[data-cy=dailyDaysError]')
-          .contains('Expiration Days is required')
+          .contains('Expiration Days is a required field')
           .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="dailyDays-sb"]').clear().type('a')
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').clear().type('a')
 
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').clear().type('0')
         cy.get('[data-cy=dailyDaysError]')
-          .contains('Expiration Days may only contain numeric characters')
+          .contains('Expiration Days must be greater than or equal to 1')
           .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="dailyDays-sb"]').clear().type('0')
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').clear().type('1000')
         cy.get('[data-cy=dailyDaysError]')
-          .contains('Expiration Days must be 1 or greater')
+          .contains('Expiration Days must be less than or equal to 999')
           .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="dailyDays-sb"]').clear().type('1000')
-        cy.get('[data-cy=dailyDaysError]')
-          .contains('Expiration Days must be 999 or less')
-          .should('be.visible');
-        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
-
-        cy.get('[data-cy="dailyDays-sb"]').clear().type('30')
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').clear()
+        cy.get('[data-cy="dailyDays-sb"] [data-pc-name="input"]').clear().type('30')
         cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
@@ -325,27 +322,30 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
         // yearly
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').check({ force: true });
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').click();
 
-        cy.get('[data-cy="yearlyMonth"]').select('October')
-        cy.get('[data-cy="yearlyDayOfMonth"]').select('30')
+        cy.get('[data-cy="yearlyMonth"]').click()
+        cy.get('[data-pc-section="itemlabel"]').contains('October').click()
+        cy.get('[data-cy="yearlyDayOfMonth"]').click()
+        cy.get('[data-pc-section="itemlabel"]').contains('30').click()
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings')
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Expiration"]').click()
 
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 3,
+                colIndex: 5,
                 value: 'Every year on October 30th'
             }],
         ], 1, false, null, false);
 
         // yearly plural
         cy.visitExpirationConfPage();
-        cy.get('[data-cy=yearlyYears-sb] > [aria-label=Increment]').click();
+        cy.get('[data-cy=yearlyYears-sb] [data-pc-name="incrementbutton"]').click();
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings')
@@ -355,14 +355,14 @@ describe('Configure Skill Expiration Tests', () => {
 
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 3,
+                colIndex: 5,
                 value: 'Every 2 years on October 30th'
             }],
         ], 1, false, null, false);
 
         // monthly
         cy.visitExpirationConfPage();
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').check({ force: true });
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').click();
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings')
@@ -370,14 +370,15 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 3,
+                colIndex: 5,
                 value: 'Every month on the 1st day of the month'
             }],
         ], 1, false, null, false);
 
         cy.visitExpirationConfPage();
-        cy.get('[data-cy="monthlyDayOption"] [value="SET_DAY_OF_MONTH"]').check({ force: true });
-        cy.get('[data-cy="monthlyDay"]').select('15')
+        cy.get('[data-cy="monthlyDayOption"] [value="SET_DAY_OF_MONTH"]').click();
+        cy.get('[data-cy="monthlyDay"]').click()
+        cy.get('[data-pc-section="itemlabel"]').contains('15').click()
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings')
@@ -386,13 +387,13 @@ describe('Configure Skill Expiration Tests', () => {
 
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 3,
+                colIndex: 5,
                 value: 'Every month on the 15th day of the month'
             }],
         ], 1, false, null, false);
 
         cy.visitExpirationConfPage();
-        cy.get('[data-cy=monthlyMonths-sb] > [aria-label=Increment]').click();
+        cy.get('[data-cy=monthlyMonths-sb] [data-pc-name="incrementbutton"]').click();
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings')
@@ -400,34 +401,34 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 3,
+                colIndex: 5,
                 value: 'Every 2 months on the 15th day of the month'
             }],
         ], 1, false, null, false);
 
         cy.visitExpirationConfPage();
-        cy.get('[data-cy="monthlyDayOption"] [value="LAST_DAY_OF_MONTH"]').check({ force: true });
+        cy.get('[data-cy="monthlyDayOption"] [value="LAST_DAY_OF_MONTH"]').click();
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings')
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 3,
+                colIndex: 5,
                 value: 'Every 2 months on the last day of the month'
             }],
         ], 1, false, null, false);
 
         // daily
         cy.visitExpirationConfPage();
-        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').check({ force: true });
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').click();
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings')
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 3,
+                colIndex: 5,
                 value: 'After 90 days of inactivity'
             }],
         ], 1, false, null, false);

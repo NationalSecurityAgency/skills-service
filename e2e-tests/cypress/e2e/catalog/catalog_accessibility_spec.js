@@ -21,18 +21,6 @@ describe('Catalog Accessibility Tests', () => {
         cy.createSubject(1, 1);
     });
 
-    it('return focus to the import button - empty catalog', () => {
-        cy.visit('/administrator/projects/proj1/subjects/subj1/');
-        cy.get('[data-cy=importFromCatalogBtn]')
-            .should('not.have.focus');
-        cy.get('[data-cy="importFromCatalogBtn"]')
-            .click();
-        cy.get('[data-cy="okButton"]')
-            .click();
-        cy.get('[data-cy=importFromCatalogBtn]')
-            .should('have.focus');
-    });
-
     it('return focus to the import button - cancel import', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
@@ -71,8 +59,7 @@ describe('Catalog Accessibility Tests', () => {
         cy.get('[data-cy="importFromCatalogBtn"]')
             .click();
 
-        cy.get('[data-cy="skillSelect_proj2-skill1"]')
-            .check({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="importBtn"]')
@@ -86,22 +73,18 @@ describe('Catalog Accessibility Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
 
-        cy.get('[data-cy=selectAllSkillsBtn]')
+        cy.get('[data-cy="newSkillButton"]')
             .should('not.have.focus');
 
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '1');
 
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillExportToCatalogBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click()
 
         cy.contains('This will export [Very Great Skill 1] Skill');
 
@@ -109,13 +92,12 @@ describe('Catalog Accessibility Tests', () => {
             .click();
         cy.get('[data-cy="okButton"]')
             .click();
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '0');
-        cy.get('[data-cy=selectAllSkillsBtn]')
+        cy.get('[data-cy=newSkillButton]')
             .should('have.focus');
     });
 
@@ -124,33 +106,29 @@ describe('Catalog Accessibility Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
 
-        cy.get('[data-cy=clearSelectedSkillsBtn]')
+        cy.get('[data-cy=skillActionsBtn]')
             .should('not.have.focus');
 
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '1');
 
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillExportToCatalogBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click()
 
         cy.contains('This will export [Very Great Skill 1] Skill');
         cy.get('[data-cy="closeButton"]')
             .click();
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '1');
-        cy.get('[data-cy=clearSelectedSkillsBtn]')
+        cy.get('[data-cy=skillActionsBtn]')
             .should('have.focus');
     });
 
@@ -159,36 +137,32 @@ describe('Catalog Accessibility Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
 
-        cy.get('[data-cy=selectAllSkillsBtn]')
+        cy.get('[data-cy=newSkillButton]')
             .should('not.have.focus');
 
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .should('be.checked');
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '1');
 
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillExportToCatalogBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click();
 
         cy.contains('This will export [Very Great Skill 1] Skill');
 
         cy.get('[data-cy="exportToCatalogButton"]')
             .click();
-        cy.get('[class="modal-content"] [aria-label="Close"]')
+        cy.get('[aria-label="Close"]')
             .click();
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="skillActionsBtn"] button')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+        cy.get('[data-cy="skillActionsBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '0');
-        cy.get('[data-cy=selectAllSkillsBtn]')
+        cy.get('[data-cy=newSkillButton]')
             .should('have.focus');
     });
 

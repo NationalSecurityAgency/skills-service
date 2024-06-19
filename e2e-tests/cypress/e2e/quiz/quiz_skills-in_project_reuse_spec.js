@@ -31,20 +31,18 @@ describe('Quiz-skills in-project reuse Tests', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep1"]')
-            .should('not.exist');
+            .should('not.be.visible');
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('1 skill will be reused in the [Subject 2] subject.');
-        cy.get('[data-cy="reuseButton"]')
-            .click();
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
+          .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully reused 1 skill.');
         cy.get('[data-cy="okButton"]')
@@ -65,19 +63,20 @@ describe('Quiz-skills in-project reuse Tests', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillSelect-skill1"]')
-            .click({ force: true });
+        cy.get(`[data-cy="skillsTable"] thead tr th`).contains('Skill').click()
+        cy.get(`[data-cy="skillsTable"] thead tr th`).contains('Skill').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group3"]')
             .click();
         cy.get('[ data-cy="reuseSkillsModalStep1"]')
-            .should('not.exist');
+          .should('not.be.visible');
         cy.get('[ data-cy="reuseSkillsModalStep2"]')
             .contains('1 skill will be reused in the [Awesome Group 3 Subj1] group');
-        cy.get('[data-cy="reuseButton"]')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
             .contains('Successfully reused 1 skill.');
@@ -86,9 +85,11 @@ describe('Quiz-skills in-project reuse Tests', () => {
 
         cy.get('[data-cy="nameCell_group3"] [data-cy="numSkillsInGroup"]').contains('1 skill')
 
-        cy.get('[data-cy="expandDetailsBtn_group3"]').click()
+        cy.get(`[data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group3"] [data-cy="skillsTable-additionalColumns"]').contains('Self Report').click();
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group3"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="closeicon"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group3"] [data-cy="selfReportCell-skill1STREUSESKILLST0-quiz"]').contains('Survey-Based Validation')
     });
 
@@ -131,10 +132,10 @@ describe('Quiz-skills in-project reuse Tests', () => {
 
         cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '150')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should('have.text', '150 Total')
     });
 
-    it('client display - reused survey-based skills - take survey through subject-rused skill', function () {
+    it('client display - reused survey-based skills - take survey through subject-reused skill', function () {
         cy.createSurveyDef(1);
         cy.createSurveyMultipleChoiceQuestionDef(1, 1);
 
@@ -173,7 +174,7 @@ describe('Quiz-skills in-project reuse Tests', () => {
 
         cy.get('[data-cy="closeSurveyBtn"]').click()
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]').should('have.text', '150')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should('have.text', '150 Total')
     });
 
 });

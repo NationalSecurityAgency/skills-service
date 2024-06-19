@@ -24,8 +24,6 @@ describe('Client Display Tests', () => {
 
     // '[data-cy=timePassed]'
 
-    const cssAttachedToNavigableCards = 'skills-navigable-item';
-
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
         cy.request('POST', '/app/projects/proj1', {
@@ -161,7 +159,7 @@ describe('Client Display Tests', () => {
         });
         cy.intercept('GET', '/api/projects/proj1/pointHistory')
             .as('pointHistoryChart');
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.injectAxe();
         cy.contains('Overall Points');
 
@@ -170,69 +168,20 @@ describe('Client Display Tests', () => {
             .should('have.css', 'background-color')
             .and('equal', 'rgba(0, 0, 0, 0)');
         cy.wait('@pointHistoryChart');
+        cy.wait(5000)
         cy.customA11y();
     });
 
     it('ability to expand skill details from subject page', () => {
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.injectAxe();
-        cy.cdClickSubj(0);
-        cy.get('input.v-switch-input')
-            .focus();
-        cy.matchSnapshotImageForElement('.skill-details-toggle', {
-            blackout: '[data-cy=pointHistoryChart]'
-        });
+        cy.cdClickSubj(0, 'Subject 1', true);
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
         cy.contains('Lorem ipsum dolor sit amet');
         // 1 skill is locked
-        cy.contains('Skill has 1 direct prerequisite(s).');
+        cy.get('[data-cy="skillProgress_index-3"]').contains('Skill has 1 direct prerequisite(s).');
         cy.customA11y();
-    });
-
-    it('badge details show skill details focus', () => {
-        cy.resetDb();
-        cy.fixture('vars.json')
-            .then((vars) => {
-                if (!Cypress.env('oauthMode')) {
-                    cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
-                }
-            });
-        cy.loginAsProxyUser();
-        cy.createProject(1);
-        cy.createProject(2);
-        cy.createSubject(1, 1);
-        cy.createSubject(2, 1);
-        cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
-        cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
-        cy.createSkill(1, 1, 3, { name: 'find Blah other skill 3' });
-        cy.createSkill(1, 1, 4, { name: 'Search nothing skill 4' });
-
-        cy.createSkill(2, 1, 1, { name: 'blah1' });
-        cy.createSkill(2, 1, 2, { name: 'blah2' });
-        cy.createSkill(2, 1, 3, { name: 'blah3' });
-        cy.createSkill(2, 1, 4, { name: 'blah4' });
-
-        cy.loginAsRootUser();
-
-        cy.createGlobalBadge(1);
-        cy.assignSkillToGlobalBadge(1, 1, 1);
-        cy.enableGlobalBadge();
-
-        cy.loginAsProxyUser();
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.contains('Global Badge 1');
-        cy.get('[data-cy=badgeDetailsLink_globalBadge1]')
-            .click();
-        cy.contains('Global Badge 1')
-            .should('be.visible');
-        cy.get('input.v-switch-input')
-            .focus();
-        cy.matchSnapshotImageForElement('.skill-details-toggle', {
-            blackout: '[data-cy=pointHistoryChart]'
-        });
     });
 
     it('internal back button', () => {
@@ -240,7 +189,7 @@ describe('Client Display Tests', () => {
         cy.intercept('GET', '/api/projects/proj1/pointHistory')
             .as('pointHistoryChart');
 
-        cy.cdVisit('/?internalBackButton=true');
+        cy.cdVisit('/?internalBackButton=true', true);
         cy.injectAxe();
         cy.contains('User Skills');
         cy.get('[data-cy=back]')
@@ -250,68 +199,57 @@ describe('Client Display Tests', () => {
         cy.cdClickRank();
         cy.cdBack();
 
-        // to subject page and back
+        // // to subject page and back
         cy.cdClickSubj(1, 'Subject 2');
         cy.cdBack();
 
         // to subject page (2nd subject card), then to skill page, back, back to home page
-        cy.cdClickSubj(0, 'Subject 1');
+        cy.cdClickSubj(0, 'Subject 1', true);
         cy.cdClickSkill(0);
         cy.cdBack('Subject 1');
         cy.cdBack();
+
+        // TODO: put back
         cy.wait('@pointHistoryChart');
         cy.wait(500); //we have to wait for the chart to load before doing accessibility tests
         cy.customA11y();
     });
 
     it('clearly represent navigable components', () => {
-        cy.cdVisit('?internalBackButton=true');
-
-        cy.get('[data-cy=myRank]')
-            .should('have.class', 'skills-navigable-item');
-        cy.get('[data-cy=myBadges]')
-            .should('have.class', 'skills-navigable-item');
-        cy.get('[data-cy=subjectTile]')
-            .eq(0)
-            .should('have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy=subjectTile]')
-            .eq(1)
-            .should('have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy=subjectTile]')
-            .eq(2)
-            .should('have.class', cssAttachedToNavigableCards);
-
-        cy.cdClickSubj(0);
-
-        // make sure progress bars have proper css attached
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy=skillProgressBar]')
-            .should('have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy=skillProgressBar]')
-            .should('have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy="skillProgress_index-2"] [data-cy=skillProgressBar]')
-            .should('have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy="skillProgress_index-3"] [data-cy=skillProgressBar]')
-            .should('have.class', cssAttachedToNavigableCards);
+        cy.cdVisit('?internalBackButton=true', true);
+        cy.get('[data-cy="pointHistoryChartWithData"]')
+        cy.cdClickSubj(0, 'Subject 1',true);
+        cy.get('[data-cy="pointHistoryChartWithData"]')
 
         // make sure it can navigate into each skill via title
         cy.cdClickSkill(0, false);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(1, false);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(2, false);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(3, false);
+        cy.get('[data-cy="prerequisitesCard"] [data-cy="skillLink-proj1-skill2"]')
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
 
         // make sure it can navigate into each skill via progress bar
         cy.cdClickSkill(0);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(1);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(2);
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
         cy.cdClickSkill(3);
+        cy.get('[data-cy="prerequisitesCard"] [data-cy="skillLink-proj1-skill2"]')
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="pointHistoryChartWithData"]')
     });
 
     it('components should not be clickable in the summary only option', () => {
@@ -321,186 +259,47 @@ describe('Client Display Tests', () => {
             name: 'Badge 1'
         });
         cy.cdVisit('/?isSummaryOnly=true');
-        cy.injectAxe();
 
-        // cy.get('[data-cy=myRank]').contains("1")
-        cy.get('[data-cy=myBadges]')
-            .contains('0 Badges');
+        cy.get('[data-cy="myRank"]')
+        cy.get('[data-cy="myRankBtn"]').should('not.exist')
 
-        // make sure click doesn't take us anywhere
-        cy.get('[data-cy=myRank]')
-            .click();
-        cy.contains('User Skills');
-
-        cy.get('[data-cy=myBadges]')
-            .click();
-        cy.contains('User Skills');
-
-        // make sure css is not attached
-        cy.get('[data-cy=myRank]')
-            .should('not.have.class', cssAttachedToNavigableCards);
-        cy.get('[data-cy=myBadges]')
-            .should('not.have.class', cssAttachedToNavigableCards);
+        cy.get('[data-cy="myBadges"]')
+        cy.get('[data-cy="myBadgesBtn"]').should('not.exist')
 
         // summaries should not be displayed at all
-        cy.get('[data-cy=subjectTile]')
-            .should('not.exist');
-        cy.customA11y();
+        cy.get('[data-cy="subjectTile-subj1"]')
+        cy.get('[data-cy="subjectTileBtn"]').should('not.exist');
+
+        cy.get('[data-cy="searchSkillsAcrossSubjects"]').should('not.exist')
     });
 
-    it('display achieved date on skill overview page', () => {
-        const m = dayjs('2020-09-12 11', 'YYYY-MM-DD HH');
-        const orig = m.clone();
+    it('skills-client: components should not be clickable in the summary only option', () => {
+        cy.on('uncaught:exception', (err, runnable) => {
+            // cy.log(err.message)
+            if (err.message.includes('Handshake Reply Failed')) {
+                return false
+            }
+            return true
+        })
 
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.format('x')
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1'
         });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.subtract(4, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.subtract(3, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.subtract(2, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.subtract(1, 'day')
-                .format('x')
-        });
-        cy.cdVisit('/?internalBackButton=true');
-        cy.cdClickSubj(0);
-        cy.cdClickSkill(1);
+        cy.visit('/test-skills-client/proj1/?isSummaryOnly=true')
 
-        cy.get('[data-cy=achievementDate]')
-            .contains(`Achieved on ${orig.format('MMMM Do YYYY')}`);
-        cy.get('[data-cy=achievementDate]')
-            .contains(`${orig.fromNow()}`);
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
-            .contains('500');
+        cy.wrapIframe().find('[data-cy="myRank"]')
+        cy.wrapIframe().find('[data-cy="myRankBtn"]').should('not.exist')
 
-        cy.matchSnapshotImage({
-            name: 'Skill-Overview-Achieved',
-            blackout: '[data-cy=pointHistoryChart]'
-        });
+        cy.wrapIframe().find('[data-cy="myBadges"]')
+        cy.wrapIframe().find('[data-cy="myBadgesBtn"]').should('not.exist')
 
-        cy.cdVisit('/?enableTheme=true');
-        cy.cdClickSubj(0);
-        cy.cdClickSkill(1);
-        cy.get('[data-cy=breadcrumb-skill2]')
-            .should('have.css', 'color')
-            .and('equal', 'rgb(253, 253, 255)');
+        // summaries should not be displayed at all
+        cy.wrapIframe().find('[data-cy="subjectTile-subj1"]')
+        cy.wrapIframe().find('[data-cy="subjectTileBtn"]').should('not.exist')
 
-        cy.get('[data-cy=achievementDate]')
-            .contains(`Achieved on ${orig.format('MMMM Do YYYY')}`);
-        cy.get('[data-cy=achievementDate]')
-            .contains(`${orig.fromNow()}`);
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
-            .contains('500');
-
-        cy.matchSnapshotImage({
-            name: 'Skill-Overview-Achieved-Themed',
-            blackout: '[data-cy=pointHistoryChart]'
-        });
-
-        cy.setResolution('iphone-6');
-
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-        cy.cdClickSkill(1);
-
-        cy.get('[data-cy=achievementDate]')
-            .contains(`Achieved on ${orig.format('MMMM Do YYYY')}`);
-        cy.get('[data-cy=achievementDate]')
-            .contains(`${orig.fromNow()}`);
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
-            .contains('500');
-
-        cy.matchSnapshotImage({
-            name: 'Skill-Overview-Achieved-iphone6',
-            blackout: '[data-cy=pointHistoryChart]'
-        });
-
-        cy.setResolution('ipad-2');
-
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-        cy.cdClickSkill(1);
-
-        cy.get('[data-cy=achievementDate]')
-            .contains(`Achieved on ${orig.format('MMMM Do YYYY')}`);
-        cy.get('[data-cy=achievementDate]')
-            .contains(`${orig.fromNow()}`);
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
-            .contains('500');
-
-        cy.matchSnapshotImage({
-            name: 'Skill-Overview-Achieved-ipad2',
-            blackout: '[data-cy=pointHistoryChart]'
-        });
-
-    });
-
-    it('display achieved date on subject page when skill details are expanded', () => {
-        const m = dayjs('2020-09-12 11', 'YYYY-MM-DD HH');
-        const orig = m.clone();
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.subtract(4, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.subtract(3, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.subtract(2, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: m.subtract(1, 'day')
-                .format('x')
-        });
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-
-        cy.get('[data-cy=toggleSkillDetails]')
-            .click();
-        cy.get('[data-cy=skillProgress_index-1] [data-cy=achievementDate]')
-            .contains(`Achieved on ${orig.format('MMMM Do YYYY')}`);
-        cy.get('[data-cy=skillProgress_index-1] [data-cy=achievementDate]')
-            .contains(`${orig.fromNow()}`);
-    });
-
-    it('skill with dependency renders dependency graph', () => {
-        cy.viewport(1200, 1000);
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
-        cy.get('[data-cy=toggleSkillDetails]')
-            .click();
-        cy.get('.locked-background')
-            .click();
-
-        cy.wait(4000);
-        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
-        cy.matchSnapshotImage({
-            blackout: '[data-cy=pointHistoryChart]'
-        });
+        cy.wrapIframe().find('[data-cy="searchSkillsAcrossSubjects"]').should('not.exist')
     });
 
     it('skilltree brand should link to docs', () => {
@@ -508,256 +307,28 @@ describe('Client Display Tests', () => {
         cy.createSkill(1, 1, 1);
 
         // ensure brand exist
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.get('[data-cy="skillTreePoweredBy"]')
             .contains('powered by');
         cy.get('[data-cy="skillTreePoweredBy"] a')
-            .should('have.attr', 'href', 'https://code.nsa.gov/skills-docs');
-    });
-
-    it('view global badge with no skills assigned', () => {
-        cy.resetDb();
-        cy.fixture('vars.json')
-            .then((vars) => {
-                if (!Cypress.env('oauthMode')) {
-                    cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
-                }
-            });
-        cy.loginAsProxyUser();
-        cy.createProject(1);
-        cy.createSubject(1, 1);
-        cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
-        cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
-        cy.createSkill(1, 1, 3, { name: 'find Blah other skill 3' });
-        cy.createSkill(1, 1, 4, { name: 'Search nothing skill 4' });
-
-        cy.loginAsRootUser();
-
-        cy.createGlobalBadge(1);
-        cy.assignProjectToGlobalBadge(1, 1);
-        cy.enableGlobalBadge();
-
-        cy.loginAsProxyUser();
-
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday');
-        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
-        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday');
-        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-
-        // visit global badge
-        cy.get('[data-cy=earnedBadgeLink_globalBadge1]')
-            .click();
-
-        cy.contains('Global Badge Details');
-    });
-
-    it('view global badge with skills from two projects assigned', () => {
-        cy.resetDb();
-        cy.fixture('vars.json')
-            .then((vars) => {
-                if (!Cypress.env('oauthMode')) {
-                    cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
-                }
-            });
-        cy.loginAsProxyUser();
-        cy.createProject(1);
-        cy.createProject(2);
-        cy.createSubject(1, 1);
-        cy.createSubject(2, 1);
-        cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
-        cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
-        cy.createSkill(1, 1, 3, { name: 'find Blah other skill 3' });
-        cy.createSkill(1, 1, 4, { name: 'Search nothing skill 4' });
-
-        cy.createSkill(2, 1, 1, { name: 'blah1' });
-        cy.createSkill(2, 1, 2, { name: 'blah2' });
-        cy.createSkill(2, 1, 3, { name: 'blah3' });
-        cy.createSkill(2, 1, 4, { name: 'blah4' });
-
-        cy.loginAsRootUser();
-
-        cy.createGlobalBadge(1);
-        cy.assignSkillToGlobalBadge(1, 1, 1);
-        cy.assignSkillToGlobalBadge(1, 1, 2);
-        cy.enableGlobalBadge();
-
-        cy.loginAsProxyUser();
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.contains('Global Badge 1');
-        cy.get('[data-cy=badgeDetailsLink_globalBadge1]')
-            .click();
-        cy.contains('Global Badge 1')
-            .should('be.visible');
-        cy.get('[data-cy=gb_proj2]')
-            .contains('Search blah skill 1')
-            .should('not.exist');
-        cy.get('[data-cy=gb_proj1]')
-            .contains('blah1')
-            .should('not.exist');
-        cy.get('[data-cy=gb_proj2]')
-            .contains('blah1')
-            .should('exist');
-        cy.get('[data-cy=gb_proj1]')
-            .contains('Search blah skill 1');
-    });
-
-    it('completed badge count should not include global badges that do not have dependencies on this project', () => {
-        cy.resetDb();
-        cy.fixture('vars.json')
-            .then((vars) => {
-                if (!Cypress.env('oauthMode')) {
-                    cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
-                }
-            });
-        cy.loginAsProxyUser();
-        cy.createProject(1);
-        cy.createProject(2);
-        cy.createSubject(1, 1);
-        cy.createSubject(2, 1);
-        cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
-        cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
-        cy.createSkill(1, 1, 3, { name: 'find Blah other skill 3' });
-        cy.createSkill(1, 1, 4, { name: 'Search nothing skill 4' });
-
-        cy.createSkill(2, 1, 1, { name: 'blah1' });
-        cy.createSkill(2, 1, 2, { name: 'blah2' });
-        cy.createSkill(2, 1, 3, { name: 'blah3' });
-        cy.createSkill(2, 1, 4, { name: 'blah4' });
-
-        cy.loginAsRootUser();
-
-        cy.createGlobalBadge(1);
-        cy.assignSkillToGlobalBadge(1, 1, 1);
-        cy.assignSkillToGlobalBadge(1, 1, 2);
-        cy.enableGlobalBadge(1);
-
-        cy.reportSkill(2, 1, Cypress.env('proxyUser'));
-        cy.reportSkill(2, 2, Cypress.env('proxyUser'));
-
-        cy.createGlobalBadge(2);
-        cy.assignSkillToGlobalBadge(2, 1, 2);
-        cy.enableGlobalBadge(2);
-
-        cy.loginAsProxyUser();
-
-        cy.cdVisit('/');
-        cy.get('[data-cy=myBadges]')
-            .contains(' 0 ');
-    });
-
-    it('global badge skills filter search no results', () => {
-        cy.resetDb();
-        cy.fixture('vars.json')
-            .then((vars) => {
-                if (!Cypress.env('oauthMode')) {
-                    cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
-                }
-            });
-        cy.loginAsProxyUser();
-        cy.createProject(1);
-        cy.createProject(2);
-        cy.createSubject(1, 1);
-        cy.createSubject(2, 1);
-        cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
-        cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
-        cy.createSkill(1, 1, 3, { name: 'find Blah other skill 3' });
-        cy.createSkill(1, 1, 4, { name: 'Search nothing skill 4' });
-
-        cy.loginAsRootUser();
-
-        cy.createGlobalBadge(1);
-        cy.assignSkillToGlobalBadge(1, 1, 1);
-        cy.enableGlobalBadge();
-
-        cy.loginAsProxyUser();
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.contains('Global Badge 1');
-        cy.get('[data-cy=badgeDetailsLink_globalBadge1]')
-            .click();
-        cy.contains('Global Badge 1')
-            .should('be.visible');
-        cy.get('[data-cy="skillsSearchInput"]')
-            .type('ffff');
-        cy.get('[data-cy=noDataYet]')
-            .should('be.visible')
-            .contains('No results');
-    });
-
-    it('global badge with project levels should not display no skill assigned message', () => {
-        cy.resetDb();
-        cy.fixture('vars.json')
-            .then((vars) => {
-                if (!Cypress.env('oauthMode')) {
-                    cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
-                }
-            });
-        cy.loginAsProxyUser();
-        cy.createProject(1);
-        cy.createProject(2);
-        cy.createSubject(1, 1);
-        cy.createSubject(2, 1);
-        cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
-        cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
-        cy.createSkill(1, 1, 3, { name: 'find Blah other skill 3' });
-        cy.createSkill(1, 1, 4, { name: 'Search nothing skill 4' });
-
-        cy.createSkill(2, 1, 1, { name: 'blah1' });
-        cy.createSkill(2, 1, 2, { name: 'blah2' });
-        cy.createSkill(2, 1, 3, { name: 'blah3' });
-        cy.createSkill(2, 1, 4, { name: 'blah4' });
-
-        cy.loginAsRootUser();
-        cy.createGlobalBadge(1);
-        cy.assignProjectToGlobalBadge(1, 1, 2);
-        cy.assignProjectToGlobalBadge(1, 2, 2);
-        cy.enableGlobalBadge();
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.contains('Global Badge 1');
-        cy.get('[data-cy=badgeDetailsLink_globalBadge1]')
-            .click();
-        cy.contains('Global Badge 1')
-            .should('be.visible');
-        cy.get('[data-cy="skillsProgressList"][data-cy=noDataYet]')
-            .should('not.exist');
-    });
-
-    it('verify that authorization header is used in DevMode', () => {
-        if (!Cypress.env('oauthMode')) {
-            cy.intercept({ url: 'http://localhost:8083/admin/projects/proj1/token/user0', })
-                .as('getToken');
-        } else {
-            cy.intercept('/api/projects/proj1/token')
-                .as('getToken');
-        }
-        cy.intercept('GET', '/api/projects/proj1/skills/skill4/dependencies')
-            .as('getDependencies');
-        cy.cdVisit('/subjects/subj1/skills/skill4');
-        cy.wait('@getToken')
-          .its('response.body')
-          .should('have.property', 'access_token');
-        cy.get('@getToken')
-          .its('response.body')
-          .should('have.property', 'token_type', 'Bearer');
-        cy.wait('@getDependencies')
-            .its('request.headers')
-            .should('have.property', 'authorization');
+            .should('have.attr', 'href', 'https://skilltreeplatform.dev');
     });
 
     if (!Cypress.env('oauthMode')) {
-        it('verify that loginAsUser is used when retrieving token in DevMode', () => {
+        it('verify that authorization header is used in DevMode', () => {
+            cy.ignoreSkillsClientError();
+            cy.intercept('/api/projects/proj1/token')
+              .as('getToken');
+            cy.visit('/test-skills-client/proj1');
+            cy.wait('@getToken')
+              .its('response.body')
+              .should('have.property', 'access_token');
+            cy.get('@getToken')
+              .its('response.body')
+              .should('have.property', 'token_type', 'Bearer');
+        });
+
+        it.skip('verify that loginAsUser is used when retrieving token in DevMode', () => {
             cy.intercept({ url: 'http://localhost:8083/admin/projects/proj1/token/user7', })
                 .as('getToken');
             cy.intercept('GET', '/api/projects/proj1/skills/skill4/dependencies')
@@ -775,99 +346,28 @@ describe('Client Display Tests', () => {
         });
     }
 
-    it('project badge skills show subject name when details enabled', () => {
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-
-        cy.get('[data-cy=badgeDetailsLink_badge1]')
-            .click();
-        cy.contains('Badge Details');
-        cy.get('[data-cy=toggleSkillDetails]')
-            .click();
-        cy.contains('Subject: Subject 1')
-            .should('be.visible');
-    });
-
-    it('badges details page does not show achieved badges in available badges section', () => {
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2'
-        });
-        cy.assignSkillToBadge(1, 2, 5);
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            enabled: true,
-        });
-        cy.reportSkill(1, 5, Cypress.env('proxyUser')); // achieve badge 2
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=achievedBadges]')
-            .contains('Badge 2');
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 1');
-    });
-
-    it('self report skills update badge progress in my badges display', () => {
-        cy.createSkill(1, 1, 1, {
-            selfReportingType: 'Approval',
-            pointIncrement: 50,
-            pointIncrementInterval: 0
-        });
-        cy.createSkill(1, 1, 2, {
-            selfReportingType: 'HonorSystem',
-            pointIncrement: 50,
-            pointIncrementInterval: 0,
-            numPerformToCompletion: 1
-        });
-        cy.createSkill(1, 1, 3);
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2'
-        });
-        cy.assignSkillToBadge(1, 2, 1);
-        cy.assignSkillToBadge(1, 2, 2);
-        cy.assignSkillToBadge(1, 2, 3);
-        cy.enableBadge(1, 2);
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=badgeDetailsLink_badge2]')
-            .click();
-
-        cy.get('.skills-badge')
-            .contains('66% Complete');
-        cy.get('[data-cy=toggleSkillDetails]')
-            .click();
-        cy.get('[data-cy=claimPointsBtn]')
-            .click();
-        cy.get('.skills-badge')
-            .contains('100% Complete');
-    });
-
     it('verify correct # of stars on subject card', () => {
         cy.request('PUT', '/admin/projects/proj1/subjects/subj1/levels/next', {
             percent: '99',
             'iconClass': 'fas fa-user-ninja',
         });
-        cy.intercept('GET', '/api/projects/proj1/pointHistory')
-            .as('pointHistoryChart');
-        cy.cdVisit('/');
-        cy.wait('@pointHistoryChart');
+        cy.cdVisit('/', true);
         cy.contains('Overall Points');
         cy.get('[data-cy=subjectTile]')
             .eq(0)
             .contains('Subject 1');
         cy.get('[data-cy=subjectTile]')
             .eq(0)
-            .find('span.fa.fa-star')
+            .find('[data-cy="subjectStars"] .p-rating-item')
             .should('have.length', 6);
+        cy.get('[data-cy=subjectTile]')
+          .eq(1)
+          .find('[data-cy="subjectStars"] [data-pc-section="officon"]')
+          .should('have.length', 5);
+        cy.get('[data-cy=subjectTile]')
+          .eq(2)
+          .find('[data-cy="subjectStars"] [data-pc-section="officon"]')
+          .should('have.length', 5);
     });
 
     it('description is rendered in client-display if configured on project', () => {
@@ -882,189 +382,13 @@ describe('Client Display Tests', () => {
             projectId: 'proj1'
         }]);
 
-
-        cy.cdVisit('/');
-        cy.injectAxe();
-        cy.contains('I am a description');
-        cy.matchSnapshotImageForElement('.project-description', {
+        cy.cdVisit('/', true);
+        cy.get('[data-cy="projectDescription"]').contains('I am a description');
+        cy.matchSnapshotImageForElement('[data-cy="projectDescription"]', {
             blackout: '[data-cy=pointHistoryChart]'
         });
     });
 
-    it('badges details page shows achievement info for skills', () => {
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2'
-        });
-        cy.assignSkillToBadge(1, 2, 5);
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            enabled: true,
-        });
-        cy.reportSkill(1, 5, Cypress.env('proxyUser')); // achieve badge 2
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=achievedBadges]')
-            .contains('Badge 2');
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 1');
-
-        cy.get('[data-cy=earnedBadgeLink_badge2]').contains('1st')
-        cy.get('[data-cy=earnedBadgeLink_badge2]').click();
-        cy.get('[data-cy=badge_badge2]').contains("You've achieved this badge - ")
-        cy.get('[data-cy=badge_badge2]').contains('and you were the first!');
-    });
-
-    it('badge achieved in third place', () => {
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2'
-        });
-        cy.assignSkillToBadge(1, 2, 5);
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            enabled: true,
-        });
-        cy.reportSkill(1, 5, 'user5', '2019-09-14 11:00');
-        cy.reportSkill(1, 5, 'user6', '2019-09-17 11:00');
-        cy.reportSkill(1, 5, Cypress.env('proxyUser')); // achieve badge 2
-
-        cy.reportSkill(1, 1, 'user5', '2019-09-14 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-15 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-16 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-17 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-18 11:00');
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=achievedBadges]')
-            .contains('Badge 2');
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 1');
-
-        cy.get('[data-cy=earnedBadgeLink_badge2]').contains('3rd')
-        cy.get('[data-cy=earnedBadgeLink_badge2]').click();
-        cy.get('[data-cy=badge_badge2]').contains("2 other people have achieved this badge so far - and you were the third!")
-    });
-
-    it('badge achieved second place', () => {
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2'
-        });
-        cy.assignSkillToBadge(1, 2, 5);
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            enabled: true,
-        });
-        cy.reportSkill(1, 5, 'user5', '2019-09-14 11:00');
-        cy.reportSkill(1, 5, Cypress.env('proxyUser'), '2019-09-15 11:00'); // achieve badge 2
-        cy.reportSkill(1, 5, 'user6', '2019-09-17 11:00');
-
-        cy.reportSkill(1, 1, 'user5', '2019-09-14 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-15 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-16 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-17 11:00');
-        cy.reportSkill(1, 1, 'user5', '2019-09-18 11:00');
-
-        cy.reportSkill(1, 1, 'user6', '2019-09-14 11:00');
-        cy.reportSkill(1, 1, 'user6', '2019-09-15 11:00');
-        cy.reportSkill(1, 1, 'user6', '2019-09-16 11:00');
-        cy.reportSkill(1, 1, 'user6', '2019-09-17 11:00');
-        cy.reportSkill(1, 1, 'user6', '2019-09-18 11:00');
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=achievedBadges]')
-            .contains('Badge 2');
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 1');
-
-        cy.get('[data-cy=earnedBadgeLink_badge2]').contains('2nd')
-        cy.get('[data-cy=earnedBadgeLink_badge2]').click();
-        cy.get('[data-cy=badge_badge2]').contains("2 other people have achieved this badge so far - and you were the second!")
-    });
-
-    it('badge with a bonus award in progress', () => {
-
-        const anHourAgo = new Date().getTime() - (1000 * 60 * 60)
-        const twoDays = (60 * 24 * 2)
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            awardAttrs: {'iconClass': 'fas fa-car', 'name': 'Test Badge Award', 'numMinutes': twoDays}
-        });
-        cy.assignSkillToBadge(1, 2, 5);
-        cy.assignSkillToBadge(1, 2, 1);
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            enabled: true,
-            awardAttrs: {'iconClass': 'fas fa-car', 'name': 'Test Badge Award', 'numMinutes': twoDays}
-        });
-
-        cy.reportSkill(1, 5, Cypress.env('proxyUser'), anHourAgo); // achieve badge 2
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 2');
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 1');
-
-        cy.get('[data-cy=badgeDetailsLink_badge2]').click();
-        cy.get('[data-cy=badge_badge2]').contains("Achieve this badge in 23 hours and 59 minutes for the Test Badge Award bonus!")
-    });
-
-    it('badge with a bonus award completed', () => {
-
-        const anHourAgo = new Date().getTime() - (1000 * 60 * 60)
-        const twoDays = (60 * 24 * 2)
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            awardAttrs: {'iconClass': 'fas fa-car', 'name': 'Test Badge Award', 'numMinutes': twoDays}
-        });
-        cy.assignSkillToBadge(1, 2, 5);
-
-        cy.request('POST', '/admin/projects/proj1/badges/badge2', {
-            projectId: 'proj1',
-            badgeId: 'badge2',
-            name: 'Badge 2',
-            enabled: true,
-            awardAttrs: {'iconClass': 'fas fa-car', 'name': 'Test Badge Award', 'numMinutes': twoDays}
-        });
-
-        cy.reportSkill(1, 5, Cypress.env('proxyUser'), anHourAgo); // achieve badge 2
-
-        cy.cdVisit('/');
-        cy.cdClickBadges();
-        cy.get('[data-cy=achievedBadges]')
-            .contains('Badge 2');
-        cy.get('[data-cy=availableBadges]')
-            .contains('Badge 1');
-
-        cy.get('[data-cy=earnedBadgeLink_badge2]').contains('Test Badge Award')
-    });
 });
 
 

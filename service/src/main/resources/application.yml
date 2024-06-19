@@ -117,7 +117,7 @@ skills:
       descriptionMaxLength: 2000000
       maxTimeWindowInMinutes: 43200
       maxBadgeBonusInMinutes: 525600
-      docsHost: https://code.nsa.gov/skills-docs
+      docsHost: https://skilltreeplatform.dev
       maxProjectsPerAdmin: 25
       maxQuizDefsPerAdmin: 1000
       maxQuestionsPerQuiz: 500
@@ -125,7 +125,7 @@ skills:
       maxSubjectsPerProject: 25
       maxBadgesPerProject: 25
       maxSkillsPerSubject: 100
-      numProjectsForTableView: 10
+      numProjectsToStartShowingAsCards: 6
       #it may be necessary to use the (?s) modifier for paragraph validation regexes, depending on the regex specified
       paragraphValidationRegex:
       paragraphValidationMessage:

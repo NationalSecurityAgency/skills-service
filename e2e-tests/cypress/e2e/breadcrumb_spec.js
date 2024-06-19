@@ -118,14 +118,17 @@ describe('Breadcrumb Navigation Tests', () => {
             .as('userToken');
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/users');
         cy.wait('@loadSkillUsers');
-        cy.get('[data-cy=usersTable_viewDetailsBtn]')
+        cy.get('[data-cy=usersTable_viewDetailsLink]')
             .click();
-        cy.get('.client-display-iframe-1')
+        cy.get('[data-cy="skillsDisplayHome"]')
             .should('be.visible');
         cy.get('[data-cy=breadcrumb-Users]')
             .click();
         cy.get('[data-cy=errorPage]')
             .should('not.exist');
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/users');
+        cy.wait('@loadSkillUsers');
         cy.get('[data-cy=breadcrumb-skill1]')
             .click();
         cy.get('[data-cy=errorPage]')
@@ -143,20 +146,12 @@ describe('Breadcrumb Navigation Tests', () => {
         cy.get('[data-cy=errorPage]')
             .should('not.exist');
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/users/user0@skills.org/skillEvents');
+        cy.visit('/administrator/projects/proj1/users/user0@skills.org/skillEvents');
         cy.get('[data-cy="breadcrumb-user0@skills.org"]')
             .click();
         cy.get('[data-cy=errorPage]')
             .should('not.exist');
         cy.get('[data-cy=breadcrumb-Users]')
-            .click();
-        cy.get('[data-cy=errorPage]')
-            .should('not.exist');
-        cy.get('[data-cy=breadcrumb-skill1]')
-            .click();
-        cy.get('[data-cy=errorPage]')
-            .should('not.exist');
-        cy.get('[data-cy=breadcrumb-subj1]')
             .click();
         cy.get('[data-cy=errorPage]')
             .should('not.exist');

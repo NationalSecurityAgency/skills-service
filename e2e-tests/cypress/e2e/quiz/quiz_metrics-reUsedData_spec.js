@@ -76,17 +76,17 @@ describe('Quiz Metrics With Reused Data Tests', () => {
         cy.get('[data-cy="metrics-q1"] [data-cy="row2-colAnswer"]').contains("Question 1 - Third Answer")
         cy.get('[data-cy="metrics-q1"] [data-cy="row2-colAnswer"] [data-cy="checkbox-false"]')
 
-        cy.get('[data-cy="metrics-q1"] [data-cy="row0-colNumAnswered"] [data-cy="num"]').should('have.text', '6')
-        cy.get('[data-cy="metrics-q1"] [data-cy="row0-colNumAnswered"] [data-cy="percent"]').should('have.text', '54%')
-        cy.get('[data-cy="metrics-q1"] [data-cy="row0-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-cy="num"]').should('have.text', '6')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-cy="percent"]').should('have.text', '54%')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-pc-section="rowtoggler"]').should('be.enabled')
 
-        cy.get('[data-cy="metrics-q1"] [data-cy="row1-colNumAnswered"] [data-cy="num"]').should('have.text', '5')
-        cy.get('[data-cy="metrics-q1"] [data-cy="row1-colNumAnswered"] [data-cy="percent"]').should('have.text', '45%')
-        cy.get('[data-cy="metrics-q1"] [data-cy="row1-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-cy="num"]').should('have.text', '5')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-cy="percent"]').should('have.text', '45%')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtoggler"]').should('be.enabled')
 
-        cy.get('[data-cy="metrics-q1"] [data-cy="row2-colNumAnswered"] [data-cy="num"]').should('have.text', '0')
-        cy.get('[data-cy="metrics-q1"] [data-cy="row2-colNumAnswered"] [data-cy="percent"]').should('have.text', '0%')
-        cy.get('[data-cy="metrics-q1"] [data-cy="row2-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('not.exist')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-cy="num"]').should('have.text', '0')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-cy="percent"]').should('have.text', '0%')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-pc-section="rowtoggler"]').should('not.be.visible')
 
         cy.get('[data-cy="metrics-q1"] [data-cy="multipleChoiceQuestionWarning"]').should('not.exist')
     });
@@ -105,28 +105,28 @@ describe('Quiz Metrics With Reused Data Tests', () => {
         cy.get('[data-cy="metrics-q2"] [data-cy="row3-colAnswer"]').contains("Fourth Answer")
         cy.get('[data-cy="metrics-q2"] [data-cy="row3-colAnswer"] [data-cy="checkbox-false"]')
 
-        cy.get('[data-cy="metrics-q2"] [data-cy="row0-colNumAnswered"] [data-cy="num"]').should('have.text', '11')
-        cy.get('[data-cy="metrics-q2"] [data-cy="row0-colNumAnswered"] [data-cy="percent"]').should('have.text', '100%')
-        cy.get('[data-cy="metrics-q2"] [data-cy="row0-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="0"] [data-cy="num"]').should('have.text', '11')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="0"] [data-cy="percent"]').should('have.text', '100%')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="0"] [data-pc-section="rowtoggler"]').should('be.enabled')
 
-        cy.get('[data-cy="metrics-q2"] [data-cy="row1-colNumAnswered"] [data-cy="num"]').should('have.text', '0')
-        cy.get('[data-cy="metrics-q2"] [data-cy="row1-colNumAnswered"] [data-cy="percent"]').should('have.text', '0%')
-        cy.get('[data-cy="metrics-q2"] [data-cy="row1-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('not.exist')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="1"] [data-cy="num"]').should('have.text', '0')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="1"] [data-cy="percent"]').should('have.text', '0%')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="1"] [data-pc-section="rowtoggler"]').should('not.be.visible')
 
-        cy.get('[data-cy="metrics-q2"] [data-cy="row2-colNumAnswered"] [data-cy="num"]').should('have.text', '9')
-        cy.get('[data-cy="metrics-q2"] [data-cy="row2-colNumAnswered"] [data-cy="percent"]').should('have.text', '81%')
-        cy.get('[data-cy="metrics-q2"] [data-cy="row2-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="2"] [data-cy="num"]').should('have.text', '9')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="2"] [data-cy="percent"]').should('have.text', '81%')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="2"] [data-pc-section="rowtoggler"]').should('be.enabled')
 
-        cy.get('[data-cy="metrics-q2"] [data-cy="row3-colNumAnswered"] [data-cy="num"]').should('have.text', '0')
-        cy.get('[data-cy="metrics-q2"] [data-cy="row3-colNumAnswered"] [data-cy="percent"]').should('have.text', '0%')
-        cy.get('[data-cy="metrics-q2"] [data-cy="row3-colNumAnswered"] [data-cy="answerHistoryBtn"]').should('not.exist')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="3"] [data-cy="num"]').should('have.text', '0')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="3"] [data-cy="percent"]').should('have.text', '0%')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="3"] [data-pc-section="rowtoggler"]').should('not.be.visible')
 
         cy.get('[data-cy="metrics-q2"] [data-cy="multipleChoiceQuestionWarning"]').should('exist')
     });
 
     it('single answer history', function () {
         cy.visit('/administrator/quizzes/quiz1/results');
-        cy.get('[data-cy="metrics-q1"] [data-cy="row1-colNumAnswered"] [data-cy="answerHistoryBtn"]').click()
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtoggler"]').click()
 
         const tableSelector = '[data-cy="metrics-q1"] [data-cy="row1-answerHistory"] [data-cy="quizAnswerHistoryTable"]';
         const headerSelector = `${tableSelector} thead tr th`;
@@ -140,5 +140,51 @@ describe('Quiz Metrics With Reused Data Tests', () => {
             [{ colIndex: 0, value: 'user8' }],
             [{ colIndex: 0, value: 'user9' }],
         ], 10, true, 5, false);
+    });
+
+    it('sort column and order is saved in local storage', () => {
+        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+
+        const tableSelector = '[data-cy="metrics-q1"] [data-cy="row1-answerHistory"] [data-cy="quizAnswerHistoryTable"]';
+        const headerSelector = `${tableSelector} thead tr th`;
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '5')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user5' }],
+            [{ colIndex: 0, value: 'user8' }],
+            [{ colIndex: 0, value: 'user9' }],
+            [{ colIndex: 0, value: 'user10' }],
+        ], 5);
+
+        // sort by user
+        cy.get(`${headerSelector} [data-cy="usrColumnHeader"]`).click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user10' }],
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user5' }],
+            [{ colIndex: 0, value: 'user8' }],
+            [{ colIndex: 0, value: 'user9' }],
+        ], 5);
+
+        cy.get(`${headerSelector} [data-cy="usrColumnHeader"]`).click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user9' }],
+            [{ colIndex: 0, value: 'user8' }],
+            [{ colIndex: 0, value: 'user5' }],
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user10' }],
+        ], 5);
+
+        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user9' }],
+            [{ colIndex: 0, value: 'user8' }],
+            [{ colIndex: 0, value: 'user5' }],
+            [{ colIndex: 0, value: 'user3' }],
+            [{ colIndex: 0, value: 'user10' }],
+        ], 5);
     });
 });

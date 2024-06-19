@@ -76,7 +76,7 @@ class PublicConfigSpecs extends DefaultIntSpec {
         def config = skillsService.getPublicClientDisplayConfigs()
         then:
         config
-        config.docsHost == "https://code.nsa.gov/skills-docs"
+        config.docsHost == "https://skilltreeplatform.dev"
         config.enablePageVisitReporting == false
     }
 }

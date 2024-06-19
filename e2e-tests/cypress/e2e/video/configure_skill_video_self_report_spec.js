@@ -21,7 +21,7 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
         Cypress.Commands.add("visitVideoConfPage", (projNum) => {
-            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-video');
             cy.wait('@getVideoProps')
             cy.wait('@getSkillInfo')
             cy.get('.spinner-border').should('not.exist')
@@ -36,7 +36,7 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="newSkillButton"]').click()
         cy.get('[data-cy="videoSelectionMsg"]').contains('Please create skill and configure video settings first')
-        cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
+        cy.get('[data-cy="selfReportEnableCheckbox"]').click()
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]')
             .should('be.enabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Video"]')
@@ -52,7 +52,7 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="editSkillButton_skill1"]').click()
         cy.get('[data-cy="videoSelectionMsg"]').contains('Please configure video settings first')
-        cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
+        cy.get('[data-cy="selfReportEnableCheckbox"]').click();
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]')
             .should('be.enabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Video"]')
@@ -69,14 +69,15 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.get('[data-cy="editSkillButton_skill1"]').click()
-        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 4)
-        cy.get('[data-cy="numPerformToCompletion"]').should('be.enabled')
-        cy.get('[data-cy="maxOccurrences"]').should('have.value', 2)
-        cy.get('[data-cy="maxOccurrences"]').should('be.enabled')
-        cy.get('[data-cy=timeWindowCheckbox').should('be.checked')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 4)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.enabled')
+        cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
+        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('have.value', 2)
+        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('be.enabled')
+        cy.get('[data-cy=timeWindowCheckbox] [data-pc-section="input"]').should('be.checked')
 
         cy.get('[data-cy="videoSelectionMsg"]').should('not.exist')
-        cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
+        cy.get('[data-cy="selfReportEnableCheckbox"]').click();
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]')
             .should('be.enabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="Video"]')
@@ -85,19 +86,20 @@ describe('Configure Self Report Video Type Tests', () => {
 
         cy.get('[data-cy="selfReportTypeSelector"] [value="Video"]')
             .click({ force: true });
-        cy.get('[data-cy="numPerformToCompletion"]').should('have.value', 1)
-        cy.get('[data-cy="numPerformToCompletion"]').should('be.disabled')
-        cy.get('[data-cy=timeWindowCheckbox').should('not.be.checked')
-        cy.get('[data-cy="maxOccurrences"]').should('have.value', 1)
-        cy.get('[data-cy="maxOccurrences"]').should('be.disabled')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.disabled')
+        cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
+        cy.get('[data-cy=timeWindowCheckbox] [data-pc-section="input"]').should('not.be.checked')
+        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('have.value', 1)
+        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('be.disabled')
 
-        cy.get('[data-cy="saveSkillButton"]').click()
-        cy.get('[data-cy="saveSkillButton"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
         cy.wait('@getSubjectSkills').then(() => {
             cy.wait(1000)
-            cy.get('[data-cy="skillsTable"] [data-cy="manageSkillBtn_skill1"]')
-            cy.get('[data-cy="skillsTable-additionalColumns"] [value="selfReportingType"]')
-                .click({ force: true });
+            cy.get('[data-cy="skillsTable"] [data-cy="manageSkillLink_skill1"]')
+            cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+            cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
             cy.get('[data-cy="skillsTable"] [data-cy="selfReportCell-skill1"]').contains('Video')
         })
     });
@@ -109,7 +111,8 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.visitVideoConfPage()
 
         const videoFile = 'create-subject.webm';
-        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.fixture(videoFile, null).as('videoFile');
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
         cy.get('[data-cy="videoSelfReportAlert"]').should('not.exist')
         cy.get('[data-cy="saveVideoSettingsBtn"]').click()
         cy.get('[data-cy="savedMsg"]')
@@ -121,11 +124,11 @@ describe('Configure Self Report Video Type Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill1"]').click()
         cy.get('[data-cy="videoSelectionMsg"]').should('not.exist')
-        cy.get('[data-cy="selfReportEnableCheckbox"]').check({ force: true });
+        cy.get('[data-cy="selfReportEnableCheckbox"]').click();
         cy.get('[data-cy="selfReportTypeSelector"] [value="Video"]')
             .click({ force: true });
-        cy.get('[data-cy="saveSkillButton"]').click()
-        cy.get('[data-cy="saveSkillButton"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
         cy.get('[data-cy="videoSelfReportAlert"]').contains('Users are required to watch this video in order to earn the skill and its points')
 
         // refresh and re-validate

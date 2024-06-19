@@ -69,13 +69,13 @@ describe('Client Display Skills Filtering Tests', () => {
 
     it('counts in the filter', () => {
         Cypress.Commands.add('refreshCounts', () => {
-            cy.cdClickRank();
+            cy.get('[data-cy="skillProgressTitle-skill1"] [data-cy="skillProgressTitle"]').click();
             cy.cdBack('Subject 1');
         });
 
         cy.createSkill(1, 1, 1);
 
-        cy.cdVisit('/?internalBackButton=true');
+        cy.cdVisit('/?internalBackButton=true', false);
         cy.cdClickSubj(0);
         cy.validateCounts(1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
@@ -169,8 +169,8 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.assignSkillToBadge(1, 1, 2);
         cy.createBadge(1, 1, { enabled: true });
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, 'Subject 1', true);
 
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
@@ -188,6 +188,7 @@ describe('Client Display Skills Filtering Tests', () => {
 
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
+        cy.get('[data-cy="filter_attributeGroups"]').click()
         cy.get('[data-cy="filter_complete"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
@@ -394,8 +395,8 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/', true);
+        cy.cdClickSubj(0, 'Subject 1', true);
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('Very Great Skill 1');
@@ -428,7 +429,7 @@ describe('Client Display Skills Filtering Tests', () => {
             .should('not.exist');
 
         // clear
-        cy.get('[data-cy="clearSelectedFilter"]')
+        cy.get('[data-cy="selectedFilter"] [data-pc-section="removeicon"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
             .should('not.exist');
@@ -541,9 +542,11 @@ describe('Client Display Skills Filtering Tests', () => {
 
         cy.get('[data-cy="skillsSearchInput"]')
             .type('bbbbbb ');
-        cy.get('[data-cy=noDataYet]')
+        cy.get('[data-cy=noContent]')
             .should('be.visible')
             .contains('No results');
+        cy.get('[data-cy=noContent]')
+          .contains('Please refine [bbbbbb ] search');
     });
 
     it('ability to clear search string', () => {
@@ -557,13 +560,8 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.cdVisit('/');
         cy.cdClickSubj(0);
 
-        cy.get('[data-cy="clearSkillsSearchInput"]')
-            .should('not.exist');
         cy.get('[data-cy="skillsSearchInput"]')
             .type('bLaH ');
-        cy.get('[data-cy="clearSkillsSearchInput"]')
-            .should('exist');
-
         cy.get('[data-cy="skillProgress_index-0"]')
             .contains('skill 1');
         cy.get('[data-cy="skillProgress_index-1"]')
@@ -603,9 +601,9 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-0"]')
             .should('not.exist');
 
-        cy.get('[ data-cy="noDataYet"]')
+        cy.get('[ data-cy="noContent"]')
             .contains('No results');
-        cy.get('[ data-cy="noDataYet"]')
+        cy.get('[ data-cy="noContent"]')
             .contains('Please refine [bLaH1 ] search');
     });
 
@@ -626,9 +624,9 @@ describe('Client Display Skills Filtering Tests', () => {
 
         cy.get('[data-cy="skillProgress_index-0"]')
             .should('not.exist');
-        cy.get('[ data-cy="noDataYet"]')
+        cy.get('[ data-cy="noContent"]')
             .contains('No results');
-        cy.get('[ data-cy="noDataYet"]')
+        cy.get('[ data-cy="noContent"]')
             .contains('Please refine [bLaH1 ] search and/or clear the selected filter');
     });
 
@@ -767,7 +765,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-1"]')
             .contains('skill 3');
 
-        cy.get('[data-cy="clearSelectedFilter"]')
+        cy.get('[data-cy="selectedFilter"] [data-pc-section="removeicon"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
             .should('not.exist');
@@ -871,6 +869,7 @@ describe('Client Display Skills Filtering Tests', () => {
 
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
+        cy.get('[data-cy="filter_selfReportGroups"]').click()
         cy.get('[data-cy="filter_approval"]')
             .click();
 
@@ -909,9 +908,8 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.cdClickBadges();
-        cy.contains('Badges');
         cy.get('[data-cy="badgeDetailsLink_badge1"]')
             .click();
 
@@ -969,7 +967,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.cdClickBadges();
         cy.contains('Badges');
         cy.get('[data-cy="earnedBadgeLink_badge1"]')
@@ -1044,7 +1042,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.cdClickBadges();
         cy.get('[data-cy="earnedBadgeLink_globalBadge1"]')
             .click();
@@ -1113,6 +1111,7 @@ describe('Client Display Skills Filtering Tests', () => {
 
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
+        cy.get('[data-cy="filter_attributeGroups"]').click()
         cy.get('[data-cy="filter_belongsToBadge"]')
             .click();
         cy.get('[data-cy="selectedFilter"]')
@@ -1205,8 +1204,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+        cy.cdVisit('/subjects/subj1');
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
 
@@ -1242,7 +1240,7 @@ describe('Client Display Skills Filtering Tests', () => {
 
         cy.get('[data-cy="skillProgress_index-6"]')
             .should('not.exist');
-        cy.matchSnapshotImage({ blackout: '[data-cy=pointHistoryChart]' });
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', { blackout: '[data-cy=pointHistoryChart]' });
     });
 
     it('Visual Tests filter selected and last viewed button present', () => {
@@ -1263,7 +1261,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
         cy.get('[data-cy="filter_approval"]').click({force: true});
         cy.get('[data-cy="selectedFilter"]').contains('Approval');
-        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"] .card-header');
+        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"] [data-pc-section="header"]');
     });
 
     it('filter on has tag', () => {
@@ -1281,6 +1279,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-2"]').contains('Very Great Skill 3');
 
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+        cy.get('[data-cy="filter_attributeGroups"]').click();
         cy.get('[data-cy="filter_hasTag"] [data-cy="filterCount"]').should('have.text', '2');
         cy.get('[data-cy="filter_hasTag"]').click();
         cy.get('[data-cy="selectedFilter"]').contains('Has a Tag');
@@ -1308,18 +1307,17 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 2');
         cy.get('[data-cy="skillProgress_index-2"]').contains('Very Great Skill 3');
 
-        cy.get('[data-cy="skillTag-0"]').click()
+        cy.get('[data-cy="skillTag-0"] [data-cy="addTagBtn"]').click()
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+        cy.get('[data-cy="filter_attributeGroups"]').click();
         cy.get('[data-cy="filter_belongsToBadge"] [data-cy="filterCount"]').should('have.text', '1')
         cy.get('[data-cy="filter_belongsToBadge"]').click();
 
         cy.get('[data-cy="selectedFilter"]').contains('Belongs to a Badge');
-        cy.get('[data-cy="clearSelectedTagFilter-tag1"]')
 
         cy.get('[data-cy="skillProgress_index-0"]').should('not.exist');
         cy.get('[data-cy="skillProgress_index-1"]').should('not.exist');
         cy.get('[data-cy="skillProgress_index-2"]').should('not.exist');
-
     });
 
 });

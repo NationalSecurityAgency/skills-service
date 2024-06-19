@@ -52,7 +52,7 @@ describe('Multiple Project With no Results', () => {
         cy.wait('@getProjects')
         cy.get('[data-cy=nav-Projects]')
         cy.get('[data-cy="nav-Quizzes and Surveys"]')
-        cy.get('[data-cy="noContent"]').contains("No Projects");
+        cy.get('[data-cy="noProjectsYet"]').contains("No Projects");
 
         // wait for nav to finish loading
         cy.wait(3000);

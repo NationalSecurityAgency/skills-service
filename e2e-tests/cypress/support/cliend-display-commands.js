@@ -14,24 +14,44 @@
  * limitations under the License.
  */
 
+Cypress.Commands.add("ignoreSkillsClientError", () => {
+    cy.on('uncaught:exception', (err, runnable) => {
+        // cy.log(err.message)
+        if (err.message.includes('Handshake Reply Failed')) {
+            return false
+        }
+        return true
+    })
+});
+
 Cypress.Commands.add("validatePoweredBy", () => {
     cy.url().then(url => {
         cy.log(`url: ${url}`);
         if (!url.includes('disableSkillTreeBrand|true') && !url.includes('disableSkillTreeBrand%7Ctrue')) {
-            cy.get('.titleBody').contains('powered by');
+            cy.get('[data-cy="skillsTitle"]').contains('powered by');
         }
     });
 });
 
-Cypress.Commands.add("cdVisit", (url) => {
-    cy.visit(`http://localhost:8083${url}`);
-    cy.validatePoweredBy();
-});
+Cypress.Commands.add('cdVisit', (url = '', expectPointHistoryData = false) => {
+    cy.visit(`/test-skills-display/proj1${url}`)
+    cy.validatePoweredBy()
+
+    // wait for the loader to go way
+    cy.get('[data-pc-name="progressspinner"]').should('not.exist')
+
+    if (!url || url === '' || url === '/' || url === '/?internalBackButton=true') {
+        cy.get(expectPointHistoryData ? '[data-cy="pointHistoryChartWithData"]' : '[data-cy="pointHistoryChartNoData"]')
+    }
+})
 
 Cypress.Commands.add("cdBack", (expectedTitle = 'User Skills') => {
     cy.get('[data-cy=back]').click()
     cy.validatePoweredBy();
     cy.contains(expectedTitle);
+
+    // wait for the loader to go way
+    cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
     // back button should not exist on the home page, whose title is the default value
     if (expectedTitle === 'User Skills'){
@@ -39,15 +59,20 @@ Cypress.Commands.add("cdBack", (expectedTitle = 'User Skills') => {
     }
 });
 
-Cypress.Commands.add("cdClickSubj", (subjIndex, expectedTitle) => {
-    cy.get(`.user-skill-subject-tile:nth-child(${subjIndex+1})`).first().click();
-    cy.validatePoweredBy();
-    if (expectedTitle){
-        cy.contains(expectedTitle);
-    }
-});
+Cypress.Commands.add('cdClickSubj', (subjIndex, expectedTitle = null, expectPointHistoryData = false) => {
+  cy.get(`[data-cy="subjectTile"] [data-cy="subjectTileBtn"]`).eq(subjIndex).click()
+  cy.validatePoweredBy()
+  if (expectedTitle) {
+    cy.get('[data-cy="skillsTitle"]').contains(expectedTitle)
+  }
+  // wait for the loader to go way
+  cy.get('[data-pc-name="progressspinner"]').should('not.exist')
+
+  cy.get(expectPointHistoryData ? '[data-cy="pointHistoryChartWithData"]' : '[data-cy="pointHistoryChartNoData"]')
+})
 
 Cypress.Commands.add("cdClickSkill", (skillIndex, useProgressBar = true, skillLabel = 'Skill') => {
+
     if (useProgressBar) {
         cy.get(`[data-cy="skillProgress_index-${skillIndex}"] [data-cy="skillProgressBar"]`).click();
     } else {
@@ -55,17 +80,21 @@ Cypress.Commands.add("cdClickSkill", (skillIndex, useProgressBar = true, skillLa
     }
     cy.contains(`${skillLabel} Overview`)
     cy.validatePoweredBy();
+    // wait for the loader to go way
+    cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 });
 
 Cypress.Commands.add("cdClickRank", () => {
-    cy.get('[data-cy=myRank]').click();
-    cy.contains('My Rank');
+    cy.get('[data-cy=myRankBtn]').click();
+    cy.get('[data-cy="title"]').contains('My Rank');
+    // wait for the loader to go way
+    cy.get('[data-pc-name="progressspinner"]').should('not.exist')
     cy.validatePoweredBy();
 });
 
 Cypress.Commands.add("cdClickBadges", () => {
-    cy.get('[data-cy=myBadges]').click()
-    cy.contains('My Badges');
+    cy.get('[data-cy="myBadgesBtn"]').click()
+    cy.get('[data-cy="title"]').contains('My Badges');
     cy.validatePoweredBy();
 });
 

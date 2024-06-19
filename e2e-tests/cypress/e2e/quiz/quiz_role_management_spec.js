@@ -33,7 +33,7 @@ describe('Quiz User Role Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('.vs__dropdown-option').contains('root@skills.org').click();
+        cy.get('[data-pc-section="item"]').contains('root@skills.org').click();
         cy.get('[data-cy="quizAdmin_root@skills.org"]').should('not.exist')
         cy.get('[data-cy="addUserBtn"]').click()
         cy.get('[data-cy="quizAdmin_root@skills.org"]')
@@ -41,7 +41,7 @@ describe('Quiz User Role Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.contains('Sorry, no matching options')
+        cy.contains('No results found')
     });
 
     it('delete quiz admin', function () {
@@ -68,25 +68,25 @@ describe('Quiz User Role Management Tests', () => {
           const oauthMode = Cypress.env('oauthMode');
           const defaultUser = oauthMode ? Cypress.env('proxyUser') : vars.defaultUser;
 
-          cy.visit('/administrator/quizzes/quiz1/access');
           cy.request('POST', `/admin/quiz-definitions/quiz1/users/user1/roles/ROLE_QUIZ_ADMIN`);
           cy.request('POST', `/admin/quiz-definitions/quiz1/users/user2/roles/ROLE_QUIZ_ADMIN`);
+          cy.visit('/administrator/quizzes/quiz1/access');
 
-          cy.get(`[data-cy="quizAdmin_${defaultUser}"] [data-cy="removeUserBtn"]`).should('be.disabled')
+          cy.get(`[data-cy="quizAdmin_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.exist')
           cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').should('be.enabled')
           cy.get('[data-cy="quizAdmin_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
 
           cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').click()
 
-          cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This action will permanently remove user1 from having admin privileges.')
+          cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove user1 from having admin privileges.')
           cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
-          cy.get('[data-cy="removeButton"]').click()
+          cy.get('[data-cy="saveDialogBtn"]').click()
 
-          cy.get(`[data-cy="quizAdmin_${defaultUser}"] [data-cy="removeUserBtn"]`).should('be.disabled')
+          cy.get(`[data-cy="quizAdmin_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.exist')
           cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').should('not.exist')
           cy.get('[data-cy="quizAdmin_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
 
-          cy.get('[data-cy="existingUserInput"] input').should('have.focus')
+          cy.get('[data-cy="existingUserInput"] [data-pc-section="input"]').should('have.focus')
         });
     })
 
@@ -112,11 +112,11 @@ describe('Quiz User Role Management Tests', () => {
         cy.request('POST', `/admin/quiz-definitions/quiz1/users/user2/roles/ROLE_QUIZ_ADMIN`);
 
         cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').click()
-        cy.get('[data-cy="closeRemovalSafetyCheck"]').click()
+        cy.get('[data-cy="closeDialogBtn"]').click()
         cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').should('have.focus')
 
         cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').click()
-        cy.get('.modal-header [aria-label="Close"]').click()
+        cy.get('.p-dialog-header [aria-label="Close"]').click()
         cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').should('have.focus')
     })
 

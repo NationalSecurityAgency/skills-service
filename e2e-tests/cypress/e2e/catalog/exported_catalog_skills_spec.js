@@ -25,8 +25,9 @@ describe('Skills Exported to Catalog Tests', () => {
 
     it('no exported skills', () => {
         cy.visit('/administrator/projects/proj1/skills-catalog');
-        cy.get('[data-cy="exportedSkillsTable"]')
-            .contains('There are no records to show');
+        cy.get('[data-cy="noExportedSkills"]')
+            .contains('No skills exported to Skills Catalog');
+        cy.get('[data-cy="exportedSkillsTable"]').should('not.exist')
     });
 
     it('delete skill', () => {
@@ -42,14 +43,14 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.visit('/administrator/projects/proj2/skills-catalog');
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2 Subj2'
             }, {
                 colIndex: 1,
                 value: 'Subject 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 1'
             }, {
                 colIndex: 1,
@@ -64,23 +65,23 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('This action CANNOT be undone')
             .should('not.exist');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me1');
         cy.get('[data-cy="currentValidationText"]')
             .should('have.value', 'Delete Me1');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="currentValidationText"]')
             .type('{backspace}');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2 Subj2'
             }, {
                 colIndex: 1,
@@ -92,7 +93,7 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.visit('/administrator/projects/proj2/skills-catalog');
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2 Subj2'
             }, {
                 colIndex: 1,
@@ -112,7 +113,7 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.visit('/administrator/projects/proj2/skills-catalog');
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 1'
             }, {
                 colIndex: 1,
@@ -124,28 +125,30 @@ describe('Skills Exported to Catalog Tests', () => {
             .click();
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 0 projects.');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me1');
         cy.get('[data-cy="currentValidationText"]')
             .should('have.value', 'Delete Me1');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="currentValidationText"]')
             .type('{backspace}');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
 
-        cy.get('[data-cy="exportedSkillsTable"]')
-            .contains('There are no records to show');
+        cy.get('[data-cy="noExportedSkills"]')
+          .contains('No skills exported to Skills Catalog');
+        cy.get('[data-cy="exportedSkillsTable"]').should('not.exist')
 
         // refresh and validate
         cy.visit('/administrator/projects/proj2/skills-catalog');
-        cy.get('[data-cy="exportedSkillsTable"]')
-            .contains('There are no records to show');
+        cy.get('[data-cy="noExportedSkills"]')
+          .contains('No skills exported to Skills Catalog');
+        cy.get('[data-cy="exportedSkillsTable"]').should('not.exist')
     });
 
     it('delete skill with url encoded id', () => {
@@ -163,14 +166,14 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.visit('/administrator/projects/proj2/skills-catalog');
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2 Subj2'
             }, {
                 colIndex: 1,
                 value: 'Subject 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 1'
             }, {
                 colIndex: 1,
@@ -182,23 +185,23 @@ describe('Skills Exported to Catalog Tests', () => {
             .click();
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains(`This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 0 projects.`);
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me1');
         cy.get('[data-cy="currentValidationText"]')
             .should('have.value', 'Delete Me1');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="currentValidationText"]')
             .type('{backspace}');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2 Subj2'
             }, {
                 colIndex: 1,
@@ -210,7 +213,7 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.visit('/administrator/projects/proj2/skills-catalog');
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2 Subj2'
             }, {
                 colIndex: 1,
@@ -239,16 +242,16 @@ describe('Skills Exported to Catalog Tests', () => {
             .click();
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 2 projects.');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
 
-        cy.get('[data-cy="closeRemovalSafetyCheck"]')
+        cy.get('[data-cy="closeDialogBtn"]')
             .click();
         cy.get('[data-cy="deleteSkillButton_skill2"]')
             .click();
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('This will PERMANENTLY remove [Very Great Skill 2] Skill from the catalog. This skill is currently imported by 1 project.');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
     });
 
@@ -284,49 +287,49 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.visit('/administrator/projects/proj1/skills-catalog');
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 7 Subj2'
             }, {
                 colIndex: 1,
                 value: 'Subject 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 6 Subj2'
             }, {
                 colIndex: 1,
                 value: 'Subject 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 5 Subj2'
             }, {
                 colIndex: 1,
                 value: 'Subject 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 4'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 3'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 1'
             }, {
                 colIndex: 1,
@@ -339,49 +342,49 @@ describe('Skills Exported to Catalog Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 1'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 3'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 4'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 5 Subj2'
             }, {
                 colIndex: 1,
                 value: 'Subject 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 6 Subj2'
             }, {
                 colIndex: 1,
                 value: 'Subject 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 7 Subj2'
             }, {
                 colIndex: 1,
@@ -394,49 +397,49 @@ describe('Skills Exported to Catalog Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 1'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 3'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 4'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 5 Subj2'
             }, {
                 colIndex: 1,
                 value: 'Subject 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 6 Subj2'
             }, {
                 colIndex: 1,
                 value: 'Subject 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 7 Subj2'
             }, {
                 colIndex: 1,
@@ -449,49 +452,49 @@ describe('Skills Exported to Catalog Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 7 Subj2'
             }, {
                 colIndex: 1,
                 value: 'Subject 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 6 Subj2'
             }, {
                 colIndex: 1,
                 value: 'Subject 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 5 Subj2'
             }, {
                 colIndex: 1,
                 value: 'Subject 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 4'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 3'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2'
             }, {
                 colIndex: 1,
                 value: 'Subject 1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 1'
             }, {
                 colIndex: 1,
@@ -500,75 +503,7 @@ describe('Skills Exported to Catalog Tests', () => {
         ], 5);
 
         cy.get(`${tableSelector} th`)
-            .contains('Subject')
-            .click();
-        cy.validateTable(tableSelector, [
-            [{
-                colIndex: 1,
-                value: 'Subject 1'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Subject 1'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Subject 1'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Subject 1'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Subject 2'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Subject 2'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Subject 2'
-            }],
-        ], 5);
-
-        cy.get(`${tableSelector} th`)
-            .contains('Subject')
-            .click();
-        cy.validateTable(tableSelector, [
-            [{
-                colIndex: 1,
-                value: 'Subject 2'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Subject 2'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Subject 2'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Subject 1'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Subject 1'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Subject 1'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Subject 1'
-            }],
-        ], 5);
-
-        cy.get(`${tableSelector} th`)
-            .contains('# of Projects Imported')
+            .contains('Projects Imported')
             .click();
         cy.validateTable(tableSelector, [
             [{
@@ -602,7 +537,7 @@ describe('Skills Exported to Catalog Tests', () => {
         ], 5);
 
         cy.get(`${tableSelector} th`)
-            .contains('# of Projects Imported')
+            .contains('Projects Imported')
             .click();
         cy.validateTable(tableSelector, [
             [{
@@ -635,6 +570,148 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5);
     });
+
+
+    it('table sort is saved in local storage', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.createSkill(1, 1, 4);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.wait(100);
+        cy.exportSkillToCatalog(1, 1, 2);
+        cy.wait(100);
+        cy.exportSkillToCatalog(1, 1, 3);
+        cy.wait(100);
+        cy.exportSkillToCatalog(1, 1, 4);
+        cy.wait(100);
+
+        cy.createSubject(1, 2);
+        cy.createSkill(1, 2, 5);
+        cy.createSkill(1, 2, 6);
+        cy.createSkill(1, 2, 7);
+        cy.exportSkillToCatalog(1, 2, 5);
+        cy.wait(100);
+        cy.exportSkillToCatalog(1, 2, 6);
+        cy.wait(100);
+        cy.exportSkillToCatalog(1, 2, 7);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.importSkillFromCatalog(2, 1, 1, 1);
+        cy.finalizeCatalogImport(2);
+
+        cy.visit('/administrator/projects/proj1/skills-catalog');
+        cy.get(`${tableSelector} th`)
+          .contains('Skill')
+          .click();
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 1'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 3'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 4'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 5 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 6 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 7 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 2'
+            }],
+        ], 5);
+
+        // refresh and validate
+        cy.visit('/administrator/projects/proj1/skills-catalog');
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 1'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 3'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 4'
+            }, {
+                colIndex: 1,
+                value: 'Subject 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 5 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 6 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 7 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Subject 2'
+            }],
+        ], 5);
+    });
+
 
     it('Select larger page', () => {
         cy.intercept('/admin/projects/proj1/skills/exported?*').as('loadExportedSkills')
@@ -667,107 +744,107 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.wait('@loadExportedSkills');
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`)
             .should('have.text', '11');
-        cy.get(`${tableSelector} [data-cy="skillsBTablePageSize"]`)
-            .select('10');
+        cy.get(`${tableSelector} [data-pc-name="rowperpagedropdown"]`).click()
+        cy.get('[data-pc-section="list"] [aria-label="10"]').click()
         cy.wait('@loadExportedSkills');
         cy.get(`${tableSelector} table tbody [role="row"]`).should('have.length', 10)
 
         cy.get(`${tableSelector} th`)
-            .contains('Subject')
+            .contains('Skill')
             .click();
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 1'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 10 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 11 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 3'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 4'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 5 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 6 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 7 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 8 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 9 Subj2'
             }],
         ], 10);
 
-        cy.get(`${tableSelector} [data-cy="skillsBTablePageSize"]`)
-            .select('25');
+        cy.get(`${tableSelector} [data-pc-name="rowperpagedropdown"]`).click()
+        cy.get('[data-pc-section="list"] [aria-label="25"]').click()
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 1'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 10 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 11 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 1'
+                value: 'Very Great Skill 2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 3'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 4'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 5 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 6 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 7 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 8 Subj2'
             }],
             [{
                 colIndex: 1,
-                value: 'Subject 2'
+                value: 'Very Great Skill 9 Subj2'
             }],
         ], 25);
     });
@@ -790,20 +867,20 @@ describe('Skills Exported to Catalog Tests', () => {
             .click();
         cy.get('[data-cy="skillName"]')
             .type('A');
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"]')
             .clear()
             .type('66');
         cy.get('[data-cy="numPerformToCompletion"]')
             .clear()
             .type('7');
-        cy.get('[data-cy="saveSkillButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.wait('@saveSkill1');
         cy.get('[data-cy="nameCell_skill1"]')
             .contains('Very Great Skill 1A');
-        cy.get('[data-cy="skillsTable-additionalColumns"]')
-            .contains('Points')
-            .click();
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
+        cy.get('[data-pc-section="closebutton"]').click()
         cy.get('[data-cy="totalPointsCell_skill1"]')
             .contains('66 pts x 7 repetitions');
 
@@ -814,9 +891,6 @@ describe('Skills Exported to Catalog Tests', () => {
             .click();
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="manageBtn_subj1"]')
-            .click();
-        cy.get('[data-cy="skillsTable-additionalColumns"]')
-            .contains('Points')
             .click();
         // occurrences are synced but not points
         cy.get('[data-cy="totalPointsCell_skill1"]')
@@ -847,34 +921,32 @@ describe('Skills Exported to Catalog Tests', () => {
             .click();
         cy.validateTable('[data-cy="exportedSkillsTable"]', [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 3'
             }, {
                 colIndex: 2,
                 value: '1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 2'
             }, {
                 colIndex: 2,
                 value: '0'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill 1'
             }, {
                 colIndex: 2,
                 value: '1'
             }],
         ], 5);
-        cy.get('[data-cy="expandDetailsBtn_proj1_skill2"]')
-            .click();
+        cy.get(`${tableSelector} [data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill2"')
             .contains('This skill has not been imported by any other projects yet...');
 
-        cy.get('[data-cy="expandDetailsBtn_proj1_skill1"]')
-            .click();
+        cy.get(`${tableSelector} [data-p-index="2"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]')
             .should('exist');
         cy.validateTable('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]', [
@@ -884,8 +956,7 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.get('[data-cy="expandDetailsBtn_proj1_skill3"]')
-            .click();
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill3"] [data-cy="importedSkillsTable"]')
             .should('exist');
         cy.validateTable('[data-cy="importSkillInfo-proj1_skill3"] [data-cy="importedSkillsTable"]', [
@@ -895,59 +966,54 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5, true, null, false);
     });
-    it('contact project owner for exported skill', () => {
-            cy.intercept('POST', '/api/projects/*/contact').as('contact');
-            cy.loginAsAdminUser();
-            cy.createSkill(1, 1, 1);
-            cy.createSkill(1, 1, 2);
-            cy.createSkill(1, 1, 3);
-            cy.exportSkillToCatalog(1, 1, 1);
-            cy.exportSkillToCatalog(1, 1, 2);
-            cy.exportSkillToCatalog(1, 1, 3);
-            cy.createProject(2);
-            cy.createSubject(2, 1);
-            cy.importSkillFromCatalog(2, 1, 1, 1);
-            cy.finalizeCatalogImport(2);
-            cy.createProject(3);
-            cy.createSubject(3, 1);
-            cy.importSkillFromCatalog(3, 1, 1, 3);
-            cy.visit('/administrator/projects/proj1');
-            cy.get('[data-cy="nav-Skill Catalog"]')
-                .click();
-            cy.get('[data-cy="exportedSkillsTable"] [data-cy="skillsBTableTotalRows"]')
-                            .should('have.text', '3')
-            cy.get('[data-cy="expandDetailsBtn_proj1_skill2"]')
-                .click();
-            cy.get('[data-cy="importSkillInfo-proj1_skill2"')
-                .contains('This skill has not been imported by any other projects yet...');
 
-            cy.get('[data-cy="expandDetailsBtn_proj1_skill1"]')
-                .click();
-            cy.get('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]')
-                .should('exist');
-            cy.validateTable('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]', [
-                [{
-                    colIndex: 0,
-                    value: 'This is project 2'
-                }],
-            ], 5, true, null, false);
-           cy.get('[data-cy="contactOwnerBtn_proj2"]').should('be.visible').click();
-           cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
-           cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
-           cy.get('[data-cy="charactersRemaining"]').should('contain.text', '2,475 characters remaining');
-           cy.get('[data-cy="contactOwnersSubmitBtn"]').should('be.enabled');
-           cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
-           cy.wait('@contact');
-           cy.get('[data-cy="contactOwnersSubmitBtn"]').should('contain.text', 'Ok');
-           cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'Message sent!');
-           cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'The Project Administrator(s) of This is project 2 will be notified of your question via email.');
-           cy.get('[data-cy="contactOwnersSubmitBtn"]').click();
-           cy.wait(500); //wait for animations to complete
-           cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
-           cy.getEmails().then((emails) => {
-                     expect(emails[0].textAsHtml).to.contain('This is project 2');
-                 });
-        });
+    it('contact project owner for exported skill', () => {
+        cy.intercept('POST', '/api/projects/*/contact').as('contact')
+        cy.loginAsAdminUser()
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        cy.exportSkillToCatalog(1, 1, 1)
+        cy.exportSkillToCatalog(1, 1, 2)
+        cy.exportSkillToCatalog(1, 1, 3)
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.importSkillFromCatalog(2, 1, 1, 1)
+        cy.createProject(3)
+        cy.createSubject(3, 1)
+        cy.importSkillFromCatalog(3, 1, 1, 3)
+        cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="nav-Skill Catalog"]')
+          .click()
+        cy.get('[data-cy="exportedSkillsTable"] [data-cy="skillsBTableTotalRows"]')
+          .should('have.text', '3')
+
+        cy.get(`[data-cy="exportedSkillsTable"] [data-p-index="2"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]')
+          .should('exist')
+        cy.validateTable('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]', [
+            [{
+                colIndex: 0,
+                value: 'This is project 2'
+            }]
+        ], 5, true, null, false)
+        cy.get('[data-cy="contactOwnerBtn_proj2"]').should('be.visible').click()
+        cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist')
+        cy.get('[data-cy="contactOwnersMsgInput"]').type('aaa bbb this is a message')
+        cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,475 characters remaining')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@contact')
+        cy.get('[data-cy="closeDialogBtn"]').should('contain.text', 'OK')
+        cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'Message sent!')
+        cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'The Project Administrator(s) of This is project 2 will be notified of your question via email.')
+        cy.get('[data-cy="closeDialogBtn"]').click()
+        cy.wait(500) //wait for animations to complete
+        cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist')
+        cy.getEmails().then((emails) => {
+            expect(emails[0].text).to.contain('This is project 2')
+        })
+    })
 });
 
 

@@ -35,12 +35,10 @@ describe('Import Skills under a Group Tests', () => {
         cy.createSkillsGroup(1, 1, 5);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
-        cy.get('[data-cy="expandDetailsBtn_group5"]')
-            .click();
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="importSkillToGroupBtn-group5"]')
             .click();
-        cy.get('[data-cy="skillSelect_proj2-skill1"]')
-            .check({ force: true });
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .click();
         cy.get('[data-cy="importSkillToGroupBtn-group5"]')
@@ -60,7 +58,7 @@ describe('Import Skills under a Group Tests', () => {
 
         cy.get('[data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -75,8 +73,8 @@ describe('Import Skills under a Group Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
             .should('have.text', '1');
 
-        cy.get('[data-cy="expandDetailsBtn_group5"]')
-            .click();
+        // cy.get('[data-cy="expandDetailsBtn_group5"]')
+        //     .click();
         cy.get('[data-cy="nameCell_skill1"] [data-cy="importedBadge-skill1"]');
         cy.get('[data-cy="nameCell_skill1"] [data-cy="disabledBadge-skill1"]')
             .should('not.exist');
@@ -85,14 +83,10 @@ describe('Import Skills under a Group Tests', () => {
     it('refocus on the import button after the Import modal is closed', () => {
         cy.createSkillsGroup(1, 1, 5);
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
-        cy.get('[data-cy="expandDetailsBtn_group5"]')
-            .click();
-        cy.get('[data-cy="importSkillToGroupBtn-group5"]')
-            .click();
-        cy.get('[data-cy="okButton"]')
-            .click();
-        cy.get('[data-cy="importSkillToGroupBtn-group5"]')
-            .should('have.focus');
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="importSkillToGroupBtn-group5"]').click();
+        cy.get('[data-pc-section="closebutton"]').click();
+        cy.get('[data-cy="importSkillToGroupBtn-group5"]').should('have.focus');
     });
 
     it('edit imported skills points', () => {
@@ -117,24 +111,23 @@ describe('Import Skills under a Group Tests', () => {
         ]);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
-        cy.get('[data-cy="expandDetailsBtn_group5"]')
-            .click();
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable-additionalColumns"]`)
-            .contains('Points')
-            .click();
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
+        cy.get('[data-pc-section="closebutton"]').click()
         cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 2'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '200'
             }],
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 1'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '200'
             }],
         ], 5, true, null, false);
@@ -142,24 +135,24 @@ describe('Import Skills under a Group Tests', () => {
         cy.get('[data-cy="editSkillButton_skill2"]')
             .click();
         cy.contains('This skill was imported from This is project 2 and can only be modified in that project.');
-        cy.get('[data-cy="skillPointIncrement"]')
+        cy.get('[data-cy="pointIncrement"]')
             .clear()
             .type('33');
-        cy.get('[data-cy="saveSkillButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 2'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '66'
             }],
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 1'
             }, {
-                colIndex: 3,
+                colIndex: 5,
                 value: '200'
             }],
         ], 5, true, null, false);
@@ -187,15 +180,14 @@ describe('Import Skills under a Group Tests', () => {
         ]);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
-        cy.get('[data-cy="expandDetailsBtn_group5"]')
-            .click();
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 1'
             }],
         ], 5, true, null, false);
@@ -204,11 +196,11 @@ describe('Import Skills under a Group Tests', () => {
             .click();
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
             [{
-                colIndex: 0,
+                colIndex: 2,
                 value: 'Very Great Skill 2'
             }],
         ], 5, true, null, false);
@@ -236,10 +228,8 @@ describe('Import Skills under a Group Tests', () => {
         ]);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
-        cy.get('[data-cy="expandDetailsBtn_group5"]')
-            .click();
-        cy.get('[data-cy="expandDetailsBtn_skill1"]')
-            .click();
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"] [data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="childRowDisplay_skill1"]')
             .contains('was initially defined in the This is project 2 project');
         cy.get('[data-cy="childRowDisplay_skill1"]')
@@ -268,9 +258,8 @@ describe('Import Skills under a Group Tests', () => {
         ]);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
-        cy.get('[data-cy="expandDetailsBtn_group5"]')
-            .click();
-        cy.get('[data-cy="manageSkillBtn_skill1"]')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="manageSkillLink_skill1"]')
             .click();
         cy.get('[data-cy="pageHeader"]')
             .contains('ID: skill1');
@@ -301,15 +290,14 @@ describe('Import Skills under a Group Tests', () => {
         cy.finalizeCatalogImport(2);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="expandDetailsBtn_group5"]')
-            .click();
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="deleteSkillButton_skill21"]')
             .click();
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('This will PERMANENTLY remove [Very Great Skill 21] Skill from the catalog');
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me');
-        cy.get('[data-cy="removeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="deleteSkillButton_skill21"]')
             .should('not.exist');

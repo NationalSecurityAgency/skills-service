@@ -16,6 +16,10 @@
 describe('Resource Not Found Tests', () => {
 
     beforeEach(() => {
+        cy.on('uncaught:exception', (err, runnable) => {
+            return false
+        })
+
         cy.logout();
         const supervisorUser = 'supervisor@skills.org';
         cy.register(supervisorUser, 'password');
@@ -40,232 +44,36 @@ describe('Resource Not Found Tests', () => {
             .as('loadProgress');
         cy.visit('/administrator/projects/proj1/subjects/fooo');
 
-        cy.get('[data-cy=notFoundExplanation]')
+        cy.url().should('include', '/error')
+        cy.get('[data-cy=errExplanation]')
             .should('be.visible')
-            .should('have.text', ' Subject [fooo] doesn\'t exist in project [proj1] ');
-        cy.get('[data-cy=notFoundExplanation]');
-        cy.get('[data-cy=takeMeHome]')
-            .click();
-        cy.wait('@loadProgress');
-        cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
-            .should('be.visible');
+            .contains('Subject [fooo] doesn\'t exist');
     });
 
-    it('invalid skill results in not found page', () => {
+    it('invalid route in not found page', () => {
         cy.intercept('GET', '/api/myProgressSummary')
             .as('loadProgress');
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skillFooo');
+        cy.visit('/administrator/doesnotexist');
 
+        cy.url().should('include', '/not-found')
         cy.get('[data-cy=notFoundExplanation]')
             .should('be.visible')
-            .should('have.text', ' Skill [skillFooo] doesn\'t exist. ');
-        cy.get('[data-cy=notFoundExplanation]');
-        cy.get('[data-cy=takeMeHome]')
-            .click();
-        cy.wait('@loadProgress');
-        cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
-            .should('be.visible');
+            .contains('The resource you requested cannot be located.');
+
+        cy.get('[data-cy="breadcrumb-bar"]').should('have.text', 'Not Found');
     });
 
-    it('redirects from old /projects link to /administrator/', () => {
+    it('invalid "old" routes in not found page with redirect message and link', () => {
         cy.intercept('GET', '/api/myProgressSummary')
-            .as('loadProgress');
-        cy.intercept('GET', '/app/projects')
-            .as('loadProjects');
-        cy.intercept('GET', '/admin/projects/proj1')
-            .as('loadProject');
+          .as('loadProgress');
         cy.visit('/projects');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=newLink]')
-            .should('be.visible');
-        cy.wait(11 * 1000); //wait for redirect timeout
-        cy.wait('@loadProjects');
-        cy.get('[data-cy=breadcrumb-Projects]')
-            .should('be.visible');
 
-        cy.visit('/projects/');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=newLink]')
-            .click();
-        cy.wait('@loadProjects');
-        cy.get('[data-cy=breadcrumb-Projects]')
-            .should('be.visible');
-
-        cy.visit('/projects/');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=takeMeHome]')
-            .click();
-        cy.wait('@loadProgress');
-        cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
-            .should('be.visible');
-
-        cy.visit('/projects/proj1');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=newLink]')
-            .click();
-        cy.wait('@loadProject');
-        cy.get('[data-cy=breadcrumb-proj1]')
-            .should('be.visible');
-    });
-
-    it('redirects from old subjects link to /administrator/', () => {
-        cy.intercept('GET', '/api/myProgressSummary')
-            .as('loadProgress');
-        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills')
-            .as('loadSkills');
-        cy.visit('/projects/proj1/subjects/subj1');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=newLink]')
-            .should('be.visible');
-        cy.wait(11 * 1000); //wait for redirect timeout
-        cy.wait('@loadSkills');
-        cy.get('[data-cy=breadcrumb-Projects]')
-            .should('be.visible');
-        cy.get('[data-cy=breadcrumb-subj1]')
-            .should('be.visible');
-
-        cy.visit('/projects/proj1/subjects/subj1');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=newLink]')
-            .click();
-        cy.wait('@loadSkills');
-        cy.get('[data-cy=breadcrumb-Projects]')
-            .should('be.visible');
-        cy.get('[data-cy=breadcrumb-subj1]')
-            .should('be.visible');
-
-        cy.visit('/projects/proj1/subjects/subjNope');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=newLink]')
-            .click(); //should try to direct to new /administrator path and then return a not-found as the subj doesn't actually exist
+        cy.url().should('include', '/not-found')
         cy.get('[data-cy=notFoundExplanation]')
-            .should('be.visible');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('not.exist');
+          .should('be.visible')
+          .contains('It looks like you may have followed an old link. You will be forwarded to /administrator');
 
-        cy.visit('/projects/proj1/subjects/subj1');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=takeMeHome]')
-            .click();
-        cy.wait('@loadProgress');
-        cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
-            .should('be.visible');
-    });
-
-    it('redirects from old skills link to /administrator/', () => {
-        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            skillId: `skill1`,
-            name: `Very Great Skill # 1`,
-            pointIncrement: '1500',
-            numPerformToCompletion: '10',
-        });
-
-        cy.intercept('GET', '/api/myProgressSummary')
-            .as('loadProgress');
-        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1')
-            .as('loadSkill');
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=newLink]')
-            .should('be.visible');
-        cy.wait(11 * 1000); //wait for redirect timeout
-        cy.wait('@loadSkill');
-        cy.get('[data-cy=breadcrumb-Projects]')
-            .should('be.visible');
-        cy.get('[data-cy=breadcrumb-skill1]')
-            .should('be.visible');
-
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1/');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=newLink]')
-            .click();
-        cy.wait('@loadSkill');
-        cy.get('[data-cy=breadcrumb-Projects]')
-            .should('be.visible');
-        cy.get('[data-cy=breadcrumb-skill1]')
-            .should('be.visible');
-
-        cy.visit('/projects/proj1/subjects/subj1/skills/skillNope/');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=newLink]')
-            .click();
-        cy.get('[data-cy=notFoundExplanation]')
-            .should('be.visible');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('not.exist');
-
-        cy.visit('/projects/proj1/subjects/subj1/skills/skill1/');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=takeMeHome]')
-            .click();
-        cy.wait('@loadProgress');
-        cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
-            .should('be.visible');
-    });
-
-    it('redirects from old global badges link to /administrator/', () => {
-        cy.intercept('GET', '/api/myProgressSummary')
-            .as('loadProgress');
-        cy.intercept('GET', '/supervisor/badges')
-            .as('loadBadges');
-        cy.intercept('GET', '/supervisor/badges/asdfBadge')
-            .as('loadBadge');
-        cy.visit('/globalBadges');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=newLink]')
-            .should('be.visible');
-        cy.wait(11 * 1000); //wait for redirect timeout
-        cy.wait('@loadBadges');
-        cy.get('[data-cy=breadcrumb-Projects]')
-            .should('be.visible');
-        cy.get('[data-cy=breadcrumb-GlobalBadges]')
-            .should('be.visible');
-
-        cy.visit('/globalBadges');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=newLink]')
-            .click();
-        cy.wait('@loadBadges');
-        cy.get('[data-cy=breadcrumb-Projects]')
-            .should('be.visible');
-        cy.get('[data-cy=breadcrumb-GlobalBadges]')
-            .should('be.visible');
-
-        cy.visit('/globalBadges/asdfBadge/');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=newLink]')
-            .click();
-        cy.wait('@loadBadge');
-        cy.get('[data-cy=notFoundExplanation]')
-            .should('be.visible');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('not.exist');
-
-        cy.visit('/globalBadges');
-        cy.get('[data-cy=oldLinkRedirect]')
-            .should('be.visible');
-        cy.get('[data-cy=takeMeHome]')
-            .click();
-        cy.wait('@loadProgress');
-        cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
-            .should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"]').should('have.text', 'Not Found');
     });
 
 });

@@ -39,7 +39,7 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="title"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
 
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('quiz with questions screen', () => {
@@ -66,9 +66,9 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="question_5"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_5"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_5"] [data-cy="answer_3"]').click()
-        cy.get('[data-cy="question_5"] [data-cy="answer_4"]').click()
+        cy.get('[data-cy="question_5"] [data-cy="answer_4"]').click().blur()
 
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('quiz passed screen', () => {
@@ -104,7 +104,7 @@ describe('Client Display Quiz Visual Tests', () => {
         const snapshotOptions = {
             blackout: '[data-cy="quizRuntime"]',
         };
-        cy.matchSnapshotImage(snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapshotOptions);
     });
 
     it('quiz failed screen', () => {
@@ -136,7 +136,7 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="quizFailed"]')
 
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('survey splash screen', () => {
@@ -153,7 +153,7 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="title"]').contains('Survey')
         cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points')
 
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('survey questions screen', () => {
@@ -172,9 +172,9 @@ describe('Client Display Quiz Visual Tests', () => {
 
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click().blur()
 
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
     it('survey completed screen', () => {
@@ -206,7 +206,7 @@ describe('Client Display Quiz Visual Tests', () => {
         const snapshotOptions = {
             blackout: '[data-cy="surveyRuntimeCard"]',
         };
-        cy.matchSnapshotImage(snapshotOptions);
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapshotOptions);
     });
 
     it('questions support markdown', () => {
@@ -274,7 +274,7 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]')
 
-        cy.matchSnapshotImage();
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
 
 });

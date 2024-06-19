@@ -62,7 +62,9 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.createSkill(1, 1, 3);
 
         cy.cdVisit('/?internalBackButton=true');
+        cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.cdClickSubj(0);
+        cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
 
@@ -171,11 +173,11 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.get('[data-cy="selfReportAlert"]')
             .contains('You just earned 50 points!');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
-        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
-        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('50 / 100 Points');
@@ -188,12 +190,12 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="selfReportAlert"]')
             .contains('You just earned 50 points and completed the skill!');
         cy.get('[data-cy="claimPointsBtn"]')
-            .should('be.disabled');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+            .should('not.exist');
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('100');
-        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('100');
-        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('100 / 100 Points');
@@ -227,11 +229,11 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportAlert"]')
             .contains('You just earned 50 points!');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('50 / 100 Points');
@@ -244,12 +246,12 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportAlert"]')
             .contains('You just earned 50 points and completed the skill!');
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="claimPointsBtn"]')
-            .should('be.disabled');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+            .should('not.exist');
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('100');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('100');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('100 / 100 Points');
@@ -281,7 +283,7 @@ describe('Client Display Self Report Skills Tests', () => {
             .contains('This skill requires approval from a project administrator. Now let\'s play the waiting game! ');
         cy.get('[data-cy="requestApprovalBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="selfReportAlert"]')
             .contains('requires approval');
@@ -294,7 +296,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSkill(0);
         cy.get('[data-cy="requestApprovalBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="pendingApprovalStatus"]').contains('pending approval')
 
@@ -308,11 +310,11 @@ describe('Client Display Self Report Skills Tests', () => {
             .should('be.enabled');
         cy.get('[data-cy="pendingApprovalStatus"]')
             .should('not.exist');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
-        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
-        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('50 / 100 Points');
@@ -338,7 +340,7 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.get('[data-cy="selfReportMsgInput"]')
             .type('some val');
-        cy.get('[data-cy="selfReportMsgInput_errMsg"]')
+        cy.get('[data-cy="descriptionError"]')
             .should('not.be.visible');
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .should('be.enabled');
@@ -350,11 +352,11 @@ describe('Client Display Self Report Skills Tests', () => {
             .contains('This skill requires approval from a project administrator. Now let\'s play the waiting game! ');
         cy.get('[data-cy="requestApprovalBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
 
         cy.get('[data-cy="pendingApprovalStatus"]').should('not.exist')
-        cy.get('[data-cy="dismissSuccessfulSubmissionBtn"]').click()
+        cy.get('[data-cy="selfReportAlert"] [data-pc-section="closebutton"]').click()
         cy.get('[data-cy="pendingApprovalStatus"]')
             .contains('pending approval');
         cy.get('[data-cy="pendingApprovalStatus"]')
@@ -367,7 +369,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSkill(0);
         cy.get('[data-cy="requestApprovalBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="pendingApprovalStatus"]')
             .contains('ending approval');
@@ -384,11 +386,11 @@ describe('Client Display Self Report Skills Tests', () => {
             .should('be.enabled');
         cy.get('[data-cy="pendingApprovalStatus"]')
             .should('not.exist');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
-        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
-        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('50 / 100 Points');
@@ -404,7 +406,7 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.get('[data-cy="requestApprovalBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="pendingApprovalStatus"]')
             .contains('pending approval');
@@ -424,7 +426,7 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="requestApprovalBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="skillProgress_index-0"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="pendingApprovalStatus"]')
             .contains('pending approval');
@@ -484,7 +486,7 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.get('[data-cy="requestApprovalBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="selfReportRejectedAlert"]')
             .contains('The reason is: "Skill was rejected"');
@@ -517,7 +519,7 @@ describe('Client Display Self Report Skills Tests', () => {
             .should('be.enabled');
 
 
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="approvalPending"]').contains('Request Rejected')
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportRejectedAlert"]')
@@ -548,7 +550,7 @@ describe('Client Display Self Report Skills Tests', () => {
             .contains('This skill requires approval from a project administrator. Now let\'s play the waiting game! ');
         cy.get('[data-cy="requestApprovalBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
 
         cy.cdVisit('/');
@@ -558,7 +560,7 @@ describe('Client Display Self Report Skills Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="requestApprovalBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="pendingApprovalStatus"]')
             .contains('pending approval');
@@ -583,7 +585,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="clearRejectionMsgBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="approvalPending"]').contains('Request Rejected')
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportRejectedAlert"]')
@@ -603,7 +605,7 @@ describe('Client Display Self Report Skills Tests', () => {
             .contains('This skill requires approval from a project administrator. Now let\'s play the waiting game! ');
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="requestApprovalBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
 
         cy.cdVisit('/');
@@ -613,7 +615,7 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="requestApprovalBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="pendingApprovalStatus"]')
             .contains('pending approval');
@@ -648,28 +650,28 @@ describe('Client Display Self Report Skills Tests', () => {
             .type('some val');
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="selfReportMsgInput_errMsg"]')
+        cy.get('[data-cy="descriptionError"]')
             .should('not.be.visible');
 
         cy.get('[data-cy="selfReportMsgInput"]')
             .type(' jabberwocky ok');
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .should('be.disabled');
-        cy.get('[data-cy="selfReportMsgInput_errMsg"]')
+        cy.get('[data-cy="descriptionError"]')
             .contains('paragraphs may not contain jabberwocky');
 
         cy.get('[data-cy="selfReportMsgInput"]')
             .type('{backspace}{backspace}{backspace}');
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .should('be.disabled');
-        cy.get('[data-cy="selfReportMsgInput_errMsg"]')
+        cy.get('[data-cy="descriptionError"]')
             .contains('paragraphs may not contain jabberwocky');
 
         cy.get('[data-cy="selfReportMsgInput"]')
             .type('{backspace}');
         cy.get('[data-cy="selfReportSubmitBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="selfReportMsgInput_errMsg"]')
+        cy.get('[data-cy="descriptionError"]')
             .should('not.be.visible');
 
         cy.get('[data-cy="selfReportSubmitBtn"]')
@@ -705,19 +707,18 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdVisit('/');
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
-
-        cy.get('[data-cy="skillProgressTitle"] [data-cy="selfReportApprovalTag"]').contains('Approval')
-        cy.matchSnapshotImageForElement('[data-cy="skillProgressTitle"]', 'Self_Reportable Label on Skill Overview');
+        cy.get('[data-cy="skillProgressTitle-skill1"] [data-cy="selfReportApprovalTag"]').contains('Approval')
+        cy.matchSnapshotImageForElement('[data-cy="skillProgressTitle-skill1"]', 'Self_Reportable Label on Skill Overview');
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(1);
-        cy.get('[data-cy="skillProgressTitle"] [data-cy="selfReportApprovalTag"]') .should('not.exist');
-        cy.get('[data-cy="skillProgressTitle"] [data-cy="selfReportHonorSystemTag"]') .should('not.exist');
+        cy.get('[data-cy="skillProgressTitle-skill1"] [data-cy="selfReportApprovalTag"]') .should('not.exist');
+        cy.get('[data-cy="skillProgressTitle-skill1"] [data-cy="selfReportHonorSystemTag"]') .should('not.exist');
 
         cy.cdVisit('/?enableTheme=true');
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
-        cy.matchSnapshotImageForElement('[data-cy="skillProgressTitle"]', 'Self_Reportable Label on Skill Overview - Themed');
+        cy.matchSnapshotImageForElement('[data-cy="skillProgressTitle-skill1"]', 'Self_Reportable Label on Skill Overview - Themed');
     });
 
     it('attempt to report skill with insufficient project points', () => {
@@ -807,74 +808,47 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
 
-        cy.get('.user-skills-overview .circle-number')
-            .eq(0)
-            .contains('0');
-        cy.get('.user-skills-overview .circle-number')
-            .eq(0)
-            .contains('out of');
-        cy.get('.user-skills-overview .circle-number')
-            .eq(0)
-            .contains('400');
-        cy.get('.progress-circle-wrapper')
-            .eq(0)
-            .contains('0 Points earned Today');
-        cy.get('.user-skills-overview .circle-number')
-            .eq(1)
-            .contains('0');
-        cy.get('.user-skills-overview .circle-number')
-            .eq(1)
-            .contains('out of');
-        cy.get('.user-skills-overview .circle-number')
-            .eq(1)
-            .contains('40');
-        cy.get('.progress-circle-wrapper')
-            .eq(1)
-            .contains('0 Points earned Today');
-        cy.get('.progress-circle-wrapper')
-            .eq(1)
-            .contains('40 Points to Level 1');
+        cy.get('[data-cy="overallPoints"] .apexcharts-canvas')
+            .contains('0 Points');
+        cy.get('[data-cy="overallPoints"] .apexcharts-canvas')
+          .contains('0%');
+        cy.get('[data-cy="overallPoints"] [data-cy="earnedPoints"]')
+          .should('have.text', '0');
+        cy.get('[data-cy="overallPoints"] [data-cy="pointsEarnedToday"]')
+          .should('have.text', '0');
+        cy.get('[data-cy="overallPoints"] [data-cy="totalPoints"]')
+          .should('have.text', '400');
+
+        cy.get('[data-cy="levelProgress"] .apexcharts-canvas')
+          .contains('0 Points');
+        cy.get('[data-cy="levelProgress"] .apexcharts-canvas')
+          .contains('0%');
+        cy.get('[data-cy="levelProgress"] [data-cy="pointsTillNextLevel"]').should('have.text', '40')
+        cy.get('[data-cy="levelProgress"]').contains('40 Points to Level 1')
+        cy.get('[data-cy="levelProgress"]').contains('Level 1 Progress')
+        cy.get('[data-cy="overallLevelDesc"]').contains('Level 0 out of 5')
 
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="claimPointsBtn"]')
             .click();
 
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportAlert"]')
-            .contains('You just earned 50 points!');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="overallPointsEarnedCard"] [data-cy="progressInfoCardTitle"]')
-            .contains('50');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsAchievedTodayCard"] [data-cy="progressInfoCardTitle"]')
-            .contains('50');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="progressInfoCardTitle"]')
-            .contains('50');
-        cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .contains('50 / 100 Points');
+        cy.get('[data-cy="overallPoints"] .apexcharts-canvas')
+          .contains('50 Points');
+        cy.get('[data-cy="overallPoints"] .apexcharts-canvas')
+          .contains('12%');
+        cy.get('[data-cy="overallPoints"] [data-cy="earnedPoints"]')
+          .should('have.text', '50');
+        cy.get('[data-cy="overallPoints"] [data-cy="pointsEarnedToday"]')
+          .should('have.text', '50');
+        cy.get('[data-cy="overallPoints"] [data-cy="totalPoints"]')
+          .should('have.text', '400');
 
-        cy.get('.user-skills-overview .circle-number')
-            .eq(0)
-            .contains('50');
-        cy.get('.user-skills-overview .circle-number')
-            .eq(0)
-            .contains('out of');
-        cy.get('.user-skills-overview .circle-number')
-            .eq(0)
-            .contains('400');
-        cy.get('.progress-circle-wrapper')
-            .eq(0)
-            .contains('50 Points earned Today');
-        cy.get('.user-skills-overview .circle-number')
-            .eq(1)
-            .contains('10');
-        cy.get('.user-skills-overview .circle-number')
-            .eq(1)
-            .contains('out of');
-        cy.get('.user-skills-overview .circle-number')
-            .eq(1)
-            .contains('60');
-        cy.get('.progress-circle-wrapper')
-            .eq(1)
-            .contains('50 Points earned Today');
-        cy.get('.progress-circle-wrapper')
-            .eq(1)
-            .contains('50 Points to Level 2');
+        cy.get('[data-cy="levelProgress"] .apexcharts-canvas')
+          .contains('10 Points');
+        cy.get('[data-cy="levelProgress"] .apexcharts-canvas')
+          .contains('16%');
+        cy.get('[data-cy="levelProgress"] [data-cy="pointsTillNextLevel"]').should('have.text', '50')
+        cy.get('[data-cy="levelProgress"]').contains('50 Points to Level 2')
+        cy.get('[data-cy="levelProgress"]').contains('Level 2 Progress')
+        cy.get('[data-cy="overallLevelDesc"]').contains('Level 1 out of 5')
     });
 });

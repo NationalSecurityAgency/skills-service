@@ -35,7 +35,8 @@ limitations under the License.
         <div class="mt-2">
           <b-badge class="mr-1">2.</b-badge>
           Create or edit a project and then navigate to the <img
-          src="/static/img/screenshot_settingsTab.png" alt="Settings tab screenshot"/> tab
+          src="/static/img/screenshot_set
+          tingsTab.png" alt="Settings tab screenshot"/> tab
         </div>
         <div class="mt-2">
           <b-badge class="mr-1">3.</b-badge>

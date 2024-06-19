@@ -21,7 +21,7 @@ describe('Configure Video Validation Tests', () => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
         Cypress.Commands.add("visitVideoConfPage", (projNum) => {
-            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-video');
             cy.wait('@getVideoProps')
             cy.wait('@getSkillInfo')
             cy.get('.spinner-border').should('not.exist')
@@ -56,7 +56,7 @@ describe('Configure Video Validation Tests', () => {
 
         // validation should work after clear
         cy.get('[data-cy="clearVideoSettingsBtn"]').click()
-        cy.get('footer .btn-danger').contains('Yes, Do clear').click()
+        cy.get('.p-dialog-footer').contains('Yes, Do clear').click()
         cy.get('[data-cy="videoUrl"]').should('not.exist')
         cy.get('[data-cy="videoCaptions"]').should('be.empty')
         cy.get('[data-cy="videoTranscript"]').should('be.empty')
@@ -69,6 +69,9 @@ describe('Configure Video Validation Tests', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
         cy.visitVideoConfPage();
+        const videoFile = 'create-subject.webm';
+        cy.fixture(videoFile, null).as('videoFile');
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
         cy.get('[data-cy="videoTranscript"]').type('jabberwocky', { delay: 0 })
         cy.get('[data-cy="videoTranscriptError"]').contains('Video Transcript - paragraphs may not contain jabberwocky')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
@@ -84,7 +87,7 @@ describe('Configure Video Validation Tests', () => {
         cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
         const invalidValue = Array(51).fill('a').join('');
         cy.get('[data-cy="videoTranscript"]').type(invalidValue, { delay: 0 })
-        cy.get('[data-cy="videoTranscriptError"]').contains('Video Transcript cannot exceed 50 characters.')
+        cy.get('[data-cy="videoTranscriptError"]').contains('Video Transcript must be at most 50 characters')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="videoTranscript"]').type('{backspace}');
         cy.get('[data-cy="videoTranscriptError"]').should('not.be.visible')
@@ -99,7 +102,7 @@ describe('Configure Video Validation Tests', () => {
         cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
         const invalidValue = Array(50).fill('a').join('');
         cy.get('[data-cy="videoCaptions"]').type(invalidValue, { delay: 0 })
-        cy.get('[data-cy="videoCaptionsError"]').contains('Captions cannot exceed 49 characters.')
+        cy.get('[data-cy="videoCaptionsError"]').contains('Captions must be at most 49 characters')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="videoCaptions"]').type('{backspace}');
         cy.get('[data-cy="videoCaptionsError"]').should('not.be.visible')
@@ -118,12 +121,13 @@ describe('Configure Video Validation Tests', () => {
         cy.get('[data-cy="showExternalUrlBtn"]').should('be.enabled')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="videoFileError"]').should('not.exist')
+        cy.get('[data-cy="videoFileInputError"]').should('not.exist')
 
         const videoFile = 'valid_icon.png';
-        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile });
+        cy.fixture(videoFile, null).as('videoFile');
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="videoFileError"]').contains('Unsupported [image/png] file type, supported types: [video/webm,video/mp4]')
+        cy.get('[data-cy="videoFileInputError"]').contains('Unsupported [image/png] file type, supported types: [video/webm,video/mp4]')
     });
 
     it('validate maximum size of the video', () => {
@@ -140,7 +144,7 @@ describe('Configure Video Validation Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/configVideo');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-video');
         cy.wait('@loadConfig')
         cy.wait('@getVideoProps')
         cy.wait('@getSkillInfo')
@@ -148,12 +152,13 @@ describe('Configure Video Validation Tests', () => {
         cy.get('[data-cy="showExternalUrlBtn"]').should('be.enabled')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="videoFileError"]').should('not.exist')
+        cy.get('[data-cy="videoFileInputError"]').should('not.exist')
 
         const videoFile = 'create-project.webm';
-        cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile });
+        cy.fixture(videoFile, null).as('videoFile');
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="videoFileError"]').contains('File exceeds maximum size of 300 KB')
+        cy.get('[data-cy="videoFileInputError"]').contains('File exceeds maximum size of 300 KB')
     });
 
 });

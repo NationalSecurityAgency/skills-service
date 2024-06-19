@@ -18,7 +18,7 @@ describe('Manage My Projects Tests', () => {
 
     beforeEach(() => {
 
-        Cypress.Commands.add('addToMyProjectsViaBtn', (rowNum, expectedNumRows = 6) => {
+        Cypress.Commands.add('addToMyProjectsViaBtn', (rowNum, expectedNumRows = 5) => {
             const tableSelector = '[data-cy="discoverProjectsTable"]';
             const rowSelector = `${tableSelector} tbody tr`;
             cy.get(rowSelector)
@@ -63,7 +63,7 @@ describe('Manage My Projects Tests', () => {
 
         });
 
-        Cypress.Commands.add('containsCellValue', (rowNum, columnNum, expectedValue, numRows = 6) => {
+        Cypress.Commands.add('containsCellValue', (rowNum, columnNum, expectedValue, numRows = 5) => {
             const tableSelector = '[data-cy="discoverProjectsTable"]';
             const rowSelector = `${tableSelector} tbody tr`;
             cy.get(rowSelector)
@@ -82,7 +82,7 @@ describe('Manage My Projects Tests', () => {
             const tableSelector = '[data-cy="discoverProjectsTable"]';
             const rowSelector = `${tableSelector} tbody tr`;
             cy.get(rowSelector)
-                .should('have.length', 6)
+                .should('have.length', 5)
                 .as('cyRows');
             cy.get('@cyRows')
                 .eq(rowNum)
@@ -104,7 +104,7 @@ describe('Manage My Projects Tests', () => {
         cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
             .click();
         cy.contains('No Discoverable Projects');
-        cy.contains('Projects can be created and managed from the "Project Admin" view');
+        cy.contains('Projects can be created and managed from the Project Admin view');
     });
 
     it('display stat cards', function () {
@@ -153,7 +153,7 @@ describe('Manage My Projects Tests', () => {
         cy.get('[data-cy="discoverNewProjCount"] [data-cy="mediaInfoCardTitle"]')
             .contains('7');
 
-        cy.addToMyProjectsViaBtn(1);
+        cy.get('[data-cy="addButton-proj5"]').click()
         cy.get('[data-cy="allProjectsCount"] [data-cy="mediaInfoCardTitle"]')
             .contains('9');
         cy.get('[data-cy="myProjectCount"] [data-cy="mediaInfoCardTitle"]')
@@ -161,7 +161,7 @@ describe('Manage My Projects Tests', () => {
         cy.get('[data-cy="discoverNewProjCount"] [data-cy="mediaInfoCardTitle"]')
             .contains('6');
 
-        cy.addToMyProjectsViaBtn(4);
+        cy.get('[data-cy="addButton-proj4"]').click()
         cy.get('[data-cy="allProjectsCount"] [data-cy="mediaInfoCardTitle"]')
             .contains('9');
         cy.get('[data-cy="myProjectCount"] [data-cy="mediaInfoCardTitle"]')
@@ -169,7 +169,7 @@ describe('Manage My Projects Tests', () => {
         cy.get('[data-cy="discoverNewProjCount"] [data-cy="mediaInfoCardTitle"]')
             .contains('5');
 
-        cy.removeFromMyProjectsViaBtn(0);
+        cy.get('[data-cy="removeBtn-proj5"]').click()
         cy.get('[data-cy="allProjectsCount"] [data-cy="mediaInfoCardTitle"]')
             .contains('9');
         cy.get('[data-cy="myProjectCount"] [data-cy="mediaInfoCardTitle"]')
@@ -177,7 +177,7 @@ describe('Manage My Projects Tests', () => {
         cy.get('[data-cy="discoverNewProjCount"] [data-cy="mediaInfoCardTitle"]')
             .contains('6');
 
-        cy.removeFromMyProjectsViaBtn(2);
+        cy.get('[data-cy="removeBtn-proj4"]').click()
         cy.get('[data-cy="allProjectsCount"] [data-cy="mediaInfoCardTitle"]')
             .contains('9');
         cy.get('[data-cy="myProjectCount"] [data-cy="mediaInfoCardTitle"]')
@@ -202,22 +202,20 @@ describe('Manage My Projects Tests', () => {
 
         cy.visit('/progress-and-rankings/manage-my-projects');
 
-        cy.doesNotContainsCellValue(0, 1, 'My Project');
-        cy.doesNotContainsCellValue(1, 1, 'My Project');
-        cy.doesNotContainsCellValue(2, 1, 'My Project');
-        cy.doesNotContainsCellValue(3, 1, 'My Project');
-        cy.doesNotContainsCellValue(4, 1, 'My Project');
-        cy.doesNotContainsCellValue(4, 1, 'My Project');
+        cy.doesNotContainsCellValue(0, 2, 'My Project');
+        cy.doesNotContainsCellValue(1, 2, 'My Project');
+        cy.doesNotContainsCellValue(2, 2, 'My Project');
+        cy.doesNotContainsCellValue(3, 2, 'My Project');
+        cy.doesNotContainsCellValue(4, 2, 'My Project');
 
-        cy.addToMyProjectsViaBtn(0);
-        cy.addToMyProjectsViaBtn(2);
-        cy.addToMyProjectsViaBtn(4);
-        cy.containsCellValue(0, 1, 'My Project');
-        cy.doesNotContainsCellValue(1, 1, 'My Project');
-        cy.containsCellValue(2, 1, 'My Project');
-        cy.doesNotContainsCellValue(3, 1, 'My Project');
-        cy.containsCellValue(4, 1, 'My Project');
-        cy.doesNotContainsCellValue(5, 1, 'My Project');
+        cy.get('[data-cy="addButton-proj1"]').click()
+        cy.get('[data-cy="addButton-proj3"]').click()
+        cy.get('[data-cy="addButton-proj5"]').click()
+        cy.containsCellValue(0, 2, 'My Project');
+        cy.doesNotContainsCellValue(1, 2, 'My Project');
+        cy.containsCellValue(2, 2, 'My Project');
+        cy.doesNotContainsCellValue(3, 2, 'My Project');
+        cy.containsCellValue(4, 2, 'My Project');
 
     });
 
@@ -233,20 +231,18 @@ describe('Manage My Projects Tests', () => {
 
         cy.visit('/progress-and-rankings/manage-my-projects');
 
-        cy.doesNotContainsCellValue(0, 1, 'My Project');
-        cy.containsCellValue(1, 1, 'My Project');
-        cy.doesNotContainsCellValue(2, 1, 'My Project');
-        cy.containsCellValue(3, 1, 'My Project');
-        cy.containsCellValue(4, 1, 'My Project');
-        cy.doesNotContainsCellValue(5, 1, 'My Project');
+        cy.doesNotContainsCellValue(0, 2, 'My Project');
+        cy.containsCellValue(1, 2, 'My Project');
+        cy.doesNotContainsCellValue(2, 2, 'My Project');
+        cy.containsCellValue(3, 2, 'My Project');
+        cy.containsCellValue(4, 2, 'My Project');
 
-        cy.removeFromMyProjectsViaBtn(3);
-        cy.doesNotContainsCellValue(0, 1, 'My Project');
-        cy.containsCellValue(1, 1, 'My Project');
-        cy.doesNotContainsCellValue(2, 1, 'My Project');
-        cy.doesNotContainsCellValue(3, 1, 'My Project');
-        cy.containsCellValue(4, 1, 'My Project');
-        cy.doesNotContainsCellValue(5, 1, 'My Project');
+        cy.get('[data-cy="removeBtn-proj4"]').click()
+        cy.doesNotContainsCellValue(0, 2, 'My Project');
+        cy.containsCellValue(1, 2, 'My Project');
+        cy.doesNotContainsCellValue(2, 2, 'My Project');
+        cy.doesNotContainsCellValue(3, 2, 'My Project');
+        cy.containsCellValue(4, 2, 'My Project');
     });
 
     it('search by name', function () {
@@ -266,51 +262,28 @@ describe('Manage My Projects Tests', () => {
         }
 
         cy.visit('/progress-and-rankings/manage-my-projects');
-        cy.containsCellValue(0, 0, 'Do we Eat');
-        cy.containsCellValue(1, 0, 'This is project 2');
-        cy.containsCellValue(2, 0, 'This is project 3');
-        cy.containsCellValue(3, 0, 'this is project 3 fleat beat');
-        cy.containsCellValue(4, 0, 'This is project 5');
-        cy.containsCellValue(5, 0, 'This is project 6');
-        cy.get('[data-cy="projectsTableTotalRows"]')
-            .contains(9);
+        cy.containsCellValue(0, 1, 'Do we Eat');
+        cy.containsCellValue(1, 1, 'This is project 2');
+        cy.containsCellValue(2, 1, 'This is project 3');
+        cy.containsCellValue(3, 1, 'this is project 3 fleat beat');
+        cy.containsCellValue(4, 1, 'This is project 5');
+        cy.get('[data-cy="discoverProjectsTable"] [data-cy="skillsBTableTotalRows"]')
+            .should('have.text', '9');
 
         cy.get('[data-cy="searchInput"]')
             .type('eAT');
-        cy.containsCellValue(0, 0, 'Do we Eat', 3);
-        cy.containsCellValue(1, 0, 'this is project 3 fleat beat', 3);
-        cy.containsCellValue(2, 0, 'Very Neat project', 3);
-        cy.get('[data-cy="projectsTableTotalRows"]')
-            .contains(3);
-
-        // verify there is no padding added to the highlighted text
-        cy.get('[data-cy="discoverProjectsTable"] tbody tr')
-          .eq(2)
-          .find('td mark')
-          .eq(0)
-          .should('have.css', 'padding', '0px');
+        cy.containsCellValue(0, 1, 'Do we Eat', 3);
+        cy.containsCellValue(1, 1, 'this is project 3 fleat beat', 3);
+        cy.containsCellValue(2, 1, 'Very Neat project', 3);
 
         cy.get('[data-cy="searchInput"]')
             .type('{backspace}{backspace}{backspace}');
-        cy.containsCellValue(5, 0, 'This is project 6');
-        cy.get('[data-cy="projectsTableTotalRows"]')
-            .contains(9);
-
-        // test for spaces and case
-        cy.get('[data-cy="searchInput"]')
-            .type('   eAt    ');
-        cy.containsCellValue(0, 0, 'Do we Eat', 3);
-        cy.containsCellValue(1, 0, 'this is project 3 fleat beat', 3);
-        cy.containsCellValue(2, 0, 'Very Neat project', 3);
-        cy.get('[data-cy="projectsTableTotalRows"]')
-            .contains(3);
+        cy.containsCellValue(4, 1, 'This is project 5');
 
         // clear search
-        cy.get('[data-cy="clearSearch"]')
+        cy.get('[data-cy="filterResetBtn"]')
             .click();
-        cy.containsCellValue(5, 0, 'This is project 6');
-        cy.get('[data-cy="projectsTableTotalRows"]')
-            .contains(9);
+        cy.containsCellValue(4, 1, 'This is project 5');
     });
 
     it('stats cards update when adding and removing projects after performing a search', function () {
@@ -338,10 +311,8 @@ describe('Manage My Projects Tests', () => {
 
         cy.get('[data-cy="searchInput"]')
             .type('project 3');
-        cy.containsCellValue(0, 0, 'This is project 3', 2);
-        cy.containsCellValue(1, 0, 'this is project 3 fleat beat', 2);
-        cy.get('[data-cy="projectsTableTotalRows"]')
-            .contains(2);
+        cy.containsCellValue(0, 1, 'This is project 3', 2);
+        cy.containsCellValue(1, 1, 'this is project 3 fleat beat', 2);
 
         cy.get('[data-cy="allProjectsCount"] [data-cy="mediaInfoCardTitle"]')
             .contains('9');
@@ -350,7 +321,7 @@ describe('Manage My Projects Tests', () => {
         cy.get('[data-cy="discoverNewProjCount"] [data-cy="mediaInfoCardTitle"]')
             .contains('4');
 
-        cy.addToMyProjectsViaBtn(1, 2);
+        cy.get('[data-cy="addButton-proj8"]').click()
         cy.get('[data-cy="allProjectsCount"] [data-cy="mediaInfoCardTitle"]')
             .contains('9');
         cy.get('[data-cy="myProjectCount"] [data-cy="mediaInfoCardTitle"]')
@@ -358,7 +329,7 @@ describe('Manage My Projects Tests', () => {
         cy.get('[data-cy="discoverNewProjCount"] [data-cy="mediaInfoCardTitle"]')
             .contains('3');
 
-        cy.removeFromMyProjectsViaBtn(0, 2);
+        cy.get('[data-cy="removeBtn-proj3"]').click()
         cy.get('[data-cy="allProjectsCount"] [data-cy="mediaInfoCardTitle"]')
             .contains('9');
         cy.get('[data-cy="myProjectCount"] [data-cy="mediaInfoCardTitle"]')
@@ -384,10 +355,8 @@ describe('Manage My Projects Tests', () => {
 
         cy.get('[data-cy="searchInput"]')
             .type('dljlajd');
-        cy.get('[data-cy="projectsTableTotalRows"]')
-            .contains(0);
         cy.get('[data-cy="discoverProjectsTable"]')
-            .contains('There are no records');
+            .contains('No results found');
         cy.get('[data-cy="discoverProjectsTable"]')
             .contains('Please modify your search string: [dljlajd]');
 

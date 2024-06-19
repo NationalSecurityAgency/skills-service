@@ -31,7 +31,7 @@ describe('Password Reset Tests', () => {
             url: '/root/saveEmailSettings',
             body: {
                 host: 'localhost',
-                port: 1026,
+                port: 1025,
                 'protocol': 'smtp',
                 publicUrl: 'http://localhost:8082/',
                 fromEmail: 'noreploy@skilltreeemail.org',

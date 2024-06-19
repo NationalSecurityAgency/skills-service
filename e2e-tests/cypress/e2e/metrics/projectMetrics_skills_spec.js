@@ -210,8 +210,7 @@ describe('Metrics Tests - Skills', () => {
         ]);
 
         // test page size
-        cy.get('[data-cy=skillsBTablePageSize]')
-            .select('10');
+        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('10').click();
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
@@ -297,11 +296,8 @@ describe('Metrics Tests - Skills', () => {
             .click();
         cy.wait('@skillUsageNavigatorChartBuilder');
 
-        cy.get('[data-cy=skillsNavigator-filters]')
-            .contains('Overlooked Skill')
-            .click({ force: true });
-        cy.get('[data-cy=skillsNavigator-filterBtn]')
-            .click();
+        cy.get('[data-cy=overlookedFilterButton]').click();
+        cy.get('[data-cy=skillsNavigator-filterBtn]').click();
 
         const tableSelector = '[data-cy=skillsNavigator-table]';
 
@@ -325,16 +321,11 @@ describe('Metrics Tests - Skills', () => {
             }],
         ]);
 
-        cy.get('[data-cy=skillsNavigator-resetBtn]')
-            .click();
-        cy.get('[data-cy=skillsBTableTotalRows]')
-            .contains(17);
+        cy.get('[data-cy=skillsNavigator-resetBtn]').click();
+        cy.get('[data-cy=skillsBTableTotalRows]').contains(17);
 
-        cy.get('[data-cy=skillsNavigator-filters]')
-            .contains('Top Skill')
-            .click({ force: true });
-        cy.get('[data-cy=skillsNavigator-filterBtn]')
-            .click();
+        cy.get('[data-cy=topSkillFilterButton]').click();
+        cy.get('[data-cy=skillsNavigator-filterBtn]').click();
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
@@ -345,12 +336,8 @@ describe('Metrics Tests - Skills', () => {
             }],
         ]);
 
-        cy.get('[data-cy=skillsNavigator-filters]')
-            .contains('Top Skill')
-            .click({ force: true });
-        cy.get('[data-cy=skillsNavigator-filters]')
-            .contains('High Activity')
-            .click({ force: true });
+        cy.get('[data-cy=topSkillFilterButton]').click();
+        cy.get('[data-cy=highActivityFilterButton]').click();
         cy.get('[data-cy=skillsNavigator-filterBtn]')
             .click();
         cy.validateTable(tableSelector, [
@@ -363,14 +350,9 @@ describe('Metrics Tests - Skills', () => {
             }],
         ]);
 
-        cy.get('[data-cy=skillsNavigator-filters]')
-            .contains('Never Achieved')
-            .click({ force: true });
-        cy.get('[data-cy=skillsNavigator-filters]')
-            .contains('High Activity')
-            .click({ force: true });
-        cy.get('[data-cy=skillsNavigator-filterBtn]')
-            .click();
+        cy.get('[data-cy=neverAchievedFilterButton]').click();
+        cy.get('[data-cy=highActivityFilterButton]').click();
+        cy.get('[data-cy=skillsNavigator-filterBtn]').click();
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
@@ -395,12 +377,8 @@ describe('Metrics Tests - Skills', () => {
             }],
         ]);
 
-        cy.get('[data-cy=skillsNavigator-filters]')
-            .contains('Never Achieved')
-            .click({ force: true });
-        cy.get('[data-cy=skillsNavigator-filters]')
-            .contains('Never Reported')
-            .click({ force: true });
+        cy.get('[data-cy=neverAchievedFilterButton]').click();
+        cy.get('[data-cy=neverReportedFilterButton]').click();
         cy.get('[data-cy=skillsNavigator-filterBtn]')
             .click();
         cy.validateTable(tableSelector, [
@@ -420,9 +398,7 @@ describe('Metrics Tests - Skills', () => {
             }],
         ]);
 
-        cy.get('[data-cy=skillsNavigator-filters]')
-            .contains('Never Achieved')
-            .click({ force: true });
+        cy.get('[data-cy=neverAchievedFilterButton]').click();
         cy.get('[data-cy=skillsNavigator-filterBtn]')
             .click();
         cy.validateTable(tableSelector, [
@@ -442,9 +418,7 @@ describe('Metrics Tests - Skills', () => {
             }],
         ]);
 
-        cy.get('[data-cy=skillsNavigator-filters]')
-            .contains('Top Skill')
-            .click({ force: true });
+        cy.get('[data-cy=topSkillFilterButton]').click();
         cy.get('[data-cy=skillsNavigator-filterBtn]')
             .click();
 
@@ -470,9 +444,7 @@ describe('Metrics Tests - Skills', () => {
         cy.get('[data-cy=skillsNavigator-skillNameFilter]')
             .clear()
             .type('3');
-        cy.get('[data-cy=skillsNavigator-filters]')
-            .contains('Overlooked Skill')
-            .click();
+        cy.get('[data-cy=overlookedFilterButton]').click();
         cy.get('[data-cy=skillsNavigator-filterBtn]')
             .click();
         cy.validateTable(tableSelector, [
@@ -521,12 +493,10 @@ describe('Metrics Tests - Skills', () => {
             .click();
         cy.wait('@skillUsageNavigatorChartBuilder');
 
-        cy.get('.skills-b-table tbody tr')
-            .should('have.length', 2);
+        cy.get('[data-cy=skillsBTableTotalRows]').should('contain', 2);
         cy.get('[data-cy=skillsNavigator-skillNameFilter]')
             .type('not so{enter}');
-        cy.get('.skills-b-table tbody tr')
-            .should('have.length', 1);
+        cy.get('[data-cy=skillsBTableTotalRows]').should('contain', 1);
     });
 
     it('skills table - tag filtering', () => {
@@ -585,8 +555,8 @@ describe('Metrics Tests - Skills', () => {
             .click();
         cy.wait('@skillUsageNavigatorChartBuilder');
 
-        cy.get('[data-cy=skillTag-filters').should('exist');
-        cy.get('[data-cy=skillTag-filters').contains('TAG 2').click({force: true});
+        cy.get('[data-cy=skillTag-filters]').should('exist');
+        cy.get('[data-cy=skillTag-filters]').contains('TAG 2').click({force: true});
 
         cy.get('[data-cy=skillsNavigator-filterBtn]')
             .click();

@@ -193,16 +193,16 @@ describe('Client Display Breadcrumb Tests', () => {
 
     it('test breadcrumbs starting on Overview page', () => {
 
-        cy.cdVisit('/');
+        cy.cdVisit('/', true);
         cy.wait('@pointHistoryChart');
 
         // Overview page
         cy.contains('Overall Points');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
+        cy.get('[data-cy=skillsDisplayBreadcrumbBar]')
             .contains('Overview')
             .should('be.visible');
     });
@@ -211,61 +211,61 @@ describe('Client Display Breadcrumb Tests', () => {
         // Go to Project Rank page
         cy.cdVisit('/rank');
         cy.contains('My Rank');
-        cy.get('[data-cy=breadcrumb-Rank]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Rank]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Rank]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Rank]')
+            .should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"]')
             .contains(new RegExp(/^Overview.*Rank.*$/))
             .should('be.visible');
 
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .its('length')
             .should('eq', 2);
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(0)
             .should('contain.text', 'Overview');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(1)
             .should('contain.text', 'Rank');
 
         // back to home page
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .click();
-        cy.contains('Overall Points');
+        cy.get('[data-cy="overallPoints"]').contains('Overall Points');
     });
 
     it('test breadcrumbs starting on Subject page', () => {
         // Go to Subject Page
         cy.cdVisit('/subjects/subj1');
         cy.contains('Subject 1');
-        cy.get('[data-cy=breadcrumb-subj1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-subj1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]')
             .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Overview.*Subject:\s+subj1.*$/))
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"]')
+            .contains(new RegExp(/^Overview.*Subject:\s*subj1.*$/))
             .should('be.visible');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .its('length')
             .should('eq', 2);
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(0)
             .should('contain.text', 'Overview');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(1)
-            .should('contain.text', 'Subject: subj1');
+            .should('contain.text', 'subj1');
 
         // back to Overview page
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .click();
         cy.contains('Overall Points');
     });
@@ -274,384 +274,346 @@ describe('Client Display Breadcrumb Tests', () => {
         // Go to skill1 page
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.contains('This is 1');
-        cy.get('[data-cy=breadcrumb-skill1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill1]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-skill1]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-subj1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-skill1]')
+            .should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-subj1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-subj1]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Overview.*Subject:\s+subj1.*Skill:\s+skill1$/))
+        cy.get('[data-cy=skillsDisplayBreadcrumbBar]')
+            .contains(new RegExp(/^Overview.*Subject:\s*subj1.*Skill:\s*skill1$/))
             .should('be.visible');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .its('length')
             .should('eq', 3);
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(0)
             .should('contain.text', 'Overview');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(1)
-            .should('contain.text', 'Subject: subj1');
-        cy.get('[data-cy=breadcrumb-item]')
+            .should('contain.text', 'subj1');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(2)
-            .should('contain.text', 'Skill: skill1');
+            .should('contain.text', 'skill1');
 
         // back to subject page
-        cy.get('[data-cy=breadcrumb-subj1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]')
             .click();
         cy.contains('Subject 1');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to Overview page
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .click();
         cy.contains('Overall Points');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
     });
 
     it('test breadcrumbs starting on Subject Rank page', () => {
         // Go to Subject Rank page
         cy.cdVisit('/subjects/subj1/rank');
         cy.contains('My Rank');
-        cy.get('[data-cy=breadcrumb-Rank]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Rank]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Rank]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Rank]')
             .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Overview.*Subject:\s+subj1.*Rank.*$/))
+        cy.get('[data-cy=skillsDisplayBreadcrumbBar]')
+            .contains(new RegExp(/^Overview.*Subject:\s*subj1.*Rank.*$/))
             .should('be.visible');
 
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .its('length')
             .should('eq', 3);
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(0)
             .should('contain.text', 'Overview');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(1)
-            .should('contain.text', 'Subject: subj1');
-        cy.get('[data-cy=breadcrumb-item]')
+            .should('contain.text', 'subj1');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(2)
             .should('contain.text', 'Rank');
 
         // back to subject page
-        cy.get('[data-cy=breadcrumb-subj1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]')
             .click();
         cy.contains('Subject 1');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to Overview page
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .click();
         cy.contains('Overall Points');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
-    });
-
-    it('test breadcrumbs with internal dependency', () => {
-        // Go to in-project dependency page
-        cy.cdVisit('/subjects/subj1/skills/skill4/dependency/skill2');
-
-        cy.get('[data-cy=breadcrumb-skill2]')
-            .should('exist');
-        cy.get('[data-cy=breadcrumb-skill2]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-subj1]')
-            .should('exist');
-        cy.get('[data-cy=breadcrumb-subj1]')
-            .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Overview]')
-            .should('exist');
-        cy.get('[data-cy=breadcrumb-Overview]')
-            .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Overview.*Subject:\s+subj1.*Skill:\s+skill4.*Dependency:\s+skill2$/))
-            .should('be.visible');
-        cy.get('[data-cy=breadcrumb-item]')
-            .its('length')
-            .should('eq', 4);
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(0)
-            .should('contain.text', 'Overview');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(1)
-            .should('contain.text', 'Subject: subj1');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(2)
-            .should('contain.text', 'Skill: skill4');
-        cy.get('[data-cy=breadcrumb-item]')
-            .eq(3)
-            .should('contain.text', 'Dependency: skill2');
-
-        // back to skill page
-        cy.get('[data-cy=breadcrumb-skill4]')
-            .click();
-        cy.contains('This is 4');
-
-        // back to subject page
-        cy.get('[data-cy=breadcrumb-subj1]')
-            .click();
-        cy.contains('Subject 1');
-
-        // back to Overview page
-        cy.get('[data-cy=breadcrumb-Overview]')
-            .click();
-        cy.contains('Overall Points');
     });
 
     it('test breadcrumbs with cross-project dependency', () => {
         // Go to cross-project dependency page
         cy.cdVisit('/subjects/subj1/skills/skill3/crossProject/proj2/skill1');
 
-        cy.get('[data-cy=breadcrumb-skill1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill1]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-skill1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill1]')
             .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-subj1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-subj1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-subj1]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Overview.*Subject:\s+subj1.*Skill:\s+skill3.*Dependency:\s+skill1$/))
+        cy.get('[data-cy=skillsDisplayBreadcrumbBar]')
+            .contains(new RegExp(/^Overview.*Subject:\s*subj1.*Skill:\s*skill3.*Prerequisite:\s*skill1$/))
             .should('be.visible');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .its('length')
             .should('eq', 4);
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(0)
             .should('contain.text', 'Overview');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(1)
-            .should('contain.text', 'Subject: subj1');
-        cy.get('[data-cy=breadcrumb-item]')
+            .should('contain.text', 'subj1');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(2)
-            .should('contain.text', 'Skill: skill3');
-        cy.get('[data-cy=breadcrumb-item]')
+            .should('contain.text', 'skill3');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(3)
-            .should('contain.text', 'Dependency: skill1');
+            .should('contain.text', 'skill1');
         cy.contains('cross-project skill');
 
         // back to skill page
-        cy.get('[data-cy=breadcrumb-skill3]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill3]')
             .click();
         cy.contains('This is 3');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to subject page
-        cy.get('[data-cy=breadcrumb-subj1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]')
             .click();
         cy.contains('Subject 1');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to Overview page
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .click();
         cy.contains('Overall Points');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
     });
 
     it('test breadcrumbs with badge', () => {
         // Go to Badges page
         cy.cdVisit('/badges');
         cy.contains('Badges');
-        cy.get('[data-cy=breadcrumb-Badges]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Badges]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Badges]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Badges]')
+            .should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
+        cy.get('[data-cy=skillsDisplayBreadcrumbBar]')
             .contains(new RegExp(/^Overview.*Badges.*$/))
             .should('be.visible');
 
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .its('length')
             .should('eq', 2);
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(0)
             .should('contain.text', 'Overview');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(1)
             .should('contain.text', 'Badges');
 
         // Go to regular badge page
         cy.cdVisit('/badges/badge1');
         cy.contains('Badge 1');
-        cy.get('[data-cy=breadcrumb-badge1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-badge1]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-badge1]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Badges]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-badge1]')
+            .should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Badges]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Badges]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Badges]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Overview.*Badges.*Badge:\s+badge1$/))
+        cy.get('[data-cy=skillsDisplayBreadcrumbBar]')
+            .contains(new RegExp(/^Overview.*Badges.*Badge:\s*badge1$/))
             .should('be.visible');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .its('length')
             .should('eq', 3);
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(0)
             .should('contain.text', 'Overview');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(1)
             .should('contain.text', 'Badges');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(2)
-            .should('contain.text', 'Badge: badge1');
+            .should('contain.text', 'badge1');
 
         // Go to skill1 page
         cy.cdClickSkill(0);
         cy.contains('This is 1');
-        cy.get('[data-cy=breadcrumb-skill1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill1]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-skill1]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-badge1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-skill1]')
+            .should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-badge1]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-badge1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-badge1]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Badges]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Badges]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Badges]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Badges]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Overview.*Badges.*Badge:\s+badge1.*Skill:\s+skill1$/))
+        cy.get('[data-cy=skillsDisplayBreadcrumbBar]')
+            .contains(new RegExp(/^Overview.*Badges.*Badge:\s*badge1.*Skill:\s*skill1$/))
             .should('be.visible');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .its('length')
             .should('eq', 4);
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(0)
             .should('contain.text', 'Overview');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(1)
             .should('contain.text', 'Badges');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(2)
-            .should('contain.text', 'Badge: badge1');
-        cy.get('[data-cy=breadcrumb-item]')
+            .should('contain.text', 'badge1');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(3)
-            .should('contain.text', 'Skill: skill1');
+            .should('contain.text', 'skill1');
 
         // back to badge page
-        cy.get('[data-cy=breadcrumb-badge1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-badge1]')
             .click();
         cy.contains('Badge 1');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to badges page
-        cy.get('[data-cy=breadcrumb-Badges]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Badges]')
             .click();
         cy.contains('Badges');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to Overview page
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .click();
         cy.contains('Overall Points');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
     });
 
     it('test breadcrumbs with global badge', () => {
         // Go to global badge page
         cy.cdVisit('/badges/global/globalBadge1');
         cy.contains('Global Badge 1');
-        cy.get('[data-cy=breadcrumb-globalBadge1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-globalBadge1]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-globalBadge1]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Badges]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-globalBadge1]')
+            .should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Badges]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Badges]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Badges]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Overview.*Badges.*Badge:\s+globalBadge1$/))
+        cy.get('[data-cy=skillsDisplayBreadcrumbBar]')
+            .contains(new RegExp(/^Overview.*Badges.*Badge:\s*globalBadge1$/))
             .should('be.visible');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .its('length')
             .should('eq', 3);
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(0)
             .should('contain.text', 'Overview');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(1)
             .should('contain.text', 'Badges');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(2)
-            .should('contain.text', 'Badge: globalBadge1');
+            .should('contain.text', 'globalBadge1');
 
         // Go to skill1 page
         cy.cdClickSkill(0);
         cy.contains('This is 1');
-        cy.get('[data-cy=breadcrumb-skill1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill1]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-skill1]')
-            .should('not.have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-globalBadge1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-skill1]')
+            .should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-globalBadge1]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-globalBadge1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-globalBadge1]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Badges]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Badges]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Badges]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Badges]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .should('exist');
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .should('have.attr', 'href');
-        cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Overview.*Badges.*Badge:\s+globalBadge1.*Skill:\s+skill1$/))
+        cy.get('[data-cy=skillsDisplayBreadcrumbBar]')
+            .contains(new RegExp(/^Overview.*Badges.*Badge:\s*globalBadge1.*Skill:\s*skill1$/))
             .should('be.visible');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .its('length')
             .should('eq', 4);
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(0)
             .should('contain.text', 'Overview');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(1)
             .should('contain.text', 'Badges');
-        cy.get('[data-cy=breadcrumb-item]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(2)
-            .should('contain.text', 'Badge: globalBadge1');
-        cy.get('[data-cy=breadcrumb-item]')
+            .should('contain.text', 'globalBadge1');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(3)
-            .should('contain.text', 'Skill: skill1');
+            .should('contain.text', 'skill1');
 
         // back to badge page
-        cy.get('[data-cy=breadcrumb-globalBadge1]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-globalBadge1]')
             .click();
         cy.contains('Badge 1');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to badges page
-        cy.get('[data-cy=breadcrumb-Badges]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Badges]')
             .click();
         cy.contains('Badges');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
         // back to Overview page
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .click();
         cy.contains('Overall Points');
+        cy.get('[data-pc-name="progressspinner"]').should('not.exist')
     });
 
 });
