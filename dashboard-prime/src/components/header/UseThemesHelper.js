@@ -33,8 +33,6 @@ export const useThemesHelper = () => {
       } else {
         currentTheme.value = themeOptions[0];
       }
-
-      configureDefaultThemeFileInHeadTag();
     });
   }
 

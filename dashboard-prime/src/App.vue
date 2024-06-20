@@ -62,7 +62,7 @@ const addCustomIconCSS = () => {
 const isLoadingApp = computed(() => appConfig.isLoadingConfig || authState.restoringSession || (skillsDisplayAttributes.loadingConfig && skillsDisplayInfo.isSkillsDisplayPath()))
 
 const themeHelper = useThemesHelper()
-themeHelper.loadTheme()
+themeHelper.configureDefaultThemeFileInHeadTag()
 
 const inceptionConfigurer = useInceptionConfigurer()
 const pageVisitService = usePageVisitService()
@@ -72,6 +72,7 @@ watch(() => authState.userInfo, async (newUserInfo) => {
     pageVisitService.reportPageVisit(route.path, route.fullPath)
     loadUserRoles()
     appInfoState.loadEmailEnabled()
+    themeHelper.loadTheme()
   }
 })
 
