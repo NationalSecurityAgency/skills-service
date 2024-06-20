@@ -18,7 +18,7 @@ import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
-import { array, date, number, object, string } from 'yup'
+import { array, date, number, object, string, tuple } from 'yup'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
@@ -118,11 +118,10 @@ const schema = object({
         then: (sch) => sch.max(maximumDays.value - 1),
         otherwise: (sch) => sch.max(maximumDays.value)
       }),
-  'gemDates': array().of(date().label('Date Range'))
-      .label('Gem Date')
-      .min(2)
-      .max(2)
-      .test('notInPast', 'End date can not be in the past', (value) => {
+  'gemDates': tuple([
+      date().label('Start date').required('You must select a start date'),
+      date().label('End date').required('You must select an end date')
+  ]).label('Gem Date').test('notInPast', 'End date can not be in the past', (value) => {
     let valid = true;
     // only trigger this validation on new badge entry, not edits
     if(value && value.length === 2) {
