@@ -96,6 +96,7 @@ describe('Client Display Custom Label Tests', () => {
 
         cy.cdVisit('/');
         cy.contains('Stage 2 Progress');
+        cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.contains('My Stage');
         cy.get('[data-cy="overallLevelDesc"]')
             .contains('Stage 1 out of 5');
@@ -109,6 +110,7 @@ describe('Client Display Custom Label Tests', () => {
             .should('not.exist');
 
         cy.cdClickRank();
+        cy.get('[data-cy="levelBreakdownChart-animationEnded"]')
         cy.get('[data-cy="myRankLevelStatCard"]')
             .contains('My Stage');
         cy.get('[data-cy="levelBreakdownChart"]')
@@ -118,9 +120,10 @@ describe('Client Display Custom Label Tests', () => {
         cy.contains('Level')
             .should('not.exist');
 
-        cy.get('[data-cy=breadcrumb-Overview]')
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
             .click();
         cy.get('[data-cy="title"]').contains('User Skills')
+        cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.get('[data-cy="subjectTileBtn"]').should('have.length', 3).should('be.visible');
         cy.cdClickSubj(0);
         cy.contains('Stage 3 Progress');
@@ -138,7 +141,8 @@ describe('Client Display Custom Label Tests', () => {
           .should('have.text', 'subj1');
 
         cy.cdClickRank();
-        cy.contains('My Stage');
+        cy.get('[data-cy="myRankLevelStatCard"]').contains('My Stage');
+        cy.get('[data-cy="levelBreakdownChart-animationEnded"]')
         cy.get('[data-cy="levelBreakdownChart"]')
             .contains('Stage Breakdown');
         cy.get('[data-cy="levelBreakdownChart"]')
@@ -149,7 +153,10 @@ describe('Client Display Custom Label Tests', () => {
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-subj1]')
             .click();
         cy.get('[data-cy="skillProgressTitle-skill1"]')
+        cy.get('[data-cy="pointHistoryChartNoData"]')
+
         cy.cdClickSkill(0, true, 'Course');
+        cy.get('[data-cy="skillProgressTitle-skill1"]').contains('Very Great Skill 1')
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj1"] [data-cy="breadcrumbItemLabel"]')
           .should('have.text', 'Competency:');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-skill1"] [data-cy="breadcrumbItemLabel"]')
@@ -158,9 +165,13 @@ describe('Client Display Custom Label Tests', () => {
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .click();
         cy.get('[data-cy="title"]').contains('User Skills')
+        cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.get('[data-cy="subjectTileBtn"]').should('have.length', 3).should('be.visible');
+
         cy.cdClickBadges();
-        cy.cdVisit('/badges/global/globalBadge1');
+        cy.get('[data-cy="badge_globalBadge1"]')
+
+        cy.get('[data-cy="badgeDetailsLink_globalBadge1"]').click()
         cy.get('[data-cy="gb_proj1"]')
             .contains('Stage 1');
         cy.contains('Level')
@@ -174,23 +185,28 @@ describe('Client Display Custom Label Tests', () => {
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .click();
         cy.get('[data-cy="title"]').contains('User Skills')
+        cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.get('[data-cy="subjectTileBtn"]').should('have.length', 3).should('be.visible');
+
         cy.cdClickSubj(1);
         cy.get('[data-cy="noContent"]')
             .contains('Courses have not been added yet');
+        cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.get('[data-cy="noContent"]')
             .contains('Please contact this work role\'s administrator.');
-
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj2"] [data-cy="breadcrumbItemLabel"]')
           .should('have.text', 'Competency:');
 
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .click();
         cy.get('[data-cy="title"]').contains('User Skills')
+        cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.get('[data-cy="subjectTileBtn"]').should('have.length', 3).should('be.visible');
-        cy.cdClickSubj(2);
+
+        cy.cdClickSubj(2, 'Subject 3', false);
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj3"] [data-cy="breadcrumbItemLabel"]')
           .should('have.text', 'Competency:');
+        cy.get('[data-cy="pointHistoryChartNoData"]')
 
         cy.cdClickSkill(0, true, 'Course');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj3"] [data-cy="breadcrumbItemLabel"]')
@@ -204,6 +220,9 @@ describe('Client Display Custom Label Tests', () => {
             .contains('You just earned 100 points!');
 
         cy.cdBack('Subject 3');
+        cy.get('[data-cy="skillProgress_index-0"]')
+        cy.get('[data-cy="pointHistoryChartNoData"]')
+
         cy.cdClickSkill(1, true, 'Course');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj3"] [data-cy="breadcrumbItemLabel"]')
           .should('have.text', 'Competency:');
@@ -218,6 +237,9 @@ describe('Client Display Custom Label Tests', () => {
             .contains('This course requires approval from a work role administrator. Now let\'s play the waiting game!');
 
         cy.cdBack('Subject 3');
+        cy.get('[data-cy="skillProgress_index-0"]')
+        cy.get('[data-cy="pointHistoryChartNoData"]')
+
         cy.cdClickSkill(2, true, 'Course');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj3"] [data-cy="breadcrumbItemLabel"]')
           .should('have.text', 'Competency:');
