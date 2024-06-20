@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import { useStorage } from '@vueuse/core'
+import SettingsService from "@/components/settings/SettingsService.js";
 
 export const useThemesHelper = () => {
 
@@ -22,6 +23,20 @@ export const useThemesHelper = () => {
     { icon: 'fas fa-moon', name: 'Dark', value: 'skills-dark-green' },
   ];
   const currentTheme = useStorage('currentTheme', themeOptions[0])
+
+  const loadTheme = () => {
+    SettingsService.getUserSettings().then((response) => {
+      const themeSetting = response.find( (it)=> it.setting === 'enable_dark_mode')
+      const darkModeEnabled = themeSetting?.value.toLowerCase() === 'true';
+      if(darkModeEnabled) {
+        currentTheme.value = themeOptions[1];
+      } else {
+        currentTheme.value = themeOptions[0];
+      }
+
+      configureDefaultThemeFileInHeadTag();
+    });
+  }
 
   const configureDefaultThemeFileInHeadTag = () =>{
     let file = document.createElement('link')
@@ -34,6 +49,7 @@ export const useThemesHelper = () => {
   return {
     currentTheme,
     themeOptions,
-    configureDefaultThemeFileInHeadTag
+    configureDefaultThemeFileInHeadTag,
+    loadTheme
   }
 }

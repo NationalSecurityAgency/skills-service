@@ -62,7 +62,7 @@ const addCustomIconCSS = () => {
 const isLoadingApp = computed(() => appConfig.isLoadingConfig || authState.restoringSession || (skillsDisplayAttributes.loadingConfig && skillsDisplayInfo.isSkillsDisplayPath()))
 
 const themeHelper = useThemesHelper()
-themeHelper.configureDefaultThemeFileInHeadTag()
+themeHelper.loadTheme()
 
 const inceptionConfigurer = useInceptionConfigurer()
 const pageVisitService = usePageVisitService()

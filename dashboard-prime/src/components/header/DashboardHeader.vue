@@ -18,7 +18,6 @@ import SettingsButton from '@/components/header/SettingsButton.vue'
 import HelpButton from '@/components/header/HelpButton.vue'
 import SkillsBreadcrumb from '@/components/header/SkillsBreadcrumb.vue'
 import { usePagePath } from '@/components/utils/UsePageLocation.js'
-import SwitchTheme from '@/components/header/SwitchTheme.vue'
 import InceptionButton from '@/components/inception /InceptionButton.vue'
 import SkipToContent from '@/components/header/SkipToContent.vue'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
@@ -58,7 +57,6 @@ const appInfoState = useAppInfoState()
             <inception-button v-if="pathPath.isAdminPage.value"
                               class="mr-2"
                               data-cy="inception-button" />
-            <switch-theme />
             <settings-button data-cy="settings-button" class="ml-2" />
             <help-button data-cy="help-button" class="ml-2" />
           </div>
