@@ -10,8 +10,6 @@ These pages provide in-depth guidance on installation, usage and contribution.
 # Workflows Status
 [![Continuous Integration](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test.yml)
 
-[![Nightly Service Tests](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-night-service-tests.yml/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-night-service-tests.yml)
-
 [![Test Web Sockets over STOMP using RabbitMQ](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-rabbitmq.yml/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-rabbitmq.yml)
 
 [![Run integration tests using two way ssl](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-ssl.yml/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-ssl.yml)

@@ -85,7 +85,6 @@ jobs:
         npm install
         npm run backend:dropAllDBTables
         npm run cyServices:start:skills-service:verifyEmail
-        npm run cyServices:start:client-display
         cd ..
 
     - name: Run Cypress tests
