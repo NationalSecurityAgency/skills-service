@@ -193,24 +193,26 @@ Cypress.Commands.add("saveVideoAttrs", (projNum, skillNum, videoAttrs) => {
         formData.set('isAlreadyHosted', videoAttrs.isAlreadyHosted);
     }
     let requestDone = false;
-    if (videoAttrs.file) {
-        const fileType = videoAttrs.file.endsWith('mp4') ? 'video/mp4' : 'video/webm';
-        cy.fixture(videoAttrs.file, 'binary')
-            .then((binaryFile) => {
-                const blob = Cypress.Blob.binaryStringToBlob(binaryFile, fileType);
-                formData.set('file', blob, videoAttrs.file);
-                cy.request('POST', url, formData).then(() => {
-                    requestDone = true;
-                });
+    cy.getCookie('XSRF-TOKEN').should('exist').then((xsrfCookie) => {
+        if (videoAttrs.file) {
+            const fileType = videoAttrs.file.endsWith('mp4') ? 'video/mp4' : 'video/webm';
+            cy.fixture(videoAttrs.file, 'binary')
+              .then((binaryFile) => {
+                  const blob = Cypress.Blob.binaryStringToBlob(binaryFile, fileType);
+                  formData.set('file', blob, videoAttrs.file);
+                  cy.request({ method: 'POST', url, body: formData, headers: {'X-XSRF-TOKEN': xsrfCookie.value} }).then(() => {
+                      requestDone = true;
+                  });
+              });
+        } else {
+            cy.request({ method: 'POST', url, body: formData, headers: {'X-XSRF-TOKEN': xsrfCookie.value} }).then(() => {
+                requestDone = true;
             });
-    } else {
-        cy.request('POST', url, formData).then(() => {
-            requestDone = true;
-        });
-    }
+        }
 
-    cy.waitUntil(() => requestDone, {
-        timeout: 30000, // waits up to 30 seconds, default is 5 seconds
+        cy.waitUntil(() => requestDone, {
+            timeout: 30000, // waits up to 30 seconds, default is 5 seconds
+        });
     });
 });
 
@@ -284,6 +286,9 @@ Cypress.Commands.add("login", (user, pass) => {
         timeout: 30000, // waits up to 30 seconds, default is 5 seconds
     });
     cy.log(`Logged in as [${user}] with [${pass}]`);
+    cy.request('/app/userInfo').then((response) => {
+        cy.wrap(response.body).as('userInfo');
+    })
 });
 
 Cypress.Commands.add("resetEmail", () => {
@@ -1276,12 +1281,19 @@ Cypress.Commands.add("validateElementsOrder", (selector, containsValues) => {
     }
 });
 
-Cypress.Commands.add('formRequest', (method, url, formData, onComplete) => {
+Cypress.Commands.add('formRequest', (method, url, formData, onComplete, includeXSRF = false) => {
     const xhr = new XMLHttpRequest();
     xhr.open(method, url)
     xhr.onload = function () { onComplete(xhr) }
     xhr.onerror = function () { onComplete(xhr) }
-    xhr.send(formData)
+    if (includeXSRF) {
+        cy.getCookie('XSRF-TOKEN').should('exist').then((xsrfCookie) => {
+            xhr.setRequestHeader('X-XSRF-TOKEN', xsrfCookie.value)
+            xhr.send(formData)
+        });
+    } else {
+        xhr.send(formData)
+    }
 })
 
 Cypress.Commands.add("uploadCustomIcon", (fileName, url) => {
@@ -1296,7 +1308,7 @@ Cypress.Commands.add("uploadCustomIcon", (fileName, url) => {
                 expect(response.status)
                     .to
                     .eq(200);
-            });
+            }, true);
         });
 });
 
