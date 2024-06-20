@@ -132,7 +132,6 @@ const headerOptions = computed(() => {
   stats.push({
     label: 'Points',
     count: project.value.totalPoints,
-    warnMsg: project.value.totalPoints < minimumPoints ? 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.' : null,
     icon: 'far fa-arrow-alt-circle-up skills-color-points',
     secondaryStats: [{
       label: 'reused',
@@ -162,8 +161,9 @@ const headerOptions = computed(() => {
   }
 })
 
-const minimumPoints = computed(() => {
-  return appConfig.minimumProjectPoints
+const isInsufficientPoints = computed(() => {
+  const projPoints = project.value?.totalPoints || 0
+  return projPoints < appConfig.minimumProjectPoints
 })
 
 const copyAndDisplayShareProjInfo = () => {
@@ -197,12 +197,16 @@ const setProject = (newProject) => {
   projectDetailsState.project = newProject
 }
 
+const isProjectExpiring = computed(() => {
+  return project.value && project.value.expiring && !isReadOnlyProj.value
+})
+
 </script>
 
 <template>
   <div ref="mainFocus">
     <PageHeader :loading="isLoading" :options="headerOptions">
-      <template #banner v-if="project && project.expiring && !isReadOnlyProj">
+      <template #banner v-if="isProjectExpiring">
         <project-expiration-warning :project="project" @extended="project.expiring = false" />
       </template>
       <template #subTitle v-if="project">
@@ -279,6 +283,10 @@ const setProject = (newProject) => {
         </div>
       </template>
     </PageHeader>
+
+    <Message v-if="isInsufficientPoints" :closable="false" data-cy="projectInsufficientPoints">
+      Project has insufficient points assigned. Skills cannot be achieved until project has at least <Tag>{{ appConfig.minimumProjectPoints }}</Tag> points.
+    </Message>
 
     <import-finalize-alert />
 

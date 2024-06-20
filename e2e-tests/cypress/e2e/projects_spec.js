@@ -278,6 +278,35 @@ describe('Projects Tests', () => {
             .contains('Project has insufficient points assigned');
         cy.get('[data-cy="projectCard_proj3"] [data-cy="projectCardWarning"]')
           .contains('Project has insufficient points assigned');
+
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="projectCardWarning"] [data-pc-section="closeicon"]').click();
+        cy.get('[data-cy="projectCard_proj3"] [data-cy="projectCardWarning"]')
+          .contains('Project has insufficient points assigned');
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="projectCardWarning"]').should('not.exist')
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="projectCardWarning"]').should('not.exist')
+
+        cy.visit('/administrator');
+        cy.get('[data-cy="projectCard_proj3"] [data-cy="projectCardWarning"]')
+          .contains('Project has insufficient points assigned');
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="projectCardWarning"]').should('not.exist')
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="projectCardWarning"]').should('not.exist')
+
+        cy.get('[data-cy="projCard_proj2_manageLink"]').click()
+        cy.contains('No Subjects Yet')
+        cy.get('[data-cy="projectInsufficientPoints"]')
+
+        cy.get('[data-cy="breadcrumb-Projects"]').click()
+        cy.get('[data-cy="projCard_proj1_manageLink"]').click()
+        cy.get('[data-cy="subjectCard-subj1"]')
+        cy.get('[data-cy="projectInsufficientPoints"]').should('not.exist')
+
+        cy.visit('/administrator/projects/proj2');
+        cy.contains('No Subjects Yet')
+        cy.get('[data-cy="projectInsufficientPoints"]')
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="subjectCard-subj1"]')
+        cy.get('[data-cy="projectInsufficientPoints"]').should('not.exist')
     });
 
     it('project description is retained after editing', () => {

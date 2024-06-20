@@ -88,7 +88,6 @@ const headerOptions = computed(() => {
       label: 'Points',
       count: subject.totalPoints,
       warn: subject.totalPoints < minimumPoints.value,
-      warnMsg: (subject.totalPoints + subject.totalPointsReused) < minimumPoints.value ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${minimumPoints.value} points.` : null,
       icon: 'far fa-arrow-alt-circle-up skills-color-points',
       secondaryStats: [{
         label: 'reused',
@@ -97,6 +96,10 @@ const headerOptions = computed(() => {
       }]
     }]
   }
+})
+
+const isInsufficientPoints = computed(() => {
+  return subjectState.subject.totalPoints < appConfig.minimumSubjectPoints
 })
 
 const minimumPoints = computed(() => {
@@ -155,6 +158,10 @@ const subjectEdited = (updatedSubject) => {
         <!--        <import-finalize-alert />-->
       </template>
     </page-header>
+
+    <Message v-if="isInsufficientPoints" :closable="false" data-cy="subjInsufficientPoints">
+      Subject has insufficient points assigned. Skills cannot be achieved until subject has at least <Tag>{{ appConfig.minimumSubjectPoints}}</Tag> points
+    </Message>
 
     <import-finalize-alert />
 
