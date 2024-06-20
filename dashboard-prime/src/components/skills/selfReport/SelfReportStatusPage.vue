@@ -66,7 +66,7 @@ const hasSkillsWithApprovals = () => {
       <email-not-enabled-warning v-if="showEmailServiceWarning"/>
 
       <div v-if="hasSkillsWithApprovals()">
-        <self-report-approval @approval-action="handleApprovalAction" :email-enabled="!showEmailServiceWarning"/>
+        <self-report-approval @approval-action="handleApprovalAction" />
         <self-report-approval-history ref="selfReportApprovalHistory" class="mt-3"/>
       </div>
       <no-content2 v-else title="No Skills Require Approval" data-cy="noApprovalTableMsg"

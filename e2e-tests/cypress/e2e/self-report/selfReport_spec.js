@@ -365,6 +365,8 @@ describe('Self Report Skills Management Tests', () => {
             .as('subscribe');
 
         cy.visit('/administrator/projects/proj1/self-report');
+        cy.get('[data-cy="btn_edit-project"]')
+        cy.get('[data-cy="viewSkillLink_skill3"]')
         cy.wait('@isSubscribed');
         cy.contains('Subscribed')
             .should('be.visible');
@@ -379,6 +381,8 @@ describe('Self Report Skills Management Tests', () => {
             .should('not.be.checked');
 
         cy.visit('/administrator/projects/proj1/self-report');
+        cy.get('[data-cy="btn_edit-project"]')
+        cy.get('[data-cy="viewSkillLink_skill3"]')
         cy.wait('@isSubscribed');
         cy.contains('Unsubscribed')
           .should('be.visible');
@@ -387,6 +391,8 @@ describe('Self Report Skills Management Tests', () => {
 
         //setting should be per project
         cy.visit('/administrator/projects/proj2/self-report');
+        cy.get('[data-cy="btn_edit-project"]')
+        cy.get('[data-cy="viewSkillLink_skill1"]')
         cy.wait('@isSubscribed');
         cy.contains('Subscribed')
             .should('be.visible');
@@ -394,6 +400,8 @@ describe('Self Report Skills Management Tests', () => {
             .should('be.checked');
 
         cy.visit('/administrator/projects/proj1/self-report');
+        cy.get('[data-cy="btn_edit-project"]')
+        cy.get('[data-cy="viewSkillLink_skill3"]')
         cy.wait('@isSubscribed');
         cy.contains('Unsubscribed')
             .should('be.visible');
