@@ -23,32 +23,34 @@
      });
 
 
-    it.skip('Verify that the value produces the expected label', () => {
+    it.only('Verify that the value produces the expected label', () => {
         cy.visit('/administrator/projects/proj1/');
 
         cy.clickNav('Settings');
 
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('not.be.checked')
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').check({ force: true });
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"] input').should('not.be.checked')
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').click();
         cy.get('[data-cy="saveSettingsBtn"]').click();
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').next().should('have.text', ' Enabled ')
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('be.checked')
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').next().should('have.text', 'Enabled')
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"] input').should('be.checked')
 
         cy.clickNav('Levels');
+        cy.get('[data-cy="editLevelButton"]').should('have.length', 5)
         cy.clickNav('Settings');
 
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('be.checked')
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').next().should('have.text', ' Enabled ')
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').uncheck({ force: true });
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"] input').should('be.checked')
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').next().should('have.text', 'Enabled')
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').click();
         cy.get('[data-cy="saveSettingsBtn"]').click();
 
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').next().should('have.text', ' Disabled ')
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('not.be.checked')
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').next().should('have.text', 'Disabled')
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"] input').should('not.be.checked')
 
         cy.clickNav('Levels');
+        cy.get('[data-cy="editLevelButton"]').should('have.length', 5)
         cy.clickNav('Settings');
-
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').next().should('have.text', ' Disabled ')
-        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').should('not.be.checked')
+        //
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]').next().should('have.text', 'Disabled')
+        cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"] input').should('not.be.checked')
     })
 })
