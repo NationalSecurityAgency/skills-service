@@ -29,12 +29,6 @@ import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 
 const route = useRoute();
 const appInfo = useAppInfoState()
-// const props = defineProps({
-//   emailEnabled: {
-//     type: Boolean,
-//     required: false
-//   }
-// });
 const emit = defineEmits(['approval-action']);
 const announcer = useSkillsAnnouncer();
 const colors = useColors()

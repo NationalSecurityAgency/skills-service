@@ -252,7 +252,7 @@ jobs:
           group: 'skills-service tests'
           tag: "${{ github.workflow }}"
           browser: chrome
-          spec: cypress/e2e/quiz/question_def_management_spec.js
+          spec: cypress/e2e/user_agreement_spec.js
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

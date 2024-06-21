@@ -965,4 +965,28 @@ describe('Subjects Tests', () => {
         cy.wait('@validateDesc')
         cy.get('[data-cy="descriptionError"]').contains('Mocked up validation failure')
     });
+
+    it('insufficient points warning', () => {
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.createSubject(1, 2);
+
+        cy.visit('/administrator/projects/proj1')
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="titleLink"]').click()
+        cy.contains('No Skills Yet')
+        cy.get('[data-cy="subjInsufficientPoints"]')
+
+        cy.get('[data-cy="breadcrumb-proj1"]').click()
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="titleLink"]').click()
+        cy.get('[data-cy="manageSkillLink_skill1"]')
+        cy.get('[data-cy="subjInsufficientPoints"]').should('not.exist')
+
+        cy.visit('/administrator/projects/proj1/subjects/subj2')
+        cy.contains('No Skills Yet')
+        cy.get('[data-cy="subjInsufficientPoints"]')
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+        cy.get('[data-cy="manageSkillLink_skill1"]')
+        cy.get('[data-cy="subjInsufficientPoints"]').should('not.exist')
+    })
 });

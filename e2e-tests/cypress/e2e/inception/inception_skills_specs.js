@@ -61,7 +61,7 @@ describe('Inception Skills Tests', () => {
         cy.assertInceptionPoints('Projects', 'CopyProject', 50)
     });
 
-    it.skip('share project', () => {
+    it('share project', () => {
         // this is needed to grant headless chrome permissions to copy-and-paste
         cy.wrap(Cypress.automation('remote:debugger:protocol', {
             command: 'Browser.grantPermissions',
@@ -79,7 +79,7 @@ describe('Inception Skills Tests', () => {
         cy.contains('No Subjects Yet')
         cy.get('[data-cy="shareProjBtn"]')
             .realClick()
-        cy.get('[data-cy="shareProjOkBtn"]')
+        cy.get('[data-cy="closeDialogBtn"]')
 
         cy.assertInceptionPoints('Projects', 'ShareProject', 50)
     });
