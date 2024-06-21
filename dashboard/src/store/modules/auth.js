@@ -168,7 +168,7 @@ const actions = {
   logout({ commit }) {
     commit('clearAuthData');
     commit('showUa', false, { root: true });
-    axios.get('/logout')
+    axios.post('/logout')
       .then(() => {
         router.replace('/skills-login');
     });
