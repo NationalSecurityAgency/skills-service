@@ -19,10 +19,8 @@ import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import SettingsService from '@/components/settings/SettingsService.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
-import {usePrimeVue} from "primevue/config";
 import {useThemesHelper} from "@/components/header/UseThemesHelper.js";
 
-const PrimeVue = usePrimeVue()
 const themeHelper = useThemesHelper()
 const appConfig = useAppConfig();
 const colors = useColors()
@@ -121,8 +119,11 @@ function saveUserSettings(dirtyChanges) {
             // $store.commit('storeUser', userInfo);
           }
           if (key === 'enableDarkMode') {
-            const selectedThemes = value.value ? [themeHelper.themeOptions[0].value, themeHelper.themeOptions[1].value] : [themeHelper.themeOptions[1].value, themeHelper.themeOptions[0].value];
-            PrimeVue.changeTheme(selectedThemes[0], selectedThemes[1], 'theme-link')
+            if(value.value) {
+              themeHelper.setDarkMode();
+            } else {
+              themeHelper.setLightMode();
+            }
           }
         });
       })

@@ -40,6 +40,7 @@ import { invoke, until } from '@vueuse/core'
 import DashboardFooter from '@/components/header/DashboardFooter.vue'
 import { useUserAgreementInterceptor } from '@/interceptors/UseUserAgreementInterceptor.js'
 import PkiAppBootstrap from '@/components/access/PkiAppBootstrap.vue'
+import {usePrimeVue} from "primevue/config";
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -49,6 +50,7 @@ const accessState = useAccessState()
 const errorHandling = useErrorHandling()
 const userAgreementInterceptor = useUserAgreementInterceptor()
 const route = useRoute()
+const PrimeVue = usePrimeVue()
 
 const customGlobalValidators = useCustomGlobalValidators()
 const globalNavGuards = useGlobalNavGuards()
@@ -74,6 +76,10 @@ watch(() => authState.userInfo, async (newUserInfo) => {
     appInfoState.loadEmailEnabled()
     themeHelper.loadTheme()
   }
+})
+
+watch(() => themeHelper.currentTheme, (newTheme, oldTheme) => {
+  PrimeVue.changeTheme(oldTheme.value, newTheme.value, 'theme-link')
 })
 
 const iframeInit = useIframeInit()

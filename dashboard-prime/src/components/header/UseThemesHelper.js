@@ -13,16 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { useStorage } from '@vueuse/core'
+import { ref } from 'vue';
+import { defineStore } from 'pinia'
 import SettingsService from "@/components/settings/SettingsService.js";
 
-export const useThemesHelper = () => {
+export const useThemesHelper = defineStore('useThemesHelper', () => {
 
   const themeOptions =[
-    { icon: 'fas fa-sun', name: 'Light', value: 'skills-light-green' },
-    { icon: 'fas fa-moon', name: 'Dark', value: 'skills-dark-green' },
+    { name: 'Light', value: 'skills-light-green' },
+    { name: 'Dark', value: 'skills-dark-green' },
   ];
-  const currentTheme = useStorage('currentTheme', themeOptions[0])
+  const currentTheme = ref(themeOptions[0]);
+
+  const setCurrentTheme = (newTheme) => {
+    currentTheme.value = newTheme;
+  }
+
+  const setDarkMode = () => {
+    setCurrentTheme(themeOptions[1]);
+  }
+
+  const setLightMode = () => {
+    setCurrentTheme(themeOptions[0]);
+  }
 
   const loadTheme = () => {
     SettingsService.getUserSettings().then((response) => {
@@ -46,8 +59,11 @@ export const useThemesHelper = () => {
 
   return {
     currentTheme,
+    setCurrentTheme,
+    setDarkMode,
+    setLightMode,
     themeOptions,
     configureDefaultThemeFileInHeadTag,
     loadTheme
   }
-}
+});
