@@ -28,11 +28,14 @@ import org.springframework.security.authorization.AuthorizationManager
 import org.springframework.security.authorization.AuthorizationManagers
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext
+import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.csrf.CsrfToken
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler
 import org.springframework.security.web.csrf.CsrfTokenRequestHandler
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
 import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.security.web.util.matcher.OrRequestMatcher
@@ -69,7 +72,13 @@ class PortalWebSecurityHelper {
     InviteOnlyProjectAuthorizationManager inviteOnlyProjectAuthorizationManager
 
     @Autowired
+    CookieCsrfTokenRepository cookieCsrfTokenRepository
+
+    @Autowired
     UserCommunityAuthorizationManager userCommunityAuthorizationManager
+
+    @Autowired
+    SessionAuthenticationStrategy csrfAuthenticationStrategy
 
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
         if (disableCsrfProtection) {
@@ -77,7 +86,9 @@ class PortalWebSecurityHelper {
         } else {
             http.csrf((csrf) -> csrf
                     .requireCsrfProtectionMatcher(new MultipartRequestMatcher())
-                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .csrfTokenRepository(cookieCsrfTokenRepository)
+//                    .csrfTokenRepository(new HttpSessionCsrfTokenRepository())
+                    .sessionAuthenticationStrategy(csrfAuthenticationStrategy)
                     .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
                     .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
         }
