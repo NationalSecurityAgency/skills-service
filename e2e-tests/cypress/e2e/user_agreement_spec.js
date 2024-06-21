@@ -107,7 +107,7 @@ describe('User Agreement Specs', ()=> {
 
         cy.intercept('GET', '/app/userAgreement').as('loadUserAgreement');
         cy.intercept('GET', '/admin/projects/projBanana/').as('loadProject');
-        cy.intercept('GET', '/logout').as('logout');
+        cy.intercept('POST', '/logout').as('logout');
 
         cy.logout();
         cy.login('user1@fake.fake', 'password1');
