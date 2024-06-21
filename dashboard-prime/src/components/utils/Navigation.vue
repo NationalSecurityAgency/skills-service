@@ -42,7 +42,7 @@ const navOnSmallScreen = (changeEvent) => {
 </script>
 
 <template>
-  <div class="mt-3" data-cy="nav" >
+  <div class="mt-3" data-cy="nav" aria-label="Navigation">
     <div class="sticky top-0 z-5 mb-3 md:hidden">
       <Dropdown
         :options="navItems"

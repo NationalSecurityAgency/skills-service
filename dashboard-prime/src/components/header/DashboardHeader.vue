@@ -21,9 +21,14 @@ import { usePagePath } from '@/components/utils/UsePageLocation.js'
 import InceptionButton from '@/components/inception /InceptionButton.vue'
 import SkipToContent from '@/components/header/SkipToContent.vue'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
+import SkillTreeHeaderSvgIcon from '@/components/brand/SkillTreeHeaderSvgIcon.vue'
 
 const pathPath = usePagePath()
 const appInfoState = useAppInfoState()
+const themeHelper = useThemesHelper()
+
+
 </script>
 
 <template>
@@ -43,13 +48,16 @@ const appInfoState = useAppInfoState()
         <div class="flex-1 justify-content-center">
           <div class="flex">
             <router-link data-cy="skillTreeLogo" class="" to="/">
-              <img
-                class="mb-3"
-                ref="skillTreeLogo"
-                src="@/assets/img/skilltree_logo_v1.png"
-                alt="skilltree logo" />
+              <SkillTreeHeaderSvgIcon />
             </router-link>
-            <div v-if="pathPath.isAdminPage.value" ref="adminStamp" class="skills-stamp">ADMIN</div>
+            <div v-if="pathPath.isAdminPage.value"
+                 ref="adminStamp"
+                 class="skills-stamp"
+                 :class="{
+                   'skills-stamp-color-light-theme': !themeHelper.isDarkTheme,
+                   'skills-stamp-color-dark-theme': themeHelper.isDarkTheme,
+                 }"
+            >ADMIN</div>
           </div>
         </div>
         <div class="flex-none">
@@ -72,10 +80,6 @@ const appInfoState = useAppInfoState()
 .skills-stamp {
   margin-left: 0.5rem;
 
-  box-shadow:
-    0 0 0 3px #8b6d6d,
-    0 0 0 2px #8b6d6d inset;
-  color: #722b2b;
   border: 2px solid transparent;
   border-radius: 4px;
   display: inline-block;
@@ -89,6 +93,20 @@ const appInfoState = useAppInfoState()
   width: 110px;
   height: 40px;
   transform: rotate(-15deg);
+}
+
+.skills-stamp-color-light-theme {
+  box-shadow:
+    0 0 0 3px #8b6d6d,
+    0 0 0 2px #8b6d6d inset;
+  color: #722b2b;
+}
+
+.skills-stamp-color-dark-theme {
+  box-shadow:
+    0 0 0 3px #E76F50,
+    0 0 0 2px #F3A161 inset;
+  color: #d9f8f4;
 }
 
 @media (max-width: 675px) {

@@ -55,7 +55,7 @@ function refresh() {
       </div>
       <div class="w-full"></div>
       <div class="col pt-2">
-        <div class="text-3xl no-content text-center sd-theme-primary-color">{{ title }}</div>
+        <div class="text-3xl no-content text-center">{{ title }}</div>
       </div>
     </div>
     <div class="grid justify-content-center">
@@ -78,16 +78,5 @@ function refresh() {
 </template>
 
 <style scoped>
-  .icon-style {
-    font-size: 4rem;
-    color: #969696;
-  }
 
-  .icon-container {
-    background: #ededed;
-  }
-
-  .no-content {
-    color: #3f5971;
-  }
 </style>

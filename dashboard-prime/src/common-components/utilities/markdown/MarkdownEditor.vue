@@ -26,6 +26,7 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import { useByteFormat } from '@/common-components/filter/UseByteFormat.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import FileUploadService from '@/common-components/utilities/FileUploadService.js'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 const appConfig = useAppConfig()
 
@@ -84,6 +85,7 @@ const props = defineProps({
     default: false
   },
 })
+const themeHelper = useThemesHelper()
 
 //  build editor options
 const toolbarItems = [
@@ -274,9 +276,11 @@ watch(value, (newValue) =>{
            :class="`${labelClass}`"
            :for="name" @click="focusOnMarkdownEditor">{{ label }}</label>
     <BlockUI :blocked="disabled">
+
       <toast-ui-editor :id="name"
                        :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
                        class="markdown"
+                       :class="{'editor-theme-dark' : themeHelper.isDarkTheme }"
                        data-cy="markdownEditorInput"
                        ref="toastuiEditor"
                        initialEditType="wysiwyg"
@@ -289,7 +293,7 @@ watch(value, (newValue) =>{
                        @keydown="onKeydown"
                        @focus="handleFocus"
                        @load="onLoad" />
-      <div class="editor-help-footer border-1 surface-border border-round-bottom px-2 py-2">
+      <div class="border-1 surface-border surface-100 border-round-bottom px-2 py-2">
       <div class="flex text-xs">
         <div class="">
           Insert images and attach files by pasting, dragging & dropping, or selecting from toolbar.
@@ -332,18 +336,36 @@ watch(value, (newValue) =>{
 </template>
 
 <style scoped>
-.editor-help-footer {
-  border-top: 0.9px dashed rgba(0, 0, 0, 0.2) !important;
-  background-color: #f7f9fc !important;
-  color: #687278 !important;
-}
 
 .editor-help-footer-help-icon {
   font-size: 1rem;
 }
+
 </style>
 
 <style>
+
+.editor-theme-dark .toastui-editor-ww-container {
+  background-color: #1f2937 !important;
+}
+.editor-theme-dark .toastui-editor-defaultUI-toolbar {
+  background-color: #374151 !important;
+}
+.editor-theme-dark .toastui-editor-contents p {
+  color: rgba(255, 255, 255, 0.87) !important;
+}
+.editor-theme-dark .toastui-editor-toolbar-group button {
+  background-color: #c2ccda !important;
+  color: #454545 !important;
+}
+
+.editor-theme-dark .toastui-editor-toolbar-icons {
+  color: #c2ccda !important;
+}
+.editor-theme-dark .toastui-editor-defaultUI {
+  border: 1px solid #424b57
+}
+
 .markdown .toastui-editor-defaultUI {
   border-bottom: none !important;
   border-bottom-left-radius: 0 !important;

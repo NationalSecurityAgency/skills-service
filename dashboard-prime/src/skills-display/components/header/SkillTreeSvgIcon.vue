@@ -19,6 +19,10 @@ import { onMounted } from 'vue'
 const props = defineProps({
   isHovering: Boolean,
   logoFill: String,
+  height: {
+    type: Number,
+    default: 2.5
+  }
 })
 
 onMounted(() => {
@@ -36,7 +40,7 @@ onMounted(() => {
     <svg version="1.1" xmlns:x="&ns_extend;" xmlns:i="&ns_ai;" xmlns:graph="&ns_graphs;"
          xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
          viewBox="0 0 716 384"
-         style="enable-background:new 0 0 716 384;" xml:space="preserve" height="2.5rem">
+         style="enable-background:new 0 0 716 384;" xml:space="preserve" :height="`${height}rem`">
     <switch>
       <g i:extraneous="self">
     <g id="Layer_1">
