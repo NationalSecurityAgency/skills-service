@@ -165,7 +165,7 @@ export const useAuthState = defineStore('authState', () => {
     const logout =() => {
         clearAuthData()
         appInfoState.setShowUa(false)
-        return axios.get('/logout').then(() => {
+        return axios.post('/logout').then(() => {
             router.replace('/skills-login')
         })
     }
