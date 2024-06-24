@@ -79,7 +79,7 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_BlahGroup"] [data-cy="description"]').contains('Description for this group!');
     })
 
-    it.skip('group\'s description supports markdown', () => {
+    it('group\'s description supports markdown', () => {
         const markdown = "# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n";
         cy.createSkillsGroup(1, 1, 1, { description : markdown });
 
@@ -494,7 +494,7 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 2');
     });
 
-    it.skip('Report Skill Events: ability to report skill events after group is enabled', () => {
+    it('Report Skill Events: ability to report skill events after group is enabled', () => {
         cy.intercept('/admin/projects/proj1/subjects/subj1/skills/skill2').as('getSkill2')
         cy.intercept('POST', '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=ONE').as('userSuggest');
         cy.createSkillsGroup(1, 1, 1);
@@ -520,11 +520,12 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('not.exist');
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
         cy.wait('@userSuggest');
-        cy.get('[data-cy="userIdInput"]').contains('user1')
+        cy.get('[data-cy="userIdInput"]').type('{enter}')
+        cy.get('[data-cy="userIdInput"] input').should('have.value', 'user1')
         cy.get('[data-cy="addSkillEventButton"]').should('be.enabled');
     });
 
-    it.skip('Report Skill Events:  must not be able to report skill events if there is not enough points because group is not enabled', () => {
+    it('Report Skill Events:  must not be able to report skill events if there is not enough points because group is not enabled', () => {
         cy.intercept('/admin/projects/proj1/subjects/subj1/skills/skill2').as('getSkill2')
         cy.intercept('POST', '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=ONE').as('userSuggest');
 
@@ -549,7 +550,7 @@ describe('Skills Group Tests', () => {
 
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
         cy.wait('@userSuggest');
-        cy.get('[data-cy="userIdInput"]').contains('user1')
+        cy.get('[data-cy="userIdInput"] input').should('have.value', 'user1')
         cy.get('[data-cy="addSkillEventButton"]').should('be.disabled');
     });
 
@@ -783,17 +784,17 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '4');
     })
 
-    it.skip('search and navigate to group\'s skill', () => {
+    it('search and navigate to group\'s skill', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 2);
 
         cy.visit('/administrator/projects/proj1/');
         cy.get('[data-cy="skillsSelector"]').click();
-        cy.get('[data-cy="skillsSelector"]').contains('Type to search for skills').should('be.visible')
-        cy.get('[data-cy="skillsSelector"]').type('skill')
+        cy.get('li.p-dropdown-empty-message').contains('Type to search for skills').should('be.visible')
+        cy.get(`[data-pc-section="filterinput"]`).type('skill')
 
-        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]').should('have.length', 2).as('skillIds');
+        cy.get('[data-cy="skillsSelectionItem-skillId"]').should('have.length', 2).as('skillIds');
         cy.get('@skillIds').eq(0).contains('skill1');
         cy.get('@skillIds').eq(1).contains('skill2');
         cy.get('@skillIds').eq(1).click();
