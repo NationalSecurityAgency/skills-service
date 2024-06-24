@@ -15,6 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { computed, ref, onMounted, provide } from 'vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
@@ -28,6 +29,7 @@ import { SkillsReporter } from '@skilltree/skills-client-js'
 import EditSkillGroup from '@/components/skills/skillsGroup/EditSkillGroup.vue'
 import ImportFromCatalogDialog from '@/components/skills/catalog/ImportFromCatalogDialog.vue'
 
+const appConfig = useAppConfig()
 const projConfig = useProjConfig()
 const route = useRoute()
 const skillsState = useSubjectSkillsState()
@@ -39,8 +41,11 @@ const isLoading = computed(() => {
 })
 
 const addSkillDisabled = computed(() => {
-  // return this.skills && this.numSubjectSkills >= appConfig.maxSkillsPerSubject;
-  return false
+  return subjectState.subject.numSkills >= appConfig.maxSkillsPerSubject;
+})
+
+const addSkillsDisabledMsg = computed(() => {
+  return `The maximum number of Skills allowed is ${appConfig.maxSkillsPerSubject}.`
 })
 
 const importDialog = ref({
@@ -155,10 +160,12 @@ const skillCreatedOrUpdated = (skill) => {
       :is-loading="isLoading"
       aria-label="new skill">
       <div v-if="!projConfig.isReadOnlyProj">
-        <!--        <i v-if="addSkillDisabled" class="fas fa-exclamation-circle text-warning ml-1 mr-1"-->
-        <!--           style="pointer-events: all; font-size: 1.5rem;"-->
-        <!--           :aria-label="addSkillsDisabledMsg"-->
-        <!--           v-b-tooltip.hover="addSkillsDisabledMsg"/>-->
+        <Message severity="warn"
+                 class="mx-2"
+                 :aria-label="addSkillsDisabledMsg"
+                 data-cy="addSkillDisabledWarning" v-if="addSkillDisabled" :closable="false">
+          {{ addSkillsDisabledMsg }}
+        </Message>
         <SkillsButton
           id="importFromCatalogBtn"
           ref="importFromCatalogBtn"
