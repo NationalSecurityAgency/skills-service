@@ -17,7 +17,7 @@
 describe('Client Display Accessibility Video Tests', () => {
     const testVideo = '/static/videos/create-quiz.mp4'
 
-    it.skip('display video on skill page', () => {
+    it('display video on skill page', () => {
         cy.intercept('GET', '/api/projects/proj1/skills/skill1/videoCaptions')
             .as('getVideoCaptions');
         cy.createProject(1)
