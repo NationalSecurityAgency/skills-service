@@ -104,15 +104,15 @@ const loadData = () => {
             <label>Skill Usage Filters</label>
             <div class="flex gap-2">
               <ToggleButton onLabel="Overlooked Skill" offLabel="Overlooked Skill" v-model="filters.overlookedTag"
-                            data-cy="overlookedFilterButton" />
+                            data-cy="overlookedFilterButton" aria-label="Overlooked Skill" />
               <ToggleButton onLabel="Top Skill" offLabel="Top Skill" v-model="filters.topSkillTag"
-                            data-cy="topSkillFilterButton" />
+                            data-cy="topSkillFilterButton" aria-label="Top Skill" />
               <ToggleButton onLabel="High Activity" offLabel="High Activity" v-model="filters.highActivityTag"
-                            data-cy="highActivityFilterButton" />
+                            data-cy="highActivityFilterButton" aria-label="High Activity" />
               <ToggleButton onLabel="Never Achieved" offLabel="Never Achieved" v-model="filters.neverAchieved"
-                            data-cy="neverAchievedFilterButton" />
+                            data-cy="neverAchievedFilterButton" aria-label="Never Achieved" />
               <ToggleButton onLabel="Never Reported" offLabel="Never Reported" v-model="filters.neverReported"
-                            data-cy="neverReportedFilterButton" />
+                            data-cy="neverReportedFilterButton" aria-label="Never Reported" />
             </div>
             <div class="font-light text-sm mt-1">Please Note: These filters become more meaningful with extensive usage
             </div>
