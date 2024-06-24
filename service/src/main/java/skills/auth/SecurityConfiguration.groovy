@@ -38,7 +38,11 @@ import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.access.AccessDeniedHandlerImpl
+import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy
 import org.springframework.security.web.context.SecurityContextRepository
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository
+import org.springframework.security.web.csrf.CsrfAuthenticationStrategy
 import org.springframework.security.web.firewall.HttpFirewall
 import org.springframework.security.web.firewall.StrictHttpFirewall
 import org.springframework.stereotype.Component
@@ -180,6 +184,22 @@ class SecurityConfiguration {
         strictHttpFirewall.setAllowUrlEncodedDoubleSlash(allowUrlEncodedDoubleForwardSlash)
         strictHttpFirewall.setAllowBackSlash(allowUrlEncodedBackSlash)
         return strictHttpFirewall
+    }
+
+    @Bean
+    CookieCsrfTokenRepository cookieCsrfTokenRepository() {
+        CookieCsrfTokenRepository cookieCsrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        cookieCsrfTokenRepository.setCookiePath("/");
+        return cookieCsrfTokenRepository;
+    }
+
+    @Bean
+    SessionAuthenticationStrategy csrfAuthenticationStrategy(CookieCsrfTokenRepository cookieCsrfTokenRepository) {
+        if (this.authMode == AuthMode.PKI) {
+            return new NullAuthenticatedSessionStrategy()
+        } else {
+            return new CsrfAuthenticationStrategy(cookieCsrfTokenRepository);
+        }
     }
 
 }
