@@ -91,7 +91,6 @@ class RestTemplateWrapper extends RestTemplate {
             if (returnedCookies && cookies == null) {
                 cookies = returnedCookies
                 log.info("Setting cookies to {}", returnedCookies)
-                printf "Setting cookies to ${returnedCookies}"
             }
             if (returnedCookies && !xsrfToken) {
                 String cookieXSRF  = returnedCookies.find { it.startsWith("XSRF-TOKEN=") }
@@ -170,6 +169,8 @@ class RestTemplateWrapper extends RestTemplate {
 
                 authenticationToken = authResponse.getHeaders().getFirst(AUTH_HEADER)
             }
+        } else {
+            restTemplate.getForEntity("${skillsServiceUrl}/app/users/validExistingDashboardUserId/{userId}", String, username)
         }
         authenticated = true
     }
