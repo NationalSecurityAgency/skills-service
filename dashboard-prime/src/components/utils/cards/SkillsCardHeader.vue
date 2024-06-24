@@ -18,7 +18,7 @@ defineProps(['title']);
 </script>
 
 <template>
-  <div class="border-bottom-1 p-3 surface-border surface-100 flex">
+  <div class="border-bottom-1 p-3 surface-border surface-100 flex" data-cy="card-header">
     <span class="font-bold flex-1"><slot name="headerIcon" />{{ title }}</span>
     <slot name="headerContent" />
   </div>

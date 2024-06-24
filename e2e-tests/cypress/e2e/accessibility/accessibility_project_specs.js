@@ -183,9 +183,9 @@ describe('Accessibility Tests', () => {
         cy.customA11y()
     });
 
-    it.skip('project - metrics', () => {
+    it('project - metrics', () => {
         cy.visit('/administrator/projects/proj1/metrics');
-        cy.get('[data-cy="metricsCard-header"').contains('Users per day');
+        cy.get('[data-cy="card-header"]').contains('Users per day');
         cy.get('[data-cy="distinctNumUsersOverTime"]').contains('This chart needs at least 2 days of user activity.');
         cy.get('[data-cy="projectLastReportedSkillValue"]')
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '4')
@@ -195,7 +195,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y()
     });
 
-    it.skip('project - achievements metrics', () => {
+    it('project - achievements metrics', () => {
         cy.visit('/administrator/projects/proj1/metrics/achievements');
         cy.contains('Level 2: 1 users');
         cy.contains('Level 1: 5 users');
@@ -212,7 +212,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y()
     })
 
-    it.skip('project - subject metrics', () => {
+    it('project - subject metrics', () => {
         cy.visit('/administrator/projects/proj1/metrics/subjects');
 
         cy.get('[data-cy="Subjects-metrics-link"]')
@@ -226,7 +226,7 @@ describe('Accessibility Tests', () => {
 
     });
 
-    it.skip('project - skills metrics', () => {
+    it('project - skills metrics', () => {
         cy.visit('/administrator/projects/proj1/metrics/skills');
         cy.get('[data-cy="skillsNavigator-table"] [data-cy="skillsBTableTotalRows"]').should('have.text', '4')
 
@@ -235,7 +235,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y()
     });
 
-    it.skip('project - access page', () => {
+    it('project - access page', () => {
         cy.visit('/administrator/projects/proj1/access');
 
         const tableSelector = '[data-cy="roleManagerTable"]';

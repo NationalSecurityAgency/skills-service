@@ -246,7 +246,7 @@ describe('Accessibility Tests', () => {
         // cy.customA11y();
     })
 
-    it.skip('subject - user - performed skills', () => {
+    it('subject - user - performed skills', () => {
         cy.visit('/administrator/projects/MyNewtestProject/users/u1/skillEvents');
         cy.injectAxe();
         cy.get('[data-cy="performedSkillsTable"]').contains('ID: skill1');

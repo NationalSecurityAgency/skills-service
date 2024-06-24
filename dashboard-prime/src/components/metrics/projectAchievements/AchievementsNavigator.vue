@@ -189,8 +189,8 @@ const reloadTable = () => {
           </div>
         </div>
         <div class="flex lg:pl-3 mb-3 lg:mt-3">
-        <SkillsButton size="small" @click="reloadTable" data-cy="achievementsNavigator-filterBtn" icon="fa fa-filter" label="Filter" />
-        <SkillsButton size="small" @click="reset" class="ml-1" data-cy="achievementsNavigator-resetBtn" icon="fa fa-times" label="Reset" />
+        <SkillsButton size="small" aria-label="Filter" @click="reloadTable" data-cy="achievementsNavigator-filterBtn" icon="fa fa-filter" label="Filter" />
+        <SkillsButton size="small" aria-label="Reset" @click="reset" class="ml-1" data-cy="achievementsNavigator-resetBtn" icon="fa fa-times" label="Reset" />
       </div>
       </div>
       <SkillsDataTable
@@ -219,7 +219,7 @@ const reloadTable = () => {
               </div>
               <div class="flex ml-2">
                 <router-link :to="{ name: 'SkillsDisplaySkillsDisplayPreviewProject', params: { projectId: route.paramsprojectId, userId: slotProps.data.userId } }">
-                  <SkillsButton size="small" data-cy="achievementsNavigator-clientDisplayBtn"><i class="fa fa-eye"/></SkillsButton>
+                  <SkillsButton aria-label="View Project" size="small" data-cy="achievementsNavigator-clientDisplayBtn"><i class="fa fa-eye"/></SkillsButton>
                 </router-link>
               </div>
             </div>
