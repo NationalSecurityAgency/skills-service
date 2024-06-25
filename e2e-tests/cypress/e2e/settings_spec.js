@@ -1237,7 +1237,7 @@ describe('Settings Tests', () => {
         cy.contains('* First Name');
     });
 
-    it.skip('Landing Page preference', () => {
+    it('Landing Page preference', () => {
         cy.intercept('POST', '/app/userInfo/**')
             .as('saveUserInfo');
         cy.intercept('GET', '/app/userInfo/**')
@@ -1255,9 +1255,8 @@ describe('Settings Tests', () => {
             .should('be.visible');
 
         // verify the default is set to 'Progress and Rankings'
-        // [data-pc-section="input"]').should('have.value', 'on');
-        cy.get('[data-cy="admin"]').should('not.have.class', 'p-highlight');
-        cy.get('[data-cy="progress"]').should('have.class', 'p-highlight');
+        cy.get('[data-cy="admin"] > input').should('not.be.checked');
+        cy.get('[data-cy="progress"] > input').should('be.checked');
 
         // click SkillTree logo and verify we are on the correct page
         cy.get('[data-cy="skillTreeLogo"]')
@@ -1276,8 +1275,8 @@ describe('Settings Tests', () => {
             .should('be.disabled');
 
         cy.get('[data-cy="admin"]').click();
-        cy.get('[data-cy="admin"]').should('have.class', 'p-highlight');
-        cy.get('[data-cy="progress"]').should('not.have.class', 'p-highlight');
+        cy.get('[data-cy="admin"] > input').should('be.checked');
+        cy.get('[data-cy="progress"] > input').should('not.be.checked');
 
         cy.get('[data-cy="userPrefsSettingsSave"]')
             .should('not.be.disabled');
@@ -1302,12 +1301,11 @@ describe('Settings Tests', () => {
             .should('be.visible');
         cy.get('[data-cy="userPrefsSettingsSave"]')
             .should('be.disabled');
-        cy.get('[data-cy="landingPageSelector"] [value="progress"]')
-            .click({ force: true });
-        cy.get('[data-cy="landingPageSelector"] [value="admin"]')
-            .should('not.be.checked');
-        cy.get('[data-cy="landingPageSelector"] [value="progress"]')
-            .should('be.checked');
+        cy.get('[data-cy="progress"]')
+            .click();
+        cy.get('[data-cy="admin"] > input').should('not.be.checked');
+        cy.get('[data-cy="progress"] > input').should('be.checked');
+
         cy.get('[data-cy="userPrefsSettingsSave"]')
             .should('not.be.disabled');
         cy.get('[data-cy="userPrefsSettingsSave"]')
@@ -1334,11 +1332,11 @@ describe('Settings Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="userPrefsSettingsSave"]')
             .should('be.disabled');
-        cy.get('[data-cy="landingPageSelector"] [value="admin"]')
-            .click({ force: true });
-        cy.get('[data-cy="landingPageSelector"] [value="progress"]')
+        cy.get('[data-cy="admin"]')
+            .click();
+        cy.get('[data-cy="progress"] > input')
             .should('not.be.checked');
-        cy.get('[data-cy="landingPageSelector"] [value="admin"]')
+        cy.get('[data-cy="admin"] > input')
             .should('be.checked');
 
         // unsaved changes visible and save button enabled
@@ -1348,11 +1346,11 @@ describe('Settings Tests', () => {
             .should('not.be.disabled');
 
         // switch values back to original and unsaved changes should not visible and save button disabled
-        cy.get('[data-cy="landingPageSelector"] [value="progress"]')
-            .click({ force: true });
-        cy.get('[data-cy="landingPageSelector"] [value="admin"]')
+        cy.get('[data-cy="progress"]')
+            .click();
+        cy.get('[data-cy="admin"] > input')
             .should('not.be.checked');
-        cy.get('[data-cy="landingPageSelector"] [value="progress"]')
+        cy.get('[data-cy="progress"] > input')
             .should('be.checked');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
