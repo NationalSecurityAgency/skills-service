@@ -113,7 +113,8 @@ const onReuseOrMove = (changedSkills) => {
   movedOrReusedSkills.value = changedSkills
 }
 const hasDestinations = computed(() => destinations.value && destinations.value.length > 0)
-const showStepper = computed(() => !state.value.skillsWereMovedOrReusedAlready && hasDestinations.value)
+const showStepper = computed(() => !state.value.skillsWereMovedOrReusedAlready && hasDestinations.value && !importFinalizePending.value)
+const importFinalizePending = computed(() => finalizeInfo.value.numSkillsToFinalize && finalizeInfo.value.numSkillsToFinalize > 0)
 
 const onVisibleChanged = (isVisible) => {
   if (!isVisible) {
@@ -138,7 +139,7 @@ const handleFocus = () => {
   >
     <div data-cy="reuseOrMoveDialog">
       <skills-spinner :is-loading="isLoadingData" class="my-8" />
-      <div v-if="!isLoadingData" class="w-100">
+      <div v-if="!isLoadingData" data-cy="reuseModalContent" class="w-100">
         <no-content2
           class="mt-5 mb-4"
           v-if="state.skillsWereMovedOrReusedAlready"
@@ -150,6 +151,11 @@ const handleFocus = () => {
           v-if="!hasDestinations && !state.skillsWereMovedOrReusedAlready"
           title="No Destinations Available"
           :message="`There are no Subjects or Groups that this skill can be ${actionNameInPast} ${actionDirection}. Please create additional subjects and/or groups if you want to ${actionNameLowerCase} skills.`" />
+        <no-content2
+            class="mt-5 mb-4"
+            v-if="importFinalizePending"
+            :title="`Cannot ${textCustomization.actionName}`"
+            :message="`Cannot initiate skill ${actionNameLowerCase} while skill finalization is pending.`"/>
 
         <Stepper v-if="showStepper" :linear="true" class="w-100">
         <StepperPanel header="Select Destination">

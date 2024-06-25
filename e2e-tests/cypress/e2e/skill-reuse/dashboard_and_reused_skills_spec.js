@@ -26,25 +26,23 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.createSubject(1, 2);
     });
 
-    it.skip('Search and Navigate directly to a skill properly labels reused skills', () => {
+    it('Search and Navigate directly to a skill properly labels reused skills', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
         cy.createSkillsGroup(1, 1, 12);
         cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
 
         cy.visit('/administrator/projects/proj1/');
 
-        cy.get('input.vs__search')
-            .invoke('attr', 'placeholder')
-            .should('contain', 'Search and Navigate directly to a skill');
+        cy.get('[data-cy="skillsSelector"]').should('contain', 'Search and Navigate directly to a skill')
         cy.get('[data-cy="skillsSelector"]')
             .click();
-        cy.get('[data-cy="skillsSelector"]')
+        cy.get('li.p-dropdown-empty-message')
             .contains('Type to search for skills')
             .should('be.visible');
-        cy.get('[data-cy="skillsSelector"]')
+        cy.get(`[data-pc-section="filterinput"]`)
             .type('s');
 
-        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]')
+        cy.get('[data-cy="skillsSelector-skillId"]')
             .should('have.length', 3)
             .as('skillIds');
         cy.get('@skillIds')
@@ -57,7 +55,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .eq(2)
             .contains('skill1');
 
-        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillName"]')
+        cy.get('[data-cy="skillsSelector-skillName"]')
             .should('have.length', 3)
             .as('skillIds');
         cy.get('@skillIds')
@@ -71,7 +69,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .eq(2)
             .find('[data-cy="reusedBadge"]');
 
-        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-groupName"]')
+        cy.get('[data-cy="skillsSelector-groupName"]')
             .should('have.length', 1)
             .as('skillIds');
         cy.get('@skillIds')
@@ -79,7 +77,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains('Awesome Group 12 Subj1');
     });
 
-    it.skip('reused skills must NOT be available for badges', () => {
+    it('reused skills must NOT be available for badges', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
         cy.createSkillsGroup(1, 1, 12);
         cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
@@ -88,7 +86,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.visit('/administrator/projects/proj1/badges/badge1');
         cy.get('[data-cy="skillsSelector"]')
             .click();
-        cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]')
+        cy.get('[data-cy="skillsSelector-skillId"]')
             .should('have.length', 1)
             .as('skillIds');
         cy.get('@skillIds')
@@ -96,7 +94,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains('skill1');
     });
 
-    it.skip('cannot initiate reuse when finalization is pending', () => {
+    it('cannot initiate reuse when finalization is pending', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.exportSkillToCatalog(1, 1, 1);
@@ -111,17 +109,15 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.importSkillFromCatalog(2, 1, 1, 2);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1/');
-        cy.get('[data-cy="skillSelect-skill11"]')
-            .click({ force: true });
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
         cy.get('[data-cy="reuseModalContent"]')
             .contains('Cannot initiate skill reuse while skill finalization is pending');
     });
 
-    it.skip('cannot initiate reuse when finalization is running', () => {
+    it('cannot initiate reuse when finalization is running', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.exportSkillToCatalog(1, 1, 1);
@@ -137,17 +133,14 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.importSkillFromCatalog(2, 1, 1, 2);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1/');
-        cy.get('[data-cy="skillSelect-skill11"]');
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="doPerformFinalizeButton"]')
+        cy.get('[data-cy="saveDialogBtn"]')
             .click();
-        cy.get('[data-cy="skillSelect-skill11"]')
-            .click({ force: true });
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillReuseBtn"]')
-            .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
         cy.get('[data-cy="reuseModalContent"]')
             .contains('Cannot initiate skill reuse while skill finalization is pending');
         cy.waitForBackendAsyncTasksToComplete();

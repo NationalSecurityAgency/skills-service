@@ -1104,7 +1104,7 @@ describe('Skills Tests', () => {
 
   })
 
-  it.skip('load page with apex charts directly and repeatedly', () => {
+  it('load page with apex charts directly and repeatedly', () => {
     // apex charts and dynamic imports had a race condition, this test verifies that charts load successfully
 
     cy.createSkill(1, 1, 1)
@@ -1134,7 +1134,7 @@ describe('Skills Tests', () => {
     }
   })
 
-  it.skip('search for skills across subjects', () => {
+  it('search for skills across subjects', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2)
     cy.createSkill(1, 1, 3)
@@ -1152,22 +1152,22 @@ describe('Skills Tests', () => {
 
 
     cy.visit('/administrator/projects/proj1/')
-    cy.get('input.vs__search').invoke('attr', 'placeholder').should('contain', 'Search and Navigate directly to a skill')
+    cy.get('[data-cy="skillsSelector"]').should('contain', 'Search and Navigate directly to a skill')
     cy.get('[data-cy="skillsSelector"]').click()
-    cy.get('[data-cy="skillsSelector"]').contains('Type to search for skills').should('be.visible')
-    cy.get('[data-cy="skillsSelector"]').type('sUbJ2')
+    cy.get('li.p-dropdown-empty-message').contains('Type to search for skills').should('be.visible')
+    cy.get(`[data-pc-section="filterinput"]`).type('sUbJ2')
 
-    cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillId"]').should('have.length', 3).as('skillIds')
+    cy.get('[data-cy="skillsSelector-skillId"]').should('have.length', 3).as('skillIds')
     cy.get('@skillIds').eq(0).contains('skill6Subj2')
     cy.get('@skillIds').eq(1).contains('skill7Subj2')
     cy.get('@skillIds').eq(2).contains('skill8Subj2')
 
-    cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-skillName"]').should('have.length', 3).as('names')
+    cy.get('[data-cy="skillsSelector-skillName"]').should('have.length', 3).as('names')
     cy.get('@names').eq(0).contains('Very Great Skill 6 Subj2')
     cy.get('@names').eq(1).contains('Very Great Skill 7 Subj2')
     cy.get('@names').eq(2).contains('Very Great Skill 8 Subj2')
 
-    cy.get('[data-cy="skillsSelector"] [data-cy="skillsSelector-subjectName"]').should('have.length', 3).as('subjects')
+    cy.get('[data-cy="skillsSelector-subjectName"]').should('have.length', 3).as('subjects')
     cy.get('@subjects').eq(0).contains('Subject 2')
     cy.get('@subjects').eq(1).contains('Subject 2')
     cy.get('@subjects').eq(2).contains('Subject 2')
@@ -1179,15 +1179,16 @@ describe('Skills Tests', () => {
     // search produces no results
     cy.visit('/administrator/projects/proj1/')
     // cy.get('[data-cy="skillsSelector"]').contains('Search and Navigate directly to a skill').should('be.visible')
-    cy.get('[data-cy="skillsSelector"]').type('sUbJ2*kd')
-    cy.get('[data-cy="skillsSelector"]').contains('No elements found. Consider changing the search query').should('be.visible')
+    cy.get('[data-cy="skillsSelector"]').click()
+    cy.get(`[data-pc-section="filterinput"]`).type('sUbJ2*kd')
+    cy.get('li.p-dropdown-empty-message').contains('No results found').should('be.visible')
 
     // special chars don't break anything
-    cy.get('[data-cy="skillsSelector"]').type('!@#$%^&*()')
-    cy.get('[data-cy="skillsSelector"]').contains('No elements found. Consider changing the search query').should('be.visible')
+    cy.get(`[data-pc-section="filterinput"]`).type('!@#$%^&*()')
+    cy.get('li.p-dropdown-empty-message').contains('No results found').should('be.visible')
   })
 
-  it.skip('add skill and copy skill buttons disabled if max skills for subject reached', () => {
+  it('add skill and copy skill buttons disabled if max skills for subject reached', () => {
     cy.intercept('/public/config', {
       body: {
         artifactBuildTimestamp: '2022-01-17T14:39:38Z',
@@ -1255,19 +1256,19 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy=newGroupButton]').should('be.disabled')
     cy.get('[data-cy=newSkillButton]').should('be.disabled')
-    cy.get('[data-cy=subPageHeaderControls] .text-warning').should('be.visible')
+    cy.get('[data-cy=addSkillDisabledWarning]').should('be.visible')
 
     cy.get('[data-cy*=copySkillButton]').should('have.length', 5)
     cy.get('[data-cy*=copySkillButton]').should('be.disabled')
 
     cy.get('[data-cy=deleteSkillButton_skill1]').click()
     cy.get('[data-cy=currentValidationText]').type('Delete Me')
-    cy.get('[data-cy=removeButton]').should('be.enabled').click()
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
     cy.wait('@deleteSkill')
 
     cy.get('[data-cy=newGroupButton]').should('be.enabled')
     cy.get('[data-cy=newSkillButton]').should('be.enabled')
-    cy.get('[data-cy=subPageHeaderControls] .text-warning').should('not.exist')
+    cy.get('[data-cy=addSkillDisabledWarning]').should('not.exist')
 
     cy.get('[data-cy*=copySkillButton]').should('have.length', 4)
     cy.get('[data-cy*=copySkillButton]').should('be.enabled')

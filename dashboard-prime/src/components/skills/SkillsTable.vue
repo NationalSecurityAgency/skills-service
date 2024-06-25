@@ -45,6 +45,7 @@ import AddSkillTagDialog from '@/components/skills/tags/AddSkillTagDialog.vue'
 import RemoveSkillTagDialog from '@/components/skills/tags/RemoveSkillTagDialog.vue'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { useLog } from '@/components/utils/misc/useLog.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -56,6 +57,7 @@ const props = defineProps({
 })
 
 const responsive = useResponsiveBreakpoints()
+const appConfig = useAppConfig()
 const skillsState = useSubjectSkillsState()
 const subjectState = useSubjectsState()
 const projConfig = useProjConfig()
@@ -204,7 +206,10 @@ const onColumnSort = () => {
   reorderEnable.value = false
 }
 
-const addSkillDisabled = ref(false)
+
+const addSkillDisabled = computed(() => {
+  return subjectState.subject.numSkills >= appConfig.maxSkillsPerSubject;
+})
 const createOrUpdateSkill = inject('createOrUpdateSkill')
 const handleEditBtnClick = (skill) => {
   if (skill.isCatalogSkill && skill.catalogType === 'imported') {
