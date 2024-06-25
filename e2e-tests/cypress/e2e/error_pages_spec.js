@@ -200,7 +200,7 @@ describe('Error Pages Tests', () => {
             .contains('Badge [fake] doesn\'t exist');
     });
 
-    it.skip('Global Badge Not Found', () => {
+    it('Global Badge Not Found', () => {
         const supervisorUser = 'supervisor@skills.org';
         cy.register(supervisorUser, 'password');
         cy.login('root@skills.org', 'password');
@@ -222,7 +222,7 @@ describe('Error Pages Tests', () => {
             .contains('GlobalBadge [fake] doesn\'t exist.');
     });
 
-    it.skip('Global Badge Not Authorized', () => {
+    it('Global Badge Not Authorized', () => {
         const supervisorUser = 'supervisor@skills.org';
         cy.register(supervisorUser, 'password');
         cy.login('root@skills.org', 'password');
