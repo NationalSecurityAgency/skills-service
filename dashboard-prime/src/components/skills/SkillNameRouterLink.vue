@@ -66,7 +66,7 @@ const highlightedValue = computed(() => {
                  tag="span"
                  :to="{ name:'SkillOverview', params: { projectId: skill.projectId, subjectId: subjectId, skillId: skill.skillId }}"
                  :aria-label="`Manage skill ${skill.name}  via link`">
-      <span class="text-lg inline-block" v-html="highlightedValue" />
+      <span data-cy="highlightedValue" class="text-lg inline-block" v-html="highlightedValue" />
     </router-link>
     <a v-if="truncate"
        @click="displayFullText = !displayFullText"
