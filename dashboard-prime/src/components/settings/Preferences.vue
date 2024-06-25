@@ -19,7 +19,9 @@ import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import SettingsService from '@/components/settings/SettingsService.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import {useThemesHelper} from "@/components/header/UseThemesHelper.js";
 
+const themeHelper = useThemesHelper()
 const appConfig = useAppConfig();
 const colors = useColors()
 
@@ -39,6 +41,13 @@ const settings = ref({
     lastLoadedValue: false,
     dirty: false,
   },
+  enableDarkMode: {
+    settingGroup: 'user.prefs',
+    value: false,
+    setting: 'enable_dark_mode',
+    lastLoadedValue: false,
+    dirty: false,
+  }
 });
 const errMsg = ref(null);
 const showSavedMsg = ref(false);
@@ -65,7 +74,7 @@ function loadSettings() {
               if (key === 'homePage') {
                 hasHomeKey = true;
               }
-              if (key === 'rankAndLeaderboardOptOut') {
+              if (key === 'rankAndLeaderboardOptOut' || key === 'enableDarkMode') {
                 settings.value[key].value = settings.value[key].value.toLowerCase() === 'true';
               }
             }
@@ -109,6 +118,13 @@ function saveUserSettings(dirtyChanges) {
             // const userInfo = { ...$store.getters.userInfo, landingPage: value.value };
             // $store.commit('storeUser', userInfo);
           }
+          if (key === 'enableDarkMode') {
+            if(value.value) {
+              themeHelper.setDarkMode();
+            } else {
+              themeHelper.setLightMode();
+            }
+          }
         });
       })
       .finally(() => {
@@ -126,6 +142,10 @@ function homePagePrefChanged() {
 
 function rankAndLeaderboardOptOutPrefChanged() {
   settings.value.rankAndLeaderboardOptOut.dirty = `${settings.value.rankAndLeaderboardOptOut.value}` !== `${settings.value.rankAndLeaderboardOptOut.lastLoadedValue}`;
+}
+
+function enableDarkModeChanged() {
+  settings.value.enableDarkMode.dirty = `${settings.value.enableDarkMode.value}` !== `${settings.value.enableDarkMode.lastLoadedValue}`;
 }
 </script>
 
@@ -151,6 +171,13 @@ function rankAndLeaderboardOptOutPrefChanged() {
                      aria-labelledby="rankAndLeaderboardOptOutLabel"
                      @change="rankAndLeaderboardOptOutPrefChanged" />
         <span class="ml-2">{{ settings.rankAndLeaderboardOptOut.value ? 'Yes' : 'No'}}</span>
+      </div>
+      <div data-cy="enableDarkMode" class="pt-2 pb-2 flex align-content-center align-items-center">
+        <i class="fas fa-moon mr-2" :class="colors.getTextClass(2)" aria-hidden="true"></i> <span id="enableDarkModeLabel">Dark Mode:</span>
+        <InputSwitch v-model="settings.enableDarkMode.value" data-cy="enableDarkModeSwitch" class="ml-2"
+                     aria-labelledby="enableDarkModeLabel"
+                     @change="enableDarkModeChanged" />
+        <span class="ml-2">{{ settings.enableDarkMode.value ? 'On' : 'Off'}}</span>
       </div>
       <SkillsButton label="Save" icon="fas fa-arrow-circle-right" @click.stop="save" size="small" :disabled="!isDirty" data-cy="userPrefsSettingsSave"/>
       <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">

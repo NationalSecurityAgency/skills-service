@@ -1621,5 +1621,44 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=saveSettingsBtn]')
             .should('be.enabled');
     });
+
+    it('Theme preference can be toggled and remains on refresh', () => {
+        cy.intercept('POST', '/app/userInfo/**')
+            .as('saveUserInfo');
+        cy.intercept('GET', '/app/userInfo/**')
+            .as('loadUserInfo');
+        cy.intercept('/app/projects')
+            .as('loadProjects');
+        cy.intercept('/api/myProgressSummary')
+            .as('loadMyProgressSummary');
+
+        cy.visit('/administrator/');
+        cy.navToSettings();
+        cy.get('[data-cy="nav-Preferences"]').click();
+
+        cy.get('[data-cy="enableDarkMode"]').should('exist');
+        cy.get('[data-cy="enableDarkMode"]').contains('Off');
+        cy.get('[data-cy="enableDarkModeSwitch"]').click();
+        cy.get('[data-cy="enableDarkMode"]').contains('On');
+        cy.get('[data-cy=userPrefsSettingsSave]').should('be.enabled');
+        cy.get('[data-cy=userPrefsSettingsSave]').click();
+        cy.get('[data-cy="nav-System"]').click();
+
+        cy.get('[data-cy="nav-Preferences"]').click();
+        cy.get('[data-cy="enableDarkMode"]').should('exist');
+        cy.get('[data-cy="enableDarkMode"]').contains('On');
+        cy.get('[data-cy=userPrefsSettingsSave]').should('not.be.enabled');
+
+        cy.reload();
+
+        cy.get('[data-cy="enableDarkMode"]').should('exist');
+        cy.get('[data-cy="enableDarkMode"]').contains('On');
+        cy.get('[data-cy=userPrefsSettingsSave]').should('not.be.enabled');
+
+        cy.get('[data-cy="nav-Preferences"]').click();
+        cy.get('[data-cy="enableDarkModeSwitch"]').click();
+        cy.get('[data-cy="enableDarkMode"]').contains('Off');
+        cy.get('[data-cy=userPrefsSettingsSave]').should('be.enabled');
+    });
 });
 

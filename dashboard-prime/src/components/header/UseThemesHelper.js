@@ -13,15 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { useStorage } from '@vueuse/core'
+import { ref, computed } from 'vue';
+import { defineStore } from 'pinia'
+import SettingsService from "@/components/settings/SettingsService.js";
 
-export const useThemesHelper = () => {
+export const useThemesHelper = defineStore('useThemesHelper', () => {
 
   const themeOptions =[
-    { icon: 'fas fa-sun', name: 'Light', value: 'skills-light-green' },
-    { icon: 'fas fa-moon', name: 'Dark', value: 'skills-dark-green' },
+    { name: 'Light', value: 'skills-light-green' },
+    { name: 'Dark', value: 'skills-dark-green' },
   ];
-  const currentTheme = useStorage('currentTheme', themeOptions[0])
+  const currentTheme = ref(themeOptions[0]);
+
+  const setCurrentTheme = (newTheme) => {
+    currentTheme.value = newTheme;
+  }
+
+  const setDarkMode = () => {
+    setCurrentTheme(themeOptions[1]);
+  }
+
+  const setLightMode = () => {
+    setCurrentTheme(themeOptions[0]);
+  }
+
+  const loadTheme = () => {
+    return SettingsService.getUserSettings().then((response) => {
+      const themeSetting = response.find( (it)=> it.setting === 'enable_dark_mode')
+      const darkModeEnabled = themeSetting?.value.toLowerCase() === 'true';
+      if(darkModeEnabled) {
+        currentTheme.value = themeOptions[1];
+      } else {
+        currentTheme.value = themeOptions[0];
+      }
+    });
+  }
 
   const configureDefaultThemeFileInHeadTag = () =>{
     let file = document.createElement('link')
@@ -30,10 +56,16 @@ export const useThemesHelper = () => {
     file.href = `/themes/${currentTheme.value.value}/theme.css`
     document.head.appendChild(file)
   }
+const isDarkTheme =  computed(() => currentTheme.value.name === 'Dark')
 
   return {
     currentTheme,
+    setCurrentTheme,
+    setDarkMode,
+    setLightMode,
     themeOptions,
-    configureDefaultThemeFileInHeadTag
+    configureDefaultThemeFileInHeadTag,
+    loadTheme,
+    isDarkTheme
   }
-}
+});
