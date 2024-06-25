@@ -116,6 +116,19 @@ const processUserTags = (userTags) =>{
 <template>
 <div>
   <page-header :loading="isLoading" :options="headerOptions">
+    <template #subSubTitle v-if="tags">
+        <span v-for="(tag, index) in tags" :key="index" data-cy="userTagHeader">
+          <span class="text-muted">{{tag.label}}: </span>
+          <span v-for="(value, vIndex) in tag.value" :key="vIndex">
+            <router-link
+                :to="{ name: 'UserTagMetrics', params: { projectId: route.params.projectId, tagKey: tag.key, tagFilter: value } }"
+                class="text-info mb-0 pb-0 preview-card-title"
+                :aria-label="`View metrics for ${value}`" role="link">{{ value }}</router-link>
+              <span v-if="vIndex < tag.value.length - 1">, </span>
+          </span>
+          <span v-if="index < tags.length - 1">; </span>
+        </span>
+    </template>
   </page-header>
 
   <navigation v-if="!isLoading" :nav-items="navItems">

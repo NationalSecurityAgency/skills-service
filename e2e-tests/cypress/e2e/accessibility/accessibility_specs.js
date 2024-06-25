@@ -375,7 +375,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
     });
 
-    it.skip('global badges', () => {
+    it('global badges', () => {
         cy.logout();
         cy.login('root@skills.org', 'password');
 
@@ -394,9 +394,9 @@ describe('Accessibility Tests', () => {
 
         cy.get('[aria-label="new global badge"]')
             .click();
-        cy.get('[data-cy=badgeName]')
+        cy.get('[data-cy=name]')
             .type('global badge');
-        cy.get('[data-cy=saveBadgeButton]')
+        cy.get('[data-cy=saveDialogBtn]')
             .click();
         cy.contains('Manage')
             .click();
@@ -404,12 +404,7 @@ describe('Accessibility Tests', () => {
         cy.customLighthouse();
         cy.customA11y();
 
-        cy.get('[data-cy="skillsSelector2"]')
-            .click();
-        cy.contains('This is 1');
-        cy.get('[data-cy="skillsSelector2"] .vs__dropdown-option')
-            .eq(0)
-            .click();
+        cy.selectItem('[data-cy="skillsSelector"]', 'This is 1')
         cy.customA11y();
         cy.get('[data-cy=nav-Levels]')
             .click();
@@ -419,15 +414,10 @@ describe('Accessibility Tests', () => {
         cy.wait('@getAvailableProjects')
         cy.get('#project-selector')
             .click();
-        cy.get('#project-selector .vs__dropdown-option')
-            .eq(0)
-            .click();
-        cy.get('#level-selector')
-            .click();
+        cy.get('[data-cy="MyNewtestProject_option"]').click();
+        cy.get('#level-selector').click();
         cy.wait('@getProjectLevels')
-        cy.get('#level-selector .vs__dropdown-option')
-            .eq(1)
-            .click();
+        cy.get('[data-pc-section="item"]').contains(2).click();
         // cy.get('.multiselect__select').eq(0).click();
         // cy.get('.multiselect__element').eq(0).click();
         // cy.get('.multiselect__select').eq(1).click();
