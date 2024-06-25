@@ -167,7 +167,7 @@ describe('Learning Path Management Validation Tests', () => {
             .should('have.length', 1)
     });
 
-    it.skip('Remove learning path item from the table', () => {
+    it('Remove learning path item from the table', () => {
         cy.intercept('POST', '/admin/projects/proj1/badge2/prerequisite/proj1/badge1').as('badge1ToBadge2')
         cy.intercept('POST', '/admin/projects/proj1/badge1/prerequisite/proj1/skill5Subj2').as('skill1ToBadge1')
         cy.intercept('POST', '/admin/projects/proj1/badge2/prerequisite/proj1/skill6Subj2').as('skill6ToBadge2')

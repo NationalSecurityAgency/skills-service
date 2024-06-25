@@ -29,12 +29,14 @@ import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillsDisplayPathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
 const responsive = useResponsiveBreakpoints()
 const colors = useColors()
 const appConfig = useAppConfig()
+const userInfo = useUserInfo()
 
 let filters = ref({
   user: '',
@@ -54,6 +56,10 @@ const sortInfo = ref({ sortOrder: -1, sortBy: 'lastUpdated' })
 const showUserTagColumn = computed(() => {
  return !!(appConfig.usersTableAdditionalUserTagKey && appConfig.usersTableAdditionalUserTagLabel);
 })
+
+const tagKey = computed(() => {
+  return appConfig.usersTableAdditionalUserTagKey;
+});
 
 onMounted(() => {
   loadData()
@@ -214,7 +220,7 @@ const sortField = () => {
               aria-label="View user details"
               data-cy="usersTable_viewDetailsLink"
             >
-              {{ slotProps.data.userIdForDisplay || slotProps.data.userId }}
+              {{ userInfo.getUserDisplay(slotProps.data, true) }}
             </router-link>
           </template>
         </Column>
@@ -224,6 +230,17 @@ const sortField = () => {
                 :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="fas fa-tag mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
+          </template>
+          <template #body="slotProps">
+            <router-link
+                v-if="showUserTagColumn && slotProps.data.userTag"
+                :to="{ name: 'UserTagMetrics', params: { projectId: route.params.projectId, tagKey: tagKey, tagFilter: slotProps.data.userTag } }"
+                class="text-info mb-0 pb-0 preview-card-title"
+                :aria-label="`View metrics for ${slotProps.data.userTag}`"
+                role="link"
+                data-cy="usersTable_viewUserTagMetricLink">
+              {{ slotProps.data.userTag }}
+            </router-link>
           </template>
         </Column>
         <Column field="totalPoints" header="Progress" :sortable="true" :class="{'flex': responsive.md.value }">

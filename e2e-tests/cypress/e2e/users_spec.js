@@ -262,7 +262,7 @@ describe('Users Tests', () => {
         cy.get('@row2').eq(3).should('contain', 'Today');
     });
 
-    it.skip('strip the oauth provider from the userId if present', () => {
+    it('strip the oauth provider from the userId if present', () => {
         const res = `
         {"data":
             [
@@ -296,7 +296,7 @@ describe('Users Tests', () => {
         }
     });
 
-    it.skip('displays user name if available', () => {
+    it('displays user name if available', () => {
         const res = `
         {"data":
             [
@@ -782,7 +782,7 @@ describe('Users Tests', () => {
         cy.get('[data-cy="usr_progress-user0"] [data-cy="progressCurrentLevel"]').should('have.text', 'None')
     });
 
-    it.skip('show user tag in users table', () => {
+    it('show user tag in users table', () => {
         const res = `
         {"data":
             [
@@ -817,7 +817,7 @@ describe('Users Tests', () => {
         cy.contains("Users for Org: tagA");
     });
 
-    it.skip('do not show user tag in users table when not configured', () => {
+    it('do not show user tag in users table when not configured', () => {
         const res = `
         {"data":
             [
@@ -849,7 +849,7 @@ describe('Users Tests', () => {
         cy.get(`${tableSelector}`).should('not.contain', 'Org');
     });
 
-    it.skip('show user tag on users page', () => {
+    it('show user tag on users page', () => {
         const res = `
         {"data":
             [
@@ -893,10 +893,11 @@ describe('Users Tests', () => {
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
         cy.wait('@getUserTags')
         cy.contains("Client Display");
+        cy.get('[data-cy="userTagHeader"]').should('exist');
         cy.contains("Org: tagA");
     });
 
-    it.skip('do not show user tag on users page if not enabled', () => {
+    it('do not show user tag on users page if not enabled', () => {
         const res = `
         {"data":
             [
@@ -929,7 +930,7 @@ describe('Users Tests', () => {
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
         cy.contains("Client Display");
-        cy.get('.h5').should('not.have.text', "Org: tagA");
+        cy.get('[data-cy="userTagHeader"]').should('not.exist');
     });
 
     it('filter project users by completion', () => {
