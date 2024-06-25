@@ -1,0 +1,71 @@
+<script setup>
+
+import { computed, onMounted, ref } from 'vue';
+import StringHighlighter from '@/common-components/utilities/StringHighlighter.js';
+
+const props = defineProps({
+  skill: Object,
+  subjectId: String,
+  filterValue: String,
+  limit: {
+    type: Number,
+    required: false,
+    default: 45,
+  },
+});
+
+const slop = ref(15);
+const displayFullText = ref(false);
+
+onMounted(() => {
+  displayFullText.value = props.skill.name.length < props.limit + slop.value;
+});
+
+const truncate = computed(() => {
+  return props.skill.name.length >= props.limit + slop.value;
+});
+
+const toDisplay = computed(() => {
+  if (displayFullText.value) {
+    return `${props.skill.name}`;
+  }
+  return `${props.skill.name.substring(0, props.limit)}`;
+});
+
+const highlightedValue = computed(() => {
+  const value = toDisplay.value;
+  const filterValue = props.filterValue ? props.filterValue.trim() : '';
+  if (filterValue && filterValue.length > 0) {
+    const highlighted = StringHighlighter.highlight(value, filterValue);
+    return highlighted || value;
+  } else {
+    return value;
+  }
+});
+
+</script>
+
+<template>
+  <div class="inline-block">
+    <router-link :data-cy="`manageSkillLink_${skill.skillId}`"
+                 tag="span"
+                 :to="{ name:'SkillOverview', params: { projectId: skill.projectId, subjectId: subjectId, skillId: skill.skillId }}"
+                 :aria-label="`Manage skill ${skill.name}  via link`">
+      <span class="text-lg inline-block" v-html="highlightedValue" />
+    </router-link>
+    <a v-if="truncate"
+       @click="displayFullText = !displayFullText"
+       aria-label="Show/Hide truncated text"
+       data-cy="showMoreOrLessBtn">
+      <small v-if="displayFullText" data-cy="showLess"> &lt;&lt; less</small>
+      <small v-else data-cy="showMore"><em>... &gt;&gt; more</em></small>
+    </a>
+  </div>
+</template>
+
+<style scoped>
+a,
+a small {
+  cursor: pointer;
+}
+</style>

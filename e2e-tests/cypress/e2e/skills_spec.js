@@ -1293,7 +1293,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=pageHeaderStat]').eq(1).should('contain.text', '4')
   })
 
-  it.skip('skills page - long skill names should be truncated', () => {
+  it('skills page - long skill names should be truncated', () => {
     const longName = 'Verylongandinterestingskill;Verylongandinterestingskill;Verylongandinterestingskill;Verylongandinterestingskill;Verylongandinterestingskill;'
     cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills', (req) => {
       req.reply({
