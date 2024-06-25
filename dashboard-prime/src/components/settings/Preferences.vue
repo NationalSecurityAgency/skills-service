@@ -20,10 +20,12 @@ import SettingsService from '@/components/settings/SettingsService.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import {useThemesHelper} from "@/components/header/UseThemesHelper.js";
+import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 
 const themeHelper = useThemesHelper()
 const appConfig = useAppConfig();
 const colors = useColors()
+const userInfo = useUserInfo()
 
 const isLoading = ref(true);
 const settings = ref({
@@ -115,8 +117,7 @@ function saveUserSettings(dirtyChanges) {
           const [key, value] = entry;
           settings[key] = Object.assign(value, { dirty: false, lastLoadedValue: value.value });
           if (key === 'homePage') {
-            // const userInfo = { ...$store.getters.userInfo, landingPage: value.value };
-            // $store.commit('storeUser', userInfo);
+            userInfo.userInfo.value.landingPage = value.value
           }
           if (key === 'enableDarkMode') {
             if(value.value) {

@@ -46,7 +46,7 @@ onMounted(() => {
 <template>
   <div>
     <skills-spinner :is-loading="loadingDescription" />
-    <div v-if="!loadingDescription">
+    <div v-if="!loadingDescription" :data-cy="`projectDescriptionRow_${projectId}`">
       <markdown-text v-if="description" :text="description" />
       <div v-else>Project does not have a description</div>
     </div>
