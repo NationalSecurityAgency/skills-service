@@ -250,7 +250,7 @@ defineExpose({
                                 outlined
                                 size="small"/>
                 </router-link>
-                <ButtonGroup class="ml-1 flex-nowrap">
+                <ButtonGroup class="ml-1 flex flex-nowrap">
                   <SkillsButton @click="showUpdateModal(slotProps.data)"
                                 icon="fas fa-edit"
                                 outlined

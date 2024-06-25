@@ -46,6 +46,7 @@ import RemoveSkillTagDialog from '@/components/skills/tags/RemoveSkillTagDialog.
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
+import SkillNameRouterLink from '@/components/skills/SkillNameRouterLink.vue';
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -553,16 +554,11 @@ const isLoading = computed(() => {
                 :value="slotProps.data.name"
                 :filter="filters.global.value" />
             </div>
-            <div v-if="!slotProps.data.isGroupType" class="flex-1 w-min-10rem">
-              <router-link
-                class=""
-                :data-cy="`manageSkillLink_${slotProps.data.skillId}`"
-                :to="{ name:'SkillOverview', params: { projectId: slotProps.data.projectId, subjectId, skillId: slotProps.data.skillId }}"
-              >
-                <highlighted-value
-                  class="text-lg"
-                  :value="slotProps.data.name" :filter="filters.global.value" />
-              </router-link>
+            <div v-if="!slotProps.data.isGroupType" class="flex-1">
+              <div class="flex">
+                <SkillNameRouterLink :skill="slotProps.data" :subjectId="subjectId"
+                                     :filter-value="filters.global.value"/>
+              </div>
               <div class="flex flex-wrap gap-1">
                 <Tag
                   v-if="slotProps.data.isCatalogImportedSkills"
@@ -595,10 +591,9 @@ const isLoading = computed(() => {
                   <span><i class="fas fa-tag"></i> {{ tag.tagValue }}</span>
                 </Tag>
               </div>
-
             </div>
-            <div class="flex-none">
-              <div class="flex">
+            <div class="flex align-items-start justify-content-end">
+              <div class="flex flex-nowrap">
                 <ButtonGroup v-if="!projConfig.isReadOnlyProj" class="mt-2 ml-1">
                   <SkillsButton
                     :id="`editSkillButton_${slotProps.data.skillId}`"
