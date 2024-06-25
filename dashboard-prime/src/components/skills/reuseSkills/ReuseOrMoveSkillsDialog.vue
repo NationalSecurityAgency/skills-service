@@ -145,7 +145,7 @@ const handleFocus = () => {
           v-if="state.skillsWereMovedOrReusedAlready"
           title="Please Refresh"
           :show-refresh-action="true"
-          message="`Cannot initiate skill ${actionNameLowerCase} while skill finalization is pending.`"/>
+          message="Skills were moved or reused in another browser tab OR modified by another project administrator." />
         <no-content2
           class="mt-5 mb-4"
           v-if="!hasDestinations && !state.skillsWereMovedOrReusedAlready"
