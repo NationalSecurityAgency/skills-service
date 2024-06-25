@@ -235,7 +235,7 @@ Cypress.Commands.add("removeFromMyProjects", (projNum) => {
     cy.request('DELETE', `/api/myprojects/proj${projNum}`, {});
 });
 
-Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = null) => {
+Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = null, firstName = 'Firstname', lastName = 'LastName') => {
     let requestStatus = 0;
     cy.request(`/app/users/validExistingDashboardUserId/${user}`)
         .then((response) => {
@@ -243,8 +243,8 @@ Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = nu
                 if (grantRoot) {
                     cy.log(`Creating root user [${user}]`)
                     cy.request('PUT', '/createRootAccount', {
-                        firstName: 'Firstname',
-                        lastName: 'LastName',
+                        firstName,
+                        lastName,
                         email: user,
                         password: pass,
                         usernameForDisplay,
