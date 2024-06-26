@@ -166,7 +166,7 @@ describe('Approver Config User Tags Tests', () => {
 
     });
 
-    it.skip('entering user tag conf validation', function () {
+    it('entering user tag conf validation', function () {
         const user1 = 'user1'
 
         cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
@@ -177,15 +177,15 @@ describe('Approver Config User Tags Tests', () => {
         cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
         // no spaces
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).type('s s');
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="tagValueInputError"]`).should('have.text', 'Org may only contain alpha-numeric characters')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="tagInputError"]`).should('have.text', 'Org may only contain alpha-numeric characters')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).should('not.be.enabled')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).type('{backspace}{backspace}');
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="tagValueInputError"]`).should('not.be.visible')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="tagInputError"]`).should('not.be.visible')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).should('be.enabled')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).type('{backspace}FIrst');
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="tagValueInputError"]`).should('have.text', 'There is already an entry for this Org value.')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="tagInputError"]`).should('have.text', 'There is already an entry for this Org value.')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).should('not.be.enabled')
     })
 
