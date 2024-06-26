@@ -21,6 +21,8 @@ import SelfReportService from '@/components/skills/selfReport/SelfReportService'
 import DateCell from "@/components/utils/table/DateCell.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import ExistingUserInput from "@/components/utils/ExistingUserInput.vue";
+import * as yup from "yup";
+import {useForm} from "vee-validate";
 
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
@@ -28,6 +30,24 @@ const props = defineProps({
   userInfo: Object,
 });
 const emit = defineEmits(['conf-added', 'conf-removed']);
+
+const schema = yup.object().shape({
+  'userIdInput': yup.mixed().transform((value, input, ctx) => {
+    if (typeof value === 'string') {
+      return {
+        userId: value,
+      }
+    }
+    return value;
+  }).label('User Id').required().test('uniqueName', 'User already exists', (value) => valueExists(value?.userId)),
+})
+
+const { meta } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    userIdInput: null,
+  }
+})
 
 const currentSelectedUser = ref(null);
 const loading = ref(false);
@@ -38,9 +58,9 @@ const pageSize = 4;
 const possiblePageSizes = [4, 10, 15, 20];
 const selectedIds = ref([]);
 
-const saveEnabled = computed(() => {
-  return currentSelectedUser.value !== null && !selectedIds.value.includes(currentSelectedUser.value.userId);
-});
+const valueExists = (userId) => {
+  return !selectedIds.value.includes(userId);
+}
 
 onMounted(() => {
   const hasConf = props.userInfo.userConf && props.userInfo.userConf.length > 0;
@@ -97,7 +117,9 @@ const updateSelectedList = () => {
               class="w-full"
               v-model="currentSelectedUser"
               :can-enter-new-user="false"
-              name="User Id"
+              name="userIdInput"
+              aria-errormessage="userIdInputError"
+              aria-describedby="userIdInputError"
               aria-label="Select User Id"
               :excluded-suggestions="selectedIds"
               data-cy="userIdInput"/>
@@ -108,7 +130,7 @@ const updateSelectedList = () => {
               data-cy="addUserConfBtn"
               @click="addConf"
               v-skills="'ConfigureSelfApprovalWorkload'"
-              :disabled="!saveEnabled"
+              :disabled="!meta.valid"
               icon="fas fa-plus-circle" label="Add">
           </SkillsButton>
         </div>

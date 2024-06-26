@@ -178,6 +178,7 @@ describe('Approver Config Users Tests', () => {
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`).type('usera{enter}');
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.disabled')
+        cy.get('[data-cy="userIdInputError"]').should('be.visible')
     });
 
     it('user conf table paging', function () {
