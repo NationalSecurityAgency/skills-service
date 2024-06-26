@@ -256,6 +256,7 @@ const isQuizzesValueUnderProgressAndRanking = (value, items) => {
   <div class="card">
     <Breadcrumb :model="items"
                 :class="{'dashboard-breadcrumb-vertical-mode': smallScreenMode}"
+                aria-label="SkillTree Dashboard Breadcrumb Bar"
                 data-cy="breadcrumb-bar">
       <template #item="{ item, props }">
         <router-link
