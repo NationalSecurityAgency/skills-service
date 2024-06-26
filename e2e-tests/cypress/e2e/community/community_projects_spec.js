@@ -53,7 +53,7 @@ describe('Community Projects Tests', () => {
         cy.afterTestSuiteThatReusesData()
     });
 
-    it.skip('dynamically populate "community.descriptor" prop for the header token substitution', () => {
+    it('dynamically populate "community.descriptor" prop for the header token substitution', () => {
         cy.visit('/administrator')
         cy.get('[data-cy="projCard_proj1_manageLink"]')
         cy.get('[data-cy="inception-button"]').contains('Level 0')
@@ -72,7 +72,7 @@ describe('Community Projects Tests', () => {
         cy.get('.community-desc-footer').should('have.text', 'All Dragons')
     });
 
-    it.skip('"community.descriptor" prop for the header token substitution - header is updated after user logged in', () => {
+    it('"community.descriptor" prop for the header token substitution - header is updated after user logged in', () => {
         cy.logout();
         cy.visit('/administrator')
         cy.get('.community-desc-header').should('have.text', 'All Dragons')

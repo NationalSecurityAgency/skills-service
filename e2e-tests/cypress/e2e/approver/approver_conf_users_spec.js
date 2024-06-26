@@ -143,7 +143,7 @@ describe('Approver Config Users Tests', () => {
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
     });
 
-    it.skip('duplicate user validation', function () {
+    it('duplicate user validation', function () {
         const user1 = 'user1'
 
         cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
@@ -161,20 +161,13 @@ describe('Approver Config Users Tests', () => {
         cy.get(`${tableSelector} [data-cy="userIdCell-userb"]`)
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('2 Specific Users')
 
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
-        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userB');
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.disabled')
-        cy.get('[data-cy="userIdInputErr"]').should('have.text', 'There is already a configuration for this User Id.')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput [data-pc-name="dropdownbutton"]`).click();
+        cy.get('[data-pc-section="item"]').contains('userB').should('not.exist');
+        cy.get('[data-pc-section="item"]').contains('userA').should('not.exist');
+        cy.get('[data-pc-section="item"]').contains('userc').click();
 
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
-        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userA');
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.disabled')
-        cy.get('[data-cy="userIdInputErr"]').should('have.text', 'There is already a configuration for this User Id.')
-
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
-        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userC');
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.enabled')
-        cy.get('[data-cy="userIdInputErr"]').should('not.be.visible')
+        // cy.get('[data-cy="userIdInputErr"]').should('not.be.visible')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '3')
@@ -182,6 +175,9 @@ describe('Approver Config Users Tests', () => {
         cy.get(`${tableSelector} [data-cy="userIdCell-userb"]`)
         cy.get(`${tableSelector} [data-cy="userIdCell-userc"]`)
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('3 Specific Users')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`).type('usera{enter}');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.disabled')
     });
 
     it('user conf table paging', function () {
