@@ -529,7 +529,7 @@ describe('Community Project Email Header/Footer Tests', () => {
           });
     });
 
-    it.skip('default communityHeaderDescriptor value replaced in header/footer for contact all admins email', () => {
+    it('default communityHeaderDescriptor value replaced in header/footer for contact all admins email', () => {
         cy.createProject(1, {enableProtectedUserCommunity: true})
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
@@ -578,7 +578,7 @@ describe('Community Project Email Header/Footer Tests', () => {
           });
     });
 
-    it.skip('default communityHeaderDescriptor value replaced in header/footer for reset password email', () => {
+    it('default communityHeaderDescriptor value replaced in header/footer for reset password email', () => {
         cy.register('test@skills.org', 'apassword', false);
         cy.visit('/administrator/');
         cy.get('[data-cy=forgotPassword]')
