@@ -20,7 +20,6 @@ import SelfReportService from '@/components/skills/selfReport/SelfReportService'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
-import { SkillsReporter } from '@skilltree/skills-client-js';
 import * as yup from "yup";
 import {useForm} from "vee-validate";
 
@@ -34,9 +33,9 @@ const props = defineProps({
 });
 
 const schema = yup.object({
-  'tagInput': yup.string().required().test('uniqueName', 'There is already an entry for this value.', (value) => {
+  'tagInput': yup.string().required().test('uniqueName', `There is already an entry for this ${props.tagLabel} value.`, (value) => {
     return !data.value.find((i) => value.toLowerCase() === i.userTagValue?.toLowerCase());
-  })
+  }).matches(/^\w+$/, () => `${props.tagLabel} may only contain alpha-numeric characters`)
 })
 const { meta } = useForm({
   validationSchema: schema

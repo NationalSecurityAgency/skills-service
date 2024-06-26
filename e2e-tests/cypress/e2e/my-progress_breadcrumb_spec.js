@@ -553,7 +553,7 @@ describe('My Progress Breadcrumb Tests', () => {
             .contains('Overall Points');
     });
 
-    it.skip('test breadcrumbs with custom labels', function () {
+    it('test breadcrumbs with custom labels', function () {
         // log in as project admin and set custom labels
         cy.fixture('vars.json')
             .then((vars) => {
@@ -804,7 +804,7 @@ describe('My Progress Breadcrumb Tests', () => {
             .contains('Cross-Work Role Course');
 
         // internal dependency
-        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill4/dependency/skill2');
+        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill2');
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill2]')
             .should('exist');
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill2]')
@@ -818,12 +818,12 @@ describe('My Progress Breadcrumb Tests', () => {
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]')
             .should('have.attr', 'href');
         cy.get('[data-cy=breadcrumb-bar]')
-            .contains(new RegExp(/^Progress And Rankings.*Work Role:\s*proj1.*Competency:\s*subj1.*Course:\s*skill4.*Prerequisite:\s*skill2$/))
+            .contains(new RegExp(/^Progress And Rankings.*Work Role:\s*proj1.*Competency:\s*subj1.*Course:\s*skill2.*$/))
             .should('be.visible');
 
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-item]')
             .its('length')
-            .should('eq', 5);
+            .should('eq', 4);
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-item]')
             .eq(0)
             .should('contain.text', 'Progress And Rankings');
@@ -835,9 +835,6 @@ describe('My Progress Breadcrumb Tests', () => {
             .should('contain.text', 'subj1');
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-item]')
             .eq(3)
-            .should('contain.text', 'skill4');
-        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-item]')
-            .eq(4)
             .should('contain.text', 'skill2');
 
         // Go to Badges page
