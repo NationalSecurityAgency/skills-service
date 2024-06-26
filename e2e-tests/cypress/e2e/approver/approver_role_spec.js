@@ -174,7 +174,7 @@ describe('Approver Role Tests', () => {
         runCheck(1, 'View', 'Approver','not.')
     });
 
-    it.skip('/subj page - approver role has no mutation controls', function () {
+    it('/subj page - approver role has no mutation controls', function () {
         const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
             cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1`);
@@ -185,8 +185,7 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="newGroupButton"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="newSkillButton"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="skillActionsBtn"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="clearSelectedSkillsBtn"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="selectAllSkillsBtn"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').should(`${chainerPrepend}exist`)
 
             cy.get('[data-cy="editSkillButton_skill1"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="editSkillButton_skill2"]').should(`${chainerPrepend}exist`)
@@ -196,17 +195,21 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="copySkillButton_skill2"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="copySkillButton_skill3"]').should(`${chainerPrepend}exist`)
 
-            cy.get('[data-cy="deleteSkillButton_skill3"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="deleteSkillButton_skill3"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="deleteSkillButton_skill1"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="deleteSkillButton_skill2"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="deleteSkillButton_skill3"]').should(`${chainerPrepend}exist`)
 
-            cy.get('[data-cy="manageSkillLink_skill3"]').contains(manageButtonTxt)
-            cy.get('[data-cy="manageSkillLink_skill3"]').contains(manageButtonTxt)
-            cy.get('[data-cy="manageSkillLink_skill3"]').contains(manageButtonTxt)
+            cy.get('[data-cy="manageSkillLink_skill1"]').invoke('attr', 'aria-label').should('contain', manageButtonTxt)
+            cy.get('[data-cy="manageSkillLink_skill2"]').invoke('attr', 'aria-label').should('contain', manageButtonTxt)
+            cy.get('[data-cy="manageSkillLink_skill3"]').invoke('attr', 'aria-label').should('contain', manageButtonTxt)
 
-            cy.get('[data-cy="skillSelect-skill1"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="skillSelect-skill2"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="skillSelect-skill3"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').should(`${chainerPrepend}exist`)
+
+            if (assertChainPrepend == null) {
+                cy.get('[data-cy="enableDisplayOrderSort"]').click()
+            }
 
             cy.get('[data-cy="orderMoveDown_skill1"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="orderMoveDown_skill2"]').should(`${chainerPrepend}exist`)
@@ -384,7 +387,7 @@ describe('Approver Role Tests', () => {
         runCheck(1, 'View','not.')
     });
 
-    it.skip('/users/user/skillEvents page - approver role has no mutation controls', function () {
+    it('/users/user/skillEvents page - approver role has no mutation controls', function () {
         const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
             cy.visit(`/administrator/projects/proj${projNum}/users/user2/skillEvents`);
@@ -395,7 +398,7 @@ describe('Approver Role Tests', () => {
         runCheck(1, 'View','not.')
     });
 
-    it.skip('/metrics page - approver role has no mutation controls', function () {
+    it('/metrics page - approver role has no mutation controls', function () {
         const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
             cy.visit(`/administrator/projects/proj${projNum}/metrics`);

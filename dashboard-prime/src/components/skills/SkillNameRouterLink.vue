@@ -27,6 +27,11 @@ const props = defineProps({
     required: false,
     default: 45,
   },
+  readOnly: {
+    type: Boolean,
+    required: false,
+    default: false,
+  }
 });
 
 const slop = ref(15);
@@ -65,7 +70,7 @@ const highlightedValue = computed(() => {
     <router-link :data-cy="`manageSkillLink_${skill.skillId}`"
                  tag="span"
                  :to="{ name:'SkillOverview', params: { projectId: skill.projectId, subjectId: subjectId, skillId: skill.skillId }}"
-                 :aria-label="`Manage skill ${skill.name}  via link`">
+                 :aria-label="`${readOnly ? 'View' : 'Manage'} skill ${skill.name} via link`">
       <span data-cy="highlightedValue" class="text-lg inline-block" v-html="highlightedValue" />
     </router-link>
     <a v-if="truncate"

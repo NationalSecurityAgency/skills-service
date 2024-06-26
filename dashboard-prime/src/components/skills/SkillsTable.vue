@@ -487,7 +487,7 @@ const isLoading = computed(() => {
                 placeholder="Optional Fields"
                 data-cy="skillsTable-additionalColumns" />
             </div>
-            <div class="w-full lg:w-auto flex mt-3 lg:mt-0">
+            <div v-if="!projConfig.isReadOnlyProj" class="w-full lg:w-auto flex mt-3 lg:mt-0">
               <div class="flex-1 align-items-center flex">
                 <label for="sortEnabledSwitch" class="lg:ml-3 mr-1">Reorder:</label>
                 <InputSwitch
@@ -524,7 +524,7 @@ const isLoading = computed(() => {
         </div>
       </template>
 
-      <Column selectionMode="multiple" :class="{'flex': responsive.lg.value }">
+      <Column v-if="!projConfig.isReadOnlyProj" selectionMode="multiple" :class="{'flex': responsive.lg.value }">
         <template #header>
           <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-check-double"
                                                   aria-hidden="true"></i> Select Rows:</span>
@@ -557,7 +557,9 @@ const isLoading = computed(() => {
             <div v-if="!slotProps.data.isGroupType" class="flex-1">
               <div class="flex">
                 <SkillNameRouterLink :skill="slotProps.data" :subjectId="subjectId"
-                                     :filter-value="filters.global.value"/>
+                                     :filter-value="filters.global.value"
+                                     :read-only="projConfig.isReadOnlyProj || slotProps.data.isCatalogImportedSkills"
+                />
               </div>
               <div class="flex flex-wrap gap-1">
                 <Tag

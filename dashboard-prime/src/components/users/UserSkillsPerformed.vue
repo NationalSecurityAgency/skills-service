@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { onMounted, onBeforeMount, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useProjectUserState } from '@/stores/UseProjectUserState.js';
 import { useConfirm } from 'primevue/useconfirm';
@@ -100,7 +100,7 @@ const sortField = (column) => {
   table.value.options.pagination.currentPage = 1
   loadData();
 }
-onBeforeMount(() => {
+const loadTableFields = () => {
   const fields = [
     {
       key: 'skillId',
@@ -123,10 +123,13 @@ onBeforeMount(() => {
     });
   }
   table.value.options.fields = fields;
-})
+}
 onMounted(() => {
-  projectUserState.loadUserDetailsState(projectId.value, route.params.userId)
-  loadData();
+  projConfig.afterProjConfigStateLoaded().then(() => {
+    loadTableFields()
+    projectUserState.loadUserDetailsState(projectId.value, route.params.userId)
+    loadData();
+  });
 })
 const loadData = () => {
   UsersService.getUserInfo(projectId.value, userId.value).then((res) => {
