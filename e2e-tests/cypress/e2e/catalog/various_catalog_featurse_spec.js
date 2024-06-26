@@ -22,7 +22,7 @@ describe('Single Skill and Catalog Tests', () => {
         cy.createSubject(1, 1);
     });
 
-    it.skip('show IMPORTED badge on performed skills table', () => {
+    it('show IMPORTED badge on performed skills table', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
