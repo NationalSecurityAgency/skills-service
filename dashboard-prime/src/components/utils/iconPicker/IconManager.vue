@@ -54,6 +54,14 @@ const props = defineProps(
     },
 )
 
+const minDimensionsString = computed(() => {
+  return `${props.minCustomIconDimensions.width}px x ${props.minCustomIconDimensions.width}px`
+});
+
+const maxDimensionsString = computed(() => {
+  return `${props.maxCustomIconDimensions.width}px x ${props.maxCustomIconDimensions.width}px`
+});
+
 onMounted(() => {
   IconManagerService.getIconIndex(route.params.projectId).then((response) => {
     if (response) {
@@ -95,7 +103,8 @@ const xlAndUp = '(min-width: 1200px)';
 
 let modalWidth = ref("70rem");
 let rowLength = 6;
-let acceptType = 'image/*';
+let acceptType = 'image/.*';
+const mimeTester = new RegExp(acceptType);
 let selected = '';
 let selectedCss = '';
 let selectedIconPack = '';
@@ -193,62 +202,6 @@ const isValidCustomIconDimensions = (width, height) => {
   return isValid;
 };
 
-// extend('image', {
-//   ...image,
-//   message: 'File is not an image format',
-// });
-// extend('imageDimensions', {
-//   message: () => `Invalid image dimensions, dimensions must be square and must be between ${minCustomIconDimensions.width} x ${minCustomIconDimensions.width} and ${maxCustomIconDimensions.width} x ${maxCustomIconDimensions.width}`,
-//   validate(value) {
-//     return new Promise((resolve) => {
-//       if (value) {
-//         const file = value;
-//         const customIcon = new Image();
-//         customIcon.src = window.URL.createObjectURL(file);
-//         customIcon.onload = () => {
-//           const width = customIcon.naturalWidth;
-//           const height = customIcon.naturalHeight;
-//           window.URL.revokeObjectURL(customIcon.src);
-//
-//           if (!isValidCustomIconDimensions(self, width, height)) {
-//             resolve({
-//               valid: false,
-//             });
-//           } else {
-//             resolve({
-//               valid: true,
-//             });
-//           }
-//         };
-//       } else {
-//         resolve({
-//           valid: true,
-//         });
-//       }
-//     });
-//   },
-// });
-
-// extend('duplicateFilename', {
-//   message: 'Custom Icon with this filename already exists',
-//   validate(value) {
-//     return new Promise((resolve) => {
-//       if (value) {
-//         const file = value;
-//
-//         const index = definitiveCustomIconList.findIndex((item) => item.filename === file.name);
-//         if (index >= 0) {
-//           resolve({
-//             valid: false,
-//           });
-//           return;
-//         }
-//       }
-//       resolve({ valid: true });
-//     });
-//   },
-// });
-
 const filter = () => {
   const value = filterCriteria.value.trim();
   const regex = new RegExp(value, 'gi');
@@ -276,19 +229,28 @@ const deleteIcon = (iconName, projectId) => {
 let uploader = ref();
 
 const isValidImageType = (type) => {
-  return true; //type !== acceptType;
+  return mimeTester.test(type);
 }
 const uploadFromInput = (event) => {
   const target = event.target;
   const files = target.files;
-  files[0].objectURL = URL.createObjectURL(files[0]);
-  beforeUpload({files: files});
+  if( files[0] ) {
+    files[0].objectURL = URL.createObjectURL(files[0]);
+    beforeUpload({files: files});
+  }
 }
 const beforeUpload = (upload) => {
   const isImageTypeValid = isValidImageType(upload.files[0].type);
 
   if (!isImageTypeValid) {
     errorMessage.value = 'File is not an image format';
+    return;
+  }
+
+  const existingIcons = iconPacks.value[2].icons.flat();
+  const uploadName = upload.files[0].name;
+  if(existingIcons.find(it => it.filename === uploadName)) {
+    errorMessage.value = 'A file with this name already exists';
     return;
   }
 
@@ -309,7 +271,7 @@ const beforeUpload = (upload) => {
         errorMessage.value = 'Encountered error when uploading icon';
       });
     } else {
-      errorMessage.value = 'Invalid image dimensions, dimensions must be square and must be between 48 x 48 and 100 x 100';
+      errorMessage.value = `Invalid image dimensions, dimensions must be square and must be between ${minDimensionsString.value} and ${maxDimensionsString.value}`;
     }
   };
 }
@@ -337,7 +299,7 @@ const beforeUpload = (upload) => {
         <template #header>
           <div class="w-full">
             <InputText class="w-full" data-cy="fileInput" placeholder="Browse..." type="file" @change="uploadFromInput($event)" />
-            <p class="text-muted text-right text-primary font-italic">* custom icons must be between 48px X 48px and 100px X 100px</p>
+            <p class="text-muted text-right text-primary font-italic">* custom icons must be between {{minDimensionsString}} and {{maxDimensionsString}}</p>
           </div>
         </template>
         <template #content>
