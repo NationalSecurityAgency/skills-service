@@ -21,7 +21,8 @@ import SelfReportService from '@/components/skills/selfReport/SelfReportService'
 import DateCell from "@/components/utils/table/DateCell.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import ExistingUserInput from "@/components/utils/ExistingUserInput.vue";
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import * as yup from "yup";
+import {useForm} from "vee-validate";
 
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
@@ -30,6 +31,24 @@ const props = defineProps({
 });
 const emit = defineEmits(['conf-added', 'conf-removed']);
 
+const schema = yup.object().shape({
+  'userIdInput': yup.mixed().transform((value, input, ctx) => {
+    if (typeof value === 'string') {
+      return {
+        userId: value,
+      }
+    }
+    return value;
+  }).label('User Id').required().test('uniqueName', 'User already exists', (value) => valueExists(value?.userId)),
+})
+
+const { meta } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    userIdInput: null,
+  }
+})
+
 const currentSelectedUser = ref(null);
 const loading = ref(false);
 const data = ref([]);
@@ -37,11 +56,17 @@ const sortBy = ref('updated');
 const sortOrder = ref(-1);
 const pageSize = 4;
 const possiblePageSizes = [4, 10, 15, 20];
+const selectedIds = ref([]);
+
+const valueExists = (userId) => {
+  return !selectedIds.value.includes(userId);
+}
 
 onMounted(() => {
   const hasConf = props.userInfo.userConf && props.userInfo.userConf.length > 0;
   if (hasConf) {
     data.value = props.userInfo.userConf.map((u) => ({ ...u }));
+    updateSelectedList();
   }
 });
 
@@ -55,6 +80,7 @@ const addConf = () => {
   SelfReportService.configureApproverForUserId(route.params.projectId, props.userInfo.userId, currentUserId)
       .then((res) => {
         data.value.push(res);
+        updateSelectedList();
         emit('conf-added', res);
         nextTick(() => announcer.polite(`Added workload configuration successfully for ${currentUserId} user.`));
         currentSelectedUser.value = null;
@@ -68,9 +94,14 @@ const removeTagConf = (removedItem) => {
   return SelfReportService.removeApproverConfig(route.params.projectId, removedItem.id)
       .then(() => {
         data.value = data.value.filter((i) => i.id !== removedItem.id);
+        updateSelectedList();
         emit('conf-removed', removedItem);
         nextTick(() => announcer.polite('Removed workload configuration successfully.'));
       });
+}
+
+const updateSelectedList = () => {
+  selectedIds.value = data.value.map((i) => i.userId );
 }
 </script>
 
@@ -86,8 +117,11 @@ const removeTagConf = (removedItem) => {
               class="w-full"
               v-model="currentSelectedUser"
               :can-enter-new-user="false"
-              name="User Id"
+              name="userIdInput"
+              aria-errormessage="userIdInputError"
+              aria-describedby="userIdInputError"
               aria-label="Select User Id"
+              :excluded-suggestions="selectedIds"
               data-cy="userIdInput"/>
         </div>
         <div>
@@ -96,7 +130,7 @@ const removeTagConf = (removedItem) => {
               data-cy="addUserConfBtn"
               @click="addConf"
               v-skills="'ConfigureSelfApprovalWorkload'"
-              :disabled="!currentSelectedUser"
+              :disabled="!meta.valid"
               icon="fas fa-plus-circle" label="Add">
           </SkillsButton>
         </div>
