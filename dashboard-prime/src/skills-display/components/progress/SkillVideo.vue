@@ -171,7 +171,7 @@ const loadTranscript = () => {
     </Message>
     <SkillsOverlay v-if="!videoCollapsed && isLocked" :show="true" :no-fade="true">
       <template #overlay>
-        <div class="text-center text-primary" style="color: #143740 !important;" data-cy="videoIsLockedMsg">
+        <div class="text-center text-primary surface-overlay" data-cy="videoIsLockedMsg">
           <i class="fas fa-lock" style="font-size: 1.2rem;"></i>
           <div class="font-weight-bold">Complete this {{ attributes.skillDisplayName.toLowerCase() }}'s prerequisites to unlock the video</div>
         </div>
