@@ -508,7 +508,7 @@ const saveSettings = ((dirtyChanges) => {
                                v-on:update:modelValue="selfReportingControl"
                                aria-labelledby="selfReportLabel"
                                data-cy="selfReportSwitch" />
-                <spand class="ml-1">{{ selfReportingEnabledLabel }}</spand>
+                <span class="ml-1">{{ selfReportingEnabledLabel }}</span>
               </div>
               <Card class="mt-2" Card :pt="{  content: { class: 'py-0' } }" data-cy="selfReportTypeSelector">
                 <template #content>
