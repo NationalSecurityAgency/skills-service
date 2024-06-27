@@ -141,6 +141,8 @@ if (props.asyncLoadDataFunction) {
         .then(() => {
           validateIfNotEmpty()
         })
+    } else {
+      validateIfNotEmpty()
     }
   }).finally(() => {
     isLoadingAsyncData.value = false
@@ -152,6 +154,8 @@ if (props.asyncLoadDataFunction) {
       .then(() => {
         validateIfNotEmpty()
       })
+  } else {
+    validateIfNotEmpty()
   }
 }
 
@@ -164,7 +168,7 @@ const validateIfNotEmpty = () => {
     .find(([key, value]) =>
       key !== 'skipTheseAttrsWhenValidatingOnInit'
       && !skipAttrs.includes(key)
-      && value && !deepEqual((props.initialValues[key]), (value)))
+      && (props.isEdit || value && !deepEqual((props.initialValues[key]), (value))))
   if (foundNonEmpty) {
     validate()
   }

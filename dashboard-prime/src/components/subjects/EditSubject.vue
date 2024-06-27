@@ -158,6 +158,7 @@ const onSubjectSaved = (subject) => {
     :initial-values="initialSubjData"
     :save-data-function="updateSubject"
     :enable-return-focus="true"
+    :isEdit="isEdit"
     @saved="onSubjectSaved"
     @close="close">
     <template #default>

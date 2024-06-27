@@ -953,7 +953,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectCard-subj2"] [data-cy="deleteBtn"]').should('have.focus');
     });
 
-    it.skip('edit subject - run validation on load in case validation improved and existing values fail to validate', () => {
+    it('edit subject - run validation on load in case validation improved and existing values fail to validate', () => {
         cy.intercept('POST', '/api/validation/description*', {
             valid: false,
             msg: 'Mocked up validation failure'
