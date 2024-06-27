@@ -30,7 +30,7 @@ describe('Client Display Point History Tests', () => {
     })
   })
 
-  it.skip('multiple achievements in the middle', () => {
+  it('multiple achievements in the middle', () => {
     const data = {
       'pointsHistory': [{
         'dayPerformed': '2020-09-02T00:00:00.000+00:00',
@@ -107,12 +107,13 @@ describe('Client Display Point History Tests', () => {
       .as('getPointHistory')
 
     cy.cdVisit('/', true)
-    cy.injectAxe()
     cy.wait('@getPointHistory')
 
     // let's wait for animation to complete
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    cy.injectAxe()
+    cy.wait(1000)
     cy.customA11y()
   })
 
