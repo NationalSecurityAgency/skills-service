@@ -30,7 +30,7 @@ describe('Client Display Point History Tests', () => {
     })
   })
 
-  it.only('multiple achievements in the middle', () => {
+  it('multiple achievements in the middle', () => {
     const data = {
       'pointsHistory': [{
         'dayPerformed': '2020-09-02T00:00:00.000+00:00',
