@@ -521,15 +521,15 @@ const saveSettings = ((dirtyChanges) => {
                                      :disabled="!selfReport.enabled" />
                         <label for="approval">Approval Queue (reviewed by project admins first)</label>
                         <span class="text-muted mr-3 ml-2">|</span>
-                        <label for="self-report-checkbox" class="m-0">
                           <Checkbox data-cy="justificationRequiredCheckbox"
+                                    inputId="justificationRequiredCheckbox"
                                     id="justification-required-checkbox" :binary="true"
                                     class="d-inline mr-2"
                                     v-model="settings.selfReportJustificationRequired.value"
                                     :disabled="!approvalSelected || !selfReport.enabled"
                                     @update:modelValue="justificationRequiredChanged" />
-                          <span class="font-italic"
-                                :class="{ 'text-secondary': !approvalSelected || !selfReport.enabled}">Justification Required </span>
+                        <label for="justificationRequiredCheckbox" class="m-0 font-italic" :class="{ 'text-secondary': !approvalSelected || !selfReport.enabled}">
+                          Justification Required
                         </label>
                       </div>
                       <div class="flex mt-2">

@@ -460,6 +460,7 @@ const isLoading = computed(() => {
               class="flex flex-grow-1"
               v-model="filters['global'].value"
               data-cy="skillsTable-skillFilter"
+              aria-label="Skill Search"
               placeholder="Skill Search" />
             <InputGroupAddon class="p-0 m-0">
               <SkillsButton
@@ -492,6 +493,7 @@ const isLoading = computed(() => {
                 <label for="sortEnabledSwitch" class="lg:ml-3 mr-1">Reorder:</label>
                 <InputSwitch
                   id="sortEnabledSwitch"
+                  inputId="sortEnabledSwitch"
                   data-cy="enableDisplayOrderSort"
                   @update:modelValue="onReorderSwitchChanged"
                   aria-label="Sorting Control - when enabled move-up and move-down buttons will be visible within each display order cell"

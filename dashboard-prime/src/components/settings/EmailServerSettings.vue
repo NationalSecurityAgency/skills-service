@@ -179,10 +179,10 @@ function isAuthValid() {
     <SkillsTextInput name="protocol" label="Protocol" is-required />
 
     <div>
-      <InputSwitch v-model="tlsEnabled" class="mr-2" data-cy="tlsSwitch" aria-labelledby="tlsSwitchLabel"/> <label id="tlsSwitchLabel">TLS {{ tlsEnabled ? 'Enabled' : 'Disabled'}}</label>
+      <InputSwitch v-model="tlsEnabled" class="mr-2" data-cy="tlsSwitch" inputId="tlsSwitch" aria-labelledby="tlsSwitchLabel"/> <label for="tlsSwitch" id="tlsSwitchLabel">TLS {{ tlsEnabled ? 'Enabled' : 'Disabled'}}</label>
     </div>
     <div class="mt-2">
-      <InputSwitch v-model="authEnabled" class="mr-2" data-cy="authSwitch" aria-labelledby="authSwitch"/> <label id="authSwitch">Authentication {{ authEnabled ? 'Enabled' : 'Disabled'}}</label>
+      <InputSwitch v-model="authEnabled" class="mr-2" data-cy="authSwitch" inputId="authSwitch" aria-labelledby="authLabel"/> <label for="authSwitch" id="authLabel">Authentication {{ authEnabled ? 'Enabled' : 'Disabled'}}</label>
       <Card v-if="authEnabled" class="mt-2">
         <template #header>
           <SkillsCardHeader title="Authentication Info"></SkillsCardHeader>
