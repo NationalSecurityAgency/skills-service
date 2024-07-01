@@ -184,6 +184,7 @@ const skillCreatedOrUpdated = (skill) => {
           label="Group"
           icon="fas fa-plus-circle"
           @click="createOrUpdateGroup"
+          :track-for-focus="true"
           size="small"
           outlined
           class="bg-primary-reverse ml-1"

@@ -73,6 +73,7 @@ const openFileDialog = (event) => {
         <InputText :pt="{ root: { readOnly: true } }"
                    id="videoFileInputDropTarget"
                    data-cy="videoFileInputDropTarget"
+                   aria-label="Upload file"
                    :disabled="false"
                    variant="filled"
                    class="bg-gray-100"
