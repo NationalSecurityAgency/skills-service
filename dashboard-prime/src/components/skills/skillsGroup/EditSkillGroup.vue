@@ -109,6 +109,7 @@ const onSkillSaved = (skill) => {
   <SkillsInputFormDialog
     :id="formId"
     v-model="show"
+    :is-edit="isEdit"
     :async-load-data-function="asyncLoadData"
     :save-data-function="saveSkill"
     :header="modalTitle"

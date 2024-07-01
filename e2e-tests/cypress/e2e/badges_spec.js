@@ -2031,7 +2031,7 @@ describe('Badges Tests', () => {
 
     });
 
-    it.skip('edit badge - run validation on load in case validation improved and existing values fail to validate', () => {
+    it('edit badge - run validation on load in case validation improved and existing values fail to validate', () => {
         cy.intercept('POST', '/api/validation/description*', {
             valid: false,
             msg: 'Mocked up validation failure'

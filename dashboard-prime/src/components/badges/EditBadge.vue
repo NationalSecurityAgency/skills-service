@@ -307,6 +307,7 @@ const onBadgeSaved = () => {
   <SkillsInputFormDialog
       :id="formId"
       v-model="model"
+      :is-edit="isEdit"
       :header="modalTitle"
       saveButtonLabel="Save"
       :validation-schema="schema"

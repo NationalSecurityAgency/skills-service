@@ -130,6 +130,25 @@ watch(() => errors.value, (newValue) => {
   emit('errors', newValue)
 })
 
+const validateIfEditOrNotEmpty = () => {
+  const skipAttrs = toRaw(values)['skipTheseAttrsWhenValidatingOnInit'] || []
+  if (!props.initialValues) {
+    console.error(`Initial values for SkillsInputFormDialog id=[${props.id}] not provided.`)
+  }
+  if (props.isEdit) {
+    validate()
+  } else {
+    const foundNonEmpty = Object.entries(values)
+        .find(([key, value]) =>
+            key !== 'skipTheseAttrsWhenValidatingOnInit'
+            && !skipAttrs.includes(key)
+            && value && !deepEqual((props.initialValues[key]), (value)))
+    if (foundNonEmpty) {
+      validate()
+    }
+  }
+}
+
 if (props.asyncLoadDataFunction) {
   isLoadingAsyncData.value = true
   props.asyncLoadDataFunction().then((res) => {
@@ -139,8 +158,10 @@ if (props.asyncLoadDataFunction) {
     if (props.enableInputFormResiliency) {
       inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
         .then(() => {
-          validateIfNotEmpty()
+          validateIfEditOrNotEmpty()
         })
+    } else {
+      validateIfEditOrNotEmpty()
     }
   }).finally(() => {
     isLoadingAsyncData.value = false
@@ -150,23 +171,10 @@ if (props.asyncLoadDataFunction) {
   if (props.enableInputFormResiliency) {
     inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
       .then(() => {
-        validateIfNotEmpty()
+        validateIfEditOrNotEmpty()
       })
-  }
-}
-
-const validateIfNotEmpty = () => {
-  const skipAttrs = toRaw(values)['skipTheseAttrsWhenValidatingOnInit'] || []
-  if (!props.initialValues) {
-    console.error(`Initial values for SkillsInputFormDialog id=[${props.id}] not provided.`)
-  }
-  const foundNonEmpty = Object.entries(values)
-    .find(([key, value]) =>
-      key !== 'skipTheseAttrsWhenValidatingOnInit'
-      && !skipAttrs.includes(key)
-      && value && !deepEqual((props.initialValues[key]), (value)))
-  if (foundNonEmpty) {
-    validate()
+  } else {
+    validateIfEditOrNotEmpty()
   }
 }
 
@@ -208,7 +216,7 @@ const validateIfNotEmpty = () => {
   z-index: 999;
   height: 2em;
   width: 2em;
-  overflow: show;
+  overflow: visible;
   margin: auto;
   top: 0;
   left: 0;

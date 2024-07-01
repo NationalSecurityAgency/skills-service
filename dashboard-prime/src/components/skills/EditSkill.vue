@@ -224,7 +224,7 @@ const initialSkillData = {
   pointIncrementIntervalMins: props.skill.pointIncrementIntervalMins || 0,
   numMaxOccurrencesIncrementInterval: props.skill.numMaxOccurrencesIncrementInterval || 1,
   numPointIncrementMaxOccurrences: props.skill.numPointIncrementMaxOccurrences || 1,
-  selfReportingType: selfReportingType.value,
+  selfReportingType: selfReportingType.value ? selfReportingType.value : 'Disabled',
   selfReportingEnabled: selfReportingType.value !== null,
   description: props.skill.description || '',
   quizId: props.skill.quizId
@@ -268,6 +268,7 @@ const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
   <SkillsInputFormDialog
     :id="formId"
     v-model="show"
+    :is-edit="isEdit"
     :async-load-data-function="asyncLoadData"
     :save-data-function="saveSkill"
     :header="modalTitle"
