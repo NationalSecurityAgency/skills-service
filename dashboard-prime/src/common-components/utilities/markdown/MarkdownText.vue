@@ -17,6 +17,7 @@ limitations under the License.
 import { ref, watch } from 'vue'
 import { useCommonMarkdownOptions } from '@/common-components/utilities/markdown/UseCommonMarkdownOptions.js'
 import ToastUiViewer from '@/common-components/utilities/markdown/ToastUiViewer.vue'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 const props = defineProps({
   text: String,
@@ -32,6 +33,7 @@ const props = defineProps({
 
 const commonOptions = useCommonMarkdownOptions()
 const viewerOptions = commonOptions.markdownOptions
+const themeHelper = useThemesHelper()
 const toastuiViewer = ref(null)
 
 watch(() => props.text, (newValue) => {
@@ -49,6 +51,7 @@ const setMarkdownText = (newText) => {
                        :instance-id="instanceId"
                        data-cy="markdownViewer"
                        ref="toastuiViewer"
+                       :class="{'markdown-text-theme-dark' : themeHelper.isDarkTheme }"
                        :initialValue="text"
                        :options="viewerOptions"
                        :height="markdownHeight" />
@@ -80,5 +83,24 @@ const setMarkdownText = (newText) => {
 }
 .markdown a {
   text-decoration: underline;
+}
+</style>
+
+<style>
+.markdown-text-theme-dark pre,
+.markdown-text-theme-dark code {
+  background-color: #374151 !important;
+}
+.markdown-text-theme-dark .toastui-editor-contents h1,
+.markdown-text-theme-dark .toastui-editor-contents h2,
+.markdown-text-theme-dark .toastui-editor-contents h3,
+.markdown-text-theme-dark .toastui-editor-contents h4,
+.markdown-text-theme-dark .toastui-editor-contents h5,
+.markdown-text-theme-dark .toastui-editor-contents h6,
+.markdown-text-theme-dark .toastui-editor-contents hr,
+.markdown-text-theme-dark .toastui-editor-contents p,
+.markdown-text-theme-dark code,
+.markdown-text-theme-dark pre {
+  color: rgba(255, 255, 255, 0.87) !important;
 }
 </style>

@@ -29,7 +29,7 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 </script>
 
 <template>
-  <Card class="skills-my-rank w-min-15rem"
+  <Card class="skills-my-rank w-min-15rem h-full"
         data-cy="myBadges"
         :pt="{ content: { class: 'py-0' } }">
     <template #subtitle>

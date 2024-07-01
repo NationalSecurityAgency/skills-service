@@ -14,15 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-
+import SkillTreeLogoSvg from '@/components/brand/SkillTreeLogoSvg.vue'
 </script>
 
 <template>
   <div class="masthead mt-3 border-1 border-round surface-border">
     <div class="masthead-content">
       <div class="container-fluid above-background">
-        <div class="text-center">
-          <img src="@/assets/img/skilltree_logo.svg" alt="SkillTree Logo" />
+        <div class="text-center mt-7">
+          <SkillTreeLogoSvg />
         </div>
         <div class="text-center mb-5 font-italic above-background text-lg">A micro-learning <b>gamification</b>
           training

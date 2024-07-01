@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, onBeforeMount, watch } from 'vue'
+import { computed, onMounted, onBeforeMount, watch, ref } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import DashboardHeader from '@/components/header/DashboardHeader.vue'
@@ -61,7 +61,8 @@ const addCustomIconCSS = () => {
   IconManagerService.refreshCustomIconCss(route.params.projectId, accessState.isSupervisor)
 }
 
-const isLoadingApp = computed(() => appConfig.isLoadingConfig || authState.restoringSession || (skillsDisplayAttributes.loadingConfig && skillsDisplayInfo.isSkillsDisplayPath()))
+const isAppLoaded = ref(false)
+const isLoadingApp = computed(() => !isAppLoaded.value || appConfig.isLoadingConfig || authState.restoringSession || (skillsDisplayAttributes.loadingConfig && skillsDisplayInfo.isSkillsDisplayPath()))
 
 const themeHelper = useThemesHelper()
 themeHelper.configureDefaultThemeFileInHeadTag()
@@ -76,6 +77,8 @@ watch(() => authState.userInfo, async (newUserInfo) => {
     appInfoState.loadEmailEnabled()
     themeHelper.loadTheme()
   }
+
+  isAppLoaded.value = true
 })
 
 watch(() => themeHelper.currentTheme, (newTheme, oldTheme) => {
@@ -100,10 +103,11 @@ onMounted(() => {
 })
 
 const loadUserRoles = () => {
-  accessState.loadIsSupervisor().then(() => {
+  const loadSuperVisorRole = accessState.loadIsSupervisor().then(() => {
     addCustomIconCSS()
   })
-  accessState.loadIsRoot()
+  const loadRootRole = accessState.loadIsRoot()
+  return Promise.all([loadSuperVisorRole, loadRootRole])
 }
 const loadConfigs = () => {
   appConfig.loadConfigState().finally(() => {
@@ -112,10 +116,11 @@ const loadConfigs = () => {
 
         inceptionConfigurer.configure()
         globalNavGuards.addNavGuards()
-        if (authState.isAuthenticated) {
-          loadUserRoles()
-          appInfoState.loadEmailEnabled()
+        if (!authState.isAuthenticated) {
+          isAppLoaded.value = true
         }
+        // do not need to set isAppLoaded to true here because it will be handled
+        // by the watch of authState.userInfo
       })
     })
   })
@@ -138,7 +143,10 @@ const inBootstrapMode = computed(() => {
 
     <customizable-header v-if="!isLoadingApp && !inBootstrapMode" role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="app">
-      <skills-spinner :is-loading="isLoadingApp" class="mt-8 text-center" />
+      <div v-if="isLoadingApp" role="main" class="text-center">
+        <skills-spinner :is-loading="true" class="mt-8 text-center"/>
+        <h1 class="text-sm sr-only" sr-only>Loading...</h1>
+      </div>
       <div v-if="!isLoadingApp" class="m-0">
         <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
         <div v-if="!inBootstrapMode" class="overall-container">
