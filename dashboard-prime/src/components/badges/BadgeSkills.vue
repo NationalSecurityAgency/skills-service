@@ -182,7 +182,8 @@ const filterSkills = (searchQuery) => {
                            v-on:added="skillAdded"
                            @search-change="filterSkills"
                            select-label="Select skill(s)"
-                           :onlySingleSelectedValue="true">
+                           :onlySingleSelectedValue="true"
+                           :showClear="false">
           </skills-selector>
           <Message v-if="learningPathViolationErr.show" severity="error" data-cy="learningPathErrMsg">
             Failed to add <b>{{ learningPathViolationErr.skillName }}</b> skill to the badge.
