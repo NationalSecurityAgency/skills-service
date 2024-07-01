@@ -187,8 +187,8 @@ const sortField = () => {
               </div>
             </div>
             <div class="flex">
-              <InputText v-model.number="filters.progress" v-on:keydown.enter="applyFilters" :min="0" :max="100"
-                         data-cy="users-progress-input" aria-label="user progress input filter"
+              <InputText v-model.number="filters.progress" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="minimumProgress"
+                         data-cy="users-progress-input" aria-label="user progress input filter" inputId="minimumProgress"
                          class="w-4rem" />
             </div>
           </div>

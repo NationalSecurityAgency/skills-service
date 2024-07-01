@@ -197,7 +197,7 @@ describe('Icon Manager Tests', () => {
     });
 
 
-    it.skip('upload custom icon - invalid mime type client validation', () => {
+    it('upload custom icon - invalid mime type client validation', () => {
         cy.intercept('/app/projects/proj1/customIcons').as('getCustomIcons')
         cy.intercept('/api/projects/proj1/customIconCss').as('getCustomIconsCss')
 

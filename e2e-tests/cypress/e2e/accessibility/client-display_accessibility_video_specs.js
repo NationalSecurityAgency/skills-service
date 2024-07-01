@@ -41,7 +41,7 @@ describe('Client Display Accessibility Video Tests', () => {
     });
 
 
-    it.skip('skill with unmet prerequisites will not allow to play the video', () => {
+    it('skill with unmet prerequisites will not allow to play the video', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})

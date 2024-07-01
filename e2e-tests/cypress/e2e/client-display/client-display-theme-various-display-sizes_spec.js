@@ -210,7 +210,7 @@ describe('Client Display Tests', () => {
         if (!Cypress.env('oauthMode')) {
             // NOTE: skipping this test for now as there is an extra space rendered in CI, it's not clear why,
             // more research is needed
-            it.skip(`test theming - project rank - ${size}`, () => {
+            it(`test theming - project rank - ${size}`, () => {
                 cy.setResolution(size);
 
                 cy.cdInitProjWithSkills();
