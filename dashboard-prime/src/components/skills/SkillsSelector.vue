@@ -136,13 +136,11 @@ const removed = (removedItem) => {
 };
 
 const added = (addedItem) => {
-  if(addedItem.value) {
-    if(addedItem.originalEvent.type === 'click') {
-      if (multipleSelection.value) {
-        emit('added', addedItem[addedItem.length - 1].value);
-      } else {
-        emit('added', addedItem.value);
-      }
+  if(addedItem.originalEvent.type === 'click') {
+    if (multipleSelection.value) {
+      emit('added', addedItem[addedItem.length - 1].value);
+    } else {
+      emit('added', addedItem.value);
     }
   }
 };
