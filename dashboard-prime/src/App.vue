@@ -145,7 +145,7 @@ const inBootstrapMode = computed(() => {
     <div id="app">
       <div v-if="isLoadingApp" role="main" class="text-center">
         <skills-spinner :is-loading="true" class="mt-8 text-center"/>
-        <h1 class="text-sm">Loading...</h1>
+        <h1 class="text-sm sr-only" sr-only>Loading...</h1>
       </div>
       <div v-if="!isLoadingApp" class="m-0">
         <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
