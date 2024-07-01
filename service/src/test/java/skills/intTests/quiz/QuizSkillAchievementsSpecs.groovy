@@ -1102,7 +1102,7 @@ class QuizSkillAchievementsSpecs extends QuizSkillAchievementsBaseIntSpec {
         userEvents_t1[0].projectId == proj.projectId
         userEvents_t1[0].skillRefId == skillRefId
         userEvents_t1[0].eventTime.time == StartDateUtil.computeStartDate(userQuizAttempt.completed, EventType.DAILY).time
-        userEvents_t1[0].weekNumber == WeekNumberUtil.getWeekNumber(userQuizAttempt.completed)
+        userEvents_t1[0].weekNumber == WeekNumberUtil.getWeekNumber(StartDateUtil.computeStartDate(userQuizAttempt.completed, EventType.DAILY))
         userEvents_t1[0].eventType == EventType.DAILY
     }
 
