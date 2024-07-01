@@ -17,12 +17,35 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 // TODO need to add support for PKI mode
 const proxyConf = {
   target: 'http://localhost:8080',
   changeOrigin: true,
 };
+
+function getChunkId(id) {
+  if (id.includes('vis-network')) {
+    return 'visNetwork';
+  } else if (id.includes('vue3-apexcharts') || id.includes('apexcharts')) {
+    return 'apexCharts';
+  } else if (id.includes('@toast-ui/editor') || id.includes('toastui-editor-viewer')) {
+    return 'toastUI';
+  } else if (id.includes('node-emoji')) {
+    return 'nodeEmoji';
+  } else if (id.includes('primevue/datatable')) {
+    return 'primevueDatatable';
+  } else if (id.includes('primevue/calendar')) {
+    return 'primevueCalendar';
+  } else if (id.includes('primevue/')) {
+    return 'primevueComponents';
+  } else if (id.includes('@skilltree/skills-client-js')) {
+    return 'skillClient';
+  } else if (id.includes('skills-display/')) {
+    return 'skillsDisplay';
+  }
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -66,5 +89,19 @@ export default defineConfig({
         ws: true,
       },
     },
+  },
+  build: {
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        manualChunks: getChunkId
+      },
+      plugins: [
+        visualizer({
+          open: false,
+        }),
+      ]
+    }
   }
 })
+
