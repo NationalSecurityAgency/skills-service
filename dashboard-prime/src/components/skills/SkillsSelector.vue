@@ -77,7 +77,11 @@ const props = defineProps({
   showType: {
     type: Boolean,
     default: false,
-  }
+  },
+  showClear: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 let selectedInternal = ref([]);
@@ -173,7 +177,7 @@ defineExpose({
 <template>
   <Dropdown :options="options" :placeholder="placeholder" class="st-skills-selector" v-model="selectedInternal" label="name"
             data-cy="skillsSelector" :class="props.class" style="min-width: 100%;" :disabled="disabled" :loading="isLoading" filter
-            @filter="searchChanged" @change="added" optionLabel="name" resetFilterOnHide showClear>
+            @filter="searchChanged" @change="added" optionLabel="name" resetFilterOnHide :showClear="showClear">
 
     <template #option="slotProps">
       <slot name="dropdown-item" :option="slotProps">

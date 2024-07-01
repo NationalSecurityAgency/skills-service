@@ -18,9 +18,10 @@ import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormD
 import SkillsNumberInput from '@/components/utils/inputForm/SkillsNumberInput.vue'
 import {number} from "yup";
 import LevelService from "@/components/levels/LevelService.js";
-import {nextTick} from "vue";
 import { useRoute } from 'vue-router';
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
+const announcer = useSkillsAnnouncer()
 const route = useRoute();
 const props = defineProps({
   levelAsPoints: Boolean,
@@ -70,7 +71,7 @@ const doEditLevel = (editedLevelObj) => {
 
 const saved = () => {
   const msg = props.isEdit ? `Level ${props.level} has been saved` : 'New Level has been created';
-  // announcer.polite(msg);
+  announcer.polite(msg);
   emit('load-levels');
   close();
 }
