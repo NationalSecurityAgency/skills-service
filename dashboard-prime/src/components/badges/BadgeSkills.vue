@@ -37,25 +37,26 @@ const { badge } = storeToRefs(badgeState);
 const route = useRoute();
 const emit = defineEmits(['skills-changed']);
 
-let loading = ref({
+const loading = ref({
   availableSkills: true,
   badgeSkills: true,
   skillOp: false,
   badgeInfo: false,
 });
 
-let badgeSkills = ref([]);
-let availableSkills = ref([]);
-let projectId = ref(null);
-let badgeId = ref(null);
-// let badge = ref(null);
-let learningPathViolationErr = ref({
+const badgeSkills = ref([]);
+const availableSkills = ref([]);
+const projectId = ref(null);
+const badgeId = ref(null);
+const learningPathViolationErr = ref({
   show: false,
   skillName: '',
 });
-let nameQuery = ref(null);
-let hideManageButton = ref(false);
-let isReadOnly = ref(false);
+const nameQuery = ref(null);
+const hideManageButton = ref(false);
+const isReadOnly = ref(false);
+const rows = ref(5);
+const rowsPerPage = [5, 10, 15, 20];
 
 onMounted(() => {
   projectId.value = route.params.projectId;
@@ -72,6 +73,10 @@ watch( () => route.params.badgeId, () => {
   loadBadgeInfo();
   loadAssignedBadgeSkills();
 });
+
+const updateRows = (newRows) => {
+  rows.value = newRows;
+}
 
 const loadAssignedBadgeSkills = () => {
   SkillsService.getBadgeSkills(projectId.value, badgeId.value)
@@ -161,6 +166,7 @@ const filterSkills = (searchQuery) => {
   nameQuery.value = searchQuery;
   loadAvailableBadgeSkills();
 }
+
 </script>
 
 <template>
@@ -191,9 +197,10 @@ const filterSkills = (searchQuery) => {
               tableStoredStateId="badgeSkillsTable"
               :value="badgeSkills"
               :paginator="badgeSkills.length > 5"
-              :rows="5"
+              :rows="rows"
               :totalRecords="badgeSkills.length"
-              :rowsPerPageOptions="[5, 10, 15, 20]"
+              :rowsPerPageOptions="rowsPerPage"
+              @update:rows="updateRows"
               data-cy="badgeSkillsTable">
               <Column header="Skill Name" field="name" style="width: 40%;" sortable>
                 <template #body="slotProps">
