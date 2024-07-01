@@ -132,13 +132,15 @@ const removed = (removedItem) => {
 };
 
 const added = (addedItem) => {
-  // if(addedItem.originalEvent.type === 'click') {
-    if (multipleSelection.value) {
-      emit('added', addedItem[addedItem.length - 1].value);
-    } else {
-      emit('added', addedItem.value);
+  if(addedItem.value) {
+    if(addedItem.originalEvent.type === 'click') {
+      if (multipleSelection.value) {
+        emit('added', addedItem[addedItem.length - 1].value);
+      } else {
+        emit('added', addedItem.value);
+      }
     }
-  // }
+  }
 };
 
 const searchChanged = (query) => {
@@ -173,7 +175,7 @@ defineExpose({
 <template>
   <Dropdown :options="options" :placeholder="placeholder" class="st-skills-selector" v-model="selectedInternal" label="name"
             data-cy="skillsSelector" :class="props.class" style="min-width: 100%;" :disabled="disabled" :loading="isLoading" filter
-            @filter="searchChanged" @change="added" optionLabel="name" resetFilterOnHide showClear>
+            @filter="searchChanged" @change="added" optionLabel="name" resetFilterOnHide>
 
     <template #option="slotProps">
       <slot name="dropdown-item" :option="slotProps">
