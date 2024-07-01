@@ -232,6 +232,7 @@ const onSavedQuestion = (savedQuestion) => {
   <SkillsInputFormDialog
       :id="modalId"
       v-model="model"
+      :is-edit="isEdit"
       :header="modalTitle"
       :loading="loadingComponent"
       :validation-schema="schema"

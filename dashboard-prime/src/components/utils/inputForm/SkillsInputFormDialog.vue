@@ -139,10 +139,10 @@ if (props.asyncLoadDataFunction) {
     if (props.enableInputFormResiliency) {
       inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
         .then(() => {
-          validateIfNotEmpty()
+          validateIfEditOrNotEmpty()
         })
     } else {
-      validateIfNotEmpty()
+      validateIfEditOrNotEmpty()
     }
   }).finally(() => {
     isLoadingAsyncData.value = false
@@ -152,25 +152,29 @@ if (props.asyncLoadDataFunction) {
   if (props.enableInputFormResiliency) {
     inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
       .then(() => {
-        validateIfNotEmpty()
+        validateIfEditOrNotEmpty()
       })
   } else {
-    validateIfNotEmpty()
+    validateIfEditOrNotEmpty()
   }
 }
 
-const validateIfNotEmpty = () => {
+const validateIfEditOrNotEmpty = () => {
   const skipAttrs = toRaw(values)['skipTheseAttrsWhenValidatingOnInit'] || []
   if (!props.initialValues) {
     console.error(`Initial values for SkillsInputFormDialog id=[${props.id}] not provided.`)
   }
-  const foundNonEmpty = Object.entries(values)
-    .find(([key, value]) =>
-      key !== 'skipTheseAttrsWhenValidatingOnInit'
-      && !skipAttrs.includes(key)
-      && (props.isEdit || value && !deepEqual((props.initialValues[key]), (value))))
-  if (foundNonEmpty) {
+  if (props.isEdit) {
     validate()
+  } else {
+    const foundNonEmpty = Object.entries(values)
+        .find(([key, value]) =>
+            key !== 'skipTheseAttrsWhenValidatingOnInit'
+            && !skipAttrs.includes(key)
+            && value && !deepEqual((props.initialValues[key]), (value)))
+    if (foundNonEmpty) {
+      validate()
+    }
   }
 }
 

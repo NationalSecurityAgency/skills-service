@@ -161,6 +161,7 @@ if (props.isEdit) {
   <SkillsInputFormDialog
       :id="formId"
       v-model="model"
+      :is-edit="isEdit"
       :header="modalTitle"
       saveButtonLabel="Save"
       :enable-return-focus="true"
