@@ -182,30 +182,36 @@ defineExpose({
 <template>
   <div>
     <div v-if="isQuizOrSurveySkill && selfReportAvailable" class="mb-2 alert alert-info">
-      <div class="row">
-        <div class="col font-italic pt-1" data-cy="quizAlert">
-          <i class="fas fa-user-check font-size-2" aria-hidden="true"></i>
-          {{ isSurveySkill ? 'Complete' : 'Pass' }} the<span
-          v-if="skillInternal.selfReporting.numQuizQuestions && skillInternal.selfReporting.numQuizQuestions > 0">&nbsp;{{
-            skillInternal.selfReporting.numQuizQuestions
-          }}-question</span>&nbsp;<b>{{ skillInternal.selfReporting.quizName
-          }}</b>&nbsp;{{ isSurveySkill ? 'Survey' : 'Quiz' }} and earn <span class="font-size-1"><Tag
-          severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> points!
-        </div>
-        <div class="col-auto text-right">
-          <SkillsButton
-            :label="isQuizSkill ? 'Take Quiz' : 'Complete Survey'"
-            icon="far fa-arrow-alt-circle-right"
-            v-if="selfReportAvailable && isQuizOrSurveySkill"
-            class="skills-theme-btn"
-            :disabled="selfReportDisabled"
-            severity="info"
-            outlined
-            size="small"
-            @click="navToQuiz"
-            data-cy="takeQuizBtn" />
-        </div>
-      </div>
+      <Message :closable="false">
+        <template #container>
+          <div class="p-3">
+            <div class="flex gap-2 align-items-center">
+              <div>
+                <i class="fas fa-user-check text-2xl" aria-hidden="true"></i>
+              </div>
+              <div class="flex-1" data-cy="quizAlert">
+                {{ isSurveySkill ? 'Complete' : 'Pass' }} the<span
+                v-if="skillInternal.selfReporting.numQuizQuestions && skillInternal.selfReporting.numQuizQuestions > 0">&nbsp;{{
+                  skillInternal.selfReporting.numQuizQuestions
+                }}-question</span>&nbsp;<b>{{ skillInternal.selfReporting.quizName
+                }}</b>&nbsp;{{ isSurveySkill ? 'Survey' : 'Quiz' }} and earn <span class="font-size-1"><Tag
+                severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> points!
+              </div>
+              <SkillsButton
+                :label="isQuizSkill ? 'Take Quiz' : 'Complete Survey'"
+                icon="far fa-arrow-alt-circle-right"
+                v-if="selfReportAvailable && isQuizOrSurveySkill"
+                class="skills-theme-btn"
+                :disabled="selfReportDisabled"
+                severity="info"
+                outlined
+                size="small"
+                @click="navToQuiz"
+                data-cy="takeQuizBtn" />
+            </div>
+          </div>
+        </template>
+      </Message>
     </div>
     <Message v-if="isHonorSystem && selfReportAvailable" class="mb-2 alert alert-info">
       <template #container>

@@ -62,15 +62,15 @@ defineExpose( {
 </script>
 
 <template>
-  <div v-if="model && model.length > 0">
-    <div v-for="(answer, index) in fields" :key="answer.key" class="flex flex-wrap align-items-baseline gap-0 mt-2" :data-cy="`answer-${index}`">
+  <div v-if="model && model.length > 0" clas="mt-2">
+    <div v-for="(answer, index) in fields" :key="answer.key" class="flex flex-wrap align-items-center gap-0" :data-cy="`answer-${index}`">
       <SelectCorrectAnswer
           v-if="isQuizType"
           :id="`answers[${index}].isCorrect`"
           :answer-number="index+1"
           :name="`answers[${index}].isCorrect`"
           v-model="answer.value.isCorrect"
-          class="flex flex-initial mr-2"/>
+          class="flex flex-initial mr-2 field"/>
       <SkillsTextInput
           class="flex flex-1"
           placeholder="Enter an answer"
@@ -81,7 +81,7 @@ defineExpose( {
           :id="`answer_${index}`"
           :name="`answers[${index}].answer`"/>
 
-      <ButtonGroup class="ml-1">
+      <ButtonGroup class="ml-1 field">
         <SkillsButton
           :disabled="noMoreAnswers"
           :aria-label="`Add New Answer at index ${index}`"

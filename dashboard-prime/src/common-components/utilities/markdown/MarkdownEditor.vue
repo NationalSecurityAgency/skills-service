@@ -351,9 +351,31 @@ watch(value, (newValue) =>{
 .editor-theme-dark .toastui-editor-defaultUI-toolbar {
   background-color: #374151 !important;
 }
-.editor-theme-dark .toastui-editor-contents p {
+.editor-theme-dark .toastui-editor-ww-code-block pre,
+.editor-theme-dark .toastui-editor-contents code {
+  background-color: #374151 !important;
+}
+.editor-theme-dark .toastui-editor-popup-body {
+  background-color: #1f2937 !important;
+}
+.editor-theme-dark .toastui-editor-popup-body li:hover {
+  background-color: #41444a !important;
+}
+.editor-theme-dark .toastui-editor-contents p,
+.editor-theme-dark .toastui-editor-contents hr,
+.editor-theme-dark .toastui-editor-popup-add-image .toastui-editor-tabs .tab-item,
+.editor-theme-dark .toastui-editor-popup-body label,
+.editor-theme-dark .toastui-editor-ww-code-block pre,
+.editor-theme-dark .toastui-editor-contents code,
+.editor-theme-dark .toastui-editor-contents h1,
+.editor-theme-dark .toastui-editor-contents h2,
+.editor-theme-dark .toastui-editor-contents h3,
+.editor-theme-dark .toastui-editor-contents h4,
+.editor-theme-dark .toastui-editor-contents h5,
+.editor-theme-dark .toastui-editor-contents h6 {
   color: rgba(255, 255, 255, 0.87) !important;
 }
+
 .editor-theme-dark .toastui-editor-toolbar-group button {
   background-color: #c2ccda !important;
   color: #454545 !important;
