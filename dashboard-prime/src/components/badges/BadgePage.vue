@@ -203,7 +203,7 @@ const toDate = (value) => {
       </template>
     </page-header>
 
-    <Message v-if="badge.enabled !== 'true'"
+    <Message v-if="badge && badge.enabled !== 'true'"
              :closable="false"
              severity="warn">
       This badge cannot be achieved until it is live
