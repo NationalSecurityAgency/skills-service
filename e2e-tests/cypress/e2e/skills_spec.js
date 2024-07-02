@@ -1256,7 +1256,7 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy=newGroupButton]').should('be.disabled')
     cy.get('[data-cy=newSkillButton]').should('be.disabled')
-    cy.get('[data-cy=addSkillDisabledWarning]').should('be.visible')
+    cy.get('[data-cy=addSkillDisabledWarning]').contains('The maximum number of Skills allowed is 5')
 
     cy.get('[data-cy*=copySkillButton]').should('have.length', 5)
     cy.get('[data-cy*=copySkillButton]').should('be.disabled')

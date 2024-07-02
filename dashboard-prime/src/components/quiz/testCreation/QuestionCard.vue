@@ -68,7 +68,7 @@ const moveQuestion = (changeIndexBy) => {
       <div class="flex flex-initial align-items-start">
         <div v-if="isDragAndDropControlsVisible"
              :id="`questionSortControl-${question.id}`"
-             class="sort-control mr-3"
+             class="sort-control mr-3 border-right-1 border-bottom-1 surface-border text-color-secondary border-round"
              @click.prevent.self
              tabindex="0"
              aria-label="Questions Sort Control. Press up or down to change the order of this question."
@@ -171,12 +171,8 @@ const moveQuestion = (changeIndexBy) => {
 .sort-control i {
   padding: 0.4rem;
   font-size: 1.2rem;
-  color: #b3b3b3 !important;
   top: 0rem;
   left: 0rem;
-  border-bottom: 1px solid #e8e8e8;
-  border-right: 1px solid #e8e8e8;
-  background-color: #fbfbfb !important;
   border-bottom-right-radius: .25rem !important
 }
 

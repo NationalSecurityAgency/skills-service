@@ -204,41 +204,10 @@ describe('Badges Tests', () => {
     });
 
     it('inactive badge displays warning', () => {
-        const expectedId = 'InactiveBadge';
-        const providedName = 'Inactive';
-
-        cy.intercept('GET', '/app/userInfo')
-            .as('getUserInfo');
-        cy.intercept('POST', `/admin/projects/proj1/badges/${expectedId}`)
-            .as('postNewBadge');
-        cy.intercept('POST', '/admin/projects/proj1/badgeNameExists')
-            .as('nameExistsCheck');
-        cy.intercept('GET', '/admin/projects/proj1/badges')
-            .as('loadBadges');
-
-        cy.get('@createProject')
-            .should((response) => {
-                expect(response.status)
-                    .to
-                    .eql(200);
-            });
-
-        cy.visit('/administrator/projects/proj1/badges');
-
-        cy.wait('@loadBadges');
-        cy.wait('@getUserInfo');
-        cy.get('[data-cy="btn_Badges"]').click();
-
-        cy.get('[data-cy="name"]')
-            .type(providedName);
-
-        cy.wait('@nameExistsCheck');
-
-        cy.clickSave();
-        cy.wait('@postNewBadge');
-
-        cy.get('.p-card-body i.fa-exclamation-circle')
-            .should('be.visible');
+        cy.createBadge(1,1)
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+        cy.contains('ID: badge1')
+        cy.contains('This badge cannot be achieved until it is live')
     });
 
     it('name causes id to fail validation', () => {
@@ -2349,4 +2318,24 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="timeLimitHours"] input').should('have.value', '22');
         cy.get('[data-cy="timeLimitMinutes"] input').should('have.value', '30');
     });
+
+
+
+    it('respect max badges per project config', () => {
+        cy.createBadge(1, 1);
+        cy.createBadge(1, 2);
+        cy.createBadge(1, 3);
+        cy.intercept('GET', '/public/config', (req) => {
+            req.continue((res) => {
+                res.body.maxBadgesPerProject = 3
+            })
+        })
+          .as('getConfig');
+
+        cy.visit('/administrator/projects/proj1/badges')
+        cy.wait('@getConfig')
+
+        cy.get('[data-cy="subPageHeaderDisabledMsg"]').contains('The maximum number of Badges allowed is 3')
+        cy.get('[data-cy="btn_Badges"]').should('be.disabled')
+    })
 });

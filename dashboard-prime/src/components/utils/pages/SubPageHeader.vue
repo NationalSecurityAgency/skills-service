@@ -74,10 +74,9 @@ function addClicked() {
                         :disabled="disabledInternal"
                         v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action"
                         :data-cy="`btn_${title}`"/>
-          <i v-if="disabledInternal" class="fas fa-exclamation-circle text-warning ml-1"
-             style="pointer-events: all; font-size: 1.5rem;"
-             :aria-label="disabledMsg"
-             v-tooltip.hover="disabledMsg"/>
+          <div v-if="disabledInternal" class="mt-1" data-cy="subPageHeaderDisabledMsg">
+            <InlineMessage  icon="fas fa-exclamation-circle" severity="warn">{{ disabledMsg }}</InlineMessage>
+          </div>
         </slot>
       </div>
     </div>

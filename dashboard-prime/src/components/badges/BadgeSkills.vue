@@ -29,6 +29,7 @@ import { SkillsReporter } from '@skilltree/skills-client-js'
 import SkillsSelector from "@/components/skills/SkillsSelector.vue";
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { storeToRefs } from 'pinia';
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 
 const confirm = useConfirm();
 const projConf = useProjConfig();
@@ -36,6 +37,7 @@ const badgeState = useBadgeState();
 const { badge } = storeToRefs(badgeState);
 const route = useRoute();
 const emit = defineEmits(['skills-changed']);
+const responsive = useResponsiveBreakpoints()
 
 const loading = ref({
   availableSkills: true,
@@ -173,26 +175,25 @@ const filterSkills = (searchQuery) => {
   <div>
     <sub-page-header title="Skills"/>
 
-    <Card>
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
         <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp || loading.badgeInfo">
-          <skills-selector :options="availableSkills"
-                           v-if="!projConf.isReadOnlyProj"
-                           class="search-and-nav border rounded"
-                           v-on:added="skillAdded"
-                           @search-change="filterSkills"
-                           select-label="Select skill(s)"
-                           :onlySingleSelectedValue="true"
-                           :showClear="false">
-          </skills-selector>
-          <Message v-if="learningPathViolationErr.show" severity="error" data-cy="learningPathErrMsg">
-            Failed to add <b>{{ learningPathViolationErr.skillName }}</b> skill to the badge.
-            Adding this skill would result in a <b>circular/infinite learning path</b>.
-            Please visit project's <router-link :to="{ name: 'FullDependencyGraph' }" data-cy="learningPathLink">Learning Path</router-link> page to review.
-          </Message>
-            <!--        <simple-skills-table v-if="badgeSkills && badgeSkills.length > 0" class="mt-2"-->
-  <!--                             :skills="badgeSkills" v-on:skill-removed="deleteSkill"></simple-skills-table>-->
-
+          <div class="p-3">
+            <skills-selector :options="availableSkills"
+                             v-if="!projConf.isReadOnlyProj"
+                             class="search-and-nav border rounded"
+                             v-on:added="skillAdded"
+                             @search-change="filterSkills"
+                             select-label="Select skill(s)"
+                             :onlySingleSelectedValue="true"
+                             :showClear="false">
+            </skills-selector>
+            <Message v-if="learningPathViolationErr.show" severity="error" data-cy="learningPathErrMsg">
+              Failed to add <b>{{ learningPathViolationErr.skillName }}</b> skill to the badge.
+              Adding this skill would result in a <b>circular/infinite learning path</b>.
+              Please visit project's <router-link :to="{ name: 'FullDependencyGraph' }" data-cy="learningPathLink">Learning Path</router-link> page to review.
+            </Message>
+          </div>
           <div v-if="badgeSkills && badgeSkills.length > 0">
             <SkillsDataTable
               tableStoredStateId="badgeSkillsTable"
@@ -203,7 +204,7 @@ const filterSkills = (searchQuery) => {
               :rowsPerPageOptions="rowsPerPage"
               @update:rows="updateRows"
               data-cy="badgeSkillsTable">
-              <Column header="Skill Name" field="name" style="width: 40%;" sortable>
+              <Column header="Skill Name" field="name" sortable :class="{'flex': responsive.md.value }">
                 <template #body="slotProps">
                   <router-link v-if="slotProps.data.subjectId && !hideManageButton" :id="slotProps.data.skillId" :to="{ name:'SkillOverview',
                     params: { projectId: slotProps.data.projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId }}"
@@ -213,9 +214,9 @@ const filterSkills = (searchQuery) => {
                   </router-link>
                 </template>
               </Column>
-              <Column header="Skill ID" field="skillId" sortable></Column>
-              <Column header="Total Points" field="totalPoints" sortable></Column>
-              <Column header="Delete">
+              <Column header="Skill ID" field="skillId" sortable :class="{'flex': responsive.md.value }"></Column>
+              <Column header="Total Points" field="totalPoints" sortable :class="{'flex': responsive.md.value }"></Column>
+              <Column header="Delete" :class="{'flex': responsive.md.value }">
                 <template #body="slotProps">
                   <SkillsButton v-if="!projConf.isReadOnlyProj" v-on:click="deleteSkill(slotProps.data)" size="small"
                           :data-cy="`deleteSkill_${slotProps.data.skillId}`" icon="fas fa-trash" label="Delete"
@@ -229,7 +230,7 @@ const filterSkills = (searchQuery) => {
               </template>
             </SkillsDataTable>
           </div>
-          <no-content2 v-else title="No Skills Selected Yet..." icon="fas fa-award" class="mb-5"
+          <no-content2 v-else title="No Skills Selected Yet..." icon="fas fa-award" class="py-5"
                        message="Please use drop-down above to start adding skills to this badge!"></no-content2>
         </loading-container>
       </template>

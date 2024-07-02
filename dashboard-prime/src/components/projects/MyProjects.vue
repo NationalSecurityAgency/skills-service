@@ -270,12 +270,15 @@ const hasData = computed(() => {
         aria-label="Create new Project"
         :track-for-focus="true"
         role="button" />
-    </SubPageHeader>
 
-    <!--    <div v-if="addProjectDisabled" class="alert alert-warning" data-cy="addProjectDisabled">-->
-    <!--      <i class="fas fa-exclamation-circle"/> Cannot create or copy projects - -->
-    <!--      {{ addProjectsDisabledMsg }}-->
-    <!--    </div>-->
+      <div v-if="addProjectDisabled" class="mt-1">
+        <InlineMessage severity="warn"
+                       icon="fas fa-exclamation-circle"
+                       data-cy="addProjectDisabledWarning">
+          {{ addProjectsDisabledMsg }}
+        </InlineMessage>
+      </div>
+    </SubPageHeader>
 
     <SkillsSpinner :is-loading="isLoading" class="my-5" />
 

@@ -197,7 +197,7 @@ const searchChanged = (query) => {
             </SkillsDataTable>
           </div>
 
-          <no-content2 v-else title="No Skills Added Yet..." icon="fas fa-award" class="mb-5"
+          <no-content2 v-else title="No Skills Added Yet..." icon="fas fa-award" class="my-5"
                        message="Please use drop-down above to start adding skills to this badge!"></no-content2>
         </loading-container>
       </template>

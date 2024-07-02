@@ -70,25 +70,12 @@ onMounted(() => {
   doLoadSubjects();
 });
 
-// computed
-
-// ...subjectsStore.mapGetters([
-//   'subjects',
-// ]),
 const isLoading = computed(() => {
   return isLoadingData.value //|| config.isLoadingProjConfig;
 });
 
 const addSubjectDisabled = computed(() => subjectsState.subjects && subjectsState.subjects.length >= appConfig.maxSubjectsPerProject)
 const addSubjectsDisabledMsg = computed(() => `The maximum number of Subjects allowed is ${appConfig.maxSubjectsPerProject}`)
-
-// methods
-// ...projects.mapActions([
-//   'loadProjectDetailsState',
-// ]),
-// ...subjectsStore.mapActions([
-//   'loadSubjects',
-// ]),
 
 const subjectDialogInfo = ref({
   show: false,
