@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, ref, nextTick } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import { useSkillsState } from '@/stores/UseSkillsState.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
@@ -26,12 +26,16 @@ import SkillsCalendarInput from '@/components/utils/inputForm/SkillsCalendarInpu
 import ProjectService from '@/components/projects/ProjectService.js';
 import * as yup from 'yup';
 import { useForm } from 'vee-validate';
+import { useSubjectsState } from '@/stores/UseSubjectsState.js';
+import { useProjConfig } from '@/stores/UseProjConfig.js';
 
 const props = defineProps({
   projectId: String,
 })
 
 const appConfig = useAppConfig()
+const projConfig = useProjConfig()
+const subjectState = useSubjectsState()
 const skillsState = useSkillsState()
 const route = useRoute()
 const router = useRouter()
@@ -44,6 +48,10 @@ const isLoading = ref(true);
 const currentSelectedUser = ref(null);
 const projectTotalPoints = ref(0);
 
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
+const isImported = computed(() => {
+  return skillsState.skill && skillsState.skill.copiedFromProjectId && skillsState.skill.copiedFromProjectId.length > 0
+})
 const reversedUsersAdded = computed(() => {
   return usersAdded.value.map((e) => e)
       .reverse();
@@ -53,18 +61,25 @@ const minimumPoints = computed(() => {
 });
 const disable = computed(() => {
   return (!currentSelectedUser.value || !currentSelectedUser.value || !currentSelectedUser.value.userId || currentSelectedUser.value.userId.length === 0)
-      || projectTotalPoints.value < minimumPoints.value
-      || (skillsState?.groupId && !skillsState?.enabled);
+      || addEventDisabled.value;
 });
-const minPointsTooltip = computed(() => {
-  let text = '';
-
-  if (skillsState?.groupId && !skillsState?.enabled) {
-    text = 'Unable to add skill for user. This skill belongs to a group whose current status is disabled';
-  } else if (projectTotalPoints.value < minimumPoints.value) {
-    text = 'Unable to add skill for user. Insufficient available points in project.';
+const addEventDisabled = computed(() => {
+  return (projectTotalPoints.value < minimumPoints.value
+      || subjectState.subject.totalPoints < appConfig.minimumSubjectPoints
+      || isImported.value
+      || isReadOnlyProj.value);
+});
+const addEventDisabledMsg = computed(() => {
+  if (projectTotalPoints.value < minimumPoints.value) {
+    return 'Unable to add skill for user. Insufficient available points in project.';
+  } else if (subjectState.subject.totalPoints < appConfig.minimumSubjectPoints) {
+    return 'Unable to add skill for user. Insufficient available points in subject.';
+  } else if (isImported.value) {
+    return 'Unable to add skill for user. Cannot add events to skills imported from the catalog.';
+  } else if (isReadOnlyProj.value) {
+    return 'Unable to add skill for user. Project is read only.';
   }
-  return text;
+  return '';
 });
 const addButtonIcon = computed(() => {
   if (projectTotalPoints.value >= minimumPoints.value) {
@@ -111,10 +126,26 @@ onMounted(() => {
   loadProject()
 });
 
-const loadProject = () => {
+watch(
+    () => skillsState.skill?.totalPoints,
+    () => {
+      if (!isLoading.value) {
+        isLoading.value = true;
+        loadProject(true)
+      }
+    }
+)
+
+const loadProject = (reloadSubject = false) => {
   ProjectService.getProject(props.projectId).then((res) => {
     projectTotalPoints.value = res.totalPoints;
-    isLoading.value = false;
+    if (!subjectState.subject || !subjectState.subject.totalPoints || reloadSubject) {
+      subjectState.loadSubjectDetailsState().then(() => {
+        isLoading.value = false;
+      })
+    } else {
+      isLoading.value = false;
+    }
   });
 }
 const addSkill = () => {
@@ -166,39 +197,45 @@ const addSkill = () => {
 
 <template>
   <div>
-    <SubPageHeader title="Add Skill Events" />
-    <Card>
-      <template #content>
-        <div class="flex flex-wrap align-items-start">
-          <div class="flex flex-1 px-1">
-            <existing-user-input class="w-full"
-                                 :project-id="projectId"
-                                 v-model="currentSelectedUser"
-                                 :can-enter-new-user="!appConfig.isPkiAuthenticated"
-                                 name="userIdInput"
-                                 aria-errormessage="userIdInputError"
-                                 aria-describedby="userIdInputError"
-                                 :aria-invalid="!meta.valid"
+    <SubPageHeader title="Add Skill Events"/>
+    <Message v-if="!isLoading && addEventDisabledMsg" severity="warn" :closable="false">{{ addEventDisabledMsg }}</Message>
+    <BlockUI :blocked="addEventDisabled">
+      <Card>
+        <template #content>
+          <div class="flex flex-wrap align-items-start">
+            <div class="flex flex-1 px-1">
+              <existing-user-input class="w-full"
+                                   :project-id="projectId"
+                                   v-model="currentSelectedUser"
+                                   :can-enter-new-user="!appConfig.isPkiAuthenticated"
+                                   name="userIdInput"
+                                   aria-errormessage="userIdInputError"
+                                   aria-describedby="userIdInputError"
+                                   :aria-invalid="!meta.valid"
                                  data-cy="userIdInput" />
+            </div>
+            <div class="flex">
+              <SkillsCalendarInput class="mx-2 my-0"
+                                   selectionMode="single"
+                                   name="eventDatePicker"
+                                   v-model="dateAdded"
+                                   data-cy="eventDatePicker"
+                                   :max-date="new Date()"
+                                   aria-label="event date" ref="eventDatePicker" />
+            </div>
+            <div class="flex">
+              <SkillsButton
+                  aria-label="Add Specific User"
+                  data-cy="addSkillEventButton"
+                  v-skills="'ManuallyAddSkillEvent'"
+                  @click="addSkill"
+                  :disabled="!meta.valid || disable"
+                  :icon="addButtonIcon" label="Add">
+              </SkillsButton>
+            </div>
           </div>
-          <div class="flex">
-            <SkillsCalendarInput class="mx-2 my-0" selectionMode="single" name="eventDatePicker" v-model="dateAdded" data-cy="eventDatePicker"
-                                 :max-date="new Date()" aria-label="event date" ref="eventDatePicker" />
-          </div>
-          <div class="flex">
-            <SkillsButton
-                aria-label="Add Specific User"
-                data-cy="addSkillEventButton"
-                v-skills="'ManuallyAddSkillEvent'"
-                @click="addSkill"
-                :disabled="!meta.valid || disable"
-                :icon="addButtonIcon" label="Add">
-            </SkillsButton>
-          </div>
-        </div>
-        <Message v-if="!isLoading && minPointsTooltip" severity="warn" :closable="false">{{ minPointsTooltip }}</Message>
-        <div class="mt-5" v-for="(user) in reversedUsersAdded" v-bind:key="user.key" data-cy="addedUserEventsInfo">
-          <div class="">
+          <div class="mt-5" v-for="(user) in reversedUsersAdded" v-bind:key="user.key" data-cy="addedUserEventsInfo">
+            <div class="">
             <span :class="[user.success ? 'text-primary' : 'text-red-800']" style="font-weight: bolder">
               <i :class="[user.success ? 'fa fa-check' : 'fa fa-info-circle']" aria-hidden="true"/>
               <span v-if="user.success">
@@ -207,12 +244,13 @@ const addSkill = () => {
               <span v-else>
                 Unable to add points for
               </span>
-              <span>[{{user.userIdForDisplay ? user.userIdForDisplay : user.userId }}]</span>
-            </span><span v-if="!user.success"> - {{user.msg}}</span>
+              <span>[{{ user.userIdForDisplay ? user.userIdForDisplay : user.userId }}]</span>
+            </span><span v-if="!user.success"> - {{ user.msg }}</span>
+            </div>
           </div>
-        </div>
-      </template>
-    </Card>
+        </template>
+      </Card>
+    </BlockUI>
   </div>
 </template>
 
