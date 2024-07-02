@@ -2349,4 +2349,24 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="timeLimitHours"] input').should('have.value', '22');
         cy.get('[data-cy="timeLimitMinutes"] input').should('have.value', '30');
     });
+
+
+
+    it('respect max badges per project config', () => {
+        cy.createBadge(1, 1);
+        cy.createBadge(1, 2);
+        cy.createBadge(1, 3);
+        cy.intercept('GET', '/public/config', (req) => {
+            req.continue((res) => {
+                res.body.maxBadgesPerProject = 3
+            })
+        })
+          .as('getConfig');
+
+        cy.visit('/administrator/projects/proj1/badges')
+        cy.wait('@getConfig')
+
+        cy.get('[data-cy="subPageHeaderDisabledMsg"]').contains('The maximum number of Badges allowed is 3')
+        cy.get('[data-cy="btn_Badges"]').should('be.disabled')
+    })
 });

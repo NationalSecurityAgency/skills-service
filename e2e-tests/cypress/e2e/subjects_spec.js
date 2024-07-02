@@ -64,7 +64,7 @@ describe('Subjects Tests', () => {
         cy.contains('ID: Lotsofspecial')
     });
 
-  it('create subject with ampersand', () => {
+    it('create subject with ampersand', () => {
     const providedName = "I am & a subject";
     cy.intercept('POST', `/admin/projects/proj1/subjects/**`).as('postNewSubject');
     cy.intercept('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
@@ -988,5 +988,23 @@ describe('Subjects Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1')
         cy.get('[data-cy="manageSkillLink_skill1"]')
         cy.get('[data-cy="subjInsufficientPoints"]').should('not.exist')
+    })
+
+    it('respect max subjects per project config', () => {
+        cy.createSubject(1, 1);
+        cy.createSubject(1, 2);
+        cy.createSubject(1, 3);
+        cy.intercept('GET', '/public/config', (req) => {
+            req.continue((res) => {
+                res.body.maxSubjectsPerProject = 3
+            })
+        })
+          .as('getConfig');
+
+        cy.visit('/administrator/projects/proj1')
+        cy.wait('@getConfig')
+
+        cy.get('[data-cy="subPageHeaderDisabledMsg"]').contains('The maximum number of Subjects allowed is 3')
+        cy.get('[data-cy="btn_Subjects"]').should('be.disabled')
     })
 });

@@ -194,4 +194,24 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="projectCard_proj3"]')
             .should('exist');
     });
+
+    it('respect max projects per admin config', () => {
+        cy.createProject(1);
+        cy.createProject(2);
+        cy.createProject(3);
+
+        cy.intercept('GET', '/public/config', (req) => {
+            req.continue((res) => {
+                res.body.maxProjectsPerAdmin = 3
+            })
+        })
+          .as('getConfig');
+
+        cy.visit('/administrator')
+        cy.wait('@getConfig')
+
+        cy.get('[data-cy="addProjectDisabledWarning"]').contains('The maximum number of Projects allowed is 3')
+        cy.get('[data-cy="newProjectButton"]').should('be.disabled')
+    })
+
 });

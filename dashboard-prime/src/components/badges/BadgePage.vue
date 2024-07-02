@@ -203,6 +203,12 @@ const toDate = (value) => {
       </template>
     </page-header>
 
+    <Message v-if="badge.enabled !== 'true'"
+             :closable="false"
+             severity="warn">
+      This badge cannot be achieved until it is live
+    </Message>
+
     <navigation v-if="!isLoading" :nav-items="navItems"></navigation>
     <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
                 :global="false" @badge-updated="badgeEdited" @hidden="handleHidden"></edit-badge>

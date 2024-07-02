@@ -160,12 +160,7 @@ const skillCreatedOrUpdated = (skill) => {
       :is-loading="isLoading"
       aria-label="new skill">
       <div v-if="!projConfig.isReadOnlyProj">
-        <Message severity="warn"
-                 class="mx-2"
-                 :aria-label="addSkillsDisabledMsg"
-                 data-cy="addSkillDisabledWarning" v-if="addSkillDisabled" :closable="false">
-          {{ addSkillsDisabledMsg }}
-        </Message>
+
         <SkillsButton
           id="importFromCatalogBtn"
           ref="importFromCatalogBtn"
@@ -208,6 +203,14 @@ const skillCreatedOrUpdated = (skill) => {
           :track-for-focus="true"
           :aria-disabled="addSkillDisabled"
           :disabled="addSkillDisabled" />
+        <div v-if="addSkillDisabled">
+          <InlineMessage severity="warn"
+                         class="mx-2"
+                         :aria-label="addSkillsDisabledMsg"
+                         data-cy="addSkillDisabledWarning"  :closable="false">
+            {{ addSkillsDisabledMsg }}
+          </InlineMessage>
+        </div>
       </div>
     </sub-page-header>
 

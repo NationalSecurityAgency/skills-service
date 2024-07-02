@@ -69,8 +69,6 @@ const cardOptions = computed(() => {
     icon: props.badge.iconClass,
     title: props.badge.name,
     subTitle: `ID: ${props.badge.badgeId}`,
-    warn: props.badge.enabled === 'false',
-    warnMsg: props.badge.enabled === 'false' ? 'This badge cannot be achieved until it is live' : '',
     stats,
     controls: {
       navTo: buildManageLink(),
@@ -154,16 +152,23 @@ defineExpose({
       </template>
       <template #footer>
         <i v-if="badge.endDate" class="fas fa-gem absolute" style="font-size: 1rem; top: 2.6rem; left: 1.6rem; color: purple" aria-hidden="true"/>
-        <div class="mt-1 row align-items-centerflex justify-content-end" style="height: 2rem;">
-          <div class="col text-right small">
-            <div v-if="!live" data-cy="badgeStatus" style="">
-              <span class="text-secondary" style="height: 3rem;">Status: </span>
-              <span class="text-uppercase" :class="{ 'border-right pr-2 mr-2' : !isReadOnlyProj }">Disabled <span class="far fa-stop-circle text-warning" aria-hidden="true"/></span>
-              <SkillsButton size="small" label="Go Live" v-if="!isReadOnlyProj" data-cy="goLive" @click.stop="handlePublish"></SkillsButton>
-<!--              <a href="#0" v-if="!isReadOnlyProj" @click.stop="handlePublish" class="btn btn-outline-primary btn-sm" data-cy="goLive">Go Live</a>-->
+        <div class="mt-1" style="height: 2.5rem;">
+          <div v-if="!live" data-cy="badgeStatus" class="flex align-items-end">
+            <div class="flex-1">
+              <span class="text-color-secondary">Status: </span>
+              <span class="uppercase" :class="{ 'border-right pr-2 mr-2' : !isReadOnlyProj }">Disabled <span
+                class="far fa-stop-circle text-red-500" aria-hidden="true" /></span>
             </div>
-            <div v-else data-cy="badgeStatus"  style="">
-              <span class="text-secondary align-middle" style="height: 4rem;">Status: </span> <span class="text-uppercase align-middle" style="height: 4rem;">Live <span class="far fa-check-circle text-success" aria-hidden="true"/></span>
+            <div>
+              <SkillsButton size="small" label="Go Live" v-if="!isReadOnlyProj" data-cy="goLive"
+                          @click.stop="handlePublish"></SkillsButton>
+            </div>
+          </div>
+          <div v-else data-cy="badgeStatus" class="flex align-items-end h-full">
+            <div class="flex-1">
+              <span class="text-color-secondary" style="height: 4rem;">Status: </span> <span
+              class="uppercase" style="height: 4rem;">Live <span
+              class="far fa-check-circle text-green-500" aria-hidden="true" /></span>
             </div>
           </div>
         </div>

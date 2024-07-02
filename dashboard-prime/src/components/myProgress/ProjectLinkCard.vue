@@ -103,7 +103,7 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
               text
               icon="fas fa-arrows-alt"
               severity="secondary"
-              class="pl-2 pr-3 surface-ground sort-control"
+              class="pl-2 pr-3 sort-control border-top-none border-left-none border-right-1 border-bottom-1 surface-border text-color-secondary"
               :aria-label="`Sort Control. Current position for ${proj.projectName} is ${displayOrder}. Press up or down to change the order.`"
               size="large"
               data-cy="sortControlHandle"

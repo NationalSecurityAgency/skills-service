@@ -66,11 +66,6 @@ defineExpose({
                 <router-link v-if="options.icon" tag="a" :to="options.navTo" data-cy="titleLink" class="no-underline">
                   {{ options.title }}
                 </router-link>
-                <i v-if="options.warn" class="fas fa-exclamation-circle text-warning ml-1"
-                   style="font-size: 1.5rem;"
-                   role="alert"
-                   :aria-label="`Warning: ${options.warnMsg}`"
-                   v-tooltip="options.warnMsg"/>
               </div>
               <div class="text-truncate text-secondary preview-card-subTitle" data-cy="subTitle">{{ options.subTitle }}</div>
             </div>
@@ -108,7 +103,9 @@ defineExpose({
           </div>
         </div>
       </div>
-
+      <div v-if="options.warnMsg" class="mt-1">
+        <InlineMessage icon="fas fa-exclamation-circle" severity="warn">{{ options.warnMsg}}</InlineMessage>
+      </div>
       <div>
         <slot name="footer"></slot>
       </div>
@@ -120,7 +117,7 @@ defineExpose({
            @keyup.down="moveDown"
            @keyup.up="moveUp"
            @click.prevent.self
-           class="absolute text-secondary px-2 py-1 sort-control"
+           class="absolute px-2 py-1 sort-control border-left-1 border-bottom-1 surface-border text-color-secondary"
            tabindex="0"
            :aria-label="`Sort Control. Current position for ${options.title} is ${options.displayOrder}. Press up or down to change the order.`"
            role="button"
@@ -160,12 +157,8 @@ defineExpose({
 
 .sort-control {
   font-size: 1.3rem !important;
-  color: #b3b3b3 !important;
   top: 0rem;
   right: 0rem;
-  border-bottom: 1px solid #e8e8e8;
-  border-left: 1px solid #e8e8e8;
-  background-color: #fbfbfb !important;
   border-bottom-left-radius:.25rem!important
 }
 
