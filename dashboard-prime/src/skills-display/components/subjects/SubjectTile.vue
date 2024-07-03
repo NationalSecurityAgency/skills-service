@@ -72,7 +72,7 @@ const progress = computed(() => {
     <template #content>
       <div :data-cy="`subjectTile-${subject.subjectId}`">
         <ribbon :color="ribbonColor" class="subject-tile-ribbon">
-          {{ subject.subject }}
+          <div class="overflow-hidden text-overflow-ellipsis" style="max-width:20rem">{{ subject.subject }}</div>
         </ribbon>
         <i :class="subject.iconClass" class="text-7xl text-400 sd-theme-subject-tile-icon" aria-hidden="true"/>
         <div class="text-xl pt-1 font-medium" data-cy="levelTitle">{{ attributes.levelDisplayName }} {{ subject.skillsLevel }}</div>

@@ -283,9 +283,9 @@ const toDate = (value) => {
     <loading-container v-bind:is-loading="isLoading">
 <!--      <transition name="projectContainer" enter-active-class="animated fadeIn">-->
         <div>
-          <div v-if="badges && badges.length" id="badgeCards" class="flex flex-wrap align-items-center justify-content-center">
-            <div v-for="(badge) of badges" :id="badge.badgeId" :key="badge.badgeId" class="lg:col-4 mb-3"  style="min-width: 23rem;">
-              <BlockUI :blocked="sortOrder.loading">
+          <div v-if="badges && badges.length" id="badgeCards" class="flex flex-wrap gap-3 align-items-stretch justify-content-center">
+            <div v-for="(badge) of badges" :id="badge.badgeId" :key="badge.badgeId" class="flex align-items-stretch"  style="min-width: 23rem;">
+              <BlockUI :blocked="sortOrder.loading" class="flex align-items-stretch h-full">
                 <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${badge.badgeId}_overlayShown`">
                   <div v-if="badge.badgeId===sortOrder.loadingBadgeId" data-cy="updatingSortMsg">
                     <div class="text-info text-uppercase mb-1">Updating sort order!</div>
@@ -297,6 +297,7 @@ const toDate = (value) => {
                        :ref="(el) => (badgeRef[badge.badgeId] = el)"
                        @badge-updated="badgeUpdated"
                        @badge-deleted="deleteBadge"
+                       class="flex align-items-stretch"
                        @sort-changed-requested="updateSortAndReloadSubjects"
                        @publish-badge="publishBadge"
                        :disable-sort-control="badges.length === 1"/>

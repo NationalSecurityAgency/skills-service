@@ -83,13 +83,13 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
           :aria-invalid="errorMessage ? null : true"
           :aria-errormessage="`${name}Error`"
           :aria-describedby="`${name}Error`"/>
-      <slot name="footer"/>
     </InputGroup>
       <small
         role="alert"
         class="p-error"
         :data-cy="`${name}Error`"
         :id="`${name}Error`">{{ errorMessage || '' }}</small>
+    <slot name="footer"/>
   </div>
 </template>
 
