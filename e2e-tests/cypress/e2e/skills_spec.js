@@ -400,6 +400,103 @@ describe('Skills Tests', () => {
     cy.get('.p-autocomplete-item').contains('foo').click({ force: true })
   })
 
+  it('Cannot Add Skill Event if project does not have enough points', () => {
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill1',
+      name: 'Skill 1',
+      pointIncrement: '10',
+      numPerformToCompletion: '5'
+    })
+
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+    }).as('loadSkill')
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+    cy.wait('@loadSkill')
+    cy.get('[data-cy="nav-Add Event"]').click()
+
+    cy.get('[data-cy="subPageHeader"]').contains('Add Skill Events')
+    cy.get('[data-cy="skillId"]').contains('skill1')
+
+    cy.get('[data-cy="addSkillEventButton"]').should('be.disabled');
+    cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should('exist');
+    cy.get('[data-cy="addEventDisabledMsg"]').contains('Unable to add skill for user. Insufficient available points in project.');
+
+    // increase the points and make sure the warning is gone
+    cy.get('[data-cy="editSkillButton_skill1"]').click()
+    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').type('{selectall}10')
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
+
+    // decrease the points and make sure the warning returns
+    cy.get('[data-cy="editSkillButton_skill1"]').click()
+    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').type('{selectall}5')
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
+
+    cy.get('[data-cy="addSkillEventButton"]').should('not.be.enabled');
+    cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should('exist');
+    cy.get('[data-cy="addEventDisabledMsg"]').contains('Unable to add skill for user. Insufficient available points in project.');
+  })
+
+  it('Cannot Add Skill Event if subject does not have enough points', () => {
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill1',
+      name: 'Skill 1',
+      pointIncrement: '10',
+      numPerformToCompletion: '5'
+    })
+
+    cy.request('POST', '/admin/projects/proj1/subjects/subj2', {
+      projectId: 'proj1',
+      subjectId: 'subj2',
+      name: 'Subject 2'
+    })
+
+    cy.request('POST', '/admin/projects/proj1/subjects/subj2/skills/skill2', {
+      projectId: 'proj1',
+      subjectId: 'subj2',
+      skillId: 'skill2',
+      name: 'Skill 2',
+      pointIncrement: '10',
+      numPerformToCompletion: '5'
+    })
+
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+    }).as('loadSkill')
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+    cy.wait('@loadSkill')
+    cy.get('[data-cy="nav-Add Event"]').click()
+
+    cy.get('[data-cy="subPageHeader"]').contains('Add Skill Events')
+    cy.get('[data-cy="skillId"]').contains('skill1')
+
+    cy.get('[data-cy="addSkillEventButton"]').should('be.disabled');
+    cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should('exist');
+    cy.get('[data-cy="addEventDisabledMsg"]').contains('Unable to add skill for user. Insufficient available points in subject.');
+
+    // increase the points and make sure the warning is gone
+    cy.get('[data-cy="editSkillButton_skill1"]').click()
+    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').type('{selectall}10')
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
+
+    // decrease the points and make sure the warning returns
+    cy.get('[data-cy="editSkillButton_skill1"]').click()
+    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').type('{selectall}5')
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
+
+    cy.get('[data-cy="addSkillEventButton"]').should('not.be.enabled');
+    cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should('exist');
+    cy.get('[data-cy="addEventDisabledMsg"]').contains('Unable to add skill for user. Insufficient available points in subject.');
+  })
+
   it('Add Skill Event for days in past correctly does not subtract one day from selected date', () => {
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',

@@ -87,7 +87,6 @@ const navOnSmallScreen = (changeEvent) => {
                            custom>
                 <li>
                   <Button link
-                          :disabled="navItem.isDisabled"
                           :class="{ 'bg-primary': isExactActive }"
                           class="no-underline w-full"
                           @click="(e) => { navigate(e); }"
@@ -99,7 +98,6 @@ const navOnSmallScreen = (changeEvent) => {
                          v-tooltip="{ value: navItem.name, autoHide: false, disabled: !responsive.lg.value }"
                          class="fas mr-2 w-2rem"
                          aria-hidden="true" /> <span v-if="!showCollapsed" class="font-medium">{{ navItem.name }}</span>
-                      <i v-if="navItem.isDisabled" class="fas fa-exclamation-circle text-red-500 ml-1" />
                     </div>
                   </Button>
                 </li>

@@ -114,6 +114,8 @@ describe('Approver Role Tests', () => {
                 res.setDelay(2000)
             })
         }).as('getSettingsProj2')
+        cy.intercept('/admin/projects/proj1/subjects/subj1/skills/skill1').as('getProj1Skill1')
+        cy.intercept('/admin/projects/proj2/subjects/subj1/skills/skill1').as('getProj2Skill1')
     });
 
     it('projects page - approver role has no mutation controls', function () {
@@ -506,5 +508,24 @@ describe('Approver Role Tests', () => {
         cy.get('[data-cy="newProjectButton"]').should('be.enabled')
     });
 
+    it('approver role does not have cannot add skill events', function () {
+        const runCheck = (projNum, assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+
+            // don't even show the link for private projects
+            cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1/skills/skill1`);
+            cy.get('[data-cy="nav-Add Event"]').should(`${chainerPrepend}exist`);
+
+            // navigate directly to the add skill event page
+            cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1/skills/skill1/addSkillEvent`);
+            cy.wait(`@getSettingsProj${projNum}`);
+            cy.wait(`@getProj${projNum}Skill1`)
+            // cy.get('[data-cy="addSkillEventButton"]').should(`${chainerPrepend}be.enabled`);
+            cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should(`${chainerPrepend}not.exist`);
+            cy.get('[data-cy="addEventDisabledMsg"]').should(`${chainerPrepend}not.exist`);
+        }
+        runCheck(2)
+        runCheck(1, 'not.')
+    });
 
 });

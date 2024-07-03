@@ -89,24 +89,11 @@ const buildNavItems = () => {
     page: 'ConfigureExpiration'
   })
   items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' })
-  const isReadOnlyNonSr = (skillsState.skill.readOnly === true && !skillsState.skill.selfReportType)
-  const addEventDisabled = subjectState.subject.totalPoints < appConfig.minimumSubjectPoints || isReadOnlyNonSr
-
-  let msg = addEventDisabled ? `Subject needs at least ${appConfig.minimumSubjectPoints} points before events can be added` : ''
-  const disabledDueToGroupBeingDisabled = skillsState.skill.groupId && !skillsState.skill.enabled
-  if (disabledDueToGroupBeingDisabled) {
-    msg = `CANNOT report skill events because this skill belongs to a group whose current status is disabled. ${msg}`
-  }
-  if (isReadOnlyNonSr) {
-    msg = 'Skills imported from the catalog can only have events added if they are configured for Self Reporting'
-  }
   if (!isImported?.value && !isReadOnlyProj.value) {
     items.push({
       name: 'Add Event',
       iconClass: 'fa-user-plus skills-color-events',
       page: 'AddSkillEvent',
-      isDisabled: addEventDisabled || disabledDueToGroupBeingDisabled || isReadOnlyNonSr,
-      msg
     })
   }
   items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SkillMetrics' })

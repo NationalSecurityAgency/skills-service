@@ -709,26 +709,6 @@ describe('Subjects Tests', () => {
 
     });
 
-    it.skip('subject name should not wrap prematurely', () => {
-        cy.request('POST', '/admin/projects/proj1/subjects/areallylongsubjectnamethatmaywraptoosoonSubject', {
-            projectId: 'proj1',
-            subjectId: 'areallylongsubjectnamethatmaywraptoosoonSubject',
-            name: 'a really long subject name that may wrap too soon'
-        });
-
-        cy.intercept('GET', '/admin/projects/proj1/subjects/areallylongsubjectnamethatmaywraptoosoonSubject').as('loadSubj');
-        // resolutions over 1280 are ignored in headless mode so we can only test at this resolution
-        cy.viewport(1280, 900);
-
-        cy.wait(200);
-        cy.visit('/administrator/projects/proj1/subjects/areallylongsubjectnamethatmaywraptoosoonSubject/');
-        cy.wait('@loadSubj');
-
-        cy.get('[data-cy=pageHeaderStat]').first().invoke('width').then((val)=>{
-            cy.get('[data-cy=pageHeaderStat]').eq(1).invoke('width').should('eq', val);
-        });
-    });
-
     it('subject modal shows Root Help Url when configured', () => {
         cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
             projectId: 'proj1',
