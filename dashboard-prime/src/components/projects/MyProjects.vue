@@ -295,7 +295,7 @@ const hasData = computed(() => {
             '': !projectsState.shouldTileProjectsCards
             }"
            :id="project.projectId">
-        <BlockUI :blocked="sortOrder.loading">
+        <BlockUI :blocked="sortOrder.loading" class="h-full">
           <div v-if="sortOrder.loading"
                class="text-center loading-indicator"
                :data-cy="`${project.projectId}_overlayShown`">

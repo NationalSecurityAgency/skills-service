@@ -48,15 +48,15 @@ const numIssuesForDisplay = computed(() => {
   <div class="text-right">
     <div class="flex"
          :class="{
-            'flex-column gap-2 justify-content-left': projectsState.shouldTileProjectsCards,
+            'flex-column gap-2 justify-content-center align-items-center': projectsState.shouldTileProjectsCards,
             '': !projectsState.shouldTileProjectsCards
           }">
       <div class="flex-1 text-left small" data-cy="ProjectCardFooter_issues">
-        <i class="fas fa-user-shield text-success" style="font-size: 1.05rem;" aria-hidden="true"></i> <i>Role:</i> <span data-cy="userRole">{{ userRoleForDisplay }}</span>
+        <i class="fas fa-user-shield text-purple-500" style="font-size: 1.05rem;" aria-hidden="true"></i> <i>Role:</i> <span data-cy="userRole">{{ userRoleForDisplay }}</span>
         <span v-if="!isReadOnlyProj" class="ml-2">
-          <span v-if="!hasIssues"><i class="fas fa-check-circle text-success" style="font-size: 1rem;"
+          <span v-if="!hasIssues"><i class="fas fa-check-circle text-green-500" style="font-size: 1rem;"
                                      aria-hidden="true"></i> <span data-cy="noIssues">No Issues</span></span>
-          <span v-if="hasIssues"><i class="fas fa-exclamation-triangle text-danger" style="font-size: 1rem;"
+          <span v-if="hasIssues"><i class="fas fa-exclamation-triangle text-red-500" style="font-size: 1rem;"
                                     aria-hidden="true"></i>
             There {{ numIssues > 1 ? 'are' : 'is' }} <span style="font-size: 1rem;"><Badge variant="danger">{{ numIssuesForDisplay }}</Badge></span> {{ numIssues > 1 ? 'issues' : 'issue' }} to address </span>
         </span>

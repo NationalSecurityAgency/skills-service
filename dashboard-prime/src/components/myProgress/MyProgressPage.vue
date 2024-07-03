@@ -55,7 +55,7 @@ onMounted(() => {
           <div class="flex-1">
             <info-snapshot-card />
           </div>
-          <div class="flex-1 h-full">
+          <div class="flex-1">
             <num-skills />
           </div>
           <div class="flex-1">

@@ -79,7 +79,7 @@ const buildToRoute = () => {
     return null
   }
   let name = 'skillDetails'
-  const params = { skillId: props.skill.skillId, projectId: props.skill.projectId }
+  const params = { skillId: props.skill.skillId }
   if (route.params.subjectId) {
     params.subjectId = route.params.subjectId
   } else if (route.params.badgeId) {

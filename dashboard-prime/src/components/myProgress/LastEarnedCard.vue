@@ -40,22 +40,22 @@ const getFooterText = () => {
 </script>
 
 <template>
-  <my-progress-info-card-util title="Earned">
+  <my-progress-info-card-util title="Earned" style="min-width: 24rem">
     <template #left-content>
       <i class="fas fa-calendar-alt mt-1 mb-2 text-bluegray-600" style="font-size: 5rem;" />
     </template>
     <template #right-content>
-      <div class="pt-2 pr-3">
+      <div class="pt-2 pr-3 text-left">
         <div v-if="myProgress.mostRecentAchievedSkill !== null" data-cy="mostRecentAchievedSkill">
           <span>Last Achieved skill</span>
           <Tag severity="success">{{ timeUtils.timeFromNow(myProgress.mostRecentAchievedSkill) }}</Tag>
         </div>
         <div class="my-2" data-cy="numAchievedSkillsLastWeek">
-          <Tag severity="info" style="font-size: 1rem;">{{ myProgress.numAchievedSkillsLastWeek }} skills</Tag>
+          <Tag severity="info" style="font-size: 1rem;">{{ myProgress.numAchievedSkillsLastWeek }}</Tag> skills
           in the last week
         </div>
         <div class="my-2" data-cy="numAchievedSkillsLastMonth">
-          <Tag severity="info" style="font-size: 1rem;">{{ myProgress.numAchievedSkillsLastMonth }} skills</Tag>
+          <Tag severity="info" style="font-size: 1rem;">{{ myProgress.numAchievedSkillsLastMonth }}</Tag> skills
           in the last month
         </div>
       </div>

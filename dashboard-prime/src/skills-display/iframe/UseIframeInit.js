@@ -56,9 +56,13 @@ export const useIframeInit = () => {
       parentState.parentFrame = Object.freeze(parent)
       const resizeObserver = new ResizeObserver(function(entries) {
         const observedEntry = entries[0].contentRect;
-        const newHeight = observedEntry.height + 10;
-        log.debug(`UseIframeInit.js: changing height to [${newHeight}]`)
-        parentState.parentFrame.emit('height-changed', newHeight)
+        if (observedEntry && observedEntry.height > 0) {
+          const newHeight = observedEntry.height + 10;
+          log.debug(`UseIframeInit.js: changing height to [${newHeight}]`)
+          parentState.parentFrame.emit('height-changed', newHeight)
+        } else {
+          log.warn('UseIframeInit.js: resize event got height of 0')
+        }
       });
       registerHeightListener(resizeObserver)
 

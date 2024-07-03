@@ -49,7 +49,7 @@ defineExpose({
 </script>
 
 <template>
-  <Card class="relative">
+  <Card class="relative" style="min-width: 30rem;">
     <template #content>
       <div class="flex mb-2 nav-cards-header">
         <div class="col">
@@ -62,12 +62,14 @@ defineExpose({
               </div>
             </router-link>
             <div class="media-body" style="min-width: 0px; margin-left: 8px;">
-              <div class="text-truncate text-info mb-0 pb-0 preview-card-title no-underline">
-                <router-link v-if="options.icon" tag="a" :to="options.navTo" data-cy="titleLink" class="no-underline">
+              <div class="text-info mb-0 pb-0 preview-card-title no-underline overflow-hidden text-overflow-ellipsis white-space-nowrap" style="max-width:20rem">
+                <router-link v-if="options.icon" :to="options.navTo" data-cy="titleLink" class="no-underline">
                   {{ options.title }}
                 </router-link>
               </div>
-              <div class="text-truncate text-secondary preview-card-subTitle" data-cy="subTitle">{{ options.subTitle }}</div>
+              <div class="text-secondary preview-card-subTitle overflow-hidden text-overflow-ellipsis white-space-nowrap"
+                   style="max-width:15rem"
+                   data-cy="subTitle">{{ options.subTitle }}</div>
             </div>
           </div>
         </div>
