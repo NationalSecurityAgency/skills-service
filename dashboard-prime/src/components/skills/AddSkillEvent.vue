@@ -28,6 +28,7 @@ import * as yup from 'yup';
 import { useForm } from 'vee-validate';
 import { useSubjectsState } from '@/stores/UseSubjectsState.js';
 import { useProjConfig } from '@/stores/UseProjConfig.js';
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 
 const props = defineProps({
   projectId: String,
@@ -64,7 +65,7 @@ const disable = computed(() => {
       || addEventDisabled.value;
 });
 const addEventDisabled = computed(() => {
-  return (projectTotalPoints.value < minimumPoints.value
+  return Boolean(projectTotalPoints.value < minimumPoints.value
       || subjectState.subject.totalPoints < appConfig.minimumSubjectPoints
       || isImported.value
       || isReadOnlyProj.value);
@@ -198,44 +199,46 @@ const addSkill = () => {
 <template>
   <div>
     <SubPageHeader title="Add Skill Events"/>
-    <Message v-if="!isLoading && addEventDisabledMsg" severity="warn" :closable="false">{{ addEventDisabledMsg }}</Message>
-    <BlockUI :blocked="addEventDisabled">
-      <Card>
-        <template #content>
-          <div class="flex flex-wrap align-items-start">
-            <div class="flex flex-1 px-1">
-              <existing-user-input class="w-full"
-                                   :project-id="projectId"
-                                   v-model="currentSelectedUser"
-                                   :can-enter-new-user="!appConfig.isPkiAuthenticated"
-                                   name="userIdInput"
-                                   aria-errormessage="userIdInputError"
-                                   aria-describedby="userIdInputError"
-                                   :aria-invalid="!meta.valid"
-                                 data-cy="userIdInput" />
+    <SkillsSpinner :is-loading="isLoading"/>
+    <div v-if="!isLoading">
+      <Message data-cy="addEventDisabledMsg" v-if="addEventDisabled" severity="warn" :closable="false">{{ addEventDisabledMsg }}</Message>
+      <BlockUI data-cy="addEventDisabledBlockUI" :blocked="addEventDisabled">
+        <Card>
+          <template #content>
+            <div class="flex flex-wrap align-items-start">
+              <div class="flex flex-1 px-1">
+                <existing-user-input class="w-full"
+                                     :project-id="projectId"
+                                     v-model="currentSelectedUser"
+                                     :can-enter-new-user="!appConfig.isPkiAuthenticated"
+                                     name="userIdInput"
+                                     aria-errormessage="userIdInputError"
+                                     aria-describedby="userIdInputError"
+                                     :aria-invalid="!meta.valid"
+                                     data-cy="userIdInput" />
+              </div>
+              <div class="flex">
+                <SkillsCalendarInput class="mx-2 my-0"
+                                     selectionMode="single"
+                                     name="eventDatePicker"
+                                     v-model="dateAdded"
+                                     data-cy="eventDatePicker"
+                                     :max-date="new Date()"
+                                     aria-label="event date" ref="eventDatePicker" />
+              </div>
+              <div class="flex">
+                <SkillsButton
+                    aria-label="Add Specific User"
+                    data-cy="addSkillEventButton"
+                    v-skills="'ManuallyAddSkillEvent'"
+                    @click="addSkill"
+                    :disabled="!meta.valid || disable"
+                    :icon="addButtonIcon" label="Add">
+                </SkillsButton>
+              </div>
             </div>
-            <div class="flex">
-              <SkillsCalendarInput class="mx-2 my-0"
-                                   selectionMode="single"
-                                   name="eventDatePicker"
-                                   v-model="dateAdded"
-                                   data-cy="eventDatePicker"
-                                   :max-date="new Date()"
-                                   aria-label="event date" ref="eventDatePicker" />
-            </div>
-            <div class="flex">
-              <SkillsButton
-                  aria-label="Add Specific User"
-                  data-cy="addSkillEventButton"
-                  v-skills="'ManuallyAddSkillEvent'"
-                  @click="addSkill"
-                  :disabled="!meta.valid || disable"
-                  :icon="addButtonIcon" label="Add">
-              </SkillsButton>
-            </div>
-          </div>
-          <div class="mt-5" v-for="(user) in reversedUsersAdded" v-bind:key="user.key" data-cy="addedUserEventsInfo">
-            <div class="">
+            <div class="mt-5" v-for="(user) in reversedUsersAdded" v-bind:key="user.key" data-cy="addedUserEventsInfo">
+              <div class="">
             <span :class="[user.success ? 'text-primary' : 'text-red-800']" style="font-weight: bolder">
               <i :class="[user.success ? 'fa fa-check' : 'fa fa-info-circle']" aria-hidden="true"/>
               <span v-if="user.success">
@@ -246,11 +249,12 @@ const addSkill = () => {
               </span>
               <span>[{{ user.userIdForDisplay ? user.userIdForDisplay : user.userId }}]</span>
             </span><span v-if="!user.success"> - {{ user.msg }}</span>
+              </div>
             </div>
-          </div>
-        </template>
-      </Card>
-    </BlockUI>
+          </template>
+        </Card>
+      </BlockUI>
+    </div>
   </div>
 </template>
 

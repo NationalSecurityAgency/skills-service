@@ -349,6 +349,38 @@ describe('Edit Imported Skill Tests', () => {
 
     });
 
+    it('cannot add skill events for imported skills', function () {
+        cy.intercept('/admin/projects/proj2/subjects/subj1/skills/skill2').as('getSkill2')
+
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+
+        cy.importSkillFromCatalog(2, 1, 1, 1);
+        cy.wait(1000);
+        cy.importSkillFromCatalog(2, 1, 1, 2);
+
+        cy.finalizeCatalogImport(2);
+
+        // don't even show the add event link for imported skills
+        cy.visit('/administrator/projects/proj2/subjects/subj1/skills/skill2');
+        cy.get('[data-cy="nav-Add Event"]').should('not.exist');
+
+        // navigate directly to the add skill event page
+        cy.visit('/administrator/projects/proj2/subjects/subj1/skills/skill2/addSkillEvent');
+        cy.wait('@getSkill2')
+        cy.get('[data-cy="subPageHeader"]').contains('Add Skill Events')
+        cy.get('[data-cy="skillId"]').contains('skill2')
+
+        cy.get('[data-cy="addSkillEventButton"]').should('be.disabled');
+        cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should('exist');
+        cy.get('[data-cy="addEventDisabledMsg"]').contains('Unable to add skill for user. Cannot add events to skills imported from the catalog.');
+    })
+
 });
 
 

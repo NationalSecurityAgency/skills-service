@@ -419,7 +419,7 @@ describe('Skills Group Tests', () => {
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('from 4 skills');
 
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
-        cy.acceptRemovalSafetyCheck();;
+        cy.acceptRemovalSafetyCheck();
 
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('150');
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('from 3 skills');
@@ -510,18 +510,25 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="pageHeader"]').contains('Group ID: group1');
         cy.get('[data-cy="disabledGroupBadge-group1"]').should('not.exist');
 
-        cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('not.exist');
+        cy.get('[data-cy="nav-Add Event"]').should('be.enabled');
 
         // nav directly to the page and nav item is disabled
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/addSkillEvent');
+
         cy.wait('@getSkill2')
         cy.get('[data-cy="subPageHeader"]').contains('Add Skill Events')
         cy.get('[data-cy="skillId"]').contains('skill2')
-        cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('not.exist');
+        cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should('not.exist');
+        cy.get('[data-cy="addEventDisabledMsg"]').should('not.exist');
         cy.get('[data-cy="userIdInput"]').type('user1{enter}')
         cy.wait('@userSuggest');
         cy.get('[data-cy="userIdInput"]').type('{enter}')
         cy.get('[data-cy="userIdInput"] input').should('have.value', 'user1')
+
+        cy.get('[data-cy="eventDatePicker"]').click()
+        cy.get('[data-pc-section="previousbutton"]').first().click()
+        cy.get('.p-datepicker-group-container').contains('10').click()
+
         cy.get('[data-cy="addSkillEventButton"]').should('be.enabled');
     });
 
@@ -540,7 +547,7 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]').click();
         cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 2');
         cy.get('[data-cy="pageHeader"]').contains('Group ID: group1');
-        cy.get('[data-cy="nav-Add Event"] .fa-exclamation-circle').should('exist');
+        cy.get('[data-cy="nav-Add Event"]').should('be.enabled');
 
         // nav directly to the page and nav item is disabled
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2/addSkillEvent');
@@ -548,10 +555,9 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="subPageHeader"]').contains('Add Skill Events')
         cy.get('[data-cy="skillId"]').contains('skill2')
 
-        cy.get('[data-cy="userIdInput"]').type('user1{enter}')
-        cy.wait('@userSuggest');
-        cy.get('[data-cy="userIdInput"] input').should('have.value', 'user1')
         cy.get('[data-cy="addSkillEventButton"]').should('be.disabled');
+        cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should('exist');
+        cy.get('[data-cy="addEventDisabledMsg"]').contains('Unable to add skill for user. Insufficient available points in project.');
     });
 
     it('modify number of required skills is enabled once there are 2 skills', () => {
