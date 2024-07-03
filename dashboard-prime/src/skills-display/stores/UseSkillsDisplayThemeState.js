@@ -107,6 +107,7 @@ export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState',
     graphTextPrimaryColor,
     initThemeObjInStyleTag,
     circleProgressInteriorTextColor,
-    textPrimaryColor
+    textPrimaryColor,
+    themeStyleId
   }
 })

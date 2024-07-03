@@ -32,6 +32,7 @@ const testThemeUtils = useTestThemeUtils()
 const skillsVersion = 2147483647 // max int
 
 const projectId = route.params.projectId
+log.info(`TestSkillsClient.vue: Using project id [${projectId}]`)
 const isSummaryOnly = route.query.isSummaryOnly && route.query.isSummaryOnly === 'true'
 const serviceUrl = browserLocation.value.origin
 const authenticator = appConfig.isPkiAuthenticated ? 'pki' : `${serviceUrl}/api/projects/${encodeURIComponent(projectId)}/token`

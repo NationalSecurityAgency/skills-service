@@ -23,8 +23,9 @@ import { useLog } from '@/components/utils/misc/useLog.js'
 export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttributesState', () => {
   const loadingConfig = ref(true)
   const config = ref({})
-  const projectId = ref('')
-  const serviceUrl = ref('')
+  const defaultEmptyValue = ''
+  const projectId = ref(defaultEmptyValue)
+  const serviceUrl = ref(defaultEmptyValue)
   const isInIframe = ref(false)
   const isSummaryOnly = ref(false)
   const internalBackButton = ref(true)
@@ -73,8 +74,25 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
 
   const maxSelfReportMessageLength = computed(() => config.value.maxSelfReportMessageLength)
   const groupDescriptionsOn = computed(() => config.value.groupDescriptionsOn)
+
+  const afterPropsAreSet = () => {
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        const serverUrlCheck = serviceUrl.value !== defaultEmptyValue || !skillsDisplayInfo.isSkillsClientPath()
+        if (projectId.value !== defaultEmptyValue && serverUrlCheck) {
+          clearInterval(interval);
+          resolve();
+        } else {
+          if (log.isTraceEnabled()) {
+            log.trace(`waiting to set: projectId: ${projectId.value}, serviceUrl: ${serviceUrl.value}`)
+          }
+        }
+      }, 100); // Check every 100 milliseconds
+    });
+  }
   return {
     projectId,
+    afterPropsAreSet,
     serviceUrl,
     loadConfigStateIfNeeded,
     loadingConfig,
