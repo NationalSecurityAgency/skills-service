@@ -29,10 +29,12 @@ const appStyleObject = ref({})
     role="main"
     :style="appStyleObject"
     aria-label="SkillTree Skills Display">
-    <skills-display-home />
+      <skills-display-home class="skills-display-home"/>
   </div>
 </template>
 
 <style scoped>
-
+.skills-display-home {
+  margin: 0 auto !important;
+}
 </style>

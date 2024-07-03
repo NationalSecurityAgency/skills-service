@@ -33,8 +33,12 @@ const attributes = useSkillsDisplayAttributesState()
 const log = useLog()
 
 onMounted(() => {
-  log.debug('SkillsDisplay.vue: onMounted')
-  userProgress.loadUserProgressSummary()
+  if (log.isDebugEnabled()) {
+    log.debug(`SkillsDisplay.vue: onMounted for projectId=[${attributes.projectId}]`)
+  }
+  attributes.afterPropsAreSet().then(() => {
+    userProgress.loadUserProgressSummary()
+  })
 })
 const description = computed(() => userProgress.userProgressSummary?.projectDescription)
 const showDescription = computed(() =>

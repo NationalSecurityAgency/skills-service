@@ -429,7 +429,25 @@ describe('Client Display Theme Components Tests', () => {
   })
 
 
+  it('maxWidth setting - 75%', () => {
+    cy.ignoreSkillsClientError()
+    cy.visit(`/test-skills-client/proj1?themeParam=maxWidth|${encodeURIComponent('75%')}`)
+    cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
+    cy.wrapIframe().find('[data-cy="pointHistoryChartWithData"]')
+    cy.wrapIframe().find('[data-cy="subjectTileBtn"]').should('have.length', 1)
+    cy.wrapIframe().find('[data-cy="myRankPosition"]')
+    cy.matchSnapshotImageForElement('body iframe')
+  })
 
+  it('maxWidth setting - 900px', () => {
+    cy.ignoreSkillsClientError()
+    cy.visit(`/test-skills-client/proj1?themeParam=maxWidth|${encodeURIComponent('900px')}`)
+    cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
+    cy.wrapIframe().find('[data-cy="pointHistoryChartWithData"]')
+    cy.wrapIframe().find('[data-cy="subjectTileBtn"]').should('have.length', 1)
+    cy.wrapIframe().find('[data-cy="myRankPosition"]')
+    cy.matchSnapshotImageForElement('body iframe')
+  })
 
 })
 

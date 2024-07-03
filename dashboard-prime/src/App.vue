@@ -142,7 +142,7 @@ const inBootstrapMode = computed(() => {
     <VueAnnouncer class="sr-only" />
 
     <customizable-header v-if="!isLoadingApp && !inBootstrapMode" role="region" aria-label="dynamic customizable header"></customizable-header>
-    <div id="app">
+    <div id="skilltree-main-container">
       <div v-if="isLoadingApp" role="main" class="text-center">
         <skills-spinner :is-loading="true" class="mt-8 text-center"/>
         <h1 class="text-sm sr-only" sr-only>Loading...</h1>

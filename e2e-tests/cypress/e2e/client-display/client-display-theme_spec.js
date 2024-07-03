@@ -186,6 +186,16 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
     });
 
+    it('skills client\'s iframe support can load theme', () => {
+        cy.ignoreSkillsClientError()
+        cy.visit(`/test-skills-client/proj1?enableTheme=true`)
+        cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
+        cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
+        cy.wrapIframe().contains('Subjects have not been added yet')
+        cy.wrapIframe().find('[data-cy="myRankPosition"]')
+        cy.matchSnapshotImageForElement('body iframe')
+    })
+
     it('test theming - Empty Subject', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',

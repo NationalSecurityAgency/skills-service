@@ -28,13 +28,24 @@ export const useIframeInit = () => {
   const log = useLog()
   const loadedIframe = ref(false)
 
+  const registerHeightListener = (resizeObserver) => {
+    const elementToObserve = document.querySelector("#skills-display-app")
+    if (elementToObserve) {
+      resizeObserver.observe(elementToObserve)
+    } else {
+      setTimeout(() => {
+        registerHeightListener(resizeObserver)
+      }, 100);
+    }
+  }
+
   const handleHandshake =() => {
     log.debug('UseIframeInit.js: handleHandshake')
     const handshake = new Postmate.Model({
       updateAuthenticationToken(authToken) {
         parentState.authToken = authToken
         if (log.isTraceEnabled()) {
-          log.trace(`SkillsDisplay.vue: updateAuthenticationToken: ${authToken}`)
+          log.trace(`UseIframeInit.js: updateAuthenticationToken: ${authToken}`)
         }
       }
     })
@@ -49,7 +60,7 @@ export const useIframeInit = () => {
         log.debug(`UseIframeInit.js: changing height to [${newHeight}]`)
         parentState.parentFrame.emit('height-changed', newHeight)
       });
-      resizeObserver.observe(document.querySelector("body"))
+      registerHeightListener(resizeObserver)
 
       // will only display summary and component will not be interactive
       displayAttributes.isSummaryOnly = parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false
@@ -57,10 +68,11 @@ export const useIframeInit = () => {
       // whether to use an internal back button as opposed to the browser back button
       // displayAttributes.internalBackButton = parent.model.internalBackButton == null || parent.model.internalBackButton
 
-      displayAttributes.projectId = parent.model.projectId
-      displayAttributes.serviceUrl = parent.model.serviceUrl
       log.debug(`UseIframeInit.js: serviceUrl: [${displayAttributes.serviceUrl}], projectId: [${displayAttributes.projectId}]`)
       parentState.serviceUrl = parent.model.serviceUrl
+
+      displayAttributes.projectId = parent.model.projectId
+      displayAttributes.serviceUrl = parent.model.serviceUrl
 
       if (parent.model.options) {
         parentState.options = { ...parent.model.options }
@@ -103,7 +115,7 @@ export const useIframeInit = () => {
 
       const style = document.createElement('style');
 
-      style.id = themeState.theme.themeStyleId;
+      style.id = themeState.themeStyleId;
       style.appendChild(document.createTextNode(themeResArtifacts.css));
 
       const { body } = document;

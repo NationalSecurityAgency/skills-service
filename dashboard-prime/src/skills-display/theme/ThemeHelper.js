@@ -18,7 +18,7 @@ export default {
   bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor', 'infoCards', 'backgroundColor', 'textPrimaryColor', 'textSecondaryColor', 'tiles', 'breadcrumb'],
   selectorKey: {
     maxWidth: {
-      selector: 'body #app',
+      selector: 'body #app .sd-theme-home',
       styleName: 'max-width'
     },
     backgroundColor: [{
