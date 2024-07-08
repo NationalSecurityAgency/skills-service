@@ -184,8 +184,8 @@ let settings = ref({
     projectId: route.params.projectId,
   },
 });
-let errMsg = ref(null);
-let showSavedMsg = ref(false);
+const errMsg = ref(null);
+const showSavedMsg = ref(false);
 
 // computed
 const isDirty = computed(() => {
@@ -630,15 +630,12 @@ const saveSettings = ((dirtyChanges) => {
               <SkillsButton variant="outline-success" @click="save" :disabled="!meta.valid || !isDirty" data-cy="saveSettingsBtn" icon="fas fa-arrow-circle-right" label="Save">
               </SkillsButton>
 
-              <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">
-                  <i class="fa fa-exclamation-circle"
-                     aria-label="Settings have been changed, do not forget to save"
-                     v-tooltip="'Settings have been changed, do not forget to save'"/> Unsaved Changes
-                </span>
-              <span v-if="!isDirty && showSavedMsg" class="text-success ml-2" data-cy="settingsSavedAlert">
-                  <i class="fa fa-check" />
+              <InlineMessage v-if="isDirty" class="ml-2" data-cy="unsavedChangesAlert" severity="warn" icon="fa fa-exclamation-circle">
+                  Unsaved Changes
+                </InlineMessage>
+              <InlineMessage v-if="!isDirty && showSavedMsg" class="ml-2" data-cy="settingsSavedAlert" severity="success" icon="fa fa-check">
                   Settings Updated!
-                </span>
+                </InlineMessage>
             </div>
           </div>
         </loading-container>

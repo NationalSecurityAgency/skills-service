@@ -28,7 +28,7 @@ const chartOptions = {
     height: 200,
     type: 'radialBar',
     offsetY: -15,
-    offsetX: 0
+    offsetX: -15
   },
   plotOptions: {
     radialBar: {
@@ -92,7 +92,6 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
 <template>
   <Card :pt="{ content: { class: 'p-0' }, body: { class: 'p-0 pb-2' } }"
         :data-cy="`project-link-card-${proj.projectId}`"
-        class="conic"
         :class="{ 'proj-link-card' : !overSortControl }">
     <template #content>
       <div>
@@ -124,11 +123,11 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
 
         </div>
         <div class="flex">
-          <div class="flex-grow-0 pt-3" style="width: 200px;">
-            <apexchart type="radialBar" height="200" :options="chartOptions"
+          <div class="pt-3" style="min-width: 200px;">
+            <apexchart type="radialBar" height="200" width="200" :options="chartOptions"
                        :series="series"></apexchart>
           </div>
-          <div class="flex-grow-1 pt-0 pr-3 text-right">
+          <div class="flex-1 pt-0 pr-3 text-right">
             <div class="uppercase text-2xl text-primary" data-cy="project-card-project-name"
                  :aria-label="`Project ${proj.projectName}`" :title="proj.projectName ">{{ proj.projectName }}
             </div>
@@ -143,7 +142,7 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
           </div>
         </div>
 
-        <div class="text-right mx-3" style="marginTop: -30px">
+        <div class="text-right mx-3">
           <div :id="`projectProgressLabel_${proj.projectId}`"
                class="small mb-1"
                :aria-label="`${proj.points} out of ${proj.totalPoints} available points`"
