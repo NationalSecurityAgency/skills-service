@@ -100,7 +100,7 @@ const projectOrderUpdate = (projectId, newIndex) => {
           :display-order="index"
           @sort-changed-requested="updateSortAndReloadProjects"
           :proj="proj"
-          class="" />
+          class="h-full" />
       </div>
     </div>
   </BlockUI>
@@ -123,6 +123,7 @@ const projectOrderUpdate = (projectId, newIndex) => {
 @media (min-width: 50rem) {
   .project-link-container {
     min-width: 32rem;
+    max-width: 50rem;
   }
 }
 </style>
