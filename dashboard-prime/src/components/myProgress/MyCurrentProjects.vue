@@ -21,6 +21,7 @@ import ProjectService from '@/components/projects/ProjectService.js'
 import ProjectLinkCard from '@/components/myProgress/ProjectLinkCard.vue'
 import Sortable from 'sortablejs'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import Badge from '@/components/badges/Badge.vue'
 
 const myProgressState = useMyProgressState()
 const elementHelper = useElementHelper()
@@ -88,18 +89,18 @@ const projectOrderUpdate = (projectId, newIndex) => {
                     v-if="sortOrderLoading"
                     aria-label="Updating sort order"
                     class="loading-indicator" />
-    <div class="grid" id="projectCards">
+    <div class="flex flex-wrap gap-3 align-items-stretch justify-content-center" id="projectCards">
 
       <div v-for="(proj, index) in myProgressState.myProjects"
            :key="proj.projectName"
            :id="proj.projectId"
-           class="col">
+           class="flex-1 project-link-container">
         <project-link-card
           :ref="`proj${proj.projectId}`"
           :display-order="index"
           @sort-changed-requested="updateSortAndReloadProjects"
           :proj="proj"
-          class="fadein animation-duration-500" />
+          class="h-full" />
       </div>
     </div>
   </BlockUI>
@@ -117,5 +118,12 @@ const projectOrderUpdate = (projectId, newIndex) => {
   left: 0;
   bottom: 0;
   right: 0;
+}
+
+@media (min-width: 50rem) {
+  .project-link-container {
+    min-width: 32rem;
+    max-width: 50rem;
+  }
 }
 </style>
