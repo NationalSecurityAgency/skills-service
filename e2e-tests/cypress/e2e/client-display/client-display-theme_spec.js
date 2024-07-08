@@ -196,6 +196,64 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('body iframe')
     })
 
+    it('skills client\'s iframe support does not show header or footer', () => {
+        cy.createSubject(1,1)
+        cy.createSkill(1,1,1)
+        cy.ignoreSkillsClientError()
+
+        cy.viewport(1300, 1600);
+        cy.visit(`/test-skills-client/proj1`)
+        cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
+        cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
+        cy.wrapIframe().find('[data-cy="myRankPosition"]')
+        cy.wrapIframe().find('[data-cy="subjectTileBtn"]')
+        cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.have.descendants', '[data-cy="skillTreeLogo"]')
+        cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.have.descendants', '[data-cy="dashboardFooter"]')
+
+        cy.wrapIframe().find('[data-cy="subjectTileBtn"]').click()
+        cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
+        cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1"]')
+        cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.have.descendants', '[data-cy="skillTreeLogo"]')
+        cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.have.descendants', '[data-cy="dashboardFooter"]')
+
+        cy.wrapIframe().find('[data-cy="skillProgressBar"]').click()
+        cy.wrapIframe().find('[data-cy="pointsPerOccurrenceCard"]')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle"]')
+        cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.have.descendants', '[data-cy="skillTreeLogo"]')
+        cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.have.descendants', '[data-cy="dashboardFooter"]')
+    })
+
+    it('skills client\'s iframe must not show configured header and footer', () => {
+        cy.createSubject(1,1)
+        cy.createSkill(1,1,1)
+
+        cy.fixture('vars.json').then((vars) => {
+            cy.logout();
+            cy.login(vars.rootUser, vars.defaultPass, true);
+            cy.request({
+                method: 'POST',
+                url: '/root/saveSystemSettings',
+                body: {
+                    customHeader: '<div data-cy="notFind">header</div>',
+                    customFooter: '<div data-cy="notFind">footer</div>',
+                }
+            });
+            cy.logout();
+            cy.login(vars.defaultUser, vars.defaultPass);
+        })
+
+        cy.ignoreSkillsClientError()
+
+        cy.viewport(1300, 1600);
+        cy.visit(`/test-skills-client/proj1`)
+        cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
+        cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
+        cy.wrapIframe().find('[data-cy="myRankPosition"]')
+        cy.wrapIframe().find('[data-cy="subjectTileBtn"]')
+        cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.have.descendants', '[data-cy="notFind"]')
+    })
+
     it('test theming - Empty Subject', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',

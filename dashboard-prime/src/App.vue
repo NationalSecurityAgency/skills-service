@@ -126,22 +126,19 @@ const loadConfigs = () => {
   })
 }
 
-const showHeader = computed(() => {
-  return !skillsDisplayInfo.isSkillsClientPath() && authState.isAuthenticated
-})
-const isPkiAndNeedsToBootstrap = computed(() => {
-  return appConfig.isPkiAuthenticated && appConfig.needToBootstrap;
-})
-const inBootstrapMode = computed(() => {
-  return isPkiAndNeedsToBootstrap.value
-})
+const notSkillsClient = computed(() => !skillsDisplayInfo.isSkillsClientPath())
+const showHeader = computed(() => notSkillsClient.value && authState.isAuthenticated)
+const isPkiAndNeedsToBootstrap = computed(() => appConfig.isPkiAuthenticated && appConfig.needToBootstrap)
+const inBootstrapMode = computed(() => isPkiAndNeedsToBootstrap.value && notSkillsClient.value)
+const isCustomizableHeader = computed(() => notSkillsClient.value && !isLoadingApp.value && !inBootstrapMode.value)
+const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.value && !inBootstrapMode.value)
 </script>
 
 <template>
   <div role="presentation" class="m-0">
     <VueAnnouncer class="sr-only" />
 
-    <customizable-header v-if="!isLoadingApp && !inBootstrapMode" role="region" aria-label="dynamic customizable header"></customizable-header>
+    <customizable-header v-if="isCustomizableHeader" role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="skilltree-main-container">
       <div v-if="isLoadingApp" role="main" class="text-center">
         <skills-spinner :is-loading="true" class="mt-8 text-center"/>
@@ -162,8 +159,8 @@ const inBootstrapMode = computed(() => {
       </div>
     </div>
     <ConfirmDialog></ConfirmDialog>
-    <dashboard-footer v-if="!isLoadingApp && !inBootstrapMode" role="region" />
-    <customizable-footer v-if="!isLoadingApp && !inBootstrapMode" role="region" aria-label="dynamic customizable footer"></customizable-footer>
+    <dashboard-footer v-if="isDashboardFooter" role="region" />
+    <customizable-footer v-if="isDashboardFooter" role="region" aria-label="dynamic customizable footer"></customizable-footer>
     <!--    <scroll-to-top v-if="!isScrollToTopDisabled && !inBootstrapMode" />-->
   </div>
 </template>

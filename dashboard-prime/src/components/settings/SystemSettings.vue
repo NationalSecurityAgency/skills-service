@@ -112,8 +112,8 @@ function loadSystemSettings() {
 
       <SkillsTextInput name="resetTokenExpiration" label="Token Expiration" is-required>
         <template #footer>
-          <div>
-            <small class="text-info" id="resetTokenExpirationFormat">supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
+          <div class="w-full">
+            <small class="text-info" id="resetTokenExpirationFormat"><i class="fas fa-exclamation-circle" aria-hidden="true" /> supports ISO 8601 time duration format, e.g., 2H, 30M, 1H30M, 1M42S, etc</small>
           </div>
         </template>
       </SkillsTextInput>

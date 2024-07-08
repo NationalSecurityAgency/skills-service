@@ -271,25 +271,8 @@ describe('Projects Tests', () => {
         cy.createBadge(1, 1);
         cy.createProject(2);
         cy.createProject(3);
-        cy.visit('/administrator');
-
-        cy.get('[data-cy="projectCard_proj1"] [data-cy="projectCardWarning"]').should('not.exist')
-        cy.get('[data-cy="projectCard_proj2"] [data-cy="projectCardWarning"]')
-            .contains('Project has insufficient points assigned');
-        cy.get('[data-cy="projectCard_proj3"] [data-cy="projectCardWarning"]')
-          .contains('Project has insufficient points assigned');
-
-        cy.get('[data-cy="projectCard_proj2"] [data-cy="projectCardWarning"] [data-pc-section="closeicon"]').click();
-        cy.get('[data-cy="projectCard_proj3"] [data-cy="projectCardWarning"]')
-          .contains('Project has insufficient points assigned');
-        cy.get('[data-cy="projectCard_proj1"] [data-cy="projectCardWarning"]').should('not.exist')
-        cy.get('[data-cy="projectCard_proj2"] [data-cy="projectCardWarning"]').should('not.exist')
 
         cy.visit('/administrator');
-        cy.get('[data-cy="projectCard_proj3"] [data-cy="projectCardWarning"]')
-          .contains('Project has insufficient points assigned');
-        cy.get('[data-cy="projectCard_proj1"] [data-cy="projectCardWarning"]').should('not.exist')
-        cy.get('[data-cy="projectCard_proj2"] [data-cy="projectCardWarning"]').should('not.exist')
 
         cy.get('[data-cy="projCard_proj2_manageLink"]').click()
         cy.contains('No Subjects Yet')

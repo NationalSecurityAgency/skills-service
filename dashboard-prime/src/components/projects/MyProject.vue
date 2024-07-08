@@ -23,18 +23,14 @@ import ProjectService from '@/components/projects/ProjectService'
 import SettingsService from '@/components/settings/SettingsService'
 import ProjectCardFooter from '@/components/projects/ProjectCardFooter.vue'
 import ProjectCardControls from '@/components/projects/ProjectCardControls.vue'
-import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import UserRolesUtil from '@/components/utils/UserRolesUtil'
-import dayjs from '@/common-components/DayJsCustomizer.js'
 import EditProject from '@/components/projects/EditProject.vue'
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import { useAccessState } from '@/stores/UseAccessState.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
-import ReminderMessage from '@/components/utils/misc/ReminderMessage.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import ProjectExpirationWarning from '@/components/projects/ProjectExpirationWarning.vue'
-import {useConfirm} from "primevue/useconfirm";
-import GlobalBadgeService from "@/components/badges/global/GlobalBadgeService.js";
+import { useConfirm } from 'primevue/useconfirm'
 import { useAdminProjectsState } from '@/stores/UseAdminProjectsState.js'
 
 const props = defineProps(['project', 'disableSortControl'])
@@ -113,13 +109,6 @@ const createCardOptions = () => {
     icon: 'fas fa-award skills-color-badges',
   }];
 };
-const warningMsgAboutPoints = computed(() => {
-  const shouldWarn = (projectInternal.value.totalPoints + projectInternal.value.totalPointsReused) < minimumPoints.value
-  if (!shouldWarn) {
-    return null
-  }
-  return `Project has insufficient points assigned. Skills cannot be achieved until project has at least ${minimumPoints.value} points.`
-})
 
 const doDeleteProject = () => {
   ProjectService.checkIfProjectBelongsToGlobalBadge(projectInternal.value.projectId)
@@ -182,13 +171,13 @@ defineExpose({
 </script>
 
 <template>
-  <div data-cy="projectCard" class="h-100">
-    <Card :data-cy="`projectCard_${projectInternal.projectId}`" class="relative">
+  <div data-cy="projectCard" class="h-full">
+    <Card :data-cy="`projectCard_${projectInternal.projectId}`" class="relative h-full">
       <template #content>
-        <div class="flex flex-column sm:flex-row flex-wrap"
+        <div class="flex flex-column"
              :class="{
-            'flex-column gap-1 justify-content-left': projectsState.shouldTileProjectsCards,
-            '': !projectsState.shouldTileProjectsCards
+            'gap-1 justify-content-left': projectsState.shouldTileProjectsCards,
+            'gap-2 sm:flex-row flex-wrap': !projectsState.shouldTileProjectsCards
           }">
           <div class="text-truncate">
             <router-link
@@ -264,11 +253,6 @@ defineExpose({
         </div>
 
         <project-expiration-warning :project="projectInternal" @extended="projectInternal.expiring = false" />
-        <ReminderMessage
-          v-if="warningMsgAboutPoints"
-          :id="`projectCardWarning_${projectInternal.projectId}`"
-          data-cy="projectCardWarning"
-          severity="info">{{ warningMsgAboutPoints}}</ReminderMessage>
 
         <div v-if="!disableSortControl"
              :id="`sortControl_${project.projectId}`"

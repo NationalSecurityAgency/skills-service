@@ -29,24 +29,25 @@ const isRootUser = computed(() => accessState.isRoot)
 </script>
 
 <template>
-  <div class="flex flex-wrap"
+  <div class="flex flex-wrap" style="min-width: 20rem"
     :class="{
-      'justify-content-left': projectsState.shouldTileProjectsCards,
+      'flex-column gap-2 justify-content-center align-items-center': projectsState.shouldTileProjectsCards,
       'justify-content-end': !projectsState.shouldTileProjectsCards
     }">
-    <router-link :to="{ name:'Subjects', params: { projectId: project.projectId }}">
+    <div>
+      <router-link :to="{ name:'Subjects', params: { projectId: project.projectId }}">
+        <SkillsButton
+            size="small"
+            class="mr-2"
+            outlined
+            severity="info"
+            :data-cy="'projCard_' + project.projectId + '_manageBtn'"
+            :label="readOnlyProject ? 'View' : 'Manage'"
+            icon="fas fa-arrow-circle-right"
+            :aria-label="'manage project + project.name'">
+        </SkillsButton>
+      </router-link>
       <SkillsButton
-          size="small"
-          class="mr-2"
-          outlined
-          severity="info"
-          :data-cy="'projCard_' + project.projectId + '_manageBtn'"
-          :label="readOnlyProject ? 'View' : 'Manage'"
-          icon="fas fa-arrow-circle-right"
-          :aria-label="'manage project + project.name'">
-      </SkillsButton>
-    </router-link>
-    <SkillsButton
       v-if="isRootUser"
       outlined
       severity="info"
@@ -59,6 +60,7 @@ const isRootUser = computed(() => accessState.isRoot)
       icon="fas fa-ban"
       :aria-pressed="project.pinned">
     </SkillsButton>
+    </div>
     <ButtonGroup class="mr-2 p-0 flex" v-if="!readOnlyProject">
       <SkillsButton
         :id="`editProjBtn${project.projectId}`"

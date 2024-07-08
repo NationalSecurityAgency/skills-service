@@ -41,9 +41,7 @@ const hasData = computed(() => userProgress.userProgressSummary.subjects?.length
       <div v-for="(subject, index) in userProgress.userProgressSummary.subjects"
            :key="`unique-subject-${index}`"
            class="flex-1 w-min-20rem md:max-w-30rem">
-        <div class="">
           <subject-tile :subject="subject" :tile-index="index"/>
-        </div>
       </div>
     </div>
   </div>
