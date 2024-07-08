@@ -225,6 +225,8 @@ describe('Client Display Tests', () => {
     })
 
     it('skills client\'s iframe must not show configured header and footer', () => {
+        cy.createSubject(1,1)
+        cy.createSkill(1,1,1)
 
         cy.fixture('vars.json').then((vars) => {
             cy.logout();

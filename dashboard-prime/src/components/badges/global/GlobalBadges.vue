@@ -14,17 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, nextTick, computed, onMounted } from 'vue';
-import Sortable from 'sortablejs';
-import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
-import GlobalBadgeService from "@/components/badges/global/GlobalBadgeService.js";
+import { computed, nextTick, onMounted, ref } from 'vue'
+import Sortable from 'sortablejs'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import GlobalBadgeService from '@/components/badges/global/GlobalBadgeService.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import EditBadge from "@/components/badges/EditBadge.vue";
-import LoadingContainer from "@/components/utils/LoadingContainer.vue";
-import NoContent2 from "@/components/utils/NoContent2.vue";
-import SkillsBadge from '@/components/badges/Badge.vue'
-import { useConfirm } from 'primevue/useconfirm';
-import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
+import EditBadge from '@/components/badges/EditBadge.vue'
+import NoContent2 from '@/components/utils/NoContent2.vue'
+import Badge from '@/components/badges/Badge.vue'
+import { useConfirm } from 'primevue/useconfirm'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 
 const confirm = useConfirm();
 const announcer = useSkillsAnnouncer();
@@ -204,8 +203,8 @@ const handleFocus = () => {
         <div v-if="(!badges || badges.length === 0) && isLoading">
           <skills-spinner :is-loading="isLoading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
         </div>
-        <div v-if="badges && badges.length" id="badgeCards" class="flex flex-wrap align-items-center justify-content-center">
-          <div v-for="(badge) of badges" :id="badge.badgeId" :key="badge.badgeId" class="lg:col-4 mb-3"  style="min-width: 23rem;">
+        <div v-if="badges && badges.length" id="badgeCards" class="flex flex-wrap gap-3 align-items-stretch justify-content-center">
+          <div v-for="(badge) of badges" :id="badge.badgeId" :key="badge.badgeId" style="min-width: 23rem;">
             <BlockUI :blocked="sortOrder.loading">
               <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${badge.badgeId}_overlayShown`">
                 <div v-if="badge.badgeId===sortOrder.loadingBadgeId" data-cy="updatingSortMsg">
@@ -214,10 +213,11 @@ const handleFocus = () => {
                 </div>
               </div>
 
-              <SkillsBadge :badge="badge" :global="true"
+              <badge :badge="badge" :global="true"
                            @badge-updated="saveBadge"
                            @badge-deleted="deleteBadge"
                            @publish-badge="publishBadge"
+                           class="flex align-items-stretch"
                            @sort-changed-requested="sortOrderUpdate"
                            :ref="(el) => (badgeRef[badge.badgeId] = el)"
                            :disable-sort-control="badges.length === 1"/>
