@@ -135,7 +135,7 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
 </script>
 
 <template>
-  <div role="presentation" class="m-0">
+  <div role="presentation" class="m-0 surface-ground">
     <VueAnnouncer class="sr-only" />
 
     <customizable-header v-if="isCustomizableHeader" role="region" aria-label="dynamic customizable header"></customizable-header>
