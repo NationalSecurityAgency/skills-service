@@ -14,7 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   label: String,
   icon: String,
   value: {
@@ -30,16 +32,20 @@ defineProps({
     default: false
   },
 })
+
+const maxWidth = computed(() => props.label ? 'max-width:13rem' : '')
 </script>
 
 <template>
-  <div  class="sd-theme-breadcrumb-item" data-cy="breadcrumb-item">
+  <div  class="sd-theme-breadcrumb-item flex" data-cy="breadcrumb-item">
     <i v-if="showSeparator"
        class="fas fa-angle-right ml-1 mr-1"
        aria-hidden="true"/>
-    <span v-if="icon" :class="[icon, 'text-color']" aria-hidden="true" class="mr-2"/>
-    <span v-if="label" class="text-color-secondary mr-1" data-cy="breadcrumbItemLabel">{{ label }}:</span>
-    <span class="font-semibold" :class="valueCss" data-cy="breadcrumbItemValue">{{ value }}</span>
+    <div v-if="icon" :class="[icon, 'text-color']" aria-hidden="true" class="mr-2"/>
+    <div v-if="label" class="text-color-secondary mr-1" data-cy="breadcrumbItemLabel">{{ label }}:</div>
+    <div class="font-semibold white-space-nowrap overflow-hidden text-overflow-ellipsis" :style="`${maxWidth}`"
+          :class="valueCss"
+          data-cy="breadcrumbItemValue">{{ value }}</div>
   </div>
 </template>
 

@@ -198,15 +198,21 @@ if (props.asyncLoadDataFunction) {
     :cancel-button-label="cancelButtonLabel"
     :cancel-button-icon="cancelButtonIcon"
     :cancel-button-severity="cancelButtonSeverity"
+    :pt="{ content: { class: 'p-0' }}"
+    footer-class="px-3 pb-3"
   >
-    <form-reload-warning
-      v-if="inputFormResiliency.isRestoredFromStore && enableInputFormResiliency"
-      @discard-changes="inputFormResiliency.discard" />
+    <div class="p-3">
+      <form-reload-warning
+        v-if="inputFormResiliency.isRestoredFromStore && enableInputFormResiliency"
+        @discard-changes="inputFormResiliency.discard" />
 
-    <BlockUI :blocked="isSaving || isSubmitting" :full-screen="false">
-      <skills-spinner :is-loading="true" v-if="isSaving || isSubmitting" class="loading-indicator"/>
-      <slot></slot>
-    </BlockUI>
+      <BlockUI :blocked="isSaving || isSubmitting" :full-screen="false">
+        <skills-spinner :is-loading="true" v-if="isSaving || isSubmitting" class="loading-indicator"/>
+        <div class="p-2">
+          <slot></slot>
+        </div>
+      </BlockUI>
+    </div>
   </SkillsDialog>
 </template>
 
