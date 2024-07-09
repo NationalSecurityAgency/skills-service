@@ -14,19 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import CardWithVericalSections from '@/components/utils/cards/CardWithVericalSections.vue'
+
 defineProps(['title', 'subtitle', 'description', 'icon', 'pathName']);
 </script>
 
 <template>
-  <Card>
+  <CardWithVericalSections>
     <template #content>
-      <div>
+      <div class="p-5">
         <div class="flex">
           <div class="flex d-inline-block mt-1 mr-3 border rounded p-2">
             <i class="fa-3x" :class="icon"/>
           </div>
           <div class="flex flex-1 flex-column">
-            <div class="h4 mb-2">{{ title }}</div>
+            <div class="h4 mb-2 font-semibold">{{ title }}</div>
             <div class="font-light text-sm">
               <slot name="subtitle">
                 {{ subtitle }}
@@ -41,13 +43,13 @@ defineProps(['title', 'subtitle', 'description', 'icon', 'pathName']);
 
     </template>
     <template #footer>
-      <div class="text-center">
+      <div class="text-center pb-3 px-5">
         <router-link :to="{ name: pathName }" :data-cy="`metricsNav-${title}`">
           <SkillsButton size="small" :label="`${title}`" icon="fas fa-arrow-right" />
         </router-link>
       </div>
     </template>
-  </Card>
+  </CardWithVericalSections>
 </template>
 
 <style scoped>

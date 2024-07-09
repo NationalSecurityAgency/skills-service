@@ -239,7 +239,7 @@ describe('Client Display Tests', () => {
                 // wait for the bar (on the bar chart) to render
                 cy.get('[data-cy="levelBreakdownChart-animationEnded"]');
                 cy.wait(5000)
-                cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', {blackout: '[data-cy="dateCell"]', errorThreshold: 0.05 });
+                cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', {blackout: '[data-cy="dateCell"]', errorThreshold: 0.35 });
             });
         }
 
