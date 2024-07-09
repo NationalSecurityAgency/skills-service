@@ -42,9 +42,6 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
             cy.cdClickSubj(0);
             cy.cdClickSkill(1);
         });
-
-        // must set viewport to show entire canvas or it will not appear in the screenshot
-        cy.viewport(1500, 1500);
     });
 
     it('skill prerequisite graph', () => {
@@ -98,7 +95,6 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
     });
 
     it('skill prerequisite graph on badge page', () => {
-        cy.viewport(1200, 1000);
 
         cy.createSkill(1, 1, 1)
         cy.createSkill(1, 1, 2)

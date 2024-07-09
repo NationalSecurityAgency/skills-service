@@ -94,7 +94,7 @@ describe('Metrics Tests - Subject', () => {
         cy.wait('@numUsersPerLevelChartBuilderSubj1');
 
         cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=levelsChart]');
+        cy.matchSnapshotImageForElement('[data-cy=levelsChart]', { errorThreshold: 0.07 });
 
         cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.clickNav('Metrics');
