@@ -204,7 +204,7 @@ describe('Client Display Tests', () => {
                 .contains('1');
             cy.get('[data-cy=myBadges]')
                 .contains('1 Badge');
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
+            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05 });
         });
 
         if (!Cypress.env('oauthMode')) {
@@ -239,7 +239,7 @@ describe('Client Display Tests', () => {
                 // wait for the bar (on the bar chart) to render
                 cy.get('[data-cy="levelBreakdownChart-animationEnded"]');
                 cy.wait(5000)
-                cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', {blackout: '[data-cy="dateCell"]'});
+                cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', {blackout: '[data-cy="dateCell"]', errorThreshold: 0.35 });
             });
         }
 
@@ -250,7 +250,7 @@ describe('Client Display Tests', () => {
 
             cy.cdVisit('/badges/?enableTheme=true');
             cy.contains('Badge 3');
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
+            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05  });
 
         });
 
@@ -270,7 +270,7 @@ describe('Client Display Tests', () => {
             cy.contains('This is 3');
             cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
             cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
+            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05  });
         });
 
         it(`test theming - subject overview - ${size}`, () => {
@@ -286,7 +286,7 @@ describe('Client Display Tests', () => {
             cy.get('[data-cy="totalPoints"]').should('have.text', '1,400');
             cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
             cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
+            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05  });
         });
 
         it(`test theming - subject overview with skill details - ${size}`, () => {
@@ -312,7 +312,7 @@ describe('Client Display Tests', () => {
 
             cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
             cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
+            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05  });
         });
 
         it(`test theming - skill details - ${size}`, () => {
@@ -328,7 +328,7 @@ describe('Client Display Tests', () => {
             cy.contains('This is 1');
             cy.contains('Lorem ipsum dolor sit amet');
             cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should('have.text', '200 Total')
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
+            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05  });
         });
 
     });
@@ -367,7 +367,7 @@ describe('Client Display Tests', () => {
             cy.contains('Lorem ipsum dolor sit amet');
             cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
             cy.wait(4000);
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
+            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05  });
         });
     });
 

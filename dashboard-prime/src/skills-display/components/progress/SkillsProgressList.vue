@@ -333,7 +333,7 @@ const isLastViewedScrollSupported = computed(() => {
     <template #content>
       <!--      <skills-spinner :loading="loading"/>-->
       <!--      <div v-if="!loading">-->
-      <div v-if="skillsToShow.length > 0">
+      <div v-if="skillsToShow.length > 0" class="skills-theme-progress-rows">
         <div v-for="(skill, index) in skillsToShow"
              :key="`skill-${skill.skillId}`"
              :id="`skillRow-${skill.skillId}`"
@@ -386,8 +386,13 @@ const isLastViewedScrollSupported = computed(() => {
 </template>
 
 <style>
-.skills-display-test-link a {
-  color: #295bac !important;
+body .skills-display-test-link a,
+body .skills-display-test-link a:link,
+body .skills-display-test-link a:visited,
+body .skills-display-test-link a:focus,
+body .skills-display-test-link a:hover,
+body .skills-display-test-link a:active {
+  color: #005efb !important;
 }
 </style>
 

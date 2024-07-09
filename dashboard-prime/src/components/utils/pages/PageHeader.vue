@@ -33,7 +33,7 @@ const colors = useColors()
         <div class="mt-2 text-center lg:text-left w-full lg:w-auto">
           <div class="text-2xl flex">
             <Avatar v-if="options.icon" class="mr-2" :icon="options.icon" />
-            <div class="text-2xl" data-cy="title">{{ options.title }}</div>
+            <div class="text-2xl" data-cy="title" style="overflow-wrap: anywhere;">{{ options.title }}</div>
             <slot name="right-of-header"></slot>
           </div>
           <div v-if="options.subTitle" data-cy="subTitle" class="mt-1 mb-2">
@@ -55,13 +55,6 @@ const colors = useColors()
                         <span v-if="stat.preformatted" data-cy="statPreformatted" v-html="stat.preformatted" />
                         <span v-else data-cy="statValue">{{ numberFormat.pretty(stat.count) }}</span>
                       </div>
-
-                      <span v-if="stat.warnMsg" class="ml-1">
-                            <i class="fa fa-exclamation-circle text-warning"
-                               :aria-label="`Warning: ${stat.warnMsg}`"
-                               role="alert"
-                               v-tooltip="stat.warnMsg" />
-                          </span>
                     </div>
                     <div class="ml-3 flex-1 text-right">
                       <i :class="`${stat.icon} ${colors.getTextClass(index)}`" style="font-size: 2.2rem;" aria-hidden="true"></i>

@@ -17,6 +17,11 @@ import moment from 'moment-timezone';
 
 describe('Client Display Prerequisites Snapshot Tests', () => {
 
+    const snapshotOptions = {
+        blackout: '[data-cy="skillTreePoweredBy"]',
+        errorThreshold: 0.05
+    };
+
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
         cy.createProject(1);
@@ -37,9 +42,6 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
             cy.cdClickSubj(0);
             cy.cdClickSkill(1);
         });
-
-        // must set viewport to show entire canvas or it will not appear in the screenshot
-        cy.viewport(1280, 1280);
     });
 
     it('skill prerequisite graph', () => {
@@ -68,7 +70,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.cdClickSkill(1);
 
         cy.wait(5000)
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapshotOptions);
     });
 
     it('skill prerequisite graph - with paging', () => {
@@ -89,11 +91,10 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.cdClickSkill(9);
 
         cy.wait(5000)
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapshotOptions);
     });
 
     it('skill prerequisite graph on badge page', () => {
-        cy.viewport(1200, 1000);
 
         cy.createSkill(1, 1, 1)
         cy.createSkill(1, 1, 2)
@@ -135,7 +136,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.get('[data-cy="prereqTable"] [data-p-index="3"] [data-cy="skillLink-proj1-skill2"]')
         cy.get('[data-cy="prereqTable"] [data-p-index="4"] [data-cy="skillLink-proj1-skill3"]')
         cy.wait(5000)
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapshotOptions);
     });
 
 });

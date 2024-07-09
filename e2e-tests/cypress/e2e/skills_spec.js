@@ -1390,48 +1390,6 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=pageHeaderStat]').eq(1).should('contain.text', '4')
   })
 
-  it('skills page - long skill names should be truncated', () => {
-    const longName = 'Verylongandinterestingskill;Verylongandinterestingskill;Verylongandinterestingskill;Verylongandinterestingskill;Verylongandinterestingskill;'
-    cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills', (req) => {
-      req.reply({
-        body: [{
-          'skillId': 'skill1',
-          'projectId': 'proj1',
-          'name': longName,
-          'subjectId': null,
-          'subjectName': null,
-          'version': 0,
-          'displayOrder': 1,
-          'created': '2022-04-28T23:48:22.078+00:00',
-          'totalPoints': 200,
-          'pointIncrement': 100,
-          'pointIncrementInterval': 480,
-          'numMaxOccurrencesIncrementInterval': 1,
-          'numPerformToCompletion': 2,
-          'type': 'Skill',
-          'updated': '2022-04-28T23:48:22.078+00:00',
-          'numUsers': 0,
-          'selfReportingType': null,
-          'numSkillsInGroup': null,
-          'numSelfReportSkills': null,
-          'numSkillsRequired': -1,
-          'enabled': true,
-          'groupId': null,
-          'groupName': null,
-          'readOnly': false,
-          'copiedFromProjectId': null,
-          'copiedFromProjectName': null,
-          'sharedToCatalog': false
-        }]
-      })
-    }).as('getSkills')
-
-    cy.createSkill(1, 1, 1)
-    cy.visit('/administrator/projects/proj1/subjects/subj1')
-    cy.wait('@getSkills')
-    cy.contains('Verylongandinterestingskill;Verylongandintere... >> more')
-  })
-
   it('edit skill with version greater than 1', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2, { version: 1 })

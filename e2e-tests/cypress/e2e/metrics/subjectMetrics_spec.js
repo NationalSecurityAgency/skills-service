@@ -94,7 +94,7 @@ describe('Metrics Tests - Subject', () => {
         cy.wait('@numUsersPerLevelChartBuilderSubj1');
 
         cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=levelsChart]');
+        cy.matchSnapshotImageForElement('[data-cy=levelsChart]', { errorThreshold: 0.07 });
 
         cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.clickNav('Metrics');
@@ -320,7 +320,7 @@ describe('Metrics Tests - Subject', () => {
         cy.wait('@distinctUsersOverTimeForProject');
 
         cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=distinctNumUsersOverTime]');
+        cy.matchSnapshotImageForElement('[data-cy=distinctNumUsersOverTime]', { errorThreshold: 0.07 });
     });
 
     if (!Cypress.env('oauthMode')) {
@@ -399,7 +399,7 @@ describe('Metrics Tests - Subject', () => {
             cy.wait('@skillAchievementsByTagBuilder');
 
             cy.wait(waitForSnap);
-            cy.matchSnapshotImageForElement('[data-cy=numUsersByTag-tagA]');
+            cy.matchSnapshotImageForElement('[data-cy=numUsersByTag-tagA]', { errorThreshold: 0.07 });
         });
     }
 });

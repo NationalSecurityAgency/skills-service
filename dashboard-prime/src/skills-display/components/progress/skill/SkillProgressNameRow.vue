@@ -141,7 +141,6 @@ const skillId = computed(() => {
               :id="`skillProgressTitleLink-${skillId}`"
               v-if="toRoute"
               :to="toRoute"
-              class="skill-link"
               data-cy="skillProgressTitle"
               :aria-label="`${skill.isSkillType ? `Navigate to ${skill.skill}` : skill.skill }`">
               <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
@@ -249,8 +248,4 @@ const skillId = computed(() => {
   display: inline-block;
 }
 
-.skill-link {
-  text-decoration-thickness: 1px;
-  text-decoration-color: gray;
-}
 </style>

@@ -98,6 +98,7 @@ export default {
         '.p-autocomplete-panel.p-component .p-autocomplete-item .text-orange-700,' +
         '.p-overlaypanel-content .p-panelmenu.p-component .p-panelmenu-header-content,' +
         '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link,' +
+        'body .sd-theme-home a, body .sd-theme-home .skills-theme-skills-progress a,' +
         '.sd-theme-home .editor-help-footer,' +
         '.sd-theme-home .editor-help-footer i',
       styleName: 'color'

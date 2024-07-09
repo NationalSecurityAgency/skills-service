@@ -575,7 +575,6 @@ const saveSettings = ((dirtyChanges) => {
                 <span class="ml-1">{{ showCustomLabelsConfigLabel }}</span>
               </div>
 
-  <!--            <b-collapse id="customLabelsCollapse" :visible="showCustomLabelsConfigToggle">-->
                 <Card class="mt-1" v-if="shouldShowCustomLabelsConfig">
                   <template #content>
                     <SkillsSettingTextInput name="projectDisplayName"
@@ -598,10 +597,8 @@ const saveSettings = ((dirtyChanges) => {
                                             label="Level Display Text"
                                             @input="updateSettingsField"
                                             help-message='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
-<!--                    projectDisplayNameChanged-->
                   </template>
                 </Card>
-  <!--            </b-collapse>-->
             </div>
           </div>
 
@@ -623,7 +620,7 @@ const saveSettings = ((dirtyChanges) => {
 
           <hr/>
 
-          <p v-if="errMsg" class="text-center text-danger" role="alert">***{{ errMsg }}***</p>
+          <Message v-if="errMsg" severity="error" :closable="false">{{ errMsg }}</Message>
 
           <div class="flex flex-row">
             <div class="col">

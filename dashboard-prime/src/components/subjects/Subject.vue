@@ -14,44 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, inject, onMounted, ref, watch } from 'vue'
+import { inject, onMounted, ref, watch } from 'vue'
 import Badge from 'primevue/badge'
-import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SubjectsService from '@/components/subjects/SubjectsService'
 import NavCardWithStatsAndControls from '@/components/utils/cards/NavCardWithStatsAndControls.vue'
 import CardNavigateAndEditControls from '@/components/utils/cards/CardNavigateAndEditControls.vue'
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import LoadingCard from '@/components/utils/LoadingCard.vue'
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
-const announcer = useSkillsAnnouncer()
-const appConfig = useAppConfig()
 const emit = defineEmits(['sort-changed-requested', 'subject-deleted']);
 const props = defineProps(['subject', 'disableSortControl']);
 const subject = props.subject;
 
 const subjectCardControls = ref();
 
-let isLoading = ref(false);
-let showDeleteDialog = ref(false);
-let cardOptions = ref({ controls: {} });
-let subjectInternal = ref({ ...subject });
-let deleteSubjectDisabled = ref(false);
-let deleteSubjectToolTip = ref('');
-const navCardWithStatsAndControls = ref();
+const isLoading = ref(false);
+const showDeleteDialog = ref(false);
+const cardOptions = ref({ controls: {} });
+const subjectInternal = ref({ ...subject });
+const navCardWithStatsAndControlsRef = ref();
 
 onMounted(() => {
   buildCardOptions();
 })
 
-// computed
-const minimumPoints = computed(() => {
-  return appConfig.minimumSubjectPoints;
-});
-
-const alreadyShared = computed(() => {
-  return subjectInternal.value?.exported === true;
-});
 
 // methods
 const buildCardOptions = () => {
@@ -76,8 +62,6 @@ const buildCardOptions = () => {
     }, {
       label: 'Points',
       count: subjectInternal.value.totalPoints,
-      warn: (subjectInternal.value.totalPoints + subjectInternal.value.totalPointsReused) < minimumPoints,
-      warnMsg: (subjectInternal.value.totalPoints + subjectInternal.value.totalPointsReused) < minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${minimumPoints} points.` : null,
       icon: 'far fa-arrow-alt-circle-up skills-color-points',
       secondaryStats: [{
         label: 'reused',
@@ -90,10 +74,6 @@ const buildCardOptions = () => {
       type: 'Subject',
       name: subjectInternal.value.name,
       id: subjectInternal.value.subjectId,
-      deleteDisabledText: deleteSubjectToolTip,
-      isDeleteDisabled: deleteSubjectDisabled,
-      showShare: false,
-      shareEnabled: !alreadyShared,
     },
     displayOrder: subject.displayOrder,
   };
@@ -119,20 +99,6 @@ const doDeleteSubject = () => {
       });
 };
 
-const shareSubject = () => {
-  SubjectsService.shareSubject(subjectInternal.value.projectId, subjectInternal.value.subjectId)
-      .then(() => {
-        subjectInternal.value.exported = true;
-      });
-};
-
-const unshareSubject = () => {
-  SubjectsService.unshareSubject(subjectInternal.value.projectId, subjectInternal.value.subjectId)
-      .then(() => {
-        subjectInternal.value.exported = false;
-      });
-};
-
 const sortRequested = (info) => {
   const withId = {
     ...info,
@@ -154,7 +120,7 @@ watch(
 const createOrUpdateSubject = inject('createOrUpdateSubject')
 
 const focusSortControl = () => {
-  navCardWithStatsAndControls.value.focusSortControl();
+  navCardWithStatsAndControlsRef.value.focusSortControl();
 }
 
 defineExpose({
@@ -166,7 +132,7 @@ defineExpose({
   <div data-cy="subjectCard">
     <loading-card :loading="isLoading"/>
     <nav-card-with-stats-and-controls v-if="!isLoading"
-                                      ref="navCardWithStatsAndControls"
+                                      ref="navCardWithStatsAndControlsRef"
                                       :disable-sort-control="disableSortControl"
                                       @sort-changed-requested="sortRequested"
                                       :options="cardOptions" :data-cy="`subjectCard-${subjectInternal.subjectId}`">
@@ -178,10 +144,7 @@ defineExpose({
             :button-id-suffix="subjectInternal.subjectId"
             @edit="createOrUpdateSubject(props.subject, true)"
             @delete="deleteSubject"
-            @share="shareSubject"
-            @unshare="unshareSubject"
-            :is-delete-disabled="deleteSubjectDisabled"
-            :delete-disabled-text="deleteSubjectToolTip"/>
+            />
       </template>
       <template #footer>
         <div class="flex justify-content-end">

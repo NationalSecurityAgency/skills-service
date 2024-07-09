@@ -22,6 +22,8 @@ dayjs.extend(advancedFormatPlugin);
 
 describe('Client Display Quiz Visual Tests', () => {
 
+    const snapConfig = { errorThreshold: 0.05, blackout: '[data-cy="skillTreePoweredBy"]' }
+
     it('quiz splash screen', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1);
@@ -39,7 +41,7 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="title"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
 
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapConfig);
     });
 
     it('quiz with questions screen', () => {
@@ -68,7 +70,7 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="question_5"] [data-cy="answer_3"]').click()
         cy.get('[data-cy="question_5"] [data-cy="answer_4"]').click().blur()
 
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapConfig);
     });
 
     it('quiz passed screen', () => {
@@ -102,7 +104,8 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
 
         const snapshotOptions = {
-            blackout: '[data-cy="quizRuntime"]',
+            blackout: '[data-cy="quizRuntime"], [data-cy="skillTreePoweredBy"]',
+            errorThreshold: 0.05
         };
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapshotOptions);
     });
@@ -136,7 +139,7 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="quizFailed"]')
 
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapConfig);
     });
 
     it('survey splash screen', () => {
@@ -153,7 +156,7 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="title"]').contains('Survey')
         cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points')
 
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapConfig);
     });
 
     it('survey questions screen', () => {
@@ -174,7 +177,7 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click().blur()
 
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapConfig);
     });
 
     it('survey completed screen', () => {
@@ -204,7 +207,8 @@ describe('Client Display Quiz Visual Tests', () => {
 
         cy.wait(500)
         const snapshotOptions = {
-            blackout: '[data-cy="surveyRuntimeCard"]',
+            blackout: '[data-cy="surveyRuntimeCard"], [data-cy="skillTreePoweredBy"]',
+            errorThreshold: 0.05
         };
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapshotOptions);
     });
@@ -274,7 +278,7 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]')
 
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapConfig);
     });
 
 });

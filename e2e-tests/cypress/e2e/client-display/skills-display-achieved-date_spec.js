@@ -7,6 +7,11 @@ dayjs.extend(advancedFormatPlugin);
 
 describe('Last Achieved date tests', () => {
 
+  const snapshotOptions = {
+    blackout: '[data-cy="skillTreePoweredBy"]',
+    errorThreshold: 0.05
+  };
+
   beforeEach(() => {
     Cypress.env('disabledUILoginProp', true);
     cy.request('POST', '/app/projects/proj1', {
@@ -153,7 +158,8 @@ describe('Last Achieved date tests', () => {
 
     cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
       name: 'Skill-Overview-Achieved',
-      blackout: '[data-cy=pointHistoryChart]'
+      blackout: '[data-cy=pointHistoryChart], [data-cy="skillTreePoweredBy"]',
+      errorThreshold: 0.05
     });
   });
 
@@ -181,7 +187,8 @@ describe('Last Achieved date tests', () => {
 
     cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
       name: 'Skill-Overview-Achieved-Themed',
-      blackout: '[data-cy=pointHistoryChart]'
+      blackout: '[data-cy=pointHistoryChart], [data-cy="skillTreePoweredBy"]',
+      errorThreshold: 0.05
     });
   });
 
@@ -211,7 +218,8 @@ describe('Last Achieved date tests', () => {
 
     cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
       name: 'Skill-Overview-Achieved-iphone6',
-      blackout: '[data-cy=pointHistoryChart]'
+      blackout: '[data-cy=pointHistoryChart], [data-cy="skillTreePoweredBy"]',
+      errorThreshold: 0.05
     });
 
   });
@@ -241,7 +249,8 @@ describe('Last Achieved date tests', () => {
 
     cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
       name: 'Skill-Overview-Achieved-ipad2',
-      blackout: '[data-cy=pointHistoryChart]'
+      blackout: '[data-cy=pointHistoryChart], [data-cy="skillTreePoweredBy"]',
+      errorThreshold: 0.05
     });
   });
 

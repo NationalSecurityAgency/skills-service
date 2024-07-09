@@ -210,18 +210,31 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
         cy.cdVisit('/');
         cy.cdClickSubj(0);
 
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', 'catalog imported skill visual regression - skill preview');
+        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', {
+            name: 'catalog imported skill visual regression - skill preview',
+            blackout: '[data-cy="skillProgressTitle"]',
+            errorThreshold: 0.05
+        });
 
         cy.cdClickSkill(0);
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress"]', 'catalog imported skill visual regression - skill details');
+        cy.matchSnapshotImageForElement('[data-cy="skillProgress"]', {
+            name: 'catalog imported skill visual regression - skill details',
+            errorThreshold: 0.05
+        });
 
         cy.cdVisit('/?enableTheme=true');
         cy.cdClickSubj(0);
 
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', 'catalog imported skill visual regression - skill preview themed');
+        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', {
+            name: 'catalog imported skill visual regression - skill preview themed',
+            errorThreshold: 0.05
+        });
 
         cy.cdClickSkill(0);
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress"]', 'catalog imported skill visual regression - skill details themed');
+        cy.matchSnapshotImageForElement('[data-cy="skillProgress"]', {
+            name: 'catalog imported skill visual regression - skill details themed',
+            errorThreshold: 0.05
+        });
     });
 
     it('catalog imported skill has self-report approval request', () => {

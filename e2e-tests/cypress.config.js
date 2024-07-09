@@ -45,7 +45,7 @@ module.exports = defineConfig({
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
   },
   env: {
-    "type": "actual",
+    "visualRegressionType": "regression",
     "SNAPSHOT_BASE_DIRECTORY": "./cypress/visualRegression/base",
     "SNAPSHOT_DIFF_DIRECTORY": "./cypress/visualRegression/diff",
     "ALWAYS_GENERATE_DIFF": false

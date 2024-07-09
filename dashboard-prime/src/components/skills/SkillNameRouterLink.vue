@@ -22,11 +22,6 @@ const props = defineProps({
   skill: Object,
   subjectId: String,
   filterValue: String,
-  limit: {
-    type: Number,
-    required: false,
-    default: 45,
-  },
   readOnly: {
     type: Boolean,
     required: false,
@@ -41,9 +36,6 @@ onMounted(() => {
   displayFullText.value = props.skill.name.length < props.limit + slop.value;
 });
 
-const truncate = computed(() => {
-  return props.skill.name.length >= props.limit + slop.value;
-});
 
 const toDisplay = computed(() => {
   if (displayFullText.value) {
@@ -66,26 +58,18 @@ const highlightedValue = computed(() => {
 </script>
 
 <template>
-  <div class="inline-block">
+  <div class="">
     <router-link :data-cy="`manageSkillLink_${skill.skillId}`"
-                 tag="span"
                  :to="{ name:'SkillOverview', params: { projectId: skill.projectId, subjectId: subjectId, skillId: skill.skillId }}"
                  :aria-label="`${readOnly ? 'View' : 'Manage'} skill ${skill.name} via link`">
-      <span data-cy="highlightedValue" class="text-lg inline-block" v-html="highlightedValue" />
+      <div data-cy="highlightedValue"
+           class="text-lg overflow-hidden text-overflow-ellipsis"
+           style="overflow-wrap: anywhere;"
+           :title="toDisplay?.length > 30 ? toDisplay : ''"
+           v-html="highlightedValue" />
     </router-link>
-    <a v-if="truncate"
-       @click="displayFullText = !displayFullText"
-       aria-label="Show/Hide truncated text"
-       data-cy="showMoreOrLessBtn">
-      <small v-if="displayFullText" data-cy="showLess"> &lt;&lt; less</small>
-      <small v-else data-cy="showMore"><em>... &gt;&gt; more</em></small>
-    </a>
   </div>
 </template>
 
 <style scoped>
-a,
-a small {
-  cursor: pointer;
-}
 </style>

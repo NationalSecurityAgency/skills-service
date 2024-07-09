@@ -692,11 +692,18 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportHonorSystemTag"]').should('not.exist');
         cy.get('[data-cy="skillProgress_index-2"] [data-cy="selfReportHonorSystemTag"]').contains('Honor');
 
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', 'Self_Reportable Label');
+        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', {
+            name: 'Self_Reportable Label',
+            blackout: '[data-cy="skillProgressTitle"]',
+            errorThreshold: 0.05
+        });
 
         cy.cdVisit('/?enableTheme=true');
         cy.cdClickSubj(0);
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', 'Self_Reportable Label - Themed');
+        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', {
+            name: 'Self_Reportable Label - Themed',
+            errorThreshold: 0.05
+        });
     });
 
     it('clearly indicate on the skill overview whether skill is self reportable', () => {

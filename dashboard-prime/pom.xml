@@ -168,6 +168,8 @@
                         <exclude>dist/**</exclude>
                         <exclude>node_modules/**</exclude>
                         <exclude>.eslintrc.cjs</exclude>
+                        <exclude>**/theme-overrides.scss</exclude>
+                        <exclude>**/theme.css</exclude>
                     </excludes>
                 </configuration>
                 <executions>

@@ -27,29 +27,14 @@ const props = defineProps({
     required: true
   }
 })
-const emit = defineEmits(['edit', 'delete', 'share', 'unshare'])
+const emit = defineEmits(['edit', 'delete'])
 const router = useRouter()
 
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
-const shareBtnIcon = computed(() => {
-  return props.options?.shareEnabled === true ? 'fas fa-hands-helping' : 'fas fa-handshake-alt-slash'
-})
-
-const shareTitle = computed(() => {
-  return props.options?.shareEnabled === true ? `Share ${props.options?.type}` : `Unshare ${props.options?.type}`
-})
 
 const editBtn = ref();
 const deleteBtn = ref();
-
-const handleShareClick = () => {
-  let eventName = 'share'
-  if (props.options.shareEnabled === false) {
-    eventName = 'unshare'
-  }
-  emit(eventName)
-}
 
 const handleManageClick = () => {
   if (props.to) {
@@ -90,16 +75,6 @@ defineExpose({
     <div v-if="!isReadOnlyProj" class="flex-1 text-right">
       <ButtonGroup>
         <SkillsButton
-          v-if="options.showShare === true"
-          :id="`shareBtn${buttonIdSuffix}`"
-          ref="shareBtn"
-          size="small"
-          outlined
-          severity="info"
-          :icon="shareBtnIcon"
-          @click="handleShareClick"
-          :title="shareTitle" />
-        <SkillsButton
           :id="`editBtn${buttonIdSuffix}`"
           ref="editBtn"
           icon="fas fa-edit"
@@ -117,7 +92,6 @@ defineExpose({
         <SkillsButton
           :id="`deleteBtn${buttonIdSuffix}`"
           variant="outline-primary"
-          v-tooltip="options.deleteDisabledText"
           ref="deleteBtn"
           size="small"
           outlined

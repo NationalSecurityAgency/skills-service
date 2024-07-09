@@ -234,9 +234,7 @@ describe('Levels Management Tests', () => {
             .eq(0)
             .contains('6');
         cy.get('@row6')
-            .find('.icon-warning')
-            .click();
-        cy.contains('Level is unachievable. Insufficient available points in project');
+            .contains('Level is unachievable. Insufficient available points in project');
 
         // do the same for a subject
         cy.visit('/administrator/projects/proj1/subjects/subj1');
@@ -268,9 +266,7 @@ describe('Levels Management Tests', () => {
             .eq(0)
             .contains('6');
         cy.get('@row6')
-            .find('.icon-warning')
-            .click();
-        cy.contains('Level is unachievable. Insufficient available points in project');
+            .contains('Level is unachievable. Insufficient available points in project');
     });
 
     it('subject: once max levels are reached add level button should be disabled', () => {
