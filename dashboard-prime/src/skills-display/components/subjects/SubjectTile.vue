@@ -21,6 +21,7 @@ import VerticalProgressBar from '@/skills-display/components/progress/VerticalPr
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
+import CardWithVericalSections from '@/components/utils/cards/CardWithVericalSections.vue'
 
 const props = defineProps({
   subject: {
@@ -68,12 +69,19 @@ const progress = computed(() => {
 </script>
 
 <template>
-  <Card class="h-full text-center" data-cy="subjectTile" :pt="{ body: { class: 'pt-1'}}">
+  <div data-cy="subjectTile" class="h-full">
+  <CardWithVericalSections class="h-full text-center" :data-cy="`subjectTile-${subject.subjectId}`">
     <template #content>
-      <div :data-cy="`subjectTile-${subject.subjectId}`">
+      <div class="px-3 pt-4">
         <ribbon :color="ribbonColor" class="subject-tile-ribbon">
-          <div class="overflow-hidden text-overflow-ellipsis" style="max-width:20rem">{{ subject.subject }}</div>
+          <div class="flex justify-content-center">
+            <div class="overflow-hidden text-overflow-ellipsis text-center" style="max-width:20rem">{{ subject.subject }}</div>
+          </div>
         </ribbon>
+      </div>
+    </template>
+    <template #footer>
+      <div  class="px-3 pb-3">
         <i :class="subject.iconClass" class="text-7xl text-400 sd-theme-subject-tile-icon" aria-hidden="true"/>
         <div class="text-xl pt-1 font-medium" data-cy="levelTitle">{{ attributes.levelDisplayName }} {{ subject.skillsLevel }}</div>
         <div class="flex justify-content-center mt-2 subject-progress-stars-icons">
@@ -134,20 +142,21 @@ const progress = computed(() => {
             <!--                                 :total-progress-before-today="progress.levelBeforeToday"/>-->
           </div>
         </div>
+        <div class="pt-4" >
+          <router-link v-if="!attributes.isSummaryOnly"
+            :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('SubjectDetailsPage'), params: { subjectId: subject.subjectId } }"
+            :aria-label="`Click to navigate to the ${subject.subject} subject page.`"
+            data-cy="subjectTileBtn">
+            <Button
+              label="View"
+              icon="far fa-eye"
+              outlined class="w-full" size="small" />
+          </router-link>
+        </div>
       </div>
     </template>
-    <template #footer v-if="!attributes.isSummaryOnly">
-      <router-link
-        :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('SubjectDetailsPage'), params: { subjectId: subject.subjectId } }"
-        :aria-label="`Click to navigate to the ${subject.subject} subject page.`"
-        data-cy="subjectTileBtn">
-        <Button
-          label="View"
-          icon="far fa-eye"
-          outlined class="w-full" size="small" />
-      </router-link>
-    </template>
-  </Card>
+  </CardWithVericalSections>
+  </div>
 </template>
 
 <style>

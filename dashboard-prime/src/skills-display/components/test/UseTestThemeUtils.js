@@ -51,8 +51,8 @@ export const useTestThemeUtils = () => {
       watermarkIconColor: '#a6c5f7',
     },
     buttons: {
-      backgroundColor: '#152E4d',
-      foregroundColor: '#59ad52',
+      backgroundColor: '#bed4ed',
+      foregroundColor: '#3f6893',
     },
     prerequisites: {
       achievedColor: '#6df28b',

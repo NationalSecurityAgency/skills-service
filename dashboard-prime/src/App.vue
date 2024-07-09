@@ -135,7 +135,12 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
 </script>
 
 <template>
-  <div role="presentation" class="m-0 surface-ground">
+  <div role="presentation"
+       :class="{
+          'skills-dark-theme': themeHelper.isDarkTheme,
+          'skills-light-theme': !themeHelper.isDarkTheme
+       }"
+       class="m-0 surface-ground skills-light-theme">
     <VueAnnouncer class="sr-only" />
 
     <customizable-header v-if="isCustomizableHeader" role="region" aria-label="dynamic customizable header"></customizable-header>
@@ -168,5 +173,32 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
 <style scoped>
 .overall-container {
   min-height: calc(100vh - 100px);
+}
+
+</style>
+
+<style>
+body a, a:link, a:visited {
+  text-decoration: none !important;
+}
+
+body .skills-light-theme a, a:link {
+  color: #2f64bd !important;
+}
+
+body .skills-light-theme a:visited {
+  color: #784f9f !important;
+}
+
+body .skills-dark-theme a, a:link {
+  color: #99befb !important;
+}
+
+body .skills-dark-theme a:visited {
+  color: #d5aafb !important;
+}
+
+body a:hover, body a:focus {
+  text-decoration: underline !important;
 }
 </style>

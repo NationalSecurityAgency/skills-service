@@ -209,8 +209,9 @@ describe('Client Display Tests', () => {
         cy.cdBack('Subject 1');
         cy.cdBack();
 
-        // TODO: put back
         cy.wait('@pointHistoryChart');
+        cy.validatePoweredBy()
+        cy.get('[data-cy="subjectTileBtn"]').should('have.length', 3);
         cy.wait(500); //we have to wait for the chart to load before doing accessibility tests
         cy.customA11y();
     });

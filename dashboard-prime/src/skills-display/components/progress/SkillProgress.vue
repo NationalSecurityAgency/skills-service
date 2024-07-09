@@ -123,7 +123,7 @@ const isSkillComplete = computed(() => props.skill && props.skill.meta && props.
 </script>
 
 <template>
-  <div class="text-left" data-cy="skillProgress">
+  <div class="text-left skills-theme-skills-progress" data-cy="skillProgress">
     <div v-if="skill.crossProject && !skillsDisplayInfo.isGlobalBadgePage.value" class="flex gap-3 flex-wrap">
       <div class="flex-1">
         <div class="text-xl"><span class="text-color-secondary font-italic">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}</div>

@@ -96,8 +96,9 @@ Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwi
         name : snapName,
         selector,
         blackout: ((options && options.blackout) || null),
-        errorThreshold: options?.errorThreshold
+
     };
+    // errorThreshold: options?.errorThreshold
     cy.doMatchSnapshotImage(params);
 })
 
@@ -116,7 +117,7 @@ Cypress.Commands.add("doMatchSnapshotImage", (options) => {
     cy.wait(1500);
 
     const visualRegressionOptions = {
-        errorThreshold: 1 // in percent
+        errorThreshold: 0.01 // in percent
     }
     if (options && options.errorThreshold) {
         visualRegressionOptions.errorThreshold = options.errorThreshold
