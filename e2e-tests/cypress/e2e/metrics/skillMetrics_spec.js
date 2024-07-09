@@ -18,7 +18,7 @@ var moment = require('moment-timezone');
 describe('Metrics Tests - Skills', () => {
 
     const waitForSnap = 4000;
-    const visualRegressionOptions = { errorThreshold: 5 }
+    const visualRegressionOptions = { errorThreshold: 0.05 }
 
     before(() => {
         Cypress.Commands.add('addUserTag', (userId, tagKey, tags) => {

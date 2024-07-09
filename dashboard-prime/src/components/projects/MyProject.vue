@@ -15,7 +15,6 @@ limitations under the License.
 */
 <script setup>
 import { computed, inject, onMounted, ref } from 'vue'
-import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import Badge from 'primevue/badge'
 import Avatar from 'primevue/avatar'
 import Card from 'primevue/card'
@@ -26,7 +25,6 @@ import ProjectCardControls from '@/components/projects/ProjectCardControls.vue'
 import UserRolesUtil from '@/components/utils/UserRolesUtil'
 import EditProject from '@/components/projects/EditProject.vue'
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
-import { useAccessState } from '@/stores/UseAccessState.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import ProjectExpirationWarning from '@/components/projects/ProjectExpirationWarning.vue'
@@ -35,22 +33,16 @@ import { useAdminProjectsState } from '@/stores/UseAdminProjectsState.js'
 
 const props = defineProps(['project', 'disableSortControl'])
 const appConfig = useAppConfig()
-const accessState = useAccessState()
 const emit = defineEmits(['project-deleted', 'copy-project', 'pin-removed', 'sort-changed-requested'])
 const numberFormat = useNumberFormat()
 const projectsState = useAdminProjectsState()
-const announcer = useSkillsAnnouncer()
 const confirm = useConfirm();
 
 // data items
 const pinned = ref(false);
 const projectInternal = computed(() => props.project );
 const stats = ref([]);
-const showEditProjectModal = ref(false);
 const showCopyProjectModal = ref(false);
-const deleteProjectDisabled = ref(false);
-const deleteProjectToolTip = ref('');
-const cancellingExpiration = ref(false);
 const showDeleteValidation = ref(false);
 let overSortControl = ref(false);
 const sortControl = ref();
@@ -65,12 +57,6 @@ onMounted(() => {
 });
 
 // computed
-const minimumPoints = computed(() => {
-  return appConfig.minimumProjectPoints;
-});
-const isRootUser = computed(() => {
-  return accessState.isRoot;
-});
 const isReadOnlyProj = computed(() => {
   return UserRolesUtil.isReadOnlyProjRole(projectInternal.value.userRole);
 });
@@ -212,9 +198,7 @@ defineExpose({
                 @copy-project="copyProject"
                 @delete-project="showDeleteValidation = true"
                 @unpin-project="unpin"
-                :read-only-project="isReadOnlyProj"
-                :is-delete-disabled="deleteProjectDisabled"
-                :delete-disabled-text="deleteProjectToolTip"/>
+                :read-only-project="isReadOnlyProj"/>
           </div>
         </div>
 
@@ -224,12 +208,6 @@ defineExpose({
               <i :class="stat.icon" aria-hidden="true" class="text-xl text-primary"/>
               <div class="uppercase">{{ stat.label }}</div>
               <div class="text-2xl mt-1 font-semibold" data-cy="statNum">{{ numberFormat.pretty(stat.count) }}</div>
-              <i v-if="stat.warn" class="fas fa-exclamation-circle text-yellow-400 ml-1"
-                 style="font-size: 1.5rem;"
-                 v-tooltip.hover="stat.warnMsg"
-                 data-cy="warning"
-                 role="alert"
-                 :aria-label="`Warning: ${stat.warnMsg}`"/>
 
               <div v-if="stat.secondaryStats">
                 <div v-for="secCount in stat.secondaryStats" :key="secCount.label">

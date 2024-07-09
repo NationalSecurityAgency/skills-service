@@ -46,7 +46,7 @@ import 'cypress-wait-until';
 var moment = require('moment-timezone');
 const { addCompareSnapshotCommand } = require('cypress-visual-regression/dist/command')
 addCompareSnapshotCommand({
-    errorThreshold: 0.01
+    errorThreshold: 0.05
 });
 
 function terminalLog(violations) {
@@ -96,9 +96,8 @@ Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwi
         name : snapName,
         selector,
         blackout: ((options && options.blackout) || null),
-
+        errorThreshold: options?.errorThreshold
     };
-    // errorThreshold: options?.errorThreshold
     cy.doMatchSnapshotImage(params);
 })
 

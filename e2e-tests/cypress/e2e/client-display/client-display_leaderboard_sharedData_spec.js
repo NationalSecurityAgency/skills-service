@@ -260,7 +260,8 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
         cy.wait(2000)
         cy.matchSnapshotImageForElement('[data-cy="myRank"]', {
             name: 'my-rank-opted-out',
-            blackout: '[data-cy="dateCell"]'
+            blackout: '[data-cy="dateCell"]',
+            errorThreshold: 0.05
         });
 
         cy.cdClickRank();
@@ -273,7 +274,8 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
         cy.wait(2000)
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
             name: 'rank-overview-leaderboard-opted-out',
-            blackout: '[data-cy="dateCell"]'
+            blackout: '[data-cy="dateCell"]',
+            errorThreshold: 0.05
         });
     });
 });

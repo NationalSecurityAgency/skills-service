@@ -198,7 +198,7 @@ if (props.asyncLoadDataFunction) {
     :cancel-button-label="cancelButtonLabel"
     :cancel-button-icon="cancelButtonIcon"
     :cancel-button-severity="cancelButtonSeverity"
-    :pt="{ content: { class: 'p-0' }}"
+    :pt="{ content: { class: 'p-0' }, maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }"
     footer-class="px-3 pb-3"
   >
     <div class="p-3">

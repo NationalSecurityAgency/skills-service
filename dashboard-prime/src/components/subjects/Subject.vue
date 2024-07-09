@@ -32,8 +32,6 @@ const isLoading = ref(false);
 const showDeleteDialog = ref(false);
 const cardOptions = ref({ controls: {} });
 const subjectInternal = ref({ ...subject });
-const deleteSubjectDisabled = ref(false);
-const deleteSubjectToolTip = ref('');
 const navCardWithStatsAndControlsRef = ref();
 
 onMounted(() => {
@@ -76,8 +74,6 @@ const buildCardOptions = () => {
       type: 'Subject',
       name: subjectInternal.value.name,
       id: subjectInternal.value.subjectId,
-      deleteDisabledText: deleteSubjectToolTip,
-      isDeleteDisabled: deleteSubjectDisabled,
     },
     displayOrder: subject.displayOrder,
   };
@@ -148,8 +144,7 @@ defineExpose({
             :button-id-suffix="subjectInternal.subjectId"
             @edit="createOrUpdateSubject(props.subject, true)"
             @delete="deleteSubject"
-            :is-delete-disabled="deleteSubjectDisabled"
-            :delete-disabled-text="deleteSubjectToolTip"/>
+            />
       </template>
       <template #footer>
         <div class="flex justify-content-end">

@@ -21,7 +21,7 @@ import { useAdminProjectsState } from '@/stores/UseAdminProjectsState.js'
 const accessState = useAccessState()
 const projectsState = useAdminProjectsState()
 
-const props = defineProps(['project', 'isDeleteDisabled', 'deleteDisabledText', 'readOnlyProject'])
+defineProps(['project', 'readOnlyProject'])
 const emit = defineEmits(['edit-project', 'unpin-project', 'copy-project', 'delete-project'])
 
 const isRootUser = computed(() => accessState.isRoot)
@@ -100,8 +100,6 @@ const isRootUser = computed(() => accessState.isRoot)
         :track-for-focus="true"
         class="p-text-secondary"
         @click="emit('delete-project', $event.target.value)"
-        :disabled="isDeleteDisabled"
-        v-tooltip="deleteDisabledText"
         title="Delete Project"
         :aria-label="'Delete Project ' + project.name"
         role="button"

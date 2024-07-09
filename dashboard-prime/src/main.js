@@ -22,8 +22,8 @@ import ToastService from 'primevue/toastservice'
 import App from './App.vue'
 import router from './router'
 import VueAnnouncer from '@vue-a11y/announcer'
-import VueApexCharts from 'vue3-apexcharts';
-import log from 'loglevel';
+import VueApexCharts from 'vue3-apexcharts'
+import log from 'loglevel'
 
 import Button from 'primevue/button'
 import ButtonGroup from 'primevue/buttongroup'
@@ -38,34 +38,33 @@ import InlineMessage from 'primevue/inlinemessage'
 import Menu from 'primevue/menu'
 import ProgressSpinner from 'primevue/progressspinner'
 import Breadcrumb from 'primevue/breadcrumb'
-import Dropdown from 'primevue/dropdown';
-import Dialog from 'primevue/dialog';
-import InputSwitch from 'primevue/inputswitch';
-import BlockUI from 'primevue/blockui';
-import SelectButton from 'primevue/selectbutton';
-import Badge from 'primevue/badge';
+import Dropdown from 'primevue/dropdown'
+import Dialog from 'primevue/dialog'
+import InputSwitch from 'primevue/inputswitch'
+import BlockUI from 'primevue/blockui'
+import SelectButton from 'primevue/selectbutton'
+import Badge from 'primevue/badge'
 import MultiSelect from 'primevue/multiselect'
 import InputNumber from 'primevue/inputnumber'
-import Tag from 'primevue/tag';
-import DataTable from 'primevue/datatable';
+import Tag from 'primevue/tag'
+import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
-import InputGroup from 'primevue/inputgroup';
-import InputGroupAddon from 'primevue/inputgroupaddon';
-import Fieldset from 'primevue/fieldset';
-import ToggleButton from 'primevue/togglebutton';
-import RadioButton from 'primevue/radiobutton';
-import Checkbox from 'primevue/checkbox';
-import Rating from 'primevue/rating';
-import Textarea from 'primevue/textarea';
-import Listbox from 'primevue/listbox';
-import ProgressBar from 'primevue/progressbar';
+import InputGroup from 'primevue/inputgroup'
+import InputGroupAddon from 'primevue/inputgroupaddon'
+import Fieldset from 'primevue/fieldset'
+import ToggleButton from 'primevue/togglebutton'
+import RadioButton from 'primevue/radiobutton'
+import Checkbox from 'primevue/checkbox'
+import Rating from 'primevue/rating'
+import Textarea from 'primevue/textarea'
+import Listbox from 'primevue/listbox'
+import ProgressBar from 'primevue/progressbar'
 import Chip from 'primevue/chip'
 
-import ConfirmationService from 'primevue/confirmationservice';
-import BadgeDirective from 'primevue/badgedirective';
+import ConfirmationService from 'primevue/confirmationservice'
+import BadgeDirective from 'primevue/badgedirective'
 
-import Tooltip from 'primevue/tooltip';
-import FocusTrap from 'primevue/focustrap';
+import FocusTrap from 'primevue/focustrap'
 
 import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue'
 import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue'
@@ -79,13 +78,13 @@ import SkillsTextarea from '@/components/utils/inputForm/SkillsTextarea.vue'
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import SkillsCardHeader from '@/components/utils/cards/SkillsCardHeader.vue'
-import { useSkillsReporterDirective } from '@/components/utils/SkillsReporterDirective.js';
+import { useSkillsReporterDirective } from '@/components/utils/SkillsReporterDirective.js'
 
 import 'primeflex/primeflex.css'
 import '@fortawesome/fontawesome-free/css/all.css'
-import 'material-icons/css/material-icons.css';
-import 'material-icons/iconfont/material-icons.css';
-import '@toast-ui/editor/dist/toastui-editor.css';
+import 'material-icons/css/material-icons.css'
+import 'material-icons/iconfont/material-icons.css'
+import '@toast-ui/editor/dist/toastui-editor.css'
 // import 'primevue/resources/themes/lara-light-green/theme.css'
 import 'video.js/dist/video-js.css'
 
@@ -155,7 +154,6 @@ app.component('SkillsCardHeader', SkillsCardHeader)
 const skillsReporterDirective = useSkillsReporterDirective();
 app.directive('skills', skillsReporterDirective.vSkills);
 app.directive('skills-onMount', skillsReporterDirective.vSkillsOnMounted);
-app.directive('tooltip', Tooltip);
 app.directive('focustrap', FocusTrap);
 app.directive('badge', BadgeDirective);
 

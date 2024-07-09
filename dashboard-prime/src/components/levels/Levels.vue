@@ -283,11 +283,9 @@ const isFlex = computed(() => responsive.sm.value)
               icon="fas fa-trash-alt" label="Remove Highest">
             </SkillsButton>
           </span>
-<!--          <b-tooltip target="add-button" title="Reached maximum limit of levels." :disabled="!reachedMaxLevels"></b-tooltip>-->
           <span id="add-button">
             <SkillsButton @click="editLevel()" ref="addLevel" :disabled="reachedMaxLevels" :track-for-focus="true" id="addLevel"
                       size="small" data-cy="addLevel" icon="fas fa-plus-circle" label="Add Next">
-<!--              <span class="d-none d-sm-inline">Add</span> Next <i class="fas fa-plus-circle" aria-hidden="true"/>-->
             </SkillsButton>
           </span>
         </div>
@@ -300,12 +298,12 @@ const isFlex = computed(() => responsive.sm.value)
                    data-cy="levelsTable" striped-rows>
           <Column field="level" header="Level" :class="{'flex': isFlex }">
             <template #body="slotProps">
+              <div>
               {{ slotProps.data.level }}
-              <span v-if="slotProps.data.achievable === false" class="icon-warning text-sm">
-                <i class="fa fa-exclamation-circle text-warning"
-                   aria-label="Level is unachievable. Insufficient available points in project."
-                   v-tooltip="'Level is unachievable. Insufficient available points in project.'"/> Level is unachievable. Insufficient available points in project.
-              </span>
+              </div>
+              <InlineMessage v-if="slotProps.data.achievable === false" class="text-sm" severity="warn">
+                Level is unachievable. Insufficient available points in project.
+              </InlineMessage>
             </template>
           </Column>
           <Column field="percent" header="Percent" :class="{'flex': isFlex }">
@@ -318,9 +316,9 @@ const isFlex = computed(() => responsive.sm.value)
                   <span v-if="slotProps.data.pointsTo">{{ slotProps.data.pointsTo }}</span>
                   <span v-else><i class="fas fa-infinity"/></span>
                 </span>
-              <span v-else aria-label="Points cannot be calculated. Please create more skills first.">N/A
-                  <span class="text-500 text-sm"><i class="fa fa-exclamation-circle"/> Please create more skills first</span>
-                </span>
+              <div v-else aria-label="Points cannot be calculated. Please create more skills first." class="flex align-items-center">N/A
+                  <InlineMessage severity="warn" class="ml-1"> Please create more skills first</InlineMessage>
+              </div>
             </template>
           </Column>
           <Column field="edit" header="Edit" :class="{'flex': isFlex }">

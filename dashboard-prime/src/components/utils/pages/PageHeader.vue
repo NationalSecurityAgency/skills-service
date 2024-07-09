@@ -55,13 +55,6 @@ const colors = useColors()
                         <span v-if="stat.preformatted" data-cy="statPreformatted" v-html="stat.preformatted" />
                         <span v-else data-cy="statValue">{{ numberFormat.pretty(stat.count) }}</span>
                       </div>
-
-                      <span v-if="stat.warnMsg" class="ml-1">
-                            <i class="fa fa-exclamation-circle text-warning"
-                               :aria-label="`Warning: ${stat.warnMsg}`"
-                               role="alert"
-                               v-tooltip="stat.warnMsg" />
-                          </span>
                     </div>
                     <div class="ml-3 flex-1 text-right">
                       <i :class="`${stat.icon} ${colors.getTextClass(index)}`" style="font-size: 2.2rem;" aria-hidden="true"></i>

@@ -92,7 +92,6 @@ defineExpose({
         <SkillsButton
           :id="`deleteBtn${buttonIdSuffix}`"
           variant="outline-primary"
-          v-tooltip="options.deleteDisabledText"
           ref="deleteBtn"
           size="small"
           outlined

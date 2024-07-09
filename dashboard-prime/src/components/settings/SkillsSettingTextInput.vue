@@ -15,8 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { useField } from 'vee-validate'
-import InlineHelp from "@/components/utils/InlineHelp.vue";
-import { computed } from "vue";
+import { computed } from 'vue'
 
 const props = defineProps({
   name: {

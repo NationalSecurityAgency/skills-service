@@ -75,8 +75,6 @@ const cardOptions = computed(() => {
       type: props.global ? 'Global Badge' : 'Badge',
       name: props.badge.name,
       id: props.badge.badgeId,
-      deleteDisabledText: '',
-      isDeleteDisabled: false,
       isFirst: props.badge.isFirst,
       isLast: props.badge.isLast,
     },

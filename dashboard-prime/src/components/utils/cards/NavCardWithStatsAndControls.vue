@@ -85,12 +85,6 @@ defineExpose({
             <i :class="stat.icon" class="text-xl"></i>
             <div class="uppercase mt-1">{{ stat.label }}</div>
             <div class="text-2xl mt-2" data-cy="statNum">{{ stat.count }}</div>
-            <i v-if="stat.warn" class="fas fa-exclamation-circle text-warning ml-1"
-               style="font-size: 1.5rem;"
-               v-tooltip="stat.warnMsg"
-               role="alert"
-               :aria-label="`Warning: ${stat.warnMsg}`"
-               data-cy="warning"/>
             <div v-if="stat.secondaryStats">
               <div v-for="secCount in stat.secondaryStats" :key="secCount.label">
                 <div v-if="secCount.count > 0" style="font-size: 0.9rem">

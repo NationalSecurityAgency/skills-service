@@ -95,7 +95,6 @@ const navOnSmallScreen = (changeEvent) => {
                           :data-cy="`nav-${navItem.name}`">
                     <div class="" :class="{'mr-4': !showCollapsed}">
                       <i :class="`${navItem.iconClass} ${colors.getTextClass(index)}${isExactActive ? ' bg-primary-reverse border-round border-1 py-1' : ''}`"
-                         v-tooltip="{ value: navItem.name, autoHide: false, disabled: !responsive.lg.value }"
                          class="fas mr-2 w-2rem"
                          aria-hidden="true" /> <span v-if="!showCollapsed" class="font-medium">{{ navItem.name }}</span>
                     </div>
