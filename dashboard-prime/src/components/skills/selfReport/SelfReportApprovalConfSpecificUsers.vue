@@ -106,12 +106,12 @@ const updateSelectedList = () => {
 </script>
 
 <template>
-  <Card>
+  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #header>
       <SkillsCardHeader title="Split Workload By Specific Users"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex mx-2">
+      <div class="flex px-3 pt-3 gap-2 flex-column md:flex-row align-items-center">
         <div class="flex flex-1 px-1">
           <existing-user-input
               class="w-full"
@@ -180,7 +180,7 @@ const updateSelectedList = () => {
         </SkillsDataTable>
 
         <no-content2 v-if="!hadData" title="Not Configured Yet..."
-                     class="my-5"
+                     class="py-5"
                      data-cy="noUserConf"
                      icon-size="fa-2x"
                      icon="fas fa-user-plus">
