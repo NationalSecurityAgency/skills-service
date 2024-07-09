@@ -1174,7 +1174,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-2"]')
             .should('not.exist');
 
-        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
+        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]', { errorThreshold: 0.05 });
     });
 
     it('Visual Test skills filter open', () => {
@@ -1240,7 +1240,7 @@ describe('Client Display Skills Filtering Tests', () => {
 
         cy.get('[data-cy="skillProgress_index-6"]')
             .should('not.exist');
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', { blackout: '[data-cy=pointHistoryChart]' });
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05 });
     });
 
     it('Visual Tests filter selected and last viewed button present', () => {

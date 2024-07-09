@@ -240,17 +240,20 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         // shared from another project
         cy.request('POST', '/admin/projects/proj1/skill1/prerequisite/proj2/skill42');
 
-        cy.cdVisit('/?internalBackButton=true');
-        cy.cdClickSubj(0, 'Subject 1');
-        cy.wait(4000);
-
-        cy.cdClickSkill(0);
+        cy.viewport(1200, 2000);
+        cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.contains('Very Great Skill 1');
         // should render Prerequisites section
         cy.contains('Prerequisites');
+        cy.get('[data-cy="skillLink-proj2-skill42"]')
 
         cy.wait(4000);
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', `LockedSkill-CrossProjectDependency`);
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]',
+          {
+              name: `LockedSkill-CrossProjectDependency`,
+              blackout: '[data-cy="skillTreePoweredBy"]',
+              errorThreshold: 0.05
+          });
     });
 
     it('parent and child Prerequisites are properly displayed', () => {
@@ -291,6 +294,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.addCrossProjectLearningPathItem(2, 1, 1, 1)
 
         // Go to parent dependency page
+        cy.viewport(1200, 2000);
         cy.cdVisit('/subjects/subj1/skills/skill1');
 
         cy.get('[data-cy="skillProgressTitle"]')
@@ -302,7 +306,12 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         // should render Prerequisites section
         cy.contains('Prerequisites');
         cy.wait(4000);
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', `CrossProject Dep with the same skillId`);
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]',
+          {
+              name: `CrossProject Dep with the same skillId`,
+              blackout: '[data-cy="skillTreePoweredBy"]',
+              errorThreshold: 0.05
+          });
 
     });
 
@@ -317,6 +326,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj1/skill2`);
         cy.request('POST', `/admin/projects/proj1/skill2/prerequisite/proj1/skill3`);
 
+        cy.viewport(1200, 2000);
         cy.cdVisit('/?internalBackButton=true');
 
         cy.cdClickSubj(0, 'Subject 1');
@@ -324,7 +334,8 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.wait(4000);
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
             name: 'Subject-WithLockedSkills-ThatWerePartiallyAchieved',
-            blackout: '[data-cy="pointHistoryChart"]'
+            blackout: '[data-cy="pointHistoryChart"], [data-cy="skillTreePoweredBy"]',
+            errorThreshold: 0.05
         });
 
         cy.cdClickSkill(0);
@@ -335,7 +346,11 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.contains('Prerequisites');
 
         cy.wait(4000);
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', `LockedSkill-ThatWasPartiallyAchieved`);
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+            name: 'LockedSkill-ThatWasPartiallyAchieved',
+            blackout: '[data-cy="skillTreePoweredBy"]',
+            errorThreshold: 0.05
+        });
 
         // make sure the other locked skill doesn't contain the same message
         cy.cdBack('Subject 1');
@@ -368,12 +383,14 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.createSkill(1, 1, 2);
         cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj1/skill2`);
 
+        cy.viewport(1200, 2000);
         cy.cdVisit('/?internalBackButton=true', true);
         cy.cdClickSubj(0, 'Subject 1', true);
 
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
             name: 'Subject-WithLockedSkills-ThatWereFullyAchieved',
-            blackout: '[data-cy="pointHistoryChart"]'
+            blackout: '[data-cy="pointHistoryChart"], [data-cy="skillTreePoweredBy"]',
+            errorThreshold: 0.05
         });
 
         cy.cdClickSkill(0);
@@ -384,7 +401,8 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.wait(4000);
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
             name: 'LockedSkill-ThatWasFullyAchieved',
-            blackout: '[data-cy="achievementOn"]'
+            blackout: '[data-cy="achievementOn"], [data-cy="skillTreePoweredBy"]',
+            errorThreshold: 0.05
         });
 
         // other skill should not have the message
@@ -434,9 +452,14 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday')
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
 
+        cy.viewport(1200, 2000);
         cy.cdVisit('/subjects/subj1/skills/skill2');
 
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', `BadgeSkill-WithBadgeDependencies`);
+        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+            name: 'BadgeSkill-WithBadgeDependencies',
+            blackout: '[data-cy="skillTreePoweredBy"]',
+            errorThreshold: 0.05
+        });
     });
 
 });

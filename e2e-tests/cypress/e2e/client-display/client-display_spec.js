@@ -181,6 +181,7 @@ describe('Client Display Tests', () => {
         cy.contains('Lorem ipsum dolor sit amet');
         // 1 skill is locked
         cy.get('[data-cy="skillProgress_index-3"]').contains('Skill has 1 direct prerequisite(s).');
+        cy.wait(4000)
         cy.customA11y();
     });
 

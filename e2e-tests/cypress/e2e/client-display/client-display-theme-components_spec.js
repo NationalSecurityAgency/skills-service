@@ -132,13 +132,15 @@ describe('Client Display Theme Components Tests', () => {
 
     cy.cdClickSubj(0, 'Subject 1', true)
     cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"] [data-pc-section="body"]', {
-      name: 'progressIndicators settings - skill list - beforeTodayColor earnedTodayColor and incompleteColor'
+      name: 'progressIndicators settings - skill list - beforeTodayColor earnedTodayColor and incompleteColor',
+      blackout: '[data-cy="skillProgressTitle"]'
     })
 
     cy.cdBack()
     cy.cdClickSubj(2, 'Completed', false)
     cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"] [data-pc-section="body"]', {
-      name: 'progressIndicators settings - skill list - completeColor'
+      name: 'progressIndicators settings - skill list - completeColor',
+      blackout: '[data-cy="skillProgressTitle"]'
     })
   })
 

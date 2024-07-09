@@ -579,7 +579,7 @@ describe('Client Display Point History Tests', () => {
     return pointHistory
   }
 
-  it.only('levels achieved on subsequent days with many days in the timeline', () => {
+  it('levels achieved on subsequent days with many days in the timeline', () => {
     const pointHistory = createTimeline('2019-09-12', 120, 10, 10, 10)
     pointHistory.forEach((value) => {
       cy.log(value)
@@ -607,7 +607,7 @@ describe('Client Display Point History Tests', () => {
     cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
   })
 
-  it.only('rapid growth of points af start followed by no activity', () => {
+  it('rapid growth of points af start followed by no activity', () => {
     const pointHistory = createTimeline('2019-09-12', 240, 10, 100, 7, 30)
     cy.log(`Generated ${pointHistory.length} points`)
     const data = {
@@ -652,7 +652,7 @@ describe('Client Display Point History Tests', () => {
     cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]', 'PointHistoryChart-Reset')
   })
 
-  it.only('subject rapid growth of points af start followed by no activity', () => {
+  it('subject rapid growth of points af start followed by no activity', () => {
     const pointHistory = createTimeline('2019-09-12', 240, 10, 100, 7, 30)
     cy.log(`Generated ${pointHistory.length} points`)
     const data = {

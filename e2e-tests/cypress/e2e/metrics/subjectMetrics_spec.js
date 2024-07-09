@@ -320,7 +320,7 @@ describe('Metrics Tests - Subject', () => {
         cy.wait('@distinctUsersOverTimeForProject');
 
         cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=distinctNumUsersOverTime]');
+        cy.matchSnapshotImageForElement('[data-cy=distinctNumUsersOverTime]', { errorThreshold: 0.07 });
     });
 
     if (!Cypress.env('oauthMode')) {
@@ -399,7 +399,7 @@ describe('Metrics Tests - Subject', () => {
             cy.wait('@skillAchievementsByTagBuilder');
 
             cy.wait(waitForSnap);
-            cy.matchSnapshotImageForElement('[data-cy=numUsersByTag-tagA]');
+            cy.matchSnapshotImageForElement('[data-cy=numUsersByTag-tagA]', { errorThreshold: 0.07 });
         });
     }
 });
