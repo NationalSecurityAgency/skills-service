@@ -509,8 +509,7 @@ describe('Approver Role Tests', () => {
     });
 
     it('approver role does not have cannot add skill events', function () {
-        const runCheck = (projNum, assertChainPrepend = null) => {
-            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+        const runCheck = (projNum, chainerPrepend = '', addSkillEventAssertChainPrepend = '') => {
 
             // don't even show the link for private projects
             cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1/skills/skill1`);
@@ -521,11 +520,11 @@ describe('Approver Role Tests', () => {
             cy.wait(`@getSettingsProj${projNum}`);
             cy.wait(`@getProj${projNum}Skill1`)
             // cy.get('[data-cy="addSkillEventButton"]').should(`${chainerPrepend}be.enabled`);
-            cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should(`${chainerPrepend}not.exist`);
-            cy.get('[data-cy="addEventDisabledMsg"]').should(`${chainerPrepend}not.exist`);
+            cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should(`${addSkillEventAssertChainPrepend}exist`);
+            cy.get('[data-cy="addEventDisabledMsg"]').should(`${addSkillEventAssertChainPrepend}exist`);
         }
-        runCheck(2)
-        runCheck(1, 'not.')
+        runCheck(2, '', 'not.')
+        runCheck(1, 'not.','')
     });
 
 });
