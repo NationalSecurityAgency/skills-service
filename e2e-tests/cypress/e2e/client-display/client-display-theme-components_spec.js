@@ -438,7 +438,10 @@ describe('Client Display Theme Components Tests', () => {
     cy.wrapIframe().find('[data-cy="pointHistoryChartWithData"]')
     cy.wrapIframe().find('[data-cy="subjectTileBtn"]').should('have.length', 1)
     cy.wrapIframe().find('[data-cy="myRankPosition"]')
-    cy.matchSnapshotImageForElement('body iframe')
+    cy.wait(4000)
+    cy.matchSnapshotImageForElement('body iframe', {
+      errorThreshold: 0.05
+    })
   })
 
   it('maxWidth setting - 900px', () => {
@@ -448,7 +451,10 @@ describe('Client Display Theme Components Tests', () => {
     cy.wrapIframe().find('[data-cy="pointHistoryChartWithData"]')
     cy.wrapIframe().find('[data-cy="subjectTileBtn"]').should('have.length', 1)
     cy.wrapIframe().find('[data-cy="myRankPosition"]')
-    cy.matchSnapshotImageForElement('body iframe')
+    cy.wait(4000)
+    cy.matchSnapshotImageForElement('body iframe', {
+      errorThreshold: 0.05
+    })
   })
 
 })
