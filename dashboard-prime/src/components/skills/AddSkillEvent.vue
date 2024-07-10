@@ -123,15 +123,13 @@ const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, error
 })
 
 onMounted(() => {
-  isLoading.value = true;
   loadProject()
 });
 
 watch(
     () => skillsState.skill?.totalPoints,
-    () => {
-      if (!isLoading.value) {
-        isLoading.value = true;
+    (after, before) => {
+      if (before) {
         loadProject(true)
       }
     }
