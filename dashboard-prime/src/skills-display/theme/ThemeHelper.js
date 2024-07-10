@@ -91,6 +91,8 @@ export default {
         'body #app .sd-theme-home .p-datatable .p-datatable-thead > tr > th,' +
         'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link,' +
         'body #app .sd-theme-home .toastui-editor-contents p,' +
+        'body #app .sd-theme-home .toastui-editor-tabs .tab-item,' +
+        'body #app .sd-theme-home .toastui-editor-popup label,' +
         'body #app .sd-theme-home .p-chip.p-component,' +
         'body #app .sd-theme-home .p-inputtext.p-component,' +
         '.p-autocomplete-panel.p-component .p-autocomplete-item,' +
@@ -103,7 +105,7 @@ export default {
         '.sd-theme-home .editor-help-footer i',
       styleName: 'color'
     }, {
-      selector: 'todo',
+      selector: '.toastui-editor-popup [data-type="Heading"]:hover',
       styleName: 'background-color'
     }, {
       selector: '.sd-theme-home .p-avatar.p-component, ' +
@@ -162,7 +164,9 @@ export default {
           + '.sd-theme-home .p-avatar.p-component,'
           + '.sd-theme-home .toastui-editor-ww-container,'
           + '.sd-theme-home .toastui-editor-defaultUI-toolbar,'
-          + '.sd-theme-home .editor-help-footer',
+          + '.sd-theme-home .toastui-editor-popup,'
+          + '.sd-theme-home .editor-help-footer,'
+          + '.sd-theme-home .sd-theme-tile-background',
         styleName: 'background-color'
       }, {
         selector: '.p-autocomplete-panel.p-component .p-autocomplete-item:hover,' +
@@ -176,7 +180,9 @@ export default {
           'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link.p-highlight,' +
           '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link:hover,' +
           '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-avatar-icon,' +
-          'body #app .sd-theme-home .fa-stack .fa-stack-1x.fa-inverse',
+          'body #app .sd-theme-home .fa-stack .fa-stack-1x.fa-inverse,' +
+          'body #app .sd-theme-home .toastui-editor-popup [data-type="Heading"]:hover,' +
+          'body #app .sd-theme-home .toastui-editor-popup .drop-down .drop-down-item:hover',
         styleName: 'color'
       }],
       borderColor: [{

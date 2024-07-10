@@ -293,7 +293,7 @@ watch(value, (newValue) =>{
                        @keydown="onKeydown"
                        @focus="handleFocus"
                        @load="onLoad" />
-      <div class="border-1 surface-border surface-100 border-round-bottom px-2 py-2">
+      <div class="border-1 surface-border surface-100 border-round-bottom px-2 py-2 sd-theme-tile-background">
       <div class="flex text-xs">
         <div class="">
           Insert images and attach files by pasting, dragging & dropping, or selecting from toolbar.
