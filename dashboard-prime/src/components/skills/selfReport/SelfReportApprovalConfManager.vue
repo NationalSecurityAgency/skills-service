@@ -62,11 +62,6 @@ const userTagConfLabel = computed(() => {
 });
 
 const toggleConfDetails = (dataToToggle) => {
-  // eslint-disable-next-line no-underscore-dangle
-  // data.value = data.value.map((item) => ({ ...item, _showDetails: data.item.userId === item.userId ? !item._showDetails : false }));
-  data.value.forEach((item) => {
-    collapseRow(item.userId);
-  })
   toggleRow(dataToToggle.userId);
 };
 
@@ -139,9 +134,6 @@ const updateTable = (basicTableInfo) => {
   data.value = res;
 };
 
-const removeTagConf = (removedConf) => {
-  removeConf(removedConf, 'tagConf');
-};
 
 const updatedConf = (newConf) => {
   const itemToUpdate = data.value.find((i) => i.userId === newConf.approverUserId);
@@ -267,10 +259,10 @@ const sortTable = (sortContext) => {
             <span class=""><i class="fas fa-users" :class="colors.getTextClass(2)" aria-hidden="true"/> Approval Workload</span>
           </template>
           <template #body="slotProps">
-            <div class="flex" :data-cy="`workloadCell_${slotProps.data.userId}`">
-              <div class="flex flex-1">
-                <div v-if="!slotProps.data.hasConf">
-                  <InputSwitch class="mr-2"
+            <div class="flex gap-2" :data-cy="`workloadCell_${slotProps.data.userId}`">
+              <div class="flex flex-1 gap-2 align-items-center">
+                <div v-if="!slotProps.data.hasConf" class="flex flex-1 gap-2 align-items-center">
+                  <InputSwitch
                       :aria-label="`Enable and disable fallback for ${slotProps.data.userId} approve`"
                       @update:modelValue="handleFallback($event, slotProps.data)"
                       data-cy="fallbackSwitch"
@@ -283,10 +275,10 @@ const sortTable = (sortContext) => {
                   <div v-for="tConf in slotProps.data.tagConf" :key="tConf.userTagValue">Users in <span class="font-italic text-secondary">{{tConf.userTagKeyLabel}}:</span> <span>{{tConf.userTagValue}}</span></div>
                 </div>
                 <div v-if="slotProps.data.userConf && slotProps.data.userConf.length > 0" >
-                  <Badge variant="success">{{slotProps.data.userConf.length}}</Badge> Specific User{{ slotProps.data.userConf.length > 1 ? 's' : '' }}
+                  <Tag variant="success">{{slotProps.data.userConf.length}}</Tag> Specific User{{ slotProps.data.userConf.length > 1 ? 's' : '' }}
                 </div>
                 <div v-if="slotProps.data.skillConf && slotProps.data.skillConf.length > 0" >
-                  <Badge variant="info">{{ slotProps.data.skillConf.length }}</Badge> Specific Skill{{ slotProps.data.skillConf.length  > 1 ? 's' : '' }}
+                  <Tag variant="info">{{ slotProps.data.skillConf.length }}</Tag> Specific Skill{{ slotProps.data.skillConf.length  > 1 ? 's' : '' }}
                 </div>
               </div>
               <div>

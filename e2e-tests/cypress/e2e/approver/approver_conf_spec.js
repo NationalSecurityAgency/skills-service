@@ -167,18 +167,4 @@ describe('Approver Config Tests', () => {
         });
     });
 
-    it('only one row can be expanded', function () {
-        cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
-        cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
-
-        cy.visit('/administrator/projects/proj1/self-report/configure');
-        const user1 = 'user1'
-        const user2 = 'user2'
-        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noUserConf"]`).should('exist')
-
-        cy.get(`[data-cy="workloadCell_${user2}"] [data-cy="editApprovalBtn"]`).click()
-        cy.get(`[data-cy="expandedChild_${user2}"] [data-cy="noUserConf"]`).should('exist')
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noUserConf"]`).should('not.exist')
-    });
 });

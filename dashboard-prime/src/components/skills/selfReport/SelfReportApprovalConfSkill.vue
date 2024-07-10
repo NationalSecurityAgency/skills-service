@@ -178,13 +178,13 @@ const removeTagConf = (removedItem) => {
 </script>
 
 <template>
-  <Card>
+  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #header>
       <SkillsCardHeader title="Split Workload By Skill"></SkillsCardHeader>
     </template>
     <template #content>
-      <div v-if="!(loadingMeta.skills || loadingMeta.subjects)" class="flex no-gutters mx-1">
-        <div class="flex flex-1 flex-column mx-1 mt-1 align-self-end">
+      <div v-if="!(loadingMeta.skills || loadingMeta.subjects)" class="flex gap-1 align-items-center pt-3 px-3 flex-column lg:flex-row">
+        <div class="flex flex-1 flex-column mx-1 mt-1 w-full">
           <div class="mb-1">Add a Single Skill</div>
           <skills-selector
               :disabled="selectedSubject !== null || loading"
@@ -196,10 +196,10 @@ const removeTagConf = (removedItem) => {
               :onlySingleSelectedValue="true"
               :warnBeforeRemoving="false"/>
         </div>
-        <div class="flex mx-1 text-center align-self-end">
-          <span class="mt-3">OR</span>
+        <div class="flex mx-1 text-center">
+          <span class="text-center">OR</span>
         </div>
-        <div class="flex flex-1 flex-column mx-1 mt-1 align-self-end">
+        <div class="flex flex-1 flex-column mx-1 mt-1 align-self-end w-full">
           <div class="mb-1">Add <b>ALL</b> Skills under a Subject</div>
           <subject-selector v-if="availableSubjects && availableSubjects.length > 0"
                             :disabled="(selectedSkills && selectedSkills.length > 0) || loading"
@@ -210,7 +210,7 @@ const removeTagConf = (removedItem) => {
                             :onlySingleSelectedValue="true"
                             :warnBeforeRemoving="false"/>
         </div>
-        <div class="mx-1 mt-1 text-center align-self-end">
+        <div class="mx-1 mt-1 text-center lg:align-self-end">
           <SkillsButton
               aria-label="Add Tag Value"
               @click="addSkillToConf"

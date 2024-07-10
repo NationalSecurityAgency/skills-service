@@ -544,23 +544,21 @@ const previewEmail = () => {
         </Message>
 
         <BlockUI :blocked="!emailFeatureConfigured">
-          <div class="font-bold text-lg pt-2 mt-2 pr-2 pl-2 mr-2 ml-2 uppercase">Filters</div>
-          <div class="flex p-2 m-2 gap-2">
-            <div class="flex flex-1 border-right-1">
-              <SkillsDropDown
-                  label="Type"
-                  name="filterSelector"
-                  id="filterSelector"
-                  :disabled="criteria.allProjectUsers"
-                  data-cy="filterSelector"
-                  class="w-full ml-2 mr-4"
-                  placeholder="Select a filter to add"
-                  optionLabel="text"
-                  optionValue="value"
-                  v-model="currentFilterType"
-                  :options="filterOptions" />
-            </div>
-            <div class="flex flex-1 gap-2 flex-column">
+          <div class="font-bold text-lg  uppercase mb-3">Filters</div>
+          <div class="">
+            <SkillsDropDown
+              label="Type"
+              name="filterSelector"
+              id="filterSelector"
+              :disabled="criteria.allProjectUsers"
+              data-cy="filterSelector"
+              class="w-full"
+              placeholder="Select a filter to add"
+              optionLabel="text"
+              optionValue="value"
+              v-model="currentFilterType"
+              :options="filterOptions" />
+            <div class="flex flex-1 gap-2 flex-column ml-4">
               <SkillsDropDown
                   v-if="currentFilterType && currentFilterType !== 'project'"
                   :disabled="currentFilterType && currentFilterType === 'project'"
@@ -568,19 +566,17 @@ const previewEmail = () => {
                   name="name-selector"
                   id="name-selector"
                   data-cy="name-selector"
-                  class="ml-2"
                   :placeholder="selectText"
                   optionLabel="name"
                   v-model="selectedItem"
                   :options="ids" />
 
               <SkillsDropDown
-                  v-if="currentFilterType !== 'skill' && currentFilterType !== 'badge'"
+                  v-if="currentFilterType === 'project' || currentFilterType === 'subject'"
                   label="Minimum Level"
                   name="emailUsers-levelsInput"
                   id="emailUsers-levelsInput"
                   data-cy="emailUsers-levelsInput"
-                  class="ml-2"
                   optionLabel="text"
                   optionValue="value"
                   placeholder="Any Level"
@@ -588,7 +584,7 @@ const previewEmail = () => {
                   v-model="levels.selected"
                   :options="levels.available" />
 
-              <div class="flex" v-if="currentFilterType && currentFilterType==='skill'">
+              <div class="flex mb-3" v-if="currentFilterType && currentFilterType==='skill'">
                 <SkillsInputSwitch
                     v-model="skills.achieved"
                     inputId="skillAchieved"
@@ -599,7 +595,7 @@ const previewEmail = () => {
               </div>
             </div>
             <div>
-              <SkillsButton class="mr-1 mt-4" @click="addCriteria" data-cy="emailUsers-addBtn"
+              <SkillsButton class="ml-4" @click="addCriteria" data-cy="emailUsers-addBtn"
                             :disabled="isAddDisabled || maxTagsReached" label="Add" icon="fas fa-plus-circle" />
               <transition name="fade">
                 <span v-if="alreadyApplied" data-cy="filterExists" class="pt-2 pl-1" role="alert">Filter already exists</span>
@@ -608,30 +604,30 @@ const previewEmail = () => {
             </div>
           </div>
 
-          <div class="pl-3 pr-3 pb-3 pt-1 mr-3 ml-1">
+          <div class="pr-3 pb-3 pt-4 mr-3 ml-1">
             <div class="flex flex-wrap gap-2 pb-3 mt-1 ml-3">
               <Chip v-for="(tag) of tags" :key="tag.display" :label="tag.display" data-cy="filterBadge" removable @remove="deleteCriteria(tag)" />
             </div>
-            <div class="ml-4 h5 uppercase" data-cy="usersMatchingFilters"><Badge variant="info">{{currentCount}}</Badge> Users Selected</div>
+            <div class="h5 uppercase" data-cy="usersMatchingFilters"><Badge variant="info">{{currentCount}}</Badge> Users Selected</div>
           </div>
 
           <hr />
 
-          <div class="pl-2 ml-2 pr-2 mr-2 pb-2 font-bold text-lg uppercase">Email Content</div>
-          <div class="flex pl-3 pr-3 pt-3 pb-1 m-3 mb-1">
+          <div class="py-2 font-bold text-lg uppercase">Email Content</div>
+          <div class="mt-2">
             <SkillsTextInput name="subjectLine" label="Subject Line" data-cy="emailUsers_subject" class="w-full" />
           </div>
-          <div class="flex pl-3 pr-3 pb-1 ml-3 mr-3 mb-1 mt-1">
+          <div class="flex w-full">
               <markdown-editor class="w-full"
                                data-cy="emailUsers_body"
                                label="Email Body"
                                name="emailBody"
-                               :resizable="true"
+                               :resizable="false"
                                :allow-attachments="false"
                                :use-html="true"/>
           </div>
 
-          <div class="flex pl-3 pr-3 pb-3 pt-1 ml-3 mr-3 mb-3 mt-1">
+          <div class="flex ">
             <SkillsButton class="mr-3" data-cy="previewUsersEmail"
                           :disabled="isPreviewDisabled || !meta.valid"
                           @click="previewEmail"

@@ -82,12 +82,12 @@ const removeTagConf = (removedIem) => {
 </script>
 
 <template>
-<Card>
+<Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
   <template #header>
     <SkillsCardHeader :title="'Split Workload By ' + tagLabel"></SkillsCardHeader>
   </template>
   <template #content>
-    <div class="flex gap-2">
+    <div class="flex gap-2 px-3 pt-3">
       <div class="flex flex-1">
         <SkillsTextInput
             class="w-full"
@@ -151,7 +151,7 @@ const removeTagConf = (removedIem) => {
     </SkillsDataTable>
 
     <no-content2 v-if="!hadData" title="Not Configured Yet..."
-                 class="my-5"
+                 class="py-5"
                  icon-size="fa-2x"
                  data-cy="noTagKeyConf"
                  icon="fas fa-user-tag">
