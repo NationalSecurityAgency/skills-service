@@ -191,14 +191,14 @@ const skillId = computed(() => {
         </Tag>
       </div>
     </div>
-    <div class="text-right align-content-end flex flex-column"
+    <div class="text-right justify-content-end flex flex-column"
          :class="{ 'text-green-800' : isSkillComplete }"
          data-cy="skillProgress-ptsOverProgressBard">
       <i class="fa fa-check mr-1 pb-1 align-content-end"
          v-if="isSkillComplete"
          :data-cy="`skillCompletedCheck-${skillId}`"
          aria-hidden="true" />
-      <span v-if="skill.isSkillsGroupType" class="align-content-end">
+      <span v-if="skill.isSkillsGroupType" class="justify-content-end">
         <animated-number :num="numChildSkillsComplete" />
         / {{ numFormat.pretty(numSkillsRequired) }} Skill{{ (numSkillsRequired === 1) ? '' : 's' }}
         {{ someSkillsAreOptional ? 'Required' : '' }}
