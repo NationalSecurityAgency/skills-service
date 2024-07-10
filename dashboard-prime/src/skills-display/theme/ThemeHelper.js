@@ -22,7 +22,8 @@ export default {
       styleName: 'max-width'
     },
     backgroundColor: [{
-      selector: 'body #app .sd-theme-home, .p-overlaypanel.p-component',
+      selector: 'body #app .sd-theme-home, .p-overlaypanel.p-component,' +
+        'body #app .sd-theme-background-color',
       styleName: 'background-color'
     }, {
       selector: 'body #app .sd-theme-home .skills-theme-bottom-border-with-background-color',

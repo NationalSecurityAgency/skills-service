@@ -795,4 +795,50 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="selfReportMsgInput"]').type('ok hello there')
         cy.matchSnapshotImageForElement('[data-cy="selfReportMsgInput"]');
     })
+
+    it('in theme -display new version banner when software is updated', () => {
+        cy.ignoreSkillsClientError()
+        cy.createSubject(1, 1);
+        cy.intercept('/api/projects/proj1/subjects/subj1/rank').as('getSubjRank')
+        cy.intercept({ url: '/api/projects/proj1/subjects/subj1/summary*', times: 1 }, (req) => {
+            req.reply((res) => {
+                res.send(200, {
+                    'subject': 'Subject 1',
+                    'subjectId': 'subj1',
+                    'description': 'Description',
+                    'skillsLevel': 0,
+                    'totalLevels': 5,
+                    'points': 0,
+                    'totalPoints': 0,
+                    'todaysPoints': 0,
+                    'levelPoints': 0,
+                    'levelTotalPoints': 0,
+                    'skills': [],
+                    'iconClass': 'fa fa-question-circle',
+                    'helpUrl': 'http://doHelpOnThisSubject.com'
+                }, { 'skills-client-lib-version': dateFormatter(new Date()) })
+            })
+        })
+          .as('getSubjectSummary')
+        cy.intercept('GET', '/api/projects/proj1/pointHistory')
+          .as('pointHistoryChart')
+
+        cy.visit('/test-skills-client/proj1/?enableTheme=true')
+        cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
+        cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
+        cy.wrapIframe().find('[data-cy="myRankPosition"]')
+        cy.wrapIframe().find('[data-cy="subjectTileBtn"]')
+
+        cy.wrapIframe().find('[data-cy="subjectTileBtn"]').click()
+        cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
+        cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
+        cy.wrapIframe().find('[data-cy="myRankPosition"]')
+
+        cy.wrapIframe().find('[data-cy="newSoftwareVersion"]').contains('New SkillTree Software Version')
+
+        cy.wait(4000)
+        cy.matchSnapshotImageForElement('body iframe', { errorThreshold: 0.05 })
+
+
+    })
 });
