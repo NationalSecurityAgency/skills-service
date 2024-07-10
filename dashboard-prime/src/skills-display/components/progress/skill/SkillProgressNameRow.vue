@@ -194,19 +194,22 @@ const skillId = computed(() => {
     <div class="text-right justify-content-end flex flex-column"
          :class="{ 'text-green-800' : isSkillComplete }"
          data-cy="skillProgress-ptsOverProgressBard">
-      <i class="fa fa-check mr-1 pb-1 align-content-end"
-         v-if="isSkillComplete"
-         :data-cy="`skillCompletedCheck-${skillId}`"
-         aria-hidden="true" />
-      <span v-if="skill.isSkillsGroupType" class="justify-content-end">
-        <animated-number :num="numChildSkillsComplete" />
-        / {{ numFormat.pretty(numSkillsRequired) }} Skill{{ (numSkillsRequired === 1) ? '' : 's' }}
-        {{ someSkillsAreOptional ? 'Required' : '' }}
-      </span>
-      <span v-else class="align-content-end">
-        <animated-number :num="skill.points" />
-        / {{ numFormat.pretty(skill.totalPoints) }} Points
-      </span>
+
+      <div>
+        <i class="fa fa-check mr-1 pb-1"
+           v-if="isSkillComplete"
+           :data-cy="`skillCompletedCheck-${skillId}`"
+           aria-hidden="true" />
+        <span v-if="skill.isSkillsGroupType">
+          <animated-number :num="numChildSkillsComplete" />
+          / {{ numFormat.pretty(numSkillsRequired) }} Skill{{ (numSkillsRequired === 1) ? '' : 's' }}
+          {{ someSkillsAreOptional ? 'Required' : '' }}
+        </span>
+        <span v-else class="align-content-end">
+          <animated-number :num="skill.points" />
+          / {{ numFormat.pretty(skill.totalPoints) }} Points
+        </span>
+      </div>
 
       <div v-if="skill.points > 0 && expirationDate() && !skill.isMotivationalSkill" data-cy="expirationDate">
         <div class="my-2 text-orange-500">
