@@ -191,7 +191,7 @@ const skillId = computed(() => {
         </Tag>
       </div>
     </div>
-    <div class="text-right align-content-end flex"
+    <div class="text-right align-content-end flex flex-column"
          :class="{ 'text-green-800' : isSkillComplete }"
          data-cy="skillProgress-ptsOverProgressBard">
       <i class="fa fa-check mr-1 pb-1 align-content-end"
