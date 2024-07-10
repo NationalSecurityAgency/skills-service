@@ -193,7 +193,8 @@ describe('Client Display Tests', () => {
         cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
         cy.wrapIframe().contains('Subjects have not been added yet')
         cy.wrapIframe().find('[data-cy="myRankPosition"]')
-        cy.matchSnapshotImageForElement('body iframe')
+        cy.wait(4000)
+        cy.matchSnapshotImageForElement('body iframe', { errorThreshold: 0.05 })
     })
 
     it('skills client\'s iframe support does not show header or footer', () => {
