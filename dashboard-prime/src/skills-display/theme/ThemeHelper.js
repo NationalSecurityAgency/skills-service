@@ -22,7 +22,8 @@ export default {
       styleName: 'max-width'
     },
     backgroundColor: [{
-      selector: 'body #app .sd-theme-home, .p-overlaypanel.p-component',
+      selector: 'body #app .sd-theme-home, .p-overlaypanel.p-component,' +
+        'body #app .sd-theme-background-color',
       styleName: 'background-color'
     }, {
       selector: 'body #app .sd-theme-home .skills-theme-bottom-border-with-background-color',
@@ -91,6 +92,12 @@ export default {
         'body #app .sd-theme-home .p-datatable .p-datatable-thead > tr > th,' +
         'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link,' +
         'body #app .sd-theme-home .toastui-editor-contents p,' +
+        'body #app .sd-theme-home .toastui-editor-contents h1,' +
+        'body #app .sd-theme-home .toastui-editor-contents h2,' +
+        'body #app .sd-theme-home .toastui-editor-contents h3,' +
+        'body #app .sd-theme-home .toastui-editor-contents h4,' +
+        'body #app .sd-theme-home .toastui-editor-contents h5,' +
+        'body #app .sd-theme-home .toastui-editor-contents h6,' +
         'body #app .sd-theme-home .toastui-editor-tabs .tab-item,' +
         'body #app .sd-theme-home .toastui-editor-popup label,' +
         'body #app .sd-theme-home .p-chip.p-component,' +
@@ -181,6 +188,7 @@ export default {
           '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link:hover,' +
           '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-avatar-icon,' +
           'body #app .sd-theme-home .fa-stack .fa-stack-1x.fa-inverse,' +
+          'body #app .sd-theme-home .toastui-editor-contents pre code,' +
           'body #app .sd-theme-home .toastui-editor-popup [data-type="Heading"]:hover,' +
           'body #app .sd-theme-home .toastui-editor-popup .drop-down .drop-down-item:hover',
         styleName: 'color'

@@ -474,5 +474,73 @@ describe('Client Display Theme Components Tests', () => {
     })
   })
 
+  it('markdown display foreground color', () => {
+    const markdown = '# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n' +
+      '---\n' +
+      '# Emphasis\n' +
+      'italics: *italicized* or _italicized_\n\n' +
+      'bold: **bolded** or __bolded__\n\n' +
+      'combination **_bolded & italicized_**\n\n' +
+      'strikethrough: ~~struck~~\n\n' +
+      '---\n' +
+      '# Inline\n' +
+      'Inline `code` has `back-ticks around` it\n\n' +
+      '---\n' +
+      '# Multiline\n' +
+      '\n' +
+      '\n' +
+      '```\n' +
+      'import { SkillsDirective } from \'@skilltree/skills-client-vue\';\n' +
+      'Vue.use(SkillsDirective);\n' +
+      '```\n' +
+      '# Lists\n' +
+      'Ordered Lists:\n' +
+      '1. Item one\n' +
+      '1. Item two\n' +
+      '1. Item three (actual number does not matter)\n\n' +
+      'If List item has multiple lines of text, subsequent lines must be idented four spaces, otherwise list item numbers will reset, e.g.,\n' +
+      '1. item one\n' +
+      '    paragrah one\n' +
+      '1. item two\n' +
+      '1. item three\n' +
+      '\n' +
+      'Unordered Lists\n' +
+      '* Item\n' +
+      '* Item\n' +
+      '* Item\n' +
+      '___\n' +
+      '# Links\n' +
+      '[in line link](https://www.somewebsite.com)\n' +
+      '___\n' +
+      '# Blockquotes\n' +
+      '> Blockquotes are very handy to emulate reply text.\n' +
+      '> This line is part of the same quote.\n\n' +
+      '# Horizontal rule\n' +
+      'Use three or more dashes, asterisks, or underscores to generate a horizontal rule line\n' +
+      '\n' +
+      'Separate me\n\n' +
+      '___\n\n' +
+      'Separate me\n\n' +
+      '---\n\n' +
+      'Separate me\n\n' +
+      '***\n\n'
+
+    cy.createSkill(1, 1, 5, {description: markdown })
+
+    const tiles = JSON.stringify( {
+      backgroundColor:encodeURIComponent('#152E4d')
+    })
+    const url = `/subjects/subj1/skills/skill5?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|white}`
+    cy.cdVisit(url)
+
+    cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]').should('have.text', '100 Increment')
+    cy.wait(4000)
+    cy.matchSnapshotImageForElement('#toastuiViewer-skillDescription-skill5', {
+      errorThreshold: 0.05
+    })
+  })
+
+
+
 })
 

@@ -795,4 +795,5 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="selfReportMsgInput"]').type('ok hello there')
         cy.matchSnapshotImageForElement('[data-cy="selfReportMsgInput"]');
     })
+
 });
