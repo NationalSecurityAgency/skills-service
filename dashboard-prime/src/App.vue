@@ -151,7 +151,7 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
       </div>
       <div v-if="!isLoadingApp" class="m-0">
         <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
-        <div v-if="!inBootstrapMode" class="overall-container">
+        <div v-if="!inBootstrapMode" :class="{ 'overall-container' : notSkillsClient }">
           <new-software-version  />
           <dashboard-header v-if="showHeader" role="banner" />
           <div role="main" id="mainContent1"

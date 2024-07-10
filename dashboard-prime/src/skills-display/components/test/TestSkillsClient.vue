@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { SkillsDisplayJS } from '@skilltree/skills-client-js'
-import { nextTick, onMounted } from 'vue'
+import { nextTick, onMounted, computed } from 'vue'
 import { useBrowserLocation } from '@vueuse/core'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useRoute } from 'vue-router'
@@ -71,10 +71,12 @@ const constructSkillsDisplay = () => {
 onMounted(() => {
   constructSkillsDisplay()
 })
+
+const isThemeApplied = computed(() => route.query.enableTheme && route.query.enableTheme.toLocaleLowerCase() === 'true')
 </script>
 
 <template>
-  <div class="mt-3">
+  <div class="mt-3 p-3" :class="{'themed-applied': isThemeApplied}">
     <div id="skills-client-container">
     </div>
   </div>
@@ -82,5 +84,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-
+.themed-applied {
+  background: #626d7d !important;
+}
 </style>

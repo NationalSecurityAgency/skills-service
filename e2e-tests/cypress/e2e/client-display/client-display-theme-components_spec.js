@@ -457,5 +457,22 @@ describe('Client Display Theme Components Tests', () => {
     })
   })
 
+  it('markdown editor header controls respect background color', () => {
+    cy.createSkill(1, 1, 5, { selfReportingType: 'Approval'})
+
+    const tiles = JSON.stringify( {
+      backgroundColor:encodeURIComponent('#152E4d')
+    })
+    const url = `/subjects/subj1/skills/skill5?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|white}`
+    cy.cdVisit(url)
+
+    cy.get('[data-cy="requestApprovalBtn"]').click()
+    cy.get('[data-cy="markdownEditorInput"] [aria-label="Headings"]').click()
+    cy.wait(4000)
+    cy.matchSnapshotImageForElement('.toastui-editor-popup [aria-label="Headings"]', {
+      errorThreshold: 0.05
+    })
+  })
+
 })
 

@@ -197,6 +197,31 @@ describe('Client Display Tests', () => {
         cy.matchSnapshotImageForElement('body iframe', { errorThreshold: 0.05 })
     })
 
+    it('skills client\'s iframe properly sets background on pages that are not full height', () => {
+
+        cy.createSubject(1,1)
+        for (let i = 0; i < 10; i++) {
+            cy.createSkill(1,1,i)
+        }
+        cy.ignoreSkillsClientError()
+        cy.visit(`/test-skills-client/proj1?enableTheme=true`)
+        cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
+        cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
+        cy.wrapIframe().find('[data-cy="myRankPosition"]')
+
+        // subject
+        cy.wrapIframe().find('[data-cy="subjectTileBtn"]').click()
+        cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
+        cy.wrapIframe().find('[data-cy="myRankPosition"]')
+        cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
+
+        // skill
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill6"] [data-cy="skillProgressTitle"]').click()
+        cy.wrapIframe().find('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]').should('have.text', '100 Increment')
+
+        cy.matchSnapshotImageForElement('body iframe')
+    })
+
     it('skills client\'s iframe support does not show header or footer', () => {
         cy.createSubject(1,1)
         cy.createSkill(1,1,1)
