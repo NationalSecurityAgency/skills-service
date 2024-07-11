@@ -28,10 +28,10 @@ const isSelfReportConfigureRoute = computed(() => {
 <template>
   <div>
     <sub-page-header title="Self Report">
-      <router-link :to="{ name: 'SelfReportConfigure' }" v-if="!isSelfReportConfigureRoute">
+      <router-link :to="{ name: 'SelfReportConfigure' }" v-if="!isSelfReportConfigureRoute" tabindex="-1">
         <SkillsButton size="small" icon="fas fa-cogs" label="Configure" data-cy="confApprovalWorkloadConfBtn" />
       </router-link>
-      <router-link :to="{ name: 'SelfReport' }" v-if="isSelfReportConfigureRoute">
+      <router-link :to="{ name: 'SelfReport' }" v-if="isSelfReportConfigureRoute" tabindex="-1">
         <SkillsButton size="small" icon="fas fa-arrow-alt-circle-left" label="Back" />
       </router-link>
     </sub-page-header>

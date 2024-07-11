@@ -35,7 +35,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <router-link to="/administrator/skills/Inception" aria-label="Dashboard Skills">
+  <router-link to="/administrator/skills/Inception" aria-label="Dashboard Skills" tabindex="-1">
     <Button v-show="isConfigurationInitialized"
             outlined
             icon="fas fa-trophy"

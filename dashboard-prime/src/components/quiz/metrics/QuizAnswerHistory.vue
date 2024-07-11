@@ -206,7 +206,7 @@ const expandLabel = (truncated) => {
             <div class="flex justify-content-start mb-2">
               <router-link :data-cy="`managesQuizBtn_${slotProps.data.quizId}`"
                            :aria-label="`View quiz attempt for ${slotProps.data.userQuizAttemptId} id`"
-                           :to="{ name: 'QuizSingleRunPage', params: { runId: slotProps.data.userQuizAttemptId } }">
+                           :to="{ name: 'QuizSingleRunPage', params: { runId: slotProps.data.userQuizAttemptId } }" tabindex="-1">
                   <SkillsButton label="View Run"
                                 icon="fas fa-eye"
                                 data-cy="viewRunBtn"

@@ -210,6 +210,7 @@ const calculateClientDisplayRoute = (props) => {
                   class="ml-1 flex"
                   data-cy="ViewUserDetailsBtn"
                   :to="calculateClientDisplayRoute(slotProps.data)"
+                  tabindex="-1"
                   target="_blank" rel="noopener">
                 <SkillsButton
                     target="_blank"

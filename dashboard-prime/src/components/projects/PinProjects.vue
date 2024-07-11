@@ -177,7 +177,7 @@ watch(searchValue, (newValue) => {
                                 data-cy="unpinButton" icon="fas fa-ban" label="Unpin"
                                 :aria-label="`remove pin from project ${slotProps.data.projectId}`">
                   </SkillsButton>
-                  <router-link :to="{ name:'Subjects', params: { projectId: slotProps.data.projectId }}">
+                  <router-link :to="{ name:'Subjects', params: { projectId: slotProps.data.projectId }}" tabindex="-1">
                     <SkillsButton variant="outline-primary"
                                   target="_blank"
                                   size="small"

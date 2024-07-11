@@ -243,6 +243,7 @@ const isProjectExpiring = computed(() => {
             class="ml-1"
             data-cy="projectPreview"
             :to="{ name:'MyProjectSkillsPage', params: { projectId: project.projectId } }"
+            tabindex="-1"
             target="_blank" rel="noopener">
             <SkillsButton
               target="_blank"

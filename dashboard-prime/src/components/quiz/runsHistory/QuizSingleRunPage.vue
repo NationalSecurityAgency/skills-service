@@ -74,7 +74,7 @@ onMounted(() => {
   <div>
     <SubPageHeader title="User Run">
       <router-link :aria-label="`Return back to all the ${runInfo.quizType} results`"
-                   :to="{ name: 'QuizRunsHistoryPage' }">
+                   :to="{ name: 'QuizRunsHistoryPage' }" tabindex="-1">
         <SkillsButton icon="fas fa-arrow-alt-circle-left"
                       outlined
                       size="small"
