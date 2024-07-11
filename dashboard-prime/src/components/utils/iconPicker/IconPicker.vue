@@ -17,7 +17,9 @@ limitations under the License.
 import { ref } from 'vue'
 import IconManager from '@/components/utils/iconPicker/IconManager.vue'
 import OverlayPanel from 'primevue/overlaypanel'
+import { useFocusState } from '@/stores/UseFocusState.js'
 
+const focusState = useFocusState()
 const emit = defineEmits(['selected-icon'])
 
 const props = defineProps({
@@ -38,13 +40,13 @@ const props = defineProps({
 
 const iconManagerOverlayPanel = ref()
 
-
 const toggleIconDisplay = (event) => {
   iconManagerOverlayPanel.value.toggle(event)
 }
 
 const onSelectedIcon = (selectedIcon) => {
   iconManagerOverlayPanel.value.hide()
+  focusState.focusOnLastElement()
   emit('selected-icon', selectedIcon)
 }
 </script>
@@ -54,6 +56,7 @@ const onSelectedIcon = (selectedIcon) => {
     <SkillsButton
       @click="toggleIconDisplay"
       outlined
+      :track-for-focus="true"
       class="p-0"
       id="iconPicker"
       role="button"
