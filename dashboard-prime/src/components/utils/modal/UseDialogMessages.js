@@ -15,10 +15,12 @@
  */
 import { useConfirm } from 'primevue/useconfirm'
 import { ref } from 'vue'
+import {useFocusState} from "@/stores/UseFocusState.js";
 
 
 export const useDialogMessages = () => {
   const confirm = useConfirm()
+  const focusState = useFocusState()
   const isConfirmVisible = ref(false);
 
   const msgOk = (message, header = 'Message!', okButtonTitle = 'Ok') => {
@@ -30,17 +32,34 @@ export const useDialogMessages = () => {
       },
       onHide: () => {
         isConfirmVisible.value = false;
+        focusState.focusOnLastElement()
       },
       rejectClass: 'hidden',
       acceptLabel: okButtonTitle,
     });
   }
 
-  const msgConfirm = (message, header = 'Message!', accept = null) => {
+  const msgConfirm = (message, header = 'Message!', accept = null, reject = null, acceptLabel = 'OK', rejectLabel = 'Cancel') => {
     confirm.require({
       message,
       header,
-      accept,
+      acceptLabel: acceptLabel,
+      rejectLabel: rejectLabel,
+      accept: () => {
+        if(accept) {
+          accept();
+        }
+        focusState.focusOnLastElement();
+      },
+      reject: () => {
+        if(reject) {
+          reject();
+        }
+        focusState.focusOnLastElement();
+      },
+      onHide: () => {
+        focusState.focusOnLastElement()
+      },
     });
   }
 

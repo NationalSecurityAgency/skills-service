@@ -21,12 +21,11 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import SettingService from '@/components/settings/SettingsService.js'
 import LevelService from './LevelService.js'
 import Column from 'primevue/column'
-import { useConfirm } from 'primevue/useconfirm'
 import NewLevel from './NewLevel.vue'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
-import { useFocusState } from '@/stores/UseFocusState.js'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
-const confirm = useConfirm();
+const dialogMessages = useDialogMessages()
 const announcer = useSkillsAnnouncer();
 const route = useRoute();
 const props = defineProps({
@@ -35,7 +34,6 @@ const props = defineProps({
     default: 25,
   },
 });
-const focusState = useFocusState()
 
 onMounted(() => {
   SettingService.getSetting(route.params.projectId, 'level.points.enabled')
@@ -180,10 +178,10 @@ const removeLastItem = () => {
       LevelService.checkIfProjectLevelBelongsToGlobalBadge(route.params.projectId, lastLevel)
           .then((belongsToGlobalBadge) => {
             if (belongsToGlobalBadge) {
-              confirm.require({
-                msg: `Cannot remove level: [${lastLevel}].  This project level belongs to one or more global badges. Please contact a Supervisor to remove this dependency.`,
-                header: 'Unable to Delete'
-              });
+              dialogMessages.msgOk(
+                  `Cannot remove level: [${lastLevel}].  This project level belongs to one or more global badges. Please contact a Supervisor to remove this dependency.`,
+                  'Unable to Delete'
+              )
             } else {
               confirmAndRemoveLastItem();
             }
@@ -196,35 +194,32 @@ const removeLastItem = () => {
 
 const confirmAndRemoveLastItem = () => {
   const msg = 'Are you absolutely sure you want to delete the highest Level?';
-  confirm.require({
-    message: msg,
-    header: 'WARNING: Delete Highest Level',
-    acceptLabel: 'YES, Delete It!',
-    rejectLabel: 'Cancel',
-    accept: () => {
-          table.value.options.busy = true;
-          doRemoveLastItem().then(() => {
-            loadLevels().then(() => {
-              focusState.focusOnLastElement()
-              announcer.polite('Level has been removed');
-            });
-          }).catch((error) => {
-            if (error?.response?.data) {
-              confirm.require({
-                message: error.response.data.explanation,
-                header: 'Unable to delete',
-                rejectClass: 'hidden',
-                acceptLabel: 'OK',
-              });
-              // msgOk(error.response.data.explanation, 'Unable to delete');
-            } else {
-              // eslint-disable-next-line
-              console.error(error);
-            }
-            table.value.options.busy = false;
-          })
-    }
-  });
+  dialogMessages.msgConfirm(
+      msg,
+      'WARNING: Delete Highest Level',
+      () => {
+        table.value.options.busy = true;
+        doRemoveLastItem().then(() => {
+          loadLevels().then(() => {
+            announcer.polite('Level has been removed');
+          });
+        }).catch((error) => {
+          if (error?.response?.data) {
+            dialogMessages.msgOk(
+              error.response.data.explanation,
+              'Unable to delete'
+            );
+          } else {
+            // eslint-disable-next-line
+            console.error(error);
+          }
+          table.value.options.busy = false;
+        })
+      },
+      null,
+      'YES, Delete It!',
+      'Cancel',
+  );
 };
 
 const doRemoveLastItem = () => {
