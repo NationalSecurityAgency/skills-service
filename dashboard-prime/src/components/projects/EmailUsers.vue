@@ -27,12 +27,12 @@ import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEdito
 import SkillsDropDown from "@/components/utils/inputForm/SkillsDropDown.vue";
 import SkillsInputSwitch from "@/components/utils/inputForm/SkillsInputSwitch.vue";
 import LevelService from "@/components/levels/LevelService.js";
-import {useConfirm} from "primevue/useconfirm";
 import {object, string} from "yup";
 import {useForm} from "vee-validate";
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
-const confirm = useConfirm();
+const dialogMessages = useDialogMessages()
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
 const appConfig = useAppConfig();
@@ -368,7 +368,7 @@ const handleTagAdd = (tag) => {
   };
   if (criteria.value.allProjectUsers) {
     if (tags.value.length > 0) {
-      confirm.require({
+      dialogMessages.msgConfirm({
         message: 'Adding the All Users filter will remove all other filters',
         header: 'Remove Other Filters?',
         acceptLabel: 'YES, Remove Them!',
@@ -595,7 +595,7 @@ const previewEmail = () => {
               </div>
             </div>
             <div>
-              <SkillsButton class="ml-4" @click="addCriteria" data-cy="emailUsers-addBtn"
+              <SkillsButton class="ml-4" @click="addCriteria" data-cy="emailUsers-addBtn" :track-for-focus="true" id="addCriteriaButton"
                             :disabled="isAddDisabled || maxTagsReached" label="Add" icon="fas fa-plus-circle" />
               <transition name="fade">
                 <span v-if="alreadyApplied" data-cy="filterExists" class="pt-2 pl-1" role="alert">Filter already exists</span>

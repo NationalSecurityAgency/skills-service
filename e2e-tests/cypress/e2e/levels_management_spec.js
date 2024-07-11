@@ -937,4 +937,109 @@ describe('Levels Management Tests', () => {
         // cy.get('[data-cy=editLevelButton]').eq(3).should('have.focus');
     });
 
+    it('focus is returned successfully', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Subject 1'
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill1`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: `This is 1`,
+            type: 'Skill',
+            pointIncrement: 500,
+            numPerformToCompletion: 1,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+        cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill2`, {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill2',
+            name: `This is 2`,
+            type: 'Skill',
+            pointIncrement: 500,
+            numPerformToCompletion: 1,
+            pointIncrementInterval: 0,
+            numMaxOccurrencesIncrementInterval: -1,
+            version: 0,
+        });
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.clickNav('Levels');
+
+        const tableSelector = '[data-cy=levelsTable]';
+        const expected = [
+            [{
+                colIndex: 0,
+                value: 1
+            }, {
+                colIndex: 1,
+                value: '10'
+            }, {
+                colIndex: 2,
+                value: '100'
+            }],
+            [{
+                colIndex: 0,
+                value: 2
+            }, {
+                colIndex: 1,
+                value: '25'
+            }, {
+                colIndex: 2,
+                value: '250'
+            }],
+            [{
+                colIndex: 0,
+                value: 3
+            }, {
+                colIndex: 1,
+                value: '45'
+            }, {
+                colIndex: 2,
+                value: '450'
+            }],
+            [{
+                colIndex: 0,
+                value: 4
+            }, {
+                colIndex: 1,
+                value: '67'
+            }, {
+                colIndex: 2,
+                value: '670'
+            }],
+            [{
+                colIndex: 0,
+                value: 5
+            }, {
+                colIndex: 1,
+                value: '92'
+            }, {
+                colIndex: 2,
+                value: '920'
+            }],
+        ];
+        cy.validateTable(tableSelector, expected, 5, true, null, false);
+
+        cy.get('[data-cy=removeLevel]').click();
+        cy.realPress('Escape');
+        cy.get('[data-cy=removeLevel]').should('have.focus');
+
+        cy.get('[data-cy=removeLevel]').click();
+        cy.get('[data-pc-section="closebutton"]').click();
+        cy.get('[data-cy=removeLevel]').should('have.focus');
+
+        cy.get('[data-cy=removeLevel]').click();
+        cy.contains('Cancel').click();
+        cy.get('[data-cy=removeLevel]').should('have.focus');
+
+        cy.get('[data-cy=removeLevel]').click();
+        cy.contains('YES, Delete It').click();
+        cy.get('[data-cy=removeLevel]').should('have.focus');
+    });
 });

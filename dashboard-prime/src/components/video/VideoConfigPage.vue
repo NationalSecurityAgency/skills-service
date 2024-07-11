@@ -16,7 +16,6 @@ limitations under the License.
 <script setup>
 import { computed, nextTick, onMounted, ref, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useConfirm } from 'primevue/useconfirm';
 import * as yup from 'yup';
 import { string } from 'yup';
 import { useForm } from 'vee-validate';
@@ -36,7 +35,9 @@ import Message from 'primevue/message';
 import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue';
 import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue';
 import VideoFileInput from '@/components/video/VideoFileInput.vue';
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
+const dialogMessages = useDialogMessages()
 const VideoPlayer = defineAsyncComponent(() =>
   import('@/common-components/video/VideoPlayer.vue')
 )
@@ -48,7 +49,6 @@ const appConfig = useAppConfig()
 const projConfig = useProjConfig()
 const timeUtils = useTimeUtils()
 const announcer = useSkillsAnnouncer()
-const confirm = useConfirm();
 const byteFormat = useByteFormat()
 
 const videoConf = ref({
@@ -212,7 +212,7 @@ const saveSettings = () => {
   });
 }
 const confirmClearSettings = () => {
-  confirm.require({
+  dialogMessages.msgConfirm({
     message: 'Video settings will be permanently cleared. Are you sure you want to proceed?',
     header: 'Please Confirm!',
     acceptLabel: 'Yes, Do clear',
@@ -537,6 +537,8 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
                   outlined
                   :disabled="!formHasAnyData"
                   data-cy="clearVideoSettingsBtn"
+                  id="clearVideoSettingsBtn"
+                  :track-for-focus="true"
                   aria-label="Clear video settings"
                   @click="confirmClearSettings"
                   icon="fas fa-trash-alt"

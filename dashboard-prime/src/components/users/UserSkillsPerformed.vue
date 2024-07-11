@@ -17,7 +17,6 @@ limitations under the License.
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useProjectUserState } from '@/stores/UseProjectUserState.js';
-import { useConfirm } from 'primevue/useconfirm';
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js';
 import { useProjConfig } from '@/stores/UseProjConfig.js';
 import { useColors } from '@/skills-display/components/utilities/UseColors.js';
@@ -36,14 +35,15 @@ import ShowMore from "@/components/skills/selfReport/ShowMore.vue";
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import UsersService from '@/components/users/UsersService.js'
 import StringHighlighter from '@/common-components/utilities/StringHighlighter.js'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
+const dialogMessages = useDialogMessages()
 const timeUtils = useTimeUtils()
 const projConfig = useProjConfig()
 const colors = useColors()
 
 const route = useRoute()
 const projectUserState = useProjectUserState()
-const confirm = useConfirm();
 const responsive = useResponsiveBreakpoints()
 
 const projectId = ref(route.params.projectId)
@@ -168,7 +168,7 @@ const getDate = (row) => {
       .format('LLL');
 };
 const deleteSkill = (row) => {
-  confirm.require({
+  dialogMessages.msgConfirm({
     message: `Removing skill [${row.skillId}] performed on [${getDate(row)}]. This will permanently remove this user's performed skill and cannot be undone.`,
     header: 'Please Confirm!',
     acceptLabel: 'YES, Delete It!',

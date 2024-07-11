@@ -22,10 +22,10 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import EditBadge from '@/components/badges/EditBadge.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import Badge from '@/components/badges/Badge.vue'
-import { useConfirm } from 'primevue/useconfirm'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
-const confirm = useConfirm();
+const dialogMessages = useDialogMessages()
 const announcer = useSkillsAnnouncer();
 const emit = defineEmits(['badge-deleted', 'badge-changed', 'global-badges-changed']);
 
@@ -141,7 +141,7 @@ const publishBadge = (badge) => {
   if (canPublish(badge)) {
     const msg = `While this Badge is disabled, user's cannot see the Badge or achieve it. Once the Badge is live, it will be visible to users.
         Please note that once the badge is live, it cannot be disabled.`;
-    confirm.require({
+    dialogMessages.msgConfirm({
       message: msg,
       header: 'Please Confirm!',
       acceptLabel: 'Yes, Go Live!',
@@ -163,11 +163,9 @@ const publishBadge = (badge) => {
       }
     });
   } else {
-    confirm.require({
+    dialogMessages.msgOk({
       message: getNoPublishMsg(),
       header: 'Empty Badge',
-      rejectClass: 'hidden',
-      acceptLabel: 'OK',
     })
   }
 }

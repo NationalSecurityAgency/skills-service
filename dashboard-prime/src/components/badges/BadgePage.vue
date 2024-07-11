@@ -23,15 +23,15 @@ import BadgesService from '@/components/badges/BadgesService';
 import { useBadgeState } from '@/stores/UseBadgeState.js';
 import { storeToRefs } from 'pinia';
 import EditBadge from "@/components/badges/EditBadge.vue";
-import {useConfirm} from "primevue/useconfirm";
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
+const dialogMessages = useDialogMessages()
 const route = useRoute();
 const router = useRouter();
 const projConfig = useProjConfig();
 const badgeState = useBadgeState();
 const { badge } = storeToRefs(badgeState);
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
-const confirm = useConfirm();
 
 const navItems = [
   {name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'BadgeSkills'},
@@ -108,25 +108,13 @@ const badgeEdited = (editedBadge) => {
 
 const handleHidden = (e) => {
   showEditBadge.value = false;
-  if (!e || !e.updated) {
-    handleFocus();
-  }
-};
-
-const handleFocus = () => {
-  // this.$nextTick(() => {
-  //   const ref = this.$refs.editAndDeleteBadge;
-  //   if (ref) {
-  //     ref.focus();
-  //   }
-  // });
 };
 
 const handlePublish = () => {
   if (canPublish()) {
     const msg = `While this Badge is disabled, user's cannot see the Badge or achieve it. Once the Badge is live, it will be visible to users.
         Please note that once the badge is live, it cannot be disabled.`;
-    confirm.require({
+    dialogMessages.msgConfirm({
       message: msg,
       header: 'Please Confirm!',
       acceptLabel: 'Yes, Go Live!',
@@ -143,11 +131,9 @@ const handlePublish = () => {
       }
     });
   } else {
-    confirm.require({
+    dialogMessages.msgOk({
       message: getNoPublishMsg(),
       header: 'Empty Badge',
-      rejectClass: 'hidden',
-      acceptLabel: 'OK',
     })
   }
 };
@@ -186,6 +172,8 @@ const toDate = (value) => {
                     size="small"
                     variant="outline-primary"
                     data-cy="btn_edit-badge"
+                    id="editBadgeButton"
+                    :track-for-focus="true"
                     label="Edit"
                     icon="fas fa-edit"
                     :aria-label="'edit Badge '+badge.badgeId">
@@ -194,6 +182,8 @@ const toDate = (value) => {
                     @click.stop="handlePublish"
                     class="btn btn-outline-primary"
                     size="small"
+                    id="badgeGoLiveButton"
+                    :track-for-focus="true"
                     variant="outline-primary"
                     aria-label="Go Live"
                     label="Go Live"

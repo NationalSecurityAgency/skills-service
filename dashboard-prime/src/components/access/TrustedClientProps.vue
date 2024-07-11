@@ -44,12 +44,16 @@ const loadClientSecret = () => {
 
 const resetClientSecret = () => {
   const message = 'Are you sure you want reset the client secret? Your current client secret will no longer work after reset and you will need to update any application configuration using the old secret.'
-  dialogMessages.msgConfirm(message, 'Reset Secret?', () => {
-    AccessService.resetClientSecret(projectId.value)
-      .then((clientSecretRes) => {
-        clientSecret.value = clientSecretRes
-      })
-  })
+  dialogMessages.msgConfirm({
+    message: message,
+    header: 'Reset Secret?',
+    accept: () => {
+      AccessService.resetClientSecret(projectId.value)
+          .then((clientSecretRes) => {
+            clientSecret.value = clientSecretRes
+          })
+    }
+  });
 }
 </script>
 
@@ -73,6 +77,8 @@ const resetClientSecret = () => {
           label="Reset Client Secret"
           icon="fas fa-sync-alt"
           size="small"
+          id="resetClientButton"
+          :track-for-focus="true"
           @click="resetClientSecret"
           class="mt-3" />
       </div>

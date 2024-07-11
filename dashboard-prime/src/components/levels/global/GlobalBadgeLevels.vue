@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import GlobalBadgeService from "@/components/badges/global/GlobalBadgeService.js";
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
@@ -23,14 +23,14 @@ import ProjectSelector from "@/components/levels/global/ProjectSelector.vue";
 import LevelSelector from "@/components/levels/global/LevelSelector.vue";
 import SimpleLevelsTable from "@/components/levels/global/SimpleLevelsTable.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
-import { useConfirm } from 'primevue/useconfirm';
 import {useBadgeState} from "@/stores/UseBadgeState.js";
 import {storeToRefs} from "pinia";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import ChangeProjectLevel from "@/components/levels/global/ChangeProjectLevel.vue";
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
+const dialogMessages = useDialogMessages()
 const announcer = useSkillsAnnouncer();
-const confirm = useConfirm();
 const route = useRoute();
 const emit = defineEmits(['global-badge-levels-changed']);
 const badgeState = useBadgeState();
@@ -104,7 +104,7 @@ const addLevel = () => {
 const deleteLevel = (deletedLevel) => {
   const msg = `Removing this level will award this badge to users that fulfill all of the remaining requirements.
         Are you sure you want to remove Level "${deletedLevel.level}" for project "${deletedLevel.projectName}" from Badge "${badge.value.name}"?`;
-  confirm.require({
+  dialogMessages.msgConfirm({
     message: msg,
     header: 'WARNING: Remove Required Level!',
     acceptLabel: 'YES, Delete It!',

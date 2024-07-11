@@ -46,6 +46,8 @@ const onEditLevel = (level) => {
                           title="Edit Project Level Requirement" icon="fas fa-edit">
             </SkillsButton>
             <SkillsButton v-on:click="onDeleteEvent(slotProps.data)" size="small"
+                          :track-for-focus="true"
+                          :id="`deleteProjectLevelButton_${slotProps.data.projectId}`"
                           :aria-label="`delete level ${slotProps.data.level} from ${slotProps.data.projectId}`"
                           :data-cy="`deleteLevelBtn_${slotProps.data.projectId}-${slotProps.data.level}`" icon="fas fa-trash">
             </SkillsButton>
