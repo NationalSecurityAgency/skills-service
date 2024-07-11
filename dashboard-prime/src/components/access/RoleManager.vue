@@ -318,7 +318,7 @@ defineExpose({
             </div>
             <div>
               <SkillsButton variant="outline-hc" @click="addUserRole" :disabled="addUsrBtnDisabled" data-cy="addUserBtn"
-                            label="Add User"
+                            label="Add User" id="addUserBtn" :track-for-focus="true"
                             :icon="isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right'">
               </SkillsButton>
             </div>
@@ -385,6 +385,8 @@ defineExpose({
                   </SkillsButton>
                   <SkillsButton @click="deleteUserRoleConfirm(slotProps.data)"
                                 :disabled="!notCurrentUser(slotProps.data.userId)"
+                                id="removeUserBtn"
+                                :track-for-focus="true"
                                 :aria-label="`remove access role from user ${slotProps.data.userId}`"
                                 data-cy="removeUserBtn" icon="fas fa-trash" label="Delete" size="small">
                   </SkillsButton>

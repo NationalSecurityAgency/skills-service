@@ -185,6 +185,8 @@ const searchChanged = (query) => {
               <Column header="Delete">
                 <template #body="slotProps">
                   <SkillsButton v-on:click="deleteSkill(slotProps.data)" size="small"
+                                :id="`deleteSkill_${slotProps.data.skillId}`"
+                                :track-for-focus="true"
                                 :data-cy="`deleteSkill_${slotProps.data.skillId}`" icon="fas fa-trash" label="Delete"
                                 :aria-label="`remove dependency on ${slotProps.data.skillId}`">
                   </SkillsButton>
