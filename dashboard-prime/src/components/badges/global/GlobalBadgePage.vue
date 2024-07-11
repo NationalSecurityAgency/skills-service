@@ -22,11 +22,11 @@ import PageHeader from "@/components/utils/pages/PageHeader.vue";
 import GlobalBadgeService from "@/components/badges/global/GlobalBadgeService.js";
 import {useBadgeState} from "@/stores/UseBadgeState.js";
 import {storeToRefs} from "pinia";
-import {useConfirm} from "primevue/useconfirm";
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
+const dialogMessages = useDialogMessages()
 const route = useRoute();
 const router = useRouter();
-const confirm = useConfirm();
 
 const isLoading = ref(true);
 const badgeId = ref(route.params.badgeId);
@@ -94,31 +94,22 @@ const badgeEdited = (editedBadge) => {
       badgeId.value = resp.badgeId;
     }
   }).finally(() => {
-    handleFocus();
   });
 };
 
 const handleHidden = (e) => {
   if (!e || !e.saved) {
-    handleFocus();
+    // handleFocus();
   }
 };
 
-const handleFocus = () => {
-  nextTick(() => {
-    // const ref = $refs.editBadgeButton;
-    // if (ref) {
-    //   ref.focus();
-    // }
-  });
-};
 
 const handlePublish = () => {
   if (canPublish()) {
     const msg = `While this Badge is disabled, user's cannot see the Badge or achieve it. Once the Badge is live, it will be visible to users.
         Please note that once the badge is live, it cannot be disabled.`;
 
-    confirm.require({
+    dialogMessages.msgConfirm({
       message: msg,
       header: 'Please Confirm!',
       acceptLabel: 'Yes, Go Live!',
@@ -135,11 +126,9 @@ const handlePublish = () => {
       }
     });
   } else {
-    confirm.require({
+    dialogMessages.msgOk({
       message: getNoPublishMsg(),
       header: 'Empty Badge',
-      rejectClass: 'hidden',
-      acceptLabel: 'OK',
     })
   }
 };
@@ -187,6 +176,8 @@ const toDate = (value) => {
                     class="btn btn-outline-primary"
                     size="small"
                     aria-label="Go Live"
+                    id="globalBadgeGoLiveButton"
+                    :track-for-focus="true"
                     data-cy="goLive" label="Go Live">
           </SkillsButton>
         </ButtonGroup>

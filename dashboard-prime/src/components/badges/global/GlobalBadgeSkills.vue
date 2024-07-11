@@ -23,11 +23,11 @@ import LoadingContainer from "@/components/utils/LoadingContainer.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import SkillsSelector from "@/components/skills/SkillsSelector.vue";
 import Column from "primevue/column";
-import { useConfirm } from 'primevue/useconfirm';
 import {useBadgeState} from "@/stores/UseBadgeState.js";
 import {storeToRefs} from "pinia";
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
-const confirm = useConfirm();
+const dialogMessages = useDialogMessages()
 const announcer = useSkillsAnnouncer();
 const emit = defineEmits(['skills-changed']);
 const route = useRoute();
@@ -99,7 +99,7 @@ const deleteSkill = (skill) => {
   const msg = `Removing this skill will award this badge to users that fulfill all of the remaining requirements.
         Are you sure you want to remove Skill "${skill.name}" from Badge "${badge.value.name}"?`;
 
-  confirm.require({
+  dialogMessages.msgConfirm({
     message: msg,
     header: 'WARNING: Remove Required Skill',
     acceptLabel: 'YES, Delete It!',

@@ -159,6 +159,7 @@ defineExpose({
             </div>
             <div>
               <SkillsButton size="small" label="Go Live" v-if="!isReadOnlyProj" data-cy="goLive"
+                            id="skillsGoLiveButton" :track-for-focus="true"
                           @click.stop="handlePublish"></SkillsButton>
             </div>
           </div>

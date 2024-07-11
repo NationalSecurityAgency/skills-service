@@ -178,10 +178,10 @@ const removeLastItem = () => {
       LevelService.checkIfProjectLevelBelongsToGlobalBadge(route.params.projectId, lastLevel)
           .then((belongsToGlobalBadge) => {
             if (belongsToGlobalBadge) {
-              dialogMessages.msgOk(
-                  `Cannot remove level: [${lastLevel}].  This project level belongs to one or more global badges. Please contact a Supervisor to remove this dependency.`,
-                  'Unable to Delete'
-              )
+              dialogMessages.msgOk({
+                  message: `Cannot remove level: [${lastLevel}].  This project level belongs to one or more global badges. Please contact a Supervisor to remove this dependency.`,
+                  header: 'Unable to Delete'
+              });
             } else {
               confirmAndRemoveLastItem();
             }
@@ -194,32 +194,31 @@ const removeLastItem = () => {
 
 const confirmAndRemoveLastItem = () => {
   const msg = 'Are you absolutely sure you want to delete the highest Level?';
-  dialogMessages.msgConfirm(
-      msg,
-      'WARNING: Delete Highest Level',
-      () => {
-        table.value.options.busy = true;
-        doRemoveLastItem().then(() => {
-          loadLevels().then(() => {
-            announcer.polite('Level has been removed');
+  dialogMessages.msgConfirm({
+    message: msg,
+    header: 'WARNING: Delete Highest Level',
+    accept: () => {
+      table.value.options.busy = true;
+      doRemoveLastItem().then(() => {
+        loadLevels().then(() => {
+          announcer.polite('Level has been removed');
+        });
+      }).catch((error) => {
+        if (error?.response?.data) {
+          dialogMessages.msgOk({
+            message: error.response.data.explanation,
+            header: 'Unable to delete',
           });
-        }).catch((error) => {
-          if (error?.response?.data) {
-            dialogMessages.msgOk(
-              error.response.data.explanation,
-              'Unable to delete'
-            );
-          } else {
-            // eslint-disable-next-line
-            console.error(error);
-          }
-          table.value.options.busy = false;
-        })
-      },
-      null,
-      'YES, Delete It!',
-      'Cancel',
-  );
+        } else {
+          // eslint-disable-next-line
+          console.error(error);
+        }
+        table.value.options.busy = false;
+      })
+    },
+    acceptLabel: 'YES, Delete It!',
+    rejectLabel: 'Cancel'
+  });
 };
 
 const doRemoveLastItem = () => {

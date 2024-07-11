@@ -30,13 +30,13 @@ import { SkillsReporter } from '@skilltree/skills-client-js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import SkillsSettingTextInput from '@/components/settings/SkillsSettingTextInput.vue'
-import { useConfirm } from 'primevue/useconfirm'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
+const dialogMessages = useDialogMessages()
 const announcer = useSkillsAnnouncer();
 const route = useRoute();
 const appConfig = useAppConfig()
 const projConfig = useProjConfig()
-const confirm = useConfirm();
 
 const publicNotDiscoverable = 'pnd';
 const discoverableProgressAndRanking = 'dpr';
@@ -325,11 +325,9 @@ const projectVisibilityChanged = ((value) => {
     } else if (value.value === privateInviteOnly) {
       settings.value.inviteOnlyProject.value = 'true';
       settings.value.productionModeEnabled.value = 'false';
-      confirm.require({
+      dialogMessages.msgOk({
         message: 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users.',
         header: 'Changing to Invite Only',
-        rejectClass: 'hidden',
-        acceptLabel: 'OK',
       })
     } else if (value.value === discoverableProgressAndRanking) {
       settings.value.inviteOnlyProject.value = 'false';

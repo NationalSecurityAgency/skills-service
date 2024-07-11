@@ -23,7 +23,7 @@ export const useDialogMessages = () => {
   const focusState = useFocusState()
   const isConfirmVisible = ref(false);
 
-  const msgOk = (message, header = 'Message!', okButtonTitle = 'Ok') => {
+  const msgOk = ({message, header = 'Message!', okButtonTitle = 'Ok'}) => {
     confirm.require({
       message,
       header,
@@ -34,12 +34,18 @@ export const useDialogMessages = () => {
         isConfirmVisible.value = false;
         focusState.focusOnLastElement()
       },
+      reject: () => {
+        focusState.focusOnLastElement()
+      },
+      accept: () => {
+        focusState.focusOnLastElement()
+      },
       rejectClass: 'hidden',
       acceptLabel: okButtonTitle,
     });
   }
 
-  const msgConfirm = (message, header = 'Message!', accept = null, reject = null, acceptLabel = 'OK', rejectLabel = 'Cancel') => {
+  const msgConfirm = ({message, header = 'Message!', accept = null, reject = null, acceptLabel = 'OK', rejectLabel = 'Cancel'}) => {
     confirm.require({
       message,
       header,

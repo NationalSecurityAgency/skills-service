@@ -15,19 +15,19 @@ limitations under the License.
 */
 <script setup>
 import {computed, nextTick, onMounted, ref} from 'vue'
-import { useConfirm } from 'primevue/useconfirm'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsService from '@/components/skills/SkillsService'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import Column from 'primevue/column'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
+const dialogMessages = useDialogMessages()
 const projConfig = useProjConfig();
 const props = defineProps(['isLoading', 'data'])
 const emit = defineEmits(['update'])
 const announcer = useSkillsAnnouncer()
-const confirm = useConfirm()
 
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
@@ -59,7 +59,7 @@ onMounted(() => {
 
 const removeLearningPath = (data) => {
   const message = `Do you want to remove the path from ${data.fromItem} to ${data.toItem}?`
-  confirm.require({
+  dialogMessages.msgConfirm({
     message: message,
     header: 'Remove Learning Path',
     acceptLabel: 'Remove',
@@ -124,10 +124,11 @@ const isFlex = computed(() => responsive.sm.value)
           </Column>
           <Column field="edit" header="Edit" v-if="!isReadOnlyProj" :class="{'flex': isFlex }">
             <template #body="slotProps">
-              <Button @click="removeLearningPath(slotProps.data)"
-                      variant="outline-info" size="small" class="text-info"
+              <SkillsButton @click="removeLearningPath(slotProps.data)"
+                      variant="outline-info" size="small" class="text-info" icon="fa fa-trash"
+                      :track-for-focus="true" :id="`removeLearningPathButton-${slotProps.data.fromItem}-${slotProps.data.toItem}`"
                       :aria-label="`Remove learning path route of ${slotProps.data.fromItem} to ${slotProps.data.toItem}`"
-                      data-cy="sharedSkillsTable-removeBtn"><i class="fa fa-trash" /></Button>
+                      data-cy="sharedSkillsTable-removeBtn"></SkillsButton>
             </template>
           </Column>
 

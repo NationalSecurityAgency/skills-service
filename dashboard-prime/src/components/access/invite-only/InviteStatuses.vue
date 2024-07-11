@@ -134,7 +134,7 @@ const remindUser = (recipientEmail) => {
     }, MESSAGE_DURATION)
   }).catch((err) => {
     if (err.response.data && err.response.data.errorCode && err.response.data.errorCode === 'ExpiredProjectInvite') {
-      dialogMessages.msgOk(`The project invite for ${recipientEmail} has expired, reminders cannot be sent for expired invites, please extend the expiration for this invite and try again.`, 'Expired Invite')
+      dialogMessages.msgOk({message: `The project invite for ${recipientEmail} has expired, reminders cannot be sent for expired invites, please extend the expiration for this invite and try again.`, header: 'Expired Invite'})
       loadData()
     } else {
       throw err

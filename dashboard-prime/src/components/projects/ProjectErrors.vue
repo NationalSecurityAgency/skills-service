@@ -20,17 +20,17 @@ import ProjectService from '@/components/projects/ProjectService';
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
-import { useConfirm } from 'primevue/useconfirm'
 import {useProjDetailsState} from "@/stores/UseProjDetailsState.js";
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import Column from 'primevue/column'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
+const dialogMessages = useDialogMessages()
 const route = useRoute();
 
 onMounted(loadErrors);
 
 const projectDetailsState = useProjDetailsState();
-const confirm = useConfirm();
 const loading = ref(true);
 const errors = ref([]);
 const totalRows = ref(null);
@@ -64,7 +64,7 @@ const sortTable = (sortContext) => {
 
 const removeAllErrors = () => {
   const msg = 'Are you absolutely sure you want to remove all Project issues?';
-  confirm.require({
+  dialogMessages.msgConfirm({
     message: msg,
     header: 'Please Confirm!',
     acceptLabel: 'YES, Delete It!',
@@ -81,7 +81,7 @@ const removeAllErrors = () => {
 
 const removeError = (projectError) => {
   const msg = `Are you absolutely sure you want to remove issue related to ${projectError.error}?`;
-  confirm.require({
+  dialogMessages.msgConfirm({
     message: msg,
     header: 'Please Confirm!',
     acceptLabel: 'YES, Delete It!',
@@ -123,7 +123,7 @@ const isFlex = computed(() => responsive.md.value)
       <div class="row">
         <div class="col">
           <span id="remove-button" class="mr-2">
-            <SkillsButton @click="removeAllErrors" :disabled="errors.length < 1" size="small" data-cy="removeAllErrors" label="Remove All" icon="fas fa-trash-alt">
+            <SkillsButton @click="removeAllErrors" :disabled="errors.length < 1" size="small" data-cy="removeAllErrors" id="removeAllErrorsButton" :track-for-focus="true" label="Remove All" icon="fas fa-trash-alt">
             </SkillsButton>
           </span>
         </div>
@@ -170,6 +170,8 @@ const isFlex = computed(() => responsive.md.value)
             <template #body="slotProps">
               <SkillsButton :ref="`delete_${slotProps.data.error}`" @click="removeError(slotProps.data)" variant="outline-info" size="small"
                         :data-cy="`deleteErrorButton_${encodeURI(slotProps.data.error)}`"
+                        :track-for-focus="true"
+                        :id="`deleteErrorButton_${encodeURI(slotProps.data.error)}`"
                         :aria-label="`delete error for reported skill ${slotProps.data.error}`"
                         icon="fas fa-trash-alt" label="Delete">
               </SkillsButton>

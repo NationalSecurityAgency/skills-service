@@ -25,16 +25,16 @@ import GraphUtils from '@/components/skills/dependencies/GraphUtils';
 import GraphLegend from '@/components/skills/dependencies/GraphLegend.vue';
 import GraphNodeSortMethodSelector from '@/components/skills/dependencies/GraphNodeSortMethodSelector.vue';
 import NoContent2 from "@/components/utils/NoContent2.vue";
-import { useConfirm } from 'primevue/useconfirm'
 import DependencyTable from "@/components/skills/dependencies/DependencyTable.vue";
 import ShareSkillsWithOtherProjects from "@/components/skills/crossProjects/ShareSkillsWithOtherProjects.vue";
 import SharedSkillsFromOtherProjects from "@/components/skills/crossProjects/SharedSkillsFromOtherProjects.vue";
 import { useProjConfig } from '@/stores/UseProjConfig.js'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
+const dialogMessages = useDialogMessages()
 const projConfig = useProjConfig();
 const route = useRoute();
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
-const confirm = useConfirm();
 
 const isLoading = ref(true);
 const showGraph = ref(true);
@@ -163,7 +163,7 @@ const createGraph = () => {
       const toNode = allNodes.find((node) => node.id === connectedNodes[1]);
 
       const message = `Do you want to remove the path from ${fromNode.name} to ${toNode.name}?`;
-      confirm.require({
+      dialogMessages.msgConfirm({
         message: message,
         header: 'Remove Learning Path?',
         acceptLabel: 'Remove',

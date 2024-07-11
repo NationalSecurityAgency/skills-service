@@ -18,17 +18,16 @@ import { ref, computed, onMounted, nextTick } from 'vue';
 import AccessService from '@/components/access/AccessService.js'
 import ExistingUserInput from "@/components/utils/ExistingUserInput.vue";
 import UserRolesUtil from '@/components/utils/UserRolesUtil';
-import { useConfirm } from 'primevue/useconfirm'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useUserInfo } from '@/components/utils/UseUserInfo.js';
 import Column from "primevue/column";
-import DataTable from "primevue/datatable";
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
-import { useRouter } from 'vue-router'
 import { userErrorState } from '@/stores/UserErrorState.js'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
+const dialogMessages = useDialogMessages()
 // role constants
 const ROLE_APP_USER = 'ROLE_APP_USER';
 const ROLE_PROJECT_ADMIN = 'ROLE_PROJECT_ADMIN';
@@ -37,13 +36,11 @@ const ROLE_SUPER_DUPER_USER = 'ROLE_SUPER_DUPER_USER';
 const ROLE_PROJECT_APPROVER = 'ROLE_PROJECT_APPROVER';
 const ALL_ROLES = [ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPERVISOR, ROLE_SUPER_DUPER_USER, ROLE_PROJECT_APPROVER];
 
-const confirm = useConfirm();
 const appConfig = useAppConfig();
 const announcer = useSkillsAnnouncer();
 const userInfo = useUserInfo();
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
-const router = useRouter()
 const errorState = userErrorState()
 
 const emit = defineEmits(['role-added', 'role-deleted']);
@@ -170,7 +167,7 @@ function addUserRole() {
     const titleText = isApproverRole ? 'Add Project Approver?' : 'Add Project Administrator?';
     const okBtnText = isApproverRole ? 'Add Approver!' : 'Add Administrator!';
 
-    confirm.require({
+    dialogMessages.msgConfirm({
       message: msgText,
       header: titleText,
       acceptLabel: okBtnText,
@@ -225,7 +222,7 @@ function notCurrentUser(userId) {
 function deleteUserRoleConfirm(row) {
   const msg = `Are you absolutely sure you want to remove ${getUserDisplay(row)} as a ${props.roleDescription}?`;
 
-  confirm.require({
+  dialogMessages.msgConfirm({
     message: msg,
     header: 'Please Confirm!',
     acceptLabel: 'YES, Delete It',
