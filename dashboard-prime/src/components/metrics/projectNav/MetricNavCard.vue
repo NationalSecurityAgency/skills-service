@@ -44,7 +44,7 @@ defineProps(['title', 'subtitle', 'description', 'icon', 'pathName']);
     </template>
     <template #footer>
       <div class="text-center pb-3 px-5">
-        <router-link :to="{ name: pathName }" :data-cy="`metricsNav-${title}`">
+        <router-link :to="{ name: pathName }" :data-cy="`metricsNav-${title}`" tabindex="-1">
           <SkillsButton size="small" :label="`${title}`" icon="fas fa-arrow-right" />
         </router-link>
       </div>

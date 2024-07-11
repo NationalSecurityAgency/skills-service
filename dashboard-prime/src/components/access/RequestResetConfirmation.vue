@@ -51,7 +51,7 @@ watch(timer, (value) => {
           <template #content>
             <p>A password reset link has been sent to <span class="text-primary font-weight-bold">{{ email }}</span>. You will be forwarded to the login page in {{ timer }} seconds.</p>
             <div class="flex justify-content-center mt-2">
-              <router-link :to="{ name: 'Login' }">
+              <router-link :to="{ name: 'Login' }" tabindex="-1">
                 <SkillsButton icon="fas fa-sign-in-alt"
                               outlined
                               size="small"

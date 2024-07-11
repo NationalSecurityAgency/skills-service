@@ -140,7 +140,7 @@ function updateQuizDef(quizDef) {
                 class="ml-1"
                 data-cy="quizPreview"
                 :to="{ name:'QuizRun', params: { quizId: quizSummaryState.quizSummary.quizId } }"
-                target="_blank" rel="noopener">
+                target="_blank" rel="noopener" tabindex="-1">
               <SkillsButton
                   target="_blank"
                   v-if="quizSummaryState.quizSummary"

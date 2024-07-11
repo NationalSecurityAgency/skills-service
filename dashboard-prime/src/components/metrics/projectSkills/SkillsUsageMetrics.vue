@@ -158,10 +158,10 @@ const loadData = () => {
                 </div>
               </div>
               <div class="flex gap-1 right-0">
-                <router-link target="_blank" :to="{ name: 'SkillOverview', params: { projectId: projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId } }">
+                <router-link target="_blank" :to="{ name: 'SkillOverview', params: { projectId: projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId } }" tabindex="-1">
                   <SkillsButton size="small" class="text-secondary"><i class="fa fa-wrench"/><span class="sr-only">view skill configuration</span></SkillsButton>
                 </router-link>
-                <router-link :id="`b-skill-metrics_${slotProps.data.skillId}`" target="_blank" :to="{ name: 'SkillMetrics', params: { projectId: projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId } }">
+                <router-link :id="`b-skill-metrics_${slotProps.data.skillId}`" target="_blank" :to="{ name: 'SkillMetrics', params: { projectId: projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId } }" tabindex="-1">
                   <SkillsButton variant="outline-info" size="small" class="text-secondary"><i class="fa fa-chart-bar"/><span class="sr-only">view skill metrics</span></SkillsButton>
                 </router-link>
               </div>

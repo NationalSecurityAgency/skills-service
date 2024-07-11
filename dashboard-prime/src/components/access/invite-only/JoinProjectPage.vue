@@ -106,7 +106,7 @@ watch(() => timer.value, (value) => {
           <div v-if="joined">
             You have successfully joined Project <span class="text-primary font-bold">{{ projectName }}</span>!
             <div class="flex justify-content-center mt-3">
-            <router-link :to="{ path: `/progress-and-rankings/projects/${route.params.pid}` }">
+            <router-link :to="{ path: `/progress-and-rankings/projects/${route.params.pid}` }" tabindex="-1">
               <Button
                 label="View Project Now"
                 :aria-label="`Click to navigate to ${projectName} project page.`"

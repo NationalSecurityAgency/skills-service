@@ -243,7 +243,7 @@ defineExpose({
               <div class="flex flex-1 flex-nowrap align-items-start justify-content-end">
                 <router-link :data-cy="`managesQuizBtn_${slotProps.data.quizId}`"
                              :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
-                             :aria-label="`Manage Quiz ${slotProps.data.name}`">
+                             :aria-label="`Manage Quiz ${slotProps.data.name}`" tabindex="-1">
                   <SkillsButton label="Manage"
                                 icon="fas fa-arrow-circle-right"
                                   class="flex-shrink-1"

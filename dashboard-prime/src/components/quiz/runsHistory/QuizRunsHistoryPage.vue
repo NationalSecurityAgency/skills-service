@@ -279,7 +279,7 @@ const deleteRun = () => {
                                      :filter="filters.global.value" />
                 </div>
                 <div class="flex flex-grow-1 align-items-start justify-content-end">
-                  <router-link :data-cy="`row${slotProps.index}-viewRun`"
+                  <router-link :data-cy="`row${slotProps.index}-viewRun`" tabindex="-1"
                                :to="{ name: 'QuizSingleRunPage', params: { runId: slotProps.data.attemptId } }">
                     <SkillsButton icon="fas fa-list-ul"
                                   class="ml-2"

@@ -35,7 +35,7 @@ const isRootUser = computed(() => accessState.isRoot)
       'justify-content-end': !projectsState.shouldTileProjectsCards
     }">
     <div>
-      <router-link :to="{ name:'Subjects', params: { projectId: project.projectId }}">
+      <router-link :to="{ name:'Subjects', params: { projectId: project.projectId }}" tabindex="-1">
         <SkillsButton
             size="small"
             class="mr-2"
@@ -44,7 +44,7 @@ const isRootUser = computed(() => accessState.isRoot)
             :data-cy="'projCard_' + project.projectId + '_manageBtn'"
             :label="readOnlyProject ? 'View' : 'Manage'"
             icon="fas fa-arrow-circle-right"
-            :aria-label="'manage project + project.name'">
+            :aria-label="'manage project' + project.name">
         </SkillsButton>
       </router-link>
       <SkillsButton

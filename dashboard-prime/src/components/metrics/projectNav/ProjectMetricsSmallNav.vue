@@ -23,7 +23,7 @@ const route = useRoute();
 
 <template>
   <div class="flex gap-1">
-    <router-link :to="{ name: navItem.pathName }" v-for="navItem in navCards" :key="navItem.title">
+    <router-link :to="{ name: navItem.pathName }" v-for="navItem in navCards" :key="navItem.title" tabindex="-1">
       <SkillsButton class=""
                     :aria-label="`${navItem.title} metrics`"
                     :data-cy="`${navItem.title}-metrics-link`"

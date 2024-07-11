@@ -93,7 +93,7 @@ watch(timer, (newValue) => {
         </div>
       </div>
       <div class="text-center">
-        <router-link to="/">
+        <router-link to="/" tabindex="-1">
           <SkillsButton
               label="Take Me Home"
               icon="fas fa-home"

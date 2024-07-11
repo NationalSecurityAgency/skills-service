@@ -34,7 +34,7 @@ const emailVerificationInfo = useEmailVerificationInfo()
             <p>An email verification code has been sent to <span class="text-primary font-weight-bold">{{ emailVerificationInfo.email }}</span>.</p>
             <p>Please check your email and confirm your email address to complete your SkillTree account creation.</p>
             <div class="text-center">
-              <router-link to="/skills-login">
+              <router-link to="/skills-login" tabindex="-1">
                 <SkillsButton class="p-2" data-cy="loginPage" icon="fas fa-sign-in-alt" label="Return to Login Page"></SkillsButton>
               </router-link>
             </div>
