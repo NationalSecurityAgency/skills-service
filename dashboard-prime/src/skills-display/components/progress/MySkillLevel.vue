@@ -16,6 +16,7 @@ limitations under the License.
 <script setup>
 import { computed } from 'vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import LevelsProgress from '@/skills-display/components/utilities/LevelsProgress.vue'
 
 const props = defineProps({
   userProgress: Object,
@@ -40,7 +41,7 @@ const totalLevels = computed(() => props.userProgress.totalLevels)
       {{ attributes.levelDisplayName }} <Tag severity="info">{{ level }}</Tag> out of <Tag>{{ totalLevels }}</Tag>
     </div>
     <div class="flex justify-content-center mt-2 overall-progress-stars-icons">
-      <Rating v-model="level" :stars="totalLevels" readonly :cancel="false" data-cy="overallStars"/>
+      <LevelsProgress :level="level" :totalLevels="totalLevels" data-cy="overallStars"/>
     </div>
   </div>
 </template>
