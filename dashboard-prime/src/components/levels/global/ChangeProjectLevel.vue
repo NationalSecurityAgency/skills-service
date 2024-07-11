@@ -72,6 +72,7 @@ const selectLevel = (level) => {
       cancel-button-severity="success"
       @on-ok="saveLevelChange"
       @on-cancel="closeMe"
+      :okButtonDisabled="newLevel === null || newLevel === oldLevel"
       :style="{ width: '40rem !important' }">
 
     <div class="mb-4">
