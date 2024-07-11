@@ -392,7 +392,7 @@ describe('Project Settings Tests', () => {
             .should('be.visible')
             .should('include.text', 'Changing to Invite Only')
             .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users.');
-        cy.clickButton('OK');
+        cy.clickButton('Ok');
         cy.get('[data-cy="saveSettingsBtn"')
             .click({ force: true });
         cy.wait('@saveSettings');
