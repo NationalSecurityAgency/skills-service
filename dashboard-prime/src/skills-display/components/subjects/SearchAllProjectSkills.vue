@@ -25,7 +25,7 @@ const skillsDisplayService = useSkillsDisplayService()
 const announcer = useSkillsAnnouncer()
 const skillDisplayInfo = useSkillsDisplayInfo()
 
-const selected = ({})
+const selected = ref('')
 const query = ref('')
 const searchRes = ref([])
 const isSearching = ref(false)
@@ -50,6 +50,7 @@ const search = (event) => {
         announcer.assertive(`No skills found for ${query.value} search string. Consider changing the search query.`)
       }
 
+    }).finally(() => {
       isSearching.value = false
     })
 }
