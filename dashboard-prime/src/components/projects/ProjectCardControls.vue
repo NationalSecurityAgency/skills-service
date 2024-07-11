@@ -44,7 +44,7 @@ const isRootUser = computed(() => accessState.isRoot)
             :data-cy="'projCard_' + project.projectId + '_manageBtn'"
             :label="readOnlyProject ? 'View' : 'Manage'"
             icon="fas fa-arrow-circle-right"
-            :aria-label="'manage project' + project.name">
+            :aria-label="'manage project ' + project.name">
         </SkillsButton>
       </router-link>
       <SkillsButton
@@ -55,7 +55,7 @@ const isRootUser = computed(() => accessState.isRoot)
       data-cy="unpin"
       size="small"
       class="mr-2"
-      aria-label="'remove pin for project '+ project.name"
+      :aria-label="'remove pin for project '+ project.name"
       label="Unpin"
       icon="fas fa-ban"
       :aria-pressed="project.pinned">
