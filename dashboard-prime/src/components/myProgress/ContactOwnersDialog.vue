@@ -45,7 +45,7 @@ const schema = object({
     .required()
     .min(10)
     .max(appConfig.maxContactOwnersMessageLength)
-    .customDescriptionValidator('Message')
+    .customDescriptionValidator('Message', false)
     .label('Message')
 })
 const sent = ref(false)
