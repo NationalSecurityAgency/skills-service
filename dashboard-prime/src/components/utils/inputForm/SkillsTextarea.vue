@@ -50,6 +50,10 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  submitOnEnter: {
+    type: Boolean,
+    default: true,
+  },
   maxNumChars: Number
 })
 const emit = defineEmits(['input', 'keydown-enter'])
@@ -59,7 +63,7 @@ const numberFormat = useNumberFormat()
 const { value, errorMessage } = useField(() => props.name)
 const doSubmitForm = inject('doSubmitForm', null)
 const onEnter = (event) => {
-  if (doSubmitForm) {
+  if (doSubmitForm && props.submitOnEnter) {
     doSubmitForm()
   }
   emit('keydown-enter', event.target.value)
