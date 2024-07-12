@@ -62,7 +62,7 @@ onMounted(() => {
           <markdown-text :text="subject.subjectSummary.description" data-cy="subjectDescription"/>
         </template>
         <template #footer v-if="subject.subjectSummary.helpUrl">
-          <a :href="subject.subjectSummary.helpUrl" target="_blank" rel="noopener">
+          <a :href="subject.subjectSummary.helpUrl" target="_blank" rel="noopener" tabindex="-1">
             <Button outlined size="small">
               <i class="fas fa-question-circle mr-1" aria-hidden="true"></i>
               Learn More

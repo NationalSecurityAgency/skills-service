@@ -51,8 +51,8 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
     <template #footer v-if="!attributes.isSummaryOnly">
       <router-link
         :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('BadgesDetailsPage') }"
-        aria-label="Click to navigate to My Rank page"
-        data-cy="myBadgesBtn">
+        aria-label="Click to navigate to My Badges page"
+        data-cy="myBadgesBtn" tabindex="-1">
         <Button
           label="View"
           icon="far fa-eye"

@@ -379,7 +379,7 @@ defineExpose({
     <div class=" pt-2">
         <div class="btn-group" role="group" aria-label="Skills Buttons">
           <a v-if="skillInternal.description && skillInternal.description.href" :href="skillInternal.description.href"
-             target="_blank" rel="noopener" class="">
+             target="_blank" rel="noopener" class="" tabindex="-1">
             <Button outlined size="small">
               <i class="fas fa-question-circle mr-1" aria-hidden="true"></i>
               Learn More

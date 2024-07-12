@@ -260,4 +260,98 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
         cy.get('[data-cy="selfReportSubmitBtn"]').should('be.enabled');
     });
+
+    it('contact project admins form shall never using community validator', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createProject(2)
+
+        const validateDefaultCustomValidatorIsUsed = () => {
+            cy.get('[data-cy="pointHistoryChartNoData"')
+            cy.get('[data-cy="myRankBtn"]')
+            cy.get('[data-cy="contactOwnerBtn"]').click()
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+            cy.get('[data-cy="contactOwnersMsgInput"]').type('ldkj aljdl aj\n\nndivinedragon');
+            cy.wait(1000)
+            const errorSelector = '[data-cy="messageError"]'
+            cy.get(errorSelector).should('not.be.visible')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+            cy.get('[data-cy="contactOwnersMsgInput"]').type('ldkj aljdl aj\n\njabberwocky');
+            cy.get(errorSelector).should('be.visible').contains('Message - paragraphs may not contain jabberwocky');
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+            cy.get('[data-cy="contactOwnersMsgInput"]').type('{backspace}');
+            cy.get(errorSelector).should('not.be.visible')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+            cy.get('[data-cy="closeDialogBtn"]').click()
+            cy.get('[data-cy="contactOwnersMsgInput"]').should('not.exist')
+        }
+
+        cy.visit('/progress-and-rankings/projects/proj1');
+        validateDefaultCustomValidatorIsUsed()
+
+        cy.visit('/progress-and-rankings/projects/proj2');
+        validateDefaultCustomValidatorIsUsed()
+    });
+
+    it('contact project users form shall never using community validator', () => {
+        cy.createProject(1, { enableProtectedUserCommunity: true })
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.reportSkill(1, 1, 'user1', 'now');
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 1)
+        cy.reportSkill(2, 1, 'user1', 'now');
+
+        const validateDefaultCustomValidatorIsUsed = () => {
+            cy.get('[data-cy="emailUsers_subject"]').type('subject');
+            cy.selectItem('[data-cy="filterSelector"]', 'Project');
+            cy.get('[data-cy="emailUsers-addBtn"]').click();
+            cy.get('[data-cy="emailUsers-submitBtn"]').should('be.disabled')
+
+
+            cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\nndivinedragon');
+            cy.wait(1000)
+            const errorSelector = '[data-cy="descriptionError"]'
+            cy.get(errorSelector).should('not.be.visible')
+            cy.get('[data-cy="emailUsers-submitBtn"]').should('be.enabled')
+
+            cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+            cy.get(errorSelector).should('be.visible').contains('Email Body - paragraphs may not contain jabberwocky');
+            cy.get('[data-cy="emailUsers-submitBtn"]').should('be.disabled')
+        }
+
+        cy.visit('/administrator/projects/proj1/contact-users');
+        validateDefaultCustomValidatorIsUsed()
+
+        cy.visit('/administrator/projects/proj2/contact-users');
+        validateDefaultCustomValidatorIsUsed()
+    });
+
+    it('contact all admins form shall never using community validator', () => {
+        cy.createProject(1, { enableProtectedUserCommunity: true })
+        cy.createProject(2)
+
+        cy.logout();
+        cy.fixture('vars.json')
+          .then((vars) => {
+              cy.login(vars.rootUser, vars.defaultPass);
+
+              cy.visit('/administrator/contactAdmins');
+
+              cy.get('[data-cy="emailUsers_subject"]').type('subject');
+              cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\nndivinedragon');
+              cy.wait(1000)
+              const errorSelector = '[data-cy="descriptionError"]'
+              cy.get(errorSelector).should('not.be.visible')
+              cy.get('[data-cy="emailUsers-submitBtn"]').should('be.enabled')
+
+              cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+              cy.get(errorSelector).should('be.visible').contains('Email Body - paragraphs may not contain jabberwocky');
+              cy.get('[data-cy="emailUsers-submitBtn"]').should('be.disabled')
+          });
+    });
 });
