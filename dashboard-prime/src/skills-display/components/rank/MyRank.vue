@@ -72,7 +72,7 @@ const toRankDetailsPage = computed(() => {
     <router-link
       :to="toRankDetailsPage"
       aria-label="Click to navigate to My Rank page"
-      data-cy="myRankBtn">
+      data-cy="myRankBtn" tabindex="-1">
       <Button
         label="View"
         icon="far fa-eye"

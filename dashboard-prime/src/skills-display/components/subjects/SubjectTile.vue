@@ -146,7 +146,7 @@ const progress = computed(() => {
           <router-link v-if="!attributes.isSummaryOnly"
             :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('SubjectDetailsPage'), params: { subjectId: subject.subjectId } }"
             :aria-label="`Click to navigate to the ${subject.subject} subject page.`"
-            data-cy="subjectTileBtn">
+            data-cy="subjectTileBtn" tabindex="-1">
             <Button
               label="View"
               icon="far fa-eye"
