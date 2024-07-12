@@ -354,4 +354,32 @@ describe('Community Project Creation Tests', () => {
               cy.get('[data-cy="emailUsers-submitBtn"]').should('be.disabled')
           });
     });
+
+    it('contact project admins should not submit on enter', () => {
+        cy.intercept('POST', '/api/projects/*/contact', cy.spy().as('contact')).as('contactProject');
+        cy.createProject(1)
+
+        cy.visit('/progress-and-rankings/projects/proj1');
+
+        cy.get('[data-cy="pointHistoryChartNoData"')
+        cy.get('[data-cy="myRankBtn"]')
+        cy.get('[data-cy="contactOwnerBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="contactOwnersMsgInput"]').type('l{enter}d{enter}k{enter}{enter}j');
+        cy.wait(1000)
+
+        cy.get('@contact').should('not.have.been.called');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="contactOwnersMsgInput"]').type('ldkj aljdl aj{enter}{enter}gjoijsgojidfsgsdfg{enter}{enter}gofdjoigjdfgdfgdf');
+        cy.wait(1000)
+
+        cy.get('@contact').should('not.have.been.called');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.wait('@contactProject');
+        cy.get('@contact').should('have.been.calledOnce');
+    });
 });
