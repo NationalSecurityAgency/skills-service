@@ -81,6 +81,7 @@ const contactProjectAdmins = (values) => {
       <SkillsTextarea
         :label="`Message for Admins of ${projectName} project`"
         :is-required="true"
+        :submit-on-enter="false"
         data-cy="contactOwnersMsgInput"
         :max-num-chars="appConfig.maxContactOwnersMessageLength ? Number(appConfig.maxContactOwnersMessageLength) : 0"
         rows="10"
