@@ -46,8 +46,11 @@ const toggleIconDisplay = (event) => {
 
 const onSelectedIcon = (selectedIcon) => {
   iconManagerOverlayPanel.value.hide()
-  focusState.focusOnLastElement()
   emit('selected-icon', selectedIcon)
+}
+
+const panelHidden = () => {
+  focusState.focusOnLastElement()
 }
 </script>
 
@@ -69,7 +72,7 @@ const onSelectedIcon = (selectedIcon) => {
       </div>
     </SkillsButton>
 
-    <OverlayPanel ref="iconManagerOverlayPanel" :show-close-icon="true">
+    <OverlayPanel ref="iconManagerOverlayPanel" :show-close-icon="true" @hide="panelHidden">
       <icon-manager @selected-icon="onSelectedIcon" name="iconClass"></icon-manager>
     </OverlayPanel>
   </div>
