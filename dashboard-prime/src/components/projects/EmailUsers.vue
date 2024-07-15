@@ -550,7 +550,7 @@ const previewEmail = () => {
               label="Type"
               name="filterSelector"
               id="filterSelector"
-              :disabled="criteria.allProjectUsers"
+              :disabled="criteria.allProjectUsers || !emailFeatureConfigured"
               data-cy="filterSelector"
               class="w-full"
               placeholder="Select a filter to add"
@@ -561,7 +561,7 @@ const previewEmail = () => {
             <div class="flex flex-1 gap-2 flex-column ml-4">
               <SkillsDropDown
                   v-if="currentFilterType && currentFilterType !== 'project'"
-                  :disabled="currentFilterType && currentFilterType === 'project'"
+                  :disabled="(currentFilterType && currentFilterType === 'project') || !emailFeatureConfigured"
                   label="Name"
                   name="name-selector"
                   id="name-selector"
@@ -580,7 +580,7 @@ const previewEmail = () => {
                   optionLabel="text"
                   optionValue="value"
                   placeholder="Any Level"
-                  :disabled="levelsDisabled || criteria.allProjectUsers"
+                  :disabled="(levelsDisabled || criteria.allProjectUsers) || !emailFeatureConfigured"
                   v-model="levels.selected"
                   :options="levels.available" />
 
@@ -590,13 +590,14 @@ const previewEmail = () => {
                     inputId="skillAchieved"
                     name="achieved-button"
                     label="test"
+                    :disabled="!emailFeatureConfigured"
                     data-cy=skillAchievedSwitch />
                 <label for="skillAchieved" class="ml-2"> {{ skills.achieved ? 'Achieved' : 'Not Achieved' }} </label>
               </div>
             </div>
             <div>
               <SkillsButton class="ml-4" @click="addCriteria" data-cy="emailUsers-addBtn" :track-for-focus="true" id="addCriteriaButton"
-                            :disabled="isAddDisabled || maxTagsReached" label="Add" icon="fas fa-plus-circle" />
+                            :disabled="isAddDisabled || maxTagsReached || !emailFeatureConfigured" label="Add" icon="fas fa-plus-circle" />
               <transition name="fade">
                 <span v-if="alreadyApplied" data-cy="filterExists" class="pt-2 pl-1" role="alert">Filter already exists</span>
               </transition>
@@ -615,21 +616,29 @@ const previewEmail = () => {
 
           <div class="py-2 font-bold text-lg uppercase">Email Content</div>
           <div class="mt-2">
-            <SkillsTextInput name="subjectLine" label="Subject Line" data-cy="emailUsers_subject" class="w-full" />
+            <SkillsTextInput name="subjectLine" label="Subject Line" data-cy="emailUsers_subject" class="w-full" :disabled="!emailFeatureConfigured" />
           </div>
           <div class="flex w-full">
               <markdown-editor class="w-full"
                                data-cy="emailUsers_body"
                                label="Email Body"
                                name="emailBody"
+                               v-if="emailFeatureConfigured"
                                :resizable="false"
                                :allow-attachments="false"
                                :use-html="true"/>
+            <SkillsTextarea v-else data-cy="emailUsers_body"
+                            label="Email Body"
+                            class="w-full"
+                            disabled
+                            rows="5"
+                            name="emailBody">
+            </SkillsTextarea>
           </div>
 
           <div class="flex ">
             <SkillsButton class="mr-3" data-cy="previewUsersEmail"
-                          :disabled="isPreviewDisabled || !meta.valid"
+                          :disabled="isPreviewDisabled || !meta.valid || !emailFeatureConfigured"
                           @click="previewEmail"
                           label="Preview"
                           :icon="emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-eye'"
@@ -637,7 +646,7 @@ const previewEmail = () => {
             <SkillsButton class="mr-1" @click="emailUsers" data-cy="emailUsers-submitBtn"
                           label="Email"
                           :icon="emailing ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fas fa-mail-bulk'"
-                          :disabled="isEmailDisabled || !meta.valid" />
+                          :disabled="isEmailDisabled || !meta.valid || !emailFeatureConfigured" />
             <transition name="fade">
               <span v-if="emailSent" class="pt-2 pl-1" data-cy="emailSent"><i class="far fa-check-square text-success"/> {{ sentMsg }}</span>
             </transition>
