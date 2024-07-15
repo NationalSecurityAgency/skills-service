@@ -261,11 +261,6 @@ function attachFile(event) {
   }
 }
 
-watch(value, (newValue) =>{
-  if (newValue !== markdownText()) {
-    setMarkdownText(newValue)
-  }
-})
 </script>
 
 <template>
