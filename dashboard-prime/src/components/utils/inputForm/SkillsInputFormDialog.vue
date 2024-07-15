@@ -94,6 +94,10 @@ const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, error
 const inputFormResiliency = reactive(useInputFormResiliency())
 
 const skillsDialog = ref(null)
+const cancel = () => {
+  emit('cancelled');
+  close()
+}
 const close = () => {
   skillsDialog.value.handleClose()
   model.value = false
@@ -187,7 +191,7 @@ if (props.asyncLoadDataFunction) {
     :header="header"
     :loading="isDialogLoading"
     :submitting="isSubmitting"
-    @on-cancel="close"
+    @on-cancel="cancel"
     @on-ok="onSubmit"
     :ok-button-label="saveButtonLabel"
     :ok-button-icon="saveButtonIcon"
