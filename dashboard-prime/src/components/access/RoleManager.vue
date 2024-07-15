@@ -190,6 +190,9 @@ function doAddUserRole() {
   AccessService.saveUserRole(props.projectId, selectedUser.value, role, pkiAuthenticated).then(() => {
     emit('role-added', { userId: selectedUser.value.userId, role });
     loadData();
+    nextTick(() => {
+      announcer.polite(`${getRoleDisplay(role)} role was added for ${getUserDisplay({ ...selectedUser.value, firstName: selectedUser.value.first, lastName: selectedUser.value.last })}`);
+    });
   }).catch((e) => {
     handleError(e);
   }).finally(() => {
@@ -235,14 +238,13 @@ function deleteUserRoleConfirm(row) {
 function deleteUserRole(row) {
   table.value.options.busy = true;
   AccessService.deleteUserRole(row.projectId, row.userId, row.roleName).then(() => {
+    nextTick(() => {
+      announcer.polite(`${getRoleDisplay(row.roleName)} role was removed from ${getUserDisplay(row)}`);
+    });
     data.value = data.value.filter((item) => item.userId !== row.userId);
-    userIds.value = userIds.value.filter((userId) => userId !== row.userId);
     emit('role-deleted', { userId: row.userId, role: row.roleName });
     table.value.options.busy = false;
     table.value.options.pagination.totalRows = data.value.length;
-    nextTick(() => {
-      announcer.polite(`${row.roleName} was removed from the user`);
-    });
   });
 }
 
@@ -360,7 +362,7 @@ defineExpose({
                         :options="userRole.options"
                         optionLabel="text"
                         optionValue="value"
-                        :aria-label="`select new access role for user ${slotProps.data.userId}`"
+                        :aria-label="`select new access role for user ${getUserDisplay(slotProps.data)}`"
                         :data-cy="`roleDropDown_${slotProps.data.userId}`"
                         @change="updateUserRole">
               </Dropdown>
@@ -380,19 +382,19 @@ defineExpose({
 
                   <SkillsButton v-if="!isOnlyOneRole" @click="editItem(slotProps.data)"
                                 :disabled="!notCurrentUser(slotProps.data.userId)"
-                                :aria-label="`edit access role from user ${slotProps.data.userId}`"
+                                :aria-label="`edit access role from user ${getUserDisplay(slotProps.data)}`"
                                 data-cy="editUserBtn" icon="fas fa-edit" label="Edit" size="small">
                   </SkillsButton>
                   <SkillsButton @click="deleteUserRoleConfirm(slotProps.data)"
                                 :disabled="!notCurrentUser(slotProps.data.userId)"
                                 id="removeUserBtn"
                                 :track-for-focus="true"
-                                :aria-label="`remove access role from user ${slotProps.data.userId}`"
+                                :aria-label="`remove access role from user ${getUserDisplay(slotProps.data)}`"
                                 data-cy="removeUserBtn" icon="fas fa-trash" label="Delete" size="small">
                   </SkillsButton>
 
                 </div>
-                <InlineMessage v-if="!notCurrentUser(slotProps.data.userId)" class="mt-1" severity="info">
+                <InlineMessage v-if="!notCurrentUser(slotProps.data.userId)" class="mt-1" severity="info" aria-live="polite">
                   Can't remove or edit yourself
                 </InlineMessage>
               </div>
