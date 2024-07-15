@@ -25,7 +25,9 @@ import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEdito
 import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import IconPicker from '@/components/utils/iconPicker/IconPicker.vue'
+import { useFocusState } from '@/stores/UseFocusState.js'
 
+const focusState = useFocusState()
 const model = defineModel()
 const props = defineProps({
   subject: Object,
@@ -47,8 +49,10 @@ let canAutoGenerateId = ref(true)
 let restoredFromStorage = ref(false)
 let currentFocus = ref(null)
 let previousFocus = ref(null)
+let originalFocusedElement = null;
 
 onMounted(() => {
+  originalFocusedElement = focusState.elementId;
   document.addEventListener('focusin', trackFocus)
 })
 
@@ -61,9 +65,9 @@ const title = computed(() => {
   return props.isEdit ? 'Editing Existing Subject' : 'New Subject'
 })
 
-
 const close = () => {
   model.value = false
+  focusState.setElementId(originalFocusedElement);
 }
 
 const onSelectedIcon = (selectedIcon) => {
@@ -161,6 +165,7 @@ const onSubjectSaved = (subject) => {
     :enable-return-focus="true"
     :isEdit="isEdit"
     @saved="onSubjectSaved"
+    @cancelled="close"
     @close="close">
     <template #default>
       <SkillsNameAndIdInput
