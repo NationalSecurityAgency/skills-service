@@ -190,7 +190,7 @@ describe('Contact Project Admins Specs', () => {
             .should('be.visible');
 
         cy.getEmails().then((emails) => {
-            expect(emails[0].text).to.contain('TestBodyPreview');
+            expect(emails[0].text).to.contain('Test Body Preview');
         })
     });
 
