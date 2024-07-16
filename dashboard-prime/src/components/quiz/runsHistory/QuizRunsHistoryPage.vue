@@ -192,7 +192,7 @@ const deleteRun = () => {
       <template #content>
         <SkillsDataTable
           tableStoredStateId="quizRunHistory"
-          :value="runsHistory" tableStyle="min-width: 50rem"
+          :value="runsHistory"
           :loading="options.busy"
           show-gridlines
           striped-rows

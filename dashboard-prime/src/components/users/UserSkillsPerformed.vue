@@ -235,7 +235,7 @@ const highlight = (value) => {
       <div v-if="table.options.fields">
         <SkillsDataTable
             tableStoredStateId="performedSkillsTable"
-            :value="table.items" tableStyle="min-width: 50rem"
+            :value="table.items"
             :loading="table.options.busy"
             show-gridlines
             striped-rows

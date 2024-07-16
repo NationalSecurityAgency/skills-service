@@ -54,7 +54,7 @@ const inputClass = computed(() => {
 </script>
 <!--v-bind="projectDisplayNameAttrs"-->
 <template>
-  <div class="flex flex-row">
+  <div class="flex flex-column gap-2 md:flex-row field">
     <div v-if="label" :class="labelClass" :id="`${name}Label`">
       <label :for="name">
         {{ label }}

@@ -196,7 +196,7 @@ const loadTranscript = () => {
            :closable="false"
            data-cy="watchVideoAlert">
         <template #container>
-          <div class="flex align-items-center p-3">
+          <div class="flex flex-column md:flex-row align-items-center p-3">
             <div class="flex-1" data-cy="watchVideoMsg">
               <div v-if="!justAchieved">
                 <i class="fas fa-video font-size-2 mr-1 animate__bounceIn" aria-hidden="true"></i>

@@ -444,7 +444,7 @@ const saveSettings = ((dirtyChanges) => {
     <Card>
       <template #content>
         <loading-container :is-loading="isLoading">
-          <div class="flex flex-row" data-cy="projectVisibility">
+          <div class="flex flex-column gap-2 md:flex-row field" data-cy="projectVisibility">
             <div class="md:col-5 xl:col-3 text-secondary" id="projectVisibilityLabel">
               Project Discoverability:
             </div>
@@ -459,13 +459,13 @@ const saveSettings = ((dirtyChanges) => {
             </div>
           </div>
 
-          <div class="flex flex-row">
+          <div class="flex flex-column gap-2 md:flex-row field">
             <div class="md:col-5 xl:col-3 text-secondary" id="hideProjectDescriptionLabel">
               Project Description:
             </div>
             <div class="md:col-7 xl:col-9">
               <Dropdown v-model="settings.hideProjectDescription.value"
-                        :options="[{value: true, label: 'Show Project Description everywhere'}, {value: false, label: 'Only show Project Description in Manage My Projects'}]"
+                        :options="[{value: true, label: 'Show Project Description everywhere'}, {value: false, label: 'Only show Description in Project Catalog'}]"
                         optionLabel="label" optionValue="value"
                         @change="hideProjectDescriptionChanged"
                         aria-labelledby="hideProjectDescriptionLabel"
@@ -474,7 +474,7 @@ const saveSettings = ((dirtyChanges) => {
             </div>
           </div>
 
-          <div class="flex flex-row">
+          <div class="flex flex-column gap-2 md:flex-row field">
             <div class="md:col-5 xl:col-3 text-secondary" id="pointsForLevelsLabel">
               Use Points For Levels:
             </div>
@@ -495,7 +495,7 @@ const saveSettings = ((dirtyChanges) => {
                                   @input="updateSettingsField"
                                   placeholder="http://www.HelpArticlesHost.com" />
 
-          <div class="flex flex-row">
+          <div class="flex flex-column gap-2 md:flex-row field">
             <div class="md:col-5 xl:col-3 text-secondary" id="selfReportLabel">
               Self Report Default:
             </div>
@@ -544,7 +544,7 @@ const saveSettings = ((dirtyChanges) => {
             </div>
           </div>
 
-          <div class="flex flex-row">
+          <div class="flex flex-column gap-2 md:flex-row field">
             <div class="md:col-5 xl:col-3 text-secondary" id="rankAndLeaderboardOptOutLabel">
               Rank Opt-Out for ALL Admins:
             </div>
@@ -560,7 +560,7 @@ const saveSettings = ((dirtyChanges) => {
             </div>
           </div>
 
-          <div class="flex flex-row">
+          <div class="flex flex-column gap-2 md:flex-row field">
             <div class="md:col-5 xl:col-3 text-secondary" id="customLabelsLabel">
               Custom Labels:
             </div>
@@ -600,7 +600,7 @@ const saveSettings = ((dirtyChanges) => {
             </div>
           </div>
 
-          <div class="flex flex-row">
+          <div class="flex flex-column gap-2 md:flex-row field">
             <div class="md:col-5 xl:col-3 text-secondary" id="groupDescriptions">
               <span id="groupDescriptionsLabel">Always Show Group Descriptions:</span>
             </div>

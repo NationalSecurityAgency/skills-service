@@ -141,7 +141,7 @@ const calculateClientDisplayRoute = (props) => {
     <template #content>
       <SkillsDataTable
           tableStoredStateId="expirationHistoryTable"
-          :value="tableOptions.items" tableStyle="min-width: 50rem"
+          :value="tableOptions.items"
           :loading="tableOptions.busy"
           show-gridlines
           striped-rows
