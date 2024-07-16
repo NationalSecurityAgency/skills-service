@@ -53,9 +53,9 @@ onMounted(() => {
   tags.value = localTags;
   MetricsService.loadChart(route.params.projectId, 'singleSkillCountsChartBuilder', { skillId: route.params.skillId })
       .then((dataFromServer) => {
-        numUsersAchieved.value = NumberFormatter.format(dataFromServer.numUsersAchieved);
+        numUsersAchieved.value = dataFromServer.numUsersAchieved;
         lastAchieved.value = dataFromServer.lastAchieved;
-        numUsersInProgress.value = NumberFormatter.format(dataFromServer.numUsersInProgress);
+        numUsersInProgress.value = dataFromServer.numUsersInProgress;
         loading.value = false;
       });
 })
