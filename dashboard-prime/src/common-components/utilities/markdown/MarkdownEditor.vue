@@ -406,4 +406,7 @@ span.placeholder.ProseMirror-widget {
 div.toastui-editor-contents {
   font-size: 0.9rem !important;
 }
+.toastui-editor-defaultUI-toolbar {
+  flex-wrap: wrap;
+}
 </style>

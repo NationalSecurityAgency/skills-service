@@ -443,7 +443,7 @@ describe('Project Settings Tests', () => {
         cy.wait('@p1GetSettings');
         cy.selectItem('[data-cy="projectVisibilitySelector"]', 'Add to the Project Catalog');
 
-        cy.get('[data-cy="showProjectDescriptionSelector"]').should('have.text', 'Only show Project Description in Manage My Projects');
+        cy.get('[data-cy="showProjectDescriptionSelector"]').should('have.text', 'Only show Description in Project Catalog');
         cy.selectItem('[data-cy="showProjectDescriptionSelector"]', 'Show Project Description everywhere');
         cy.get('[data-cy="saveSettingsBtn"')
             .click();

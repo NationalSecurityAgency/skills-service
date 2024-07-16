@@ -173,7 +173,6 @@ defineExpose({
       <SkillsDataTable
         tableStoredStateId="quizDefinitionsTable"
         :value="quizzes"
-        tableStyle="min-width: 25rem"
         data-cy="quizDefinitionsTable"
         v-model:filters="filters"
         :globalFilterFields="['name']"

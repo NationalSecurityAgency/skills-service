@@ -28,10 +28,12 @@ import SingleUserAction from '@/components/userActions/SingleUserAction.vue'
 import StartRecordingUserActionsDateWarning from '@/components/userActions/StartRecordingUserActionsDateWarning.vue'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { useContentMaxWidthState } from '@/stores/UseContentMaxWidthState.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 
 const route = useRoute()
 const userInfo = useUserInfo()
 const contentMaxWidthState = useContentMaxWidthState()
+const responsive = useResponsiveBreakpoints()
 
 const filters = ref({
   user: '',
@@ -208,7 +210,7 @@ const tableFilters = ref({
         <div :style="contentMaxWidthState.main2ContentMaxWidthStyleObj">
             <SkillsDataTable
             :tableStoredStateId="`${route.name}-eventsTable`"
-            :value="items" tableStyle="min-width: 50rem"
+            :value="items"
             :loading="tableOptions.busy"
             show-gridlines
             striped-rows
@@ -251,7 +253,7 @@ const tableFilters = ref({
             </div>
           </template>
 
-          <Column expander style="width: 20rem" :showFilterMenu="false">
+          <Column expander style="width: 20rem" :showFilterMenu="false" :class="{'flex': responsive.md.value }">
             <template #header>
               <span class="sr-only">Rows expand and collapse control - Not sortable</span>
             </template>
@@ -259,7 +261,7 @@ const tableFilters = ref({
               <span class="sr-only">Rows expand and collapse control - No filtering</span>
             </template>>
           </Column>
-          <Column field="userIdForDisplay" :showFilterMenu="false" header="User" :sortable="true">
+          <Column field="userIdForDisplay" :showFilterMenu="false" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
             <template #header>
               <i class="fas fa-user-cog skills-color-skills mr-1" aria-hidden="true"></i>
             </template>
@@ -276,7 +278,7 @@ const tableFilters = ref({
                          placeholder="Search by User" />
             </template>
           </Column>
-          <Column field="action" header="Action" :showFilterMenu="false" :sortable="true">
+          <Column field="action" header="Action" :showFilterMenu="false" :sortable="true" :class="{'flex': responsive.md.value }">
             <template #header>
               <i class="fas fa-stamp text-success mr-1" aria-hidden="true"></i>
             </template>
@@ -297,7 +299,7 @@ const tableFilters = ref({
               </Dropdown>
             </template>
           </Column>
-          <Column field="item" header="Item" :showFilterMenu="false" :sortable="true">
+          <Column field="item" header="Item" :showFilterMenu="false" :sortable="true" :class="{'flex': responsive.md.value }">
             <template #header>
               <i class="fas fa-clipboard-check skills-color-subjects mr-1" aria-hidden="true"></i>
             </template>
@@ -318,7 +320,7 @@ const tableFilters = ref({
               </Dropdown>
             </template>
           </Column>
-          <Column field="itemId" header="Item ID" :showFilterMenu="false" :sortable="true">
+          <Column field="itemId" header="Item ID" :showFilterMenu="false" :sortable="true" :class="{'flex': responsive.md.value }">
             <template #header>
               <i class="fas fa-fingerprint skills-color-points mr-1" aria-hidden="true"></i>
             </template>
@@ -335,7 +337,7 @@ const tableFilters = ref({
                          placeholder="Search by Item ID" />
             </template>
           </Column>
-          <Column v-if="isAllEvents" field="projectId" header="Project ID" :showFilterMenu="false" :sortable="true">
+          <Column v-if="isAllEvents" field="projectId" header="Project ID" :showFilterMenu="false" :sortable="true" :class="{'flex': responsive.md.value }">
             <template #header>
               <i class="fas fa-tasks skills-color-projects mr-1" aria-hidden="true"></i>
             </template>
@@ -352,7 +354,7 @@ const tableFilters = ref({
                          placeholder="Search by Project ID" />
             </template>
           </Column>
-          <Column v-if="isAllEvents" field="quizId" header="Quiz ID" :showFilterMenu="false" :sortable="true">
+          <Column v-if="isAllEvents" field="quizId" header="Quiz ID" :showFilterMenu="false" :sortable="true" :class="{'flex': responsive.md.value }">
             <template #header>
               <i class="fas fa-spell-check skills-color-subjects mr-1" aria-hidden="true"></i>
             </template>
@@ -369,7 +371,7 @@ const tableFilters = ref({
                          placeholder="Search by Quiz ID" />
             </template>
           </Column>
-          <Column field="created" header="Performed" :sortable="false" :showFilterMenu="false">
+          <Column field="created" header="Performed" :sortable="false" :showFilterMenu="false" :class="{'flex': responsive.md.value }">
             <template #header>
               <i class="fas fa-clock text-warning mr-1" aria-hidden="true"></i>
             </template>

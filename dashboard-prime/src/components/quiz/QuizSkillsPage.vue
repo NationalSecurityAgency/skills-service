@@ -118,7 +118,7 @@ const onFilter = (filterEvent) => {
           <div v-if="skills.length > 0 && !options.busy">
             <SkillsDataTable
               tableStoredStateId="quizSkills"
-              :value="skills" tableStyle="min-width: 50rem"
+              :value="skills"
               :loading="options.busy"
               show-gridlines
               striped-rows
