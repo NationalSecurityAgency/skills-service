@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useField } from 'vee-validate'
 import ToastUiEditor from '@/common-components/utilities/markdown/ToastUiEditor.vue'
 
@@ -261,11 +261,6 @@ function attachFile(event) {
   }
 }
 
-watch(value, (newValue) =>{
-  if (newValue !== markdownText()) {
-    setMarkdownText(newValue)
-  }
-})
 </script>
 
 <template>
