@@ -22,6 +22,7 @@ import ModeSelector from "@/components/metrics/common/ModeSelector.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import { useUserInfo } from '@/components/utils/UseUserInfo.js'
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
+import SkillsDisplayPathAppendValues from "@/router/SkillsDisplayPathAppendValues.js";
 
 defineProps(['skillName']);
 const route = useRoute();
@@ -97,8 +98,9 @@ const sortTable = (sortContext) => {
 };
 
 const calculateClientDisplayRoute = (props) => {
+  // ClientDisplayPreviewSkill
   return {
-    name: 'ClientDisplayPreviewSkill',
+    name: `SkillsDisplay${SkillsDisplayPathAppendValues.SkillsDisplayPreview}`,
     params: {
       projectId: route.params.projectId,
       subjectId: route.params.subjectId,
@@ -143,12 +145,12 @@ const calculateClientDisplayRoute = (props) => {
                 <div class="flex flex-1">
                   {{ userInfo.getUserDisplay(slotProps.data, true) }}
                 </div>
-<!--              <router-link :to="calculateClientDisplayRoute(slotProps.data.userId)">-->
+<!--                <router-link :to="calculateClientDisplayRoute(slotProps.data)" tabindex="-1">-->
                   <SkillsButton size="small" class="text-secondary"
                                 :aria-label="`View details for user ${userInfo.getUserDisplay(slotProps.data)}`"
                                 data-cy="usersTable_viewDetailsBtn"><i class="fa fa-user-alt" aria-hidden="true"/><span class="sr-only">view user details</span>
                   </SkillsButton>
-<!--              </router-link>-->
+<!--                </router-link>-->
               </div>
             </template>
           </Column>

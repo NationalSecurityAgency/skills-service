@@ -18,6 +18,8 @@ package skills.storage.model
 public interface UserMetrics {
     String getUserId();
     String getUserIdForDisplay();
+    String getFirstName();
+    String getLastName();
     Integer getCount();
     Date getDate();
 }
