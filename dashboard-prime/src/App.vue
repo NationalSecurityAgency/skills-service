@@ -41,6 +41,7 @@ import DashboardFooter from '@/components/header/DashboardFooter.vue'
 import { useUserAgreementInterceptor } from '@/interceptors/UseUserAgreementInterceptor.js'
 import PkiAppBootstrap from '@/components/access/PkiAppBootstrap.vue'
 import {usePrimeVue} from "primevue/config";
+import ScrollToTop from "@/common-components/utilities/ScrollToTop.vue";
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -62,6 +63,9 @@ const addCustomIconCSS = () => {
 }
 
 const isAppLoaded = ref(false)
+const isScrollToTopDisabled = computed(() => {
+  return appConfig.disableScrollToTop === 'true' || appConfig.disableScrollToTop === true;
+})
 const isLoadingApp = computed(() => !isAppLoaded.value || appConfig.isLoadingConfig || authState.restoringSession || (skillsDisplayAttributes.loadingConfig && skillsDisplayInfo.isSkillsDisplayPath()))
 
 const themeHelper = useThemesHelper()
@@ -166,7 +170,7 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
     <ConfirmDialog></ConfirmDialog>
     <dashboard-footer v-if="isDashboardFooter" role="region" />
     <customizable-footer v-if="isDashboardFooter" role="region" aria-label="dynamic customizable footer"></customizable-footer>
-    <!--    <scroll-to-top v-if="!isScrollToTopDisabled && !inBootstrapMode" />-->
+    <scroll-to-top v-if="!isScrollToTopDisabled && !inBootstrapMode" />
   </div>
 </template>
 
