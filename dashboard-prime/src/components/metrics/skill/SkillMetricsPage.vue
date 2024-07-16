@@ -27,7 +27,6 @@ import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import SkillEventsOverTime from "@/components/metrics/skill/SkillEventsOverTime.vue";
 import SkillAchievedByUsersOverTime from "@/components/metrics/skill/SkillAchievedByUsersOverTime.vue";
 import UsersByTagChart from "@/components/metrics/skill/UsersByTagChart.vue";
-import NumberFormatter from '@/components/utils/NumberFormatter.js'
 
 const appConfig = useAppConfig();
 const route = useRoute();
