@@ -188,11 +188,9 @@ function doAddUserRole() {
 
   const role = isOnlyOneRole.value ? props.roles[0] : userRole.value.selected;
   AccessService.saveUserRole(props.projectId, selectedUser.value, role, pkiAuthenticated).then(() => {
+    announcer.polite(`${getRoleDisplay(role)} role was added for ${getUserDisplay({ ...selectedUser.value, firstName: selectedUser.value.first, lastName: selectedUser.value.last })}`);
     emit('role-added', { userId: selectedUser.value.userId, role });
     loadData();
-    nextTick(() => {
-      announcer.polite(`${getRoleDisplay(role)} role was added for ${getUserDisplay({ ...selectedUser.value, firstName: selectedUser.value.first, lastName: selectedUser.value.last })}`);
-    });
   }).catch((e) => {
     handleError(e);
   }).finally(() => {
@@ -238,9 +236,7 @@ function deleteUserRoleConfirm(row) {
 function deleteUserRole(row) {
   table.value.options.busy = true;
   AccessService.deleteUserRole(row.projectId, row.userId, row.roleName).then(() => {
-    nextTick(() => {
-      announcer.polite(`${getRoleDisplay(row.roleName)} role was removed from ${getUserDisplay(row)}`);
-    });
+    announcer.polite(`${getRoleDisplay(row.roleName)} role was removed from ${getUserDisplay(row)}`);
     data.value = data.value.filter((item) => item.userId !== row.userId);
     emit('role-deleted', { userId: row.userId, role: row.roleName });
     table.value.options.busy = false;
@@ -251,7 +247,7 @@ function deleteUserRole(row) {
 function editItem(item) {
   data.value = data.value.map((user) => {
     if (user.userId === item.userId) {
-      return ({ ...user, isEdited: true });
+      return ({ ...user, existingRoleName: user.roleName, isEdited: true });
     }
     return ({ ...user, isEdited: false });
   });
@@ -260,7 +256,7 @@ function editItem(item) {
 function updateUserRole(selectedRole) {
   const newRole = selectedRole.value;
   const userRoleToUpdate = data.value.find((user) => user.isEdited);
-  if (userRoleToUpdate) {
+  if (userRoleToUpdate && newRole !== userRoleToUpdate.existingRoleName) {
     // mark record as loading
     data.value = data.value.map((user) => {
       if (user.isEdited) {
@@ -282,14 +278,13 @@ function updateUserRole(selectedRole) {
                 isEdited: false,
                 isLoading: false,
                 roleName: newRole,
+                existingRoleName: newRole,
               });
               return copy;
             }
             return user;
           });
-          nextTick(() => {
-            announcer.polite(`New ${newRole} was added to the user`);
-          });
+          announcer.polite(`User role was updated to ${getRoleDisplay(newRole)} for ${getUserDisplay(userRoleToUpdate)}`);
         }).catch((e) => {
       handleError(e);
     });
