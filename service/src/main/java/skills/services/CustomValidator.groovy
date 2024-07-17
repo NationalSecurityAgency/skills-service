@@ -79,7 +79,7 @@ class CustomValidator {
     private static final Pattern HTML = ~/(?s)<[\/]?\w+(?: .+?)*>/
     private static final Pattern CODEBLOCK = ~/(?ms)(^[`]{3}$.*?^[`]{3}$)/
 
-    private static final Pattern TABLE_FIX = ~/(?ms)(^\n)(^[|].+[|]$\n^[|].*[-]{3,}.*[|]$)/
+    private static final Pattern TABLE_FIX = ~/(?m)(^\n)(^[|].+[|]$\n^[|].*[-]{3,}.*[|]$)/
     private static final Pattern CODEBLOCK_FIX = ~/(?m)(^\n)(^[`]{3}$)/
     private static final Pattern LIST_FIX = ~/(?m)(^\n)(\s*\d\. |\* |- .*$)/
 

@@ -670,6 +670,38 @@ if (a == true) {
         validator.validateDescription(styledBlockQuote).valid
     }
 
+    def "multiple tables markdown"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        when:
+        validator.init()
+
+        then:
+
+        validator.validateDescription("""(A)
+
+| First | Second |
+| ----- | ------ |
+| Third | Fourth |
+
+(A)
+
+| Fifth | Sixth |
+| ----- | ------ |
+| Seventh | Eighth |
+
+(A)
+
+| <br> | <br> |
+| --- | --- |
+| <br> | <br> |
+
+""").valid
+
+    }
+
     def "ignore extra html markdown"() {
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
@@ -692,22 +724,26 @@ if (a == true) {
 | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> |
 | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif;"> </span> | <span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; background-repeat: repeat-x; background-position: left bottom; background-image: var(--urlSpellingErrorV2, url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB3aWR0aD0iNXB4IiBoZWlnaHQ9IjRweCIgdmlld0JveD0iMCAwIDUgNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj4KICAgIDwhLS0gR2VuZXJhdG9yOiBTa2V0Y2ggNTYuMiAoODE2NzIpIC0gaHR0cHM6Ly9za2V0Y2guY29tIC0tPgogICAgPHRpdGxlPnNwZWxsaW5nX3NxdWlnZ2xlPC90aXRsZT4KICAgIDxkZXNjPkNyZWF0ZWQgd2l0aCBTa2V0Y2guPC9kZXNjPgogICAgPGcgaWQ9IkZsYWdzIiBzdHJva2U9Im5vbmUiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgICAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTAxMC4wMDAwMDAsIC0yOTYuMDAwMDAwKSIgaWQ9InNwZWxsaW5nX3NxdWlnZ2xlIj4KICAgICAgICAgICAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTAxMC4wMDAwMDAsIDI5Ni4wMDAwMDApIj4KICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0wLDMgQzEuMjUsMyAxLjI1LDEgMi41LDEgQzMuNzUsMSAzLjc1LDMgNSwzIiBpZD0iUGF0aCIgc3Ryb2tlPSIjRUIwMDAwIiBzdHJva2Utd2lkdGg9IjEiPjwvcGF0aD4KICAgICAgICAgICAgICAgIDxyZWN0IGlkPSJSZWN0YW5nbGUiIHg9IjAiIHk9IjAiIHdpZHRoPSI1IiBoZWlnaHQ9IjQiPjwvcmVjdD4KICAgICAgICAgICAgPC9nPgogICAgICAgIDwvZz4KICAgIDwvZz4KPC9zdmc+)); border-bottom: 1px solid transparent;">eafe</span><span style="margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 11pt; line-height: 18.3458px; font-family: Verdana Pro, Verdana Pro_EmbeddedFont, Verdana Pro_MSFontService, sans-serif; color: rgb(0, 0, 0);"> </span> |
 """).valid
-        
-        validator.validateDescription("""(A) some words
 
-| **<span style="font-family:'Arial',sans-serif;
-  mso-fareast-font-family:'Times New Romain';color:black;">Heading 1</span>** | **<span style="font-family:'Arial',sans-serif;
-  mso-fareast-font-family:'Times New Romain';color:black;">Heading 2</span>** | **<span style="font-family:'Arial',sans-serif;
-  mso-fareast-font-family:'Times New Romain';color:black;">Heading 1</span>** |
-| ----- | ---------- | ---- |
-| <span style="font-family:'Arial',sans-serif;mso-fareast-font-family:
-  'Times New Romain';color:black;">Row 1: Value 1</span> | <span style="font-family:'Arial',sans-serif;mso-fareast-font-family:
-  'Times New Romain';color:black;">Row 1: Value 2</span> | <span style="font-family:'Arial',sans-serif;mso-fareast-font-family:
-  'Times New Romain';color:black;">Row 1: Value 3</span> |
-| <span style="font-family:'Arial',sans-serif;mso-fareast-font-family:
-  'Times New Romain';color:black;">Row 1: Value 1</span> | <span style="font-family:'Arial',sans-serif;mso-fareast-font-family:
-  'Times New Romain';color:black;">Row 1: Value 2</span> | <span style="font-family:'Arial',sans-serif;mso-fareast-font-family:
-  'Times New Romain';color:black;">Row 1: Value 3</span> |""").valid
+//        the below test was originally added in #2564. this examples has newlines between columns likely due to all the extra formatting.
+//        the new lines causes the TABLE_FIX to no longer match, so it was fixed by adding the DOTALL flag, but that was too aggressive
+//        and would continue to match treating two or more tables as a single table.  it was later determined that the user can strip the formatting
+//        from the MS Word table to fix the problem.
+//        validator.validateDescription("""(A) some words
+//
+//| **<span style="font-family:'Arial',sans-serif;
+//  mso-fareast-font-family:'Times New Romain';color:black;">Heading 1</span>** | **<span style="font-family:'Arial',sans-serif;
+//  mso-fareast-font-family:'Times New Romain';color:black;">Heading 2</span>** | **<span style="font-family:'Arial',sans-serif;
+//  mso-fareast-font-family:'Times New Romain';color:black;">Heading 1</span>** |
+//| ----- | ---------- | ---- |
+//| <span style="font-family:'Arial',sans-serif;mso-fareast-font-family:
+//  'Times New Romain';color:black;">Row 1: Value 1</span> | <span style="font-family:'Arial',sans-serif;mso-fareast-font-family:
+//  'Times New Romain';color:black;">Row 1: Value 2</span> | <span style="font-family:'Arial',sans-serif;mso-fareast-font-family:
+//  'Times New Romain';color:black;">Row 1: Value 3</span> |
+//| <span style="font-family:'Arial',sans-serif;mso-fareast-font-family:
+//  'Times New Romain';color:black;">Row 1: Value 1</span> | <span style="font-family:'Arial',sans-serif;mso-fareast-font-family:
+//  'Times New Romain';color:black;">Row 1: Value 2</span> | <span style="font-family:'Arial',sans-serif;mso-fareast-font-family:
+//  'Times New Romain';color:black;">Row 1: Value 3</span> |""").valid
 
         validator.validateDescription("""(A) this is some normal text
 
