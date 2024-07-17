@@ -86,7 +86,10 @@ const ariaLabel = computed(() => {
   }
   return res;
 })
-const flipSelected = () => {
+const flipSelected = (event) => {
+  if (event instanceof KeyboardEvent) {
+    event.preventDefault()
+  }
   if (!props.a.isGraded) {
     selected.value = !selected.value;
     emit('input', selected.value);

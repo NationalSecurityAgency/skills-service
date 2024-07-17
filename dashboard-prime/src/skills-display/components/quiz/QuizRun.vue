@@ -160,7 +160,7 @@ const beginDateTimer = () => {
 const destroyDateTimer = () => {
   clearInterval(dateTimer.value);
   dateTimer.value = null;
-  window.removeEventListener('scroll', handleScroll());
+  window.removeEventListener('scroll', handleScroll);
 }
 const loadData = () => {
   isLoading.value = true;
