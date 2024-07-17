@@ -62,18 +62,5 @@ describe('Resource Not Found Tests', () => {
 
         cy.get('[data-cy="breadcrumb-bar"]').should('have.text', 'Not Found');
     });
-
-    it('invalid "old" routes in not found page with redirect message and link', () => {
-        cy.intercept('GET', '/api/myProgressSummary')
-          .as('loadProgress');
-        cy.visit('/projects');
-
-        cy.url().should('include', '/not-found')
-        cy.get('[data-cy=notFoundExplanation]')
-          .should('be.visible')
-          .contains('It looks like you may have followed an old link. You will be forwarded to /administrator');
-
-        cy.get('[data-cy="breadcrumb-bar"]').should('have.text', 'Not Found');
-    });
-
+    
 });

@@ -54,8 +54,6 @@ describe('Redirection Tests', () => {
         cy.get('[data-cy=redirectExplanation]')
             .should('be.visible')
             .contains('You seem to have followed an old link. You will be redirected to /progress-and-rankings/projects/proj1/subjects/subj1 shortly.');
-
-        // cy.get('[data-cy="breadcrumb-bar"]').should('have.text', 'Not Found');
     });
 
     it('Old skills client display route is redirected from a skill', () => {
@@ -65,8 +63,6 @@ describe('Redirection Tests', () => {
         cy.get('[data-cy=redirectExplanation]')
             .should('be.visible')
             .contains('You seem to have followed an old link. You will be redirected to /progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1 shortly.');
-
-        // cy.get('[data-cy="breadcrumb-bar"]').should('have.text', 'Not Found');
     });
 
 });
