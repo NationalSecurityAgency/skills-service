@@ -48,7 +48,7 @@ const timer = setInterval(() => {
       <div class="row justify-content-center mt-3">
         <div class="col col-sm-8 col-md-6 col-lg-4 text-center" data-cy="redirectExplanation">
           You seem to have followed an old link.
-          You will be redirected to <router-link :to="route.query.nextPage" data-cy="newLink">the new link</router-link> shortly.
+          You will be redirected to <router-link :to="route.query.nextPage" data-cy="newLink">{{ route.query.nextPage }}</router-link> shortly.
           Please update your bookmarks to the new link.
 
           <div class="mt-5">
