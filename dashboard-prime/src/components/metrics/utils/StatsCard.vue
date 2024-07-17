@@ -16,10 +16,11 @@ limitations under the License.
 <script setup>
 
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
+import NumberFormatter from "@/components/utils/NumberFormatter.js";
 
 const timeUtils = useTimeUtils();
 
-const props = defineProps({
+defineProps({
   title: {
     type: String,
     required: true,
@@ -50,7 +51,7 @@ const props = defineProps({
           <slot name="card-value">
             <span class="text-2xl font-bold mb-0" data-cy="statCardValue">
               <span v-if="calculateTimeFromNow"><span v-if="statNum">{{ timeUtils.timeFromNow(statNum) }}</span><span v-else>Never</span></span>
-              <span v-else>{{ statNum }}</span>
+              <span v-else>{{ NumberFormatter.format(statNum) }}</span>
             </span>
           </slot>
         </div>

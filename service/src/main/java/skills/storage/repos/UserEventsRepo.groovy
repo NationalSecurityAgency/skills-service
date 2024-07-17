@@ -482,7 +482,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Nullable
     @Query(value='''
-        SELECT ue.user_id as userId, ua.user_id_for_display as userIdForDisplay, SUM(ue.count) as count, MAX(ue.event_time) as date
+        SELECT ue.user_id as userId, ua.first_name as firstName, ua.last_name as lastName, ua.user_id_for_display as userIdForDisplay, SUM(ue.count) as count, MAX(ue.event_time) as date
         FROM user_events ue, user_attrs ua, (
             SELECT user_id, achieved_on, COUNT(id) AS counts FROM user_achievement 
             WHERE skill_ref_id = :skillRefId
@@ -494,7 +494,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             AND ue.user_id = ua.user_id 
             AND ue.event_time > achievements.achieved_on 
             AND ue.count >= :minEventCountThreshold
-        GROUP BY ue.user_id, ua.user_id_for_display
+        GROUP BY ue.user_id, ua.user_id_for_display, ua.first_name, ua.last_name
     ''', nativeQuery = true)
     public List<UserMetrics> getUsersUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, @Param("minEventCountThreshold") Integer minEventCountThreshold, Pageable pageable)
 

@@ -22,6 +22,7 @@ import ModeSelector from "@/components/metrics/common/ModeSelector.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import { useUserInfo } from '@/components/utils/UseUserInfo.js'
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
+import SkillsDisplayPathAppendValues from "@/router/SkillsDisplayPathAppendValues.js";
 
 defineProps(['skillName']);
 const route = useRoute();
@@ -98,11 +99,9 @@ const sortTable = (sortContext) => {
 
 const calculateClientDisplayRoute = (props) => {
   return {
-    name: 'ClientDisplayPreviewSkill',
+    name: `SkillsDisplay${SkillsDisplayPathAppendValues.SkillsDisplayPreview}`,
     params: {
       projectId: route.params.projectId,
-      subjectId: route.params.subjectId,
-      skillId: route.params.skillId,
       userId: props.userId,
       dn: props.dn,
     },
@@ -139,17 +138,9 @@ const calculateClientDisplayRoute = (props) => {
                          v-model:sort-order="sortOrder">
           <Column field="userId" header="User" sortable>
             <template #body="slotProps">
-              <div class="flex">
-                <div class="flex flex-1">
-                  {{ userInfo.getUserDisplay(slotProps.data, true) }}
-                </div>
-<!--              <router-link :to="calculateClientDisplayRoute(slotProps.data.userId)">-->
-                  <SkillsButton size="small" class="text-secondary"
-                                :aria-label="`View details for user ${userInfo.getUserDisplay(slotProps.data)}`"
-                                data-cy="usersTable_viewDetailsBtn"><i class="fa fa-user-alt" aria-hidden="true"/><span class="sr-only">view user details</span>
-                  </SkillsButton>
-<!--              </router-link>-->
-              </div>
+              <router-link :to="calculateClientDisplayRoute(slotProps.data)" tabindex="-1">
+                {{ userInfo.getUserDisplay(slotProps.data, true) }}
+              </router-link>
             </template>
           </Column>
           <Column field="count" header="Times Performed" sortable></Column>
