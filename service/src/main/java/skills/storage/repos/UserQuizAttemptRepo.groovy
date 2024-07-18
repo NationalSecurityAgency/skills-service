@@ -51,7 +51,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                     and quizDef.quiz_id = ?1
                     and quizAttempt.status <> 'INPROGRESS'
      ''', nativeQuery = true)
-    Integer getAverageMsRuntimeForQuiz(String quizId)
+    Double getAverageMsRuntimeForQuiz(String quizId)
 
 
     @Query('''select count(distinct quizAttempt.userId)
