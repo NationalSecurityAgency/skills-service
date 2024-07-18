@@ -101,6 +101,8 @@ const removeReuseTag = (val) => {
 const setSelectedInternal = () => {
   if (props.selected) {
     selectedInternal.value = { entryId: `${props.selected.projectId}_${props.selected.skillId}`, ...props.selected }; //props.selected.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
+  } else {
+    selectedInternal.value = [];
   }
 };
 
@@ -109,25 +111,11 @@ const setOptionsInternal = () => {
     optionsInternal.value = props.options.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
     if (props.selected) {
       // removed already selected items
-      optionsInternal.value = optionsInternal.value.filter((el) => !props.selected.some((sel) => `${sel.projectId}_${sel.skillId}` === el.entryId));
+      optionsInternal.value = optionsInternal.value.filter((el) => !props.selected?.some((sel) => `${sel.projectId}_${sel.skillId}` === el.entryId));
     }
     if (optionsInternal.value && optionsInternal.value.length === 0) {
       announcer.polite('No elements found. Consider changing the search query');
     }
-  }
-};
-
-const considerRemoval = (removedItem) => {
-  if (props.warnBeforeRemoving) {
-    const msg = `Are you sure you want to remove "${removedItem.name}"?`;
-    // this.msgConfirm(msg, 'WARNING', 'Yes, Please!')
-    //     .then((res) => {
-    //       if (res) {
-    //         removed(removedItem);
-    //       }
-    //     });
-  } else {
-    removed(removedItem);
   }
 };
 
@@ -148,12 +136,6 @@ const added = (addedItem) => {
 const searchChanged = (query) => {
   currentSearch.value = query.value;
   emit('search-change', query.value);
-};
-
-const valChanged = (val) => {
-  if (isMounted.value && val === null) {
-    emit('selection-removed');
-  }
 };
 
 const clearValue = () => {
