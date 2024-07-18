@@ -45,7 +45,6 @@ const allSkills = ref([])
 const selectedSkill = ref(null)
 const sharedSkills = ref([])
 const selectedProject = ref(null)
-const displayError = ref(false)
 const errorMessage = ref('')
 const shareWithAllProjects = ref(false)
 
@@ -89,10 +88,7 @@ const loadSharedSkills = () => {
 }
 
 const shareSkill = () => {
-  if (doesShareAlreadyExist()) {
-    displayError.value = true
-  } else {
-    displayError.value = false
+  if (!doesShareAlreadyExist.value) {
     loading.value.sharedSkills = true
     let sharedProjectId = allProjectsConstant
     if (!shareWithAllProjects.value) {
@@ -106,13 +102,16 @@ const shareSkill = () => {
         selectedSkill.value = null
         loadSharedSkills().then(() => {
           const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId
-          nextTick(() => announcer.assertive(`Skill with id of ${skillId} was shared with ${sharedWith}`))
+          announcer.assertive(`Skill with id of ${skillId} was shared with ${sharedWith}`)
         })
       })
   }
 }
 
-const doesShareAlreadyExist = () => {
+const doesShareAlreadyExist = computed(() => {
+  if(!selectedSkill.value || (!selectedProject.value && !shareWithAllProjects.value)) {
+    return false;
+  }
   const alreadyExist = sharedSkills.value.find((entry) => entry.skillId === selectedSkill.value.skillId && (!entry.projectId || shareWithAllProjects.value || entry.projectId === selectedProject.value.projectId))
   if (alreadyExist) {
     if (alreadyExist.sharedWithAllProjects) {
@@ -122,7 +121,7 @@ const doesShareAlreadyExist = () => {
     }
   }
   return alreadyExist
-}
+});
 
 const deleteSharedSkill = (itemToRemove) => {
   loading.value.sharedSkills = true
@@ -135,32 +134,27 @@ const deleteSharedSkill = (itemToRemove) => {
       loadSharedSkills()
     }).finally(() => {
     const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId
-    nextTick(() => announcer.assertive(`Removed shared skill ${itemToRemove.skillId} from ${sharedWith}`))
+    announcer.assertive(`Removed shared skill with id ${itemToRemove.skillId} from ${sharedWith}`)
   })
 }
 
 const onSelectedProject = (item) => {
-  displayError.value = false
   selectedProject.value = item
 }
 
 const onUnSelectedProject = () => {
-  displayError.value = false
   selectedProject.value = null
 }
 
 const onSelectedSkill = (item) => {
-  displayError.value = false
   selectedSkill.value = item
 }
 
 const onDeselectedSkill = () => {
-  displayError.value = false
   selectedSkill.value = null
 }
 
 const onShareWithAllProjects = (checked) => {
-  displayError.value = false
   if (checked) {
     selectedProject.value = null
   }
@@ -175,7 +169,6 @@ const onShareWithAllProjects = (checked) => {
       <SkillsCardHeader title="Share skills from this project with other projects"></SkillsCardHeader>
     </template>
     <template #content>
-      <!--      <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills || loading.projInfo">-->
       <no-content2 v-if="restrictedUserCommunity" title="Cannot Be Added" icon="fas fa-shield-alt"
                    class="my-5 mx-4" data-cy="restrictedUserCommunityWarning">
         This project's access is
@@ -200,6 +193,7 @@ const onShareWithAllProjects = (checked) => {
                                 v-on:selected="onSelectedProject"
                                 v-on:unselected="onUnSelectedProject"
                                 :only-single-selected-value="true"
+                                :showClear="true"
                                 :disabled="shareWithAllProjects">
 
               </project-selector>
@@ -207,25 +201,23 @@ const onShareWithAllProjects = (checked) => {
           </div>
 
           <div class="flex gap-4 mt-2">
-            <div class="flex flex-1 text-center text-sm-left">
-              <Button size="small" v-on:click="shareSkill"
+            <div class="flex flex-1 justify-content-end">
+              <Checkbox v-model="shareWithAllProjects" inputId="shareToggle" @change="onShareWithAllProjects" :disabled="selectedProject !== null"
+                        :binary="true" data-cy="shareWithAllProjectsCheckbox"></Checkbox>
+              <label for="shareToggle" class="ml-1">Share With All Projects</label>
+
+              <Button size="small" v-on:click="shareSkill" class="ml-4"
                       aria-label="Share skill with another project"
-                      :disabled="!shareButtonEnabled" data-cy="shareButton">
+                      :disabled="!shareButtonEnabled || doesShareAlreadyExist" data-cy="shareButton">
                 <i class="fas fa-share-alt mr-1"></i><span class="text-truncate">Share</span>
               </Button>
             </div>
-            <div class="flex flex-1">
-              <Checkbox v-model="shareWithAllProjects" inputId="shareToggle" @change="onShareWithAllProjects"
-                        :binary="true" data-cy="shareWithAllProjectsCheckbox"></Checkbox>
-              <label for="shareToggle" class="ml-1">Share With All Projects</label>
-            </div>
           </div>
         </div>
-        <!--          <b-alert v-if="displayError" variant="danger" class="mt-2" show dismissible>-->
-        <!--            <i class="fa fa-exclamation-circle"></i> <span v-html="errorMessage"></span>-->
-        <!--          </b-alert>-->
+        <Message v-if="doesShareAlreadyExist" severity="error">
+          <span v-html="errorMessage"></span>
+        </Message>
 
-        <!--          <loading-container :is-loading="loading.sharedSkills">-->
         <div v-if="sharedSkills && sharedSkills.length > 0" class="my-4">
           <shared-skills-table :shared-skills="sharedSkills"
                                v-on:skill-removed="deleteSharedSkill"></shared-skills-table>
@@ -234,9 +226,7 @@ const onShareWithAllProjects = (checked) => {
           <no-content2 title="Not Selected Yet..." icon="fas fa-share-alt" class="p-5"
                        message="To make your project's skills eligible please select a skill and then the project that you want to share this skill with." />
         </div>
-        <!--          </loading-container>-->
       </div>
-      <!--      </loading-container>      -->
     </template>
   </Card>
 </template>
