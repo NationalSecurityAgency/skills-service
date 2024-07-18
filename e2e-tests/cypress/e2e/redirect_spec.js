@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-describe('Resource Not Found Tests', () => {
+describe('Redirection Tests', () => {
 
     beforeEach(() => {
         cy.on('uncaught:exception', (err, runnable) => {
@@ -37,30 +37,32 @@ describe('Resource Not Found Tests', () => {
             subjectId: 'subj1',
             name: 'Subject 1'
         });
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: 'Skill 1',
+            pointIncrement: '50',
+            numPerformToCompletion: '5'
+        });
     });
 
-    it('invalid subject results in not found page', () => {
-        cy.intercept('GET', '/api/myProgressSummary')
-            .as('loadProgress');
-        cy.visit('/administrator/projects/proj1/subjects/fooo');
+    it('Old skills client display route is redirected from a subject', () => {
+        cy.visit('/progress-and-rankings/projects/proj1?skillsClientDisplayPath=%2Fsubjects%2Fsubj1');
 
-        cy.url().should('include', '/error')
-        cy.get('[data-cy=errExplanation]')
+        cy.url().should('include', '/redirect')
+        cy.get('[data-cy=redirectExplanation]')
             .should('be.visible')
-            .contains('Subject [fooo] doesn\'t exist');
+            .contains('You seem to have followed an old link. You will be redirected to /progress-and-rankings/projects/proj1/subjects/subj1 shortly.');
     });
 
-    it('invalid route in not found page', () => {
-        cy.intercept('GET', '/api/myProgressSummary')
-            .as('loadProgress');
-        cy.visit('/administrator/doesnotexist');
+    it('Old skills client display route is redirected from a skill', () => {
+        cy.visit('/progress-and-rankings/projects/proj1?skillsClientDisplayPath=%2Fsubjects%2Fsubj1%2Fskills%2Fskill1');
 
-        cy.url().should('include', '/not-found')
-        cy.get('[data-cy=notFoundExplanation]')
+        cy.url().should('include', '/redirect')
+        cy.get('[data-cy=redirectExplanation]')
             .should('be.visible')
-            .contains('The resource you requested cannot be located.');
-
-        cy.get('[data-cy="breadcrumb-bar"]').should('have.text', 'Not Found');
+            .contains('You seem to have followed an old link. You will be redirected to /progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1 shortly.');
     });
-    
+
 });

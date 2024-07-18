@@ -84,6 +84,7 @@ import UserAgreement from '@/components/access/UserAgreement.vue'
 import EmailVerificationSent from "@/components/access/EmailVerificationSent.vue";
 import EmailVerifiedConfirmation from "@/components/access/EmailVerifiedConfirmation.vue";
 import RequestEmailVerification from "@/components/access/RequestEmailVerification.vue";
+import RedirectPage from "@/components/utils/RedirectPage.vue";
 
 const routes = [
   {
@@ -782,6 +783,18 @@ const routes = [
         },
       },
     }],
+  },
+  {
+    path: '/redirect',
+    name: 'Redirect',
+    component: RedirectPage,
+    props: true,
+    meta: {
+      requiresAuth: true,
+      announcer: {
+        message: 'Redirecting',
+      },
+    },
   },
   {
     path: '/not-found',

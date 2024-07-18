@@ -59,13 +59,7 @@ export const useGlobalNavGuards = () => {
   const getLandingPage = () => authState.userInfo?.landingPage === 'admin' ? 'AdminHomePage' : 'MyProgressPage'
 
   const beforeEachNavGuard = (to, from, next) => {
-    if (to.query) {
-      const { skillsClientDisplayPath } = to.query
-      clientDisplayPath.setClientPathInfo({
-        path: skillsClientDisplayPath,
-        fromDashboard: true
-      })
-    }
+    const { skillsClientDisplayPath } = to.query
     const requestAccountPath = '/request-root-account'
     if (
       !isPki() &&
@@ -126,7 +120,14 @@ export const useGlobalNavGuards = () => {
             }
             next(newRoute)
           } else {
-            next()
+            if(skillsClientDisplayPath) {
+              const newRoute = to.path + skillsClientDisplayPath;
+              const nextRoute = '/redirect?nextPage=' + newRoute
+              next(nextRoute)
+            }
+            else {
+              next()
+            }
           }
         } else {
           next()
