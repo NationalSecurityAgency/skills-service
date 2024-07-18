@@ -60,7 +60,7 @@ const sortTable = (criteria) => {
   <div id="shared-skills-table" v-if="sharedSkills && sharedSkills.length" data-cy="sharedSkillsTableDiv">
     <SkillsDataTable
       v-if="loaded" :value="sharedSkills" :sortField="sortField" :sortOrder="sortOrder" @sort="sortTable"
-      data-cy="sharedSkillsTable" tableStoredStateId="sharedSkillsTable">
+      data-cy="sharedSkillsTable" tableStoredStateId="sharedSkillsTable" aria-label="Skills Shared with Other Projects">
       <Column field="skillName" header="Shared Skill" sortable :class="{'flex': isFlex }">
         <template #body="slotProps">
           {{ slotProps.data.skillName }}

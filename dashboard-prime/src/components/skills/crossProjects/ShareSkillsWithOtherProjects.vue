@@ -102,7 +102,7 @@ const shareSkill = () => {
         selectedSkill.value = null
         loadSharedSkills().then(() => {
           const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId
-          nextTick(() => announcer.assertive(`Skill with id of ${skillId} was shared with ${sharedWith}`))
+          announcer.assertive(`Skill with id of ${skillId} was shared with ${sharedWith}`)
         })
       })
   }
@@ -134,7 +134,7 @@ const deleteSharedSkill = (itemToRemove) => {
       loadSharedSkills()
     }).finally(() => {
     const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId
-    nextTick(() => announcer.assertive(`Removed shared skill ${itemToRemove.skillId} from ${sharedWith}`))
+    announcer.assertive(`Removed shared skill with id ${itemToRemove.skillId} from ${sharedWith}`)
   })
 }
 

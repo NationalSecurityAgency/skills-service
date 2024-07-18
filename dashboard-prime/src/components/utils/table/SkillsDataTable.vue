@@ -43,6 +43,10 @@ const props = defineProps({
     type: Object,
     required: false,
     default: null,
+  },
+  ariaLabel: {
+    type: String,
+    required: false,
   }
 })
 const slots = useSlots()
@@ -50,6 +54,9 @@ const announcer = useSkillsAnnouncer()
 const responsive = useResponsiveBreakpoints()
 
 const sortInfo = useStorage(`skillsTable-sort-${props.tableStoredStateId}`, { sortOrder: sortOrder.value, sortBy: sortField.value })
+const tableProps = {
+  'aria-label': props.ariaLabel
+};
 
 sortField.value = sortInfo.value.sortBy
 sortInfo.value.sortBy = toRef(() => sortField.value)
@@ -83,6 +90,7 @@ const onPage = (pageEvent) => {
     @sort="onColumnSort"
     @filter="onFilter"
     @page="onPage"
+    :tableProps="tableProps"
   >
     <template v-for="(_, name) in slots" v-slot:[name]="slotData">
       <Column v-if="expander"
