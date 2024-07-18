@@ -28,7 +28,7 @@ import SkillTreeLogoSvg from '@/components/brand/SkillTreeLogoSvg.vue'
           training
           platform
         </div>
-        <div class="flex gap-4 px-4">
+        <div class="flex flex-column md:flex-row gap-4 px-4">
           <Card class="h-100 card-1-border-top">
             <template #content>
               <div class="text-primary uppercase text-xl text-center">Gamification</div>
