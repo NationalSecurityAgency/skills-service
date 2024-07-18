@@ -74,15 +74,7 @@ const timer = setInterval(() => {
         </router-link>
       </div>
     </div>
-
   </div>
-
-<!--  <div v-if="timeoutForDisplay > 0">-->
-<!--    Redirecting in {{ timeoutForDisplay }} seconds...-->
-<!--  </div>-->
-<!--  <div v-else>-->
-<!--    Redirecting now...-->
-<!--  </div>-->
 </template>
 
 <style scoped>
