@@ -86,10 +86,7 @@ const ariaLabel = computed(() => {
   }
   return res;
 })
-const flipSelected = (event) => {
-  if (event instanceof KeyboardEvent) {
-    event.preventDefault()
-  }
+const flipSelected = () => {
   if (!props.a.isGraded) {
     selected.value = !selected.value;
     emit('input', selected.value);
@@ -107,7 +104,7 @@ const flipSelected = (event) => {
 
 <template>
   <div class="answer-row"
-       v-on:keydown.space="flipSelected"
+       @keydown.prevent.space="flipSelected"
        @click="flipSelected"
        :tabindex="a.isGraded ? -1 : 0"
        :class="{ 'selected-answer': selected, 'point-cursor answer-row-editable skills-theme-quiz-selected-answer-row' : !a.isGraded }"
