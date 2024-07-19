@@ -187,7 +187,7 @@ export default {
   },
   updateImportedSkill(skill) {
     const url = `/admin/projects/${encodeURIComponent(skill.projectId)}/import/skills/${encodeURIComponent(skill.skillId)}`
-    return axios.patch(url, { pointIncrement: skill.pointIncrement }).then((res) => res.data)
+    return axios.patch(url, { pointIncrement: skill.pointIncrement, quizId: skill.quizId }).then((res) => res.data)
   },
   deleteSkill(skill) {
     return axios

@@ -48,7 +48,12 @@ const saveSkill = (values) => {
     projectId: route.params.projectId,
     skillId: InputSanitizer.sanitize(props.skill.skillId),
     pointIncrement: values.pointIncrement,
+    quizId: null,
   }
+  if(props.skill.selfReportingType === 'Quiz') {
+    skilltoSave.quizId = props.skill.quizId
+  }
+
   return SkillsService.updateImportedSkill(skilltoSave)
     .then(() => {
       return {

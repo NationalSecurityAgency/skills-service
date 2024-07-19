@@ -622,7 +622,7 @@ class SkillCatalogService {
         SkillDef subject = relationshipService.getMySubjectParent(skillDefWithExtra.id)
         SkillRequest skillRequest = new SkillRequest(
                 pointIncrement: importedSkillUpdate.pointIncrement, // update
-
+                quizId: importedSkillUpdate.quizId,
                 skillId: skillDefWithExtra.skillId,
                 projectId: skillDefWithExtra.projectId,
                 subjectId: subject.skillId,

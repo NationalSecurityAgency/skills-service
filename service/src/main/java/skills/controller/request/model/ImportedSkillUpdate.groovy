@@ -22,4 +22,5 @@ import groovy.transform.ToString
 @ToString(includePackage = false)
 class ImportedSkillUpdate {
     int pointIncrement
+    String quizId
 }
