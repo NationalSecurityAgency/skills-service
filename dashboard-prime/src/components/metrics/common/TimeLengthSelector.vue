@@ -43,6 +43,7 @@ const handleClick = (index) => {
   <span data-cy="timeLengthSelector" class="time-length-selector">
     <Badge v-for="(item, index) in options" :key="`${item.length}${item.unit}`"
              class="ml-2" :class="{'can-select' : (index !== selectedIndex) }"
+             :aria-label="`show data for the last ${item.length} ${item.unit}`"
              :severity="getVariant(index)" @click="handleClick(index)" @keyup.enter="handleClick(index)" tabindex="0">
       {{ item.length }} {{ item.unit }}
     </Badge>

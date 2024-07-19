@@ -39,7 +39,7 @@ onMounted(() => {
     <Button v-show="isConfigurationInitialized"
             outlined
             icon="fas fa-trophy"
-            label="Level 1"
+            label="Dashboard Skills"
             severity="info">
       <i class="fas fa-trophy mr-1" aria-hidden="true"></i>
       <span id="skills-level-container" />

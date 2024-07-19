@@ -317,7 +317,7 @@ const isFlex = computed(() => responsive.sm.value)
           </Column>
           <Column field="edit" header="Edit" :class="{'flex': isFlex }">
             <template #body="slotProps">
-              <SkillsButton :ref="`edit_${ slotProps.data.level}`" @click="editLevel(slotProps.data)" size="small" data-cy="editLevelButton" icon="fas fa-edit" label="Edit" :track-for-focus="true" :id="`editLevelButton_${slotProps.data.level}`" />
+              <SkillsButton :ref="`edit_${ slotProps.data.level}`" @click="editLevel(slotProps.data)" size="small" data-cy="editLevelButton" icon="fas fa-edit" label="Edit" :track-for-focus="true" :id="`editLevelButton_${slotProps.data.level}`" :aria-label="`Edit level ${slotProps.data.level}`"/>
             </template>
           </Column>
         </SkillsDataTable>

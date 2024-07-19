@@ -69,11 +69,11 @@ const inputClass = computed(() => {
                  class="w-full"
                  :placeholder="placeholder"
                  :class="{ 'p-invalid': errorMessage }"
-                 :aria-invalid="errorMessage ? null : true"
+                 :aria-invalid="!!errorMessage"
                  :aria-errormessage="`${name}Error`"
                  :aria-describedby="`${name}Error`"
                  :aria-labelledby="`${name}Label`" />
-      <small class="p-error" :id="`${name}Error`" :data-cy="`${name}Error`" v-if="errorMessage">{{ errorMessage || '&nbsp;' }}</small>
+      <small role="alert" class="p-error" :id="`${name}Error`" :data-cy="`${name}Error`" v-if="errorMessage">{{ errorMessage || '&nbsp;' }}</small>
     </div>
   </div>
 </template>

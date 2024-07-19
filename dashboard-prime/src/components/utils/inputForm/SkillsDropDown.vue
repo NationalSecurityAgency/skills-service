@@ -64,7 +64,7 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
               :disabled="disabled"
               :data-cy="$attrs['data-cy'] || name"
               :class="{ 'p-invalid': errorMessage }"
-              :aria-invalid="errorMessage ? null : true"
+              :aria-invalid="!!errorMessage"
               :aria-errormessage="`${name}Error`">
       <template #value="slotProps">
         <slot name="value" :value="slotProps.value"></slot>
