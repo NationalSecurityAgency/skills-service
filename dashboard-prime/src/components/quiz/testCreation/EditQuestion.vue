@@ -312,7 +312,7 @@ const onSavedQuestion = (savedQuestion) => {
             v-model="props.questionDef.answers"
             :quiz-type="props.questionDef.quizType"
             :class="{ 'p-invalid': answersErrorMessage }"
-            :aria-invalid="answersErrorMessage ? null : true"
+            :aria-invalid="!!answersErrorMessage"
             aria-errormessage="answersError"
               aria-describedby="answersError" />
         <small

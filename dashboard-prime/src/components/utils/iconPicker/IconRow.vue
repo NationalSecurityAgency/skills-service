@@ -14,7 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref } from 'vue';
+
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js';
+
+const announcer = useSkillsAnnouncer()
 
 const props = defineProps({
   item: {
@@ -34,9 +37,8 @@ const props = defineProps({
 const emit = defineEmits(['icon-selected']);
 
 const handleClick = (name, cssClass) => {
+  announcer.polite(`${name} icon selected`);
   emit('icon-selected', { name, cssClass });
-  // hacky but can't pass an event from grand-child to grand-parent otherwise
-  // this.$parent.$parent.$emit('icon-selected', { name, cssClass });
 }
 </script>
 

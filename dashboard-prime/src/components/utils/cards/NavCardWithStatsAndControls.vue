@@ -63,7 +63,7 @@ defineExpose({
             </router-link>
             <div class="media-body" style="min-width: 0px; margin-left: 8px;">
               <div class="text-info mb-0 pb-0 preview-card-title no-underline overflow-hidden text-overflow-ellipsis white-space-nowrap" style="max-width:20rem">
-                <router-link v-if="options.icon" :to="options.navTo" data-cy="titleLink" class="no-underline">
+                <router-link v-if="options.icon" :to="options.navTo" data-cy="titleLink" class="no-underline" :aria-label="`${isReadOnlyProj ? 'View' : 'Manage'} ${options.controls.type} ${options.controls.name}`">
                   {{ options.title }}
                 </router-link>
               </div>

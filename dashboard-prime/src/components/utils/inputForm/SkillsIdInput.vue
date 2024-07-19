@@ -76,7 +76,7 @@ defineExpose({
             style="height:1rem !important;"
             size="small"
             name="Enable Id"
-            aria-label="Enable ID input to override auto-generated value."
+            aria-label="Enable input to override auto-generated ID value."
             data-cy="enableIdInput"
             @input="notifyAboutEditStateChange" />
         </div>
@@ -91,7 +91,7 @@ defineExpose({
       @keydown.enter="onEnter"
       :disabled="!canEdit || disabled"
       aria-required="true"
-      :aria-invalid="errorMessage ? true : false"
+      :aria-invalid="!!errorMessage"
       aria-errormessage="idError"
       aria-describedby="idError"
       data-cy="idInputValue" />
