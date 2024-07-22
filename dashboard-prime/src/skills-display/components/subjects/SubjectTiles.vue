@@ -40,7 +40,7 @@ const hasData = computed(() => userProgress.userProgressSummary.subjects?.length
     <div v-if="hasData" class="flex flex-wrap gap-2">
       <div v-for="(subject, index) in userProgress.userProgressSummary.subjects"
            :key="`unique-subject-${index}`"
-           class="flex-1 w-min-20rem lg:max-w-30rem">
+           class="flex-1 lg:w-min-20rem lg:max-w-30rem">
           <subject-tile :subject="subject" :tile-index="index"/>
       </div>
     </div>
