@@ -259,7 +259,7 @@ const sortTable = (sortContext) => {
             <span class=""><i class="fas fa-users" :class="colors.getTextClass(2)" aria-hidden="true"/> Approval Workload</span>
           </template>
           <template #body="slotProps">
-            <div class="flex gap-2" :data-cy="`workloadCell_${slotProps.data.userId}`">
+            <div class="flex gap-2 flex-column sm:flex-row" :data-cy="`workloadCell_${slotProps.data.userId}`">
               <div class="flex flex-1 gap-2 align-items-center">
                 <div v-if="!slotProps.data.hasConf" class="flex flex-1 gap-2 align-items-center">
                   <InputSwitch

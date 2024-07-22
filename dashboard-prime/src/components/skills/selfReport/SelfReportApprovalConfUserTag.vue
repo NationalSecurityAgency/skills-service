@@ -87,7 +87,7 @@ const removeTagConf = (removedIem) => {
     <SkillsCardHeader :title="'Split Workload By ' + tagLabel"></SkillsCardHeader>
   </template>
   <template #content>
-    <div class="flex gap-2 px-3 pt-3">
+    <div class="flex gap-2 px-3 pt-3 flex-column sm:flex-row">
       <div class="flex flex-1">
         <SkillsTextInput
             class="w-full"
