@@ -36,6 +36,7 @@ import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue';
 import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue';
 import VideoFileInput from '@/components/video/VideoFileInput.vue';
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 
 const dialogMessages = useDialogMessages()
 const VideoPlayer = defineAsyncComponent(() =>
@@ -50,6 +51,7 @@ const projConfig = useProjConfig()
 const timeUtils = useTimeUtils()
 const announcer = useSkillsAnnouncer()
 const byteFormat = useByteFormat()
+const responsive = useResponsiveBreakpoints()
 
 const videoConf = ref({
   file: null,
@@ -400,18 +402,20 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
             </Message>
           </div>
 
-          <div data-cy="videoInputFields" class="mb-4">
-            <div class="flex mb-2">
+<!--          <div data-cy="videoInputFields" class="flex flex-column md:flex-row flex-wrap gap-2 mb-4">-->
+          <div data-cy="videoInputFields" class="mb-4" :class="{'flex flex-column gap-2': responsive.md.value }">
+            <div class="flex flex-column md:flex-row gap-2 md:mb-2">
               <div class="flex-1 align-content-end">
                 <label>* Video:</label>
               </div>
-              <div class="flex">
+              <div class="flex" >
                 <SkillsButton
                     v-if="!showFileUpload"
                     data-cy="showFileUploadBtn"
                     size="small"
                     severity="info"
                     outlined
+                    :class="{'w-full': responsive.md.value }"
                     aria-label="Switch to Video Upload input option"
                     @click="switchToFileUploadOption"
                     icon="fas fa-arrow-circle-up"
@@ -423,6 +427,7 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
                     size="small"
                     severity="info"
                     outlined
+                    :class="{'w-full': responsive.md.value }"
                     aria-label="Switch to External Link input option"
                     @click="switchToExternalUrlOption"
                     icon="fas fa-globe"
@@ -457,8 +462,8 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
             </div>
           </div>
 
-          <div data-cy="videoCaptionsInputFields">
-            <div class="flex mb-2">
+          <div data-cy="videoCaptionsInputFields" :class="{'flex flex-column gap-2': responsive.md.value }">
+            <div class="flex flex-column md:flex-row gap-2 md:mb-2">
               <div class="flex-1 align-content-end">
                 <label for="videoCaptions">Captions:</label>
               </div>
@@ -468,6 +473,7 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
                     size="small"
                     severity="info"
                     outlined
+                    :class="{'w-full': responsive.md.value }"
                     aria-label="Click to fill in sample captions using The Web Video Text Tracks (WEBVTT) format"
                     @click="fillInCaptionsExample"
                     icon="fas fa-plus"
@@ -511,10 +517,11 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
             {{ overallErrMsg }}
           </Message>
 
-          <div v-if="!isReadOnly" data-cy="updateButtons" class="my-3 flex">
+          <div v-if="!isReadOnly" data-cy="updateButtons" class="my-3 flex flex-column md:flex-row gap-2">
             <div class="flex-1">
               <SkillsButton
                   severity="success"
+                  :class="{'w-full': responsive.md.value }"
                   outlined
                   :disabled="!hasVideoUrl || !meta.valid"
                   data-cy="saveVideoSettingsBtn"
@@ -524,10 +531,11 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
                   label="Save and Preview" />
               <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success" data-cy="savedMsg"><i class="fas fa-check" /> Saved</span>
             </div>
-            <div class="flex">
+            <div class="flex flex-column md:flex-row gap-2">
               <SkillsButton
                   severity="secondary"
-                  class="mr-2"
+                  class="md:mr-2"
+                  :class="{'w-full': responsive.md.value }"
                   outlined
                   data-cy="discardChangesBtn"
                   aria-label="Discard Unsaved"

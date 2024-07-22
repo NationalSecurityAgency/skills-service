@@ -27,10 +27,13 @@ import ExpirationService from '@/components/expiration/ExpirationService.js';
 import SkillsNumberInput from '@/components/utils/inputForm/SkillsNumberInput.vue';
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
 import SkillsRadioButtonInput from '@/components/utils/inputForm/SkillsRadioButtonInput.vue';
+import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue';
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 
 const skillsState = useSkillsState();
 const announcer = useSkillsAnnouncer()
 const route = useRoute()
+const responsive = useResponsiveBreakpoints()
 
 const NEVER = 'NEVER';
 const YEARLY = 'YEARLY';
@@ -353,13 +356,14 @@ const saveSettings = handleSubmit((values) => {
               </div>
 
               <div class="flex flex-wrap md:flex-nowrap ml-5 gap-2" :class="{ 'text-color-secondary' : expirationType !== YEARLY}" data-cy="yearlyFormGroup">
-                <div class="flex align-items-baseline gap-2">
+                <div class="flex flex-column md:flex-row gap-2 align-items-baseline gap-2" :class="{'w-full': responsive.md.value }">
                   <label for="inputyearlyYears" class="">Skills will expire every</label>
                   <SkillsNumberInput
                       id="yearlyYears-sb"
                       data-cy="yearlyYears-sb"
                       v-model="yearlyYears"
                       :disabled="expirationType !== 'YEARLY'"
+                      :class="{'w-full': responsive.md.value }"
                       name="yearlyYears"
                       inputClass="w-6rem"
                       inputId="minmax-buttons"
@@ -368,11 +372,12 @@ const saveSettings = handleSubmit((values) => {
                       :min="0" :max="99"/>
                   <!--                  <span class="ml-2">year{{yearlyYears > 1 ? 's' : ''}} on:</span>-->
                 </div>
-                <div class="flex align-items-baseline gap-2">
+                <div class="flex align-items-baseline flex-column md:flex-row gap-2" :class="{'w-full': responsive.md.value }">
                   <span class="">on:</span>
                   <SkillsDropDown :options="monthsOptions"
                                   v-model="yearlyMonth"
                                   :disabled="expirationType !== YEARLY"
+                                  :class="{'w-full': responsive.md.value }"
                                   name="yearlyMonth"
                                   optionLabel="text"
                                   optionValue="value"
@@ -382,6 +387,7 @@ const saveSettings = handleSubmit((values) => {
                   <SkillsDropDown v-model="yearlyDayOfMonth"
                                   :options="dayOptions"
                                   :disabled="expirationType !== YEARLY"
+                                  :class="{'w-full': responsive.md.value }"
                                   aria-label="Day of month"
                                   name="yearlyDayOfMonth"
                                   optionLabel="text"
@@ -406,12 +412,13 @@ const saveSettings = handleSubmit((values) => {
               </div>
 
               <div class="flex flex-wrap md:flex-nowrap ml-5 gap-2" :class="{ 'text-color-secondary' : expirationType !== MONTHLY}">
-                <div class="flex align-items-baseline gap-2">
+                <div class="flex flex-column md:flex-row align-items-baseline gap-2" :class="{'w-full': responsive.md.value }">
                   <label for="inputmonthlyMonths" class="">Skills will expire every</label>
                   <SkillsNumberInput
                       id="monthlyMonths-sb"
                       data-cy="monthlyMonths-sb"
                       v-model="monthlyMonths"
+                      :class="{'w-full': responsive.md.value }"
                       :disabled="expirationType !== MONTHLY"
                       name="monthlyMonths"
                       inputClass="w-6rem"
@@ -421,17 +428,22 @@ const saveSettings = handleSubmit((values) => {
                       :min="0" :max="99"/>
                   <!--                  <span class="ml-2">year{{monthlyMonths > 1 ? 's' : ''}} on:</span>-->
                 </div>
-                <div class="flex align-items-baseline gap-2">
-                  <span class="">on:</span>
-                  <div class="flex flex-wrap gap-3" data-cy="monthlyDayOption">
-                    <div  v-for="category in monthlyDayCategories" :key="category.key" class="flex align-items-center">
-                      <SkillsRadioButtonInput v-model="monthlyDayOption" :inputId="category.key" name="monthlyDayOption" :value="category.key" />
-                      <label :for="category.key" class="ml-2">{{ category.name }}</label>
+                <div class="flex align-items-baseline flex-column md:flex-row gap-2" :class="{'w-full': responsive.md.value }">
+                  <div class="flex gap-2">
+                    <span class="">on:</span>
+                    <div class="flex flex-wrap flex-column md:flex-row gap-3" data-cy="monthlyDayOption">
+                      <div v-for="category in monthlyDayCategories" :key="category.key" class="flex align-items-center">
+                        <SkillsRadioButtonInput v-model="monthlyDayOption" :inputId="category.key"
+                                                :disabled="expirationType !== MONTHLY"
+                                                name="monthlyDayOption" :value="category.key"/>
+                        <label :for="category.key" class="ml-2">{{ category.name }}</label>
+                      </div>
                     </div>
                   </div>
                   <SkillsDropDown v-model="monthlyDay"
                                   :options="dayOptions"
                                   :disabled="expirationType !== MONTHLY || monthlyDayOption !== 'SET_DAY_OF_MONTH'"
+                                  :class="{'w-full': responsive.md.value }"
                                   aria-label="Set day of month"
                                   name="monthlyDay"
                                   optionLabel="text"
@@ -446,7 +458,7 @@ const saveSettings = handleSubmit((values) => {
             <div class="border-round p-3" :class="{ 'bg-gray-100' : expirationType === DAILY}" data-cy="dailyFormGroup">
               <div class="flex align-items-center justify-content-start">
                 <div class="flex flex-wrap">
-                  <div class="flex align-items-center">
+                  <div class="flex align-items-center mb-2 md:mb-0">
                     <SkillsRadioButtonInput v-model="expirationType"
                                  inputId="dailyRadio"
                                  name="expirationType"
@@ -458,13 +470,14 @@ const saveSettings = handleSubmit((values) => {
               </div>
 
               <div class="flex flex-wrap md:flex-nowrap ml-5 gap-2" :class="{ 'text-color-secondary' : expirationType !== DAILY}">
-                <div class="flex align-items-baseline gap-2">
+                <div class="flex align-items-baseline flex-column md:flex-row gap-2" :class="{'w-full': responsive.md.value }">
                   <label for="dailyDays-sb" class="">Achievement will expire after</label>
                   <SkillsNumberInput
                       id="dailyDays-sb"
                       data-cy="dailyDays-sb"
                       v-model="dailyDays"
                       :disabled="expirationType !== DAILY"
+                      :class="{'w-full': responsive.md.value }"
                       :aria-label="`Skills will expire every ${dailyDays} days after user earns an achievement`"
                       name="dailyDays"
                       inputClass="w-6rem"
