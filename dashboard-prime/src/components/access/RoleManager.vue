@@ -308,7 +308,7 @@ defineExpose({
             <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
                                  v-model="selectedUser" data-cy="existingUserInput" />
           </div>
-          <div class="mt-3 mb-3 flex gap-2">
+          <div class="mt-3 mb-3 flex gap-2 flex-column sm:flex-row">
             <div v-if="!isOnlyOneRole" class="flex-1">
               <Dropdown class="w-full" v-model="userRole.selected" :options="userRole.options" data-cy="userRoleSelector"
                         placeholder="Please select user's Role" optionLabel="text" optionValue="value" />

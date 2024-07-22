@@ -196,7 +196,7 @@ const suggestUsers = (query) => {
 
 <template>
   <div data-cy="existingUserInput" v-bind="fallthroughAttributes.rootAttrs.value">
-    <div class="flex">
+    <div class="flex flex-column sm:flex-row gap-2">
       <Dropdown v-if="hasUserSuggestOptions" data-cy="userSuggestOptionsDropdown" v-model="selectedSuggestOption" :options="userSuggestOptions" class="mr-2"/>
       <AutoComplete v-bind="fallthroughAttributes.inputAttrs.value"
                     v-model="currentSelectedUser"
