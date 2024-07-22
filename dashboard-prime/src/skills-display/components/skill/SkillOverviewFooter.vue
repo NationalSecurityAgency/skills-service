@@ -246,7 +246,7 @@ defineExpose({
              class="mb-2">
       <template #container>
         <div class="p-3">
-          <div class="flex gap-2 align-items-center">
+          <div class="flex gap-2 sm:align-items-center flex-column sm:flex-row">
             <div>
               <i class="fas fa-traffic-light text-2xl" aria-hidden="true"></i>
             </div>

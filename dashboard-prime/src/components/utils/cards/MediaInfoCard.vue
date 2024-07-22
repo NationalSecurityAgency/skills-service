@@ -35,7 +35,7 @@ const styleObject = {
 <template>
   <Card :pt="{content: { class: 'p-0' } }">
     <template #content>
-      <div class="flex flex-row">
+      <div class="flex flex-column sm:flex-row text-center sm:text-left">
         <div style="min-width: 5rem;" class="text-center">
           <i class="fa-3x" :class="iconClass" :style="styleObject"/>
         </div>
