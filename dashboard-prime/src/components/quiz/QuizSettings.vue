@@ -380,34 +380,26 @@ const collectAndSave = (values) => {
                              name="quizTimeLimitUnlimited"
                              aria-label="Quiz Time Limit setting, unlimited time checkbox"
                              data-cy="unlimitedTimeSwitch"/>
-                <span class="mx-2">Unlimited</span>
-                <div v-if="!settings.quizTimeLimit.unlimited" class="flex flex-row flex-1">
-                  <InputGroup class="align-items-start mr-1">
+                <div class="flex flex-column flex-1">
+                  <div class="mx-2">Unlimited</div>
+                  <div v-if="!settings.quizTimeLimit.unlimited" class="flex flex-column sm:flex-row flex-1 gap-2 mt-3">
                     <SkillsNumberInput
                         class="flex-1"
+                        label="Hours"
                         name="quizTimeLimitHours"
                         data-cy="timeLimitHoursInput"
                         aria-labelledby="hours-append"
                         v-model="hoursForQuiz"
-                        @update:modelValue="updateTimeLimit">
-                      <template #addOnAfter>
-                        <InputGroupAddon id="hours-append">Hours</InputGroupAddon>
-                      </template>
-                    </SkillsNumberInput>
-                  </InputGroup>
-                  <InputGroup class="align-items-start ml-1">
+                        @update:modelValue="updateTimeLimit"/>
                     <SkillsNumberInput
                         class="flex-1"
+                        label="Minutes"
                         name="quizTimeLimitMinutes"
                         data-cy="timeLimitMinutesInput"
                         aria-labelledby="minutes-append"
                         v-model="minutesForQuiz"
-                        @update:modelValue="updateTimeLimit">
-                      <template #addOnAfter>
-                        <InputGroupAddon id="minutes-append">Minutes</InputGroupAddon>
-                      </template>
-                    </SkillsNumberInput>
-                  </InputGroup>
+                        @update:modelValue="updateTimeLimit"/>
+                </div>
                 </div>
               </div>
             </div>

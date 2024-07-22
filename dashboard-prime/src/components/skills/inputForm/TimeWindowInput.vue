@@ -65,11 +65,10 @@ const resetTimeWindow = (checked) => {
         :value="true" />
       <label for="timeWindowEnabled" class="ml-2 font-italic" :class="{ 'text-color-secondary' : disabled }">Time Window Enabled</label>
     </div>
-    <div class="flex m-0 flex-wrap">
+    <div class="flex m-0 flex-wrap flex-column lg:flex-row">
       <SkillsNumberInput
         class="flex-1 mx-2"
         :class="{ 'text-color-secondary' : disabled }"
-        style="min-width: 14rem"
         showButtons
         :disabled="!value"
         label="Hours"
@@ -78,7 +77,6 @@ const resetTimeWindow = (checked) => {
       <SkillsNumberInput
         class="flex-1 mx-2"
         :class="{ 'text-color-secondary' : disabled }"
-        style="min-width: 14rem"
         showButtons
         :min="0"
         :disabled="!value"
@@ -88,7 +86,6 @@ const resetTimeWindow = (checked) => {
       <SkillsNumberInput
         class="flex-1 mx-2"
         :class="{ 'text-color-secondary' : disabled }"
-        style="min-width: 16rem"
         :min="1"
         showButtons
         :disabled="!value"
