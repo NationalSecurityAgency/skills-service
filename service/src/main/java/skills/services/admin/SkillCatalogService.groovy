@@ -620,9 +620,9 @@ class SkillCatalogService {
     void updateImportedSkill(String projectId, String skillId, ImportedSkillUpdate importedSkillUpdate) {
         SkillDefWithExtra skillDefWithExtra = skillAccessor.getSkillDefWithExtra(projectId, skillId, [SkillDef.ContainerType.Skill])
         SkillDef subject = relationshipService.getMySubjectParent(skillDefWithExtra.id)
+
         SkillRequest skillRequest = new SkillRequest(
                 pointIncrement: importedSkillUpdate.pointIncrement, // update
-                quizId: importedSkillUpdate.quizId,
                 skillId: skillDefWithExtra.skillId,
                 projectId: skillDefWithExtra.projectId,
                 subjectId: subject.skillId,
@@ -636,6 +636,12 @@ class SkillCatalogService {
                 selfReportingType: skillDefWithExtra.selfReportingType,
                 enabled: skillDefWithExtra.enabled,
         )
+
+        if (skillDefWithExtra.selfReportingType && skillDefWithExtra.selfReportingType == SkillDef.SelfReportingType.Quiz) {
+            QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(skillDefWithExtra.id)
+            skillRequest.quizId = quizNameAndId.quizId
+        }
+
         skillsAdminService.saveSkill(skillDefWithExtra.skillId, skillRequest, false)
 
     }
