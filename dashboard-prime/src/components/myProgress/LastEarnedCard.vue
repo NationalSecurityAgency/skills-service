@@ -48,7 +48,7 @@ const getFooterText = () => {
       <div class="pt-2 pr-3 text-left">
         <div v-if="myProgress.mostRecentAchievedSkill !== null" data-cy="mostRecentAchievedSkill">
           <span>Last Achieved skill</span>
-          <Tag severity="success">{{ timeUtils.timeFromNow(myProgress.mostRecentAchievedSkill) }}</Tag>
+          <Tag severity="success" class="ml-2">{{ timeUtils.timeFromNow(myProgress.mostRecentAchievedSkill) }}</Tag>
         </div>
         <div class="my-2" data-cy="numAchievedSkillsLastWeek">
           <Tag severity="info" style="font-size: 1rem;">{{ myProgress.numAchievedSkillsLastWeek }}</Tag> skills
