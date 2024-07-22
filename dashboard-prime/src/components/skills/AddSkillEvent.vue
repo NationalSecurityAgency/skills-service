@@ -203,7 +203,7 @@ const addSkill = () => {
       <BlockUI data-cy="addEventDisabledBlockUI" :blocked="addEventDisabled">
         <Card>
           <template #content>
-            <div class="flex flex-wrap align-items-start">
+            <div class="flex flex-column md:flex-row gap-2 flex-wrap align-items-start">
               <div class="flex flex-1 px-1">
                 <existing-user-input class="w-full"
                                      :project-id="projectId"
@@ -216,7 +216,7 @@ const addSkill = () => {
                                      data-cy="userIdInput" />
               </div>
               <div class="flex">
-                <SkillsCalendarInput class="mx-2 my-0"
+                <SkillsCalendarInput class="mx-1 md:mx-2 md:my-0"
                                      selectionMode="single"
                                      name="eventDatePicker"
                                      v-model="dateAdded"
