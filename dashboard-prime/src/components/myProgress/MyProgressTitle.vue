@@ -22,7 +22,7 @@ defineProps({
 <template>
   <Card :pt="{ content: { class: 'p-0' }, body: { class: 'p-3' } }">
     <template #content>
-      <div class="flex">
+      <div class="flex flex-column sm:flex-row gap-1">
         <div class="flex-1">
           <span class="text-2xl uppercase" role="heading" aria-level="1">{{ title }}</span>
         </div>

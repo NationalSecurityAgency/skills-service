@@ -29,7 +29,7 @@ const myProgress = computed(() => myProgressState.myProgress)
     <template #left-content>
       <div class="">
         <span
-          class="text-4xl text-orange-500 mr-1"
+          class="text-4xl text-orange-500"
           data-cy="numAchievedBadges">{{ myProgress.numAchievedBadges }}</span>
         <span
           class="text-secondary"
@@ -56,18 +56,21 @@ const myProgress = computed(() => myProgressState.myProgress)
       </div>
     </template>
     <template #right-content>
-      <div style="font-size: 3.5rem;" class="mt-2">
-      <span class="fa-stack">
-            <i class="fas fa-circle fa-stack-2x text-bluegray-600"></i>
-            <i class="fas fa-trophy fa-stack-1x text-green-500"></i>
-          </span>
+      <div class="flex justify-content-center sm:justify-content-end">
+        <div style="font-size: 3.5rem;" class="mt-2">
+        <span class="fa-stack">
+              <i class="fas fa-circle fa-stack-2x text-bluegray-600"></i>
+              <i class="fas fa-trophy fa-stack-1x text-green-500"></i>
+            </span>
+        </div>
       </div>
     </template>
     <template #footer>
-      <div class="flex">
-        <div data-cy="badges-num-footer" class="flex-1">
+      <div class="flex gap-2 align-items-center flex-column sm:flex-row">
+        <div data-cy="badges-num-footer" class="flex-1 w-min-10rem">
           Be proud to earn those badges!!
         </div>
+        <div>
         <router-link :to="{ name: 'MyBadges' }" tabindex="-1">
           <SkillsButton
             label="My Badges"
@@ -76,6 +79,7 @@ const myProgress = computed(() => myProgressState.myProgress)
             size="small"
             data-cy="viewBadges" />
         </router-link>
+        </div>
       </div>
     </template>
   </my-progress-info-card-util>

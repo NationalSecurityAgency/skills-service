@@ -66,7 +66,7 @@ const chartOptions = {
 </script>
 
 <template>
-  <my-progress-info-card-util title="Skills" style="min-width: 20rem">
+  <my-progress-info-card-util title="Skills">
     <template #left-content>
       <div>
         <div class="text-4xl text-orange-500" data-cy="numAchievedSkills">{{ myProgress.numAchievedSkills }}</div>
@@ -76,7 +76,9 @@ const chartOptions = {
       </div>
     </template>
     <template #right-content>
-      <apexchart type="line" height="140" :options="chartOptions" :series="series"></apexchart>
+      <div>
+        <apexchart type="line" height="140" :options="chartOptions" :series="series"></apexchart>
+      </div>
     </template>
     <template #footer>
       <span data-cy="num-skills-footer" class="">So many skills... so little time! Good luck!</span>

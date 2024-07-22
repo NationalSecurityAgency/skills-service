@@ -134,7 +134,7 @@ const contactProject = (name, id) => {
 <template>
   <Card>
     <template #header>
-      <div class="flex pt-4 px-3">
+      <div class="flex pt-4 px-3 flex-column sm:flex-row gap-1">
         <div class="flex-1">
           <span class="text-2xl uppercase" role="heading" aria-level="1">Projects Catalog</span>
         </div>

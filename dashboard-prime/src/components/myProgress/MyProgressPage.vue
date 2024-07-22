@@ -51,7 +51,7 @@ onMounted(() => {
           </template>
         </my-progress-title>
 
-        <div class="flex gap-3 flex-wrap mt-3">
+        <div class="flex flex-column sm:flex-row gap-3 flex-wrap mt-3">
           <div class="flex-1">
             <info-snapshot-card />
           </div>
