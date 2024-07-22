@@ -222,4 +222,8 @@ defineExpose({
   </Dropdown>
 </template>
 
-<style scoped></style>
+<style>
+.st-skills-selector .p-placeholder {
+  text-wrap: wrap;
+}
+</style>

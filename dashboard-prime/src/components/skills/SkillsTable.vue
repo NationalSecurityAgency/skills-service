@@ -488,7 +488,7 @@ const isLoading = computed(() => {
                 placeholder="Optional Fields"
                 data-cy="skillsTable-additionalColumns" />
             </div>
-            <div v-if="!projConfig.isReadOnlyProj" class="w-full lg:w-auto flex mt-3 lg:mt-0">
+            <div v-if="!projConfig.isReadOnlyProj" class="w-full lg:w-auto flex mt-3 lg:mt-0 flex-column sm:flex-row gap-2">
               <div class="flex-1 align-items-center flex">
                 <label for="sortEnabledSwitch" class="lg:ml-3 mr-1">Reorder:</label>
                 <InputSwitch
@@ -542,7 +542,7 @@ const isLoading = computed(() => {
         </template>
         <template #body="slotProps">
           <div v-if="slotProps.field == 'name'"
-               class="flex flex-wrap align-items-center w-min-20rem"
+               class="flex flex-wrap align-items-center flex-column sm:flex-row"
                :data-cy="`nameCell_${slotProps.data.skillId}`">
             <div v-if="slotProps.data.isGroupType" class="flex-1">
               <div>
@@ -552,12 +552,12 @@ const isLoading = computed(() => {
                 </Tag>
               </div>
               <highlighted-value
-                class="text-lg"
+                class="text-lg w-min-10rem"
                 :value="slotProps.data.name"
                 :filter="filters.global.value" />
             </div>
             <div v-if="!slotProps.data.isGroupType" class="flex-1">
-              <div class="flex">
+              <div class="flex w-min-10rem">
                 <SkillNameRouterLink :skill="slotProps.data" :subjectId="subjectId"
                                      :filter-value="filters.global.value"
                                      :read-only="projConfig.isReadOnlyProj || slotProps.data.isCatalogImportedSkills"

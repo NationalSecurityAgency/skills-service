@@ -50,7 +50,7 @@ const navToSkill = (selectedItem) => {
 </script>
 
 <template>
-  <div class="flex mb-2" style="height: 3rem;">
+  <div class="flex mb-2 st-jump-to-skill-height">
     <div style="width: 100%;">
       <skills-selector :options="availableSkills"
                         class="search-and-nav border rounded"
@@ -70,5 +70,14 @@ const navToSkill = (selectedItem) => {
 <style scoped>
 .search-and-nav {
   border-color: #d9d9d9 !important;
+}
+
+.st-jump-to-skill-height {
+  height: 3rem;
+}
+@media only screen and (max-width: 400px) {
+  .st-jump-to-skill-height {
+    height: 4rem;
+  }
 }
 </style>

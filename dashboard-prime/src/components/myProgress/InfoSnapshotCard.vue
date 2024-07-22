@@ -130,12 +130,15 @@ const projectsNotContributedToYet = computed(() => myProjects.value.length - myP
       <span class="text-secondary" data-cy="numProjectsAvailable">/ {{ myProjects.length }}</span>
     </template>
     <template #right-content>
-      <apexchart type="radialBar" height="200" width="200" :options="chartOptions" :series="series"></apexchart>
+      <div class="flex justify-content-center sm:justify-content-end">
+        <apexchart type="radialBar" height="200" width="200" :options="chartOptions" :series="series"></apexchart>
+      </div>
     </template>
     <template #footer>
-      <div class="flex gap-2 align-items-center">
+      <div class="flex gap-2 align-items-center flex-column sm:flex-row">
         <div v-if="projectsNotContributedToYet > 0"
              data-cy="info-snap-footer"
+             class="w-min-12rem"
              :title="`You still have ${projectsNotContributedToYet} project${ projectsNotContributedToYet > 1 ? 's' : ''} to explore.`">
           You still have
           <Tag severity="info">{{ projectsNotContributedToYet
@@ -143,7 +146,9 @@ const projectsNotContributedToYet = computed(() => myProjects.value.length - myP
           </Tag>
           project{{ projectsNotContributedToYet > 1 ? 's' : '' }} to explore.
         </div>
-        <div v-else data-cy="info-snap-footer"
+        <div v-else
+             data-cy="info-snap-footer"
+             class="w-min-12rem"
              title="Great job, you have contributed to all projects!">Great job, you have contributed to all
           projects!
         </div>

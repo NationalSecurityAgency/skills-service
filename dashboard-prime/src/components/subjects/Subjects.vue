@@ -188,25 +188,29 @@ const sortOrderUpdate = (updateEvent) => {
                        :disabled="addSubjectDisabled" :disabled-msg="addSubjectsDisabledMsg"
                        :aria-label="'new subject'"/>
       <jump-to-skill />
-      <div v-if="subjectsState.subjects && subjectsState.subjects.length" class="flex flex-wrap gap-3 align-items-stretch justify-content-center" id="subjectCards" data-cy="subjectCards">
-        <div v-for="(subject) of subjectsState.subjects" :key="subject.subjectId" :id="subject.subjectId" class="flex align-items-stretch" :data-cy="`${subject.subjectId}_card`">
-          <div>
-            <BlockUI :blocked="sortOrder.loading" class="flex align-items-stretch h-full">
-                <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${subject.subjectId}_overlayShown`">
-                  <div v-if="subject.subjectId===sortOrder.loadingSubjectId" data-cy="updatingSortMsg">
-                    <div class="text-info uppercase mb-1">Updating sort order!</div>
-                    <skills-spinner :is-loading="sortOrder.loading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
-                  </div>
+      <div v-if="subjectsState.subjects && subjectsState.subjects.length"
+           class="flex flex-wrap gap-3 justify-content-center"
+           id="subjectCards"
+           data-cy="subjectCards">
+        <div v-for="(subject) of subjectsState.subjects"
+             :key="subject.subjectId"
+             :id="subject.subjectId"
+             class="flex-1 lg:w-min-20rem lg:max-w-30rem"
+             :data-cy="`${subject.subjectId}_card`">
+          <BlockUI :blocked="sortOrder.loading">
+              <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${subject.subjectId}_overlayShown`">
+                <div v-if="subject.subjectId===sortOrder.loadingSubjectId" data-cy="updatingSortMsg">
+                  <div class="text-info uppercase mb-1">Updating sort order!</div>
+                  <skills-spinner :is-loading="sortOrder.loading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
                 </div>
+              </div>
 
-              <subject :subject="subject"
-                       :ref="(el) => (subjRef[subject.subjectId] = el)"
-                       @subject-deleted="deleteSubject"
-                       class="flex"
-                       @sort-changed-requested="updateSortAndReloadSubjects"
-                       :disable-sort-control="subjectsState.subjects.length === 1"/>
-            </BlockUI>
-          </div>
+            <subject :subject="subject"
+                     :ref="(el) => (subjRef[subject.subjectId] = el)"
+                     @subject-deleted="deleteSubject"
+                     @sort-changed-requested="updateSortAndReloadSubjects"
+                     :disable-sort-control="subjectsState.subjects.length === 1"/>
+          </BlockUI>
         </div>
       </div>
 

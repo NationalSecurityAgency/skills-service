@@ -177,7 +177,7 @@ defineExpose({
                 shape="circle">
                 {{ projectInternal.name.substring(0, 2) }}
               </Avatar>
-              <span class="text-2xl font-bold ml-2">{{ projectInternal.name }}</span>
+              <span class="text-2xl font-bold ml-2 skills-break-word">{{ projectInternal.name }}</span>
             </router-link>
             <div v-if="projectInternal.userCommunity" class="my-2" data-cy="userCommunity">
               <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>

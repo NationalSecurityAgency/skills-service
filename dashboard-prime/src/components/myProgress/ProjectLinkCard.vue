@@ -129,12 +129,12 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
     <template #content>
       <div :class="{'pt-4': !showSortControl }">
 
-        <div class="flex">
+        <div class="flex flex-column sm:flex-row align-items-center">
           <div class="pt-3" style="min-width: 200px;">
             <apexchart type="radialBar" height="200" width="200" :options="chartOptions"
                        :series="series"></apexchart>
           </div>
-          <div class="flex-1 pt-0 pr-3 text-right">
+          <div class="flex-1 pt-0 pr-3 text-center sm:text-right">
             <div class="uppercase text-2xl text-primary" data-cy="project-card-project-name"
                  :aria-label="`Project ${proj.projectName}`" :title="proj.projectName ">{{ proj.projectName }}
             </div>
