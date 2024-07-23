@@ -218,14 +218,14 @@ const skillId = computed(() => {
         </div>
       </div>
       <div v-if="showMotivationalExpirationMessage" data-cy="expirationDate" class="my-2">
-        <div class="my-2 text-orange-700">
+        <div class="my-2 text-orange-500">
           Expires <span
           class="font-semibold">{{ timeUtils.relativeTime(expirationDate(true)) }}</span>,
           perform this skill to keep your points!
         </div>
       </div>
       <div v-if="showHasExpiredMessage" data-cy="hasExpired">
-        <div class="my-2 text-orange-700">
+        <div class="my-2 text-orange-500">
           <i class="fas fa-clock skills-color-expiration mr-2"></i>Points expired <span
           class="font-weight-bold">{{ timeUtils.relativeTime(skill.lastExpirationDate) }}</span>
         </div>
@@ -233,7 +233,7 @@ const skillId = computed(() => {
 
       <div v-if="skill.selfReporting && skill.selfReporting.requestedOn"
            data-cy="approvalPending">
-        <span v-if="!skill.selfReporting.rejectedOn" class="text-orange-700"><i class="far fa-clock"
+        <span v-if="!skill.selfReporting.rejectedOn" class="text-orange-500"><i class="far fa-clock"
                                                                                 aria-hidden="true" /> Pending Approval</span>
         <span v-else class="text-red-500"><i class="fas fa-heart-broken skills-theme-primary-color"
                                              aria-hidden="true"></i> Request Rejected</span>

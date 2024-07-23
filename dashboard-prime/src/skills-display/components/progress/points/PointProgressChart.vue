@@ -253,7 +253,7 @@ const zoomed = (chartContext, { xaxis, yaxis }) => {
               <point-history-chart-placeholder v-if="!hasData" />
             </BlockUI>
             <chart-overlay-msg  style="top: 4rem;">
-              <div class="uppercase text-red-600"><i class="fa fa-lock"></i> Locked
+              <div class="uppercase p-error"><i class="fa fa-lock"></i> Locked
               </div>
               <small>*** <b>2 days</b> of usage will unlock this chart!
                 ***</small>

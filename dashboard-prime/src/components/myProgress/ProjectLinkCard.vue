@@ -159,7 +159,7 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
              class="small mb-1"
              :aria-label="`${proj.points} out of ${proj.totalPoints} available points`"
              data-cy="project-card-project-points">
-          <span class="text-xl text-orange-700">{{ numberFormat.pretty(proj.points) }}</span>
+          <span class="text-xl text-orange-500">{{ numberFormat.pretty(proj.points) }}</span>
           <span>/</span>
           <span>{{ numberFormat.pretty(proj.totalPoints) }}</span>
         </div>

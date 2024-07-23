@@ -24,6 +24,7 @@ const logoWidth = computed(() => responsive.sm.value ? '15rem' : '23rem')
 
 <template>
   <div class="masthead mt-3 border-1 border-round surface-border">
+    <h1 class="sr-only">SkillTree Progress and Rankings</h1>
     <div class="masthead-content">
       <div class="container-fluid above-background">
         <div class="text-center mt-7">

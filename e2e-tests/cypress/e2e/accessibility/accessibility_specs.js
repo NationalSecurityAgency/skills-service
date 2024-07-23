@@ -726,4 +726,16 @@ describe('Accessibility Tests', () => {
         cy.customLighthouse();
         cy.customA11y();
     });
+
+    it.only('splash home page', () => {
+        cy.visit('/progress-and-rankings');
+        cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
+          .contains('Progress And Rankings')
+          .should('be.visible');
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
+
+        cy.customLighthouse();
+        cy.injectAxe();
+        cy.customA11y();
+    });
 });
