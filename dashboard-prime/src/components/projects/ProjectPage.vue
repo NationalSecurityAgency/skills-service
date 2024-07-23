@@ -225,7 +225,7 @@ const isProjectExpiring = computed(() => {
         </div>
       </template>
       <template #subSubTitle v-if="project">
-        <div v-if="!isReadOnlyProj">
+        <div v-if="!isReadOnlyProj" class="flex gap-1 flex-wrap justify-content-center lg:justify-content-start">
           <SkillsButton
             id="editProjectBtn"
             @click="editProject = true"
@@ -240,7 +240,6 @@ const isProjectExpiring = computed(() => {
             :aria-label="`edit Project ${project.name}`">
           </SkillsButton>
           <router-link
-            class="ml-1"
             data-cy="projectPreview"
             :to="{ name:'MyProjectSkillsPage', params: { projectId: project.projectId } }"
             tabindex="-1"
@@ -265,7 +264,6 @@ const isProjectExpiring = computed(() => {
             severity="info"
             @click="copyAndDisplayShareProjInfo"
             data-cy="shareProjBtn"
-            class=" ml-1"
             label="Share" icon="fas fa-share-alt"
             :track-for-focus="true"
             v-skills="'ShareProject'"

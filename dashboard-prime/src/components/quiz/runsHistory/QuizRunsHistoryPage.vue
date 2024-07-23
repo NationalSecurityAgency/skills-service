@@ -266,7 +266,7 @@ const deleteRun = () => {
             </div>
           </template>
           <Column v-for="(col, index) in options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
-                  :class="{'flex': responsive.md.value }">
+                  :class="{'flex': responsive.lg.value }">
             <template #header>
               <span v-if="col.key === 'controls'" class="sr-only">Controls Heading - Not sortable</span>
               <span v-else><i :class="[col.imageClass, colors.getTextClass(index + 1)]" aria-hidden="true"></i> {{ col.label }}</span>

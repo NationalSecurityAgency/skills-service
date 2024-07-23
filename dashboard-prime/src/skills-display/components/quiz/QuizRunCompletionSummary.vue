@@ -59,7 +59,7 @@ const runAgain = () => {
         </div>
       </div>
       
-      <div class="flex column-gap-4 pt-2">
+      <div class="flex flex-wrap flex-column md:flex-row gap-4 pt-2">
         <Card class="text-center surface-50 skills-card-theme-border flex-1" data-cy="numCorrectInfoCard">
           <template #content>
             <div class="text-2xl" data-cy="numCorrect" v-if="!quizResult.outOfTime">

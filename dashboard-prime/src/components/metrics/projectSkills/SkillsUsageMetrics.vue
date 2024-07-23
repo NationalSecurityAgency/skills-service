@@ -102,7 +102,7 @@ const loadData = () => {
           </div>
           <div class="field flex-1 " data-cy="skillsNavigator-filters">
             <label>Skill Usage Filters</label>
-            <div class="flex gap-2">
+            <div class="flex gap-2 flex-wrap">
               <ToggleButton onLabel="Overlooked Skill" offLabel="Overlooked Skill" v-model="filters.overlookedTag"
                             data-cy="overlookedFilterButton" aria-label="Overlooked Skill" />
               <ToggleButton onLabel="Top Skill" offLabel="Top Skill" v-model="filters.topSkillTag"

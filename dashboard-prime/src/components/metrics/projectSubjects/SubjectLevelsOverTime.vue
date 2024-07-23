@@ -105,7 +105,7 @@ const loadChart = () => {
       <SkillsCardHeader title="Number of users for each level over time"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex gap-2 mb-5">
+      <div class="flex gap-2 mb-5 flex-column sm:flex-row">
         <BlockUI :blocked="loading.subjects" rounded="sm" opacity="0.5" spinner-variant="info" spinner-type="grow" spinner-small class="flex flex-1">
           <Dropdown :options="subjects.available"
                     v-model="subjects.selected"
@@ -120,7 +120,7 @@ const loadChart = () => {
       </div>
       <BlockUI :blocked="loading.charts || isSeriesEmpty" opacity=".5">
         <apexchart type="area" height="300" :options="chartOptions" :series="series"></apexchart>
-        <div class="absolute z-5 top-50 w-full text-center" v-if="loading.charts || isSeriesEmpty">
+        <div class="absolute z-4 top-50 w-full text-center" v-if="loading.charts || isSeriesEmpty">
           <div v-if="loading.charts">
             <SkillsSpinner :is-loading="loading.charts" />
           </div>

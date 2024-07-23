@@ -86,20 +86,20 @@ const numUsersBehindMe = computed(() => {
 
       <div class='flex flex-wrap gap-3 mt-3'>
 
-        <div class="w-min-13rem flex-1">
+        <div class="flex-1">
           <media-info-card
             :title="myRankPosition"
-            class="h-full text-center font-bold"
+            class="h-full text-center font-bold w-min-13rem"
             :icon-class="`fas fa-users ${colors.getTextClass(0)}`"
             data-cy="myRankPositionStatCard">
             <span class="uppercase font-normal">My Rank</span>
           </media-info-card>
         </div>
 
-        <div class="w-min-13rem flex-1">
+        <div class="flex-1">
           <media-info-card
             :title="`${rankingDistribution.myLevel}`"
-            class="h-full text-center font-bold"
+            class="h-full text-center font-bold w-min-13rem"
             :icon-class="`fas fa-trophy ${colors.getTextClass(1)}`"
             data-cy="myRankLevelStatCard">
             <span class="uppercase font-normal">My {{ attributes.levelDisplayName }}</span>
