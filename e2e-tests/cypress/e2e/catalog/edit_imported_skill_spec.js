@@ -381,7 +381,7 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="addEventDisabledMsg"]').contains('Unable to add skill for user. Cannot add events to skills imported from the catalog.');
     })
 
-    its('can edit point increment of an imported skill associated with a quiz', () => {
+    it('can edit point increment of an imported skill associated with a quiz', () => {
 
         cy.createQuizDef(1, { name: 'Test Quiz' });
         cy.createQuizQuestionDef(1, 1);
