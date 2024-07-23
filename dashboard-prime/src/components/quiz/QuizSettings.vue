@@ -304,7 +304,6 @@ const collectAndSave = (values) => {
               <SkillsDropDown
                   name="quizLength"
                   inputId="quizNumQuestions"
-                  id="quizNumQuestions"
                   data-cy="quizNumQuestions"
                   optionLabel="text"
                   optionValue="value"
@@ -319,7 +318,6 @@ const collectAndSave = (values) => {
             <div class="col-12 md:col-9">
               <SkillsDropDown
                   name="quizPassingReq"
-                  id="quizPassingReq"
                   inputId="quizPassingReq"
                   data-cy="quizPassingSelector"
                   optionLabel="text"
