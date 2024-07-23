@@ -17,6 +17,7 @@ limitations under the License.
 
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import NumberFormatter from "@/components/utils/NumberFormatter.js";
+import CardWithVericalSections from '@/components/utils/cards/CardWithVericalSections.vue'
 
 const timeUtils = useTimeUtils();
 
@@ -43,7 +44,7 @@ defineProps({
 </script>
 
 <template>
-  <Card :pt="{ body: { class: 'p-2' }, content: { class: 'p-2' } }">
+  <CardWithVericalSections :pt="{ body: { class: 'p-2' }, content: { class: 'p-2' } }">
     <template #content>
       <div class="grid w-full">
         <div class="col">
@@ -59,11 +60,14 @@ defineProps({
           <i :class="icon" style="font-size: 2.2rem;"/>
         </div>
       </div>
+
+    </template>
+    <template #footer>
       <p class="font-light text-sm mt-3 mb-0" data-cy="statCardDescription">
         <slot />
       </p>
     </template>
-  </Card>
+  </CardWithVericalSections>
 </template>
 
 <style scoped>

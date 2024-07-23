@@ -44,7 +44,7 @@ const close = () => {
         <span class="font-bold text-success mb-2 skills-page-title-text-color">{{ quizInfo.name }}</span>
       </div>
 
-      <div class="flex column-gap-4 pt-2 pb-1 text-center">
+      <div class="flex gap-4 flex-column md:flex-row pt-2 pb-1 text-center">
         <div class="flex">
           <Card class="text-center skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2 px-3' } }">
             <template #content>

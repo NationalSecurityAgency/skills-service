@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import Column from 'primevue/column'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
@@ -84,6 +84,21 @@ const chartOptions = {
     }
   }
 }
+
+const quetionCorrectChartRef = ref()
+watch(() => responsive.sm.value, (newValue) => {
+  if (!props.isSurvey) {
+    quetionCorrectChartRef.value.updateOptions({
+      legend: {
+        position: newValue ? 'bottom' : 'left',
+      },
+      chart: {
+        width: newValue ? 250 : 300,
+      },
+    })
+  }
+})
+
 const tableOptions = {
   bordered: true,
   outlined: true,
@@ -163,6 +178,7 @@ const numberOfStars = computed(() => {
       <div v-if="!isSurvey">
         <div>
           <apexchart :type="chartOptions.chart.type" :width="chartOptions.chart.width" :options="chartOptions"
+                     ref="quetionCorrectChartRef"
                      :series="series"></apexchart>
         </div>
       </div>
