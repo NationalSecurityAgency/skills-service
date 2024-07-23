@@ -330,6 +330,7 @@ defineExpose({
           :rowsPerPageOptions="possiblePageSizes"
           data-cy="roleManagerTable"
           tableStoredStateId="roleManagerTableSort"
+          aria-label="User Roles"
           striped-rows
           paginator
           v-model:sort-field="sortInfo.sortBy"

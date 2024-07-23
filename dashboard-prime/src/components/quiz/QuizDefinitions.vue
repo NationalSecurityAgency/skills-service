@@ -172,6 +172,7 @@ defineExpose({
     <div v-if="!loading && hasData">
       <SkillsDataTable
         tableStoredStateId="quizDefinitionsTable"
+        aria-label="Quizzes and Surveys"
         :value="quizzes"
         data-cy="quizDefinitionsTable"
         v-model:filters="filters"

@@ -448,6 +448,7 @@ const isLoading = computed(() => {
       :exportFilename="`skilltree-${subjectId}-skills`"
       :row-class="disableRow"
       :expander="true"
+      aria-label="Skills"
       data-cy="skillsTable">
 
       <template #header>

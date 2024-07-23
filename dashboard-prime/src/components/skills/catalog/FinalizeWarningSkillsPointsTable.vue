@@ -38,6 +38,7 @@ const numberFormat = useNumberFormat()
   <SkillsDataTable
     tableStoredStateId="quizAccess"
     :value="skillsWithOutOfBoundsPoints"
+    aria-label="Skills"
     sortField="skillName"
     :sortOrder="1"
     data-cy="skillsWithOutOfBoundsPoints">

@@ -237,6 +237,7 @@ const sortTable = (sortContext) => {
                        :sort-field="sortBy"
                        :sort-order="sortOrder"
                        tableStoredStateId="skillApprovalConfTable"
+                       aria-label="Confogire Approval Workload"
                        data-cy="skillApprovalConfTable">
         <Column field="userId" sortable :class="{'flex': responsive.md.value }">
           <template #header>

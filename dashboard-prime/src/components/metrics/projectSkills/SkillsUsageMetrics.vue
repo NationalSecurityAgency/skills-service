@@ -139,6 +139,7 @@ const loadData = () => {
 
       <SkillsDataTable :value="items"
                        data-cy="skillsNavigator-table"
+                       aria-label="Skill Usage"
                        tableStoredStateId="skillsNavigator-table"
                        paginator
                        show-grid-lines

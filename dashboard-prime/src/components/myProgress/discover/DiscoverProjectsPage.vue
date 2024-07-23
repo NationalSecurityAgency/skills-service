@@ -173,6 +173,7 @@ const contactProject = (name, id) => {
             v-model:first="firstRow"
             :globalFilterFields="['name']"
             data-cy="discoverProjectsTable"
+            aria-label="Projects"
             tableStoredStateId="projectCatalogTable">
 
             <template #empty>

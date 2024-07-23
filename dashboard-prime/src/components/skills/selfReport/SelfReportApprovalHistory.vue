@@ -162,6 +162,7 @@ defineExpose( {
       <SkillsDataTable :value="items"
                        v-model:expandedRows="expandedRows"
                        tableStoredStateId="selfReportApprovalHistoryTable"
+                       aria-label="Approval History"
                        data-cy="selfReportApprovalHistoryTable" paginator lazy
                        :rows="pageSize"
                        :rowsPerPageOptions="possiblePageSizes"

@@ -142,6 +142,7 @@ const updateSelectedList = () => {
                         :value="data" paginator
                         tableStoredStateId="skillApprovalConfSpecificUsersTable"
                         data-cy="skillApprovalConfSpecificUsersTable"
+                         aria-label="Approval Configuration Users"
                         show-gridlines
                         striped-rows
                         :rows="pageSize"

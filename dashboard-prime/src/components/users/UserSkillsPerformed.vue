@@ -242,6 +242,7 @@ const highlight = (value) => {
             lazy
             paginator
             data-cy="performedSkillsTable"
+            aria-label="Performed Skills"
             v-model:filters="filters"
             :globalFilterFields="['skillId']"
             @filter="onFilter"

@@ -119,6 +119,7 @@ const removeTagConf = (removedIem) => {
                      v-model:sort-order="sortOrder"
                      :value="data"
                      paginator
+                     aria-label="Approval Configuration User Tags"
                      tableStoredStateId="skillApprovalConfSpecificUsersTable">
       <Column :header="tagLabel" field="userTagValue" sortable>
         <template #body="slotProps">
