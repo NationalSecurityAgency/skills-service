@@ -638,7 +638,7 @@ class SkillCatalogService {
         )
 
         if (skillDefWithExtra.selfReportingType && skillDefWithExtra.selfReportingType == SkillDef.SelfReportingType.Quiz) {
-            QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(skillDefWithExtra.id)
+            QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(skillDefWithExtra.copiedFrom)
             skillRequest.quizId = quizNameAndId.quizId
         }
 

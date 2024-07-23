@@ -75,7 +75,7 @@ const onSkillSaved = (skill) => {
     :validation-schema="schema"
     :initial-values="initialSkillData"
     :enable-return-focus="true"
-    data-cy="EditSkillGroupModal"
+    data-cy="EditImportedSkillModal"
     @saved="onSkillSaved">
 
     <Message :closable="false" icon="fas fa-book">
