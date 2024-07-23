@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.*
 import skills.controller.result.model.TableResult
 import skills.intTests.utils.*
+import skills.storage.model.SkillDef
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 
@@ -1323,5 +1324,125 @@ class AdminEditSpecs extends DefaultIntSpec {
         filteredByString.data[0].userId == userId
         filteredByString.data[0].firstName == userFirstName
         filteredByString.data[0].lastName == userLastName
+    }
+
+    def "editing skill points on an imported skill without finalization is successful"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skill1 = createSkill(1, 1, 1, 0, 5, 0, 100)
+
+        skillsService.createProject(project1)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSkill(p1skill1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, p1skill1.skillId)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, p1skill1.skillId)
+
+        when:
+        def updated = skillsService.updateImportedSkill(project2.projectId, p1skill1.skillId, 500)
+        def updatedSkill = skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: p1skill1.skillId])
+
+        then:
+        updated != null
+        updated.body.success == true
+        updatedSkill.pointIncrement == 500
+    }
+
+    def "editing skill points on an imported skill with finalization is successful"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skill1 = createSkill(1, 1, 1, 0, 5, 0, 100)
+
+        skillsService.createProject(project1)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSkill(p1skill1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, p1skill1.skillId)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, p1skill1.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId, true)
+
+        when:
+        def updated = skillsService.updateImportedSkill(project2.projectId, p1skill1.skillId, 500)
+        def updatedSkill = skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: p1skill1.skillId])
+
+        then:
+        updated != null
+        updated.body.success == true
+        updatedSkill.pointIncrement == 500
+    }
+
+    def "editing skill points on an imported quiz skill without finalization is successful"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skill1 = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+        p1skill1.selfReportingType = SkillDef.SelfReportingType.Quiz
+        p1skill1.quizId = quiz.body.quizId
+
+        skillsService.createProject(project1)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSkill(p1skill1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, p1skill1.skillId)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, p1skill1.skillId)
+
+        when:
+        def updated = skillsService.updateImportedSkill(project2.projectId, p1skill1.skillId, 500)
+        def updatedSkill = skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: p1skill1.skillId])
+
+        then:
+        updated != null
+        updated.body.success == true
+        updatedSkill.pointIncrement == 500
+    }
+
+    def "editing skill points on an imported quiz skill with finalization is successful"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skill1 = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+        p1skill1.selfReportingType = SkillDef.SelfReportingType.Quiz
+        p1skill1.quizId = quiz.body.quizId
+
+        skillsService.createProject(project1)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSkill(p1skill1)
+
+        skillsService.exportSkillToCatalog(project1.projectId, p1skill1.skillId)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, p1skill1.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId, true)
+
+        when:
+        def updated = skillsService.updateImportedSkill(project2.projectId, p1skill1.skillId, 500)
+        def updatedSkill = skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: p1skill1.skillId])
+
+        then:
+        updated != null
+        updated.body.success == true
+        updatedSkill.pointIncrement == 500
     }
 }
