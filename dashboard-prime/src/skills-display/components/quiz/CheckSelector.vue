@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { computed } from 'vue';
+
 const model = defineModel()
 const props = defineProps({
   readOnly: {
@@ -25,6 +27,15 @@ const props = defineProps({
     default: '2.1rem',
   },
 })
+const checkBinding = computed(() => {
+  if (!props.readOnly) {
+    return {
+      tabindex: '0',
+      "aria-label": 'Select as the correct answer'
+    }
+  }
+  return { tabindex: '-1' }
+})
 const flipSelected = () => {
   if (!props.readOnly) {
     model.value = !model.value;
@@ -33,8 +44,7 @@ const flipSelected = () => {
 </script>
 
 <template>
-  <span v-on:keydown.space="flipSelected" @click="flipSelected" tabindex="0"
-        aria-label="Select as the correct answer" :class="{ 'cursorPointer': !readOnly}">
+  <span v-on:keydown.space="flipSelected" @click="flipSelected" v-bind="checkBinding" :class="{ 'cursorPointer': !readOnly}">
     <i v-if="!model" class="far fa-square" :style="{ 'font-size': fontSize }" aria-hidden="true"></i>
     <i v-if="model" class="far fa-check-square text-success" :style="{ 'font-size': fontSize }" aria-hidden="true"></i>
   </span>

@@ -23,6 +23,7 @@ import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkil
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import CardWithVericalSections from '@/components/utils/cards/CardWithVericalSections.vue'
 import LevelsProgress from '@/skills-display/components/utilities/LevelsProgress.vue'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 
 const props = defineProps({
   subject: {
@@ -40,6 +41,7 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 const numFormat = useNumberFormat()
 const ribbonColor = ['#4472ba', '#c74a41', '#44843E', '#BE5A09', '#A15E9A', '#23806A'][props.tileIndex % 6]
 const themeState = useSkillsDisplayThemeState()
+const themeHelper = useThemesHelper()
 
 const progress = computed(() => {
   let levelBeforeToday = 0
@@ -66,6 +68,10 @@ const progress = computed(() => {
     levelBeforeToday,
     allLevelsComplete: props.subject.totalPoints > 0 && props.subject.levelTotalPoints < 0
   }
+})
+
+const activePointsColor = computed(() => {
+  return themeHelper.isDarkTheme ? 'text-orange-500' : 'text-orange-700'
 })
 </script>
 
@@ -95,7 +101,7 @@ const progress = computed(() => {
           </div>
           <div class="">
             <label class="skill-label text-right" data-cy="pointsProgress">
-              <span class="text-orange-700 font-medium sd-theme-primary-color">{{ numFormat.pretty(subject.points) }}</span> /
+              <span :class="activePointsColor" class="font-medium sd-theme-primary-color">{{ numFormat.pretty(subject.points) }}</span> /
               {{ numFormat.pretty(subject.totalPoints) }}
             </label>
           </div>
@@ -115,7 +121,7 @@ const progress = computed(() => {
                 }}</label>
             </div>
             <div v-if="!progress.allLevelsComplete" data-cy="levelProgress">
-                <span class="text-orange-700 font-medium sd-theme-primary-color">{{ numFormat.pretty(subject.levelPoints) }}</span> /
+                <span :class="activePointsColor" class="font-medium sd-theme-primary-color">{{ numFormat.pretty(subject.levelPoints) }}</span> /
                 {{ numFormat.pretty(subject.levelTotalPoints) }}
             </div>
           </div>
