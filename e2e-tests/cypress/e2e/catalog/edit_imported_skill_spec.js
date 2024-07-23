@@ -381,6 +381,47 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="addEventDisabledMsg"]').contains('Unable to add skill for user. Cannot add events to skills imported from the catalog.');
     })
 
+    its('can edit point increment of an imported skill associated with a quiz', () => {
+
+        cy.createQuizDef(1, { name: 'Test Quiz' });
+        cy.createQuizQuestionDef(1, 1);
+
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.exportSkillToCatalog(1, 1, 1);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+
+        cy.importSkillFromCatalog(2, 1, 1, 1);
+        cy.wait(1000);
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="editSkillButton_skill1"]')
+            .click();
+        cy.contains('You can change the Point Increment');
+        cy.get('[data-cy="pointIncrement"] input')
+            .should('have.value', '150');
+        cy.get('[data-cy="pointIncrement"]')
+            .type('1');
+        cy.get('[data-cy="saveDialogBtn"]')
+            .click();
+
+        cy.get('[data-cy="editSkillButton_skill1"]')
+            .click();
+        cy.contains('You can change the Point Increment');
+        cy.get('[data-cy="pointIncrement"] input')
+            .should('have.value', '1,501');
+
+        // refresh re-validate
+        cy.visit('/administrator/projects/proj2/subjects/subj1');
+
+        cy.get('[data-cy="editSkillButton_skill1"]')
+            .click();
+        cy.contains('You can change the Point Increment');
+        cy.get('[data-cy="pointIncrement"] input')
+            .should('have.value', '1,501');
+    });
 });
 
 
