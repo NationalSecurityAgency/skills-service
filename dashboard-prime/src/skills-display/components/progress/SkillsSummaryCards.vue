@@ -55,7 +55,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-3 sd-theme-summary-cards" data-cy="skillsSummaryCards">
+  <div class="flex flex-wrap gap-3 sd-theme-summary-cards flex-column md:flex-row" data-cy="skillsSummaryCards">
     <div class="flex-1">
       <media-info-card
         :title="`${numFormat.pretty(skill.points)} Total`"

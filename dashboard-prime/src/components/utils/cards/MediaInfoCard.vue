@@ -41,7 +41,7 @@ const styleObject = {
         </div>
         <div>
           <div class="text-2xl mb-2 uppercase" data-cy="mediaInfoCardTitle">{{ title }}</div>
-          <div class="text-sm" data-cy="mediaInfoCardSubTitle">
+          <div class="text-sm w-min-10rem" data-cy="mediaInfoCardSubTitle">
             <slot>
               {{ subTitle }}
             </slot>
