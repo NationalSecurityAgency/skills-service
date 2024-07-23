@@ -727,7 +727,7 @@ describe('Accessibility Tests', () => {
         cy.customA11y();
     });
 
-    it.only('splash home page', () => {
+    it('splash home page', () => {
         cy.visit('/progress-and-rankings');
         cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
           .contains('Progress And Rankings')
