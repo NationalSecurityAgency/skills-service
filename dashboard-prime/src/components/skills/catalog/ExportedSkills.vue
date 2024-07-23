@@ -116,6 +116,7 @@ const doRemoveSkill = () => {
           />
           <SkillsDataTable
             tableStoredStateId="exportedSkillsTable"
+            aria-label="Exported Skills"
             v-if="initialLoadHadData"
             :value="data"
             :loading="reloadData"

@@ -148,6 +148,7 @@ const calculateClientDisplayRoute = (props) => {
           lazy
           paginator
           data-cy="expirationHistoryTable"
+          aria-label="Skill Expiration History"
           v-model:filters="tableFilters"
           :globalFilterFields="['userIdForDisplay']"
           filterDisplay="row"

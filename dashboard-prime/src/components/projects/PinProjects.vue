@@ -153,6 +153,7 @@ watch(searchValue, (newValue) => {
           :value="result.values"
           :rowsPerPageOptions="[5, 10, 15, 20]"
           data-cy="pinProjectsSearchResults"
+          aria-label="Projects"
           striped-rows
           paginator
           :nullSortOrder="-1"

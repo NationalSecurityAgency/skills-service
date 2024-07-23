@@ -197,6 +197,7 @@ const filterSkills = (searchQuery) => {
           <div v-if="badgeSkills && badgeSkills.length > 0">
             <SkillsDataTable
               tableStoredStateId="badgeSkillsTable"
+              aria-label="Badge Skills"
               :value="badgeSkills"
               :paginator="badgeSkills.length > 5"
               :rows="rows"

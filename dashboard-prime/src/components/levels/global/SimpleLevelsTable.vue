@@ -29,6 +29,7 @@ const onEditLevel = (level) => {
 <template>
   <div id="simple-levels-table" v-if="levels">
     <SkillsDataTable :value="levels" tableStoredStateId="simpleLevelsTable" data-cy="simpleLevelsTable"
+                     aria-label="Levels"
                      :rows="5"
                      :totalRecords="levels.length"
                      :rowsPerPageOptions="[5, 10, 15, 20]"

@@ -289,7 +289,7 @@ const isFlex = computed(() => responsive.sm.value)
     <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
         <SkillsDataTable tableStoredStateId="levels" v-if="!loading" :options="table.options" :loading="loading" :value="levels"
-                   data-cy="levelsTable" striped-rows>
+                   data-cy="levelsTable" striped-rows aria-label="Levels">
           <Column field="level" header="Level" :class="{'flex': isFlex }">
             <template #body="slotProps">
               <div>

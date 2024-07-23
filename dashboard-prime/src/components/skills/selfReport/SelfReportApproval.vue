@@ -184,6 +184,7 @@ const toggleRow = (row) => {
                        v-model:expandedRows="expandedRows"
                        tableStoredStateId="skillsReportApprovalTable"
                        data-cy="skillsReportApprovalTable" paginator lazy
+                       aria-label="Approval"
                        :rows="pageSize"
                        :rowsPerPageOptions="possiblePageSizes"
                        :totalRecords="totalRows"

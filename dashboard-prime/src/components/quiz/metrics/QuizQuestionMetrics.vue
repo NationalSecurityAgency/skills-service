@@ -176,6 +176,7 @@ const numberOfStars = computed(() => {
     </div>
     <SkillsDataTable
       tableStoredStateId="quizQuestionMetrics"
+      aria-label="Question Metrics"
       v-if="!isTextInput && answers"
       v-model:expandedRows="expandedRows"
       :expander="true"

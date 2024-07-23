@@ -174,6 +174,7 @@ defineExpose({
       <SkillsDataTable
         v-if="hasData"
         tableStoredStateId="pendingInviteTable"
+        aria-label="Invitation Pending"
         :value="data"
         :loading="busy"
         data-cy="projectInviteStatusTable"

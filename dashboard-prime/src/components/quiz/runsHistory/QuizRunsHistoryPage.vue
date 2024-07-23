@@ -192,6 +192,7 @@ const deleteRun = () => {
       <template #content>
         <SkillsDataTable
           tableStoredStateId="quizRunHistory"
+          aria-label="Quiz Run History"
           :value="runsHistory"
           :loading="options.busy"
           show-gridlines

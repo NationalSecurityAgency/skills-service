@@ -70,6 +70,7 @@ const getTypeIconColor = (type) => {
       :paginator="prerequisites.length > 8"
       :rows="5"
       :value="prerequisites"
+      aria-label="Prerequisites"
       data-cy="prereqTable">
       <Column field="skillName" header="Prerequisite Name" :sortable="true" :class="{'flex': responsive.md.value }">
         <template #header>
