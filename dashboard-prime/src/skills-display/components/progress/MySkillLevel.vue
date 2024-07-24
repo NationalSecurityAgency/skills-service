@@ -32,7 +32,7 @@ const totalLevels = computed(() => props.userProgress.totalLevels)
   <div class="progress-circle-wrapper" data-cy="overallLevel">
     <label class="text-2xl font-medium" data-cy="overallLevelTitle">My {{ attributes.levelDisplayName }}</label>
     <div class="mt-4">
-     <TrophySvgIcon :level="level" />
+     <TrophySvgIcon :level="level" data-cy="trophyIcon" />
     </div>
     <div data-cy="overallLevelDesc" class="mt-3">
       {{ attributes.levelDisplayName }} <Tag severity="info">{{ level }}</Tag> out of <Tag>{{ totalLevels }}</Tag>
