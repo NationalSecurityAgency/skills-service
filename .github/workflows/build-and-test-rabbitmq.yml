@@ -110,5 +110,4 @@ jobs:
           ./e2e-tests/logs
           ./e2e-tests/cypress/videos
           ./e2e-tests/cypress/screenshots
-          ./e2e-tests/cypress/snapshots/**/**/__diff_output__/*.png
-          ./e2e-tests/cypress/snapshots/**/__diff_output__/*.png
+          ./e2e-tests/cypress/visualRegression/diff
