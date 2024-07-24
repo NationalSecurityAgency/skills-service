@@ -21,8 +21,9 @@ import deepEqual from 'deep-equal';
 import FormReloadWarning from '@/components/utils/inputForm/FormReloadWarning.vue'
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
-
+const dialogMessages = useDialogMessages()
 const isLoadingAsyncData = ref(true)
 const model = defineModel()
 const props = defineProps({
@@ -97,6 +98,23 @@ const skillsDialog = ref(null)
 const cancel = () => {
   emit('cancelled');
   close()
+}
+const confirmCancel = () => {
+  if(meta.value.dirty) {
+    dialogMessages.msgConfirm({
+      message: 'You have unsaved changes.  Discard?',
+      header: 'Discard Unsaved Changes',
+      acceptLabel: 'Discard',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        emit('cancelled');
+        close()
+      }
+    });
+  } else {
+    emit('cancelled');
+    close()
+  }
 }
 const close = () => {
   skillsDialog.value.handleClose()
@@ -191,6 +209,7 @@ if (props.asyncLoadDataFunction) {
     :header="header"
     :loading="isDialogLoading"
     :submitting="isSubmitting"
+    @confirm-cancel="confirmCancel"
     @on-cancel="cancel"
     @on-ok="onSubmit"
     :ok-button-label="saveButtonLabel"
