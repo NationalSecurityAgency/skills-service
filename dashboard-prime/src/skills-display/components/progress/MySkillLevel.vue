@@ -17,6 +17,7 @@ limitations under the License.
 import { computed } from 'vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import LevelsProgress from '@/skills-display/components/utilities/LevelsProgress.vue'
+import TrophySvgIcon from '@/skills-display/components/progress/TrophySvgIcon.vue'
 
 const props = defineProps({
   userProgress: Object,
@@ -31,11 +32,7 @@ const totalLevels = computed(() => props.userProgress.totalLevels)
   <div class="progress-circle-wrapper" data-cy="overallLevel">
     <label class="text-2xl font-medium" data-cy="overallLevelTitle">My {{ attributes.levelDisplayName }}</label>
     <div class="mt-4">
-      <div class="fa-stack skills-icon trophy-stack">
-        <i class="fa fa-trophy fa-stack-2x" />
-        <i class="fa fa-star fa-stack-1x trophy-star" />
-        <strong class="fa-stack-1x trophy-text" data-cy="levelOnTrophy">{{ level }}</strong>
-      </div>
+     <TrophySvgIcon :level="level" />
     </div>
     <div data-cy="overallLevelDesc" class="mt-3">
       {{ attributes.levelDisplayName }} <Tag severity="info">{{ level }}</Tag> out of <Tag>{{ totalLevels }}</Tag>
@@ -54,33 +51,4 @@ const totalLevels = computed(() => props.userProgress.totalLevels)
 </style>
 <style scoped>
 
-/* Font awesome gives a 2em width which doesnt fit the full trophy at font-size:60px. A bug? */
-.trophy-stack.fa-stack {
-  width: 3em;
-  font-size: 60px;
-}
-
-.trophy-text {
-  margin-top: -0.65em;
-  font-size: 0.5em;
-  color: #333;
-}
-
-.skills-icon {
-  display: inline-block;
-  color: #b1b1b1;
-  margin: 5px 0;
-}
-
-.trophy-star {
-  color: #ffffff;
-  margin-top: -0.35em;
-  font-size: 0.9em;
-}
-
-.trophy-text {
-  margin-top: -0.65em;
-  font-size: 0.5em;
-  color: #333;
-}
 </style>

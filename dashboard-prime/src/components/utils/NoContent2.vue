@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 
-const props = defineProps({
+defineProps({
   title: String,
   message: {
     type: String,
@@ -24,14 +24,6 @@ const props = defineProps({
   icon: {
     type: String,
     default: 'fas fa-dragon',
-  },
-  iconSize: {
-    type: String,
-    default: 'fa-3x',
-  },
-  iconColor: {
-    type: String,
-    default: 'text-color-secondary',
   },
   showRefreshAction: {
     type: Boolean,
@@ -45,20 +37,17 @@ function refresh() {
 </script>
 
 <template>
-  <div class="text-color-secondary text-center" data-cy="noContent" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="grid justify-content-center text-center">
-      <div class="col">
-        <span class="fa-stack text-center" :class="iconSize" style="vertical-align: top;" aria-hidden="true">
-          <i class="fas fa-circle fa-stack-2x" :class="iconColor"></i>
-          <i class="fa-stack-1x fa-inverse" :class="icon"></i>
-        </span>
-      </div>
-      <div class="w-full"></div>
-      <div class="col pt-2">
-        <div class="text-3xl no-content text-center">{{ title }}</div>
+  <div class="text-color-secondary text-center" data-cy="noContent" role="alert" aria-live="assertive"
+       aria-atomic="true">
+    <div class="flex justify-content-center text-center">
+      <div class="border-circle w-8rem h-8rem m-2 surface-500 font-bold flex align-items-center justify-content-center">
+        <i class="text-0 text-7xl" :class="icon"></i>
       </div>
     </div>
-    <div class="grid justify-content-center">
+    <div v-if="title" class="mt-1">
+      <div class="text-3xl no-content text-center">{{ title }}</div>
+    </div>
+    <div class="grid justify-content-center mt-1">
       <div class="col md:col-8 lg:col-7 xl:col-5 no-content sd-theme-primary-color">
         <slot>
           {{ message }}
@@ -78,5 +67,17 @@ function refresh() {
 </template>
 
 <style scoped>
+.circle-icon {
+  font-size: 8rem;
+}
+
+.in-circle-icon {
+  font-size: 3.5rem;
+  position: absolute;
+  top: 2.2rem;
+  right: 0;
+  left: 0;
+  margin: auto;
+}
 
 </style>

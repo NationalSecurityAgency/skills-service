@@ -507,7 +507,7 @@ const isLoading = computed(() => {
                 @click="toggleActionsMenu"
                 aria-label="Skill's actions button"
                 aria-haspopup="true"
-                aria-controls="user_settings_menu"
+                aria-controls="skillsActionsMenu"
                 :disabled="selectedSkills.length === 0"
                 :track-for-focus="true"
                 data-cy="skillActionsBtn">

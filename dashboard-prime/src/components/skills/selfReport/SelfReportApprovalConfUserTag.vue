@@ -153,7 +153,6 @@ const removeTagConf = (removedIem) => {
 
     <no-content2 v-if="!hadData" title="Not Configured Yet..."
                  class="py-5"
-                 icon-size="fa-2x"
                  data-cy="noTagKeyConf"
                  icon="fas fa-user-tag">
       You can split the approval workload by routing approval requests for users with the selected <span class="text-info">{{tagLabel}}</span> to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.

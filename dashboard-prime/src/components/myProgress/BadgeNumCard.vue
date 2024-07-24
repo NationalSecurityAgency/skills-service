@@ -57,11 +57,10 @@ const myProgress = computed(() => myProgressState.myProgress)
     </template>
     <template #right-content>
       <div class="flex justify-content-center sm:justify-content-end">
-        <div style="font-size: 3.5rem;" class="mt-2">
-        <span class="fa-stack">
-              <i class="fas fa-circle fa-stack-2x text-bluegray-600"></i>
-              <i class="fas fa-trophy fa-stack-1x text-green-500"></i>
-            </span>
+        <div class="flex justify-content-center">
+          <div class="border-circle w-7rem h-7rem m-2 bg-bluegray-600 font-bold flex align-items-center justify-content-center">
+            <i class="text-green-500 text-7xl fas fa-trophy"></i>
+          </div>
         </div>
       </div>
     </template>
