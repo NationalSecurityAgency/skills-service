@@ -240,6 +240,16 @@ const projectVisibilityOptions = computed(() => {
   return opts;
 });
 
+const projectVisibilityHelpMsg = computed(() => {
+  if (isProgressAndRankingEnabled.value) {
+    return '<b>Not in the Project Catalog</b> (default) projects can be accessed directly but are not discoverable via Project Catalog page. <br/><br/>'
+        + '<b>Add to the Project Catalog</b> projects can be accessed directly and can be found in the Project Catalog. <br/><br/>'
+        + '<b>Private Invite Only</b> projects may ONLY be accessed by users who have been issued a specific project invite. ';
+  }
+  return '<b>Not in the Project Catalog</b> (default) projects can be accessed directly but are not discoverable via Project Catalog page. <br/><br/>'
+      + '<b>Private Invite Only</b> projects may ONLY be accessed by users who have been issued a specific project invite.';
+});
+
 // functions
 const updateApprovalType = ((disabled) => {
   selfReport.value.options = selfReport.value.options.map((item) => {
@@ -434,94 +444,104 @@ const saveSettings = ((dirtyChanges) => {
     <Card>
       <template #content>
         <loading-container :is-loading="isLoading">
-          <div class="field flex flex-column lg:flex-row lg:gap-3" data-cy="projectVisibility">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="projectVisibilityLabel" for="projectVisibilityDropdown">
-              Project Discoverability:
-            </label>
-            <Dropdown v-model="settings.projectVisibility.value"
-                      inputId="projectVisibilityDropdown"
-                      :options="projectVisibilityOptions"
-                      @change="projectVisibilityChanged"
-                      aria-labelledby="projectVisibilityLabel"
-                      optionLabel="text" optionValue="value"
-                      class="w-full"
-                      data-cy="projectVisibilitySelector" required />
+          <div class="flex flex-column gap-2 md:flex-row field" data-cy="projectVisibility">
+            <div class="md:col-5 xl:col-3 text-secondary" id="projectVisibilityLabel">
+              <label for="projectVisibilitySelector">
+                Project Discoverability:
+              </label>
+            </div>
+            <div class="md:col-7 xl:col-9">
+              <Dropdown v-model="settings.projectVisibility.value"
+                        :options="projectVisibilityOptions"
+                        @change="projectVisibilityChanged"
+                        aria-labelledby="projectVisibilityLabel"
+                        optionLabel="text" optionValue="value"
+                        inputId="projectVisibilitySelector"
+                        class="w-full"
+                        data-cy="projectVisibilitySelector" required/>
+            </div>
           </div>
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="hideProjectDescriptionLabel" for="hideProjectDescription">
-              Project Description:
-            </label>
-            <Dropdown v-model="settings.hideProjectDescription.value"
-                      inputId="hideProjectDescription"
-                      :options="[{value: true, label: 'Show Project Description everywhere'}, {value: false, label: 'Only show Description in Project Catalog'}]"
-                      optionLabel="label" optionValue="value"
-                      @change="hideProjectDescriptionChanged"
-                      aria-labelledby="hideProjectDescriptionLabel"
-                      class="w-full"
-                      data-cy="showProjectDescriptionSelector" />
+          <div class="flex flex-column gap-2 md:flex-row field">
+            <div class="md:col-5 xl:col-3 text-secondary" id="hideProjectDescriptionLabel">
+              <label for="showProjectDescriptionSelector">
+                Project Description:
+              </label>
+            </div>
+            <div class="md:col-7 xl:col-9">
+              <Dropdown v-model="settings.hideProjectDescription.value"
+                        :options="[{value: true, label: 'Show Project Description everywhere'}, {value: false, label: 'Only show Description in Project Catalog'}]"
+                        optionLabel="label" optionValue="value"
+                        @change="hideProjectDescriptionChanged"
+                        aria-labelledby="hideProjectDescriptionLabel"
+                        class="w-full"
+                        inputId="showProjectDescriptionSelector"
+                        data-cy="showProjectDescriptionSelector" />
+            </div>
           </div>
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="pointsForLevelsLabel" for="levelPointsEnabled">
-              Use Points For Levels:
-            </label>
-            <div class="flex align-items-center">
-              <InputSwitch v-model="settings.levelPointsEnabled.value"
-                           inputId="levelPointsEnabled"
-                           v-on:update:modelValue="levelPointsEnabledChanged"
-                           name="check-button"
-                           aria-labelledby="pointsForLevelsLabel"
-                           data-cy="usePointsForLevelsSwitch" />
-              <span class="ml-1">{{ usePointsForLevelsLabel }}</span>
+          <div class="flex flex-column gap-2 md:flex-row field">
+            <div class="md:col-5 xl:col-3 text-secondary" id="pointsForLevelsLabel">
+              <label for="usePointsForLevelsSwitch">
+                Use Points For Levels:
+              </label>
+            </div>
+            <div class="md:col-7 xl:col-9">
+              <div class="flex align-items-center">
+                <InputSwitch v-model="settings.levelPointsEnabled.value"
+                             v-on:update:modelValue="levelPointsEnabledChanged"
+                             name="check-button"
+                             inputId="usePointsForLevelsSwitch"
+                             aria-labelledby="pointsForLevelsLabel"
+                             data-cy="usePointsForLevelsSwitch" />
+                <span class="ml-1">{{ usePointsForLevelsLabel }}</span>
+              </div>
             </div>
           </div>
 
           <SkillsSettingTextInput name="helpUrlHost"
-                                  label="Root Help Url:"
+                                  label="Root Help Url"
                                   @input="updateSettingsField"
-                                  placeholder="http://www.STarticle.com" />
+                                  placeholder="http://www.HelpArticlesHost.com" />
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="selfReportLabel" for="selfReportingControl">
-              Self Report Default:
-            </label>
-            <div class="">
+          <div class="flex flex-column gap-2 md:flex-row field">
+            <div class="md:col-5 xl:col-3 text-secondary" id="selfReportLabel">
+              <label for="selfReportSwitch">
+                Self Report Default:
+              </label>
+            </div>
+            <div class="md:col-7 xl:col-9">
               <div class="flex align-items-center">
               <InputSwitch v-model="selfReport.enabled"
                                name="check-button"
-                               inputId="selfReportingControl"
                                v-on:update:modelValue="selfReportingControl"
                                aria-labelledby="selfReportLabel"
+                               inputId="selfReportSwitch"
                                data-cy="selfReportSwitch" />
                 <span class="ml-1">{{ selfReportingEnabledLabel }}</span>
               </div>
               <Card class="mt-2" Card :pt="{  content: { class: 'py-0' } }" data-cy="selfReportTypeSelector">
                 <template #content>
-                  <div class="flex flex-column">
-                    <div>
-                      <RadioButton class="mr-2"
-                                   inputId="approval"
-                                   value="Approval"
-                                   v-model="selfReport.selected"
-                                   @change="selfReportingTypeChanged('Approval')"
-                                   :disabled="!selfReport.enabled" />
-                      <label for="approval">Approval Queue (reviewed by project admins first)</label>
-                    </div>
-                    <div class="ml-4">
-                      <Checkbox data-cy="justificationRequiredCheckbox"
-                                inputId="justificationRequiredCheckbox"
-                                id="justification-required-checkbox" :binary="true"
-                                class="d-inline mr-2"
-                                v-model="settings.selfReportJustificationRequired.value"
-                                :disabled="!approvalSelected || !selfReport.enabled"
-                                @update:modelValue="justificationRequiredChanged" />
-                      <label for="justificationRequiredCheckbox" class="m-0 font-italic"
-                             :class="{ 'text-secondary': !approvalSelected || !selfReport.enabled}">
-                        Justification Required
-                      </label>
-                    </div>
-                  </div>
+                      <div class="flex">
+                        <RadioButton class="mr-2"
+                                     inputId="approval"
+                                     value="Approval"
+                                     v-model="selfReport.selected"
+                                     @change="selfReportingTypeChanged('Approval')"
+                                     :disabled="!selfReport.enabled" />
+                        <label for="approval">Approval Queue (reviewed by project admins first)</label>
+                        <span class="text-muted mr-3 ml-2">|</span>
+                          <Checkbox data-cy="justificationRequiredCheckbox"
+                                    inputId="justificationRequiredCheckbox"
+                                    id="justification-required-checkbox" :binary="true"
+                                    class="d-inline mr-2"
+                                    v-model="settings.selfReportJustificationRequired.value"
+                                    :disabled="!approvalSelected || !selfReport.enabled"
+                                    @update:modelValue="justificationRequiredChanged" />
+                        <label for="justificationRequiredCheckbox" class="m-0 font-italic" :class="{ 'text-secondary': !approvalSelected || !selfReport.enabled}">
+                          Justification Required
+                        </label>
+                      </div>
                       <div class="flex mt-2">
                         <RadioButton class="mr-2"
                                      inputId="honorSystem"
@@ -536,36 +556,42 @@ const saveSettings = ((dirtyChanges) => {
             </div>
           </div>
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="rankAndLeaderboardOptOutLabel" for="rankAndLeaderboardOptOut">
-              Rank Opt-Out for ALL Admins:
-            </label>
-            <div class="flex align-items-center">
+          <div class="flex flex-column gap-2 md:flex-row field">
+            <div class="md:col-5 xl:col-3 text-secondary" id="rankAndLeaderboardOptOutLabel">
+              <label for="rankAndLeaderboardOptOutSwitch">
+                Rank Opt-Out for ALL Admins:
+              </label>
+            </div>
+            <div class="md:col-7 xl:col-9">
+              <div class="flex align-items-center">
               <InputSwitch v-model="settings.rankAndLeaderboardOptOut.value"
-                           inputId="rankAndLeaderboardOptOut"
                            name="check-button"
                            v-on:update:modelValue="rankAndLeaderboardOptOutChanged"
                            aria-labelledby="rankAndLeaderboardOptOutLabel"
-                           data-cy="rankAndLeaderboardOptOutSwitch" />
-              <span class="ml-1">{{ rankOptOutLabel }}</span>
+                           inputId="rankAndLeaderboardOptOutSwitch"
+                           data-cy="rankAndLeaderboardOptOutSwitch"/>
+                <span class="ml-1">{{ rankOptOutLabel }}</span>
+              </div>
             </div>
           </div>
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="customLabelsLabel" for="showCustomLabelsConfigToggle">
-              Custom Labels:
-            </label>
-            <div class="">
+          <div class="flex flex-column gap-2 md:flex-row field">
+            <div class="md:col-5 xl:col-3 text-secondary" id="customLabelsLabel">
+              <label for="customLabelsSwitch">
+                Custom Labels:
+              </label>
+            </div>
+            <div class="md:col-7 xl:col-9">
               <div class="flex align-items-center">
                 <InputSwitch v-model="showCustomLabelsConfigToggle"
-                             inputId="showCustomLabelsConfigToggle"
                                name="check-button"
                                aria-labelledby="customLabelsLabel"
+                               inputId="customLabelsSwitch"
                                data-cy="customLabelsSwitch"/>
                 <span class="ml-1">{{ showCustomLabelsConfigLabel }}</span>
               </div>
 
-                <Card class="mt-3" v-if="shouldShowCustomLabelsConfig">
+                <Card class="mt-1" v-if="shouldShowCustomLabelsConfig">
                   <template #content>
                     <SkillsSettingTextInput name="projectDisplayName"
                                             label="Project Display Text"
@@ -592,18 +618,20 @@ const saveSettings = ((dirtyChanges) => {
             </div>
           </div>
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="groupDescriptions" for="groupDescriptionsSwitch">
-              <span id="groupDescriptionsLabel">Always Show Group Descriptions:</span>
-            </label>
-            <div class="flex align-items-center">
-              <InputSwitch v-model="settings.groupDescriptions.value"
-                           inputId="groupDescriptionsSwitch"
-                           name="check-button"
-                           v-on:update:modelValue="groupDescriptionsChanged"
-                           aria-labelledby="groupDescriptionsLabel"
-                           data-cy="groupDescriptionsSwitch" />
-              <span class="ml-1">{{ groupDescriptionsLabel }}</span>
+          <div class="flex flex-column gap-2 md:flex-row field">
+            <div class="md:col-5 xl:col-3 text-secondary" id="groupDescriptions">
+              <label for="groupDescriptionsSwitch" id="groupDescriptionsLabel">Always Show Group Descriptions:</label>
+            </div>
+            <div class="md:col-7 xl:col-9">
+              <div class="flex align-items-center">
+                <InputSwitch v-model="settings.groupDescriptions.value"
+                             name="check-button"
+                             v-on:update:modelValue="groupDescriptionsChanged"
+                             aria-labelledby="groupDescriptionsLabel"
+                             inputId="groupDescriptionsSwitch"
+                             data-cy="groupDescriptionsSwitch" />
+                <span class="ml-1">{{ groupDescriptionsLabel }}</span>
+              </div>
             </div>
           </div>
 
@@ -631,8 +659,4 @@ const saveSettings = ((dirtyChanges) => {
   </div>
 </template>
 
-<style>
-.p-dropdown-label.p-inputtext {
-  text-wrap: wrap;
-}
-</style>
+<style scoped></style>
