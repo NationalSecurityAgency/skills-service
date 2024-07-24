@@ -210,7 +210,7 @@ class RankingLoader {
         List<String> admins = []
 
         boolean isOptOut() {
-            personalOptOut || allAdminOptOut
+            personalOptOut
         }
     }
 
