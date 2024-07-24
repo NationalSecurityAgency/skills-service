@@ -412,7 +412,7 @@ describe('Client Display Theme Components Tests', () => {
 
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.wait(1111)
-    cy.matchSnapshotImageForElement('[data-cy="overallLevel"] .trophy-stack')
+    cy.matchSnapshotImageForElement('[data-cy="overallLevel"] [data-cy="trophyIcon"]')
   })
 
 

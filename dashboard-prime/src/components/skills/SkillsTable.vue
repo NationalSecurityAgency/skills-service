@@ -507,7 +507,6 @@ const isLoading = computed(() => {
                 @click="toggleActionsMenu"
                 aria-label="Skill's actions button"
                 aria-haspopup="true"
-                aria-controls="user_settings_menu"
                 :disabled="selectedSkills.length === 0"
                 :track-for-focus="true"
                 data-cy="skillActionsBtn">
@@ -517,9 +516,10 @@ const isLoading = computed(() => {
                 <i class="fas fa-caret-down ml-2"></i>
               </SkillsButton>
               <Menu ref="skillsActionsMenu"
-                    id="skillsActionsMenu"
+                    id="skills-actions-menu"
                     data-cy="skillsActionsMenu"
                     :model="actionsMenu"
+                    aria-label="Menu to perform actions on selected skills"
                     :popup="true">
               </Menu>
             </div>

@@ -35,10 +35,11 @@ const timer = setInterval(() => {
 <template>
   <div class="my-5">
     <div class="text-center text-color-secondary">
-      <span class="fa-stack fa-3x " style="vertical-align: top;">
-                      <i class="fas fa-circle fa-stack-2x"></i>
-                      <i class="fas fa-exclamation-triangle fa-stack-1x fa-inverse"></i>
-                    </span>
+      <div class="flex justify-content-center">
+        <div class="border-circle w-6rem h-6rem m-2 surface-500 font-bold flex align-items-center justify-content-center">
+          <i class="text-0 text-6xl fas fa-exclamation-triangle"></i>
+        </div>
+      </div>
     </div>
     <div class="text-center text-color-secondary text-2xl mt-2">
       This page has moved

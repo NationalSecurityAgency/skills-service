@@ -183,7 +183,6 @@ const updateSelectedList = () => {
         <no-content2 v-if="!hadData" title="Not Configured Yet..."
                      class="py-5"
                      data-cy="noUserConf"
-                     icon-size="fa-2x"
                      icon="fas fa-user-plus">
           You can split the approval workload by routing approval requests for specific users to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
         </no-content2>

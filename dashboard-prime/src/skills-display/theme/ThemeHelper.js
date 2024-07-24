@@ -30,8 +30,8 @@ export default {
       styleName: 'border-bottom-color'
     }],
     trophyIconColor: {
-      selector: 'body #app .sd-theme-home .fa.fa-trophy',
-      styleName: 'color'
+      selector: 'body #app .sd-theme-home .trophy-icon',
+      styleName: 'fill'
     },
     subjectTileIconColor: {
       selector: 'body #app .sd-theme-home .sd-theme-subject-tile-icon',
