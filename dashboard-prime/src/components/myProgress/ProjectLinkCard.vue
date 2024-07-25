@@ -31,8 +31,11 @@ const activePointsColor = computed(() => {
 })
 const showSortControl = computed(() => myProgressState.myProjects.length > 1)
 
+const currentProgressPercent = props.proj.totalPoints ?
+  Math.trunc((props.proj.points / props.proj.totalPoints) * 100) : 0
+
 const overSortControl = ref(false)
-const series = [0]
+const series = [currentProgressPercent]
 const chartOptions = {
   chart: {
     height: 200,
@@ -56,7 +59,7 @@ const chartOptions = {
         value: {
           offsetY: 10,
           fontSize: '22px',
-          color: undefined,
+          color: themeHelper.isDarkTheme ? 'white' : '#303030',
           formatter(val) {
             return `${val}%`
           }
@@ -96,7 +99,7 @@ const moveUp = () => {
   })
 }
 
-const currentProgressPercent = computed(() => Math.trunc(props.proj.points / props.proj.totalPoints))
+
 </script>
 
 <template>
@@ -171,6 +174,7 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
         <ProgressBar
           :value="currentProgressPercent"
           :aria-label="`${currentProgressPercent} percent complete`"
+          :show-value="false"
           style="height: 6px" />
       </div>
 

@@ -76,7 +76,7 @@ const chartOptions = {
       </div>
     </template>
     <template #right-content>
-      <div>
+      <div class="w-min-10rem">
         <apexchart type="line" height="140" :options="chartOptions" :series="series"></apexchart>
       </div>
     </template>
