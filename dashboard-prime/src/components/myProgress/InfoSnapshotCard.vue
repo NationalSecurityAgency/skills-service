@@ -17,10 +17,12 @@ limitations under the License.
 import { computed } from 'vue'
 import MyProgressInfoCardUtil from '@/components/myProgress/MyProgressInfoCardUtil.vue'
 import { useMyProgressState } from '@/stores/UseMyProgressState.js'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 const myProgressState = useMyProgressState()
 const myProgress = computed(() => myProgressState.myProgress)
 const myProjects = computed(() => myProgressState.myProjects)
+const themeHelper = useThemesHelper()
 
 const chartOptions = {
   chart: {
@@ -44,7 +46,7 @@ const chartOptions = {
       hollow: {
         margin: 0,
         size: '75%',
-        background: '#fff',
+        background: undefined,
         image: undefined,
         imageOffsetX: 0,
         imageOffsetY: 0,
@@ -69,13 +71,12 @@ const chartOptions = {
           opacity: 0.35
         }
       },
-
       dataLabels: {
         show: true,
         name: {
           offsetY: -10,
           show: true,
-          color: '#888',
+          color:  themeHelper.isDarkTheme ? 'white' : '#888',
           fontSize: '16px'
         },
         value: {
@@ -83,7 +84,7 @@ const chartOptions = {
             return `${val} %`
           },
           offsetY: 0,
-          color: '#888',
+          color:  themeHelper.isDarkTheme ? 'white' : '#888',
           fontSize: '22px',
           show: true
         }
@@ -106,7 +107,7 @@ const chartOptions = {
   stroke: {
     lineCap: 'round'
   },
-  labels: ['Percent']
+  labels: ['STARTED']
 }
 
 const series = computed(() => {
