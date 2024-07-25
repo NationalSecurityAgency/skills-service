@@ -68,6 +68,10 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  shouldConfirmCancel: {
+    type: Boolean,
+    default: false
+  },
 })
 const emit = defineEmits(['on-ok', 'on-cancel', 'confirm-cancel'])
 const focusState = useFocusState()
@@ -120,7 +124,7 @@ defineExpose({
   <Dialog modal
           @update:visible="onUpdateVisible"
           :closable="!submitting"
-          :close-on-escape="false"
+          :close-on-escape="!shouldConfirmCancel && !submitting"
           v-model:visible="model"
           :maximizable="true"
           :header="header"

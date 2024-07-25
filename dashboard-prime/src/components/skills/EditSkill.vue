@@ -268,6 +268,7 @@ const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
   <SkillsInputFormDialog
     :id="formId"
     v-model="show"
+    :should-confirm-cancel="true"
     :is-edit="isEdit"
     :async-load-data-function="asyncLoadData"
     :save-data-function="saveSkill"
