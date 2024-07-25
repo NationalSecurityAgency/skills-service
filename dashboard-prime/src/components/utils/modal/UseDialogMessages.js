@@ -18,12 +18,11 @@ import { ref } from 'vue'
 import {useFocusState} from "@/stores/UseFocusState.js";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
-const announcer = useSkillsAnnouncer()
-
 export const useDialogMessages = () => {
   const confirm = useConfirm()
   const focusState = useFocusState()
   const isConfirmVisible = ref(false);
+  const announcer = useSkillsAnnouncer()
 
   const msgOk = ({message, header = 'Message!', okButtonTitle = 'Ok'}) => {
     confirm.require({
