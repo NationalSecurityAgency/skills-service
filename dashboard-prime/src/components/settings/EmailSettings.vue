@@ -53,7 +53,8 @@ function loadEmailSettings() {
       <SkillsCardHeader title="Email Connection Settings"></SkillsCardHeader>
     </template>
     <template #content>
-      <email-server-settings v-if="!isLoading" :emailSettings="emailSettings" />
+      <skills-spinner :is-loading="isLoading" v-if="isLoading" />
+      <email-server-settings v-else :emailSettings="emailSettings" />
     </template>
   </Card>
 
