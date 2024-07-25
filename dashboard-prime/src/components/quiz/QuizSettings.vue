@@ -297,11 +297,13 @@ const collectAndSave = (values) => {
                     data-cy="noSettingsAvailable"/>
         <div v-if="!isSurveyType && !isLoadingData">
           <div class="field grid align-items-start">
-            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary"># of Questions per Quiz Attempt:</div>
+            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+              <label for="quizNumQuestions"># of Questions per Quiz Attempt:</label>
+            </div>
             <div class="col-12 md:col-9">
               <SkillsDropDown
                   name="quizLength"
-                  id="quizNumQuestions"
+                  inputId="quizNumQuestions"
                   data-cy="quizNumQuestions"
                   optionLabel="text"
                   optionValue="value"
@@ -310,11 +312,13 @@ const collectAndSave = (values) => {
             </div>
           </div>
           <div class="field grid align-items-start">
-            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Passing Requirement:</div>
+            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+              <label for="quizPassingReq">Passing Requirement:</label>
+            </div>
             <div class="col-12 md:col-9">
               <SkillsDropDown
                   name="quizPassingReq"
-                  id="quizPassingReq"
+                  inputId="quizPassingReq"
                   data-cy="quizPassingSelector"
                   optionLabel="text"
                   optionValue="value"
@@ -324,33 +328,40 @@ const collectAndSave = (values) => {
           </div>
 
           <div class="field grid align-items-start">
-            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Maximum Number of Attempts:</div>
+            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+              <label for="quizNumberOfAttemptsUnlimited">Maximum Number of Attempts:</label>
+            </div>
             <div class="col-12 md:col-9">
               <div class="flex flex-wrap">
                 <SkillsInputSwitch
                     v-model="settings.numAttempts.unlimited"
                     name="quizNumberOfAttemptsUnlimited"
+                    inputId="quizNumberOfAttemptsUnlimited"
                     aria-label="Maximum Number of Attempts setting, unlimited number of attempts checkbox"
                     data-cy="unlimitedAttemptsSwitch"/>
                 <span class="mx-2">Unlimited</span>
-                <SkillsNumberInput
-                    v-if="!settings.numAttempts.unlimited"
-                    class="flex-1"
-                    name="quizNumberOfAttempts"
-                    aria-label="Maximum Number of Attempts"
-                    data-cy="numAttemptsInput"
-                    v-model="settings.numAttempts.value"/>
+                <div v-if="!settings.numAttempts.unlimited" class="flex-1 border-left-1 ml-2 pl-2">
+                  <SkillsNumberInput
+                      label="Number of Attempts"
+                      id="numAttemptsInput"
+                      name="quizNumberOfAttempts"
+                      aria-label="Maximum Number of Attempts"
+                      data-cy="numAttemptsInput"
+                      v-model="settings.numAttempts.value"/>
+                </div>
               </div>
             </div>
           </div>
 
           <div class="field grid align-items-start">
-            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Randomize Question Order:</div>
+            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+              <label for="randomizeQuestions">Randomize Question Order:</label>
+            </div>
             <div class="col-12 md:col-9">
               <SkillsInputSwitch
                   v-model="settings.randomizeQuestions.value"
                   name="quizRandomizeQuestions"
-                  id="randomizeQuestions"
+                  inputId="randomizeQuestions"
                   aria-label="Randomize order of the questions"
                   data-cy="randomizeQuestionSwitch"/>
               <span class="mx-2 vertical-align-top">Randomize</span>
@@ -358,12 +369,16 @@ const collectAndSave = (values) => {
           </div>
 
           <div class="field grid align-items-start">
-            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Randomize Answer Order:</div>
+            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+              <label for="randomizeAnswers">
+                Randomize Answer Order:
+              </label>
+            </div>
             <div class="col-12 md:col-9">
               <SkillsInputSwitch
                   v-model="settings.randomizeAnswers.value"
                   name="quizRandomizeAnswers"
-                  id="randomizeAnswers"
+                  inputId="randomizeAnswers"
                   aria-label="Randomize order of the answers"
                   data-cy="randomizeAnswerSwitch"/>
               <span class="mx-2 vertical-align-top">Randomize</span>
@@ -372,11 +387,13 @@ const collectAndSave = (values) => {
 
 
           <div class="field grid align-items-start">
-            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">Quiz Time Limit:</div>
+            <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+              <label for="timeLimitUnlimited">Quiz Time Limit:</label>
+            </div>
             <div class="col-12 md:col-9">
               <div class="flex flex-wrap">
                 <SkillsInputSwitch v-model="settings.quizTimeLimit.unlimited"
-                             id="timeLimitUnlimited"
+                             inputId="timeLimitUnlimited"
                              name="quizTimeLimitUnlimited"
                              aria-label="Quiz Time Limit setting, unlimited time checkbox"
                              data-cy="unlimitedTimeSwitch"/>
