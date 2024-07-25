@@ -158,6 +158,7 @@ const onSubjectSaved = (subject) => {
     v-model="model"
     :is-edit="isEdit"
     :header="modalTitle"
+    :should-confirm-cancel="true"
     saveButtonLabel="Save"
     :validation-schema="schema"
     :initial-values="initialSubjData"

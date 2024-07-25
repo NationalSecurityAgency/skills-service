@@ -84,6 +84,10 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
+  shouldConfirmCancel: {
+    type: Boolean,
+    default: false,
+  }
 })
 const emit = defineEmits(['saved', 'cancelled', 'isDirty', 'errors'])
 
@@ -209,6 +213,7 @@ if (props.asyncLoadDataFunction) {
     :header="header"
     :loading="isDialogLoading"
     :submitting="isSubmitting"
+    :shouldConfirmCancel="shouldConfirmCancel"
     @confirm-cancel="confirmCancel"
     @on-cancel="cancel"
     @on-ok="onSubmit"

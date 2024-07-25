@@ -181,6 +181,7 @@ const onSavedProject = () => {
   <SkillsInputFormDialog
     :id="formId"
     v-model="model"
+    :should-confirm-cancel="true"
     :is-edit="isEdit"
     :header="modalTitle"
     :saveButtonLabel="`${isCopy ? 'Copy Project' : 'Save'}`"
