@@ -16,7 +16,9 @@
 import { useConfirm } from 'primevue/useconfirm'
 import { ref } from 'vue'
 import {useFocusState} from "@/stores/UseFocusState.js";
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
+const announcer = useSkillsAnnouncer()
 
 export const useDialogMessages = () => {
   const confirm = useConfirm()
@@ -29,6 +31,7 @@ export const useDialogMessages = () => {
       header,
       onShow: () => {
         isConfirmVisible.value = true;
+        announcer.polite(message);
       },
       onHide: () => {
         isConfirmVisible.value = false;
@@ -51,6 +54,9 @@ export const useDialogMessages = () => {
       header,
       acceptLabel: acceptLabel,
       rejectLabel: rejectLabel,
+      onShow: () => {
+        announcer.polite(message);
+      },
       accept: () => {
         if(accept) {
           accept();

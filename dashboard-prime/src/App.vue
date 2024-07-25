@@ -167,8 +167,7 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
         </div>
       </div>
     </div>
-    <ConfirmDialog>
-    </ConfirmDialog>
+    <ConfirmDialog></ConfirmDialog>
     <dashboard-footer v-if="isDashboardFooter" role="region" />
     <customizable-footer v-if="isDashboardFooter" role="region" aria-label="dynamic customizable footer"></customizable-footer>
     <scroll-to-top v-if="!isScrollToTopDisabled && !inBootstrapMode" />
