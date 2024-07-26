@@ -122,11 +122,15 @@ const chartOptions = ref({
   plotOptions: {
     bar: {
       columnWidth: '50%',
-      borderRadius: 5
+      borderRadius: 5,
+      distributed: true,
     }
   },
   dataLabels: {
     enabled: false
+  },
+  legend: {
+    show: false
   },
   grid: {
     row: {

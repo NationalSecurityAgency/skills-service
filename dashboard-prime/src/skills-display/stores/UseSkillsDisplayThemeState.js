@@ -18,10 +18,12 @@ import { computed, ref } from 'vue'
 import ThemeHelper from '@/skills-display/theme/ThemeHelper.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import UniqueIdGenerator from '@/utils/UniqueIdGenerator.js'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState', () => {
 
   const log = useLog()
+  const themeHelper = useThemesHelper()
   const themeStyleId = UniqueIdGenerator.uniqueId('custom-theme-style-node-')
   const colors = {
     info: '#146c75',
@@ -35,9 +37,7 @@ export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState',
   }
 
   const theme = ref({
-    charts: {
-      axisLabelColor: 'black'
-    }
+    charts: {}
   })
   const setThemeByKey = (key, value) => {
     if (typeof value === 'object') {
@@ -54,7 +54,7 @@ export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState',
         iconColors && iconColors.length > 0 ? iconColors[0] : colors.success,
         iconColors && iconColors.length > 1 ? iconColors[1] : colors.warning,
         iconColors && iconColors.length > 2 ? iconColors[2] : colors.info,
-        iconColors && iconColors.length > 3 ? iconColors[3] : colors.danger
+        iconColors && iconColors.length > 3 ? iconColors[3] : themeHelper.isDarkTheme ? '#e46c6c' : colors.danger
       ]
     }
   }
