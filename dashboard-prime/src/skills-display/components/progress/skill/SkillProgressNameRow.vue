@@ -126,7 +126,7 @@ const skillId = computed(() => {
        :id="`skillProgressTitle-${skillId}`">
     <div class=" flex-1 text-2xl w-min-12rem">
       <div class="py-1 md:flex">
-        <div class="text-blue-700 sd-theme-primary-color font-medium flex">
+        <div class="sd-theme-primary-color font-medium flex">
           <div class="mr-1">
             <i  v-if="skill.isSkillsGroupType" class="fas fa-layer-group"></i>
             <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType"
@@ -192,7 +192,7 @@ const skillId = computed(() => {
       </div>
     </div>
     <div class="text-right justify-content-end flex flex-column"
-         :class="{ 'text-green-800' : isSkillComplete }"
+         :class="{ 'text-color-success' : isSkillComplete }"
          data-cy="skillProgress-ptsOverProgressBard">
 
       <div>

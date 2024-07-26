@@ -24,6 +24,7 @@ import GraphLegend from '@/skills-display/components/skill/prerequisites/GraphLe
 import UserPrerequisitesProgress from '@/skills-display/components/skill/prerequisites/UserPrerequisitesProgress.vue'
 import PrerequisitesTable from '@/skills-display/components/skill/prerequisites/PrerequisitesTable.vue'
 import { useNavToSkillUtil } from '@/skills-display/components/skill/prerequisites/UseNavToSkillUtil.js'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 
 const props = defineProps({
@@ -34,6 +35,7 @@ const route = useRoute()
 const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
 const themeState = useSkillsDisplayThemeState()
+const themeHelper = useThemesHelper()
 const navHelper = useNavToSkillUtil()
 
 const loadingData = ref(true)
@@ -297,6 +299,8 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
     const themePrimaryColor = themeState.graphTextPrimaryColor
     if (themePrimaryColor) {
       node.font.color = themePrimaryColor
+    } else if(themeHelper.isDarkTheme) {
+      node.font.color = '#f5f9ff'
     }
 
     if (isAchieved) {

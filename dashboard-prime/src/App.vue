@@ -79,10 +79,12 @@ watch(() => authState.userInfo, async (newUserInfo) => {
     pageVisitService.reportPageVisit(route.path, route.fullPath)
     loadUserRoles()
     appInfoState.loadEmailEnabled()
-    themeHelper.loadTheme()
+    themeHelper.loadTheme().then(() => {
+      isAppLoaded.value = true
+    })
+  } else {
+    isAppLoaded.value = true
   }
-
-  isAppLoaded.value = true
 })
 
 watch(() => themeHelper.currentTheme, (newTheme, oldTheme) => {

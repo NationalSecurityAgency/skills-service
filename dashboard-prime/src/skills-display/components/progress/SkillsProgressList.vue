@@ -25,6 +25,7 @@ import SkillTypeFilter from '@/skills-display/components/skill/SkillTypeFilter.v
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useRoute } from 'vue-router'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 // subject: {
 //   type: Object,
@@ -63,12 +64,9 @@ const subjectAndSkillsState = useSkillsDisplaySubjectState()
 const parentFrame = useSkillsDisplayParentFrameState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const route = useRoute()
+const themeHelper = useThemesHelper()
 const searchString = ref('')
 
-let filter = () => true
-if (props.projectId) {
-  filter = (s) => s.projectId === props.projectId
-}
 const skillsInternal = computed(() => subjectAndSkillsState.subjectSummary.skills)
 const subject = computed(() => subjectAndSkillsState.subjectSummary)
 onMounted(() => {
@@ -250,7 +248,7 @@ const isLastViewedScrollSupported = computed(() => {
 
 <template>
   <Card data-cy="skillsProgressList"
-        :class="{'skills-display-test-link': skillsDisplayInfo.isLocalTestPath()}"
+        :class="{'skills-display-test-link': skillsDisplayInfo.isLocalTestPath() && themeHelper.isDarkTheme.value }"
         v-if="(skillsInternal && skillsInternal.length > 0 || searchString || showNoDataMsg)">
     <template #header>
       <div class="px-4 pt-3">

@@ -375,6 +375,9 @@ function attachFile(event) {
   background-color: #c2ccda !important;
   color: #454545 !important;
 }
+.editor-theme-dark span.placeholder.ProseMirror-widget {
+  color: #d5d5d5 !important;
+}
 
 .editor-theme-dark .toastui-editor-toolbar-icons {
   color: #c2ccda !important;
