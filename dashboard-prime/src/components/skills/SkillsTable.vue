@@ -47,6 +47,7 @@ import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import SkillNameRouterLink from '@/components/skills/SkillNameRouterLink.vue';
+import { useFocusState } from '@/stores/UseFocusState.js'
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -67,6 +68,7 @@ const announcer = useSkillsAnnouncer()
 const timeWindowFormatter = useTimeWindowFormatter()
 const numberFormat = useNumberFormat()
 const inviteOnlyProjectState = useInviteOnlyProjectState()
+const focusState = useFocusState()
 const log = useLog()
 
 const subjectId = computed(() => route.params.subjectId)
@@ -422,6 +424,26 @@ const isLoading = computed(() => {
   return skillsState.loadingSubjectSkills
 })
 
+
+// Actions Men Tab fix
+// the following functions handle when pressing tab after Action Menu is open
+// before this code tab would cause focus to jump all way up to the address bar
+// these functions block tab and when menu is closed re-focus on the Actions Button
+function handleKeyDown(event) {
+  // tab=9
+  if (event.keyCode === 9) {
+    event.preventDefault();
+  }
+}
+const actionMenuOnFocus = () => {
+  document.addEventListener('keydown', handleKeyDown);
+}
+const actionMenuOnBlur = () => {
+  document.removeEventListener('keydown', handleKeyDown);
+  focusState.focusOnLastElement()
+}
+// done with actions fix
+
 </script>
 
 <template>
@@ -519,6 +541,8 @@ const isLoading = computed(() => {
                     id="skills-actions-menu"
                     data-cy="skillsActionsMenu"
                     :model="actionsMenu"
+                    @focus="actionMenuOnFocus"
+                    @blur="actionMenuOnBlur"
                     aria-label="Menu to perform actions on selected skills"
                     :popup="true">
               </Menu>

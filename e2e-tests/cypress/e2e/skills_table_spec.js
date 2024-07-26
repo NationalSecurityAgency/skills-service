@@ -734,5 +734,18 @@ describe('Skills Table Tests', () => {
     ], 10, false, null, false)
   })
 
+  it('when action menu is open tab key is disabled and when closed focus is placed back to the action menu button', () => {
+    cy.createSkill(1, 1,1 )
+    cy.visit('/administrator/projects/proj1/subjects/subj1')
+
+    cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+    cy.get('[data-cy="enableDisplayOrderSort"] input').tab().type('{enter}');
+    cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]')
+    cy.focused().tab()
+    cy.get('[data-cy="skillActionsBtn"]').should('have.focus')
+    cy.focused().tab()
+    cy.get('[data-pc-name="headercheckbox"] input').should('have.focus')
+  })
+
 })
 
