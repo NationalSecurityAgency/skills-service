@@ -170,6 +170,7 @@
                         <exclude>.eslintrc.cjs</exclude>
                         <exclude>**/theme-overrides.scss</exclude>
                         <exclude>**/theme.css</exclude>
+                        <exclude>**/theme-append.css</exclude>
                     </excludes>
                 </configuration>
                 <executions>
