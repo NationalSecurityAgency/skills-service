@@ -30,10 +30,12 @@ import ShareSkillsWithOtherProjects from "@/components/skills/crossProjects/Shar
 import SharedSkillsFromOtherProjects from "@/components/skills/crossProjects/SharedSkillsFromOtherProjects.vue";
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 const dialogMessages = useDialogMessages()
 const projConfig = useProjConfig();
 const route = useRoute();
+const themeHelper = useThemesHelper()
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
 const isLoading = ref(true);
@@ -204,6 +206,10 @@ const buildData = () => {
       font: { multi: 'html', size: 20 },
       title: GraphUtils.getTitle(node, isCrossProject),
     };
+    if(themeHelper.isDarkTheme) {
+      newNode.font.color = '#f5f9ff'
+    }
+
     if (isCrossProject) {
       newNode.margin = { top: 40 };
     }
@@ -271,57 +277,62 @@ const setVisNetworkTabIndex = () => {
   </div>
 </template>
 
-<style scoped>
-#full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-up,
-#full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-down,
-#full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-left,
-#full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-right,
-#full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-zoomIn,
-#full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-zoomOut,
-#full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button.vis-zoomExtends {
+<style>
+#dependency-graph div.vis-network div.vis-navigation div.vis-button.vis-up,
+#dependency-graph div.vis-network div.vis-navigation div.vis-button.vis-down,
+#dependency-graph div.vis-network div.vis-navigation div.vis-button.vis-left,
+#dependency-graph div.vis-network div.vis-navigation div.vis-button.vis-right,
+#dependency-graph div.vis-network div.vis-navigation div.vis-button.vis-zoomIn,
+#dependency-graph div.vis-network div.vis-navigation div.vis-button.vis-zoomOut,
+#dependency-graph div.vis-network div.vis-navigation div.vis-button.vis-zoomExtends {
   background-image: none !important;
 }
 
-#full-dependent-skills-graph div.vis-network div.vis-navigation div.vis-button:hover {
+#dependency-graph div.vis-network div.vis-navigation div.vis-button:hover {
   box-shadow: none !important;
 }
 
-#full-dependent-skills-graph .vis-button:after {
+#dependency-graph .vis-button {
   font-size: 2em;
-  color: gray;
+  color: #8c8c8c;
   font-family: "Font Awesome 5 Free";
 }
 
-#full-dependent-skills-graph .vis-button:hover:after {
-  font-size: 2em;
+@media screen and (max-width: 720px) {
+  #dependency-graph .vis-button {
+    display: none;
+  }
+}
+
+#dependency-graph .vis-button:hover:after {
   color: #3273dc;
 }
 
-#full-dependent-skills-graph .vis-button.vis-up:after {
+#dependency-graph .vis-button.vis-up:after {
   content: '\f35b';
 }
 
-#full-dependent-skills-graph .vis-button.vis-down:after {
+#dependency-graph .vis-button.vis-down:after {
   content: '\f358';
 }
 
-#full-dependent-skills-graph .vis-button.vis-left:after {
+#dependency-graph .vis-button.vis-left:after {
   content: '\f359';
 }
 
-#full-dependent-skills-graph .vis-button.vis-right:after {
+#dependency-graph .vis-button.vis-right:after {
   content: '\f35a';
 }
 
-#full-dependent-skills-graph .vis-button.vis-zoomIn:after {
+#dependency-graph .vis-button.vis-zoomIn:after {
   content: '\f0fe';
 }
 
-#full-dependent-skills-graph .vis-button.vis-zoomOut:after {
+#dependency-graph .vis-button.vis-zoomOut:after {
   content: '\f146';
 }
 
-#full-dependent-skills-graph .vis-button.vis-zoomExtends:after {
+#dependency-graph .vis-button.vis-zoomExtends:after {
   content: "\f78c";
   font-weight: 900;
   font-size: 30px;
