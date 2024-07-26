@@ -22,6 +22,7 @@ import NoContent2 from "@/components/utils/NoContent2.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import * as yup from "yup";
 import {useForm} from "vee-validate";
+import DataTable from "primevue/datatable";
 
 const emit = defineEmits(['conf-added', 'conf-removed']);
 const announcer = useSkillsAnnouncer();
@@ -119,6 +120,7 @@ const removeTagConf = (removedIem) => {
                      v-model:sort-order="sortOrder"
                      :value="data"
                      paginator
+                     pt:paginator:paginatorWrapper:aria-label="Approval Configuration User Tags Paginator"
                      aria-label="Approval Configuration User Tags"
                      tableStoredStateId="skillApprovalConfSpecificUsersTable">
       <Column :header="tagLabel" field="userTagValue" sortable>

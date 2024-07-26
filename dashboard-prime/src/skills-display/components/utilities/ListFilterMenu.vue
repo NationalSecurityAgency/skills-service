@@ -99,7 +99,7 @@ const focusOnProgressGroup = () => {
               data-cy="selectedFilter"/>
       </div>
     </div>
-    <OverlayPanel id="typeSelectorPanel" ref="menu" @show="focusOnProgressGroup">
+    <OverlayPanel id="typeSelectorPanel" ref="menu" @show="focusOnProgressGroup" aria-label="Type Selector Menu">
       <div>
         <PanelMenu :model="filtersInternal" class="w-full md:w-20rem" v-model:expandedKeys="expandedKeys">
           <template #item="{ item, props, root, active }">
