@@ -144,8 +144,9 @@ const updateTimeRange = (timeEvent) => {
   <Card data-cy="appliedSkillEventsOverTimeMetric">
     <template #header>
       <SkillsCardHeader :title="title">
-        <span class="text-muted ml-2">|</span>
-        <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
+        <template #headerContent>
+          <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
+        </template>
       </SkillsCardHeader>
     </template>
     <template #content>
