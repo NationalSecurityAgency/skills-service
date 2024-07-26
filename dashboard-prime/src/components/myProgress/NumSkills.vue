@@ -69,7 +69,7 @@ const chartOptions = {
   <my-progress-info-card-util title="Skills">
     <template #left-content>
       <div>
-        <div class="text-4xl text-orange-500" data-cy="numAchievedSkills">{{ myProgress.numAchievedSkills }}</div>
+        <div class="text-4xl text-color-warn" data-cy="numAchievedSkills">{{ myProgress.numAchievedSkills }}</div>
         <div class="w-5rem">
           <Tag severity="info" data-cy="numSkillsAvailable">Total: {{ myProgress.totalSkills }}</Tag>
         </div>
