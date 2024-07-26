@@ -26,9 +26,6 @@ const numberFormat = useNumberFormat()
 const myProgressState = useMyProgressState()
 const themeHelper = useThemesHelper()
 
-const activePointsColor = computed(() => {
-  return themeHelper.isDarkTheme ? 'text-orange-500' : 'text-orange-700'
-})
 const showSortControl = computed(() => myProgressState.myProjects.length > 1)
 
 const currentProgressPercent = props.proj.totalPoints ?
@@ -167,7 +164,7 @@ const moveUp = () => {
              class="small mb-1"
              :aria-label="`${proj.points} out of ${proj.totalPoints} available points`"
              data-cy="project-card-project-points">
-          <span :class="activePointsColor" class="text-xl">{{ numberFormat.pretty(proj.points) }}</span>
+          <span class="text-color-warn text-xl">{{ numberFormat.pretty(proj.points) }}</span>
           <span>/</span>
           <span>{{ numberFormat.pretty(proj.totalPoints) }}</span>
         </div>

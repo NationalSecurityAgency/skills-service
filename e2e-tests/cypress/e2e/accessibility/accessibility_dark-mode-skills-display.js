@@ -229,6 +229,39 @@ describe('Dark Mode Accessibility Tests for Progress and Rankings pages', () => 
     cy.customA11y();
   })
 
+  it('"My Progress" landing page with many skills', () => {
+    for (let i = 1; i <= 10; i++) {
+      if (i > 1) {
+        cy.createProject(i);
+      }
+      cy.enableProdMode(i);
+      cy.addToMyProjects(i);
 
+      cy.createSubject(i, 1);
+      cy.createSkill(i, 1, 100, {numPerformToCompletion: 1});
+      cy.reportSkill(i, 100, Cypress.env('proxyUser'), 'now')
+
+      cy.createBadge(i, 1);
+      cy.assignSkillToBadge(i, 1, 100);
+      cy.createBadge(i, 1, { enabled: true });
+    }
+
+    cy.createSubject(1, 1);
+    const numSkills = 10
+    for (let i = 0; i < numSkills; i++) {
+      cy.createSkill(1, 1, i, {numPerformToCompletion: 1});
+    }
+    for (let i = 0; i < numSkills; i++) {
+      cy.reportSkill(1, i, Cypress.env('proxyUser'), 'now')
+    }
+
+    cy.visit('/progress-and-rankings');
+    cy.injectAxe();
+    cy.get('[data-cy="numProjectsContributed"]').should('have.text', 10);
+    cy.get('[data-cy="numAchievedSkills"]').should('have.text', 20);
+    cy.get('[data-cy="numAchievedBadges"]').should('have.text', 10);
+    cy.customLighthouse();
+    cy.customA11y();
+  })
 })
 

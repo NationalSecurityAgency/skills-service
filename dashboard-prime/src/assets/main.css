@@ -99,3 +99,11 @@
 .st-light-theme .text-color-success {
     color: #136c34 !important;
 }
+
+.st-dark-theme .text-color-warn {
+    color: #fa9854 !important;
+}
+
+.st-light-theme .text-color-warn {
+    color: #893f0c !important;
+}

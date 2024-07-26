@@ -127,7 +127,7 @@ const projectsNotContributedToYet = computed(() => myProjects.value.length - myP
 <template>
   <my-progress-info-card-util title="Projects">
     <template #left-content>
-      <span class="text-4xl text-orange-500 mr-1" data-cy="numProjectsContributed">{{ myProgress.numProjectsContributed }}</span>
+      <span class="text-4xl text-color-warn mr-1" data-cy="numProjectsContributed">{{ myProgress.numProjectsContributed }}</span>
       <span class="text-secondary" data-cy="numProjectsAvailable">/ {{ myProjects.length }}</span>
     </template>
     <template #right-content>

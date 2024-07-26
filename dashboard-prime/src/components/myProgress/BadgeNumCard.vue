@@ -29,7 +29,7 @@ const myProgress = computed(() => myProgressState.myProgress)
     <template #left-content>
       <div class="">
         <span
-          class="text-4xl text-orange-500"
+          class="text-4xl text-color-warn"
           data-cy="numAchievedBadges">{{ myProgress.numAchievedBadges }}</span>
         <span
           class="text-secondary"
