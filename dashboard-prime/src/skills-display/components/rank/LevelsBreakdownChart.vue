@@ -129,6 +129,9 @@ const chartOptions = ref({
   dataLabels: {
     enabled: false
   },
+  legend: {
+    show: false
+  },
   grid: {
     row: {
       colors: ['#fff', '#f2f2f2']
