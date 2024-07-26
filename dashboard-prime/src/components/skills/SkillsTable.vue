@@ -433,14 +433,20 @@ function handleKeyDown(event) {
   // tab=9
   if (event.keyCode === 9) {
     event.preventDefault();
+    if (actionMenuFocused.value) {
+      focusState.focusOnLastElement()
+    }
   }
 }
+const actionMenuFocused = ref(false)
 const actionMenuOnFocus = () => {
+  actionMenuFocused.value = true
   document.addEventListener('keydown', handleKeyDown);
 }
 const actionMenuOnBlur = () => {
+  actionMenuFocused.value = false
   document.removeEventListener('keydown', handleKeyDown);
-  focusState.focusOnLastElement()
+
 }
 // done with actions fix
 
