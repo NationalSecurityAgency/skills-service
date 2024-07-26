@@ -155,7 +155,7 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
         <skills-spinner :is-loading="true" class="mt-8 text-center"/>
         <h1 class="text-sm sr-only">Loading...</h1>
       </div>
-      <div v-if="!isLoadingApp" class="m-0">
+      <div v-if="!isLoadingApp" class="m-0" :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }">
         <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
         <div v-if="!inBootstrapMode" :class="{ 'overall-container' : notSkillsClient, 'sd-theme-background-color': !notSkillsClient }">
           <new-software-version  />

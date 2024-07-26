@@ -67,8 +67,8 @@ handle_theme() {
     echo "Theme file does not exist: [$themeFile]"
   fi
 
-  echo >> $themePath/theme.scss # add new line
-  cat $appendCssFile >> $themePath/theme.scss
+#  echo >> $themePath/theme.scss # add new line
+#  cat $appendCssFile >> $themePath/theme.scss
 
   cd "$primeVueSass" && eval "sass --update $themePath/theme.scss:$themePath/theme.css"
 

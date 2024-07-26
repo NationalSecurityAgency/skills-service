@@ -28,6 +28,142 @@ describe('Dark Mode Accessibility Tests for Progress and Rankings pages', () => 
     cy.createProject(1)
   });
 
+  it('project page with multiple subjects with various progress', () => {
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem'})
+    cy.createSkill(1, 1, 2)
+    cy.createSkill(1, 1, 3)
+    cy.createSkill(1, 1, 4, { selfReportingType: 'Approval'})
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
+
+    cy.createSubject(1, 2)
+
+    cy.createSubject(1, 3)
+    cy.createSkill(1, 3, 4, { selfReportingType: 'HonorSystem'})
+    cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: Cypress.env('proxyUser'), date: 'yesterday' })
+    cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: Cypress.env('proxyUser'), date: 'now' })
+
+    cy.createBadge(1, 1);
+    cy.assignSkillToBadge(1, 1, 1);
+    cy.createBadge(1, 1, { enabled: true });
+
+    cy.visit('/progress-and-rankings/projects/proj1')
+    cy.injectAxe();
+    cy.get('[data-cy="subjectTile-subj1"]')
+    cy.get('[data-cy="pointHistoryChartWithData"]')
+    cy.get('[data-cy="myRankBtn"]')
+
+    cy.customLighthouse();
+    cy.customA11y();
+  })
+
+  it('rank page', () => {
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1, 1)
+    cy.createSkill(1, 1, 2)
+    cy.createSkill(1, 1, 3)
+    cy.createSkill(1, 1, 4)
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
+
+    cy.reportSkill(1, 1, 'user1', 'now');
+    cy.reportSkill(1, 2, 'user1', 'now');
+
+    cy.reportSkill(1, 1, 'user2', 'now');
+
+    cy.reportSkill(1, 2, 'user3', 'now');
+    cy.reportSkill(1, 3, 'user3', 'yesterday');
+    cy.reportSkill(1, 3, 'user3', 'now');
+
+    cy.createSubject(1, 2)
+
+    cy.createSubject(1, 3)
+    cy.createSkill(1, 3, 4)
+    cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: Cypress.env('proxyUser'), date: 'yesterday' })
+    cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: Cypress.env('proxyUser'), date: 'now' })
+
+
+    cy.visit('/progress-and-rankings/projects/proj1/rank')
+    cy.injectAxe();
+    cy.get('[data-cy="levelBreakdownChart-animationEnded"]')
+
+    cy.customLighthouse();
+    cy.customA11y();
+  })
+
+  it('badges page', () => {
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem'})
+    cy.createSkill(1, 1, 2)
+    cy.createSkill(1, 1, 3)
+    cy.createSkill(1, 1, 4, { selfReportingType: 'Approval'})
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
+
+    cy.createSubject(1, 2)
+
+    cy.createSubject(1, 3)
+    cy.createSkill(1, 3, 4, { selfReportingType: 'HonorSystem'})
+    cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: Cypress.env('proxyUser'), date: 'yesterday' })
+    cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: Cypress.env('proxyUser'), date: 'now' })
+
+    cy.createBadge(1, 1);
+    cy.assignSkillToBadge(1, 1, 1);
+    cy.createBadge(1, 1, { enabled: true });
+
+    cy.createBadge(1, 2);
+    cy.assignSkillToBadge(1, 2, 2);
+    cy.createBadge(1, 2, { enabled: true });
+
+    cy.createBadge(1, 3);
+    cy.assignSkillToBadge(1, 3, 3);
+    cy.createBadge(1, 3, { enabled: true });
+
+    cy.visit('/progress-and-rankings/projects/proj1/badges')
+    cy.injectAxe();
+    cy.get('[data-cy="earnedBadgeLink_badge3"]')
+    cy.get('[data-cy="badgeDetailsLink_badge1"]')
+
+    cy.customLighthouse();
+    cy.customA11y();
+  })
+
+  it('single badge page', () => {
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem'})
+    cy.createSkill(1, 1, 2)
+    cy.createSkill(1, 1, 3)
+    cy.createSkill(1, 1, 4, { selfReportingType: 'Approval'})
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
+
+    cy.createSubject(1, 2)
+
+    cy.createSubject(1, 3)
+    cy.createSkill(1, 3, 4, { selfReportingType: 'HonorSystem'})
+    cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: Cypress.env('proxyUser'), date: 'yesterday' })
+    cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: Cypress.env('proxyUser'), date: 'now' })
+
+    cy.createBadge(1, 1);
+    cy.assignSkillToBadge(1, 1, 1);
+    cy.assignSkillToBadge(1, 1, 2);
+    cy.assignSkillToBadge(1, 1, 3);
+
+    cy.createBadge(1, 1, { enabled: true });
+
+    cy.visit('/progress-and-rankings/projects/proj1/badges/badge1')
+    cy.injectAxe();
+    cy.get('[data-cy="skillProgressTitle-skill1"]')
+
+    cy.customLighthouse();
+    cy.customA11y();
+  })
+
   it('subject page with skills of various achievements', () => {
     cy.createSubject(1, 1)
     cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem'})
@@ -47,7 +183,6 @@ describe('Dark Mode Accessibility Tests for Progress and Rankings pages', () => 
     cy.customA11y();
   })
 
-
   it('achieved skill page', () => {
     cy.createSubject(1, 1)
     cy.createSkill(1, 1, 1)
@@ -61,7 +196,6 @@ describe('Dark Mode Accessibility Tests for Progress and Rankings pages', () => 
     cy.customLighthouse();
     cy.customA11y();
   })
-
 
   it('request approval-based skill page with justification expanded', () => {
     cy.createSubject(1, 1)
@@ -94,7 +228,6 @@ describe('Dark Mode Accessibility Tests for Progress and Rankings pages', () => 
     cy.customLighthouse();
     cy.customA11y();
   })
-
 
 
 })

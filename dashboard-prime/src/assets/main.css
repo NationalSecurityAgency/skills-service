@@ -80,3 +80,22 @@
     overflow-wrap: break-word !important;
     word-break: break-all;
 }
+
+.st-dark-theme .apexcharts-menu-item {
+    color: #1f2937 !important;
+}
+
+.st-dark-theme .apexcharts-legend-text,
+.st-dark-theme .apexcharts-text.apexcharts-xaxis-label,
+.st-dark-theme .apexcharts-text.apexcharts-yaxis-title-text{
+    color: #f5f9ff !important;
+    fill: #f5f9ff !important;
+}
+
+.st-dark-theme .text-color-success {
+    color: #6ee7b7 !important;
+}
+
+.st-light-theme .text-color-success {
+    color: #136c34 !important;
+}
