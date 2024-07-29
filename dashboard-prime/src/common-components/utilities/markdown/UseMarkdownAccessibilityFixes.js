@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { nextTick, ref } from 'vue'
+import { nextTick, watch } from 'vue'
 import { useCommonMarkdownOptions } from './UseCommonMarkdownOptions'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useDebounceFn, useWindowSize } from '@vueuse/core'
 
 export const useMarkdownAccessibilityFixes = () => {
 
   const commonMarkdownOptions = useCommonMarkdownOptions()
   const announcer = useSkillsAnnouncer()
+  const windowSize = useWindowSize()
 
   function doClickOnToolbarButton(selector) {
     const markdownEditor = commonMarkdownOptions.getMarkdownEditor()
@@ -145,6 +147,18 @@ export const useMarkdownAccessibilityFixes = () => {
       sizeInput.focus()
     })
   }
+
+  const debouncedFixMoreButtonAriaLabel = useDebounceFn(() => {
+    fixMoreButtonAriaLabel(1)
+  }, 150)
+
+  watch(() => windowSize?.width?.value,
+    (newWidth) => {
+      if (newWidth <= 950) {
+        debouncedFixMoreButtonAriaLabel()
+      }
+    }
+  )
 
   function fixMoreButtonAriaLabel(attemptNum) {
     if (attemptNum <= 10) {

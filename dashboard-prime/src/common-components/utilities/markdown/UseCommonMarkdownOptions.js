@@ -51,7 +51,7 @@ export const useCommonMarkdownOptions = () => {
 
   const getMenuItem = () => document.querySelector('.toastui-editor-popup-body [aria-role="menu"]')
   const getMenuPopup = () => document.querySelector('.toastui-editor-popup-body')
-  const getMarkdownEditor = () => document.getElementById('markdown-editor')
+  const getMarkdownEditor = () => document.querySelector('[data-cy="markdownEditorInput"]')
   const getHeaderButton = () => getMarkdownEditor()?.querySelector('.heading')
   const getMouseEvent = () => new MouseEvent('click', { view: window, bubbles: true, cancelable: true })
 
