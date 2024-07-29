@@ -263,5 +263,22 @@ describe('Dark Mode Accessibility Tests for Progress and Rankings pages', () => 
     cy.customLighthouse();
     cy.customA11y();
   })
+
+
+  it('table in a skill description', () => {
+    cy.createSubject(1,1)
+    cy.createSkill(1, 1, 1, {description: '| Function | Explanation                                                                                                                                                       |\n' +
+        '| -------- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------|\n' +
+        '| Subjects | Add, edit or remove Subjects                                                                                                                                      |\n' +
+        '| Skills | Add, edit or remove Skill definitions                                                                                                                             |'});
+
+    cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
+    cy.injectAxe();
+    cy.get('[data-cy="skillProgressTitle-skill1"]')
+
+    cy.customLighthouse();
+    cy.customA11y();
+  })
+
 })
 
