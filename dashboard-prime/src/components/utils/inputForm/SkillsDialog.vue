@@ -16,6 +16,7 @@ limitations under the License.
 <script setup>
 import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 const model = defineModel()
 const props = defineProps({
@@ -69,6 +70,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['on-ok', 'on-cancel'])
 const focusState = useFocusState()
+const themeHelper = useThemesHelper()
 const onUpdateVisible = (newVal) => {
   if (!newVal) {
     emit('on-cancel', newVal)
@@ -109,7 +111,7 @@ defineExpose({
   >
     <skills-spinner :is-loading="loading" />
 
-    <div v-if="!loading" v-focustrap>
+    <div v-if="!loading" v-focustrap :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }">
       <slot></slot>
 
       <div :class="`text-right ${footerClass}`">
