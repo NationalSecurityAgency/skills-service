@@ -137,7 +137,7 @@ const loadData = () => {
             </template>
           </Card>
         </div>
-        <div class="flex flex-1 mb-3">
+        <div class="flex flex-1">
           <Card data-cy="usersAchievedByTag" class="w-full">
             <template #header>
               <SkillsCardHeader title="Achieved"></SkillsCardHeader>
