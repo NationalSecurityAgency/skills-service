@@ -92,6 +92,7 @@ const userCommunityRestrictedDescriptor = computed(() => {
 
             <InputSwitch
               data-cy="restrictCommunity"
+              :aria-label="`Restrict Access to ${userCommunityRestrictedDescriptor} Users Only`"
               class="mr-2"
               v-model="value" />
             <label id="restrictMsg">Restrict <i class="fas fa-shield-alt text-red-500" aria-hidden="true" /> Access to
