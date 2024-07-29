@@ -89,7 +89,7 @@ import '@toast-ui/editor/dist/toastui-editor.css'
 import 'video.js/dist/video-js.css'
 
 
-log.setLevel('trace')
+log.setLevel('warn')
 
 const pinia = createPinia()
 
