@@ -233,6 +233,7 @@ const removeTagConf = (removedItem) => {
                          tableStoredStateId="skillApprovalConfSpecificUsersTable"
                          data-cy="skillApprovalSkillConfTable"
                          aria-label="Approval Configuration Skills"
+                         pt:paginator:paginatorWrapper:aria-label="Approval Configuration Skills Paginator"
                          :rows="pageSize"
                          :rowsPerPageOptions="possiblePageSizes"
                          v-model:sort-field="sortBy"

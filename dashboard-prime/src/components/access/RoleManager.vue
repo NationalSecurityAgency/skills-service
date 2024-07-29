@@ -26,6 +26,7 @@ import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import { userErrorState } from '@/stores/UserErrorState.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import DataTable from "primevue/datatable";
 
 const dialogMessages = useDialogMessages()
 // role constants
@@ -333,6 +334,7 @@ defineExpose({
           aria-label="User Roles"
           striped-rows
           paginator
+          :pt:paginator:paginatorWrapper:aria-label='`${title} Paginator`'
           v-model:sort-field="sortInfo.sortBy"
           v-model:sort-order="sortInfo.sortOrder"
           :rows="pageSize">

@@ -916,15 +916,7 @@ Cypress.Commands.add('customA11y', ()=> {
             ['.skillsBTableTotalRows'],
             ['.rank-detail-card'],
             ['.apex-chart-container'],
-        ]}, {
-            rules:{
-                "landmark-no-duplicate-banner": {enabled:false},
-                'landmark-no-duplicate-contentinfo': {enabled:false},
-                'heading-order': {enabled:false},
-                'landmark-unique': {enabled:false},
-                'aria-dialog-name': {enabled:false},
-            }
-    }, terminalLog);
+        ]}, {}, terminalLog);
 });
 
 
