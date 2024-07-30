@@ -304,7 +304,7 @@ describe('Login Tests', () => {
         });
     }
 
-    it.only('already logged in will redirect to the landing page', () => {
+    it('already logged in will redirect to the landing page', () => {
         cy.fixture('vars.json')
           .then((vars) => {
               if (!Cypress.env('oauthMode')) {
@@ -338,7 +338,7 @@ describe('Login Tests', () => {
         .contains('Progress And Rankings');
     })
 
-  it.only('already logged in will redirect to the redirect param when present', () => {
+  it('already logged in will redirect to the redirect param when present', () => {
     cy.fixture('vars.json')
       .then((vars) => {
         if (!Cypress.env('oauthMode')) {
