@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { ref } from 'vue';
 import { useRoute } from 'vue-router'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
@@ -41,10 +42,9 @@ const asyncLoadData = () => {
   if (props.isEdit) {
     return SkillsService.getSkillDetails(route.params.projectId, route.params.subjectId, props.skill.skillId)
       .then((resSkill) => {
-        return {
-          ...resSkill,
-          'description': resSkill.description || '',
-        }
+        const loadedSkill = { ...resSkill, 'description': resSkill.description || ''};
+        initialSkillData.value = { ...loadedSkill }
+        return loadedSkill
       })
   }
   return Promise.resolve({})
@@ -74,12 +74,12 @@ const schema = object({
     .label('Skill Description'),
 })
 
-const initialSkillData = {
+const initialSkillData = ref({
   skillId: props.skill.skillId || '',
   name: props.skill.name || '',
   originalSkillId: props.skill.skillId || '',
   description: props.skill.description || ''
-}
+})
 
 const saveSkill = (values) => {
   const skilltoSave = {

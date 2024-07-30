@@ -138,19 +138,26 @@ const schema = object({
 })
 
 
-const initialProjData = {
+const initialProjData = ref({
   projectId: props.project.projectId || '',
   projectName: props.project.name || '',
   description: props.project.description || '',
   enableProtectedUserCommunity: false,
-}
+})
 
-const loadDescription = () => {
-  return ProjectService.loadDescription(props.project.projectId).then((data) => {
-    return { 'description': data.description || '' }
-  })
+const asyncLoadData = () => {
+  const loadDescription = () => {
+    if(props.isEdit) {
+      return ProjectService.loadDescription(props.project.projectId).then((data) => {
+        initialProjData.value = { ...data }
+        return {'description': data.description || ''}
+      })
+    }
+    return Promise.resolve({})
+  }
+
+  return loadDescription()
 }
-const asyncLoadData = props.isEdit ? loadDescription : null
 
 const close = () => { model.value = false }
 

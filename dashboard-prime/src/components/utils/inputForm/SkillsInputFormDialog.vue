@@ -205,6 +205,7 @@ if (props.asyncLoadDataFunction) {
 }
 
 watch(() => props.initialValues, (newValues) => {
+  console.log('Values have changed')
   resetForm({values: newValues});
 })
 </script>
