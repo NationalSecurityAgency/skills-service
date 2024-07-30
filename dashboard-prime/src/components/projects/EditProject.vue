@@ -149,7 +149,8 @@ const asyncLoadData = () => {
   const loadDescription = () => {
     if(props.isEdit) {
       return ProjectService.loadDescription(props.project.projectId).then((data) => {
-        initialProjData.value = { ...data }
+        initialProjData.value.description = data.description ? data.description : ''
+        initialProjData.value = { ...initialProjData.value }
         return {'description': data.description || ''}
       })
     }

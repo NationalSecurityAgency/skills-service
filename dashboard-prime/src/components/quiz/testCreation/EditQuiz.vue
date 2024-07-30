@@ -24,6 +24,7 @@ import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEdito
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
+import ProjectService from "@/components/projects/ProjectService.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -89,18 +90,28 @@ const schema = object({
       .customDescriptionValidator('Quiz/Survey Description', false)
       .label('Description')
 })
-const loadDescription = () => {
-  return QuizService.getQuizDef(props.quiz.quizId).then((data) => {
-    return { 'description': data.description || '' }
-  })
+
+const asyncLoadData = () => {
+  const loadDescription = () => {
+    if(props.isEdit) {
+      return QuizService.getQuizDef(props.quiz.quizId).then((data) => {
+        initialQuizData.value.description = data.description ? data.description : ''
+        initialQuizData.value = { ...initialQuizData.value }
+        return { 'description': data.description || '' }
+      })
+    }
+    return Promise.resolve({})
+  }
+
+  return loadDescription()
 }
-const asyncLoadData = props.isEdit ? loadDescription : null
-const initialQuizData = {
+
+const initialQuizData = ref({
   quizId: props.quiz.quizId || '',
   quizName: props.quiz.name || '',
   type: props.quiz.type || '',
   description: props.quiz.description || '',
-}
+})
 const close = () => { model.value = false }
 
 const saveQuiz = (values) => {
