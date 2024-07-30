@@ -46,7 +46,7 @@ const props = defineProps({
   },
   ariaLabel: {
     type: String,
-    required: false,
+    required: true,
   }
 })
 const slots = useSlots()

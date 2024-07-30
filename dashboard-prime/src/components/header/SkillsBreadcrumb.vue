@@ -168,6 +168,7 @@ const buildBreadcrumb = () => {
   })
 
   if (newItems.length > 0) {
+    newItems[0].isFirst = true
     newItems[newItems.length-1].isLast = true
   }
   items.value = newItems
@@ -269,7 +270,7 @@ const isQuizzesValueUnderProgressAndRanking = (value, items) => {
               :icon="item.icon"
               :label="item.label"
               :value="item.value"
-              :show-separator="item.label && smallScreenMode"
+              :show-separator="!item.isFirst && smallScreenMode"
               value-css="text-primary" />
           </a>
         </router-link>

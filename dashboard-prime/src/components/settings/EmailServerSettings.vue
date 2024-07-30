@@ -14,10 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { object, string, boolean, number } from 'yup';
 import {useForm} from "vee-validate";
 import SettingsService from '@/components/settings/SettingsService.js';
+
+const props = defineProps({
+  emailSettings: Object
+});
 
 const schema = object({
   publicUrl: string().required().label('Public URL'),
@@ -39,26 +43,11 @@ const schema = object({
   }),
 });
 
-const { defineField, errors, meta } = useForm({
+const { values, defineField, errors, meta } = useForm({
   validationSchema: schema,
-  initialValues: {
-    host: 'localhost',
-    port: 25,
-    protocol: 'smtp',
-    username: '',
-    password: '',
-    authEnabled: false,
-    tlsEnabled: false,
-    publicUrl: '',
-    fromEmail: 'no_reply@skilltree',
-  }
+  initialValues: props.emailSettings
 })
 
-const [publicUrl] = defineField('publicUrl');
-const [fromEmail] = defineField('fromEmail');
-const [host] = defineField('host');
-const [port] = defineField('port');
-const [protocol] = defineField('protocol');
 const [tlsEnabled] = defineField('tlsEnabled');
 const [authEnabled] = defineField('authEnabled');
 const [username] = defineField('username');
@@ -86,26 +75,9 @@ let testButtonClass = computed(() => {
   return 'fa fa-question-circle';
 });
 
-onMounted(() => {
-  loadEmailSettings();
-});
-
-const getEmailInfoAsObject = () => {
-  return {
-    publicUrl: publicUrl.value,
-    fromEmail: fromEmail.value,
-    host: host.value,
-    port: port.value,
-    protocol: protocol.value,
-    tlsEnabled: tlsEnabled.value,
-    authEnabled: authEnabled.value,
-    username: username.value,
-    password: password.value
-  };
-};
 function testConnection() {
   isTesting.value = true;
-  SettingsService.testConnection(getEmailInfoAsObject()).then((response) => {
+  SettingsService.testConnection(values).then((response) => {
     if (response) {
       // successToast('Connection Status', 'Email Connection Successful!');
       testSuccess.value = true;
@@ -115,13 +87,11 @@ function testConnection() {
       testSuccess.value = false;
       testFailed.value = true;
     }
-  })
-      .catch(() => {
-        // errorToast('Failure', 'Failed to Test the Email Connection');
-      })
-      .finally(() => {
-        isTesting.value = false;
-      });
+  }).catch(() => {
+    // errorToast('Failure', 'Failed to Test the Email Connection');
+  }).finally(() => {
+    isTesting.value = false;
+  });
 }
 
 function saveEmailSettings() {
@@ -130,7 +100,7 @@ function saveEmailSettings() {
     username.value = '';
     password.value = '';
   }
-  SettingsService.saveEmailSettings(getEmailInfoAsObject()).then((result) => {
+  SettingsService.saveEmailSettings(values).then((result) => {
     if (result) {
       if (result.success) {
         // successToast('Saved', 'Email Connection Successful!');
@@ -138,35 +108,11 @@ function saveEmailSettings() {
         connectionError.value = result.explanation;
       }
     }
-  })
-      .catch(() => {
-        // errorToast('Failure', 'Failed to Save the Connection Settings!');
-      })
-      .finally(() => {
-        isSaving.value = false;
-      });
-}
-
-function loadEmailSettings() {
-  SettingsService.loadEmailSettings().then((response) => {
-    publicUrl.value = response.publicUrl;
-    fromEmail.value = response.fromEmail;
-    host.value = response.host;
-    port.value = response.port;
-    protocol.value = response.protocol;
-    tlsEnabled.value = response.tlsEnabled;
-    authEnabled.value = response.authEnabled;
-    username.value = response.username;
-    password.value = response.password;
+  }).catch(() => {
+    // errorToast('Failure', 'Failed to Save the Connection Settings!');
+  }).finally(() => {
+    isSaving.value = false;
   });
-}
-
-function missingRequiredValues() {
-  return !isAuthValid() || !host.value || !port.value || !protocol.value || !publicUrl.value || !fromEmail.value;
-}
-
-function isAuthValid() {
-  return !authEnabled.value || (username.value && password.value);
 }
 </script>
 

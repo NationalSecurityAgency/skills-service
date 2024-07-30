@@ -49,7 +49,7 @@ defineExpose({
 </script>
 
 <template>
-  <Card class="relative" style="min-width: 30rem;">
+  <Card class="relative">
     <template #content>
       <div class="flex mb-2 nav-cards-header">
         <div class="col">
@@ -63,7 +63,7 @@ defineExpose({
             </router-link>
             <div class="media-body" style="min-width: 0px; margin-left: 8px;">
               <div class="text-info mb-0 pb-0 preview-card-title no-underline overflow-hidden text-overflow-ellipsis white-space-nowrap" style="max-width:20rem">
-                <router-link v-if="options.icon" :to="options.navTo" data-cy="titleLink" class="no-underline">
+                <router-link v-if="options.icon" :to="options.navTo" data-cy="titleLink" class="no-underline" :aria-label="`${isReadOnlyProj ? 'View' : 'Manage'} ${options.controls.type} ${options.controls.name}`">
                   {{ options.title }}
                 </router-link>
               </div>
@@ -79,8 +79,8 @@ defineExpose({
         <slot name="underTitle"></slot>
       </div>
 
-      <div class="flex text-center justify-content-center flex-grow-1">
-        <div v-for="(stat) in options.stats" :key="stat.label" class="col my-3" style="min-width: 10rem;">
+      <div class="flex gap-2 flex-column sm:flex-row text-center justify-content-center my-3">
+        <div v-for="(stat) in options.stats" :key="stat.label" class="flex-1" style="min-width: 10rem;">
           <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="h-full border-round border-1 border-300 surface-100 p-3">
             <i :class="stat.icon" class="text-xl"></i>
             <div class="uppercase mt-1">{{ stat.label }}</div>

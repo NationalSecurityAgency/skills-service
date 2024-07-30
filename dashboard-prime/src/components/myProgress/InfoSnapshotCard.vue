@@ -17,10 +17,12 @@ limitations under the License.
 import { computed } from 'vue'
 import MyProgressInfoCardUtil from '@/components/myProgress/MyProgressInfoCardUtil.vue'
 import { useMyProgressState } from '@/stores/UseMyProgressState.js'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 const myProgressState = useMyProgressState()
 const myProgress = computed(() => myProgressState.myProgress)
 const myProjects = computed(() => myProgressState.myProjects)
+const themeHelper = useThemesHelper()
 
 const chartOptions = {
   chart: {
@@ -44,7 +46,7 @@ const chartOptions = {
       hollow: {
         margin: 0,
         size: '75%',
-        background: '#fff',
+        background: undefined,
         image: undefined,
         imageOffsetX: 0,
         imageOffsetY: 0,
@@ -69,13 +71,12 @@ const chartOptions = {
           opacity: 0.35
         }
       },
-
       dataLabels: {
         show: true,
         name: {
           offsetY: -10,
           show: true,
-          color: '#888',
+          color:  themeHelper.isDarkTheme ? 'white' : '#888',
           fontSize: '16px'
         },
         value: {
@@ -83,7 +84,7 @@ const chartOptions = {
             return `${val} %`
           },
           offsetY: 0,
-          color: '#888',
+          color:  themeHelper.isDarkTheme ? 'white' : '#888',
           fontSize: '22px',
           show: true
         }
@@ -106,7 +107,7 @@ const chartOptions = {
   stroke: {
     lineCap: 'round'
   },
-  labels: ['Percent']
+  labels: ['STARTED']
 }
 
 const series = computed(() => {
@@ -126,16 +127,19 @@ const projectsNotContributedToYet = computed(() => myProjects.value.length - myP
 <template>
   <my-progress-info-card-util title="Projects">
     <template #left-content>
-      <span class="text-4xl text-orange-500 mr-1" data-cy="numProjectsContributed">{{ myProgress.numProjectsContributed }}</span>
+      <span class="text-4xl text-color-warn mr-1" data-cy="numProjectsContributed">{{ myProgress.numProjectsContributed }}</span>
       <span class="text-secondary" data-cy="numProjectsAvailable">/ {{ myProjects.length }}</span>
     </template>
     <template #right-content>
-      <apexchart type="radialBar" height="200" width="200" :options="chartOptions" :series="series"></apexchart>
+      <div class="flex justify-content-center sm:justify-content-end">
+        <apexchart type="radialBar" height="200" width="200" :options="chartOptions" :series="series"></apexchart>
+      </div>
     </template>
     <template #footer>
-      <div class="flex gap-2 align-items-center">
+      <div class="flex gap-2 align-items-center flex-column sm:flex-row">
         <div v-if="projectsNotContributedToYet > 0"
              data-cy="info-snap-footer"
+             class="w-min-12rem"
              :title="`You still have ${projectsNotContributedToYet} project${ projectsNotContributedToYet > 1 ? 's' : ''} to explore.`">
           You still have
           <Tag severity="info">{{ projectsNotContributedToYet
@@ -143,7 +147,9 @@ const projectsNotContributedToYet = computed(() => myProjects.value.length - myP
           </Tag>
           project{{ projectsNotContributedToYet > 1 ? 's' : '' }} to explore.
         </div>
-        <div v-else data-cy="info-snap-footer"
+        <div v-else
+             data-cy="info-snap-footer"
+             class="w-min-12rem"
              title="Great job, you have contributed to all projects!">Great job, you have contributed to all
           projects!
         </div>

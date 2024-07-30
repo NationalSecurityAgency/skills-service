@@ -177,11 +177,13 @@ const onSubjectSaved = (subject) => {
         id-suffix="Subject"
         :name-to-id-sync-enabled="!props.isEdit">
         <template #beforeName>
-          <icon-picker
-            class="mb-3"
-            :startIcon="currentIcon"
-            @selected-icon="onSelectedIcon"
-          />
+          <div class="flex justify-content-center">
+            <icon-picker
+              class="mb-3"
+              :startIcon="currentIcon"
+              @selected-icon="onSelectedIcon"
+            />
+          </div>
         </template>
       </SkillsNameAndIdInput>
 

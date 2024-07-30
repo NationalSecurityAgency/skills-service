@@ -35,13 +35,13 @@ const styleObject = {
 <template>
   <Card :pt="{content: { class: 'p-0' } }">
     <template #content>
-      <div class="flex flex-row">
+      <div class="flex flex-column sm:flex-row text-center sm:text-left">
         <div style="min-width: 5rem;" class="text-center">
           <i class="fa-3x" :class="iconClass" :style="styleObject"/>
         </div>
         <div>
-          <div class="text-2xl mb-2 uppercase" data-cy="mediaInfoCardTitle">{{ title }}</div>
-          <div class="text-sm" data-cy="mediaInfoCardSubTitle">
+          <div class="text-2xl mb-2 uppercase" data-cy="mediaInfoCardTitle" style="overflow-wrap: break-word; text-wrap: wrap;">{{ title }}</div>
+          <div class="text-sm w-min-10rem" data-cy="mediaInfoCardSubTitle">
             <slot>
               {{ subTitle }}
             </slot>

@@ -18,16 +18,21 @@ import { computed, ref } from 'vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import CardWithVericalSections from '@/components/utils/cards/CardWithVericalSections.vue'
 import { useMyProgressState } from '@/stores/UseMyProgressState.js'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 
 const props = defineProps(['proj', 'displayOrder'])
 const emit = defineEmits(['sort-changed-requested'])
 const numberFormat = useNumberFormat()
 const myProgressState = useMyProgressState()
+const themeHelper = useThemesHelper()
 
 const showSortControl = computed(() => myProgressState.myProjects.length > 1)
 
+const currentProgressPercent = props.proj.totalPoints ?
+  Math.trunc((props.proj.points / props.proj.totalPoints) * 100) : 0
+
 const overSortControl = ref(false)
-const series = [0]
+const series = [currentProgressPercent]
 const chartOptions = {
   chart: {
     height: 200,
@@ -51,7 +56,7 @@ const chartOptions = {
         value: {
           offsetY: 10,
           fontSize: '22px',
-          color: undefined,
+          color: themeHelper.isDarkTheme ? 'white' : '#303030',
           formatter(val) {
             return `${val}%`
           }
@@ -91,7 +96,7 @@ const moveUp = () => {
   })
 }
 
-const currentProgressPercent = computed(() => Math.trunc(props.proj.points / props.proj.totalPoints))
+
 </script>
 
 <template>
@@ -129,12 +134,12 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
     <template #content>
       <div :class="{'pt-4': !showSortControl }">
 
-        <div class="flex">
+        <div class="flex flex-column sm:flex-row align-items-center">
           <div class="pt-3" style="min-width: 200px;">
             <apexchart type="radialBar" height="200" width="200" :options="chartOptions"
                        :series="series"></apexchart>
           </div>
-          <div class="flex-1 pt-0 pr-3 text-right">
+          <div class="flex-1 pt-0 pr-3 text-center sm:text-right">
             <div class="uppercase text-2xl text-primary" data-cy="project-card-project-name"
                  :aria-label="`Project ${proj.projectName}`" :title="proj.projectName ">{{ proj.projectName }}
             </div>
@@ -159,13 +164,14 @@ const currentProgressPercent = computed(() => Math.trunc(props.proj.points / pro
              class="small mb-1"
              :aria-label="`${proj.points} out of ${proj.totalPoints} available points`"
              data-cy="project-card-project-points">
-          <span class="text-xl text-orange-700">{{ numberFormat.pretty(proj.points) }}</span>
+          <span class="text-color-warn text-xl">{{ numberFormat.pretty(proj.points) }}</span>
           <span>/</span>
           <span>{{ numberFormat.pretty(proj.totalPoints) }}</span>
         </div>
         <ProgressBar
           :value="currentProgressPercent"
           :aria-label="`${currentProgressPercent} percent complete`"
+          :show-value="false"
           style="height: 6px" />
       </div>
 

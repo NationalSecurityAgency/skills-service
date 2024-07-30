@@ -243,6 +243,48 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
         });
     }
 
+    it('all admin leaderboard top 10 - opt out - non admin switch between "top 10" and "10 around me"', () => {
+        cy.request('POST', '/admin/projects/proj1/settings', [{
+            "value": true,
+            "setting": "project-admins_rank_and_leaderboard_optOut",
+            "lastLoadedValue": false,
+            "dirty": true,
+            "projectId": "proj1"
+        }]);
+
+        cy.register('user1', 'password1', false);
+        cy.logout();
+        cy.login('user1', 'password1');
+
+        cy.cdVisit('/');
+        cy.cdClickRank();
+
+        cy.get(tableSelector)
+          .contains('Loading...')
+          .should('not.exist');
+        cy.get(rowSelector)
+          .should('have.length', 10)
+          .as('cyRows');
+
+        cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"] [data-cy="select-tenAroundMe"]')
+          .click();
+        cy.get(tableSelector)
+          .contains('Loading...')
+          .should('not.exist');
+        cy.get(rowSelector)
+          .should('have.length', 6)
+          .as('cyRows');
+
+        cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"] [data-cy="select-topTen"]')
+          .click();
+        cy.get(tableSelector)
+          .contains('Loading...')
+          .should('not.exist');
+        cy.get(rowSelector)
+          .should('have.length', 10)
+          .as('cyRows');
+    });
+
     it('leaderboard top 10 - opt out', () => {
         cy.request('POST', '/app/userInfo/settings', [{
             'settingGroup': 'user.prefs',

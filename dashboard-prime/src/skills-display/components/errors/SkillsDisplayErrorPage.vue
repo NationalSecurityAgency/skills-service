@@ -24,13 +24,13 @@ const errorState = userErrorState()
     <template #content>
       <div class="text-center py-5">
         <div class="text-color-secondary">
-          <span class="fa-stack fa-3x text-orange-400" style="vertical-align: top;">
-                      <i class="fas fa-circle fa-stack-2x"></i>
-                      <i class="fa-stack-1x fa-inverse" :class="errorState.icon"></i>
-                    </span>
+          <div class="flex justify-content-center">
+            <div class="border-circle w-6rem h-6rem m-2 surface-500 font-bold flex align-items-center justify-content-center">
+              <i class="text-0 text-6xl" :class="errorState.icon"></i>
+            </div>
+          </div>
         </div>
         <div class="text-2xl text-primary">{{ errorState.title }}</div>
-
         <p v-if="errorState.explanation" data-cy="errExplanation">
           {{ errorState.explanation }}
         </p>

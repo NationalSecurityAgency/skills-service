@@ -65,15 +65,15 @@ onMounted(() => {
       </template>
     </Card>
     <div v-if="hasMetrics">
-      <div class="grid">
-        <div class="sm:col-12 md:col-6 mb-2 flex-grow-1" :class="{'xl:col-3': !isSurvey}">
-          <StatsCard class="w-full h-full" title="Total" icon="fas fa-pen-square skills-color-selfreport" :stat-num="metrics.numTaken" data-cy="metricsCardTotal">
+      <div class="flex gap-3 flex-column lg:flex-row flex-wrap mb-3">
+        <div class="flex-1">
+          <StatsCard class="w-full h-full w-min-14rem" title="Total" icon="fas fa-pen-square skills-color-selfreport" :stat-num="metrics.numTaken" data-cy="metricsCardTotal">
             <span v-if="!isSurvey"><Tag severity="info">{{ metrics.numTaken }}</Tag> attempt{{ metrics.numTaken!=1 ? 's' : '' }} by <Tag severity="success">{{ metrics.numTakenDistinctUsers }}</Tag> user{{ metrics.numTakenDistinctUsers !=1 ? 's' : '' }}</span>
             <span v-if="isSurvey">Survey was completed <Tag severity="info">{{ metrics.numTaken }}</Tag> time{{ metrics.numTaken!=1 ? 's' : '' }}</span>
           </StatsCard>
         </div>
-        <div v-if="!isSurvey" class="sm:col-12 md:col-6 xl:col-3 mb-2 flex-grow-1" data-cy="metricsCardPassed">
-          <StatsCard class="w-full h-full" title="Passed" :stat-num="metrics.numPassed" icon="fas fa-trophy text-success">
+        <div v-if="!isSurvey" class="flex-1" data-cy="metricsCardPassed">
+          <StatsCard class="w-full h-full w-min-14rem" title="Passed" :stat-num="metrics.numPassed" icon="fas fa-trophy text-success">
             <Tag severity="success">{{ metrics.numPassed }}</Tag>
             attempt{{ metrics.numPassed != 1 ? 's' : '' }} <span
               class="text-success uppercase">passed</span>
@@ -82,16 +82,16 @@ onMounted(() => {
             user{{ metrics.numPassedDistinctUsers != 1 ? 's' : '' }}
           </StatsCard>
         </div>
-        <div v-if="!isSurvey" class="sm:col-12 md:col-6 xl:col-3 mb-2 flex-grow-1" data-cy="metricsCardFailed">
-          <StatsCard class="w-full h-full" title="Failed" :stat-num="metrics.numFailed" icon="far fa-sad-tear text-warning">
+        <div v-if="!isSurvey" class="flex-1" data-cy="metricsCardFailed">
+          <StatsCard class="w-full h-full w-min-14rem" title="Failed" :stat-num="metrics.numFailed" icon="far fa-sad-tear text-warning">
             <Tag severity="danger">{{ metrics.numFailed }}</Tag>
             attempt{{ metrics.numFailed != 1 ? 's' : '' }} <span class="text-danger uppercase">failed</span> by
             <Tag severity="success">{{ metrics.numFailedDistinctUsers }}</Tag>
             user{{ metrics.numFailedDistinctUsers != 1 ? 's' : '' }}
           </StatsCard>
         </div>
-        <div class="sm:col-12 md:col-6 mb-2 flex-grow-1" :class="{'xl:col-3': !isSurvey}">
-          <StatsCard class="w-full h-full" title="Average Runtime" :stat-num="metrics.avgAttemptRuntimeInMs"
+        <div class="flex-1">
+          <StatsCard class="w-full h-full w-min-14rem" title="Average Runtime" :stat-num="metrics.avgAttemptRuntimeInMs"
                      icon="fas fa-user-clock c"
                      data-cy="metricsCardRuntime">
             <template #card-value>

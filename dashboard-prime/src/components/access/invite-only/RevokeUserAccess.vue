@@ -171,6 +171,7 @@ const tableFilters = ref({
               tableStoredStateId="revokeInvitesTable"
               :value="data"
               data-cy="privateProjectUsersTable"
+              aria-label="Invitation Accepted"
               paginator
               lazy
               @page="pageChanged"

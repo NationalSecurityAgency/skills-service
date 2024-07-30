@@ -49,6 +49,7 @@ const saveSkill = (values) => {
     skillId: InputSanitizer.sanitize(props.skill.skillId),
     pointIncrement: values.pointIncrement,
   }
+
   return SkillsService.updateImportedSkill(skilltoSave)
     .then(() => {
       return {
@@ -74,7 +75,7 @@ const onSkillSaved = (skill) => {
     :validation-schema="schema"
     :initial-values="initialSkillData"
     :enable-return-focus="true"
-    data-cy="EditSkillGroupModal"
+    data-cy="EditImportedSkillModal"
     @saved="onSkillSaved">
 
     <Message :closable="false" icon="fas fa-book">

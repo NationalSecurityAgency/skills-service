@@ -289,7 +289,7 @@ const isFlex = computed(() => responsive.sm.value)
     <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
         <SkillsDataTable tableStoredStateId="levels" v-if="!loading" :options="table.options" :loading="loading" :value="levels"
-                   data-cy="levelsTable" striped-rows>
+                   data-cy="levelsTable" striped-rows aria-label="Levels">
           <Column field="level" header="Level" :class="{'flex': isFlex }">
             <template #body="slotProps">
               <div>
@@ -317,7 +317,7 @@ const isFlex = computed(() => responsive.sm.value)
           </Column>
           <Column field="edit" header="Edit" :class="{'flex': isFlex }">
             <template #body="slotProps">
-              <SkillsButton :ref="`edit_${ slotProps.data.level}`" @click="editLevel(slotProps.data)" size="small" data-cy="editLevelButton" icon="fas fa-edit" label="Edit" :track-for-focus="true" :id="`editLevelButton_${slotProps.data.level}`" />
+              <SkillsButton :ref="`edit_${ slotProps.data.level}`" @click="editLevel(slotProps.data)" size="small" data-cy="editLevelButton" icon="fas fa-edit" label="Edit" :track-for-focus="true" :id="`editLevelButton_${slotProps.data.level}`" :aria-label="`Edit level ${slotProps.data.level}`"/>
             </template>
           </Column>
         </SkillsDataTable>

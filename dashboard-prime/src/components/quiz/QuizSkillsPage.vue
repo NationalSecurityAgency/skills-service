@@ -124,6 +124,7 @@ const onFilter = (filterEvent) => {
               striped-rows
               paginator
               data-cy="quizSkills"
+              aria-label="Quiz Skills"
               v-model:filters="filters"
               :globalFilterFields="['skillName']"
               @filter="onFilter"

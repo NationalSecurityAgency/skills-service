@@ -29,16 +29,15 @@ const isRootUser = computed(() => accessState.isRoot)
 </script>
 
 <template>
-  <div class="flex flex-wrap" style="min-width: 20rem"
+  <div class="flex flex-wrap gap-2"
     :class="{
-      'flex-column gap-2 justify-content-center align-items-center': projectsState.shouldTileProjectsCards,
+      'flex-column justify-content-center align-items-center': projectsState.shouldTileProjectsCards,
       'justify-content-end': !projectsState.shouldTileProjectsCards
     }">
-    <div>
+    <div class="flex gap-2">
       <router-link :to="{ name:'Subjects', params: { projectId: project.projectId }}" tabindex="-1">
         <SkillsButton
             size="small"
-            class="mr-2"
             outlined
             severity="info"
             :data-cy="'projCard_' + project.projectId + '_manageBtn'"
@@ -48,17 +47,17 @@ const isRootUser = computed(() => accessState.isRoot)
         </SkillsButton>
       </router-link>
       <SkillsButton
-      v-if="isRootUser"
-      outlined
-      severity="info"
-      @click="emit('unpin-project')"
-      data-cy="unpin"
-      size="small"
-      class="mr-2"
-      :aria-label="'remove pin for project '+ project.name"
-      label="Unpin"
-      icon="fas fa-ban"
-      :aria-pressed="project.pinned">
+        v-if="isRootUser"
+        outlined
+        severity="info"
+        @click="emit('unpin-project')"
+        data-cy="unpin"
+        size="small"
+        class="mr-2"
+        :aria-label="'remove pin for project '+ project.name"
+        label="Unpin"
+        icon="fas fa-ban"
+        :aria-pressed="project.pinned">
     </SkillsButton>
     </div>
     <ButtonGroup class="mr-2 p-0 flex" v-if="!readOnlyProject">

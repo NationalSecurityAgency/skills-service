@@ -245,6 +245,7 @@ const filterProjects = (event) => {
                            class="w-full"
                            show-gridlines
                            striped-rows
+                           aria-label="Selected Projects"
                            data-cy="multiProjectUsersInCommon-inputProjs"
                            table-stored-state-id="multiProjectUsersInCommon-inputProjs">
             <Column field="name" header="Name"></Column>
@@ -305,6 +306,7 @@ const filterProjects = (event) => {
                            lazy
                            striped-rows
                            show-gridlines
+                           aria-label="Users in Common"
                            tableStoredStateId="usersInCommonResultTable"
                            data-cy="usersInCommonResultTable">
 

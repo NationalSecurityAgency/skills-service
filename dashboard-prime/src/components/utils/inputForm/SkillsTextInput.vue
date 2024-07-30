@@ -80,7 +80,7 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
           :disabled="disabled"
           :placeholder="placeholder"
           :class="{ 'p-invalid': errorMessage }"
-          :aria-invalid="errorMessage ? null : true"
+          :aria-invalid="!!errorMessage"
           :aria-errormessage="`${name}Error`"
           :aria-describedby="`${name}Error`"/>
     </InputGroup>

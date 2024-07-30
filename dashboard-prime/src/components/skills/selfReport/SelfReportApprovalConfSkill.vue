@@ -232,6 +232,8 @@ const removeTagConf = (removedItem) => {
                          paginator
                          tableStoredStateId="skillApprovalConfSpecificUsersTable"
                          data-cy="skillApprovalSkillConfTable"
+                         aria-label="Approval Configuration Skills"
+                         pt:paginator:paginatorWrapper:aria-label="Approval Configuration Skills Paginator"
                          :rows="pageSize"
                          :rowsPerPageOptions="possiblePageSizes"
                          v-model:sort-field="sortBy"
@@ -269,7 +271,6 @@ const removeTagConf = (removedItem) => {
         </SkillsDataTable>
         <no-content2 v-if="!hadData" title="Not Configured Yet..."
                      class="p-2 py-5"
-                     icon-size="fa-2x"
                      data-cy="noSkillConf"
                      icon="fas fa-graduation-cap">
           You can split approval workload by routing approval requests for selected skills approval requests to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.

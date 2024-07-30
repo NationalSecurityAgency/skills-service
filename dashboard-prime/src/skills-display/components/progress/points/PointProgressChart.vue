@@ -22,10 +22,12 @@ import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDis
 import { useRoute } from 'vue-router'
 import PointHistoryChartPlaceholder from '@/skills-display/components/progress/points/PointHistoryChartPlaceholder.vue'
 import ChartOverlayMsg from '@/skills-display/components/utilities/ChartOverlayMsg.vue'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 const pointHistoryState = useSkillsDisplayPointHistoryState()
 const numFormat = useNumberFormat()
 const themeState = useSkillsDisplayThemeState()
+const themeHelper = useThemesHelper()
 const route = useRoute()
 
 const chartSeries = ref([])
@@ -43,6 +45,14 @@ const pointHistoryChart = () => {
 const lineColor = (returnArr = true) => {
   const color = pointHistoryChart().lineColor
   return returnArr ? [color] : color
+}
+
+const chartAxisColor = () => {
+  if (themeState.theme.charts.axisLabelColor) {
+    return themeState.theme.charts.axisLabelColor
+  }
+
+  return themeHelper.isDarkTheme ? 'white' : undefined
 }
 
 const chartOptions = {
@@ -64,7 +74,7 @@ const chartOptions = {
     tickAmount: 1,
     labels: {
       style: {
-        colors: themeState.theme.charts.axisLabelColor
+        colors: chartAxisColor()
       }
     }
   },
@@ -75,7 +85,7 @@ const chartOptions = {
     forceNiceScale: true,
     labels: {
       style: {
-        colors: [themeState.theme.charts.axisLabelColor]
+        colors: [chartAxisColor()]
       },
       formatter: function format(val) {
         return numFormat.pretty(val)
@@ -253,7 +263,7 @@ const zoomed = (chartContext, { xaxis, yaxis }) => {
               <point-history-chart-placeholder v-if="!hasData" />
             </BlockUI>
             <chart-overlay-msg  style="top: 4rem;">
-              <div class="uppercase text-red-600"><i class="fa fa-lock"></i> Locked
+              <div class="uppercase p-error"><i class="fa fa-lock"></i> Locked
               </div>
               <small>*** <b>2 days</b> of usage will unlock this chart!
                 ***</small>

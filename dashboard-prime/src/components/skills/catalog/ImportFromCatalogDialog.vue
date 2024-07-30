@@ -286,6 +286,7 @@ const onUpdateVisible = (newVal) => {
 
         <SkillsDataTable
           tableStoredStateId="importSkillsFromCatalog"
+          aria-label="Import Skills"
           :value="data"
           :loading="reloadData"
           v-model:selection="selectedRows"

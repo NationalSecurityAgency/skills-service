@@ -145,6 +145,7 @@ const loadData = (shouldHighlight = false) => {
                          :rowsPerPageOptions="table.options.pagination.possiblePageSizes"
                          :total-records="table.options.pagination.totalRows"
                          tableStoredStateId="userTagsTable"
+                         aria-label="User Tags"
                          data-cy="userTagsTable">
           <Column field="value" :header="tagChart.tagLabel ? tagChart.tagLabel : 'Tag'" sortable>
             <template #body="slotProps">

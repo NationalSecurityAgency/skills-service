@@ -14,15 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { computed } from 'vue'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import SkillTreeLogoSvg from '@/components/brand/SkillTreeLogoSvg.vue'
+
+const responsive = useResponsiveBreakpoints()
+const logoWidth = computed(() => responsive.sm.value ? '15rem' : '23rem')
 </script>
 
 <template>
   <div class="masthead mt-3 border-1 border-round surface-border">
+    <h1 class="sr-only">SkillTree Progress and Rankings</h1>
     <div class="masthead-content">
       <div class="container-fluid above-background">
         <div class="text-center mt-7">
-          <SkillTreeLogoSvg />
+          <SkillTreeLogoSvg :logo-width="logoWidth"/>
         </div>
         <div class="text-center mb-5 font-italic above-background text-lg">A micro-learning <b>gamification</b>
           training
@@ -199,6 +205,13 @@ import SkillTreeLogoSvg from '@/components/brand/SkillTreeLogoSvg.vue'
 @media (max-width: 768px) {
   .masthead .masthead-content {
     min-height: 70rem !important;
+  }
+}
+
+/* zoom 400% @ 1280px browser window */
+@media (max-width: 400px) {
+  .masthead .masthead-content {
+    min-height: 75rem !important;
   }
 }
 </style>

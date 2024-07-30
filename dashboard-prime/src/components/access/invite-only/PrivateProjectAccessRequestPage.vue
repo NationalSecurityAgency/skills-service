@@ -31,11 +31,10 @@ const projectId = computed(() => route.params.projectId)
 
 <template>
   <div class="mt-8">
-    <div class="text-center">
-      <span class="fa-stack fa-3x" style="vertical-align: top;">
-                      <i class="fas fa-circle fa-stack-2x" :class="colors.getTextClass(1)"></i>
-                      <i class="fas fa-shield-alt fa-stack-1x fa-inverse"></i>
-                    </span>
+    <div class="flex justify-content-center">
+      <div class="border-circle w-6rem h-6rem m-2 surface-500 font-bold flex align-items-center justify-content-center">
+        <i class="text-0 text-7xl fas fa-shield-alt"></i>
+      </div>
     </div>
     <div class="text-center">
       <div class="text-2xl text-primary">Invite Only Project</div>

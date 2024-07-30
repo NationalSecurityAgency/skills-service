@@ -68,6 +68,7 @@ const contactProjAdmins = (projInfo) => {
         :value="importedProjects"
         sortField="skillName"
         :sortOrder="1"
+        aria-label="Imported Skills"
         data-cy="importedSkillsTable">
         <Column field="importingProjectName" header="Importing Project" :sortable="true">
           <template #header>

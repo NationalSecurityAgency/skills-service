@@ -135,6 +135,7 @@ const isFlex = computed(() => responsive.md.value)
         <SkillsDataTable :busy="loading"
                          :value="errors"
                          tableStoredStateId="projectErrorsTable"
+                         aria-label="Project Errors"
                          data-cy="projectErrorsTable" paginator lazy
                          :totalRecords="totalRows"
                          :rows="pageSize"

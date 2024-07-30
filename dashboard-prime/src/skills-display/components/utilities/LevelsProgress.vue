@@ -14,13 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps({
   level: Number,
   totalLevels: Number
 })
 const levelInternal = ref(props.level)
+watch(() => props.level, (newVal) => {
+  levelInternal.value = newVal;
+})
 </script>
 
 <template>

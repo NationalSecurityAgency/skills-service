@@ -47,6 +47,7 @@ import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import SkillNameRouterLink from '@/components/skills/SkillNameRouterLink.vue';
+import { useFocusState } from '@/stores/UseFocusState.js'
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -67,6 +68,7 @@ const announcer = useSkillsAnnouncer()
 const timeWindowFormatter = useTimeWindowFormatter()
 const numberFormat = useNumberFormat()
 const inviteOnlyProjectState = useInviteOnlyProjectState()
+const focusState = useFocusState()
 const log = useLog()
 
 const subjectId = computed(() => route.params.subjectId)
@@ -422,6 +424,32 @@ const isLoading = computed(() => {
   return skillsState.loadingSubjectSkills
 })
 
+
+// Actions Men Tab fix
+// the following functions handle when pressing tab after Action Menu is open
+// before this code tab would cause focus to jump all way up to the address bar
+// these functions block tab and when menu is closed re-focus on the Actions Button
+function handleKeyDown(event) {
+  // tab=9
+  if (event.keyCode === 9) {
+    event.preventDefault();
+    if (actionMenuFocused.value) {
+      focusState.focusOnLastElement()
+    }
+  }
+}
+const actionMenuFocused = ref(false)
+const actionMenuOnFocus = () => {
+  actionMenuFocused.value = true
+  document.addEventListener('keydown', handleKeyDown);
+}
+const actionMenuOnBlur = () => {
+  actionMenuFocused.value = false
+  document.removeEventListener('keydown', handleKeyDown);
+
+}
+// done with actions fix
+
 </script>
 
 <template>
@@ -448,6 +476,7 @@ const isLoading = computed(() => {
       :exportFilename="`skilltree-${subjectId}-skills`"
       :row-class="disableRow"
       :expander="true"
+      aria-label="Skills"
       data-cy="skillsTable">
 
       <template #header>
@@ -488,7 +517,7 @@ const isLoading = computed(() => {
                 placeholder="Optional Fields"
                 data-cy="skillsTable-additionalColumns" />
             </div>
-            <div v-if="!projConfig.isReadOnlyProj" class="w-full lg:w-auto flex mt-3 lg:mt-0">
+            <div v-if="!projConfig.isReadOnlyProj" class="w-full lg:w-auto flex mt-3 lg:mt-0 flex-column sm:flex-row gap-2">
               <div class="flex-1 align-items-center flex">
                 <label for="sortEnabledSwitch" class="lg:ml-3 mr-1">Reorder:</label>
                 <InputSwitch
@@ -506,7 +535,6 @@ const isLoading = computed(() => {
                 @click="toggleActionsMenu"
                 aria-label="Skill's actions button"
                 aria-haspopup="true"
-                aria-controls="user_settings_menu"
                 :disabled="selectedSkills.length === 0"
                 :track-for-focus="true"
                 data-cy="skillActionsBtn">
@@ -516,9 +544,12 @@ const isLoading = computed(() => {
                 <i class="fas fa-caret-down ml-2"></i>
               </SkillsButton>
               <Menu ref="skillsActionsMenu"
-                    id="skillsActionsMenu"
+                    id="skills-actions-menu"
                     data-cy="skillsActionsMenu"
                     :model="actionsMenu"
+                    @focus="actionMenuOnFocus"
+                    @blur="actionMenuOnBlur"
+                    aria-label="Menu to perform actions on selected skills"
                     :popup="true">
               </Menu>
             </div>
@@ -542,7 +573,7 @@ const isLoading = computed(() => {
         </template>
         <template #body="slotProps">
           <div v-if="slotProps.field == 'name'"
-               class="flex flex-wrap align-items-center w-min-20rem"
+               class="flex flex-wrap align-items-center flex-column sm:flex-row"
                :data-cy="`nameCell_${slotProps.data.skillId}`">
             <div v-if="slotProps.data.isGroupType" class="flex-1">
               <div>
@@ -552,12 +583,12 @@ const isLoading = computed(() => {
                 </Tag>
               </div>
               <highlighted-value
-                class="text-lg"
+                class="text-lg w-min-10rem"
                 :value="slotProps.data.name"
                 :filter="filters.global.value" />
             </div>
             <div v-if="!slotProps.data.isGroupType" class="flex-1">
-              <div class="flex">
+              <div class="flex w-min-10rem">
                 <SkillNameRouterLink :skill="slotProps.data" :subjectId="subjectId"
                                      :filter-value="filters.global.value"
                                      :read-only="projConfig.isReadOnlyProj || slotProps.data.isCatalogImportedSkills"

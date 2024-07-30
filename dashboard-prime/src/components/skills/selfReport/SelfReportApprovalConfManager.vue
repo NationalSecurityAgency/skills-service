@@ -237,6 +237,7 @@ const sortTable = (sortContext) => {
                        :sort-field="sortBy"
                        :sort-order="sortOrder"
                        tableStoredStateId="skillApprovalConfTable"
+                       aria-label="Confogire Approval Workload"
                        data-cy="skillApprovalConfTable">
         <Column field="userId" sortable :class="{'flex': responsive.md.value }">
           <template #header>
@@ -259,7 +260,7 @@ const sortTable = (sortContext) => {
             <span class=""><i class="fas fa-users" :class="colors.getTextClass(2)" aria-hidden="true"/> Approval Workload</span>
           </template>
           <template #body="slotProps">
-            <div class="flex gap-2" :data-cy="`workloadCell_${slotProps.data.userId}`">
+            <div class="flex gap-2 flex-column sm:flex-row" :data-cy="`workloadCell_${slotProps.data.userId}`">
               <div class="flex flex-1 gap-2 align-items-center">
                 <div v-if="!slotProps.data.hasConf" class="flex flex-1 gap-2 align-items-center">
                   <InputSwitch
@@ -318,9 +319,9 @@ const sortTable = (sortContext) => {
         </template>
       </SkillsDataTable>
 
-      <no-content2 v-if="!hasMoreThanOneApprover && !loading" title="Not Available" class="py-8" icon-size="fa-2x" icon="fas fa-cogs" data-cy="approvalConfNotAvailable">
+      <no-content2 v-if="!hasMoreThanOneApprover && !loading" title="Not Available" class="py-8" icon="fas fa-cogs" data-cy="approvalConfNotAvailable">
         The ability to split the approval workload is unavailable because there is only <Badge variant="info">1</Badge> Admin for this project.
-        Please add <b>Admins</b> or <b>Approvers</b> on the <router-link :to="{ name: 'ProjectAccess' }" style="text-decoration: underline" data-cy="navToAccessPage"><i class="fas fa-shield-alt skills-color-access" aria-hidden="true"/>Access</router-link> page in order to start using this feature.
+        Please add <b>Admins</b> or <b>Approvers</b> on the <router-link :to="{ name: 'ProjectAccess' }" style="text-decoration: underline" class="font-bold" data-cy="navToAccessPage"><i class="fas fa-shield-alt skills-color-access" aria-hidden="true"/>Access</router-link> page in order to start using this feature.
       </no-content2>
     </template>
   </Card>

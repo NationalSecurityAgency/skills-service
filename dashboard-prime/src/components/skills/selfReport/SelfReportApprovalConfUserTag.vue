@@ -22,6 +22,7 @@ import NoContent2 from "@/components/utils/NoContent2.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import * as yup from "yup";
 import {useForm} from "vee-validate";
+import DataTable from "primevue/datatable";
 
 const emit = defineEmits(['conf-added', 'conf-removed']);
 const announcer = useSkillsAnnouncer();
@@ -87,7 +88,7 @@ const removeTagConf = (removedIem) => {
     <SkillsCardHeader :title="'Split Workload By ' + tagLabel"></SkillsCardHeader>
   </template>
   <template #content>
-    <div class="flex gap-2 px-3 pt-3">
+    <div class="flex gap-2 px-3 pt-3 flex-column sm:flex-row">
       <div class="flex flex-1">
         <SkillsTextInput
             class="w-full"
@@ -119,6 +120,8 @@ const removeTagConf = (removedIem) => {
                      v-model:sort-order="sortOrder"
                      :value="data"
                      paginator
+                     pt:paginator:paginatorWrapper:aria-label="Approval Configuration User Tags Paginator"
+                     aria-label="Approval Configuration User Tags"
                      tableStoredStateId="skillApprovalConfSpecificUsersTable">
       <Column :header="tagLabel" field="userTagValue" sortable>
         <template #body="slotProps">
@@ -152,7 +155,6 @@ const removeTagConf = (removedIem) => {
 
     <no-content2 v-if="!hadData" title="Not Configured Yet..."
                  class="py-5"
-                 icon-size="fa-2x"
                  data-cy="noTagKeyConf"
                  icon="fas fa-user-tag">
       You can split the approval workload by routing approval requests for users with the selected <span class="text-info">{{tagLabel}}</span> to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.

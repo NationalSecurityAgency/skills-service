@@ -5,7 +5,7 @@
     <parent>
         <artifactId>skills-service-parent</artifactId>
         <groupId>skill-tree</groupId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -170,6 +170,7 @@
                         <exclude>.eslintrc.cjs</exclude>
                         <exclude>**/theme-overrides.scss</exclude>
                         <exclude>**/theme.css</exclude>
+                        <exclude>**/theme-append.css</exclude>
                     </excludes>
                 </configuration>
                 <executions>

@@ -65,7 +65,7 @@ defineExpose({
         outlined
         severity="info"
         @click="handleManageClick"
-        :aria-label="`Manage ${options.type} ${options.name}`"
+        :aria-label="`${isReadOnlyProj ? 'View' : 'Manage'} ${options.type} ${options.name}`"
         icon="fas fa-arrow-circle-right"
         :label="isReadOnlyProj ? 'View' : 'Manage'"
         :data-cy="`manageBtn_${options.id}`">

@@ -55,7 +55,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
 </script>
 
 <template>
-  <div class="flex flex-wrap gap-3 sd-theme-summary-cards" data-cy="skillsSummaryCards">
+  <div class="flex flex-wrap gap-3 sd-theme-summary-cards flex-column md:flex-row" data-cy="skillsSummaryCards">
     <div class="flex-1">
       <media-info-card
         :title="`${numFormat.pretty(skill.points)} Total`"
@@ -70,7 +70,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
     <div class="flex-1">
       <media-info-card
         :title="`${numFormat.pretty(skill.todaysPoints)} Today`"
-        class="h-full w-min-13rem"
+        class="h-full sm:w-min-13rem"
         icon-class="fa fa-clock"
         :icon-color="themeState.infoCards().iconColors[1]"
         data-cy="pointsAchievedTodayCard">
@@ -81,7 +81,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
     <div class="flex-1">
       <media-info-card
         :title="`${numFormat.pretty(skill.pointIncrement)} Increment`"
-        class="h-full w-min-13rem"
+        class="h-full sm:w-min-13rem"
         icon-class="fas fa-flag-checkered"
         :icon-color="themeState.infoCards().iconColors[2]"
         data-cy="pointsPerOccurrenceCard">
@@ -92,7 +92,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
     <div v-if="!isTimeWindowDisabled" class="flex-1">
       <media-info-card
         :title="`${timeWindowTitle} Limit`"
-        class="h-full w-min-13rem"
+        class="h-full sm:w-min-13rem"
         icon-class="fas fa-hourglass-half"
         :icon-color="themeState.infoCards().iconColors[3]"
         data-cy="timeWindowPts">

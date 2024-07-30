@@ -89,7 +89,7 @@ import '@toast-ui/editor/dist/toastui-editor.css'
 import 'video.js/dist/video-js.css'
 
 
-log.setLevel('trace')
+log.setLevel('warn')
 
 const pinia = createPinia()
 
@@ -99,7 +99,7 @@ app.use(router)
 app.use(pinia)
 app.use(PrimeVue)
 app.use(ToastService)
-app.use(VueAnnouncer)
+app.use(VueAnnouncer, { router })
 app.use(VueApexCharts)
 app.use(ConfirmationService)
 app.component('Button', Button)

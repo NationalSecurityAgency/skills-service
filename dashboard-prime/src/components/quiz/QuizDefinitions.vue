@@ -172,6 +172,7 @@ defineExpose({
     <div v-if="!loading && hasData">
       <SkillsDataTable
         tableStoredStateId="quizDefinitionsTable"
+        aria-label="Quizzes and Surveys"
         :value="quizzes"
         data-cy="quizDefinitionsTable"
         v-model:filters="filters"
@@ -230,16 +231,15 @@ defineExpose({
             <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
           </template>
           <template #body="slotProps">
-            <div v-if="slotProps.field === 'name'" class="flex w-full">
-              <div class="flex align-items-start justify-content-start">
+            <div v-if="slotProps.field === 'name'" class="flex w-full flex-wrap flex-column sm:flex-row gap-2">
+              <div class="flex align-items-start justify-content-start w-min-10rem">
                 <router-link :data-cy="`managesQuizLink_${slotProps.data.quizId}`"
                              :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
-                             :aria-label="`Manage Quiz ${slotProps.data.name}`"
-                             tag="a">
+                             :aria-label="`Manage Quiz ${slotProps.data.name}`">
                   <highlighted-value :value="slotProps.data.name" :filter="filters.global.value" />
                 </router-link>
               </div>
-              <div class="flex flex-1 flex-nowrap align-items-start justify-content-end">
+              <div class="flex flex-1 flex-wrap align-items-start justify-content-end gap-2">
                 <router-link :data-cy="`managesQuizBtn_${slotProps.data.quizId}`"
                              :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
                              :aria-label="`Manage Quiz ${slotProps.data.name}`" tabindex="-1">
@@ -249,7 +249,7 @@ defineExpose({
                                 outlined
                                 size="small"/>
                 </router-link>
-                <ButtonGroup class="ml-1 flex flex-nowrap">
+                <ButtonGroup class="flex flex-nowrap">
                   <SkillsButton @click="showUpdateModal(slotProps.data)"
                                 icon="fas fa-edit"
                                 outlined

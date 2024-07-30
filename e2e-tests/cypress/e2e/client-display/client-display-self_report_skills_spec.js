@@ -834,6 +834,8 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="levelProgress"]').contains('40 Points to Level 1')
         cy.get('[data-cy="levelProgress"]').contains('Level 1 Progress')
         cy.get('[data-cy="overallLevelDesc"]').contains('Level 0 out of 5')
+        cy.get('[data-cy="overallStars"]').find('[data-p-active="true"]').should('have.length', 0)
+        cy.get('[data-cy="overallStars"]').find('[data-p-active="false"]').should('have.length', 5)
 
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="claimPointsBtn"]')
             .click();
@@ -857,5 +859,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="levelProgress"]').contains('50 Points to Level 2')
         cy.get('[data-cy="levelProgress"]').contains('Level 2 Progress')
         cy.get('[data-cy="overallLevelDesc"]').contains('Level 1 out of 5')
+        cy.get('[data-cy="overallStars"]').find('[data-p-active="true"]').should('have.length', 1)
+        cy.get('[data-cy="overallStars"]').find('[data-p-active="false"]').should('have.length', 4)
     });
 });

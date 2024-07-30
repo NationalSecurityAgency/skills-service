@@ -169,11 +169,11 @@ const toggleRow = (row) => {
       </SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex p-3">
-        <div class="flex flex-1">
+      <div class="flex p-3 gap-2 flex-column sm:flex-row">
+        <div class="flex flex-1 justify-content-center sm:justify-content-start">
           <SkillsButton size="small" @click="loadApprovals" aria-label="Sync Records" data-cy="syncApprovalsBtn" class="" icon="fas fa-sync-alt" />
         </div>
-        <div class="flex flex-1 justify-content-end">
+        <div class="flex flex-1 justify-content-center sm:justify-content-end">
           <SkillsButton size="small" @click="showRejectModal=true" data-cy="rejectBtn" class="" :disabled="selectedItems.length === 0" icon="fa fa-times-circle" label="Reject" />
           <SkillsButton size="small" @click="approve" data-cy="approveBtn" class="ml-2" :disabled="selectedItems.length === 0" icon="fa fa-check" label="Approve" />
         </div>
@@ -184,6 +184,7 @@ const toggleRow = (row) => {
                        v-model:expandedRows="expandedRows"
                        tableStoredStateId="skillsReportApprovalTable"
                        data-cy="skillsReportApprovalTable" paginator lazy
+                       aria-label="Approval"
                        :rows="pageSize"
                        :rowsPerPageOptions="possiblePageSizes"
                        :totalRecords="totalRows"
@@ -192,6 +193,7 @@ const toggleRow = (row) => {
                        :sort-order="sortOrder"
                        @page="pageChanged"
                        data-key="id"
+                       pt:paginator:paginatorWrapper:aria-label="Approval Paginator"
                        @sort="sortTable">
         <Column selectionMode="multiple" :class="{'flex': responsive.md.value }">
           <template #header>

@@ -131,11 +131,11 @@ const oAuth2Login = (registrationId) => {
                       v-bind="usernameAttrs"
                       :class="{ 'p-invalid': errors.username }"
                       autocomplete="username"
-                      :aria-invalid="errors.username ? null : true"
+                      :aria-invalid="!!errors.username"
                       aria-describedby="username-error"
                       aria-errormessage="username-error" />
                   </InputGroup>
-                  <small class="p-error" id="username-error">{{ errors.username || '&nbsp;' }}</small>
+                  <small role="alert" class="p-error" id="username-error">{{ errors.username || '&nbsp;' }}</small>
                 </div>
 
                 <div class="text-left">
@@ -160,11 +160,11 @@ const oAuth2Login = (registrationId) => {
                       v-bind="passwordAttrs"
                       :class="{ 'p-invalid': errors.password }"
                       autocomplete="current-password"
-                      :aria-invalid="errors.password ? null : true"
+                      :aria-invalid="!!errors.password"
                       aria-describedby="password-error"
                       aria-errormessage="password-error" />
                   </InputGroup>
-                  <small class="p-error" id="password-error">{{ errors.password || '&nbsp;' }}</small>
+                  <small role="alert" class="p-error" id="password-error">{{ errors.password || '&nbsp;' }}</small>
                 </div>
 
                 <div class="mt-1">

@@ -210,6 +210,7 @@ const tableFilters = ref({
         <div :style="contentMaxWidthState.main2ContentMaxWidthStyleObj">
             <SkillsDataTable
             :tableStoredStateId="`${route.name}-eventsTable`"
+            aria-label="User Actions"
             :value="items"
             :loading="tableOptions.busy"
             show-gridlines

@@ -91,6 +91,7 @@ const setMarkdownText = (newText) => {
 .markdown-text-theme-dark code {
   background-color: #374151 !important;
 }
+.markdown-text-theme-dark .toastui-editor-contents table tbody tr td,
 .markdown-text-theme-dark .toastui-editor-contents h1,
 .markdown-text-theme-dark .toastui-editor-contents h2,
 .markdown-text-theme-dark .toastui-editor-contents h3,

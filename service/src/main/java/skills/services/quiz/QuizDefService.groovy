@@ -588,7 +588,7 @@ class QuizDefService {
         int numDistinctUsersPassed = passedQuizCounts ? passedQuizCounts.getNumDistinctUsers() : 0
         int numDistinctUsersFailed = failedQuizCounts ? failedQuizCounts.getNumDistinctUsers() : 0
 
-        Integer averageRuntimeInMs = userQuizAttemptRepo.getAverageMsRuntimeForQuiz(quizId)
+        Integer averageRuntimeInMs = userQuizAttemptRepo.getAverageMsRuntimeForQuiz(quizId)?.intValue()
 
         QuizQuestionsResult quizQuestionsResult = getQuestionDefs(quizId)
         List<QuizQuestionDefResult> questionDefResults = quizQuestionsResult?.questions

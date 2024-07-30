@@ -267,4 +267,41 @@ describe('Accessibility Tests', () => {
         cy.customA11y()
     });
 
+
+    it('create restricted community project', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.userCommunityDocsLabel = 'User Community Docs';
+                conf.userCommunityDocsLink = 'https://somedocs.com';
+                res.send(conf);
+            });
+        })
+
+        const allDragonsUser = 'allDragons@email.org'
+        cy.fixture('vars.json').then((vars) => {
+            cy.logout();
+            cy.login(vars.rootUser, vars.defaultPass, true);
+            cy.request('POST', `/root/users/${vars.rootUser}/tags/dragons`, { tags: ['DivineDragon'] });
+            cy.request('POST', `/root/users/${vars.defaultUser}/tags/dragons`, { tags: ['DivineDragon'] });
+            cy.logout();
+
+            cy.register(allDragonsUser, vars.defaultPass);
+            cy.logout();
+
+            cy.login(vars.defaultUser, vars.defaultPass);
+        });
+
+        cy.visit('/administrator')
+        cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="newProjectButton"]').click()
+        cy.injectAxe();
+        cy.get('[data-cy="projectName"]').type('one')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="userCommunityDocsLink"] a').contains( 'User Community Docs')
+
+        cy.customLighthouse();
+        cy.customA11y()
+    });
+
 });

@@ -125,6 +125,7 @@ const calculateClientDisplayRoute = (props) => {
         <SkillsDataTable :value="postAchievementUsers"
                          data-cy="postAchievementUsers-table"
                          tableStoredStateId="postAchievementUsers-table"
+                         aria-label="Achievement Users"
                          striped-rows
                          show-gridlines
                          paginator

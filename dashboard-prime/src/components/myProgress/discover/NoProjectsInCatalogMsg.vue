@@ -47,7 +47,7 @@ const conf = useAppConfig()
             </p>
 
             <p class="mt-6">
-              To learn more please visit <a target="_blank"
+              To learn more please visit <a class="font-bold" target="_blank"
               :href="`${conf.docsHost}/dashboard/user-guide/projects.html#setting-project-discoverability`">Setting:
               Project Discoverability</a> section in the documentation.
             </p>

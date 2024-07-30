@@ -103,6 +103,7 @@ const isFlex = computed(() => responsive.sm.value)
       <div v-if="!isLoading && !isProcessing && learningPaths.length > 0">
         <SkillsDataTable
           tableStoredStateId="dependencies"
+          aria-label="Learning Path Routes"
           :value="learningPaths"
           v-if="!isProcessing"
           data-cy="learningPathTable"

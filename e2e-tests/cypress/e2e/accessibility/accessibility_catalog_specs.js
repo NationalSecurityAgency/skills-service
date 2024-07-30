@@ -266,8 +266,8 @@ describe('Accessibility Tests', () => {
         cy.exportSkillToCatalog(2, 1, 7);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
-        cy.injectAxe();
         cy.get('[data-cy="skillActionsBtn"]')
+        cy.injectAxe();
 
         cy.customLighthouse();
         cy.customA11y();

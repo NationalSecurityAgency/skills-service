@@ -161,7 +161,8 @@ const searchChanged = (query) => {
 
           <div v-if="badgeSkills && badgeSkills.length > 0">
             <SkillsDataTable
-                tableStoredStateId="badgeSkillsTable"
+                tableStoredStateId="globalBadgeSkillsTable"
+                aria-label="Global Badge Skills"
                 :value="badgeSkills"
                 paginator
                 :rows="5"

@@ -148,23 +148,24 @@ const expandLabel = (truncated) => {
 <template>
   <div>
     <SkillsDataTable
-      tableStoredStateId="answerHistory"
-      :value="answerHistory"
-               :loading="tableOptions.busy"
-               stripedRows
-               showGridlines
-               lazy
-               :paginator="true"
-               :rows="tableOptions.pagination.pageSize"
-               :rowsPerPageOptions="tableOptions.pagination.possiblePageSizes"
-               :total-records="tableOptions.pagination.totalRows"
-               @page="pageChanged"
-               @sort="sortField"
-               v-model:sort-field="sortInfo.sortBy"
-               v-model:sort-order="sortInfo.sortOrder"
-               data-cy="quizAnswerHistoryTable">
+        tableStoredStateId="answerHistory"
+        :value="answerHistory"
+        :loading="tableOptions.busy"
+        stripedRows
+        showGridlines
+        lazy
+        :paginator="true"
+        :rows="tableOptions.pagination.pageSize"
+        :rowsPerPageOptions="tableOptions.pagination.possiblePageSizes"
+        :total-records="tableOptions.pagination.totalRows"
+        @page="pageChanged"
+        @sort="sortField"
+        v-model:sort-field="sortInfo.sortBy"
+        v-model:sort-order="sortInfo.sortOrder"
+        aria-label="Answer History"
+        data-cy="quizAnswerHistoryTable">
 
-      <template #paginatorstart>
+    <template #paginatorstart>
         <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ tableOptions.pagination.totalRows }}</span>
       </template>
 

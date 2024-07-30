@@ -164,6 +164,7 @@ const addUserRole = () => {
           </div>
           <SkillsDataTable
             tableStoredStateId="quizAccess"
+            aria-label="Quiz Access"
             :value="userRoles"
             :loading="options.busy"
             show-gridlines

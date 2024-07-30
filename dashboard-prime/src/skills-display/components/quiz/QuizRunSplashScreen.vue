@@ -89,7 +89,7 @@ const start = () => {
           </template>
         </Card>
 
-        <div class="flex column-gap-4 pt-2">
+        <div class="flex flex-wrap flex-column md:flex-row gap-4 pt-2">
             <Card class="skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2' } }" data-cy="quizInfoCard">
               <template #content>
                 <div class="px-3">

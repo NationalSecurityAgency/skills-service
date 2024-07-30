@@ -195,6 +195,7 @@ const reloadTable = () => {
       </div>
       <SkillsDataTable
         data-cy="achievementsNavigator-table"
+        aria-label="Achievements"
         :value="items"
         show-gridlines
         striped-rows

@@ -44,17 +44,17 @@ const emit = defineEmits(['input'])
 const { value, errorMessage } = useField(() => props.name);
 
 const labelClass = computed(() => {
-  return props.label ? 'md:col-5 xl:col-3 text-secondary' : null
+  return props.label ? 'text-secondary w-min-11rem max-w-11rem' : null
 })
 
 const inputClass = computed(() => {
-  return props.label ? 'md:col-7 xl:col-9' : 'w-full'
+  return props.label ? '' : 'w-full'
 })
 
 </script>
 <!--v-bind="projectDisplayNameAttrs"-->
 <template>
-  <div class="flex flex-column gap-2 md:flex-row field">
+  <div class="field flex flex-column lg:flex-row gap-3">
     <div v-if="label" :class="labelClass" :id="`${name}Label`">
       <label :for="name">
         {{ label }}
@@ -64,16 +64,17 @@ const inputClass = computed(() => {
       <InputText v-model="value"
                  :data-cy="`${name}TextInput`"
                  :id="name"
+                 :inputId="name"
                  type="text"
                  @input="emit('input', [name, $event.target.value])"
                  class="w-full"
                  :placeholder="placeholder"
                  :class="{ 'p-invalid': errorMessage }"
-                 :aria-invalid="errorMessage ? null : true"
+                 :aria-invalid="!!errorMessage"
                  :aria-errormessage="`${name}Error`"
                  :aria-describedby="`${name}Error`"
                  :aria-labelledby="`${name}Label`" />
-      <small class="p-error" :id="`${name}Error`" :data-cy="`${name}Error`" v-if="errorMessage">{{ errorMessage || '&nbsp;' }}</small>
+      <small role="alert" class="p-error" :id="`${name}Error`" :data-cy="`${name}Error`" v-if="errorMessage">{{ errorMessage || '&nbsp;' }}</small>
     </div>
   </div>
 </template>

@@ -620,6 +620,22 @@ describe('My Progress Tests', () => {
             .contains('Level');
     });
 
+    it('verify progress on ProjectLinkCard', function () {
+        cy.loginAsProxyUser();
+        cy.visit('/progress-and-rankings/');
+
+        // proj 2 has no progress
+        const proj2Selector = '[data-cy="project-link-card-proj2"]'
+        cy.get(`${proj2Selector} [data-cy="project-card-project-level"]`).should('have.text', 'Level 0')
+        cy.get(`${proj2Selector} [data-cy="project-card-project-points"]`).should('have.text', '0/1,200')
+        cy.get(`${proj2Selector} .apexcharts-text.apexcharts-datalabel-value`).should('have.text', '0%')
+
+        const proj1Selector = '[data-cy="project-link-card-proj1"]'
+        cy.get(`${proj1Selector} [data-cy="project-card-project-level"]`).should('have.text', 'Level 3')
+        cy.get(`${proj1Selector} [data-cy="project-card-project-points"]`).should('have.text', '400/800')
+        cy.get(`${proj1Selector} .apexcharts-text.apexcharts-datalabel-value`).should('have.text', '50%')
+    });
+
     it('My Progress page - verify custom project label', function () {
         // set custom level display name for proj1
         cy.loginAsRootUser();

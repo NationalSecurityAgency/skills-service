@@ -79,10 +79,12 @@ watch(() => authState.userInfo, async (newUserInfo) => {
     pageVisitService.reportPageVisit(route.path, route.fullPath)
     loadUserRoles()
     appInfoState.loadEmailEnabled()
-    themeHelper.loadTheme()
+    themeHelper.loadTheme().then(() => {
+      isAppLoaded.value = true
+    })
+  } else {
+    isAppLoaded.value = true
   }
-
-  isAppLoaded.value = true
 })
 
 watch(() => themeHelper.currentTheme, (newTheme, oldTheme) => {
@@ -140,18 +142,15 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
 
 <template>
   <div role="presentation"
-       :class="{
-          'skills-dark-theme': themeHelper.isDarkTheme,
-          'skills-light-theme': !themeHelper.isDarkTheme
-       }"
-       class="m-0 surface-ground skills-light-theme">
+       :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }"
+       class="m-0 surface-ground">
     <VueAnnouncer class="sr-only" />
 
     <customizable-header v-if="isCustomizableHeader" role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="skilltree-main-container">
       <div v-if="isLoadingApp" role="main" class="text-center">
         <skills-spinner :is-loading="true" class="mt-8 text-center"/>
-        <h1 class="text-sm sr-only" sr-only>Loading...</h1>
+        <h1 class="text-sm sr-only">Loading...</h1>
       </div>
       <div v-if="!isLoadingApp" class="m-0">
         <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
@@ -186,19 +185,19 @@ body a, a:link, a:visited {
   text-decoration: none !important;
 }
 
-body .skills-light-theme a, a:link {
+body .st-light-theme a, a:link {
   color: #2f64bd !important;
 }
 
-body .skills-light-theme a:visited {
+body .st-light-theme a:visited {
   color: #784f9f !important;
 }
 
-body .skills-dark-theme a, a:link {
+body .st-dark-theme a, a:link {
   color: #99befb !important;
 }
 
-body .skills-dark-theme a:visited {
+body .st-dark-theme a:visited {
   color: #d5aafb !important;
 }
 

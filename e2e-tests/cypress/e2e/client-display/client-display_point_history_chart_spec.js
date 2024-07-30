@@ -108,13 +108,14 @@ describe('Client Display Point History Tests', () => {
 
     cy.cdVisit('/', true)
     cy.wait('@getPointHistory')
-
     // let's wait for animation to complete
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
     cy.injectAxe()
     cy.wait(1000)
     cy.customA11y()
+
+
+    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
   })
 
   it('point history with data from server', () => {

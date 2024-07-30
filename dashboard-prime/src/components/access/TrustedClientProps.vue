@@ -65,13 +65,13 @@ const resetClientSecret = () => {
     <template #content>
       <skills-spinner v-if="loadingSecret" :is-loading="loadingSecret" class="my-5" />
       <div v-if="!loadingSecret">
-        <div>
-          <span class="text-color-secondary">Client ID:</span>
-          <span class="ml-2">{{ projectId }}</span>
+        <div class="flex flex-column sm:flex-row gap-2">
+          <div class="text-color-secondary">Client ID:</div>
+          <div class="">{{ projectId }}</div>
         </div>
-        <div class="mt-2">
-          <span class="text-color-secondary">Client Secret:</span>
-          <span class="ml-2">{{ clientSecret }}</span>
+        <div class="mt-2 flex flex-column sm:flex-row gap-2">
+          <div class="text-color-secondary">Client Secret:</div>
+          <div style="text-wrap: wrap; overflow-wrap: break-word;" class="max-w-12rem sm:max-w-max">{{ clientSecret }}</div>
         </div>
         <SkillsButton
           label="Reset Client Secret"

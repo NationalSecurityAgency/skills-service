@@ -279,11 +279,15 @@ const toDate = (value) => {
                      :disabled="addBadgeDisabled"
                      :disabled-msg="addBadgesDisabledMsg" aria-label="new badge"/>
     <loading-container v-bind:is-loading="isLoading">
-<!--      <transition name="projectContainer" enter-active-class="animated fadeIn">-->
         <div>
-          <div v-if="badges && badges.length" id="badgeCards" class="flex flex-wrap gap-3 align-items-stretch justify-content-center">
-            <div v-for="(badge) of badges" :id="badge.badgeId" :key="badge.badgeId" class="flex align-items-stretch"  style="min-width: 23rem;">
-              <BlockUI :blocked="sortOrder.loading" class="flex align-items-stretch h-full">
+          <div v-if="badges && badges.length"
+               id="badgeCards"
+               class="flex flex-wrap gap-3 justify-content-center">
+            <div v-for="(badge) of badges"
+                 :id="badge.badgeId"
+                 :key="badge.badgeId"
+                 class="flex-1 lg:w-min-20rem lg:max-w-30rem">
+              <BlockUI :blocked="sortOrder.loading">
                 <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${badge.badgeId}_overlayShown`">
                   <div v-if="badge.badgeId===sortOrder.loadingBadgeId" data-cy="updatingSortMsg">
                     <div class="text-info text-uppercase mb-1">Updating sort order!</div>
@@ -295,7 +299,6 @@ const toDate = (value) => {
                        :ref="(el) => (badgeRef[badge.badgeId] = el)"
                        @badge-updated="badgeUpdated"
                        @badge-deleted="deleteBadge"
-                       class="flex align-items-stretch"
                        @sort-changed-requested="updateSortAndReloadSubjects"
                        @publish-badge="publishBadge"
                        :disable-sort-control="badges.length === 1"/>
@@ -307,7 +310,6 @@ const toDate = (value) => {
                        message="Badges add another facet to the overall gamification profile and allows you to further reward your users by providing these prestigious symbols. Badges are a collection of skills and when all of the skills are accomplished that badge is earned."
                        class="mt-4"/>
         </div>
-<!--      </transition>-->
     </loading-container>
 
     <edit-badge v-if="displayNewBadgeModal" v-model="displayNewBadgeModal"

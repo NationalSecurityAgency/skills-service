@@ -205,6 +205,7 @@ const sortField = () => {
         :value="data" :loading="isLoading" size="small" stripedRows showGridlines paginator lazy
         :totalRecords="totalRows" :rows="pageSize" @page="pageChanged"
         tableStoredStateId="usersTable" data-cy="usersTable"
+        aria-label="Users"
         :rowsPerPageOptions="possiblePageSizes"
         v-model:sort-field="sortInfo.sortBy"
         v-model:sort-order="sortInfo.sortOrder"

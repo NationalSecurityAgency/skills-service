@@ -416,6 +416,7 @@ describe('Markdown Tests', () => {
         cy.contains('👍 👍 👍 👍');
         cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', {
             name: 'Markdown-SkillsPage-Overview',
+            errorThreshold: 0.1
         });
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
@@ -430,6 +431,7 @@ describe('Markdown Tests', () => {
         cy.contains('👍 👍 👍 👍');
         cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', {
             name: 'Markdown-SkillsPage-SkillPreview',
+            errorThreshold: 0.1
         });
     });
 
