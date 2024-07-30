@@ -91,7 +91,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['saved', 'cancelled', 'isDirty', 'errors'])
 
-const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, errors } = useForm({
+const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, errors, resetForm } = useForm({
   validationSchema: props.validationSchema,
   initialValues: props.initialValues
 })
@@ -191,6 +191,7 @@ if (props.asyncLoadDataFunction) {
     }
   }).finally(() => {
     isLoadingAsyncData.value = false
+    resetForm();
   })
 } else {
   isLoadingAsyncData.value = false

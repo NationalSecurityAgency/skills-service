@@ -142,6 +142,7 @@ const initialProjData = {
   projectId: props.project.projectId || '',
   projectName: props.project.name || '',
   description: props.project.description || '',
+  enableProtectedUserCommunity: false,
 }
 
 const loadDescription = () => {
