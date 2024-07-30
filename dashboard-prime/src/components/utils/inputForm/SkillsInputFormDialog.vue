@@ -177,10 +177,7 @@ const validateIfEditOrNotEmpty = () => {
 
 if (props.asyncLoadDataFunction) {
   isLoadingAsyncData.value = true
-  props.asyncLoadDataFunction().then((res) => {
-    // for (const [key, value] of Object.entries(res)) {
-    //   setFieldValue(key, value)
-    // }
+  props.asyncLoadDataFunction().then(() => {
     if (props.enableInputFormResiliency) {
       inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
         .then(() => {
@@ -205,7 +202,6 @@ if (props.asyncLoadDataFunction) {
 }
 
 watch(() => props.initialValues, (newValues) => {
-  console.log('Values have changed')
   resetForm({values: newValues});
 })
 </script>
