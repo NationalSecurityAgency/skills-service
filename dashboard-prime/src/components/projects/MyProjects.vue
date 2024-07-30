@@ -162,8 +162,6 @@ const enableDropAndDrop = () => {
         }
       })
     })
-  } else {
-    log.error(`Didn't attempt to enable sort - sort will not work property`)
   }
 }
 const sortOrderUpdate = (updateEvent) => {
