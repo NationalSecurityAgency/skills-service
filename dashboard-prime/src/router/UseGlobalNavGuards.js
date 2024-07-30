@@ -61,6 +61,7 @@ export const useGlobalNavGuards = () => {
   const beforeEachNavGuard = (to, from, next) => {
     const { skillsClientDisplayPath } = to.query
     const requestAccountPath = '/request-root-account'
+    const skillsLoginPath = '/skills-login'
     if (
       !isPki() &&
       !isLoggedIn() &&
@@ -74,6 +75,11 @@ export const useGlobalNavGuards = () => {
       !appConfig.needToBootstrap
     ) {
       next({ name: getLandingPage() })
+    } else if (
+      (isPki() || isLoggedIn() &&
+      (to.path === skillsLoginPath || to.path === `${skillsLoginPath}/`))
+    ) {
+      next(route.query.redirect || { name: getLandingPage() })
     } else {
       /* eslint-disable no-lonely-if */
       if (appInfoState.showUa && to.path !== '/user-agreement' && to.path !== '/skills-login') {
