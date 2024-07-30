@@ -304,4 +304,72 @@ describe('Login Tests', () => {
         });
     }
 
+    it.only('already logged in will redirect to the landing page', () => {
+        cy.fixture('vars.json')
+          .then((vars) => {
+              if (!Cypress.env('oauthMode')) {
+                  cy.log('NOT in oauthMode, using form login');
+                  cy.login(vars.defaultUser, vars.defaultPass);
+              } else {
+                  cy.log('oauthMode, using loginBySingleSignOn');
+                  cy.loginBySingleSignOn();
+              }
+
+              // // setup existing project
+              // cy.createProject(1);
+              // cy.enableProdMode(1);
+              // cy.createSubject(1, 1);
+              // cy.createSkill(1, 1, 1);
+              // cy.logout();
+          });
+
+        cy.visit('/skills-login/');
+
+      // cy.contains('PROJECT: This is project 1')
+      //   .should('be.visible');
+      // cy.contains('ID: proj1')
+      //   .should('be.visible');
+      // cy.get('[data-cy=subPageHeader]')
+      //   .contains('Subjects');
+
+
+      // cy.contains('Project');
+      cy.get('[data-cy=breadcrumbItemValue]')
+        .contains('Progress And Rankings');
+    })
+
+  it.only('already logged in will redirect to the redirect param when present', () => {
+    cy.fixture('vars.json')
+      .then((vars) => {
+        if (!Cypress.env('oauthMode')) {
+          cy.log('NOT in oauthMode, using form login');
+          cy.login(vars.defaultUser, vars.defaultPass);
+        } else {
+          cy.log('oauthMode, using loginBySingleSignOn');
+          cy.loginBySingleSignOn();
+        }
+
+        // // setup existing project
+        cy.createProject(1);
+        cy.enableProdMode(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        // cy.logout();
+      });
+
+    cy.visit('skills-login?redirect=/administrator/projects/proj1/');
+
+    cy.contains('PROJECT: This is project 1')
+      .should('be.visible');
+    cy.contains('ID: proj1')
+      .should('be.visible');
+    cy.get('[data-cy=subPageHeader]')
+      .contains('Subjects');
+
+
+    // cy.contains('Project');
+    // cy.get('[data-cy=subPageHeader]')
+    //   .contains('Projects');
+  })
+
 });
