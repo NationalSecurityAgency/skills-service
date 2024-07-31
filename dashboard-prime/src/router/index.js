@@ -85,6 +85,7 @@ import EmailVerificationSent from "@/components/access/EmailVerificationSent.vue
 import EmailVerifiedConfirmation from "@/components/access/EmailVerifiedConfirmation.vue";
 import RequestEmailVerification from "@/components/access/RequestEmailVerification.vue";
 import RedirectPage from "@/components/utils/RedirectPage.vue";
+import UpgradeInProgressPage from '@/components/utils/errors/UpgradeInProgressPage.vue'
 
 const routes = [
   {
@@ -235,6 +236,18 @@ const routes = [
       requiresAuth: false,
       announcer: {
         message: 'Error Page',
+      },
+    },
+  },
+  {
+    path: '/upgrade-in-progress',
+    name: 'DbUpgradeInProgressPage',
+    component: UpgradeInProgressPage,
+    props: true,
+    meta: {
+      requiresAuth: true,
+      announcer: {
+        message: 'Dashboard upgrade in progress',
       },
     },
   },

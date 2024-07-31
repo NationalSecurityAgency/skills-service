@@ -2338,4 +2338,20 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="subPageHeaderDisabledMsg"]').contains('The maximum number of Badges allowed is 3')
         cy.get('[data-cy="btn_Badges"]').should('be.disabled')
     })
+
+    it('when adding skills to a badge and an error occurs redirect to the error page', () => {
+        cy.intercept('POST', '/admin/projects/proj1/badge/badge1/skills/skill1', { statusCode: 500 }).as('saveEndpoint')
+        cy.createBadge(1, 1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/badges/badge1')
+
+        cy.get('[data-cy="skillsSelector"] [data-pc-section="trigger"]').click();
+        cy.get('[data-pc-section="item"]').first().click();
+
+        cy.wait('@saveEndpoint')
+
+        cy.get('[data-cy="errorPage"]')
+        cy.url().should('include', '/error')
+    })
 });

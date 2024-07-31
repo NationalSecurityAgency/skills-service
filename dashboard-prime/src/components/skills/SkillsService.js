@@ -150,7 +150,7 @@ export default {
         : `/admin/projects/${encodeURIComponent(skill.projectId)}/subjects/${encodeURIComponent(skill.subjectId)}/skills/${encodeURIComponent(requestSkillId)}`
 
     return axios
-      .post(url, copy, { handleError: false })
+      .post(url, copy)
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId))
   },
   reuseSkillInAnotherSubject(projectId, skillIds, newSubjectId, newGroupId = null) {

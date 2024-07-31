@@ -18,8 +18,7 @@ import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
-import { array, date, number, object, string, tuple } from 'yup'
-import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { date, number, object, string, tuple } from 'yup'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
@@ -46,7 +45,6 @@ const props = defineProps({
 const appConfig = useAppConfig()
 const emit = defineEmits(['hidden', 'badge-updated', 'keydown-enter']);
 const route = useRoute()
-const announcer = useSkillsAnnouncer()
 
 onMounted(() => {
   document.addEventListener('focusin', trackFocus);
@@ -63,14 +61,6 @@ const maximumDays = computed(() => {
   return appConfig.maxBadgeBonusInMinutes / (60 * 24)
 });
 
-const validateTime = (value, testContext) => {
-  return true;
-  // return ((days * 24 * 60) + (hours * 60) + minutes) <= this.$store.getters.config.maxBadgeBonusInMinutes;
-}
-
-const maxTimeLimitMessage = computed(() => {
-  return `Time Window must be less then ${appConfig.maxBadgeBonusInMinutes / (60 * 24)} days`;
-});
 
 const schema = object({
   'name': string()

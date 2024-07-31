@@ -264,7 +264,7 @@ class UpgradeInProgressFilterSpec extends Specification {
         1 * mockFilterChain.doFilter(mockRequest, mockResponse)
     }
 
-    def "PUT/POST methods not allowed unless annotated as safe"() {
+    def "POST methods not allowed unless annotated as safe"() {
         def upgradeSafeUrlDecider = Mock(UpgradeSafeUrlDecider)
         def skillEventQueue = Mock(ReportedSkillEventQueue)
         def mockMessageConverter = Mock(HttpMessageConverter)
@@ -306,6 +306,88 @@ class UpgradeInProgressFilterSpec extends Specification {
         }, MediaType.APPLICATION_JSON, _)
     }
 
+    def "PUT methods not allowed unless annotated as safe"() {
+        def upgradeSafeUrlDecider = Mock(UpgradeSafeUrlDecider)
+        def skillEventQueue = Mock(ReportedSkillEventQueue)
+        def mockMessageConverter = Mock(HttpMessageConverter)
+        def mockResponse = new MockHttpServletResponse()
+        def mockFilterChain = Mock(FilterChain)
+        def authentication = Mock(Authentication)
+        def securityContext = Mock(SecurityContext)
+        def userInfo = Mock(UserInfo)
+        def mockHeaders = Mock(HttpHeaders)
 
+        securityContext.getAuthentication() >> authentication
+        authentication.isAuthenticated() >> true
+        authentication.getPrincipal() >> userInfo
+        userInfo.getUsername() >> "userMakingRequest"
+
+        upgradeSafeUrlDecider.isSkillEventReport("/random", HttpMethod.PUT) >> null
+        upgradeSafeUrlDecider.isUrlAllowed("/random", HttpMethod.PUT) >> false
+
+        SecurityContextHolder.setContext(securityContext)
+
+        MockHttpServletRequest mockRequest = post("/random")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{fake}").buildRequest()
+
+        when:
+        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter()
+        progressFilter.configuredMessageConverters = [mockMessageConverter]
+        progressFilter.safeUrlDecider = upgradeSafeUrlDecider
+        progressFilter.skillEventQueue = skillEventQueue
+
+        progressFilter.doFilter(mockRequest, mockResponse, mockFilterChain)
+
+        then:
+        1 * mockMessageConverter.canWrite(UpgradeInProgressFilter.DbUpgradeErrBody.class, MediaType.APPLICATION_JSON) >> true
+        1 * mockMessageConverter.write({ UpgradeInProgressFilter.DbUpgradeErrBody it ->
+            it.errorCode == ErrorCode.DbUpgradeInProgress.toString() &&
+                    it.explanation == "A database upgrade is currently in progress, no training profile modifications are allowed at this time."
+        }, MediaType.APPLICATION_JSON, _)
+    }
+
+    def "PATCH methods not allowed unless annotated as safe"() {
+        def upgradeSafeUrlDecider = Mock(UpgradeSafeUrlDecider)
+        def skillEventQueue = Mock(ReportedSkillEventQueue)
+        def mockMessageConverter = Mock(HttpMessageConverter)
+        def mockResponse = new MockHttpServletResponse()
+        def mockFilterChain = Mock(FilterChain)
+        def authentication = Mock(Authentication)
+        def securityContext = Mock(SecurityContext)
+        def userInfo = Mock(UserInfo)
+        def mockHeaders = Mock(HttpHeaders)
+
+        securityContext.getAuthentication() >> authentication
+        authentication.isAuthenticated() >> true
+        authentication.getPrincipal() >> userInfo
+        userInfo.getUsername() >> "userMakingRequest"
+
+        upgradeSafeUrlDecider.isSkillEventReport("/random", HttpMethod.PATCH) >> null
+        upgradeSafeUrlDecider.isUrlAllowed("/random", HttpMethod.PATCH) >> false
+
+        SecurityContextHolder.setContext(securityContext)
+
+        MockHttpServletRequest mockRequest = post("/random")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{fake}").buildRequest()
+
+        when:
+        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter()
+        progressFilter.configuredMessageConverters = [mockMessageConverter]
+        progressFilter.safeUrlDecider = upgradeSafeUrlDecider
+        progressFilter.skillEventQueue = skillEventQueue
+
+        progressFilter.doFilter(mockRequest, mockResponse, mockFilterChain)
+
+        then:
+        1 * mockMessageConverter.canWrite(UpgradeInProgressFilter.DbUpgradeErrBody.class, MediaType.APPLICATION_JSON) >> true
+        1 * mockMessageConverter.write({ UpgradeInProgressFilter.DbUpgradeErrBody it ->
+            it.errorCode == ErrorCode.DbUpgradeInProgress.toString() &&
+                    it.explanation == "A database upgrade is currently in progress, no training profile modifications are allowed at this time."
+        }, MediaType.APPLICATION_JSON, _)
+    }
 
 }
