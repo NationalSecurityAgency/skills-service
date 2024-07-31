@@ -60,8 +60,7 @@ const asyncLoadData = () => {
             skillId: props.isCopy ? `copy_of_${resSkill.skillId}` : resSkill.skillId,
             selfReportingType: props.isCopy && resSkill.selfReportingType === 'Video' ? 'Approval' : resSkill.selfReportingType,
           }
-          initialSkillData.value = { ...skillDetails };
-          initialSkillData.value.hasVideoConfigured = resSkill.hasVideoConfigured;
+          skillDetails.hasVideoConfigured = resSkill.hasVideoConfigured;
           return skillDetails;
         })
     }
@@ -102,6 +101,7 @@ const asyncLoadData = () => {
             skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('justificationRequired');
           }
         }
+        initialSkillData.value = { ...skillResWithVersion };
         return skillResWithVersion;
       })
     }
