@@ -84,11 +84,11 @@ const toggle = (event) => {
       data-cy="helpButton"
       aria-controls="help_settings_menu" />
     <div id="help_settings_menu">
-      <Menu ref="menu" :model="items" :popup="true">
+      <Menu ref="menu" :model="items" :popup="true" role="navigation">
         <template #item="{ item, props }">
           <a :href="item.url" target="_blank" v-bind="props.action">
-            <span class="w-1rem"><i :class="item.icon"/></span>
-            <span class="ml-2">{{ item.label }}</span>
+            <span class="w-1rem p-menuitem-icon"><i :class="item.icon"/></span>
+            <span class="ml-2 p-menuitem-text">{{ item.label }}</span>
           </a>
         </template>
       </Menu>
