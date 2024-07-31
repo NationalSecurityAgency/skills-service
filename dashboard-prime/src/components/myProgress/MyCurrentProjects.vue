@@ -89,12 +89,12 @@ const projectOrderUpdate = (projectId, newIndex) => {
                     v-if="sortOrderLoading"
                     aria-label="Updating sort order"
                     class="loading-indicator" />
-    <div class="flex flex-wrap gap-3 flex-column sm:flex-row align-items-stretch justify-content-center" id="projectCards">
+    <div class="grid" id="projectCards">
 
       <div v-for="(proj, index) in myProgressState.myProjects"
            :key="proj.projectName"
            :id="proj.projectId"
-           class="flex-1 project-link-container">
+           class="col-12 lg:col-6 project-link-container">
         <project-link-card
           :ref="`proj${proj.projectId}`"
           :display-order="index"
@@ -120,10 +120,4 @@ const projectOrderUpdate = (projectId, newIndex) => {
   right: 0;
 }
 
-@media (min-width: 50rem) {
-  .project-link-container {
-    min-width: 32rem;
-    max-width: 70rem;
-  }
-}
 </style>
