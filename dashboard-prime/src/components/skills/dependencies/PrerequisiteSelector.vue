@@ -210,7 +210,7 @@ function validate(value, ctx) {
 </script>
 
 <template>
-  <Card style="margin-bottom:10px;">
+  <Card style="margin-bottom:10px;" data-cy="addPrerequisiteToLearningPath">
     <template #header>
       <SkillsCardHeader title="Add a new item to the learning path"></SkillsCardHeader>
     </template>

@@ -23,6 +23,7 @@ import SkipToContent from '@/components/header/SkipToContent.vue'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 import SkillTreeHeaderSvgIcon from '@/components/brand/SkillTreeHeaderSvgIcon.vue'
+import UpgradeInProgressWarning from '@/components/header/UpgradeInProgressWarning.vue'
 
 const pathPath = usePagePath()
 const appInfoState = useAppInfoState()
@@ -34,16 +35,8 @@ const themeHelper = useThemesHelper()
 <template>
   <div class="header">
     <skip-to-content></skip-to-content>
-
-    <!--    <div v-if="isUpgradeInProgress" class="container-fluid p-3 text-center bg-warning mb-1" data-cy="upgradeInProgressWarning">-->
-    <!--      <span class="fa-stack fa-2x" style="vertical-align: middle; font-size:1em;">-->
-    <!--        <i class="fas fa-circle fa-stack-2x"></i>-->
-    <!--        <i class="fas fa-hammer fa-stack-1x fa-inverse"></i>-->
-    <!--      </span>-->
-    <!--      <span class="pl-1">An upgrade is currently in process. Please note that no changes will be permitted until the upgrade is complete.-->
-    <!--      Any reported skills will be queued for application once the upgrade has completed.</span>-->
-    <!--    </div>-->
     <div class="bg-primary-reverse">
+      <upgrade-in-progress-warning />
       <div class="flex flex-wrap pt-3 px-3 pb-2 justify-content-center mb-3 border-bottom-1 border-200">
         <div class="flex-1 justify-content-center">
           <div class="flex">

@@ -14,19 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { computed, onMounted, ref } from 'vue'
 import AccessService from '@/components/access/AccessService.js'
-import ExistingUserInput from "@/components/utils/ExistingUserInput.vue";
-import UserRolesUtil from '@/components/utils/UserRolesUtil';
+import ExistingUserInput from '@/components/utils/ExistingUserInput.vue'
+import UserRolesUtil from '@/components/utils/UserRolesUtil'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import { useUserInfo } from '@/components/utils/UseUserInfo.js';
-import Column from "primevue/column";
+import { useUserInfo } from '@/components/utils/UseUserInfo.js'
+import Column from 'primevue/column'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import { userErrorState } from '@/stores/UserErrorState.js'
-import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
-import DataTable from "primevue/datatable";
+import { useDialogMessages } from '@/components/utils/modal/UseDialogMessages.js'
+import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
 
 const dialogMessages = useDialogMessages()
 // role constants
@@ -43,6 +43,7 @@ const userInfo = useUserInfo();
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
 const errorState = userErrorState()
+const upgradeInProgressErrorChecker = useUpgradeInProgressErrorChecker()
 
 const emit = defineEmits(['role-added', 'role-deleted']);
 const props = defineProps({
@@ -206,6 +207,8 @@ function handleError(e) {
   if (e.response.data && e.response.data.errorCode && (e.response.data.errorCode === 'UserNotFound' || e.response.data.errorCode === 'AccessDenied')) {
     errNotification.value.msg = e.response.data.explanation;
     errNotification.value.enable = true;
+  } else if (upgradeInProgressErrorChecker.isUpgrading(e)) {
+    upgradeInProgressErrorChecker.navToUpgradeInProgressPage()
   } else {
     const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
     errorState.navToErrorPage('Failed to add User Role', errorMessage)

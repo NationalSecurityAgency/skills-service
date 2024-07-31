@@ -141,6 +141,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxLastNameLength = computed(() => config.value.maxLastNameLength)
   const numProjectsToStartShowingAsCards = computed(() => config.value.numProjectsToStartShowingAsCards)
   const disableScrollToTop = computed(() => config.value.disableScrollToTop)
+  const dbUpgradeInProgress = computed(() => config.value.dbUpgradeInProgress)
   return {
     loadConfigState,
     refreshConfig,
@@ -225,5 +226,6 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxLastNameLength,
     numProjectsToStartShowingAsCards,
     disableScrollToTop,
+    dbUpgradeInProgress,
   }
 })

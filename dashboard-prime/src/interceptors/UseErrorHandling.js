@@ -20,6 +20,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { userErrorState } from '@/stores/UserErrorState.js'
 import { useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
+import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
 
 export const useErrorHandling = () => {
 
@@ -28,6 +29,7 @@ export const useErrorHandling = () => {
   const authState = useAuthState()
   const appConfig = useAppConfig()
   const errorState = userErrorState()
+  const upgradeInProgressErrorChecker = useUpgradeInProgressErrorChecker()
 
   const skillsDisplayInfo = useSkillsDisplayInfo()
   const log = useLog()
@@ -99,8 +101,8 @@ export const useErrorHandling = () => {
       errorState.setErrorParams('Resource Not Found', explanation, 'fas fa-exclamation-triangle')
       navToErrorPage()
       return Promise.reject(error);
-    } else if (errorCode === 503 && error?.response?.data?.errorCode === 'DbUpgradeInProgress') {
-      router.push({ name: 'DbUpgradeInProgressPage' });
+    } else if (upgradeInProgressErrorChecker.isUpgrading(error)) {
+      upgradeInProgressErrorChecker.navToUpgradeInProgressPage()
       return Promise.reject(error);
     } else {
       errorState.resetToDfeault()
