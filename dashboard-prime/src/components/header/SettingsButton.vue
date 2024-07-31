@@ -101,7 +101,7 @@ const toggle = (event) => {
       aria-haspopup="true"
       aria-controls="user_settings_menu" />
     <div id="user_settings_menu">
-      <Menu ref="menu" :model="items" :popup="true">
+      <Menu ref="menu" :model="items" :popup="true" role="navigation">
         <template #start>
           <div class="mx-3 mt-2">
             <Avatar icon="fas fa-user" class="bg-lime-900 text-white" />
