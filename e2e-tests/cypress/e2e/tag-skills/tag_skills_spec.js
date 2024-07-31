@@ -401,7 +401,7 @@ describe('Tag Skills Tests', () => {
     });
 
 
-    it.only('adding a duplicate tag skill is ignored and not displayed', () => {
+    it('adding a duplicate tag skill is ignored and not displayed', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         // must exist initially
