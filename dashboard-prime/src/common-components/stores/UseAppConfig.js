@@ -62,6 +62,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     return res
   }
 
+  const isTrue = (val) => val && (val === true || val?.toLowerCase() === 'true')
+
   const maxBadgeBonusInMinutes = computed(() => config.value.maxBadgeBonusInMinutes)
   const minNameLength = computed(() => config.value.minNameLength)
   const maxProjectNameLength = computed(() => config.value.maxProjectNameLength)
@@ -141,6 +143,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxLastNameLength = computed(() => config.value.maxLastNameLength)
   const numProjectsToStartShowingAsCards = computed(() => config.value.numProjectsToStartShowingAsCards)
   const disableScrollToTop = computed(() => config.value.disableScrollToTop)
+  const dbUpgradeInProgress = computed(() => isTrue(config.value.dbUpgradeInProgress))
   return {
     loadConfigState,
     refreshConfig,
@@ -225,5 +228,6 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxLastNameLength,
     numProjectsToStartShowingAsCards,
     disableScrollToTop,
+    dbUpgradeInProgress,
   }
 })

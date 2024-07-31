@@ -120,7 +120,7 @@ class UpgradeSafeUrlDecider {
 
     public boolean isUrlAllowed(String path, HttpMethod method) {
         log.info("checking if http ${method} against [${path}] is allowed")
-        if (HttpMethod.PUT == method || HttpMethod.POST == method || HttpMethod.DELETE == method) {
+        if (HttpMethod.PUT == method || HttpMethod.POST == method || HttpMethod.DELETE == method || HttpMethod.PATCH == method) {
             Matcher matcher = allowedMutationUrls.matcher(path)
             return matcher.find()
         }

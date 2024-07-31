@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import Card from 'primevue/card';
 import Column from 'primevue/column';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
@@ -30,14 +30,17 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { storeToRefs } from 'pinia';
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
 
 const dialogMessages = useDialogMessages()
 const projConf = useProjConfig();
 const badgeState = useBadgeState();
 const { badge } = storeToRefs(badgeState);
 const route = useRoute();
+const router = useRouter();
 const emit = defineEmits(['skills-changed']);
 const responsive = useResponsiveBreakpoints()
+const upgradeInProgressErrorChecker = useUpgradeInProgressErrorChecker()
 
 const loading = ref({
   availableSkills: true,
@@ -154,12 +157,11 @@ const skillAdded = (newItem) => {
       loading.value.skillOp = false;
       learningPathViolationErr.value.show = true;
       learningPathViolationErr.value.skillName = newItem.name;
+    } else if(upgradeInProgressErrorChecker.isUpgrading(e)) {
+      upgradeInProgressErrorChecker.navToUpgradeInProgressPage()
     } else {
       const errorMessage = (e.response && e.response.data && e.response.data.explanation) ? e.response.data.explanation : undefined;
-      // handlePush({
-      //   name: 'ErrorPage',
-      //   query: { errorMessage },
-      // });
+      router.push({ name: 'ErrorPage', query: { errorMessage } });
     }
   });
 };

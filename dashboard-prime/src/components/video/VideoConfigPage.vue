@@ -37,6 +37,7 @@ import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue';
 import VideoFileInput from '@/components/video/VideoFileInput.vue';
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
+import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
 
 const dialogMessages = useDialogMessages()
 const VideoPlayer = defineAsyncComponent(() =>
@@ -46,6 +47,7 @@ const VideoPlayer = defineAsyncComponent(() =>
 const skillsState = useSkillsState();
 const route = useRoute();
 const router = useRouter()
+const upgradeInProgressErrorChecker = useUpgradeInProgressErrorChecker()
 const appConfig = useAppConfig()
 const projConfig = useProjConfig()
 const timeUtils = useTimeUtils()
@@ -209,8 +211,9 @@ const saveSettings = () => {
     }, 3500);
     announcer.polite('Video settings were saved');
     setupPreview();
-  }, () => {
+  }, (error) => {
     loading.value.video = false;
+    upgradeInProgressErrorChecker.checkError(error)
   });
 }
 const confirmClearSettings = () => {
