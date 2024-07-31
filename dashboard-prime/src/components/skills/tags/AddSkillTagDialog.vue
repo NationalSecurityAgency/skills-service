@@ -82,7 +82,9 @@ const afterSave = (taggedInfo) => {
   const skills = props.groupId ? skillsState.getGroupSkills(props.groupId) : skillsState.subjectSkills
   const toUpdate = skills.filter(sk => taggedInfo.skillIds.includes(sk.skillId))
   toUpdate.forEach((sk) => {
-    sk.tags.push({ tagId: taggedInfo.tagId, tagValue: taggedInfo.tagValue })
+    if (sk.tags.findIndex((item) => item.tagId === taggedInfo.tagId) === -1) {
+      sk.tags.push({tagId: taggedInfo.tagId, tagValue: taggedInfo.tagValue})
+    }
   })
   SkillsReporter.reportSkill('AddOrModifyTags')
   emit('added-tag', taggedInfo)
