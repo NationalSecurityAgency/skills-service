@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { onMounted, onBeforeUnmount } from 'vue';
 import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
@@ -67,10 +68,25 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  shouldConfirmCancel: {
+    type: Boolean,
+    default: false
+  },
 })
-const emit = defineEmits(['on-ok', 'on-cancel'])
+const emit = defineEmits(['on-ok', 'on-cancel', 'confirm-cancel'])
 const focusState = useFocusState()
+
+onMounted(() => {
+  window.addEventListener('keydown', handleEscape);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleEscape)
+})
+
+
 const themeHelper = useThemesHelper()
+
 const onUpdateVisible = (newVal) => {
   if (!newVal) {
     emit('on-cancel', newVal)
@@ -93,6 +109,14 @@ const handleClose = () => {
     focusState.focusOnLastElement()
   }
 }
+
+const handleEscape = (event) => {
+  if (event.key === 'Escape' && !props.submitting) {
+    emit('confirm-cancel', event)
+    handleClose()
+  }
+}
+
 defineExpose({
   handleClose
 })
@@ -102,7 +126,7 @@ defineExpose({
   <Dialog modal
           @update:visible="onUpdateVisible"
           :closable="!submitting"
-          :close-on-escape="!submitting"
+          :close-on-escape="!shouldConfirmCancel && !submitting"
           v-model:visible="model"
           :maximizable="true"
           :header="header"
@@ -116,25 +140,25 @@ defineExpose({
 
       <div :class="`text-right ${footerClass}`">
         <SkillsButton
-          :label="cancelButtonLabel"
-          :icon="cancelButtonIcon"
-          :severity="cancelButtonSeverity"
-          outlined size="small"
-          class="float-right mr-2"
-          :disabled="submitting"
-          @click="onCancel"
-          data-cy="closeDialogBtn" />
+            :label="cancelButtonLabel"
+            :icon="cancelButtonIcon"
+            :severity="cancelButtonSeverity"
+            outlined size="small"
+            class="float-right mr-2"
+            :disabled="submitting"
+            @click="onCancel"
+            data-cy="closeDialogBtn" />
         <SkillsButton
-          v-if="showOkButton"
-          :label="okButtonLabel"
-          :icon="okButtonIcon"
-          :severity="okButtonSeverity"
-          outlined size="small"
-          class="float-right"
-          @click="onOk"
-          :disabled="okButtonDisabled || submitting"
-          :loading="submitting"
-          data-cy="saveDialogBtn" />
+            v-if="showOkButton"
+            :label="okButtonLabel"
+            :icon="okButtonIcon"
+            :severity="okButtonSeverity"
+            outlined size="small"
+            class="float-right"
+            @click="onOk"
+            :disabled="okButtonDisabled || submitting"
+            :loading="submitting"
+            data-cy="saveDialogBtn" />
       </div>
     </div>
   </Dialog>

@@ -60,7 +60,8 @@ const asyncLoadData = () => {
             skillId: props.isCopy ? `copy_of_${resSkill.skillId}` : resSkill.skillId,
             selfReportingType: props.isCopy && resSkill.selfReportingType === 'Video' ? 'Approval' : resSkill.selfReportingType,
           }
-          initialSkillData.hasVideoConfigured = resSkill.hasVideoConfigured;
+          initialSkillData.value = { ...skillDetails };
+          initialSkillData.value.hasVideoConfigured = resSkill.hasVideoConfigured;
           return skillDetails;
         })
     }
@@ -101,6 +102,7 @@ const asyncLoadData = () => {
             skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('justificationRequired');
           }
         }
+        initialSkillData.value = { ...skillResWithVersion };
         return skillResWithVersion;
       })
     }
@@ -212,7 +214,7 @@ const schema = object({
       .label('Quiz/Survey'),
 })
 const selfReportingType = ref(props.skill.selfReportingType && props.skill.selfReportingType !== 'Disabled' ? props.skill.selfReportingType : null)
-const initialSkillData = {
+const initialSkillData = ref({
   skillId: props.skill.skillId || '',
   skillName: props.skill.name || '',
   originalSkillId: props.skill.skillId || '',
@@ -228,7 +230,7 @@ const initialSkillData = {
   selfReportingEnabled: selfReportingType.value !== null,
   description: props.skill.description || '',
   quizId: props.skill.quizId
-}
+})
 
 const saveSkill = (values) => {
   const skilltoSave = {
@@ -268,6 +270,7 @@ const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
   <SkillsInputFormDialog
     :id="formId"
     v-model="show"
+    :should-confirm-cancel="true"
     :is-edit="isEdit"
     :async-load-data-function="asyncLoadData"
     :save-data-function="saveSkill"

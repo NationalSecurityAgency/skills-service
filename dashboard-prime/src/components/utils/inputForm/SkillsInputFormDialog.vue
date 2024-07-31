@@ -21,8 +21,9 @@ import deepEqual from 'deep-equal';
 import FormReloadWarning from '@/components/utils/inputForm/FormReloadWarning.vue'
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
-
+const dialogMessages = useDialogMessages()
 const isLoadingAsyncData = ref(true)
 const model = defineModel()
 const props = defineProps({
@@ -83,10 +84,14 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
+  shouldConfirmCancel: {
+    type: Boolean,
+    default: false,
+  }
 })
 const emit = defineEmits(['saved', 'cancelled', 'isDirty', 'errors'])
 
-const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, errors } = useForm({
+const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, errors, resetForm } = useForm({
   validationSchema: props.validationSchema,
   initialValues: props.initialValues
 })
@@ -97,6 +102,23 @@ const skillsDialog = ref(null)
 const cancel = () => {
   emit('cancelled');
   close()
+}
+const confirmCancel = () => {
+  if(meta.value.dirty) {
+    dialogMessages.msgConfirm({
+      message: 'You have unsaved changes.  Discard?',
+      header: 'Discard Unsaved Changes',
+      acceptLabel: 'Discard',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        emit('cancelled');
+        close()
+      }
+    });
+  } else {
+    emit('cancelled');
+    close()
+  }
 }
 const close = () => {
   skillsDialog.value.handleClose()
@@ -155,10 +177,7 @@ const validateIfEditOrNotEmpty = () => {
 
 if (props.asyncLoadDataFunction) {
   isLoadingAsyncData.value = true
-  props.asyncLoadDataFunction().then((res) => {
-    for (const [key, value] of Object.entries(res)) {
-      setFieldValue(key, value)
-    }
+  props.asyncLoadDataFunction().then(() => {
     if (props.enableInputFormResiliency) {
       inputFormResiliency.init(props.id, values, props.initialValues, setFieldValue)
         .then(() => {
@@ -182,6 +201,9 @@ if (props.asyncLoadDataFunction) {
   }
 }
 
+watch(() => props.initialValues, (newValues) => {
+  resetForm({values: newValues});
+})
 </script>
 
 <template>
@@ -191,6 +213,8 @@ if (props.asyncLoadDataFunction) {
     :header="header"
     :loading="isDialogLoading"
     :submitting="isSubmitting"
+    :shouldConfirmCancel="shouldConfirmCancel"
+    @confirm-cancel="confirmCancel"
     @on-cancel="cancel"
     @on-ok="onSubmit"
     :ok-button-label="saveButtonLabel"
