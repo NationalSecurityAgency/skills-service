@@ -60,7 +60,7 @@ const asyncLoadData = () => {
             skillId: props.isCopy ? `copy_of_${resSkill.skillId}` : resSkill.skillId,
             selfReportingType: props.isCopy && resSkill.selfReportingType === 'Video' ? 'Approval' : resSkill.selfReportingType,
           }
-          skillDetails.hasVideoConfigured = resSkill.hasVideoConfigured;
+          initialSkillData.value.hasVideoConfigured = resSkill.hasVideoConfigured;
           return skillDetails;
         })
     }
