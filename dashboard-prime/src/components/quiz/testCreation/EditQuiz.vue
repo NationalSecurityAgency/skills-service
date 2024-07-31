@@ -141,6 +141,7 @@ const onSavedQuiz = (savedQuiz) => {
       :id="modalId"
       v-model="model"
       :is-edit="isEdit"
+      :should-confirm-cancel="true"
       :header="modalTitle"
       :loading="loadingComponent"
       :validation-schema="schema"
