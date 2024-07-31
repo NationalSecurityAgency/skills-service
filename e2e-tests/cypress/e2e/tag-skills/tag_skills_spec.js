@@ -401,4 +401,47 @@ describe('Tag Skills Tests', () => {
     });
 
 
+    it.only('adding a duplicate tag skill is ignored and not displayed', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+
+        cy.get('[data-cy="newTag"]').type('New Tag 1')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('exist')
+        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
+        cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
+        cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
+        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('exist')
+        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
+        cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
+        cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
+        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+
+        cy.get('[data-cy="newTag"]').type('New Tag 1')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('exist')
+        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
+        cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
+        cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
+        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
+    });
 });
