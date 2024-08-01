@@ -37,10 +37,10 @@ const hasData = computed(() => userProgress.userProgressSummary.subjects?.length
       </template>
     </Card>
     <search-all-project-skills v-if="hasData && !attributes.isSummaryOnly" class="mb-3"/>
-    <div v-if="hasData" class="flex flex-wrap gap-2">
+    <div v-if="hasData" class="grid">
       <div v-for="(subject, index) in userProgress.userProgressSummary.subjects"
            :key="`unique-subject-${index}`"
-           class="flex-1 xsm:w-min-20rem lg:max-w-30rem">
+           class="col-12 md:col-6 xl:col-4">
           <subject-tile :subject="subject" :tile-index="index"/>
       </div>
     </div>
