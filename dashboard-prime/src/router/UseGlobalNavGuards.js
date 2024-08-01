@@ -76,7 +76,7 @@ export const useGlobalNavGuards = () => {
     ) {
       next({ name: getLandingPage() })
     } else if (
-      (isPki() || isLoggedIn() &&
+      ((isPki() || isLoggedIn()) &&
       (to.path === skillsLoginPath || to.path === `${skillsLoginPath}/`))
     ) {
       next(route.query.redirect || { name: getLandingPage() })
