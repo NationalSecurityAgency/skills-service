@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import tinycolor from 'tinycolor2';
+
 export default {
   nonCSSConfig: ['charts', 'landingPageTitle', 'disableSkillTreeBrand', 'disableBreadcrumb', 'iconColors', 'prerequisites', 'circleProgressInteriorTextColor'],
   bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor', 'infoCards', 'backgroundColor', 'textPrimaryColor', 'textSecondaryColor', 'tiles', 'breadcrumb'],
@@ -185,7 +187,6 @@ export default {
           '.p-autocomplete-panel.p-component .p-autocomplete-item.p-focus .text-orange-700,' +
           '.p-autocomplete-panel.p-component .p-autocomplete-item:hover .text-orange-700,' +
           'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link.p-highlight,' +
-          '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link:hover,' +
           '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-avatar-icon,' +
           'body #app .sd-theme-home .fa-stack .fa-stack-1x.fa-inverse,' +
           'body #app .sd-theme-home .toastui-editor-contents pre code,' +
@@ -464,6 +465,18 @@ export default {
     }
     setDefaultBackgroundIfNotSet(theme)
     applyDefaults(theme)
+
+    const handleMenuItemLinkHoverColor = (theme, selectorKey) => {
+      if (theme?.tiles?.backgroundColor && theme?.tiles?.backgroundColor !== '#fff') {
+        const hoverColor = tinycolor(theme.tiles.backgroundColor).lighten(10).toString();
+        theme.tilesMenuLinkHoverCalculatedColor=hoverColor
+        selectorKey.tilesMenuLinkHoverCalculatedColor = {
+          selector: '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link:hover',
+          styleName: 'background-color'
+        }
+      }
+    }
+    handleMenuItemLinkHoverColor(theme, this.selectorKey)
     populateResult(this.selectorKey, theme)
 
     // Some CSS may mess up some things, fix those here
