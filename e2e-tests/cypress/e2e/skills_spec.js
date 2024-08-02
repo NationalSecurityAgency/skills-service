@@ -1231,7 +1231,7 @@ describe('Skills Tests', () => {
     }
   })
 
-  it.only('search for skills across subjects', () => {
+  it('search for skills across subjects', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2)
     cy.createSkill(1, 1, 3)
