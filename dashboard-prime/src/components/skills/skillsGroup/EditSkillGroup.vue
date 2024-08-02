@@ -117,6 +117,7 @@ const onSkillSaved = (skill) => {
     :validation-schema="schema"
     :initial-values="initialSkillData"
     :enable-return-focus="true"
+    :should-confirm-cancel="true"
     data-cy="EditSkillGroupModal"
     @saved="onSkillSaved">
 
