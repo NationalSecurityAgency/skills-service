@@ -418,39 +418,14 @@ describe('Client Display Features Tests', () => {
   })
 
   it('custom icons in skills-client', () => {
+    cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj1/icons/upload')
+
+    cy.createBadge(1, 1)
     cy.createSubject(1, 1)
     cy.createSkill(1, 1, 1)
-    cy.createBadge(1,1)
-    cy.assignSkillToBadge(1, 1, 1);
-    cy.enableBadge(1, 1);
-    cy.intercept({
-      method: 'POST',
-      url: '/admin/projects/proj1/icons/upload',
-    })
-      .as('uploadIcon');
+    cy.assignSkillToBadge(1, 1, 1)
+    cy.enableBadge(1, 1, { iconClass: 'proj1-validiconpng' })
 
-    cy.visit('/administrator/projects/proj1/badges');
-    cy.get('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]')
-      .click();
-
-    cy.get('[data-cy="name"]').should('have.value', 'Badge 1');
-    cy.get('[data-cy="iconPicker"] .fas.fa-ghost');
-
-    cy.get('[data-cy="iconPicker"]').first().click();
-    cy.get('[data-cy="virtualIconList"] .fas.fa-ad')
-    cy.wait(1000)
-    cy.get('.p-menuitem-link').contains('Custom').click();
-    cy.wait(1000)
-    const filename = 'valid_icon.png';
-    cy.get('[data-cy="fileInput"]').attachFile(filename);
-    cy.wait('@uploadIcon');
-    cy.get('[data-cy="iconPicker"] .proj1-validiconpng');
-    cy.get('[data-cy="name"]').type('customIcon');
-    cy.get('[data-cy="saveDialogBtn"]').click();
-
-    cy.get('[data-cy="badgeCard-badge1"] .proj1-validiconpng');
-
-    // now validate skills-client
     cy.ignoreSkillsClientError()
     cy.visit('/test-skills-client/proj1');
     cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
