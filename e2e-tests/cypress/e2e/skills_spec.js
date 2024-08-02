@@ -1231,7 +1231,7 @@ describe('Skills Tests', () => {
     }
   })
 
-  it('search for skills across subjects', () => {
+  it.only('search for skills across subjects', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2)
     cy.createSkill(1, 1, 3)
@@ -1249,10 +1249,12 @@ describe('Skills Tests', () => {
 
 
     cy.visit('/administrator/projects/proj1/')
-    cy.get('[data-cy="skillsSelector"]').should('contain', 'Search and Navigate directly to a skill')
+    cy.get('[data-cy="skillsSelector"] input')
+      .invoke('attr', 'placeholder')
+      .should('contain', 'Search and Navigate directly to a skill');
     cy.get('[data-cy="skillsSelector"]').click()
-    cy.get('li.p-dropdown-empty-message').contains('Type to search for skills').should('be.visible')
-    cy.get(`[data-pc-section="filterinput"]`).type('sUbJ2')
+    cy.get('li.p-autocomplete-empty-message').contains('Type to search for skills').should('be.visible')
+    cy.get(`[data-cy="skillsSelector"]`).type('sUbJ2')
 
     cy.get('[data-cy="skillsSelector-skillId"]').should('have.length', 3).as('skillIds')
     cy.get('@skillIds').eq(0).contains('skill6Subj2')
@@ -1276,13 +1278,12 @@ describe('Skills Tests', () => {
     // search produces no results
     cy.visit('/administrator/projects/proj1/')
     // cy.get('[data-cy="skillsSelector"]').contains('Search and Navigate directly to a skill').should('be.visible')
-    cy.get('[data-cy="skillsSelector"]').click()
-    cy.get(`[data-pc-section="filterinput"]`).type('sUbJ2*kd')
-    cy.get('li.p-dropdown-empty-message').contains('No results found').should('be.visible')
+    cy.get('[data-cy="skillsSelector"]').type('sUbJ2*kd')
+    cy.get('li.p-autocomplete-empty-message').contains('No results found').should('be.visible')
 
     // special chars don't break anything
-    cy.get(`[data-pc-section="filterinput"]`).type('!@#$%^&*()')
-    cy.get('li.p-dropdown-empty-message').contains('No results found').should('be.visible')
+    cy.get(`[data-cy="skillsSelector"]`).type('!@#$%^&*()')
+    cy.get('li.p-autocomplete-empty-message').contains('No results found').should('be.visible')
   })
 
   it('add skill and copy skill buttons disabled if max skills for subject reached', () => {

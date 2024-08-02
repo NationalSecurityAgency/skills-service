@@ -322,7 +322,7 @@ describe('Approver Config Skills Tests', () => {
         cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '5')
     });
 
-    it.only('added skills are not presented in the skills selector', function () {
+    it('added skills are not presented in the skills selector', function () {
         cy.visit('/administrator/projects/proj1/self-report/configure');
         const user1 = 'user1'
         const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`
@@ -361,7 +361,7 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).click();
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('ski');
         cy.wait(1000)
-        cy.contains('No elements found')
+        cy.contains('No results found')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelectionItem-proj1-skill4"]`).should('not.exist');
 
         // refresh and re-test
@@ -371,7 +371,7 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).click();
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('ski');
         cy.wait(1000)
-        cy.contains('No elements found')
+        cy.contains('No results found')
         cy.get(`[data-cy="skillsSelectionItem-proj1-skill4"]`).should('not.exist');
     });
 
