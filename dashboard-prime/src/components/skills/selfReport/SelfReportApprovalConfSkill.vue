@@ -189,12 +189,8 @@ const removeTagConf = (removedItem) => {
           <skills-selector
               :disabled="selectedSubject !== null || loading"
               :options="availableSkills"
-              :selected="selectedSkills"
               @added="selectSkill"
-              @removed="selectedSkills = []"
-              placeholder="Select skill"
-              :onlySingleSelectedValue="true"
-              :warnBeforeRemoving="false"/>
+              placeholder="Select skill"/>
         </div>
         <div class="flex mx-1 text-center">
           <span class="text-center">OR</span>

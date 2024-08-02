@@ -60,7 +60,6 @@ const navToSkill = (selectedItem) => {
                         placeholder="Search and Navigate directly to a skill"
                         placeholder-icon="fas fa-search"
                         select-label="Click to navigate"
-                        :onlySingleSelectedValue="true"
                         :internal-search="false"
                         :empty-without-search="true"/>
     </div>
