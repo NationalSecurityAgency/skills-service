@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { reactive, computed, ref, provide, toRaw, watch } from 'vue'
+import { reactive, computed, ref, provide, toRaw, watch, nextTick } from 'vue'
 import { useForm } from 'vee-validate'
 import { useInputFormResiliency } from '@/components/utils/inputForm/UseInputFormResiliency.js'
 import deepEqual from 'deep-equal';
@@ -106,6 +106,7 @@ const cancel = () => {
 const confirmCancel = () => {
   if(meta.value.dirty) {
     dialogMessages.msgConfirm({
+      targetElement: skillsDialog.value,
       message: 'You have unsaved changes.  Discard?',
       header: 'Discard Unsaved Changes',
       acceptLabel: 'Discard',
@@ -113,6 +114,18 @@ const confirmCancel = () => {
       accept: () => {
         emit('cancelled');
         close()
+      },
+      onShowHandler: () => {
+        setTimeout(() => {
+          nextTick(() => {
+            const discardButton = document.querySelector('[aria-label="Discard"]')
+            if (discardButton) {
+              discardButton.focus()
+            } else {
+              console.warn('SkillsInputFormDialog" Failed to focus on discard button')
+            }
+          })
+        }, 600)
       }
     });
   } else {
