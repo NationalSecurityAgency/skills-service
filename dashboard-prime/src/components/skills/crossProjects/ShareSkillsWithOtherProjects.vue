@@ -150,10 +150,6 @@ const onSelectedSkill = (item) => {
   selectedSkill.value = item
 }
 
-const onDeselectedSkill = () => {
-  selectedSkill.value = null
-}
-
 const onShareWithAllProjects = (checked) => {
   if (checked) {
     selectedProject.value = null
@@ -180,13 +176,10 @@ const onShareWithAllProjects = (checked) => {
           <div class="flex gap-4 flex-wrap flex-column lg:flex-row">
             <div class="flex flex-1 ">
               <skills-selector :options="allSkills"
-                               v-on:removed="onDeselectedSkill"
                                v-on:added="onSelectedSkill"
                                placeholder="Select Skill"
                                placeholder-icon="fas fa-search"
-                               :selected="selectedSkill"
-                               data-cy="skillSelector"
-                               :onlySingleSelectedValue="true" />
+                               data-cy="skillSelector" />
             </div>
             <div class="flex flex-1">
               <project-selector :project-id="projectId" :selected="selectedProject"

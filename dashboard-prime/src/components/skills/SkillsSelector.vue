@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    https://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,10 +63,6 @@ const props = defineProps({
     type: String,
     default: 'Press enter to select',
   },
-  warnBeforeRemoving: {
-    type: Boolean,
-    default: true,
-  },
   disabled: {
     type: Boolean,
     default: false,
@@ -95,8 +91,8 @@ const removeReuseTag = (val) => {
 };
 
 const setSelectedInternal = () => {
-  if (props.selected) {
-    selectedInternal.value = { entryId: `${props.selected.projectId}_${props.selected.skillId}`, ...props.selected }; //props.selected.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
+  if (props.selected && (props.selected.length || props.selected.name)) {
+    selectedInternal.value = {entryId: `${props.selected.projectId}_${props.selected.skillId}`, ...props.selected}; //props.selected.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
   } else {
     selectedInternal.value = [];
   }
@@ -104,7 +100,7 @@ const setSelectedInternal = () => {
 
 const setOptionsInternal = () => {
   if (props.options) {
-    optionsInternal.value = props.options.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
+    optionsInternal.value = props.options.map((entry) => ({entryId: `${entry.projectId}_${entry.skillId}`, ...entry}));
     if (props.selected) {
       // removed already selected items
       optionsInternal.value = optionsInternal.value.filter((el) => !props.selected?.some((sel) => `${sel.projectId}_${sel.skillId}` === el.entryId));
@@ -116,12 +112,22 @@ const setOptionsInternal = () => {
 };
 
 const added = (addedItem) => {
-    emit('added', addedItem.value);
+  emit('added', addedItem?.value);
 };
 
 const searchChanged = (event) => {
   currentSearch.value = event?.query || '';
   emit('search-change', currentSearch.value);
+  if (props.internalSearch) {
+    if(currentSearch.value) {
+      optionsInternal.value = props.options.filter((item) => {
+        return item.name.toLowerCase().includes(currentSearch.value.toLowerCase());
+      })
+    }
+    else {
+      optionsInternal.value = props.options.map((entry) => ({ name: entry.name, ...entry }));
+    }
+  }
 };
 
 const clearValue = () => {
@@ -141,37 +147,38 @@ defineExpose({
 
 <template>
   <!--  <Fluid>-->
-  <div class="p-fluid">
-    <AutoComplete
-        v-model="selectedInternal"
-        :suggestions="options"
-        :placeholder="placeholder"
-        class="st-skills-selector"
-        :class="props.class"
-        :fluid="true"
-        style="min-width: 100%;"
-        data-cy="skillsSelector"
-        :disabled="disabled"
-        :loading="isLoading"
-        @complete="searchChanged"
-        @item-select="added"
-        @option-select="added"
-        optionLabel="name"
-        :completeOnFocus="true"
-        :delay="500">
+    <div class="p-fluid">
+      <AutoComplete
+          v-model="selectedInternal"
+          :suggestions="internalSearch ? optionsInternal : options"
+          :placeholder="placeholder"
+          class="st-skills-selector"
+          :class="props.class"
+          :fluid="true"
+          data-cy="skillsSelector"
+          :disabled="disabled"
+          :loading="isLoading"
+          @complete="searchChanged"
+          @item-select="added"
+          @option-select="added"
+          @clear="added"
+          optionLabel="name"
+          :completeOnFocus="true"
+          :delay="500">
 
-      <template #option="slotProps">
-        <slot name="dropdown-item" :option="slotProps">
-          <div :data-cy="`skillsSelectionItem-${slotProps.option.projectId}-${slotProps.option.skillId}`">
-            <div class="text-xl text-info skills-option-name" data-cy="skillsSelector-skillName"><span v-if="showType">{{
-                slotProps.option.type
-              }}:</span> {{ slotProps.option.name }}
-              <Tag v-if="slotProps.option.isReused" variant="success" size="sm" class="uppercase"
-                   data-cy="reusedBadge"
-                   style="font-size: 0.85rem !important;"><i class="fas fa-recycle"></i> reused
-              </Tag>
-            </div>
-            <div style="font-size: 0.8rem;">
+        <template #option="slotProps">
+          <slot name="dropdown-item" :option="slotProps">
+            <div :data-cy="`skillsSelectionItem-${slotProps.option.projectId}-${slotProps.option.skillId}`">
+              <div class="text-xl text-info skills-option-name" data-cy="skillsSelector-skillName"><span
+                  v-if="showType">{{
+                  slotProps.option.type
+                }}:</span> {{ slotProps.option.name }}
+                <Tag v-if="slotProps.option.isReused" variant="success" size="sm" class="uppercase"
+                     data-cy="reusedBadge"
+                     style="font-size: 0.85rem !important;"><i class="fas fa-recycle"></i> reused
+                </Tag>
+              </div>
+              <div style="font-size: 0.8rem;">
               <span class="skills-option-id">
                 <span v-if="showProject" data-cy="skillsSelectionItem-projectId"><span
                     class="uppercase mr-1 font-italic">Project ID:</span><span
@@ -184,39 +191,39 @@ defineExpose({
                   </span>
                 </span>
               </span>
-              <span class="mx-2" v-if="slotProps.option.type !== 'Badge'">|</span>
-              <span v-if="slotProps.option.type === 'Skill'" class="uppercase mr-1 font-italic"
-                    data-cy="skillsSelectionItem-subjectId">Subject:</span>
-              <span v-if="slotProps.option.type === 'Skill'"
-                    class="font-bold skills-option-subject-name"
-                    data-cy="skillsSelector-subjectName">{{ slotProps.option.subjectName }}</span>
-              <span v-if="slotProps.option.type === 'Shared Skill'" class="uppercase mr-1 font-italic"
-                    data-cy="skillsSelectionItem-projectName">Project:</span>
-              <span v-if="slotProps.option.type === 'Shared Skill'"
-                    class="font-bold skills-option-subject-name"
-                    data-cy="skillsSelector-projectName">{{ slotProps.option.projectName }}</span>
-              <span v-if="slotProps.option.groupName">
+                <span class="mx-2" v-if="slotProps.option.type !== 'Badge'">|</span>
+                <span v-if="slotProps.option.type === 'Skill'" class="uppercase mr-1 font-italic"
+                      data-cy="skillsSelectionItem-subjectId">Subject:</span>
+                <span v-if="slotProps.option.type === 'Skill'"
+                      class="font-bold skills-option-subject-name"
+                      data-cy="skillsSelector-subjectName">{{ slotProps.option.subjectName }}</span>
+                <span v-if="slotProps.option.type === 'Shared Skill'" class="uppercase mr-1 font-italic"
+                      data-cy="skillsSelectionItem-projectName">Project:</span>
+                <span v-if="slotProps.option.type === 'Shared Skill'"
+                      class="font-bold skills-option-subject-name"
+                      data-cy="skillsSelector-projectName">{{ slotProps.option.projectName }}</span>
+                <span v-if="slotProps.option.groupName">
                 <span class="mx-2">|</span>
                 <span class="uppercase mr-1 font-italic skills-option-group-name" data-cy="skillsSelectionItem-group">Group:</span><span
-                  class="font-bold skills-id"
-                  data-cy="skillsSelector-groupName">{{ slotProps.option.groupName }}</span>
+                    class="font-bold skills-id"
+                    data-cy="skillsSelector-groupName">{{ slotProps.option.groupName }}</span>
               </span>
+              </div>
             </div>
-          </div>
-        </slot>
-      </template>
-      <template #footer v-if="afterListSlotText">
-        <li>
-          <div class="h6 ml-1"> {{ afterListSlotText }}</div>
-        </li>
-      </template>
-      <template #empty>
+          </slot>
+        </template>
+        <template #footer v-if="afterListSlotText">
+          <li>
+            <div class="h6 ml-1"> {{ afterListSlotText }}</div>
+          </li>
+        </template>
+        <template #empty>
         <span v-if="emptyWithoutSearch && !internalSearch && !currentSearch"><i class="fas fa-search"/> Type to <span
             class="font-bold">search</span> for skills...</span>
-        <span v-else>No elements found. Consider changing the search query</span>
-      </template>
-    </AutoComplete>
-  </div>
+          <span v-else>No elements found. Consider changing the search query</span>
+        </template>
+      </AutoComplete>
+    </div>
   <!--  </Fluid>-->
 </template>
 
