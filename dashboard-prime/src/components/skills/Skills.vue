@@ -185,6 +185,7 @@ const skillCreatedOrUpdated = (skill) => {
           aria-label="new skills group"
           aria-describedby="newGroupSrText"
           data-cy="newGroupButton"
+          :track-for-focus="true"
           :aria-disabled="addSkillDisabled"
           :disabled="addSkillDisabled" />
         <SkillsButton
