@@ -417,4 +417,25 @@ describe('Client Display Features Tests', () => {
       .should('not.have.been.called')
   })
 
+  it('custom icons in skills-client', () => {
+    cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj1/icons/upload')
+
+    cy.createBadge(1, 1)
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1, 1)
+    cy.assignSkillToBadge(1, 1, 1)
+    cy.enableBadge(1, 1, { iconClass: 'proj1-validiconpng' })
+
+    cy.ignoreSkillsClientError()
+    cy.visit('/test-skills-client/proj1');
+    cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
+    cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
+    cy.wrapIframe().find('[data-cy="myBadgesBtn"]').click()
+    cy.wrapIframe().find('[data-cy="badge_badge1"] .proj1-validiconpng')
+      .invoke('css', 'background-image')
+      .then((bgImage) => {
+        expect(bgImage).to.contain('data:image/png;base64')
+      })
+  });
+
 })

@@ -18,6 +18,7 @@ import { ref } from 'vue'
 import IconManager from '@/components/utils/iconPicker/IconManager.vue'
 import OverlayPanel from 'primevue/overlaypanel'
 import { useFocusState } from '@/stores/UseFocusState.js'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 const focusState = useFocusState()
 const emit = defineEmits(['selected-icon'])
@@ -52,6 +53,8 @@ const onSelectedIcon = (selectedIcon) => {
 const panelHidden = () => {
   focusState.focusOnLastElement()
 }
+
+const themeHelper = useThemesHelper()
 </script>
 
 <template>
@@ -72,7 +75,10 @@ const panelHidden = () => {
       </div>
     </SkillsButton>
 
-    <OverlayPanel ref="iconManagerOverlayPanel" :show-close-icon="true" @hide="panelHidden">
+    <OverlayPanel ref="iconManagerOverlayPanel"
+                  :show-close-icon="true"
+                  @hide="panelHidden"
+                  :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }">
       <icon-manager @selected-icon="onSelectedIcon" name="iconClass"></icon-manager>
     </OverlayPanel>
   </div>
