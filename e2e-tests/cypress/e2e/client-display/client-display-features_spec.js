@@ -417,4 +417,47 @@ describe('Client Display Features Tests', () => {
       .should('not.have.been.called')
   })
 
+  it('custom icons in skills-client', () => {
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1, 1)
+    cy.createBadge(1,1)
+    cy.assignSkillToBadge(1, 1, 1);
+    cy.enableBadge(1, 1);
+    cy.intercept({
+      method: 'POST',
+      url: '/admin/projects/proj1/icons/upload',
+    })
+      .as('uploadIcon');
+
+    cy.visit('/administrator/projects/proj1/badges');
+    // // cy.get('[data-cy="inception-button"]').contains('Level');
+    cy.get('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]')
+      .click();
+
+    cy.get('[data-cy="iconPicker"]').first()
+      .click();
+    cy.get('.p-menuitem-link').contains('Custom').click();
+    const filename = 'valid_icon.png';
+    cy.get('[data-cy="fileInput"]').attachFile(filename);
+    cy.wait('@uploadIcon');
+    cy.get('[data-cy="iconPicker"] .proj1-validiconpng');
+    cy.get('[data-cy="name"]').type('customIcon');
+    cy.get('[data-cy="saveDialogBtn"]').click();
+
+    cy.get('[data-cy="badgeCard-badge1"] .proj1-validiconpng');
+
+    // // refresh and re-validate
+    cy.ignoreSkillsClientError()
+    cy.visit('/test-skills-client/proj1');
+    cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
+    cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
+    cy.wrapIframe().find('[data-cy="myBadgesBtn"]').click()
+    cy.wrapIframe().find('[data-cy="badge_badge1"] .proj1-validiconpng')
+      .invoke('css', 'background-image')
+      .then((bgImage) => {
+        expect(bgImage).to.contain('data:image/png;base64')
+      })
+    // cy.matchSnapshotImageForElement('body iframe')
+  });
+
 })

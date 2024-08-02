@@ -59,7 +59,8 @@ const skillsDisplayAttributes = useSkillsDisplayAttributesState()
 
 const addCustomIconCSS = () => {
   // This must be done here AFTER authentication
-  IconManagerService.refreshCustomIconCss(route.params.projectId, accessState.isSupervisor)
+  const projectId = skillsDisplayInfo.isSkillsClientPath() ? skillsDisplayAttributes.projectId : route.params.projectId
+  IconManagerService.refreshCustomIconCss(projectId, accessState.isSupervisor)
 }
 
 const isAppLoaded = ref(false)
