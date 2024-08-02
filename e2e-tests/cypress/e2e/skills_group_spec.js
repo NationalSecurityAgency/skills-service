@@ -797,8 +797,8 @@ describe('Skills Group Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
         cy.get('[data-cy="skillsSelector"]').click();
-        cy.get('li.p-dropdown-empty-message').contains('Type to search for skills').should('be.visible')
-        cy.get(`[data-pc-section="filterinput"]`).type('skill')
+        cy.get('li.p-autocomplete-empty-message').contains('Type to search for skills').should('be.visible')
+        cy.get(`[data-cy="skillsSelector"]`).type('skill')
 
         cy.get('[data-cy="skillsSelectionItem-skillId"]').should('have.length', 2).as('skillIds');
         cy.get('@skillIds').eq(0).contains('skill1');

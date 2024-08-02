@@ -106,7 +106,7 @@ const setOptionsInternal = () => {
       optionsInternal.value = optionsInternal.value.filter((el) => !props.selected?.some((sel) => `${sel.projectId}_${sel.skillId}` === el.entryId));
     }
     if (optionsInternal.value && optionsInternal.value.length === 0) {
-      announcer.polite('No elements found. Consider changing the search query');
+      announcer.polite('No results found. Consider changing the search query');
     }
   }
 };
@@ -220,7 +220,7 @@ defineExpose({
         <template #empty>
         <span v-if="emptyWithoutSearch && !internalSearch && !currentSearch"><i class="fas fa-search"/> Type to <span
             class="font-bold">search</span> for skills...</span>
-          <span v-else>No elements found. Consider changing the search query</span>
+          <span v-else>No results found. Consider changing the search query</span>
         </template>
       </AutoComplete>
     </div>
