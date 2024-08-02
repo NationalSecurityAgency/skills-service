@@ -1450,6 +1450,15 @@ Cypress.Commands.add('selectItem', (selector, item, openPicker = true, autoCompl
     cy.get('[data-pc-section="item"]').contains(item).click();
 })
 
+Cypress.Commands.add('selectSkill', (selector, skillId, searchString = '', projId='proj1') => {
+    cy.get(selector).blur({force: true})
+    cy.get(selector).click()
+    if (searchString) {
+        cy.get(selector).type(`{selectall}${searchString}`)
+    }
+    cy.get(`[data-cy="skillsSelectionItem-${projId}-${skillId}"]`).click()
+})
+
 Cypress.Commands.add('filterSelection', (selector, filter) => {
     let itemToSelect = selector + ' [data-pc-section="trigger"]';
     cy.get(itemToSelect).click();
