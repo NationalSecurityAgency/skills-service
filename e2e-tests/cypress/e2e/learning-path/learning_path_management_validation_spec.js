@@ -27,8 +27,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.createSkill(1, 1, 2)
         cy.createSkill(1, 1, 3)
 
-        cy.intercept('GET', '/admin/projects/proj1/sharedWithMe')
-          .as('loadSharedSkills');
+        cy.intercept('GET', '/admin/projects/proj1/sharedWithMe').as('loadSharedSkills');
     });
 
     Cypress.Commands.add('selectSkill', (selector, skillId, searchString = '', projId='proj1') => {

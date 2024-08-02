@@ -23,8 +23,6 @@ import SkillsService from '@/components/skills/SkillsService';
 import SkillsShareService from '@/components/skills/crossProjects/SkillsShareService.js';
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
-import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 
 const props = defineProps(['selectedFromSkills']);
 const emit = defineEmits(['updateSelectedFromSkills', 'clearSelectedFromSkills', 'update'])
@@ -194,6 +192,7 @@ function validate(value, ctx) {
           <label for="learningItemFromInput">From:</label>
           <skills-selector :options="allSkills"
                            :is-loading="isLoading"
+                           :selected="selectedFromSkills"
                            ref="fromSelector"
                            data-cy="learningPathFromSkillSelector"
                            id="learningItemFromInput"

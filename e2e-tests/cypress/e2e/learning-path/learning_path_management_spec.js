@@ -17,6 +17,11 @@ describe('Learning Path Management Validation Tests', () => {
 
     const tableSelector = '[data-cy="learningPathTable"]';
     const headerSelector = `${tableSelector} thead tr th`;
+    
+    const visitLearningPath = () => {
+        cy.visit('/administrator/projects/proj1/learning-path')
+        cy.wait('@loadSharedSkills')
+    }
 
     beforeEach(() => {
         Cypress.Commands.add('clickOnNode', (x, y) => {
@@ -49,34 +54,36 @@ describe('Learning Path Management Validation Tests', () => {
         cy.assignSkillToBadge(1, 2, 3);
         cy.assignSkillToBadge(1, 2, 4);
         cy.createBadge(1, 2, { enabled: true });
+
+        cy.intercept('GET', '/admin/projects/proj1/sharedWithMe').as('loadSharedSkills');
     });
 
     it('Create a simple learning path', () => {
-        cy.visit('/administrator/projects/proj1/learning-path')
+        visitLearningPath()
 
         // Add Badge1 as a prerequisite for Badge2
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'Badge 1')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 2');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
         // Add Skill5 as a prerequisite for Badge1
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'skill5Subj2')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 1');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill5Subj2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
         // Add Skill6 as a prerequisite for Badge2
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'skill6Subj2')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 2');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill6Subj2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
         // Add Skill7 as a prerequisite for Skill5
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'skill7Subj2')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'skill5Subj2');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill7Subj2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'skill5Subj2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
         // Add Skill8 as a prerequisite for Badge1
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'skill8Subj2')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 1');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill8Subj2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
         cy.wait(1000);
@@ -128,10 +135,10 @@ describe('Learning Path Management Validation Tests', () => {
         cy.addSkillToGroup(1, 1, 15, 16);
         cy.addSkillToGroup(1, 1, 15, 17);
 
-        cy.visit('/administrator/projects/proj1/learning-path');
+        visitLearningPath();
         cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet')
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'skill16')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'skill17');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill16')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'skill17');
         cy.get('[data-cy="addLearningPathItemBtn"]').should('be.enabled')
         cy.get('[data-cy="addLearningPathItemBtn"]').click()
 
@@ -152,17 +159,17 @@ describe('Learning Path Management Validation Tests', () => {
         cy.createSkillsGroup(1, 1, 12);
         cy.reuseSkillIntoAnotherGroup(1, 15, 1, 12);
 
-        cy.visit('/administrator/projects/proj1/learning-path');
+        visitLearningPath();
 
         cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet')
-        cy.filterSelection('[data-cy="learningPathFromSkillSelector"]', '15')
+        cy.get('[data-cy="learningPathFromSkillSelector"]').type( '15')
         cy.get('[data-pc-section="list"] [data-pc-section="item"]')
             .should('have.length', 1)
 
-        cy.get('[data-pc-section="filterinput"]').type('{selectall}1');
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'skill1', false);
+        cy.get('[data-cy="learningPathFromSkillSelector"]').type('{selectall}1');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill1');
 
-        cy.filterSelection('[data-cy="learningPathToSkillSelector"]', '15')
+        cy.get('[data-cy="learningPathFromSkillSelector"]').type( '{selectall}15')
         cy.get('[data-pc-section="list"] [data-pc-section="item"]')
             .should('have.length', 1)
     });
@@ -175,35 +182,35 @@ describe('Learning Path Management Validation Tests', () => {
         cy.intercept('POST', '/admin/projects/proj1/badge1/prerequisite/proj1/skill8Subj2').as('skill8ToBadge1')
         cy.intercept('DELETE', '/admin/projects/proj1/badge2/prerequisite/proj1/badge1').as('removeBadge1ToBadge2')
 
-        cy.visit('/administrator/projects/proj1/learning-path')
+        visitLearningPath()
 
         // Add Badge1 as a prerequisite for Badge2
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'Badge 1')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 2');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
         cy.wait('@badge1ToBadge2')
 
         // Add Skill5 as a prerequisite for Badge1
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'skill5Subj2')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 1');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill5Subj2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
         cy.wait('@skill1ToBadge1')
 
         // Add Skill6 as a prerequisite for Badge2
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'skill6Subj2')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 2');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill6Subj2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
         cy.wait('@skill6ToBadge2')
 
         // Add Skill7 as a prerequisite for Skill5
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'skill7Subj2')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'skill5Subj2');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill7Subj2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'skill5Subj2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
         cy.wait('@skill7ToSkill5')
 
         // Add Skill8 as a prerequisite for Badge1
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'skill8Subj2')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 1');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill8Subj2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
         cy.wait('@skill8ToBadge1')
 
@@ -287,46 +294,46 @@ describe('Learning Path Management Validation Tests', () => {
     })
 
     it('Clicking a node fills in the from selector', () => {
-        cy.visit('/administrator/projects/proj1/learning-path')
+        visitLearningPath()
 
         // Add Badge1 as a prerequisite for Badge2
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'Badge 1')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 2');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
         cy.clickOnNode(300, 200);
-        cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Badge 1');
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('have.value', 'Badge 1');
 
         cy.clickOnNode(300, 300);
-        cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Badge 2');
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('have.value', 'Badge 2');
     })
 
     it('Clicking a node clears the to selector and errors', () => {
-        cy.visit('/administrator/projects/proj1/learning-path')
+        visitLearningPath()
 
         // Add Badge1 as a prerequisite for Badge2
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'Badge 1')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 2');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
         cy.clickOnNode(300, 300);
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'Badge 2')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 1');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
 
         cy.get('[data-cy="learningPathError"]').contains('Badge 1 already exists in the learning path and adding it again will cause a circular/infinite learning path')
 
         cy.clickOnNode(300, 200);
-        cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Badge 1');
-        cy.get('[data-cy="learningPathToSkillSelector"]').should('have.value', '');
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('have.value', 'Badge 1');
+        cy.get('[data-cy="learningPathToSkillSelector"] input').should('have.value', '');
         cy.get('[data-cy="learningPathError"]').should('not.exist')
     })
 
     it('Can remove a learning path route from the graph', () => {
-        cy.visit('/administrator/projects/proj1/learning-path')
+        visitLearningPath()
 
         // Add Badge1 as a prerequisite for Badge2
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'Badge 1')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 2');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
         cy.clickOnNode(300, 250);
@@ -335,55 +342,55 @@ describe('Learning Path Management Validation Tests', () => {
     })
 
     it('Changing the From skill clears the To skill', () => {
-        cy.visit('/administrator/projects/proj1/learning-path')
+        visitLearningPath()
 
         // Add Badge1 as a prerequisite for Badge2
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'Badge 1')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 2');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
 
-        cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Badge 1');
-        cy.get('[data-cy="learningPathToSkillSelector"]').contains('Badge 2');
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('have.value', 'Badge 1');
+        cy.get('[data-cy="learningPathToSkillSelector"] input').should('have.value', 'Badge 2');
 
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'Very Great Skill 1')
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill1', 'Very Great Skill 1')
 
-        cy.get('[data-cy="learningPathFromSkillSelector"]').contains('Very Great Skill 1');
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('have.value', 'Very Great Skill 1');
         cy.get('[data-cy="learningPathToSkillSelector"]').should('have.value', '');
     })
 
     it('Changing the From skill clears errors', () => {
-        cy.visit('/administrator/projects/proj1/learning-path')
+        visitLearningPath()
 
         // Add Badge1 as a prerequisite for Badge2
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'Badge 1')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 2');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'Badge 2')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 1');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
 
         cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
         cy.get('[data-cy="learningPathError"]').contains('Badge 1 already exists in the learning path and adding it again will cause a circular/infinite learning path')
 
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'skill5Subj2')
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill5Subj2', 's')
 
         cy.get('[data-cy="learningPathError"]').should('not.exist')
     })
 
     it('Changing the To skill clears errors', () => {
-        cy.visit('/administrator/projects/proj1/learning-path')
+        visitLearningPath()
 
         // Add Badge1 as a prerequisite for Badge2
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'Badge 1')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 2');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
-        cy.selectItem('[data-cy="learningPathFromSkillSelector"]', 'Badge 2')
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'Badge 1');
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge2');
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
 
         cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
         cy.get('[data-cy="learningPathError"]').contains('Badge 1 already exists in the learning path and adding it again will cause a circular/infinite learning path')
 
-        cy.selectItem('[data-cy="learningPathToSkillSelector"]', 'skill5Subj2');
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'skill5Subj2', 's');
 
         cy.get('[data-cy="learningPathError"]').should('not.exist')
     })
