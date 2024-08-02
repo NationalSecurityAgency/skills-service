@@ -430,13 +430,17 @@ describe('Client Display Features Tests', () => {
       .as('uploadIcon');
 
     cy.visit('/administrator/projects/proj1/badges');
-    // // cy.get('[data-cy="inception-button"]').contains('Level');
     cy.get('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]')
       .click();
 
-    cy.get('[data-cy="iconPicker"]').first()
-      .click();
+    cy.get('[data-cy="name"]').should('have.value', 'Badge 1');
+    cy.get('[data-cy="iconPicker"] .fas.fa-ghost');
+
+    cy.get('[data-cy="iconPicker"]').first().click();
+    cy.get('[data-cy="virtualIconList"] .fas.fa-ad')
+    cy.wait(1000)
     cy.get('.p-menuitem-link').contains('Custom').click();
+    cy.wait(1000)
     const filename = 'valid_icon.png';
     cy.get('[data-cy="fileInput"]').attachFile(filename);
     cy.wait('@uploadIcon');
@@ -446,7 +450,7 @@ describe('Client Display Features Tests', () => {
 
     cy.get('[data-cy="badgeCard-badge1"] .proj1-validiconpng');
 
-    // // refresh and re-validate
+    // now validate skills-client
     cy.ignoreSkillsClientError()
     cy.visit('/test-skills-client/proj1');
     cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
@@ -457,7 +461,6 @@ describe('Client Display Features Tests', () => {
       .then((bgImage) => {
         expect(bgImage).to.contain('data:image/png;base64')
       })
-    // cy.matchSnapshotImageForElement('body iframe')
   });
 
 })
