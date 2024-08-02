@@ -39,6 +39,7 @@ describe('Discard confirmation tests', () => {
         cy.get('[data-cy="projectName"]').type('one')
         cy.realPress('Escape');
         cy.get('.p-dialog').contains('You have unsaved changes').should('exist')
+        cy.get('[data-pc-name="acceptbutton"]').should('have.focus')
         cy.get('[data-pc-name="rejectbutton"]').click()
         cy.get('.p-dialog').contains('You have unsaved changes').should('not.exist')
         cy.get('.p-dialog').contains('New Project').should('be.visible')
@@ -61,6 +62,7 @@ describe('Discard confirmation tests', () => {
         cy.get('[data-cy="projectName"]').type('one')
         cy.realPress('Escape');
         cy.get('.p-dialog').contains('You have unsaved changes').should('exist')
+        cy.get('[data-pc-name="acceptbutton"]').should('have.focus')
         cy.get('[data-pc-name="rejectbutton"]').click()
         cy.get('.p-dialog').contains('You have unsaved changes').should('not.exist')
         cy.get('.p-dialog').contains('Editing Existing Project').should('be.visible')
@@ -83,6 +85,7 @@ describe('Discard confirmation tests', () => {
         cy.get('[data-cy="subjectName"]').type('one')
         cy.realPress('Escape');
         cy.get('.p-dialog').contains('You have unsaved changes').should('exist')
+        cy.get('[data-pc-name="acceptbutton"]').should('have.focus')
         cy.get('[data-pc-name="rejectbutton"]').click()
         cy.get('.p-dialog').contains('You have unsaved changes').should('not.exist')
         cy.get('.p-dialog').contains('New Subject').should('be.visible')
@@ -105,6 +108,7 @@ describe('Discard confirmation tests', () => {
         cy.get('[data-cy="subjectName"]').type('one')
         cy.realPress('Escape');
         cy.get('.p-dialog').contains('You have unsaved changes').should('exist')
+        cy.get('[data-pc-name="acceptbutton"]').should('have.focus')
         cy.get('[data-pc-name="rejectbutton"]').click()
         cy.get('.p-dialog').contains('You have unsaved changes').should('not.exist')
         cy.get('.p-dialog').contains('Editing Existing Subject').should('be.visible')
@@ -129,6 +133,7 @@ describe('Discard confirmation tests', () => {
         cy.get('[data-cy="skillName"]').type('one')
         cy.realPress('Escape');
         cy.get('.p-dialog').contains('You have unsaved changes').should('exist')
+        cy.get('[data-pc-name="acceptbutton"]').should('have.focus')
         cy.get('[data-pc-name="rejectbutton"]').click()
         cy.get('.p-dialog').contains('You have unsaved changes').should('not.exist')
         cy.get('.p-dialog').contains('New Skill').should('be.visible')
@@ -153,6 +158,7 @@ describe('Discard confirmation tests', () => {
         cy.get('[data-cy="skillName"]').type('one')
         cy.realPress('Escape');
         cy.get('.p-dialog').contains('You have unsaved changes').should('exist')
+        cy.get('[data-pc-name="acceptbutton"]').should('have.focus')
         cy.get('[data-pc-name="rejectbutton"]').click()
         cy.get('.p-dialog').contains('You have unsaved changes').should('not.exist')
         cy.get('.p-dialog').contains('Edit Skill').should('be.visible')
@@ -165,6 +171,7 @@ describe('Discard confirmation tests', () => {
 
     it('Discard new badge creation', () => {
         cy.visit('/administrator/projects/proj1/badges/');
+        cy.get('[data-cy="badgeCard-badge1"]')
 
         cy.get('[data-cy="btn_Badges"]').click()
         cy.wait(100);
@@ -177,6 +184,7 @@ describe('Discard confirmation tests', () => {
         cy.get('[data-cy="name"]').type('one')
         cy.realPress('Escape');
         cy.get('.p-dialog').contains('You have unsaved changes').should('exist')
+        cy.get('[data-pc-name="acceptbutton"]').should('have.focus')
         cy.get('[data-pc-name="rejectbutton"]').click()
         cy.get('.p-dialog').contains('You have unsaved changes').should('not.exist')
         cy.get('.p-dialog').contains('New Badge').should('be.visible')
@@ -201,6 +209,7 @@ describe('Discard confirmation tests', () => {
         cy.get('[data-cy="name"]').type('one')
         cy.realPress('Escape');
         cy.get('.p-dialog').contains('You have unsaved changes').should('exist')
+        cy.get('[data-pc-name="acceptbutton"]').should('have.focus')
         cy.get('[data-pc-name="rejectbutton"]').click()
         cy.get('.p-dialog').contains('You have unsaved changes').should('not.exist')
         cy.get('.p-dialog').contains('Editing Existing Badge').should('be.visible')
@@ -225,6 +234,7 @@ describe('Discard confirmation tests', () => {
         cy.get('[data-cy="quizName"]').type('one')
         cy.realPress('Escape');
         cy.get('.p-dialog').contains('You have unsaved changes').should('exist')
+        cy.get('[data-pc-name="acceptbutton"]').should('have.focus')
         cy.get('[data-pc-name="rejectbutton"]').click()
         cy.get('.p-dialog').contains('You have unsaved changes').should('not.exist')
         cy.get('.p-dialog').contains('New Quiz').should('be.visible')
@@ -250,6 +260,7 @@ describe('Discard confirmation tests', () => {
         cy.get('[data-cy="quizName"]').type('one')
         cy.realPress('Escape');
         cy.get('.p-dialog').contains('You have unsaved changes').should('exist')
+        cy.get('[data-pc-name="acceptbutton"]').should('have.focus')
         cy.get('[data-pc-name="rejectbutton"]').click()
         cy.get('.p-dialog').contains('You have unsaved changes').should('not.exist')
         cy.get('.p-dialog').contains('Editing Existing Quiz').should('be.visible')

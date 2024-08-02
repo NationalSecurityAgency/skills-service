@@ -47,14 +47,25 @@ export const useDialogMessages = () => {
     });
   }
 
-  const msgConfirm = ({message, header = 'Message!', accept = null, reject = null, acceptLabel = 'OK', rejectLabel = 'Cancel'}) => {
+  const msgConfirm = ({
+                        message,
+                        header = 'Message!',
+                        accept = null,
+                        reject = null,
+                        acceptLabel = 'OK',
+                        rejectLabel = 'Cancel',
+                        targetElement = undefined,
+                        onShowHandler = () => {},
+                      }) => {
     confirm.require({
+      target: targetElement,
       message,
       header,
       acceptLabel: acceptLabel,
       rejectLabel: rejectLabel,
       onShow: () => {
         announcer.polite(message);
+        onShowHandler.call()
       },
       accept: () => {
         if(accept) {
@@ -71,6 +82,7 @@ export const useDialogMessages = () => {
       onHide: () => {
         focusState.focusOnLastElement()
       },
+      defaultFocus: 'accept',
     });
   }
 
