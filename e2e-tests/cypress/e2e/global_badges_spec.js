@@ -28,12 +28,12 @@ describe('Global Badges Tests', () => {
         cy.login(supervisorUser, 'password');
         cy.log('completed supervisor user login');
 
-        Cypress.Commands.add('selectSkill', (skillsSelector='[data-cy="skillsSelectionItem-proj1-skill1"]', retry=true) => {
-            cy.get('[data-cy="skillsSelector"] [data-pc-section="trigger"]').as('getOptions')
-                .click();
-            cy.wait(500);
-            cy.get(skillsSelector).click();
-        });
+        // Cypress.Commands.add('selectSkill', (skillsSelector='[data-cy="skillsSelectionItem-proj1-skill1"]', retry=true) => {
+        //     cy.get('[data-cy="skillsSelector"] [data-pc-section="trigger"]').as('getOptions')
+        //         .click();
+        //     cy.wait(500);
+        //     cy.get(skillsSelector).click();
+        // });
 
         cy.intercept('GET', '/supervisor/badges/*/skills/available?*')
           .as('loadAvailableSkills');
@@ -310,7 +310,7 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="manageBtn_a_badge"]')
             .click();
         cy.wait('@loadAvailableSkills');
-        cy.selectSkill('[data-cy="skillsSelectionItem-proj2-skill1"]')
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1', '', 'proj2')
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
@@ -503,7 +503,7 @@ describe('Global Badges Tests', () => {
         cy.contains('Manage')
             .click();
         cy.wait('@loadAvailableSkills');
-        cy.selectSkill('[data-cy="skillsSelectionItem-proj1-skill1"]')
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1')
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
@@ -591,7 +591,7 @@ describe('Global Badges Tests', () => {
         cy.contains('Manage')
             .click();
         cy.wait('@loadAvailableSkills');
-        cy.selectSkill('[data-cy="skillsSelectionItem-proj1-skill1"]')
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1')
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
@@ -707,7 +707,7 @@ describe('Global Badges Tests', () => {
         cy.contains('Manage')
             .click();
         cy.wait('@loadAvailableSkills');
-        cy.selectSkill('[data-cy="skillsSelectionItem-proj1-skill1"]')
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1')
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
@@ -1740,7 +1740,7 @@ describe('Global Badges Tests', () => {
                     .eq('/administrator/globalBadges/a_new_id');
             });
         cy.wait('@loadAvailableSkills');
-        cy.selectSkill('[data-cy="skillsSelectionItem-proj2-skill1"]')
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1', '', 'proj2')
         cy.get('button[data-cy=deleteSkill_skill1]')
             .click();
         cy.contains('YES, Delete It!')
@@ -2200,7 +2200,7 @@ describe('Global Badges Tests', () => {
         cy.contains('Manage')
             .click();
         cy.wait('@loadAvailableSkills');
-        cy.selectSkill('[data-cy="skillsSelectionItem-proj1-skill1"]')
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1')
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,

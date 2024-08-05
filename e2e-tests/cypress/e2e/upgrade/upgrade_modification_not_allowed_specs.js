@@ -244,8 +244,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
     cy.visit('/administrator/projects/proj1/badges/badge1')
     cy.wait('@loadConfigWithDbInProgressUpgrade')
 
-    cy.get('[data-cy="skillsSelector"] [data-pc-section="trigger"]').click();
-    cy.get('[data-pc-section="item"]').first().click();
+    cy.selectSkill('[data-cy="skillsSelector"]', 'skill1')
 
     cy.wait('@saveEndpoint')
 
