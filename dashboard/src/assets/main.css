@@ -1,0 +1,109 @@
+/**
+ * Copyright 2024 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@import './base.css';
+
+.w-min-1rem {
+    min-width: 1rem
+}
+.w-min-2rem {
+    min-width: 2rem
+}
+.w-min-3rem {
+    min-width: 3rem
+}
+.w-min-4rem {
+    min-width: 4rem
+}
+.w-min-5rem {
+    min-width: 5rem
+}
+.w-min-6rem {
+    min-width: 6rem
+}
+.w-min-7rem {
+    min-width: 7rem
+}
+.w-min-8rem {
+    min-width: 8rem
+}
+.w-min-9rem {
+    min-width: 9rem
+}
+.w-min-10rem {
+    min-width: 10rem
+}
+.w-min-11rem {
+    min-width: 11rem
+}
+.w-min-12rem {
+    min-width: 12rem
+}
+.w-min-13rem {
+    min-width: 13rem
+}
+.w-min-14rem {
+    min-width: 14rem
+}
+.w-min-15rem {
+    min-width: 15rem
+}
+.w-min-16rem {
+    min-width: 16rem
+}
+.w-min-17rem {
+    min-width: 17rem
+}
+.w-min-18rem {
+    min-width: 18rem
+}
+.w-min-19rem {
+    min-width: 19rem
+}
+.w-min-20rem {
+    min-width: 20rem
+}
+
+.skills-break-word {
+    overflow-wrap: break-word !important;
+    word-break: break-all;
+}
+
+.st-dark-theme .apexcharts-menu-item {
+    color: #1f2937 !important;
+}
+
+.st-dark-theme .apexcharts-legend-text,
+.st-dark-theme .apexcharts-text.apexcharts-xaxis-label,
+.st-dark-theme .apexcharts-text.apexcharts-yaxis-title-text{
+    color: #f5f9ff !important;
+    fill: #f5f9ff !important;
+}
+
+.st-dark-theme .text-color-success {
+    color: #6ee7b7 !important;
+}
+
+.st-light-theme .text-color-success {
+    color: #136c34 !important;
+}
+
+.st-dark-theme .text-color-warn {
+    color: #fa9854 !important;
+}
+
+.st-light-theme .text-color-warn {
+    color: #893f0c !important;
+}
