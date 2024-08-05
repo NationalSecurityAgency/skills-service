@@ -15,13 +15,14 @@ limitations under the License.
 */
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import Dropdown from 'primevue/dropdown';
+import AutoComplete from 'primevue/autocomplete'
 import Badge from 'primevue/badge';
+// import Fluid from 'primevue/fluid';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
 
 const announcer = useSkillsAnnouncer();
-const emit = defineEmits(['removed', 'added', 'search-change', 'selection-removed']);
+const emit = defineEmits(['added', 'search-change']);
 const props = defineProps({
   options: {
     type: Array,
@@ -29,10 +30,6 @@ const props = defineProps({
   },
   selected: {
     type: Object,
-  },
-  onlySingleSelectedValue: {
-    type: Boolean,
-    default: false,
   },
   isLoading: {
     type: Boolean,
@@ -66,10 +63,6 @@ const props = defineProps({
     type: String,
     default: 'Press enter to select',
   },
-  warnBeforeRemoving: {
-    type: Boolean,
-    default: true,
-  },
   disabled: {
     type: Boolean,
     default: false,
@@ -86,7 +79,6 @@ const props = defineProps({
 
 let selectedInternal = ref([]);
 let optionsInternal = ref([]);
-let multipleSelection = ref(true);
 let currentSearch = ref('');
 let isMounted = ref(false);
 
@@ -99,8 +91,8 @@ const removeReuseTag = (val) => {
 };
 
 const setSelectedInternal = () => {
-  if (props.selected) {
-    selectedInternal.value = { entryId: `${props.selected.projectId}_${props.selected.skillId}`, ...props.selected }; //props.selected.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
+  if (props.selected && (props.selected.length || props.selected.name)) {
+    selectedInternal.value = {entryId: `${props.selected.projectId}_${props.selected.skillId}`, ...props.selected}; //props.selected.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
   } else {
     selectedInternal.value = [];
   }
@@ -108,34 +100,34 @@ const setSelectedInternal = () => {
 
 const setOptionsInternal = () => {
   if (props.options) {
-    optionsInternal.value = props.options.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
+    optionsInternal.value = props.options.map((entry) => ({entryId: `${entry.projectId}_${entry.skillId}`, ...entry}));
     if (props.selected) {
       // removed already selected items
       optionsInternal.value = optionsInternal.value.filter((el) => !props.selected?.some((sel) => `${sel.projectId}_${sel.skillId}` === el.entryId));
     }
     if (optionsInternal.value && optionsInternal.value.length === 0) {
-      announcer.polite('No elements found. Consider changing the search query');
+      announcer.polite('No results found. Consider changing the search query');
     }
   }
 };
 
-const removed = (removedItem) => {
-  emit('removed', removedItem);
-};
-
 const added = (addedItem) => {
-  // if(addedItem.originalEvent.type === 'click') {
-    if (multipleSelection.value) {
-      emit('added', addedItem[addedItem.length - 1].value);
-    } else {
-      emit('added', addedItem.value);
-    }
-  // }
+  emit('added', addedItem?.value);
 };
 
-const searchChanged = (query) => {
-  currentSearch.value = query.value;
-  emit('search-change', query.value);
+const searchChanged = (event) => {
+  currentSearch.value = event?.query || '';
+  emit('search-change', currentSearch.value);
+  if (props.internalSearch) {
+    if(currentSearch.value) {
+      optionsInternal.value = props.options.filter((item) => {
+        return item.name.toLowerCase().includes(currentSearch.value.toLowerCase());
+      })
+    }
+    else {
+      optionsInternal.value = props.options.map((entry) => ({ name: entry.name, ...entry }));
+    }
+  }
 };
 
 const clearValue = () => {
@@ -145,9 +137,6 @@ const clearValue = () => {
 onMounted(() => {
   setSelectedInternal();
   setOptionsInternal();
-  if (props.onlySingleSelectedValue) {
-    multipleSelection.value = false;
-  }
   isMounted.value = true;
 })
 
@@ -157,20 +146,39 @@ defineExpose({
 </script>
 
 <template>
-  <Dropdown :options="options" :placeholder="placeholder" class="st-skills-selector" v-model="selectedInternal" label="name"
-            data-cy="skillsSelector" :class="props.class" style="min-width: 100%;" :disabled="disabled" :loading="isLoading" filter
-            @filter="searchChanged" @change="added" optionLabel="name" resetFilterOnHide :showClear="showClear">
+  <!--  <Fluid>-->
+    <div class="p-fluid">
+      <AutoComplete
+          v-model="selectedInternal"
+          :suggestions="internalSearch ? optionsInternal : options"
+          :placeholder="placeholder"
+          class="st-skills-selector"
+          :class="props.class"
+          :fluid="true"
+          data-cy="skillsSelector"
+          :disabled="disabled"
+          :loading="isLoading"
+          @complete="searchChanged"
+          @item-select="added"
+          @option-select="added"
+          @clear="added"
+          optionLabel="name"
+          :completeOnFocus="true"
+          :delay="500">
 
-    <template #option="slotProps">
-      <slot name="dropdown-item" :option="slotProps">
-        <div :data-cy="`skillsSelectionItem-${slotProps.option.projectId}-${slotProps.option.skillId}`">
-          <div class="text-xl text-info skills-option-name" data-cy="skillsSelector-skillName"><span v-if="showType">{{ slotProps.option.type }}:</span> {{ slotProps.option.name }}
-            <Tag v-if="slotProps.option.isReused" variant="success" size="sm" class="uppercase"
+        <template #option="slotProps">
+          <slot name="dropdown-item" :option="slotProps">
+            <div :data-cy="`skillsSelectionItem-${slotProps.option.projectId}-${slotProps.option.skillId}`">
+              <div class="text-xl text-info skills-option-name" data-cy="skillsSelector-skillName"><span
+                  v-if="showType">{{
+                  slotProps.option.type
+                }}:</span> {{ slotProps.option.name }}
+                <Tag v-if="slotProps.option.isReused" variant="success" size="sm" class="uppercase"
                      data-cy="reusedBadge"
                      style="font-size: 0.85rem !important;"><i class="fas fa-recycle"></i> reused
-            </Tag>
-          </div>
-          <div style="font-size: 0.8rem;">
+                </Tag>
+              </div>
+              <div style="font-size: 0.8rem;">
               <span class="skills-option-id">
                 <span v-if="showProject" data-cy="skillsSelectionItem-projectId"><span
                     class="uppercase mr-1 font-italic">Project ID:</span><span
@@ -183,43 +191,40 @@ defineExpose({
                   </span>
                 </span>
               </span>
-            <span class="mx-2" v-if="slotProps.option.type !== 'Badge'">|</span>
-            <span v-if="slotProps.option.type === 'Skill'" class="uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Subject:</span>
-            <span v-if="slotProps.option.type === 'Skill'"
-                  class="font-bold skills-option-subject-name"
-                  data-cy="skillsSelector-subjectName">{{ slotProps.option.subjectName }}</span>
-            <span v-if="slotProps.option.type === 'Shared Skill'" class="uppercase mr-1 font-italic" data-cy="skillsSelectionItem-projectName">Project:</span>
-            <span v-if="slotProps.option.type === 'Shared Skill'"
-                  class="font-bold skills-option-subject-name"
-                  data-cy="skillsSelector-projectName">{{ slotProps.option.projectName }}</span>
-            <span v-if="slotProps.option.groupName">
+                <span class="mx-2" v-if="slotProps.option.type !== 'Badge'">|</span>
+                <span v-if="slotProps.option.type === 'Skill'" class="uppercase mr-1 font-italic"
+                      data-cy="skillsSelectionItem-subjectId">Subject:</span>
+                <span v-if="slotProps.option.type === 'Skill'"
+                      class="font-bold skills-option-subject-name"
+                      data-cy="skillsSelector-subjectName">{{ slotProps.option.subjectName }}</span>
+                <span v-if="slotProps.option.type === 'Shared Skill'" class="uppercase mr-1 font-italic"
+                      data-cy="skillsSelectionItem-projectName">Project:</span>
+                <span v-if="slotProps.option.type === 'Shared Skill'"
+                      class="font-bold skills-option-subject-name"
+                      data-cy="skillsSelector-projectName">{{ slotProps.option.projectName }}</span>
+                <span v-if="slotProps.option.groupName">
                 <span class="mx-2">|</span>
                 <span class="uppercase mr-1 font-italic skills-option-group-name" data-cy="skillsSelectionItem-group">Group:</span><span
-                class="font-bold skills-id"
-                data-cy="skillsSelector-groupName">{{ slotProps.option.groupName }}</span>
+                    class="font-bold skills-id"
+                    data-cy="skillsSelector-groupName">{{ slotProps.option.groupName }}</span>
               </span>
-          </div>
-        </div>
-      </slot>
-    </template>
-    <template #value="slotProps">
-      <div v-if="slotProps.value && slotProps.value.name">
-        {{ slotProps.value.name }}
-      </div>
-      <div v-else>
-        {{ slotProps.placeholder }}
-      </div>
-    </template>
-    <template #footer v-if="afterListSlotText">
-      <li>
-        <div class="h6 ml-1"> {{ afterListSlotText }}</div>
-      </li>
-    </template>
-    <template #empty>
-      <span v-if="emptyWithoutSearch && !internalSearch && !currentSearch"><i class="fas fa-search"/> Type to <span class="font-bold">search</span> for skills...</span>
-      <span v-else>No elements found. Consider changing the search query</span>
-    </template>
-  </Dropdown>
+              </div>
+            </div>
+          </slot>
+        </template>
+        <template #footer v-if="afterListSlotText">
+          <li>
+            <div class="h6 ml-1"> {{ afterListSlotText }}</div>
+          </li>
+        </template>
+        <template #empty>
+        <span v-if="emptyWithoutSearch && !internalSearch && !currentSearch"><i class="fas fa-search"/> Type to <span
+            class="font-bold">search</span> for skills...</span>
+          <span v-else>No results found. Consider changing the search query</span>
+        </template>
+      </AutoComplete>
+    </div>
+  <!--  </Fluid>-->
 </template>
 
 <style>

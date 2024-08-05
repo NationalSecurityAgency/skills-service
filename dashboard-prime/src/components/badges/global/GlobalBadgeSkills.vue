@@ -156,7 +156,7 @@ const searchChanged = (query) => {
         <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp">
           <skills-selector :options="availableSkills" class="mb-4"
                             v-on:added="skillAdded" v-on:search-change="searchChanged"
-                            :onlySingleSelectedValue="true" :internal-search="false" :show-project="true"
+                            :internal-search="false" :show-project="true"
                             :after-list-slot-text="afterListSlotText"></skills-selector>
 
           <div v-if="badgeSkills && badgeSkills.length > 0">

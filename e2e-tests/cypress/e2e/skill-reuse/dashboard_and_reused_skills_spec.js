@@ -33,13 +33,15 @@ describe('Skill Reuse and Dashboard Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
 
-        cy.get('[data-cy="skillsSelector"]').should('contain', 'Search and Navigate directly to a skill')
+        cy.get('[data-cy="skillsSelector"] input')
+          .invoke('attr', 'placeholder')
+          .should('contain', 'Search and Navigate directly to a skill');
         cy.get('[data-cy="skillsSelector"]')
             .click();
-        cy.get('li.p-dropdown-empty-message')
+        cy.get('li.p-autocomplete-empty-message')
             .contains('Type to search for skills')
             .should('be.visible');
-        cy.get(`[data-pc-section="filterinput"]`)
+        cy.get('[data-cy="skillsSelector"]')
             .type('s');
 
         cy.get('[data-cy="skillsSelector-skillId"]')

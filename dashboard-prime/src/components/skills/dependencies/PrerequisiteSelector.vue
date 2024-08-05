@@ -92,11 +92,6 @@ const updatePotentialSkills = () => {
         if (props.selectedFromSkills && props.selectedFromSkills.skillId) {
           allPotentialSkills.value = skills.filter((skill) => (skill.skillId !== props.selectedFromSkills.skillId || (skill.skillId === props.selectedFromSkills.skillId && skill.projectId !== props.selectedFromSkills.projectId)));
         }
-        if (selectedToSkills.value.length > 0) {
-          selectedToSkills.value.forEach((skill) => {
-            allPotentialSkills.value = allPotentialSkills.value.filter((potentialSkill) => (potentialSkill.skillId !== skill.skillId || (potentialSkill.skillId === skill.skillId && potentialSkill.projectId !== skill.projectId)));
-          });
-        }
         loadingPotentialSkills.value = false;
       });
 };
@@ -113,33 +108,10 @@ const onToSelected = (item) => {
   }
 };
 
-const onToDeselected = () => {
-  selectedToSkills.value = [];
-  updatePotentialSkills();
-};
-
-const onFromSelectionRemoved = () => {
-  // if ($refs && $refs.learningPathValidator) {
-  //   clearData();
-  //   $refs.learningPathValidator.reset();
-  // }
-};
-
-const onToSelectionRemoved = () => {
-  // if ($refs && $refs.learningPathValidator) {
-  //   clearToData();
-  //   $refs.learningPathValidator.reset();
-  //   updatePotentialSkills();
-  // }
-};
-
 const onFromSelected = (item) => {
   clearToData();
   emit('updateSelectedFromSkills', item);
 }
-
-const onFromDeselected = () => {
-};
 
 const onAddPath = () => {
   SkillsService.assignDependency(toProjectId.value, toSkillId.value, props.selectedFromSkills.skillId, props.selectedFromSkills.projectId)
@@ -219,36 +191,32 @@ function validate(value, ctx) {
         <div class="flex-1 field">
           <label for="learningItemFromInput">From:</label>
           <skills-selector :options="allSkills"
+                           :is-loading="isLoading"
+                           :selected="selectedFromSkills"
                            ref="fromSelector"
+                           data-cy="learningPathFromSkillSelector"
                            id="learningItemFromInput"
                            inputId="learningItemFromInput"
-                           v-on:removed="onFromDeselected"
-                           v-on:added="onFromSelected"
-                           @selection-removed="onFromSelectionRemoved"
                            placeholder="From Skill or Badge"
                            placeholder-icon="fas fa-search"
                            aria-label="Select a skill or a badge for the Learning Path's from step"
-                           :selected="selectedFromSkills"
-                           data-cy="learningPathFromSkillSelector"
-                           :showType=true
-                           :onlySingleSelectedValue="true" />
+                           v-on:added="onFromSelected"
+                           :showType=true />
         </div>
         <div class="flex-1 field">
           <label for="learningItemToInput">To:</label>
           <skills-selector :options="allPotentialSkills"
+                           :is-loading="isLoading"
                            ref="toSelector"
+                           data-cy="learningPathToSkillSelector"
                            id="learningItemToInput"
                            inputId="learningItemToInput"
-                           v-on:removed="onToDeselected"
-                           v-on:added="onToSelected"
-                           @selection-removed="onToSelectionRemoved"
-                           :disabled="!selectedFromSkills || !selectedFromSkills.skillId"
                            placeholder="To Skill or Badge"
                            placeholder-icon="fas fa-search"
                            :selected="selectedToSkills"
-                           data-cy="learningPathToSkillSelector"
-                           :showType=true
-                           :onlySingleSelectedValue="true" />
+                           v-on:added="onToSelected"
+                           :disabled="!selectedFromSkills || !selectedFromSkills.skillId"
+                           :showType=true />
         </div>
         <div class="field text-center">
           <Button @click="onAddPath"
