@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,182 +13,184 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref, onMounted, computed, nextTick } from 'vue';
+import { useRoute } from 'vue-router';
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js';
+import SelfReportService from '@/components/skills/selfReport/SelfReportService';
+import DateCell from "@/components/utils/table/DateCell.vue";
+import NoContent2 from "@/components/utils/NoContent2.vue";
+import ExistingUserInput from "@/components/utils/ExistingUserInput.vue";
+import * as yup from "yup";
+import {useForm} from "vee-validate";
+
+const route = useRoute();
+const announcer = useSkillsAnnouncer();
+const props = defineProps({
+  userInfo: Object,
+});
+const emit = defineEmits(['conf-added', 'conf-removed']);
+
+const schema = yup.object().shape({
+  'userIdInput': yup.mixed().transform((value, input, ctx) => {
+    if (typeof value === 'string') {
+      return {
+        userId: value,
+      }
+    }
+    return value;
+  }).label('User Id').required().test('uniqueName', 'User already exists', (value) => valueExists(value?.userId)),
+})
+
+const { meta } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    userIdInput: null,
+  }
+})
+
+const currentSelectedUser = ref(null);
+const loading = ref(false);
+const data = ref([]);
+const sortBy = ref('updated');
+const sortOrder = ref(-1);
+const pageSize = 4;
+const possiblePageSizes = [4, 10, 15, 20];
+const selectedIds = ref([]);
+
+const valueExists = (userId) => {
+  return !selectedIds.value.includes(userId);
+}
+
+onMounted(() => {
+  const hasConf = props.userInfo.userConf && props.userInfo.userConf.length > 0;
+  if (hasConf) {
+    data.value = props.userInfo.userConf.map((u) => ({ ...u }));
+    updateSelectedList();
+  }
+});
+
+let hadData = computed(() => {
+  return data.value && data.value.length > 0;
+});
+
+const addConf = () => {
+  loading.value = true;
+  const currentUserId = currentSelectedUser.value.dn ? currentSelectedUser.value.dn : currentSelectedUser.value.userId;
+  SelfReportService.configureApproverForUserId(route.params.projectId, props.userInfo.userId, currentUserId)
+      .then((res) => {
+        data.value.push(res);
+        updateSelectedList();
+        emit('conf-added', res);
+        nextTick(() => announcer.polite(`Added workload configuration successfully for ${currentUserId} user.`));
+        currentSelectedUser.value = null;
+      }).finally(() => {
+    loading.value = false;
+  });
+};
+
+const removeTagConf = (removedItem) => {
+  data.value = data.value.map((i) => ({ ...i, deleteInProgress: i.id === removedItem.id }));
+  return SelfReportService.removeApproverConfig(route.params.projectId, removedItem.id)
+      .then(() => {
+        data.value = data.value.filter((i) => i.id !== removedItem.id);
+        updateSelectedList();
+        emit('conf-removed', removedItem);
+        nextTick(() => announcer.polite('Removed workload configuration successfully.'));
+      });
+}
+
+const updateSelectedList = () => {
+  selectedIds.value = data.value.map((i) => i.userId );
+}
+</script>
+
 <template>
-  <b-card header="Assign Specific Users" body-class="p-0 mt-3">
+  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #header>
-      <div>
-        <i class="fas fa-user-plus text-primary" aria-hidden="true"/> Split Workload <span class="font-italic text-primary">By Specific Users</span>
+      <SkillsCardHeader title="Split Workload By Specific Users"></SkillsCardHeader>
+    </template>
+    <template #content>
+      <div class="flex px-3 pt-3 gap-2 flex-column md:flex-row align-items-center">
+        <div class="flex flex-1 px-1">
+          <existing-user-input
+              class="w-full"
+              v-model="currentSelectedUser"
+              :can-enter-new-user="false"
+              name="userIdInput"
+              aria-errormessage="userIdInputError"
+              aria-describedby="userIdInputError"
+              aria-label="Select User Id"
+              :excluded-suggestions="selectedIds"
+              data-cy="userIdInput"/>
+        </div>
+        <div>
+          <SkillsButton
+              aria-label="Add Specific User"
+              data-cy="addUserConfBtn"
+              @click="addConf"
+              v-skills="'ConfigureSelfApprovalWorkload'"
+              :disabled="!meta.valid"
+              icon="fas fa-plus-circle" label="Add">
+          </SkillsButton>
+        </div>
+      </div>
+
+      <skills-spinner v-if="loading" :is-loading="loading" class="mb-5"/>
+      <div v-if="!loading">
+        <SkillsDataTable v-if="hadData" class="mt-3"
+                        :value="data" paginator
+                        tableStoredStateId="skillApprovalConfSpecificUsersTable"
+                        data-cy="skillApprovalConfSpecificUsersTable"
+                        aria-label="Approval Configuration Users"
+                        pt:paginator:paginatorWrapper:aria-label="Approval Configuration Users Paginator"
+                        show-gridlines
+                        striped-rows
+                        :rows="pageSize"
+                        :rowsPerPageOptions="possiblePageSizes"
+                        v-model:sort-field="sortBy"
+                        v-model:sort-order="sortOrder">
+          <Column field="userId" header="User" sortable>
+            <template #body="slotProps">
+              <div class="flex" :data-cy="`userIdCell-${slotProps.data.userId}`">
+                <div class="flex flex-1">
+                  {{ slotProps.data.userIdForDisplay }}
+                </div>
+                <div class="flex">
+                  <SkillsButton title="Delete Skill"
+                            variant="outline-danger"
+                            :aria-label="`Remove ${slotProps.data.userId} tag.`"
+                            @click="removeTagConf(slotProps.data)"
+                            :disabled="slotProps.data.deleteInProgress"
+                            data-cy="deleteBtn"
+                            icon="fas fa-trash"
+                            size="small"
+                            :loading="slotProps.data.deleteInProgress">
+                  </SkillsButton>
+                </div>
+              </div>
+            </template>
+          </Column>
+          <Column field="updated" header="Updated On" sortable>
+            <template #body="slotProps">
+              <date-cell :value="slotProps.data.updated" />
+            </template>
+          </Column>
+          <template #paginatorstart>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ data.length }}</span>
+          </template>
+        </SkillsDataTable>
+
+        <no-content2 v-if="!hadData" title="Not Configured Yet..."
+                     class="py-5"
+                     data-cy="noUserConf"
+                     icon="fas fa-user-plus">
+          You can split the approval workload by routing approval requests for specific users to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
+        </no-content2>
       </div>
     </template>
-    <ValidationProvider name="User Id" v-slot="{errors}" rules="userNoSpaceInUserIdInNonPkiMode|uniqueUserConf">
-      <div class="row mx-2 no-gutters">
-        <div class="col px-1">
-          <existing-user-input
-                             v-model="currentSelectedUser"
-                             :can-enter-new-user="false"
-                             name="User Id"
-                             aria-label="Select User Id"
-                             :aria-invalid="errors && errors.length > 0"
-                             data-cy="userIdInput"/>
-          <small role="alert" data-cy="userIdInputErr" class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
-        </div>
-        <div class="col-auto px-1">
-          <b-button
-            aria-label="Add Specific User"
-            data-cy="addUserConfBtn"
-            v-skills="'ConfigureSelfApprovalWorkload'"
-            @click="addConf"
-            :disabled="!currentSelectedUser || (errors && errors.length > 0)"
-            variant="outline-primary">Add <i class="fas fa-plus-circle" aria-hidden="true" />
-          </b-button>
-        </div>
-      </div>
-    </ValidationProvider>
-
-    <skills-spinner v-if="loading" :is-loading="loading" class="mb-5"/>
-    <div v-if="!loading">
-      <skills-b-table v-if="hadData" class="mt-3"
-                      :options="table.options" :items="table.items"
-                      tableStoredStateId="skillApprovalConfSpecificUsersTable"
-                      data-cy="skillApprovalConfSpecificUsersTable">
-        <template v-slot:cell(userId)="data">
-          <div class="row" :data-cy="`userIdCell-${data.item.userId}`">
-            <div class="col">
-              {{ data.item.userIdForDisplay }}
-            </div>
-            <div class="col-auto">
-              <b-button title="Delete Skill"
-                        variant="outline-danger"
-                        :aria-label="`Remove ${data.value} tag.`"
-                        @click="removeTagConf(data.item)"
-                        :disabled="data.item.deleteInProgress"
-                        data-cy="deleteBtn"
-                        size="sm">
-                <b-spinner v-if="data.item.deleteInProgress" small></b-spinner>
-                <i v-else class="fas fa-trash" aria-hidden="true"/>
-              </b-button>
-            </div>
-          </div>
-        </template>
-        <template v-slot:cell(updated)="data">
-          <date-cell :value="data.value" />
-        </template>
-      </skills-b-table>
-
-      <no-content2 v-if="!hadData" title="Not Configured Yet..."
-                   class="my-5"
-                   data-cy="noUserConf"
-                   icon-size="fa-2x"
-                   icon="fas fa-user-plus">
-        You can split the approval workload by routing approval requests for specific users to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
-      </no-content2>
-    </div>
-  </b-card>
+  </Card>
 </template>
-
-<script>
-  import { extend } from 'vee-validate';
-  import ExistingUserInput from '@/components/utils/ExistingUserInput';
-  import SkillsBTable from '@/components/utils/table/SkillsBTable';
-  import DateCell from '@/components/utils/table/DateCell';
-  import SelfReportService from '@/components/skills/selfReport/SelfReportService';
-  import SelfReportApprovalConfMixin
-    from '@/components/skills/selfReport/SelfReportApprovalConfMixin';
-  import NoContent2 from '@/components/utils/NoContent2';
-  import SkillsSpinner from '@/components/utils/SkillsSpinner';
-
-  export default {
-    name: 'SelfReportApprovalConfSpecificUsers',
-    components: {
-      NoContent2, DateCell, SkillsBTable, ExistingUserInput, SkillsSpinner,
-    },
-    mixins: [SelfReportApprovalConfMixin],
-    props: {
-      userInfo: Object,
-    },
-    data() {
-      return {
-        projectId: this.$route.params.projectId,
-        currentSelectedUser: null,
-        loading: false,
-        table: {
-          items: [],
-          options: {
-            busy: false,
-            bordered: true,
-            outlined: true,
-            stacked: 'md',
-            sortBy: 'updated',
-            sortDesc: true,
-            emptyText: 'You are the only user',
-            tableDescription: 'Configure Approval Workload',
-            fields: [
-              {
-                key: 'userId',
-                label: 'User',
-                sortable: true,
-              },
-              {
-                key: 'updated',
-                label: 'Configured On',
-                sortable: true,
-              },
-            ],
-            pagination: {
-              remove: false,
-              server: false,
-              currentPage: 1,
-              totalRows: 1,
-              pageSize: 4,
-              possiblePageSizes: [4, 10, 15, 20],
-            },
-          },
-        },
-      };
-    },
-    computed: {
-      pkiAuthenticated() {
-        return this.$store.getters.isPkiAuthenticated;
-      },
-      hadData() {
-        return this.table.items && this.table.items.length > 0;
-      },
-    },
-    created() {
-      this.assignCustomValidation();
-    },
-    mounted() {
-      const hasConf = this.userInfo.userConf && this.userInfo.userConf.length > 0;
-      if (hasConf) {
-        this.table.items = this.userInfo.userConf.map((u) => ({ ...u }));
-      }
-    },
-    methods: {
-      addConf() {
-        this.loading = true;
-        const currentUserId = this.currentSelectedUser.dn ? this.currentSelectedUser.dn : this.currentSelectedUser.userId;
-        SelfReportService.configureApproverForUserId(this.projectId, this.userInfo.userId, currentUserId)
-          .then((res) => {
-            this.table.items.push(res);
-            this.$emit('conf-added', res);
-            this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${currentUserId} user.`));
-            this.currentSelectedUser = null;
-          }).finally(() => {
-            this.loading = false;
-          });
-      },
-      assignCustomValidation() {
-        const self = this;
-        extend('uniqueUserConf', {
-          message: (field) => `There is already a configuration for this ${field}.`,
-          validate(value) {
-            return !self.table.items.find((i) => value?.userId?.toLowerCase() === i.userId?.toLowerCase());
-          },
-        });
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,56 +13,39 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-    <div class="container-fluid">
-      <sub-page-header title="My Usage" class="pt-4">
-      </sub-page-header>
+<script setup>
+import { onMounted, ref } from 'vue';
 
-      <skills-spinner :is-loading="loading" />
-      <b-row v-if="!loading" class="my-4">
-        <b-col class="my-summary-card">
-          <event-history-chart :availableProjects="projects"></event-history-chart>
-        </b-col>
-      </b-row>
-    </div>
-</template>
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
+import EventHistoryChart from '@/components/myProgress/usage/EventHistoryChart.vue';
+import MyProgressService from '@/components/myProgress/MyProgressService.js';
+import MyProgressTitle from '@/components/myProgress/MyProgressTitle.vue'
 
-<script>
-  import SubPageHeader from '../../utils/pages/SubPageHeader';
-  import EventHistoryChart from './EventHistoryChart';
-  import MyProgressService from '../MyProgressService';
-  import SkillsSpinner from '../../utils/SkillsSpinner';
+const loading = ref(true);
+const projects = ref([]);
 
-  export default {
-    name: 'MyUsagePage',
-    components: { SkillsSpinner, EventHistoryChart, SubPageHeader },
-    data() {
-      return {
-        loading: true,
-        projects: [],
-      };
-    },
-    mounted() {
-      if (this.$route.params.projects) {
-        this.projects = this.$route.params.projects;
-        this.loading = false;
-      } else {
-        this.loadProjects();
-      }
-    },
-    methods: {
-      loadProjects() {
-        MyProgressService.loadMyProgressSummary()
-          .then((res) => {
-            this.myProgressSummary = res;
-            this.projects = this.myProgressSummary.projectSummaries;
-          }).finally(() => {
-            this.loading = false;
-          });
-      },
-    },
-  };
+onMounted(() => {
+  loadProjects();
+});
+const loadProjects = () => {
+  MyProgressService.loadMyProgressSummary()
+      .then((myProgressSummary) => {
+        projects.value = myProgressSummary.projectSummaries;
+      }).finally(() => {
+    loading.value = false;
+  });
+}
 </script>
+
+<template>
+<div>
+  <my-progress-title title="My Usage" />
+  <SkillsSpinner :is-loading="loading"/>
+  <div class="my-4 w-min-17rem">
+    <EventHistoryChart v-if="!loading" :availableProjects="projects" />
+  </div>
+</div>
+</template>
 
 <style scoped>
 

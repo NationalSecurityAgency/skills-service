@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,53 +13,45 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <loading-container :is-loading="loadingDescription" :data-cy="`projectDescriptionRow_${projectId}`">
-    <div class="w-100" :data-cy="`${projectId}_projectDescription`">
-      <markdown-text :text="description" />
-    </div>
-  </loading-container>
-</template>
+<script setup>
+import ProjectService from '@/components/projects/ProjectService.js'
+import { ref, onMounted } from 'vue'
+import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 
-<script>
-  import MarkdownText from '@/common-components/utilities/MarkdownText';
-  import LoadingContainer from '@/components/utils/LoadingContainer';
-  import ProjectService from '@/components/projects/ProjectService';
+const props = defineProps({
+  projectId: {
+    type: String,
+    required: true
+  }
+})
 
-  export default {
-    name: 'ProjectDescriptionRow',
-    components: {
-      LoadingContainer,
-      MarkdownText,
-    },
-    props: {
-      projectId: {
-        type: String,
-        required: true,
-      },
-    },
-    data() {
-      return {
-        loadingDescription: true,
-        description: '',
-      };
-    },
-    mounted() {
-      this.loadDescription();
-    },
-    methods: {
-      loadDescription() {
-        this.loadingDescription = true;
-        ProjectService.loadDescription(this.projectId)
-          .then((data) => {
-            this.description = data.description;
-          }).finally(() => {
-            this.loadingDescription = false;
-          });
-      },
-    },
-  };
+const loadingDescription = ref(true)
+const description = ref('')
+const loadDescription = () => {
+  loadingDescription.value = true
+  ProjectService.loadDescription(props.projectId)
+    .then((data) => {
+      description.value = data.description
+    })
+    .finally(() => {
+      loadingDescription.value = false
+    })
+}
+
+onMounted(() => {
+  loadDescription()
+})
 </script>
+
+<template>
+  <div>
+    <skills-spinner :is-loading="loadingDescription" />
+    <div v-if="!loadingDescription" :data-cy="`projectDescriptionRow_${projectId}`">
+      <markdown-text v-if="description" :text="description" />
+      <div v-else>Project does not have a description</div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,92 +13,132 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <b-modal id="removalValidation" size="md" title="Removal Safety Check"
-           v-model="show"
-           :no-close-on-backdrop="true" :centered="true" body-class="px-0 mx-0"
-           header-bg-variant="info" header-text-variant="light" no-fade role="dialog"
-           @hide="publishHidden">
-    <div class="px-2">
-      <div data-cy="removalSafetyCheckMsg">
-        <slot />
-      </div>
+<script setup>
+import { ref, computed, watch } from 'vue';
+import { useFocusState } from '@/stores/UseFocusState.js'
+import { useSlotsUtil } from '@/components/utils/UseSlotsUtil.js';
+import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue';
+import InputText from 'primevue/inputtext';
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 
-      <div v-if="!removalNotAvailable" >
-        <hr />
-        <p
-          :aria-label="`Please type ${validationText} in the input box to permanently remove the record. To complete deletion press 'Yes, Do Remove' button!`">
-          Please type <span class="font-italic font-weight-bold text-primary">{{ validationText }}</span> to permanently
-          remove the record.
-        </p>
-        <b-form-input v-model="currentValidationText"
-                      data-cy="currentValidationText"
-                      :autofocus="true"
-                      aria-required="true"
-                      aria-label="Type 'Delete Me' text here to enable the removal operation. Please make sure that 'D' and 'M' are uppercase."></b-form-input>
-      </div>
-    </div>
+const focusState = useFocusState()
+const slotsUtil = useSlotsUtil();
 
-    <div slot="modal-footer" class="w-100">
-      <b-button v-if="!removalNotAvailable" variant="danger" size="sm" class="float-right ml-2"
-                @click="removeAction" data-cy="removeButton" :disabled="removeDisabled"><i
-        class="fas fa-trash"></i> Yes, Do Remove!
-      </b-button>
-      <b-button variant="secondary" size="sm" class="float-right" @click="publishHidden" data-cy="closeRemovalSafetyCheck">
-        <i class="fas fa-times"></i> Cancel
-      </b-button>
-    </div>
-  </b-modal>
-</template>
+const emit = defineEmits(['hidden', 'do-remove']);
 
-<script>
-  export default {
-    name: 'RemovalValidation',
-    props: {
-      value: {
-        type: Boolean,
-        required: true,
-      },
-      validationText: {
-        type: String,
-        required: false,
-        default: 'Delete Me',
-      },
-      removalNotAvailable: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-    },
-    data() {
-      return {
-        show: this.value,
-        currentValidationText: '',
-      };
-    },
-    watch: {
-      show(newValue) {
-        this.$emit('input', newValue);
-      },
-    },
-    computed: {
-      removeDisabled() {
-        return this.currentValidationText !== this.validationText;
-      },
-    },
-    methods: {
-      publishHidden(e) {
-        this.show = false;
-        this.$emit('hidden', { ...e });
-      },
-      removeAction() {
-        this.show = false;
-        this.$emit('do-remove');
-      },
-    },
-  };
+const props = defineProps({
+  itemName: {
+    type: String,
+    required: true,
+  },
+  itemType: {
+    type: String,
+    required: false,
+  },
+  validationText: {
+    type: String,
+    required: false,
+    default: 'Delete Me',
+  },
+  removeButtonLabel: {
+    type: String,
+    required: false,
+    default: 'Yes, Do Remove!',
+  },
+  removalNotAvailable: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  focusOnCloseId: {
+    type: String,
+    required: false,
+  },
+  loading: {
+    type: Boolean,
+    default: false
+  },
+  removalTextPrefix: {
+    type: String,
+    required: false,
+    default: 'This will remove',
+  },
+});
+
+const model = defineModel()
+
+let currentValidationText = ref('');
+
+const removeDisabled = computed(() => {
+  return currentValidationText.value !== props.validationText;
+});
+const announcer = useSkillsAnnouncer()
+watch(removeDisabled, (newValue) => {
+  if(!newValue) {
+    announcer.polite(`Removal operation successfully enabled. Please click on ${props.removeButtonLabel} button`)
+  }
+})
+
+const publishHidden = (e) => {
+  close()
+  emit('hidden', { ...e });
+};
+
+const removeAction = () => {
+  if (props.focusOnCloseId) {
+    focusState.setElementId(props.focusOnCloseId);
+  }
+  close()
+  emit('do-remove');
+};
+
+const close = () => {
+  model.value = false
+}
+const hasSlot = computed(() => {
+  return slotsUtil.hasSlot()
+})
 </script>
 
-<style scoped>
+<template>
+  <SkillsDialog
+      :maximizable="false"
+      v-model="model"
+      header="Removal Safety Check"
+      cancel-button-severity="secondary"
+      ok-button-severity="danger"
+      :ok-button-icon="'fas fa-trash'"
+      :ok-button-label="removeButtonLabel"
+      :ok-button-disabled="removeDisabled"
+      :show-ok-button="!removalNotAvailable"
+      @on-ok="removeAction"
+      @on-cancel="publishHidden"
+      :enable-return-focus="true"
+      :style="{ width: '40rem !important' }">
+    <skills-spinner v-if="loading" :is-loading="loading" class="my-4"/>
+    <div v-if="!loading" class="px-2">
+      <div data-cy="removalSafetyCheckMsg">
+        <div v-if="!removalNotAvailable">
+          {{ removalTextPrefix }} <span
+          class="font-bold text-primary">{{ itemName }}</span><span v-if="itemType">&nbsp;{{ itemType }}</span>.
+        </div>
+        <Message v-if="hasSlot" severity="warn" :closable="false">
+          <div class="pl-2"><slot /></div>
+        </Message>
+      </div>
 
-</style>
+      <div v-if="!removalNotAvailable" class="mb-4">
+        <p
+            :aria-label="`Please type ${validationText} in the input box to permanently remove the record. To complete deletion press 'Yes, Do Remove' button!`">
+          Please type <span class="font-italic font-bold text-primary">{{ validationText }}</span> to permanently
+          remove the record.
+        </p>
+        <InputText v-model="currentValidationText" data-cy="currentValidationText" aria-required="true" style="width: 100%"
+                   aria-label="Type 'Delete Me' text here to enable the removal operation. Please make sure that 'D' and 'M' are uppercase." />
+      </div>
+    </div>
+  </SkillsDialog>
+</template>
+
+<style scoped></style>

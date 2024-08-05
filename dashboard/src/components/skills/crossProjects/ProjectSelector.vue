@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,93 +13,85 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref, onMounted, watch } from 'vue';
+import ProjectService from '@/components/projects/ProjectService'
+import Dropdown from "primevue/dropdown";
+
+const props = defineProps({
+  projectId: String,
+  selected: Object,
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+  onlySingleSelectedValue: {
+    type: Boolean,
+    default: false,
+  },
+  showClear: {
+    type: Boolean,
+    default: false,
+  },
+});
+const emit = defineEmits(['selected', 'unselected']);
+
+const isLoading = ref(false);
+const projects = ref([]);
+const selectedValue = ref({});
+
+watch(() => props.selected, () => {
+  selectedValue.value = props.selected;
+})
+
+onMounted(() => {
+  selectedValue.value = props.selected;
+  search('');
+});
+
+const onSelected = (selectedItem) => {
+  emit('selected', selectedItem);
+};
+
+const onRemoved = (item) => {
+  emit('unselected', item);
+};
+
+const inputChanged = (inputItem) => {
+  if (inputItem != null) {
+    onSelected(inputItem);
+  } else {
+    onRemoved(null);
+  }
+};
+
+const search = (query) => {
+  isLoading.value = true;
+
+  ProjectService.queryOtherProjectsByName(props.projectId, query).then((response) => {
+    isLoading.value = false;
+    projects.value = response;
+  });
+};
+</script>
+
 <template>
-  <div id="project-selector" data-cy="projectSelector">
-    <v-select v-model="selectedValue"
-              :options="projects"
-              :multiple="!onlySingleSelectedValue"
-              :filterable="false"
-              placeholder="Search for a project..."
-              label="name"
-              v-on:search="search"
-              v-on:input="inputChanged"
-              :loading="isLoading"
-              :disabled="disabled">
-      <template #option="{ name, projectId }">
-        <div class="h6 project-name">{{ name }}</div>
-        <div class="text-secondary project-id">ID: {{ projectId }}</div>
+  <div id="project-selector" data-cy="projectSelector" class="w-full">
+    <Dropdown :options="projects" placeholder="Search for a project..." v-model="selectedValue" label="name" class="w-full" filter
+              :disabled="disabled" :loading="isLoading" :filterFields="['name']" @update:model-value="inputChanged" :showClear="showClear">
+      <template #value="slotProps" v-if="selectedValue">
+        <div>{{slotProps.value?.name}}</div>
       </template>
-    </v-select>
+      <template #option="slotProps">
+        <div>
+          <div class="h6 project-name" data-cy="projectSelector-projectName">{{ slotProps.option.name }}</div>
+          <div class="text-secondary project-id">ID: {{ slotProps.option.projectId }}</div>
+        </div>
+      </template>
+    </Dropdown>
   </div>
 </template>
 
-<script>
-  import vSelect from 'vue-select';
-  import ProjectService from '../../projects/ProjectService';
-
-  export default {
-    name: 'ProjectSelector',
-    components: { vSelect },
-    props: {
-      projectId: String,
-      selected: Object,
-      disabled: {
-        type: Boolean,
-        default: false,
-      },
-      onlySingleSelectedValue: {
-        type: Boolean,
-        default: false,
-      },
-    },
-    data() {
-      return {
-        isLoading: false,
-        projects: [],
-        selectedValue: null,
-      };
-    },
-    mounted() {
-      this.selectedValue = this.selected;
-      this.search('');
-    },
-    watch: {
-      selected: function selectionChanged() {
-        this.selectedValue = this.selected;
-      },
-    },
-    methods: {
-      onSelected(selectedItem) {
-        this.$emit('selected', selectedItem);
-      },
-      onRemoved(item) {
-        this.$emit('unselected', item);
-      },
-      inputChanged(inputItem) {
-        if (inputItem != null) {
-          this.onSelected(inputItem);
-        } else {
-          this.onRemoved(null);
-        }
-      },
-      search(query) {
-        this.isLoading = true;
-        ProjectService.queryOtherProjectsByName(this.projectId, query)
-          .then((response) => {
-            this.isLoading = false;
-            this.projects = response;
-          });
-      },
-    },
-  };
-</script>
-
 <style scoped>
-  .vs__dropdown-option--highlight .project-name {
-    color: #FFFFFF !important;
-  }
 
-  .vs__dropdown-option--highlight .project-id {
-    color: #FFFFFF !important;
-  }
 </style>

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,251 +13,187 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <ValidationObserver ref="templateSettingsObserver" v-slot="{invalid, pristine}" slim>
-    <div>
-      <div class="form-group">
-        <b-tabs class="h-100">
-          <b-tab active>
-            <template slot="title">
-              <div data-cy="htmlHeaderTitle">
-                <span class="label" v-show="htmlHeaderRequired" :class="hHeaderTitleClass">* </span>
-                <label class="label" for="htmlEmailHeader">
-                  HTML Header <inline-help :tab-index="false" target-id="htmlEmailHeaderHelp" msg="HTML (and in-line css) to display as a header for outgoing emails"/>
-                </label>
-              </div>
-            </template>
-            <div class="mt-2 content-height">
-              <ValidationProvider :rules="{'noscript':true,'max':3000, 'required':htmlHeaderRequired}" vid="htmlHeader" name="HTML Header" v-slot="{ errors }">
-                <textarea class="form-control" name="htmlEmailHeader" data-cy="htmlEmailHeader" rows="3" v-model="htmlHeader"
-                          id="htmlEmailHeader"
-                          :aria-invalid="errors && errors.length > 0"
-                          aria-errormessage="htmlEmailHeaderError" aria-describedby="htmlEmailHeaderError"/>
-                  <p role="alert" class="text-danger" v-show="errors[0]" data-cy="htmlEmailHeaderError" id="htmlEmailHeaderError">{{errors[0]}}</p>
-                  <p role="alert" class="text-danger"
-                     v-show="!errors[0] && htmlHeaderRequired && !htmlHeader"
-                     data-cy="htmlEmailHeaderRequired">HTML Header is required</p>
-              </ValidationProvider>
-            </div>
-          </b-tab>
-          <b-tab>
-            <template slot="title">
-              <div data-cy="ptHeaderTitle">
-                <span class="label" v-show="plaintextHeaderRequired" :class="pHeaderTitleClass">* </span>
-                <label class="label" for="plaintextEmailHeader">
-                  Plaintext Header <inline-help :tab-index="false" target-id="plaintextEmailHeaderHelp" msg="Plaintext to display as a header for outgoing emails"/>
-                </label>
-              </div>
-            </template>
-            <div class="mt-2 content-height">
-              <ValidationProvider :rules="{'noscript':true,'max':3000, 'required':plaintextHeaderRequired}" vid="plaintextHeader" name="Plaintext Header" v-slot="{ errors }">
-                <textarea class="form-control" name="plaintextEmailHeader" data-cy="plaintextEmailHeader" rows="3" v-model="plainTextHeader"
-                          id="plaintextEmailHeader"
-                          :aria-invalid="errors && errors.length > 0"
-                          aria-errormessage="plaintextEmailHeaderError" aria-describedby="plaintextEmailHeaderError"/>
-                  <p role="alert" class="text-danger" v-show="errors[0]" data-cy="plaintextEmailHeaderError" id="plaintextEmailHeaderError">{{errors[0]}}</p>
-                  <p role="alert" class="text-danger"
-                     v-show="!errors[0] && plaintextHeaderRequired && !plainTextHeader"
-                     data-cy="plaintextEmailHeaderRequired">Plaintext Header is required</p>
-              </ValidationProvider>
-            </div>
-          </b-tab>
-        </b-tabs>
-      </div>
+<script setup>
+import { ref, onMounted } from 'vue';
+import { object, string } from 'yup';
+import {useForm} from "vee-validate";
+import TabPanel from 'primevue/tabpanel';
+import TabView from 'primevue/tabview';
+import SettingsService from "@/components/settings/SettingsService.js";
 
-      <div class="form-group">
-        <b-tabs class="h-100">
-          <b-tab active>
-            <template slot="title">
-              <div data-cy="htmlFooterTitle">
-                <span class="label" v-if="htmlFooterRequired" :class="hFooterTitleClass">* </span>
-                <label class="label" for="htmlEmailFooter">
-                  HTML Footer <inline-help :tab-index="false" target-id="htmlEmailFooterHelp" msg="HTML (and in-line css) to display as a footer for outgoing emails"/>
-                </label>
-              </div>
-            </template>
-            <div class="mt-2 content-height">
-              <ValidationProvider :rules="{'noscript':true,'max':3000, 'required':htmlFooterRequired}" vid="htmlFooter" name="HTML Footer" v-slot="{ errors }">
-              <textarea class="form-control" name="htmlEmailFooter" data-cy="htmlEmailFooter" v-model="htmlFooter" rows="3"
-                        id="htmlEmailFooter"
-                        :aria-invalid="errors && errors.length > 0"
-                        aria-errormessage="htmlEmailFooterError" aria-describedby="htmlEmailFooterError"/>
-                <p role="alert" class="text-danger" v-show="errors[0]" data-cy="htmlEmailFooterError" id="htmlEmailFooterError">{{errors[0]}}</p>
-                <p role="alert" class="text-danger"
-                   v-show="!errors[0] && htmlFooterRequired && !htmlFooter"
-                   data-cy="htmlEmailFooterRequired">HTML Footer is required</p>
-              </ValidationProvider>
-            </div>
-          </b-tab>
-          <b-tab>
-            <template slot="title">
-              <div data-cy="ptFooterTitle">
-                <span class="label" v-if="plaintextFooterRequired" :class="pFooterTitleClass">* </span>
-                <label class="label" for="plaintextEmailFooter">
-                  Plaintext Footer <inline-help :tab-index="false" target-id="plaintextEmailFooterHelp" msg="Plaintext to display as a footer for outgoing emails"/>
-                </label>
-              </div>
-            </template>
-            <div class="mt-2 content-height">
-              <ValidationProvider :rules="{'noscript':true,'max':3000, 'required':plaintextFooterRequired}" vid="plaintextFooter" name="Plaintext Footer" v-slot="{ errors }">
-              <textarea class="form-control" name="plaintextEmailFooter" data-cy="plaintextEmailFooter" v-model="plainTextFooter" rows="3"
-                        id="plaintextEmailFooter"
-                        :aria-invalid="errors && errors.length > 0"
-                        aria-errormessage="plaintextEmailFooterError" aria-describedby="plaintextEmailFooterError"/>
-                <p role="alert" class="text-danger" v-show="errors[0]" data-cy="plaintextEmailFooterError" id="plaintextEmailFooterError">{{errors[0]}}</p>
-                <p role="alert" class="text-danger"
-                   v-show="!errors[0] && plaintextFooterRequired && !plainTextFooter"
-                   data-cy="plaintextEmailFooterRequired">Plaintext Footer is required</p>
-              </ValidationProvider>
-            </div>
-          </b-tab>
-        </b-tabs>
-      </div>
+const checkDependentValue = (value, dependency, ctx) => {
+  const dependencyLength = dependency.length;
+  if(value.length > 0) {
+    return dependencyLength > 0 ? true : ctx.createError({ message: `${dependency.label} is also required` });
+  } else if(dependencyLength > 0 ){
+    return ctx.createError({ message: `${value.label} is required` });
+  } else {
+    return true;
+  }
+}
 
-      <div>
-        <button class="btn btn-outline-success"
-                type="button"
-                v-on:click="saveTemplateSettings"
-                :disabled="invalid || pristine || isSaving"
-                data-cy="emailTemplateSettingsSave">
-          Save
-          <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
-        </button>
-      </div>
-    </div>
-  </ValidationObserver>
-</template>
+const schema = object({
+  htmlHeader: string()
+      .max(3000)
+      .noScript()
+      .label('HTML Header')
+      .test({
+        name: 'require-other-field',
+        test(value, ctx) {
+          return checkDependentValue(
+              {label: 'HTML Header', length: value?.length},
+              {label: 'Plaintext Header', length: ctx.parent.plainTextHeader?.length},
+              ctx
+          );
+        }
+      }),
+  plainTextHeader: string()
+      .max(3000)
+      .noScript()
+      .label('Plaintext Header')
+      .test({
+        name: 'require-other-field',
+        test(value, ctx) {
+          return checkDependentValue(
+              {label: 'Plaintext Header', length: value?.length},
+              {label: 'HTML Header', length: ctx.parent.htmlHeader?.length},
+              ctx
+          );
+        }
+      }),
+  htmlFooter: string()
+      .max(3000)
+      .noScript()
+      .label('HTML Footer')
+      .test({
+        name: 'require-other-field',
+        test(value, ctx) {
+          return checkDependentValue(
+              {label: 'HTML Footer', length: value?.length},
+              {label: 'Plaintext Footer', length: ctx.parent.plainTextFooter?.length},
+              ctx
+          );
+        }
+      }),
+  plainTextFooter: string()
+      .max(3000)
+      .noScript()
+      .label('Plaintext Footer')
+      .test({
+        name: 'require-other-field',
+        test(value, ctx) {
+          return checkDependentValue(
+              {label: 'Plaintext Footer', length: value?.length},
+              {label: 'HTML Footer', length: ctx.parent.htmlFooter?.length},
+              ctx
+          );
+        }
+      }),
+});
 
-<script>
-  import { extend } from 'vee-validate';
-  import { max, required } from 'vee-validate/dist/rules';
-  import SettingsService from './SettingsService';
-  import ToastSupport from '../utils/ToastSupport';
-  import InlineHelp from '../utils/InlineHelp';
+const { defineField, meta } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    htmlHeader: '',
+    htmlFooter: '',
+    plainTextHeader: '',
+    plainTextFooter: '',
+  }
+});
 
-  extend('max', max);
-  extend('required', required);
+const [htmlHeader] = defineField('htmlHeader');
+const [htmlFooter] = defineField('htmlFooter');
+const [plainTextHeader] = defineField('plainTextHeader');
+const [plainTextFooter] = defineField('plainTextFooter');
 
-  const scriptRegex = /<[^>]*script/;
-  extend('noscript', {
-    message: '<script> tags are not allowed',
-    validate(value) {
-      if (value) {
-        return value.match(scriptRegex) === null;
+const settingGroup = 'GLOBAL.EMAIL';
+const isSaving = ref(false);
+const htmlHeaderText = ref('HTML Header');
+const htmlFooterText = ref('HTML Footer');
+const plainTextHeaderText = ref('Plaintext Header');
+const plainTextFooterText = ref('Plaintext Footer');
+const saveMessage = ref('');
+
+onMounted(() => {
+  loadEmailSettings()
+});
+const saveTemplateSettings = () => {
+  isSaving.value = true;
+  saveMessage.value = '';
+  const settings = convertToSettings();
+  SettingsService.saveGlobalSettings(settings).then((result) => {
+    if (result) {
+      if (result.success) {
+        saveMessage.value = 'Email Template Settings Saved!';
       }
-      return false;
-    },
+    }
+  })
+  .catch(() => {
+    saveMessage.value = 'Failed to Save the Email Template Settings!';
+  })
+  .finally(() => {
+    isSaving.value = false;
   });
+};
 
-  const settingGroup = 'GLOBAL.EMAIL';
-  export default {
-    name: 'EmailTemplateSettings',
-    mixins: [ToastSupport],
-    components: { InlineHelp },
-    data() {
-      return {
-        htmlHeader: '',
-        htmlFooter: '',
-        plainTextHeader: '',
-        plainTextFooter: '',
-        isSaving: false,
-      };
-    },
-    mounted() {
-      this.loadEmailSettings();
-    },
-    computed: {
-      htmlHeaderRequired() {
-        return !!this.plainTextHeader && !this.htmlHeader;
-      },
-      plaintextHeaderRequired() {
-        return !!this.htmlHeader && !this.plainTextHeader;
-      },
-      htmlFooterRequired() {
-        return !!this.plainTextFooter && !this.htmlFooter;
-      },
-      plaintextFooterRequired() {
-        return !!this.htmlFooter && !this.plainTextFooter;
-      },
-      hHeaderTitleClass() {
-        return {
-          'text-danger': this.htmlHeaderRequired && !this.htmlHeader,
-        };
-      },
-      pHeaderTitleClass() {
-        return {
-          'text-danger': this.plaintextHeaderRequired && !this.plainTextHeader,
-        };
-      },
-      hFooterTitleClass() {
-        return {
-          'text-danger': this.htmlFooterRequired && !this.htmlFooter,
-        };
-      },
-      pFooterTitleClass() {
-        return {
-          'text-danger': this.plaintextFooterRequired && !this.plainTextFooter,
-        };
-      },
-    },
-    methods: {
-      saveTemplateSettings() {
-        this.$refs.templateSettingsObserver.validate().then((res) => {
-          if (res) {
-            this.isSaving = true;
-            const settings = this.convertToSettings();
-            SettingsService.saveGlobalSettings(settings).then((result) => {
-              if (result) {
-                if (result.success) {
-                  this.successToast('Saved', 'Email Template Settings Saved!');
-                }
-              }
-            })
-              .catch(() => {
-                this.errorToast('Failure', 'Failed to Save the Email Template Settings!');
-              })
-              .finally(() => {
-                this.isSaving = false;
-              });
-          }
-        });
-      },
-      convertToSettings() {
-        return [{
-                  settingGroup,
-                  setting: 'email.htmlHeader',
-                  value: this.htmlHeader,
-                },
-                {
-                  settingGroup,
-                  setting: 'email.htmlFooter',
-                  value: this.htmlFooter,
-                },
-                {
-                  settingGroup,
-                  setting: 'email.plaintextHeader',
-                  value: this.plainTextHeader,
-                },
-                {
-                  settingGroup,
-                  setting: 'email.plaintextFooter',
-                  value: this.plainTextFooter,
-                }];
-      },
-      convertFromSettings(settings) {
-        this.htmlHeader = settings.find((setting) => setting.setting === 'email.htmlHeader')?.value;
-        this.htmlFooter = settings.find((setting) => setting.setting === 'email.htmlFooter')?.value;
-        this.plainTextHeader = settings.find((setting) => setting.setting === 'email.plaintextHeader')?.value;
-        this.plainTextFooter = settings.find((setting) => setting.setting === 'email.plaintextFooter')?.value;
-      },
-      loadEmailSettings() {
-        SettingsService.getGlobalSettings(settingGroup).then((response) => {
-          this.convertFromSettings(response);
-        });
-      },
-    },
-  };
+const convertToSettings = () => {
+  return [{
+    settingGroup,
+    setting: 'email.htmlHeader',
+    value: htmlHeader.value,
+  },
+  {
+    settingGroup,
+    setting: 'email.htmlFooter',
+    value: htmlFooter.value,
+  },
+  {
+    settingGroup,
+    setting: 'email.plaintextHeader',
+    value: plainTextHeader.value,
+  },
+  {
+    settingGroup,
+    setting: 'email.plaintextFooter',
+    value: plainTextFooter.value,
+  }];
+};
+
+const convertFromSettings = (settings) => {
+  let htmlHeaderSaved = settings.find((setting) => setting.setting === 'email.htmlHeader')?.value;
+  let htmlFooterSaved = settings.find((setting) => setting.setting === 'email.htmlFooter')?.value;
+  let plainTextHeaderSaved = settings.find((setting) => setting.setting === 'email.plaintextHeader')?.value;
+  let plainTextFooterSaved = settings.find((setting) => setting.setting === 'email.plaintextFooter')?.value;
+
+  htmlHeader.value = htmlHeaderSaved ? htmlHeaderSaved : htmlHeader.value;
+  htmlFooter.value = htmlFooterSaved ? htmlFooterSaved : htmlFooter.value;
+  plainTextHeader.value = plainTextHeaderSaved ? plainTextHeaderSaved : plainTextHeader.value;
+  plainTextFooter.value = plainTextFooterSaved ? plainTextFooterSaved : plainTextFooter.value;
+};
+
+const loadEmailSettings = () => {
+  SettingsService.getGlobalSettings(settingGroup).then((response) => {
+    convertFromSettings(response);
+  });
+};
 </script>
+
+<template>
+  <div data-cy="emailTemplateSettings">
+
+    <SkillsTextarea name="htmlHeader" label="HTML Header" />
+    <SkillsTextarea name="plainTextHeader" label="Plain Text Header" />
+
+    <SkillsTextarea name="htmlFooter" label="HTML Footer" />
+    <SkillsTextarea name="plainTextFooter" label="Plain Text Footer" />
+
+    <Message v-if="saveMessage" :sticky="false" :life="10000">{{saveMessage}}</Message>
+
+    <SkillsButton v-on:click="saveTemplateSettings" :disabled="!meta.valid || !meta.dirty || isSaving" data-cy="emailTemplateSettingsSave"
+                  label="Save" :icon="isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right'" >
+    </SkillsButton>
+  </div>
+</template>
 
 <style scoped>
 

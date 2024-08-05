@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,75 +13,90 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { computed } from 'vue'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
+import SkillTreeLogoSvg from '@/components/brand/SkillTreeLogoSvg.vue'
+
+const responsive = useResponsiveBreakpoints()
+const logoWidth = computed(() => responsive.sm.value ? '15rem' : '23rem')
+</script>
+
 <template>
-  <div class="masthead">
+  <div class="masthead mt-3 border-1 border-round surface-border">
+    <h1 class="sr-only">SkillTree Progress and Rankings</h1>
     <div class="masthead-content">
-      <div class="container-fluid above-background" >
-        <div class="text-center">
-          <img src="/static/img/skilltree_logo.svg" alt="SkillTree Logo"/>
+      <div class="container-fluid above-background">
+        <div class="text-center mt-7">
+          <SkillTreeLogoSvg :logo-width="logoWidth"/>
         </div>
-        <div class="h4 text-center mb-4 text-primary font-italic above-background">A micro-learning <b>gamification</b> training platform</div>
-        <div class="row">
-          <div class="col-md-6 col-lg mt-2">
-            <b-card body-class="text-center" style="border-top: 5px solid #007c49;" class="h-100">
-              <div class="h5 text-primary text-uppercase">Gamification</div>
-              <div class="row no-gutters text-center">
-                <div class="col-auto">
-                  <div class="border rounded py-2 px-3 border-success">
-                    <i class="fas fa-trophy text-success" style="font-size: 2rem;" aria-hidden="true"></i>
-                  </div>
-                </div>
-                <div class="col text-left px-2">
+        <div class="text-center mb-5 font-italic above-background text-lg">A micro-learning <b>gamification</b>
+          training
+          platform
+        </div>
+        <div class="flex flex-column md:flex-row gap-4 px-4">
+          <Card class="h-100 card-1-border-top">
+            <template #content>
+              <div class="text-primary uppercase text-xl text-center">Gamification</div>
+              <div class="flex gap-2 mt-2">
+                <Avatar icon="fas fa-trophy" class="bg-primary-reverse border-1 card-1-icon w-min-3rem"
+                        size="large" />
+                <div>
                   Earn <b>points <i class="far fa-arrow-alt-circle-up skills-color-points"
-                                    aria-hidden="true"/></b>, achieve <b>badges <i
-                  class="fas fa-award skills-color-badges" aria-hidden="true"/></b> and complete
+                                    aria-hidden="true" /></b>, achieve <b>badges <i
+                  class="fas fa-award skills-color-badges" aria-hidden="true" /></b> and complete
                   <b>skills <i class="fas fa-graduation-cap skills-color-skills"
-                               aria-hidden="true"/></b>
+                               aria-hidden="true" /></b>
                   all from the comfort of your own chair!
                 </div>
               </div>
-            </b-card>
-          </div>
-          <div class="col-md-6 col-lg mt-2">
-            <b-card body-class="text-center" style="border-top: 5px solid #ffc42b;" class="h-100">
-              <div class="h5 text-primary text-uppercase">Go At your Own Pace</div>
-              <div class="row no-gutters text-center">
-                <div class="col-auto">
-                  <div class="border rounded py-2 px-3 border-success">
-                    <i class="fas fa-clock text-warning" style="font-size: 2rem;" aria-hidden="true"></i>
-                  </div>
-                </div>
-                <div class="col text-left px-2">
+            </template>
+          </Card>
+          <Card class="card-2-border-top h-100">
+            <template #content>
+              <div class="text-primary uppercase text-xl text-center">Go At your Own Pace</div>
+              <div class="flex gap-2 mt-2">
+                <Avatar icon="fas fa-clock" class="bg-primary-reverse border-1 card-2-icon w-min-3rem"
+                        size="large" />
+                <div>
                   Learn new <b>skills <i class="fas fa-graduation-cap skills-color-skills"
-                                         aria-hidden="true"/></b> and effectively master advanced
+                                         aria-hidden="true" /></b> and effectively master advanced
                   knowledge when it's <b>most convenient <i
                   class="fas fa-hourglass-half text-success" aria-hidden="true"></i></b> for you!
                 </div>
               </div>
-            </b-card>
-          </div>
-          <div class="col-lg mt-2">
-            <b-card body-class="text-center" style="border-top: 5px solid #e76f51ff;" class="h-100">
-              <div class="h5 text-info text-uppercase">Community</div>
-              <div class="row no-gutters text-center">
-                <div class="col-auto">
-                  <div class="border rounded py-2 px-3 border-success">
-                    <i class="fas fa-users" style="font-size: 2rem; color: #e76f51ff !important;" aria-hidden="true"></i>
-                  </div>
-                </div>
-                <div class="col text-left px-2">
+            </template>
+          </Card>
+          <Card class="card-1-border-top h-100">
+            <template #content>
+              <div class="text-primary uppercase text-xl text-center">Community</div>
+              <div class="flex gap-2 mt-2">
+                <Avatar icon="fas fa-users" class="bg-primary-reverse border-1 card-3-icon w-min-3rem"
+                        size="large" />
+                <div>
                   Take the learning journey <b>together <i class="fas fa-users skills-color-users"
-                                                           aria-hidden="true"/></b> with your
+                                                           aria-hidden="true" /></b> with your
                   peers and enjoy <b>friendly <i class="fas fa-handshake text-info"
-                                                 aria-hidden="true"/></b> competition!
+                                                 aria-hidden="true" /></b> competition!
                 </div>
               </div>
-            </b-card>
-          </div>
+            </template>
+          </Card>
         </div>
         <div class="text-center mt-5">
-          <div class="text-info mb-1 text-uppercase" style="font-size: 1.5rem;">Get Started Now</div>
-          <div><b-button size="lg" :to="{ name: 'DiscoverProjectsPage' }" variant="primary" data-cy="manageMyProjsBtnInNoContent" class="animate__bounceIn"><i class="fas fa-tasks" aria-hidden="true"/> Projects Catalog</b-button></div>
+          <div class="mb-3 uppercase text-2xl text-primary">Get Started Now</div>
+          <div>
+            <router-link :to="{ name: 'DiscoverProjectsPage' }" tabindex="-1">
+              <SkillsButton
+                label="Projects Catalog"
+                icon="fas fa-tasks"
+                size="large"
+                severity="info"
+                :outlined="false"
+                data-cy="manageMyProjsBtnInNoContent"
+                class="fadein animation-duration-500" />
+            </router-link>
+          </div>
         </div>
       </div>
       <div class="bg-circle-1 bg-circle"></div>
@@ -92,13 +107,34 @@ limitations under the License.
   </div>
 </template>
 
-<script>
-  export default {
-    name: 'ProgressAndRankingSplash',
-  };
-</script>
-
 <style scoped>
+.card-1-border-top {
+  border-top: 5px solid #007c49;
+}
+
+.card-1-icon {
+  border-color: #007c49 !important;
+  color: #007c49 !important;
+}
+
+.card-2-border-top {
+  border-top: 5px solid #ffc42b;
+}
+
+.card-2-icon {
+  border-color: #ffc42b !important;
+  color: #ffc42b !important;
+}
+
+.card-3-border-top {
+  border-top: 5px solid #e76f51ff;
+}
+
+.card-3-icon {
+  border-color: #e76f51ff !important;
+  color: #e76f51ff !important;
+}
+
 .masthead img {
   position: relative;
   height: 12rem;
@@ -107,7 +143,6 @@ limitations under the License.
 }
 
 .masthead {
-  margin-top: 0px !important;
   position: relative;
   overflow: hidden;
 }
@@ -165,10 +200,18 @@ limitations under the License.
     min-height: 53rem !important;
   }
 }
+
 /* bootstrap md breakpoint */
 @media (max-width: 768px) {
   .masthead .masthead-content {
     min-height: 70rem !important;
+  }
+}
+
+/* zoom 400% @ 1280px browser window */
+@media (max-width: 400px) {
+  .masthead .masthead-content {
+    min-height: 75rem !important;
   }
 }
 </style>

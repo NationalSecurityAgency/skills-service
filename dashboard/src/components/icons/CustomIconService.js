@@ -13,21 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios';
+import axios from 'axios'
 
 export default {
   getCustomIconCss(projectId, isSupervisor) {
-    let url;
+    let url
     if (projectId) {
-      url = `/api/projects/${encodeURIComponent(projectId)}/customIconCss`;
+      url = `/api/projects/${encodeURIComponent(projectId)}/customIconCss`
     } else if (isSupervisor) {
-      url = '/api/icons/customIconCss';
+      url = '/api/icons/customIconCss'
     }
     if (url) {
-      return axios
-        .get(url)
-        .then((response) => response.data);
+      return axios.get(url).then((response) => response.data)
     }
-    return new Promise((resolve) => resolve(null));
-  },
-};
+    return new Promise((resolve) => resolve(null))
+  }
+}

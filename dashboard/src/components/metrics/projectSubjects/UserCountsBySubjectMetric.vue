@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,127 +13,126 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <metrics-card title="Number of users for each level for each subject" data-cy="userCountsBySubjectMetric">
-      <b-overlay v-if="loading" :show="loading" opacity=".5">
-        <apexchart v-if="loading" type="bar" height="350" :options="{}" :series="[]"></apexchart>
-      </b-overlay>
-      <b-overlay v-if="!loading" :show="isEmpty" opacity=".5">
-        <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
-        <template v-slot:overlay>
-          <div class="alert alert-info">
-            <i class="fas fa-user-clock"></i> Users have not achieved any levels, yet...</div>
-        </template>
-      </b-overlay>
-  </metrics-card>
-</template>
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import MetricsService from "@/components/metrics/MetricsService.js";
 
-<script>
-  import MetricsService from '../MetricsService';
-  import MetricsCard from '../utils/MetricsCard';
+const route = useRoute();
 
-  export default {
-    name: 'UserCountsBySubjectMetric',
-    components: { MetricsCard },
-    data() {
-      return {
-        loading: true,
-        isEmpty: true,
-        series: [],
-        chartOptions: {
-          chart: {
-            type: 'bar',
-            height: 350,
-            toolbar: {
-              show: true,
-              offsetX: 0,
-              offsetY: -60,
-            },
-          },
-          plotOptions: {
-            bar: {
-              horizontal: false,
-              columnWidth: '55%',
-              endingShape: 'rounded',
-            },
-          },
-          dataLabels: {
-            enabled: false,
-          },
-          stroke: {
-            show: true,
-            width: 2,
-            colors: ['transparent'],
-          },
-          xaxis: {
-            categories: [],
-            axisTicks: {
-              height: 300,
-              offsetY: -300,
-            },
-            labels: {
-              style: {
-                fontSize: '13px',
-                fontWeight: 600,
-              },
-            },
-          },
-          yaxis: {
-            title: {
-              text: '# of users',
-            },
-          },
-          fill: {
-            opacity: 1,
-          },
-          tooltip: {
-            y: {
-              formatter(val) {
-                return `${val}`;
-              },
-            },
-          },
-          legend: {
-            offsetY: 5,
-          },
-        },
-      };
+onMounted(() => {
+  MetricsService.loadChart(route.params.projectId, 'numUsersPerSubjectPerLevelChartBuilder')
+      .then((res) => {
+        updateChart(res);
+        loading.value = false;
+      });
+});
+
+const loading = ref(true);
+const isEmpty = ref(true);
+const series = ref([]);
+const chartOptions = ref({
+  chart: {
+    type: 'bar',
+    height: 350,
+    toolbar: {
+      show: true,
+      offsetX: 0,
+      offsetY: -60,
     },
-    mounted() {
-      MetricsService.loadChart(this.$route.params.projectId, 'numUsersPerSubjectPerLevelChartBuilder')
-        .then((res) => {
-          this.updateChart(res);
-          this.loading = false;
-        });
+  },
+  plotOptions: {
+    bar: {
+      horizontal: false,
+      columnWidth: '55%',
+      endingShape: 'rounded',
     },
-    methods: {
-      updateChart(res) {
-        const series = [];
-        const sortedSubjects = res.sort((subj) => subj.subject);
-        this.chartOptions.xaxis.categories = sortedSubjects.map((subj) => subj.subject);
-        const allLevels = sortedSubjects.map((subj) => subj.numUsersPerLevels.length);
-        if (allLevels) {
-          const maxLevel = Math.max(...allLevels);
-          for (let i = 1; i <= maxLevel; i += 1) {
-            const data = sortedSubjects.map((subj) => {
-              const found = subj.numUsersPerLevels.find((item) => item.level === i);
-              const numUsers = found ? found.numberUsers : 0;
-              if (numUsers > 0) {
-                this.isEmpty = false;
-              }
-              return numUsers;
-            });
-            series.push({
-              name: `Level ${i}`,
-              data,
-            });
-          }
-        }
-        this.series = series;
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  stroke: {
+    show: true,
+    width: 2,
+    colors: ['transparent'],
+  },
+  xaxis: {
+    categories: [],
+    axisTicks: {
+      height: 300,
+      offsetY: -300,
+    },
+    labels: {
+      style: {
+        fontSize: '13px',
+        fontWeight: 600,
       },
     },
-  };
+  },
+  yaxis: {
+    title: {
+      text: '# of users',
+    },
+  },
+  fill: {
+    opacity: 1,
+  },
+  tooltip: {
+    y: {
+      formatter(val) {
+        return `${val}`;
+      },
+    },
+  },
+  legend: {
+    offsetY: 5,
+  },
+});
+
+const updateChart = (res) => {
+  const localSeries = [];
+  const sortedSubjects = res.sort((subj) => subj.subject);
+  chartOptions.value.xaxis.categories = sortedSubjects.map((subj) => subj.subject);
+  const allLevels = sortedSubjects.map((subj) => subj.numUsersPerLevels.length);
+  if (allLevels) {
+    const maxLevel = Math.max(...allLevels);
+    for (let i = 1; i <= maxLevel; i += 1) {
+      const data = sortedSubjects.map((subj) => {
+        const found = subj.numUsersPerLevels.find((item) => item.level === i);
+        const numUsers = found ? found.numberUsers : 0;
+        if (numUsers > 0) {
+          isEmpty.value = false;
+        }
+        return numUsers;
+      });
+      localSeries.push({
+        name: `Level ${i}`,
+        data,
+      });
+    }
+  }
+  series.value = localSeries;
+};
 </script>
+
+<template>
+  <Card data-cy="userCountsBySubjectMetric">
+    <template #header>
+      <SkillsCardHeader title="Number of users for each level for each subject"></SkillsCardHeader>
+    </template>
+    <template #content>
+      <BlockUI :blocked="loading" opacity=".5">
+        <apexchart v-if="loading" type="bar" height="350" :options="{}" :series="[]" class="mt-4"></apexchart>
+      </BlockUI>
+      <BlockUI :blocked="loading" opacity=".5">
+        <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series" class="mt-4"></apexchart>
+        <div class="alert alert-info" v-if="!loading && series.length === 0">
+          <i class="fas fa-user-clock"></i> Users have not achieved any levels, yet...
+        </div>
+      </BlockUI>
+    </template>
+  </Card>
+</template>
 
 <style scoped>
 

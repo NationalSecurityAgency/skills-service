@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,317 +13,276 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { computed, nextTick, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { useQuizSummaryState } from '@/stores/UseQuizSummaryState.js';
+import { useQuizConfig } from '@/stores/UseQuizConfig.js';
+import { useFocusState } from '@/stores/UseFocusState.js'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useElementHelper } from '@/components/utils/inputForm/UseElementHelper.js';
+import Sortable from 'sortablejs';
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
+import NoContent2 from '@/components/utils/NoContent2.vue';
+import QuestionCard from '@/components/quiz/testCreation/QuestionCard.vue';
+import EditQuestion from '@/components/quiz/testCreation/EditQuestion.vue';
+import QuizService from '@/components/quiz/QuizService.js';
+import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
+
+const announcer = useSkillsAnnouncer()
+const route = useRoute()
+const quizSummaryState = useQuizSummaryState()
+const quizConfig = useQuizConfig()
+const focusState = useFocusState()
+const elementHelper = useElementHelper()
+
+const loadingQuestions = ref(false);
+const operationInProgress = ref(false);
+const questions = ref([]);
+const quizType = ref(null);
+const sortOrder = ref({
+  loading: false,
+  loadingQuestionId: -1,
+});
+const editQuestionInfo = ref({
+  showDialog: false,
+  isEdit: true,
+  questionDef: {},
+})
+const isLoading = computed(() => quizConfig.loadingQuizConfig || loadingQuestions.value);
+const hasData = computed(() => questions.value && questions.value.length > 0)
+
+onMounted(() => {
+  loadQuestions(route.params.quizId)
+})
+
+function loadQuestions(quizId) {
+  loadingQuestions.value = true;
+  QuizService.getQuizQuestionDefs(quizId)
+      .then((res) => {
+        quizType.value = res.quizType;
+        questions.value = res.questions;
+      })
+      .finally(() => {
+        loadingQuestions.value = false;
+        enableDropAndDrop();
+      });
+}
+
+function enableDropAndDrop() {
+  if (hasData.value) {
+    nextTick(() => {
+      elementHelper.getElementById('questionsCard').then((cards) => {
+        // need to check for null because this logic is within the nextTick method
+        // and may actually run after the user moved onto another page
+        if (cards) {
+          Sortable.create(cards, {
+            handle: '.sort-control',
+            animation: 150,
+            ghostClass: 'skills-sort-order-ghost-class',
+            onUpdate(event) {
+              sortOrderUpdate(event);
+            },
+          });
+        }
+      });
+    });
+  }
+}
+
+function sortOrderUpdate(updateEvent) {
+  const {id} = updateEvent.item;
+  sortOrder.value.loadingQuestionId = id;
+  sortOrder.value.loading = true;
+  QuizService.updateQuizQuestionDisplaySortOrder(route.params.quizId, id, updateEvent.newIndex)
+      .finally(() => {
+        sortOrder.value.loading = false;
+        announcer.polite(`Sort order changed. This is now a question number ${updateEvent.newIndex + 1}`);
+      });
+}
+
+function openNewQuestionModal() {
+  editQuestionInfo.value.questionDef = {
+    id: null,
+    question: '',
+    type: QuestionType.MultipleChoice,
+    quizType: quizType.value,
+    answers: [{
+      id: null,
+      answer: '',
+      isCorrect: false,
+    }, {
+      id: null,
+      answer: '',
+      isCorrect: false,
+    }],
+  };
+  editQuestionInfo.value.isEdit =  false;
+  editQuestionInfo.value.showDialog = true;
+}
+function questionDefSaved(questionDef) {
+  try {
+    operationInProgress.value = true;
+    if (questionDef.isEdit) {
+      // is edit
+      questions.value = questions.value.map((q) => {
+        if (q.id === questionDef.id) {
+          return questionDef;
+        }
+        return q;
+      });
+    } else {
+      // is new
+      questions.value.push(questionDef)
+    }
+    if (questions.value && questions.value.length === 1) {
+      enableDropAndDrop();
+    }
+    quizSummaryState.loadQuizSummary(route.params.quizId)
+  } finally {
+    announcer.polite('Question was successfully updated.');
+    operationInProgress.value = false;
+  }
+}
+function initiatedEditQuestionDef(questionDef) {
+  editQuestionInfo.value.questionDef = { ...questionDef, quizId: route.params.quizId, quizType: quizType.value };
+  editQuestionInfo.value.isEdit =  true;
+  editQuestionInfo.value.showDialog = true;
+}
+
+function deleteQuestion(questionDef) {
+  operationInProgress.value = true;
+  QuizService.deleteQuizQuestion(route.params.quizId, questionDef.id)
+      .then(() => {
+        questions.value = questions.value.filter((q) => q.id !== questionDef.id);
+        quizSummaryState.loadQuizSummary(route.params.quizId)
+            .then(() => handleNewQuestionBtnFocus());
+      }).finally(() => {
+    operationInProgress.value = false;
+    announcer.polite('Question was successfully deleted.');
+  });
+}
+
+function handleKeySortRequest(sortRequestInfo) {
+  const {question, newIndex} = sortRequestInfo;
+  if (newIndex >= 0 && newIndex < questions.value.length) {
+    operationInProgress.value = true;
+    QuizService.updateQuizQuestionDisplaySortOrder(route.params.quizId, question.id, newIndex)
+        .then(() => {
+          questions.value = questions.value.filter((q) => q.id !== question.id);
+          questions.value.splice(newIndex, 0, question);
+        })
+        .finally(() => {
+          operationInProgress.value = false;
+          focusState.setElementId(`questionSortControl-${question.id}`);
+          focusState.focusOnLastElement()
+          announcer.polite(`Sort order changed. This is now a question number ${newIndex + 1}`);
+          nextTick(() => {
+            nextTick(() => {
+              const editBtn = document.getElementById(`questionSortControl-${question.id}`);
+              if (editBtn) {
+                editBtn.focus();
+              }
+              announcer.polite(`Sort order changed. This is now a question number ${newIndex + 1}`);
+            });
+          });
+        });
+  }
+}
+function handleNewQuestionBtnFocus() {
+  focusState.setElementId('btn_Questions');
+  focusState.focusOnLastElement()
+}
+</script>
+
 <template>
   <div>
-    <sub-page-header ref="subPageHeader"
-                     title="Questions"
-                     :is-loading="isLoading"
-                     aria-label="new question">
-      <b-button v-if="!isReadOnlyQuiz"
-                id="btn_Questions"
-                ref="btn_Questions"
-                @click="openNewAnswerModal()"
-                variant="outline-primary"
-                size="sm"
-                data-cy="btn_Questions"
-                aria-label="Create new Question" role="button">
-        <span class="d-none d-sm-inline">Question</span> <i class="fas fa-plus-circle" aria-hidden="true"/>
-      </b-button>
-    </sub-page-header>
+    <SubPageHeader ref="subPageHeader"
+                   title="Questions"
+                   :is-loading="quizConfig.loadingQuizConfig"
+                   aria-label="new question">
 
-    <b-overlay :show="operationInProgress" rounded="sm">
-    <b-card body-class="p-0" footer-bg-variant="white">
-      <skills-spinner :is-loading="isLoading" class="mb-5"/>
-      <div v-if="!isLoading">
-        <no-content2 v-if="!hasData" class="my-5"
-                     data-cy="noQuestionsYet"
-                     title="No Questions Yet..." message="Create a question to get started."/>
-        <div v-if="hasData" id="questionsCard">
-          <div v-for="(q, index) in questions" :key="q.id" :id="q.id">
-            <b-overlay :show="sortOrder.loading" rounded="sm" opacity="0.4">
-              <template #overlay>
-                <div class="text-center" :data-cy="`${q.id}_overlayShown`">
-                  <div v-if="q.id.toString()===sortOrder.loadingQuestionId"
-                       data-cy="updatingSortMsg">
-                    <div class="text-info text-uppercase mb-1">Updating sort order!</div>
-                    <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
-                  </div>
+      <SkillsButton v-if="!quizConfig.isReadOnlyQuiz"
+                    @click="openNewQuestionModal()"
+                    icon="fas fa-plus-circle"
+                    outlined
+                    size="small"
+                    data-cy="btn_Questions"
+                    id="btn_Questions"
+                    aria-label="Create new Question"
+                    :track-for-focus="true"
+                    label="Question">
+      </SkillsButton>
+    </SubPageHeader>
+
+    <BlockUI :blocked="operationInProgress">
+      <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+        <template #content>
+          <div>
+            <SkillsSpinner :is-loading="isLoading" class="py-8"/>
+            <div v-if="!isLoading">
+              <NoContent2 v-if="!hasData"
+                          title="No Questions Yet..."
+                          class="mt-5 pt-5"
+                          message="Create a question to get started."
+                          data-cy="noQuestionsYet"/>
+              <div v-if="hasData" id="questionsCard">
+                <div v-for="(q, index) in questions" :key="q.id" :id="q.id">
+                  <BlockUI :blocked="sortOrder.loading">
+                    <div class="absolute top-50 z-5 w-full text-center" :data-cy="`${q.id}_overlayShown`">
+                      <div v-if="sortOrder.loading && q.id.toString()===sortOrder.loadingQuestionId" data-cy="updatingSortMsg" >
+                        <div class="text-primary uppercase mb-1">Updating sort order!</div>
+                        <div class="flex justify-content-center">
+                          <SkillsSpinner label="Loading..." extra-class="m-0" :is-loading="true"
+                                         style="width: 3rem; height: 3rem;" variant="info"/>
+                        </div>
+                      </div>
+                    </div>
+                    <QuestionCard
+                        @edit-question="initiatedEditQuestionDef"
+                        @delete-question="deleteQuestion"
+                        @sort-change-requested="handleKeySortRequest"
+                        :question="q"
+                        :quiz-type="quizType"
+                        :show-drag-and-drop-controls="questions && questions.length > 1"
+                        :question-num="index+1"/>
+                  </BlockUI>
                 </div>
-              </template>
-              <question-card
-                @edit-question="initiatedEditQuizDef"
-                @delete-question="deleteQuestion"
-                @sort-change-requested="handleKeySortRequest"
-                :question="q"
-                :quiz-type="quizType"
-                :show-drag-and-drop-controls="questions && questions.length > 1"
-                :question-num="index+1"/>
-            </b-overlay>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </template>
 
-      <template v-if="!isLoading && !isReadOnlyQuiz" #footer>
-        <div class="text-right">
-          <b-button ref="newQuestionOnBottomBtn"
-                    data-cy="newQuestionOnBottomBtn"
-                    variant="outline-primary"
-                    size="sm"
-                    aria-label="Create new question"
-                    @click="openNewAnswerModal('newQuestionOnBottomBtn')">
-            Question <i class="fas fa-plus-circle" aria-hidden="true"/>
-          </b-button>
-        </div>
-      </template>
-    </b-card>
-    </b-overlay>
+        <template #footer v-if="!quizConfig.isReadOnlyQuiz && !quizConfig.loadingQuizConfig">
+          <div class="flex justify-content-end flex-wrap p-3">
+            <SkillsButton @click="openNewQuestionModal()"
+                          icon="fas fa-plus-circle"
+                          outlined
+                          size="small"
+                          data-cy="newQuestionOnBottomBtn"
+                          aria-label="Create new Question"
+                          ref="newQuestionOnBottomBtn"
+                          id="newQuestionOnBottomBtn"
+                          :track-for-focus="true"
+                          label="Question">
+            </SkillsButton>
+          </div>
+        </template>
+      </Card>
+    </BlockUI>
 
-    <edit-question v-if="editQuestionInfo.showDialog" v-model="editQuestionInfo.showDialog"
-                   :is-edit="editQuestionInfo.isEdit"
-                   @question-saved="questionDefSaved"
-                   @hidden="handleEditQuestionModalClose"
-                   :question-def="editQuestionInfo.questionDef"/>
+    <!-- Edit Question Modal -->
+    <edit-question
+        data-cy="editQuestionModal"
+        v-if="editQuestionInfo.showDialog"
+        v-model="editQuestionInfo.showDialog"
+        :question-def="editQuestionInfo.questionDef"
+        :is-edit="editQuestionInfo.isEdit"
+        :enable-return-focus="true"
+        @question-saved="questionDefSaved" />
   </div>
 </template>
-
-<script>
-  import { createNamespacedHelpers } from 'vuex';
-  import Sortable from 'sortablejs';
-  import QuestionType from '@/common-components/quiz/QuestionType';
-  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  import QuestionCard from '@/components/quiz/testCreation/QuestionCard';
-  import EditQuestion from '@/components/quiz/testCreation/EditQuestion';
-  import QuizService from '@/components/quiz/QuizService';
-  import SkillsSpinner from '@/components/utils/SkillsSpinner';
-  import NoContent2 from '@/components/utils/NoContent2';
-  import QuizConfigMixin from '@/components/quiz/QuizConfigMixin';
-
-  const { mapActions } = createNamespacedHelpers('quiz');
-
-  export default {
-    name: 'Questions',
-    mixins: [QuizConfigMixin],
-    components: {
-      NoContent2,
-      SkillsSpinner,
-      EditQuestion,
-      QuestionCard,
-      SubPageHeader,
-    },
-    data() {
-      return {
-        isLoading: true,
-        operationInProgress: false,
-        quizId: this.$route.params.quizId,
-        quizType: null,
-        questions: [],
-        editQuestionInfo: {
-          showDialog: false,
-          isEdit: false,
-          questionDef: {},
-          initiatedByBtnRef: null,
-        },
-        sortOrder: {
-          loading: false,
-          loadingQuestionId: -1,
-        },
-      };
-    },
-    mounted() {
-      this.loadQuestions();
-    },
-    computed: {
-      hasData() {
-        return this.questions && this.questions.length > 0;
-      },
-    },
-    methods: {
-      ...mapActions([
-        'loadQuizSummary',
-      ]),
-      questionDefSaved(questionDef) {
-        const questionDefWithQuizId = ({ ...questionDef, quizId: this.quizId });
-        this.operationInProgress = true;
-        if (questionDef.id) {
-          QuizService.updateQuizQuestionDef(this.quizId, questionDefWithQuizId)
-            .then((res) => {
-              this.questions = this.questions.map((q) => {
-                if (q.id === res.id) {
-                  return res;
-                }
-                return q;
-              });
-              if (this.questions && this.questions.length === 1) {
-                this.enableDropAndDrop();
-              }
-              this.loadQuizSummary({ quizId: this.quizId })
-                .then(() => this.handleEditQuestionBtnFocus(questionDef));
-            }).finally(() => {
-              this.operationInProgress = false;
-              this.$nextTick(() => {
-                this.$announcer.polite('Question was successfully updated.');
-              });
-            });
-        } else {
-          QuizService.saveQuizQuestionDef(this.quizId, questionDefWithQuizId)
-            .then((res) => {
-              this.questions.push(res);
-              if (this.questions && this.questions.length === 1) {
-                this.enableDropAndDrop();
-              }
-              this.loadQuizSummary({ quizId: this.quizId })
-                .then(() => {
-                  this.handleNewQuestionBtnFocus();
-                });
-            }).finally(() => {
-              this.operationInProgress = false;
-              this.$nextTick(() => {
-                this.$announcer.polite('Question was successfully saved.');
-              });
-            });
-        }
-      },
-      initiatedEditQuizDef(questionDef) {
-        this.editQuestionInfo.questionDef = { ...questionDef, quizId: this.quizId, quizType: this.quizType };
-        this.editQuestionInfo.isEdit = true;
-        this.editQuestionInfo.showDialog = true;
-        this.editQuestionInfo.initiatedByBtnRef = null;
-      },
-      deleteQuestion(questionDef) {
-        this.operationInProgress = true;
-        QuizService.deleteQuizQuestion(this.quizId, questionDef.id)
-          .then(() => {
-            this.questions = this.questions.filter((q) => q.id !== questionDef.id);
-            this.loadQuizSummary({ quizId: this.quizId })
-              .then(() => this.handleNewQuestionBtnFocus());
-          }).finally(() => {
-            this.operationInProgress = false;
-            this.$nextTick(() => {
-              this.$announcer.polite('Question was successfully deleted.');
-            });
-          });
-      },
-      handleEditQuestionModalClose(questionDef) {
-        if (questionDef.id) {
-          this.handleEditQuestionBtnFocus(questionDef);
-        } else {
-          this.handleNewQuestionBtnFocus();
-        }
-      },
-      handleNewQuestionBtnFocus() {
-        const self = this;
-        this.$nextTick(() => {
-          this.$nextTick(() => {
-            if (this.editQuestionInfo.initiatedByBtnRef) {
-              self.$refs[self.editQuestionInfo.initiatedByBtnRef]?.focus();
-            } else {
-              self.$refs.btn_Questions?.focus();
-            }
-          });
-        });
-      },
-      handleEditQuestionBtnFocus(questionDef) {
-        this.$nextTick(() => {
-          this.$nextTick(() => {
-            const editBtn = document.getElementById(`editQuestion_${questionDef.id}`);
-            if (editBtn) {
-              editBtn.focus();
-            }
-          });
-        });
-      },
-      openNewAnswerModal(initiatedBtnRef = null) {
-        this.editQuestionInfo.questionDef = {
-          id: null,
-          question: '',
-          type: QuestionType.MultipleChoice,
-          quizType: this.quizType,
-          answers: [{
-            id: null,
-            answer: '',
-            isCorrect: false,
-          }, {
-            id: null,
-            answer: '',
-            isCorrect: false,
-          }],
-        };
-        this.editQuestionInfo.isEdit = false;
-        this.editQuestionInfo.initiatedByBtnRef = initiatedBtnRef;
-        this.editQuestionInfo.showDialog = true;
-      },
-      loadQuestions() {
-        this.isLoading = true;
-        QuizService.getQuizQuestionDefs(this.quizId)
-          .then((res) => {
-            this.quizType = res.quizType;
-            this.questions = res.questions;
-          })
-          .finally(() => {
-            this.isLoading = false;
-            this.enableDropAndDrop();
-          });
-      },
-      enableDropAndDrop() {
-        if (this.hasData && this.questions.length > 0) {
-          const self = this;
-          this.$nextTick(() => {
-            const cards = document.getElementById('questionsCard');
-            // need to check for null because this logic is within nextTick method
-            // an may actually run after the user moved onto another page
-            if (cards) {
-              Sortable.create(cards, {
-                handle: '.sort-control',
-                animation: 150,
-                ghostClass: 'skills-sort-order-ghost-class',
-                onUpdate(event) {
-                  self.sortOrderUpdate(event);
-                },
-              });
-            }
-          });
-        }
-      },
-      handleKeySortRequest(sortRequestInfo) {
-        const { question, newIndex } = sortRequestInfo;
-        if (newIndex >= 0 && newIndex < this.questions.length) {
-          this.operationInProgress = true;
-          QuizService.updateQuizQuestionDisplaySortOrder(this.quizId, question.id, newIndex)
-            .then(() => {
-              this.questions = this.questions.filter((q) => q.id !== question.id);
-              this.questions.splice(newIndex, 0, question);
-            })
-            .finally(() => {
-              this.operationInProgress = false;
-              this.$nextTick(() => {
-                this.$nextTick(() => {
-                  const editBtn = document.getElementById(`questionSortControl-${question.id}`);
-                  if (editBtn) {
-                    editBtn.focus();
-                  }
-                  this.$nextTick(() => {
-                    this.$announcer.polite(`Sort order changed. This is now a question number ${newIndex + 1}`);
-                  });
-                });
-              });
-            });
-        }
-      },
-      sortOrderUpdate(updateEvent) {
-        const { id } = updateEvent.item;
-        this.sortOrder.loadingQuestionId = id;
-        this.sortOrder.loading = true;
-        QuizService.updateQuizQuestionDisplaySortOrder(this.quizId, id, updateEvent.newIndex)
-          .finally(() => {
-            this.sortOrder.loading = false;
-            this.$nextTick(() => {
-              this.$announcer.polite(`Sort order changed. This is now a question number ${updateEvent.newIndex + 1}`);
-            });
-          });
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

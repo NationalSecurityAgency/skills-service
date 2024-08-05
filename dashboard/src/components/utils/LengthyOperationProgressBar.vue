@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,60 +13,36 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <b-progress :max="max" :height="height" :variant="variant" :animated="animated">
-    <b-progress-bar :value="current" :aria-label="`${name} Progress`"></b-progress-bar>
-  </b-progress>
-</template>
+<script setup>
+import { ref } from 'vue'
+import ProgressBar from 'primevue/progressbar'
+import { useIntervalFn } from '@vueuse/core'
 
-<script>
-  export default {
-    name: 'LengthyOperationProgressBar',
-    props: {
-      name: String,
-      timeout: {
-        type: Number,
-        default: 600,
-      },
-      increment: {
-        type: Number,
-        default: 4,
-      },
-      variant: {
-        type: String,
-        default: 'success',
-      },
-      height: {
-        type: String,
-        default: '6px',
-      },
-      animated: {
-        type: Boolean,
-        default: false,
-      },
-    },
-    data() {
-      return {
-        max: 100,
-        current: 5,
-        timer: null,
-      };
-    },
-    mounted() {
-      this.timer = setInterval(() => {
-        if (this.current >= this.max) {
-          this.current = this.increment;
-        } else {
-          this.current += this.increment;
-        }
-      }, this.timeout);
-    },
-    beforeDestroy() {
-      clearInterval(this.timer);
-      this.timer = null;
-    },
-  };
+const props = defineProps({
+  timeout: {
+    type: Number,
+    default: 600,
+  },
+  increment: {
+    type: Number,
+    default: 4,
+  },
+})
+
+const max = 100
+const current = ref(0)
+useIntervalFn(() => {
+  if (current.value >= max) {
+    current.value = 0;
+  } else {
+    current.value += props.increment;
+  }
+}, props.timeout)
 </script>
+
+<template>
+  <ProgressBar :value="current"></ProgressBar>
+</template>
 
 <style scoped>
 

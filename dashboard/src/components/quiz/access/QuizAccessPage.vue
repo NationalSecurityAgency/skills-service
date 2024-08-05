@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,223 +13,216 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { useUserInfo } from '@/components/utils/UseUserInfo.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
+import { useFocusState } from '@/stores/UseFocusState.js'
+import QuizService from '@/components/quiz/QuizService.js'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import Column from 'primevue/column'
+import SkillsOverlay from '@/components/utils/SkillsOverlay.vue'
+import ExistingUserInput from '@/components/utils/ExistingUserInput.vue'
+import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue'
+import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
+
+const announcer = useSkillsAnnouncer()
+const route = useRoute()
+const userInfo = useUserInfo()
+const appConfig = useAppConfig()
+const focusState = useFocusState()
+const responsive = useResponsiveBreakpoints()
+
+const initialLoad = ref(true)
+const userRoles = ref([])
+const userIds = ref([])
+const removeRoleInfo = ref({
+  showDialog: false,
+  userInfo: {}
+})
+const selectedUser = ref(null)
+
+const options = ref({
+  busy: true,
+  bordered: true,
+  outlined: true,
+  stacked: 'md',
+  sortBy: 'userIdForDisplay',
+  sortDesc: true,
+  fields: [
+    {
+      key: 'userIdForDisplay',
+      label: 'Quiz Admin',
+      sortable: true
+    }
+  ],
+  pagination: {
+    server: false,
+    currentPage: 1,
+    totalRows: 0,
+    pageSize: 5,
+    possiblePageSizes: [5, 10, 20, 50]
+  }
+})
+const sortInfo = ref({ sortOrder: -1, sortBy: 'userIdForDisplay' })
+
+const userSelected = computed(() => {
+  return selectedUser.value && selectedUser.value.userId
+})
+onMounted(() => {
+  loadData()
+})
+
+const loadData = () => {
+  return QuizService.getQuizUserRoles(route.params.quizId)
+    .then((res) => {
+      userRoles.value = res
+      options.value.pagination.totalRows = userRoles.value.length
+      userIds.value = userRoles.value.map((u) => [u.userId, u.userIdForDisplay]).flat()
+      options.value.busy = false
+    })
+    .finally(() => {
+      initialLoad.value = false
+    })
+}
+const deleteUserRoleConfirm = (user) => {
+  removeRoleInfo.value.userInfo = user
+  removeRoleInfo.value.showDialog = true
+}
+const doDeleteUserRole = () => {
+  options.value.busy = true
+  const { userIdForDisplay, userId, dn } = removeRoleInfo.value.userInfo
+  const pkiAuthenticated = appConfig.isPkiAuthenticated
+  const userIdParam = pkiAuthenticated ? dn : userId
+  QuizService.deleteQuizAdmin(route.params.quizId, userIdParam)
+    .then(() => {
+      loadData()
+        .finally(() => {
+          document.getElementById('existingUserInput').firstElementChild.focus()
+          announcer.polite(`Admin ${userIdForDisplay} was removed`)
+        })
+    })
+}
+const notCurrentUser = (userId) => {
+  return userInfo.userInfo.value && userId !== userInfo.userInfo.value.userId
+}
+const addUserRole = () => {
+  options.value.busy = true
+  const { userIdForDisplay, userId, dn } = selectedUser.value
+  const pkiAuthenticated = appConfig.isPkiAuthenticated
+  const userIdParam = pkiAuthenticated ? dn : userId
+  QuizService.addQuizAdmin(route.params.quizId, userIdParam)
+    .then(() => {
+      selectedUser.value = null
+      loadData()
+        .then(() => {
+          // focusOnTable();
+          announcer.polite(`New admin ${userIdForDisplay} was added`)
+        })
+    })
+}
+</script>
+
 <template>
   <div>
-    <sub-page-header title="Access"/>
-    <b-card body-class="mb-4 p-0">
-      <skills-spinner v-if="initialLoad" :is-loading="initialLoad"/>
+    <SubPageHeader title="Access" />
 
-      <div v-if="!initialLoad">
-        <div class="row py-4 px-3">
-          <div class="col">
-            <b-overlay :show="table.options.busy"
-                       variant="transparent"
-                       spinner-variant="info"
-                       spinner-type="grow"
-                       spinner-small>
-              <existing-user-input :suggest="true"
-                                   ref="existingUserInput"
-                                 :validate="true"
-                                 user-type="DASHBOARD"
-                                 :excluded-suggestions="userIds"
-                                 v-model="selectedUser"
-                                 data-cy="existingUserInput"/>
-            </b-overlay>
-          </div>
-          <div class="col-auto">
-            <b-button variant="outline-hc"
-                      ref="addUserBtn"
-                      @click="addUserRole"
-                      aria-label="Add selected user as an admin of this quiz or survey"
-                      :disabled="!userSelected || table.options.busy"
-                      data-cy="addUserBtn">
-              Add User <i class="fas fa-arrow-circle-right" aria-hidden="true"></i>
-            </b-button>
-          </div>
-        </div>
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+      <template #content>
 
-        <skills-b-table id="quizUserRoleTable"
-                        :options="table.options"
-                        :items="userRoles"
-                        tableStoredStateId="quizUserRoleTable"
-                        data-cy="quizUserRoleTable">
-          <template #head(userIdForDisplay)="data">
-            <span class="text-primary"><i class="fas fa-user skills-color-users" aria-hidden="true"></i> {{ data.label }}</span>
-          </template>
-
-          <template v-slot:cell(userIdForDisplay)="data">
-            <div class="row" :data-cy="`quizAdmin_${data.item.userId}`">
-              <div class="col">
-                {{ getUserDisplay(data.item, true) }}
-              </div>
-              <div class="col-auto">
-                <b-tooltip target="warningIconForSelfRemoval" triggers="hover">
-                  Can not remove <b>myself</b>. Sorry!!
-                </b-tooltip>
-                <i id="warningIconForSelfRemoval" v-if="!notCurrentUser(data.item.userId)"
-                   data-cy="cannotRemoveWarning"
-                   class="text-warning fas fa-exclamation-circle mr-1" />
-                <b-button :ref="`delBtn_${data.item.userId}`"
-                          @click="deleteUserRoleConfirm(data.item)"
-                          :disabled="!notCurrentUser(data.item.userId)"
-                          variant="outline-primary"
-                          :aria-label="`remove access role from user ${data.item.userId}`"
-                          data-cy="removeUserBtn">
-                  <i class="text-warning fas fa-trash" aria-hidden="true"/>
-                </b-button>
-              </div>
+        <SkillsSpinner :is-loading="initialLoad" />
+        <div v-if="!initialLoad">
+          <div class="flex py-4 px-2">
+            <div class="flex flex-1 px-3">
+              <SkillsOverlay :show="options.busy" opacity="0" class="w-full">
+                <ExistingUserInput :suggest="true"
+                                   :validate="true"
+                                   user-type="DASHBOARD"
+                                   :excluded-suggestions="userIds"
+                                   v-model="selectedUser"
+                                   data-cy="existingUserInput" />
+              </SkillsOverlay>
             </div>
-          </template>
-        </skills-b-table>
-      </div>
-    </b-card>
+            <div class="flex flex-0 px-3">
+              <SkillsButton @click="addUserRole"
+                            icon="fas fa-arrow-circle-right"
+                            outlined
+                            size="small"
+                            data-cy="addUserBtn"
+                            id="addUserBtn"
+                            aria-label="Add selected user as an admin of this quiz or survey"
+                            :disabled="!userSelected || options.busy"
+                            :track-for-focus="true"
+                            label="Add User">
+              </SkillsButton>
+            </div>
+          </div>
+          <SkillsDataTable
+            tableStoredStateId="quizAccess"
+            aria-label="Quiz Access"
+            :value="userRoles"
+            :loading="options.busy"
+            show-gridlines
+            striped-rows
+            paginator
+            id="quizUserRoleTable"
+            data-cy="quizUserRoleTable"
+            :rows="options.pagination.pageSize"
+            :rowsPerPageOptions="options.pagination.possiblePageSizes"
+            v-model:sort-field="sortInfo.sortBy"
+            v-model:sort-order="sortInfo.sortOrder">
 
-    <removal-validation v-if="removeRoleInfo.showDialog"
-                        v-model="removeRoleInfo.showDialog"
-                        @do-remove="doDeleteUserRole"
-                        @hidden="focusOnRefId(`delBtn_${removeRoleInfo.userInfo.userId}`)">
-      This action will permanently remove <b>{{ removeRoleInfo.userInfo.userIdForDisplay }}</b> from having admin privileges.
-    </removal-validation>
+            <template #paginatorstart>
+              <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ userRoles.length
+              }}</span>
+            </template>
+
+            <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
+                    :class="{'flex': responsive.md.value }">
+              <template #header>
+                <span class="text-primary"><i class="fas fa-user skills-color-users"
+                                              aria-hidden="true"></i> {{ col.label }}</span>
+              </template>
+              <template #body="slotProps">
+                <div v-if="slotProps.field === 'userIdForDisplay'" class="flex flex-row flex-wrap"
+                     :data-cy="`quizAdmin_${slotProps.data.userId}`">
+                  <div class="flex align-items-start justify-content-start">
+                    {{ userInfo.getUserDisplay(slotProps.data, true) }}
+                  </div>
+                  <div v-if="notCurrentUser(slotProps.data.userId)"
+                       class="flex flex-grow-1 align-items-start justify-content-end">
+                    <SkillsButton data-cy="removeUserBtn"
+                                  :id="`deleteAdmin-${slotProps.data.userId}`"
+                                  @click="deleteUserRoleConfirm(slotProps.data)"
+                                  icon="fa fa-trash"
+                                  size="small"
+                                  outlined
+                                  :track-for-focus="true"
+                                  :aria-label="`remove access role from user ${slotProps.data.userId}`" />
+                  </div>
+                </div>
+              </template>
+            </Column>
+          </SkillsDataTable>
+        </div>
+      </template>
+    </Card>
+
+    <RemovalValidation
+      v-if="removeRoleInfo.showDialog"
+      v-model="removeRoleInfo.showDialog"
+      @do-remove="doDeleteUserRole"
+      :item-name="removeRoleInfo.userInfo.userIdForDisplay"
+      item-type="from having admin privileges"
+      :enable-return-focus="true">
+    </RemovalValidation>
   </div>
 </template>
-
-<script>
-  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  import SkillsSpinner from '@/components/utils/SkillsSpinner';
-  import QuizService from '@/components/quiz/QuizService';
-  import SkillsBTable from '@/components/utils/table/SkillsBTable';
-  import ExistingUserInput from '@/components/utils/ExistingUserInput';
-  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
-  import UserIdForDisplayMixin from '../../users/UserIdForDisplayMixin';
-
-  export default {
-    name: 'QuizAccessPage',
-    mixins: [UserIdForDisplayMixin],
-    components: {
-      ExistingUserInput,
-      SubPageHeader,
-      SkillsSpinner,
-      SkillsBTable,
-      RemovalValidation,
-    },
-    data() {
-      return {
-        initialLoad: true,
-        quizId: this.$route.params.quizId,
-        userRoles: [],
-        userIds: [],
-        removeRoleInfo: {
-          showDialog: false,
-          userInfo: {},
-        },
-        selectedUser: null,
-        table: {
-          options: {
-            busy: false,
-            bordered: true,
-            outlined: true,
-            stacked: 'md',
-            sortBy: 'started',
-            sortDesc: true,
-            fields: [
-              {
-                key: 'userIdForDisplay',
-                label: 'Quiz Admin',
-                sortable: true,
-              },
-            ],
-            pagination: {
-              server: false,
-              currentPage: 1,
-              totalRows: 0,
-              pageSize: 5,
-              possiblePageSizes: [5, 10, 20, 50],
-            },
-          },
-        },
-      };
-    },
-    mounted() {
-      this.loadData();
-    },
-    computed: {
-      userSelected() {
-        return this.selectedUser && this.selectedUser.userId;
-      },
-    },
-    methods: {
-      loadData() {
-        return QuizService.getQuizUserRoles(this.quizId)
-          .then((res) => {
-            this.table.options.pagination.totalRows = this.userRoles.length;
-            this.userRoles = res;
-            this.userIds = this.userRoles.map((u) => [u.userId, u.userIdForDisplay]).flatten();
-            this.table.options.busy = false;
-          })
-          .finally(() => {
-            this.initialLoad = false;
-          });
-      },
-      deleteUserRoleConfirm(user) {
-        this.removeRoleInfo.userInfo = user;
-        this.removeRoleInfo.showDialog = true;
-      },
-      doDeleteUserRole() {
-        this.table.options.busy = true;
-        const { userIdForDisplay, userId } = this.removeRoleInfo.userInfo;
-        QuizService.deleteQuizAdmin(this.quizId, userId)
-          .finally(() => {
-            this.loadData()
-              .finally(() => {
-                this.focusOnRefId('existingUserInput');
-                this.$nextTick(() => {
-                  this.$announcer.polite(`Admin ${userIdForDisplay} was removed`);
-                });
-              });
-          });
-      },
-      notCurrentUser(userId) {
-        return this.$store.getters.userInfo && userId !== this.$store.getters.userInfo.userId;
-      },
-      addUserRole() {
-        this.table.options.busy = true;
-        const { userIdForDisplay, userId, dn } = this.selectedUser;
-        const pkiAuthenticated = this.$store.getters.isPkiAuthenticated;
-        const userIdParam = pkiAuthenticated ? dn : userId;
-        QuizService.addQuizAdmin(this.quizId, userIdParam)
-          .then(() => {
-            this.selectedUser = null;
-            this.loadData()
-              .then(() => {
-                this.focusOnTable();
-                this.$nextTick(() => {
-                  this.$announcer.polite(`New admin ${userIdForDisplay} was added`);
-                });
-              });
-          });
-      },
-      focusOnRefId(refId) {
-        this.$nextTick(() => {
-          const ref = this.$refs[refId];
-          if (ref) {
-            ref.focus();
-          }
-        });
-      },
-      focusOnTable() {
-        this.$nextTick(() => {
-          const quizUserRoleTable = document.getElementById('quizUserRoleTable');
-          if (quizUserRoleTable) {
-            const foundInput = quizUserRoleTable.querySelector('table thead th:first-child');
-            if (foundInput) {
-              quizUserRoleTable.focus();
-            }
-          }
-        });
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

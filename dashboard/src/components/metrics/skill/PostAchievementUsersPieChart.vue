@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,72 +13,72 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <metrics-card title="User Counts" data-cy="numUsersPostAchievement">
-    <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">
-      <apexchart type="pie" height="350" :options="chartOptions" :series="series"></apexchart>
-    </metrics-overlay>
-  </metrics-card>
-</template>
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
+import MetricsService from "@/components/metrics/MetricsService.js";
 
-<script>
-  import MetricsCard from '../utils/MetricsCard';
-  import MetricsService from '../MetricsService';
-  import MetricsOverlay from '../utils/MetricsOverlay';
+const props = defineProps(['skillName']);
+const route = useRoute();
 
-  export default {
-    name: 'PostAchievementUsersPieChart',
-    components: { MetricsOverlay, MetricsCard },
-    props: ['skillName'],
-    data() {
-      return {
-        series: [],
-        chartOptions: {
-          chart: {
-            height: 250,
-            width: 250,
-            type: 'pie',
-            toolbar: {
-              show: true,
-              offsetX: 0,
-              offsetY: -60,
-            },
-          },
-          colors: ['#17a2b8', '#28a745'],
-          labels: ['stopped after achieving', 'performed Skill at least once after achieving'],
-          dataLabels: {
-            enabled: false,
-          },
-          legend: {
-            position: 'top',
-            horizontalAlign: 'left',
-          },
-        },
-        loading: true,
-        hasData: false,
-      };
+const series = ref([]);
+const chartOptions = ref({
+  chart: {
+    height: 250,
+    width: 250,
+    type: 'pie',
+    toolbar: {
+      show: true,
+      offsetX: 0,
+      offsetY: -60,
     },
-    mounted() {
-      this.loadData();
-    },
-    methods: {
-      loadData() {
-        this.loading = true;
-        MetricsService.loadChart(this.$route.params.projectId, 'usagePostAchievementMetricsBuilder', { skillId: this.$route.params.skillId })
-          .then((dataFromServer) => {
-            // need to check if the properties are defined so that 0 doesn't return false
-            if (Object.prototype.hasOwnProperty.call(dataFromServer, 'totalUsersAchieved')
-              && Object.prototype.hasOwnProperty.call(dataFromServer, 'usersPostAchievement')) {
-              const usersWhoStoppedAfterAchieving = dataFromServer.totalUsersAchieved - dataFromServer.usersPostAchievement;
-              this.hasData = true;
-              this.series = [usersWhoStoppedAfterAchieving, dataFromServer.usersPostAchievement];
-            }
-            this.loading = false;
-          });
-      },
-    },
-  };
+  },
+  colors: ['#17a2b8', '#28a745'],
+  labels: ['stopped after achieving', 'performed Skill at least once after achieving'],
+  dataLabels: {
+    enabled: false,
+  },
+  legend: {
+    position: 'top',
+    horizontalAlign: 'left',
+  },
+});
+const loading = ref(true);
+const hasData = ref(false);
+
+onMounted(() => {
+  loadData();
+});
+
+const loadData = () => {
+  loading.value = true;
+  MetricsService.loadChart(route.params.projectId, 'usagePostAchievementMetricsBuilder', { skillId: route.params.skillId })
+      .then((dataFromServer) => {
+        // need to check if the properties are defined so that 0 doesn't return false
+        if (Object.prototype.hasOwnProperty.call(dataFromServer, 'totalUsersAchieved')
+            && Object.prototype.hasOwnProperty.call(dataFromServer, 'usersPostAchievement')) {
+          const usersWhoStoppedAfterAchieving = dataFromServer.totalUsersAchieved - dataFromServer.usersPostAchievement;
+          hasData.value = true;
+          series.value = [usersWhoStoppedAfterAchieving, dataFromServer.usersPostAchievement];
+        }
+        loading.value = false;
+      });
+};
 </script>
+
+<template>
+  <Card data-cy="numUsersPostAchievement">
+    <template #header>
+      <SkillsCardHeader title="User Counts"></SkillsCardHeader>
+    </template>
+    <template #content>
+      <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">
+        <apexchart type="pie" height="350" :options="chartOptions" :series="series" class="mt-3"></apexchart>
+      </metrics-overlay>
+    </template>
+  </Card>
+</template>
 
 <style scoped>
 

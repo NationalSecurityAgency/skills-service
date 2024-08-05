@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,766 +13,332 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit }" slim>
-    <b-modal :id="skillInternal.skillId" size="xl" :title="title" v-model="show"
-             :no-close-on-backdrop="true" :centered="true"
-             header-bg-variant="info" header-text-variant="light" no-fade role="dialog" @hide="publishHidden"
-             :aria-label="isEdit?'Edit Skill':'New Skill'">
-      <skills-spinner :is-loading="isLoading" />
-      <b-container v-if="!isLoading" fluid>
-          <ReloadMessage v-if="restoredFromStorage" @discard-changes="discardChanges" />
-          <div class="row">
-            <div class="col-12 col-lg">
-              <div class="form-group">
-                <label for="skillName">* Skill Name</label>
-                <ValidationProvider rules="required|minNameLength|maxSkillNameLength|nullValueNotAllowed|uniqueName|customNameValidator" :debounce="250" v-slot="{errors}" name="Skill Name" ref="skillNameProvider">
-                  <input type="text" class="form-control" id="skillName" @input="updateSkillId"
-                         v-model="skillInternal.name" v-focus
-                         aria-required="true"
-                         v-on:keydown.enter="handleSubmit(saveSkill)"
-                         data-cy="skillName"
-                         aria-describedby="skillNameError"
-                         aria-errormessage="skillNameError"
-                         :aria-invalid="errors && errors.length > 0">
-                  <small role="alert" class="form-text text-danger" data-cy="skillNameError" id="skillNameError">{{ errors[0] }}</small>
-                </ValidationProvider>
-              </div>
-            </div>
-            <div class="col-12 col-lg">
-              <id-input type="text" label="Skill ID" :isSkillId="true" additional-validation-rules="uniqueId"
-                        v-model="skillInternal.skillId" @can-edit="canEditSkillId=$event"
-                        :next-focus-el="previousFocus"
-                        @shown="tooltipShowing=true"
-                        @hidden="tooltipShowing=false"
-                        v-on:keydown.enter.native="handleSubmit(saveSkill)"/>
-            </div>
-            <div class="col-12 col-lg-2 mt-2 mt-lg-0">
-              <div class="form-group">
-                <label for="skillVersion">Version
-                  <inline-help
-                    target-id="skillVersionHelp"
-                    :next-focus-el="previousFocus"
-                    @shown="tooltipShowing=true"
-                    @hidden="tooltipShowing=false"
-                    msg="An optional version for this skill to allow filtering of available skills for different versions of an application"/>
-                </label>
-                <ValidationProvider :rules="{ 'optionalNumeric':true,'min_value':0, 'maxSkillVersion':true, 'maxVersion': !isEdit }" v-slot="{errors}" name="Version">
-                  <input class="form-control" type="text" id="skillVersion"
-                         v-model="skillInternal.version" :disabled="isEdit"
-                         data-cy="skillVersion" v-on:keydown.enter="handleSubmit(saveSkill)"
-                         aria-describedby="skillVersionError"
-                         aria-errormessage="skillVersionError"
-                         :aria-invalid="errors && errors.length > 0"/>
-                  <small role="alert" class="form-text text-danger" data-cy="skillVersionError" id="skillVersionError">{{ errors[0] }}</small>
-                </ValidationProvider>
-              </div>
-            </div>
-          </div>
+<script setup>
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
+import { number, object, string } from 'yup'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
+import SkillsService from '@/components/skills/SkillsService.js'
+import TotalPointsField from '@/components/skills/inputForm/TotalPointsField.vue'
+import TimeWindowInput from '@/components/skills/inputForm/TimeWindowInput.vue'
+import SelfReportingTypeInput from '@/components/skills/inputForm/SelfReportingTypeInput.vue'
+import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
+import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
+import InputSanitizer from '@/components/utils/InputSanitizer.js'
+import { useSkillYupValidators } from '@/components/skills/UseSkillYupValidators.js'
+import SettingsService from '@/components/settings/SettingsService.js';
 
-          <div class="row mt-3">
-            <div class="col-12 col-lg">
-              <div class="form-group mb-1">
-                <label for="pointIncrement">* Point Increment</label>
-                <ValidationProvider rules="optionalNumeric|required|min_value:1|maxPointIncrement" v-slot="{errors}" name="Point Increment">
-                  <input class="form-control" type="text" v-model="skillInternal.pointIncrement"
-                         aria-required="true"
-                         :aria-label="`Point Increment values must range between 1 and ${maxPointIncrement}`"
-                         data-cy="skillPointIncrement" v-on:keydown.enter="handleSubmit(saveSkill)"
-                         id="pointIncrement"
-                         aria-describedby="skillPointIncrementError"
-                         aria-errormessage="skillPointIncrementError"
-                         :aria-invalid="errors && errors.length > 0"/>
-                  <small role="alert" class="form-text text-danger" data-cy="skillPointIncrementError" id="skillPointIncrementError">{{ errors[0] }}</small>
-                </ValidationProvider>
-              </div>
-            </div>
-            <div class="col-12 col-lg">
-              <div class="form-group mt-2 mt-lg-0">
-                <label for="numPerformToCompletion">* Occurrences to Completion</label>
-                <ValidationProvider vid="totalOccurrences" rules="optionalNumeric|required|min_value:1|maxNumPerformToCompletion|moreThanMaxWindowOccurrences:@windowMaxOccurrence" v-slot="{errors}" name="Occurrences to Completion" tag="div">
-                  <input class="form-control" type="text"
-                         v-model="skillInternal.numPerformToCompletion"
-                         data-cy="numPerformToCompletion" aria-required="true"
-                         v-on:keydown.enter="handleSubmit(saveSkill)"
-                         id="numPerformToCompletion"
-                         aria-describedby="skillOccurrencesError"
-                         aria-errormessage="skillOccurrencesError"
-                         :disabled="occurrencesToCompletionDisabled"
-                         :aria-label="`Occurrences to Completion values must range between 1 and ${maxPointIncrement}`"
-                         :aria-invalid="errors && errors.length > 0"/>
-                  <small role="alert" class="form-text text-danger" data-cy="skillOccurrencesError" id="skillOccurrencesError">{{ errors[0] }}</small>
-                </ValidationProvider>
-              </div>
-            </div>
-            <div class="col-12 col-lg-3">
-              <div class="form-group">
-                <label>Total Points
-                  <inline-help
-                    target-id="totalPointsHelp"
-                    :next-focus-el="previousFocus"
-                    @shown="tooltipShowing=true"
-                    @hidden="tooltipShowing=false"
-                    msg="Derived and can't be entered directly. Total Points = Increment x Occurrences."/>
-                </label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <div class="input-group-text"><i class="fas fa-equals"/></div>
-                  </div>
-                  <div class="form-control font-italic" style="background: #eeeeee;">{{ totalPoints | number }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
+const show = defineModel()
+const route = useRoute()
+const props = defineProps({
+  skill: Object,
+  isEdit: Boolean,
+  isCopy: Boolean,
+  groupId: {
+    type: String,
+    default: null,
+  }
+})
+const emit = defineEmits(['skill-saved'])
+const appConfig = useAppConfig()
+const skillYupValidators = useSkillYupValidators()
 
-          <div class="row mt-3">
-            <div class="col-12 col-lg">
-              <div class="form-group">
-                <label><b-form-checkbox data-cy="timeWindowCheckbox" id="checkbox-1" class="d-inline" v-model="skillInternal.timeWindowEnabled" v-on:input="resetTimeWindow"/>Time Window
-                  <inline-help
-                    target-id="timeWindowHelp"
-                    :next-focus-el="previousFocus"
-                    @shown="tooltipShowing=true"
-                    @hidden="tooltipShowing=false"
-                    :msg="skillInternal.timeWindowEnabled ? 'Uncheck to disable. When disabled, there is no limit on how often a skill can be performed.' : 'Check to enable. When enabled, this limits how often a skill can be performed.'"/>
+const latestSkillVersion = ref(0)
+const maxSkillVersion = ref(1)
 
-                </label>
-                <div class="row">
-                  <div class="col-12 col-sm">
-                    <ValidationProvider rules="optionalNumeric|required|min_value:0|hoursMaxTimeWindow:@timeWindowMinutes|cantBe0IfMins0" vid="timeWindowHours" v-slot="{errors}" name="Hours">
-                      <div class="input-group">
-                        <input class="form-control d-inline" type="text" v-model="skillInternal.pointIncrementIntervalHrs"
-                               value="8" :disabled="!skillInternal.timeWindowEnabled"
-                               :aria-required="skillInternal.timeWindowEnabled"
-                               ref="timeWindowHours" data-cy="timeWindowHours"
-                               v-on:keydown.enter="handleSubmit(saveSkill)"
-                               id="timeWindowHours" :aria-label="`time window hours ${maxTimeWindowMessage}`"
-                               aria-describedby="skillHoursError" :aria-invalid="errors && errors.length > 0"
-                               aria-errormessage="skillHoursError"/>
-                        <div class="input-group-append">
-                          <span class="input-group-text" id="hours-append">Hours</span>
-                        </div>
-                      </div>
-                      <small role="alert" class="form-text text-danger" data-cy="skillHoursError" id="skillHoursError">{{ errors[0] }}</small>
-                    </ValidationProvider>
-                  </div>
-                  <div class="col-12 col-sm">
-                    <ValidationProvider rules="optionalNumeric|required|min_value:0|max_value:59|minutesMaxTimeWindow:@timeWindowHours|cantBe0IfHours0" vid="timeWindowMinutes" v-slot="{errors}" name="Minutes">
-                      <div class="input-group">
-                        <input class="form-control d-inline"  type="text" v-model="skillInternal.pointIncrementIntervalMins"
-                               value="0" :disabled="!skillInternal.timeWindowEnabled" ref="timeWindowMinutes" data-cy="timeWindowMinutes"
-                               v-on:keydown.enter="handleSubmit(saveSkill)"
-                               :aria-required="skillInternal.timeWindowEnabled"
-                               aria-label="time window minutes"
-                               aria-describedby="skillMinutesError"
-                               aria-errormessage="skillMinutesError"
-                               :aria-invalid="errors && errors.length > 0"/>
-                        <div class="input-group-append">
-                          <span class="input-group-text" id="minutes-append">Minutes</span>
-                        </div>
-                      </div>
-                      <small role="alert" class="form-text text-danger" data-cy="skillMinutesError" id="skillMinutesError">{{ errors[0] }}</small>
-                    </ValidationProvider>
-                  </div>
-                </div>
+const asyncLoadData = () => {
+  const loadSkillDetails = () => {
+    if (props.isEdit || props.isCopy) {
+      return SkillsService.getSkillDetails(route.params.projectId, route.params.subjectId, props.skill.skillId)
+        .then((resSkill) => {
+          const skillDetails = {
+            ...resSkill,
+            'description': resSkill.description || '',
+            skillName: props.isCopy ? `Copy of ${resSkill.name}` : resSkill.name,
+            skillId: props.isCopy ? `copy_of_${resSkill.skillId}` : resSkill.skillId,
+            selfReportingType: props.isCopy && resSkill.selfReportingType === 'Video' ? 'Approval' : resSkill.selfReportingType,
+          }
+          initialSkillData.value = { ...skillDetails };
+          initialSkillData.value.hasVideoConfigured = resSkill.hasVideoConfigured;
+          return skillDetails;
+        })
+    }
+    return Promise.resolve({})
+  }
 
-              </div>
-            </div>
-            <div class="col-12 col-lg">
-              <ValidationProvider vid="windowMaxOccurrence" rules="optionalNumeric|required|min_value:1|lessThanTotalOccurrences:@totalOccurrences|maxNumPointIncrementMaxOccurrences" v-slot="{errors}" name="Window's Max Occurrences">
-                <div class="form-group">
-                  <label for="maxOccurrences">Window's Max Occurrences
-                    <inline-help
-                      target-id="maxOccurrencesHelp"
-                      :next-focus-el="previousFocus"
-                      @shown="tooltipShowing=true"
-                      @hidden="tooltipShowing=false"
-                      msg="Once this Max Occurrences has been reached, points will not be incremented until outside of the configured Time Window."/>
-                  </label>
+  const findLatestSkillVersion = (skillRes) => {
+    if (!props.isEdit) {
+      return SkillsService.getLatestSkillVersion(route.params.projectId).then((latestVersion) => {
+        latestSkillVersion.value = latestVersion
+        maxSkillVersion.value = Math.min(latestVersion + 1, appConfig.maxSkillVersion)
+        return {
+          ...skillRes,
+          skipTheseAttrsWhenValidatingOnInit: ['version'],
+          version: latestVersion
+        }
+      })
+    }
+    return Promise.resolve(skillRes)
+  }
 
-                    <input class="form-control" type="text" v-model="skillInternal.numPointIncrementMaxOccurrences"
-                           :disabled="!skillInternal.timeWindowEnabled" data-cy="maxOccurrences"
-                           v-on:keydown.enter="handleSubmit(saveSkill)"
-                           id="maxOccurrences"
-                           :aria-required="skillInternal.timeWindowEnabled"
-                           aria-describedby="skillMaxOccurrencesError"
-                           aria-errormessage="skillMaxOccurrencesError"
-                           :aria-invalid="errors && errors.length > 0"/>
-                    <small role="alert" class="form-text text-danger" data-cy="skillMaxOccurrencesError" id="skillMaxOccurrencesError">{{ errors[0] }}</small>
-                </div>
-              </ValidationProvider>
-            </div>
-          </div>
+  const getProjectDefaults = (skillResWithVersion) => {
+    if (!props.isEdit && !props.copy) {
+      return SettingsService.getSettingsForProject(route.params.projectId).then((settings) => {
+        if (settings) {
+          const selfReportingTypeSetting = settings.find((item) => item.setting === 'selfReport.type');
+          if (selfReportingTypeSetting) {
+            skillResWithVersion.selfReportingType = selfReportingTypeSetting.value;
+            skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('selfReportingType');
+            if (selfReportingTypeSetting.value !== 'Disabled') {
+              skillResWithVersion.selfReportingEnabled = true;
+              skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('selfReportingEnabled');
+            }
+          }
+          const selfReportingJustificationSetting = settings.find((item) => item.setting === 'selfReport.justificationRequired');
+          if (selfReportingJustificationSetting) {
+            skillResWithVersion.justificationRequired = selfReportingJustificationSetting.value && selfReportingJustificationSetting.value !== 'false';
+            skillResWithVersion.skipTheseAttrsWhenValidatingOnInit.push('justificationRequired');
+          }
+        }
+        initialSkillData.value = { ...skillResWithVersion };
+        return skillResWithVersion;
+      })
+    }
+    return Promise.resolve(skillResWithVersion)
+  }
 
-            <hr class="mt-0"/>
+  return loadSkillDetails().then((skillRes) => {
+    return findLatestSkillVersion(skillRes).then((skillResWithVersion) => {
+      return getProjectDefaults(skillResWithVersion)
+    })
+  })
+}
 
-            <self-reporting-type-input v-model="skillInternal.selfReportingType"
-                                       :skill="skillInternal"
-                                       :is-edit="isEdit"
-                                       :next-focus-el="previousFocus"
-                                       @shown="tooltipShowing=true"
-                                       @hidden="tooltipShowing=false"
-                                       @justificationRequiredChanged="updateJustificationRequired"
-                                       @input="selfReportTypeChanged"
-                                       @quizIdChanged="updateQuizId"
-                                       @quizIdCleared="clearQuizId"
-            />
+let formId = 'newSkillDialog'
+let modalTitle = 'New Skill'
+if (props.isEdit) {
+  modalTitle = 'Edit Skill'
+  formId = `editSkillDialog-${props.skill.projectId}-${props.skill.skillId}`
+}
+if (props.isCopy) {
+  modalTitle = 'Copy Skill'
+  formId = `copySkillDialog-${props.skill.projectId}-${props.skill.skillId}`
+}
 
-            <hr class="mt-0"/>
+const schema = object({
+  'skillName': string()
+    .trim()
+    .required()
+    .min(appConfig.minNameLength)
+    .max(appConfig.maxSkillNameLength)
+    .nullValueNotAllowed()
+    .customNameValidator('Skill Name')
+    .test('uniqueName', 'The value for the Skill Name is already taken', (value) => skillYupValidators.checkSkillNameUnique(value, props.skill.name, props.isEdit))
+    .label('Skill Name'),
+  'skillId': string()
+    .required()
+    .min(appConfig.minIdLength)
+    .max(appConfig.maxIdLength)
+    .nullValueNotAllowed()
+    .matches(/^[\w%]+$/, (fieldProps) => `${fieldProps.label} may only contain alpha-numeric, underscore or percent characters`)
+    .test('uniqueId', 'The value for the Skill ID is already taken', (value) => skillYupValidators.checkSkillIdUnique(value, props.skill.skillId, props.isEdit))
+    .label('Skill ID'),
+  'description': string()
+    .max(appConfig.descriptionMaxLength)
+    .customDescriptionValidator('Skill Description')
+    .label('Skill Description'),
+  'pointIncrement': number()
+    .required()
+    .min(1)
+    .max(appConfig.maxPointIncrement)
+    .label('Point Increment'),
+  'numPerformToCompletion': number()
+    .required()
+    .min(1)
+    .max(appConfig.maxPointIncrement)
+    .test(
+      'moreThanWindowOccurrences',
+      ({ label }) => `${label} must be >= Window's Max Occurrences`,
+      async (value, testContext) => testContext.parent.numPointIncrementMaxOccurrences <= value
+    )
+    .label('Occurrences'),
+  'pointIncrementIntervalHrs': number()
+    .required()
+    .min(0)
+    .max(appConfig.maxTimeWindowInHrs)
+    .test(
+      'mustHaveHoursIfMinsAre0',
+      'Hours must be > 0 if Minutes = 0',
+      async (value, testContext) => testContext.parent.pointIncrementIntervalMins > 0 || value > 0
+    )
+    .label('Hours'),
+  'pointIncrementIntervalMins': number()
+    .required()
+    .min(0)
+    .max(60)
+    .test(
+      'mustHaveMinsIfHoursAre0',
+      'Minutes must be > 0 if Hours = 0',
+      async (value, testContext) => testContext.parent.pointIncrementIntervalHrs > 0 || value > 0
+    )
+    .label('Minutes'),
+  'numPointIncrementMaxOccurrences': number()
+    .required()
+    .min(1)
+    .max(appConfig.maxNumPointIncrementMaxOccurrences)
+    .test(
+      'lessThanTotalOccurrences',
+      ({ label }) => `${label} must be <= total Occurrences to Completion`,
+      async (value, testContext) => testContext.parent.numPerformToCompletion >= value
+    )
+    .label('Max Occurrences'),
+  'version': number()
+    .required()
+    .min(0)
+    .max(appConfig.maxSkillVersion)
+    .test(
+      'maxNextVersion',
+      ({ label }) => `${label} ${latestSkillVersion.value} is the latest; max supported version is 1 (latest + 1)`,
+      async (value) => props.isEdit || (latestSkillVersion.value + 1) >= value
+    )
+    .label('Version'),
+  'helpUrl': string()
+    .urlValidator()
+    .nullable()
+    .label('Help URL'),
+  'associatedQuiz': object()
+      .nullable()
+      .test('quizRequired', 'Please select an available Quiz/Survey', (value) => !!(selfReportingType.value !== 'Quiz' || value))
+      .label('Quiz/Survey'),
+})
+const selfReportingType = ref(props.skill.selfReportingType && props.skill.selfReportingType !== 'Disabled' ? props.skill.selfReportingType : null)
+const initialSkillData = ref({
+  skillId: props.skill.skillId || '',
+  skillName: props.skill.name || '',
+  originalSkillId: props.skill.skillId || '',
+  version: props.skill.verison || 0,
+  pointIncrement: props.skill.pointIncrement || 100,
+  numPerformToCompletion: props.skill.numPerformToCompletion || 1,
+  timeWindowEnabled: props.skill.timeWindowEnabled || false,
+  pointIncrementIntervalHrs: props.skill.pointIncrementIntervalHrs || 8,
+  pointIncrementIntervalMins: props.skill.pointIncrementIntervalMins || 0,
+  numMaxOccurrencesIncrementInterval: props.skill.numMaxOccurrencesIncrementInterval || 1,
+  numPointIncrementMaxOccurrences: props.skill.numPointIncrementMaxOccurrences || 1,
+  selfReportingType: selfReportingType.value ? selfReportingType.value : 'Disabled',
+  selfReportingEnabled: selfReportingType.value !== null,
+  description: props.skill.description || '',
+  quizId: props.skill.quizId
+})
 
-            <div class="">
-            <div class="control">
-              <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Skill Description">
-                <markdown-editor v-model="skillInternal.description"
-                                 :project-id="skillInternal.projectId"
-                                 :skill-id="isEdit ? skillInternal.skillId : null"
-                                 data-cy="skillDescription"/>
-                <small role="alert" class="form-text text-danger" data-cy="skillDescriptionError">{{ errors[0] }}</small>
-              </ValidationProvider>
-            </div>
-          </div>
-
-          <help-url-input class="mt-3"
-                          :next-focus-el="previousFocus"
-                          @shown="tooltipShowing=true"
-                          @hidden="tooltipShowing=false"
-                          v-model="skillInternal.helpUrl"
-                          v-on:keydown.enter.native="handleSubmit(saveSkill)" />
-
-          <p v-if="invalid && overallErrMsg" class="text-center text-danger">***{{ overallErrMsg }}***</p>
-        </b-container>
-
-      <div slot="modal-footer" class="w-100">
-        <b-button variant="success" size="sm" class="float-right" @click="handleSubmit(saveSkill)"
-                  :disabled="invalid || isLoading"
-                  data-cy="saveSkillButton">
-          Save
-        </b-button>
-        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="closeSkillButton">
-          Cancel
-        </b-button>
-      </div>
-    </b-modal>
-  </ValidationObserver>
-</template>
-
-<script>
-  import { extend } from 'vee-validate';
-  import { max_value, min_value } from 'vee-validate/dist/rules';
-  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
-  import SelfReportingTypeInput from '@/components/skills/selfReport/SelfReportingTypeInput';
-  import SkillsSpinner from '@/components/utils/SkillsSpinner';
-  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
-  import SkillsService from './SkillsService';
-  import IdInput from '../utils/inputForm/IdInput';
-  import InlineHelp from '../utils/InlineHelp';
-  import InputSanitizer from '../utils/InputSanitizer';
-  import SettingsService from '../settings/SettingsService';
-  import HelpUrlInput from '../utils/HelpUrlInput';
-  import SaveComponentStateLocallyMixin from '../utils/SaveComponentStateLocallyMixin';
-  import ReloadMessage from '../utils/ReloadMessage';
-
-  extend('min_value', {
-    // eslint-disable-next-line camelcase
-    ...min_value,
-    message: (fieldname, placeholders) => `${fieldname} must be ${placeholders.min} or more`,
-  });
-  extend('max_value', {
-    // eslint-disable-next-line camelcase
-    ...max_value,
-    message: (fieldname, placeholders) => `${fieldname} must be ${placeholders.max} or less`,
-  });
-  extend('help_url', {
-    message: (field) => `${field} must start with "/" or "http(s)"`,
-    validate(value) {
-      if (!value) {
-        return true;
-      }
-      return value.startsWith('http') || value.startsWith('https') || value.startsWith('/');
-    },
-  });
-
-  export default {
-    name: 'EditSkill',
-    components: {
-      HelpUrlInput,
-      SkillsSpinner,
-      SelfReportingTypeInput,
-      InlineHelp,
-      IdInput,
-      MarkdownEditor,
-      ReloadMessage,
-    },
-    mixins: [SaveComponentStateLocallyMixin, MsgBoxMixin],
-    props: {
-      projectId: {
-        type: String,
-        required: true,
-      },
-      subjectId: {
-        type: String,
-        required: true,
-      },
-      groupId: {
-        type: String,
-        required: false,
-      },
-      skillId: String,
-      isEdit: {
-        type: Boolean,
-        required: true,
-      },
-      isCopy: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-      value: {
-        type: Boolean,
-        required: true,
-      },
-      newSkillDefaultValues: {
-        type: Object,
-        required: false,
-      },
-    },
-    data() {
+const saveSkill = (values) => {
+  const skilltoSave = {
+    ...values,
+    type: 'Skill',
+    subjectId: route.params.subjectId,
+    projectId: route.params.projectId,
+    isEdit: props.isEdit,
+    groupId: props.groupId,
+    name: InputSanitizer.sanitize(values.skillName),
+    skillId: InputSanitizer.sanitize(values.skillId),
+    quizId: values.associatedQuiz ? values.associatedQuiz.quizId : null,
+    pointIncrementInterval: values.timeWindowEnabled ? values.pointIncrementIntervalHrs * 60 + values.pointIncrementIntervalMins : 0,
+    selfReportingType: values.selfReportingType && values.selfReportingType !== 'Disabled' ? values.selfReportingType : null,
+  }
+  return SkillsService.saveSkill(skilltoSave)
+    .then((skillRes) => {
       return {
-        currentFocus: null,
-        previousFocus: null,
-        tooltipShowing: false,
-        isLoadingSkillDetails: true,
-        saveTimer: null,
-        originalSkill: {
-          skillId: '',
-          projectId: this.projectId,
-          subjectId: this.subjectId,
-          name: '',
-          pointIncrement: 100,
-          numPerformToCompletion: 1,
-          pointIncrementIntervalHrs: 8,
-          pointIncrementIntervalMins: 0,
-          timeWindowEnabled: false,
-          numPointIncrementMaxOccurrences: 1,
-          description: null,
-          helpUrl: null,
-          selfReportingType: null,
-          justificationRequired: false,
-          quizId: null,
-          type: 'Skill',
-        },
-        skillInternal: {
-          skillId: '',
-          originalSkillId: this.skillId,
-          projectId: this.projectId,
-          subjectId: this.subjectId,
-          name: '',
-          pointIncrement: 100,
-          numPerformToCompletion: 1,
-          // Time Window - represented in hrs + mins;
-          // 0  for both means 'disabled' and that
-          // the action can be performed right away
-          pointIncrementIntervalHrs: 8,
-          pointIncrementIntervalMins: 0,
-          timeWindowEnabled: false,
-          // Max Occurrences Within Window
-          numPointIncrementMaxOccurrences: 1,
-          description: null,
-          helpUrl: null,
-          selfReportingType: null,
-          justificationRequired: false,
-          quizId: null,
-          type: 'Skill',
-        },
-        canEditSkillId: false,
-        initial: {
-          skillId: '',
-          skillName: '',
-          latestVersion: 0,
-        },
-        selfReport: {
-          loading: false,
-        },
-        overallErrMsg: '',
-        show: this.value,
-        keysToWatch: [
-          'name', 'description', 'skillId', 'helpUrl', 'pointIncrement', 'numPerformToCompletion',
-          'pointIncrementIntervalHrs', 'pointIncrementIntervalMins', 'timeWindowEnabled',
-          'numPointIncrementMaxOccurrences', 'selfReportingType', 'type',
-        ],
-        restoredFromStorage: false,
-      };
-    },
-    mounted() {
-      this.loadComponent();
+        ...skillRes,
+        originalSkillId: !props.isCopy ? props.skill.skillId : null,
+      }
+    })
+  // close()
+}
 
-      this.setupValidation();
-      document.addEventListener('focusin', this.trackFocus);
-    },
-    computed: {
-      occurrencesToCompletionDisabled() {
-        return this.skillInternal && this.skillInternal.selfReportingType
-          && (this.skillInternal.selfReportingType === 'Quiz' || this.skillInternal.selfReportingType === 'Video');
-      },
-      isLoading() {
-        return this.isLoadingSkillDetails || this.selfReport.loading;
-      },
-      totalPoints() {
-        if (this.skillInternal.pointIncrement && this.skillInternal.numPerformToCompletion) {
-          const result = this.skillInternal.pointIncrement * this.skillInternal.numPerformToCompletion;
-          if (result > 0) {
-            return result;
-          }
-        }
-        return 0;
-      },
-      title() {
-        return this.isEdit ? 'Editing Existing Skill' : 'New Skill';
-      },
-      maxTimeWindowMessage() {
-        return `Time Window must be less then ${this.$store.getters.config.maxTimeWindowInMinutes / 60} hours`;
-      },
-      maxNumPerformToCompletion() {
-        return this.$store.getters.config.maxNumPerformToCompletion;
-      },
-      maxPointIncrement() {
-        return this.$store.getters.config.maxPointIncrement;
-      },
-      componentName() {
-        return `${this.projectId}-${this.subjectId}-${this.$options.name}${this.isEdit ? 'Edit' : ''}${this.isCopy ? 'Copy' : ''}`;
-      },
-    },
-    watch: {
-      show(newValue) {
-        this.$emit('input', newValue);
-      },
-      skillInternal: {
-        handler(newValue) {
-          if (this.hasObjectChanged(newValue, this.originalSkill)) {
-            this.saveComponentState(this.componentName, newValue);
-          }
-        },
-        deep: true,
-      },
-    },
-    methods: {
-      discardChanges(reload = false) {
-        this.clearComponentState(this.componentName);
-        if (reload) {
-          this.restoredFromStorage = false;
-          this.loadComponent();
-        }
-      },
-      loadComponent() {
-        this.isLoadingSkillDetails = true;
+const onSkillSaved = (skill) => {
+  emit('skill-saved', skill)
+}
 
-        if (this.isEdit || this.isCopy) {
-          this.loadSkillDetails(this.isCopy);
-        } else {
-          this.startLoadingFromState();
-        }
-      },
-      trackFocus() {
-        this.previousFocus = this.currentFocus;
-        this.currentFocus = document.activeElement;
-      },
-      close(e) {
-        this.clearComponentState(this.componentName);
-        this.hideModal(e);
-      },
-      publishHidden(e) {
-        if (!e.saved && this.hasObjectChanged(this.skillInternal, this.originalSkill) && !this.isLoading) {
-          e.preventDefault();
-          this.$nextTick(() => this.$announcer.polite('You have unsaved changes.  Discard?'));
-          this.msgConfirm('You have unsaved changes.  Discard?', 'Discard Changes?', 'Discard Changes', 'Continue Editing')
-            .then((res) => {
-              if (res) {
-                this.clearComponentState(this.componentName);
-                this.hideModal(e);
-                this.$nextTick(() => this.$announcer.polite('Changes discarded'));
-              } else {
-                this.$nextTick(() => this.$announcer.polite('Continued editing'));
-              }
-            });
-        } else if (this.tooltipShowing) {
-          e.preventDefault();
-        } else {
-          this.clearComponentState(this.componentName);
-          this.hideModal(e);
-        }
-      },
-      hideModal(e) {
-        this.show = false;
-        this.$emit('hidden', { updated: this.isEdit, ...e });
-      },
-      updateJustificationRequired(value) {
-        this.skillInternal.justificationRequired = value;
-      },
-      updateQuizId(quizId) {
-        this.skillInternal.quizId = quizId;
-      },
-      clearQuizId() {
-        this.skillInternal.quizId = null;
-      },
-      selfReportTypeChanged(newType) {
-        if (newType === 'Quiz' || newType === 'Video') {
-          this.skillInternal.numPerformToCompletion = 1;
-          this.skillInternal.timeWindowEnabled = false;
-          this.skillInternal.numPointIncrementMaxOccurrences = 1;
-        }
-      },
-      setupValidation() {
-        const self = this;
-        extend('uniqueName', {
-          message: (field) => `The value for the ${field} is already taken.`,
-          validate(value) {
-            if (self.isEdit && (value === self.initial.skillName || self.initial.skillName.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
-              return true;
-            }
-            return SkillsService.skillWithNameExists(self.projectId, value);
-          },
-        });
+const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
+  return (selfReportingType.value === 'Quiz' || selfReportingType.value === 'Video')
+})
 
-        extend('uniqueId', {
-          message: (field) => `The value for the ${field} is already taken.`,
-          validate(value) {
-            if (self.isEdit && self.initial.skillId === value) {
-              return true;
-            }
-            return SkillsService.skillWithIdExists(self.projectId, value);
-          },
-        });
-
-        extend('lessThanTotalOccurrences', {
-          message: () => 'Must be less than or equals to \'Occurrences to Completion\' field',
-          params: ['target'],
-          validate(value, { target }) {
-            return parseInt(target, 10) >= parseInt(value, 10);
-          },
-        });
-        extend('moreThanMaxWindowOccurrences', {
-          message: () => 'Must be more than or equals to \'Max Occurrences Within Window\' field',
-          params: ['target'],
-          validate(value, { target }) {
-            return parseInt(value, 10) >= parseInt(target, 10);
-          },
-        });
-        extend('cantBe0IfHours0', {
-          message: (field) => `${field} must be > 0 if Hours = 0`,
-          validate(value) {
-            if (parseInt(value, 10) > 0 || parseInt(self.skillInternal.pointIncrementIntervalHrs, 10) > 0) {
-              return true;
-            }
-            return false;
-          },
-        });
-        extend('cantBe0IfMins0', {
-          message: (field) => `${field} must be > 0 if Minutes = 0`,
-          validate(value) {
-            if (parseInt(value, 10) > 0 || parseInt(self.skillInternal.pointIncrementIntervalMins, 10) > 0) {
-              return true;
-            }
-            return false;
-          },
-        });
-
-        extend('maxVersion', {
-          message: () => `Version ${self.initial.latestVersion} is the latest; max supported version is ${self.initial.latestVersion + 1} (latest + 1)`,
-          validate(value) {
-            if (parseInt(value, 10) > (self.initial.latestVersion + 1)) {
-              return false;
-            }
-            return true;
-          },
-        });
-
-        extend('selfReportQuiz', {
-          message: (field) => `Test was not selected for the ${field}`,
-          validate() {
-            if (self.skillInternal.selfReportingType === 'Quiz' && !self.skillInternal.quizId) {
-              return false;
-            }
-            return true;
-          },
-        });
-
-        const validateWindow = (windowHours, windowMinutes, validator) => {
-          let hours = 0;
-          let minutes = 0;
-          if (windowHours) {
-            hours = parseInt(windowHours, 10);
-          }
-
-          if (windowMinutes) {
-            minutes = parseInt(windowMinutes, 10);
-          }
-
-          if (validator === 'hoursMaxTimeWindow' && hours === 0) {
-            return true;
-          }
-          if (validator === 'minutesMaxTimeWindow' && minutes === 0) {
-            return true;
-          }
-
-          return ((hours * 60) + minutes) <= this.$store.getters.config.maxTimeWindowInMinutes;
-        };
-
-        extend('hoursMaxTimeWindow', {
-          message: () => this.maxTimeWindowMessage,
-          params: ['target'],
-          validate(value, { target }) {
-            return validateWindow(value, target, 'hoursMaxTimeWindow');
-          },
-        });
-        extend('minutesMaxTimeWindow', {
-          message: () => this.maxTimeWindowMessage,
-          params: ['target'],
-          validate(value, { target }) {
-            return validateWindow(target, value, 'minutesMaxTimeWindow');
-          },
-        });
-      },
-      saveSkill() {
-        this.$refs.observer.validate()
-          .then((res) => {
-            if (!res) {
-              this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
-            } else {
-              this.skillInternal.name = InputSanitizer.sanitize(this.skillInternal.name);
-              this.skillInternal.skillId = InputSanitizer.sanitize(this.skillInternal.skillId);
-              this.skillInternal.helpUrl = InputSanitizer.sanitize(this.skillInternal.helpUrl);
-              if (this.skillInternal.selfReportingType === 'Disabled') {
-                this.skillInternal.selfReportingType = null;
-              }
-              this.skillInternal = {
-                subjectId: this.subjectId,
-                ...this.skillInternal,
-                pointIncrement: parseInt(this.skillInternal.pointIncrement, 10),
-                numPerformToCompletion: parseInt(this.skillInternal.numPerformToCompletion, 10),
-              };
-              const isQuiz = this.skillInternal.selfReportingType === 'Quiz';
-              const quizId = isQuiz ? this.skillInternal.quizId : null;
-              const quizName = isQuiz ? this.skillInternal.quizName : null;
-              const quizType = isQuiz ? this.skillInternal.quizType : null;
-              this.$emit('skill-saved', {
-                isEdit: this.isEdit,
-                ...this.skillInternal,
-                groupId: this.groupId,
-                quizId,
-                quizName,
-                quizType,
-              });
-              this.publishHidden({ saved: true });
-            }
-          });
-      },
-      startLoadingFromState() {
-        this.loadComponentState(this.componentName).then((result) => {
-          if (result && (!this.isEdit || (this.isEdit && result.originalSkillId === this.originalSkill.skillId))) {
-            this.skillInternal = result;
-            this.restoredFromStorage = true;
-          } else if (!this.isEdit && !this.isCopy) {
-            this.findLatestSkillVersion();
-            this.loadSelfReportProjectSetting();
-          } else if (this.newSkillDefaultValues) {
-            Object.assign(this.skillInternal, this.newSkillDefaultValues);
-          } else {
-            Object.assign(this.skillInternal, this.originalSkill);
-          }
-        }).finally(() => {
-          this.isLoadingSkillDetails = false;
-          if (this.isEdit || this.isCopy) {
-            setTimeout(() => {
-              this.$nextTick(() => {
-                const { observer } = this.$refs;
-                if (observer) {
-                  observer.validate({ silent: false });
-                }
-              });
-            }, 600);
-          }
-        });
-      },
-      loadSkillDetails(isCopy) {
-        return SkillsService.getSkillDetails(this.projectId, this.subjectId, this.skillId)
-          .then((loadedSkill) => {
-            if (!isCopy) {
-              this.originalSkill = {
-                originalSkillId: loadedSkill.skillId, isEdit: this.isEdit, ...loadedSkill, subjectId: this.subjectId,
-              };
-            } else {
-              const copy = { ...loadedSkill };
-              copy.name = `Copy of ${loadedSkill.name}`;
-              copy.skillId = `copy_of_${loadedSkill.skillId}`;
-              copy.subjectId = this.subjectId;
-              copy.originalSkillId = `copy_of_${loadedSkill.skillId}`;
-              if (loadedSkill.selfReportingType === 'Video') {
-                copy.selfReportingType = null;
-              }
-              this.originalSkill = { isEdit: false, ...copy };
-            }
-            this.initial.skillId = this.originalSkill.skillId;
-            this.initial.skillName = this.originalSkill.name;
-          })
-          .finally(() => {
-            this.startLoadingFromState();
-          });
-      },
-      loadSelfReportProjectSetting() {
-        this.selfReport.loading = true;
-        SettingsService.getSettingsForProject(this.projectId)
-          .then((response) => {
-            if (response) {
-              const selfReportingTypeSetting = response.find((item) => item.setting === 'selfReport.type');
-              if (selfReportingTypeSetting) {
-                this.originalSkill.selfReportingType = selfReportingTypeSetting.value;
-              }
-              const selfReportingJustificationSetting = response.find((item) => item.setting === 'selfReport.justificationRequired');
-              if (selfReportingJustificationSetting) {
-                this.originalSkill.justificationRequired = selfReportingJustificationSetting.value;
-              }
-            }
-          }).finally(() => {
-            if (this.newSkillDefaultValues) {
-              Object.assign(this.skillInternal, this.newSkillDefaultValues);
-            } else {
-              Object.assign(this.skillInternal, this.originalSkill);
-            }
-            this.selfReport.loading = false;
-          });
-      },
-      findLatestSkillVersion() {
-        SkillsService.getLatestSkillVersion(this.projectId)
-          .then((latestVersion) => {
-            this.skillInternal.version = latestVersion;
-            this.initial.latestVersion = latestVersion;
-          })
-          .finally(() => {
-            this.isLoadingSkillDetails = false;
-          });
-      },
-      updateSkillId() {
-        if (!this.isEdit && !this.canEditSkillId) {
-          let id = InputSanitizer.removeSpecialChars(this.skillInternal.name);
-          // Subjects, skills and badges can not have same id under a project
-          // by default append Skill to avoid id collision with other entities,
-          // user can always override in edit mode
-          if (id) {
-            id = `${id}Skill`;
-          }
-          this.skillInternal.skillId = id;
-        }
-      },
-      resetTimeWindow(checked) {
-        if (!checked) {
-          this.skillInternal.pointIncrementIntervalHrs = 8;
-          this.skillInternal.pointIncrementIntervalMins = 0;
-          this.skillInternal.numPointIncrementMaxOccurrences = 1;
-        }
-      },
-    },
-  };
 </script>
 
-<style>
+<template>
+  <SkillsInputFormDialog
+    :id="formId"
+    v-model="show"
+    :should-confirm-cancel="true"
+    :is-edit="isEdit"
+    :async-load-data-function="asyncLoadData"
+    :save-data-function="saveSkill"
+    :header="modalTitle"
+    saveButtonLabel="Save"
+    :validation-schema="schema"
+    :initial-values="initialSkillData"
+    :enable-return-focus="true"
+    @saved="onSkillSaved"
+  >
+    <div class="flex flex-wrap">
+      <div class="flex-1">
+        <SkillsNameAndIdInput
+          :name-label="`${isCopy ? 'New Skill Name' : 'Skill Name'}`"
+          name-field-name="skillName"
+          :id-label="`${props.isCopy ? 'New Skill ID' : 'Skill ID'}`"
+          id-field-name="skillId"
+          :is-inline="true"
+          id-suffix="Skill"
+          :name-to-id-sync-enabled="!props.isEdit" />
+      </div>
+
+      <div class="lg:max-w-10rem lg:ml-3 w-full">
+        <SkillsNumberInput
+          showButtons
+          :disabled="isEdit"
+          :min="latestSkillVersion"
+          label="Version"
+          name="version" />
+      </div>
+    </div>
+
+    <div class="flex flex-wrap lg:flex-no-wrap">
+      <SkillsNumberInput
+        class="flex-1"
+        style="min-width: 14rem;"
+        :min="1"
+        :is-required="true"
+        label="Point Increment"
+        name="pointIncrement" />
+
+      <SkillsNumberInput
+        class="flex-1 sm:ml-2"
+        style="min-width: 16rem;"
+        showButtons
+        :min="0"
+        :is-required="true"
+        :disabled="occurrencesToCompletionAndTimeWindowDisabled"
+        label="Occurrences to Completion"
+        name="numPerformToCompletion" />
+
+      <total-points-field class="lg:ml-2" />
+    </div>
+
+    <time-window-input :disabled="occurrencesToCompletionAndTimeWindowDisabled" class="mb-3"/>
+
+    <self-reporting-type-input @self-reporting-type-changed="selfReportingType = $event" :initial-skill-data="initialSkillData" :is-edit="isEdit" class="mt-1"/>
+
+    <markdown-editor
+      class="mt-5"
+      name="description" />
+
+    <help-url-input class="mt-3"
+                    name="helpUrl" />
+
+  </SkillsInputFormDialog>
+</template>
+
+<style scoped>
+
 </style>

@@ -123,7 +123,7 @@ export default {
       return false;
     }
 
-    const filterTags = Object.keys(filters.skillTags).filter((key) => filters.skillTags[key] === true);
+    const filterTags = filters.skillTags;
 
     if (filterTags.length > 0) {
       const skillTags = item.skillTags.map((tag) => tag.tagId);

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,325 +13,265 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <ValidationObserver ref="observer" v-slot="{invalid}" slim>
-    <metrics-card title="Achievements" :no-padding="true" data-cy="achievementsNavigator">
-      <div class="row p-3">
-        <div class="col-md border-right">
-          <b-form-group label="User Name Filter:" label-for="user-name-filter" label-class="text-muted">
-            <b-form-input id="user-name-filter" v-model="usernameFilter" v-on:keydown.enter="reloadTable" data-cy="achievementsNavigator-usernameInput"/>
-          </b-form-group>
-        </div>
-          <div class="col-6 col-md border-right">
-            <ValidationProvider rules="dateOrder" v-slot="{errors}" name="From Date"
-                                ref="fromDateValidationProvider">
-              <b-form-group label="From Date:" label-for="from-date-filter"
-                            label-class="text-muted">
-                <b-form-datepicker aria-label="from date filter" id="from-date-filter"
-                                   v-model="fromDayFilter" class="mb-2"
-                                   aria-errormessage="fromDateError"
-                                   aria-describedby="fromDateError"
-                                   :aria-invalid="errors && errors.length > 0"
-                                   data-cy="achievementsNavigator-fromDateInput">
-                </b-form-datepicker>
-              </b-form-group>
-              <small role="alert" id="fromDateError" class="form-text text-danger" v-show="errors[0]"
-                     data-cy="fromDateError">{{ errors[0] }}
-              </small>
-            </ValidationProvider>
-          </div>
-          <div class="col-6 col-md">
-            <ValidationProvider rules="dateOrder" v-slot="{errors}" name="To Date"
-                                ref="toDateValidationProvider">
-              <b-form-group label="To Date:" label-for="to-date-filter" label-class="text-muted">
-                <b-form-datepicker aria-label="to date filter" id="to-date-filter"
-                                   v-model="toDayFilter" class="mb-2"
-                                   aria-errormessage="toDateError"
-                                   aria-describedby="toDateError"
-                                   :aria-invalid="errors && errors.length > 0"
-                                   data-cy="achievementsNavigator-toDateInput">
-                </b-form-datepicker>
-              </b-form-group>
-              <small role="alert" id="toDateError" class="form-text text-danger" v-show="errors[0]" data-cy="toDateError">{{
-                  errors[0]
-                }}</small>
-            </ValidationProvider>
-          </div>
-        </div>
-        <div class="row px-3">
-          <div class="col-xl border-right">
-            <b-form-group label="Types:" label-class="text-muted" data-cy="achievementsNavigator-typeInput">
-              <b-form-checkbox-group
-                id="checkbox-group-1"
-                v-model="achievementTypes.selected"
-                :options="achievementTypes.available"
-                name="flavour-1"
-              >
-              </b-form-checkbox-group>
-            </b-form-group>
-          </div>
-          <div class="col-12 col-md-6 col-xl border-right">
-            <b-form-group id="levels-input-group" label="Minimum Level (Subject & Skill Only):" label-for="input-3" label-class="text-muted">
-              <b-form-select id="input-3" v-model="levels.selected" :options="levels.available" required data-cy="achievementsNavigator-levelsInput"/>
-            </b-form-group>
-          </div>
-          <div class="col-12 col-md-6 col-xl">
-            <b-form-group label="Name (Subject, Skill and Badge Only):" label-for="name-filter" label-class="text-muted">
-              <b-form-input id="name-filter" v-model="nameFilter" v-on:keydown.enter="reloadTable" data-cy="achievementsNavigator-nameInput"/>
-            </b-form-group>
-          </div>
-        </div>
-        <div class="row pl-3 mb-2">
-          <div class="col">
-            <b-button variant="outline-primary" @click="reloadTable" data-cy="achievementsNavigator-filterBtn" :disabled="invalid"><i class="fa fa-filter"/> Filter</b-button>
-            <b-button variant="outline-primary" @click="reset" class="ml-1" data-cy="achievementsNavigator-resetBtn"><i class="fa fa-times"/> Reset</b-button>
-          </div>
-        </div>
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router';
+import dayjs from 'dayjs';
+import MetricsService from "@/components/metrics/MetricsService.js";
+import DateCell from "@/components/utils/table/DateCell.vue";
+import AchievementType from "@/components/metrics/projectAchievements/AchievementType.vue";
+import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
+import InputText from "primevue/inputtext";
+import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
+import SkillsDropDown from "@/components/utils/inputForm/SkillsDropDown.vue";
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import Column from 'primevue/column'
 
-        <skills-b-table class="mb-5" data-cy="achievementsNavigator-table"
-                        :items="items" :options="tableOptions" tableStoredStateId="achievementsNavigator-table"
-                        @sort-changed="sortTable" @page-changed="pageChanged" @page-size-changed="pageSizeChanged">
-          <template v-slot:cell(username)="data">
-            <div class="row">
-              <div class="col-12 col-md-8">
-                <span>{{ data.value }}</span>
-              </div>
-              <div class="col-12 col-md-4 text-md-right">
-                <b-button :to="{ name: 'ClientDisplayPreview', params: { projectId: projectId, userId: data.item.userId } }"
-                          variant="outline-info" size="sm" class="text-secondary"
-                          v-b-tooltip.hover title="View User's Client Display" data-cy="achievementsNavigator-clientDisplayBtn"><i class="fa fa-eye"/></b-button>
-              </div>
-            </div>
-          </template>
-          <template v-slot:cell(type)="data">
-            <achievement-type :type="data.value" />
-          </template>
-          <template v-slot:cell(name)="data">
-            <div data-cy="achievementsNavigator-table-skillName">
-              <span v-if="data.value == 'Overall'" class="small text-muted">
-                N/A
-              </span>
-              <span v-else>{{ data.value }}</span>
-            </div>
-          </template>
-          <template v-slot:cell(level)="data">
-            <span v-if="!data.value" class="small text-muted">
-              N/A
-            </span>
-            <span v-else>{{ data.value }}</span>
-          </template>
-          <template v-slot:cell(achievedOn)="data">
-            <span class="">{{ data.value | date }}</span>
-            <b-badge v-if="isToday(data.value)" variant="info" class="ml-2">Today</b-badge>
-            <div class="small text-muted">
-              {{ data.value | timeFromNow }}
-            </div>
-          </template>
-        </skills-b-table>
-    </metrics-card>
-  </ValidationObserver>
-</template>
+const route = useRoute();
+const responsive = useResponsiveBreakpoints()
+const isFlex = computed(() => responsive.md.value)
 
-<script>
-  import { extend } from 'vee-validate';
-  import dayjs from '@/common-components/DayJsCustomizer';
-  import SkillsBTable from '../../utils/table/SkillsBTable';
-  import MetricsService from '../MetricsService';
-  import AchievementType from './AchievementType';
-  import MetricsCard from '../utils/MetricsCard';
+const isLoading = ref(true);
+const usernameFilter = ref('');
+const fromDayFilter = ref();
+const toDayFilter = ref();
+const nameFilter = ref('');
+const levels = {
+  selected: '',
+  available: [
+    { value: '', text: 'Optionally select level' },
+    { value: 1, text: 'Level 1' },
+    { value: 2, text: 'Level 2' },
+    { value: 3, text: 'Level 3' },
+    { value: 4, text: 'Level 4' },
+    { value: 5, text: 'Level 5' },
+  ],
+};
+const achievementTypes = ref({
+  selected: ['Overall', 'Subject', 'Skill', 'Badge'],
+  available: ['Overall', 'Subject', 'Skill', 'Badge'],
+});
 
-  /*
-   Provider's reset() method triggers an infinite loop if we use it in dateOrder
-   we need to explicitly set the flags and manually clear errors
-  */
-  const resetProvider = (provider) => {
-    if (provider) {
-      provider.setErrors([]);
-      provider.setFlags({
-        valid: true,
-        invalid: false,
-        passed: true,
-        failed: false,
+const sortBy = ref('achievedOn');
+const sortOrder = ref(-1);
+const currentPage = ref(1);
+const totalRows = ref(0);
+const pageSize = ref(5);
+const possiblePageSizes = [5, 10, 15, 20, 50];
+const loadingTable = ref(false);
+
+const items = ref([]);
+
+onMounted(() => {
+  reloadTable();
+});
+
+const pageChanged = (pagingInfo) => {
+  currentPage.value = pagingInfo.page + 1;
+  pageSize.value = pagingInfo.rows;
+  reloadTable();
+};
+
+const sortTable = (sortContext) => {
+  sortBy.value = sortContext.sortField;
+  sortOrder.value = sortContext.sortOrder;
+
+  // set to the first page
+  currentPage.value = 1;
+  reloadTable();
+};
+
+const reset = () => {
+  usernameFilter.value = '';
+  currentPage.value = 1;
+  fromDayFilter.value = null;
+  toDayFilter.value = null;
+  nameFilter.value = '';
+  levels.selected = '';
+  achievementTypes.value.selected = achievementTypes.value.available;
+  reloadTable();
+};
+
+const reloadTable = () => {
+  loadingTable.value = true;
+  const params = {
+    pageSize: pageSize.value,
+    currentPage: currentPage.value,
+    usernameFilter: usernameFilter.value,
+    fromDayFilter: fromDayFilter.value ? dayjs(fromDayFilter.value).format('YYYY-MM-DD') : '',
+    toDayFilter: toDayFilter.value ? dayjs(toDayFilter.value).format('YYYY-MM-DD') : '',
+    nameFilter: nameFilter.value,
+    minLevel: levels.selected,
+    achievementTypes: achievementTypes.value.selected,
+    sortBy: sortBy.value,
+    sortDesc: sortOrder.value !== 1,
+  };
+
+  MetricsService.loadChart(route.params.projectId, 'userAchievementsChartBuilder', params)
+      .then((dataFromServer) => {
+        isLoading.value = false;
+        items.value = dataFromServer.items;
+        totalRows.value = dataFromServer.totalNumItems;
+        loadingTable.value = false;
       });
-    }
-  };
-
-  export default {
-    name: 'AchievementsNavigator',
-    components: { MetricsCard, AchievementType, SkillsBTable },
-    mounted() {
-      this.customValidation();
-      this.reloadTable();
-    },
-    data() {
-      return {
-        isLoading: true,
-        projectId: this.$route.params.projectId,
-        usernameFilter: '',
-        fromDayFilter: '',
-        toDayFilter: '',
-        nameFilter: '',
-        levels: {
-          selected: '',
-          available: [
-            { value: '', text: 'Optionally select level' },
-            { value: 1, text: 'Level 1' },
-            { value: 2, text: 'Level 2' },
-            { value: 3, text: 'Level 3' },
-            { value: 4, text: 'Level 4' },
-            { value: 5, text: 'Level 5' },
-          ],
-        },
-        achievementTypes: {
-          selected: ['Overall', 'Subject', 'Skill', 'Badge'],
-          available: ['Overall', 'Subject', 'Skill', 'Badge'],
-        },
-        tableOptions: {
-          busy: true,
-          sortBy: 'achievedOn',
-          sortDesc: true,
-          bordered: true,
-          outlined: true,
-          rowDetailsControls: false,
-          stacked: 'md',
-          fields: [
-            {
-              key: 'userName',
-              sortable: true,
-              label: 'Username',
-            },
-            {
-              key: 'type',
-              sortable: false,
-            },
-            {
-              key: 'name',
-              sortable: false,
-            },
-            {
-              key: 'level',
-              sortable: false,
-            },
-            {
-              key: 'achievedOn',
-              label: 'Date',
-              sortable: true,
-            },
-          ],
-          pagination: {
-            server: true,
-            currentPage: 1,
-            totalRows: 0,
-            pageSize: 5,
-            possiblePageSizes: [5, 10, 15, 20, 50],
-          },
-          tableDescription: 'User Achievement Results',
-        },
-        items: [],
-      };
-    },
-    methods: {
-      pageChanged(pageNum) {
-        this.tableOptions.pagination.currentPage = pageNum;
-        this.reloadTable();
-      },
-      pageSizeChanged(newSize) {
-        this.tableOptions.pagination.pageSize = newSize;
-        this.reloadTable();
-      },
-      sortTable(sortContext) {
-        this.tableOptions.sortBy = sortContext.sortBy;
-        this.tableOptions.sortDesc = sortContext.sortDesc;
-
-        // set to the first page
-        this.tableOptions.pagination.currentPage = 1;
-        this.reloadTable();
-      },
-      customValidation() {
-        const self = this;
-        extend('dateOrder', {
-          message: 'From Date must come before To Date',
-          validate() {
-            let valid = true;
-            if (self.fromDayFilter && self.toDayFilter) {
-              valid = dayjs(self.fromDayFilter).isBefore(dayjs(self.toDayFilter));
-              if (valid) {
-                // manually clear errors in case the orig error occurred when setting startDate,
-                // but was fixed by updating endDate (or vise-versa)
-                resetProvider(self.$refs.fromDateValidationProvider);
-                resetProvider(self.$refs.toDateValidationProvider);
-              }
-            }
-            return valid;
-          },
-        });
-      },
-      reset() {
-        this.usernameFilter = '';
-        this.tableOptions.pagination.currentPage = 1;
-        this.fromDayFilter = '';
-        this.toDayFilter = '';
-        this.nameFilter = '';
-        this.levels.selected = '';
-        this.achievementTypes.selected = this.achievementTypes.available;
-        this.reloadTable();
-      },
-      reloadTable() {
-        this.tableOptions.busy = true;
-        const params = {
-          pageSize: this.tableOptions.pagination.pageSize,
-          currentPage: this.tableOptions.pagination.currentPage,
-          usernameFilter: this.usernameFilter,
-          fromDayFilter: this.fromDayFilter,
-          toDayFilter: this.toDayFilter,
-          nameFilter: this.nameFilter,
-          minLevel: this.levels.selected,
-          achievementTypes: this.achievementTypes.selected,
-          sortBy: this.tableOptions.sortBy,
-          sortDesc: this.tableOptions.sortDesc,
-        };
-
-        MetricsService.loadChart(this.$route.params.projectId, 'userAchievementsChartBuilder', params)
-          .then((dataFromServer) => {
-            this.isLoading = false;
-            this.items = dataFromServer.items;
-            this.tableOptions.pagination.totalRows = dataFromServer.totalNumItems;
-            this.tableOptions.busy = false;
-          });
-      },
-      isToday(timestamp) {
-        return dayjs(timestamp)
-          .isSame(new Date(), 'day');
-      },
-    },
-    watch: {
-      'tableOptions.pagination.pageSize': function pageSizeUpdate() {
-        if (this.tableOptions.pagination.currentPage > 1) {
-          // will reload the table in currentPage watch
-          this.tableOptions.pagination.currentPage = 1;
-        } else {
-          this.reloadTable();
-        }
-      },
-    },
-  };
+};
 </script>
 
-<style lang="scss" scoped>
-@import "../../../assets/custom";
+<template>
+  <Card data-cy="achievementsNavigator" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <template #header>
+      <SkillsCardHeader title="Achievements"></SkillsCardHeader>
+    </template>
+    <template #content>
+      <div class="p-3">
+        <div class="flex pb-2 flex-column lg:flex-row">
+          <div class="flex flex-1 flex-column lg:border-right-1 lg:surface-border lg:pr-3 gap-2">
+            <div class="field">
+              <label for="user-name-filter">User Name Filter:</label>
+              <InputText class="w-full"
+                         v-model="usernameFilter"
+                         id="user-name-filter"
+                         data-cy="achievementsNavigator-usernameInput"
+                         @keydown.enter="reloadTable"
+                         aria-label="Skill name filter" />
+            </div>
+            <div class="field">
+              <label>Types: </label>
+              <div class="flex gap-2 mt-2" data-cy="achievementsNavigator-typeInput">
+                <span v-for="tag in achievementTypes.available" :key="tag">
+                  <Checkbox v-model="achievementTypes.selected" :value="tag" :name="tag" :inputId="tag"></Checkbox>
+                  <label :for="tag" class="ml-2">
+                    {{ tag }}
+                  </label>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-1 flex-column gap-2 lg:border-right-1 lg:surface-border lg:pl-2 lg:pr-2">
+            <SkillsCalendarInput
+              v-model="fromDayFilter"
+              id="from-date-filter"
+              data-cy="achievementsNavigator-fromDateInput"
+              label="From Date:"
+              name="fromDayFilter"
+              input-class="w-full"
+              :max-date="toDayFilter" />
 
-.customPagination ::v-deep button {
-  color: $info !important;
-  border-color: $secondary !important;
-}
+            <SkillsDropDown
+                label="Minimum Level (Subject & Skill Only)"
+                name="levels-input-group"
+                id="levels-input-group"
+                data-cy="achievementsNavigator-levelsInput"
+                placeholder="Optionally select level"
+                optionLabel="text"
+                optionValue="value"
+                v-model="levels.selected"
+                :options="levels.available" />
+          </div>
+          <div class="flex flex-1 flex-column lg:gap-2 lg:pl-2">
+            <SkillsCalendarInput
+              v-model="toDayFilter"
+              id="to-date-filter"
+              data-cy="achievementsNavigator-toDateInput"
+              label="To Date:"
+              name="toDayFilter"
+              input-class="w-full"
+              :min-date="fromDayFilter" />
 
-.customPagination ::v-deep .disabled > .page-link {
-  border-color: $secondary !important;
-}
+            <div class="field">
+              <label for="name-filter">Name (Subject, Skill and Badge Only):</label>
+              <InputText class="w-full"
+                         v-model="nameFilter"
+                         id="name-filter"
+                         data-cy="achievementsNavigator-nameInput"
+                         @keydown.enter="reloadTable" />
+            </div>
+          </div>
+        </div>
+        <div class="flex lg:pl-3 mb-3 lg:mt-3">
+        <SkillsButton size="small" aria-label="Filter" @click="reloadTable" data-cy="achievementsNavigator-filterBtn" icon="fa fa-filter" label="Filter" />
+        <SkillsButton size="small" aria-label="Reset" @click="reset" class="ml-1" data-cy="achievementsNavigator-resetBtn" icon="fa fa-times" label="Reset" />
+      </div>
+      </div>
+      <SkillsDataTable
+        data-cy="achievementsNavigator-table"
+        aria-label="Achievements"
+        :value="items"
+        show-gridlines
+        striped-rows
+        lazy
+        :loading="loadingTable"
+        :total-records="totalRows"
+        :rows="pageSize"
+        :rowsPerPageOptions="possiblePageSizes"
+        v-model:sort-field="sortBy"
+        v-model:sort-order="sortOrder"
+        @page="pageChanged"
+        @sort="sortTable"
+        paginator
+        tableStoredStateId="achievementsNavigator-table">
+        <Column field="userName" header="Username" sortable :class="{'flex': isFlex }">
+          <template #body="slotProps">
+            <div class="flex">
+              <div class="flex flex-1">
+                <span>
+                  {{ slotProps.data.userName }}
+                </span>
+              </div>
+              <div class="flex ml-2">
+                <router-link :to="{ name: 'SkillsDisplaySkillsDisplayPreviewProject', params: { projectId: route.paramsprojectId, userId: slotProps.data.userId } }" tabindex="-1">
+                  <SkillsButton aria-label="View Project" size="small" data-cy="achievementsNavigator-clientDisplayBtn"><i class="fa fa-eye"/></SkillsButton>
+                </router-link>
+              </div>
+            </div>
+          </template>
+        </Column>
+        <Column field="type" header="Type" :class="{'flex': isFlex }">
+          <template #body="slotProps">
+            <achievement-type :type="slotProps.data.type" />
+          </template>
+        </Column>
+        <Column field="name" header="Name" :class="{'flex': isFlex }">
+          <template #body="slotProps">
+            <span v-if="slotProps.data.name === 'Overall'" class="font-light text-sm">
+              N/A
+            </span>
+            <span v-else>
+              {{ slotProps.data.name }}
+            </span>
+          </template>
+        </Column>
+        <Column field="level" header="Level" :class="{'flex': isFlex }">
+          <template #body="slotProps">
+            <span v-if="!slotProps.data.level" class="font-light text-sm">
+              N/A
+            </span>
+            <span v-else>
+              {{ slotProps.data.level }}
+            </span>
+          </template>
+        </Column>
+        <Column field="achievedOn" header="Date" sortable :class="{'flex': isFlex }">
+          <template #body="slotProps">
+            <date-cell :value="slotProps.data.achievedOn" />
+          </template>
+        </Column>
 
-.customPagination ::v-deep .active > button {
-  background-color: $info !important;
-  color: $white !important;
-}
+        <template #paginatorstart>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+        </template>
+
+        <template #empty>
+          <div class="flex justify-content-center flex-wrap" data-cy="emptyTable">
+            <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+            <span class="flex align-items-center justify-content-center">There are no records to show</span>
+          </div>
+        </template>
+      </SkillsDataTable>
+    </template>
+  </Card>
+</template>
+
+<style scoped>
 
 </style>

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,289 +13,329 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <metrics-card title="Find users across multiple projects" data-cy="multiProjectUsersInCommon" :no-padding="true">
-    <skills-spinner :is-loading="projects.loading" class="mb-5"/>
-    <div v-if="enoughOverallProjects && !projects.loading">
-      <div class="p-2 px-4">
-        <v-select :options="projects.available"
-                  v-model="projects.selected"
-                  :loading="projects.loading"
-                  :multiple="true"
-                  :close-on-select="false"
-                  label="name"
-                  placeholder="Select option"
-                  :selectable="() => projects.selected.length < 5"
-                  v-on:option:selected="projAdded"
-                  v-on:option:deselecting="projRemoved"
-                  data-cy="projectSelector">
-          <template v-if="beforeListSlotText" #list-header>
-            <li>
-              <div class="h6 ml-1"> {{ beforeListSlotText }}</div>
-            </li>
-          </template>
-        </v-select>
-      </div>
-      <div class="my-3">
-      <no-content2 v-if="!atLeast1Proj" title="No Projects Selected"
-                   message="Please select at least 2 projects using search above then click 'Find Users' button below"></no-content2>
+<script setup>
+import { ref, computed, onMounted, watch } from 'vue';
+import NoContent2 from "@/components/utils/NoContent2.vue";
+import MetricsService from "@/components/metrics/MetricsService.js";
+import SupervisorService from "@/components/utils/SupervisorService.js";
+import AutoComplete from "primevue/autocomplete";
+import NumberFormatter from "../../utils/NumberFormatter.js";
+import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
+import ColumnGroup from 'primevue/columngroup';
+import Row from 'primevue/row';
+import LevelBadge from "@/components/metrics/multipleProjects/LevelBadge.vue";
 
-        <b-table v-if="atLeast1Proj"
-                 striped
-                 :items="projects.selected"
-                 :fields="fields"
-                 stacked="md"
-                 :no-sort-reset="true"
-                 aria-label="Find users across multiple projects"
-                 data-cy="multiProjectUsersInCommon-inputProjs">
-          <template v-slot:cell(minLevel)="data">
-            <b-row>
-              <b-col>
-                <b-form-select v-if="!data.item.loadingLevels"
-                               v-model="data.item.minLevel"
-                               :options="data.item.availableLevels"
-                               data-cy="minLevelSelector" aria-label="minimum level select"></b-form-select>
-              </b-col>
-              <b-col cols="auto">
-                <b-button variant="outline-info"
-                          v-b-tooltip.hover title="Sync other levels"
-                          aria-label="Sync other levels"
-                          @click="syncOtherLevels(data.item.minLevel)"
-                          data-cy="syncLevelButton">
-                  <i class="fas fa-sync"></i>
-                </b-button>
-              </b-col>
-            </b-row>
-          </template>
-          <template v-slot:cell(numSkills)="data">
-            {{ data.value | number }}
-          </template>
-          <template v-slot:cell(totalPoints)="data">
-            {{ data.value | number }}
-          </template>
-        </b-table>
-      </div>
-      <div class="text-center my-2 mb-4"
-           v-b-tooltip.hover
-           :title="atLeast2Proj ? '' : 'Please select at least 2 projects'">
-        <b-button variant="outline-info"
-                  :disabled="!atLeast2Proj"
-                  @click="locateUsers"
-                  data-cy="findUsersBtn">
-          Find Users <i class="fas fa-search-plus"></i>
-        </b-button>
-      </div>
+const props = defineProps(['availableProjects']);
 
-      <skills-b-table v-if="hasResults || resultsLoaded"
-                      :items="results"
-                      :options="resultTableOptions"
-                      @sort-changed="sortTable"
-                      @page-changed="pageChanged"
-                      @page-size-changed="pageSizeChanged"
-                      tabindex="0"
-                      aria-label="Find users across multiple projects results"
-                      tableStoredStateId="usersInCommonResultTable"
-                      data-cy="usersInCommonResultTable">
-        <template v-slot:cell(0)="data">
-          <level-badge :level="data.value" />
-        </template>
-        <template v-slot:cell(1)="data">
-          <level-badge :level="data.value" />
-        </template>
-        <template v-slot:cell(2)="data">
-          <level-badge :level="data.value" />
-        </template>
-        <template v-slot:cell(3)="data">
-          <level-badge :level="data.value" />
-        </template>
-        <template v-slot:cell(4)="data">
-          <level-badge :level="data.value" />
-        </template>
-      </skills-b-table>
-    </div>
-    <no-content2 v-if="!enoughOverallProjects"
-                 class="my-5"
-                 title="Feature is disabled"
-                 icon="fas fa-poo"
-                 message="At least 2 projects must exist for this feature to work. Please create more projects to enable this feature."/>
-  </metrics-card>
-</template>
-
-<script>
-  import vSelect from 'vue-select';
-  import MetricsCard from '../utils/MetricsCard';
-  import NoContent2 from '../../utils/NoContent2';
-  import SkillsBTable from '../../utils/table/SkillsBTable';
-  import SupervisorService from '../../utils/SupervisorService';
-  import SkillsSpinner from '../../utils/SkillsSpinner';
-  import MetricsService from '../MetricsService';
-  import LevelBadge from './LevelBadge';
-
-  export default {
-    name: 'MultipleProjUsersInCommon',
-    components: {
-      LevelBadge,
-      SkillsSpinner,
-      SkillsBTable,
-      NoContent2,
-      MetricsCard,
-      vSelect,
+const fields = ref(['name', 'numSubjects', 'numBadges', 'numSkills', 'totalPoints', 'minLevel']);
+const projects = ref({
+  loading: true,
+  available: [],
+  selected: [],
+});
+const selectProjects = ref([]);
+const results = ref([]);
+const resultsLoaded = ref(false);
+const resultTableOptions = ref({
+  busy: false,
+  sortBy: 'userId',
+  sortOrder: 1,
+  bordered: true,
+  outlined: true,
+  rowDetailsControls: false,
+  stacked: 'md',
+  fields: [
+    {
+      key: 'userId',
+      label: 'User',
+      sortable: true,
     },
-    props: ['availableProjects'],
-    data() {
-      return {
-        fields: ['name', 'numSubjects', 'numBadges', 'numSkills', 'totalPoints', 'minLevel'],
-        projects: {
-          loading: true,
-          available: [],
-          selected: [],
-        },
-        selectProjects: [],
-        results: [],
-        resultsLoaded: false,
-        resultTableOptions: {
-          busy: false,
-          sortBy: 'userId',
-          sortDesc: false,
-          bordered: true,
-          outlined: true,
-          rowDetailsControls: false,
-          stacked: 'md',
-          fields: [
-            {
-              key: 'userId',
-              label: 'User',
-              sortable: true,
-            },
-          ],
-          pagination: {
-            server: true,
-            currentPage: 1,
-            totalRows: 1,
-            pageSize: 5,
-            possiblePageSizes: [5, 10, 15, 20, 50],
-          },
-        },
-      };
-    },
-    computed: {
-      atLeast1Proj() {
-        return this.projects.selected && this.projects.selected.length > 0;
-      },
-      atLeast2Proj() {
-        return this.projects.selected && this.projects.selected.length > 1;
-      },
-      hasResults() {
-        return this.results && this.results.length > 0;
-      },
-      enoughOverallProjects() {
-        return this.availableProjects && this.availableProjects.length >= 2;
-      },
-      beforeListSlotText() {
-        if (this.projects.selected.length >= 5) {
-          return 'Maximum of 5 options selected. First remove a selected option to select another.';
-        }
-        return '';
-      },
-    },
-    mounted() {
-      this.loadProjects();
-    },
-    watch: {
-      'projects.selected': function rebuild() {
-        this.rebuildFields();
-      },
-    },
-    methods: {
-      pageChanged(pageNum) {
-        this.resultTableOptions.pagination.currentPage = pageNum;
-        this.locateUsers();
-      },
-      pageSizeChanged(newSize) {
-        this.resultTableOptions.pagination.pageSize = newSize;
-        this.locateUsers();
-      },
-      sortTable(sortContext) {
-        this.resultTableOptions.sortDesc = sortContext.sortDesc;
+  ],
+  pagination: {
+    server: true,
+    currentPage: 1,
+    totalRows: 1,
+    pageSize: 5,
+    possiblePageSizes: [5, 10, 15, 20, 50],
+  },
+});
 
-        // set to the first page
-        this.resultTableOptions.pagination.currentPage = 1;
-        this.locateUsers();
-      },
-      projAdded(addedItem) {
-        this.clearRes();
+watch(() => projects.value.selected, () => {
+  rebuildFields();
+})
 
-        const refProj = addedItem[addedItem.length - 1];
-        SupervisorService.getProjectLevels(refProj.projectId)
-          .then((res) => {
-            refProj.availableLevels = res.map((r) => r.level);
-          }).finally(() => {
-            refProj.loadingLevels = false;
-          });
-      },
-      projRemoved() {
-        this.clearRes();
-      },
-      rebuildFields() {
-        this.resultTableOptions.fields = this.projects.selected.map((projItem, index) => ({
-          projectId: projItem.projectId,
-          key: `${index}`,
-          label: projItem.name,
-          sortable: false,
-        }));
-        this.resultTableOptions.fields.splice(0, 0, {
-          key: 'userId',
-          label: 'User',
-          sortable: true,
-        });
-        this.loadProjects();
-        this.projects.available = this.projects.available.filter((el) => !this.projects.selected.some((sel) => sel.projectId === el.projectId));
-      },
-      clearRes() {
-        this.results = [];
-        this.resultsLoaded = false;
-      },
-      locateUsers() {
-        this.resultTableOptions.busy = true;
-        this.resultsLoaded = true;
+const atLeast1Proj = computed(() => {
+  return projects.value.selected && projects.value.selected.length > 0;
+});
 
-        const params = {
-          pageSize: this.resultTableOptions.pagination.pageSize,
-          currentPage: this.resultTableOptions.pagination.currentPage,
-          sortDesc: this.resultTableOptions.sortDesc,
-          projIdsAndLevel: this.projects.selected.map((item) => `${item.projectId}AndLevel${item.minLevel}`).join(','),
-        };
-        MetricsService.loadGlobalMetrics('findExpertsForMultipleProjectsChartBuilder', params)
-          .then((dataFromServer) => {
-            this.resultTableOptions.busy = false;
-            this.resultTableOptions.pagination.totalRows = dataFromServer.totalNum;
-            this.results = dataFromServer.data.map((item) => {
-              const res = { userId: item.userId };
-              item.levels.forEach((level) => {
-                const keyForLevel = this.resultTableOptions.fields.find((p) => p.projectId === level.projectId);
-                res[`${keyForLevel.key}`] = level.level;
-              });
-              return res;
-            });
-          });
-      },
-      loadProjects() {
-        this.projects.available = this.availableProjects.map((proj) => ({
-          loadingLevels: true,
-          minLevel: 1,
-          ...proj,
-        }));
-        this.projects.loading = false;
-      },
-      syncOtherLevels(level) {
-        for (let i = 0; i < this.projects.selected.length; i += 1) {
-          const maxLevel = Math.max(...this.projects.selected[i].availableLevels);
-          this.projects.selected[i].minLevel = level > maxLevel ? maxLevel : level;
-        }
-      },
-    },
+const atLeast2Proj = computed(() => {
+  return projects.value.selected && projects.value.selected.length > 1;
+});
+
+const hasResults = computed(() => {
+  return results.value && results.value.length > 0;
+});
+
+const enoughOverallProjects = computed(() => {
+  return props.availableProjects && props.availableProjects.length >= 2;
+});
+
+const beforeListSlotText = computed(() => {
+  if (projects.value.selected.length >= 5) {
+    return 'Maximum of 5 options selected. First remove a selected option to select another.';
+  }
+  return '';
+});
+
+onMounted(() => {
+  loadProjects();
+});
+
+const pageChanged = (pagingInfo) => {
+  resultTableOptions.value.pagination.pageSize = pagingInfo.rows
+  resultTableOptions.value.pagination.currentPage = pagingInfo.page + 1
+  locateUsers()
+}
+const sortTable = (sortContext) => {
+  resultTableOptions.value.sortOrder = sortContext.sortOrder;
+  resultTableOptions.value.sortBy = sortContext.sortField;
+  // set to the first page
+  resultTableOptions.value.pagination.currentPage = 1;
+  locateUsers();
+};
+
+const projAdded = (addedItem) => {
+  const addedProject = addedItem.value;
+  clearRes();
+
+  SupervisorService.getProjectLevels(addedProject.projectId)
+      .then((res) => {
+        addedProject.availableLevels = res.map((r) => r.level);
+      }).finally(() => {
+    addedProject.loadingLevels = false;
+    loadProjects();
+  });
+};
+
+const projRemoved = () => {
+  clearRes();
+  loadProjects();
+};
+
+const rebuildFields = () => {
+  resultTableOptions.value.fields = projects.value.selected.map((projItem, index) => ({
+    projectId: projItem.projectId,
+    key: `${index}`,
+    label: projItem.name,
+    sortable: false,
+  }));
+  resultTableOptions.value.fields.splice(0, 0, {
+    key: 'userId',
+    label: 'User',
+    sortable: true,
+  });
+  loadProjects();
+  projects.value.available = projects.value.available.filter((el) => !projects.value.selected.some((sel) => sel.projectId === el.projectId));
+};
+
+const clearRes = () => {
+  results.value = [];
+  resultsLoaded.value = false;
+};
+
+const locateUsers = () => {
+  resultTableOptions.value.busy = true;
+  resultsLoaded.value = true;
+
+  const params = {
+    pageSize: resultTableOptions.value.pagination.pageSize,
+    currentPage: resultTableOptions.value.pagination.currentPage,
+    sortDesc: resultTableOptions.value.sortOrder === -1,
+    projIdsAndLevel: projects.value.selected.map((item) => `${item.projectId}AndLevel${item.minLevel}`).join(','),
   };
+  MetricsService.loadGlobalMetrics('findExpertsForMultipleProjectsChartBuilder', params)
+      .then((dataFromServer) => {
+        resultTableOptions.value.busy = false;
+        resultTableOptions.value.pagination.totalRows = dataFromServer.totalNum;
+        results.value = dataFromServer.data.map((item) => {
+          const res = { userId: item.userId };
+          item.levels.forEach((level) => {
+            const keyForLevel = resultTableOptions.value.fields.find((p) => p.projectId === level.projectId);
+            res[`${keyForLevel.projectId}`] = level.level;
+          });
+          return res;
+        });
+      });
+};
+
+const loadProjects = (filter) => {
+  if( projects.value.selected.length < 5 ) {
+    projects.value.available = props.availableProjects.map((proj) => ({
+      loadingLevels: true,
+      minLevel: 1,
+      ...proj,
+    }));
+
+    projects.value.available = projects.value.available.filter((el) => !projects.value.selected.some((sel) => sel.projectId === el.projectId));
+
+    if (filter) {
+      projects.value.available = projects.value.available.filter((el) => el.name.toLowerCase().includes(filter));
+    }
+  } else {
+    projects.value.available = [];
+  }
+
+  projects.value.loading = false;
+};
+
+const syncOtherLevels = (level) => {
+  for (let i = 0; i < projects.value.selected.length; i += 1) {
+    const maxLevel = Math.max(...projects.value.selected[i].availableLevels);
+    projects.value.selected[i].minLevel = level > maxLevel ? maxLevel : level;
+  }
+};
+
+const filterProjects = (event) => {
+  loadProjects(event.query.toLowerCase());
+}
 </script>
+
+<template>
+  <Card data-cy="multiProjectUsersInCommon" class="mb-4">
+    <template #header>
+      <SkillsCardHeader title="Find users across multiple projects"></SkillsCardHeader>
+    </template>
+    <template #content>
+      <skills-spinner :is-loading="projects.loading" class="mb-5"/>
+
+      <div v-if="enoughOverallProjects && !projects.loading">
+        <div class="flex">
+          <AutoComplete
+              v-model="projects.selected"
+              :suggestions="projects.available"
+              :loading="projects.loading"
+              :delay="500"
+              :completeOnFocus="true"
+              dropdown
+              @item-unselect="projRemoved"
+              @item-select="projAdded"
+              multiple
+              optionLabel="name"
+              inputClass="w-full"
+              class="w-full mb-4"
+              @complete="filterProjects"
+              data-cy="projectSelector"
+              placeholder="Select option">
+            <template #empty>
+              <div v-if="projects.selected.length === 5" class="ml-4" data-cy="projectSelectorMaximumReached">
+                Maximum of 5 options selected. First remove a selected option to select another.
+              </div>
+              <div v-else class="ml-4">
+                No results found
+              </div>
+            </template>
+          </AutoComplete>
+        </div>
+        <div class="flex mb-4">
+          <no-content2 v-if="!atLeast1Proj" title="No Projects Selected" class="w-full"
+                       message="Please select at least 2 projects using search above then click 'Find Users' button below"></no-content2>
+
+          <SkillsDataTable :value="projects.selected"
+                           v-if="atLeast1Proj"
+                           class="w-full"
+                           show-gridlines
+                           striped-rows
+                           aria-label="Selected Projects"
+                           data-cy="multiProjectUsersInCommon-inputProjs"
+                           table-stored-state-id="multiProjectUsersInCommon-inputProjs">
+            <Column field="name" header="Name"></Column>
+            <Column field="numSubjects" header="# of Subjects"></Column>
+            <Column field="numBadges" header="# of Badges"></Column>
+            <Column field="numSkills" header="# of Skills">
+              <template #body="slotProps">
+                {{ NumberFormatter.format(slotProps.data.numSkills )}}
+              </template>
+            </Column>
+            <Column field="totalPoints" header="Total Points">
+              <template #body="slotProps">
+                {{ NumberFormatter.format(slotProps.data.totalPoints )}}
+              </template>
+            </Column>
+            <Column field="minLevel" header="Min Level">
+              <template #body="slotProps">
+                <div class="flex gap-4">
+                  <Dropdown :options="slotProps.data.availableLevels"
+                            v-if="!slotProps.data.loadingLevels"
+                            v-model="slotProps.data.minLevel"
+                            data-cy="minLevelSelector">
+                  </Dropdown>
+                  <SkillsButton variant="outline-info"
+                                aria-label="Sync other levels"
+                                @click="syncOtherLevels(slotProps.data.minLevel)"
+                                data-cy="syncLevelButton"
+                                size="small"
+                                icon="fas fa-sync"
+                                label="Sync Levels">
+                  </SkillsButton>
+                </div>
+              </template>
+            </Column>
+          </SkillsDataTable>
+        </div>
+        <div class="flex justify-content-center">
+          <SkillsButton :disabled="!atLeast2Proj"
+                        @click="locateUsers"
+                        label="Find Users"
+                        icon="fas fa-search-plus"
+                        data-cy="findUsersBtn">
+          </SkillsButton>
+        </div>
+        <div class="flex mt-4">
+          <SkillsDataTable v-if="hasResults || resultsLoaded"
+                           :value="results"
+                           class="w-full"
+                           @page="pageChanged"
+                           @sort="sortTable"
+                           :totalRecords="resultTableOptions.
+                           pagination.totalRows"
+                           :rows="resultTableOptions.pagination.pageSize"
+                           :sort-field="resultTableOptions.sortBy"
+                           :sort-order="resultTableOptions.sortOrder"
+                           :rowsPerPageOptions="resultTableOptions.pagination.possiblePageSizes"
+                           paginator
+                           lazy
+                           striped-rows
+                           show-gridlines
+                           aria-label="Users in Common"
+                           tableStoredStateId="usersInCommonResultTable"
+                           data-cy="usersInCommonResultTable">
+
+            <Column field="userId" header="User" sortable></Column>
+            <Column v-for="project in projects.selected" v-bind:key="project.projectId" :header="project.name" field="levels">
+              <template #body="slotProps">
+                <level-badge :level="slotProps.data[project.projectId]"></level-badge>
+              </template>
+            </Column>
+
+            <template #paginatorstart>
+              <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ resultTableOptions.pagination.totalRows }}</span>
+            </template>
+
+            <template #empty>
+              <span class="flex align-items-center justify-content-center">There are no records to show</span>
+            </template>
+          </SkillsDataTable>
+        </div>
+      </div>
+
+      <no-content2 v-if="!enoughOverallProjects"
+                   class="my-5"
+                   title="Feature is disabled"
+                   icon="fas fa-poo"
+                   message="At least 2 projects must exist for this feature to work. Please create more projects to enable this feature."/>
+    </template>
+  </Card>
+</template>
 
 <style scoped>
 
