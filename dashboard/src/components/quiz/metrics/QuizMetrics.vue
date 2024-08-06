@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,114 +13,107 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router'
+import QuizService from '@/components/quiz/QuizService.js';
+import NoContent2 from '@/components/utils/NoContent2.vue';
+import StatsCard from '@/components/metrics/utils/StatsCard.vue';
+import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
+import QuizQuestionMetrics from '@/components/quiz/metrics/QuizQuestionMetrics.vue';
+
+const timeUtils = useTimeUtils();
+const route = useRoute();
+const isLoading = ref(true);
+const quizId = ref(route.params.quizId);
+const metrics = ref(null);
+
+const isSurvey = computed(() => metrics.value && metrics.value.quizType === 'Survey');
+const hasMetrics = computed(() => metrics.value && metrics.value.numTaken > 0);
+
+onMounted(() => {
+  isLoading.value = true;
+  QuizService.getQuizMetrics(quizId.value)
+      .then((res) => {
+        metrics.value = res;
+      })
+      .finally(() => {
+        isLoading.value = false;
+      });
+
+})
+</script>
+
 <template>
   <div>
-    <sub-page-header title="Results" aria-label="results"/>
+    <SubPageHeader title="Results"
+                   aria-label="results">
+    </SubPageHeader>
 
-    <skills-spinner :is-loading="isLoading" />
+    <SkillsSpinner :is-loading="isLoading"/>
 
-    <div v-if="!isLoading">
-      <b-card v-if="!hasMetrics">
-        <no-content2 title="No Results Yet..." class="my-5" data-cy="noMetricsYet"
-                     :message="`Results will be available once at least 1 ${metrics.quizType} is completed`"/>
-      </b-card>
-      <div v-if="hasMetrics">
-        <div class="row">
-          <div class="col-md-6 mb-2" :class="{'col-xl-3': !isSurvey}">
-            <stats-card title="Total" icon="fas fa-pen-square skills-color-selfreport"
-                :stat-num="metrics.numTaken" data-cy="metricsCardTotal">
-              <span v-if="!isSurvey"><b-badge variant="info">{{ metrics.numTaken }}</b-badge> attempt{{ metrics.numTaken!=1 ? 's' : '' }} by <b-badge variant="success">{{ metrics.numTakenDistinctUsers }}</b-badge> user{{ metrics.numTakenDistinctUsers !=1 ? 's' : '' }}</span>
-              <span v-if="isSurvey">Survey was completed <b-badge variant="info">{{ metrics.numTaken }}</b-badge> time{{ metrics.numTaken!=1 ? 's' : '' }}</span>
-            </stats-card>
-          </div>
-          <div v-if="!isSurvey" class="col-md-6 col-xl-3 mb-2" data-cy="metricsCardPassed">
-            <stats-card title="Passed" :stat-num="metrics.numPassed" icon="fas fa-trophy text-success">
-              <b-badge variant="success">{{ metrics.numPassed }}</b-badge>
-              attempt{{ metrics.numPassed != 1 ? 's' : '' }} <span
-              class="text-success text-uppercase">passed</span>
-              by
-              <b-badge variant="success">{{ metrics.numPassedDistinctUsers }}</b-badge>
-              user{{ metrics.numPassedDistinctUsers != 1 ? 's' : '' }}
-            </stats-card>
-          </div>
-          <div v-if="!isSurvey" class="col-md-6 col-xl-3 mb-2" data-cy="metricsCardFailed">
-            <stats-card title="Failed" :stat-num="metrics.numFailed" icon="far fa-sad-tear text-warning">
-              <b-badge variant="danger">{{ metrics.numFailed }}</b-badge>
-              attempt{{ metrics.numFailed != 1 ? 's' : '' }} <span class="text-danger text-uppercase">failed</span> by
-              <b-badge variant="success">{{ metrics.numFailedDistinctUsers }}</b-badge>
-              user{{ metrics.numFailedDistinctUsers != 1 ? 's' : '' }}
-            </stats-card>
-          </div>
-          <div class="col-md-6 mb-2" :class="{'col-xl-3': !isSurvey}">
-            <stats-card title="Average Runtime" :stat-num="metrics.avgAttemptRuntimeInMs"
-                        icon="fas fa-user-clock skills-color-badges"
-                        data-cy="metricsCardRuntime">
-              <template #card-value>
-                <span class="h4 font-weight-bold">{{ metrics.avgAttemptRuntimeInMs | formatDuration }}</span>
-              </template>
-              Average {{ metrics.quizType }} runtime for
-              <b-badge variant="success">{{ metrics.numTaken }}</b-badge>
-              {{ isSurvey ? 'user' : 'attempt' }}{{ metrics.numTaken != 1 ? 's' : '' }}
-            </stats-card>
-          </div>
-
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+      <template #content>
+        <NoContent2 v-if="!hasMetrics && !isLoading"
+                    title="No Results Yet..."
+                    class="my-5 py-5"
+                    :message="`Results will be available once at least 1 ${metrics.quizType} is completed`"
+                    data-cy="noMetricsYet"/>
+      </template>
+    </Card>
+    <div v-if="hasMetrics">
+      <div class="flex gap-3 flex-column lg:flex-row flex-wrap mb-3">
+        <div class="flex-1">
+          <StatsCard class="w-full h-full w-min-14rem" title="Total" icon="fas fa-pen-square skills-color-selfreport" :stat-num="metrics.numTaken" data-cy="metricsCardTotal">
+            <span v-if="!isSurvey"><Tag severity="info">{{ metrics.numTaken }}</Tag> attempt{{ metrics.numTaken!=1 ? 's' : '' }} by <Tag severity="success">{{ metrics.numTakenDistinctUsers }}</Tag> user{{ metrics.numTakenDistinctUsers !=1 ? 's' : '' }}</span>
+            <span v-if="isSurvey">Survey was completed <Tag severity="info">{{ metrics.numTaken }}</Tag> time{{ metrics.numTaken!=1 ? 's' : '' }}</span>
+          </StatsCard>
         </div>
-
-        <b-card class="mt-3" body-class="p-0">
-          <div v-for="(q, index) in metrics.questions" :key="q.id" class="mb-5">
-            <quiz-question-metrics :q="q" :num="index" :is-survey="isSurvey" />
-          </div>
-        </b-card>
+        <div v-if="!isSurvey" class="flex-1" data-cy="metricsCardPassed">
+          <StatsCard class="w-full h-full w-min-14rem" title="Passed" :stat-num="metrics.numPassed" icon="fas fa-trophy text-success">
+            <Tag severity="success">{{ metrics.numPassed }}</Tag>
+            attempt{{ metrics.numPassed != 1 ? 's' : '' }} <span
+              class="text-success uppercase">passed</span>
+            by
+            <Tag severity="success">{{ metrics.numPassedDistinctUsers }}</Tag>
+            user{{ metrics.numPassedDistinctUsers != 1 ? 's' : '' }}
+          </StatsCard>
+        </div>
+        <div v-if="!isSurvey" class="flex-1" data-cy="metricsCardFailed">
+          <StatsCard class="w-full h-full w-min-14rem" title="Failed" :stat-num="metrics.numFailed" icon="far fa-sad-tear text-warning">
+            <Tag severity="danger">{{ metrics.numFailed }}</Tag>
+            attempt{{ metrics.numFailed != 1 ? 's' : '' }} <span class="text-danger uppercase">failed</span> by
+            <Tag severity="success">{{ metrics.numFailedDistinctUsers }}</Tag>
+            user{{ metrics.numFailedDistinctUsers != 1 ? 's' : '' }}
+          </StatsCard>
+        </div>
+        <div class="flex-1">
+          <StatsCard class="w-full h-full w-min-14rem" title="Average Runtime" :stat-num="metrics.avgAttemptRuntimeInMs"
+                     icon="fas fa-user-clock c"
+                     data-cy="metricsCardRuntime">
+            <template #card-value>
+              <span class="text-2xl font-bold">{{ timeUtils.formatDuration(metrics.avgAttemptRuntimeInMs) }}</span>
+            </template>
+            Average {{ metrics.quizType }} runtime for
+            <Tag severity="success">{{ metrics.numTaken }}</Tag>
+            {{ isSurvey ? 'user' : 'attempt' }}{{ metrics.numTaken != 1 ? 's' : '' }}
+          </StatsCard>
+        </div>
       </div>
+
+      <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+        <template #content>
+          <div v-for="(q, index) in metrics.questions" :key="q.id" class="mb-5">
+            <QuizQuestionMetrics :q="q" :num="index" :is-survey="isSurvey"/>
+          </div>
+        </template>
+      </Card>
     </div>
   </div>
 </template>
 
-<script>
-  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  import QuizService from '@/components/quiz/QuizService';
-  import StatsCard from '@/components/metrics/utils/StatsCard';
-  import QuizQuestionMetrics from '@/components/quiz/metrics/QuizQuestionMetrics';
-  import SkillsSpinner from '@/components/utils/SkillsSpinner';
-  import NoContent2 from '@/components/utils/NoContent2';
-
-  export default {
-    name: 'QuizMetrics',
-    components: {
-      NoContent2,
-      SkillsSpinner,
-      QuizQuestionMetrics,
-      StatsCard,
-      SubPageHeader,
-    },
-    data() {
-      return {
-        isLoading: true,
-        quizId: this.$route.params.quizId,
-        metrics: null,
-      };
-    },
-    computed: {
-      isSurvey() {
-        return this.metrics.quizType === 'Survey';
-      },
-      hasMetrics() {
-        return this.metrics && this.metrics.numTaken > 0;
-      },
-    },
-    mounted() {
-      this.isLoading = true;
-      QuizService.getQuizMetrics(this.quizId)
-        .then((res) => {
-          this.metrics = res;
-        })
-        .finally(() => {
-          this.isLoading = false;
-        });
-    },
-  };
-</script>
-
 <style scoped>
-
 </style>

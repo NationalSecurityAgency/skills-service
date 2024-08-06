@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,92 +13,102 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
+
+const projConfig = useProjConfig();
+const props = defineProps({
+  options: Object,
+  to: Object,
+  buttonIdSuffix: {
+    type: String,
+    required: true
+  }
+})
+const emit = defineEmits(['edit', 'delete'])
+const router = useRouter()
+
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
+
+
+const editBtn = ref();
+const deleteBtn = ref();
+
+const handleManageClick = () => {
+  if (props.to) {
+    router.push(props.to)
+  }
+}
+
+const focusOnEdit = () => {
+  // editBtn.value.focus();
+}
+
+const focusOnDelete = () => {
+  // deleteBtn.value.focus();
+}
+
+defineExpose({
+  focusOnEdit,
+  focusOnDelete,
+})
+
+</script>
+
 <template>
-  <div class="row" :class="{ 'justify-content-center' : isReadOnlyProj }">
-    <div class="col-auto">
-      <b-button
-        :to="options.navTo"
-        variant="outline-primary" size="sm" class="mr-2"
-        :aria-label="`Manage ${options.type} ${options.name}`"
+  <div class="flex" :class="{ 'justify-content-center' : isReadOnlyProj }">
+    <div class="">
+      <SkillsButton
+        size="small"
+        outlined
+        severity="info"
+        @click="handleManageClick"
+        :aria-label="`${isReadOnlyProj ? 'View' : 'Manage'} ${options.type} ${options.name}`"
+        icon="fas fa-arrow-circle-right"
+        :label="isReadOnlyProj ? 'View' : 'Manage'"
         :data-cy="`manageBtn_${options.id}`">
-        <span v-if="isReadOnlyProj">View</span><span v-else>Manage</span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
-      </b-button>
+      </SkillsButton>
     </div>
 
-    <div v-if="!isReadOnlyProj" class="col text-right">
-      <b-button-group size="sm" class="buttons">
-        <b-button v-if="options.showShare === true"
-                  ref="shareBtn"
-                  size="sm"
-                  variant="outline-primary"
-                  @click="handleShareClick"
-                  :title="this.shareTitle"><i :class="shareBtnIcon" aria-hidden="true"/></b-button>
-        <b-button ref="editBtn"
-                  size="sm"
-                  variant="outline-primary"
-                  @click="$emit('edit')"
-                  :title="`Edit ${options.type}`"
-                  :aria-label="`Edit ${options.type} ${options.name}`"
-                  role="button"
-                  data-cy="editBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
+    <div v-if="!isReadOnlyProj" class="flex-1 text-right">
+      <ButtonGroup>
+        <SkillsButton
+          :id="`editBtn${buttonIdSuffix}`"
+          ref="editBtn"
+          icon="fas fa-edit"
+          size="small"
+          outlined
+          severity="info"
+          @click="emit('edit')"
+          :track-for-focus="true"
+          :title="`Edit ${options.type}`"
+          :aria-label="`Edit ${options.type} ${options.name}`"
+          role="button"
+          label=""
+          data-cy="editBtn" />
 
-        <span v-b-tooltip.hover="options.deleteDisabledText" :aria-label="options.deleteDisabledText">
-          <b-button variant="outline-primary"
-                    class="last-right-group-btn"
-                    ref="deleteBtn"
-                    size="sm"
-                    @click="$emit('delete')"
-                    :disabled="options.isDeleteDisabled"
-                    :title="`Delete ${options.type}`"
-                    :aria-label="`Delete ${options.type} ${options.name}`"
-                    role="button"
-                    data-cy="deleteBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
-        </span>
-      </b-button-group>
-
+        <SkillsButton
+          :id="`deleteBtn${buttonIdSuffix}`"
+          variant="outline-primary"
+          ref="deleteBtn"
+          size="small"
+          outlined
+          severity="info"
+          @click="emit('delete')"
+          :disabled="options.isDeleteDisabled"
+          :title="`Delete ${options.type}`"
+          :track-for-focus="true"
+          :aria-label="options.deleteDisabledText ? options.deleteDisabledText : `Delete ${options.type} ${options.name}`"
+          role="button"
+          label="" icon="text-warning fas fa-trash"
+          data-cy="deleteBtn"></SkillsButton>
+      </ButtonGroup>
     </div>
   </div>
 </template>
 
-<script>
-  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
-
-  export default {
-    name: 'CardNavigateAndEditControls',
-    mixins: [ProjConfigMixin],
-    props: {
-      options: Object,
-    },
-    computed: {
-      shareBtnIcon() {
-        return this.options?.shareEnabled === true ? 'fas fa-hands-helping' : 'fas fa-handshake-alt-slash';
-      },
-      shareTitle() {
-        return this.options?.shareEnabled === true ? `Share ${this.options?.type}` : `Unshare ${this.options?.type}`;
-      },
-    },
-    methods: {
-      handleShareClick() {
-        let eventName = 'share';
-        if (this.options.shareEnabled === false) {
-          eventName = 'unshare';
-        }
-        this.$emit(eventName);
-      },
-      focusOnEdit() {
-        this.$refs.editBtn.focus();
-      },
-      focusOnDelete() {
-        this.$refs.deleteBtn.focus();
-      },
-    },
-  };
-</script>
-
 <style scoped>
-.last-right-group-btn {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  border-left: none;
-}
+
 </style>

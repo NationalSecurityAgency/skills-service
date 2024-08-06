@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,6 +13,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref, onMounted } from 'vue';
+import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
+import SupervisorService from "@/components/utils/SupervisorService.js";
+import TrainingProfileComparator from "@/components/metrics/multipleProjects/TrainingProfileComparator.vue";
+import MultipleProjUsersInCommon from "@/components/metrics/multipleProjects/MultipleProjUsersInCommon.vue";
+
+const loading = ref(true);
+const projects = ref([]);
+
+onMounted(() => {
+  loadProjects();
+});
+
+const loadProjects = () => {
+  SupervisorService.getAllProjects()
+      .then((res) => {
+        projects.value = res;
+      }).finally(() => {
+    loading.value = false;
+  });
+};
+</script>
+
 <template>
   <div>
     <sub-page-header title="Metrics"/>
@@ -24,43 +48,6 @@ limitations under the License.
     </div>
   </div>
 </template>
-
-<script>
-  import SubPageHeader from '@//components/utils/pages/SubPageHeader';
-  import MultipleProjUsersInCommon from './MultipleProjUsersInCommon';
-  import TrainingProfileComparator from './TrainingProfileComparator';
-  import SupervisorService from '../../utils/SupervisorService';
-  import SkillsSpinner from '../../utils/SkillsSpinner';
-
-  export default {
-    name: 'SkillMetricsPage',
-    components: {
-      SkillsSpinner,
-      TrainingProfileComparator,
-      MultipleProjUsersInCommon,
-      SubPageHeader,
-    },
-    data() {
-      return {
-        loading: true,
-        projects: [],
-      };
-    },
-    mounted() {
-      this.loadProjects();
-    },
-    methods: {
-      loadProjects() {
-        SupervisorService.getAllProjects()
-          .then((res) => {
-            this.projects = res;
-          }).finally(() => {
-            this.loading = false;
-          });
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

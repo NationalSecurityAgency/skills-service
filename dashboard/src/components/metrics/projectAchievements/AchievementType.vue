@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,6 +13,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { computed } from 'vue';
+
+const props = defineProps(['type']);
+const types = [
+  'Overall',
+  'Subject',
+  'Skill',
+  'Badge',
+];
+
+const isUnknownType = computed(() => {
+  return types.find((item) => item === props.type) === undefined;
+});
+</script>
+
 <template>
   <div style="vertical-align: text-top !important;">
     <span class="border-info rounded d-inline-block p-1 text-center icon text-secondary">
@@ -38,30 +54,6 @@ limitations under the License.
   </div>
 </template>
 
-<script>
-  export default {
-    name: 'AchievementType',
-    props: ['type'],
-    data() {
-      return {
-        types: [
-          'Overall',
-          'Subject',
-          'Skill',
-          'Badge',
-        ],
-      };
-    },
-    computed: {
-      isUnknownType() {
-        return this.types.find((item) => item === this.type) === undefined;
-      },
-    },
-  };
-</script>
-
 <style scoped>
-.icon {
-  width: 2rem;
-}
+
 </style>

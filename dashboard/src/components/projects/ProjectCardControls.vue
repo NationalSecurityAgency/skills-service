@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,85 +13,101 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { computed } from 'vue'
+import { useAccessState } from '@/stores/UseAccessState.js'
+import { useAdminProjectsState } from '@/stores/UseAdminProjectsState.js'
+
+const accessState = useAccessState()
+const projectsState = useAdminProjectsState()
+
+defineProps(['project', 'readOnlyProject'])
+const emit = defineEmits(['edit-project', 'unpin-project', 'copy-project', 'delete-project'])
+
+const isRootUser = computed(() => accessState.isRoot)
+
+</script>
+
 <template>
-  <div>
-    <b-button
-      :to="{ name:'Subjects', params: { projectId: this.project.projectId, project: this.project }}"
-      variant="outline-primary" size="sm" class="mr-2"
-      :data-cy="`projCard_${this.project.projectId}_manageBtn`"
-      :aria-label="`manage project ${this.project.name}`">
-      <span v-if="readOnlyProject">View</span><span v-else>Manage</span> <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
-    </b-button>
-    <b-button v-if="isRootUser" class="mr-2" @click="$emit('unpin-project')" data-cy="unpin" size="sm"
-              variant="outline-primary" :aria-label="'remove pin for project '+ project.name"
-              :aria-pressed="project.pinned">
-      <span class="d-none d-sm-inline">Unpin</span> <i class="fas fa-ban" style="font-size: 1rem;" aria-hidden="true"/>
-    </b-button>
-    <div v-if="!readOnlyProject" class="d-inline-block float-right">
-      <b-button-group size="sm" class="buttons mr-2">
-        <b-button ref="editBtn"
-                  size="sm"
-                  variant="outline-primary"
-                  @click="$emit('edit-project')"
-                  title="Edit Project"
-                  :aria-label="`Edit Project ${this.project.name}`"
-                  role="button"
-                  data-cy="editProjBtn"><i class="fas fa-edit" aria-hidden="true"/></b-button>
-
-        <b-button ref="copyBtn"
-                  size="sm"
-                  variant="outline-primary"
-                  @click="$emit('copy-project')"
-                  title="Copy Project"
-                  :aria-label="`Copy Project ${this.project.name}`"
-                  role="button"
-                  data-cy="copyProjBtn"><i class="fas fa-copy" aria-hidden="true"/></b-button>
-
-        <span v-b-tooltip.hover="deleteDisabledText" :aria-label="deleteDisabledText">
-          <b-button variant="outline-primary"
-                    ref="deleteBtn"
-                    class="last-right-group-btn"
-                    size="sm"
-                    @click="$emit('delete-project')"
-                    :disabled="isDeleteDisabled"
-                    title="Delete Project"
-                    :aria-label="`Delete Project ${this.project.name}`"
-                    role="button"
-                    data-cy="deleteProjBtn"><i class="text-warning fas fa-trash" aria-hidden="true"/></b-button>
-        </span>
-      </b-button-group>
-
+  <div class="flex flex-wrap gap-2"
+    :class="{
+      'flex-column justify-content-center align-items-center': projectsState.shouldTileProjectsCards,
+      'justify-content-end': !projectsState.shouldTileProjectsCards
+    }">
+    <div class="flex gap-2">
+      <router-link :to="{ name:'Subjects', params: { projectId: project.projectId }}" tabindex="-1">
+        <SkillsButton
+            size="small"
+            outlined
+            severity="info"
+            :data-cy="'projCard_' + project.projectId + '_manageBtn'"
+            :label="readOnlyProject ? 'View' : 'Manage'"
+            icon="fas fa-arrow-circle-right"
+            :aria-label="'manage project ' + project.name">
+        </SkillsButton>
+      </router-link>
+      <SkillsButton
+        v-if="isRootUser"
+        outlined
+        severity="info"
+        @click="emit('unpin-project')"
+        data-cy="unpin"
+        size="small"
+        class="mr-2"
+        :aria-label="'remove pin for project '+ project.name"
+        label="Unpin"
+        icon="fas fa-ban"
+        :aria-pressed="project.pinned">
+    </SkillsButton>
     </div>
+    <ButtonGroup class="mr-2 p-0 flex" v-if="!readOnlyProject">
+      <SkillsButton
+        :id="`editProjBtn${project.projectId}`"
+        :track-for-focus="true"
+        ref="editBtn"
+        outlined
+        severity="info"
+        size="small"
+        @click="emit('edit-project', $event.target.value)"
+        title="Edit Project"
+        :aria-label="'Edit Project ' + project.name"
+        role="button"
+        icon="fas fa-edit"
+        data-cy="editProjBtn" />
+
+      <SkillsButton
+        :id="`copyProjBtn${project.projectId}`"
+        ref="copyBtn"
+        outlined
+        severity="info"
+        :track-for-focus="true"
+        size="small"
+        @click="emit('copy-project', $event.target.value)"
+        title="Copy Project"
+        :aria-label="'Copy Project ' + project.name"
+        role="button"
+        icon="fas fa-copy"
+        label=""
+        data-cy="copyProjBtn" />
+
+      <SkillsButton
+        :id="`deleteProjBtn${project.projectId}`"
+        outlined
+        severity="info"
+        ref="deleteBtn"
+        size="small"
+        :track-for-focus="true"
+        class="p-text-secondary"
+        @click="emit('delete-project', $event.target.value)"
+        title="Delete Project"
+        :aria-label="'Delete Project ' + project.name"
+        role="button"
+        icon="text-warning fas fa-trash p-text-warning"
+        data-cy="deleteProjBtn" />
+    </ButtonGroup>
+
   </div>
 </template>
-
-<script>
-  export default {
-    name: 'ProjectCardControls',
-    props: {
-      project: Object,
-      isDeleteDisabled: Boolean,
-      deleteDisabledText: String,
-      readOnlyProject: Boolean,
-    },
-    computed: {
-      isRootUser() {
-        return this.$store.getters['access/isRoot'];
-      },
-    },
-    methods: {
-      focusOnEdit() {
-        this.$refs.editBtn.focus();
-      },
-      focusOnCopy() {
-        this.$refs.copyBtn.focus();
-      },
-      focusOnDelete() {
-        this.$nextTick(() => this.$refs.deleteBtn.focus());
-      },
-    },
-  };
-</script>
 
 <style scoped>
 .last-right-group-btn {

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,345 +13,263 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <b-card body-class="p-0 mt-3">
-    <template #header>
-      <div class="row">
-        <div class="col h6 mb-0 font-weight-bold">Self Reported Skills Requiring Approval</div>
-        <div class="col text-right" v-if="isEmailEnabled" data-cy="unsubscribeContainer">
-          <inline-help
-            msg="Configure whether or not you will receive self reported skill approval request emails."/>
-          <b-form-checkbox v-model="emailSubscribed"
-                           name="unsubscribe-toggle"
-                           class="ml-2 mt-2"
-                           style="display: inline-block"
-                           v-on:input="toggleUnsubscribe"
-                           :aria-label="unsubscribeHelpMsg"
-                           data-cy="unsubscribeSwitch"
-                           switch>
-            {{ emailSubscribed ? 'Subscribed' : 'Unsubscribed' }}
-          </b-form-checkbox>
-        </div>
-      </div>
-    </template>
-    <div class="row px-3 mb-3 mt-2">
-      <div class="col">
-        <b-button variant="outline-info" @click="loadApprovals" aria-label="Sync Records"
-                  data-cy="syncApprovalsBtn" class="mr-2 mt-1">
-          <i class="fas fa-sync-alt"></i>
-        </b-button>
-        <b-button variant="outline-info" @click="changeSelectionForAll(true)" data-cy="selectPageOfApprovalsBtn" class="mr-2 mt-1"><i class="fa fa-check-square"/> Select Page</b-button>
-        <b-button variant="outline-info" @click="changeSelectionForAll(false)" data-cy="clearSelectedApprovalsBtn" class="mt-1"><i class="far fa-square"></i> Clear</b-button>
-      </div>
-      <div class="col text-right">
-        <b-button variant="outline-danger" @click="reject.showModal=true" data-cy="rejectBtn" class="mt-1 ml-2" :disabled="actionsDisabled"><i class="fa fa-times-circle"/> Reject</b-button>
-        <b-button variant="outline-success" @click="approve" data-cy="approveBtn" class="mt-1 ml-2" :disabled="actionsDisabled"><i class="fa fa-check"/> Approve</b-button>
-      </div>
-    </div>
+<script setup>
+import { ref, onMounted, computed, nextTick } from 'vue';
+import { useRoute } from 'vue-router';
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import SelfReportService from '@/components/skills/selfReport/SelfReportService';
+import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
+import DateCell from "@/components/utils/table/DateCell.vue";
+import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
+import RejectSkillModal from "@/components/skills/selfReport/RejectSkillModal.vue";
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 
-    <skills-b-table :options="table.options" :items="table.items"
-                    @page-changed="pageChanged"
-                    @page-size-changed="pageSizeChanged"
-                    @sort-changed="sortTable"
-                    tableStoredStateId="skillsReportApprovalTable"
-                    data-cy="skillsReportApprovalTable">
-      <template #head(request)="data">
-        <span class="text-primary"><i class="fas fa-hand-pointer skills-color-skills" /> {{ data.label }}</span>
-      </template>
-      <template #head(userId)="data">
-        <span class="text-primary"><i class="fas fa-user-plus skills-color-crossProjects" /> {{ data.label }}</span>
-      </template>
-      <template #head(requestedOn)="data">
-        <span class="text-primary"><i class="fas fa-clock skills-color-access" /> {{ data.label }}</span>
-      </template>
 
-      <template v-slot:cell(userId)="data">
-        {{ data.item.userIdForDisplay }}
-      </template>
+const route = useRoute();
+const appInfo = useAppInfoState()
+const emit = defineEmits(['approval-action']);
+const announcer = useSkillsAnnouncer();
+const colors = useColors()
+const responsive = useResponsiveBreakpoints()
 
-      <template v-slot:cell(request)="data">
-        <div>
-          <b-form-checkbox
-            :id="`${data.item.userId}-${data.item.skillId}`"
-            v-model="data.item.selected"
-            :name="`checkbox--${data.item.skillId}`"
-            :value="true"
-            :unchecked-value="false"
-            :inline="true"
-            v-on:input="updateActionsDisableStatus"
-            :data-cy="`approvalSelect_${data.item.userId}-${data.item.skillId}`"
-          >
-              <span>{{ data.item.skillName }}</span>
-            <b-badge class="ml-2">+ {{ data.item.points }} Points</b-badge>
-          </b-form-checkbox>
-        </div>
+const approvals = ref([]);
+const loading = ref(true);
+const pageSize = ref(5);
+const possiblePageSizes = ref([5, 10, 25]);
+const currentPage = ref(1);
+const sortOrder = ref(-1);
+const sortBy = ref('requestedOn');
+const selectedItems = ref([]);
+const expandedRows = ref({});
+const totalRows = ref(null);
+const emailSubscribed = ref(true);
+const isEmailEnabled = computed(() => appInfo.emailEnabled)
+const showRejectModal = ref(false);
 
-        <b-button size="sm" variant="outline-info"
-                  class="mr-2 py-0 px-1 mt-1"
-                  @click="data.toggleDetails"
-                  :aria-label="`Show Justification for ${data.item.name}`"
-                  :data-cy="`expandDetailsBtn_${data.item.skillId}`">
-          <i v-if="data.detailsShowing" class="fa fa-minus-square" />
-          <i v-else class="fa fa-plus-square" />
-          Justification
-        </b-button>
-        <b-button size="sm" variant="outline-info"
-                  class="py-0 px-1 mt-1"
-                  :data-cy="`viewSkillLink_${data.item.skillId}`"
-                  :to="{ name:'SkillOverview',
-                         params: { projectId: data.item.projectId,
-                                   subjectId: data.item.subjectId,
-                                   skillId: data.item.skillId }}"
-                  :aria-label="`View skill ${data.item.skillName}  via link`"
-                  target="_blank">
-          View Skill <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
-        </b-button>
-      </template>
+onMounted(() => {
+  loadApprovals();
+  if (isEmailEnabled.value) {
+    checkEmailSubscriptionStatus();
+  }
+});
 
-      <template v-slot:cell(requestedOn)="data">
-        <date-cell :value="data.value" />
-      </template>
+const unsubscribeHelpMsg = computed(() => {
+  if (emailSubscribed.value) {
+    return 'Change to Unsubscribed to unsubscribe from all Skill Approval request emails';
+  }
+  return 'Change to Subscribed to receive Skill Approval request emails';
+});
+const pageChanged = (pagingInfo) => {
+  currentPage.value = pagingInfo.page + 1;
+  pageSize.value = pagingInfo.rows;
+  loadApprovals();
+};
 
-      <template #row-details="row">
-        <div>
-          <b-card v-if="row.item.requestMsg && row.item.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-4">
-            <markdown-text class="d-inline-block" :text="row.item.requestMsg" data-cy="approvalMessage"/>
-          </b-card>
-          <b-card v-else class="ml-4" header="No Justification supplied" no-body/>
-        </div>
-      </template>
+const sortTable = (sortContext) => {
+  sortBy.value = sortContext.sortField;
+  sortOrder.value = sortContext.sortOrder;
 
-    </skills-b-table>
+  // set to the first page
+  currentPage.value = 1;
+  loadApprovals();
+};
 
-    <ValidationObserver v-slot="{invalid}" slim>
-    <b-modal id="rejectSkillsModal"
-             :no-close-on-backdrop="true"
-             :centered="true"
-             v-model="reject.showModal">
-      <template #modal-title>
-        <div class="h5 text-uppercase">Reject Skills</div>
-      </template>
-      <div id="rejectionTitleInModal" class="row p-2" data-cy="rejectionTitle">
-        <div class="col-auto text-center">
-          <i class="far fa-thumbs-down text-warning" style="font-size: 3rem"/>
-        </div>
-        <div class="col">
-          <p class="h6">This will reject user's request(s) to get points. Users will be notified and you can provide an optional message below.</p>
-        </div>
-      </div>
-      <ValidationProvider rules="maxSelfReportRejectionMessageLength|customDescriptionValidator" :debounce="250" v-slot="{errors}"
-                          name="Rejection Message">
-        <b-form-textarea rows="5" type="text" id="approvalRequiredMsg"
-                         v-model="reject.rejectMsg"
-                         aria-describedby="rejectionTitleInModal"
-                         aria-label="Optional Rejection Message"
-                         class="form-control" placeholder="Message (optional)"
-                         data-cy="rejectionInputMsg"
-                         aria-errormessage="approvalRequiredMsgError"
-                         :aria-invalid="errors && errors.length > 0"/>
-        <small role="alert" id="approvalRequiredMsgError" class="form-text text-danger mb-3" data-cy="rejectionInputMsgError">{{ errors[0] }}</small>
-      </ValidationProvider>
-      <template #modal-footer>
-        <button type="button" class="btn btn-outline-danger text-uppercase" @click="reject.showModal=false"
-                data-cy="cancelRejectionBtn">
-          <i class="fas fa-times-circle"></i> Cancel
-        </button>
-        <button type="button" class="btn btn-outline-success text-uppercase"
-                :disabled="invalid"
-                @click="doReject(); reject.showModal=false;" data-cy="confirmRejectionBtn">
-          <i class="fas fa-arrow-alt-circle-right"></i> Reject
-        </button>
-      </template>
-    </b-modal>
-    </ValidationObserver>
-  </b-card>
-</template>
-
-<script>
-  import MarkdownText from '@/common-components/utilities/MarkdownText';
-  import SkillsBTable from '../../utils/table/SkillsBTable';
-  import DateCell from '../../utils/table/DateCell';
-  import SelfReportService from './SelfReportService';
-  import InlineHelp from '../../utils/InlineHelp';
-
-  export default {
-    name: 'SelfReportApproval',
-    components: {
-      DateCell,
-      SkillsBTable,
-      InlineHelp,
-      MarkdownText,
-    },
-    props: {
-      emailEnabled: {
-        type: Boolean,
-        required: false,
-      },
-    },
-    data() {
-      return {
-        projectId: this.$route.params.projectId,
-        actionsDisabled: true,
-        emailSubscribed: true,
-        isEmailEnabled: this.emailEnabled,
-        reject: {
-          showModal: false,
-          rejectMsg: '',
-        },
-        table: {
-          items: [],
-          options: {
-            busy: true,
-            bordered: true,
-            outlined: true,
-            stacked: 'md',
-            sortBy: 'requestedOn',
-            sortDesc: true,
-            emptyText: 'Nothing to approve',
-            tableDescription: 'Self Reported Skills',
-            fields: [
-              {
-                key: 'request',
-                label: 'Requested',
-                sortable: false,
-              },
-              {
-                key: 'userId',
-                label: 'For User',
-                sortable: true,
-              },
-              {
-                key: 'requestedOn',
-                label: 'Requested On',
-                sortable: true,
-              },
-            ],
-            pagination: {
-              server: true,
-              currentPage: 1,
-              totalRows: 1,
-              pageSize: 5,
-              possiblePageSizes: [5, 10, 15, 20],
-            },
-          },
-        },
-      };
-    },
-    mounted() {
-      this.loadApprovals();
-      if (this.isEmailEnabled) {
-        this.checkEmailSubscriptionStatus();
-      }
-    },
-    computed: {
-      unsubscribeHelpMsg() {
-        if (this.emailSubscribed) {
-          return 'Change to Unsubscribed to unsubscribe from all Skill Approval request emails';
-        }
-        return 'Change to Subscribed to receive Skill Approval request emails';
-      },
-    },
-    watch: {
-      emailEnabled(newVal) {
-        this.isEmailEnabled = newVal;
-        if (this.isEmailEnabled) {
-          this.checkEmailSubscriptionStatus();
-        }
-      },
-    },
-    methods: {
-      pageChanged(pageNum) {
-        this.table.options.pagination.currentPage = pageNum;
-        this.loadApprovals();
-      },
-      pageSizeChanged(newSize) {
-        this.table.options.pagination.pageSize = newSize;
-        this.loadApprovals();
-      },
-      sortTable(sortContext) {
-        this.table.options.sortBy = sortContext.sortBy;
-        this.table.options.sortDesc = sortContext.sortDesc;
-
-        // set to the first page
-        this.table.options.pagination.currentPage = 1;
-        this.loadApprovals();
-      },
-      loadApprovals() {
-        this.table.options.busy = true;
-        const pageParams = {
-          limit: this.table.options.pagination.pageSize,
-          ascending: !this.table.options.sortDesc,
-          page: this.table.options.pagination.currentPage,
-          orderBy: this.table.options.sortBy,
-        };
-        return SelfReportService.getApprovals(this.projectId, pageParams)
-          .then((res) => {
-            this.table.items = res.data.map((item) => ({ selected: false, ...item }));
-            this.table.options.pagination.totalRows = res.count;
-            this.table.options.busy = false;
-            this.updateActionsDisableStatus();
-          });
-      },
-      changeSelectionForAll(selectedValue) {
-        this.table.items.forEach((item) => {
-          // eslint-disable-next-line no-param-reassign
-          item.selected = selectedValue;
-        });
-        this.updateActionsDisableStatus();
-      },
-      updateActionsDisableStatus() {
-        if (this.table.items.find((item) => item.selected) !== undefined) {
-          this.actionsDisabled = false;
-        } else {
-          this.actionsDisabled = true;
-        }
-      },
-      approve() {
-        this.table.options.busy = true;
-        const idsToApprove = this.table.items.filter((item) => item.selected).map((item) => item.id);
-        SelfReportService.approve(this.projectId, idsToApprove)
-          .then(() => {
-            this.loadApprovals().then(() => {
-              setTimeout(() => this.$announcer.polite(`approved ${idsToApprove.length} skill approval request${idsToApprove.length > 1 ? 's' : ''}`), 0);
-            });
-            this.$emit('approval-action', 'approved');
-          });
-      },
-      doReject() {
-        this.table.options.busy = true;
-        const ids = this.table.items.filter((item) => item.selected).map((item) => item.id);
-        SelfReportService.reject(this.projectId, ids, this.reject.rejectMsg)
-          .then(() => {
-            this.loadApprovals().then(() => {
-              setTimeout(() => this.$announcer.polite(`rejected ${ids.length} skill approval request${ids.length > 1 ? 's' : ''}`), 0);
-            });
-            this.$emit('approval-action', 'rejected');
-            this.reject.rejectMsg = '';
-          });
-      },
-      checkEmailSubscriptionStatus() {
-        SelfReportService.isUserSubscribedToEmails(this.projectId).then((respData) => {
-          this.emailSubscribed = respData;
-        });
-      },
-      toggleUnsubscribe() {
-        if (this.emailSubscribed) {
-          SelfReportService.subscribeUserToEmails(this.projectId).then(() => {
-            this.$nextTick(() => {
-              this.$announcer.polite('You have subscribed to self-report approval request emails for this project');
-            });
-          });
-        } else {
-          SelfReportService.unsubscribeUserFromEmails(this.projectId).then(() => {
-            this.$nextTick(() => {
-              this.$announcer.polite('You have unsubscribed from self-report approval request emails for this project');
-            });
-          });
-        }
-      },
-    },
+const loadApprovals = () => {
+  loading.value = true;
+  const pageParams = {
+    limit: pageSize.value,
+    ascending: sortOrder.value === 1,
+    page: currentPage.value,
+    orderBy: sortBy.value,
   };
+  return SelfReportService.getApprovals(route.params.projectId, pageParams)
+      .then((res) => {
+        approvals.value = res.data.map((item) => ({ selected: false, ...item }));
+        totalRows.value = res.count;
+        loading.value = false;
+      });
+};
+
+const approve = () => {
+  loading.value = true;
+  const idsToApprove = selectedItems.value.map((item) => item.id);
+  SelfReportService.approve(route.params.projectId, idsToApprove)
+      .then(() => {
+        loadApprovals().then(() => {
+          setTimeout(() => announcer.polite(`approved ${idsToApprove.length} skill approval request${idsToApprove.length > 1 ? 's' : ''}`), 0);
+        });
+        emit('approval-action', 'approved');
+        selectedItems.value = [];
+      });
+};
+
+const doReject = (rejectedIds) => {
+  loading.value = true;
+  loadApprovals().then(() => {
+    setTimeout(() => announcer.polite(`rejected ${rejectedIds.length} skill approval request${rejectedIds.length > 1 ? 's' : ''}`), 0);
+    emit('approval-action', 'rejected');
+    selectedItems.value = [];
+  });
+  closeModal();
+};
+
+const closeModal = () => {
+  showRejectModal.value = false;
+}
+
+const checkEmailSubscriptionStatus = () => {
+  SelfReportService.isUserSubscribedToEmails(route.params.projectId).then((respData) => {
+    emailSubscribed.value = respData;
+  });
+};
+
+const toggleUnsubscribe = () => {
+  if (emailSubscribed.value) {
+    SelfReportService.subscribeUserToEmails(route.params.projectId).then(() => {
+      nextTick(() => {
+        announcer.polite('You have subscribed to self-report approval request emails for this project');
+      });
+    });
+  } else {
+    SelfReportService.unsubscribeUserFromEmails(route.params.projectId).then(() => {
+      nextTick(() => {
+        announcer.polite('You have unsubscribed from self-report approval request emails for this project');
+      });
+    });
+  }
+};
+
+const toggleRow = (row) => {
+  if(expandedRows.value[row]) {
+    delete expandedRows.value[row];
+  }
+  else {
+    expandedRows.value[row] = true;
+  }
+
+  expandedRows.value = { ...expandedRows.value };
+}
 </script>
+
+<template>
+  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <template #header>
+      <SkillsCardHeader title="Self Reported Skills Requiring Approval">
+        <template #headerContent>
+          <div v-if="isEmailEnabled" data-cy="unsubscribeContainer" class="flex align-content-center align-items-center">
+            {{ emailSubscribed ? 'Subscribed' : 'Unsubscribed' }} <InputSwitch v-model="emailSubscribed"
+                                                                               @update:modelValue="toggleUnsubscribe"
+                                                                               aria-label="Enable to receive Skill Approval request emails"
+                                                                               class="ml-2"
+                                                                               data-cy="unsubscribeSwitch" />
+          </div>
+        </template>
+      </SkillsCardHeader>
+    </template>
+    <template #content>
+      <div class="flex p-3 gap-2 flex-column sm:flex-row">
+        <div class="flex flex-1 justify-content-center sm:justify-content-start">
+          <SkillsButton size="small" @click="loadApprovals" aria-label="Sync Records" data-cy="syncApprovalsBtn" class="" icon="fas fa-sync-alt" />
+        </div>
+        <div class="flex flex-1 justify-content-center sm:justify-content-end">
+          <SkillsButton size="small" @click="showRejectModal=true" data-cy="rejectBtn" class="" :disabled="selectedItems.length === 0" icon="fa fa-times-circle" label="Reject" />
+          <SkillsButton size="small" @click="approve" data-cy="approveBtn" class="ml-2" :disabled="selectedItems.length === 0" icon="fa fa-check" label="Approve" />
+        </div>
+      </div>
+
+      <SkillsDataTable :value="approvals"
+                       v-model:selection="selectedItems"
+                       v-model:expandedRows="expandedRows"
+                       tableStoredStateId="skillsReportApprovalTable"
+                       data-cy="skillsReportApprovalTable" paginator lazy
+                       aria-label="Approval"
+                       :rows="pageSize"
+                       :rowsPerPageOptions="possiblePageSizes"
+                       :totalRecords="totalRows"
+                       :busy="loading"
+                       :sort-field="sortBy"
+                       :sort-order="sortOrder"
+                       @page="pageChanged"
+                       data-key="id"
+                       pt:paginator:paginatorWrapper:aria-label="Approval Paginator"
+                       @sort="sortTable">
+        <Column selectionMode="multiple" :class="{'flex': responsive.md.value }">
+          <template #header>
+            <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-check-double"
+                                                    aria-hidden="true"></i> Select Rows:</span>
+          </template>
+        </Column>
+        <Column field="request" :class="{'flex': responsive.md.value }">
+          <template #header>
+            <span class="mr-1"><i class="fas fa-user-plus" :class="colors.getTextClass(1)"/> Requested</span>
+          </template>
+          <template #body="slotProps">
+            <div>
+                <span>
+                  <router-link class="ml-1" target="_blank" rel="noopener"
+                               :data-cy="`viewSkillLink_${slotProps.data.skillId}`"
+                      :to="{ name:'SkillOverview', params: { projectId: slotProps.data.projectId,
+                                                             subjectId: slotProps.data.subjectId,
+                                                             skillId: slotProps.data.skillId }}">
+                        {{ slotProps.data.skillName }}
+                  </router-link>
+                </span>
+                <Badge class="ml-2">+ {{ slotProps.data.points }} Points</Badge>
+            </div>
+            <SkillsButton size="small" variant="outline-info"
+                      class="mr-2 py-0 px-1 mt-1 ml-2 lg:ml-0"
+                      @click="toggleRow(slotProps.data.id)"
+                      :aria-label="`Show Justification for ${slotProps.data.name}`"
+                      :data-cy="`expandDetailsBtn_${slotProps.data.skillId}`" :icon="expandedRows[slotProps.data.id] ? 'fa fa-minus-square' : 'fa fa-plus-square'" label="Justification">
+            </SkillsButton>
+          </template>
+        </Column>
+        <Column field="userId" sortable :class="{'flex': responsive.md.value }">
+          <template #header>
+            <span class="mr-1"><i class="fas fa-hand-pointer" :class="colors.getTextClass(2)"/> For User</span>
+          </template>
+          <template #body="slotProps">
+            {{ slotProps.data.userIdForDisplay }}
+          </template>
+        </Column>
+        <Column field="requestedOn" sortable :class="{'flex': responsive.md.value }">
+          <template #header>
+            <span class="mr-1"><i class="fas fa-clock" :class="colors.getTextClass(3)" /> Requested On</span>
+          </template>
+          <template #body="slotProps">
+            <date-cell :value="slotProps.data.requestedOn" />
+          </template>
+        </Column>
+
+        <template #expansion="slotProps">
+          <div>
+            <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-4">
+              <template #content>
+                <markdown-text class="d-inline-block" :text="slotProps.data.requestMsg" data-cy="approvalMessage"/>
+              </template>
+            </Card>
+            <Card v-else>
+              <template #content>
+                No Justification supplied
+              </template>
+            </Card>
+          </div>
+        </template>
+
+        <template #paginatorstart>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+        </template>
+
+        <template #empty>
+          There are no records to show
+        </template>
+      </SkillsDataTable>
+    </template>
+  </Card>
+  <RejectSkillModal v-model="showRejectModal" @do-reject="doReject" @done="closeModal" :selected-items="selectedItems"/>
+</template>
 
 <style scoped>
 

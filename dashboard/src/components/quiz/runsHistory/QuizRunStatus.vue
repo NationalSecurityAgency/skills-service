@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,29 +13,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-<div>
-  <div v-if="status === 'FAILED'" class="text-danger">
-    <i class="far fa-times-circle" aria-hidden="true"></i> Failed
-  </div>
-  <div v-if="status === 'PASSED'" class="text-success">
-    <i class="fas fa-check-double" aria-hidden="true"></i> <span v-if="quizType === 'Survey'">Completed</span><span v-else>Passed</span>
-  </div>
-  <div v-if="status === 'INPROGRESS'" class="text-info">
-    <i class="fas fa-running" aria-hidden="true"></i> In Progress
-  </div>
-</div>
-</template>
+<script setup>
 
-<script>
-  export default {
-    name: 'QuizRunStatus',
-    props: {
-      quizType: String,
-      status: String,
-    },
-  };
+const props = defineProps({
+  quizType: String,
+  status: String,
+})
 </script>
+
+<template>
+  <div>
+    <div v-if="status === 'FAILED'" class="text-danger">
+      <i class="far fa-times-circle" aria-hidden="true"></i> Failed
+    </div>
+    <div v-if="status === 'PASSED'" class="text-success">
+      <i class="fas fa-check-double" aria-hidden="true"></i> <span v-if="quizType === 'Survey'">Completed</span><span v-else>Passed</span>
+    </div>
+    <div v-if="status === 'INPROGRESS'" class="text-info">
+      <i class="fas fa-running" aria-hidden="true"></i> In Progress
+    </div>
+  </div>
+</template>
 
 <style scoped>
 

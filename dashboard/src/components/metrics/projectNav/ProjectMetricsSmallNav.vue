@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,35 +13,28 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <b-button-group>
-    <b-button :to="{ name: navItem.pathName }" v-for="navItem in navCards" :key="navItem.title"
-              class="skill-nav-button"
-              :aria-label="`${navItem.title} metrics`"
-              :data-cy="`${navItem.title}-metrics-link`"
-              :class="{'bg-primary' : $route.name === navItem.pathName, 'skills-white-text' : $route.name === navItem.pathName}"
-              variant="outline-info"> <i :class="navItem.icon"/><span class="sr-only">{{navItem.title}}</span></b-button>
-  </b-button-group>
-</template>
+<script setup>
+import { useRoute } from 'vue-router';
 
-<script>
-  export default {
-    name: 'ProjectMetricsSmallNav',
-    props: ['navCards'],
-    data() {
-      return {
-        routerPageName: this.$route.name,
-      };
-    },
-  };
+defineProps(['navCards']);
+const route = useRoute();
+
 </script>
 
-<style scoped>
-.skills-white-text i {
-  color: white !important;
-}
+<template>
+  <div class="flex gap-1">
+    <router-link :to="{ name: navItem.pathName }" v-for="navItem in navCards" :key="navItem.title" tabindex="-1">
+      <SkillsButton class=""
+                    :aria-label="`${navItem.title} metrics`"
+                    :data-cy="`${navItem.title}-metrics-link`"
+                    :class="{
+                      'bg-primary' : route.name === navItem.pathName,
+                      'text-white' : route.name === navItem.pathName
+                    }"> <i :class="navItem.icon"/><span class="sr-only">{{navItem.title}}</span></SkillsButton>
+    </router-link>
+  </div>
+</template>
 
-.skill-nav-button:hover i {
-  color: white !important;
-}
+<style scoped>
+
 </style>

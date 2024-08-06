@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,89 +13,71 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import Navigation from '@/components/utils/Navigation.vue'
+import { computed } from 'vue'
+import { useAccessState } from '@/stores/UseAccessState.js'
+
+const accessState = useAccessState()
+const isRoot = computed(() => {
+  return accessState.isRoot;
+});
+const isSupervisor = computed(() => {
+  return accessState.isSupervisor;
+});
+
+
+const items = computed(() => {
+  const res = [];
+  res.push({
+    name: 'Projects',
+    iconClass: 'fa-tasks skills-color-projects',
+    page: 'AdminHomePage',
+  });
+  res.push({
+    name: 'Quizzes and Surveys',
+    iconClass: 'fa-spell-check skills-color-subjects',
+    page: 'QuizzesAndSurveys',
+  });
+
+  if (isSupervisor.value || isRoot.value) {
+    res.push({
+      name: 'Global Badges',
+      iconClass: 'fa-globe-americas skills-color-badges',
+      page: 'GlobalBadges',
+    });
+    res.push({
+      name: 'Metrics',
+      iconClass: 'fa-chart-bar skills-color-metrics',
+      page: 'MultipleProjectsMetricsPage',
+    });
+  }
+
+  if (isRoot.value) {
+    res.push({
+      name: 'Contact Admins',
+      iconClass: 'fas fa-mail-bulk',
+      page: 'ContactAdmins',
+    });
+
+    res.push({
+      name: 'Activity History',
+      iconClass: 'fas fa-users-cog text-success',
+      page: 'UserActions',
+    });
+  }
+  return res;
+});
+</script>
+
 <template>
   <div>
-    <div class="bg-white m-0" style="height: 1rem;width:100%;"></div>
-    <navigation :nav-items="navItems" data-cy="navigationmenu" role="navigation">
+    <navigation :nav-items="items"
+        data-cy="navigationmenu"
+        role="navigation">
     </navigation>
+
   </div>
 </template>
 
-<script>
-  import { createNamespacedHelpers } from 'vuex';
-  import Navigation from './utils/Navigation';
-
-  const { mapGetters } = createNamespacedHelpers('access');
-
-  export default {
-    name: 'AdminHomePage',
-    components: {
-      Navigation,
-    },
-    data() {
-      return {
-        isLoading: true,
-      };
-    },
-    computed: {
-      ...mapGetters([
-        'isSupervisor',
-        'isRoot',
-      ]),
-      headerOptions() {
-        return {
-          icon: 'fas fa-cubes',
-          title: 'Home',
-          subTitle: '',
-          stats: [],
-        };
-      },
-      navItems() {
-        const items = [];
-        items.push({
-          name: 'Projects',
-          iconClass: 'fa-tasks skills-color-projects',
-          page: 'AdminHomePage',
-        });
-        items.push({
-          name: 'Quizzes and Surveys',
-          iconClass: 'fa-spell-check skills-color-subjects',
-          page: 'QuizzesAndSurveys',
-        });
-
-        if (this.isSupervisor || this.isRoot) {
-          items.push({
-            name: 'Global Badges',
-            iconClass: 'fa-globe-americas skills-color-badges',
-            page: 'GlobalBadges',
-          });
-          items.push({
-            name: 'Metrics',
-            iconClass: 'fa-chart-bar skills-color-metrics',
-            page: 'MultipleProjectsMetricsPage',
-          });
-        }
-
-        if (this.isRoot) {
-          items.push({
-            name: 'Contact Admins',
-            iconClass: 'fas fa-mail-bulk',
-            page: 'ContactAdmins',
-          });
-
-          items.push({
-            name: 'Activity History',
-            iconClass: 'fas fa-users-cog text-success',
-            page: 'UserActions',
-          });
-        }
-
-        return items;
-      },
-    },
-  };
-</script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-</style>
+<style scoped></style>

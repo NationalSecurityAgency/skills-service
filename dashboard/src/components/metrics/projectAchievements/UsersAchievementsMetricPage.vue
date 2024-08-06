@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,27 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import LevelBreakdownMetric from '@/components/metrics/common/LevelBreakdownMetric.vue'
+import AchievementsNavigator from '@/components/metrics/projectAchievements/AchievementsNavigator.vue'
+</script>
+
 <template>
   <div>
-    <div class="row mb-2">
-      <div class="col">
-        <level-breakdown-metric />
-      </div>
+    <div class="flex flex-column gap-3">
+      <level-breakdown-metric />
+      <achievements-navigator />
     </div>
-    <achievements-navigator />
   </div>
 </template>
 
-<script>
-  import LevelBreakdownMetric from '../common/LevelBreakdownMetric';
-  import AchievementsNavigator from './AchievementsNavigator';
-
-  export default {
-    name: 'UsersAchievementsMetricPage',
-    components: { AchievementsNavigator, LevelBreakdownMetric },
-  };
-</script>
-
-<style scoped>
-
-</style>
+<style scoped></style>

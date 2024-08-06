@@ -13,50 +13,35 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { computed } from 'vue';
+import Badge from 'primevue/badge';
+import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
+
+const timeUtils = useTimeUtils();
+
+const props = defineProps(['value', 'fromStartOfDay', 'cssClass']);
+
+const fromNow = computed(() => {
+  return timeUtils.timeFromNow(props.value, props.fromStartOfDay);
+})
+
+const isToday = (timestamp) => {
+  return timeUtils.isToday(timestamp);
+};
+</script>
+
 <template>
     <span v-if="!value" class="text-primary">
-      <b-badge variant="warning">Never</b-badge>
+      <Badge severity="warning">Never</Badge>
     </span>
-    <span v-else-if="isToday(value)" class="text-primary">
-      <b-badge variant="info">Today</b-badge>
+  <span v-else-if="isToday(value)" class="text-primary">
+      <Badge severity="info">Today</Badge>
     </span>
-    <span v-else class="text-primary small">
+  <span v-else class="text-primary small">
       {{ fromNow }}
     </span>
 </template>
-
-<script>
-  import dayjs from '@/common-components/DayJsCustomizer';
-
-  export default {
-    name: 'SlimDateCell',
-    props: {
-      value: String,
-      fromStartOfDay: {
-        type: Boolean,
-        default: false,
-      },
-      cssClass: {
-        type: String,
-        default: 'text-secondary small',
-      },
-    },
-    computed: {
-      fromNow() {
-        if (this.fromStartOfDay) {
-          return dayjs().startOf('day').to(dayjs(this.value));
-        }
-        return dayjs(this.value).startOf('seconds').fromNow();
-      },
-    },
-    methods: {
-      isToday(timestamp) {
-        return dayjs().utc()
-          .isSame(dayjs(timestamp), 'day');
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,28 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
+import UsersTable from './UsersTable.vue';
+</script>
+
 <template>
   <div class="usersTable">
     <sub-page-header title="Users"/>
-    <b-card body-class="p-0">
-      <users-table />
-    </b-card>
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+      <template #content>
+        <UsersTable />
+      </template>
+    </Card>
   </div>
 </template>
 
-<script>
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import UsersTable from './UsersTable';
-
-  export default {
-    name: 'Users',
-    components: {
-      SubPageHeader,
-      UsersTable,
-    },
-  };
-</script>
-
-<style>
-
-</style>
+<style scoped></style>

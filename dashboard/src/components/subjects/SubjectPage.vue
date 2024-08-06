@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,192 +13,165 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
+import { useSubjectsState } from '@/stores/UseSubjectsState.js'
+import { useFocusState } from '@/stores/UseFocusState.js'
+import PageHeader from '@/components/utils/pages/PageHeader.vue'
+import Navigation from '@/components/utils/Navigation.vue'
+import EditSubject from '@/components/subjects/EditSubject.vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert.vue'
+
+const appConfig = useAppConfig()
+const route = useRoute()
+const router = useRouter()
+const announcer = useSkillsAnnouncer()
+const projConfig = useProjConfig()
+const subjectState = useSubjectsState()
+const focusState = useFocusState()
+
+let showEditSubject = ref(false)
+
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
+
+onMounted(() => {
+  loadSubject()
+})
+
+const isLoadingData = computed(() => {
+  return subjectState.isLoadingSubject.value; // || projConfig.loadingProjConfig
+})
+
+const navItems = computed(() => {
+  const items = [
+    { name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'SubjectSkills' }
+  ]
+
+  if (!isReadOnlyProj.value) {
+    items.push({ name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'SubjectLevels' })
+  }
+  items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SubjectUsers' })
+  items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SubjectMetrics' })
+
+  return items
+})
+
+const headerOptions = computed(() => {
+  const subject = subjectState.subject
+  return {
+    icon: 'fas fa-cubes skills-color-subjects',
+    title: `SUBJECT: ${subject.name}`,
+    subTitle: `ID: ${subject.subjectId}`,
+    stats: [{
+      label: 'Groups',
+      count: subject.numGroups,
+      disabledCount: subject.numGroupsDisabled,
+      icon: 'fas fa-layer-group skills-color-groups'
+    }, {
+      label: 'Skills',
+      count: subject.numSkills,
+      icon: 'fas fa-graduation-cap skills-color-skills',
+      secondaryStats: [{
+        label: 'reused',
+        count: subject.numSkillsReused,
+        badgeVariant: 'info'
+      }, {
+        label: 'disabled',
+        count: subject.numSkillsDisabled,
+        badgeVariant: 'warning'
+      }]
+    }, {
+      label: 'Points',
+      count: subject.totalPoints,
+      warn: subject.totalPoints < minimumPoints.value,
+      icon: 'far fa-arrow-alt-circle-up skills-color-points',
+      secondaryStats: [{
+        label: 'reused',
+        count: subject.totalPointsReused,
+        badgeVariant: 'info'
+      }]
+    }]
+  }
+})
+
+const isInsufficientPoints = computed(() => {
+  return subjectState.subject.totalPoints < appConfig.minimumSubjectPoints
+})
+
+const minimumPoints = computed(() => {
+  return appConfig.minimumSubjectPoints
+})
+
+// watch(subject, (newVal, oldVal) => {
+//   if (newVal && newVal.subjectId !== subjectId.value) {
+//     subjectId.value = newVal.subjectId;
+//   }
+// });
+
+const loadSubject = () => {
+  subjectState.loadSubjectDetailsState()
+}
+
+const displayEditSubject = () => {
+  showEditSubject.value = true
+}
+
+const subjectEdited = (updatedSubject) => {
+  // store.dispatch('subject/setSubject', resp);
+  if (updatedSubject.subjectId !== subjectState.subject.subjectId) {
+    router.replace({ name: route.name, params: { ...route.params, subjectId: updatedSubject.subjectId } })
+      .then(() => focusState.focusOnLastElement())
+  } else {
+    focusState.focusOnLastElement()
+  }
+  subjectState.subject.subjectId = updatedSubject.subjectId
+  subjectState.subject.name = updatedSubject.name
+  announcer.polite(`Subject ${updatedSubject.name} has been edited`)
+}
+
+</script>
+
 <template>
   <div>
     <page-header :loading="isLoadingData" :options="headerOptions">
-      <div slot="subSubTitle" v-if="subject && !isReadOnlyProj">
-        <b-button @click="displayEditSubject"
-                  ref="editSubjectButton"
-                  class="btn btn-outline-primary mr-1"
-                  size="sm"
-                  variant="outline-primary"
-                  data-cy="btn_edit-subject"
-                  :aria-label="'edit Subject '+subject.subjectId">
-          <span class="">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
-        </b-button>
-      </div>
-      <div slot="footer">
-        <import-finalize-alert />
-      </div>
+      <template #subSubTitle v-if="!isLoadingData && !isReadOnlyProj">
+        <SkillsButton
+          id="editSubjectBtn"
+          v-if="!isReadOnlyProj"
+          @click="displayEditSubject"
+          ref="editSubjectButton"
+          label="Edit"
+          icon="fas fa-edit"
+          outlined
+          class="btn btn-outline-primary mr-1"
+          size="small"
+          :track-for-focus="true"
+          severity="info"
+          data-cy="btn_edit-subject"
+          :aria-label="`edit Subject ${subjectState.subject.name}`" />
+      </template>
+      <template #footer>
+        <!--        <import-finalize-alert />-->
+      </template>
     </page-header>
+
+    <Message v-if="isInsufficientPoints" :closable="false" data-cy="subjInsufficientPoints">
+      Subject has insufficient points assigned. Skills cannot be achieved until subject has at least <Tag>{{ appConfig.minimumSubjectPoints}}</Tag> points
+    </Message>
+
+    <import-finalize-alert />
 
     <navigation v-if="!isLoadingData" :nav-items="navItems">
     </navigation>
 
     <edit-subject v-if="showEditSubject" v-model="showEditSubject"
-                  :subject="subject" @subject-saved="subjectEdited"
-                  :is-edit="true"
-                  @hidden="handleHideSubjectEdit"/>
+                  :subject="subjectState.subject" @subject-saved="subjectEdited"
+                  :is-edit="true" />
   </div>
 </template>
 
-<script>
-  import { createNamespacedHelpers } from 'vuex';
-  import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert';
-  import Navigation from '@/components/utils/Navigation';
-  import PageHeader from '@/components/utils/pages/PageHeader';
-  import EditSubject from '@/components/subjects/EditSubject';
-  import SubjectsService from '@/components/subjects/SubjectsService';
-  import projConfigMixin from '@/components/projects/ProjConfigMixin';
-
-  const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('subjects');
-
-  export default {
-    name: 'SubjectPage',
-    mixins: [projConfigMixin],
-    components: {
-      ImportFinalizeAlert,
-      PageHeader,
-      Navigation,
-      EditSubject,
-    },
-    data() {
-      return {
-        isLoadingSubjects: true,
-        projectId: '',
-        subjectId: '',
-        showEditSubject: false,
-      };
-    },
-    created() {
-      this.projectId = this.$route.params.projectId;
-      this.subjectId = this.$route.params.subjectId;
-    },
-    mounted() {
-      this.loadSubject();
-    },
-    computed: {
-      ...mapGetters([
-        'subject',
-      ]),
-      isLoadingData() {
-        return this.isLoadingSubjects || this.isLoadingProjConfig;
-      },
-      navItems() {
-        const items = [
-          { name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'SubjectSkills' },
-        ];
-
-        if (!this.isReadOnlyProj) {
-          items.push({ name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'SubjectLevels' });
-        }
-        items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SubjectUsers' });
-        items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SubjectMetrics' });
-
-        return items;
-      },
-      headerOptions() {
-        if (!this.subject) {
-          return {};
-        }
-        return {
-          icon: 'fas fa-cubes skills-color-subjects',
-          title: `SUBJECT: ${this.subject.name}`,
-          subTitle: `ID: ${this.subjectId}`,
-          stats: [{
-            label: 'Groups',
-            count: this.subject.numGroups,
-            disabledCount: this.subject.numGroupsDisabled,
-            icon: 'fas fa-layer-group skills-color-groups',
-          }, {
-            label: 'Skills',
-            count: this.subject.numSkills,
-            icon: 'fas fa-graduation-cap skills-color-skills',
-            secondaryStats: [{
-              label: 'reused',
-              count: this.subject.numSkillsReused,
-              badgeVariant: 'info',
-            }, {
-              label: 'disabled',
-              count: this.subject.numSkillsDisabled,
-              badgeVariant: 'warning',
-            }],
-          }, {
-            label: 'Points',
-            count: this.subject.totalPoints,
-            warn: this.subject.totalPoints < this.minimumPoints,
-            warnMsg: (this.subject.totalPoints + this.subject.totalPointsReused) < this.minimumPoints ? `Subject has insufficient points assigned. Skills cannot be achieved until subject has at least ${this.minimumPoints} points.` : null,
-            icon: 'far fa-arrow-alt-circle-up skills-color-points',
-            secondaryStats: [{
-              label: 'reused',
-              count: this.subject.totalPointsReused,
-              badgeVariant: 'info',
-            }],
-          }],
-        };
-      },
-      minimumPoints() {
-        return this.$store.getters.config.minimumSubjectPoints;
-      },
-    },
-    watch: {
-      subject(newVal) {
-        if (newVal && newVal.subjectId !== this.subjectId) {
-          this.subjectId = newVal.subjectId;
-        }
-      },
-    },
-    methods: {
-      ...mapActions([
-        'loadSubjectDetailsState',
-      ]),
-      ...mapMutations([
-        'setSubject',
-      ]),
-      loadSubject() {
-        this.isLoadingSubjects = true;
-        if (this.$route.params.subject) {
-          this.setSubject(this.$route.params.subject);
-          this.isLoadingSubjects = false;
-        } else {
-          this.loadSubjectDetailsState({ projectId: this.projectId, subjectId: this.subjectId })
-            .finally(() => {
-              this.isLoadingSubjects = false;
-            });
-        }
-      },
-      displayEditSubject() {
-        this.showEditSubject = true;
-      },
-      subjectEdited(subject) {
-        SubjectsService.saveSubject(subject).then((resp) => {
-          const origId = this.subject.subjectId;
-          this.setSubject(resp);
-          if (resp.subjectId !== origId) {
-            this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, subjectId: resp.subjectId } });
-          }
-          this.$nextTick(() => {
-            this.$announcer.polite(`Subject ${subject.name} has been edited`);
-          });
-        });
-      },
-      handleHideSubjectEdit() {
-        this.showEditSubject = false;
-        // if the id is edited, the route is reloaded which causes the focus to be moved to the container element
-        // as such, if we want the edit button receive focus after the id has been altered, we need to double
-        // the nextTick wait.
-        this.$nextTick(() => {
-          this.$nextTick(() => {
-            const ref = this.$refs?.editSubjectButton;
-            if (ref) {
-              ref.focus();
-            }
-          });
-        });
-      },
-    },
-  };
-</script>
-
-<style scoped>
-</style>
+<style scoped></style>

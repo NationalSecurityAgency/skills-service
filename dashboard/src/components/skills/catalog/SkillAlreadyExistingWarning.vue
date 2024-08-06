@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,37 +13,35 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <div v-if="skill.skillIdAlreadyExist || skill.skillNameAlreadyExist" class="alert alert-warning"
-       :data-cy="`alreadyExistWarning_${skill.projectId}-${skill.skillId}`">
-    <i class="fas fa-exclamation-triangle text-danger"></i> <span class="text-danger font-weight-bold mr-1"
-                                                                  style="font-size: 1.1rem">Cannot import!</span>
-    <b>{{ itemThatDoesNotExist }}</b> already
-    {{ this.skill.skillIdAlreadyExist && this.skill.skillNameAlreadyExist ? 'exist' : 'exists' }} in this project!
-  </div>
-</template>
+<script setup>
+import { computed } from 'vue'
+const props = defineProps({
+  skill: {
+    type: Object,
+    required: true
+  }
+})
+const itemThatDoesNotExist = computed(() => {
+  if (props.skill.skillIdAlreadyExist && props.skill.skillNameAlreadyExist) {
+    return 'Skill ID and name';
+  }
 
-<script>
-  export default {
-    name: 'SkillAlreadyExistingWarning',
-    props: {
-      skill: Object,
-    },
-    computed: {
-      itemThatDoesNotExist() {
-        if (this.skill.skillIdAlreadyExist && this.skill.skillNameAlreadyExist) {
-          return 'Skill ID and name';
-        }
+  if (props.skill.skillIdAlreadyExist) {
+    return 'Skill ID';
+  }
 
-        if (this.skill.skillIdAlreadyExist) {
-          return 'Skill ID';
-        }
-
-        return 'Skill name';
-      },
-    },
-  };
+  return 'Skill name';
+})
 </script>
+
+<template>
+  <InlineMessage v-if="skill.skillIdAlreadyExist || skill.skillNameAlreadyExist" severity="warn"
+       :data-cy="`alreadyExistWarning_${skill.projectId}-${skill.skillId}`" class="mb-2">
+    <span class="font-semibold mr-1">Cannot import!</span>
+    <span class="text-primary">{{ itemThatDoesNotExist }}</span> already
+    {{ skill.skillIdAlreadyExist && skill.skillNameAlreadyExist ? 'exist' : 'exists' }} in this project!
+  </InlineMessage>
+</template>
 
 <style scoped>
 

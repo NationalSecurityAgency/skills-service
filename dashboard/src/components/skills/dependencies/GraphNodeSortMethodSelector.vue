@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,57 +13,51 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref, watch } from 'vue';
+import SelectButton from 'primevue/selectbutton';
+
+const emit = defineEmits(['value-changed']);
+
+const msg = ref({
+  directed: 'Directed adheres to the to and from data of the edges. A --> B so B is a level lower than A.',
+  hubsize: 'Hubsize takes the nodes with the most edges and puts them at the top. From that the rest of the hierarchy is evaluated.',
+})
+// optionLabel="value" dataKey="value"
+const options = [{
+  value: 'directed',
+  label: 'Directed',
+  icon: 'fas fa-vector-square'
+}, {
+  value: 'hubsize',
+  label: 'Hubsize',
+  icon: 'fas fa-bezier-curve'
+}];
+const sortMethod = ref(options[0]);
+
+const notifyOfChange = () => {
+  emit('value-changed', sortMethod.value.value);
+};
+
+watch(sortMethod, notifyOfChange);
+</script>
+
 <template>
   <div class="deps-overlay">
-      <b-form-radio-group id="radio-group-2" v-model="sortMethod"
-                          name="graph-sort-method" button-variant="outline-hc" stacked buttons>
-        <b-form-radio value="directed" v-b-tooltip.hover="msg.directed" :aria-label="msg.directed" tabindex="-1"><span><i
-          class="fas fa-vector-square"></i> Directed</span></b-form-radio>
-        <b-form-radio value="hubsize" v-b-tooltip.hover="msg.hubsize" :aria-label="msg.hubsize" tabindex="-1"><span><i
-          class="fas fa-bezier-curve"></i> Hubsize</span></b-form-radio>
-      </b-form-radio-group>
+    <SelectButton v-model="sortMethod" :options="options" optionLabel="value" dataKey="value">
+      <template #option="slotProps">
+        <i :class="slotProps.option.icon"></i> {{ slotProps.option.label }}
+      </template>
+    </SelectButton>
   </div>
 </template>
 
-<script>
-  export default {
-    name: 'GraphNodeSortMethodSelector',
-    data() {
-      return {
-        sortMethod: 'directed',
-        msg: {
-          directed: 'Directed adheres to the to and from data of the edges. A --> B so B is a level lower than A.',
-          hubsize: 'Hubsize takes the nodes with the most edges and puts them at the top. From that the rest of the hierarchy is evaluated.',
-        },
-      };
-    },
-    watch: {
-      sortMethod: function watchUpdatesToSelected() {
-        this.notifyOfChange();
-      },
-    },
-    methods: {
-      notifyOfChange() {
-        this.$emit('value-changed', this.sortMethod);
-      },
-    },
-  };
-</script>
-
 <style>
-  .deps-overlay {
-    z-index: 99;
-    position: relative;
-  }
+.deps-overlay {
+  z-index: 99;
+  position: relative;
+}
 
 </style>
 <style scoped>
-  .btn.btn-outline-hc {
-    background-color: #fff;
-  }
-
-  .btn.btn-outline-hc:hover {
-    background-color: #146c75;
-    color: #fff;
-  }
 </style>

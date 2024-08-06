@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,240 +13,206 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-/*
-Copyright 2021 SkillTree
+<script setup>
+import { onMounted, ref, watch } from 'vue'
+import CatalogService from '@/components/skills/catalog/CatalogService.js'
+import { useRoute } from 'vue-router'
+import DateCell from '@/components/utils/table/DateCell.vue'
+import Column from 'primevue/column'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import ImportedSkillInfo from '@/components/skills/catalog/ImportedSkillInfo.vue'
+import NoContent2 from '@/components/utils/NoContent2.vue'
+import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
+import ExportedSkillRemovalValidation from '@/components/skills/catalog/ExportedSkillRemovalValidation.vue'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+const route = useRoute()
+const responsive = useResponsiveBreakpoints()
+const announcer = useSkillsAnnouncer()
 
-https://www.apache.org/licenses/LICENSE-2.0
+const initialLoad = ref(true)
+const reloadData = ref(false)
+const data = ref([])
+const totalRows = ref(1)
+const pageSize = ref(5)
+const possiblePageSizes = [5, 10, 15, 25, 50]
+const currentPage = ref(1)
+const sortInfo = ref({ sortOrder: -1, sortBy: 'exportedOn' })
+const initialLoadHadData = ref(false)
+const selectedRows = ref([])
+const expandedRows = ref([])
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+onMounted(() => {
+  loadData()
+})
+
+const loadData = () => {
+  reloadData.value = true
+  const pageParams = {
+    limit: pageSize.value,
+    page: currentPage.value,
+    orderBy: sortInfo.value.sortBy,
+    ascending: sortInfo.value.sortOrder === 1
+  }
+  return CatalogService.getSkillsExportedToCatalog(route.params.projectId, pageParams).then((res) => {
+    if (res.data) {
+      data.value = res.data.map((skill) => ({ projectId: route.params.projectId, ...skill }))
+      totalRows.value = res.totalCount
+      if (totalRows.value > 0) {
+        initialLoadHadData.value = true
+      }
+    } else {
+      totalRows.value = 0
+      initialLoadHadData.value = false
+    }
+  }).finally(() => {
+    initialLoad.value = false
+    reloadData.value = false
+  })
+}
+const pageChanged = (pagingInfo) => {
+  pageSize.value = pagingInfo.rows
+  currentPage.value = pagingInfo.page + 1
+  loadData()
+}
+watch(sortInfo.value,
+  () => {
+    currentPage.value = 1
+    loadData()
+  })
+
+const removalValidation = ref({
+  show: false,
+  skillToRemove: {}
+})
+const initiateRemoveCheck = (skillToRemove) => {
+  removalValidation.value.skillToRemove = skillToRemove
+  removalValidation.value.show = true
+}
+const doRemoveSkill = () => {
+  reloadData.value = true;
+  CatalogService.removeExportedSkill(removalValidation.value.skillToRemove.projectId, removalValidation.value.skillToRemove.skillId)
+    .then(() => {
+      loadData().then(() => {
+        announcer.polite(`exported skill ${removalValidation.value.skillToRemove.skillName} has been removed from the skill catalog`)
+      });
+    });
+}
+</script>
+
 <template>
-  <div id="exportedSkillsPanel">
-    <b-card body-class="p-0">
-      <template #header>
-        <div class="h6 mb-0 font-weight-bold">Exported to Catalog</div>
+  <div>
+    <Card :pt="{ 'body': 'p-0 m-0', 'content': 'pt-0'}">
+      <template #content>
+        <skills-spinner :is-loading="initialLoad" />
+        <div v-if="!initialLoad">
+          <no-content2
+            v-if="!initialLoadHadData"
+            class="py-6"
+            message="To export to the Skills Catalog please navigate to the Skills page, then select skills to export and click on the Action button located on the top-right above the skills' table."
+            title="No skills exported to Skills Catalog"
+            data-cy="noExportedSkills"
+          />
+          <SkillsDataTable
+            tableStoredStateId="exportedSkillsTable"
+            aria-label="Exported Skills"
+            v-if="initialLoadHadData"
+            :value="data"
+            :loading="reloadData"
+            :expander="true"
+            v-model:selection="selectedRows"
+            v-model:expandedRows="expandedRows"
+            v-model:sort-field="sortInfo.sortBy"
+            v-model:sort-order="sortInfo.sortOrder"
+            stripedRows
+            paginator
+            lazy
+            :totalRecords="totalRows"
+            :rows="pageSize"
+            @page="pageChanged"
+            data-cy="exportedSkillsTable"
+            :rowsPerPageOptions="possiblePageSizes">
+            <template #header>Exported to Catalog</template>
+
+            <Column field="skillName" header="Skill" :sortable="true" :class="{'flex': responsive.md.value }">
+              <template #header>
+                <i class="fas fa-graduation-cap mr-1" aria-hidden="true"></i>
+              </template>
+              <template #body="slotProps">
+                <div :data-cy="`nameCell_${slotProps.data.skillId}`">
+                  <router-link
+                    :data-cy="`viewSkillLink_${slotProps.data.skillId}`"
+                    :to="{ name:'SkillOverview', params: { projectId: slotProps.data.projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId }}"
+                    :aria-label="`View skill ${slotProps.data.skillName} via link`">
+                    <div class="h5 d-inline-block">{{ slotProps.data.skillName }}</div>
+                  </router-link>
+
+                  <div class="mt-1">
+                    <span>Subject:</span><span class="ml-2">{{ slotProps.data.subjectName }}</span>
+                  </div>
+                  <div v-if="slotProps.data.groupName" class="mt-1">
+                    <span>Group:</span><span class="ml-2">{{ slotProps.data.groupName }}</span>
+                  </div>
+                </div>
+              </template>
+            </Column>
+            <Column field="importedProjectCount" header="Projects Imported" :sortable="true" :class="{'flex': responsive.md.value }">
+              <template #header>
+                <i class="fas fa-tasks mr-1" aria-hidden="true"></i>
+              </template>
+            </Column>
+            <Column field="exportedOn" header="Exported On" :sortable="true" :class="{'flex': responsive.md.value }">
+              <template #header>
+                <i class="fas fa-clock mr-1" aria-hidden="true"></i>
+              </template>
+              <template #body="slotProps">
+                <date-cell :value="slotProps.data.exportedOn" />
+              </template>
+            </Column>
+            <Column class="md:w-2rem" :class="{'flex': responsive.md.value }">
+              <template #header>
+                <span class="sr-only">Controls Heading - Not sortable</span>
+              </template>
+              <template #body="slotProps">
+                <SkillsButton
+                  :id="`deleteSkillButton_${slotProps.data.skillId}`"
+                  icon="fas fa-trash"
+                  @click="initiateRemoveCheck(slotProps.data)"
+                  severity="primary"
+                  outlined
+                  :data-cy="`deleteSkillButton_${slotProps.data.skillId}`"
+                  :aria-label="'delete Skill '+slotProps.data.skillName"
+                  title="Delete Skill"
+                  size="small" />
+              </template>
+            </Column>
+
+            <template #paginatorstart>
+              <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+            </template>
+            <template #expansion="slotProps">
+              <imported-skill-info :skill="slotProps.data"></imported-skill-info>
+            </template>
+            <template #empty>
+              <div class="text-center">
+                <i class="fas fa-exclamation-circle" aria-hidden="true" /> There are no records to show
+              </div>
+            </template>
+          </SkillsDataTable>
+        </div>
       </template>
-
-      <skills-b-table :options="table.options"
-                      :items="exportedSkills"
-                      tableStoredStateId="exportedSkillsTable"
-                      data-cy="exportedSkillsTable"
-                      @page-changed="pageChanged"
-                      @page-size-changed="pageSizeChanged"
-                      @sort-changed="sortTable">
-        <template #head(skillName)="data">
-          <span class="text-primary"><i
-            class="fas fa-graduation-cap skills-color-skills"/> {{ data.label }}</span>
-        </template>
-        <template #head(subjectName)="data">
-          <span class="text-primary"><i
-            class="fas fa-cubes skills-color-subjects"></i> {{ data.label }}</span>
-        </template>
-        <template #head(importedProjectCount)="data">
-          <span class="text-primary"><i
-            class="fas fa-tasks skills-color-projects"></i> {{ data.label }}</span>
-        </template>
-        <template #head(exportedOn)="data">
-          <span class="text-primary"><i
-            class="fas fa-clock skills-color-projects"></i> {{ data.label }}</span>
-        </template>
-
-        <template v-slot:cell(skillName)="data">
-          <div class="row" :data-cy="`nameCell_${data.item.skillId}`">
-            <div class="col">
-              <div>
-                <router-link :data-cy="`viewSkillLink_${data.item.skillId}`" tag="a" :to="{ name:'SkillOverview',
-                                        params: { projectId: data.item.projectId, subjectId: data.item.subjectId, skillId: data.item.skillId }}"
-                             :aria-label="`View skill ${data.item.skillName} via link`">
-                  <div class="h5 d-inline-block">{{ data.item.skillName }}</div>
-                </router-link>
-              </div>
-              <div v-if="data.item.groupName"><span class="font-italic">Group:</span> {{ data.item.groupName }}</div>
-              <div>
-                <b-button size="sm" variant="outline-info"
-                          class="mr-2 py-0 px-1 mt-1"
-                          @click="data.toggleDetails"
-                          :aria-label="`Expand details for projects that imported ${data.item.skillName}`"
-                          :data-cy="`expandDetailsBtn_${data.item.projectId}_${data.item.skillId}`">
-                  <i v-if="data.detailsShowing" class="fa fa-minus-square"/>
-                  <i v-else class="fa fa-plus-square"/>
-                  Imported Details
-                </b-button>
-              </div>
-            </div>
-            <div class="col-auto ml-auto mr-0">
-              <b-button-group size="sm" class="ml-1">
-                <b-button :id="`deleteSkillButton_${data.item.skillId}`"
-                          @click="removeExported(data.item)" variant="outline-primary"
-                          :data-cy="`deleteSkillButton_${data.item.skillId}`"
-                          :aria-label="'delete Skill '+data.item.skillName"
-                          title="Delete Skill"
-                          size="sm">
-                  <i class="text-warning fas fa-trash" aria-hidden="true"/>
-                </b-button>
-              </b-button-group>
-            </div>
-          </div>
-        </template>
-        <template v-slot:cell(subjectName)="data">
-          <div class="h5 d-inline-block">{{ data.item.subjectName }}</div>
-        </template>
-        <template v-slot:cell(importedProjectCount)="data">
-          <div class="h5 d-inline-block">{{ data.item.importedProjectCount }}</div>
-        </template>
-        <template v-slot:cell(exportedOn)="data">
-          <date-cell :value="data.value" />
-        </template>
-
-        <template #row-details="row">
-          <imported-skill-info :skill="row.item"></imported-skill-info>
-        </template>
-
-      </skills-b-table>
-    </b-card>
-
-    <removal-validation v-if="removalValidation.show" v-model="removalValidation.show" @do-remove="doRemoveExportedSkill">
-      <exported-skill-removal-validation :skill-to-remove="removalValidation.skillToRemove"/>
+    </Card>
+    <removal-validation
+      v-if="removalValidation.show"
+      v-model="removalValidation.show"
+      :item-name="removalValidation.skillToRemove.skillName"
+      item-type="skill"
+      @do-remove="doRemoveSkill">
+      <exported-skill-removal-validation :skill-to-remove="removalValidation.skillToRemove" />
     </removal-validation>
   </div>
 </template>
-
-<script>
-  import SkillsBTable from '@/components/utils/table/SkillsBTable';
-  import CatalogService from '@/components/skills/catalog/CatalogService';
-  import DateCell from '@/components/utils/table/DateCell';
-  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
-  import ExportedSkillRemovalValidation
-    from '@/components/skills/catalog/ExportedSkillRemovalValidation';
-  import ImportedSkillInfo from '@/components/skills/catalog/ImportedSkillInfo';
-
-  export default {
-    name: 'ExportedSkills',
-    components: {
-      ExportedSkillRemovalValidation,
-      RemovalValidation,
-      SkillsBTable,
-      DateCell,
-      ImportedSkillInfo,
-    },
-    data() {
-      return {
-        projectId: this.$route.params.projectId,
-        exportedSkills: [],
-        removalValidation: {
-          show: false,
-          skillToRemove: {},
-        },
-        table: {
-          options: {
-            sortBy: 'exportedOn',
-            sortDesc: true,
-            busy: true,
-            stacked: 'md',
-            tableDescription: 'Exported Skills',
-            pagination: {
-              server: true,
-              currentPage: 1,
-              totalRows: 1,
-              pageSize: 5,
-              possiblePageSizes: [5, 10, 25],
-            },
-            fields: [
-              {
-                key: 'skillName',
-                label: 'Skill',
-                sortable: true,
-                sortKey: 'skillName',
-              }, {
-                key: 'subjectName',
-                label: 'Subject',
-                sortable: true,
-                sortKey: 'subjectName',
-              }, {
-                key: 'importedProjectCount',
-                label: '# of Projects Imported',
-                sortable: true,
-                sortKey: 'importedProjectCount',
-              }, {
-                key: 'exportedOn',
-                label: 'Exported On',
-                sortable: true,
-                sortKey: 'exportedOn',
-              },
-            ],
-          },
-        },
-      };
-    },
-    mounted() {
-      this.loadExported();
-    },
-    watch: {
-      '$route.params.projectId': function watcher() {
-        this.projectId = this.$route.params.projectId;
-      },
-    },
-    methods: {
-      pageChanged(pageNum) {
-        this.table.options.pagination.currentPage = pageNum;
-        this.loadExported();
-      },
-      pageSizeChanged(newSize) {
-        this.table.options.pagination.pageSize = newSize;
-        this.loadExported();
-      },
-      sortTable(sortContext) {
-        this.table.options.sortBy = sortContext.sortBy;
-        this.table.options.sortDesc = sortContext.sortDesc;
-
-        // set to the first page
-        this.table.options.pagination.currentPage = 1;
-        this.loadExported();
-      },
-      loadExported() {
-        this.table.options.busy = true;
-        const pageParams = {
-          limit: this.table.options.pagination.pageSize,
-          ascending: !this.table.options.sortDesc,
-          page: this.table.options.pagination.currentPage,
-          orderBy: this.table.options.sortBy,
-        };
-        return CatalogService.getSkillsExportedToCatalog(this.projectId, pageParams).then((res) => {
-          if (res.data) {
-            this.exportedSkills = res.data.map((skill) => ({ projectId: this.projectId, ...skill }));
-            this.table.options.pagination.totalRows = res.totalCount;
-          } else {
-            this.exportedSkills = null;
-            this.table.options.pagination.totalRows = 0;
-          }
-        }).finally(() => {
-          this.table.options.busy = false;
-        });
-      },
-      removeExported(skill) {
-        this.removalValidation.skillToRemove = skill;
-        this.removalValidation.show = true;
-      },
-      doRemoveExportedSkill() {
-        this.table.options.busy = true;
-        CatalogService.removeExportedSkill(this.removalValidation.skillToRemove.projectId, this.removalValidation.skillToRemove.skillId)
-          .then(() => {
-            this.loadExported().then(() => {
-              this.$nextTick(() => this.$announcer.polite('exported skill has been removed from the skill catalog'));
-            });
-          });
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

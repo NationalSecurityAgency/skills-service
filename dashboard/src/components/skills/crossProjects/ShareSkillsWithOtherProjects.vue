@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,228 +13,217 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref, onMounted, computed, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import ProjectService from '@/components/projects/ProjectService'
+import SkillsService from '@/components/skills/SkillsService.js'
+import SkillsShareService from '@/components/skills/crossProjects/SkillsShareService'
+import NoContent2 from '@/components/utils/NoContent2.vue'
+import SkillsSelector from '@/components/skills/SkillsSelector.vue'
+import ProjectSelector from '@/components/skills/crossProjects/ProjectSelector.vue'
+import SharedSkillsTable from '@/components/skills/crossProjects/SharedSkillsTable.vue'
+
+const route = useRoute()
+const projectId = route.params.projectId
+const announcer = useSkillsAnnouncer()
+const communityLabels = useCommunityLabels()
+const appConfig = useAppConfig()
+
+const allProjectsConstant = 'ALL_SKILLS_PROJECTS'
+const loading = ref({
+  allSkills: true,
+  sharedSkillsInit: true,
+  sharedSkills: false,
+  projInfo: true
+})
+const restrictedUserCommunity = ref(false)
+const allSkills = ref([])
+const selectedSkill = ref(null)
+const sharedSkills = ref([])
+const selectedProject = ref(null)
+const errorMessage = ref('')
+const shareWithAllProjects = ref(false)
+
+const shareButtonEnabled = computed(() => {
+  return (selectedProject.value || shareWithAllProjects.value) && selectedSkill.value && !loading.value.sharedSkills
+})
+
+onMounted(() => {
+  loadProjectInfo()
+  loadAllSkills()
+  loadSharedSkills()
+})
+
+const loadProjectInfo = () => {
+  loading.value.projInfo = true
+  ProjectService.getProject(projectId)
+    .then((projRes) => {
+      restrictedUserCommunity.value = communityLabels.isRestrictedUserCommunity(projRes.userCommunity)
+    }).finally(() => {
+    loading.value.projInfo = false
+  })
+}
+
+const loadAllSkills = () => {
+  loading.value.allSkills = true
+  SkillsService.getProjectSkillsWithoutImportedSkills(projectId)
+    .then((skills) => {
+      allSkills.value = skills
+      loading.value.allSkills = false
+    })
+}
+
+const loadSharedSkills = () => {
+  loading.value.sharedSkills = true
+  return SkillsShareService.getSharedSkills(projectId)
+    .then((data) => {
+      sharedSkills.value = data
+      loading.value.sharedSkillsInit = false
+      loading.value.sharedSkills = false
+    })
+}
+
+const shareSkill = () => {
+  if (!doesShareAlreadyExist.value) {
+    loading.value.sharedSkills = true
+    let sharedProjectId = allProjectsConstant
+    if (!shareWithAllProjects.value) {
+      sharedProjectId = selectedProject.value.projectId
+    }
+    SkillsShareService.shareSkillToAnotherProject(projectId, selectedSkill.value.skillId, sharedProjectId)
+      .then(() => {
+        loading.value.sharedSkills = true
+        selectedProject.value = null
+        const skillId = selectedSkill.value.skillId
+        selectedSkill.value = null
+        loadSharedSkills().then(() => {
+          const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId
+          announcer.assertive(`Skill with id of ${skillId} was shared with ${sharedWith}`)
+        })
+      })
+  }
+}
+
+const doesShareAlreadyExist = computed(() => {
+  if(!selectedSkill.value || (!selectedProject.value && !shareWithAllProjects.value)) {
+    return false;
+  }
+  const alreadyExist = sharedSkills.value.find((entry) => entry.skillId === selectedSkill.value.skillId && (!entry.projectId || shareWithAllProjects.value || entry.projectId === selectedProject.value.projectId))
+  if (alreadyExist) {
+    if (alreadyExist.sharedWithAllProjects) {
+      errorMessage.value = `Skill <strong>[${selectedSkill.value.name}]</strong> is already shared to <strong>[All Projects]</strong>.`
+    } else {
+      errorMessage.value = `Skill <strong>[${selectedSkill.value.name}]</strong> is already shared to project <strong>[${alreadyExist.projectName}]</strong>.`
+    }
+  }
+  return alreadyExist
+});
+
+const deleteSharedSkill = (itemToRemove) => {
+  loading.value.sharedSkills = true
+  let sharedProjectId = allProjectsConstant
+  if (!itemToRemove.sharedWithAllProjects) {
+    sharedProjectId = itemToRemove.projectId
+  }
+  SkillsShareService.deleteSkillShare(projectId, itemToRemove.skillId, sharedProjectId)
+    .then(() => {
+      loadSharedSkills()
+    }).finally(() => {
+    const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId
+    announcer.assertive(`Removed shared skill with id ${itemToRemove.skillId} from ${sharedWith}`)
+  })
+}
+
+const onSelectedProject = (item) => {
+  selectedProject.value = item
+}
+
+const onUnSelectedProject = () => {
+  selectedProject.value = null
+}
+
+const onSelectedSkill = (item) => {
+  selectedSkill.value = item
+}
+
+const onShareWithAllProjects = (checked) => {
+  if (checked) {
+    selectedProject.value = null
+  }
+}
+</script>
+
 <template>
-  <metrics-card id="shared-skills-with-others-panel" title="Share skills from this project with other projects"
-                :no-padding="true" data-cy="shareSkillsWithOtherProjectsCard">
-      <loading-container :is-loading="loading.sharedSkillsInit || loading.allSkills || loading.projInfo">
-        <no-content2 v-if="restrictedUserCommunity" title="Cannot Be Added" icon="fas fa-shield-alt"
-                     class="my-5" data-cy="restrictedUserCommunityWarning">
-          This project's access is
-          restricted to <b class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users
-          only and its skills <b class="text-primary">cannot</b> be added as dependencies in other Projects.
-        </no-content2>
-        <div v-if="!restrictedUserCommunity">
-          <div class="row px-3 py-1">
-            <div class="col-lg mt-2">
-              <skills-selector2 :options="allSkills" v-on:added="onSelectedSkill" v-on:removed="onDeselectedSkill"
-                                :selected="selectedSkills" :onlySingleSelectedValue="true"
-                                data-cy="skillSelector"></skills-selector2>
+  <Card class="mb-3"
+        :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"
+        data-cy="shareSkillsWithOtherProjectsCard">
+    <template #header>
+      <SkillsCardHeader title="Share skills from this project with other projects"></SkillsCardHeader>
+    </template>
+    <template #content>
+      <no-content2 v-if="restrictedUserCommunity" title="Cannot Be Added" icon="fas fa-shield-alt"
+                   class="my-5 mx-4" data-cy="restrictedUserCommunityWarning">
+        This project's access is
+        restricted to <b class="text-primary">{{ appConfig.userCommunityRestrictedDescriptor }}</b> users
+        only and its skills <b class="text-primary">cannot</b> be added as dependencies in other Projects.
+      </no-content2>
+      <div v-if="!restrictedUserCommunity">
+        <div class="p-3">
+          <div class="flex gap-4 flex-wrap flex-column lg:flex-row">
+            <div class="flex flex-1 ">
+              <skills-selector :options="allSkills"
+                               v-on:added="onSelectedSkill"
+                               placeholder="Select Skill"
+                               placeholder-icon="fas fa-search"
+                               data-cy="skillSelector" />
             </div>
-            <div class="col-lg mt-2">
+            <div class="flex flex-1">
               <project-selector :project-id="projectId" :selected="selectedProject"
                                 v-on:selected="onSelectedProject"
                                 v-on:unselected="onUnSelectedProject"
                                 :only-single-selected-value="true"
+                                :showClear="true"
                                 :disabled="shareWithAllProjects">
 
               </project-selector>
-              <b-form-checkbox v-model="shareWithAllProjects" @change="onShareWithAllProjects " class="mt-2"
-                               data-cy="shareWithAllProjectsCheckbox">
-                <small>Share With All Projects </small><inline-help msg="Select this checkbox to share the skill with ALL projects."/>
-              </b-form-checkbox>
             </div>
           </div>
 
-          <div class="row px-3">
-            <div class="col text-center text-sm-left">
-              <button class="btn btn-outline-hc h-100" v-on:click="shareSkill"
+          <div class="flex gap-4 mt-2">
+            <div class="flex flex-1 justify-content-end">
+              <Checkbox v-model="shareWithAllProjects" inputId="shareToggle" @change="onShareWithAllProjects" :disabled="selectedProject !== null"
+                        :binary="true" data-cy="shareWithAllProjectsCheckbox"></Checkbox>
+              <label for="shareToggle" class="ml-1">Share With All Projects</label>
+
+              <Button size="small" v-on:click="shareSkill" class="ml-4"
                       aria-label="Share skill with another project"
-                      :disabled="!shareButtonEnabled" data-cy="shareButton">
+                      :disabled="!shareButtonEnabled || doesShareAlreadyExist" data-cy="shareButton">
                 <i class="fas fa-share-alt mr-1"></i><span class="text-truncate">Share</span>
-              </button>
+              </Button>
             </div>
           </div>
-
-          <b-alert v-if="displayError" variant="danger" class="mt-2" show dismissible>
-            <i class="fa fa-exclamation-circle"></i> <span v-html="errorMessage"></span>
-          </b-alert>
-
-          <loading-container :is-loading="loading.sharedSkills">
-          <div v-if="sharedSkills && sharedSkills.length > 0" class="my-4">
-            <shared-skills-table :shared-skills="sharedSkills"
-                                 v-on:skill-removed="deleteSharedSkill"></shared-skills-table>
-          </div>
-          <div v-else>
-            <no-content2 title="Not Selected Yet..." icon="fas fa-share-alt" class="my-5"
-                         message="To make your project's skills eligible please select a skill and then the project that you want to share this skill with."/>
-          </div>
-        </loading-container>
         </div>
-      </loading-container>
-  </metrics-card>
+        <Message v-if="doesShareAlreadyExist" severity="error">
+          <span v-html="errorMessage"></span>
+        </Message>
+
+        <div v-if="sharedSkills && sharedSkills.length > 0" class="my-4">
+          <shared-skills-table :shared-skills="sharedSkills"
+                               v-on:skill-removed="deleteSharedSkill"></shared-skills-table>
+        </div>
+        <div v-else>
+          <no-content2 title="Not Selected Yet..." icon="fas fa-share-alt" class="p-5"
+                       message="To make your project's skills eligible please select a skill and then the project that you want to share this skill with." />
+        </div>
+      </div>
+    </template>
+  </Card>
 </template>
 
-<script>
-  import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
-  import SkillsSelector2 from '../SkillsSelector2';
-  import LoadingContainer from '../../utils/LoadingContainer';
-  import SkillsService from '../SkillsService';
-  import ProjectSelector from './ProjectSelector';
-  import SharedSkillsTable from './SharedSkillsTable';
-  import SkillsShareService from './SkillsShareService';
-  import NoContent2 from '../../utils/NoContent2';
-  import InlineHelp from '../../utils/InlineHelp';
-  import MetricsCard from '../../metrics/utils/MetricsCard';
-  import ProjectService from '../../projects/ProjectService';
-
-  const allProjectsConstant = 'ALL_SKILLS_PROJECTS';
-
-  export default {
-    name: 'ShareSkillsWithOtherProjects',
-    mixins: [CommunityLabelsMixin],
-    props: ['projectId'],
-    components: {
-      MetricsCard,
-      NoContent2,
-      SharedSkillsTable,
-      ProjectSelector,
-      LoadingContainer,
-      SkillsSelector2,
-      InlineHelp,
-    },
-    data() {
-      return {
-        loading: {
-          allSkills: true,
-          sharedSkillsInit: true,
-          sharedSkills: false,
-          projInfo: true,
-        },
-        restrictedUserCommunity: false,
-        isLoading: true,
-        allSkills: [],
-        selectedSkills: [],
-        sharedSkills: [],
-        selectedProject: null,
-        displayError: false,
-        errorMessage: '',
-        shareWithAllProjects: false,
-      };
-    },
-    mounted() {
-      this.loadProjectInfo();
-      this.loadAllSkills();
-      this.loadSharedSkills();
-    },
-    computed: {
-      shareButtonEnabled() {
-        return (this.selectedProject || this.shareWithAllProjects) && this.selectedSkills && this.selectedSkills.length > 0 && !this.loading.sharedSkills;
-      },
-    },
-    methods: {
-      loadProjectInfo() {
-        this.loading.projInfo = true;
-        ProjectService.getProject(this.projectId)
-          .then((projRes) => {
-            this.restrictedUserCommunity = this.isRestrictedUserCommunity(projRes.userCommunity);
-          }).finally(() => {
-            this.loading.projInfo = false;
-          });
-      },
-      loadAllSkills() {
-        this.loading.allSkills = true;
-        SkillsService.getProjectSkillsWithoutImportedSkills(this.projectId)
-          .then((skills) => {
-            this.allSkills = skills;
-            this.loading.allSkills = false;
-          });
-      },
-      loadSharedSkills() {
-        this.loading.sharedSkills = true;
-        return SkillsShareService.getSharedSkills(this.projectId)
-          .then((data) => {
-            this.sharedSkills = data;
-            this.loading.sharedSkillsInit = false;
-            this.loading.sharedSkills = false;
-          });
-      },
-
-      shareSkill() {
-        if (this.doesShareAlreadyExist()) {
-          this.displayError = true;
-        } else {
-          this.displayError = false;
-          this.loading.sharedSkills = true;
-          const selectedSkill = this.selectedSkills[0];
-          let sharedProjectId = allProjectsConstant;
-          if (!this.shareWithAllProjects) {
-            sharedProjectId = this.selectedProject.projectId;
-          }
-          SkillsShareService.shareSkillToAnotherProject(this.projectId, selectedSkill.skillId, sharedProjectId)
-            .then(() => {
-              this.loading.sharedSkills = true;
-              this.selectedProject = null;
-              this.selectedSkills = [];
-              this.loadSharedSkills().then(() => {
-                const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId;
-                this.$nextTick(() => this.$announcer.assertive(`Skill with id of ${selectedSkill.skillId} was shared with ${sharedWith}`));
-              });
-            });
-        }
-      },
-      doesShareAlreadyExist() {
-        const selectedSkill = this.selectedSkills[0];
-        const alreadyExist = this.sharedSkills.find((entry) => entry.skillId === selectedSkill.skillId && (!entry.projectId || this.shareWithAllProjects || entry.projectId === this.selectedProject.projectId));
-        if (alreadyExist) {
-          if (alreadyExist.sharedWithAllProjects) {
-            this.errorMessage = `Skill <strong>[${selectedSkill.name}]</strong> is already shared to <strong>[All Projects]</strong>.`;
-          } else {
-            this.errorMessage = `Skill <strong>[${selectedSkill.name}]</strong> is already shared to project <strong>[${alreadyExist.projectName}]</strong>.`;
-          }
-        }
-        return alreadyExist;
-      },
-      deleteSharedSkill(itemToRemove) {
-        this.loading.sharedSkills = true;
-        let sharedProjectId = allProjectsConstant;
-        if (!itemToRemove.sharedWithAllProjects) {
-          sharedProjectId = itemToRemove.projectId;
-        }
-        SkillsShareService.deleteSkillShare(this.projectId, itemToRemove.skillId, sharedProjectId)
-          .then(() => {
-            this.loadSharedSkills();
-          }).finally(() => {
-            const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId;
-            this.$nextTick(() => this.$announcer.assertive(`Removed shared skill ${itemToRemove.skillId} from ${sharedWith}`));
-          });
-      },
-      onSelectedProject(item) {
-        this.displayError = false;
-        this.selectedProject = item;
-      },
-      onUnSelectedProject() {
-        this.displayError = false;
-        this.selectedProject = null;
-      },
-      onSelectedSkill(item) {
-        this.displayError = false;
-        this.selectedSkills = [item];
-      },
-      onDeselectedSkill() {
-        this.displayError = false;
-        this.selectedSkills = [];
-      },
-      onShareWithAllProjects(checked) {
-        this.displayError = false;
-        if (checked) {
-          this.selectedProject = null;
-        }
-      },
-    },
-
-  };
-</script>
-
-<style>
+<style scoped>
 
 </style>

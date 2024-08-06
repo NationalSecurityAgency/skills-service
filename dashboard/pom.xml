@@ -11,106 +11,178 @@
 
     <artifactId>dashboard</artifactId>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <frontend-maven-plugin.version>1.13.4</frontend-maven-plugin.version>
-  </properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <frontend-maven-plugin.version>1.13.4</frontend-maven-plugin.version>
+    </properties>
 
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-jar</id>
-            <phase>none</phase>
-            <configuration>
-              <finalName>unwanted</finalName>
-              <classifier>unwanted</classifier>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-install-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-install</id>
-            <phase>none</phase>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>none</phase>
+                        <configuration>
+                            <finalName>unwanted</finalName>
+                            <classifier>unwanted</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-install-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-install</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--      <plugin>-->
+            <!--        <groupId>org.apache.maven.plugins</groupId>-->
+            <!--        <artifactId>maven-deploy-plugin</artifactId>-->
+            <!--        <configuration>-->
+            <!--          <skip>true</skip>-->
+            <!--        </configuration>-->
+            <!--      </plugin>-->
 
-      <plugin>
-        <groupId>com.github.eirslett</groupId>
-        <artifactId>frontend-maven-plugin</artifactId>
-        <version>${frontend-maven-plugin.version}</version>
-        <configuration>
-          <installDirectory>target</installDirectory>
-        </configuration>
-        <executions>
-          <execution>
-            <id>install node and npm</id>
-            <goals>
-              <goal>install-node-and-npm</goal>
-            </goals>
-            <configuration>
-              <nodeVersion>${node.version}</nodeVersion>
-            </configuration>
-          </execution>
-          <execution>
-            <id>npm install</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <phase>generate-resources</phase>
-            <configuration>
-              <arguments>install</arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>npm run build</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <configuration>
-              <arguments>run build</arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>npm run getDashboardVersion</id>
-            <goals>
-              <goal>npm</goal>
-            </goals>
-            <configuration>
-              <arguments>run getDashboardVersion</arguments>
-            </configuration>
-          </execution>
+            <!--      <plugin>-->
+            <!--        <groupId>com.github.eirslett</groupId>-->
+            <!--        <artifactId>frontend-maven-plugin</artifactId>-->
+            <!--        <version>${frontend-maven-plugin.version}</version>-->
+            <!--        <configuration>-->
+            <!--          <installDirectory>target</installDirectory>-->
+            <!--        </configuration>-->
+            <!--        <executions>-->
+            <!--          <execution>-->
+            <!--            <id>install node and npm</id>-->
+            <!--            <goals>-->
+            <!--              <goal>install-node-and-npm</goal>-->
+            <!--            </goals>-->
+            <!--            <configuration>-->
+            <!--              <nodeVersion>${node.version}</nodeVersion>-->
+            <!--            </configuration>-->
+            <!--          </execution>-->
+            <!--          <execution>-->
+            <!--            <id>npm install</id>-->
+            <!--            <goals>-->
+            <!--              <goal>npm</goal>-->
+            <!--            </goals>-->
+            <!--            <phase>generate-resources</phase>-->
+            <!--            <configuration>-->
+            <!--              <arguments>install</arguments>-->
+            <!--            </configuration>-->
+            <!--          </execution>-->
+            <!--          <execution>-->
+            <!--            <id>npm run build</id>-->
+            <!--            <goals>-->
+            <!--              <goal>npm</goal>-->
+            <!--            </goals>-->
+            <!--            <configuration>-->
+            <!--              <arguments>run build</arguments>-->
+            <!--            </configuration>-->
+            <!--          </execution>-->
+            <!--          <execution>-->
+            <!--            <id>npm run getDashboardVersion</id>-->
+            <!--            <goals>-->
+            <!--              <goal>npm</goal>-->
+            <!--            </goals>-->
+            <!--            <configuration>-->
+            <!--              <arguments>run getDashboardVersion</arguments>-->
+            <!--            </configuration>-->
+            <!--          </execution>-->
 
-           <!--TODO: uncomment when we have at least 1 unit test-->
-          <!--<execution>-->
-            <!--<id>npm run test</id>-->
-            <!--<goals>-->
-              <!--<goal>npm</goal>-->
-            <!--</goals>-->
-            <!--<phase>test</phase>-->
-            <!--<configuration>-->
-              <!--<arguments>run unit</arguments>-->
-            <!--</configuration>-->
-          <!--</execution>-->
-        </executions>
+            <!--           &lt;!&ndash;TODO: uncomment when we have at least 1 unit test&ndash;&gt;-->
+            <!--          &lt;!&ndash;<execution>&ndash;&gt;-->
+            <!--            &lt;!&ndash;<id>npm run test</id>&ndash;&gt;-->
+            <!--            &lt;!&ndash;<goals>&ndash;&gt;-->
+            <!--              &lt;!&ndash;<goal>npm</goal>&ndash;&gt;-->
+            <!--            &lt;!&ndash;</goals>&ndash;&gt;-->
+            <!--            &lt;!&ndash;<phase>test</phase>&ndash;&gt;-->
+            <!--            &lt;!&ndash;<configuration>&ndash;&gt;-->
+            <!--              &lt;!&ndash;<arguments>run unit</arguments>&ndash;&gt;-->
+            <!--            &lt;!&ndash;</configuration>&ndash;&gt;-->
+            <!--          &lt;!&ndash;</execution>&ndash;&gt;-->
+            <!--        </executions>-->
 
-      </plugin>
-    </plugins>
-  </build>
+            <!--      </plugin>-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>exec-npm-install</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>npm</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>build</argument>
+                            </arguments>
+                            <workingDirectory>${basedir}</workingDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!--                mvn com.mycila:license-maven-plugin:3.0:check
+                                    mvn com.mycila:license-maven-plugin:3.0:format-->
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>3.0</version>
+
+                <configuration>
+                    <header>${basedir}/../license-add/LICENSE-HEADER.txt</header>
+                    <validHeaders>
+                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2020.txt</validHeader>
+                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2021.txt</validHeader>
+                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2022.txt</validHeader>
+                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2023.txt</validHeader>
+                    </validHeaders>
+                    <headerDefinitions>
+                        <headerDefinition>vue-header-style.xml</headerDefinition>
+                    </headerDefinitions>
+                    <mapping>
+                        <vue>VUE_STYLE</vue>
+                        <scss>JAVADOC_STYLE</scss>
+                    </mapping>
+                    <excludes>
+                        <exclude>**/*.xml</exclude>
+                        <exclude>**/*.jks</exclude>
+                        <exclude>**/*.ftl</exclude>
+                        <exclude>**/*.mp4</exclude>
+                        <exclude>**/*.webm</exclude>
+                        <exclude>**/*.woff2</exclude>
+                        <exclude>src/test/resources/certs/*.*</exclude>
+                        <exclude>src/main/resources/public/**</exclude>
+                        <exclude>src/main/resources/templates/**</exclude>
+                        <exclude>**/license/*.properties</exclude>
+                        <exclude>**/src/main/resources/client-version</exclude>
+                        <exclude>dist/**</exclude>
+                        <exclude>node_modules/**</exclude>
+                        <exclude>.eslintrc.cjs</exclude>
+                        <exclude>**/theme-overrides.scss</exclude>
+                        <exclude>**/theme.css</exclude>
+                        <exclude>**/theme-append.css</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

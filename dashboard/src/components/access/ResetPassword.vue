@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,146 +13,132 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useForm } from 'vee-validate';
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
+import * as yup from 'yup';
+import { string } from 'yup';
+import Logo1 from '@/components/brand/Logo1.vue';
+import AccessService from '@/components/access/AccessService.js';
+
+const route = useRoute()
+const router = useRouter()
+const appConfig = useAppConfig()
+
+const resetToken = ref(route.params.resetToken);
+const resetInProgress = ref(false);
+const resetFailed = ref(false);
+const resetSuccessful = ref(false);
+const remoteError = ref(null);
+
+const changePassword = (email, password) => {
+  resetInProgress.value = true;
+  const reset = { resetToken: resetToken.value, userId: email, password: password };
+
+  resetFailed.value = false;
+  resetSuccessful.value = false;
+  remoteError.value = null;
+
+  AccessService.resetPassword(reset).then(() => {
+    resetInProgress.value = false;
+    router.push({ name: 'ResetConfirmation' });
+  }).catch((err) => {
+    if (err && err.response && err.response.data && err.response.data.explanation) {
+      remoteError.value = err.response.data.explanation;
+    } else {
+      remoteError.value = `Password reset failed due to ${err.response.status}`;
+    }
+    resetFailed.value = true;
+    resetInProgress.value = false;
+  });
+};
+
+const schema = yup.object().shape({
+  email: string().required().email().min(appConfig.minUsernameLength).label('Email Address'),
+  password: string().required().min(appConfig.minPasswordLength).max(appConfig.maxPasswordLength).label('Password'),
+  passwordConfirmation: string().required().oneOf([yup.ref('password')], 'Passwords must match').label('Confirm Password'),
+})
+
+const { values, meta, handleSubmit, validate, errors } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    email: '',
+    password: '',
+    passwordConfirmation: '',
+  }
+})
+const onSubmit = handleSubmit((values) => {
+  changePassword(values.email, values.password);
+});
+</script>
+
 <template>
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-6 mt-3">
-        <div class="text-center mt-5">
-          <i class="fa fa-users fa-4x text-secondary"></i>
-          <div class="h2 mt-4 text-info">
-            <span>Reset Account Password</span>
-          </div>
+  <div>
+    <div class="grid justify-content-center text-center">
+      <div class="col md:col-8 lg:col-7 xl:col-4 mt-3" style="min-width: 20rem;">
+        <div class="mt-5">
+          <logo1 />
+          <div class="text-3xl mt-4 text-primary">Reset Password For SkillTree Dashboard</div>
         </div>
-        <ValidationObserver ref="resetForm" v-slot="{invalid, handleSubmit}" slim>
-          <form @submit.prevent="handleSubmit(changePassword)">
-            <div class="card">
-              <div class="card-body p-4">
-                <div class="form-group">
-                  <label for="email" class="text-secondary font-weight-bold">* Email</label>
-                  <ValidationProvider name="Email" :debounce=500 rules="required|email" v-slot="{errors}">
-                    <input class="form-control" type="text" v-model="resetFields.email" id="email" :disabled="resetInProgress"
-                           name="email" data-cy="resetPasswordEmail" aria-required="true"
-                           :aria-invalid="errors && errors.length > 0"
-                           aria-errormessage="emailError"
-                           aria-describedby="emailError"/>
-                    <small id="emailError" role="alert" class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
-                  </ValidationProvider>
-                </div>
-                <div class="form-group">
-                  <label for="password" class="text-secondary font-weight-bold">* New Password</label>
-                  <ValidationProvider vid="password" name="New Password" :debounce=500 rules="required|minPasswordLength|maxPasswordLength" v-slot="{errors}">
-                    <input class="form-control" type="password" v-model="resetFields.password" id="password" :disabled="resetInProgress"
-                           name="password" data-cy="resetPasswordNewPassword" aria-required="true"
-                           :aria-invalid="errors && errors.length > 0"
-                           aria-errormessage="passwordError"
-                           aria-describedby="passwordError"/>
-                    <small id="passwordError" role="alert" class="form-text text-danger" v-show="errors[0]">{{ errors[0] }}</small>
-                  </ValidationProvider>
-                </div>
-                <div class="form-group">
-                  <label for="password_confirmation" class="text-secondary font-weight-bold">* Confirm New Password</label>
-                  <ValidationProvider name="Confirm New Password" :debounce=500 rules="required|confirmed:password" v-slot="{errors}">
-                    <input class="form-control" type="password" v-model="passwordConfirmation" id="password_confirmation" :disabled="resetInProgress"
-                           name="password_confirmation" data-cy="resetPasswordConfirm" aria-required="true"
-                           :aria-invalid="errors && errors.length > 0"
-                           aria-errormessage="passwordConfirmError"
-                           aria-describedby="passwordConfirmError"/>
-                    <small id="passwordConfirmError" role="alert" class="form-text text-danger" v-show="errors[0]">{{ errors[0]}}</small>
-                  </ValidationProvider>
-                </div>
-                <small class="text-danger" v-if="resetFailed" data-cy="resetError">{{remoteError}}</small>
-                <div class="field is-grouped">
-                  <div class="control">
-                    <button type="submit" class="btn btn-outline-hc" :disabled="invalid || missingRequiredValues() || resetInProgress || remoteError" data-cy="resetPasswordSubmit">
-                      Reset Password <i v-if="!resetInProgress" class="fas fa-arrow-circle-right" aria-hidden="true"/>
-                      <b-spinner v-if="resetInProgress" label="Loading..." style="width: 1rem; height: 1rem;" variant="primary"/>
-                    </button>
-                  </div>
-                </div>
+        <Card class="mt-3 text-left">
+          <template #content>
+            <form @submit="onSubmit">
+              <div class="w-full">
+                <SkillsTextInput
+                    label="Email Address"
+                    size="small"
+                    autocomplete="username"
+                    :is-required="true"
+                    :disabled="resetInProgress"
+                    @keyup.enter="onSubmit"
+                    placeholder="Enter email"
+                    data-cy="resetPasswordEmail"
+                    id="email"
+                    name="email"/>
+                <SkillsTextInput
+                    label="New Password"
+                    size="small"
+                    type="password"
+                    autocomplete="new-password"
+                    :is-required="true"
+                    :disabled="resetInProgress"
+                    @keyup.enter="onSubmit"
+                    placeholder="Enter new password"
+                    data-cy="resetPasswordNewPassword"
+                    id="password"
+                    name="password"/>
+                <SkillsTextInput
+                    label="Confirm New Password"
+                    size="small"
+                    type="password"
+                    autocomplete="new-password"
+                    :is-required="true"
+                    :disabled="resetInProgress"
+                    @keyup.enter="onSubmit"
+                    placeholder="Confirm new password"
+                    data-cy="resetPasswordConfirm"
+                    id="passwordConfirmation"
+                    name="passwordConfirmation"/>
               </div>
-            </div>
-          </form>
-        </ValidationObserver>
+              <small class="text-danger text-red-500" v-if="remoteError" data-cy="resetError" role="alert">{{ remoteError }}</small>
+              <div class="flex justify-content-end mt-2">
+                <SkillsButton variant="outline-success"
+                              type="submit"
+                              label="Reset Password"
+                              icon="fas fa-arrow-circle-right"
+                              :disabled="!meta.valid || resetInProgress || remoteError"
+                              data-cy="resetPasswordSubmit">
+                </SkillsButton>
+              </div>
+            </form>
+          </template>
+        </Card>
       </div>
     </div>
   </div>
 </template>
-
-<script>
-  import { extend } from 'vee-validate';
-  import { required, email, confirmed } from 'vee-validate/dist/rules';
-  import AccessService from './AccessService';
-
-  extend('required', required);
-  extend('email', email);
-  extend('confirmed', confirmed);
-
-  extend('uniqueEmail', {
-    message: 'The email address is already used for another account.',
-    validate(value) {
-      return AccessService.userWithEmailExists(value);
-    },
-  });
-
-  export default {
-    name: 'RequestAccount',
-    props: {
-      resetToken: {
-        type: String,
-        default: '',
-      },
-    },
-    data() {
-      return {
-        resetFields: {
-          email: '',
-          password: '',
-        },
-        resetInProgress: false,
-        resetFailed: false,
-        resetSuccessful: false,
-        remoteError: null,
-        passwordConfirmation: '',
-      };
-    },
-    watch: {
-      resetFields: {
-        deep: true,
-        handler() {
-          if (this.remoteError) {
-            this.remoteError = '';
-          }
-        },
-      },
-    },
-    methods: {
-      changePassword() {
-        this.resetInProgress = true;
-        const reset = { resetToken: this.resetToken, userId: this.resetFields.email, password: this.resetFields.password };
-
-        this.resetFailed = false;
-        this.resetSuccessful = false;
-        this.remoteError = null;
-
-        AccessService.resetPassword(reset).then(() => {
-          this.resetInProgress = false;
-          this.$router.push({ name: 'ResetConfirmation', params: { countDown: 10 } });
-        }).catch((err) => {
-          if (err && err.response && err.response.data && err.response.data.explanation) {
-            this.remoteError = err.response.data.explanation;
-          } else {
-            this.remoteError = `Password reset failed due to ${err.response.status}`;
-          }
-          this.resetFailed = true;
-          this.resetInProgress = false;
-        });
-      },
-      missingRequiredValues() {
-        return !this.resetFields.email || !this.resetFields.password;
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

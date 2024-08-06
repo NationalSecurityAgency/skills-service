@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,20 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+defineProps(['level']);
+</script>
+
 <template>
   <div>
-    <b-badge v-if="level <= 2" variant="warning">Level {{ level }}</b-badge>
-    <b-badge v-if="level > 2 && level <=4" variant="info">Level {{ level }}</b-badge>
-    <b-badge v-if="level >= 5" variant="success">Level {{ level }}</b-badge>
+    <Badge v-if="level <= 2" severity="warning">Level {{ level }}</Badge>
+    <Badge v-if="level > 2 && level <=4" severity="info">Level {{ level }}</Badge>
+    <Badge v-if="level >= 5" severity="success">Level {{ level }}</Badge>
   </div>
 </template>
-
-<script>
-  export default {
-    name: 'LevelBadge',
-    props: ['level'],
-  };
-</script>
 
 <style scoped>
 

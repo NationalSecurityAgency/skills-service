@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,75 +13,63 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <div data-cy="showMoreText" class="text-break" :class="{'d-inline-block' : isInline}">
-    <span>
-      <span v-if="containsHtml" v-html="toDisplay"></span><span v-else data-cy="smtText">{{toDisplay}}</span>
-      <b-link v-if="truncate" size="xs" variant="outline-info"
-                class=""
-                @click="displayFullText = !displayFullText"
-                aria-label="Show/Hide truncated text"
-                data-cy="showMoreOrLessBtn">
-        <small v-if="displayFullText" data-cy="showLess"> &lt;&lt; less</small>
-        <small v-else data-cy="showMore"><em>... &gt;&gt; more</em></small>
-      </b-link>
-    </span>
-  </div>
+<script setup>
+import { ref, onMounted, computed } from 'vue';
 
-</template>
+const props = defineProps({
+  text: {
+    type: String,
+    required: true,
+  },
+  limit: {
+    type: Number,
+    required: false,
+    default: 50,
+  },
+  containsHtml: {
+    type: Boolean,
+    required: false,
+  },
+  isInline: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+});
 
-<script>
-  export default {
-    name: 'ShowMore',
-    props: {
-      text: {
-        type: String,
-        required: true,
-      },
-      limit: {
-        type: Number,
-        required: false,
-        default: 50,
-      },
-      containsHtml: {
-        type: Boolean,
-        required: false,
-      },
-      isInline: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-    },
-    data() {
-      return {
-        slop: 15,
-        displayFullText: false,
-      };
-    },
-    mounted() {
-      this.displayFullText = this.text.length < this.limit + this.slop;
-    },
-    computed: {
-      truncate() {
-        return this.text.length >= this.limit + this.slop;
-      },
-      toDisplay() {
-        if (this.displayFullText) {
-          return `${this.text}`;
-        }
-        return `${this.text.substring(0, this.limit)}`;
-      },
-    },
-  };
+let slop = ref(15);
+let displayFullText = ref(false);
+
+onMounted(() => {
+  displayFullText.value = props.text.length < props.limit + slop.value;
+});
+
+const truncate = computed(() => {
+  return props.text.length >= props.limit + slop.value;
+});
+
+const toDisplay = computed(() => {
+  if (displayFullText.value) {
+    return `${props.text}`;
+  }
+  return `${props.text.substring(0, props.limit)}`;
+});
 </script>
 
-<style scoped>
-  .btn-group-xs > .btn,
-  .btn-xs {
-    padding : .25rem .4rem;
-    font-size : .875rem;
-    line-height : .5;
-    border-radius: .2rem;
-  }
-</style>
+<template>
+  <div data-cy="showMoreText" class="text-break" :class="{'inline-block' : isInline}">
+    <span>
+      <span v-if="containsHtml" v-html="toDisplay"></span><span v-else data-cy="smtText">{{toDisplay}}</span>
+      <a v-if="truncate" size="xs" variant="outline-info"
+              class=""
+              @click="displayFullText = !displayFullText"
+              aria-label="Show/Hide truncated text"
+              data-cy="showMoreOrLessBtn">
+        <small v-if="displayFullText" data-cy="showLess"> &lt;&lt; less</small>
+        <small v-else data-cy="showMore"><em>... &gt;&gt; more</em></small>
+      </a>
+    </span>
+  </div>
+</template>
+
+<style scoped></style>

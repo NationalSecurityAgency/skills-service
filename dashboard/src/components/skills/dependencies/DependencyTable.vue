@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,143 +13,140 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <metrics-card id="learning-path-table" title="Learning Path Routes"
-                :no-padding="true" data-cy="dependencyTable">
-    <loading-container :is-loading="isLoading">
-        <div v-if="!isLoading && !isProcessing && learningPaths.length > 0" class="my-4">
-          <skills-b-table v-if="!isProcessing" :options="table.options" :items="learningPaths" data-cy="learningPathTable" tableStoredStateId="learningPathTable">
-            <template v-slot:cell(fromItem)="data">
-              <a :href="getUrl(data.item.fromNode)">{{ data.item.fromItem }}</a>
-            </template>
-            <template v-slot:cell(toItem)="data">
-              <a :href="getUrl(data.item.toNode)">{{ data.item.toItem }}</a>
-            </template>
-            <template v-slot:cell(edit)="data">
-              <b-button @click="removeLearningPath(data)"
-                        variant="outline-info" size="sm" class="text-info"
-                        :aria-label="`Remove learning path route of ${data.item.fromItem} to ${data.item.toItem}`"
-                        data-cy="sharedSkillsTable-removeBtn"><i class="fa fa-trash"/></b-button>
-            </template>
-          </skills-b-table>
-        </div>
-        <div v-else>
-          <no-content2 title="No Learning Paths Yet..." icon="fas fa-share-alt" class="my-5"
-                       message="Add a path between a Skill/Badge and another Skill/Badge"/>
-        </div>
-    </loading-container>
-  </metrics-card>
-</template>
+<script setup>
+import {computed, nextTick, onMounted, ref} from 'vue'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import SkillsService from '@/components/skills/SkillsService'
+import NoContent2 from '@/components/utils/NoContent2.vue'
+import Column from 'primevue/column'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
-<script>
-  import SkillsService from '@/components/skills/SkillsService';
-  import MsgBoxMixin from '@/components/utils/modal/MsgBoxMixin';
-  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
-  import LoadingContainer from '../../utils/LoadingContainer';
-  import NoContent2 from '../../utils/NoContent2';
-  import MetricsCard from '../../metrics/utils/MetricsCard';
-  import SkillsBTable from '../../utils/table/SkillsBTable';
+const dialogMessages = useDialogMessages()
+const projConfig = useProjConfig();
+const props = defineProps(['isLoading', 'data'])
+const emit = defineEmits(['update'])
+const announcer = useSkillsAnnouncer()
 
-  export default {
-    name: 'DependencyTable',
-    mixins: [MsgBoxMixin, ProjConfigMixin],
-    props: ['isLoading', 'data'],
-    components: {
-      MetricsCard,
-      NoContent2,
-      LoadingContainer,
-      SkillsBTable,
-    },
-    data() {
-      const fields = [
-        {
-          key: 'fromItem',
-          label: 'From',
-          sortable: true,
-        },
-        {
-          key: 'toItem',
-          label: 'To',
-          sortable: true,
-        },
-      ];
-      if (!this.isReadOnlyProjMethod()) {
-        fields.push({
-          key: 'edit',
-          label: 'Remove',
-          sortable: false,
-        });
-      }
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
-      return {
-        learningPaths: [],
-        isProcessing: true,
-        table: {
-          options: {
-            busy: false,
-            bordered: false,
-            outlined: true,
-            stacked: 'md',
-            fields,
-            pagination: {
-              server: false,
-              currentPage: 1,
-              totalRows: 1,
-              pageSize: 5,
-              possiblePageSizes: [5, 10, 15, 20],
-            },
-          },
-        },
-      };
-    },
-    mounted() {
-      if (this.data && this.data.edges && this.data.edges.length > 0) {
-        const { nodes, edges } = this.data;
+const learningPaths = ref([])
+const isProcessing = ref(true)
+const sortField = ref('')
+const sortOrder = ref(0)
 
-        if (edges && edges.length > 0) {
-          edges.forEach((edge) => {
-            const fromNode = nodes.find((node) => node.id === edge.from);
-            const toNode = nodes.find((node) => node.id === edge.to);
+onMounted(() => {
+  if (props.data && props.data.edges && props.data.edges.length > 0) {
+    const { nodes, edges } = props.data
 
-            this.learningPaths.push({
-              fromItem: fromNode.details.name,
-              fromNode: fromNode.details,
-              toItem: toNode.details.name,
-              toNode: toNode.details,
-            });
-          });
-        }
-        this.isProcessing = false;
-      }
-    },
-    methods: {
-      removeLearningPath(data) {
-        const message = `Do you want to remove the path from ${data.item.fromItem} to ${data.item.toItem}?`;
-        this.msgConfirm(message, 'Remove Learning Path?', 'Remove')
-          .then((ok) => {
-            if (ok) {
-              SkillsService.removeDependency(data.item.toNode.projectId, data.item.toNode.skillId, data.item.fromNode.skillId, data.item.fromNode.projectId).then(() => {
-                this.$emit('update');
-              }).finally(() => {
-                this.$nextTick(() => this.$announcer.assertive(`Successfully removed Learning Path route of ${data.item.fromItem} to ${data.item.toItem}`));
-              });
-            }
-          });
-      },
-      getUrl(item) {
-        let url = `/administrator/projects/${encodeURIComponent(item.projectId)}`;
-        if (item.type === 'Skill') {
-          url += `/subjects/${encodeURIComponent(item.subjectId)}/skills/${encodeURIComponent(item.skillId)}/`;
-        } else if (item.type === 'Badge') {
-          url += `/badges/${encodeURIComponent(item.skillId)}/`;
-        }
+    if (edges && edges.length > 0) {
+      edges.forEach((edge) => {
+        const fromNode = nodes.find((node) => node.id === edge.from)
+        const toNode = nodes.find((node) => node.id === edge.to)
 
-        return url;
-      },
-    },
-  };
+        learningPaths.value.push({
+          fromItem: fromNode.details.name,
+          fromNode: fromNode.details,
+          toItem: toNode.details.name,
+          toNode: toNode.details
+        })
+      })
+    }
+    isProcessing.value = false
+  }
+})
+
+const removeLearningPath = (data) => {
+  const message = `Do you want to remove the path from ${data.fromItem} to ${data.toItem}?`
+  dialogMessages.msgConfirm({
+    message: message,
+    header: 'Remove Learning Path',
+    acceptLabel: 'Remove',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      SkillsService.removeDependency(data.toNode.projectId, data.toNode.skillId, data.fromNode.skillId, data.fromNode.projectId).then(() => {
+        emit('update')
+      }).finally(() => {
+        nextTick(() => announcer.assertive(`Successfully removed Learning Path route of ${data.fromItem} to ${data.toItem}`))
+      })
+    }
+  })
+}
+
+const getUrl = (item) => {
+  let url = `/administrator/projects/${encodeURIComponent(item.projectId)}`
+  if (item.type === 'Skill') {
+    url += `/subjects/${encodeURIComponent(item.subjectId)}/skills/${encodeURIComponent(item.skillId)}/`
+  } else if (item.type === 'Badge') {
+    url += `/badges/${encodeURIComponent(item.skillId)}/`
+  }
+
+  return url
+}
+
+const sortTable = (criteria) => {
+  sortField.value = criteria.sortField
+  sortOrder.value = criteria.sortOrder
+}
+
+const responsive = useResponsiveBreakpoints()
+const isFlex = computed(() => responsive.sm.value)
 </script>
 
-<style>
+<template>
+  <Card class="mb-3" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <template #header>
+      <SkillsCardHeader title="Learning Path Routes"></SkillsCardHeader>
+    </template>
+    <template #content>
+      <div v-if="!isLoading && !isProcessing && learningPaths.length > 0">
+        <SkillsDataTable
+          tableStoredStateId="dependencies"
+          aria-label="Learning Path Routes"
+          :value="learningPaths"
+          v-if="!isProcessing"
+          data-cy="learningPathTable"
+          paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"
+          show-gridlines
+          :sortField="sortField"
+          :sortOrder="sortOrder"
+          @sort="sortTable"
+          striped-rows>
+          <Column field="fromItem" header="From" sortable :class="{'flex': isFlex }">
+            <template #body="slotProps">
+              <a :href="getUrl(slotProps.data.fromNode)">{{ slotProps.data.fromItem }}</a>
+            </template>
+          </Column>
+          <Column field="toItem" header="To" sortable :class="{'flex': isFlex }">
+            <template #body="slotProps">
+              <a :href="getUrl(slotProps.data.toNode)">{{ slotProps.data.toItem }}</a>
+            </template>
+          </Column>
+          <Column field="edit" header="Edit" v-if="!isReadOnlyProj" :class="{'flex': isFlex }">
+            <template #body="slotProps">
+              <SkillsButton @click="removeLearningPath(slotProps.data)"
+                      variant="outline-info" size="small" class="text-info" icon="fa fa-trash"
+                      :track-for-focus="true" :id="`removeLearningPathButton-${slotProps.data.fromItem}-${slotProps.data.toItem}`"
+                      :aria-label="`Remove learning path route of ${slotProps.data.fromItem} to ${slotProps.data.toItem}`"
+                      data-cy="sharedSkillsTable-removeBtn"></SkillsButton>
+            </template>
+          </Column>
+
+          <template #paginatorstart>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ learningPaths.length
+            }}</span>
+          </template>
+        </SkillsDataTable>
+      </div>
+      <div v-else>
+        <no-content2 title="No Learning Paths Yet..." icon="fas fa-share-alt" class="my-5"
+                     message="Add a path between a Skill/Badge and another Skill/Badge" />
+      </div>
+    </template>
+  </Card>
+</template>
+
+<style scoped>
 
 </style>

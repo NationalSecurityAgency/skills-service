@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,117 +13,111 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <metrics-card :title="titleInternal" data-cy="userTagChart">
-    <skills-spinner :is-loading="isLoading" class="mb-5"/>
-    <div v-if="!isLoading">
-      <metrics-overlay :loading="isLoading" :has-data="!isEmpty" no-data-msg="No data yet...">
-        <apexchart :type="this.chartType" :height="`${heightInPx}px`"  :options="chartOptions" :series="series"></apexchart>
-      </metrics-overlay>
-    </div>
-  </metrics-card>
-</template>
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import MetricsService from "@/components/metrics/MetricsService.js";
+import { useUserTagChartConfig } from '@/components/metrics/common/UserTagChartConfig.js';
+import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 
-<script>
-  import MetricsCard from '../utils/MetricsCard';
-  import MetricsService from '../MetricsService';
-  import UserTagChartMixin from './UserTagChartMixin';
-  import SkillsSpinner from '../../utils/SkillsSpinner';
-  import MetricsOverlay from '../utils/MetricsOverlay';
+const route = useRoute();
+const userTagChartConfig = useUserTagChartConfig();
 
-  const PIE = 'pie';
-  const BAR = 'bar';
+const props = defineProps({
+  tagKey: {
+    type: String,
+    required: true,
+  },
+  chartType: {
+    type: String,
+    required: true,
+    validator: (value) => (['pie', 'bar'].indexOf(value) >= 0),
+  },
+  title: {
+    type: String,
+    required: false,
+    default: 'Users',
+  },
+})
 
-  export default {
-    name: 'UserTagChart',
-    mixins: [UserTagChartMixin],
-    components: {
-      MetricsOverlay,
-      SkillsSpinner,
-      MetricsCard,
-    },
-    props: {
-      tagKey: {
-        type: String,
-        required: true,
-      },
-      chartType: {
-        type: String,
-        required: true,
-        validator: (value) => ([PIE, BAR].indexOf(value) >= 0),
-      },
-      title: {
-        type: String,
-        required: false,
-        default: 'Users',
-      },
-    },
-    data() {
-      return {
-        isLoading: true,
-        isEmpty: false,
-        series: [],
-        chartOptions: {},
-        heightInPx: 350,
-        titleInternal: this.title,
-      };
-    },
-    mounted() {
-      if (this.chartType === PIE) {
-        this.chartOptions = this.pieChartOptions;
-      }
-      if (this.chartType === BAR) {
-        this.chartOptions = this.barChartOptions;
-      }
-      this.loadData();
-    },
-    methods: {
-      loadData() {
-        this.isLoading = true;
+onMounted(() => {
+  if (props.chartType === 'pie') {
+    chartOptions.value = userTagChartConfig.pieChartOptions;
+  }
+  if (props.chartType === 'bar') {
+    chartOptions.value = userTagChartConfig.barChartOptions;
+  }
+  loadData();
+});
 
-        const params = {
-          tagKey: this.tagKey,
-          currentPage: 1,
-          pageSize: 20,
-          sortDesc: true,
-          tagFilter: '',
-        };
-        const self = this;
-        MetricsService.loadChart(this.$route.params.projectId, 'numUsersPerTagBuilder', params)
-          .then((dataFromServer) => {
-            if (dataFromServer) {
-              const series = [];
-              const labels = [];
-              const { items } = dataFromServer;
-              items.forEach((data) => {
-                series.push(data.count);
-                labels.push(data.value);
-              });
-              if (this.chartType === PIE) {
-                this.series = series;
-              }
-              if (this.chartType === BAR) {
-                this.series = [{
-                  name: 'Number of Users',
-                  data: series,
-                }];
-              }
-              this.chartOptions = Object.assign(this.chartOptions, { labels });
-              this.isEmpty = items.find((item) => item.count > 0) === undefined;
+const isLoading = ref(true);
+const isEmpty = ref(false);
+const series = ref([]);
+const chartOptions = ref({});
+const heightInPx = ref(350);
+const titleInternal = ref(props.title);
 
-              if (items.length > 10) {
-                this.heightInPx = 600;
-              }
-              if (dataFromServer.totalNumItems > params.pageSize) {
-                self.titleInternal = `${self.titleInternal} (Top ${params.pageSize})`;
-              }
-            }
-            this.isLoading = false;
-          });
-      },
-    },
+const loadData = () => {
+  isLoading.value = true;
+
+  const params = {
+    tagKey: props.tagKey,
+    currentPage: 1,
+    pageSize: 20,
+    sortDesc: true,
+    tagFilter: '',
   };
+
+  MetricsService.loadChart(route.params.projectId, 'numUsersPerTagBuilder', params)
+      .then((dataFromServer) => {
+        if (dataFromServer) {
+          const localSeries = [];
+          const labels = [];
+          const { items } = dataFromServer;
+          items.forEach((data) => {
+            localSeries.push(data.count);
+            labels.push(data.value);
+          });
+          if (props.chartType === 'pie') {
+            series.value = localSeries;
+          }
+          if (props.chartType === 'bar') {
+            series.value = [{
+              name: 'Number of Users',
+              data: localSeries,
+            }];
+          }
+          chartOptions.value = Object.assign(chartOptions.value, { labels });
+          isEmpty.value = items.find((item) => item.count > 0) === undefined;
+
+          if (items.length > 10) {
+            heightInPx.value = 600;
+          }
+          if (dataFromServer.totalNumItems > params.pageSize) {
+            titleInternal.value = `${titleInternal.value} (Top ${params.pageSize})`;
+          }
+        }
+        isLoading.value = false;
+      });
+};
 </script>
 
+<template>
+  <Card data-cy="userTagChart">
+    <template #header>
+      <SkillsCardHeader :title="titleInternal"></SkillsCardHeader>
+    </template>
+    <template #content>
+      <skills-spinner :is-loading="isLoading" v-if="isLoading" />
+      <div v-if="!isLoading">
+        <metrics-overlay :loading="isLoading" :has-data="!isEmpty" no-data-msg="No data yet...">
+          <apexchart :type="chartType" :height="`${heightInPx}px`"  :options="chartOptions" :series="series"></apexchart>
+        </metrics-overlay>
+      </div>
+    </template>
+  </Card>
+</template>
+
 <style scoped>
+
 </style>

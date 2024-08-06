@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,69 +13,68 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <b-overlay :show="doShow" opacity=".5">
-    <slot />
-    <template v-slot:overlay>
-      <div v-if="loading">
-        <b-spinner variant="info" label="Spinning"></b-spinner>
-      </div>
-      <div v-if="!loading && !loadedOnce && !hasData" class="alert alert-info">
-        <i :class="chartNotGeneratedIcon"></i> {{ chartNotGeneratedMsg }}
-      </div>
-      <div v-if="!loading && loadedOnce && !hasData" class="alert alert-info">
-        <i :class="noDataIcon" class="mr-1"></i> {{ noDataMsg }}
-      </div>
-    </template>
-  </b-overlay>
-</template>
+<script setup>
+import { computed } from 'vue';
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
+import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
 
-<script>
-  export default {
-    name: 'MetricsOverlay',
-    props: {
-      hasData: {
-        type: Boolean,
-        required: true,
-      },
-      loading: {
-        type: Boolean,
-        required: true,
-      },
-      noDataMsg: {
-        type: String,
-        default: 'No Data. Yet...',
-        required: false,
-      },
-      noDataIcon: {
-        type: String,
-        default: 'fas fa-dragon',
-        required: false,
-      },
-      loadedOnce: {
-        type: Boolean,
-        default: true,
-        required: false,
-      },
-      chartNotGeneratedMsg: {
-        type: String,
-        default: 'Generate the chart using controls above!',
-        required: false,
-      },
-      chartNotGeneratedIcon: {
-        type: String,
-        default: 'fas fa-chart-line',
-        required: false,
-      },
-    },
-    computed: {
-      doShow() {
-        return this.loading || !this.hasData;
-      },
-    },
-  };
+const props = defineProps({
+  hasData: {
+    type: Boolean,
+    required: true,
+  },
+  loading: {
+    type: Boolean,
+    required: true,
+  },
+  noDataMsg: {
+    type: String,
+    default: 'No Data. Yet...',
+    required: false,
+  },
+  noDataIcon: {
+    type: String,
+    default: 'fas fa-dragon',
+    required: false,
+  },
+  loadedOnce: {
+    type: Boolean,
+    default: true,
+    required: false,
+  },
+  chartNotGeneratedMsg: {
+    type: String,
+    default: 'Generate the chart using controls above!',
+    required: false,
+  },
+  chartNotGeneratedIcon: {
+    type: String,
+    default: 'fas fa-chart-line',
+    required: false,
+  },
+})
+
+const doShow = computed(() => {
+  return props.loading || !props.hasData;
+})
 </script>
 
-<style scoped>
+<template>
+  <SkillsOverlay :show="doShow" opacity="50">
+    <slot></slot>
+    <template #overlay>
+      <div v-if="loading">
+        <SkillsSpinner :is-loading="loading"></SkillsSpinner>
+      </div>
+      <div v-if="!loading && !loadedOnce && !hasData" class="alert alert-info">
+        <Tag class="p-2 text-base font-light":icon="chartNotGeneratedIcon" :value="chartNotGeneratedMsg" severity="info"></Tag>
+      </div>
+      <div v-if="!loading && loadedOnce && !hasData" class="alert alert-info">
+        <Tag class="mr-1 p-2 text-base font-light" :icon="noDataIcon" :value="noDataMsg" severity="info"></Tag>
+      </div>
+    </template>
+  </SkillsOverlay>
+</template>
 
+<style scoped>
 </style>

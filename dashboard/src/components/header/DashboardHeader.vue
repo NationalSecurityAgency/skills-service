@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,128 +13,93 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import SettingsButton from '@/components/header/SettingsButton.vue'
+import HelpButton from '@/components/header/HelpButton.vue'
+import SkillsBreadcrumb from '@/components/header/SkillsBreadcrumb.vue'
+import { usePagePath } from '@/components/utils/UsePageLocation.js'
+import InceptionButton from '@/components/inception /InceptionButton.vue'
+import SkipToContent from '@/components/header/SkipToContent.vue'
+import { useAppInfoState } from '@/stores/UseAppInfoState.js'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
+import SkillTreeHeaderSvgIcon from '@/components/brand/SkillTreeHeaderSvgIcon.vue'
+import UpgradeInProgressWarning from '@/components/header/UpgradeInProgressWarning.vue'
+
+const pathPath = usePagePath()
+const appInfoState = useAppInfoState()
+const themeHelper = useThemesHelper()
+
+
+</script>
+
 <template>
-  <div class="bg-white header">
-    <!--  see usage of preSkipToContentPlaceholder in main.js  -->
-    <span id="preSkipToContentPlaceholder" tabindex="-1" aria-hidden="true" data-cy="preSkipToContentPlaceholder"/>
-    <a
-      class="skip-main btn btn-primary"
-      @click="focusOnMainContent"
-      @keydown.prevent.enter="focusOnMainContent"
-      tabindex="0"
-      data-cy="skipToContentButton">Skip to content</a>
-    <div v-if="isUpgradeInProgress" class="container-fluid p-3 text-center bg-warning mb-1" data-cy="upgradeInProgressWarning">
-      <span class="fa-stack fa-2x" style="vertical-align: middle; font-size:1em;">
-        <i class="fas fa-circle fa-stack-2x"></i>
-        <i class="fas fa-hammer fa-stack-1x fa-inverse"></i>
-      </span>
-      <span class="pl-1">An upgrade is currently in process. Please note that no changes will be permitted until the upgrade is complete.
-      Any reported skills will be queued for application once the upgrade has completed.</span>
-    </div>
-    <div class="container-fluid py-3">
-      <div class="row">
-        <div class="col-sm">
-          <div class="text-center text-sm-left">
-            <router-link data-cy="skillTreeLogo" class="h2 text-primary ml-2" to="/">
-              <img ref="skillTreeLogo" src="/static/img/skilltree_logo_v1.png" alt="skilltree logo"/>
+  <div class="header">
+    <skip-to-content></skip-to-content>
+    <div class="bg-primary-reverse">
+      <upgrade-in-progress-warning />
+      <div class="flex flex-wrap pt-3 px-3 pb-2 justify-content-center mb-3 border-bottom-1 border-200">
+        <div class="flex-1 justify-content-center">
+          <div class="flex">
+            <router-link data-cy="skillTreeLogo" class="" to="/">
+              <SkillTreeHeaderSvgIcon />
             </router-link>
-            <span v-if="isAdminPage" ref="adminStamp" class="skills-stamp">ADMIN</span>
+            <div v-if="pathPath.isAdminPage.value"
+                 ref="adminStamp"
+                 class="skills-stamp"
+                 :class="{
+                   'skills-stamp-color-light-theme': !themeHelper.isDarkTheme,
+                   'skills-stamp-color-dark-theme': themeHelper.isDarkTheme,
+                 }"
+            >ADMIN</div>
           </div>
         </div>
-
-        <hr class="w-75 mb-0 d-sm-none"/>
-
-        <div class="col-sm-auto text-center text-sm-right pt-sm-2 mt-3 mt-sm-0">
-          <inception-button v-if="isAdminPage" class="mr-2" data-cy="inception-button"></inception-button>
-<!--          message center is just mocked up for now and will be implemented in its own ticket -->
-<!--          <message-center />-->
-          <settings-button data-cy="settings-button"/>
-          <help-button class="" data-cy="help-button"/>
+        <div class="flex-none">
+          <div v-if="!appInfoState.showUa" class="flex flex-row">
+            <inception-button v-if="pathPath.isAdminPage.value"
+                              class="mr-2"
+                              data-cy="inception-button" />
+            <settings-button data-cy="settings-button" class="ml-2" />
+            <help-button data-cy="help-button" class="ml-2" />
+          </div>
         </div>
       </div>
     </div>
-    <breadcrumb></breadcrumb>
+    <skills-breadcrumb class="px-3"></skills-breadcrumb>
   </div>
 </template>
 
-<script>
-  import store from '@/store/store';
-  import SettingsButton from './SettingsButton';
-  import Breadcrumb from './Breadcrumb';
-  import InceptionButton from '../inception/InceptionButton';
-  import HelpButton from './HelpButton';
-
-  export default {
-    name: 'DashboardHeader',
-    components: {
-      HelpButton,
-      InceptionButton,
-      Breadcrumb,
-      SettingsButton,
-    },
-    computed: {
-      isAdminPage() {
-        return this.$route && this.$route.meta && this.$route.meta.requiresAuth && !this.$route.meta.nonAdmin;
-      },
-      isUpgradeInProgress() {
-        return store.getters.config.dbUpgradeInProgress === 'true';
-      },
-    },
-    beforeDestroy() {
-      window.removeEventListener('resize', this.updateAdminStampSize);
-    },
-    methods: {
-      focusOnMainContent() {
-        const toSearch = ['mainContent3', 'mainContent2', 'mainContent1'];
-        //  there are currently only 3 levels
-        this.$nextTick(() => {
-          const foundId = toSearch.find((id) => document.getElementById(id));
-          if (foundId) {
-            this.$nextTick(() => {
-              const focusOn = document.getElementById(foundId);
-              if (focusOn) {
-                focusOn.focus({});
-              }
-            });
-          }
-        });
-      },
-    },
-  };
-</script>
-
 <style scoped>
-/* black-ops-one-regular - latin-ext_latin */
-@font-face {
-  font-family: 'Black Ops One';
-  font-style: normal;
-  font-weight: 400;
-  src: url('../../fonts/black-ops-one-v12-latin-ext_latin-regular.eot'); /* IE9 Compat Modes */
-  src: local(''),
-  url('../../fonts/black-ops-one-v12-latin-ext_latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-  url('../../fonts/black-ops-one-v12-latin-ext_latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
-  url('../../fonts/black-ops-one-v12-latin-ext_latin-regular.woff') format('woff'), /* Modern Browsers */
-  url('../../fonts/black-ops-one-v12-latin-ext_latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
-  url('../../fonts/black-ops-one-v12-latin-ext_latin-regular.svg#BlackOpsOne') format('svg'); /* Legacy iOS */
-}
 
 .skills-stamp {
   margin-left: 0.5rem;
 
-  box-shadow: 0 0 0 3px #8b6d6d, 0 0 0 2px #8b6d6d inset;
-  color: #722b2b;
   border: 2px solid transparent;
   border-radius: 4px;
   display: inline-block;
-  padding: 5px 2px;
-  line-height: 22px;
-  font-size: 24px;
+  padding: 8px 2px 0px 2px;
+  line-height: 18px;
+  font-size: 18px;
   font-family: 'Black Ops One', cursive;
   text-transform: uppercase;
   text-align: center;
   opacity: 0.8;
-  width: 155px;
-  transform: rotate(-17deg);
+  width: 110px;
+  height: 40px;
+  transform: rotate(-15deg);
+}
+
+.skills-stamp-color-light-theme {
+  box-shadow:
+    0 0 0 3px #8b6d6d,
+    0 0 0 2px #8b6d6d inset;
+  color: #722b2b;
+}
+
+.skills-stamp-color-dark-theme {
+  box-shadow:
+    0 0 0 3px #E76F50,
+    0 0 0 2px #F3A161 inset;
+  color: #d9f8f4;
 }
 
 @media (max-width: 675px) {
@@ -157,15 +122,15 @@ limitations under the License.
 
 .skip-main {
   position: absolute !important;
-  overflow: hidden !important;;
-  z-index: -999 !important;;
+  overflow: hidden !important;
+  z-index: -999 !important;
 }
 
-.skip-main:focus, .skip-main:active {
-  left: 5px !important;;
-  top: 5px !important;;
-  font-size: 1.2em !important;;
-  z-index: 999 !important;;
+.skip-main:focus,
+.skip-main:active {
+  left: 5px !important;
+  top: 5px !important;
+  font-size: 1.2em !important;
+  z-index: 999 !important;
 }
-
 </style>

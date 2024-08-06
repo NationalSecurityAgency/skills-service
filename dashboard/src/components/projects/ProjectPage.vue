@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,320 +13,300 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
+import PageHeader from '@/components/utils/pages/PageHeader.vue'
+import Navigation from '@/components/utils/Navigation.vue'
+import ProjectService from '@/components/projects/ProjectService'
+import ProjectDates from '@/components/projects/ProjectDates.vue'
+import dayjs from '@/common-components/DayJsCustomizer.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert.vue'
+import EditProject from '@/components/projects/EditProject.vue'
+import { useProjDetailsState } from '@/stores/UseProjDetailsState.js'
+import UserRolesUtil from '@/components/utils/UserRolesUtil'
+import Avatar from 'primevue/avatar'
+import ProjectShareDialog from '@/components/projects/ProjectShareDialog.vue'
+import ProjectExpirationWarning from '@/components/projects/ProjectExpirationWarning.vue'
+
+// const props = defineProps(['project'])
+const router = useRouter()
+const route = useRoute()
+const projConfig = useProjConfig()
+const appConfig = useAppConfig()
+const announcer = useSkillsAnnouncer()
+const projectDetailsState = useProjDetailsState()
+
+
+const cancellingExpiration = ref(false)
+const editProject = ref(false)
+const shareProjModal = ref(false)
+const shareUrl = ref('')
+const project = computed(() => projectDetailsState.project)
+const isLoadingData = computed(() => projectDetailsState.isLoading)
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj)
+
+const isLoading = computed(() => {
+  return isLoadingData.value // || projConfig.loadingProjConfig;
+})
+
+onMounted(() => {
+  projectDetailsState.loadProjectDetailsState(true)
+})
+
+const navItems = computed(() => {
+  const items = [
+    { name: 'Subjects', iconClass: 'fa-cubes skills-color-subjects', page: 'Subjects' },
+    { name: 'Badges', iconClass: 'fa-award skills-color-badges', page: 'Badges' },
+    { name: 'Self Report', iconClass: 'fa-laptop skills-color-selfreport', page: 'SelfReport' },
+    { name: 'Learning Path', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'FullDependencyGraph' }
+  ]
+
+  if (!isReadOnlyProj.value) {
+    items.push({ name: 'Skill Catalog', iconClass: 'fa-book skills-color-skill-catalog', page: 'SkillsCatalog' })
+    items.push({ name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'ProjectLevels' })
+  }
+
+  items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'ProjectUsers' })
+  items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'ProjectMetrics' })
+
+  if (!isReadOnlyProj.value) {
+    items.push({ name: 'Contact Users', iconClass: 'fas fa-mail-bulk', page: 'EmailUsers' })
+    items.push({ name: 'Issues', iconClass: 'fas fa-exclamation-triangle', page: 'ProjectErrorsPage' })
+    items.push({ name: 'Access', iconClass: 'fa-shield-alt skills-color-access', page: 'ProjectAccess' })
+    items.push({ name: 'Admin Activity', iconClass: 'fa-users-cog text-success', page: 'ProjectActivityHistory' })
+    items.push({
+      name: 'Skill Expiration History',
+      iconClass: 'fa-clock skills-color-expiration',
+      page: 'ExpirationHistory'
+    })
+    items.push({ name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'ProjectSettings' })
+  }
+
+  return items
+})
+
+const headerOptions = computed(() => {
+  if (!project.value || !projConfig.projConfig) {
+    return {}
+  }
+  let visibilityLabel = 'Project Catalog'
+  let visibilityIcon = 'fas fa-eye-slash text-warning'
+  let visibilityDescription = ''
+  let visibilityType = 'Hidden'
+  if (projConfig.isProjConfigInviteOnly) {
+    visibilityLabel = 'Protection'
+    visibilityDescription = 'Invite Only'
+    visibilityIcon = 'fas fa-user-lock text-danger'
+    visibilityType = 'PRIVATE'
+  } else if (projConfig.isProjConfigDiscoverable) {
+    visibilityType = 'Discoverable'
+    visibilityIcon = 'fas fa-search-plus text-success'
+    visibilityDescription = ''
+  }
+
+  const stats = []
+  stats.push({
+    label: visibilityLabel,
+    preformatted: `<div class="h5 font-weight-bold mb-0">${visibilityType}</div>`,
+    secondaryPreformatted: `<div class="text-secondary text-uppercase text-truncate" style="font-size:0.8rem;margin-top:0.1em;">${visibilityDescription}</div>`,
+    icon: `${visibilityIcon} skills-color-visibility`
+  })
+  stats.push({
+    label: 'Skills',
+    count: project.value.numSkills,
+    secondaryStats: [{
+      label: 'reused',
+      count: project.value.numSkillsReused,
+      badgeVariant: 'info'
+    }, {
+      label: 'disabled',
+      count: project.value.numSkillsDisabled,
+      badgeVariant: 'warning'
+    }],
+    icon: 'fas fa-graduation-cap skills-color-skills'
+  })
+  stats.push({
+    label: 'Points',
+    count: project.value.totalPoints,
+    icon: 'far fa-arrow-alt-circle-up skills-color-points',
+    secondaryStats: [{
+      label: 'reused',
+      count: project.value.totalPointsReused,
+      badgeVariant: 'info'
+    }]
+  })
+  stats.push({
+    label: 'Badges',
+    count: project.value.numBadges,
+    icon: 'fas fa-award skills-color-badges'
+  })
+
+  if (!isReadOnlyProj.value) {
+    stats.push({
+      label: 'Issues',
+      count: project.value.numErrors,
+      icon: 'fas fa-exclamation-triangle'
+    })
+  }
+
+  return {
+    icon: 'fas fa-list-alt skills-color-projects',
+    title: `PROJECT: ${project.value.name}`,
+    subTitle: `ID: ${project.value.projectId}`,
+    stats
+  }
+})
+
+const isInsufficientPoints = computed(() => {
+  const projPoints = project.value?.totalPoints || 0
+  return projPoints < appConfig.minimumProjectPoints
+})
+
+const copyAndDisplayShareProjInfo = () => {
+  const host = window.location.origin
+  shareUrl.value = `${host}/progress-and-rankings/projects/${project.value.projectId}?invited=true`
+  navigator.clipboard.writeText(shareUrl.value).then(() => {
+    shareProjModal.value = true
+  })
+}
+
+const projectSaved = (updatedProject) => {
+  const origProjId = project.value.projectId
+  ProjectService.saveProject(updatedProject).then(() => {
+    ProjectService.getProject(updatedProject.projectId)
+      .then((retrievedProject) => {
+        setProject(retrievedProject)
+      })
+    if (updatedProject.projectId !== origProjId) {
+      router.replace({ name: route.name, params: { ...route.params, projectId: updatedProject.projectId } })
+        .then(() => {
+          projConfig.loadProjConfigState({ projectId: updatedProject.projectId, updateLoadingVar: false })
+        })
+    } else {
+      projConfig.loadProjConfigState({ projectId: updatedProject.projectId, updateLoadingVar: false })
+    }
+    announcer.polite(`Project ${updatedProject.name} has been edited`)
+  })
+}
+
+const setProject = (newProject) => {
+  projectDetailsState.project = newProject
+}
+
+const isProjectExpiring = computed(() => {
+  return project.value && project.value.expiring && !isReadOnlyProj.value
+})
+
+</script>
+
 <template>
   <div ref="mainFocus">
-    <page-header :loading="isLoading" :options="headerOptions">
-      <div slot="banner" v-if="project && project.expiring && !isReadOnlyProj" data-cy="projectExpiration"
-           class="w-100 text-center alert-danger p-2 mb-3">
-          <span class="mr-2"
-                aria-label="This Project has not been used recently, it will  be deleted unless you explicitly retain it"
-                v-b-tooltip.hover="'This Project has not been used recently, it will  be deleted unless you explicitly retain it'">
-            Project has not been used in over <b>{{ this.$store.getters.config.expireUnusedProjectsOlderThan }} days</b> and will be deleted <b>{{
-              fromExpirationDate()
-            }}</b>.
-          </span>
-        <b-button @click="keepIt" data-cy="keepIt" size="sm" variant="alert"
-                  :aria-label="'Keep Project '+ project.name">
-          <span class="d-none d-sm-inline">Keep It</span>
-          <b-spinner v-if="cancellingExpiration" small style="font-size:1rem"/>
-          <i v-if="!cancellingExpiration" :class="'fas fa-shield-alt'" style="font-size: 1rem;" aria-hidden="true"/>
-        </b-button>
-      </div>
-      <div slot="subTitle" v-if="project">
+    <PageHeader :loading="isLoading" :options="headerOptions">
+      <template #banner v-if="isProjectExpiring">
+        <project-expiration-warning :project="project" @extended="project.expiring = false" />
+      </template>
+      <template #subTitle v-if="project">
         <div v-if="project.userCommunity" class="mb-3" data-cy="userCommunity">
-          <span class="border p-1 border-danger rounded"><i
-            class="fas fa-shield-alt text-danger" aria-hidden="true"/></span> <span
-          class="text-secondary font-italic ml-1">{{ beforeCommunityLabel }}</span> <span
+          <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
+          <span
+            class="text-secondary font-italic ml-1">{{ appConfig.userCommunityBeforeLabel }}</span> <span
           class="font-weight-bold text-primary">{{ project.userCommunity }}</span> <span
-          class="text-secondary font-italic">{{ afterCommunityLabel }}</span>
+          class="text-secondary font-italic">{{ appConfig.userCommunityAfterLabel }}</span>
         </div>
-        <div class="h6"><span class="border p-1 border-info rounded mr-1 mb-2">
-          <i class="fas fa-fingerprint text-info" aria-hidden="true"/></span> <span class="font-italic text-muted">Project ID</span>: {{ project.projectId }}</div>
-      </div>
-      <div slot="subSubTitle" v-if="project">
-        <b-button-group v-if="!isReadOnlyProj" class="mb-3" size="sm">
-          <b-button @click="displayEditProject"
-                    ref="editProjectButton"
-                    class="btn btn-outline-primary"
-                    variant="outline-primary"
-                    data-cy="btn_edit-project"
-                    :aria-label="'edit Project '+project.projectId">
-            <span>Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
-          </b-button>
-          <b-button target="_blank" v-if="project" :to="{ name:'MyProjectSkills', params: { projectId: project.projectId } }"
-                    data-cy="projectPreview"
-                    v-skills="'PreviewProjectClientDisplay'"
-                    variant="outline-primary" :aria-label="'preview client display for project'+project.name">
-            <span>Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
-          </b-button>
-          <b-button v-if="isProjConfigDiscoverable"
-                    ref="shareProjectButton"
-                    @click="copyAndDisplayShareProjInfo"
-                    data-cy="shareProjBtn"
-                    variant="outline-primary"
-                    v-skills="'ShareProject'"
-                    :aria-label="`Share ${project.name} with new users`">
-            <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>
-          </b-button>
-        </b-button-group>
-        <div data-cy="projectCreated">
-          <i class="fas fa-clock text-success header-status-icon" aria-hidden="true" /> <project-dates :created="project.created" :load-last-reported-date="true"/>
+        <div class="">
+          <span class="border-1 border-round px-1 mr-2">
+           <i class="fas fa-fingerprint" aria-hidden="true" />
+          </span>
+          <span class="font-italic text-color-secondary">Project ID</span>: {{ project.projectId }}
         </div>
-        <div v-if="userProjRole">
-          <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span class="text-secondary font-italic small">Role:</span> <span class="small text-primary" data-cy="userRole">{{ userProjRole | userRole }}</span>
+      </template>
+      <template #subSubTitle v-if="project">
+        <div v-if="!isReadOnlyProj" class="flex gap-1 flex-wrap justify-content-center lg:justify-content-start">
+          <SkillsButton
+            id="editProjectBtn"
+            @click="editProject = true"
+            ref="editProjectButton"
+            size="small"
+            outlined
+            severity="info"
+            :track-for-focus="true"
+            data-cy="btn_edit-project"
+            label="Edit"
+            icon="fas fa-edit"
+            :aria-label="`edit Project ${project.name}`">
+          </SkillsButton>
+          <router-link
+            data-cy="projectPreview"
+            :to="{ name:'MyProjectSkillsPage', params: { projectId: project.projectId } }"
+            tabindex="-1"
+            target="_blank" rel="noopener">
+            <SkillsButton
+              target="_blank"
+              v-if="project"
+              outlined
+              severity="info"
+              size="small"
+              label="Preview"
+              icon="fas fa-eye"
+              v-skills="'PreviewProjectClientDisplay'"
+              :aria-label="`preview client display for project ${project.name}`">
+            </SkillsButton>
+          </router-link>
+          <SkillsButton
+            id="projectShareBtn"
+            v-if="projConfig.isProjConfigDiscoverable"
+            ref="shareProjectButton"
+            size="small"
+            severity="info"
+            @click="copyAndDisplayShareProjInfo"
+            data-cy="shareProjBtn"
+            label="Share" icon="fas fa-share-alt"
+            :track-for-focus="true"
+            v-skills="'ShareProject'"
+            :aria-label="`Share ${project.name} with new users`">
+          </SkillsButton>
         </div>
-      </div>
-      <div slot="footer">
-        <import-finalize-alert />
-      </div>
-    </page-header>
+        <div data-cy="projectCreated" class="mt-3">
+          <i class="fas fa-clock text-success mr-1" aria-hidden="true" />
+          <ProjectDates :created="project.created" :load-last-reported-date="true" />
+        </div>
+        <div v-if="projConfig.userProjRole">
+          <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span
+          class="text-secondary font-italic small">Role:</span> <span class="small text-primary"
+                                                                      data-cy="userRole">{{ UserRolesUtil.userRoleFormatter(projConfig.userProjRole)
+          }}</span>
+        </div>
+      </template>
+    </PageHeader>
 
-    <navigation v-if="!isLoading" :nav-items="navItems">
-    </navigation>
+    <Message v-if="isInsufficientPoints" :closable="false" data-cy="projectInsufficientPoints">
+      Project has insufficient points assigned. Skills cannot be achieved until project has at least <Tag>{{ appConfig.minimumProjectPoints }}</Tag> points.
+    </Message>
 
-    <edit-project v-if="editProject" v-model="editProject" :project="project" :is-edit="true"
-                  @project-saved="projectSaved" @hidden="editProjectHidden"/>
-    <project-share-modal v-if="shareProjModal" v-model="shareProjModal"
-                           :share-url="shareUrl"
-                           @hidden="focusOnShareButton"/>
+    <import-finalize-alert />
+
+    <Navigation :nav-items="navItems">
+    </Navigation>
+
+    <edit-project
+      v-if="editProject"
+      v-model="editProject"
+      :is-edit="true"
+      :id="`editProjectModal${project.projectId}`"
+      :project="project"
+      :enable-return-focus="true"
+      @project-saved="projectSaved" />
+
+    <project-share-dialog
+      v-if="shareProjModal"
+      v-model="shareProjModal"
+      :share-url="shareUrl" />
   </div>
 
 </template>
 
-<script>
-  import { createNamespacedHelpers } from 'vuex';
-  import dayjs from '@/common-components/DayJsCustomizer';
-  import ProjectDates from '@/components/projects/ProjectDates';
-  import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert';
-  import Navigation from '@/components/utils/Navigation';
-  import PageHeader from '@/components/utils/pages/PageHeader';
-  import EditProject from '@/components/projects/EditProject';
-  import ProjectService from '@/components/projects/ProjectService';
-  import ProjectShareModal from '@/components/projects/ProjectShareModal';
-  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
-  import CommunityLabelsMixin from '@/components/utils/CommunityLabelsMixin';
-
-  const { mapActions, mapGetters, mapMutations } = createNamespacedHelpers('projects');
-
-  export default {
-    name: 'ProjectPage',
-    mixins: [ProjConfigMixin, CommunityLabelsMixin],
-    components: {
-      ProjectShareModal,
-      ImportFinalizeAlert,
-      ProjectDates,
-      PageHeader,
-      Navigation,
-      EditProject,
-    },
-    data() {
-      return {
-        isLoadingData: true,
-        cancellingExpiration: false,
-        editProject: false,
-        shareProjModal: false,
-        shareUrl: '',
-      };
-    },
-    mounted() {
-      this.loadProjects();
-    },
-    computed: {
-      ...mapGetters([
-        'project',
-      ]),
-      isLoading() {
-        return this.isLoadingData || this.isLoadingProjConfig;
-      },
-      navItems() {
-        const items = [
-          { name: 'Subjects', iconClass: 'fa-cubes skills-color-subjects', page: 'Subjects' },
-          { name: 'Badges', iconClass: 'fa-award skills-color-badges', page: 'Badges' },
-          { name: 'Self Report', iconClass: 'fa-laptop skills-color-selfreport', page: 'SelfReport' },
-          { name: 'Learning Path', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'FullDependencyGraph' },
-        ];
-
-        if (!this.isReadOnlyProj) {
-          items.push({ name: 'Skill Catalog', iconClass: 'fa-book skills-color-skill-catalog', page: 'SkillsCatalog' });
-          items.push({ name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'ProjectLevels' });
-        }
-
-        items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'ProjectUsers' });
-        items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'ProjectMetrics' });
-
-        if (!this.isReadOnlyProj) {
-          items.push({ name: 'Contact Users', iconClass: 'fas fa-mail-bulk', page: 'EmailUsers' });
-          items.push({ name: 'Issues', iconClass: 'fas fa-exclamation-triangle', page: 'ProjectErrorsPage' });
-          items.push({ name: 'Access', iconClass: 'fa-shield-alt skills-color-access', page: 'ProjectAccess' });
-          items.push({ name: 'Admin Activity', iconClass: 'fa-users-cog text-success', page: 'ProjectActivityHistory' });
-          items.push({ name: 'Skill Expiration History', iconClass: 'fa-clock skills-color-expiration', page: 'ExpirationHistory' });
-          items.push({ name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'ProjectSettings' });
-        }
-
-        return items;
-      },
-      headerOptions() {
-        if (!this.project || !this.projConfig) {
-          return {};
-        }
-        let visibilityLabel = 'Project Catalog';
-        let visibilityIcon = 'fas fa-eye-slash text-warning';
-        let visibilityDescription = '';
-        let visibilityType = 'Hidden';
-        if (this.isProjConfigInviteOnly) {
-          visibilityLabel = 'Protection';
-          visibilityDescription = 'Invite Only';
-          visibilityIcon = 'fas fa-user-lock text-danger';
-          visibilityType = 'PRIVATE';
-        } else if (this.isProjConfigDiscoverable) {
-          visibilityType = 'Discoverable';
-          visibilityIcon = 'fas fa-search-plus text-success';
-          visibilityDescription = '';
-        }
-
-        const stats = [];
-        stats.push({
-          label: visibilityLabel,
-          preformatted: `<div class="h5 font-weight-bold mb-0">${visibilityType}</div>`,
-          secondaryPreformatted: `<div class="text-secondary text-uppercase text-truncate" style="font-size:0.8rem;margin-top:0.1em;">${visibilityDescription}</div>`,
-          icon: `${visibilityIcon} skills-color-visibility`,
-        });
-        stats.push({
-          label: 'Skills',
-          count: this.project.numSkills,
-          secondaryStats: [{
-            label: 'reused',
-            count: this.project.numSkillsReused,
-            badgeVariant: 'info',
-          }, {
-            label: 'disabled',
-            count: this.project.numSkillsDisabled,
-            badgeVariant: 'warning',
-          }],
-          icon: 'fas fa-graduation-cap skills-color-skills',
-        });
-        stats.push({
-          label: 'Points',
-          count: this.project.totalPoints,
-          warnMsg: this.project.totalPoints < this.minimumPoints ? 'Project has insufficient points assigned. Skills cannot be achieved until project has at least 100 points.' : null,
-          icon: 'far fa-arrow-alt-circle-up skills-color-points',
-          secondaryStats: [{
-            label: 'reused',
-            count: this.project.totalPointsReused,
-            badgeVariant: 'info',
-          }],
-        });
-        stats.push({
-          label: 'Badges',
-          count: this.project.numBadges,
-          icon: 'fas fa-award skills-color-badges',
-        });
-
-        if (!this.isReadOnlyProj) {
-          stats.push({
-            label: 'Issues',
-            count: this.project.numErrors,
-            icon: 'fas fa-exclamation-triangle',
-          });
-        }
-
-        return {
-          icon: 'fas fa-list-alt skills-color-projects',
-          title: `PROJECT: ${this.project.name}`,
-          subTitle: `ID: ${this.project.projectId}`,
-          stats,
-        };
-      },
-      minimumPoints() {
-        return this.$store.getters.config.minimumProjectPoints;
-      },
-      expirationDate() {
-        if (!this.project.expiring) {
-          return '';
-        }
-        const gracePeriodInDays = this.$store.getters.config.expirationGracePeriod;
-        const expires = dayjs(this.project.expirationTriggered).add(gracePeriodInDays, 'day').startOf('day');
-        return expires.format('YYYY-MM-DD HH:mm');
-      },
-    },
-    methods: {
-      ...mapActions([
-        'loadProjectDetailsState',
-      ]),
-      ...mapMutations([
-        'setProject',
-      ]),
-      copyAndDisplayShareProjInfo() {
-        const host = window.location.origin;
-        this.shareUrl = `${host}/progress-and-rankings/projects/${this.project.projectId}?invited=true`;
-        navigator.clipboard.writeText(this.shareUrl).then(() => {
-          this.shareProjModal = true;
-        });
-      },
-      fromExpirationDate() {
-        return dayjs().startOf('day').to(dayjs(this.expirationDate));
-      },
-      displayEditProject() {
-        this.editProject = true;
-      },
-      loadProjects() {
-        this.isLoadingData = true;
-        if (this.$route.params.project) {
-          this.setProject(this.$route.params.project);
-          this.isLoadingData = false;
-        } else {
-          this.loadProjectDetailsState({ projectId: this.$route.params.projectId })
-            .finally(() => {
-              this.isLoadingData = false;
-            });
-        }
-      },
-      editProjectHidden() {
-        this.editProject = false;
-        this.$nextTick(() => {
-          const ref = this.$refs.editProjectButton;
-          if (ref) {
-            ref.focus();
-          }
-        });
-      },
-      focusOnShareButton() {
-        this.$nextTick(() => {
-          const ref = this.$refs.shareProjectButton;
-          if (ref) {
-            ref.focus();
-          }
-        });
-      },
-      projectSaved(updatedProject) {
-        ProjectService.saveProject(updatedProject).then((resp) => {
-          const origProjId = this.project.projectId;
-          this.setProject(resp);
-          if (resp.projectId !== origProjId) {
-            this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, projectId: resp.projectId } });
-            this.projectId = resp.projectId;
-          }
-          this.$store.dispatch('loadProjConfigState', { projectId: resp.projectId, updateLoadingVar: false });
-          this.$nextTick(() => {
-            this.$announcer.polite(`Project ${updatedProject.name} has been edited`);
-          });
-        });
-      },
-      keepIt() {
-        this.cancellingExpiration = true;
-        ProjectService.cancelUnusedProjectDeletion(this.$route.params.projectId).then(() => {
-          this.loadProjects();
-        }).finally(() => {
-          this.cancellingExpiration = false;
-        });
-      },
-    },
-  };
-</script>
-
-<style scoped>
-.header-status-icon {
-  font-size: 0.9rem;
-  width: 1.2rem;
-}
-</style>
+<style scoped></style>

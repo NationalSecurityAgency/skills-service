@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,94 +13,99 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref, watch, onMounted } from 'vue';
+import GlobalBadgeService from "@/components/badges/global/GlobalBadgeService.js";
+
+const emit = defineEmits(['input', 'removed'])
+const props = defineProps({
+  value: {
+    type: Number,
+  },
+  projectId: {
+    type: String,
+  },
+  disabled: {
+    type: Boolean,
+  },
+  placeholder: {
+    type: String,
+  },
+  loadImmediately: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  selectedLevel: {
+    required: false,
+    type: Number,
+  }
+});
+
+onMounted(() => {
+  setSelectedInternal();
+  if (props.loadImmediately && props.projectId) {
+    loadProjectLevels(props.projectId);
+  }
+})
+
+watch(() => props.projectId, (newProjectId) => {
+  selectedInternal.value = null;
+  if (!newProjectId) {
+    projectLevels.value = [];
+  } else {
+    loadProjectLevels(newProjectId);
+  }
+})
+
+const isLoading = ref(false);
+const projectLevels = ref([]);
+const selectedInternal = ref(null);
+
+const loadProjectLevels = (projectId) => {
+  isLoading.value = true;
+  GlobalBadgeService.getProjectLevels(projectId)
+      .then((response) => {
+        response.forEach((entry) => {
+          projectLevels.value.push({ level: entry.level, disabled: props.selectedLevel && props.selectedLevel === entry.level });
+        })
+      }).finally(() => {
+    isLoading.value = false;
+  });
+};
+
+const setSelectedInternal = () => {
+  if (props.value) {
+    selectedInternal.value = props.value;
+  }
+};
+
+const removed = (removedItem) => {
+  emit('removed', removedItem);
+};
+
+const selected = (selectedItem) => {
+  emit('input', selectedItem);
+};
+
+const inputChanged = (inputItem) => {
+  if (inputItem.value != null) {
+    selected(inputItem.value);
+  } else {
+    removed(null);
+  }
+};
+</script>
+
 <template>
   <div id="level-selector">
-    <v-select :disabled="disabled" v-model="selectedInternal" :options="projectLevels"
-              :placeholder="placeholder" v-on:input="inputChanged" :loading="isLoading">
-    </v-select>
+    <Dropdown v-model="selectedInternal" :disabled="disabled" optionLabel="level" optionValue="level"
+              optionDisabled="disabled" :options="projectLevels" :placeholder="placeholder" filter
+              class="w-full" :loading="isLoading" @change="inputChanged">
+    </Dropdown>
   </div>
 </template>
 
-<script>
-  import vSelect from 'vue-select';
-  import GlobalBadgeService from '../../badges/global/GlobalBadgeService';
+<style scoped>
 
-  export default {
-    name: 'LevelSelector',
-    components: { vSelect },
-    props: {
-      value: {
-        type: Number,
-      },
-      projectId: {
-        type: String,
-      },
-      disabled: {
-        type: Boolean,
-      },
-      placeholder: {
-        type: String,
-      },
-      loadImmediately: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-    },
-    data() {
-      return {
-        isLoading: false,
-        projectLevels: [],
-        selectedInternal: null,
-      };
-    },
-    mounted() {
-      this.setSelectedInternal();
-      if (this.loadImmediately && this.projectId) {
-        this.loadProjectLevels(this.projectId);
-      }
-    },
-    watch: {
-      projectId: function watchUpdatesToProjectId(newProjectId) {
-        this.selectedInternal = null;
-        if (!newProjectId) {
-          this.projectLevels = [];
-        } else {
-          this.loadProjectLevels(newProjectId);
-        }
-      },
-    },
-    methods: {
-      loadProjectLevels(projectId) {
-        this.isLoading = true;
-        GlobalBadgeService.getProjectLevels(projectId)
-          .then((response) => {
-            this.projectLevels = response.map((entry) => entry.level);
-          }).finally(() => {
-            this.isLoading = false;
-          });
-      },
-      setSelectedInternal() {
-        if (this.value) {
-          this.selectedInternal = this.value;
-        }
-      },
-      removed(removedItem) {
-        this.$emit('removed', removedItem);
-      },
-      selected(selectedItem) {
-        this.$emit('input', selectedItem);
-      },
-      inputChanged(inputItem) {
-        if (inputItem != null) {
-          this.selected(inputItem);
-        } else {
-          this.removed(null);
-        }
-      },
-    },
-  };
-</script>
-
-<style>
 </style>

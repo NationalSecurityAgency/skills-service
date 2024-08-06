@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,407 +13,518 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { computed, onMounted, nextTick, ref } from 'vue';
+import { useSkillsState } from '@/stores/UseSkillsState.js';
+import { useRoute } from 'vue-router';
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js';
+import * as yup from 'yup';
+import { useForm } from 'vee-validate';
+import dayjs from '@/common-components/DayJsCustomizer'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
+import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
+import ExpirationService from '@/components/expiration/ExpirationService.js';
+import SkillsNumberInput from '@/components/utils/inputForm/SkillsNumberInput.vue';
+import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
+import SkillsRadioButtonInput from '@/components/utils/inputForm/SkillsRadioButtonInput.vue';
+import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue';
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
+
+const skillsState = useSkillsState();
+const announcer = useSkillsAnnouncer()
+const route = useRoute()
+const responsive = useResponsiveBreakpoints()
+
+const NEVER = 'NEVER';
+const YEARLY = 'YEARLY';
+const MONTHLY = 'MONTHLY';
+const DAILY = 'DAILY';
+const FIRST_DAY_OF_MONTH = 'FIRST_DAY_OF_MONTH';
+const LAST_DAY_OF_MONTH = 'LAST_DAY_OF_MONTH';
+const SET_DAY_OF_MONTH = 'SET_DAY_OF_MONTH';
+
+const monthlyDayCategories = ref([
+  { name: 'First', key: FIRST_DAY_OF_MONTH },
+  { name: 'Last', key: LAST_DAY_OF_MONTH },
+  { name: 'Other', key: SET_DAY_OF_MONTH },
+])
+const yearlyYears = ref(1);
+const yearlyMonth = ref(1);
+const yearlyDayOfMonth = ref(1);
+const monthlyMonths = ref(1);
+const monthlyDay = ref(1);
+const monthlyDayOption = ref(FIRST_DAY_OF_MONTH);
+const dailyDays = ref(90);
+const expirationType = ref(NEVER);
+const loading = ref(true);
+const saving = ref(false);
+const showSavedMsg = ref(false);
+const loadedSettings = ref({});
+const overallErrMsg = ref(null);
+
+const isDirty = computed(()  => {
+  if (loading.value) {
+    return false;
+  }
+  if (loadedSettings.value.expirationType !== expirationType.value) {
+    return true;
+  }
+  const nextExpirationDate = dayjs(loadedSettings.value.nextExpirationDate);
+  if (expirationType.value === YEARLY) {
+    return loadedSettings.value.every !== yearlyYears.value
+        || nextExpirationDate.month() !== yearlyMonth.value
+        || nextExpirationDate.date() !== yearlyDayOfMonth.value;
+  }
+  if (expirationType.value === MONTHLY) {
+    const loadedMonthlyDay = loadedSettings.value.monthlyDay;
+    return loadedSettings.value.every !== monthlyMonths.value
+        || (monthlyDayOption.value === SET_DAY_OF_MONTH && loadedMonthlyDay !== monthlyDay.value)
+        || ((monthlyDayOption.value === FIRST_DAY_OF_MONTH || monthlyDayOption.value === LAST_DAY_OF_MONTH) && loadedMonthlyDay !== monthlyDayOption.value);
+  }
+  if (expirationType.value === DAILY) {
+    return loadedSettings.value.every !== dailyDays.value;
+  }
+  return false;
+});
+const monthsOptions = computed(() => {
+  return dayjs.months().map((m, index) => ({ value: index, text: m }));
+});
+const dayOptions = computed(() => {
+  const daysInSelectedMonth = dayjs().month(yearlyMonth.value).daysInMonth();
+  return Array.from({ length: daysInSelectedMonth }, (_, index) => ({ value: index + 1, text: `${index + 1}` }));
+});
+const isImported = computed(() => {
+  return skillsState.skill && skillsState.skill.copiedFromProjectId && skillsState.skill.copiedFromProjectId.length > 0 && !skillsState.skill.reusedSkill;
+});
+const isReused = computed(() => {
+  return skillsState.skill && skillsState.skill.reusedSkill;
+});
+const isReadOnly = computed(() => {
+  return isReused.value || isImported.value;
+});
+
+onMounted(() => {
+  const now = dayjs();
+  yearlyMonth.value = now.month();
+  yearlyDayOfMonth.value = now.date();
+  loadSettings();
+  // loadSkillInfo();
+});
+const loadSettings = () => {
+  loading.value = true;
+  ExpirationService.getExpirationSettings(route.params.projectId, route.params.skillId)
+      .then((expirationSettings) => {
+        expirationType.value = expirationSettings.expirationType;
+        if (expirationSettings.expirationType === YEARLY) {
+          yearlyYears.value = expirationSettings.every;
+          const nextExpirationDate = dayjs(expirationSettings.nextExpirationDate);
+          yearlyMonth.value = nextExpirationDate.month();
+          yearlyDayOfMonth.value = nextExpirationDate.date();
+        } else if (expirationSettings.expirationType === MONTHLY) {
+          monthlyMonths.value = expirationSettings.every;
+          if (expirationSettings.monthlyDay !== FIRST_DAY_OF_MONTH && expirationSettings.monthlyDay !== LAST_DAY_OF_MONTH) {
+            monthlyDayOption.value = SET_DAY_OF_MONTH;
+            monthlyDay.value = expirationSettings.monthlyDay; // in this case, monthly day is the actual day of the month
+          } else {
+            monthlyDayOption.value = expirationSettings.monthlyDay;
+          }
+        } else if (expirationSettings.expirationType === DAILY) {
+          dailyDays.value = expirationSettings.every;
+        }
+        updateLoadedSettings(expirationSettings);
+
+      }).finally(() => {
+    loading.value = false;
+  });
+}
+const setFieldValues = () => {
+  resetForm({
+    values: {
+      expirationType: expirationType.value,
+      yearlyYears: yearlyYears.value,
+      yearlyMonth: yearlyMonth.value,
+      yearlyDayOfMonth: yearlyDayOfMonth.value,
+      monthlyMonths: monthlyMonths.value,
+      monthlyDayOption: monthlyDayOption.value,
+      monthlyDay: monthlyDay.value,
+      dailyDays: dailyDays.value
+    }
+  });
+}
+const updateLoadedSettings = (expirationSettings) => {
+  loadedSettings.value.expirationType = expirationSettings.expirationType;
+  loadedSettings.value.every = expirationSettings.every;
+  loadedSettings.value.monthlyDay = expirationSettings.monthlyDay;
+  loadedSettings.value.nextExpirationDate = expirationSettings.nextExpirationDate;
+  setFieldValues()
+}
+
+const schema = yup.object().shape({
+  'expirationType': yup.string(),
+  'yearlyYears': yup.number()
+      .when('expirationType', {
+        is: YEARLY,
+        then: (sch)  => sch
+            .required()
+            .min(1)
+            .max(99)
+            .label('Years')
+            .typeError('Years must be a number between 1 and 1000'),
+      }),
+  'yearlyMonth': yup.number()
+      .when('expirationType', {
+        is: YEARLY,
+        then: (sch)  => sch
+            .required()
+            .min(1)
+            .max(12)
+            .label('Month'),
+      }),
+  'yearlyDayOfMonth': yup.number()
+      .when('expirationType', {
+        is: YEARLY,
+        then: (sch)  => sch
+            .required()
+            .min(1)
+            .max(31)
+            .label('Day')
+            .typeError('Day be a number between 1 and 31'),
+      }),
+  'monthlyMonths': yup.number()
+      .when('expirationType', {
+        is: MONTHLY,
+        then: (sch)  => sch
+            .required()
+            .min(1)
+            .max(99)
+            .label('Months')
+            .typeError('Months must be a number between 1 and 1000'),
+      }),
+  'monthlyDayOption': yup.string()
+      .when('expirationType', {
+        is: MONTHLY,
+        then: (sch)  => sch
+            .required()
+            .test('isValidMonthlyDayOption', 'Invalid Day of Month Option', (selected) => monthlyDayCategories.value.map((m) => m.key).includes(selected))
+            .label('Day of Month Option'),
+      }),
+  'monthlyDay': yup.number()
+      .when('expirationType', {
+        is: (expirationType, monthlyDayOption) => expirationType === MONTHLY && monthlyDayOption === SET_DAY_OF_MONTH,
+        then: (sch)  => sch
+            .required()
+            .min(1)
+            .max(31)
+            .label('Day')
+            .typeError('Day be a number between 1 and 31'),
+      }),
+  'dailyDays': yup.number()
+      .when('expirationType', {
+        is: DAILY,
+        then: (sch)  => sch
+            .required()
+            .min(1)
+            .max(999)
+            .label('Expiration Days')
+            .typeError('Expiration Days must be a number between 1 and 1000'),
+      }),
+})
+
+const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ validationSchema: schema, })
+const saveSettings = handleSubmit((values) => {
+  saving.value = true;
+  loading.value = true;
+  const expirationSettings = {
+    expirationType: expirationType.value,
+    every: null,
+    monthlyDay: null,
+    nextExpirationDate: null,
+  };
+  if (expirationType.value !== NEVER) {
+    const now = dayjs();
+    const currentMonth = now.month();
+    const currentDayOfMonth = now.date();
+    if (expirationType.value === YEARLY) {
+      expirationSettings.every = yearlyYears.value;
+
+      // calculate next expiration date
+      let incrementYearBy = yearlyYears.value;
+      if (currentMonth < yearlyMonth.value || (currentMonth === yearlyMonth.value && currentDayOfMonth <= yearlyDayOfMonth.value)) {
+        incrementYearBy -= 1;
+      }
+      expirationSettings.nextExpirationDate = dayjs(new Date(now.year() + incrementYearBy, yearlyMonth.value, yearlyDayOfMonth.value));
+    } else if (expirationType.value === MONTHLY) {
+      expirationSettings.every = monthlyMonths.value;
+      expirationSettings.monthlyDay = monthlyDayOption.value;
+
+      // calculate next expiration date
+      let incrementMonthBy = monthlyMonths.value;
+      if (monthlyDayOption.value === LAST_DAY_OF_MONTH || (monthlyDayOption.value === SET_DAY_OF_MONTH && currentDayOfMonth <= monthlyDay.value)) {
+        incrementMonthBy -= 1;
+      }
+      const nextExpirationDate = dayjs(new Date(now.year(), now.month(), now.day())).date(1).add(incrementMonthBy, 'month');
+      if (monthlyDayOption.value === FIRST_DAY_OF_MONTH) {
+        expirationSettings.nextExpirationDate = nextExpirationDate.date(1);
+      } else if (monthlyDayOption.value === LAST_DAY_OF_MONTH) {
+        expirationSettings.nextExpirationDate = nextExpirationDate.endOf('month');
+      } else if (monthlyDayOption.value === SET_DAY_OF_MONTH) {
+        const nextExpirationDateDay = monthlyDay.value <= nextExpirationDate.daysInMonth() ? monthlyDay.value : nextExpirationDate.endOf('month').date();
+        expirationSettings.nextExpirationDate = nextExpirationDate.date(nextExpirationDateDay);
+        expirationSettings.monthlyDay = monthlyDay.value;
+      }
+    } else if (expirationType.value === DAILY) {
+      expirationSettings.every = dailyDays.value;
+      // any user achievement achievedOn before this date
+      // expirationSettings.nextExpirationDate = dayjs(now).subtract(dailyDays.value, 'day');
+    }
+    ExpirationService.saveExpirationSettings(route.params.projectId, route.params.skillId, expirationSettings)
+        .then(() => {
+          updateLoadedSettings(expirationSettings);
+          showSavedMsg.value = true;
+          setTimeout(() => {
+            showSavedMsg.value = false;
+          }, 3500);
+          nextTick(() => announcer.polite('Expiration settings were saved'));
+        })
+        .finally(() => {
+          loading.value = false;
+          saving.value = false;
+        });
+  } else {
+    // expirationType changed to NEVER so delete existing settings
+    ExpirationService.deleteExpirationSettings(route.params.projectId, route.params.skillId, expirationSettings)
+        .then(() => {
+          updateLoadedSettings(expirationSettings);
+          showSavedMsg.value = true;
+          setTimeout(() => {
+            showSavedMsg.value = false;
+          }, 3500);
+          nextTick(() => announcer.polite('Expiration settings were saved'));
+        })
+        .finally(() => {
+          loading.value = false;
+          saving.value = false;
+        });
+  }
+});
+</script>
+
 <template>
   <div>
-    <sub-page-header title="Configure Expiration"/>
-    <b-overlay :show="loading || loadingSkill">
-      <b-card v-if="!loading && !loadingSkill">
-        <div v-if="isReadOnly" class="alert alert-info" data-cy="readOnlyAlert">
-          <i class="fas fa-exclamation-triangle" aria-hidden="true"/> Expiration attributes of <span
-          v-if="isImported"><b-badge variant="success"><i class="fas fa-book" aria-hidden="true"/> Imported</b-badge></span><span v-if="isReused"><b-badge variant="success"><i class="fas fa-recycle" aria-hidden="true"/> Reused</b-badge></span>
-          skills are read-only.
-        </div>
-        <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
-        <b-form-group v-slot="{ ariaDescribedby }" class="m-0 p-0" :disabled="isReadOnly">
-          <b-form-radio-group
-            id="expiration-type"
-            v-model="expirationType"
-            :aria-describedby="ariaDescribedby"
-            name="Achievement Expiration Options"
-            aria-label="Achievement Expiration Options"
-            data-cy="expirationTypeSelector"
-            stacked
-          >
-            <template #first>
-              <div class="row m-0">
-                <div class="col-12 col-lg-auto mb-1">
-                  <b-form-radio class="" value="NEVER" data-cy="expirationNeverRadio">Never</b-form-radio>
-                </div>
-              </div>
-            </template>
+    <SubPageHeader title="Configure Expiration" />
+    <SkillsOverlay :show="loading || skillsState.loadingSkill">
+<!--      :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"-->
+      <Card v-if="saving || (!loading && !skillsState.loadingSkill)">
+        <template #content>
+          <Message v-if="isReadOnly" severity="info" icon="fas fa-exclamation-triangle" data-cy="readOnlyAlert" :closable="false">
+            Expiration attributes of
+            <span v-if="isImported"><Tag severity="infosuccess"><i class="fas fa-book mr-1" aria-hidden="true"/> Imported</Tag></span>
+            <span v-if="isReused"><Tag severity="success"><i class="fas fa-recycle mr-1" aria-hidden="true"/> Reused</Tag></span>
+            skills are read-only.
+          </Message>
+          <div class="flex flex-column" data-cy="expirationTypeSelector">
 
-            <hr class="my-3"/>
-
-            <template>
-              <div class="row m-0">
-                <div class="col-12 col-lg-auto">
-                  <b-form-radio class="" value="YEARLY" data-cy="yearlyRadio">Yearly</b-form-radio>
-                </div>
-              </div>
-              <div class="row ml-5">
-                <b-form-group :disabled="expirationType !== 'YEARLY'" data-cy="yearlyFormGroup">
-                  <div class="input-group">
-                      <div class="col-auto mr-0 pr-0" :class="{'text-muted': expirationType !== 'YEARLY'}">
-                        <label for="yearlyYears-sb">Skills will expire every</label>
-                        <b-form-spinbutton :disabled="expirationType !== 'YEARLY'"
-                                           class="m-1"
-                                           id="yearlyYears-sb"
-                                           data-cy="yearlyYears-sb"
-                                           :aria-label="`Skills will expire every ${yearlyYears} years`"
-                                           v-model="yearlyYears"
-                                           min="1"
-                                           max="99"
-                                           inline>
-                        </b-form-spinbutton>
-                        <span>year{{yearlyYears > 1 ? 's' : ''}} on: </span>
-                      </div>
-                      <div class="col-auto m-1 px-0">
-                        <b-form-select v-model="yearlyMonth"
-                                       :options="monthsOptions"
-                                       @change="yearlyDayOfMonth=1"
-                                       aria-label="Month of year"
-                                       data-cy="yearlyMonth"/>
-                      </div>
-
-                      <div class="col-auto m-1 pl-0">
-                        <b-form-select v-model="yearlyDayOfMonth"
-                                       :options="dayOptions"
-                                       aria-label="Day of month"
-                                       data-cy="yearlyDayOfMonth"/>
-                      </div>
+            <div class="border-round p-3" :class="{ 'bg-gray-100' : expirationType === NEVER}">
+              <div class="flex align-items-center justify-content-start">
+                <div class="flex flex-wrap">
+                  <div class="flex align-items-center">
+                    <SkillsRadioButtonInput v-model="expirationType"
+                                 inputId="expirationTypeNone"
+                                 name="expirationType"
+                                 data-cy="expirationNeverRadio"
+                                 :value="NEVER" />
+                    <label for="expirationTypeNone" class="ml-2 font-bold">Never</label>
                   </div>
-                </b-form-group>
-              </div>
-            </template>
-            <template>
-              <div class="row m-0">
-                <div class="col-12 col-lg-auto">
-                  <b-form-radio value="MONTHLY" data-cy="monthlyRadio">Monthly</b-form-radio>
                 </div>
               </div>
-              <div class="row ml-5">
-                <b-form-group :disabled="expirationType !== 'MONTHLY'" data-cy="monthlyFormGroup" >
-                  <div class="input-group">
-                    <div class="col-auto mr-0 pr-0" :class="{'text-muted': expirationType !== 'MONTHLY'}">
-                      <label for="monthlyMonths-sb">Skills will expire every</label>
-                      <b-form-spinbutton :disabled="expirationType !== 'MONTHLY'"
-                                         class="m-1"
-                                         id="monthlyMonths-sb"
-                                         data-cy="monthlyMonths-sb"
-                                         :aria-label="`Skills will expire every ${monthlyMonths} months`"
-                                         v-model="monthlyMonths"
-                                         min="1"
-                                         max="99"
-                                         inline>
-                      </b-form-spinbutton>
-                      <span>month{{monthlyMonths > 1 ? 's' : ''}} on day: </span>
-                    </div>
-                    <div class="col-auto m-1 px-0">
-                      <b-form-group
-                        :disabled="expirationType !== 'MONTHLY'"
-                        v-model="monthlyDay"
-                        class="mb-0"
-                        v-slot="{ ariaDescribedby }"
-                      >
-                        <b-form-radio-group
-                          class="pt-2"
-                          v-model="monthlyDayOption"
-                          data-cy="monthlyDayOption"
-                          aria-label="Day of month"
-                          :options="[
-                            {value: 'FIRST_DAY_OF_MONTH', text: 'First'},
-                            {value: 'LAST_DAY_OF_MONTH', text: 'Last'},
-                            {value: 'SET_DAY_OF_MONTH', text: 'Other'}
-                          ]"
-                        :aria-describedby="ariaDescribedby"
-                        ></b-form-radio-group>
-                      </b-form-group>
-                    </div>
+            </div>
 
-                    <div class="col-auto m-1 pl-0">
-                      <b-form-select v-model="monthlyDay"
-                                     :disabled="monthlyDayOption !== 'SET_DAY_OF_MONTH'"
-                                     :options="dayOptions"
-                                     aria-label="Set day of month"
-                                     data-cy="monthlyDay"/>
-                    </div>
+            <Divider />
+
+            <div class="border-round p-3 mb-3" :class="{ 'bg-gray-100' : expirationType === YEARLY}">
+              <div class="flex align-items-center justify-content-start">
+                <div class="flex flex-wrap">
+                  <div class="flex align-items-center">
+                    <SkillsRadioButtonInput v-model="expirationType"
+                                 inputId="yearlyRadio"
+                                 name="expirationType"
+                                 data-cy="yearlyRadio"
+                                 :value="YEARLY" />
+                    <label for="yearlyRadio" class="ml-2 font-bold">Yearly</label>
                   </div>
-                </b-form-group>
-              </div>
-            </template>
-
-            <hr class="my-3"/>
-
-            <template>
-              <div class="row m-0">
-                <div class="col-12 col-lg-auto">
-                  <b-form-radio class="" value="DAILY" data-cy="dailyRadio">Daily with ability to retain</b-form-radio>
                 </div>
               </div>
-              <div class="row ml-5">
-                <b-form inline :disabled="expirationType !== 'DAILY'"  data-cy="dailyFormGroup">
-                  <div class="input-group">
-                    <div class="col-auto mr-0 pr-0" :class="{'text-muted': expirationType !== 'DAILY'}">
-                      <span for="dailyDays-sb">Achievement will expire after</span>
-                      <ValidationProvider :rules="{ 'optionalNumeric':true, 'required':expirationType === 'DAILY', 'min_value':1, 'max_value':999 }" :debounce="250" v-slot="{ errors }" name="Expiration Days">
-                        <input class="form-control m-1" type="text"
-                               style="max-width: 4rem;"
-                               v-model="dailyDays"
-                               data-cy="dailyDays-sb" aria-required="true"
-                               v-on:keydown.enter="handleSubmit(saveSettings)"
-                               id="dailyDays-sb"
-                               aria-describedby="dailyDaysError"
-                               aria-errormessage="dailyDaysError"
-                               :disabled="expirationType !== 'DAILY'"
-                               :aria-label="`Skills will expire every ${dailyDays} days after user earns achievement`"
-                               :aria-invalid="errors && errors.length > 0"/>
-                        <span>day{{dailyDays > 1 ? 's' : ''}} of inactivity</span>
-                        <small role="alert" class="form-text text-danger" data-cy="dailyDaysError" id="dailyDaysError">{{ errors[0] }}</small>
-                      </ValidationProvider>
+
+              <div class="flex flex-wrap md:flex-nowrap ml-5 gap-2" :class="{ 'text-color-secondary' : expirationType !== YEARLY}" data-cy="yearlyFormGroup">
+                <div class="flex flex-column md:flex-row gap-2 align-items-baseline gap-2" :class="{'w-full': responsive.md.value }">
+                  <label for="inputyearlyYears" class="">Skills will expire every</label>
+                  <SkillsNumberInput
+                      id="yearlyYears-sb"
+                      data-cy="yearlyYears-sb"
+                      v-model="yearlyYears"
+                      :disabled="expirationType !== 'YEARLY'"
+                      :class="{'w-full': responsive.md.value }"
+                      name="yearlyYears"
+                      inputClass="w-6rem"
+                      inputId="minmax-buttons"
+                      showButtons
+                      :suffix="` year${yearlyYears > 1 ? 's' : ''}`"
+                      :min="0" :max="99"/>
+                  <!--                  <span class="ml-2">year{{yearlyYears > 1 ? 's' : ''}} on:</span>-->
+                </div>
+                <div class="flex align-items-baseline flex-column md:flex-row gap-2" :class="{'w-full': responsive.md.value }">
+                  <span class="">on:</span>
+                  <SkillsDropDown :options="monthsOptions"
+                                  v-model="yearlyMonth"
+                                  :disabled="expirationType !== YEARLY"
+                                  :class="{'w-full': responsive.md.value }"
+                                  name="yearlyMonth"
+                                  optionLabel="text"
+                                  optionValue="value"
+                                  @change="yearlyDayOfMonth=1"
+                                  aria-label="Month of year"
+                                  data-cy="yearlyMonth"/>
+                  <SkillsDropDown v-model="yearlyDayOfMonth"
+                                  :options="dayOptions"
+                                  :disabled="expirationType !== YEARLY"
+                                  :class="{'w-full': responsive.md.value }"
+                                  aria-label="Day of month"
+                                  name="yearlyDayOfMonth"
+                                  optionLabel="text"
+                                  optionValue="value"
+                                  data-cy="yearlyDayOfMonth"/>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-round p-3" :class="{ 'bg-gray-100' : expirationType === MONTHLY}" data-cy="monthlyFormGroup">
+              <div class="flex align-items-center justify-content-start">
+                <div class="flex flex-wrap">
+                  <div class="flex align-items-center">
+                    <SkillsRadioButtonInput v-model="expirationType"
+                                 inputId="monthlyRadio"
+                                 name="expirationType"
+                                 data-cy="monthlyRadio"
+                                 :value="MONTHLY" />
+                    <label for="monthlyRadio" class="ml-2 font-bold">Monthly</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap md:flex-nowrap ml-5 gap-2" :class="{ 'text-color-secondary' : expirationType !== MONTHLY}">
+                <div class="flex flex-column md:flex-row align-items-baseline gap-2" :class="{'w-full': responsive.md.value }">
+                  <label for="inputmonthlyMonths" class="">Skills will expire every</label>
+                  <SkillsNumberInput
+                      id="monthlyMonths-sb"
+                      data-cy="monthlyMonths-sb"
+                      v-model="monthlyMonths"
+                      :class="{'w-full': responsive.md.value }"
+                      :disabled="expirationType !== MONTHLY"
+                      name="monthlyMonths"
+                      inputClass="w-6rem"
+                      inputId="minmax-buttons"
+                      showButtons
+                      :suffix="` month${monthlyMonths > 1 ? 's' : ''}`"
+                      :min="0" :max="99"/>
+                  <!--                  <span class="ml-2">year{{monthlyMonths > 1 ? 's' : ''}} on:</span>-->
+                </div>
+                <div class="flex align-items-baseline flex-column md:flex-row gap-2" :class="{'w-full': responsive.md.value }">
+                  <div class="flex gap-2">
+                    <span class="">on:</span>
+                    <div class="flex flex-wrap flex-column md:flex-row gap-3" data-cy="monthlyDayOption">
+                      <div v-for="category in monthlyDayCategories" :key="category.key" class="flex align-items-center">
+                        <SkillsRadioButtonInput v-model="monthlyDayOption" :inputId="category.key"
+                                                :disabled="expirationType !== MONTHLY"
+                                                name="monthlyDayOption" :value="category.key"/>
+                        <label :for="category.key" class="ml-2">{{ category.name }}</label>
+                      </div>
                     </div>
                   </div>
-                </b-form>
+                  <SkillsDropDown v-model="monthlyDay"
+                                  :options="dayOptions"
+                                  :disabled="expirationType !== MONTHLY || monthlyDayOption !== 'SET_DAY_OF_MONTH'"
+                                  :class="{'w-full': responsive.md.value }"
+                                  aria-label="Set day of month"
+                                  name="monthlyDay"
+                                  optionLabel="text"
+                                  optionValue="value"
+                                  data-cy="monthlyDay"/>
+                </div>
               </div>
-            </template>
-          </b-form-radio-group>
-        </b-form-group>
-        <hr/>
-        <div class="row">
-          <div v-if="overallErrMsg" class="alert alert-danger">
-            {{ overallErrMsg }}
+            </div>
+
+            <Divider/>
+
+            <div class="border-round p-3" :class="{ 'bg-gray-100' : expirationType === DAILY}" data-cy="dailyFormGroup">
+              <div class="flex align-items-center justify-content-start">
+                <div class="flex flex-wrap">
+                  <div class="flex align-items-center mb-2 md:mb-0">
+                    <SkillsRadioButtonInput v-model="expirationType"
+                                 inputId="dailyRadio"
+                                 name="expirationType"
+                                 data-cy="dailyRadio"
+                                 :value="DAILY" />
+                    <label for="dailyRadio" class="ml-2 font-bold">Daily with ability to retain</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap md:flex-nowrap ml-5 gap-2" :class="{ 'text-color-secondary' : expirationType !== DAILY}">
+                <div class="flex align-items-baseline flex-column md:flex-row gap-2" :class="{'w-full': responsive.md.value }">
+                  <label for="dailyDays-sb" class="">Achievement will expire after</label>
+                  <SkillsNumberInput
+                      id="dailyDays-sb"
+                      data-cy="dailyDays-sb"
+                      v-model="dailyDays"
+                      :disabled="expirationType !== DAILY"
+                      :class="{'w-full': responsive.md.value }"
+                      :aria-label="`Skills will expire every ${dailyDays} days after user earns an achievement`"
+                      name="dailyDays"
+                      inputClass="w-6rem"
+                      inputId="minmax-buttons"
+                      showButtons
+                      :suffix="` day${dailyDays > 1 ? 's' : ''}`"
+                      :min="0" :max="999"/>
+                  <span class="">of inactivity</span>
+                </div>
+              </div>
+            </div>
+
+            <Divider />
+
+            <div class="flex flex-row">
+              <div class="">
+                <SkillsButton variant="outline-success"
+                              label="Save"
+                              icon="fas fa-arrow-circle-right"
+                              @click="saveSettings"
+                              :disabled="!meta.valid || !isDirty"
+                              aria-label="Save Settings"
+                              data-cy="saveSettingsBtn">
+                </SkillsButton>
+
+                <InlineMessage v-if="isDirty"
+                               severity="warn"
+                               class="ml-2"
+                               data-cy="unsavedChangesAlert"
+                               aria-label="Settings have been changed, do not forget to save">
+                  Unsaved Changes
+                </InlineMessage>
+                <InlineMessage v-if="!isDirty && showSavedMsg"
+                               severity="success"
+                               class="ml-2"
+                               data-cy="settingsSavedAlert">
+                  Settings Updated!
+                </InlineMessage>
+              </div>
+            </div>
+
           </div>
-          <div class="col">
-            <b-button variant="outline-success" @click="handleSubmit(saveSettings)" :disabled="!isDirty || invalid" data-cy="saveSettingsBtn">
-              Save <i class="fas fa-arrow-circle-right"/>
-            </b-button>
 
-            <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">
-                <i class="fa fa-exclamation-circle"
-                   aria-label="Settings have been changed, do not forget to save"
-                   v-b-tooltip.hover="'Settings have been changed, do not forget to save'"/> Unsaved Changes
-              </span>
-            <span v-if="!isDirty && showSavedMsg" class="text-success ml-2" data-cy="settingsSavedAlert">
-                <i class="fa fa-check" />
-                Settings Updated!
-              </span>
-          </div>
-        </div>
-        </ValidationObserver>
-      </b-card>
-
-    </b-overlay>
+        </template>
+      </Card>
+    </SkillsOverlay>
   </div>
 </template>
 
-<script>
-  import { createNamespacedHelpers } from 'vuex';
-  import dayjs from '@/common-components/DayJsCustomizer';
-  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  import ExpirationService from './ExpirationService';
-
-  const skills = createNamespacedHelpers('skills');
-
-  const NEVER = 'NEVER';
-  const YEARLY = 'YEARLY';
-  const MONTHLY = 'MONTHLY';
-  const DAILY = 'DAILY';
-  const FIRST_DAY_OF_MONTH = 'FIRST_DAY_OF_MONTH';
-  const LAST_DAY_OF_MONTH = 'LAST_DAY_OF_MONTH';
-  const SET_DAY_OF_MONTH = 'SET_DAY_OF_MONTH';
-
-  export default {
-    name: 'ExpirationConfigPage',
-    components: { SubPageHeader },
-    data() {
-      return {
-        yearlyYears: 1,
-        yearlyMonth: 1,
-        yearlyDayOfMonth: 1,
-        monthlyMonths: 1,
-        monthlyDay: '1',
-        monthlyDayOption: FIRST_DAY_OF_MONTH,
-        dailyDays: 90,
-        expirationType: NEVER,
-        loading: true,
-        showSavedMsg: false,
-        loadedSettings: {},
-        overallErrMsg: null,
-      };
-    },
-    mounted() {
-      const now = dayjs();
-      this.yearlyMonth = now.month();
-      this.yearlyDayOfMonth = now.date();
-      this.loadSettings();
-      this.loadSkillInfo();
-    },
-    computed: {
-      ...skills.mapGetters([
-        'skill',
-      ]),
-      ...skills.mapGetters([
-        'loadingSkill',
-      ]),
-      isDirty() {
-        if (this.loading) {
-          return false;
-        }
-        if (this.loadedSettings.expirationType !== this.expirationType) {
-          return true;
-        }
-        const nextExpirationDate = dayjs(this.loadedSettings.nextExpirationDate);
-        if (this.expirationType === YEARLY) {
-          return this.loadedSettings.every !== this.yearlyYears
-            || nextExpirationDate.month() !== this.yearlyMonth
-            || nextExpirationDate.date() !== this.yearlyDayOfMonth;
-        }
-        if (this.expirationType === MONTHLY) {
-          const loadedMonthlyDay = this.loadedSettings.monthlyDay;
-          return this.loadedSettings.every !== this.monthlyMonths
-            || (this.monthlyDayOption === SET_DAY_OF_MONTH && loadedMonthlyDay !== this.monthlyDay)
-            || ((this.monthlyDayOption === FIRST_DAY_OF_MONTH || this.monthlyDayOption === LAST_DAY_OF_MONTH) && loadedMonthlyDay !== this.monthlyDayOption);
-        }
-        if (this.expirationType === DAILY) {
-          return this.loadedSettings.every !== this.dailyDays;
-        }
-        return false;
-      },
-      monthsOptions() {
-        return dayjs.months().map((m, index) => ({ value: index, text: m }));
-      },
-      dayOptions() {
-        const daysInSelectedMonth = dayjs().month(this.yearlyMonth).daysInMonth();
-        return Array.from({ length: daysInSelectedMonth }, (_, index) => ({ value: index + 1, text: `${index + 1}` }));
-      },
-      isImported() {
-        return this.skill && this.skill.copiedFromProjectId && this.skill.copiedFromProjectId.length > 0 && !this.skill.reusedSkill;
-      },
-      isReused() {
-        return this.skill && this.skill.reusedSkill;
-      },
-      isReadOnly() {
-        return this.isReused || this.isImported;
-      },
-    },
-    methods: {
-      ...skills.mapActions([
-        'loadSkill',
-      ]),
-      loadSettings() {
-        this.loading = true;
-        ExpirationService.getExpirationSettings(this.$route.params.projectId, this.$route.params.skillId)
-          .then((expirationSettings) => {
-            this.expirationType = expirationSettings.expirationType;
-            this.updateLoadedSettings(expirationSettings);
-            if (expirationSettings.expirationType === YEARLY) {
-              this.yearlyYears = expirationSettings.every;
-              const nextExpirationDate = dayjs(expirationSettings.nextExpirationDate);
-              this.yearlyMonth = nextExpirationDate.month();
-              this.yearlyDayOfMonth = nextExpirationDate.date();
-            } else if (expirationSettings.expirationType === MONTHLY) {
-              this.monthlyMonths = expirationSettings.every;
-              if (expirationSettings.monthlyDay !== FIRST_DAY_OF_MONTH && expirationSettings.monthlyDay !== LAST_DAY_OF_MONTH) {
-                this.monthlyDayOption = SET_DAY_OF_MONTH;
-                this.monthlyDay = expirationSettings.monthlyDay; // in this case, monthly day is the actual day of the month
-              } else {
-                this.monthlyDayOption = expirationSettings.monthlyDay;
-              }
-            } else if (expirationSettings.expirationType === DAILY) {
-              this.dailyDays = expirationSettings.every;
-            }
-          }).finally(() => {
-            this.loading = false;
-          });
-      },
-      updateLoadedSettings(expirationSettings) {
-        this.loadedSettings.expirationType = expirationSettings.expirationType;
-        this.loadedSettings.every = expirationSettings.every;
-        this.loadedSettings.monthlyDay = expirationSettings.monthlyDay;
-        this.loadedSettings.nextExpirationDate = expirationSettings.nextExpirationDate;
-      },
-      saveSettings() {
-        this.loading = true;
-        const expirationSettings = {
-          expirationType: this.expirationType,
-          every: null,
-          monthlyDay: null,
-          nextExpirationDate: null,
-        };
-        if (this.expirationType !== NEVER) {
-          const now = dayjs();
-          const currentMonth = now.month();
-          const currentDayOfMonth = now.date();
-          if (this.expirationType === YEARLY) {
-            expirationSettings.every = this.yearlyYears;
-
-            // calculate next expiration date
-            let incrementYearBy = this.yearlyYears;
-            if (currentMonth < this.yearlyMonth || (currentMonth === this.yearlyMonth && currentDayOfMonth <= this.yearlyDayOfMonth)) {
-              incrementYearBy -= 1;
-            }
-            expirationSettings.nextExpirationDate = dayjs(new Date(now.year() + incrementYearBy, this.yearlyMonth, this.yearlyDayOfMonth));
-          } else if (this.expirationType === MONTHLY) {
-            expirationSettings.every = this.monthlyMonths;
-            expirationSettings.monthlyDay = this.monthlyDayOption;
-
-            // calculate next expiration date
-            let incrementMonthBy = this.monthlyMonths;
-            if (this.monthlyDayOption === LAST_DAY_OF_MONTH || (this.monthlyDayOption === SET_DAY_OF_MONTH && currentDayOfMonth <= this.monthlyDay)) {
-              incrementMonthBy -= 1;
-            }
-            const nextExpirationDate = dayjs(new Date(now.year(), now.month(), now.day())).date(1).add(incrementMonthBy, 'month');
-            if (this.monthlyDayOption === FIRST_DAY_OF_MONTH) {
-              expirationSettings.nextExpirationDate = nextExpirationDate.date(1);
-            } else if (this.monthlyDayOption === LAST_DAY_OF_MONTH) {
-              expirationSettings.nextExpirationDate = nextExpirationDate.endOf('month');
-            } else if (this.monthlyDayOption === SET_DAY_OF_MONTH) {
-              const nextExpirationDateDay = this.monthlyDay <= nextExpirationDate.daysInMonth() ? this.monthlyDay : nextExpirationDate.endOf('month').date();
-              expirationSettings.nextExpirationDate = nextExpirationDate.date(nextExpirationDateDay);
-              expirationSettings.monthlyDay = this.monthlyDay;
-            }
-          } else if (this.expirationType === DAILY) {
-            expirationSettings.every = this.dailyDays;
-            // any user achievement achievedOn before this date
-            // expirationSettings.nextExpirationDate = dayjs(now).subtract(this.dailyDays, 'day');
-          }
-          ExpirationService.saveExpirationSettings(this.$route.params.projectId, this.$route.params.skillId, expirationSettings)
-            .then(() => {
-              this.updateLoadedSettings(expirationSettings);
-              this.showSavedMsg = true;
-              setTimeout(() => {
-                this.showSavedMsg = false;
-              }, 3500);
-              this.$nextTick(() => this.$announcer.polite('Expiration settings were saved'));
-            })
-            .finally(() => {
-              this.loading = false;
-            });
-        } else {
-          // expirationType changed to NEVER so delete existing settings
-          ExpirationService.deleteExpirationSettings(this.$route.params.projectId, this.$route.params.skillId, expirationSettings)
-            .then(() => {
-              this.updateLoadedSettings(expirationSettings);
-              this.showSavedMsg = true;
-              setTimeout(() => {
-                this.showSavedMsg = false;
-              }, 3500);
-              this.$nextTick(() => this.$announcer.polite('Expiration settings were saved'));
-            })
-            .finally(() => {
-              this.loading = false;
-            });
-        }
-      },
-      loadSkillInfo() {
-        this.loadSkill({
-          projectId: this.$route.params.projectId,
-          subjectId: this.$route.params.subjectId,
-          skillId: this.$route.params.skillId,
-        });
-      },
-    },
-  };
-</script>
-
-<style scoped>
-</style>
+<style scoped></style>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 SkillTree
+ * Copyright 2024 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,272 +13,148 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
-import Vue from 'vue';
-import {
-  ButtonPlugin,
-  ToastPlugin,
-  ButtonGroupPlugin,
-  TooltipPlugin,
-  ModalPlugin,
-  LayoutPlugin,
-  FormRadioPlugin,
-  AlertPlugin,
-  FormSelectPlugin,
-  SpinnerPlugin,
-  TabsPlugin,
-  FormTextareaPlugin,
-  LinkPlugin,
-  DropdownPlugin,
-  AvatarPlugin,
-  TablePlugin,
-  FormInputPlugin,
-  FormCheckboxPlugin,
-  InputGroupPlugin,
-  CardPlugin,
-  PaginationPlugin,
-  CollapsePlugin,
-  OverlayPlugin,
-  BadgePlugin,
-  PopoverPlugin,
-  FormPlugin,
-  FormGroupPlugin,
-  FormDatepickerPlugin,
-  ProgressPlugin,
-  BIcon,
-  BIconQuestion,
-  ListGroupPlugin,
-  FormFilePlugin,
-  FormRatingPlugin,
-  BFormSpinbutton,
-} from 'bootstrap-vue';
+import './assets/main.css'
 
-import { SkillsConfiguration, SkillsReporter } from '@skilltree/skills-client-js';
-import {
-  localize, ValidationProvider, ValidationObserver, setInteractionMode,
-} from 'vee-validate';
-import en from 'vee-validate/dist/locale/en.json';
-import Vuex from 'vuex';
-import VueApexCharts from 'vue-apexcharts';
-import VueAnnouncer from '@vue-a11y/announcer';
-import FiltersPlugin from '@/common-components/filter/FiltersPlugin';
-import TimeDurationFilter from '@/common-components/filter/TimeDurationFilter';
-import dayjs from '@/common-components/DayJsCustomizer';
-import '@/common-components/filter/ByteFilter';
-import '@/common-components/filter/FormatDurationFilter';
-import PageVisitService from '@/components/PageVisitService';
-import InceptionConfigurer from './InceptionConfigurer';
-import SkillsReporterDirective from './directives/SkillsReporterDirective';
-import 'babel-polyfill';
-import 'matchmedia-polyfill';
-import 'matchmedia-polyfill/matchMedia.addListener';
-// import './filters/NumberFilter';
-import './filters/TruncateFilter';
-import './filters/DateFilter';
-import './filters/UserRoleFilter';
-// import './filters/TimeFromNowFilter';
-import './directives/SkillsOnMountDirective';
-import RegisterValidators from './validators/RegisterValidators';
-import './directives/FocusDirective';
-import App from './App';
-import router from './router';
-import store from './store/store';
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import PrimeVue from 'primevue/config'
+import ToastService from 'primevue/toastservice'
+import App from './App.vue'
+import router from './router'
+import VueAnnouncer from '@vue-a11y/announcer'
+import VueApexCharts from 'vue3-apexcharts'
+import log from 'loglevel'
 
-Vue.component('apexchart', VueApexCharts);
-Vue.component('ValidationProvider', ValidationProvider);
-Vue.component('ValidationObserver', ValidationObserver);
-Vue.use(Vuex);
+import Button from 'primevue/button'
+import ButtonGroup from 'primevue/buttongroup'
+import Card from 'primevue/card'
+import Panel from 'primevue/panel'
+import Toast from 'primevue/toast'
+import Avatar from 'primevue/avatar'
+import InputText from 'primevue/inputtext'
+import Divider from 'primevue/divider'
+import Message from 'primevue/message'
+import InlineMessage from 'primevue/inlinemessage'
+import Menu from 'primevue/menu'
+import ProgressSpinner from 'primevue/progressspinner'
+import Breadcrumb from 'primevue/breadcrumb'
+import Dropdown from 'primevue/dropdown'
+import Dialog from 'primevue/dialog'
+import InputSwitch from 'primevue/inputswitch'
+import BlockUI from 'primevue/blockui'
+import SelectButton from 'primevue/selectbutton'
+import Badge from 'primevue/badge'
+import MultiSelect from 'primevue/multiselect'
+import InputNumber from 'primevue/inputnumber'
+import Tag from 'primevue/tag'
+import DataTable from 'primevue/datatable'
+import Column from 'primevue/column'
+import InputGroup from 'primevue/inputgroup'
+import InputGroupAddon from 'primevue/inputgroupaddon'
+import Fieldset from 'primevue/fieldset'
+import ToggleButton from 'primevue/togglebutton'
+import RadioButton from 'primevue/radiobutton'
+import Checkbox from 'primevue/checkbox'
+import Rating from 'primevue/rating'
+import Textarea from 'primevue/textarea'
+import Listbox from 'primevue/listbox'
+import ProgressBar from 'primevue/progressbar'
+import Chip from 'primevue/chip'
 
-Vue.use(ButtonPlugin);
-Vue.use(ToastPlugin);
-Vue.use(TooltipPlugin);
-Vue.use(LayoutPlugin);
-Vue.use(FormRadioPlugin);
-Vue.use(AlertPlugin);
-Vue.use(FormSelectPlugin);
-Vue.use(ModalPlugin);
-Vue.use(SpinnerPlugin);
-Vue.use(TabsPlugin);
-Vue.use(FormTextareaPlugin);
-Vue.use(LinkPlugin);
-Vue.use(DropdownPlugin);
-Vue.use(AvatarPlugin);
-Vue.use(ButtonGroupPlugin);
-Vue.use(TablePlugin);
-Vue.use(FormInputPlugin);
-Vue.use(InputGroupPlugin);
-Vue.use(FormCheckboxPlugin);
-Vue.use(CardPlugin);
-Vue.use(PaginationPlugin);
-Vue.use(CollapsePlugin);
-Vue.use(OverlayPlugin);
-Vue.use(BadgePlugin);
-Vue.use(PopoverPlugin);
-Vue.use(FormPlugin);
-Vue.use(FormGroupPlugin);
-Vue.use(FormDatepickerPlugin);
-Vue.use(ProgressPlugin);
-Vue.use(ListGroupPlugin);
-Vue.use(FormRatingPlugin);
-Vue.use(TimeDurationFilter);
-Vue.use(FormFilePlugin);
-Vue.component('BIcon', BIcon);
-Vue.component('BIconQuestion', BIconQuestion);
-Vue.component('b-form-spinbutton', BFormSpinbutton);
+import ConfirmationService from 'primevue/confirmationservice'
+import BadgeDirective from 'primevue/badgedirective'
 
-const install = (vue) => {
-  vue.directive('skills', SkillsReporterDirective);
-};
+import FocusTrap from 'primevue/focustrap'
 
-window.SkillsReporterDirective = SkillsReporterDirective;
-Vue.use(install);
-SkillsReporterDirective.install = install;
+import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue'
+import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue'
+import SkillsIdInput from '@/components/utils/inputForm/SkillsIdInput.vue'
+import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import SkillsNumberInput from '@/components/utils/inputForm/SkillsNumberInput.vue'
+import SkillsCheckboxInput from '@/components/utils/inputForm/SkillsCheckboxInput.vue'
+import SkillsRadioButtonInput from '@/components/utils/inputForm/SkillsRadioButtonInput.vue'
+import SkillsTextarea from '@/components/utils/inputForm/SkillsTextarea.vue'
+import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue'
+import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
+import SkillsCardHeader from '@/components/utils/cards/SkillsCardHeader.vue'
+import { useSkillsReporterDirective } from '@/components/utils/SkillsReporterDirective.js'
 
-Vue.use(FiltersPlugin);
-Vue.use(VueAnnouncer, {}, router);
+import 'primeflex/primeflex.css'
+import '@fortawesome/fontawesome-free/css/all.css'
+import 'material-icons/css/material-icons.css'
+import 'material-icons/iconfont/material-icons.css'
+import '@toast-ui/editor/dist/toastui-editor.css'
+// import 'primevue/resources/themes/lara-light-green/theme.css'
+import 'video.js/dist/video-js.css'
 
-localize({
-  en,
-});
 
-setInteractionMode('custom', () => ({ on: ['input', 'change'] }));
-Vue.config.productionTip = false;
-window.dayjs = dayjs;
+log.setLevel('warn')
 
-window.axios = require('axios');
+const pinia = createPinia()
 
-window.cancellationController = new AbortController();
+const app = createApp(App)
 
-require('./interceptors/errorHandler');
-require('./interceptors/clientVersionInterceptor');
-require('./interceptors/userAgreementInterceptor');
-require('./interceptors/upgradeInProgressInterceptor');
-require('./interceptors/globalCancelInterceptor');
+app.use(router)
+app.use(pinia)
+app.use(PrimeVue)
+app.use(ToastService)
+app.use(VueAnnouncer, { router })
+app.use(VueApexCharts)
+app.use(ConfirmationService)
+app.component('Button', Button)
+app.component('ButtonGroup', ButtonGroup)
+app.component('Card', Card)
+app.component('Panel', Panel)
+app.component('Toast', Toast)
+app.component('Avatar', Avatar)
+app.component('InputText', InputText)
+app.component('Divider', Divider)
+app.component('Message', Message)
+app.component('InlineMessage', InlineMessage)
+app.component('Menu', Menu)
+app.component('ProgressSpinner', ProgressSpinner)
+app.component('Breadcrumb', Breadcrumb)
+app.component('Dropdown', Dropdown)
+app.component('Dialog', Dialog)
+app.component('InputSwitch', InputSwitch)
+app.component('BlockUI', BlockUI)
+app.component('SelectButton', SelectButton)
+app.component('Badge', Badge)
+app.component('SkillsSpinner', SkillsSpinner)
+app.component('MultiSelect', MultiSelect)
+app.component('Tag', Tag)
+app.component('DataTable', DataTable)
+app.component('Column', Column)
+app.component('InputNumber', InputNumber)
+app.component('InputGroup', InputGroup)
+app.component('InputGroupAddon', InputGroupAddon)
+app.component('Fieldset', Fieldset)
+app.component('ToggleButton', ToggleButton)
+app.component('RadioButton', RadioButton)
+app.component('Checkbox', Checkbox)
+app.component('Rating', Rating)
+app.component('Textarea', Textarea)
+app.component('Listbox', Listbox)
+app.component('ProgressBar', ProgressBar)
+app.component('Chip', Chip)
 
-const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId;
-const isAdminPage = (route) => route.path.startsWith('/administrator');
-const isLoggedIn = () => store.getters.isAuthenticated;
-const isPki = () => store.getters.isPkiAuthenticated;
-const getLandingPage = () => {
-  let landingPage = 'MyProgressPage';
-  if (store.getters.userInfo) {
-    if (store.getters.userInfo.landingPage === 'admin') {
-      landingPage = 'AdminHomePage';
-    }
-  }
-  return landingPage;
-};
+app.component('SkillsButton', SkillsButton)
+app.component('SkillsTextInput', SkillsTextInput)
+app.component('SkillsIdInput', SkillsIdInput)
+app.component('SkillsDialog', SkillsDialog)
+app.component('SkillsNumberInput', SkillsNumberInput)
+app.component('SkillsCheckboxInput', SkillsCheckboxInput)
+app.component('SkillsRadioButtonInput', SkillsRadioButtonInput)
+app.component('SkillsTextarea', SkillsTextarea)
+app.component('SkillsDropDown', SkillsDropDown)
+app.component('SkillsDataTable', SkillsDataTable)
+app.component('SkillsCardHeader', SkillsCardHeader)
 
-router.beforeEach((to, from, next) => {
-  const { skillsClientDisplayPath } = to.query;
-  store.commit('skillsClientDisplayPath', { path: skillsClientDisplayPath, fromDashboard: true });
+const skillsReporterDirective = useSkillsReporterDirective();
+app.directive('skills', skillsReporterDirective.vSkills);
+app.directive('skills-onMount', skillsReporterDirective.vSkillsOnMounted);
+app.directive('focustrap', FocusTrap);
+app.directive('badge', BadgeDirective);
 
-  const requestAccountPath = '/request-root-account';
-  if (!isPki() && !isLoggedIn() && to.path !== requestAccountPath && store.getters.config.needToBootstrap) {
-    next({ path: requestAccountPath });
-  } else if (!isPki() && to.path === requestAccountPath && !store.getters.config.needToBootstrap) {
-    next({ name: getLandingPage() });
-  } else {
-    /* eslint-disable no-lonely-if */
-    if (store.state.showUa && (to.path !== '/user-agreement' && to.path !== '/skills-login')) {
-      let p = '';
-      if (to.query?.redirect) {
-        p = to.query.redirect;
-      } else {
-        p = to.fullPath;
-      }
-      const ua = p !== '/' ? { name: 'UserAgreement', query: { redirect: p } } : { name: 'UserAgreement' };
-      next(ua);
-    } else {
-      if (to.path === '/') {
-        const landingPageRoute = { name: getLandingPage() };
-        next(landingPageRoute);
-      }
-      if (from.path !== '/error') {
-        store.commit('previousUrl', from.fullPath);
-      }
-      if (isActiveProjectIdChange(to, from)) {
-        store.commit('currentProjectId', to.params.projectId);
-        if (isAdminPage(to) && to.params.projectId) {
-          store.dispatch('loadProjConfigState', { projectId: to.params.projectId });
-        }
-      }
-      if (to.path.startsWith('/administrator/quizzes/') && to.params.quizId && to.params.quizId !== from.params.quizId) {
-        store.dispatch('loadQuizConfigState', { quizId: to.params.quizId });
-      }
-      if (to.matched.some((record) => record.meta.requiresAuth)) {
-        // this route requires auth, check if logged in if not, redirect to login page.
-        if (!isLoggedIn()) {
-          const newRoute = { query: { redirect: to.fullPath } };
-          if (isPki()) {
-            newRoute.name = getLandingPage();
-          } else {
-            newRoute.name = 'Login';
-          }
-          next(newRoute);
-        } else {
-          next();
-        }
-      } else {
-        next();
-      }
-    }
-  }
-});
-
-const DEFAULT_TITLE = 'SkillTree Dashboard';
-router.afterEach((to, from) => {
-  if (to.meta.reportSkillId) {
-    SkillsConfiguration.afterConfigure()
-      .then(() => {
-        SkillsReporter.reportSkill(to.meta.reportSkillId);
-      });
-  }
-  if (isPki() || isLoggedIn()) {
-    PageVisitService.reportPageVisit(to.path, to.fullPath);
-  }
-  // Use next tick to handle router history correctly
-  // see: https://github.com/vuejs/vue-router/issues/914#issuecomment-384477609
-  Vue.nextTick(() => {
-    let newTitle = DEFAULT_TITLE;
-    if (to && to.meta && to.meta.announcer && to.meta.announcer.message) {
-      newTitle = `${DEFAULT_TITLE} - ${to.meta.announcer.message}`;
-    }
-    document.title = newTitle;
-  });
-
-  // this hack is needed because otherwise when navigating between
-  // pages the focus is placed onto the next visible element which in case of
-  // drilling-down (for example projects page into a single project page)
-  // the focus is placed on the next tabbable element which happens to in the footer
-  // (when skills.config.ui.supportLinkN properties are utilized)
-  if (from.name !== to.name) {
-    setTimeout(() => {
-      Vue.nextTick(() => {
-        const preSkipButtonPlaceholder = document.querySelector('#preSkipToContentPlaceholder');
-        if (preSkipButtonPlaceholder) {
-          preSkipButtonPlaceholder.setAttribute('tabindex', 0);
-          preSkipButtonPlaceholder.focus();
-          preSkipButtonPlaceholder.setAttribute('tabindex', -1);
-        }
-      });
-    }, 150);
-  }
-});
-
-store.dispatch('loadConfigState').finally(() => {
-  RegisterValidators.init();
-  store.dispatch('restoreSessionIfAvailable').finally(() => {
-    InceptionConfigurer.configure();
-    /* eslint-disable no-new */
-    const vm = new Vue({
-      el: '#app',
-      router,
-      components: { App },
-      template: '<App/>',
-      store,
-    });
-    window.vm = vm;
-  });
-});
+app.mount('#app')

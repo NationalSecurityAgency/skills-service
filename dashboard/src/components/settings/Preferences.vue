@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,191 +13,191 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <div>
-    <sub-page-header title="Preferences"/>
+<script setup>
+import { computed, onMounted, ref } from 'vue'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import SettingsService from '@/components/settings/SettingsService.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import {useThemesHelper} from "@/components/header/UseThemesHelper.js";
+import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 
-    <loading-container v-bind:is-loading="isLoading">
-        <div class="card">
-          <div class="card-body">
-            <div v-if="isProgressAndRankingEnabled()" data-cy="defaultHomePageSetting">
-              <b-form-group label-for="home-page-pref">
-                <template v-slot:label>
-                  <i class="fas fa-home" aria-hidden="true"></i> Default Home Page:
-                  <inline-help
-                    target-id="defaultHomePageHelp"
-                    msg="Select which page you would to be displayed when first visiting the SkillTree dashboard."/>
-                </template>
-                <b-form-radio-group
-                  id="home-page-pref"
-                  class="pl-2"
-                  data-cy="landingPageSelector"
-                  v-on:input="homePagePrefChanged"
-                  v-model="settings.homePage.value"
-                  :options="[{text: 'Project Admin', value: 'admin'}, { text: 'Progress and Rankings', value: 'progress'}]"
-                  stacked
-                ></b-form-radio-group>
-              </b-form-group>
-            </div>
-            <div data-cy="rankOptOut">
-              <i class="fas fa-users-slash" aria-hidden="true"></i> <span id="rankAndLeaderboardOptOutLabel">Rank and Leaderboard Opt-Out:</span>
-              <inline-help
-                target-id="rankOptOutHelp"
-                msg="Change to true and you will not be shown on the Leaderboard or assigned a rank"/>
-              <b-form-checkbox v-model="settings.rankAndLeaderboardOptOut.value"
-                               name="check-button"
-                               v-on:input="rankAndLeaderboardOptOutPrefChanged"
-                               aria-labelledby="rankAndLeaderboardOptOutLabel"
-                               data-cy="rankAndLeaderboardOptOutSwitch"
-                               class="ml-3"
-                               inline switch>
-                {{ settings.rankAndLeaderboardOptOut.value ? 'Yes' : 'No' }}
-              </b-form-checkbox>
-            </div>
+const themeHelper = useThemesHelper()
+const appConfig = useAppConfig();
+const colors = useColors()
+const userInfo = useUserInfo()
 
-            <hr/>
-            <p v-if="errMsg" class="text-center text-danger mt-3" role="alert">***{{ errMsg }}***</p>
+const isLoading = ref(true);
+const settings = ref({
+  homePage: {
+    settingGroup: 'user.prefs',
+    value: 'admin',
+    setting: 'home_page',
+    lastLoadedValue: '',
+    dirty: false,
+  },
+  rankAndLeaderboardOptOut: {
+    settingGroup: 'user.prefs',
+    value: false,
+    setting: 'rank_and_leaderboard_optOut',
+    lastLoadedValue: false,
+    dirty: false,
+  },
+  enableDarkMode: {
+    settingGroup: 'user.prefs',
+    value: false,
+    setting: 'enable_dark_mode',
+    lastLoadedValue: false,
+    dirty: false,
+  }
+});
+const errMsg = ref(null);
+const showSavedMsg = ref(false);
 
-            <div class="row">
-              <div class="col">
-                <b-button variant="outline-success" @click="save" :disabled="!isDirty" data-cy="userPrefsSettingsSave">
-                  Save <i class="fas fa-arrow-circle-right"/>
-                </b-button>
+onMounted(() => {
+  loadSettings();
+})
 
-                <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">
-              <i class="fa fa-exclamation-circle"
-                 aria-label="Settings have been changed, do not forget to save"
-                 v-b-tooltip.hover="'Settings have been changed, do not forget to save'"/> Unsaved Changes
-            </span>
-                <span v-if="!isDirty && showSavedMsg" class="text-success ml-2" data-cy="settingsSavedAlert">
-              <i class="fa fa-check" />
-              Settings Updated!
-            </span>
-              </div>
-            </div>
+let isDirty = computed(() => {
+  return Object.values(settings.value).find((item) => item.dirty);
+});
 
-          </div>
-        </div>
-    </loading-container>
-  </div>
-</template>
-
-<script>
-  import SettingsService from './SettingsService';
-  import LoadingContainer from '../utils/LoadingContainer';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import ToastSupport from '../utils/ToastSupport';
-  import InlineHelp from '../utils/InlineHelp';
-
-  export default {
-    name: 'Preferences',
-    mixins: [ToastSupport],
-    components: { SubPageHeader, LoadingContainer, InlineHelp },
-    data() {
-      return {
-        isLoading: true,
-        settings: {
-          homePage: {
-            settingGroup: 'user.prefs',
-            value: 'admin',
-            setting: 'home_page',
-            lastLoadedValue: '',
-            dirty: false,
-          },
-          rankAndLeaderboardOptOut: {
-            settingGroup: 'user.prefs',
-            value: false,
-            setting: 'rank_and_leaderboard_optOut',
-            lastLoadedValue: false,
-            dirty: false,
-          },
-        },
-        errMsg: null,
-        showSavedMsg: false,
-      };
-    },
-    mounted() {
-      this.loadSettings();
-    },
-    methods: {
-      homePagePrefChanged(value) {
-        this.settings.homePage.dirty = `${value}` !== `${this.settings.homePage.lastLoadedValue}`;
-      },
-      rankAndLeaderboardOptOutPrefChanged(value) {
-        this.settings.rankAndLeaderboardOptOut.dirty = `${value}` !== `${this.settings.rankAndLeaderboardOptOut.lastLoadedValue}`;
-      },
-      loadSettings() {
-        SettingsService.getUserSettings()
-          .then((response) => {
-            if (response) {
-              const entries = Object.entries(this.settings);
-              let hasHomeKey = false;
-              entries.forEach((entry) => {
-                const [key, value] = entry;
-                const found = response.find((item) => item.setting === value.setting);
-                if (found) {
-                  this.settings[key] = { dirty: false, lastLoadedValue: found.value, ...found };
-                  if (key === 'homePage') {
-                    hasHomeKey = true;
-                  }
-                }
-              });
-              if (!hasHomeKey) {
-                this.settings.homePage.value = this.$store.getters.config.defaultLandingPage;
+function loadSettings() {
+  SettingsService.getUserSettings()
+      .then((response) => {
+        if (response) {
+          const entries = Object.entries(settings.value);
+          let hasHomeKey = false;
+          entries.forEach((entry) => {
+            const [key, value] = entry;
+            const found = response.find((item) => item.setting === value.setting);
+            if (found) {
+              settings.value[key] = { dirty: false, lastLoadedValue: found.value, ...found };
+              if (key === 'homePage') {
+                hasHomeKey = true;
+              }
+              if (key === 'rankAndLeaderboardOptOut' || key === 'enableDarkMode') {
+                settings.value[key].value = settings.value[key].value.toLowerCase() === 'true';
               }
             }
-          })
-          .finally(() => {
-            this.isLoading = false;
           });
-      },
-      save() {
-        const dirtyChanges = Object.values(this.settings).filter((item) => item.dirty);
-        if (dirtyChanges) {
-          this.isLoading = true;
-          SettingsService.checkUserSettingsValidity(dirtyChanges)
-            .then((res) => {
-              if (res.valid) {
-                this.saveUserSettings(dirtyChanges);
-              } else {
-                this.errMsg = res.explanation;
-                this.isLoading = false;
-              }
-            });
+          if (!hasHomeKey) {
+            settings.value.homePage.value = appConfig.defaultLandingPage;
+          }
         }
-      },
-      saveUserSettings(dirtyChanges) {
-        SettingsService.saveUserSettings(dirtyChanges)
-          .then(() => {
-            this.showSavedMsg = true;
-            setTimeout(() => { this.showSavedMsg = false; }, 4000);
-            const entries = Object.entries(this.settings);
-            entries.forEach((entry) => {
-              const [key, value] = entry;
-              this.settings[key] = Object.assign(value, { dirty: false, lastLoadedValue: value.value });
+      })
+      .finally(() => {
+        isLoading.value = false;
+      });
+}
 
-              if (key === 'homePage') {
-                const userInfo = { ...this.$store.getters.userInfo, landingPage: value.value };
-                this.$store.commit('storeUser', userInfo);
-              }
-            });
-          })
-          .finally(() => {
-            this.isLoading = false;
-          });
-      },
-      isProgressAndRankingEnabled() {
-        return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
-      },
-    },
-    computed: {
-      isDirty() {
-        const foundDirty = Object.values(this.settings).find((item) => item.dirty);
-        return foundDirty;
-      },
-    },
-  };
+function save() {
+  const dirtyChanges = Object.values(settings.value).filter((item) => item.dirty);
+  if (dirtyChanges) {
+    isLoading.value = true;
+    SettingsService.checkUserSettingsValidity(dirtyChanges)
+        .then((res) => {
+          if (res.valid) {
+            saveUserSettings(dirtyChanges);
+          } else {
+            errMsg.value = res.explanation;
+            isLoading.value = false;
+          }
+        });
+  }
+}
+
+function saveUserSettings(dirtyChanges) {
+  SettingsService.saveUserSettings(dirtyChanges)
+      .then(() => {
+        showSavedMsg.value = true;
+        setTimeout(() => { showSavedMsg.value = false; }, 4000);
+        const entries = Object.entries(settings.value);
+        entries.forEach((entry) => {
+          const [key, value] = entry;
+          settings[key] = Object.assign(value, { dirty: false, lastLoadedValue: value.value });
+          if (key === 'homePage') {
+            userInfo.userInfo.value.landingPage = value.value
+          }
+          if (key === 'enableDarkMode') {
+            if(value.value) {
+              themeHelper.setDarkMode();
+            } else {
+              themeHelper.setLightMode();
+            }
+          }
+        });
+      })
+      .finally(() => {
+        isLoading.value = false;
+      });
+}
+
+function isProgressAndRankingEnabled() {
+  return appConfig.rankingAndProgressViewsEnabled === true || appConfig.rankingAndProgressViewsEnabled === 'true';
+}
+
+function homePagePrefChanged() {
+  settings.value.homePage.dirty = `${settings.value.homePage.value}` !== `${settings.value.homePage.lastLoadedValue}`;
+}
+
+function rankAndLeaderboardOptOutPrefChanged() {
+  settings.value.rankAndLeaderboardOptOut.dirty = `${settings.value.rankAndLeaderboardOptOut.value}` !== `${settings.value.rankAndLeaderboardOptOut.lastLoadedValue}`;
+}
+
+function enableDarkModeChanged() {
+  settings.value.enableDarkMode.dirty = `${settings.value.enableDarkMode.value}` !== `${settings.value.enableDarkMode.lastLoadedValue}`;
+}
 </script>
 
-<style scoped>
-</style>
+<template>
+  <sub-page-header title="Preferences"/>
+
+  <Card v-if="!isLoading">
+    <template #content>
+      <div data-cy="defaultHomePageSetting" v-if="isProgressAndRankingEnabled()">
+        <label :for="settings.homePage.value === 'admin' ? 'progress' : 'admin'">
+          <i class="fas fa-home mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i> Default Home Page:
+        </label>
+        <div class="pt-2 pl-2">
+          <RadioButton v-model="settings.homePage.value" data-cy="admin" value="admin" inputId="admin" @change="homePagePrefChanged" />
+          <label for="admin" class="ml-2">Project Admin</label>
+        </div>
+        <div class="pt-2 pl-2">
+          <RadioButton v-model="settings.homePage.value" data-cy="progress" value="progress" inputId="progress" @change="homePagePrefChanged"/>
+          <label for="progress" class="ml-2">Progress and Rankings</label>
+        </div>
+      </div>
+      <div data-cy="rankOptOut" class="pt-4 pb-2 flex align-content-center align-items-center">
+        <label for="rankAndLeaderboardOptOutSwitch">
+          <i class="fas fa-users-slash mr-2" :class="colors.getTextClass(2)" aria-hidden="true"></i> <span id="rankAndLeaderboardOptOutLabel">Rank and Leaderboard Opt-Out:</span>
+        </label>
+        <InputSwitch v-model="settings.rankAndLeaderboardOptOut.value" data-cy="rankAndLeaderboardOptOutSwitch" class="ml-2"
+                     aria-labelledby="rankAndLeaderboardOptOutLabel"
+                     inputId="rankAndLeaderboardOptOutSwitch"
+                     @change="rankAndLeaderboardOptOutPrefChanged" />
+        <span class="ml-2">{{ settings.rankAndLeaderboardOptOut.value ? 'Yes' : 'No'}}</span>
+      </div>
+      <div data-cy="enableDarkMode" class="pt-2 pb-2 flex align-content-center align-items-center">
+        <label for="enableDarkModeSwitch">
+          <i class="fas fa-moon mr-2" :class="colors.getTextClass(2)" aria-hidden="true"></i> <span id="enableDarkModeLabel">Dark Mode:</span>
+        </label>
+        <InputSwitch v-model="settings.enableDarkMode.value" data-cy="enableDarkModeSwitch" class="ml-2"
+                     aria-labelledby="enableDarkModeLabel"
+                     inputId="enableDarkModeSwitch"
+                     @change="enableDarkModeChanged" />
+        <span class="ml-2">{{ settings.enableDarkMode.value ? 'On' : 'Off'}}</span>
+      </div>
+      <SkillsButton label="Save" icon="fas fa-arrow-circle-right" @click.stop="save" size="small" :disabled="!isDirty" data-cy="userPrefsSettingsSave"/>
+      <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">
+              <i class="fa fa-exclamation-circle" /> Unsaved Changes
+      </span>
+      <span v-if="!isDirty && showSavedMsg" class="text-success ml-2" data-cy="settingsSavedAlert">
+        <i class="fa fa-check" />
+        Settings Updated!
+      </span>
+    </template>
+  </Card>
+</template>
+
+<style scoped></style>
