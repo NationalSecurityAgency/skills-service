@@ -19,12 +19,14 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import CardWithVericalSections from '@/components/utils/cards/CardWithVericalSections.vue'
 import { useMyProgressState } from '@/stores/UseMyProgressState.js'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
 const props = defineProps(['proj', 'displayOrder'])
-const emit = defineEmits(['sort-changed-requested'])
+const emit = defineEmits(['sort-changed-requested', 'remove-project'])
 const numberFormat = useNumberFormat()
 const myProgressState = useMyProgressState()
 const themeHelper = useThemesHelper()
+const dialogMessages = useDialogMessages()
 
 const showSortControl = computed(() => myProgressState.myProjects.length > 1)
 
@@ -95,7 +97,16 @@ const moveUp = () => {
     direction: 'up'
   })
 }
-
+const remove = () => {
+  dialogMessages.msgConfirm({
+    message: 'Remove this project from My Projects?',
+    header: 'Please Confirm!',
+    acceptLabel: 'YES, Remove It',
+    accept: () => {
+      emit('remove-project', props.proj.projectId);
+    }
+  });
+}
 
 </script>
 
@@ -103,10 +114,11 @@ const moveUp = () => {
   <CardWithVericalSections
         :data-cy="`project-link-card-${proj.projectId}`"
         :class="{ 'proj-link-card' : !overSortControl }">
-    <template #header v-if="showSortControl">
+    <template #header>
       <div class="flex">
         <div class="flex-1">
           <SkillsButton
+            v-if="showSortControl"
             :id="`sortControlHandle-${proj.projectId}`"
             text
             icon="fas fa-arrows-alt"
@@ -121,13 +133,14 @@ const moveUp = () => {
         </div>
         <div class="text-right">
           <!--            todo: support of project removal -->
-          <!--            <SkillsButton-->
-          <!--              text-->
-          <!--              icon="far fa-times-circle"-->
-          <!--              severity="secondary"-->
-          <!--              class="pr-3 pt-2"-->
-          <!--              :aria-label="`Remove ${proj.projectName} from My Projects`"-->
-          <!--              size="large"></SkillsButton>-->
+          <SkillsButton
+            text
+            icon="far fa-times-circle"
+            severity="secondary"
+            class="pr-3 pt-2"
+            @click="remove"
+            :aria-label="`Remove ${proj.projectName} from My Projects`"
+            size="large"></SkillsButton>
         </div>
       </div>
     </template>
