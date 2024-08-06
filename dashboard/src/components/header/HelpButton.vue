@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,84 +13,87 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <b-dropdown right variant="link" id="helpMenu">
-    <template slot="button-content">
-      <i class="far fa-question-circle" style="font-size: 1.55rem" aria-hidden="true" data-cy="helpButton"></i>
-      <span class="sr-only">help menu</span>
-    </template>
-    <b-dropdown-item :href="officialGuide" target="_blank" style="min-width: 12.5rem;">
-      <span class="text-gray-700" aria-label="Link to SkillTree's official documentation"> <i class="fas fa-book skills-color-officialDocs" aria-hidden="true"></i>Official Docs</span>
-      <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
-    </b-dropdown-item>
-    <b-dropdown-divider />
-    <b-dropdown-group id="dropdown-group-1" header="Guides">
-      <b-dropdown-item :href="dashboardGuideUrl" target="_blank">
-        <span class="text-gray-700" aria-label="Link to SkillTree's Dashboard Guide"> <i class="fas fa-info-circle skills-color-dashboardDocs" aria-hidden="true"/><span class="link-name">Dashboard</span></span>
-        <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
-      </b-dropdown-item>
-      <b-dropdown-item :href="integrationGuideUrl" target="_blank">
-        <span class="text-gray-700" aria-label="Link to SkillTree's Integration Guide"> <i class="fas fa-hands-helping skills-color-integrationDocs" aria-hidden="true"></i>Integration</span>
-        <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
-      </b-dropdown-item>
-    </b-dropdown-group>
-    <b-dropdown-group v-if="supportLinksProps && supportLinksProps.length > 0" id="support-group" header="Support">
-      <b-dropdown-item v-for="supportLink in supportLinksProps" :key="supportLink.label" :href="supportLink.link"
-                       :data-cy="`helpButtonSupportLinkLabel_${supportLink.label}`"
-                       target="_blank">
-        <span class="text-gray-700" :aria-label="`Link to SkillTree's ${supportLink.label}`"> <i class="text-primary" :class="supportLink.icon" aria-hidden="true"></i>{{ supportLink.label }}</span>
-        <span class="float-right" aria-hidden="true"><i class="fas fa-external-link-alt text-secondary"></i></span>
-      </b-dropdown-item>
-    </b-dropdown-group>
-  </b-dropdown>
-</template>
+<script setup>
+import { ref } from 'vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
-<script>
-  export default {
-    name: 'HelpButton',
-    computed: {
-      officialGuide() {
-        return `${this.$store.getters.config.docsHost}`;
+const appConfig = useAppConfig()
+
+const menu = ref()
+let allItemsTmp = [
+  {
+    label: 'Official Docs',
+    icon: 'fas fa-book',
+    url: `${appConfig.docsHost}`
+  },
+  {
+    separator: true
+  },
+  {
+    label: 'Guides',
+    items: [
+      {
+        label: 'Dashboard',
+        icon: 'fas fa-info-circle',
+        url: `${appConfig.docsHost}/dashboard/user-guide/`
       },
-      dashboardGuideUrl() {
-        return `${this.$store.getters.config.docsHost}/dashboard/user-guide/`;
-      },
-      integrationGuideUrl() {
-        return `${this.$store.getters.config.docsHost}/skills-client/`;
-      },
-      supportLinksProps() {
-        const configs = this.$store.getters.config;
-        const dupKeys = Object.keys(configs).filter((conf) => conf.startsWith('supportLink')).map((filteredConf) => filteredConf.substr(0, 12));
-        const keys = dupKeys.filter((v, i, a) => a.indexOf(v) === i);
-        return keys.map((key) => ({
-          link: configs[key],
-          label: configs[`${key}Label`],
-          icon: configs[`${key}Icon`],
-        }));
-      },
-    },
-  };
+      {
+        label: 'Integration',
+        icon: 'fas fa-hands-helping',
+        url: `${appConfig.docsHost}/skills-client/`
+      }
+    ]
+  }
+]
+
+const keyLookup = 'supportLink'
+const configs = appConfig.getConfigsThatStartsWith(keyLookup)
+const dupKeys = Object.keys(configs).map((conf) => conf.substring(0, 12))
+const keys = dupKeys.filter((v, i, a) => a.indexOf(v) === i)
+if (keys && keys.length > 0) {
+  const items = keys.map((key) => {
+    return {
+      label: configs[`${key}Label`],
+      icon: configs[`${key}Icon`],
+      url: configs[key]
+    }
+  })
+  allItemsTmp.push({
+    label: 'Support',
+    items
+  })
+}
+
+const items = ref(allItemsTmp)
+
+const toggle = (event) => {
+  menu.value.toggle(event)
+}
 </script>
 
-<style scoped>
-.fa-external-link-alt {
-  font-size: 0.6rem;
-}
-.link-name {
-  padding-right: 2rem;
-}
-.text-gray-700 {
-  width: 40rem !important;
-}
-.text-gray-700 > i {
-  width: 1.6rem;
-}
-.sr-only {
-  position:absolute;
-  left:-10000px;
-  top:auto;
-  width:1px;
-  height:1px;
-  overflow:hidden;
-}
-</style>
+<template>
+  <div class="d-inline">
+    <Button
+      icon="fas fa-question"
+      severity="success"
+      outlined
+      raised
+      @click="toggle"
+      aria-label="Help Button"
+      aria-haspopup="true"
+      data-cy="helpButton"
+      aria-controls="help_settings_menu" />
+    <div id="help_settings_menu">
+      <Menu ref="menu" :model="items" :popup="true" role="navigation">
+        <template #item="{ item, props }">
+          <a :href="item.url" target="_blank" v-bind="props.action">
+            <span class="w-1rem p-menuitem-icon"><i :class="item.icon"/></span>
+            <span class="ml-2 p-menuitem-text">{{ item.label }}</span>
+          </a>
+        </template>
+      </Menu>
+    </div>
+  </div>
+</template>
+
+<style scoped></style>

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,95 +13,90 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
-    <b-modal :id="projectId" size="md" :title="title" v-model="show"
-             :no-close-on-backdrop="true" :centered="true"
-             header-bg-variant="info"
-             @hide="publishHidden"
-             header-text-variant="light" no-fade>
-      <b-container fluid>
-          <label for="existingLevel">Existing level</label>
-          <b-form-input id="existingLevel" :readonly="true" v-model="oldLevel" />
-          <div class="mt-3" aria-hidden="true"/>
-          <label for="newLevel">New level</label>
-          <ValidationProvider name="New Level" :debounce=500 v-slot="{errors}" rules="required|min_value:0|max_value:100">
-            <!-- this stupid thing doesn't load on mount -->
-            <level-selector v-model="newLevel"
-                            :load-immediately="true"
-                            id="newLevel"
-                            :project-id="projectId"
-                            aria-errormessage="newLevelError"
-                            aria-describedby="newLevelError"
-                            :aria-invalid="errors && errors.length > 0"
-                            placeholder="select new project level"></level-selector>
-            <small role="alert" class="form-text text-danger" v-show="errors[0]" data-cy="newLevelError" id="newLevelError">{{ errors[0] }}</small>
-          </ValidationProvider>
-      </b-container>
-      <div slot="modal-footer" class="w-100">
-        <b-button variant="success"
-                  size="sm"
-                  class="float-right"
-                  @click="handleSubmit(saveLevelChange)"
-                  :disabled="invalid || newLevel === oldLevel"
-                  data-cy="saveLevelButton">
-          Save
-        </b-button>
-        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="closeMe" data-cy="cancelLevel">
-          Cancel
-        </b-button>
-      </div>
-    </b-modal>
-  </ValidationObserver>
-</template>
+<script setup>
+import { ref } from 'vue';
+import SkillsDialog from "@/components/utils/inputForm/SkillsDialog.vue";
+import LevelSelector from "@/components/levels/global/LevelSelector.vue";
 
-<script>
-  import LevelSelector from '@/components/levels/global/LevelSelector';
+const emit = defineEmits(['level-changed', 'hidden']);
+const props = defineProps({
+  projectId: {
+    type: String,
+    required: true,
+  },
+  currentLevel: {
+    type: Number,
+    required: true,
+  },
+  title: {
+    type: String,
+    required: false,
+    default: '',
+  },
+});
 
-  export default {
-    name: '',
-    props: {
-      projectId: {
-        type: String,
-        required: true,
-      },
-      currentLevel: {
-        type: Number,
-        required: true,
-      },
-      title: {
-        type: String,
-        required: false,
-        default: '',
-      },
-    },
-    components: { LevelSelector },
-    data() {
-      return {
-        show: true,
-        newLevel: null,
-        oldLevel: this.currentLevel,
-      };
-    },
-    methods: {
-      saveLevelChange() {
-        this.$emit('level-changed', {
-          projectId: this.projectId,
-          oldLevel: this.currentLevel,
-          newLevel: this.newLevel,
-        });
-        this.closeMe();
-      },
-      closeMe() {
-        this.show = false;
-        this.publishHidden();
-      },
-      publishHidden() {
-        this.$emit('hidden', { projectId: this.projectId });
-      },
-    },
-  };
+const show = ref(true);
+const newLevel = ref(null);
+const oldLevel = ref(props.currentLevel);
+
+const saveLevelChange = () => {
+  emit('level-changed', {
+    projectId: props.projectId,
+    oldLevel: props.currentLevel,
+    newLevel: newLevel.value,
+  });
+  closeMe();
+};
+
+const closeMe = () => {
+  show.value = false;
+  publishHidden();
+};
+
+const publishHidden = () => {
+  emit('hidden', { projectId: props.projectId });
+};
+
+const selectLevel = (level) => {
+  newLevel.value = level;
+}
 </script>
 
+<template>
+  <SkillsDialog
+      v-model="show"
+      header="Change Level"
+      :enable-return-focus="true"
+      cancel-button-label="Cancel"
+      cancel-button-icon=""
+      cancel-button-severity="success"
+      @on-ok="saveLevelChange"
+      @on-cancel="closeMe"
+      :okButtonDisabled="newLevel === null || newLevel === oldLevel"
+      :style="{ width: '40rem !important' }">
+
+    <div class="mb-4">
+      <div>
+        <label for="existingLevel">Existing level</label>
+      </div>
+      <div>
+        <InputNumber id="existingLevel" :disabled="true" v-model="oldLevel" class="w-full" />
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label for="newLevel">New level</label>
+      <level-selector v-model="newLevel"
+                      :load-immediately="true"
+                      @input="selectLevel"
+                      inputId="newLevel"
+                      :project-id="projectId"
+                      :selectedLevel="oldLevel"
+                      placeholder="select new project level"></level-selector>
+    </div>
+  </SkillsDialog>
+</template>
+
 <style scoped>
+
 </style>

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,18 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+</script>
+
 <template>
-  <div>
+  <div class="mt-2">
     <router-view id="mainContent2" tabindex="-1" aria-label="Main content area, click tab to navigate" />
   </div>
 </template>
 
-<script>
-  export default {
-    name: 'MyProgress',
-  };
-</script>
-
-<style scoped>
-
-</style>
+<style scoped></style>

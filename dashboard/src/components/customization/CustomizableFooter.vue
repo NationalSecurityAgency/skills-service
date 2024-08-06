@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,25 +13,23 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { computed } from 'vue';
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useDynamicVariableReplacementHelper } from '@/components/customization/DynamicVariableReplacementHelper.js';
+
+const appConfig = useAppConfig();
+const variableReplacementHelper = useDynamicVariableReplacementHelper();
+
+let customFooter = computed(() => {
+  return variableReplacementHelper.populateDynamicVariables(appConfig.customFooter)
+})
+</script>
+
 <template>
-  <!-- This footer will appear at the top of every page, update this component to customize for your app -->
   <div v-html="customFooter">
   </div>
 </template>
-
-<script>
-  import DynamicVariableReplacementMixin from './DynamicVariableReplacementMixin';
-
-  export default {
-    name: 'CustomizableFooter',
-    mixins: [DynamicVariableReplacementMixin],
-    computed: {
-      customFooter() {
-        return this.populateDynamicVariables(this.$store.getters.config.customFooter);
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

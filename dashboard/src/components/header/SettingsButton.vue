@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,131 +13,104 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <b-dropdown right variant="link">
-    <template slot="button-content">
-      <i class="fas fa-user-circle" style="font-size: 1.55rem" aria-hidden="true"/>
-      <span class="sr-only">settings menu</span>
-    </template>
-    <b-dropdown-text style="width: 14rem;">
-      <div class="text-secondary"><i class="fas fa-key skills-color-loggedIn" aria-hidden="true"/> Logged in as</div>
-      <div class="text-left text-primary font-weight-bold" data-cy="settingsButton-loggedInName">
-        {{ displayName }}
-      </div>
-    </b-dropdown-text>
-    <b-dropdown-divider />
-    <b-dropdown-item v-if="isProgressAndRankingEnabled" href="#" :disabled="myProgressLinkDisabled"  @click="gotoMyProgress" data-cy="settingsButton-navToMyProgress">
-      <span class="text-gray-700"> <i class="fas fa-chart-bar skills-color-progressAndRanking" aria-hidden="true"/><span class="link-name" aria-label="Navigate to Progress and Ranking pages">Progress and Rankings</span></span>
-    </b-dropdown-item>
-    <b-dropdown-item v-if="isProgressAndRankingEnabled"  href="#" :disabled="adminLinkDisabled"  @click="gotoAdmin" data-cy="settingsButton-navToProjectAdmin">
-      <span class="text-gray-700"> <i class="fas fa-tasks skills-color-projectAdmin" aria-hidden="true"/><span class="link-name" aria-label="Navigate to Project Admin pages">Project Admin</span></span>
-    </b-dropdown-item>
-    <b-dropdown-item href="#" :disabled="settingsLinkDisabled" @click="gotoSettings" data-cy="settingsButton-navToSettings">
-      <span class="text-gray-700"> <i class="fas fa-cog skills-color-settings" aria-hidden="true"/><span class="link-name" aria-label="Navigate to the dashboard's settings">Settings</span></span>
-    </b-dropdown-item>
-    <template v-if="isFormAuthenticatedUser">
-      <b-dropdown-divider />
-      <b-dropdown-item href="#" @click="signOut">
-        <span class="text-gray-700"> <i class="fas fa-sign-out-alt skills-color-loggedOut" aria-hidden="true"/><span class="link-name">Log Out</span></span>
-      </b-dropdown-item>
-    </template>
-  </b-dropdown>
-</template>
+<script setup>
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthState } from '@/stores/UseAuthState.js'
+import { usePagePath } from '@/components/utils/UsePageLocation'
+import { useUserInfo } from '@/components/utils/UseUserInfo'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
-<script>
-  import NavigationErrorMixin from '../utils/NavigationErrorMixin';
+const authState = useAuthState()
+const userInfo = useUserInfo()
+const displayName = computed(() => {
+  const userInfoObj = userInfo.userInfo.value
+  let displayName = userInfoObj.nickname
+  if (!displayName) {
+    displayName = `${userInfoObj.first} ${userInfoObj.last}`
+  }
+  return displayName
+})
 
-  export default {
-    name: 'SettingsButton',
-    mixins: [NavigationErrorMixin],
-    data() {
-      return {
-        userInfoLoaded: false,
-      };
+const router = useRouter()
+const pagePath = usePagePath()
+
+const menu = ref()
+let allItems = [
+  {
+    separator: true
+  }
+]
+const appConfig = useAppConfig()
+if (appConfig.rankingAndProgressViewsEnabled) {
+  allItems.push({
+    label: 'Progress and Ranking',
+    icon: 'fas fa-chart-bar',
+    command: () => {
+      router.push({ path: pagePath.progressAndRankingHomePage })
     },
-    computed: {
-      userInfo() {
-        return this.$store.getters.userInfo;
-      },
-      isAuthenticatedUser() {
-        return this.$store.getters.isAuthenticated;
-      },
-      isFormAuthenticatedUser() {
-        return this.isAuthenticatedUser && !this.$store.getters.isPkiAuthenticated;
-      },
-      avatarTxt() {
-        const { userInfo } = this.$store.getters;
-        return `${userInfo.first[0]}${userInfo.last[0]}`.toUpperCase();
-      },
-      displayName() {
-        const { userInfo } = this.$store.getters;
-        let displayName = userInfo.nickname;
-        if (!displayName) {
-          displayName = `${userInfo.first} ${userInfo.last}`;
-        }
-        return displayName;
-      },
-      myProgressLinkDisabled() {
-        return this.$route.path && this.$route.name === 'MyProgressPage';
-      },
-      settingsLinkDisabled() {
-        return this.$route.path && this.$route.name === 'GeneralSettings';
-      },
-      adminLinkDisabled() {
-        return this.$route.path && this.$route.name === 'AdminHomePage';
-      },
-      isProgressAndRankingEnabled() {
-        return this.$store.getters.config.rankingAndProgressViewsEnabled === true || this.$store.getters.config.rankingAndProgressViewsEnabled === 'true';
-      },
+    disabled: pagePath.isProgressAndRankingPage
+  })
+  allItems.push({
+    label: 'Project Admin',
+    icon: 'fas fa-user-edit',
+    command: () => {
+      router.push({ path: pagePath.adminHomePage })
     },
-    methods: {
-      gotoSettings() {
-        this.handlePush({ name: 'GeneralSettings' });
-      },
-      gotoAdmin() {
-        this.handlePush({ name: 'AdminHomePage' });
-      },
-      gotoMyProgress() {
-        this.handlePush({ name: 'MyProgressPage' });
-      },
-      signOut() {
-        this.$store.dispatch('logout');
-      },
-    },
-  };
+    disabled: pagePath.isAdminPage
+  })
+}
+allItems.push({
+  label: 'Settings',
+  icon: 'fas fa-cog',
+  command: () => {
+    router.push({ path: pagePath.settingsHomePage })
+  },
+  disabled: pagePath.isSettingsPage
+})
+
+if (userInfo.isFormAuthenticatedUser.value) {
+  allItems.push({
+    separator: true
+  })
+  allItems.push({
+    label: 'Log Out',
+    icon: 'fas fa-sign-out-alt',
+    command: () => {
+      authState.logout()
+    }
+  })
+}
+
+const items = ref(allItems)
+
+const toggle = (event) => {
+  menu.value.toggle(event)
+}
 </script>
 
-<style scoped>
-  .userName {
-    max-width: 5rem;
-    vertical-align: top
-  }
+<template>
+  <div class="d-inline">
+    <Button
+      icon="fas fa-user"
+      severity="info"
+      outlined
+      raised
+      @click="toggle"
+      aria-label="User Settings Button"
+      aria-haspopup="true"
+      aria-controls="user_settings_menu" />
+    <div id="user_settings_menu">
+      <Menu ref="menu" :model="items" :popup="true" role="navigation">
+        <template #start>
+          <div class="mx-3 mt-2">
+            <Avatar icon="fas fa-user" class="bg-lime-900 text-white" />
+            <span data-cy="settingsButton-loggedInName" class="ml-1">{{ displayName }}</span>
+          </div>
+        </template>
+      </Menu>
+    </div>
+  </div>
+</template>
 
-  @media (min-width: 576px) {
-    .userName {
-      max-width: 9rem;
-    }
-  }
-
-  @media (min-width: 1200px) {
-    .userName {
-      max-width: 12rem;
-    }
-  }
-
-  .text-gray-700 > i {
-    width: 1.6rem;
-  }
-
-  .sr-only {
-    border: 0;
-    clip: rect(0, 0, 0, 0);
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    width: 1px;
-  }
-
-</style>
+<style scoped></style>

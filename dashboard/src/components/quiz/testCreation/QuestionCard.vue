@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,164 +13,172 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <div class="border pb-2" data-cy="questionDisplayCard">
-    <div class="row" :data-cy="`questionDisplayCard-${questionNum}`">
-      <div class="col">
+<script setup>
+import { computed, ref } from 'vue'
 
-        <b-row :no-gutters="true" class="mb-3">
-          <b-col v-if="isDragAndDropControlsVisible" cols="auto">
-            <div :id="`questionSortControl-${question.id}`"
-                 class="sort-control mr-3"
-                 @click.prevent.self
-                 tabindex="0"
-                 aria-label="Questions Sort Control. Press up or down to change the order of this question."
-                 role="button"
-                 @keyup.down="move(1)"
-                 @keyup.up="move(-1)"
-                 data-cy="sortControlHandle"><i class="fas fa-arrows-alt"/></div>
-          </b-col>
-          <b-col :class="{ 'ml-3': !isDragAndDropControlsVisible }">
-            <div class="px-2 py-1">
-              <markdown-text :text="question.question" data-cy="questionDisplayText"/>
+import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue';
+import { useQuizConfig } from "@/stores/UseQuizConfig.js";
+import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
+import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
+import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
 
-              <div v-if="!isTextInputType && !isRatingType" class="mt-1 pl-1">
-                <div v-for="(a, index) in question.answers" :key="a.id" class="row no-gutters">
-                  <div class="col-auto pb-1" :data-cy="`answerDisplay-${index}`">
-                    <select-correct-answer :value="a.isCorrect" :read-only="true" :is-radio-icon="isSingleChoiceType"
-                                           font-size="1.3rem"/>
-                  </div>
-                  <div class="col ml-2 pb-1"><div class="answerText align-middle" :data-cy="`answer-${index}_displayText`">{{ a.answer }}</div>
-                  </div>
-                </div>
-              </div>
-              <div v-if="isRatingType">
-                <b-form-rating disabled no-border inline size="lg" :stars="numberOfStars"/>
-              </div>
-              <div v-if="isTextInputType">
-                <label :for="`q${questionNum}textInputPlaceholder`" hidden>Text Input Answer Placeholder:</label>
-                <b-form-textarea
-                  :id="`q${questionNum}textInputPlaceholder`"
-                  placeholder="Users will be required to enter text."
-                  :disabled="true"
-                  aria-hidden="true"
-                  data-cy="textAreaPlaceHolder"
-                  rows="2"
-                  max-rows="4"/>
-              </div>
-            </div>
-          </b-col>
-        </b-row>
+const quizConfig = useQuizConfig()
 
-      </div>
-      <div v-if="!isReadOnlyQuiz" class="col-auto">
-        <b-button-group size="sm" class="ml-1 mt-2 mr-3">
-          <b-button variant="outline-primary"
-                    :data-cy="`editQuestionButton_${questionNum}`"
-                    :aria-label="`Edit Question Number ${questionNum}`"
-                    :id="`editQuestion_${question.id}`"
-                    ref="editQuestionBtn"
-                    @click="editQuestion"
-                    title="Edit Question">
-            Edit <i class="fas fa-edit" aria-hidden="true"/>
-          </b-button>
-          <b-button @click="showDeleteDialog = true"
-                    variant="outline-primary"
-                    ref="deleteQuestionBtn"
-                    :data-cy="`deleteQuestionButton_${questionNum}`"
-                    :aria-label="`delete question number ${questionNum}`"
-                    title="Delete Question">
-            Delete <i class="text-warning fas fa-trash" aria-hidden="true"/>
-          </b-button>
-        </b-button-group>
-      </div>
-    </div>
+const props = defineProps({
+  quizType: String,
+  question: Object,
+  questionNum: Number,
+  showDragAndDropControls: Boolean
+})
 
-    <removal-validation v-if="showDeleteDialog" v-model="showDeleteDialog" @do-remove="deletedQuestion" @hidden="handleDeleteCancelled">
-      <p>
-        This will remove <span class="text-primary font-weight-bold">Question #{{ questionNum }}.</span>
-      </p>
-      <div>
-        Any any associated answers and metrics for this questions will also be removed. Please proceed with caution.
-      </div>
-    </removal-validation>
-  </div>
-</template>
+const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested'])
 
-<script>
-  import MarkdownText from '@/common-components/utilities/MarkdownText';
-  import QuestionType from '@/common-components/quiz/QuestionType';
-  import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer';
-  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
-  import QuizConfigMixin from '@/components/quiz/QuizConfigMixin';
+const showDeleteDialog = ref(false)
 
-  export default {
-    name: 'QuestionCard',
-    mixins: [QuizConfigMixin],
-    components: { RemovalValidation, MarkdownText, SelectCorrectAnswer },
-    props: {
-      quizType: String,
-      question: Object,
-      questionNum: Number,
-      showDragAndDropControls: Boolean,
-    },
-    data() {
-      return {
-        showDeleteDialog: false,
-      };
-    },
-    computed: {
-      isSingleChoiceType() {
-        return this.question.questionType === QuestionType.SingleChoice;
-      },
-      isTextInputType() {
-        return this.question.questionType === QuestionType.TextInput;
-      },
-      isRatingType() {
-        return this.question.questionType === QuestionType.Rating;
-      },
-      isDragAndDropControlsVisible() {
-        return !this.isReadOnlyQuiz && this.showDragAndDropControls;
-      },
-      numberOfStars() {
-        return this.question?.answers?.length ? this.question?.answers?.length : 3;
-      },
-    },
-    methods: {
-      editQuestion() {
-        this.$emit('edit-question', this.question);
-      },
-      deletedQuestion() {
-        this.$emit('delete-question', this.question);
-      },
-      handleDeleteCancelled() {
-        this.$refs.deleteQuestionBtn.focus();
-      },
-      move(changeIndexBy) {
-        this.$emit('sort-change-requested', { question: this.question, newIndex: this.questionNum + changeIndexBy - 1 });
-      },
-    },
-  };
+const isSingleChoiceType = computed(() => {
+  return props.question.questionType === QuestionType.SingleChoice;
+})
+const isTextInputType = computed(() => {
+  return props.question.questionType === QuestionType.TextInput;
+})
+const isRatingType = computed(() => {
+  return props.question.questionType === QuestionType.Rating;
+})
+const isDragAndDropControlsVisible = computed(() => {
+  return !quizConfig.isReadOnlyQuiz && props.showDragAndDropControls;
+})
+const numberOfStars = computed(() => {
+  return props.question.answers ? props.question.answers.length : 3;
+})
+const editQuestion = () => {
+  emit('editQuestion', props.question)
+}
+const deleteQuestion = () => {
+  emit('deleteQuestion', props.question)
+}
+const moveQuestion = (changeIndexBy) => {
+  emit('sortChangeRequested', { question: props.question, newIndex: props.questionNum + changeIndexBy - 1 })
+}
+
 </script>
 
-<style lang="scss" scoped>
-@import "@/assets/custom";
+<template>
+  <div class="border-1 border-300" data-cy="questionDisplayCard">
+    <div class="flex flex-column md:flex-row flex-wrap gap-0 mb-3" :data-cy="`questionDisplayCard-${questionNum}`">
+      <div class="flex flex-initial align-items-start">
+        <div v-if="isDragAndDropControlsVisible"
+             :id="`questionSortControl-${question.id}`"
+             class="sort-control mr-3 border-right-1 border-bottom-1 surface-border text-color-secondary border-round"
+             @click.prevent.self
+             tabindex="0"
+             aria-label="Questions Sort Control. Press up or down to change the order of this question."
+             role="button"
+             @keyup.down="moveQuestion(1)"
+             @keyup.up="moveQuestion(-1)"
+             data-cy="sortControlHandle">
+          <i class="fas fa-arrows-alt"/>
+        </div>
+      </div>
+      <div :class="{ 'ml-3' : !isDragAndDropControlsVisible }" class="flex-column flex-1 align-items-start px-2 py-1">
+        <div class="flex flex-1">
+          <markdown-text
+              :text="question.question"
+              :instance-id="`${question.id}`"
+              data-cy="questionDisplayText"/>
+        </div>
+        <div v-if="!isTextInputType && !isRatingType">
+          <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
+            <div class="flex align-items-center justify-content-center pb-1" :data-cy="`answerDisplay-${index}`">
+              <SelectCorrectAnswer v-model="a.isCorrect"
+                                   :name="`answers[${index}].isCorrect`"
+                                   :answer-number="index+1"
+                                   :read-only="true"
+                                   :is-radio-icon="isSingleChoiceType"
+                                   font-size="1.3rem"/>
+            </div>
+            <div class="flex align-items-center justify-content-center ml-2 pb-1">
+              <div class="answerText" :data-cy="`answer-${index}_displayText`">{{ a.answer }}</div>
+            </div>
+          </div>
+        </div>
+        <div v-if="isRatingType" class="flex">
+          <Rating class="flex-initial bg-gray-100 border-round py-3 px-4" :stars="numberOfStars" disabled :cancel="false"/>
+        </div>
+        <div v-if="isTextInputType" class="flex">
+          <label :for="`q${questionNum}textInputPlaceholder`" hidden>Text Input Answer Placeholder:</label>
+          <Textarea
+              style="resize: none"
+              class="flex-1"
+              :id="`q${questionNum}textInputPlaceholder`"
+              placeholder="Users will be required to enter text."
+              disabled
+              aria-hidden="true"
+              data-cy="textAreaPlaceHolder"
+              rows="2"/>
+        </div>
+      </div>
+      <div v-if="!quizConfig.isReadOnlyQuiz" class="flex flex-none justify-content-center">
+        <ButtonGroup class="ml-1 mt-2 mr-3">
+          <SkillsButton @click="editQuestion"
+                        icon="fas fa-edit"
+                        label="Edit"
+                        outlined
+                        size="small"
+                        :data-cy="`editQuestionButton_${questionNum}`"
+                        :aria-label="`Edit Question Number ${questionNum}`"
+                        :ref="`editQuestion_${question.id}`"
+                        :id="`editQuestion_${question.id}`"
+                        :track-for-focus="true"
+                        title="Edit Question">
+          </SkillsButton>
+          <SkillsButton @click="showDeleteDialog = true"
+                        icon="text-warning fas fa-trash"
+                        label="Delete"
+                        outlined
+                        size="small"
+                        :data-cy="`deleteQuestionButton_${questionNum}`"
+                        :aria-label="`delete question number ${questionNum}`"
+                        :ref="`deleteQuestion_${question.id}`"
+                        :id="`deleteQuestion_${question.id}`"
+                        :track-for-focus="true"
+                        title="Delete Question">
+          </SkillsButton>
+        </ButtonGroup>
+      </div>
+
+      <removal-validation
+          v-if="showDeleteDialog"
+          :item-name="`Question #${questionNum}`"
+          item-type=""
+          v-model="showDeleteDialog"
+          focus-on-close-id="btn_Questions"
+          @do-remove="deleteQuestion">
+        <div>
+          Any associated answers and metrics for this question will also be removed. Please proceed with caution.
+        </div>
+      </removal-validation>
+    </div>
+  </div>
+
+
+</template>
+
+
+<!--TODO: figure scss and theming-->
+<!--@import "@/assets/custom";-->
+<style lang="css" scoped>
 
 .sort-control i {
   padding: 0.4rem;
   font-size: 1.2rem;
-  color: #b3b3b3 !important;
   top: 0rem;
   left: 0rem;
-  border-bottom: 1px solid #e8e8e8;
-  border-right: 1px solid #e8e8e8;
-  background-color: #fbfbfb !important;
   border-bottom-right-radius: .25rem !important
 }
 
 .sort-control:hover, .sort-control i:hover {
   cursor: grab !important;
-  color: $info !important;
+  color: #146c75 !important;
   font-size: 1.5rem;
 }
 

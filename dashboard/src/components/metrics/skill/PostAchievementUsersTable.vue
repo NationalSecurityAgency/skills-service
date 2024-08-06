@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,161 +13,152 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <metrics-card title="Users that Achieved this Skill" data-cy="postAchievementUserList" :no-padding="true">
-    <template v-slot:afterTitle>
-      <div class="d-block d-lg-inline-block">
-        <span class="text-muted ml-2 d-none d-lg-inline-block">|</span>
-        <mode-selector :options="modeSelectorOptions" @mode-selected="updateMode"/>
-      </div>
-    </template>
-    <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">
-      <skills-b-table :items="postAchievementUsers" :options="tableOptions" data-cy="postAchievementUsers-table" tableStoredStateId="postAchievementUsers-table"
-                          @page-changed="pageChanged"
-                          @page-size-changed="pageSizeChanged"
-                          @sort-changed="sortTable">
-        <template v-slot:cell(userId)="data">
-          {{ getUserDisplay(data.item, true) }}
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import MetricsService from "@/components/metrics/MetricsService.js";
+import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
+import ModeSelector from "@/components/metrics/common/ModeSelector.vue";
+import DateCell from "@/components/utils/table/DateCell.vue";
+import { useUserInfo } from '@/components/utils/UseUserInfo.js'
+import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
+import SkillsDisplayPathAppendValues from "@/router/SkillsDisplayPathAppendValues.js";
 
-          <b-button-group class="float-right">
-            <b-button :to="calculateClientDisplayRoute(data.item)"
-                      variant="outline-info" size="sm" class="text-secondary"
-                      v-b-tooltip.hover="'View User Details'"
-                      :aria-label="`View details for user ${getUserDisplay(data.item)}`"
-                      data-cy="usersTable_viewDetailsBtn"><i class="fa fa-user-alt" aria-hidden="true"/><span class="sr-only">view user details</span>
-            </b-button>
-          </b-button-group>
-        </template>
-        <template v-slot:cell(date)="data">
-          <date-cell :value="data.value" />
-        </template>
-      </skills-b-table>
-    </metrics-overlay>
-  </metrics-card>
-</template>
+defineProps(['skillName']);
+const route = useRoute();
+const userInfo = useUserInfo()
 
-<script>
-  import SkillsBTable from '@/components/utils/table/SkillsBTable';
-  import MetricsCard from '../utils/MetricsCard';
-  import MetricsService from '../MetricsService';
-  import MetricsOverlay from '../utils/MetricsOverlay';
-  import ModeSelector from '../common/ModeSelector';
-  import DateCell from '../../utils/table/DateCell';
-  import UserIdForDisplayMixin from '../../users/UserIdForDisplayMixin';
+onMounted(() => {
+  loadData();
+})
 
-  export default {
-    name: 'PostAchievementUsersTable',
-    mixins: [UserIdForDisplayMixin],
-    components: {
-      MetricsOverlay, MetricsCard, SkillsBTable, ModeSelector, DateCell,
-    },
-    props: ['skillName'],
-    data() {
-      return {
-        postAchievementUsers: [],
-        chartToLoad: 'usagePostAchievementUsersBuilder',
-        modeSelectorOptions: [
-          {
-            label: 'Still Using',
-            value: 'usagePostAchievementUsersBuilder',
-          },
-          {
-            label: 'Stopped',
-            value: 'noUsagePostAchievementUsersBuilder',
-          },
-        ],
-        tableOptions: {
-          busy: false,
-          sortBy: 'userId',
-          sortDesc: true,
-          bordered: true,
-          outlined: true,
-          rowDetailsControls: false,
-          stacked: 'md',
-          fields: [
-            {
-              key: 'userId',
-              label: 'User',
-              sortable: true,
-            },
-            {
-              key: 'count',
-              label: 'Times Performed',
-              sortable: true,
-            },
-            {
-              key: 'date',
-              label: 'Date Last Used',
-              sortable: true,
-            },
-          ],
-          pagination: {
-            currentPage: 1,
-            totalRows: 1,
-            pageSize: 5,
-            server: true,
-            possiblePageSizes: [5, 10, 15, 20, 50],
-          },
-          tableDescription: 'Skill Metrics',
-        },
-        loading: true,
-        hasData: false,
-      };
-    },
-    mounted() {
-      this.loadData();
-    },
-    methods: {
-      updateMode(mode) {
-        this.chartToLoad = mode.value;
-        this.loadData();
-      },
-      loadData() {
-        this.loading = true;
-        MetricsService.loadChart(this.$route.params.projectId, this.chartToLoad, {
-          skillId: this.$route.params.skillId, page: this.tableOptions.pagination.currentPage, pageSize: this.tableOptions.pagination.pageSize, sortDesc: this.tableOptions.sortDesc, sortBy: this.tableOptions.sortBy,
-        })
-          .then((dataFromServer) => {
-            if (dataFromServer) {
-              this.hasData = true;
-              this.tableOptions.pagination.totalRows = dataFromServer.totalCount;
-              this.postAchievementUsers = dataFromServer.users;
-            }
-            this.loading = false;
-          });
-      },
-      pageChanged(pageNum) {
-        this.tableOptions.pagination.currentPage = pageNum;
-        this.loadData();
-      },
-      pageSizeChanged(newSize) {
-        this.tableOptions.pagination.pageSize = newSize;
-        this.loadData();
-      },
-      sortTable(sortContext) {
-        const sortBy = sortContext.sortBy === 'userId' ? 'user_id' : sortContext.sortBy;
-        this.tableOptions.sortBy = sortBy;
-        this.tableOptions.sortDesc = sortContext.sortDesc;
+const postAchievementUsers = ref([]);
+const chartToLoad = ref('usagePostAchievementUsersBuilder');
+const modeSelectorOptions = ref([
+  {
+    label: 'Still Using',
+    value: 'usagePostAchievementUsersBuilder',
+  },
+  {
+    label: 'Stopped',
+    value: 'noUsagePostAchievementUsersBuilder',
+  },
+]);
 
-        // set to the first page
-        this.tableOptions.pagination.currentPage = 1;
-        this.loadData();
-      },
-      calculateClientDisplayRoute(props) {
-        return {
-          name: 'ClientDisplayPreviewSkill',
-          params: {
-            projectId: this.$route.params.projectId,
-            subjectId: this.$route.params.subjectId,
-            skillId: this.$route.params.skillId,
-            userId: props.userId,
-            dn: props.dn,
-          },
-        };
-      },
+const loading = ref(true);
+const hasData = ref(false);
+const currentPage = ref(1);
+const totalRows = ref(0);
+const pageSize = ref(5);
+const sortField = ref('userId');
+const sortOrder = ref(-1);
+const possiblePageSizes = [5, 10, 15, 20, 50];
+
+onMounted(() => {
+  loadData();
+});
+
+const updateMode = (mode) => {
+  chartToLoad.value = mode.value;
+  loadData();
+};
+
+const loadData = () => {
+  loading.value = true;
+  const queryParams = {
+    skillId: route.params.skillId,
+    page: currentPage.value,
+    pageSize: pageSize.value,
+    sortBy: sortField.value,
+    sortDesc: sortOrder.value !== 1,
+  };
+  MetricsService.loadChart(route.params.projectId, chartToLoad.value, queryParams).then((dataFromServer) => {
+        if (dataFromServer) {
+          hasData.value = true;
+          totalRows.value = dataFromServer.totalCount;
+          postAchievementUsers.value = dataFromServer.users;
+        }
+        loading.value = false;
+      });
+};
+
+const pageChanged = (pagingInfo) => {
+  currentPage.value = pagingInfo.page + 1;
+  pageSize.value = pagingInfo.rows;
+  loadData();
+};
+
+const sortTable = (sortContext) => {
+  sortField.value = sortContext.sortField;
+  sortOrder.value = sortContext.sortOrder;
+
+  // set to the first page
+  currentPage.value = 1;
+  loadData();
+};
+
+const calculateClientDisplayRoute = (props) => {
+  return {
+    name: `SkillsDisplay${SkillsDisplayPathAppendValues.SkillsDisplayPreview}`,
+    params: {
+      projectId: route.params.projectId,
+      userId: props.userId,
+      dn: props.dn,
     },
   };
+};
 </script>
+
+<template>
+  <Card data-cy="postAchievementUserList" :no-padding="true">
+    <template #header>
+      <SkillsCardHeader title="Users that Achieved this Skill">
+        <template #headerContent>
+          <div class="d-block d-lg-inline-block">
+            <mode-selector :options="modeSelectorOptions" @mode-selected="updateMode"/>
+          </div>
+        </template>
+      </SkillsCardHeader>
+    </template>
+    <template #content>
+      <metrics-overlay :loading="loading" :has-data="hasData && postAchievementUsers?.length > 0" no-data-msg="No achievements yet for this skill.">
+        <SkillsDataTable :value="postAchievementUsers"
+                         data-cy="postAchievementUsers-table"
+                         tableStoredStateId="postAchievementUsers-table"
+                         aria-label="Achievement Users"
+                         striped-rows
+                         show-gridlines
+                         paginator
+                         lazy
+                         @page="pageChanged"
+                         @sort="sortTable"
+                         :rows="pageSize"
+                         :totalRecords="totalRows"
+                         :rowsPerPageOptions="possiblePageSizes"
+                         v-model:sort-field="sortField"
+                         v-model:sort-order="sortOrder">
+          <Column field="userId" header="User" sortable>
+            <template #body="slotProps">
+              <router-link :to="calculateClientDisplayRoute(slotProps.data)" tabindex="-1">
+                {{ userInfo.getUserDisplay(slotProps.data, true) }}
+              </router-link>
+            </template>
+          </Column>
+          <Column field="count" header="Times Performed" sortable></Column>
+          <Column field="date" header="Date Last Used" sortable>
+            <template #body="slotProps">
+              <date-cell :value="slotProps.data.date" />
+            </template>
+          </Column>
+
+          <template #paginatorstart>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+          </template>
+        </SkillsDataTable>
+      </metrics-overlay>
+    </template>
+  </Card>
+</template>
 
 <style scoped>
 

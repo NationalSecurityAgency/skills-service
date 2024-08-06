@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,68 +13,51 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <metrics-card id="shared-skills-from-others-panel"
-    title="Available skills from other projects for use as prerequisites" :no-padding="true"
-                data-cy="skillsSharedWithMeCard">
-      <loading-container :is-loading="loading">
-        <div v-if="sharedSkills && sharedSkills.length > 0" class="my-4">
-          <shared-skills-table :shared-skills="sharedSkills" :disable-delete="true"></shared-skills-table>
-        </div>
-        <div v-else class="my-5">
-          <no-content2 title="No Skills Available Yet..." icon="far fa-handshake"
-                       message="Coordinate with other projects to share skills with this project."></no-content2>
-        </div>
+<script setup>
+import { ref, onMounted } from 'vue';
+import SkillsShareService from '@/components/skills/crossProjects/SkillsShareService.js';
+import SharedSkillsTable from "@/components/skills/crossProjects/SharedSkillsTable.vue";
+import NoContent2 from "@/components/utils/NoContent2.vue";
 
-      </loading-container>
-  </metrics-card>
-</template>
+const props = defineProps(['projectId']);
 
-<script>
-  import NoContent2 from '../../utils/NoContent2';
-  import SkillsShareService from './SkillsShareService';
-  import LoadingContainer from '../../utils/LoadingContainer';
-  import SharedSkillsTable from './SharedSkillsTable';
-  import MetricsCard from '../../metrics/utils/MetricsCard';
+const loading = ref(true);
+const sharedSkills = ref([]);
 
-  export default {
-    name: 'SharedSkillsFromOtherProjects',
-    components: {
-      MetricsCard,
-      SharedSkillsTable,
-      LoadingContainer,
-      NoContent2,
-    },
-    props: ['projectId'],
-    data() {
-      return {
-        loading: true,
-        sharedSkills: [],
-      };
-    },
-    mounted() {
-      this.loadSharedSkills();
-    },
-    methods: {
-      loadSharedSkills() {
-        this.loading = true;
-        SkillsShareService.getSharedWithmeSkills(this.projectId)
-          .then((data) => {
-            this.sharedSkills = data;
-            this.loading = false;
-          });
-      },
-    },
-  };
+const loadSharedSkills = () => {
+  loading.value = true;
+  SkillsShareService.getSharedWithmeSkills(props.projectId)
+      .then((data) => {
+        sharedSkills.value = data;
+        loading.value = false;
+      });
+};
+
+onMounted(() => {
+  loadSharedSkills();
+})
 </script>
 
-<style scoped>
-  #shared-skills-from-others-panel .title {
-    color: #3273dc;
-    font-weight: normal;
-  }
+<template>
+  <Card class="mb-3"
+        :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"
+        data-cy="skillsSharedWithMeCard">
+    <template #header>
+      <SkillsCardHeader title="Available skills from other projects for use as prerequisites"></SkillsCardHeader>
+    </template>
+    <template #content>
+      <div v-if="sharedSkills && sharedSkills.length > 0">
+        <shared-skills-table :shared-skills="sharedSkills" :disable-delete="true"></shared-skills-table>
+      </div>
+      <div v-else>
+        <no-content2 title="No Skills Available Yet..." icon="far fa-handshake"
+                     class="p-5"
+                     message="Coordinate with other projects to share skills with this project."></no-content2>
+      </div>
+    </template>
+  </Card>
+</template>
 
-  #shared-skills-from-others-panel .title strong {
-    font-weight: bold;
-  }
+<style scoped>
+
 </style>

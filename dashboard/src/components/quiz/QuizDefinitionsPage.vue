@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,52 +13,39 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref } from 'vue'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
+import QuizDefinitions from '@/components/quiz/QuizDefinitions.vue';
+
+const quizDefinitionsRef = ref(null)
+const quizDefPageSubPageHeader = ref(null)
+function openNewTestModal() {
+  quizDefinitionsRef.value.showUpdateModal({
+    name: '',
+    testId: '',
+    type: 'Quiz',
+    description: '',
+  }, false);
+}
+</script>
+
 <template>
-<div>
-  <sub-page-header ref="quizDefPageSubPageHeader"
+  <div>
+    <SubPageHeader ref="quizDefPageSubPageHeader"
+                   size="small"
                    title="Quizzes And Surveys"
                    action="Quiz/Survey"
                    aria-label="Create New Quiz or Survey"
-                   @add-action="openNewTestModal"/>
-
-  <b-card body-class="p-0">
-    <quiz-definitions ref="configuredTests" @focus-on-new-button="focusOnNewButton"/>
-  </b-card>
-</div>
+                   @add-action="openNewTestModal">
+    </SubPageHeader>
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+      <template #content>
+        <QuizDefinitions ref="quizDefinitionsRef"/>
+      </template>
+    </Card>
+  </div>
 </template>
-
-<script>
-  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  import QuizDefinitions from '@/components/quiz/QuizDefinitions';
-
-  export default {
-    name: 'TestsAndSurveys',
-    components: { QuizDefinitions, SubPageHeader },
-    data() {
-      return {
-        showNewTestModal: false,
-        newQuiz: {
-          show: false,
-          isEdit: false,
-          quiz: {},
-        },
-      };
-    },
-    methods: {
-      openNewTestModal() {
-        this.$refs.configuredTests.showUpdateModal({
-          name: '',
-          testId: '',
-          type: 'Quiz',
-          description: '',
-        }, false);
-      },
-      focusOnNewButton() {
-        this.$refs.quizDefPageSubPageHeader.focusOnActionBtn();
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

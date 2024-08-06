@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,163 +13,167 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router'
+import { useQuizSummaryState } from '@/stores/UseQuizSummaryState.js';
+import { useQuizConfig } from '@/stores/UseQuizConfig.js';
+import { useFocusState } from '@/stores/UseFocusState.js'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import PageHeader from '@/components/utils/pages/PageHeader.vue';
+import Navigation from '@/components/utils/Navigation.vue';
+import UserRolesUtil from '@/components/utils/UserRolesUtil.js';
+import EditQuiz from '@/components/quiz/testCreation/EditQuiz.vue';
+
+const announcer = useSkillsAnnouncer()
+const router = useRouter()
+const route = useRoute()
+const quizSummaryState = useQuizSummaryState()
+const quizConfig = useQuizConfig()
+const focusState = useFocusState()
+
+onMounted(() => {
+  if (!quizSummaryState.quizSummary || quizSummaryState.quizSummary.quizId !== route.params.quizId) {
+    quizSummaryState.loadQuizSummary(route.params.quizId).then((quizSummary) => {
+      updateEditQuizInfo(quizSummary)
+    })
+  } else {
+    updateEditQuizInfo(quizSummaryState.quizSummary)
+  }
+})
+
+const isLoading = computed(() => quizSummaryState.loadingQuizSummary || quizConfig.loadingQuizConfig)
+const navItems = computed(() => {
+  const res = [
+    { name: 'Questions', iconClass: 'fa-graduation-cap skills-color-skills', page: 'Questions' },
+    { name: 'Results', iconClass: 'fa-chart-bar skills-color-metrics', page: 'QuizMetrics' },
+    { name: 'Runs', iconClass: 'fa-users skills-color-users', page: 'QuizRunsHistoryPage' },
+    { name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'QuizSkillsPage' },
+  ];
+
+  if (!quizConfig.isReadOnlyQuiz) {
+    res.push({ name: 'Access', iconClass: 'fas fa-shield-alt skills-color-access', page: 'QuizAccessPage' });
+    res.push({ name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'QuizSettings' });
+    res.push({ name: 'Activity History', iconClass: 'fa-users-cog text-success', page: 'QuizActivityHistory' });
+  }
+
+  return res;
+})
+const headerOptions = computed(() => {
+  const quizSummary = quizSummaryState.quizSummary
+  if (!quizSummary) {
+    return {};
+  }
+  const isSurvey = quizSummary.type === 'Survey';
+  const typeDesc = isSurvey ? 'Collect Info' : 'Graded Questions';
+  const typeIcon = isSurvey ? 'fas fa-chart-pie' : 'fas fa-tasks';
+  return {
+    icon: 'fas fa-spell-check skills-color-subjects',
+    title: `${quizSummary.name}`,
+    stats: [{
+      label: 'Type',
+      preformatted: `<div class="h5 font-weight-bold mb-0">${quizSummary.type}</div>`,
+      secondaryPreformatted: `<div class="text-secondary text-uppercase text-truncate" style="font-size:0.8rem;margin-top:0.1em;">${typeDesc}</div>`,
+      icon: `${typeIcon} skills-color-points`,
+    }, {
+      label: 'Questions',
+      count: quizSummary.numQuestions,
+      icon: 'fas fa-graduation-cap skills-color-skills',
+    }],
+  };
+})
+const userRoleForDisplay = computed(() => {
+  return UserRolesUtil.userRoleFormatter(quizConfig.userQuizRole);
+})
+
+// const quizId = ref(route.params.quizId)
+const editQuizInfo = ref({
+  showDialog: false,
+  isEdit: true,
+  quizDef: {},
+})
+function updateEditQuizInfo(quizSummary) {
+  editQuizInfo.value.quizDef.quizId = quizSummary.quizId
+  editQuizInfo.value.quizDef.name = quizSummary.name
+  editQuizInfo.value.quizDef.type = quizSummary.type
+}
+
+function updateQuizDef(quizDef) {
+  const origId = route.params.quizId
+  if (quizDef.quizId !== origId) {
+    editQuizInfo.value.quizDef.quizId = quizDef.quizId
+    router.replace({ name: route.name, params: { ...route.params, quizId: quizDef.quizId } })
+      .then(() =>{
+        focusState.focusOnLastElement()
+      })
+  } else {
+    focusState.focusOnLastElement()
+  }
+  updateEditQuizInfo(quizDef)
+  quizSummaryState.quizSummary.name = quizDef.name
+  quizSummaryState.quizSummary.quizId = quizDef.quizId
+  announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`)
+}
+</script>
+
 <template>
   <div>
-    <page-header :loading="loadingQuizSummary || isLoadingQuizConfig" :options="headerOptions">
-      <div slot="subSubTitle">
-        <b-button-group v-if="!isReadOnlyQuiz" class="mt-1" size="sm">
-          <b-button ref="editQuizButton"
-                    class="btn btn-outline-primary"
-                    size="sm"
-                    variant="outline-primary"
-                    data-cy="editQuizButton"
-                    @click="editQuizInfo.showDialog = true"
-                    :aria-label="`edit Quiz ${quizId}`">
-            <span class="d-none d-sm-inline">Edit </span> <i class="fas fa-edit" aria-hidden="true"/>
-          </b-button>
-<!--          <b-button ref="shareQuizButton"-->
-<!--                    data-cy="shareQuizBtn"-->
-<!--                    variant="outline-primary"-->
-<!--                    :aria-label="`Share ${quizId} quiz with users`">-->
-<!--            <span>Share</span> <i class="fas fa-share-alt" style="font-size:1rem;" aria-hidden="true"/>-->
-<!--          </b-button>-->
-          <b-button target="_blank" :to="{ name:'QuizRun', params: { quizId: quizId } }"
-                    data-cy="quizPreview"
-                    variant="outline-primary" :aria-label="`Preview Quiz ${quizId}`">
-            <span>Preview</span> <i class="fas fa-eye" style="font-size:1rem;" aria-hidden="true"/>
-          </b-button>
-        </b-button-group>
-        <div class="mt-2" v-if="!isLoadingQuizConfig">
-          <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span class="text-secondary font-italic small">Role:</span> <span class="small text-primary" data-cy="userRole">{{ userQuizRole | userRole }}</span>
+    <PageHeader :loading="isLoading" :options="headerOptions">
+      <template #subSubTitle v-if="quizSummaryState.quizSummary">
+        <div>
+          <div v-if="!quizConfig.isReadOnlyQuiz" class="mt-2">
+            <SkillsButton
+                id="editQuizButton"
+                @click="editQuizInfo.showDialog = true"
+                ref="editQuizButton"
+                size="small"
+                outlined
+                severity="info"
+                :track-for-focus="true"
+                data-cy="editQuizButton"
+                label="Edit"
+                icon="fas fa-edit"
+                :aria-label="`edit Quiz ${quizSummaryState.quizSummary.name}`">
+            </SkillsButton>
+            <router-link
+                class="ml-1"
+                data-cy="quizPreview"
+                :to="{ name:'QuizRun', params: { quizId: quizSummaryState.quizSummary.quizId } }"
+                target="_blank" rel="noopener" tabindex="-1">
+              <SkillsButton
+                  target="_blank"
+                  v-if="quizSummaryState.quizSummary"
+                  outlined
+                  severity="info"
+                  size="small"
+                  label="Preview"
+                  icon="fas fa-eye"
+                  :aria-label="`Preview Quiz ${quizSummaryState.quizSummary.name}`">
+              </SkillsButton>
+            </router-link>
+          </div>
+          <div class="mt-3" v-if="!isLoading">
+            <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true"/>
+            <span class="text-secondary font-italic small">Role:</span>
+            <span class="small text-primary" data-cy="userRole">{{ userRoleForDisplay }}</span>
+          </div>
         </div>
-      </div>
-    </page-header>
+      </template>
+    </PageHeader>
 
-    <edit-quiz v-if="editQuizInfo.showDialog" v-model="editQuizInfo.showDialog"
-               :quiz="editQuizInfo.quizDef"
-               :is-edit="editQuizInfo.isEdit"
-               @quiz-saved="updateQuizDef"
-               @hidden="handleHideQuizEdit"/>
+    <EditQuiz
+        v-if="editQuizInfo.showDialog"
+        v-model="editQuizInfo.showDialog"
+        :quiz="editQuizInfo.quizDef"
+        :is-edit="editQuizInfo.isEdit"
+        @quiz-saved="updateQuizDef" />
 
-    <navigation v-if="!this.isLoadingQuizConfig" :nav-items="navItems">
-    </navigation>
+    <Navigation :nav-items="navItems">
+    </Navigation>
+
   </div>
 </template>
-
-<script>
-  import { createNamespacedHelpers } from 'vuex';
-  import Navigation from '@/components/utils/Navigation';
-  import PageHeader from '@/components/utils/pages/PageHeader';
-  import EditQuiz from '@/components/quiz/testCreation/EditQuiz';
-  import QuizService from '@/components/quiz/QuizService';
-  import QuizConfigMixin from '@/components/quiz/QuizConfigMixin';
-
-  const { mapActions, mapGetters } = createNamespacedHelpers('quiz');
-
-  export default {
-    name: 'QuizPage',
-    mixins: [QuizConfigMixin],
-    components: {
-      EditQuiz,
-      PageHeader,
-      Navigation,
-    },
-    data() {
-      return {
-        quizId: this.$route.params.quizId,
-        editQuizInfo: {
-          showDialog: false,
-          isEdit: true,
-          quizDef: {
-            quizId: this.$route.params.quizId,
-          },
-        },
-      };
-    },
-    computed: {
-      ...mapGetters([
-        'quizSummary',
-        'loadingQuizSummary',
-      ]),
-      navItems() {
-        const res = [
-          { name: 'Questions', iconClass: 'fa-graduation-cap skills-color-skills', page: 'Questions' },
-          { name: 'Results', iconClass: 'fa-chart-bar skills-color-metrics', page: 'QuizMetrics' },
-          { name: 'Runs', iconClass: 'fa-users skills-color-users', page: 'QuizRunsHistoryPage' },
-          { name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'QuizSkillsPage' },
-        ];
-
-        if (!this.isReadOnlyQuiz) {
-          res.push({ name: 'Access', iconClass: 'fas fa-shield-alt skills-color-access', page: 'QuizAccessPage' });
-          res.push({ name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'QuizSettings' });
-          res.push({ name: 'Activity History', iconClass: 'fa-users-cog text-success', page: 'QuizActivityHistory' });
-        }
-
-        return res;
-      },
-      headerOptions() {
-        if (!this.quizSummary) {
-          return {};
-        }
-        const isSurvey = this.quizSummary.type === 'Survey';
-        const typeDesc = isSurvey ? 'Collect Info' : 'Graded Questions';
-        const typeIcon = isSurvey ? 'fas fa-chart-pie' : 'fas fa-tasks';
-        return {
-          icon: 'fas fa-spell-check skills-color-subjects',
-          title: `${this.quizSummary.name}`,
-          stats: [{
-            label: 'Type',
-            preformatted: `<div class="h5 font-weight-bold mb-0">${this.quizSummary.type}</div>`,
-            secondaryPreformatted: `<div class="text-secondary text-uppercase text-truncate" style="font-size:0.8rem;margin-top:0.1em;">${typeDesc}</div>`,
-            icon: `${typeIcon} skills-color-points`,
-          }, {
-            label: 'Questions',
-            count: this.quizSummary.numQuestions,
-            icon: 'fas fa-graduation-cap skills-color-skills',
-          }],
-        };
-      },
-    },
-    mounted() {
-      this.loadQuizSummary({ quizId: this.$route.params.quizId });
-    },
-    methods: {
-      ...mapActions([
-        'loadQuizSummary',
-      ]),
-      updateQuizDef(quizDef) {
-        QuizService.updateQuizDef(quizDef)
-          .then(() => {
-            const origId = this.quizId;
-            if (quizDef.quizId !== origId) {
-              this.quizId = quizDef.quizId;
-              this.editQuizInfo.quizDef.quizId = quizDef.quizId;
-              this.$router.replace({ name: this.$route.name, params: { ...this.$route.params, quizId: quizDef.quizId } })
-                .then(() => {
-                  this.loadQuizSummary({ quizId: quizDef.quizId }).then(() => this.handleHideQuizEdit());
-                });
-            } else {
-              this.loadQuizSummary({ quizId: this.$route.params.quizId }).then(() => this.handleHideQuizEdit());
-            }
-            this.$nextTick(() => {
-              this.$announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`);
-            });
-          });
-      },
-      handleHideQuizEdit() {
-        this.editQuizInfo.showDialog = false;
-        this.$nextTick(() => {
-          this.$nextTick(() => {
-            const ref = this.$refs?.editQuizButton;
-            if (ref) {
-              ref.focus();
-            }
-          });
-        });
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

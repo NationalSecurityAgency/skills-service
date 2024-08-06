@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,119 +13,118 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <b-card>
-    <div class="text-center">
-      <span class="font-weight-bold"><i :class="titleIcon" class="mr-2 text-secondary"></i>{{ title }}</span>
-      <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="Selected projects don't have any data">
-        <apexchart v-if="!loading"
-                   :ref="chartId"
-                   type="bar" height="350"
-                   :options="options"
-                   :series="seriesInternal"/>
-      </metrics-overlay>
-    </div>
-  </b-card>
-</template>
+<script setup>
+import { ref, onMounted, watch } from 'vue';
+import NumberFormatter from "@/components/utils/NumberFormatter.js";
+import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 
-<script>
-  import numberFormatter from '@//filters/NumberFilter';
-  import MetricsOverlay from '../utils/MetricsOverlay';
+const props = defineProps({
+  title: {
+    type: String,
+    required: true,
+  },
+  titleIcon: {
+    type: String,
+    required: true,
+  },
+  series: {
+    type: Array,
+    required: true,
+  },
+  labels: {
+    type: Array,
+    required: true,
+  },
+  horizontal: {
+    type: Boolean,
+    default: false,
+  },
+});
 
-  export default {
-    name: 'TrainingProfileComparisonChart',
-    components: { MetricsOverlay },
-    props: {
-      title: {
-        type: String,
-        required: true,
-      },
-      titleIcon: {
-        type: String,
-        required: true,
-      },
-      series: {
-        type: Array,
-        required: true,
-      },
-      labels: {
-        type: Array,
-        required: true,
-      },
-      horizontal: {
-        type: Boolean,
-        default: false,
+
+const chartId = ref(props.title.replace(/\s+/g, ''));
+const chartRef = ref();
+const loading = ref(true);
+const hasData = ref(false);
+const seriesInternal = ref([]);
+const options = {
+  chart: {
+    type: 'bar',
+        height: 350,
+        toolbar: {
+      show: false,
+    },
+  },
+  legend: {
+    show: false,
+  },
+  plotOptions: {
+    bar: {
+      horizontal: props.horizontal,
+      distributed: true,
+      columnWidth: '50%',
+      endingShape: 'rounded',
+    },
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  xaxis: {
+    categories: props.labels,
+  },
+  yaxis: {
+    min: 0,
+    labels: {
+      formatter(val) {
+        return typeof val === 'number' ? NumberFormatter.format(val) : val;
       },
     },
-    data() {
-      return {
-        chartId: this.title.replace(/\s+/g, ''),
-        loading: true,
-        hasData: false,
-        seriesInternal: [],
-        options: {
-          chart: {
-            type: 'bar',
-            height: 350,
-            toolbar: {
-              show: false,
-            },
-          },
-          legend: {
-            show: false,
-          },
-          plotOptions: {
-            bar: {
-              horizontal: this.horizontal,
-              distributed: true,
-              columnWidth: '50%',
-              endingShape: 'rounded',
-            },
-          },
-          dataLabels: {
-            enabled: false,
-          },
-          xaxis: {
-            categories: this.labels,
-          },
-          yaxis: {
-            min: 0,
-            labels: {
-              formatter(val) {
-                return typeof val === 'number' ? numberFormatter(val) : val;
-              },
-            },
-          },
-        },
-      };
-    },
-    watch: {
-      series() {
-        this.seriesInternal = [{
-          name: this.title,
-          data: this.series,
-        }];
-      },
-      labels() {
-        this.$refs[this.chartId].updateOptions({
-          xaxis: {
-            categories: this.labels,
-          },
-        });
-      },
-    },
-    mounted() {
-      this.seriesInternal = [{
-        name: this.title,
-        data: this.series,
-      }];
+  },
+};
 
-      this.hasData = this.series && this.series.length > 0 && this.series.find((item) => item > 0) !== undefined;
+onMounted(() => {
+  seriesInternal.value = [{
+    name: props.title,
+    data: props.series,
+  }];
 
-      this.loading = false;
+  hasData.value = props.series && props.series.length > 0 && props.series.find((item) => item > 0) !== undefined;
+
+  loading.value = false;
+});
+
+watch(() => props.series, () => {
+  seriesInternal.value = [{
+    name: props.title,
+    data: props.series
+  }]
+});
+
+watch(() => props.labels, () => {
+  chartRef.value.updateOptions({
+    xaxis: {
+      categories: props.labels,
     },
-  };
+  })
+})
 </script>
+
+<template>
+  <Card class="w-full">
+    <template #content>
+      <div class="text-center">
+        <span class="font-weight-bold"><i :class="titleIcon" class="mr-2 text-secondary"></i>{{ title }}</span>
+        <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="Selected projects don't have any data">
+          <apexchart v-if="!loading"
+                     ref="chartRef"
+                     type="bar" height="350"
+                     :options="options"
+                     :series="seriesInternal"/>
+        </metrics-overlay>
+      </div>
+    </template>
+  </Card>
+</template>
 
 <style scoped>
 

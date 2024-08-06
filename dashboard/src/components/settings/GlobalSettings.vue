@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,60 +13,46 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <div>
-    <page-header :loading="isLoading"
-                 :options="{title: 'Settings', icon: 'fas fa-cog skills-color-settings', subTitle: 'Dashboard settings'}"/>
+<script setup>
+import { ref, onMounted } from 'vue';
+import PageHeader from '../utils/pages/PageHeader.vue';
+import Navigation from '../utils/Navigation.vue';
+import SettingsService from './SettingsService.js';
 
-    <navigation :nav-items="navItems"/>
-  </div>
-</template>
 
-<script>
-  import Navigation from '../utils/Navigation';
-  import SettingsService from './SettingsService';
-  import PageHeader from '../utils/pages/PageHeader';
+const navItems = ref([
+  { name: 'Profile', iconClass: 'fa-address-card skills-color-profile', page: 'GeneralSettings' },
+  { name: 'Preferences', iconClass: 'fa-user-cog skills-color-preferences', page: 'Preferences' },
+]);
 
-  export default {
-    name: 'GlobalSettings',
-    components: {
-      PageHeader,
-      Navigation,
-    },
-    data() {
-      return {
-        isLoading: true,
-        isRoot: false,
-        navItems: [
-          { name: 'Profile', iconClass: 'fa-address-card skills-color-profile', page: 'GeneralSettings' },
-          { name: 'Preferences', iconClass: 'fa-user-cog skills-color-preferences', page: 'Preferences' },
-        ],
-      };
-    },
-    mounted() {
-      this.loadSettings();
-    },
-    methods: {
-      loadSettings() {
-        SettingsService.hasRoot()
-          .then((response) => {
-            this.isRoot = response;
-            if (this.isRoot) {
-              this.navItems.push(
-                { name: 'Security', iconClass: 'fa-lock skills-color-security', page: 'SecuritySettings' },
-                { name: 'Email', iconClass: 'fa-at skills-color-email', page: 'EmailSettings' },
-                { name: 'System', iconClass: 'fa-wrench skills-color-system', page: 'SystemSettings' },
-              );
-            }
-          })
-          .finally(() => {
-            this.isLoading = false;
-          });
-      },
-    },
-  };
+const isLoading = ref(true);
+
+const loadSettings = () => {
+  SettingsService.hasRoot()
+      .then((response) => {
+        const isRoot = response;
+        if (isRoot) {
+          navItems.value.push(
+            { name: 'Security', iconClass: 'fa-lock skills-color-security', page: 'SecuritySettings' },
+            { name: 'Email', iconClass: 'fa-at skills-color-email', page: 'EmailSettings' },
+            { name: 'System', iconClass: 'fa-wrench skills-color-system', page: 'SystemSettings' },
+          );
+        }
+      })
+      .finally(() => {
+        isLoading.value = false;
+      });
+};
+
+onMounted(() => {
+  loadSettings();
+})
 </script>
 
-<style scoped>
+<template>
+  <PageHeader :loading="isLoading"
+              :options="{title: 'Settings', icon: 'fas fa-cog skills-color-settings', subTitle: 'Dashboard settings'}" />
+  <Navigation :nav-items="navItems"/>
+</template>
 
-</style>
+<style scoped></style>

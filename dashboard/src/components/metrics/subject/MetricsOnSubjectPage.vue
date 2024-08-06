@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,6 +13,32 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref, onMounted } from 'vue';
+import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import LevelBreakdownMetric from "@/components/metrics/common/LevelBreakdownMetric.vue";
+import NumUsersPerDay from "@/components/metrics/common/NumUsersPerDay.vue";
+import UserTagsByLevelChart from "@/components/metrics/common/UserTagsByLevelChart.vue";
+
+const appConfig = useAppConfig();
+const tags = ref([]);
+
+onMounted(() => {
+  const localTags = [];
+  const userPageTags = appConfig.projectMetricsTagCharts;
+  if (userPageTags) {
+    const tagSections = JSON.parse(userPageTags);
+    tagSections.forEach((section) => {
+      localTags.push({
+        key: section.key, label: section.tagLabel,
+      });
+    });
+  }
+  tags.value = localTags;
+})
+</script>
+
 <template>
   <div>
     <sub-page-header title="Metrics"/>
@@ -24,42 +50,4 @@ limitations under the License.
   </div>
 </template>
 
-<script>
-  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  import LevelBreakdownMetric from '@/components/metrics/common/LevelBreakdownMetric';
-  import NumUsersPerDay from '@/components/metrics/common/NumUsersPerDay';
-  import UserTagsByLevelChart from '@/components/metrics/common/UserTagsByLevelChart';
-
-  export default {
-    name: 'MetricsOnSubjectPage',
-    components: {
-      NumUsersPerDay,
-      LevelBreakdownMetric,
-      SubPageHeader,
-      UserTagsByLevelChart,
-    },
-    mounted() {
-      const tags = [];
-      const userPageTags = this.$store.getters.config.projectMetricsTagCharts;
-      if (userPageTags) {
-        const tagSections = JSON.parse(userPageTags);
-        tagSections.forEach((section) => {
-          tags.push({
-            key: section.key, label: section.tagLabel,
-          });
-        });
-      }
-      this.tags = tags;
-    },
-    data() {
-      return {
-        tags: [],
-        loading: true,
-      };
-    },
-  };
-</script>
-
-<style scoped>
-
-</style>
+<style scoped></style>

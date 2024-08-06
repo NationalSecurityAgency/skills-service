@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,6 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+defineProps(['items']);
+</script>
+
+
 <template>
   <div class="graph-legend" data-cy="graphLegend">
     <span class="font-italic">Legend:</span>
@@ -25,18 +30,12 @@ limitations under the License.
   </div>
 </template>
 
-<script>
-  export default {
-    name: 'GraphLegend',
-    props: ['items'],
-  };
-</script>
 
 <style scoped>
-  .graph-legend {
-    font-size: 1rem;
-  }
-  .legend-list-item i {
-    font-size: 1.2rem;
-  }
+.graph-legend {
+  font-size: 1rem;
+}
+.legend-list-item i {
+  font-size: 1.2rem;
+}
 </style>

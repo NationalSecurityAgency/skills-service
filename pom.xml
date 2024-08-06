@@ -9,8 +9,7 @@
     <packaging>pom</packaging>
     <version>3.0.2-SNAPSHOT</version>
     <modules>
-        <module>dashboard-prime</module>
-<!--        <module>client-display</module>-->
+        <module>dashboard</module>
         <module>service</module>
     </modules>
     <properties>

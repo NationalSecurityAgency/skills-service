@@ -85,7 +85,7 @@ class CachingSpec extends DefaultIntSpec {
     def "assets should be cached"() {
         when:
         int count = 0
-        List<String> ignore = ["dashboard-prime"]
+        List<String> ignore = ["dashboard"]
         getFileNamesFromClasspath("/public/assets/**")
                 .findAll { !ignore.contains(it) }
                 .each {

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,146 +13,81 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+
+const props = defineProps(['loading', 'options'])
+const numberFormat = useNumberFormat()
+const colors = useColors()
+</script>
+
 <template>
-  <div class="mx-0 py-0 bg-white" data-cy="pageHeader">
-    <div class="card-body px-1">
-      <loading-container :is-loading="loading">
-        <div class="container-fluid">
-          <slot name="banner"></slot>
-          <div class="row">
-            <div :class="titleCss">
-              <div class="h3"><i v-if="options.icon" class="has-text-link" :class="options.icon"/> {{ options.title }}<slot name="right-of-header"></slot></div>
-              <slot name="subTitle"><div class="h5 text-muted">{{ options.subTitle }}</div></slot>
-              <slot name="subSubTitle"></slot>
-            </div>
-            <div :class="statcsCss">
-              <div class="row text-center mt-4 mt-lg-0 justify-content-center justify-content-lg-end">
-                <div v-for="(stat) in options.stats" :key="stat.label" :class="individualStatCss" data-cy="pageHeaderStat">
-                  <div class="card h-100" >
-                    <div class="card-body">
-                      <div class="d-flex flex-row">
-                        <div class="text-left mr-auto" :data-cy="`pageHeaderStat_${stat.label}`">
-                          <div class="h5 card-title text-uppercase text-muted mb-0 small">{{stat.label}}</div>
-                          <div v-if="stat.preformatted" data-cy="statPreformatted" v-html="stat.preformatted"/>
-                          <span v-else class="h5 font-weight-bold mb-0" data-cy="statValue">{{ stat.count | number}}</span>
-                          <span v-if="stat.warnMsg" class="ml-1">
-                            <i class="fa fa-exclamation-circle text-warning"
-                               :aria-label="`Warning: ${stat.warnMsg}`"
-                               role="alert"
-                               v-b-tooltip.hover="stat.warnMsg"/>
-                          </span>
-                        </div>
-                        <div class="">
-                          <i :class="stat.icon" style="font-size: 2.2rem;"></i>
-                        </div>
+  <div data-cy="pageHeader" class="border-1 border-round-md surface-border font-medium surface-0 mt-2 px-3 py-3">
+    <skills-spinner v-if="loading" :is-loading="loading" />
+    <div v-if="!loading">
+      <slot name="banner"></slot>
+    <div  class="flex py-1 px-1 w-full">
+      <div class="flex w-full flex-wrap">
+        <div class="mt-2 text-center lg:text-left w-full lg:w-auto">
+          <div class="text-2xl flex">
+            <Avatar v-if="options.icon" class="mr-2" :icon="options.icon" />
+            <div class="text-2xl" data-cy="title" style="overflow-wrap: anywhere;">{{ options.title }}</div>
+            <slot name="right-of-header"></slot>
+          </div>
+          <div v-if="options.subTitle" data-cy="subTitle" class="mt-1 mb-2">
+            <slot name="subTitle">
+              <div class="text-xl">{{ options.subTitle }}</div>
+            </slot>
+          </div>
+          <slot name="subSubTitle" data-cy="subSubTitle"></slot>
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-content-center lg:justify-content-end flex-wrap">
+            <div v-for="(stat, index) in options.stats" :key="stat.label" data-cy="pageHeaderStat" class="w-full md:w-6 lg:w-auto mb-1">
+              <Card class="ml-3 mt-2 h-full" :pt="{ body: { class: 'p-3' }, content: { class: 'p-0' } }">
+                <template #content>
+                  <div class="flex">
+                    <div class="" :data-cy="`pageHeaderStat_${stat.label}`">
+                      <div class="uppercase text-color-secondary">{{ stat.label }}</div>
+                      <div class="font-bold text-xl">
+                        <span v-if="stat.preformatted" data-cy="statPreformatted" v-html="stat.preformatted" />
+                        <span v-else data-cy="statValue">{{ numberFormat.pretty(stat.count) }}</span>
                       </div>
-                      <div class="text-left" style="font-size:0.9rem;" v-if="stat.secondaryPreformatted" v-html="stat.secondaryPreformatted" :data-cy="`pageHeaderStatSecondaryLabel_${stat.label}`"></div>
-                      <div v-if="stat.secondaryStats">
-                        <div v-for="secCount in stat.secondaryStats" :key="secCount.label">
-                          <div v-if="secCount.count > 0" style="font-size: 0.9rem"
-                               class="text-left">
-                            <b-badge :variant="`${secCount.badgeVariant}`"
-                                     :data-cy="`pageHeaderStats_${stat.label}_${secCount.label}`">
-                              <span>{{ secCount.count }}</span>
-                            </b-badge>
-                            <span class="text-left text-secondary text-uppercase ml-1"
-                                  style="font-size: 0.8rem">{{ secCount.label }}</span>
-                          </div>
-                        </div>
+                    </div>
+                    <div class="ml-3 flex-1 text-right">
+                      <i :class="`${stat.icon} ${colors.getTextClass(index)}`" style="font-size: 2.2rem;" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                  <div class="text-left" style="font-size:0.9rem;" v-if="stat.secondaryPreformatted"
+                       v-html="stat.secondaryPreformatted"
+                       :data-cy="`pageHeaderStatSecondaryLabel_${stat.label}`"></div>
+                  <div v-if="stat.secondaryStats" class="mt-2">
+                    <div v-for="secCount in stat.secondaryStats" :key="secCount.label">
+                      <div v-if="secCount.count > 0" class="text-left">
+                        <Tag
+                          :severity="`${secCount.badgeVariant}`"
+                               :data-cy="`pageHeaderStats_${stat.label}_${secCount.label}`">
+                          {{ numberFormat.pretty(secCount.count) }}
+                        </Tag>
+                        <span class="text-left uppercase ml-1"
+                              style="font-size: 0.8rem">{{ secCount.label }}</span>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                </template>
+              </Card>
             </div>
           </div>
-          <slot name="footer"></slot>
         </div>
-      </loading-container>
+      </div>
+      <slot name="footer"/>
+    </div>
     </div>
   </div>
 </template>
 
-<script>
-  import LoadingContainer from '../LoadingContainer';
-
-  export default {
-    name: 'PageHeader',
-    components: {
-      LoadingContainer,
-    },
-    props: {
-      loading: {
-        type: Boolean,
-        default: true,
-      },
-      options: {
-        icon: String,
-        title: {
-          type: String,
-          default: '',
-        },
-        subTitle: {
-          type: String,
-          default: '',
-        },
-        stats: {
-          type: Array,
-          default: [],
-        },
-      },
-    },
-    computed: {
-      titleCss() {
-        const statCount = this.options?.stats ? this.options.stats.length : 0;
-        return {
-          pageHeaderTitle: true,
-          'text-center': true,
-          'text-lg-left': true,
-          'col-lg-5': statCount > 2,
-          'col-xxxl-3': statCount > 2,
-          'col-lg-7': statCount === 2,
-          'col-xxxl-8': statCount === 2,
-          'col-lg-8': statCount < 2,
-          'col-xl-9': statCount < 2,
-          'col-xxxl-9': statCount < 2,
-        };
-      },
-      statcsCss() {
-        const statCount = this.options?.stats ? this.options.stats.length : 0;
-        return {
-          'col-lg-7': statCount > 2,
-          'col-xxxl-9': statCount > 2,
-          'col-lg-5': statCount === 2,
-          'col-xxxl-4': statCount === 2,
-          'col-lg-4': statCount < 2,
-          'col-xl-3': statCount < 2,
-          'col-xxxl-3': statCount < 2,
-
-        };
-      },
-      individualStatCss() {
-        const statCount = this.options?.stats ? this.options.stats.length : 0;
-        return {
-          'col-md-6': statCount >= 2,
-          'col-xl-4': statCount >= 2,
-          'col-xxxl-2': statCount >= 2,
-          'col-xl-6': statCount === 2,
-          'col-xxxl-6': statCount === 2,
-          'col-md-12': statCount < 2,
-          'col-xl-12': statCount < 2,
-          'col-xxxl-12': statCount < 2,
-          'mt-2': true,
-        };
-      },
-    },
-  };
-</script>
-
 <style scoped>
-
-.pageHeaderTitle {
-  overflow-wrap: break-word;
-}
 
 </style>

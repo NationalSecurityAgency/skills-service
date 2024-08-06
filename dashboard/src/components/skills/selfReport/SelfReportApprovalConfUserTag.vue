@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,190 +13,155 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref, nextTick, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import SelfReportService from '@/components/skills/selfReport/SelfReportService';
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import NoContent2 from "@/components/utils/NoContent2.vue";
+import DateCell from "@/components/utils/table/DateCell.vue";
+import * as yup from "yup";
+import {useForm} from "vee-validate";
+import DataTable from "primevue/datatable";
+
+const emit = defineEmits(['conf-added', 'conf-removed']);
+const announcer = useSkillsAnnouncer();
+const route = useRoute();
+const props = defineProps({
+  userInfo: Object,
+  tagLabel: String,
+  tagKey: String,
+});
+
+const schema = yup.object({
+  'tagInput': yup.string().required().test('uniqueName', `There is already an entry for this ${props.tagLabel} value.`, (value) => {
+    return !data.value.find((i) => value.toLowerCase() === i.userTagValue?.toLowerCase());
+  }).matches(/^\w+$/, () => `${props.tagLabel} may only contain alpha-numeric characters`)
+})
+const { meta } = useForm({
+  validationSchema: schema
+});
+
+const data = ref([]);
+const enteredTag = ref('');
+const sortBy = ref('updated');
+const sortOrder = ref(-1);
+const pageSize = 4;
+const possiblePageSizes = [4, 10, 15, 20];
+
+const hadData = computed(() => {
+  return data.value && data.value.length > 0;
+});
+
+onMounted(() => {
+  const hasTagConf = props.userInfo.tagConf && props.userInfo.tagConf.length > 0;
+  if (hasTagConf) {
+    data.value = props.userInfo.tagConf.map((u) => ({ ...u }));
+  }
+});
+const addTagConf = () => {
+  if (enteredTag.value && enteredTag.value !== '') {
+    SelfReportService.configureApproverForUserTag(route.params.projectId, props.userInfo.userId, props.tagKey, enteredTag.value)
+      .then((res) => {
+        data.value.push(res);
+        enteredTag.value = '';
+        emit('conf-added', res);
+        nextTick(() => announcer.polite(`Added workload configuration successfully for ${enteredTag.value} ${props.tagLabel}.`));
+      });
+  }
+};
+
+const removeTagConf = (removedIem) => {
+  data.value = data.value.map((i) => ({ ...i, deleteInProgress: i.id === removedIem.id }));
+  SelfReportService.removeApproverConfig(route.params.projectId, removedIem.id)
+      .then(() => {
+        data.value = data.value.filter((i) => i.id !== removedIem.id);
+        emit('conf-removed', removedIem);
+        nextTick(() => announcer.polite(`Removed workload configuration successfully for ${removedIem.userTagValue} ${props.tagLabel}.`));
+      });
+};
+</script>
+
 <template>
-  <b-card body-class="p-0 mt-3">
-    <template #header>
+<Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+  <template #header>
+    <SkillsCardHeader :title="'Split Workload By ' + tagLabel"></SkillsCardHeader>
+  </template>
+  <template #content>
+    <div class="flex gap-2 px-3 pt-3 flex-column sm:flex-row">
+      <div class="flex flex-1">
+        <SkillsTextInput
+            class="w-full"
+            name="tagInput"
+            :placeholder="`Enter ${tagLabel} value`"
+            aria-label="Enter Tag Label"
+            v-on:keydown.enter="addTagConf"
+            v-skills="'ConfigureSelfApprovalWorkload'"
+            v-model="enteredTag"
+            data-cy="userTagValueInput" />
+      </div>
       <div>
-        <i class="fas fa-user-tag text-primary" aria-hidden="true"/> Split Workload <span class="font-italic text-primary">By {{ tagLabel }}</span>
-      </div>
-    </template>
-    <ValidationProvider ref="validationProvider" :name="`${tagLabel}`" v-slot="{errors}" rules="maxTagValueLengthInApprovalWorkloadConfig|alpha_num|uniqueTagConf">
-    <div class="row mx-2 no-gutters">
-      <div class="col px-1">
-          <b-form-input v-model="enteredTag"
-                        v-on:keydown.enter="addTagConf"
-                        :placeholder="`Enter ${tagLabel} value`"
-                        data-cy="userTagValueInput"
-                        :aria-invalid="errors && errors.length > 0"
-                        :aria-label="`Enter ${tagLabel} value`"></b-form-input>
-          <small role="alert" class="form-text text-danger" v-show="errors[0]" data-cy="tagValueInputError">{{ errors[0] }}</small>
-      </div>
-      <div class="col-auto px-1">
-        <b-button
-          aria-label="Add Tag Value"
-          @click="addTagConf"
-          data-cy="addTagKeyConfBtn"
-          v-skills="'ConfigureSelfApprovalWorkload'"
-          :disabled="!enteredTag || (errors && errors.length > 0)"
-          variant="outline-primary">Add <i class="fas fa-plus-circle" aria-hidden="true" />
-        </b-button>
+        <SkillsButton size="small"
+            aria-label="Add Tag Value"
+            @click="addTagConf"
+            v-skills="'ConfigureSelfApprovalWorkload'"
+            data-cy="addTagKeyConfBtn"
+            :disabled="!enteredTag || !meta.valid"
+            label="Add"
+            icon="fas fa-plus-circle">
+        </SkillsButton>
       </div>
     </div>
-    </ValidationProvider>
 
-    <skills-b-table v-if="hadData" class="mt-3"
-                    data-cy="tagKeyConfTable"
-                    :options="table.options" :items="table.items"
-                    tableStoredStateId="skillApprovalConfSpecificUsersTable">
-      <template v-slot:cell(userTagValue)="data">
-        <div class="row" :data-cy="`tagValue_${data.value}`">
-          <div class="col">
-            {{ data.value }}
+    <SkillsDataTable v-if="hadData" class="mt-3" data-cy="tagKeyConfTable"
+                     :rows="pageSize"
+                     :rowsPerPageOptions="possiblePageSizes"
+                     v-model:sort-field="sortBy"
+                     v-model:sort-order="sortOrder"
+                     :value="data"
+                     paginator
+                     pt:paginator:paginatorWrapper:aria-label="Approval Configuration User Tags Paginator"
+                     aria-label="Approval Configuration User Tags"
+                     tableStoredStateId="skillApprovalConfSpecificUsersTable">
+      <Column :header="tagLabel" field="userTagValue" sortable>
+        <template #body="slotProps">
+          <div class="flex" :data-cy="`tagValue_${slotProps.data.userTagValue}`">
+            <div class="flex flex-1">
+              {{ slotProps.data.userTagValue }}
+            </div>
+            <div class="flex">
+              <SkillsButton title="Delete Skill"
+                        data-cy="deleteBtn"
+                        show-gridlines
+                        striped-rows
+                        :aria-label="`Remove ${slotProps.data.userTagValue} tag.`"
+                        @click="removeTagConf(slotProps.data)"
+                        :disabled="slotProps.data.deleteInProgress"
+                        size="small" icon="fas fa-trash" :loading="slotProps.data.deleteInProgress">
+              </SkillsButton>
+            </div>
           </div>
-          <div class="col-auto">
-            <b-button title="Delete Skill"
-                      variant="outline-danger"
-                      data-cy="deleteBtn"
-                      :aria-label="`Remove ${data.value} tag.`"
-                      @click="removeTagConf(data.item)"
-                      :disabled="data.item.deleteInProgress"
-                      size="sm">
-              <b-spinner v-if="data.item.deleteInProgress" small></b-spinner>
-              <i v-else class="fas fa-trash" aria-hidden="true"/>
-            </b-button>
-          </div>
-        </div>
-
+        </template>
+      </Column>
+      <Column header="Configured On" field="updated" sortable>
+        <template #body="slotProps">
+          <date-cell :value="slotProps.data.updated" />
+        </template>
+      </Column>
+      <template #paginatorstart>
+        <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ data.length }}</span>
       </template>
-      <template v-slot:cell(updated)="data">
-        <date-cell :value="data.value" />
-      </template>
-    </skills-b-table>
+    </SkillsDataTable>
 
     <no-content2 v-if="!hadData" title="Not Configured Yet..."
-                 class="my-5"
-                 icon-size="fa-2x"
+                 class="py-5"
                  data-cy="noTagKeyConf"
                  icon="fas fa-user-tag">
       You can split the approval workload by routing approval requests for users with the selected <span class="text-info">{{tagLabel}}</span> to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.
     </no-content2>
-
-  </b-card>
+  </template>
+</Card>
 </template>
-
-<script>
-  import { extend } from 'vee-validate';
-  import SkillsBTable from '@/components/utils/table/SkillsBTable';
-  import DateCell from '@/components/utils/table/DateCell';
-  import NoContent2 from '@/components/utils/NoContent2';
-  import SelfReportService from '@/components/skills/selfReport/SelfReportService';
-
-  export default {
-    name: 'SelfReportApprovalConfUserTag',
-    components: {
-      NoContent2, DateCell, SkillsBTable,
-    },
-    props: {
-      userInfo: Object,
-      tagLabel: String,
-      tagKey: String,
-    },
-    created() {
-      this.assignCustomValidation();
-    },
-    mounted() {
-      this.table.options.fields = [
-        {
-          key: 'userTagValue',
-          label: this.tagLabel,
-          sortable: true,
-        },
-        {
-          key: 'updated',
-          label: 'Configured On',
-          sortable: true,
-        },
-      ];
-
-      const hasTagConf = this.userInfo.tagConf && this.userInfo.tagConf.length > 0;
-      if (hasTagConf) {
-        this.table.items = this.userInfo.tagConf.map((u) => ({ ...u }));
-      }
-    },
-    data() {
-      return {
-        projectId: this.$route.params.projectId,
-        enteredTag: '',
-        table: {
-          items: [],
-          options: {
-            busy: false,
-            bordered: true,
-            outlined: true,
-            stacked: 'md',
-            sortBy: 'updated',
-            sortDesc: true,
-            emptyText: 'You are the only user',
-            tableDescription: 'Configure Approval Workload',
-            fields: null,
-            pagination: {
-              remove: false,
-              server: false,
-              currentPage: 1,
-              totalRows: 1,
-              pageSize: 4,
-              possiblePageSizes: [4, 10, 15, 20],
-            },
-          },
-        },
-      };
-    },
-    computed: {
-      pkiAuthenticated() {
-        return this.$store.getters.isPkiAuthenticated;
-      },
-      hadData() {
-        return this.table.options.fields && this.table.items && this.table.items.length > 0;
-      },
-    },
-    methods: {
-      addTagConf() {
-        if (this.enteredTag && this.enteredTag !== '') {
-          this.$refs.validationProvider.validate()
-            .then((validationRes) => {
-              if (validationRes.valid) {
-                SelfReportService.configureApproverForUserTag(this.projectId, this.userInfo.userId, this.tagKey, this.enteredTag)
-                  .then((res) => {
-                    this.table.items.push(res);
-                    this.enteredTag = '';
-                    this.$emit('conf-added', res);
-                    this.$nextTick(() => this.$announcer.polite(`Added workload configuration successfully for ${this.enteredTag} ${this.tagLabel}.`));
-                  });
-              }
-            });
-        }
-      },
-      removeTagConf(removedIem) {
-        this.table.items = this.table.items.map((i) => ({ ...i, deleteInProgress: i.id === removedIem.id }));
-        SelfReportService.removeApproverConfig(this.projectId, removedIem.id)
-          .then(() => {
-            this.table.items = this.table.items.filter((i) => i.id !== removedIem.id);
-            this.$emit('conf-removed', removedIem);
-            this.$nextTick(() => this.$announcer.polite(`Removed workload configuration successfully for ${removedIem.userTagValue} ${this.tagLabel}.`));
-          });
-      },
-      assignCustomValidation() {
-        const self = this;
-        extend('uniqueTagConf', {
-          message: (field) => `There is already an entry for this ${field} value.`,
-          validate(value) {
-            return !self.table.items.find((i) => value.toLowerCase() === i.userTagValue?.toLowerCase());
-          },
-        });
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

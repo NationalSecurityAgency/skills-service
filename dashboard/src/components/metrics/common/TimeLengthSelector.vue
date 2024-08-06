@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,54 +13,45 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref } from 'vue';
+import dayjs from 'dayjs';
+
+const props = defineProps(['options']);
+const emit = defineEmits(['time-selected']);
+
+const selectedIndex = ref(0);
+
+const getVariant = (index) => {
+  return selectedIndex.value === index ? 'success' : 'secondary';
+};
+
+const handleClick = (index) => {
+  selectedIndex.value = index;
+  const selectedItem = props.options[index];
+  const start = dayjs().subtract(selectedItem.length, selectedItem.unit);
+  const event = {
+    durationLength: selectedItem.length,
+    durationUnit: selectedItem.unit,
+    startTime: start,
+  };
+  emit('time-selected', event);
+};
+</script>
+
 <template>
   <span data-cy="timeLengthSelector" class="time-length-selector">
-    <b-badge v-for="(item, index) in options" :key="`${item.length}${item.unit}`"
-      class="ml-2" :class="{'can-select' : (index !== selectedIndex) }"
-             :variant="getVariant(index)" @click="handleClick(index)" @keyup.enter="handleClick(index)" tabindex="0">
+    <Badge v-for="(item, index) in options" :key="`${item.length}${item.unit}`"
+             class="ml-2" :class="{'can-select' : (index !== selectedIndex) }"
+             :aria-label="`show data for the last ${item.length} ${item.unit}`"
+             :severity="getVariant(index)" @click="handleClick(index)" @keyup.enter="handleClick(index)" tabindex="0">
       {{ item.length }} {{ item.unit }}
-    </b-badge>
+    </Badge>
   </span>
 </template>
-
-<script>
-  import dayjs from '@/common-components/DayJsCustomizer';
-
-  export default {
-    name: 'TimeLengthSelector',
-    props: ['options'],
-    data() {
-      return {
-        selectedIndex: 0,
-      };
-    },
-    methods: {
-      getVariant(index) {
-        return this.selectedIndex === index ? 'primary' : 'secondary';
-      },
-      handleClick(index) {
-        this.selectedIndex = index;
-        const selectedItem = this.options[index];
-        const start = dayjs()
-          .subtract(selectedItem.length, selectedItem.unit);
-        const event = {
-          durationLength: selectedItem.length,
-          durationUnit: selectedItem.unit,
-          startTime: start,
-        };
-        this.$emit('time-selected', event);
-      },
-    },
-  };
-</script>
 
 <style scoped>
 .can-select {
   cursor: pointer;
 }
-
-.time-length-selector {
-  padding-right: 8em;
-}
-
 </style>

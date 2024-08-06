@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import TruncateFilter from '../../../filters/TruncateFilter';
+// import TruncateFilter from '../../../filters/TruncateFilter';
 
 export default {
   getTitle(skillItem, isCrossProject) {
@@ -35,7 +35,8 @@ export default {
     return isCrossProject ? `Shared from\n<b>${this.truncate(skillItem.projectName)}</b>\n${skillItem.name} ` : skillItem.name;
   },
   truncate(strValue, truncateTo = 35) {
-    return TruncateFilter(strValue, truncateTo);
+    // return TruncateFilter(strValue, truncateTo);
+    return strValue;
   },
 
 };

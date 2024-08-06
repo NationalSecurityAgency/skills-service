@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,87 +13,63 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref, watch } from 'vue';
+import LengthyOperationProgressBar from "@/components/utils/LengthyOperationProgressBar.vue";
+
+const model = defineModel();
+
+const emit = defineEmits(['operation-done']);
+defineProps({
+  title: {
+    type: String,
+    required: true,
+  },
+  progressMessage: {
+    type: String,
+    required: true,
+  },
+  isComplete: {
+    type: Boolean,
+    required: true,
+  },
+  successMessage: {
+    type: String,
+    default: 'Operation completed successfully!',
+  },
+});
+
+const allDone = () => {
+  emit('operation-done');
+  model.value = false;
+};
+</script>
+
 <template>
-  <b-modal id="removalValidation" size="lg" :hide-footer="!isComplete"
-           :no-close-on-esc="true"
-           :hide-header-close="!isComplete"
-           :title="title"
-           v-model="show"
-           :no-close-on-backdrop="true" :centered="true" body-class="p-0 m-0 border-primary"
-           header-bg-variant="info" header-text-variant="light" no-fade role="dialog"
-           @hidden="allDone"
-           @close="allDone">
-    <div class="px-4 py-5 text-center" data-cy="lengthyOpModal">
+  <Dialog modal v-model:visible="model" :maximizable="false" :closable="false" :header="title"
+          :pt="{ maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }">
+
+    <div class="text-center" data-cy="lengthyOpModal">
       <div v-if="!isComplete">
-        <i class="fas fa-running border p-2 rounded mb-1 text-white bg-info"
-           style="font-size: 2.5rem"/>
+        <i class="fas fa-running p-2 mb-1 p-badge p-badge-info" style="font-size: 2.5rem; height: 100%;"/>
         <div class="h4 text-primary mb-3" data-cy="title">{{ progressMessage }}</div>
-        <lengthy-operation-progress-bar :value="true" height="15px" :animated="true"/>
+        <lengthy-operation-progress-bar :showValue="false" height="15px" :animated="true"/>
         <div class="text-secondary mt-1">This operation takes a little while so buckle up!</div>
       </div>
       <div v-else>
-        <i class="fas fa-check-double border p-2 rounded mb-1 text-white bg-info"
-           style="font-size: 2.5rem"/>
+        <i class="fas fa-check-double p-2 mb-1 p-badge p-badge-info" style="font-size: 2.5rem; height: 100%;"/>
         <div class="h4 text-primary mb-1 mt-1">We are all done!</div>
         <div class="text-secondary" data-cy="successMessage">{{ successMessage }}</div>
       </div>
     </div>
 
-    <div slot="modal-footer" class="w-100">
-      <b-button variant="success" size="sm" class="float-right" @click="allDone"
-                data-cy="allDoneBtn">
+    <template #footer>
+      <SkillsButton v-if="isComplete" variant="success" size="small" class="float-right" @click="allDone" data-cy="allDoneBtn">
         Done
-      </b-button>
-    </div>
-  </b-modal>
+      </SkillsButton>
+    </template>
+  </Dialog>
 </template>
-
-<script>
-  import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar';
-
-  export default {
-    name: 'LengthyOperationProgressBarModal',
-    components: { LengthyOperationProgressBar },
-    props: {
-      value: {
-        type: Boolean,
-        required: true,
-      },
-      title: {
-        type: String,
-        required: true,
-      },
-      progressMessage: {
-        type: String,
-        required: true,
-      },
-      isComplete: {
-        type: Boolean,
-        required: true,
-      },
-      successMessage: {
-        type: String,
-        default: 'Operation completed successfully!',
-      },
-    },
-    data() {
-      return {
-        show: this.value,
-      };
-    },
-    watch: {
-      show(newValue) {
-        this.$emit('input', newValue);
-      },
-    },
-    methods: {
-      allDone() {
-        this.$emit('operation-done');
-        this.show = false;
-      },
-    },
-  };
-</script>
 
 <style scoped>
 
