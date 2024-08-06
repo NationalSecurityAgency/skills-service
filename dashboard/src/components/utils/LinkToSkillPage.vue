@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,50 +13,49 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { onMounted, ref } from 'vue'
+import SkillsService from '@/components/skills/SkillsService.js'
+
+const props = defineProps({
+  projectId: {
+    type: String,
+    required: true
+  },
+  skillId: {
+    type: String,
+    required: true
+  },
+  linkLabel: {
+    type: String,
+    default: null
+  }
+})
+const loading = ref(true)
+
+const skill = ref({})
+onMounted(() => {
+  SkillsService.getSkillInfo(props.projectId, props.skillId)
+    .then((res) => {
+      skill.value = res
+      loading.value = false;
+    })
+})
+</script>
+
 <template>
-<span>
-  <router-link v-if="!loading"
-               tag="a"
-               :to="{ name:'SkillOverview', params: { projectId: this.projectId, subjectId: this.skill.subjectId, skillId:  this.skill.skillId }}"
-               :aria-label="`Navigate to skill ${this.skill.name}  via link`">
+  <div class="inline-block">
+    <skills-spinner :is-loading="loading" :size-in-rem="1"/>
+    <router-link v-if="!loading"
+                 :to="{ name:'SkillOverview', params: { projectId: projectId, subjectId: skill.subjectId, skillId:  skill.skillId }}"
+                 :aria-label="`Navigate to skill ${skill.name}  via link`">
       <div class="d-inline-block" style="text-decoration: underline">
         <span v-if="linkLabel">{{ linkLabel }}</span>
-        <show-more v-else :text="this.skill.name" :limit="45" :contains-html="false"/>
+        <span v-else>{{ skill.name }}</span>
       </div>
-  </router-link>
-</span>
+    </router-link>
+  </div>
 </template>
-
-<script>
-  import SkillsService from '@/components/skills/SkillsService';
-  import ShowMore from '@/components/skills/selfReport/ShowMore';
-
-  export default {
-    name: 'LinkToSkillPage',
-    components: { ShowMore },
-    props: {
-      projectId: String,
-      skillId: String,
-      linkLabel: {
-        type: String,
-        default: null,
-      },
-    },
-    data() {
-      return {
-        loading: true,
-        skill: null,
-      };
-    },
-    mounted() {
-      SkillsService.getSkillInfo(this.projectId, this.skillId)
-        .then((res) => {
-          this.skill = res;
-          this.loading = false;
-        });
-    },
-  };
-</script>
 
 <style scoped>
 

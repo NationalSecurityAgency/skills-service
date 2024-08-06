@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,223 +13,129 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <ValidationObserver ref="observer" v-slot="{invalid, handleSubmit}" slim>
-    <b-modal :id="internalGroup.skillId"
-             :title="title"
-             @hide="publishHidden"
-             v-model="show"
-             size="xl"
-             :no-close-on-backdrop="true"
-             :centered="true"
-             data-cy="EditSkillGroupModal"
-             header-bg-variant="info"
-             header-text-variant="light" no-fade>
-      <skills-spinner :is-loading="isLoading" />
-      <b-container :is-loading="!isLoading" fluid>
-        <div class="row">
-          <div class="col-12">
-            <div class="form-group">
-              <label for="groupNameInput">* Group Name</label>
-              <ValidationProvider rules="required|minNameLength|maxSkillNameLength|nullValueNotAllowed|uniqueGroupName|customNameValidator"
-                                  v-slot="{errors}"
-                                  :debounce="250"
-                                  name="Group Name">
-                <input class="form-control" type="text" v-model="internalGroup.name"
-                       v-on:input="updateId"
-                       v-on:keydown.enter="handleSubmit(updateGroup)"
-                       v-focus
-                       data-cy="groupName"
-                       id="groupNameInput"
-                       :aria-invalid="errors && errors.length > 0"
-                       aria-errormessage="groupNameError"
-                       aria-describedby="groupNameError"/>
-                <small role="alert" class="form-text text-danger" data-cy="groupNameError" id="groupNameError">{{ errors[0] }}</small>
-              </ValidationProvider>
-            </div>
-          </div>
+<script setup>
+import { ref } from 'vue';
+import { useRoute } from 'vue-router'
+import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
+import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
+import SkillsService from '@/components/skills/SkillsService.js'
+import InputSanitizer from '@/components/utils/InputSanitizer.js'
+import { object, string } from 'yup'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useSkillYupValidators } from '@/components/skills/UseSkillYupValidators.js'
+import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 
-          <div class="col-12">
-            <id-input type="text" label="Group ID" v-model="internalGroup.skillId"
-                      additional-validation-rules="uniqueGroupId" @can-edit="canEditGroupId=$event"
-                      v-on:keydown.enter.native="handleSubmit(updateGroup)"
-                      :next-focus-el="previousFocus"
-                      @shown="tooltipShowing=true"
-                      @hidden="tooltipShowing=false"/>
-          </div>
-        </div>
+const show = defineModel()
+const route = useRoute()
+const props = defineProps({
+  skill: Object,
+  isEdit: Boolean,
+})
+const emit = defineEmits(['skill-saved'])
+const appConfig = useAppConfig()
+const skillYupValidators = useSkillYupValidators()
 
-        <div class="mt-3">
-          <div class="control">
-            <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{errors}" name="Group Description">
-              <markdown-editor v-if="internalGroup && (!isEdit || !isLoading)"
-                               v-model="internalGroup.description"
-                               :project-id="internalGroup.projectId"
-                               :skill-id="isEdit ? internalGroup.skillId : null"
-                               :aria-invalid="errors && errors.length > 0"
-                               aria-errormessage="groupDescriptionError"
-                               aria-describedby="groupDescriptionError"
-                               data-cy="groupDescription"/>
-              <small role="alert" id="groupDescriptionError" class="form-text text-danger" data-cy="groupDescriptionError">{{ errors[0] }}</small>
-            </ValidationProvider>
-          </div>
-        </div>
+const formId = props.isEdit ? `editGroupDialog-${props.skill.projectId}-${props.skill.skillId}` : 'newGroupDialog'
+let modalTitle = props.isEdit ? 'Edit Skills Group' : 'New Skills Group'
 
-        <p v-if="invalid && overallErrMsg" class="text-center text-danger mt-2" aria-live="polite"><small>***{{ overallErrMsg }}***</small></p>
-      </b-container>
+const asyncLoadData = () => {
+  if (props.isEdit) {
+    return SkillsService.getSkillDetails(route.params.projectId, route.params.subjectId, props.skill.skillId)
+      .then((resSkill) => {
+        const loadedSkill = { ...resSkill, 'description': resSkill.description || ''};
+        initialSkillData.value = { ...loadedSkill }
+        return loadedSkill
+      })
+  }
+  return Promise.resolve({})
+}
 
-      <div slot="modal-footer" class="w-100">
-        <b-button variant="success" size="sm" class="float-right" @click="handleSubmit(updateGroup)"
-                  :disabled="invalid"
-                  data-cy="saveGroupButton">
-          Save
-        </b-button>
-        <b-button variant="secondary" size="sm" class="float-right mr-2" @click="close" data-cy="closeGroupButton">
-          Cancel
-        </b-button>
-      </div>
-    </b-modal>
-  </ValidationObserver>
-</template>
+const schema = object({
+  'name': string()
+    .trim()
+    .required()
+    .min(appConfig.minNameLength)
+    .max(appConfig.maxSkillNameLength)
+    .nullValueNotAllowed()
+    .customNameValidator('Group Name')
+    .test('uniqueName', 'The value for the Group Name is already taken', (value) => skillYupValidators.checkSkillNameUnique(value, props.skill.name, props.isEdit))
+    .label('Group Name'),
+  'skillId': string()
+    .required()
+    .min(appConfig.minIdLength)
+    .max(appConfig.maxIdLength)
+    .nullValueNotAllowed()
+    .idValidator()
+    .test('uniqueId', 'The value for the Group ID is already taken', (value) => skillYupValidators.checkSkillIdUnique(value, props.skill.skillId, props.isEdit))
+    .label('Group ID'),
+  'description': string()
+    .max(appConfig.descriptionMaxLength)
+    .customDescriptionValidator('Group Description')
+    .label('Skill Description'),
+})
 
-<script>
-  import { extend } from 'vee-validate';
-  import MarkdownEditor from '@/common-components/utilities/MarkdownEditor';
-  import IdInput from '../../utils/inputForm/IdInput';
-  import InputSanitizer from '../../utils/InputSanitizer';
-  import SkillsService from '../SkillsService';
-  import SkillsSpinner from '../../utils/SkillsSpinner';
+const initialSkillData = ref({
+  skillId: props.skill.skillId || '',
+  name: props.skill.name || '',
+  originalSkillId: props.skill.skillId || '',
+  description: props.skill.description || ''
+})
 
-  export default {
-    name: 'EditSkillGroup',
-    components: { SkillsSpinner, MarkdownEditor, IdInput },
-    props: {
-      group: Object,
-      isEdit: Boolean,
-      value: {
-        type: Boolean,
-        required: true,
-      },
-    },
-    data() {
+const saveSkill = (values) => {
+  const skilltoSave = {
+    ...values,
+    type: 'SkillsGroup',
+    subjectId: route.params.subjectId,
+    projectId: route.params.projectId,
+    isEdit: props.isEdit,
+    name: InputSanitizer.sanitize(values.name),
+    skillId: InputSanitizer.sanitize(values.skillId),
+  }
+  return SkillsService.saveSkill(skilltoSave)
+    .then((skillRes) => {
       return {
-        isLoading: this.isEdit,
-        show: this.value,
-        internalGroup: {
-          originalSkillId: this.group.skillId,
-          isEdit: this.isEdit,
-          description: null,
-          ...this.group,
-        },
-        canEditGroupId: false,
-        overallErrMsg: '',
-        original: {
-          name: '',
-          skillId: '',
-          projectId: '',
-        },
-        currentFocus: null,
-        previousFocus: null,
-        tooltipShowing: false,
-      };
-    },
-    created() {
-      this.registerValidation();
-    },
-    mounted() {
-      this.original = {
-        name: this.group.name,
-        skillId: this.group.skillId,
-        projectId: this.group.projectId,
-      };
-      if (this.isEdit) {
-        this.isLoading = true;
-        SkillsService.getSkillDetails(this.group.projectId, this.group.subjectId, this.group.skillId)
-          .then((res) => {
-            this.internalGroup.description = res.description;
-          }).finally(() => {
-            this.isLoading = false;
-          });
+        ...skillRes,
+        originalSkillId: props.skill.skillId,
       }
-      document.addEventListener('focusin', this.trackFocus);
-    },
-    computed: {
-      title() {
-        return this.isEdit ? 'Editing Existing Skills Group' : 'New Skills Group';
-      },
-    },
-    watch: {
-      show(newValue) {
-        this.$emit('input', newValue);
-      },
-    },
-    methods: {
-      trackFocus() {
-        this.previousFocus = this.currentFocus;
-        this.currentFocus = document.activeElement;
-      },
-      handleIdToggle(canEdit) {
-        this.canEditGroupId = canEdit;
-      },
-      close() {
-        this.show = false;
-        this.publishHidden({});
-      },
-      updateGroup() {
-        this.$refs.observer.validate()
-          .then((res) => {
-            if (!res) {
-              this.overallErrMsg = 'Form did NOT pass validation, please fix and try to Save again';
-            } else {
-              this.internalGroup.name = InputSanitizer.sanitize(this.internalGroup.name);
-              this.internalGroup.projectId = InputSanitizer.sanitize(this.internalGroup.projectId);
-              this.$emit('group-saved', this.internalGroup);
-              this.close();
-            }
-          });
-      },
-      updateId() {
-        if (!this.isEdit && !this.canEditGroupId) {
-          let id = InputSanitizer.removeSpecialChars(this.internalGroup.name);
-          if (id) {
-            id = `${id}Group`;
-          }
-          this.internalGroup.skillId = id;
-        }
-      },
-      publishHidden(e) {
-        if (this.tooltipShowing) {
-          e.preventDefault();
-        } else {
-          this.$emit('hidden', e);
-        }
-      },
-      registerValidation() {
-        const self = this;
-        extend('uniqueGroupName', {
-          message: (field) => `The value for the ${field} is already taken.`,
-          validate(value) {
-            if (self.isEdit && (self.original.name === value || self.original.name.localeCompare(value, 'en', { sensitivity: 'base' }) === 0)) {
-              return true;
-            }
-            return SkillsService.skillWithNameExists(self.original.projectId, value);
-          },
-        });
+    })
+}
 
-        extend('uniqueGroupId', {
-          message: (field) => `The value for the ${field} is already taken.`,
-          validate(value) {
-            if (self.isEdit && self.original.skillId === value) {
-              return true;
-            }
-            return SkillsService.skillWithIdExists(self.original.projectId, value);
-          },
-        });
-      },
-    },
-  };
+const onSkillSaved = (skill) => {
+  emit('skill-saved', skill)
+}
 </script>
 
-<style lang="scss" scoped>
+<template>
+  <SkillsInputFormDialog
+    :id="formId"
+    v-model="show"
+    :is-edit="isEdit"
+    :async-load-data-function="asyncLoadData"
+    :save-data-function="saveSkill"
+    :header="modalTitle"
+    saveButtonLabel="Save"
+    :validation-schema="schema"
+    :initial-values="initialSkillData"
+    :enable-return-focus="true"
+    :should-confirm-cancel="true"
+    data-cy="EditSkillGroupModal"
+    @saved="onSkillSaved">
+
+    <SkillsNameAndIdInput
+      name-label="Group Name"
+      name-field-name="name"
+      id-label="Group ID"
+      id-field-name="skillId"
+      id-suffix="Group"
+      :name-to-id-sync-enabled="!props.isEdit" />
+
+    <markdown-editor
+      class="mt-5"
+      name="description" />
+
+  </SkillsInputFormDialog>
+</template>
+
+<style scoped>
 
 </style>

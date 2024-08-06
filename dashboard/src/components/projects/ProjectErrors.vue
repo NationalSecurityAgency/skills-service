@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,211 +13,188 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router';
+import ProjectService from '@/components/projects/ProjectService';
+import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
+import DateCell from "@/components/utils/table/DateCell.vue";
+import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
+import {useProjDetailsState} from "@/stores/UseProjDetailsState.js";
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import Column from 'primevue/column'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+
+const dialogMessages = useDialogMessages()
+const route = useRoute();
+
+onMounted(loadErrors);
+
+const projectDetailsState = useProjDetailsState();
+const loading = ref(true);
+const errors = ref([]);
+const totalRows = ref(null);
+const pageSize = ref(5);
+const currentPage = ref(1);
+const sortOrder = ref(-1);
+const sortBy = ref('lastSeen');
+const possiblePageSizes = ref([5, 10, 25]);
+
+const formatErrorMsg = (errorType, error) => {
+  if (errorType === 'SkillNotFound') {
+    return `Reported Skill Id [${error}] does not exist in this Project`;
+  }
+  return error;
+};
+
+const pageChanged = (pagingInfo) => {
+  currentPage.value = pagingInfo.page + 1;
+  pageSize.value = pagingInfo.rows;
+  loadErrors();
+};
+
+const sortTable = (sortContext) => {
+  sortBy.value = sortContext.sortField;
+  sortOrder.value = sortContext.sortOrder;
+
+  // set to the first page
+  currentPage.value = 1;
+  loadErrors();
+};
+
+const removeAllErrors = () => {
+  const msg = 'Are you absolutely sure you want to remove all Project issues?';
+  dialogMessages.msgConfirm({
+    message: msg,
+    header: 'Please Confirm!',
+    acceptLabel: 'YES, Delete It!',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      loading.value = true;
+      ProjectService.deleteAllProjectErrors(route.params.projectId).then(() => {
+        loadErrors();
+        projectDetailsState.loadProjectDetailsState();
+      });
+    }
+  })
+};
+
+const removeError = (projectError) => {
+  const msg = `Are you absolutely sure you want to remove issue related to ${projectError.error}?`;
+  dialogMessages.msgConfirm({
+    message: msg,
+    header: 'Please Confirm!',
+    acceptLabel: 'YES, Delete It!',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      loading.value = true;
+      ProjectService.deleteProjectError(projectError.projectId, projectError.errorId).then(() => {
+        loadErrors();
+        projectDetailsState.loadProjectDetailsState();
+      });
+    }
+  })
+};
+
+function loadErrors() {
+  loading.value = true;
+  const pageParams = {
+    limit: pageSize.value,
+    ascending: sortOrder.value === 1,
+    page: currentPage.value,
+    orderBy: sortBy.value,
+  };
+  ProjectService.getProjectErrors(route.params.projectId, pageParams).then((res) => {
+    errors.value = res.data;
+    totalRows.value = res.totalCount;
+    projectDetailsState.loadProjectDetailsState();
+  }).finally(() => {
+    loading.value = false;
+  });
+}
+
+const responsive = useResponsiveBreakpoints()
+const isFlex = computed(() => responsive.md.value)
+</script>
+
 <template>
   <div id="projectErrorsPanel">
     <sub-page-header title="Project Issues">
       <div class="row">
         <div class="col">
-          <b-tooltip target="remove-button" title="Remove all project errors." :disabled="errors.length < 1"></b-tooltip>
           <span id="remove-button" class="mr-2">
-            <b-button variant="outline-primary" ref="removeAllErrors" @click="removeAllErrors" :disabled="errors.length < 1" size="sm"
-                      data-cy="removeAllErrors">
-              <span class="d-none d-sm-inline">Remove</span> All <i class="text-warning fas fa-trash-alt" aria-hidden="true"/>
-            </b-button>
+            <SkillsButton @click="removeAllErrors" :disabled="errors.length < 1" size="small" data-cy="removeAllErrors" id="removeAllErrorsButton" :track-for-focus="true" label="Remove All" icon="fas fa-trash-alt">
+            </SkillsButton>
           </span>
         </div>
       </div>
     </sub-page-header>
 
-    <b-card body-class="p-0">
-      <skills-spinner :is-loading="loading" />
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+      <template #content>
+        <SkillsDataTable :busy="loading"
+                         :value="errors"
+                         tableStoredStateId="projectErrorsTable"
+                         aria-label="Project Errors"
+                         data-cy="projectErrorsTable" paginator lazy
+                         :totalRecords="totalRows"
+                         :rows="pageSize"
+                         @page="pageChanged"
+                         @sort="sortTable"
+                         :sort-field="sortBy"
+                         :sort-order="sortOrder"
+                         :rowsPerPageOptions="possiblePageSizes">
+          <Column header="Error" field="typeAndError" sortable  :class="{'flex': isFlex }">
+            <template #body="slotProps">
+              <div class="pl-3">
+                <div class="mb-2">
+                  {{ slotProps.data.errorType }}
+                </div>
+                <div class="text-sm">
+                  {{ formatErrorMsg(slotProps.data.errorType, slotProps.data.error) }}
+                </div>
+              </div>
+            </template>
+          </Column>
+          <Column header="First Seen" field="created" sortable :class="{'flex': isFlex }">
+            <template #body="slotProps">
+              <date-cell :value="slotProps.data.created" />
+            </template>
+          </Column>
+          <Column header="Last Seen" field="lastSeen" sortable :class="{'flex': isFlex }">
+            <template #body="slotProps">
+              <date-cell :value="slotProps.data.lastSeen" />
+            </template>
+          </Column>
+          <Column header="Times Seen" field="count" sortable :class="{'flex': isFlex }"></Column>
+          <Column header="Delete" :class="{'flex': isFlex }">
+            <template #body="slotProps">
+              <SkillsButton :ref="`delete_${slotProps.data.error}`" @click="removeError(slotProps.data)" variant="outline-info" size="small"
+                        :data-cy="`deleteErrorButton_${encodeURI(slotProps.data.error)}`"
+                        :track-for-focus="true"
+                        :id="`deleteErrorButton_${encodeURI(slotProps.data.error)}`"
+                        :aria-label="`delete error for reported skill ${slotProps.data.error}`"
+                        icon="fas fa-trash-alt" label="Delete">
+              </SkillsButton>
+            </template>
+          </Column>
 
-      <skills-b-table v-if="!loading"
-                      :options="table.options"
-                      :items="errors"
-                      tableStoredStateId="projectErrorsTable"
-                      data-cy="projectErrorsTable"
-                      @page-changed="pageChanged"
-                      @page-size-changed="pageSizeChanged"
-                      @sort-changed="sortTable">
+          <template #paginatorstart>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy="skillsBTableTotalRows">{{ totalRows }}</span>
+          </template>
 
-        <template v-slot:cell(typeAndError)="data">
-          <div class="pl-3">
-            <div class="row mb-2">
-              {{ data.item.errorType }}
+          <template #empty>
+            <div class="flex justify-content-center flex-wrap" data-cy="emptyTable">
+              <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle"
+                 aria-hidden="true"></i>
+              <span class="flex align-items-center justify-content-center">There are no records to show
+              </span>
             </div>
-            <div class="row small">
-              {{ formatErrorMsg(data.item.errorType, data.item.error) }}
-            </div>
-          </div>
-        </template>
-
-        <template v-slot:cell(created)="data">
-          <date-cell :value="data.value"/>
-        </template>
-
-        <template v-slot:cell(lastSeen)="data">
-          <date-cell :value="data.value"/>
-        </template>
-
-        <template v-slot:cell(count)="data">
-          {{ data.value }}
-        </template>
-
-        <template #cell(edit)="data">
-          <b-button :ref="`delete_${data.item.error}`" @click="removeError(data.item)" variant="outline-info" size="sm"
-                    :data-cy="`deleteErrorButton_${encodeURI(data.item.error)}`"
-                    :aria-label="`delete error for reported skill ${data.item.error}`">
-            <i class="text-warning fas fa-trash-alt" aria-hidden="true"/>
-          </b-button>
-        </template>
-
-      </skills-b-table>
-    </b-card>
+          </template>
+        </SkillsDataTable>
+      </template>
+    </Card>
   </div>
-
 </template>
 
-<script>
-  import { createNamespacedHelpers } from 'vuex';
-  import SkillsSpinner from '@/components/utils/SkillsSpinner';
-  import SkillsBTable from '../utils/table/SkillsBTable';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import MsgBoxMixin from '../utils/modal/MsgBoxMixin';
-  import ProjectService from './ProjectService';
-  import DateCell from '../utils/table/DateCell';
-
-  const { mapActions } = createNamespacedHelpers('projects');
-
-  export default {
-    name: 'ProjectErrors',
-    components: {
-      SkillsBTable,
-      SkillsSpinner,
-      SubPageHeader,
-      DateCell,
-    },
-    mixins: [MsgBoxMixin],
-    props: [],
-    data() {
-      return {
-        loading: true,
-        errors: [],
-        table: {
-          options: {
-            sortBy: 'lastSeen',
-            sortDesc: true,
-            busy: true,
-            stacked: 'md',
-            tableDescription: 'Project Errors',
-            pagination: {
-              server: true,
-              currentPage: 1,
-              totalRows: 1,
-              pageSize: 5,
-              possiblePageSizes: [5, 10, 25],
-            },
-            fields: [
-              {
-                label: 'Error',
-                key: 'typeAndError',
-                sortable: true,
-                sortKey: 'errorType',
-              }, {
-                key: 'created',
-                label: 'First Seen',
-                sortable: true,
-              }, {
-                key: 'lastSeen',
-                label: 'Last Seen',
-                sortable: true,
-              }, {
-                key: 'count',
-                label: 'Times Seen',
-                sortable: true,
-              }, {
-                key: 'edit',
-                label: 'Delete',
-                sortable: false,
-              },
-
-            ],
-          },
-        },
-      };
-    },
-    mounted() {
-      this.loadErrors();
-    },
-    methods: {
-      ...mapActions([
-        'loadProjectDetailsState',
-      ]),
-      formatErrorMsg(errorType, error) {
-        if (errorType === 'SkillNotFound') {
-          return `Reported Skill Id [${error}] does not exist in this Project`;
-        }
-        return error;
-      },
-      pageChanged(pageNum) {
-        this.table.options.pagination.currentPage = pageNum;
-        this.loadErrors();
-      },
-      pageSizeChanged(newSize) {
-        this.table.options.pagination.pageSize = newSize;
-        this.loadErrors();
-      },
-      sortTable(sortContext) {
-        this.table.options.sortBy = sortContext.sortBy;
-        this.table.options.sortDesc = sortContext.sortDesc;
-
-        // set to the first page
-        this.table.options.pagination.currentPage = 1;
-        this.loadErrors();
-      },
-      loadErrors() {
-        this.loading = true;
-        const pageParams = {
-          limit: this.table.options.pagination.pageSize,
-          ascending: !this.table.options.sortDesc,
-          page: this.table.options.pagination.currentPage,
-          orderBy: this.table.options.sortBy,
-        };
-        ProjectService.getProjectErrors(this.$route.params.projectId, pageParams).then((res) => {
-          this.errors = res.data;
-          this.table.options.pagination.totalRows = res.totalCount;
-          this.loadProjectDetailsState({ projectId: this.$route.params.projectId });
-        }).finally(() => {
-          this.loading = false;
-          this.table.options.busy = false;
-        });
-      },
-      removeAllErrors() {
-        const msg = 'Are you absolutely sure you want to remove all Project issues?';
-        this.msgConfirm(msg)
-          .then((res) => {
-            if (res) {
-              this.loading = true;
-              ProjectService.deleteAllProjectErrors(this.$route.params.projectId).then(() => {
-                this.loadErrors();
-                this.loadProjectDetailsState({ projectId: this.$route.params.projectId });
-              });
-            }
-          });
-      },
-      removeError(projectError) {
-        const msg = `Are you absolutely sure you want to remove issue related to ${projectError.error}?`;
-        this.msgConfirm(msg)
-          .then((res) => {
-            if (res) {
-              this.loading = true;
-              ProjectService.deleteProjectError(projectError.projectId, projectError.errorId).then(() => {
-                this.loadErrors();
-                this.loadProjectDetailsState({ projectId: this.$route.params.projectId });
-              });
-            }
-          });
-      },
-    },
-  };
-</script>
+<style scoped></style>

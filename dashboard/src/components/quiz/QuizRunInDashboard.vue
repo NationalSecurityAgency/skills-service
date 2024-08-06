@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,67 +13,59 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <div class="container-fluid">
-    <skills-spinner :is-loading="loadingQuizInfo" />
-    <div v-if="!loadingQuizInfo">
-      <sub-page-header :title="quizInfo.quizType" class="pt-4 pl-3">
-      </sub-page-header>
+<script setup>
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
+import QuizRunService from '@/skills-display/components/quiz/QuizRunService.js';
+import QuizRun from '@/skills-display/components/quiz/QuizRun.vue';
 
-      <quiz-run v-if="quizId"
-                :quiz-id="quizId"
-                :quiz="quizInfo"
-                class="mb-5"
-                @testWasTaken="navToProgressAndRanking"
-                @cancelled="navToProgressAndRanking"/>
+const router = useRouter()
+const route = useRoute()
+const quizInfo = ref({});
+const loadingQuizInfo = ref(true);
+
+const quizId = computed(() => {
+  return route.params.quizId
+})
+
+onMounted(() => {
+  loadQuizInfo();
+})
+
+const loadQuizInfo = () => {
+  loadingQuizInfo.value = true;
+  QuizRunService.getQuizInfo(quizId.value)
+      .then((res) => {
+        quizInfo.value = res;
+      })
+      .finally(() => {
+        loadingQuizInfo.value = false;
+      });
+}
+
+const navToProgressAndRanking = () => {
+  router.push({ name: 'MyProgressPage' });
+}
+</script>
+
+<template>
+  <div>
+    <SkillsSpinner :is-loading="loadingQuizInfo"/>
+    <div v-if="!loadingQuizInfo">
+      <SubPageHeader :title="quizInfo.quizType" class="pt-4 pl-3">
+      </SubPageHeader>
+
+      <QuizRun v-if="quizId"
+      :quiz-id="quizId"
+      :quiz="quizInfo"
+      class="mb-5"
+      @testWasTaken="navToProgressAndRanking"
+      @cancelled="navToProgressAndRanking"/>
     </div>
   </div>
 </template>
-
-<script>
-  import QuizRunService from '@/common-components/quiz/QuizRunService';
-  import QuizRun from '@/common-components/quiz/QuizRun';
-  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  import SkillsSpinner from '@/components/utils/SkillsSpinner';
-
-  export default {
-    name: 'QuizRunInDashboard',
-    components: {
-      SkillsSpinner,
-      SubPageHeader,
-      QuizRun,
-    },
-    data() {
-      return {
-        quizInfo: {},
-        loadingQuizInfo: true,
-      };
-    },
-    mounted() {
-      this.loadQuizInfo();
-    },
-    computed: {
-      quizId() {
-        return this.$route?.params?.quizId;
-      },
-    },
-    methods: {
-      navToProgressAndRanking() {
-        this.$router.push({ name: 'MyProgressPage' });
-      },
-      loadQuizInfo() {
-        this.loadingQuizInfo = true;
-        QuizRunService.getQuizInfo(this.quizId)
-          .then((quizInfo) => {
-            this.quizInfo = quizInfo;
-          })
-          .finally(() => {
-            this.loadingQuizInfo = false;
-          });
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

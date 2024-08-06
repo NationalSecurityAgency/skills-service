@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,136 +13,111 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <div class="container-fluid">
-    <div class="row justify-content-center text-center">
-    <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
-      <div class="mt-5">
-        <logo1 />
-        <div class="h3 mt-4 text-primary">Reset Password For SkillTree Dashboard</div>
-      </div>
-      <ValidationObserver ref="resetForm" v-slot="{invalid, handleSubmit}" slim>
-        <form @submit.prevent="handleSubmit(reset)">
-          <div class="card text-left">
-            <div class="card-body p-4">
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { useForm } from 'vee-validate';
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
+import * as yup from 'yup';
+import Logo1 from '@/components/brand/Logo1.vue';
+import AccessService from '@/components/access/AccessService.js';
+import { string } from 'yup';
 
-              <div class="form-group">
-                <label for="username" class="text-secondary font-weight-bold">* Email Address</label>
-                <ValidationProvider name="Email Address" rules="required|minUsernameLength|email" :debounce=300 v-slot="{errors}">
-                  <input type="text" class="form-control" id="username" tabindex="1" placeholder="Enter email"
-                         aria-errormessage="emailHelp"
-                         aria-describedby="emailHelp"
-                         :aria-invalid="errors && errors.length > 0"
-                         v-model="username"
-                         data-cy="forgotPasswordEmail"
-                        aria-required="true">
-                    <small id="emailHelp" role="alert" class="form-text text-danger" v-show="errors[0]">{{
-                      errors[0] }}
-                    </small>
-                    <small class="text-danger" v-if="serverError" data-cy="resetFailedError" role="alert">{{ serverError }}</small>
-                </ValidationProvider>
-              </div>
-              <button type="submit" class="btn btn-outline-hc" tabindex="3" :disabled="invalid || (disabled === true)" data-cy="resetPassword">
-                Reset Password <i class="fas fa-arrow-circle-right" aria-hidden="true"/>
-              </button>
-            </div>
-          </div>
+const router = useRouter()
+const appConfig = useAppConfig()
 
-        </form>
-      </ValidationObserver>
-    </div>
-  </div>
-  </div>
-</template>
+const username = ref('');
+const serverError = ref('');
 
-<script>
-  import { extend } from 'vee-validate';
-  import { required, email } from 'vee-validate/dist/rules';
-  import AccessService from './AccessService';
-  import Logo1 from '../brand/Logo1';
-  import NavigationErrorMixin from '../utils/NavigationErrorMixin';
 
-  extend('required', required);
-  extend('email', email);
+onMounted(() => {
+  AccessService.isResetSupported().then((response) => {
+    if (response === false) {
+      router.replace({ name: 'ResetNotSupportedPage' });
+    }
+  });
+})
 
-  export default {
-    name: 'RequestPasswordResetForm',
-    components: { Logo1 },
-    mixins: [NavigationErrorMixin],
-    data() {
-      return {
-        username: '',
-        resetSent: false,
-        isAutoFilled: false,
-        serverError: '',
-      };
-    },
-    mounted() {
-      AccessService.isResetSupported().then((response) => {
-        if (response === false) {
-          this.$router.replace({ name: 'ResetNotSupportedPage' });
-        }
-      });
-    },
-    watch: {
-      username(newVal, oldVal) {
-        if (newVal.trim() !== oldVal.trim()) {
-          this.serverError = '';
-        }
-      },
-    },
-    methods: {
-      reset() {
-        AccessService.requestPasswordReset(this.username).then((response) => {
-          this.serverError = '';
-          if (response.success) {
-            this.handlePush({ name: 'RequestResetConfirmation', params: { countDown: 10, email: this.username } });
-          }
-        }).catch((err) => {
-          if (err && err.response && err.response.data && err.response.data.explanation) {
-            this.serverError = err.response.data.explanation;
-          } else {
-            this.serverError = `Password reset request failed due to ${err.response.status}`;
-          }
-        });
-      },
-      onAnimationStart(event) {
-        // required to work around chrome auto-fill issue (see see https://stackoverflow.com/a/41530164)
-        if (event && event.animationName && event.animationName.startsWith('onAutoFillStart')) {
-          this.isAutoFilled = true;
-        } else {
-          this.isAutoFilled = false;
-        }
-      },
-    },
-    computed: {
-      disabled() {
-        return (!this.isAutoFilled && (!this.username)) || this.serverError !== '';
-      },
-    },
-  };
+watch(username, (newVal, oldVal) => {
+  if (newVal.trim() !== oldVal.trim()) {
+    serverError.value = '';
+  }
+})
+
+const disabled = computed(() => {
+  return !meta.value.valid || serverError.value !== '';
+})
+const schema = yup.object().shape({
+  username: string().required().email().min(appConfig.minUsernameLength).label('Email Address'),
+})
+
+const { values, meta, handleSubmit, validate, errors } = useForm({
+  validationSchema: schema,
+  initialValues: {
+    username: '',
+  }
+})
+
+const reset = (username) => {
+  AccessService.requestPasswordReset(username).then((response) => {
+    serverError.value = '';
+    if (response.success) {
+      router.push({ name: 'RequestResetConfirmation', params: { email: username } });
+    }
+  }).catch((err) => {
+    if (err && err.response && err.response.data && err.response.data.explanation) {
+      serverError.value = err.response.data.explanation;
+    } else {
+      serverError.value = `Password reset request failed due to ${err.response.status}`;
+    }
+  });
+}
+
+const resetPassword = handleSubmit((values) => {
+  reset(values.username)
+});
+
 </script>
 
-<style lang="css" scoped>
-  :-webkit-autofill {
-    animation-name: onAutoFillStart;
-  }
+<template>
+<div>
+  <div class="grid justify-content-center text-center">
+    <div class="col md:col-8 lg:col-7 xl:col-4 mt-3" style="min-width: 20rem;">
+      <div class="mt-5">
+        <logo1 />
+        <div class="text-3xl mt-4 text-primary">Reset Password For SkillTree Dashboard</div>
+      </div>
+      <Card class="mt-3 text-left">
+        <template #content>
+          <div class="w-full">
+            <SkillsTextInput
+                label="Email Address"
+                size="small"
+                :is-required="true"
+                @keyup.enter="resetPassword"
+                placeholder="Enter email"
+                v-model="username"
+                data-cy="forgotPasswordEmail"
+                id="username"
+                name="username"/>
+          </div>
+          <small class="text-danger text-red-500" v-if="serverError" data-cy="resetFailedError" role="alert">{{ serverError }}</small>
+          <div class="flex justify-content-end mt-2">
+            <SkillsButton variant="outline-success"
+                          label="Reset Password"
+                          icon="fas fa-arrow-circle-right"
+                          @click="resetPassword"
+                          :disabled="disabled"
+                          data-cy="resetPassword">
+            </SkillsButton>
+          </div>
+        </template>
+      </Card>
+    </div>
+  </div>
+</div>
+</template>
 
-  :not(:-webkit-autofill) {
-    animation-name: onAutoFillCancel;
-  }
+<style scoped>
 
-  @keyframes onAutoFillStart {
-    from {
-    }
-    to {
-    }
-  }
-
-  @keyframes onAutoFillCancel {
-    from {
-    }
-    to {
-    }
-  }
 </style>

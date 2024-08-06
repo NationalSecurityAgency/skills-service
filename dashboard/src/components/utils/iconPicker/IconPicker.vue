@@ -13,76 +13,77 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <button class="icon-button"
-       @click="selectIcon"
-       @keypress.enter="selectIcon"
-       role="button"
-       aria-roledescription="icon selector button"
-       aria-label="icon selector"
-       tabindex="0"
-       :disabled="disabled"
-       data-cy="iconPicker">
-    <div class="card-body text-primary" style="min-height: 4rem;">
-      <i :class="[selectedIconClass]" />
-    </div>
-  </button>
-</template>
+<script setup>
+import { ref } from 'vue'
+import IconManager from '@/components/utils/iconPicker/IconManager.vue'
+import OverlayPanel from 'primevue/overlaypanel'
+import { useFocusState } from '@/stores/UseFocusState.js'
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
-<script>
-  export default {
-    name: 'IconPicker',
-    props: {
-      startIcon: String,
-      customIconHeight: {
-        type: Number,
-        default: 48,
-      },
-      customIconWidth: {
-        type: Number,
-        default: 48,
-      },
-      disabled: {
-        type: Boolean,
-        default: false,
-      },
-    },
-    data() {
-      return {
-        hideAvailableIcons: true,
-        selectedIconClass: this.startIcon,
-      };
-    },
-    methods: {
-      selectIcon() {
-        this.$emit('select-icon');
-      },
-      onSelectedIcon(selectedIcon) {
-        this.selectedIconClass = `${selectedIcon.css}`;
-        this.hideAvailableIcons = true;
-        this.$emit('on-icon-selected', this.selectedIconClass);
-        this.$bvModal.hide('icons');
-      },
-      close() {
-        this.hideAvailableIcons = true;
-      },
-    },
-  };
+const focusState = useFocusState()
+const emit = defineEmits(['selected-icon'])
+
+const props = defineProps({
+  startIcon: String,
+  customIconHeight: {
+    type: Number,
+    default: 48
+  },
+  customIconWidth: {
+    type: Number,
+    default: 48
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const iconManagerOverlayPanel = ref()
+
+const toggleIconDisplay = (event) => {
+  iconManagerOverlayPanel.value.toggle(event)
+}
+
+const onSelectedIcon = (selectedIcon) => {
+  iconManagerOverlayPanel.value.hide()
+  emit('selected-icon', selectedIcon)
+}
+
+const panelHidden = () => {
+  focusState.focusOnLastElement()
+}
+
+const themeHelper = useThemesHelper()
 </script>
 
+<template>
+  <div>
+    <SkillsButton
+      @click="toggleIconDisplay"
+      outlined
+      :track-for-focus="true"
+      class="p-0"
+      id="iconPicker"
+      role="button"
+      aria-roledescription="icon selector button"
+      aria-label="icon selector"
+      :disabled="disabled"
+      data-cy="iconPicker">
+      <div class="text-primary text-5xl w-6rem h-5rem flex align-items-center justify-content-center m-0">
+        <i :class="[startIcon]" />
+      </div>
+    </SkillsButton>
+
+    <OverlayPanel ref="iconManagerOverlayPanel"
+                  :show-close-icon="true"
+                  @hide="panelHidden"
+                  :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }">
+      <icon-manager @selected-icon="onSelectedIcon" name="iconClass"></icon-manager>
+    </OverlayPanel>
+  </div>
+</template>
+
 <style scoped>
-  i {
-    font-size: 3rem;
-  }
 
-  .icon-button {
-    border: 1px solid rgba(0, 0, 0, 0.125);
-    border-radius: 0.25em;
-    background-color: #fff;
-  }
-
-  .icon-button:disabled {
-    background-color: lightgrey;
-    cursor: none;
-  }
 </style>

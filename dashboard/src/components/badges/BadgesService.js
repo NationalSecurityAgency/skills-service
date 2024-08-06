@@ -13,86 +13,110 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios';
+import axios from 'axios'
 
 const enrichBadgeObjWithRequiredAtts = (badge) => {
-  const copy = { ...badge };
+  const copy = { ...badge }
   if (!badge.timeLimitEnabled) {
-    copy.awardAttrs.numMinutes = 0;
+    copy.awardAttrs = {
+      numMinutes: 0
+    };
+    // copy.awardAttrs.numMinutes = 0
   } else {
     // convert to minutes
-    copy.awardAttrs.numMinutes = ((parseInt(badge.expirationDays, 10) * 60 * 24) + (parseInt(badge.expirationHrs, 10) * 60) + parseInt(badge.expirationMins, 10));
+    copy.awardAttrs.numMinutes =
+      parseInt(badge.expirationDays, 10) * 60 * 24 +
+      parseInt(badge.expirationHrs, 10) * 60 +
+      parseInt(badge.expirationMins, 10)
   }
 
-  return copy;
-};
+  return copy
+}
 export default {
   enhanceWithTimeWindow(badge) {
-    const copy = { ...badge };
+    const copy = { ...badge }
 
     if (badge && badge.awardAttrs && badge.awardAttrs.numMinutes) {
-      copy.timeLimitEnabled = badge.awardAttrs.numMinutes > 0;
+      copy.timeLimitEnabled = badge.awardAttrs.numMinutes > 0
       if (!copy.timeLimitEnabled) {
         // set to default if window is disabled
-        copy.expirationDays = 0;
-        copy.expirationHrs = 8;
-        copy.expirationMins = 0;
+        copy.expirationDays = 0
+        copy.expirationHrs = 8
+        copy.expirationMins = 0
       } else {
-        copy.expirationDays = Math.floor(badge.awardAttrs.numMinutes / (60 * 24));
-        const remainingMinutes = badge.awardAttrs.numMinutes - (copy.expirationDays * 24 * 60);
-        copy.expirationHrs = Math.floor(remainingMinutes / 60);
-        copy.expirationMins = remainingMinutes % 60;
+        copy.expirationDays = Math.floor(badge.awardAttrs.numMinutes / (60 * 24))
+        const remainingMinutes = badge.awardAttrs.numMinutes - copy.expirationDays * 24 * 60
+        copy.expirationHrs = Math.floor(remainingMinutes / 60)
+        copy.expirationMins = remainingMinutes % 60
       }
     } else {
-      copy.timeLimitEnabled = false;
-      copy.expirationDays = 0;
-      copy.expirationHrs = 8;
-      copy.expirationMins = 0;
+      copy.timeLimitEnabled = false
+      copy.expirationDays = 0
+      copy.expirationHrs = 8
+      copy.expirationMins = 0
     }
 
-    return copy;
+    return copy
   },
   getBadges(projectId) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/badges`)
-      .then((response) => {
-        const badges = [];
-        response.data.forEach((badge) => {
-          badges.push(this.enhanceWithTimeWindow(badge));
-        });
-        return badges;
-      });
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/badges`).then((response) => {
+      const badges = []
+      response.data.forEach((badge) => {
+        badges.push(this.enhanceWithTimeWindow(badge))
+      })
+      return badges
+    })
   },
   getBadge(projectId, badgeId) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/badges/${encodeURIComponent(badgeId)}`)
+    return axios
+      .get(`/admin/projects/${encodeURIComponent(projectId)}/badges/${encodeURIComponent(badgeId)}`)
       .then((response) => {
-        const badge = response.data;
-        return this.enhanceWithTimeWindow(badge);
-      });
+        const badge = response.data
+        return this.enhanceWithTimeWindow(badge)
+      })
   },
   saveBadge(badgeReq) {
-    const copy = enrichBadgeObjWithRequiredAtts(badgeReq);
+    const copy = enrichBadgeObjWithRequiredAtts(badgeReq)
     if (badgeReq.isEdit) {
-      return axios.post(`/admin/projects/${encodeURIComponent(badgeReq.projectId)}/badges/${encodeURIComponent(badgeReq.originalBadgeId)}`, copy)
-        .then(() => this.getBadge(badgeReq.projectId, badgeReq.badgeId));
+      return axios
+        .post(
+          `/admin/projects/${encodeURIComponent(badgeReq.projectId)}/badges/${encodeURIComponent(badgeReq.originalBadgeId)}`,
+          copy
+        )
+        .then(() => this.getBadge(badgeReq.projectId, badgeReq.badgeId))
     }
 
-    const req = { enabled: false, ...badgeReq };
-    return axios.post(`/admin/projects/${encodeURIComponent(req.projectId)}/badges/${encodeURIComponent(req.badgeId)}`, req)
-      .then(() => this.getBadge(req.projectId, req.badgeId));
+    const req = { enabled: false, ...badgeReq }
+    return axios
+      .post(
+        `/admin/projects/${encodeURIComponent(req.projectId)}/badges/${encodeURIComponent(req.badgeId)}`,
+        req
+      )
+      .then(() => this.getBadge(req.projectId, req.badgeId))
   },
   deleteBadge(projectId, badgeId) {
-    return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/badges/${encodeURIComponent(badgeId)}`)
-      .then((repsonse) => repsonse.data);
+    return axios
+      .delete(
+        `/admin/projects/${encodeURIComponent(projectId)}/badges/${encodeURIComponent(badgeId)}`
+      )
+      .then((repsonse) => repsonse.data)
   },
   updateBadgeDisplaySortOrder(projectId, badgeId, newDisplayOrderIndex) {
-    return axios.patch(`/admin/projects/${encodeURIComponent(projectId)}/badges/${encodeURIComponent(badgeId)}`, { action: 'NewDisplayOrderIndex', newDisplayOrderIndex });
+    return axios.patch(
+      `/admin/projects/${encodeURIComponent(projectId)}/badges/${encodeURIComponent(badgeId)}`,
+      { action: 'NewDisplayOrderIndex', newDisplayOrderIndex }
+    )
   },
   badgeWithNameExists(projectId, badgeName) {
-    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/badgeNameExists`, { name: badgeName })
-      .then((remoteRes) => !remoteRes.data);
+    return axios
+      .post(`/admin/projects/${encodeURIComponent(projectId)}/badgeNameExists`, { name: badgeName })
+      .then((remoteRes) => !remoteRes.data)
   },
   badgeWithIdExists(projectId, badgeId) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/entityIdExists?id=${encodeURIComponent(badgeId)}`)
-      .then((remoteRes) => !remoteRes.data);
-  },
-};
+    return axios
+      .get(
+        `/admin/projects/${encodeURIComponent(projectId)}/entityIdExists?id=${encodeURIComponent(badgeId)}`
+      )
+      .then((remoteRes) => !remoteRes.data)
+  }
+}

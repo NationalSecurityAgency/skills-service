@@ -438,7 +438,7 @@ describe('Accessibility Tests', () => {
         cy.customLighthouse();
         cy.customA11y();
 
-        cy.selectItem('[data-cy="skillsSelector"]', 'This is 1')
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1', 'This is 1', 'MyNewtestProject');
         cy.customA11y();
         cy.get('[data-cy=nav-Levels]')
             .click();

@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,56 +13,55 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <div>
-    <div class="row justify-content-center text-center">
-      <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
-        <div class="mt-5">
-          <i class="fa fa-users fa-4x text-secondary"></i>
-          <div class="h2 mt-4 text-info">SkillTree Dashboard</div>
-        </div>
+<script setup>
+import { onMounted, ref } from 'vue'
+import BootstrapService from '@/components/access/BootstrapService.js'
+import Logo1 from '@/components/brand/Logo1.vue'
 
-        <div class="card text-center">
-          <div class="card-body p-4">
-            <div v-if="isLoading" class="justify-content-center mt-1">
-              <b-spinner label="Loading..." style="width: 2rem; height: 2rem;" variant="secondary"/>
-              <div class="h5 mt-2 text-primary">Getting Things Ready!</div>
-              <div class="h6 text-secondary">This may take just a second...</div>
-            </div>
-            <div v-else>
-              <p><i class="far fa-check-square text-success"></i> The root account has been successfully
-              created!</p>
-              <p><i class="far fa-check-square text-success"></i> Inception self-training project
-                created!
-              </p>
-              <p style="margin-top:2em">Please proceed to the SkillTree Dashboard.</p>
-              <a class="btn btn-outline-hc" href="/">Let's Get Started!</a>
-            </div>
-          </div>
-        </div>
+const isLoading = ref(true)
+
+const refresh = () => {
+  window.location.reload()
+}
+
+onMounted(() => {
+  BootstrapService.grantRoot()
+    .then(() => {
+      isLoading.value = false
+    })
+})
+</script>
+
+<template>
+  <div class="flex justify-content-center">
+    <Card class="mt-3 text-center w-11">
+    <template #content>
+      <logo1 />
+      <div v-if="isLoading" class="justify-content-center mt-4">
+        <skills-spinner :is-loading="true" />
+        <div class="mt-2 text-primary text-xl">Getting Things Ready!</div>
+        <div class="text-color-secondary">This may take just a second...</div>
       </div>
-    </div>
+      <div v-else>
+        <Message icon="far fa-check-square" severity="success" :closable="false">
+          The root account has been successfully created!
+        </Message>
+
+        <Message icon="far fa-check-square" severity="success" :closable="false">
+          Inception self-training project created!
+        </Message>
+        <p class="mt-2">Please proceed to the SkillTree Dashboard.</p>
+        <SkillsButton
+          label="Let's Get Started!"
+          icon="far fa-smile-beam"
+          @click="refresh"
+          class="mt-2"
+          severity="success" />
+      </div>
+    </template>
+  </Card>
   </div>
 </template>
-
-<script>
-  import BootstrapService from './BootstrapService';
-
-  export default {
-    name: 'PkiAppBootstrap',
-    data() {
-      return {
-        isLoading: true,
-      };
-    },
-    mounted() {
-      BootstrapService.grantRoot()
-        .then(() => {
-          this.isLoading = false;
-        });
-    },
-  };
-</script>
 
 <style scoped>
 

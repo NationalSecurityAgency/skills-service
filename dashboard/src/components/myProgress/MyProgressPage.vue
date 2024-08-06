@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,207 +13,66 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <loading-container :is-loading="loading">
+<script setup>
+import { onMounted } from 'vue'
+import { useMyProgressState } from '@/stores/UseMyProgressState.js'
+import ProgressAndRankingSplash from '@/components/myProgress/ProgressAndRankingSplash.vue'
+import InfoSnapshotCard from '@/components/myProgress/InfoSnapshotCard.vue'
+import NumSkills from '@/components/myProgress/NumSkills.vue'
+import LastEarnedCard from '@/components/myProgress/LastEarnedCard.vue'
+import BadgeNumCard from '@/components/myProgress/BadgeNumCard.vue'
+import MyCurrentProjects from '@/components/myProgress/MyCurrentProjects.vue'
+import MyProgressTitle from '@/components/myProgress/MyProgressTitle.vue'
 
-    <div class="container-fluid mb-0">
-    <sub-page-header v-if="hasProjects" title="My Projects" class="pt-4" :margin-bottom="0">
-        <b-button id="manageMyProjectsBtn" :to="{ name: 'DiscoverProjectsPage' }" variant="outline-primary" data-cy="manageMyProjsBtn"><i class="fas fa-tasks" aria-hidden="true"/> Projects Catalog</b-button>
-      <b-tooltip v-if="!hasProjects" target="manageMyProjectsBtn" placement="bottom" variant="primary">
-        <i class="fas fa-tasks"></i> Click here to add to
-        <div class="text-uppercase"><b>My Projects</b></div>
-      </b-tooltip>
-    </sub-page-header>
-    </div>
-    <progress-and-ranking-splash v-if="!hasProjects"/>
+const myProgressState = useMyProgressState()
 
-    <div v-if="!loading && hasProjects" class="container-fluid">
-      <b-row class="my-4">
-        <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1">
-          <info-snapshot-card :projects="myProjects"
-                              :num-projects-contributed="myProgress.numProjectsContributed"
-                              class="flex-grow-1 my-summary-card"/>
-        </b-col>
-        <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1 pr-xl-1">
-          <num-skills :total-skills="myProgress.totalSkills"
-                      :num-achieved-skills="myProgress.numAchievedSkills" class="flex-grow-1 my-summary-card"/>
-        </b-col>
-        <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pl-md-3 pr-md-1 pl-xl-1">
-          <last-earned-card :num-achieved-skills-last-month="myProgress.numAchievedSkillsLastMonth"
-                            :num-achieved-skills-last-week="myProgress.numAchievedSkillsLastWeek"
-                            :most-recent-achieved-skill="myProgress.mostRecentAchievedSkill"
-                            class="flex-grow-1 my-summary-card"/>
-        </b-col>
-        <b-col cols="12" md="6" xl="3" class="d-flex mb-2 pr-md-3 pl-md-1">
-          <badges-num-card :total-badges="myProgress.totalBadges"
-                           :num-achieved-badges="myProgress.numAchievedBadges"
-                           :num-achieved-gem-badges="myProgress.numAchievedGemBadges"
-                           :num-achieved-global-badges="myProgress.numAchievedGlobalBadges"
-                           :total-gems="myProgress.gemCount"
-                           :total-global-badges="myProgress.globalBadgeCount"
-                           class="flex-grow-1 my-summary-card"/>
-        </b-col>
-      </b-row>
-      <hr/>
-      <b-row class="my-4 px-1" id="projectCards">
-        <b-col v-for="(proj, index) in myProjects" :key="proj.projectName" :id="proj.projectId"
-               cols="12" md="6" xl="4"
-               class="mb-2 px-2">
-          <b-overlay :show="sortOrderLoading" rounded="sm" opacity="0.4">
-            <template #overlay>
-              <div class="text-center">
-                <div v-if="proj.projectId===sortOrderLoadingProjectId">
-                  <div class="text-info text-uppercase mb-1">Updating sort order!</div>
-                  <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
-                </div>
-              </div>
-            </template>
+onMounted(() => {
+  myProgressState.loadMyProgressSummary(true)
+})
 
-            <router-link :to="{ name:'MyProjectSkills', params: { projectId: proj.projectId, name: proj.projectName } }"
-                         tag="a"
-                         :aria-label="`Click to navigate to ${proj.projectName} project page.`"
-                         class="project-link" :data-cy="`project-link-${proj.projectId}`" tabindex="0">
-              <project-link-card
-                :ref="`proj${proj.projectId}`"
-                :display-order="index"
-                @sort-changed-requested="updateSortAndReloadProjects"
-                :proj="proj" class="my-summary-card"/>
-            </router-link>
-          </b-overlay>
-        </b-col>
-      </b-row>
-    </div>
-  </loading-container>
-</template>
-
-<script>
-  import { createNamespacedHelpers } from 'vuex';
-  import Sortable from 'sortablejs';
-  import ProjectLinkCard from './ProjectLinkCard';
-  import InfoSnapshotCard from './InfoSnapshotCard';
-  import NumSkills from './NumSkills';
-  import BadgesNumCard from './BadgesNumCard';
-  import LastEarnedCard from './LastEarnedCard';
-  import LoadingContainer from '../utils/LoadingContainer';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import ProjectService from '../projects/ProjectService';
-  import ProgressAndRankingSplash from './ProgressAndRankingSplash';
-
-  const { mapActions, mapGetters } = createNamespacedHelpers('myProgress');
-
-  export default {
-    name: 'MyProgressPage',
-    components: {
-      ProgressAndRankingSplash,
-      SubPageHeader,
-      LastEarnedCard,
-      BadgesNumCard,
-      NumSkills,
-      InfoSnapshotCard,
-      ProjectLinkCard,
-      LoadingContainer,
-    },
-    data() {
-      return {
-        loading: true,
-        sortOrderLoading: false,
-        sortOrderLoadingProjectId: -1,
-        projects: [],
-      };
-    },
-    mounted() {
-      this.loadSummaryAndEnableSummary();
-    },
-    methods: {
-      ...mapActions(['loadMyProgressSummary']),
-      loadSummaryAndEnableSummary() {
-        return this.loadMyProgressSummary()
-          .finally(() => {
-            this.loading = false;
-            this.enableProjectDropAndDrop();
-          });
-      },
-      enableProjectDropAndDrop() {
-        if (this.myProjects && this.myProjects.length > 0) {
-          const self = this;
-          this.$nextTick(() => {
-            const cards = document.getElementById('projectCards');
-            Sortable.create(cards, {
-              handle: '.sort-control',
-              animation: 150,
-              ghostClass: 'skills-sort-order-ghost-class',
-              onUpdate(event) {
-                self.projectOrderUpdate(event);
-              },
-            });
-          });
-        }
-      },
-      projectOrderUpdate(updateEvent) {
-        const projectId = updateEvent.item.id;
-        this.sortOrderLoadingProjectId = projectId;
-        this.sortOrderLoading = true;
-        ProjectService.moveMyProject(projectId, updateEvent.newIndex)
-          .finally(() => {
-            this.sortOrderLoading = false;
-          });
-      },
-      updateSortAndReloadProjects(updateInfo) {
-        const currentIndex = this.myProjects.sort((a, b) => {
-          if (a.displayOrder > b.displayOrder) {
-            return 1;
-          }
-          if (b.displayOrder > a.displayOrder) {
-            return -1;
-          }
-          return 0;
-        })
-          .findIndex((item) => item.projectId === updateInfo.projectId);
-        const newIndex = updateInfo.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-        if (newIndex >= 0 && (newIndex) < this.myProjects.length) {
-          this.loading = true;
-          ProjectService.moveMyProject(updateInfo.projectId, newIndex)
-            .finally(() => {
-              this.loadSummaryAndEnableSummary()
-                .then(() => {
-                  const foundRef = this.$refs[`proj${updateInfo.projectId}`];
-                  this.$nextTick(() => {
-                    foundRef[0].focusSortControl();
-                  });
-                });
-            });
-        }
-      },
-    },
-    computed: {
-      hasProjects() {
-        return this.myProjects && this.myProjects.length > 0;
-      },
-      ...mapGetters([
-        'myProgress',
-        'myProjects',
-      ]),
-    },
-  };
 </script>
 
-<style scoped>
-.project-link :hover {
-  cursor: pointer;
-}
-.my-summary-card {
-  min-width: 17rem !important;
-}
-hr {
-  border:none;
-  height: 20px;
-  width: 90%;
-  height: 50px;
-  margin-top: 0;
-  border-bottom: 1px solid rgba(45, 135, 121, 0.31);
-  box-shadow: 0 10px 10px -10px rgba(45, 134, 120, 0.15);
-  margin: -50px auto 10px;
-  width: 90%;
-}
+<template>
+  <div>
+    <skills-spinner :is-loading="myProgressState.isLoadingMyProgressSummary" class="mt-8" />
+    <div v-if="!myProgressState.isLoadingMyProgressSummary">
+      <progress-and-ranking-splash v-if="!myProgressState.hasProjects" />
+      <div v-if="myProgressState.hasProjects">
+        <my-progress-title title="My Progress">
+          <template #rightContent>
+            <router-link :to="{ name: 'DiscoverProjectsPage' }" tabindex="-1">
+              <SkillsButton
+                label="Projects Catalog"
+                outlined
+                icon="fas fa-tasks"
+                data-cy="manageMyProjsBtn"
+                variant="outline-primary" />
+            </router-link>
+          </template>
+        </my-progress-title>
 
-</style>
+        <div class="flex flex-column sm:flex-row gap-3 flex-wrap mt-3">
+          <div class="flex-1">
+            <info-snapshot-card />
+          </div>
+          <div class="flex-1">
+            <num-skills />
+          </div>
+          <div class="flex-1">
+            <last-earned-card />
+          </div>
+          <div class="flex-1">
+            <badge-num-card />
+          </div>
+        </div>
+
+        <Divider />
+
+        <my-current-projects />
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<style scoped></style>

@@ -13,84 +13,71 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+
+defineProps({
+  title: String,
+  message: {
+    type: String,
+    default: '',
+  },
+  icon: {
+    type: String,
+    default: 'fas fa-dragon',
+  },
+  showRefreshAction: {
+    type: Boolean,
+    default: false,
+  }
+})
+
+function refresh() {
+  window.location.reload();
+}
+</script>
+
 <template>
-  <div class="text-secondary text-center" data-cy="noContent">
-    <div class="row">
-      <div class="col">
-        <span class="fa-stack" :class="iconSize" style="vertical-align: top;">
-          <i class="fas fa-circle fa-stack-2x" :class="iconColor"></i>
-          <i class="fa-stack-1x fa-inverse" :class="icon"></i>
-        </span>
-      </div>
-      <div class="w-100"></div>
-      <div class="col pt-2">
-        <div class="h3 no-content">{{ title }}</div>
+  <div class="text-color-secondary text-center" data-cy="noContent" role="alert" aria-live="assertive"
+       aria-atomic="true">
+    <div class="flex justify-content-center text-center">
+      <div class="border-circle w-8rem h-8rem m-2 surface-500 font-bold flex align-items-center justify-content-center">
+        <i class="text-0 text-7xl" :class="icon"></i>
       </div>
     </div>
-    <div class="row justify-content-center ">
-      <div class="col col-md-8 col-lg-7 col-xl-5 no-content">
+    <div v-if="title" class="mt-1">
+      <div class="text-3xl no-content text-center">{{ title }}</div>
+    </div>
+    <div class="grid justify-content-center mt-1">
+      <div class="col md:col-8 lg:col-7 xl:col-5 no-content sd-theme-primary-color">
         <slot>
           {{ message }}
         </slot>
       </div>
     </div>
-    <div v-if="showRefreshAction" class="row justify-content-center mt-3">
+    <div v-if="showRefreshAction" class="grid justify-content-center mt-3">
       <div class="col col-md-8 col-lg-7 col-xl-5 no-content">
         Please
-        <b-button variant="info" @click="refresh" class="text-uppercase" size="sm"
+        <Button severity="info" @click="refresh" class="uppercase" size="small"
                   data-cy="refreshBtn"><i class="fas fa-redo-alt"></i> refresh
-        </b-button>
+        </Button>
         the page.
       </div>
     </div>
   </div>
 </template>
 
-<script>
-  export default {
-    name: 'NoContent2',
-    props: {
-      title: String,
-      message: {
-        type: String,
-        default: '',
-      },
-      icon: {
-        type: String,
-        default: 'fas fa-dragon',
-      },
-      iconSize: {
-        type: String,
-        default: 'fa-3x',
-      },
-      iconColor: {
-        type: String,
-        default: 'text-secondary',
-      },
-      showRefreshAction: {
-        type: Boolean,
-        default: false,
-      },
-    },
-    methods: {
-      refresh() {
-        window.location.reload();
-      },
-    },
-  };
-</script>
-
 <style scoped>
-  .icon-style {
-    font-size: 4rem;
-    color: #969696;
-  }
+.circle-icon {
+  font-size: 8rem;
+}
 
-  .icon-container {
-    background: #ededed;
-  }
+.in-circle-icon {
+  font-size: 3.5rem;
+  position: absolute;
+  top: 2.2rem;
+  right: 0;
+  left: 0;
+  margin: auto;
+}
 
-  .no-content {
-    color: #3f5971;
-  }
 </style>

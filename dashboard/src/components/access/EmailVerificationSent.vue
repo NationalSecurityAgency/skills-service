@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,42 +13,39 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import Logo1 from "@/components/brand/Logo1.vue";
+import {useEmailVerificationInfo} from "@/components/access/UseEmailVerificationInfo.js";
+
+const emailVerificationInfo = useEmailVerificationInfo()
+
+</script>
+
 <template>
-  <div class="container-fluid">
-    <div class="row justify-content-center text-center" data-cy="emailVerificationSentConfirmation">
-    <div class="col col-md-8 col-lg-7 col-xl-4 mt-3" style="min-width: 20rem;">
-      <div class="mt-5">
-        <logo1 />
-        <div class="h3 mt-4 text-primary">Email Verification Sent!</div>
-      </div>
-        <div class="card text-left">
-          <div class="card-body p-4">
-            <p>An email verification code has been sent to <span class="text-primary font-weight-bold">{{ email }}</span>.</p>
+  <div>
+    <div class="flex justify-content-center text-center" data-cy="emailVerificationSentConfirmation">
+      <div class="" style="min-width: 20rem;">
+        <div class="mt-5">
+          <logo1 />
+          <div class="h3 mt-4 text-primary">Email Verification Sent!</div>
+        </div>
+        <Card>
+          <template #content>
+            <p>An email verification code has been sent to <span class="text-primary font-weight-bold">{{ emailVerificationInfo.email }}</span>.</p>
             <p>Please check your email and confirm your email address to complete your SkillTree account creation.</p>
             <div class="text-center">
-              <b-button href="/skills-login" variant="outline-primary" class="p-2" data-cy="loginPage"><i class="fas fa-sign-in-alt mr-1"/>Return to Login Page</b-button>
+              <router-link to="/skills-login" tabindex="-1">
+                <SkillsButton class="p-2" data-cy="loginPage" icon="fas fa-sign-in-alt" label="Return to Login Page"></SkillsButton>
+              </router-link>
             </div>
-          </div>
-        </div>
+          </template>
+        </Card>
 
+      </div>
     </div>
-  </div>
   </div>
 </template>
 
-<script>
-  import Logo1 from '../brand/Logo1';
+<style scoped>
 
-  export default {
-    name: 'EmailVerificationSent',
-    components: { Logo1 },
-    props: {
-      email: String,
-    },
-    data() {
-      return {
-        timer: -1,
-      };
-    },
-  };
-</script>
+</style>

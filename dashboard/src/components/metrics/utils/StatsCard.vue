@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,16 +13,46 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+
+import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
+import NumberFormatter from "@/components/utils/NumberFormatter.js";
+import CardWithVericalSections from '@/components/utils/cards/CardWithVericalSections.vue'
+
+const timeUtils = useTimeUtils();
+
+defineProps({
+  title: {
+    type: String,
+    required: true,
+  },
+  statNum: {
+    type: Number,
+    required: false,
+  },
+  icon: {
+    type: String,
+    required: true,
+  },
+  calculateTimeFromNow: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+})
+
+</script>
+
 <template>
-  <div class="card h-100">
-    <div class="card-body">
-      <div class="row">
+  <CardWithVericalSections :pt="{ body: { class: 'p-2' }, content: { class: 'p-2' } }">
+    <template #content>
+      <div class="grid w-full">
         <div class="col">
-          <div class="h5 text-uppercase text-muted card-title small mb-1">{{ title }}</div>
+          <div class="uppercase font-light card-title text-sm mb-1">{{ title }}</div>
           <slot name="card-value">
-            <span class="h4 font-weight-bold mb-0" data-cy="statCardValue">
-              <span v-if="calculateTimeFromNow"><span v-if="statNum">{{ statNum | timeFromNow }}</span><span v-else>Never</span></span>
-              <span v-else>{{ statNum | number }}</span>
+            <span class="text-2xl font-bold mb-0" data-cy="statCardValue">
+              <span v-if="calculateTimeFromNow"><span v-if="statNum">{{ timeUtils.timeFromNow(statNum) }}</span><span v-else>Never</span></span>
+              <span v-else>{{ NumberFormatter.format(statNum) }}</span>
             </span>
           </slot>
         </div>
@@ -30,35 +60,15 @@ limitations under the License.
           <i :class="icon" style="font-size: 2.2rem;"/>
         </div>
       </div>
-      <p class="text-muted small mt-3 mb-0" data-cy="statCardDescription"><slot /></p>
-    </div>
-  </div>
-</template>
 
-<script>
-  export default {
-    name: 'StatsCard',
-    props: {
-      title: {
-        type: String,
-        required: true,
-      },
-      statNum: {
-        type: Number,
-        required: false,
-      },
-      icon: {
-        type: String,
-        required: true,
-      },
-      calculateTimeFromNow: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-    },
-  };
-</script>
+    </template>
+    <template #footer>
+      <p class="font-light text-sm mt-3 mb-0" data-cy="statCardDescription">
+        <slot />
+      </p>
+    </template>
+  </CardWithVericalSections>
+</template>
 
 <style scoped>
 

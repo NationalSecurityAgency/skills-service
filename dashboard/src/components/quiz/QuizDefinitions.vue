@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,325 +13,319 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { computed, onMounted, ref } from 'vue'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
+import { FilterMatchMode } from 'primevue/api'
+import QuizService from '@/components/quiz/QuizService.js'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import NoContent2 from '@/components/utils/NoContent2.vue'
+import Column from 'primevue/column'
+import DateCell from '@/components/utils/table/DateCell.vue'
+import EditQuiz from '@/components/quiz/testCreation/EditQuiz.vue'
+import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
+import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
+import InputGroup from 'primevue/inputgroup'
+import InputGroupAddon from 'primevue/inputgroupaddon'
+
+const announcer = useSkillsAnnouncer()
+const responsive = useResponsiveBreakpoints()
+
+const loading = ref(false);
+const quizzes = ref([]);
+const sortInfo = ref({ sortOrder: 1, sortBy: 'created' })
+const options = ref({
+  emptyText: 'Click Test+ on the top-right to create a test!',
+  busy: false,
+  bordered: true,
+  outlined: true,
+  stacked: 'md',
+  fields: [
+    {
+      key: 'name',
+      label: 'Name',
+      sortable: true,
+      imageClass: 'fas fa-spell-check skills-color-subjects',
+    },
+    {
+      key: 'type',
+      label: 'Type',
+      sortable: true,
+      imageClass: 'fas fa-sliders-h text-success',
+    },
+    {
+      key: 'created',
+      label: 'Created On',
+      sortable: true,
+      imageClass: 'fas fa-clock text-warning',
+    },
+  ],
+  pagination: {
+    server: false,
+    currentPage: 1,
+    totalRows: 0,
+    pageSize: 5,
+    possiblePageSizes: [5, 10, 15, 20],
+  },
+});
+const deleteQuizInfo = ref( {
+  showDialog: false,
+      quizDef: {},
+  disableDelete: true,
+      numSkillsAssignedTo: 0,
+      loadingDeleteCheck: true,
+});
+const editQuizInfo = ref({
+  showDialog: false,
+      isEdit: false,
+      quizDef: {},
+});
+
+const totalRows = ref(0)
+
+const hasData = computed(() => {
+  return quizzes.value && quizzes.value.length > 0;
+});
+
+onMounted(() => {
+  loadData()
+})
+
+function loadData() {
+  loading.value = true;
+  QuizService.getQuizDefs()
+      .then((res) => {
+        quizzes.value = res.map((q) => ({ ...q }));
+        options.value.pagination.totalRows = quizzes.value.length;
+        totalRows.value = quizzes.value.length;
+      })
+      .finally(() => {
+        options.value.busy = false;
+        loading.value = false;
+      });
+}
+
+const filters = ref({
+  global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+})
+
+const clearFilter = () => {
+  filters.value.global.value = null
+}
+const onFilter = (filterEvent) => {
+  totalRows.value = filterEvent.filteredValue.length
+}
+function updateQuizDef(quizDef) {
+  const existingIndex = quizzes.value.findIndex((item) => item.quizId === quizDef.originalQuizId)
+  if (existingIndex >= 0) {
+    quizzes.value.splice(existingIndex, 1, quizDef)
+  } else {
+    quizzes.value.push(quizDef)
+  }
+  announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`);
+}
+function showDeleteWarningModal(quizDef) {
+  deleteQuizInfo.value.quizDef = quizDef;
+  deleteQuizInfo.value.showDialog = true;
+  deleteQuizInfo.value.loadingDeleteCheck = true;
+  deleteQuizInfo.value.disableDelete = true;
+  QuizService.countNumSkillsQuizAssignedTo(quizDef.quizId)
+      .then((res) => {
+        deleteQuizInfo.value.numSkillsAssignedTo = res;
+        deleteQuizInfo.value.disableDelete = res > 0;
+        deleteQuizInfo.value.loadingDeleteCheck = false;
+      });
+}
+function deleteQuiz() {
+  options.value.busy = true;
+  const { quizDef } = deleteQuizInfo.value;
+  deleteQuizInfo.value.quizDef = {};
+  QuizService.deleteQuizId(quizDef.quizId)
+      .then(() => {
+        quizzes.value = quizzes.value.filter((q) => q.quizId !== quizDef.quizId);
+      })
+      .finally(() => {
+        options.value.busy = false;
+        announcer.polite(`${quizDef.type} named ${quizDef.name} was removed.`);
+      });
+}
+const showUpdateModal = (quizDef, isEdit = true) => {
+  editQuizInfo.value.quizDef = quizDef;
+  editQuizInfo.value.isEdit = isEdit;
+  editQuizInfo.value.showDialog = true;
+};
+
+defineExpose({
+  showUpdateModal,
+})
+</script>
+
 <template>
   <div style="min-height: 20rem;">
-    <skills-spinner :is-loading="loading" class="my-5"/>
-    <no-content2 v-if="!loading && !hasData" title="No Quiz or Survey Definitions"
-                 class="mt-5"
-                 message="Create a Survey or a Quiz to run independently or to associate to a skill in one of the existing SkillTree projects."
-                 data-cy="noQuizzesYet"/>
+    <SkillsSpinner :is-loading="loading" class="my-5" />
+    <NoContent2 v-if="!loading && !hasData"
+                title="No Quiz or Survey Definitions"
+                class="py-8 px-4"
+                message="Create a Survey or a Quiz to run independently or to associate to a skill in one of the existing SkillTree projects."
+                data-cy="noQuizzesYet"/>
     <div v-if="!loading && hasData">
-      <div class="row px-3 py-3">
-        <div class="col-12">
-          <b-input v-model="filter.name" v-on:keyup.enter="applyFilters"
-                   data-cy="quizNameFilter" aria-label="Quiz/Survey Name Filter"/>
-        </div>
-      </div>
+      <SkillsDataTable
+        tableStoredStateId="quizDefinitionsTable"
+        aria-label="Quizzes and Surveys"
+        :value="quizzes"
+        data-cy="quizDefinitionsTable"
+        v-model:filters="filters"
+        :globalFilterFields="['name']"
+        @filter="onFilter"
+        v-model:sort-field="sortInfo.sortBy"
+        v-model:sort-order="sortInfo.sortOrder"
+        paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"
+        show-gridlines
+        striped-rows>
+        <template #header>
+          <div class="flex gap-1">
+            <InputGroup>
+              <InputGroupAddon>
+                <i class="fas fa-search" aria-hidden="true"/>
+              </InputGroupAddon>
+              <InputText class="flex flex-grow-1"
+                         v-model="filters['global'].value"
+                         data-cy="quizNameFilter"
+                         placeholder="Quiz/Survey Search"
+                         aria-label="Quiz/Survey Name Filter"/>
+              <InputGroupAddon class="p-0 m-0">
+                <SkillsButton
+                              icon="fa fa-times"
+                              text
+                              outlined
+                              @click="clearFilter"
+                              aria-label="Reset surveys and quizzes filter"
+                              data-cy="quizResetBtn"/>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+        </template>
 
-      <div class="row pl-3 mb-3">
-        <div class="col">
-          <b-button variant="outline-info"
-                    aria-label="Filter surveys and quizzes table"
-                    @click="applyFilters"
-                    data-cy="quizFilterBtn"><i
-            class="fa fa-filter" aria-hidden="true"/> Filter
-          </b-button>
-          <b-button variant="outline-info"
-                    @click="reset"
-                    aria-label="Reset surveys and quizzes filter"
-                    class="ml-1"
-                    data-cy="quizResetBtn"><i
-            class="fa fa-times" aria-hidden="true"/> Reset
-          </b-button>
-        </div>
-      </div>
+        <template #paginatorstart>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+        </template>
 
-      <skills-b-table :options="options" :items="quizzes"
-                      tableStoredStateId="quizDeffinitionsTable"
-                      data-cy="quizDeffinitionsTable">
-        <template #head(name)="data">
-          <span class="text-primary"><i class="fas fa-spell-check skills-color-subjects" aria-hidden="true"></i> {{ data.label }}</span>
+        <template #empty>
+          <div class="flex justify-content-center flex-wrap">
+            <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+            <span class="flex align-items-center justify-content-center">No Quiz or Survey Definitions.  Click
+            <SkillsButton class="flex flex align-items-center justify-content-center px-1"
+                          label="Reset"
+                          link
+                          size="small"
+                          @click="clearFilter"
+                          aria-label="Reset surveys and quizzes filter"
+                          data-cy="quizResetBtn"/> to clear the existing filter.
+              </span>
+          </div>
         </template>
-        <template #head(type)="data">
-          <span class="text-primary"><i class="fas fa-sliders-h text-success" aria-hidden="true"></i> {{ data.label }}</span>
-        </template>
-        <template #head(created)="data">
-          <span class="text-primary"><i class="fas fa-clock text-warning" aria-hidden="true"></i> {{ data.label }}</span>
-        </template>
-        <template v-slot:cell(name)="data">
-          <div class="row">
-            <div class="col">
-              <div class="h5">
-                <router-link :data-cy="`managesQuizLink_${data.item.quizId}`"
-                             :to="{ name:'Questions', params: { quizId: data.item.quizId }}"
-                             :aria-label="`Manage Quiz ${data.item.name}`"
-                             tag="a">
-                  <span v-html="data.item.nameHtml ? data.item.nameHtml : data.item.name" />
+        <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
+                :class="{'flex': responsive.md.value }">
+          <template #header>
+            <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
+          </template>
+          <template #body="slotProps">
+            <div v-if="slotProps.field === 'name'" class="flex w-full flex-wrap flex-column sm:flex-row gap-2">
+              <div class="flex align-items-start justify-content-start w-min-10rem">
+                <router-link :data-cy="`managesQuizLink_${slotProps.data.quizId}`"
+                             :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
+                             :aria-label="`Manage Quiz ${slotProps.data.name}`">
+                  <highlighted-value :value="slotProps.data.name" :filter="filters.global.value" />
                 </router-link>
               </div>
+              <div class="flex flex-1 flex-wrap align-items-start justify-content-end gap-2">
+                <router-link :data-cy="`managesQuizBtn_${slotProps.data.quizId}`"
+                             :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
+                             :aria-label="`Manage Quiz ${slotProps.data.name}`" tabindex="-1">
+                  <SkillsButton label="Manage"
+                                icon="fas fa-arrow-circle-right"
+                                  class="flex-shrink-1"
+                                outlined
+                                size="small"/>
+                </router-link>
+                <ButtonGroup class="flex flex-nowrap">
+                  <SkillsButton @click="showUpdateModal(slotProps.data)"
+                                icon="fas fa-edit"
+                                outlined
+                                :data-cy="`editQuizButton_${slotProps.data.quizId}`"
+                                :aria-label="`Edit Quiz ${slotProps.data.name}`"
+                                :ref="`edit_${slotProps.data.quizId}`"
+                                :id="`edit_${slotProps.data.quizId}`"
+                                :track-for-focus="true"
+                                title="Edit Quiz">
+                  </SkillsButton>
+                  <SkillsButton @click="showDeleteWarningModal(slotProps.data)"
+                                icon="text-warning fas fa-trash"
+                                outlined
+                                :data-cy="`deleteQuizButton_${slotProps.data.quizId}`"
+                                :aria-label="'delete Quiz '+slotProps.data.name"
+                                :ref="`delete_${slotProps.data.quizId}`"
+                                :id="`delete_${slotProps.data.quizId}`"
+                                :track-for-focus="true"
+                                title="Delete Quiz">
+                  </SkillsButton>
+                </ButtonGroup>
+              </div>
             </div>
-            <div class="col-auto text-right">
-              <router-link :data-cy="`managesQuizBtn_${data.item.quizId}`"
-                           :to="{ name:'Questions', params: { quizId: data.item.quizId }}"
-                           :aria-label="`Manage Quiz ${data.item.name}`"
-                           class="btn btn-outline-primary btn-sm">
-                <span class="d-none d-sm-inline">Manage </span> <i class="fas fa-arrow-circle-right"
-                                                                   aria-hidden="true"/>
-              </router-link>
-              <b-button-group size="sm" class="ml-1">
-                <b-button @click="showUpdateModal(data.item)"
-                          variant="outline-primary" :data-cy="`editQuizButton_${data.item.quizId}`"
-                          :aria-label="`Edit Quiz ${data.item.name}`" :ref="`edit_${data.item.quizId}`"
-                          title="Edit Quiz">
-                  <i class="fas fa-edit" aria-hidden="true"/>
-                </b-button>
-                <b-button @click="showDeleteWarningModal(data.item)" variant="outline-primary"
-                          :data-cy="`deleteQuizButton_${data.item.quizId}`"
-                          :aria-label="'delete Quiz '+data.item.name"
-                          :ref="`delete_${data.item.quizId}`"
-                          title="Delete Quiz">
-                  <i class="text-warning fas fa-trash" aria-hidden="true"/>
-                </b-button>
-              </b-button-group>
+            <div v-else-if="slotProps.field === 'type'">
+              <highlighted-value :value="slotProps.data[col.key]" :filter="filters.global.value" />
             </div>
-          </div>
-        </template>
-        <template v-slot:cell(created)="data">
-          <date-cell :value="data.value"/>
-        </template>
-      </skills-b-table>
+            <div v-else-if="slotProps.field === 'created'">
+              <DateCell :value="slotProps.data[col.key]" />
+            </div>
+            <div v-else>
+              {{ slotProps.data[col.key] }}
+            </div>
+          </template>
+        </Column>
+      </SkillsDataTable>
     </div>
-      <edit-quiz v-if="editQuizInfo.showDialog" v-model="editQuizInfo.showDialog"
-                 :quiz="editQuizInfo.quizDef"
-                 :is-edit="editQuizInfo.isEdit"
-                 @quiz-saved="updateQuizDef"
-                 @hidden="handleEditQuizModalClose"/>
-      <removal-validation v-if="deleteQuizInfo.showDialog" v-model="deleteQuizInfo.showDialog"
-                          :removal-not-available="deleteQuizInfo.disableDelete"
-                          @do-remove="deleteQuiz" @hidden="focusOnRefId(`delete_${deleteQuizInfo.quizDef.quizId}`)">
-        <skills-spinner :is-loading="deleteQuizInfo.loadingDeleteCheck" class="my-4"/>
-        <div v-if="!deleteQuizInfo.loadingDeleteCheck">
-          <div v-if="deleteQuizInfo.disableDelete">
-            Cannot remove the quiz since it is currently assigned to <b-badge>{{ deleteQuizInfo.numSkillsAssignedTo }}</b-badge> skill{{ deleteQuizInfo.numSkillsAssignedTo > 1 ? 's' : ''}}.
-          </div>
-          <div v-if="!deleteQuizInfo.disableDelete">
-            <p>
-              This will remove <span
-              class="text-primary font-weight-bold">{{ deleteQuizInfo.quizDef.name }}</span> {{ deleteQuizInfo.quizDef.type }}.
-            </p>
-            <div>
-              Deletion <b>cannot</b> be undone and permanently removes all of the underlying questions
-              as well as users' achievements, stats and metrics. Proceed with caution!
-            </div>
-          </div>
+
+    <edit-quiz
+        v-if="editQuizInfo.showDialog"
+        v-model="editQuizInfo.showDialog"
+        :quiz="editQuizInfo.quizDef"
+        :is-edit="editQuizInfo.isEdit"
+        @quiz-saved="updateQuizDef"
+        :enable-return-focus="true"/>
+
+    <removal-validation
+      v-if="deleteQuizInfo.showDialog"
+      :item-name="deleteQuizInfo.quizDef.name"
+      :item-type="deleteQuizInfo.quizDef.type"
+      v-model="deleteQuizInfo.showDialog"
+      :loading="deleteQuizInfo.loadingDeleteCheck"
+      :removal-not-available="deleteQuizInfo.disableDelete"
+      :enable-return-focus="true"
+      @do-remove="deleteQuiz">
+        <div v-if="deleteQuizInfo.disableDelete">
+          Cannot remove the quiz since it is currently assigned to <Tag>{{ deleteQuizInfo.numSkillsAssignedTo }}</Tag> skill{{ deleteQuizInfo.numSkillsAssignedTo > 1 ? 's' : ''}}.
         </div>
-      </removal-validation>
+        <div v-if="!deleteQuizInfo.disableDelete">
+            Deletion <b>cannot</b> be undone and permanently removes all of the underlying questions
+            as well as users' achievements, stats and metrics. Proceed with caution!
+        </div>
+    </removal-validation>
+
   </div>
 </template>
 
-<script>
-  import StringHighlighter from '@/common-components/utilities/StringHighlighter';
-  import SkillsBTable from '@/components/utils/table/SkillsBTable';
-  import DateCell from '@/components/utils/table/DateCell';
-  import QuizService from '@/components/quiz/QuizService';
-  import RemovalValidation from '@/components/utils/modal/RemovalValidation';
-  import EditQuiz from '@/components/quiz/testCreation/EditQuiz';
-  import SkillsSpinner from '@/components/utils/SkillsSpinner';
-  import NoContent2 from '@/components/utils/NoContent2';
-
-  export default {
-    name: 'QuizDefinitions',
-    components: {
-      NoContent2,
-      SkillsSpinner,
-      RemovalValidation,
-      DateCell,
-      SkillsBTable,
-      EditQuiz,
-    },
-    data() {
-      return {
-        loading: true,
-        filter: {
-          name: '',
-        },
-        quizzes: [],
-        quizzesPreFilter: [],
-        options: {
-          emptyText: 'Click Test+ on the top-right to create a test!',
-          busy: false,
-          bordered: true,
-          outlined: true,
-          stacked: 'md',
-          sortBy: 'created',
-          sortDesc: false,
-          fields: [
-            {
-              key: 'name',
-              label: 'Name',
-              sortable: true,
-            },
-            {
-              key: 'type',
-              label: 'Type',
-              sortable: true,
-            },
-            {
-              key: 'created',
-              label: 'Created On',
-              sortable: true,
-            },
-          ],
-          pagination: {
-            server: false,
-            currentPage: 1,
-            totalRows: 0,
-            pageSize: 5,
-            possiblePageSizes: [5, 10, 15, 20],
-          },
-        },
-        deleteQuizInfo: {
-          showDialog: false,
-          quizDef: {},
-          disableDelete: true,
-          numSkillsAssignedTo: 0,
-          loadingDeleteCheck: true,
-        },
-        editQuizInfo: {
-          showDialog: false,
-          isEdit: false,
-          quizDef: {},
-        },
-      };
-    },
-    mounted() {
-      this.loadData();
-    },
-    computed: {
-      hasData() {
-        return this.quizzesPreFilter && this.quizzesPreFilter.length > 0;
-      },
-    },
-    methods: {
-      applyFilters() {
-        if (!this.filter.name || this.filter.name.trim() === '') {
-          this.reset();
-        } else {
-          this.quizzes = this.quizzesPreFilter.filter((q) => q.name.toLowerCase()
-            .includes(this.filter.name.trim().toLowerCase()))?.map((item) => {
-            const nameHtml = StringHighlighter.highlight(item.name, this.filter.name);
-            return {
-              nameHtml,
-              ...item,
-            };
-          });
-        }
-      },
-      reset() {
-        this.filter.name = '';
-        this.quizzes = this.quizzesPreFilter.map((q) => ({ ...q }));
-      },
-      showUpdateModal(quizDef, isEdit = true) {
-        this.editQuizInfo.quizDef = quizDef;
-        this.editQuizInfo.isEdit = isEdit;
-        this.editQuizInfo.showDialog = true;
-      },
-      updateQuizDef(quizDef) {
-        if (!this.hasData) {
-          this.loading = true;
-        }
-        this.options.busy = true;
-        const isNewQuizDef = !quizDef.originalQuizId;
-        QuizService.updateQuizDef(quizDef)
-          .then((updatedQuizDef) => {
-            // presence of the originalQuizId indicates edit operation
-            if (isNewQuizDef) {
-              this.quizzes.push(updatedQuizDef);
-              this.quizzesPreFilter.push(updatedQuizDef);
-              this.options.pagination.totalRows = this.quizzesPreFilter.length;
-            } else {
-              const replaceUpdated = (q) => {
-                if (q.quizId === quizDef.originalQuizId) {
-                  return updatedQuizDef;
-                }
-                return q;
-              };
-              this.quizzes = this.quizzes.map(replaceUpdated);
-              this.quizzesPreFilter = this.quizzesPreFilter.map(replaceUpdated);
-            }
-          })
-          .finally(() => {
-            this.options.busy = false;
-            this.loading = false;
-            this.handleEditQuizModalClose(quizDef);
-            this.$nextTick(() => {
-              this.$announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`);
-            });
-          });
-      },
-      handleEditQuizModalClose(quizDef) {
-        const isNewQuizDef = !quizDef.originalQuizId && !quizDef.isEdit;
-        if (isNewQuizDef) {
-          this.$emit('focus-on-new-button');
-        } else {
-          this.focusOnRefId(`edit_${quizDef.quizId}`);
-        }
-      },
-      loadData() {
-        this.loading = true;
-        QuizService.getQuizDefs()
-          .then((res) => {
-            this.quizzes = res.map((q) => ({ ...q }));
-            this.quizzesPreFilter = res.map((q) => ({ ...q }));
-            this.options.pagination.totalRows = this.quizzes.length;
-          })
-          .finally(() => {
-            this.options.busy = false;
-            this.loading = false;
-          });
-      },
-      showDeleteWarningModal(quizDef) {
-        this.deleteQuizInfo.quizDef = quizDef;
-        this.deleteQuizInfo.showDialog = true;
-        this.deleteQuizInfo.loadingDeleteCheck = true;
-        this.deleteQuizInfo.disableDelete = true;
-        QuizService.countNumSkillsQuizAssignedTo(quizDef.quizId)
-          .then((res) => {
-            this.deleteQuizInfo.numSkillsAssignedTo = res;
-            this.deleteQuizInfo.disableDelete = res > 0;
-            this.deleteQuizInfo.loadingDeleteCheck = false;
-          });
-      },
-      deleteQuiz() {
-        this.options.busy = true;
-        const { quizDef } = this.deleteQuizInfo;
-        this.deleteQuizInfo.quizDef = {};
-        QuizService.deleteQuizId(quizDef.quizId)
-          .then(() => {
-            this.quizzes = this.quizzes.filter((q) => q.quizId !== quizDef.quizId);
-            this.quizzesPreFilter = this.quizzesPreFilter.filter((q) => q.quizId !== quizDef.quizId);
-          })
-          .finally(() => {
-            this.options.busy = false;
-            this.$emit('focus-on-new-button');
-            this.$nextTick(() => {
-              this.$announcer.polite(`${quizDef.type} named ${quizDef.name} was removed.`);
-            });
-          });
-      },
-      focusOnRefId(refId) {
-        this.$nextTick(() => {
-          const ref = this.$refs[refId];
-          if (ref) {
-            ref.focus();
-          }
-        });
-      },
-    },
-  };
-
-</script>
-
 <style scoped>
+
+.skills-color-subjects {
+  color: #2a9d8fff;
+}
+.text-success {
+  color: #007c49;
+}
+.text-warning {
+  color: #ffc42b;
+}
 
 </style>

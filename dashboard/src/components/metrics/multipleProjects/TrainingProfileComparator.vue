@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,155 +13,162 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <metrics-card title="Project definitions comparison" data-cy="trainingProfileComparator">
+<script setup>
+import { ref, onMounted, computed } from 'vue';
+import NoContent2 from "@/components/utils/NoContent2.vue";
+import TrainingProfileComparisonChart from "@/components/metrics/multipleProjects/TrainingProfileComparisonChart.vue";
+import AutoComplete from "primevue/autocomplete";
 
-    <div>
-      <v-select :options="projects.available"
-                v-model="projects.selected"
-                :loading="loading"
-                :multiple="true"
-                :close-on-select="false"
-                label="name"
-                placeholder="Select option"
-                :selectable="() => projects.selected.length < 5"
-                data-cy="trainingProfileComparatorProjectSelector">
-        <template v-if="beforeListSlotText" #list-header>
-          <li>
-            <div class="h6 ml-1"> {{ beforeListSlotText }}</div>
-          </li>
-        </template>
-      </v-select>
-      <div v-if="!loading && enoughProjectsSelected" class="mt-4">
-      <b-row>
-        <b-col xl class="charts-content">
-          <training-profile-comparison-chart :series="numSkillsChart.series" :labels="numSkillsChart.labels"
-            title="Number of Skills" title-icon="fas fa-graduation-cap" data-cy="numOfSkillsChart"/>
-        </b-col>
-        <b-col xl class="mt-3 mt-xl-0 charts-content">
-          <training-profile-comparison-chart :series="numPointsChart.series" :labels="numPointsChart.labels"
-                                             :horizontal="true"
-                                             title-icon="far fa-arrow-alt-circle-up"
-                                             title="Total Available Points"
-                                             data-cy="totalAvailablePointsChart"/>
-        </b-col>
-      </b-row>
-      <b-row class="mt-3">
-        <b-col xl class="charts-content">
-          <training-profile-comparison-chart :series="numSubjectsChart.series" :labels="numSubjectsChart.labels"
-                                             title="Number of Subjects" title-icon="fas fa-cubes" data-cy="numOfSubjChart"/>
-        </b-col>
-        <b-col xl class="mt-3 mt-xl-0 charts-content">
-          <training-profile-comparison-chart :series="numBadgesChart.series" :labels="numBadgesChart.labels"
-                                             title="Number of Badges" title-icon="fas fa-award" data-cy="numOfBadgesChart"/>
-        </b-col>
-      </b-row>
-    </div>
-    </div>
-    <no-content2 v-if="!loading && !enoughOverallProjects"
-                 class="my-5"
-                 title="Feature is disabled"
-                 icon="fas fa-poo"
-                 message="At least 2 projects must exist for this feature to work. Please create more projects to enable this feature."/>
-    <no-content2 v-if="!loading && enoughOverallProjects && !enoughProjectsSelected"
-                 class="my-5"
-                 title="Need more projects"
-                 message="Please select at least 2 projects using the search above"/>
+const props = defineProps(['availableProjects']);
 
-  </metrics-card>
-</template>
+const loading = ref(true);
+const projects = ref({
+  selected: [],
+  available: [],
+});
 
-<script>
-  import vSelect from 'vue-select';
-  import MetricsCard from '../utils/MetricsCard';
-  import TrainingProfileComparisonChart from './TrainingProfileComparisonChart';
-  import NoContent2 from '../../utils/NoContent2';
+const numSkillsChart = ref({
+  labels: [],
+  series: [],
+});
 
-  export default {
-    name: 'TrainingProfileComparator',
-    components: {
-      NoContent2, TrainingProfileComparisonChart, MetricsCard, vSelect,
-    },
-    props: ['availableProjects'],
-    data() {
-      return {
-        loading: true,
-        projects: {
-          selected: [],
-          available: [],
-        },
-        numSkillsChart: {
-          labels: [],
-          series: [],
-        },
-        numPointsChart: {
-          labels: [],
-          series: [],
-        },
-        numBadgesChart: {
-          labels: [],
-          series: [],
-        },
-        numSubjectsChart: {
-          labels: [],
-          series: [],
-        },
-      };
-    },
-    mounted() {
-      this.projects.available = this.availableProjects.map((proj) => ({ ...proj }));
-      const numProjectsToSelect = Math.min(this.availableProjects.length, 4);
-      const availableSortedByMostSkills = this.projects.available.sort((a, b) => a.projectId.localeCompare(b.projectId));
-      const projs = availableSortedByMostSkills.slice(0, numProjectsToSelect);
-      this.projects.selected = projs;
-      this.genDataForCharts();
-    },
-    computed: {
-      enoughOverallProjects() {
-        return this.availableProjects && this.availableProjects.length >= 2;
-      },
-      enoughProjectsSelected() {
-        return this.projects.selected && this.projects.selected.length >= 2;
-      },
-      beforeListSlotText() {
-        if (this.projects.selected.length >= 5) {
-          return 'Maximum of 5 options selected. First remove a selected option to select another.';
-        }
-        return '';
-      },
-    },
-    watch: {
-      'projects.selected': function rebuild() {
-        this.genDataForCharts();
-      },
-    },
-    methods: {
-      genDataForCharts() {
-        this.numSkillsChart.labels = this.projects.selected.map((proj) => proj.name);
-        this.numSkillsChart.series = this.projects.selected.map((proj) => proj.numSkills);
+const numPointsChart = ref({
+  labels: [],
+  series: [],
+});
 
-        this.numPointsChart.labels = this.projects.selected.map((proj) => proj.name);
-        this.numPointsChart.series = this.projects.selected.map((proj) => proj.totalPoints);
+const numBadgesChart = ref({
+  labels: [],
+  series: [],
+});
 
-        this.numBadgesChart.labels = this.projects.selected.map((proj) => proj.name);
-        this.numBadgesChart.series = this.projects.selected.map((proj) => proj.numBadges);
+const numSubjectsChart = ref({
+  labels: [],
+  series: [],
+});
 
-        this.numSubjectsChart.labels = this.projects.selected.map((proj) => proj.name);
-        this.numSubjectsChart.series = this.projects.selected.map((proj) => proj.numSubjects);
+const enoughOverallProjects = computed(() => {
+  return props.availableProjects && props.availableProjects.length >= 2;
+});
 
-        this.projects.available = this.availableProjects.map((proj) => ({ ...proj }));
-        this.projects.available = this.projects.available.filter((el) => !this.projects.selected.some((sel) => sel.projectId === el.projectId));
+const enoughProjectsSelected = computed(() => {
+  return projects.value.selected && projects.value.selected.length >= 2;
+});
 
-        this.loading = false;
-      },
-    },
-  };
+onMounted(() => {
+  projects.value.available = props.availableProjects.map((proj) => ({ ...proj }));
+  const numProjectsToSelect = Math.min(props.availableProjects.length, 4);
+  const availableSortedByMostSkills = projects.value.available.sort((a, b) => a.projectId.localeCompare(b.projectId));
+  projects.value.selected = availableSortedByMostSkills.slice(0, numProjectsToSelect);
+  genDataForCharts();
+})
+
+const genDataForCharts = (filter) => {
+
+  numSkillsChart.value.labels = projects.value.selected.map((proj) => proj.name);
+  numSkillsChart.value.series = projects.value.selected.map((proj) => proj.numSkills);
+
+  numPointsChart.value.labels = projects.value.selected.map((proj) => proj.name);
+  numPointsChart.value.series = projects.value.selected.map((proj) => proj.totalPoints);
+
+  numBadgesChart.value.labels = projects.value.selected.map((proj) => proj.name);
+  numBadgesChart.value.series = projects.value.selected.map((proj) => proj.numBadges);
+
+  numSubjectsChart.value.labels = projects.value.selected.map((proj) => proj.name);
+  numSubjectsChart.value.series = projects.value.selected.map((proj) => proj.numSubjects);
+
+  if(projects.value.selected.length < 5) {
+    projects.value.available = props.availableProjects.map((proj) => ({...proj}));
+    projects.value.available = projects.value.available.filter((el) => !projects.value.selected.some((sel) => sel.projectId === el.projectId));
+
+    if( filter ) {
+      projects.value.available = projects.value.available.filter((el) => el.name.toLowerCase().includes(filter));
+    }
+  } else {
+    projects.value.available = [];
+  }
+
+  loading.value = false;
+};
+
+const filter = (event) => {
+  genDataForCharts(event.query.toLowerCase());
+}
 </script>
 
-<style scoped>
-.charts-content {
-  /* this little hack is required to prevent apexcharts from wrapping onto a new line;
-  the gist is that they calculate width dynamically and do not work properly with the width of 0*/
-  min-width: 1rem !important;
+<template>
+  <Card data-cy="trainingProfileComparator">
+    <template #header>
+      <SkillsCardHeader title="Project definition comparison"></SkillsCardHeader>
+    </template>
+    <template #content>
+      <div class="flex w-full">
+        <AutoComplete
+            v-model="projects.selected"
+            :suggestions="projects.available"
+            :delay="500"
+            :completeOnFocus="true"
+            dropdown
+            @item-unselect="genDataForCharts"
+            @item-select="genDataForCharts"
+            multiple
+            optionLabel="name"
+            inputClass="w-full"
+            class="w-full"
+            @complete="filter"
+            data-cy="trainingProfileComparatorProjectSelector"
+            placeholder="Select option">
+          <template #empty>
+            <div v-if="projects.selected.length === 5" class="ml-4" data-cy="trainingProfileMaximumReached">
+              Maximum of 5 options selected. First remove a selected option to select another.
+            </div>
+            <div v-else class="ml-4">
+              No results found
+            </div>
+          </template>
+        </AutoComplete>
+      </div>
+      <div v-if="!loading && enoughProjectsSelected">
+        <div class="flex gap-4 mt-4">
+          <div class="flex flex-1">
+            <training-profile-comparison-chart :series="numSkillsChart.series" :labels="numSkillsChart.labels"
+                                               title="Number of Skills" title-icon="fas fa-graduation-cap" data-cy="numOfSkillsChart"/>
+          </div>
+          <div class="flex flex-1">
+            <training-profile-comparison-chart :series="numPointsChart.series" :labels="numPointsChart.labels"
+                                               :horizontal="true"
+                                               title-icon="far fa-arrow-alt-circle-up"
+                                               title="Total Available Points"
+                                               data-cy="totalAvailablePointsChart"/>
+          </div>
+        </div>
+        <div class="flex gap-4 mt-4">
+          <div class="flex flex-1">
+            <training-profile-comparison-chart :series="numSubjectsChart.series" :labels="numSubjectsChart.labels"
+                                               title="Number of Subjects" title-icon="fas fa-cubes" data-cy="numOfSubjChart"/>
+          </div>
+          <div class="flex flex-1">
+            <training-profile-comparison-chart :series="numBadgesChart.series" :labels="numBadgesChart.labels"
+                                               title="Number of Badges" title-icon="fas fa-award" data-cy="numOfBadgesChart"/>
+          </div>
+        </div>
+      </div>
+
+      <no-content2 v-if="!loading && !enoughOverallProjects"
+                   class="my-5"
+                   title="Feature is disabled"
+                   icon="fas fa-poo"
+                   message="At least 2 projects must exist for this feature to work. Please create more projects to enable this feature."/>
+      <no-content2 v-if="!loading && enoughOverallProjects && !enoughProjectsSelected"
+                   class="my-5"
+                   title="Need more projects"
+                   message="Please select at least 2 projects using the search above"/>
+    </template>
+  </Card>
+</template>
+
+<style>
+.p-autocomplete-multiple-container {
+  width: 100% !important;
 }
 </style>

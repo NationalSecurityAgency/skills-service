@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,198 +13,241 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <div>
-    <sub-page-header title="Skill Expiration History"/>
-    <b-card body-class="p-0">
-      <div class="row px-3 pt-3">
-        <div class="col-md-6">
-          <b-form-group label="Skill Name Filter" label-class="text-muted">
-            <b-input v-model="filters.skillName" v-on:keydown.enter="applyFilters" data-cy="skillNameFilter" aria-label="skill name filter"/>
-          </b-form-group>
-        </div>
-        <div class="col-md-6">
-          <b-form-group label="User Filter" label-class="text-muted">
-            <b-input v-model="filters.userIdForDisplay" v-on:keydown.enter="applyFilters" data-cy="userIdFilter" aria-label="user id filter"/>
-          </b-form-group>
-        </div>
-      </div>
-      <div class="row pl-3 mb-3">
-        <div class="col">
-          <b-button variant="outline-info" @click="applyFilters" data-cy="users-filterBtn"><i class="fa fa-filter" aria-hidden="true" /> Filter</b-button>
-          <b-button variant="outline-info" @click="reset" class="ml-1" data-cy="users-resetBtn"><i class="fa fa-times" aria-hidden="true" /> Reset</b-button>
-        </div>
-      </div>
-      <b-overlay :show="table.options.busy">
-        <skills-b-table :options="table.options" :items="table.items"
-                        @page-size-changed="pageSizeChanged"
-                        @page-changed="pageChanged"
-                        @sort-changed="sortTable"
-                        tableStoredStateId="expirationHistoryTable"
-                        data-cy="expirationHistoryTable">
-          <template #head(userIdForDisplay)="data">
-            <span class="text-primary">
-              <i class="fas fa-user-cog skills-color-skills" aria-hidden="true"/> {{ data.label }}
-            </span>
-          </template>
-          <template #head(skillName)="data">
-            <span class="text-primary"><i class="fas fa-graduation-cap skills-color-skills" aria-hidden="true"></i> {{ data.label }}</span>
-          </template>
-          <template #head(expiredOn)="data">
-            <span class="text-primary"><i class="fas fa-clock text-warning" aria-hidden="true"></i> {{ data.label }}</span>
-          </template>
-          <template v-slot:cell(userIdForDisplay)="data">
-            {{ getUserDisplay(data.item, true) }}
+<script setup>
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { FilterMatchMode } from 'primevue/api';
+import { useUserInfo } from '@/components/utils/UseUserInfo.js';
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js';
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
+import ExpirationService from '@/components/expiration/ExpirationService.js';
+import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
+import InputText from 'primevue/inputtext';
+import Column from 'primevue/column';
+import DateCell from '@/components/utils/table/DateCell.vue';
 
-            <b-button-group class="float-right">
-              <b-button :to="calculateClientDisplayRoute(data)"
-                        variant="outline-info" size="sm" class="text-secondary"
-                        v-b-tooltip.hover="'View User Details'"
-                        :aria-label="`View details for user ${data.label}`"
-                        data-cy="usersTable_viewDetailsBtn"><i class="fa fa-user-alt" aria-hidden="true"/><span class="sr-only">view user details</span>
-              </b-button>
-            </b-button-group>
-          </template>
-          <template v-slot:cell(skillName)="data">
-            <a :href="getUrl(data.item)">{{ data.value }}</a>
-          </template>
-          <template v-slot:cell(expiredOn)="data">
-            <date-cell :value="data.value" />
-          </template>
-        </skills-b-table>
-      </b-overlay>
-    </b-card>
-  </div>
-</template>
+const route = useRoute()
+const userInfo = useUserInfo()
+const announcer = useSkillsAnnouncer()
+const responsive = useResponsiveBreakpoints()
 
-<script>
-  import SubPageHeader from '@/components/utils/pages/SubPageHeader';
-  import SkillsBTable from '@/components/utils/table/SkillsBTable';
-  import ExpirationService from '@/components/expiration/ExpirationService';
-  import DateCell from '../utils/table/DateCell';
-  import UserIdForDisplayMixin from '../users/UserIdForDisplayMixin';
-
-  export default {
-    name: 'ExpirationHistory',
-    mixins: [UserIdForDisplayMixin],
-    components: {
-      SubPageHeader,
-      SkillsBTable,
-      DateCell,
+const projectId = route.params.projectId;
+const sortInfo = ref({ sortOrder: -1, sortBy: 'userIdForDisplay' })
+const totalRows = ref(0)
+const items = ref([])
+const filters = ref({
+  skillName: '',
+  userIdForDisplay: '',
+})
+const filtering = ref(false)
+const tableOptions = ref({
+  busy: false,
+  bordered: true,
+  outlined: true,
+  stacked: 'md',
+  sortBy: 'userIdForDisplay',
+  sortDesc: true,
+  tableDescription: 'ExpirationHistory',
+  fields: [
+    {
+      key: 'skillName',
+      label: 'Skill Name',
+      sortable: true,
     },
-    data() {
-      return {
-        projectId: this.$route.params.projectId,
-        filters: {
-          skillName: '',
-          userIdForDisplay: '',
-        },
-        table: {
-          options: {
-            busy: false,
-            bordered: true,
-            outlined: true,
-            stacked: 'md',
-            sortBy: 'userIdForDisplay',
-            sortDesc: true,
-            tableDescription: 'ExpirationHistory',
-            fields: [
-              {
-                key: 'skillName',
-                label: 'Skill Name',
-                sortable: true,
-              },
-              {
-                key: 'userIdForDisplay',
-                label: 'User',
-                sortable: true,
-              },
-              {
-                key: 'expiredOn',
-                label: 'Expired On',
-                sortable: true,
-              },
-            ],
-            pagination: {
-              server: true,
-              currentPage: 1,
-              totalRows: 1,
-              pageSize: 10,
-              possiblePageSizes: [10, 25, 50],
-            },
-          },
-          items: [],
-        },
-      };
+    {
+      key: 'userIdForDisplay',
+      label: 'User',
+      sortable: true,
     },
-    mounted() {
-      this.loadData();
+    {
+      key: 'expiredOn',
+      label: 'Expired On',
+      sortable: true,
     },
-    methods: {
-      loadData() {
-        const params = {
-          limit: this.table.options.pagination.pageSize,
-          page: this.table.options.pagination.currentPage,
-          orderBy: this.table.options.sortBy,
-          ascending: !this.table.options.sortDesc,
-          skillName: this.filters.skillName,
-          userIdForDisplay: this.filters.userIdForDisplay,
-        };
-        return ExpirationService.getExpiredSkills(this.$route.params.projectId, params).then((res) => {
-          this.table.items = res.data;
-          this.table.options.pagination.totalRows = res.totalCount;
-        });
-      },
-      sortTable(sortContext) {
-        this.table.options.sortBy = sortContext.sortBy;
-        this.table.options.sortDesc = sortContext.sortDesc;
+  ],
+  pagination: {
+    server: true,
+    currentPage: 1,
+    totalRows: 1,
+    pageSize: 10,
+    possiblePageSizes: [10, 25, 50],
+  },
+  items: [],
+})
 
-        // set to the first page
-        this.table.options.pagination.currentPage = 1;
-        this.loadData();
-      },
-      pageChanged(pageNum) {
-        this.table.options.pagination.currentPage = pageNum;
-        this.loadData();
-      },
-      pageSizeChanged(newSize) {
-        this.table.options.pagination.pageSize = newSize;
-        this.loadData();
-      },
-      applyFilters() {
-        this.table.options.pagination.currentPage = 1;
-        this.loadData().then(() => {
-          let filterMessage = 'Skill expiration history table has been filtered by';
-          if (this.filters.skillName) {
-            filterMessage += ` ${this.filters.skillName}`;
-          }
-          if (this.filters.userIdForDisplay) {
-            filterMessage += ` ${this.filters.userIdForDisplay}`;
-          }
-          this.$nextTick(() => this.$announcer.polite(filterMessage));
-        });
-      },
-      reset() {
-        this.filters.userIdForDisplay = '';
-        this.filters.skillName = '';
-        this.loadData().then(() => {
-          this.$nextTick(() => this.$announcer.polite('Skill expiration history table filters have been removed'));
-        });
-      },
-      getUrl(item) {
-        return `/administrator/projects/${encodeURIComponent(this.projectId)}/subjects/${encodeURIComponent(item.subjectId)}/skills/${encodeURIComponent(item.skillId)}/`;
-      },
-      calculateClientDisplayRoute(props) {
-        const routeObj = {
-          name: 'ClientDisplayPreview',
-          params: {
-            projectId: this.$route.params.projectId,
-            userId: props.item.userId,
-          },
-        };
+onMounted(() => {
+  loadData();
+})
 
-        return routeObj;
-      },
+const loadData = () => {
+  tableOptions.value.busy = true
+  const params = {
+    limit: tableOptions.value.pagination.pageSize,
+    page: tableOptions.value.pagination.currentPage,
+    orderBy: sortInfo.value.sortBy,
+    ascending: sortInfo.value.sortOrder === 1,
+    skillName: encodeURIComponent(tableFilters.value.skillName.value || ''),
+    userIdForDisplay: encodeURIComponent(tableFilters.value.userIdForDisplay.value || ''),
+  };
+  return ExpirationService.getExpiredSkills(projectId, params).then((res) => {
+    tableOptions.value.items = res.data;
+    tableOptions.value.pagination.totalRows = res.totalCount;
+    totalRows.value = res.totalCount;
+  }).finally(() => {
+    tableOptions.value.busy = false;
+  });
+}
+const clearFilter = () => {
+  tableFilters.value.global.value = null
+  loadData().then(() => filtering.value = false)
+}
+const onFilter = (filterEvent) => {
+  loadData().then(() => filtering.value = true)
+}
+const pageChanged = (pagingInfo) => {
+  tableOptions.value.pagination.pageSize = pagingInfo.rows
+  tableOptions.value.pagination.currentPage = pagingInfo.page + 1
+  loadData()
+}
+const sortField = (column) => {
+  // set to the first page
+  tableOptions.value.pagination.currentPage = 1
+  loadData()
+}
+const tableFilters = ref({
+  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  userIdForDisplay: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+  skillName: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+})
+const getUrl = (item) => {
+  return `/administrator/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(item.subjectId)}/skills/${encodeURIComponent(item.skillId)}/`;
+}
+const calculateClientDisplayRoute = (props) => {
+  return {
+    name: 'SkillsDisplaySkillsDisplayPreviewProject',
+    params: {
+      projectId: projectId,
+      userId: props.userId,
     },
   };
+}
 </script>
+
+<template>
+  <SubPageHeader title="Skill Expiration History" />
+
+  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <template #content>
+      <SkillsDataTable
+          tableStoredStateId="expirationHistoryTable"
+          :value="tableOptions.items"
+          :loading="tableOptions.busy"
+          show-gridlines
+          striped-rows
+          lazy
+          paginator
+          data-cy="expirationHistoryTable"
+          aria-label="Skill Expiration History"
+          v-model:filters="tableFilters"
+          :globalFilterFields="['userIdForDisplay']"
+          filterDisplay="row"
+          @filter="onFilter"
+          @page="pageChanged"
+          @sort="sortField"
+          :rows="tableOptions.pagination.pageSize"
+          :rowsPerPageOptions="tableOptions.pagination.possiblePageSizes"
+          :total-records="tableOptions.pagination.totalRows"
+          v-model:sort-field="sortInfo.sortBy"
+          v-model:sort-order="sortInfo.sortOrder">
+
+        <template #paginatorstart>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+        </template>
+
+        <template #empty>
+          <div class="flex justify-content-center flex-wrap h-12rem">
+            <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle fa-3x"
+               aria-hidden="true"></i>
+            <span class="w-full">
+                <span class="flex align-items-center justify-content-center">There are no records to show</span>
+                <span v-if="filtering" class="flex align-items-center justify-content-center">  Click
+                    <SkillsButton class="flex flex align-items-center justify-content-center px-1"
+                                  label="Reset"
+                                  link
+                                  size="small"
+                                  @click="clearFilter"
+                                  :aria-label="`Reset filter for $ {quizType} results`"
+                                  data-cy="userResetBtn" /> to clear the existing filter.
+              </span>
+            </span>
+          </div>
+        </template>
+        <Column field="skillName" header="Skill Name" :showFilterMenu="false" :sortable="true" :class="{'flex': responsive.md.value }">
+          <template #header>
+            <i class="fas fa-graduation-cap skills-color-skills mr-1" aria-hidden="true"></i>
+          </template>
+          <template #body="slotProps">
+            <a :data-cy="`row${slotProps.index}-${slotProps.field}`" :href="getUrl(slotProps.data)">{{ slotProps.data.skillName }}</a>
+          </template>
+          <template #filter="{ filterModel, filterCallback }">
+            <InputText v-model="filterModel.value"
+                       type="text"
+                       class="p-column-filter"
+                       data-cy="skillNameFilter"
+                       style="min-width: 10rem"
+                       @input="filterCallback()"
+                       placeholder="Search by Skill Name" />
+          </template>
+        </Column>
+        <Column field="userIdForDisplay" :showFilterMenu="false" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
+          <template #header>
+            <i class="fas fa-user-cog skills-color-skills mr-1" aria-hidden="true"></i>
+          </template>
+          <template #body="slotProps">
+            <div class="flex gap-1">
+              <span class="flex-1" :data-cy="`row${slotProps.index}-userId`">{{ userInfo.getUserDisplay(slotProps.data, true) }}</span>
+              <router-link
+                  class="ml-1 flex"
+                  data-cy="ViewUserDetailsBtn"
+                  :to="calculateClientDisplayRoute(slotProps.data)"
+                  tabindex="-1"
+                  target="_blank" rel="noopener">
+                <SkillsButton
+                    target="_blank"
+                    outlined
+                    severity="info"
+                    size="small"
+                    icon="fa fa-user-alt"
+                    :aria-label="`View details for user ${userInfo.getUserDisplay(slotProps.data, true)}`">
+                </SkillsButton>
+              </router-link>
+            </div>
+          </template>
+          <template #filter="{ filterModel, filterCallback }">
+            <InputText v-model="filterModel.value"
+                       type="text"
+                       data-cy="userIdFilter"
+                       class="p-column-filter"
+                       style="min-width: 10rem"
+                       @input="filterCallback()"
+                       placeholder="Search by User" />
+          </template>
+        </Column>
+        <Column field="expiredOn" header="Expired On" :sortable="false" :show-filter-menu="false" :class="{'flex': responsive.md.value }">
+          <template #header>
+            <i class="fas fa-clock text-warning mr-1" aria-hidden="true"></i>
+          </template>
+          <template #filter>
+            <span class="sr-only">No filter for this column</span>
+          </template>
+          <template #body="slotProps">
+            <DateCell :value="slotProps.data.expiredOn" />
+          </template>
+        </Column>
+      </SkillsDataTable>
+    </template>
+  </Card>
+</template>
+
+<style scoped></style>

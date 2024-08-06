@@ -42,20 +42,6 @@ describe('Badges Tests', () => {
                 .click();
         });
 
-        Cypress.Commands.add('selectSkill', (skillIndex=0, retry=true) => {
-            cy.get('[data-cy="skillsSelector"] [data-pc-section="trigger"]').as('getOptions')
-              .click();
-            // cy.get('@getOptions').then(($el) => {
-                cy.wait(500);
-              // if (cy.get('[data-pc-section="item"]').length > 0) {
-                cy.get('[data-pc-section="item"]')
-                  .eq(skillIndex).click();
-                  // .click();
-              // } else if (retry) {
-              //   cy.selectSkill(skillIndex, false);}
-            // })
-        });
-
         cy.intercept('POST', '/admin/projects/proj1/badgeNameExists')
             .as('nameExistsCheck');
         cy.intercept('GET', '/admin/projects/proj1/badges')
@@ -564,7 +550,7 @@ describe('Badges Tests', () => {
             .click();
         cy.wait(500);
         cy.wait('@loadSkills');
-        cy.selectSkill(0);
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
         cy.contains('.p-menuitem', 'Badges')
             .click();
 
@@ -617,7 +603,7 @@ describe('Badges Tests', () => {
             .click();
         cy.wait(500);
         cy.wait('@loadSkills');
-        cy.selectSkill(0);
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
         cy.contains('.p-menuitem', 'Badges')
             .click();
 
@@ -670,7 +656,7 @@ describe('Badges Tests', () => {
             .click();
         cy.wait(500);
         cy.wait('@loadSkills');
-        cy.selectSkill(0);
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
         cy.contains('.p-menuitem', 'Badges')
             .click();
         cy.contains('Test Badge')
@@ -718,7 +704,7 @@ describe('Badges Tests', () => {
             .click();
         cy.wait(500);
         cy.wait('@loadSkills');
-        cy.selectSkill(0);
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,
@@ -2076,7 +2062,7 @@ describe('Badges Tests', () => {
 
         // add one more skill to the badge to make 6 skills total
         // cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill5');
-        cy.get('[data-cy="skillsSelector"] [data-pc-section="trigger"]')
+        cy.get('[data-cy="skillsSelector"]')
           .click();
         cy.get('[data-pc-section="item"]').first().click();
 
@@ -2337,5 +2323,21 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy="subPageHeaderDisabledMsg"]').contains('The maximum number of Badges allowed is 3')
         cy.get('[data-cy="btn_Badges"]').should('be.disabled')
+    })
+
+    it('when adding skills to a badge and an error occurs redirect to the error page', () => {
+        cy.intercept('POST', '/admin/projects/proj1/badge/badge1/skills/skill1', { statusCode: 500 }).as('saveEndpoint')
+        cy.createBadge(1, 1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/badges/badge1')
+
+        cy.get('[data-cy="skillsSelector"]').click();
+        cy.get('[data-pc-section="item"]').first().click();
+
+        cy.wait('@saveEndpoint')
+
+        cy.get('[data-cy="errorPage"]')
+        cy.url().should('include', '/error')
     })
 });

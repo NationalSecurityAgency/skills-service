@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,162 +13,166 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <metrics-card :title="titleInternal" data-cy="userTagTableCard" :noPadding="true">
-    <skills-spinner :is-loading="isLoading" class="mb-5"/>
-    <div v-if="!isLoading">
-      <div class="p-3 row no-gutters">
-        <div class="col px-1">
-            <b-input v-model="filters.tag" v-on:keydown.enter="filter" data-cy="userTagTable-tagFilter" aria-label="tag filter"/>
-        </div>
-        <div class="col-auto px-1">
-          <b-button-group class="float-right">
-            <b-button variant="outline-info" class="text-secondary" @click="filter" data-cy="userTagTable-filterBtn" title="search by tag">
-              <i class="fa fa-search"/><span class="sr-only">filter tags</span>
-            </b-button>
-            <b-button variant="outline-info" class="text-danger" @click="clearFilter" data-cy="userTagTable-clearBtn" title="clear filter">
-              <i class="fas fa-eraser"></i><span class="sr-only">clear filter</span>
-            </b-button>
-          </b-button-group>
-        </div>
-      </div>
-      <skills-b-table :options="table.options"
-                      :items="table.items"
-                      tableStoredStateId="userTagsTable"
-                      @page-changed="pageChanged"
-                      @sort-changed="sortTable"
-                      data-cy="userTagsTable">
-        <template v-slot:cell(value)="data">
-          <span :data-cy="`cell_tagValue-${data.item.value}`">
-          <span v-if="data.item.htmlValue" v-html="data.item.htmlValue"></span><span v-else>{{ data.item.value }}</span>
-          <b-button-group class="float-right">
-            <b-button :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: data.item.value } }"
-                      variant="outline-info" size="sm" class="text-secondary"
-                      v-b-tooltip.hover="'View Metrics'"
-                      :aria-label="`View metrics for ${data.item.value}`"
-                      data-cy="userTagTable_viewMetricsBtn"><i class="fa fa-chart-bar"/><span class="sr-only">view user tag metrics</span>
-            </b-button>
-          </b-button-group>
-          </span>
-        </template>
-      </skills-b-table>
-    </div>
-  </metrics-card>
-</template>
+<script setup>
+import { ref, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import MetricsService from "@/components/metrics/MetricsService.js";
+import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 
-<script>
-  import MetricsCard from '../utils/MetricsCard';
-  import SkillsSpinner from '../../utils/SkillsSpinner';
-  import SkillsBTable from '../../utils/table/SkillsBTable';
-  import MetricsService from '../MetricsService';
+const props = defineProps({
+  tagChart: Object
+})
+const route = useRoute();
 
-  export default {
-    name: 'UserTagTable',
-    components: { SkillsBTable, SkillsSpinner, MetricsCard },
-    props: {
-      tagChart: Object,
-    },
-    data() {
-      return {
-        isLoading: true,
-        titleInternal: this.tagChart.title,
-        filters: {
-          tag: '',
-        },
-        table: {
-          items: [],
-          options: {
-            busy: false,
-            bordered: true,
-            outlined: true,
-            stacked: 'md',
-            sortBy: 'count',
-            sortDesc: true,
-            fields: [
-              {
-                key: 'value',
-                label: this.tagChart.tagLabel ? this.tagChart.tagLabel : 'Tag',
-                sortable: true,
-              },
-              {
-                key: 'count',
-                label: '# Users',
-                sortable: true,
-              },
-            ],
-            pagination: {
-              server: true,
-              currentPage: 1,
-              totalRows: 1,
-              pageSize: 10,
-              removePerPage: true,
-            },
-            tableDescription: `${this.tagChart.title} Users`,
-          },
-        },
-      };
-    },
-    mounted() {
-      this.loadData();
-    },
-    computed: {
-      projectId() {
-        return this.$route.params.projectId;
-      },
-      tagKey() {
-        return this.tagChart.key;
-      },
-    },
-    methods: {
-      sortTable(sortContext) {
-        this.table.options.sortDesc = sortContext.sortDesc;
+onMounted(() => {
+  loadData();
+});
 
-        // set to the first page
-        this.table.options.pagination.currentPage = 1;
-        this.loadData();
-      },
-      pageChanged(pageNum) {
-        this.table.options.pagination.currentPage = pageNum;
-        this.loadData();
-      },
-      filter() {
-        this.filters.tag = this.filters.tag.trim();
-        this.loadData(true);
-      },
-      clearFilter() {
-        this.filters.tag = '';
-        this.loadData();
-      },
-      loadData(shouldHighlight = false) {
-        this.table.options.busy = true;
-        const params = {
-          tagKey: this.tagChart.key,
-          currentPage: this.table.options.pagination.currentPage,
-          pageSize: this.table.options.pagination.pageSize,
-          sortDesc: this.table.options.sortDesc,
-          tagFilter: this.filters.tag,
-          sortBy: this.table.options.sortBy === 'count' ? 'numUsers' : 'tag',
-        };
-        MetricsService.loadChart(this.$route.params.projectId, 'numUsersPerTagBuilder', params)
-          .then((dataFromServer) => {
-            let { items } = dataFromServer;
-            if (shouldHighlight && this.filters.tag && this.filters.tag.length > 0) {
-              items = items.map((item) => {
-                const searchStringNorm = this.filters.tag.trim().toLowerCase();
-                const index = item.value.toLowerCase().indexOf(searchStringNorm);
-                const htmlValue = `${item.value.substring(0, index)}<mark>${item.value.substring(index, index + searchStringNorm.length)}</mark>${item.value.substring(index + searchStringNorm.length)}`;
-                return { htmlValue, ...item };
-              });
-            }
-            this.table.items = items;
-            this.table.options.pagination.totalRows = dataFromServer.totalNumItems;
-            this.isLoading = false;
-            this.table.options.busy = false;
-          });
-      },
+const isLoading = ref(true);
+const titleInternal = ref(props.tagChart.title);
+const filters = ref({
+  tag: '',
+});
+const table = ref({
+  items: [],
+  options: {
+    busy: false,
+    sortBy: 'count',
+    sortOrder: -1,
+    pagination: {
+      server: true,
+      currentPage: 1,
+      totalRows: 1,
+      pageSize: 10,
+      removePerPage: true,
     },
+    tableDescription: `${props.tagChart.title} Users`,
+  },
+});
+
+const projectId = computed(() => {
+  return route.params.projectId;
+});
+
+const tagKey = computed(() => {
+  return props.tagChart.key;
+});
+
+const pageChanged = (pagingInfo) => {
+  table.value.options.pagination.pageSize = pagingInfo.rows
+  table.value.options.pagination.currentPage = pagingInfo.page + 1
+  loadData()
+}
+const sortTable = (sortContext) => {
+  table.value.options.sordOrder = sortContext.sortOrder;
+  table.value.options.sortBy = sortContext.sortField;
+  // set to the first page
+  table.value.options.pagination.currentPage = 1;
+  loadData();
+};
+
+const filter = () => {
+  filters.value.tag = filters.value.tag.trim();
+  loadData(true);
+};
+
+const clearFilter = () => {
+  filters.value.tag = '';
+  loadData();
+};
+
+const loadData = (shouldHighlight = false) => {
+  table.value.options.busy = true;
+  const params = {
+    tagKey: props.tagChart.key,
+    currentPage: table.value.options.pagination.currentPage,
+    pageSize: table.value.options.pagination.pageSize,
+    sortDesc: table.value.options.sortOrder === -1,
+    tagFilter: filters.value.tag,
+    sortBy: table.value.options.sortBy === 'count' ? 'numUsers' : 'tag',
   };
+  MetricsService.loadChart(route.params.projectId, 'numUsersPerTagBuilder', params)
+      .then((dataFromServer) => {
+        let { items } = dataFromServer;
+        if (shouldHighlight && filters.value.tag && filters.value.tag.length > 0) {
+          items = items.map((item) => {
+            const searchStringNorm = filters.value.tag.trim().toLowerCase();
+            const index = item.value.toLowerCase().indexOf(searchStringNorm);
+            const htmlValue = `${item.value.substring(0, index)}<mark>${item.value.substring(index, index + searchStringNorm.length)}</mark>${item.value.substring(index + searchStringNorm.length)}`;
+            return { htmlValue, ...item };
+          });
+        }
+        table.value.items = items;
+        table.value.options.pagination.totalRows = dataFromServer.totalNumItems;
+        isLoading.value = false;
+        table.value.options.busy = false;
+      });
+};
 </script>
+
+<template>
+  <Card data-cy="userTagTableCard">
+    <template #header>
+      <SkillsCardHeader :title="titleInternal"></SkillsCardHeader>
+    </template>
+    <template #content>
+      <skills-spinner :is-loading="isLoading" class="mb-5"/>
+      <div v-if="!isLoading">
+        <div class="flex gap-2">
+          <div class="flex">
+            <SkillsTextInput label="Filter" v-model="filters.tag" v-on:keydown.enter="filter" id="userTagTable-tagFilter" name="userTagTable-tagFilter"/>
+          </div>
+          <div class="mt-5">
+            <SkillsButton size="small" @click="filter" data-cy="userTagTable-filterBtn" title="search by tag">
+              <i class="fa fa-search"/><span class="sr-only">filter tags</span>
+            </SkillsButton>
+            <SkillsButton size="small" severity="danger" class="ml-2" @click="clearFilter" data-cy="userTagTable-clearBtn" title="clear filter">
+              <i class="fas fa-eraser"></i><span class="sr-only">clear filter</span>
+            </SkillsButton>
+          </div>
+        </div>
+        <SkillsDataTable :value="table.items"
+                         :loading="table.options.busy"
+                         show-gridlines
+                         striped-rows
+                         paginator
+                         lazy
+                         @page="pageChanged"
+                         @sort="sortTable"
+                         v-model:sort-field="table.options.sortBy"
+                         v-model:sort-order="table.options.sortOrder"
+                         :rows="table.options.pagination.pageSize"
+                         :rowsPerPageOptions="table.options.pagination.possiblePageSizes"
+                         :total-records="table.options.pagination.totalRows"
+                         tableStoredStateId="userTagsTable"
+                         aria-label="User Tags"
+                         data-cy="userTagsTable">
+          <Column field="value" :header="tagChart.tagLabel ? tagChart.tagLabel : 'Tag'" sortable>
+            <template #body="slotProps">
+              <span :data-cy="`cell_tagValue-${slotProps.data.value}`">
+                <router-link :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: slotProps.data.value } }" data-cy="userTagTable_viewMetricsLink">
+                  <span v-if="slotProps.data.htmlValue" v-html="slotProps.data.htmlValue"></span><span v-else>{{ slotProps.data.value }}</span>
+                </router-link>
+              </span>
+            </template>
+          </Column>
+          <Column field="count" header="# Users" sortable></Column>
+
+          <template #paginatorstart>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ table.options.pagination.totalRows }}</span>
+          </template>
+
+          <template #empty>
+            <div class="flex justify-content-center flex-wrap" data-cy="emptyTable">
+              <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+              <span class="flex align-items-center justify-content-center">There are no records to show</span>
+            </div>
+          </template>
+        </SkillsDataTable>
+      </div>
+    </template>
+  </Card>
+</template>
 
 <style scoped>
 

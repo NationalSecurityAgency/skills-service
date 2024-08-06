@@ -13,51 +13,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios';
+import axios from 'axios'
 
-import CustomIconService from '@/components/icons/CustomIconService';
+import CustomIconService from '@/components/icons/CustomIconService.js'
 
 const createCustomIconStyleElementIfNotExist = () => {
-  const head = document.getElementsByTagName('head')[0];
+  const head = document.getElementsByTagName('head')[0]
 
-  let existingStyles = document.getElementById('skill-custom-icons');
+  let existingStyles = document.getElementById('skill-custom-icons')
   if (!existingStyles) {
-    existingStyles = document.createElement('style');
-    existingStyles.id = 'skill-custom-icons';
-    existingStyles.type = 'text/css';
-    head.appendChild(existingStyles);
+    existingStyles = document.createElement('style')
+    existingStyles.id = 'skill-custom-icons'
+    existingStyles.type = 'text/css'
+    head.appendChild(existingStyles)
   }
 
-  return existingStyles;
-};
+  return existingStyles
+}
 
 export default {
   getIconIndex(projectId) {
-    let url = `/app/projects/${encodeURIComponent(projectId)}/customIcons`;
+    let url = `/app/projects/${encodeURIComponent(projectId)}/customIcons`
     if (!projectId) {
-      url = '/supervisor/icons/customIcons';
+      url = '/supervisor/icons/customIcons'
     }
-    return axios.get(url).then((response) => response.data);
+    return axios.get(url).then((response) => response.data)
   },
   deleteIcon(iconName, projectId) {
-    let url = `/admin/projects/${encodeURIComponent(projectId)}/icons/${iconName}`;
+    let url = `/admin/projects/${encodeURIComponent(projectId)}/icons/${iconName}`
     if (!projectId) {
-      url = `/supervisor/icons/${iconName}`;
+      url = `/supervisor/icons/${iconName}`
     }
-    return axios.delete(url);
+    return axios.delete(url)
   },
   addCustomIconCSS(css) {
-    const existingStyles = createCustomIconStyleElementIfNotExist();
-    existingStyles.innerText += css;
+    const existingStyles = createCustomIconStyleElementIfNotExist()
+    existingStyles.innerText += css
   },
   refreshCustomIconCss(projectId, isSupervisor) {
-    const existingStyles = createCustomIconStyleElementIfNotExist();
-
-    CustomIconService.getCustomIconCss(projectId, isSupervisor)
-      .then((response) => {
-        if (response) {
-          existingStyles.innerText = response;
-        }
-    });
-  },
-};
+    const existingStyles = createCustomIconStyleElementIfNotExist()
+    CustomIconService.getCustomIconCss(projectId, isSupervisor).then((response) => {
+      if (response) {
+        existingStyles.innerText = response
+      }
+    })
+  }
+}

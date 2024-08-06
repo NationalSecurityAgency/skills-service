@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,74 +13,65 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { ref } from 'vue';
+import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
+import RoleManager from '@/components/access/RoleManager.vue';
+
+const root = ref({
+  role: 'ROLE_SUPER_DUPER_USER',
+      roleDescription: 'Root User',
+      userType: 'ROOT',
+});
+
+const supervisor = ref({
+  role: 'ROLE_SUPERVISOR',
+      roleDescription: 'Supervisor User',
+      userType: 'SUPERVISOR',
+});
+
+const supervisorRoleManager = ref();
+
+const handleRootRoleChanged = () => {
+  supervisorRoleManager.value.loadData();
+};
+
+const handleRoleAdded = (event) => {
+  // if ($store.getters.userInfo && event.userId === $store.getters.userInfo.userId && event.role === supervisor.role) {
+  //   $store.commit('access/supervisor', true);
+  // }
+};
+
+const handleRoleDeleted = (event) => {
+  // if ($store.getters.userInfo && event.userId === $store.getters.userInfo.userId && event.role === supervisor.role) {
+  //   $store.commit('access/supervisor', false);
+  // }
+};
+</script>
+
 <template>
   <div>
-    <sub-page-header title="Security Settings"/>
+    <sub-page-header title="Security Settings" />
 
-    <metrics-card title="Root Users Management" :no-padding="true">
-      <role-manager id="add-root-user" ref="rootUserRoleManager"
-                    :roles="['ROLE_SUPER_DUPER_USER']"
-                    @role-added="handleRootRoleChanged"
-                    @role-deleted="handleRootRoleChanged"
-                    data-cy="rootrm" :user-type="root.userType" :role-description="root.roleDescription" />
-    </metrics-card>
+    <role-manager id="add-root-user"
+                  title="Root Users Management"
+                  ref="rootUserRoleManager"
+                  :roles="['ROLE_SUPER_DUPER_USER']"
+                  @role-added="handleRootRoleChanged"
+                  @role-deleted="handleRootRoleChanged"
+                  data-cy="rootrm" :user-type="root.userType" :role-description="root.roleDescription" />
 
-    <metrics-card title="Supervisor Users Management" :no-padding="true" class="mt-3">
-      <role-manager id="add-supervisor-user" ref="supervisorRoleManager"
-                    data-cy="supervisorrm"
-                    :roles="['ROLE_SUPERVISOR']"
-                    :user-type="supervisor.userType"
-                    :role-description="supervisor.roleDescription"
-                    @role-added="handleRoleAdded"
-                    @role-deleted="handleRoleDeleted"/>
-    </metrics-card>
+    <role-manager id="add-supervisor-user"
+                  title="Supervisor Users Management"
+                  ref="supervisorRoleManager"
+                  data-cy="supervisorrm"
+                  class="mt-3"
+                  :roles="['ROLE_SUPERVISOR']"
+                  :user-type="supervisor.userType"
+                  :role-description="supervisor.roleDescription"
+                  @role-added="handleRoleAdded"
+                  @role-deleted="handleRoleDeleted" />
   </div>
 </template>
 
-<script>
-  import MetricsCard from '@/components/metrics/utils/MetricsCard';
-  import RoleManager from '../access/RoleManager';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-
-  export default {
-    name: 'SecuritySettings',
-    components: { MetricsCard, SubPageHeader, RoleManager },
-    data() {
-      return {
-        root: {
-          role: 'ROLE_SUPER_DUPER_USER',
-          roleDescription: 'Root User',
-          userType: 'ROOT',
-        },
-        supervisor: {
-          role: 'ROLE_SUPERVISOR',
-          roleDescription: 'Supervisor User',
-          userType: 'SUPERVISOR',
-        },
-      };
-    },
-    methods: {
-      handleRootRoleChanged() {
-        this.$refs.supervisorRoleManager.loadData();
-      },
-      handleRoleAdded(event) {
-        if (this.$store.getters.userInfo
-          && event.userId === this.$store.getters.userInfo.userId
-          && event.role === this.supervisor.role) {
-          this.$store.commit('access/supervisor', true);
-        }
-      },
-      handleRoleDeleted(event) {
-        if (this.$store.getters.userInfo
-          && event.userId === this.$store.getters.userInfo.userId
-          && event.role === this.supervisor.role) {
-          this.$store.commit('access/supervisor', false);
-        }
-      },
-    },
-  };
-</script>
-
-<style scoped>
-
-</style>
+<style scoped></style>

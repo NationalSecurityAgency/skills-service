@@ -13,32 +13,39 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { computed } from 'vue';
+import Badge from 'primevue/badge';
+import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
+
+const timeUtils = useTimeUtils();
+
+const props = defineProps(['value', 'excludeTime']);
+
+const timeFromNow = computed(() => {
+  return timeUtils.timeFromNow(props.value);
+})
+
+const formattedDate = computed(() => {
+  const formatter = props.excludeTime ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm'
+  return timeUtils.formatDate(props.value, formatter);
+})
+const isToday = (timestamp) => {
+  return timeUtils.isToday(timestamp);
+};
+</script>
+
 <template>
-  <div>
+  <div data-cy="dateCell">
     <div>
-      <span>{{ value | date }}</span>
-      <b-badge v-if="isToday(value)" variant="info" class="ml-2">Today</b-badge>
+      <span>{{ formattedDate }}</span>
+      <Badge v-if="isToday(value)" severity="info" class="ml-2">Today</Badge>
     </div>
-    <div class="text-muted small">
-      {{ value | timeFromNow }}
+    <div class="font-light text-sm">
+      {{ timeFromNow }}
     </div>
   </div>
 </template>
-
-<script>
-  import dayjs from '@/common-components/DayJsCustomizer';
-
-  export default {
-    name: 'DateCell',
-    props: ['value'],
-    methods: {
-      isToday(timestamp) {
-        return dayjs(timestamp)
-          .isSame(new Date(), 'day');
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

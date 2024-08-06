@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,24 +13,70 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import {ref, computed, watch} from 'vue';
+import { useProjConfig } from '@/stores/UseProjConfig.js'
+import { useRoute } from "vue-router";
+
+const emit = defineEmits(['add-action'])
+const props = defineProps(['title', 'action', 'disabled', 'disabledMsg', 'ariaLabel', 'isLoading', 'marginBottom']);
+const route = useRoute()
+
+const config = useProjConfig();
+const disabledInternal = ref(props.disabled);
+
+const isAdminProjectsPage = computed(() => {
+  return route.path?.toLowerCase() === '/administrator/' || route.path?.toLowerCase() === '/administrator';
+});
+
+const isAdminPage = computed(() => {
+  return route.path?.toLowerCase()?.startsWith('/administrator');
+});
+
+const isReadOnlyProj = computed(() => config.isReadOnlyProj);
+
+const isMetricsPage = computed(() => {
+  const projId = route.params?.projectId;
+  if (!projId) {
+    return false;
+  }
+  const startsWith = `/administrator/projects/${projId}/metrics`;
+  return route.path?.toLowerCase()?.startsWith(startsWith);
+});
+
+const isReadOnlyProjUnderAdminUrl = computed(() => {
+  return isReadOnlyProj.value && isAdminPage.value && !isAdminProjectsPage.value && !isMetricsPage.value;
+});
+
+watch(() => props.disabled, (newValue) => {
+  disabledInternal.value = newValue;
+});
+
+function addClicked() {
+  emit('add-action');
+}
+
+</script>
+
 <template>
-  <div class="row bg-white border-bottom py-2 text-center" data-cy="subPageHeader" :class="`mb-${marginBottom}`">
-    <div class="col-sm-6 col-md-7 text-sm-left">
-      <h1 class="h4 text-uppercase">{{ title }}</h1>
+  <div class="flex flex-wrap pb-2" data-cy="subPageHeader" :class="`mb-${marginBottom}`" role="heading" aria-level="1">
+    <div class="flex-1 text-left">
+      <div class="text-2xl uppercase font-normal">{{ title }}</div>
     </div>
-    <div class="col-sm-6 col-md-5 pt-0 text-sm-right" data-cy="subPageHeaderControls">
+    <div class="flex pt-0 text-right" data-cy="subPageHeaderControls">
       <div v-if="!isLoading">
         <slot v-if="!isReadOnlyProjUnderAdminUrl">
-          <b-button ref="actionButton" v-if="action" type="button" size="sm" variant="outline-primary"
-                    :class="{'btn':true, 'btn-outline-primary':true, 'disabled':disabledInternal}"
-                    v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action"
-                    :data-cy="`btn_${title}`">
-            <span class="">{{ action }} </span> <i class="fas fa-plus-circle"/>
-          </b-button>
-          <i v-if="disabledInternal" class="fas fa-exclamation-circle text-warning ml-1"
-             style="pointer-events: all; font-size: 1.5rem;"
-             :aria-label="disabledMsg"
-             v-b-tooltip.hover="disabledMsg"/>
+          <SkillsButton ref="actionButton" v-if="action" type="button" size="small" outlined
+                        id="actionButton"
+                        :label="action"
+                        :track-for-focus="true"
+                        icon="fas fa-plus-circle"
+                        :disabled="disabledInternal"
+                        v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action"
+                        :data-cy="`btn_${title}`"/>
+          <div v-if="disabledInternal" class="mt-1" data-cy="subPageHeaderDisabledMsg">
+            <InlineMessage  icon="fas fa-exclamation-circle" severity="warn">{{ disabledMsg }}</InlineMessage>
+          </div>
         </slot>
       </div>
     </div>
@@ -38,90 +84,4 @@ limitations under the License.
   </div>
 </template>
 
-<script>
-  import ProjConfigMixin from '@/components/projects/ProjConfigMixin';
-
-  export default {
-    name: 'SubPageHeader',
-    mixins: [ProjConfigMixin],
-    props: {
-      title: {
-        type: String,
-        required: true,
-      },
-      action: {
-        type: String,
-        required: false,
-      },
-      disabled: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-      disabledMsg: {
-        type: String,
-        required: false,
-      },
-      ariaLabel: {
-        type: String,
-        required: false,
-      },
-      isLoading: {
-        type: Boolean,
-        required: false,
-        default: false,
-      },
-      marginBottom: {
-        type: Number,
-        required: false,
-        default: 3,
-      },
-    },
-    data() {
-      return {
-        disabledInternal: this.disabled,
-      };
-    },
-    watch: {
-      disabled() {
-        this.disabledInternal = this.disabled;
-      },
-    },
-    computed: {
-      isAdminProjectsPage() {
-        return this.$route.path?.toLowerCase() === '/administrator/' || this.$route.path?.toLowerCase() === '/administrator';
-      },
-      isAdminPage() {
-        return this.$route.path?.toLowerCase()?.startsWith('/administrator');
-      },
-      isMetricsPage() {
-        const projId = this.$route.params?.projectId;
-        if (!projId) {
-          return false;
-        }
-        const startsWith = `/administrator/projects/${projId}/metrics`;
-        return this.$route.path?.toLowerCase()?.startsWith(startsWith);
-      },
-      isReadOnlyProjUnderAdminUrl() {
-        return this.isReadOnlyProj && this.isAdminPage && !this.isAdminProjectsPage && !this.isMetricsPage;
-      },
-    },
-    methods: {
-      addClicked() {
-        this.$emit('add-action');
-      },
-      focusOnActionBtn() {
-        this.$nextTick(() => {
-          const ref = this.$refs.actionButton;
-          if (ref) {
-            ref.focus();
-          }
-        });
-      },
-    },
-  };
-</script>
-
-<style scoped>
-
-</style>
+<style scoped></style>

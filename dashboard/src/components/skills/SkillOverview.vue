@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,43 +13,31 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { useRoute } from 'vue-router';
+import Card from 'primevue/card';
+import { useSkillsState } from '@/stores/UseSkillsState.js'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
+import LoadingContainer from '@/components/utils/LoadingContainer.vue';
+import ChildRowSkillsDisplay from '@/components/skills/ChildRowSkillsDisplay.vue';
+
+const route = useRoute();
+const skillsState = useSkillsState();
+</script>
+
 <template>
   <div>
     <sub-page-header title="Overview"/>
-    <loading-container :is-loading="loadingSkill">
-      <div class="card">
-        <div class="card-body">
-          <child-row-skills-display v-if="skill && skill.skillId" :skill="skill" :project-id="this.$route.params.projectId"></child-row-skills-display>
-        </div>
-      </div>
+    <loading-container :is-loading="skillsState.loadingSkill">
+      <Card>
+        <template #content>
+          <child-row-skills-display 
+            v-if="skillsState.skill && skillsState.skill.skillId" 
+            :skill="skillsState.skill" />
+        </template>
+      </Card>
     </loading-container>
   </div>
 </template>
 
-<script>
-  import { createNamespacedHelpers } from 'vuex';
-  import SubPageHeader from '../utils/pages/SubPageHeader';
-  import ChildRowSkillsDisplay from './ChildRowSkillsDisplay';
-  import LoadingContainer from '../utils/LoadingContainer';
-
-  const { mapGetters } = createNamespacedHelpers('skills');
-
-  export default {
-    name: 'SkillOverview',
-    components: {
-      LoadingContainer,
-      ChildRowSkillsDisplay,
-      SubPageHeader,
-    },
-    computed: {
-      ...mapGetters([
-        'skill',
-        'loadingSkill',
-      ]),
-    },
-  };
-</script>
-
-<style scoped>
-
-</style>
+<style scoped></style>

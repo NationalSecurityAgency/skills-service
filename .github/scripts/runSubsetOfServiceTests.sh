@@ -83,7 +83,7 @@ fi
 
 if  [ "$cachingSpec" == 'yes' ]; then
     echo 'Found CachingSpec. Building dashboard'
-    cd ../dashboard-prime
+    cd ../dashboard
     npm run deploy
 #    cd ../client-display
 #    npm install

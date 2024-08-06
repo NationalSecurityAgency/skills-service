@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,28 +13,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <metrics-card :title="title" :no-padding="true" data-cy="usersTableMetric" >
-      <users-table />
-  </metrics-card>
-</template>
+<script setup>
 
-<script>
-  import MetricsCard from '../utils/MetricsCard';
-  import UsersTable from '../../users/UsersTable';
+import UsersTable from "@/components/users/UsersTable.vue";
 
-  export default {
-    name: 'UsersTableMetric',
-    components: { MetricsCard, UsersTable },
-    props: {
-      title: {
-        type: String,
-        required: false,
-        default: 'Users',
-      },
-    },
-  };
+defineProps({
+  title: {
+    type: String,
+    required: false,
+    default: 'Users',
+  }
+});
 </script>
 
+<template>
+  <Card :no-padding="true" data-cy="usersTableMetric" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <template #header>
+      <SkillsCardHeader :title="title"></SkillsCardHeader>
+    </template>
+    <template #content>
+      <users-table />
+    </template>
+  </Card>
+</template>
+
 <style scoped>
+
 </style>

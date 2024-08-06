@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,60 +13,35 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <b-alert
-    v-model="showNewVersionAlert"
-    class="position-fixed fixed-top m-0 rounded-0"
-    style="z-index: 2000;"
-    variant="success"
-    dismissible
-  >
-    New Software Version is Available!! Please click <a href="" @click="refresh">Here</a>
-    to reload.
-  </b-alert>
-</template>
+<script setup>
+import { useAppVersionState } from '@/stores/UseAppVersionState.js'
+import axios from 'axios'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
-<script>
-  export default {
-    name: 'NewSoftwareVersionComponent',
-    data() {
-      return {
-        showNewVersionAlert: false,
-        currentLibVersion: undefined,
-      };
-    },
-    mounted() {
-      this.updateStorageIfNeeded();
-    },
-    computed: {
-      libVersion() {
-        return this.$store.getters.libVersion;
-      },
-    },
-    watch: {
-      libVersion() {
-        if (this.currentLibVersion !== undefined
-          && this.libVersion !== undefined
-          && this.libVersion.localeCompare(this.currentLibVersion) > 0) {
-          this.showNewVersionAlert = true;
-        }
-        this.updateStorageIfNeeded();
-      },
-    },
-    methods: {
-      refresh() {
-        window.location.reload();
-      },
-      updateStorageIfNeeded() {
-        const storedVal = this.currentLibVersion;
-        const currentVersion = this.libVersion;
-        if (currentVersion !== undefined && (storedVal === undefined || currentVersion.localeCompare(storedVal) > 0)) {
-          this.currentLibVersion = currentVersion;
-        }
-      },
-    },
-  };
+const appVersionState = useAppVersionState()
+const skillsDisplayInfo = useSkillsDisplayInfo()
+
+const refresh = () => {
+  window.location.reload();
+}
+
+axios.interceptors.response.use(
+  (response) => {
+    const incomingVersion = response?.headers?.['skills-client-lib-version'];
+    if (incomingVersion) {
+      appVersionState.updateLatestLibVersion(incomingVersion)
+    }
+    return response;
+  },
+);
 </script>
+
+<template>
+  <Message v-if="appVersionState.isVersionDifferent" :closable="false" data-cy="newSoftwareVersion" class="mb-3">
+    New SkillTree Software Version is Available!! <span v-if="!skillsDisplayInfo.isSkillsClientPath()">Please click <a href="" @click="refresh" data-cy="newSoftwareVersionReload">Here</a>
+    to reload.</span><span v-else>Please refresh the page.</span>
+  </Message>
+</template>
 
 <style scoped>
 

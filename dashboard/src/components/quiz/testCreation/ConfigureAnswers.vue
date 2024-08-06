@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,98 +13,95 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { computed } from 'vue'
+import { useFieldArray } from "vee-validate";
+import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
+
+const model = defineModel()
+const props = defineProps({
+  quizType: {
+    type: String,
+    required: true,
+  }
+})
+const { remove, insert, push, replace, fields } = useFieldArray('answers');
+const appConfig = useAppConfig()
+const isQuizType = computed(() => {
+  return props.quizType === 'Quiz';
+})
+const maxAnswersAllowed = computed(() => {
+  return appConfig.maxAnswersPerQuizQuestion;
+})
+const noMoreAnswers = computed(() => {
+  return fields.value && fields.value.length >= maxAnswersAllowed.value
+})
+const twoOrLessAnswers = computed(() => {
+  return !fields.value || fields.value.length <= 2
+})
+
+function addNewAnswer(index) {
+  const initialValue = {
+    id: null,
+    answer: '',
+    isCorrect: false,
+  };
+  insert(index + 1, initialValue)
+}
+function removeAnswer(index) {
+  remove(index)
+}
+const replaceAnswers = (answers) => {
+  replace(answers)
+}
+
+defineExpose( {
+  replaceAnswers
+})
+</script>
+
 <template>
-  <div v-if="answersInternal && answersInternal.length > 0">
-    <div v-for="(answer, index) in answersInternal" :key="index">
-      <div class="row no-gutters mt-2" :data-cy="`answer-${index}`">
-        <div class="col-auto">
-          <select-correct-answer v-if="isQuizType"
-                                 :id="`answer=${index}`"
-                                 :answer-number="index+1"
-                                 v-model="answer.isCorrect"
-                                 class="mr-2"/>
-        </div>
-        <div class="col">
-          <input class="form-control" type="text" v-model="answer.answer"
-                 placeholder="Enter an answer"
-                 data-cy="answerText"
-                 :id="`answer${index}TextInput`"
-                 :aria-label="`Enter answer number ${index+1}`" />
-        </div>
-        <b-button-group class="ml-2">
-          <b-button variant="outline-info"
-                    :disabled="noMoreAnswers"
-                    :aria-label="`Add New Answer at index ${index}`"
-                    data-cy="addNewAnswer"
-                    @click="addNewAnswer(index)">
-            <i class="fas fa-plus"></i>
-          </b-button>
-          <b-button variant="outline-info"
-                    :disabled="twoOrLessQuestions"
-                    :aria-label="`Delete Answer at index ${index}`"
-                    data-cy="removeAnswer"
-                    @click="removeAnswer(index)">
-            <i class="fas fa-minus"></i>
-          </b-button>
-        </b-button-group>
-      </div>
+  <div v-if="model && model.length > 0" clas="mt-2">
+    <div v-for="(answer, index) in fields" :key="answer.key" class="flex flex-wrap align-items-center gap-0" :data-cy="`answer-${index}`">
+      <SelectCorrectAnswer
+          v-if="isQuizType"
+          :id="`answers[${index}].isCorrect`"
+          :answer-number="index+1"
+          :name="`answers[${index}].isCorrect`"
+          v-model="answer.value.isCorrect"
+          class="flex flex-initial mr-2 field"/>
+      <SkillsTextInput
+          class="flex flex-1"
+          placeholder="Enter an answer"
+          v-model="answer.value.answer"
+          :initialValue="answer.value.answer"
+          :aria-label="`Enter answer number ${index+1}`"
+          data-cy="answerText"
+          :id="`answer_${index}`"
+          :name="`answers[${index}].answer`"/>
+
+      <ButtonGroup class="ml-1 field">
+        <SkillsButton
+          :disabled="noMoreAnswers"
+          :aria-label="`Add New Answer at index ${index}`"
+          data-cy="addNewAnswer"
+          outlined
+          icon="fas fa-plus"
+          @click="addNewAnswer(index)">
+        </SkillsButton>
+        <SkillsButton
+          :disabled="twoOrLessAnswers"
+          :aria-label="`Delete Answer at index ${index}`"
+          data-cy="removeAnswer"
+          outlined
+          icon="fas fa-minus"
+          @click="removeAnswer(index)">
+        </SkillsButton>
+      </ButtonGroup>
     </div>
   </div>
 </template>
-
-<script>
-  import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer';
-
-  export default {
-    name: 'ConfigureAnswers',
-    components: { SelectCorrectAnswer },
-    props: {
-      value: Array,
-      quizType: String,
-    },
-    data() {
-      return {
-        answersInternal: this.value.map((a) => ({ ...a })),
-      };
-    },
-    computed: {
-      isQuizType() {
-        return this.quizType === 'Quiz';
-      },
-      maxAnswersAllowed() {
-        return this.$store.getters.config.maxAnswersPerQuizQuestion;
-      },
-      noMoreAnswers() {
-        return this.answersInternal && this.answersInternal?.length >= this.maxAnswersAllowed;
-      },
-      twoOrLessQuestions() {
-        return !this.answersInternal || this.answersInternal?.length <= 2;
-      },
-    },
-    watch: {
-      answersInternal: {
-        handler: function emitUpdate() {
-          this.$emit('input', this.answersInternal);
-        },
-        deep: true,
-      },
-    },
-    methods: {
-      addNewAnswer(index) {
-        const newQuestion = {
-          id: null,
-          answer: '',
-          isCorrect: false,
-        };
-        this.answersInternal.splice(index + 1, 0, newQuestion);
-        this.answersInternal = this.answersInternal.map((a) => ({ ...a }));
-      },
-      removeAnswer(index) {
-        this.answersInternal = this.answersInternal.filter((item, arrIndex) => arrIndex !== index);
-      },
-    },
-  };
-</script>
 
 <style scoped>
 

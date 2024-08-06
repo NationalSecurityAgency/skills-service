@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,37 +13,43 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import { reactive} from 'vue'
+import Card from 'primevue/card'
+
+const props = defineProps({
+  title: [String, Number],
+  subTitle: String,
+  iconClass: String,
+  iconColor: {
+    type: String,
+    require: false,
+  }
+});
+
+const styleObject = {
+  color: props.iconColor,
+}
+</script>
+
 <template>
-  <div class="card h-100">
-    <div class="card-body">
-      <div class="media">
-        <div class="d-inline-block mt-1 mr-3 text-center" style="min-width: 4rem;">
-          <i class="fa-3x" :class="iconClass"/>
+  <Card :pt="{content: { class: 'p-0' } }">
+    <template #content>
+      <div class="flex flex-column sm:flex-row text-center sm:text-left">
+        <div style="min-width: 5rem;" class="text-center">
+          <i class="fa-3x" :class="iconClass" :style="styleObject"/>
         </div>
-        <div class="media-body">
-          <div class="h4 mb-2 text-uppercase" data-cy="mediaInfoCardTitle">{{ title }}</div>
-          <div style="font-size: 0.95rem;" class="text-secondary" data-cy="mediaInfoCardSubTitle">
+        <div>
+          <div class="text-2xl mb-2 uppercase" data-cy="mediaInfoCardTitle" style="overflow-wrap: break-word; text-wrap: wrap;">{{ title }}</div>
+          <div class="text-sm w-min-10rem" data-cy="mediaInfoCardSubTitle">
             <slot>
               {{ subTitle }}
             </slot>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </template>
+  </Card>
 </template>
 
-<script>
-  export default {
-    name: 'MediaInfoCard',
-    props: {
-      title: String,
-      subTitle: String,
-      iconClass: String,
-    },
-  };
-</script>
-
-<style scoped>
-
-</style>
+<style scoped></style>

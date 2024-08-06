@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,26 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+<script setup>
+import MetricNavCard from "@/components/metrics/projectNav/MetricNavCard.vue";
+
+defineProps(['navCards'])
+</script>
+
 <template>
-  <div class="row">
-    <div v-for="(navItem) in navCards" :key="navItem.title" class="col-md-6 col-xl-4 mt-2">
-      <metric-nav-card :title="navItem.title" :subtitle="navItem.subtitle" :description="navItem.description"
-                       :path-name="navItem.pathName"
-                       :icon="navItem.icon"
-      />
-    </div>
+  <div class="flex flex-wrap gap-3 flex-column lg:flex-row mt-4">
+      <metric-nav-card v-for="(navItem) in navCards" :key="navItem.title" class="flex-1"
+                       :title="navItem.title" :subtitle="navItem.subtitle" :description="navItem.description"
+                       :path-name="navItem.pathName" :icon="navItem.icon" />
   </div>
 </template>
-
-<script>
-  import MetricNavCard from '@/components/metrics/projectNav/MetricNavCard';
-
-  export default {
-    name: 'ProjectMetricsNavCards',
-    props: ['navCards'],
-    components: { MetricNavCard },
-  };
-</script>
 
 <style scoped>
 

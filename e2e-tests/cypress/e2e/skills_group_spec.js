@@ -32,6 +32,7 @@ describe('Skills Group Tests', () => {
 
             cy.get('[data-cy="saveDialogBtn"]').click();
             cy.get('[data-cy="EditSkillGroupModal"]').should('not.exist');
+            cy.get('[data-cy="newGroupButton"]').should('have.focus')
         });
 
         Cypress.Commands.add("addSkillToGroupViaUI", (groupId, skillNum, expandGroupNum = 0) => {
@@ -90,7 +91,7 @@ describe('Skills Group Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"]');
     });
 
-    it('handle focus', () => {
+    it('handle focus on edit', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.createSkill(1, 1, 1);
         cy.createSkillsGroup(1, 1, 2);
@@ -107,6 +108,30 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="editSkillButton_skill1"]').click();
         cy.get('[data-cy="closeDialogBtn"]').click();
         cy.get('[data-cy="editSkillButton_skill1"]').should('have.focus')
+    });
+
+    it('handle focus on new group - cancel', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.createSkillsGroup(1, 1, 2);
+        cy.createSkill(1, 1, 2);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="newGroupButton"]').click();
+        cy.get('[data-cy="name"]')
+        cy.get('[data-cy="closeDialogBtn"]').click();
+        cy.get('[data-cy="newGroupButton"]').should('have.focus')
+
+        cy.get('[data-cy="newGroupButton"]').click();
+        cy.get('[data-cy="name"]')
+        cy.get('[data-pc-section="closebuttonicon"]').click();
+        cy.get('[data-cy="newGroupButton"]').should('have.focus')
+
+        cy.get('[data-cy="newGroupButton"]').click();
+        cy.get('[data-cy="name"]')
+        cy.realPress('Escape');
+        cy.get('[data-cy="newGroupButton"]').should('have.focus')
     });
 
     it('remove group - display order should be updated', () => {
@@ -433,11 +458,14 @@ describe('Skills Group Tests', () => {
         const groupId = 'group1'
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="nameCell_group1"]')
 
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
         cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
         cy.get('[data-pc-section="closebutton"]').click()
+
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="tokenlabel"]').contains('Points')
 
         cy.get('[data-cy="editSkillButton_skill2"]').click();
         cy.get('[data-cy="skillName"]').clear().type('other');
@@ -797,8 +825,8 @@ describe('Skills Group Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
         cy.get('[data-cy="skillsSelector"]').click();
-        cy.get('li.p-dropdown-empty-message').contains('Type to search for skills').should('be.visible')
-        cy.get(`[data-pc-section="filterinput"]`).type('skill')
+        cy.get('li.p-autocomplete-empty-message').contains('Type to search for skills').should('be.visible')
+        cy.get(`[data-cy="skillsSelector"]`).type('skill')
 
         cy.get('[data-cy="skillsSelectionItem-skillId"]').should('have.length', 2).as('skillIds');
         cy.get('@skillIds').eq(0).contains('skill1');

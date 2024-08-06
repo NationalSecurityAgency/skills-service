@@ -13,48 +13,53 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-    <div class="icon-row" :key="source.id">
-      <div class="icon-item" v-for="item in iconRows" :key="item.cssClass">
-        <a
-          href="#"
-          @click.stop.prevent="handleClick(item.name, item.cssClass)"
-          :class="`icon-${item.name}`"
-          :data-cy="`${item.cssClass}-link`"
-          :aria-label="`select icon ${item.name}`">
-          <span class="icon is-large">
-            <i :class="item.cssClass"></i>
-          </span>
-        </a><br/>
-        <span class="iconName">{{ item.name }}</span>
-      </div>
-    </div>
-</template>
+<script setup>
 
-<script>
-  export default {
-    name: 'IconRow',
-    props: {
-      source: {
-        type: Object,
-        default() {
-          return {};
-        },
-      },
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js';
+
+const announcer = useSkillsAnnouncer()
+
+const props = defineProps({
+  item: {
+    type: Object,
+    default() {
+      return {};
     },
-    data() {
-      return {
-        iconRows: this.source.row,
-      };
+  },
+  options: {
+    type: Object,
+    default() {
+      return {};
     },
-    methods: {
-      handleClick(name, cssClass) {
-        // hacky but can't pass an event from grand-child to grand-parent otherwise
-        this.$parent.$parent.$emit('icon-selected', { name, cssClass });
-      },
-    },
-  };
+  },
+});
+
+const emit = defineEmits(['icon-selected']);
+
+const handleClick = (name, cssClass) => {
+  announcer.polite(`${name} icon selected`);
+  emit('icon-selected', { name, cssClass });
+}
 </script>
+
+<template>
+  <div :class="['flex p-2 align-items-center', { 'surface-hover': options.odd }]" style="height: 100px">
+    <template v-for="(el, index) of item" :key="index">
+      <div class="icon-item flex-1">
+        <a href="#"
+           @click.stop.prevent="handleClick(el.name, el.cssClass)"
+           :class="`icon-${el.name}`"
+           :data-cy="`${el.cssClass}-link`"
+           :aria-label="`select icon ${el.name}`">
+               <span class="icon is-large">
+                   <i :class="el.cssClass"></i>
+               </span>
+        </a><br/>
+        <span class="iconName">{{ el.name }}</span>
+      </div>
+    </template>
+  </div>
+</template>
 
 <style scoped>
 .icon-row {

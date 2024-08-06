@@ -89,8 +89,8 @@ describe('Cross-project Skills Tests', () => {
                 .should('be.disabled');
             cy.get('[data-cy="skillSelector"]')
                 .click()
-            cy.get('[data-pc-section="filterinput"]')
-                .type(`${skillText}`)
+            cy.get('[data-cy="skillSelector"]')
+                .type(`{selectall}${skillText}`)
             cy.get('[data-cy="skillsSelector-skillName"]').contains(skillText).first()
                 .click()
             cy.get('[data-cy="shareButton"')
@@ -185,6 +185,7 @@ describe('Cross-project Skills Tests', () => {
         cy.get('[data-cy="skillSelector"]')
             .click()
             .type('1{enter}');
+        cy.get(`[data-cy="skillsSelectionItem-proj1-skill1"]`).click()
         cy.get('[data-cy="shareButton"')
             .should('be.disabled');
 

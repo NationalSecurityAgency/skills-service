@@ -1,5 +1,5 @@
 /*
-Copyright 2020 SkillTree
+Copyright 2024 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,244 +13,149 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<template>
-  <ValidationObserver ref="observer" v-slot="{invalid, pristine}" slim>
-    <div>
-          <div class="form-group">
-            <label class="label" for="publicUrl">* Public URL <InlineHelp target-id="publicUrlHelp" msg="Because it is possible for the SkillTree dashboard
-            to be deployed behind a load balancer or proxy, it is necessary to configure the public url so that email
-            based communications from the system can provide valid links back to the SkillTree dashboard."/></label>
-            <ValidationProvider rules="required" name="Public URL" v-slot="{ errors }" :debounce=500>
-              <input class="form-control" type="text" v-model="emailInfo.publicUrl" name="publicUrl"
-                     data-cy="publicUrlInput" aria-required="true"
-                    id="publicUrl"
-                    :aria-invalid="errors && errors.length > 0"
-                    aria-errormessage="publicUrlError" aria-describedby="publicUrlError"/>
-              <p role="alert" class="text-danger" v-show="errors[0]" id="publicUrlError" data-cy="publicUrlError">{{errors[0]}}</p>
-            </ValidationProvider>
-          </div>
-          <div class="form-group">
-            <label class="label" for="fromEmail">* From Email <InlineHelp target-id="fromEmailHelp" msg="The From email address used in all email originating from the SkillTree application"/></label>
-            <ValidationProvider :rules="{email:{require_tld:false,allow_ip_domain:true}}" name="From Email" v-slot="{ errors }" :debounce=500>
-              <input class="form-control" type="text" v-model="emailInfo.fromEmail" name="fromEmail"
-                     data-cy="fromEmailInput" id="fromEmail"
-                    :aria-invalid="errors && errors.length  > 0"
-                    aria-errormessage="fromEmailError" aria-describedby="fromEmailError"/>
-              <p role="alert" class="text-danger" v-show="errors[0]" data-cy="fromEmailError" id="fromEmailError">{{errors[0]}}</p>
-            </ValidationProvider>
-          </div>
-      <div class="form-group">
-        <label class="label" for="emailHost">* Host</label>
-        <ValidationProvider name="Host" :debounce=500 v-slot="{errors}" rules="required">
-          <input class="form-control" type="text" v-model="emailInfo.host" name="host"
-                 data-cy="hostInput" aria-required="true"
-                  :aria-invalid="errors && errors.length > 0"
-                  aria-errormessage="hostError" aria-describedby="hostError"
-                  id="emailHost"/>
-          <p role="alert" class="text-danger" v-show="errors[0]" data-cy="hostError" id="hostError">{{errors[0]}}</p>
-        </ValidationProvider>
-      </div>
-      <div class="form-group">
-        <label class="label" for="emailPort">* Port</label>
-        <ValidationProvider name="Port" :debounce=500 v-slot="{errors}" rules="required|min_value:1|max_value:65535">
-          <input class="form-control" type="text" v-model="emailInfo.port" name="port"
-                 data-cy="portInput" aria-required="true"
-                  :aria-invalid="errors && errors.length > 0"
-                  aria-errormessage="portError" aria-describedby="portError"
-                  id="emailPort"/>
-          <p role="alert" class="text-danger" v-show="errors[0]" data-cy="portError" id="portError">{{errors[0] }}</p>
-        </ValidationProvider>
-      </div>
-      <div class="form-group">
-        <label class="label" for="emailProtocol">* Protocol</label>
-        <ValidationProvider name="Protocol" :debounce=500 v-slot="{errors}" rules="required">
-          <input class="form-control" type="text" v-model="emailInfo.protocol" name="protocol"
-                 data-cy="protocolInput" aria-required="true"
-                  :aria-invalid="errors && errors.length > 0"
-                  aria-errormessage="protocolError" aria-describedby="protocolError"
-                  id="emailProtocol"/>
-          <p role="alert" class="text-danger" v-show="errors[0]" data-cy="protocolError" id="protocolError">{{
-            errors[0] }}</p>
-        </ValidationProvider>
-      </div>
-      <div class="form-group">
-        <b-form-checkbox v-model="emailInfo.tlsEnabled" switch data-cy="tlsSwitch">
-          {{ emailInfo.tlsEnabled ? 'TLS Enabled' : 'TLS Disabled' }}
-        </b-form-checkbox>
-      </div>
-      <div class="form-group">
-        <b-form-checkbox v-model="emailInfo.authEnabled" switch data-cy="authSwitch">
-          {{ emailInfo.authEnabled ? 'Authentication Enabled' : 'Authentication Disabled' }}
-        </b-form-checkbox>
-      </div>
-      <div id="auth-div" v-if="emailInfo.authEnabled">
-        <div class="form-group">
-          <label class="label" for="emailUsername">* Username</label>
-          <ValidationProvider name="Username" :debounce=500 v-slot="{errors}" rules="required">
-            <input class="form-control" type="text" v-model="emailInfo.username" name="username"
-                   data-cy="emailUsername" aria-required="true"
-                   :aria-invalid="errors && errors.length > 0"
-                    aria-errormessage="emailUsernameError" aria-describedby="emailUsernameError"
-                    id="emailUsername"/>
-            <p role="alert" class="text-danger" v-show="errors[0]" data-cy="emailUsernameError" id="emailUsernameError">{{errors[0]}}</p>
-          </ValidationProvider>
-        </div>
-        <div class="form-group">
-          <label class="label" for="emailPassword">* Password</label>
-          <ValidationProvider name="Password" :debounce=500 v-slot="{errors}" rules="required">
-            <input class="form-control" type="text" v-model="emailInfo.password" name="password"
-                   data-cy="emailPassword" aria-required="true"
-                    :aria-invalid="errors && errors.length > 0"
-                    aria-errormessage="emailPasswordError" aria-describedby="emailPasswordError"
-                    id="emailPassword"/>
-            <p role="alert" class="text-danger" v-show="errors[0]" data-cy="emailPasswordError" id="emailPasswordError">{{errors[0]}}</p>
-          </ValidationProvider>
-        </div>
-      </div>
+<script setup>
+import { ref, computed } from 'vue';
+import { object, string, boolean, number } from 'yup';
+import {useForm} from "vee-validate";
+import SettingsService from '@/components/settings/SettingsService.js';
 
-      <p v-if="connectionError" class="text-danger" data-cy="connectionError" role="alert">
-        Connection to Email server failed due to: {{connectionError}}
-      </p>
+const props = defineProps({
+  emailSettings: Object
+});
 
-      <div>
-        <button class="btn btn-outline-info mr-1" type="button"
-                v-on:click="testConnection" :disabled="invalid || missingRequiredValues() || isTesting || isSaving"
-                data-cy="emailSettingsTest"
-                aria-roledescription="test email server settings button">
-          Test
-          <i :class="testButtonClass"></i>
-        </button>
-        <button class="btn btn-outline-success" type="button" v-on:click="saveEmailSettings" :disabled="invalid || pristine || missingRequiredValues() || isSaving || isTesting" data-cy="emailSettingsSave">
-          Save
-          <i :class="[isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right']"></i>
-        </button>
-      </div>
-    </div>
-  </ValidationObserver>
-</template>
+const schema = object({
+  publicUrl: string().required().label('Public URL'),
+  fromEmail: string().required().label('From Email').email(),
+  host: string().required().label('Host'),
+  port: number().required().min(0).max(65535).label('Port'),
+  protocol: string().required().label('Protocol'),
+  tlsEnabled: boolean(),
+  authEnabled: boolean(),
+  username: string().label('Username').when(['authEnabled'],  {
+    is: (authEnabled) => authEnabled === true,
+    then: (sch) => sch.required(),
+    otherwise: (sch) => sch.notRequired()
+  }),
+  password: string().label('Password').when(['authEnabled'],  {
+    is: (authEnabled) => authEnabled === true,
+    then: (sch) => sch.required(),
+    otherwise: (sch) => sch.notRequired()
+  }),
+});
 
-<script>
-  import { extend } from 'vee-validate';
-  // eslint-disable-next-line camelcase
-  import { min_value, max_value } from 'vee-validate/dist/rules';
-  import SettingsService from './SettingsService';
-  import ToastSupport from '../utils/ToastSupport';
-  import InlineHelp from '../utils/InlineHelp';
+const { values, defineField, errors, meta } = useForm({
+  validationSchema: schema,
+  initialValues: props.emailSettings
+})
 
-  extend('min_value', {
-    // eslint-disable-next-line camelcase
-    ...min_value,
-    message: (fieldname, placeholders) => `${fieldname} must be ${placeholders.min} or greater`,
+const [tlsEnabled] = defineField('tlsEnabled');
+const [authEnabled] = defineField('authEnabled');
+const [username] = defineField('username');
+const [password] = defineField('password');
+
+const isTesting = ref(false);
+const isSaving = ref(false);
+const connectionError = ref('');
+const testFailed = ref(false);
+const testSuccess = ref(false);
+
+let testButtonClass = computed(() => {
+  if (isTesting.value) {
+    return 'fa fa-circle-notch fa-spin fa-3x-fa-fw';
+  }
+
+  if (testSuccess.value) {
+    return 'fa fa-check-circle';
+  }
+
+  if (testFailed.value) {
+    return 'fa fa-times-circle';
+  }
+
+  return 'fa fa-question-circle';
+});
+
+function testConnection() {
+  isTesting.value = true;
+  SettingsService.testConnection(values).then((response) => {
+    if (response) {
+      // successToast('Connection Status', 'Email Connection Successful!');
+      testSuccess.value = true;
+      testFailed.value = false;
+    } else {
+      // errorToast('Connection Status', 'Email Connection Failed');
+      testSuccess.value = false;
+      testFailed.value = true;
+    }
+  }).catch(() => {
+    // errorToast('Failure', 'Failed to Test the Email Connection');
+  }).finally(() => {
+    isTesting.value = false;
   });
-  extend('max_value', {
-    // eslint-disable-next-line camelcase
-    ...max_value,
-    message: (fieldname, placeholders) => `${fieldname} must be ${placeholders.max} or less`,
+}
+
+function saveEmailSettings() {
+  isSaving.value = true;
+  if (authEnabled.value === false || authEnabled.value === 'false') {
+    username.value = '';
+    password.value = '';
+  }
+  SettingsService.saveEmailSettings(values).then((result) => {
+    if (result) {
+      if (result.success) {
+        // successToast('Saved', 'Email Connection Successful!');
+      } else {
+        connectionError.value = result.explanation;
+      }
+    }
+  }).catch(() => {
+    // errorToast('Failure', 'Failed to Save the Connection Settings!');
+  }).finally(() => {
+    isSaving.value = false;
   });
-
-  export default {
-    name: 'EmailServerSettings',
-    mixins: [ToastSupport],
-    components: {
-      InlineHelp,
-    },
-    data() {
-      return {
-        emailInfo: {
-          host: 'localhost',
-          port: '25',
-          protocol: 'smtp',
-          username: '',
-          password: '',
-          authEnabled: false,
-          tlsEnabled: false,
-          publicUrl: '',
-          fromEmail: 'no_reply@skilltree',
-        },
-        isTesting: false,
-        isSaving: false,
-        connectionError: '',
-        testFailed: false,
-        testSuccess: false,
-      };
-    },
-    mounted() {
-      this.loadEmailSettings();
-    },
-    computed: {
-      testButtonClass() {
-        if (this.isTesting) {
-          return ['fa fa-circle-notch fa-spin fa-3x-fa-fw'];
-        }
-
-        if (this.testSuccess) {
-          return ['fa fa-check-circle'];
-        }
-
-        if (this.testFailed) {
-          return ['fa fa-times-circle'];
-        }
-
-        return ['fa fa-question-circle'];
-      },
-    },
-    methods: {
-      testConnection() {
-        this.isTesting = true;
-        SettingsService.testConnection(this.emailInfo).then((response) => {
-          if (response) {
-            this.successToast('Connection Status', 'Email Connection Successful!');
-            this.testSuccess = true;
-            this.testFailed = false;
-          } else {
-            this.errorToast('Connection Status', 'Email Connection Failed');
-            this.testSuccess = false;
-            this.testFailed = true;
-          }
-        })
-          .catch(() => {
-            this.errorToast('Failure', 'Failed to Test the Email Connection');
-          })
-          .finally(() => {
-            this.isTesting = false;
-          });
-      },
-      saveEmailSettings() {
-        this.isSaving = true;
-        if (this.emailInfo.authEnabled === false || this.emailInfo.authEnabled === 'false') {
-          this.emailInfo.username = '';
-          this.emailInfo.password = '';
-        }
-        SettingsService.saveEmailSettings(this.emailInfo).then((result) => {
-          if (result) {
-            if (result.success) {
-              this.successToast('Saved', 'Email Connection Successful!');
-            } else {
-              this.connectionError = result.explanation;
-            }
-          }
-        })
-          .catch(() => {
-            this.errorToast('Failure', 'Failed to Save the Connection Settings!');
-          })
-          .finally(() => {
-            this.isSaving = false;
-          });
-      },
-      loadEmailSettings() {
-        SettingsService.loadEmailSettings().then((response) => {
-          this.emailInfo = Object.assign(this.emailInfo, response);
-        });
-      },
-      missingRequiredValues() {
-        return !this.isAuthValid() || !this.emailInfo.host || !this.emailInfo.port || !this.emailInfo.protocol || !this.emailInfo.publicUrl || !this.emailInfo.fromEmail;
-      },
-      isAuthValid() {
-        return !this.emailInfo.authEnabled || (this.emailInfo.username && this.emailInfo.password);
-      },
-    },
-  };
+}
 </script>
+
+<template>
+  <div data-cy="emailConnectionSettings">
+    <SkillsTextInput name="publicUrl" label="Public URL" is-required />
+    <SkillsTextInput name="fromEmail" label="From Email" is-required />
+    <SkillsTextInput name="host" label="Host" is-required />
+    <SkillsNumberInput class="w-full" label="Port" :min="0" name="port" is-required :useGrouping="false" />
+    <SkillsTextInput name="protocol" label="Protocol" is-required />
+
+    <div>
+      <InputSwitch v-model="tlsEnabled" class="mr-2" data-cy="tlsSwitch" inputId="tlsSwitch" aria-labelledby="tlsSwitchLabel"/> <label for="tlsSwitch" id="tlsSwitchLabel">TLS {{ tlsEnabled ? 'Enabled' : 'Disabled'}}</label>
+    </div>
+    <div class="mt-2">
+      <InputSwitch v-model="authEnabled" class="mr-2" data-cy="authSwitch" inputId="authSwitch" aria-labelledby="authLabel"/> <label for="authSwitch" id="authLabel">Authentication {{ authEnabled ? 'Enabled' : 'Disabled'}}</label>
+      <Card v-if="authEnabled" class="mt-2">
+        <template #header>
+          <SkillsCardHeader title="Authentication Info"></SkillsCardHeader>
+        </template>
+        <template #content>
+          <SkillsTextInput name="username" label="Username" is-required />
+          <SkillsTextInput name="password" label="Password" is-required />
+        </template>
+      </Card>
+    </div>
+
+    <Message v-if="!isTesting && (testFailed || testSuccess || connectionError)" :severity="(testFailed || connectionError ? 'error' : 'success')">
+      <span v-if="testFailed">Email Connection Failed</span>
+      <span v-if="testSuccess">Email Connection Successful</span>
+      <span v-if="connectionError">{{ connectionError }}</span>
+    </Message>
+
+    <div class="flex gap-2 mt-4">
+      <SkillsButton v-on:click="testConnection" :disabled="!meta.valid || isTesting || isSaving"
+              data-cy="emailSettingsTest" label="Test" :icon="testButtonClass" aria-roledescription="test email server settings button">
+      </SkillsButton>
+      <SkillsButton v-on:click="saveEmailSettings" :disabled="!meta.valid || !meta.dirty || isSaving || isTesting"
+                    data-cy="emailSettingsSave" label="Save" :icon="isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right'">
+      </SkillsButton>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 
