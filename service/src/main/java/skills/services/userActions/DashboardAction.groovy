@@ -34,4 +34,5 @@ enum DashboardAction {
     RemoveConfiguration,
     Extend,
     Remind,
+    CancelExpiration,
 }

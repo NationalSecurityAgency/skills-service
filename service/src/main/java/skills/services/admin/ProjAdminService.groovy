@@ -555,6 +555,12 @@ class ProjAdminService {
     @Transactional
     void cancelProjectExpiration(String projectId) {
         projectExpirationService.cancelExpiration(projectId)
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.CancelExpiration,
+                item: DashboardItem.Project,
+                itemId: projectId,
+                projectId: projectId,
+        ))
     }
 
     @Transactional(readOnly = true)
