@@ -138,6 +138,7 @@ const remove = () => {
             icon="far fa-times-circle"
             severity="secondary"
             class="pr-3 pt-2"
+            :data-cy="`remove-${proj.projectId}Btn`"
             @click="remove"
             :aria-label="`Remove ${proj.projectName} from My Projects`"
             size="large"></SkillsButton>
