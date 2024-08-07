@@ -198,12 +198,15 @@ const onShareWithAllProjects = (checked) => {
               <Checkbox v-model="shareWithAllProjects" inputId="shareToggle" @change="onShareWithAllProjects" :disabled="selectedProject !== null"
                         :binary="true" data-cy="shareWithAllProjectsCheckbox"></Checkbox>
               <label for="shareToggle" class="ml-1">Share With All Projects</label>
-
-              <Button size="small" v-on:click="shareSkill" class="ml-4"
-                      aria-label="Share skill with another project"
-                      :disabled="!shareButtonEnabled || doesShareAlreadyExist" data-cy="shareButton">
-                <i class="fas fa-share-alt mr-1"></i><span class="text-truncate">Share</span>
-              </Button>
+              <SkillsButton size="small"
+                            v-on:click="shareSkill"
+                            class="ml-4"
+                            icon="fas fa-share-alt"
+                            label="Share"
+                            aria-label="Share skill with another project"
+                            :disabled="!shareButtonEnabled || doesShareAlreadyExist"
+                            data-cy="shareButton">
+              </SkillsButton>
             </div>
           </div>
         </div>
