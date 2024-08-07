@@ -32,7 +32,7 @@ import java.util.regex.Pattern
 @Service
 class AttachmentService {
 
-    private static final Pattern UUID_PATTERN = ~/\[.+\]\(\/api\/download\/([^\)]*)/
+    private static final Pattern UUID_PATTERN = ~/\[.+\]\(\/api\/download|playVideo\/([^\)]*)/
 
     @Autowired
     AttachmentRepo attachmentRepo

@@ -58,9 +58,11 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
 
     private static final Pattern PROJECT_ID = ~/(?i)\/.*\/(?:my)?projects\/([^\/]+).*/
     private static final Pattern ATTACHMENT_UUID = ~/(?i)\/api\/download\/(.+)/
+    private static final Pattern VIDEO_UUID = ~/(?i)\/api\/playVideo\/(.+)/
 
     private RequestMatcher projectsRequestMatcher
     private RequestMatcher attachmentsRequestMatcher
+    private RequestMatcher videoRequestMatcher
 
     @Autowired
     @Lazy
@@ -81,6 +83,7 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
         projectsRequestMatcher = new AntPathRequestMatcher("/**/*projects/**")
         attachmentsRequestMatcher = new AntPathRequestMatcher("/api/download/**")
+        videoRequestMatcher = new AntPathRequestMatcher("/api/playVideo/**")
     }
 
     @Override
@@ -98,6 +101,8 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
             projectId = extractProjectId(request)
         } else if (attachmentsRequestMatcher.matches(request)) {
             projectId = extractProjectIdForAttachment(request)
+        } else if (videoRequestMatcher.matches(request)) {
+            projectId = extractProjectIdForVideo(request)
         }
         if (projectId) {
             log.debug("evaluating request [{}] for user community protection", request.getRequestURI())
@@ -129,6 +134,17 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     private String extractProjectIdForAttachment(HttpServletRequest request) {
         String url = getRequestUrl(request)
         Matcher pid = ATTACHMENT_UUID.matcher(url)
+        if (pid.matches()) {
+            String uuid = pid.group(1)
+            Attachment attachment = attachmentService.getAttachment(uuid);
+            return attachment?.projectId
+        }
+        return StringUtils.EMPTY
+    }
+
+    private String extractProjectIdForVideo(HttpServletRequest request) {
+        String url = getRequestUrl(request)
+        Matcher pid = VIDEO_UUID.matcher(url)
         if (pid.matches()) {
             String uuid = pid.group(1)
             Attachment attachment = attachmentService.getAttachment(uuid);
