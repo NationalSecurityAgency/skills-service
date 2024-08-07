@@ -139,7 +139,7 @@ class AdminVideoService {
         attachmentRepo.save(attachment)
 
         videoAttrs.videoType = attachment.contentType
-        videoAttrs.videoUrl = "/api/download/${uuid}"
+        videoAttrs.videoUrl = "/api/playVideo/${uuid}"
         videoAttrs.isInternallyHosted = true
         videoAttrs.internallyHostedFileName = attachment.filename
         videoAttrs.internallyHostedAttachmentUuid = attachment.uuid
