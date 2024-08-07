@@ -219,11 +219,14 @@ function validate(value, ctx) {
                            :showType=true />
         </div>
         <div class="field text-center">
-          <Button @click="onAddPath"
-                  class="mt-3"
-                  data-cy="addLearningPathItemBtn"
-                  aria-label="Add item to the learning path"
-                  :disabled="!selectedFromSkills || !selectedFromSkills.skillId || !toSkillId || errors.toSkillId">Add <i class="fas fa-plus-circle" aria-hidden="true"/></Button>
+          <SkillsButton @click="onAddPath"
+                        class="mt-3"
+                        icon="fas fa-plus-circle"
+                        label="Add"
+                        data-cy="addLearningPathItemBtn"
+                        aria-label="Add item to the learning path"
+                        :disabled="!selectedFromSkills || !selectedFromSkills.skillId || !toSkillId || errors.toSkillId">
+          </SkillsButton>
         </div>
       </div>
       <div>
