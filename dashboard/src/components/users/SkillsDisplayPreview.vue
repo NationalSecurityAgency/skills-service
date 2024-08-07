@@ -22,11 +22,13 @@ import SkillsDisplayHome from '@/skills-display/components/SkillsDisplayHome.vue
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useRoute } from 'vue-router'
+import { useAuthState } from '@/stores/UseAuthState.js'
 
 const projConfig = useProjConfig()
 
 const skillsDisplayAttributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
+const authState = useAuthState()
 const route = useRoute()
 
 skillsDisplayAttributes.projectId = route.params.projectId
@@ -47,7 +49,8 @@ onMounted(() => {
   projConfig.afterProjConfigStateLoaded().then((projConfigRes) => {
     if (projConfigRes.invite_only === 'true') {
       canAccess.value = false;
-      UsersService.canAccess(route.params.projectId, route.params.userId).then((res) => {
+      const userId = authState.userInfo?.dn || route.params.userId
+      UsersService.canAccess(route.params.projectId, userId).then((res) => {
         canAccess.value = res === true;
       }).finally(() => {
         checkingAccess.value = false;
