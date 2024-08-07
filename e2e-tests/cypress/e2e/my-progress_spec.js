@@ -497,6 +497,7 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy="project-link-proj3"] button')
           .should('be.visible')
           .tab({ shift: true })
+          .tab({ shift: true })
           .type('{downArrow}')
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 3', 'This is project 1']);
         cy.get('[data-cy="project-link-card-proj3"] [data-cy="sortControlHandle"]')
@@ -506,6 +507,7 @@ describe('My Progress Tests', () => {
         cy.wait(1000)
         cy.get('[data-cy="project-link-proj3"] button')
             .tab({ shift: true })
+            .tab({ shift: true })
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
         cy.get('[data-cy="project-link-card-proj3"] [data-cy="sortControlHandle"]')
@@ -514,6 +516,7 @@ describe('My Progress Tests', () => {
         // move down - last item already; no action
         cy.wait(1000)
         cy.get('[data-cy="project-link-proj3"] button')
+            .tab({ shift: true })
             .tab({ shift: true })
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
@@ -529,6 +532,7 @@ describe('My Progress Tests', () => {
         cy.wait(1000)
         cy.get('[data-cy="project-link-proj1"] button')
             .tab({ shift: true })
+            .tab({ shift: true })
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 1', 'This is project 2', 'This is project 3']);
         cy.get('[data-cy="project-link-card-proj1"] [data-cy="sortControlHandle"]')
@@ -537,6 +541,7 @@ describe('My Progress Tests', () => {
         // move up; first item already - no action
         cy.wait(1000)
         cy.get('[data-cy="project-link-proj1"] button')
+            .tab({ shift: true })
             .tab({ shift: true })
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 1', 'This is project 2', 'This is project 3']);
@@ -731,5 +736,34 @@ describe('My Progress Tests', () => {
         cy.getEmails().then((emails) => {
                 expect(emails[0].html).to.contain('aaa bbb this is a message');
         });
+    });
+
+    it('remove project from My Progress view', function () {
+        cy.createProject(3);
+        cy.enableProdMode(3);
+        cy.addToMyProjects(3);
+
+        cy.viewport(1200, 1000);
+
+        cy.visit('/progress-and-rankings');
+        cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 3', 'This is project 2', 'This is project 1']);
+
+        cy.get('[data-cy="remove-proj3Btn"]').click()
+        cy.get('[data-pc-name="acceptbutton"]').click()
+
+        cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1']);
+        cy.get('[data-cy="project-link-card-proj3"]').should('not.exist');
+
+        cy.get('[data-cy="remove-proj1Btn"]').click()
+        cy.get('[data-pc-name="acceptbutton"]').click()
+
+        cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2']);
+        cy.get('[data-cy="project-link-card-proj1"]').should('not.exist');
+
+        cy.get('[data-cy="remove-proj2Btn"]').click()
+        cy.get('[data-pc-name="acceptbutton"]').click()
+
+        cy.get('[data-cy="project-link-card-proj2"]').should('not.exist');
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]').should('exist');
     });
 });

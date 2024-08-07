@@ -81,6 +81,20 @@ const projectOrderUpdate = (projectId, newIndex) => {
     })
 }
 
+const removeProject = (projectId) => {
+  sortOrderLoading.value = true;
+
+  const currentProjects = myProgressState.myProjects
+  const itemToRemove = currentProjects.find(it => it.projectId === projectId);
+  const indexToRemove = currentProjects.indexOf(itemToRemove);
+  const updatedProjects = [...currentProjects]
+  updatedProjects.splice(indexToRemove, 1)
+
+  ProjectService.removeFromMyProjects(projectId).finally(() => {
+    sortOrderLoading.value = false
+    myProgressState.myProjects = updatedProjects
+  })
+}
 </script>
 
 <template>
@@ -99,6 +113,7 @@ const projectOrderUpdate = (projectId, newIndex) => {
           :ref="`proj${proj.projectId}`"
           :display-order="index"
           @sort-changed-requested="updateSortAndReloadProjects"
+          @remove-project="removeProject"
           :proj="proj"
           class="h-full" />
       </div>
