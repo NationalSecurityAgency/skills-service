@@ -375,4 +375,24 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="skillsSelectionItem-proj1-skill4"]`).should('not.exist');
     });
 
+    it('configure approver for single skill, then update skill search should reset selected skill', function () {
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        const user1 = 'user1'
+        const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noSkillConf"]`).should('exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.disabled')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).click();
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('skill 3');
+        cy.get(`[data-cy="skillsSelectionItem-proj1-skill3"]`).click()
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.enabled')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('{backspace}');
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.enabled')
+    });
+
 });
