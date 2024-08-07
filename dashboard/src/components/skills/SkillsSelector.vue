@@ -218,7 +218,7 @@ defineExpose({
           </li>
         </template>
         <template #empty>
-          <span v-if="emptyWithoutSearch && !internalSearch && !currentSearch"><i class="fas fa-search"/> Type to <span
+          <span v-if="emptyWithoutSearch && !internalSearch && !currentSearch" class="pl-3"><i class="fas fa-search"/> Type to <span
             class="font-bold">search</span> for skills...</span>
           <span class="p-3" v-else>No results found. Consider changing the search query</span>
         </template>
