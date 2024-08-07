@@ -285,7 +285,7 @@ class WSHelper {
         String url = "${skillsService}/${endpoint}"
         ResponseEntity<Resource> responseEntity = restTemplateWrapper.getForEntity(url, Resource)
         String resBody = responseEntity.body
-        if(!resBody || responseEntity.statusCode != HttpStatus.OK){
+        if(!resBody || (responseEntity.statusCode != HttpStatus.OK && responseEntity.statusCode != HttpStatus.PARTIAL_CONTENT)){
             String msg = "Bad request for [$url] code=${responseEntity.statusCode}"
             log.error(msg)
             SkillsClientException e = new SkillsClientException(msg, url, responseEntity.statusCode)
