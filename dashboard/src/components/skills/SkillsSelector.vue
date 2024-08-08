@@ -77,10 +77,11 @@ const props = defineProps({
   },
 });
 
-let selectedInternal = ref([]);
-let optionsInternal = ref([]);
-let currentSearch = ref('');
-let isMounted = ref(false);
+const selectedInternal = ref([]);
+const optionsInternal = ref([]);
+const currentSearch = ref('');
+const currentSelectedSkill = ref(null);
+const isMounted = ref(false);
 
 watch(() => props.selected, async () => {
   setSelectedInternal();
@@ -101,7 +102,7 @@ const setSelectedInternal = () => {
 const setOptionsInternal = () => {
   if (props.options) {
     optionsInternal.value = props.options.map((entry) => ({entryId: `${entry.projectId}_${entry.skillId}`, ...entry}));
-    if (props.selected) {
+    if (props.selected && props.selected.length) {
       // removed already selected items
       optionsInternal.value = optionsInternal.value.filter((el) => !props.selected?.some((sel) => `${sel.projectId}_${sel.skillId}` === el.entryId));
     }
@@ -112,6 +113,7 @@ const setOptionsInternal = () => {
 };
 
 const added = (addedItem) => {
+  currentSelectedSkill.value = addedItem?.value;
   emit('added', addedItem?.value);
 };
 
@@ -129,6 +131,19 @@ const searchChanged = (event) => {
     }
   }
 };
+
+const isString = (variable) => typeof variable === 'string';
+const isObject = (variable) => typeof variable === 'object' && variable !== null;
+
+const handleBlur = () => {
+  if (currentSearch.value && currentSelectedSkill.value) {
+    if (isString(currentSearch.value) && currentSearch.value !== currentSelectedSkill.value.name) {
+      currentSearch.value = currentSelectedSkill.value.name;
+    } else if (isObject(currentSearch.value) && currentSearch.value.name !== currentSelectedSkill.value.name) {
+      currentSearch.value = currentSelectedSkill.value.name;
+    }
+  }
+}
 
 const clearValue = () => {
   selectedInternal.value = [];
@@ -149,7 +164,7 @@ defineExpose({
   <!--  <Fluid>-->
     <div class="p-fluid">
       <AutoComplete
-          v-model="selectedInternal"
+          v-model="currentSearch"
           :suggestions="internalSearch ? optionsInternal : options"
           :placeholder="placeholder"
           class="st-skills-selector"
@@ -162,6 +177,7 @@ defineExpose({
           @item-select="added"
           @option-select="added"
           @clear="added"
+          @blur="handleBlur"
           optionLabel="name"
           :completeOnFocus="true"
           :delay="500">

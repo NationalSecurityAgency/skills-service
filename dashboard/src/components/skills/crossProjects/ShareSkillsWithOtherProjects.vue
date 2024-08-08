@@ -177,7 +177,6 @@ const onShareWithAllProjects = (checked) => {
             <div class="flex-1 field">
               <skills-selector :options="allSkills"
                                v-on:added="onSelectedSkill"
-                               @search-change="onSelectedSkill(null)"
                                placeholder="Select Skill"
                                placeholder-icon="fas fa-search"
                                data-cy="skillSelector" />
