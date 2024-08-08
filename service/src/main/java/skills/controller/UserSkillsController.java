@@ -525,33 +525,6 @@ class UserSkillsController {
         return videoCaptionsService.getVideoTranscript(projectId, skillId);
     }
 
-    @RequestMapping(value="/playVideo/{uuid}", method = RequestMethod.GET)
-    @Transactional(readOnly = true)
-    public void viewVideo(@PathVariable("uuid") String uuid, HttpServletResponse response) {
-        Attachment attachment = attachmentService.getAttachment(uuid);
-        if (attachment == null) {
-            throw new SkillException("Attachment for uuid [" + uuid + "] does not exist");
-        }
-
-        if (attachment.getProjectId() != null && inviteOnlyProjectService.isInviteOnlyProject(attachment.getProjectId())) {
-            String userId = userInfoService.getCurrentUserId();
-            if (!inviteOnlyProjectService.isPrivateProjRoleOrAdminRole(attachment.getProjectId(), userId)) {
-                throw new InviteOnlyAccessDeniedException("Access is denied", attachment.getProjectId());
-            }
-        }
-
-        try (InputStream inputStream = attachment.getContent().getBinaryStream(); OutputStream outputStream = response.getOutputStream();) {
-            response.setContentType(attachment.getContentType());
-            response.setHeader("Content-Length", attachment.getSize().toString());
-            Long attachmentSize = attachment.getSize() - 1;
-            response.setHeader("Content-Range", "bytes 0-" + attachmentSize + "/" + attachment.getSize().toString());
-            response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-            IOUtils.copy(inputStream, outputStream);
-        } catch (Exception e) {
-            throw new SkillException("Error closing stream resources", e);
-        }
-    }
-
     @RequestMapping(value = "/download/{uuid}", method = RequestMethod.GET)
     @Transactional(readOnly = true)
     public void download(@PathVariable("uuid") String uuid,
@@ -573,6 +546,13 @@ class UserSkillsController {
             response.setContentType(attachment.getContentType());
             if (!StringUtils.equalsIgnoreCase(attachment.getContentType(), "application/pdf")) {
                 response.setHeader("Content-Disposition", "attachment; filename=\"" + attachment.getFilename() + "\"");
+            }
+            if (StringUtils.equalsIgnoreCase(attachment.getContentType(), "video/mp4") || StringUtils.equalsIgnoreCase(attachment.getContentType(), "video/webm")) {
+                response.setContentType(attachment.getContentType());
+                response.setHeader("Content-Length", attachment.getSize().toString());
+                Long attachmentSize = attachment.getSize() - 1;
+                response.setHeader("Content-Range", "bytes 0-" + attachmentSize + "/" + attachment.getSize().toString());
+                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
             }
             IOUtils.copy(inputStream, outputStream);
         } catch (Exception e) {
