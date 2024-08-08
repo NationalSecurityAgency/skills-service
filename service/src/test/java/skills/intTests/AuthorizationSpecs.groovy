@@ -108,7 +108,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
     def 'current user cannot delete them self'() {
 
         when:
-        skillsService.deleteUserRole("skills@skills.org", projId, "ROLE_PROJECT_ADMIN")
+        skillsService.deleteUserRole("skills@skills.org", projId, RoleName.ROLE_PROJECT_ADMIN.toString())
 
         then:
         SkillsClientException ex = thrown()

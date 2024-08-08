@@ -1228,6 +1228,10 @@ class SkillsService {
         return wsHelper.adminDelete("/projects/${projectId}/users/${userId}/roles/ROLE_PRIVATE_PROJECT_USER")
     }
 
+    def canAccessProject(String projectId, String userId) {
+        return wsHelper.adminGet("/projects/${projectId}/${userId}/canAccess")
+    }
+
     def addOrUpdateGlobalSetting(String setting, Map value) {
         return wsHelper.rootPut("/global/settings/${setting}", value)
     }
