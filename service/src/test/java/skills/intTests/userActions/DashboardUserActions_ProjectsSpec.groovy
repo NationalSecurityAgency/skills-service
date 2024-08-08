@@ -700,13 +700,13 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         create.captions == "captions"
         create.transcript == "transcript"
-        create.videoUrl.startsWith('/api/playVideo/')
+        create.videoUrl.startsWith('/api/download/')
         create.isInternallyHosted == true
         create.internallyHostedFileName == 'create-quiz.mp4'
 
         edit.captions == "captions1"
         edit.transcript == "transcript1"
-        edit.videoUrl.startsWith('/api/playVideo/')
+        edit.videoUrl.startsWith('/api/download/')
         edit.isInternallyHosted == true
         edit.internallyHostedFileName == 'create-quiz.mp4'
 

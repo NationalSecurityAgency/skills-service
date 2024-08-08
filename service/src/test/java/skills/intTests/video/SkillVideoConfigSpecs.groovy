@@ -115,7 +115,7 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         when:
         def attributes = skillsService.getSkillVideoAttributes(p1.projectId, p1Skills[0].skillId)
         then:
-        attributes.videoUrl.toString().startsWith('/api/playVideo/')
+        attributes.videoUrl.toString().startsWith('/api/download/')
         attributes.captions == "captions"
         attributes.transcript == "transcript"
     }
@@ -164,18 +164,22 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         attachmentRepo.count() == 2
         skill1.videoSummary.videoType == "video/webm"
         skill1Download.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/webm"
+        skill1Download.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-project.webm"'
         skill1Download.file.bytes == Files.readAllBytes(video1.getFile().toPath())
 
         skill2.videoSummary.videoType == "video/mp4"
         skill2Download.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/mp4"
+        skill2Download.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-quiz.mp4"'
         skill2Download.file.bytes == Files.readAllBytes(video2.getFile().toPath())
 
         skill1After.videoSummary.videoType == "video/webm"
         skill1DownloadAfter.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/webm"
+        skill1DownloadAfter.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-skill.webm"'
         skill1DownloadAfter.file.bytes == Files.readAllBytes(video3.getFile().toPath())
 
         skill2After.videoSummary.videoType == "video/mp4"
         skill2DownloadAfter.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/mp4"
+        skill2DownloadAfter.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-quiz.mp4"'
         skill2DownloadAfter.file.bytes == Files.readAllBytes(video2.getFile().toPath())
     }
 
@@ -218,36 +222,40 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
 
         then:
         attachmentRepo.count() == 2
-        skill1.videoUrl.startsWith('/api/playVideo/')
+        skill1.videoUrl.startsWith('/api/download/')
         skill1.videoType == "video/webm"
         skill1.captions == "captions"
         skill1.transcript == "transcript"
 
-        skill2.videoUrl.startsWith('/api/playVideo/')
+        skill2.videoUrl.startsWith('/api/download/')
         skill2.videoType == "video/mp4"
         skill2.captions == "captions"
         skill2.transcript == "transcript"
 
         skill1Download.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/webm"
+        skill1Download.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-project.webm"'
         skill1Download.file.bytes == Files.readAllBytes(video1.getFile().toPath())
 
         skill2Download.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/mp4"
+        skill2Download.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-quiz.mp4"'
         skill2Download.file.bytes == Files.readAllBytes(video2.getFile().toPath())
 
-        skill1After.videoUrl.startsWith('/api/playVideo/')
+        skill1After.videoUrl.startsWith('/api/download/')
         skill1After.videoType == "video/webm"
         skill1After.captions == "captions new"
         skill1After.transcript == "transcript new"
 
-        skill2After.videoUrl.startsWith('/api/playVideo/')
+        skill2After.videoUrl.startsWith('/api/download/')
         skill2After.videoType == "video/mp4"
         skill2After.captions == "captions"
         skill2After.transcript == "transcript"
 
         skill1DownloadAfter.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/webm"
+        skill1DownloadAfter.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-project.webm"'
         skill1DownloadAfter.file.bytes == Files.readAllBytes(video1.getFile().toPath())
 
         skill2DownloadAfter.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/mp4"
+        skill2DownloadAfter.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-quiz.mp4"'
         skill2DownloadAfter.file.bytes == Files.readAllBytes(video2.getFile().toPath())
     }
 
@@ -290,10 +298,12 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         attachmentRepo.count() == 1
         skill1.videoSummary.videoType == "video/webm"
         skill1Download.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/webm"
+        skill1Download.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-project.webm"'
         skill1Download.file.bytes == Files.readAllBytes(video1.getFile().toPath())
 
         skill2.videoSummary.videoType == "video/mp4"
         skill2Download.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/mp4"
+        skill2Download.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-quiz.mp4"'
         skill2Download.file.bytes == Files.readAllBytes(video2.getFile().toPath())
 
         !skill1After.videoSummary.videoType
@@ -301,6 +311,7 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
 
         skill2After.videoSummary.videoType == "video/mp4"
         skill2DownloadAfter.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/mp4"
+        skill2DownloadAfter.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-quiz.mp4"'
         skill2DownloadAfter.file.bytes == Files.readAllBytes(video2.getFile().toPath())
     }
 
@@ -347,18 +358,21 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         skill1.videoSummary.videoUrl == "http://some.url"
 
         skill2.videoSummary.videoType == "video/mp4"
-        skill2.videoSummary.videoUrl.startsWith('/api/playVideo')
+        skill2.videoSummary.videoUrl.startsWith('/api/download')
         skill2Download.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/mp4"
+        skill2Download.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-quiz.mp4"'
         skill2Download.file.bytes == Files.readAllBytes(video2.getFile().toPath())
 
         skill1After.videoSummary.videoType == "video/webm"
-        skill1After.videoSummary.videoUrl.startsWith('/api/playVideo')
+        skill1After.videoSummary.videoUrl.startsWith('/api/download')
         skill1DownloadAfter.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/webm"
+        skill1DownloadAfter.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-skill.webm"'
         skill1DownloadAfter.file.bytes == Files.readAllBytes(video3.getFile().toPath())
 
         skill2After.videoSummary.videoType == "video/mp4"
-        skill2After.videoSummary.videoUrl.startsWith('/api/playVideo')
+        skill2After.videoSummary.videoUrl.startsWith('/api/download')
         skill2DownloadAfter.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/mp4"
+        skill2DownloadAfter.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-quiz.mp4"'
         skill2DownloadAfter.file.bytes == Files.readAllBytes(video2.getFile().toPath())
     }
 
@@ -476,16 +490,19 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         attachmentRepo.count() == 1
         skill1.videoSummary.videoType == "video/webm"
         skill1Download.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/webm"
+        skill1Download.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-project.webm"'
         skill1Download.file.bytes == Files.readAllBytes(video1.getFile().toPath())
 
         skill2.videoSummary.videoType == "video/mp4"
         skill2Download.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/mp4"
+        skill2Download.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-quiz.mp4"'
         skill2Download.file.bytes == Files.readAllBytes(video2.getFile().toPath())
 
         !skill1After.videoSummary
 
         skill2After.videoSummary.videoType == "video/mp4"
         skill2DownloadAfter.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/mp4"
+        skill2DownloadAfter.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-quiz.mp4"'
         skill2DownloadAfter.file.bytes == Files.readAllBytes(video2.getFile().toPath())
     }
 
