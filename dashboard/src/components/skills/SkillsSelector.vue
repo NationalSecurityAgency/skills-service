@@ -147,6 +147,7 @@ const handleBlur = () => {
 
 const clearValue = () => {
   selectedInternal.value = [];
+  currentSearch.value = ''
 }
 
 onMounted(() => {
