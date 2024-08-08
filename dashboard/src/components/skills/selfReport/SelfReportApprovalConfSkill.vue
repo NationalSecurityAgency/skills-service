@@ -190,6 +190,7 @@ const removeTagConf = (removedItem) => {
               :disabled="selectedSubject !== null || loading"
               :options="availableSkills"
               @added="selectSkill"
+              @search-change="selectSkill(null)"
               placeholder="Select skill"/>
         </div>
         <div class="flex mx-1 text-center">

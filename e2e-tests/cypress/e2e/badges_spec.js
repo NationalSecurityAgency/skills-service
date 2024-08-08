@@ -2340,4 +2340,19 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="errorPage"]')
         cy.url().should('include', '/error')
     })
+
+    it('typing into skill search input and then erasing the text should not cause an error', () => {
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.get('[data-cy="btn_Badges"]').click();
+        cy.contains('New Badge');
+        cy.get('[data-cy="name"]')
+          .type('Test Badge');
+        cy.clickSave();
+        cy.wait('@loadBadges');
+        cy.get('[data-cy=manageBtn_TestBadgeBadge]')
+          .click();
+        cy.wait(500);
+        cy.wait('@loadSkills');
+        cy.get('[data-cy="skillsSelector"]').type('a{backspace}');
+    })
 });

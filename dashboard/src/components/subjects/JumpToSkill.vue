@@ -41,11 +41,13 @@ const searchChanged = (query) => {
 };
 
 const navToSkill = (selectedItem) => {
+  if (selectedItem) {
     router.push({
       name: 'SkillOverview',
       params: { projectId: selectedItem.projectId, subjectId: selectedItem.subjectId, skillId: selectedItem.skillId },
     });
     SkillsReporter.reportSkill('SearchandNavigatedirectlytoaskill');
+  }
 };
 </script>
 

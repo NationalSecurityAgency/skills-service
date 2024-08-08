@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import UsersService from '@/components/users/UsersService.js'

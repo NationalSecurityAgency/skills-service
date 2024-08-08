@@ -57,14 +57,6 @@ export default {
       .then((res) => res.data)
   },
   canAccess(projectId, userId) {
-    if (typeof userId === 'object' && userId !== null) {
-      return axios
-        .get(
-          `/admin/projects/${encodeURIComponent(projectId)}/${encodeURIComponent(userId.id)}/canAccess`,
-          { params: { idType: userId.idType } }
-        )
-        .then((response) => response.data)
-    }
     return axios
       .get(
         `/admin/projects/${encodeURIComponent(projectId)}/${encodeURIComponent(userId)}/canAccess`

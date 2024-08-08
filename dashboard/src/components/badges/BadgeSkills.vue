@@ -142,28 +142,30 @@ const skillDeleted = (deletedItem) => {
 };
 
 const skillAdded = (newItem) => {
-  loading.value.skillOp = true;
-  SkillsService.assignSkillToBadge(projectId.value, badgeId.value, newItem.skillId)
-      .then(() => {
-        badgeSkills.value.push(newItem);
-        availableSkills.value = availableSkills.value.filter((item) => item.skillId !== newItem.skillId);
-        badgeState.loadBadgeDetailsState(projectId.value, badgeId.value );
+  if (newItem) {
+    loading.value.skillOp = true;
+    SkillsService.assignSkillToBadge(projectId.value, badgeId.value, newItem.skillId)
+        .then(() => {
+          badgeSkills.value.push(newItem);
+          availableSkills.value = availableSkills.value.filter((item) => item.skillId !== newItem.skillId);
+          badgeState.loadBadgeDetailsState(projectId.value, badgeId.value );
+          loading.value.skillOp = false;
+          SkillsReporter.reportSkill('AssignGemOrBadgeSkills');
+          nameQuery.value = null
+          filterSkills('');
+        }).catch((e) => {
+      if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'LearningPathViolation') {
         loading.value.skillOp = false;
-        SkillsReporter.reportSkill('AssignGemOrBadgeSkills');
-        nameQuery.value = null
-        filterSkills('');
-      }).catch((e) => {
-    if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'LearningPathViolation') {
-      loading.value.skillOp = false;
-      learningPathViolationErr.value.show = true;
-      learningPathViolationErr.value.skillName = newItem.name;
-    } else if(upgradeInProgressErrorChecker.isUpgrading(e)) {
-      upgradeInProgressErrorChecker.navToUpgradeInProgressPage()
-    } else {
-      const errorMessage = (e.response && e.response.data && e.response.data.explanation) ? e.response.data.explanation : undefined;
-      router.push({ name: 'ErrorPage', query: { errorMessage } });
-    }
-  });
+        learningPathViolationErr.value.show = true;
+        learningPathViolationErr.value.skillName = newItem.name;
+      } else if(upgradeInProgressErrorChecker.isUpgrading(e)) {
+        upgradeInProgressErrorChecker.navToUpgradeInProgressPage()
+      } else {
+        const errorMessage = (e.response && e.response.data && e.response.data.explanation) ? e.response.data.explanation : undefined;
+        router.push({ name: 'ErrorPage', query: { errorMessage } });
+      }
+    });
+  }
 };
 
 const filterSkills = (searchQuery) => {
