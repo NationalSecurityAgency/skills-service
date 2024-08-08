@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import UsersService from '@/components/users/UsersService.js'
@@ -22,13 +22,11 @@ import SkillsDisplayHome from '@/skills-display/components/SkillsDisplayHome.vue
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useRoute } from 'vue-router'
-import { useAuthState } from '@/stores/UseAuthState.js'
 
 const projConfig = useProjConfig()
 
 const skillsDisplayAttributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
-const authState = useAuthState()
 const route = useRoute()
 
 skillsDisplayAttributes.projectId = route.params.projectId
@@ -49,8 +47,7 @@ onMounted(() => {
   projConfig.afterProjConfigStateLoaded().then((projConfigRes) => {
     if (projConfigRes.invite_only === 'true') {
       canAccess.value = false;
-      const userId = authState.userInfo?.dn || route.params.userId
-      UsersService.canAccess(route.params.projectId, userId).then((res) => {
+      UsersService.canAccess(route.params.projectId, route.params.userId).then((res) => {
         canAccess.value = res === true;
       }).finally(() => {
         checkingAccess.value = false;

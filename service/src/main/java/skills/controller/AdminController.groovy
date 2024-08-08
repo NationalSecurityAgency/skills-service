@@ -1006,13 +1006,12 @@ class AdminController {
     @GetMapping(value="/projects/{projectId}/{userId}/canAccess", produces='application/json')
     @ResponseBody
     @CompileStatic
-    Boolean canUserAccess(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId,
-                          @RequestParam(required=false, value="idType") String idType) {
+    Boolean canUserAccess(@PathVariable("projectId") String projectId, @PathVariable("userId") String userId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(userId, "User ID")
 
         if (inviteOnlyProjectService.isInviteOnlyProject(projectId)) {
-            return inviteOnlyProjectService.canUserAccess(projectId, userId, idType)
+            return inviteOnlyProjectService.canUserAccess(projectId, userId)
         }
         return Boolean.TRUE
     }

@@ -251,7 +251,7 @@ class AccessSettingsStorageService {
     @Transactional()
     void deleteUserRole(String userId, String projectId, RoleName roleName, boolean saveUserAction = false) {
         userId = userId?.toLowerCase()
-        if (userId != userInfoService.getCurrentUser().username.toLowerCase()) {
+        if (userId != userInfoService.getCurrentUser().username.toLowerCase() || roleName == RoleName.ROLE_PRIVATE_PROJECT_USER) {
             deleteUserRoleInternal(userId, projectId, roleName)
             if (saveUserAction) {
                 saveUserRoleActions(userId, roleName, DashboardAction.Delete)
