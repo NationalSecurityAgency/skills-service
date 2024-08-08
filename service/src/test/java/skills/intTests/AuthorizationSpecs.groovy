@@ -21,6 +21,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.auth.RoleName
 import spock.lang.IgnoreIf
 import spock.lang.IgnoreRest
 import spock.lang.Specification
@@ -108,7 +109,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
     def 'current user cannot delete them self'() {
 
         when:
-        skillsService.deleteUserRole("skills@skills.org", projId, "ROLE_PROJECT_ADMIN")
+        skillsService.deleteUserRole("skills@skills.org", projId, RoleName.ROLE_PROJECT_ADMIN.toString())
 
         then:
         SkillsClientException ex = thrown()
