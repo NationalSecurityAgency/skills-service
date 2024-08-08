@@ -77,10 +77,10 @@ const props = defineProps({
   },
 });
 
-let selectedInternal = ref([]);
-let optionsInternal = ref([]);
-let currentSearch = ref('');
-let isMounted = ref(false);
+const selectedInternal = ref([]);
+const optionsInternal = ref([]);
+const currentSearch = ref('');
+const isMounted = ref(false);
 
 watch(() => props.selected, async () => {
   setSelectedInternal();
@@ -93,15 +93,16 @@ const removeReuseTag = (val) => {
 const setSelectedInternal = () => {
   if (props.selected && (props.selected.length || props.selected.name)) {
     selectedInternal.value = {entryId: `${props.selected.projectId}_${props.selected.skillId}`, ...props.selected}; //props.selected.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
+    currentSearch.value = selectedInternal.value.name
   } else {
-    selectedInternal.value = [];
+    clearValue();
   }
 };
 
 const setOptionsInternal = () => {
   if (props.options) {
     optionsInternal.value = props.options.map((entry) => ({entryId: `${entry.projectId}_${entry.skillId}`, ...entry}));
-    if (props.selected) {
+    if (props.selected && props.selected.length) {
       // removed already selected items
       optionsInternal.value = optionsInternal.value.filter((el) => !props.selected?.some((sel) => `${sel.projectId}_${sel.skillId}` === el.entryId));
     }
@@ -112,6 +113,7 @@ const setOptionsInternal = () => {
 };
 
 const added = (addedItem) => {
+  selectedInternal.value = addedItem?.value;
   emit('added', addedItem?.value);
 };
 
@@ -130,8 +132,22 @@ const searchChanged = (event) => {
   }
 };
 
+const isString = (variable) => typeof variable === 'string';
+const isObject = (variable) => typeof variable === 'object' && variable !== null;
+
+const handleBlur = () => {
+  if (currentSearch.value && selectedInternal.value) {
+    if (isString(currentSearch.value) && currentSearch.value !== selectedInternal.value.name) {
+      currentSearch.value = selectedInternal.value.name;
+    } else if (isObject(currentSearch.value) && currentSearch.value.name !== selectedInternal.value.name) {
+      currentSearch.value = selectedInternal.value.name;
+    }
+  }
+}
+
 const clearValue = () => {
-  selectedInternal.value = [];
+  selectedInternal.value = null
+  currentSearch.value = ''
 }
 
 onMounted(() => {
@@ -149,7 +165,7 @@ defineExpose({
   <!--  <Fluid>-->
     <div class="p-fluid">
       <AutoComplete
-          v-model="selectedInternal"
+          v-model="currentSearch"
           :suggestions="internalSearch ? optionsInternal : options"
           :placeholder="placeholder"
           class="st-skills-selector"
@@ -162,6 +178,7 @@ defineExpose({
           @item-select="added"
           @option-select="added"
           @clear="added"
+          @blur="handleBlur"
           optionLabel="name"
           :completeOnFocus="true"
           :delay="500">
@@ -218,7 +235,7 @@ defineExpose({
           </li>
         </template>
         <template #empty>
-          <span v-if="emptyWithoutSearch && !internalSearch && !currentSearch"><i class="fas fa-search"/> Type to <span
+          <span v-if="emptyWithoutSearch && !internalSearch && !currentSearch" class="pl-3"><i class="fas fa-search"/> Type to <span
             class="font-bold">search</span> for skills...</span>
           <span class="p-3" v-else>No results found. Consider changing the search query</span>
         </template>

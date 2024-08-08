@@ -225,7 +225,7 @@ function validate(value, ctx) {
                         label="Add"
                         data-cy="addLearningPathItemBtn"
                         aria-label="Add item to the learning path"
-                        :disabled="!selectedFromSkills || !selectedFromSkills.skillId || !toSkillId || errors.toSkillId">
+                        :disabled="!selectedFromSkills || !selectedFromSkills.skillId || !toSkillId || !!errors.toSkillId">
           </SkillsButton>
         </div>
       </div>
