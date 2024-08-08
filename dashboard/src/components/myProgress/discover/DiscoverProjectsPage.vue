@@ -239,22 +239,10 @@ const contactProject = (name, id) => {
                   <div class="flex-1">
                     <highlighted-value :value="slotProps.data.name" :filter="filters['global'].value || ''" />
                   </div>
-                  <router-link :to="{ name:'Subjects', params: { projectId: slotProps.data.projectId }}" tabindex="-1">
-                    <SkillsButton
-                        label="View"
-                        icon="fas fa-eye"
-                        outlined
-                        class="fadein animation-duration-300"
-                        size="small"
-                        :data-cy="`viewButton-${slotProps.data.projectId}`"
-                        :loading="slotProps.data.loading"
-                        :aria-label="`view project ${slotProps.data.projectId}`" />
-                  </router-link>
                   <div v-if="appInfoState.emailEnabled">
                     <SkillsButton
                       label="Contact Project"
                       icon="fas fas fa-mail-bulk"
-                      class="ml-2"
                       outlined
                       severity="info"
                       :aria-label="`Contact ${slotProps.data.name} project owner`"
@@ -282,6 +270,17 @@ const contactProject = (name, id) => {
                   :data-cy="`addButton-${slotProps.data.projectId}`"
                   :loading="slotProps.data.loading"
                   :aria-label="`add project ${slotProps.data.projectId} to my projects`" />
+                <router-link :to="{ name:'Subjects', params: { projectId: slotProps.data.projectId }}" tabindex="-1" v-if="!slotProps.data.isMyProject">
+                  <SkillsButton
+                      label="View"
+                      icon="fas fa-eye"
+                      outlined
+                      class="fadein animation-duration-300 ml-2"
+                      size="small"
+                      :data-cy="`viewButton-${slotProps.data.projectId}`"
+                      :loading="slotProps.data.loading"
+                      :aria-label="`view project ${slotProps.data.projectId}`" />
+                </router-link>
                 <div v-if="slotProps.data.isMyProject" class="flex align-items-center">
                   <Tag
                     class="animate__bounceIn"
