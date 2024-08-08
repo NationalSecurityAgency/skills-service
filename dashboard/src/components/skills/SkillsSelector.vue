@@ -80,7 +80,6 @@ const props = defineProps({
 const selectedInternal = ref([]);
 const optionsInternal = ref([]);
 const currentSearch = ref('');
-const currentSelectedSkill = ref(null);
 const isMounted = ref(false);
 
 watch(() => props.selected, async () => {
@@ -94,8 +93,9 @@ const removeReuseTag = (val) => {
 const setSelectedInternal = () => {
   if (props.selected && (props.selected.length || props.selected.name)) {
     selectedInternal.value = {entryId: `${props.selected.projectId}_${props.selected.skillId}`, ...props.selected}; //props.selected.map((entry) => ({ entryId: `${entry.projectId}_${entry.skillId}`, ...entry }));
+    currentSearch.value = selectedInternal.value.name
   } else {
-    selectedInternal.value = [];
+    clearValue();
   }
 };
 
@@ -113,7 +113,7 @@ const setOptionsInternal = () => {
 };
 
 const added = (addedItem) => {
-  currentSelectedSkill.value = addedItem?.value;
+  selectedInternal.value = addedItem?.value;
   emit('added', addedItem?.value);
 };
 
@@ -136,17 +136,17 @@ const isString = (variable) => typeof variable === 'string';
 const isObject = (variable) => typeof variable === 'object' && variable !== null;
 
 const handleBlur = () => {
-  if (currentSearch.value && currentSelectedSkill.value) {
-    if (isString(currentSearch.value) && currentSearch.value !== currentSelectedSkill.value.name) {
-      currentSearch.value = currentSelectedSkill.value.name;
-    } else if (isObject(currentSearch.value) && currentSearch.value.name !== currentSelectedSkill.value.name) {
-      currentSearch.value = currentSelectedSkill.value.name;
+  if (currentSearch.value && selectedInternal.value) {
+    if (isString(currentSearch.value) && currentSearch.value !== selectedInternal.value.name) {
+      currentSearch.value = selectedInternal.value.name;
+    } else if (isObject(currentSearch.value) && currentSearch.value.name !== selectedInternal.value.name) {
+      currentSearch.value = selectedInternal.value.name;
     }
   }
 }
 
 const clearValue = () => {
-  selectedInternal.value = [];
+  selectedInternal.value = null
   currentSearch.value = ''
 }
 
