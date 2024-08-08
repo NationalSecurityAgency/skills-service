@@ -21,6 +21,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.auth.RoleName
 import spock.lang.IgnoreIf
 import spock.lang.IgnoreRest
 import spock.lang.Specification
