@@ -61,7 +61,6 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
 
     private RequestMatcher projectsRequestMatcher
     private RequestMatcher attachmentsRequestMatcher
-    private RequestMatcher videoRequestMatcher
 
     @Autowired
     @Lazy
