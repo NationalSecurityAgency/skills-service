@@ -16,6 +16,8 @@
 package skills.controller;
 
 import callStack.profiler.Profile;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormatter;
@@ -31,7 +33,6 @@ import org.springframework.util.unit.DataSize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import skills.PublicProps;
-import skills.auth.AuthMode;
 import skills.auth.UserInfoService;
 import skills.auth.aop.AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied;
 import skills.auth.inviteOnly.InviteOnlyAccessDeniedException;
@@ -44,7 +45,6 @@ import skills.controller.request.model.SkillsClientVersionRequest;
 import skills.controller.result.model.RequestResult;
 import skills.controller.result.model.TableResult;
 import skills.controller.result.model.UploadAttachmentResult;
-import skills.controller.result.model.UserRoleRes;
 import skills.dbupgrade.DBUpgradeSafe;
 import skills.icons.CustomIconFacade;
 import skills.services.*;
@@ -56,11 +56,7 @@ import skills.skillLoading.SkillsLoader;
 import skills.skillLoading.SkillsService;
 import skills.skillLoading.model.*;
 import skills.storage.model.Attachment;
-import skills.storage.model.auth.RoleName;
 import skills.utils.MetricsLogger;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import skills.utils.TablePageUtil;
 
 import java.io.InputStream;
@@ -528,6 +524,7 @@ class UserSkillsController {
     public String getVideoTranscript(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
         return videoCaptionsService.getVideoTranscript(projectId, skillId);
     }
+
     @RequestMapping(value = "/download/{uuid}", method = RequestMethod.GET)
     @Transactional(readOnly = true)
     public void download(@PathVariable("uuid") String uuid,
@@ -549,6 +546,13 @@ class UserSkillsController {
             response.setContentType(attachment.getContentType());
             if (!StringUtils.equalsIgnoreCase(attachment.getContentType(), "application/pdf")) {
                 response.setHeader("Content-Disposition", "attachment; filename=\"" + attachment.getFilename() + "\"");
+            }
+            if (StringUtils.equalsIgnoreCase(attachment.getContentType(), "video/mp4") || StringUtils.equalsIgnoreCase(attachment.getContentType(), "video/webm")) {
+                response.setContentType(attachment.getContentType());
+                response.setHeader("Content-Length", attachment.getSize().toString());
+                Long attachmentSize = attachment.getSize() - 1;
+                response.setHeader("Content-Range", "bytes 0-" + attachmentSize + "/" + attachment.getSize().toString());
+                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
             }
             IOUtils.copy(inputStream, outputStream);
         } catch (Exception e) {
