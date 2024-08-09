@@ -66,7 +66,19 @@ const transcriptInfo = {
     userPoints: 200,
     totalPoints: 1500,
     userSkillsCompleted: 3,
-    totalSkills: 5
+    totalSkills: 5,
+    skills: [
+      {
+        name: 'Skill A',
+        userPoints: 200,
+        totalPoints: 1500
+      },
+      {
+        name: 'Skill B',
+        userPoints: 200,
+        totalPoints: 1500
+      }
+    ]
   }, {
     name: 'Subject D',
     userLevel: 1,

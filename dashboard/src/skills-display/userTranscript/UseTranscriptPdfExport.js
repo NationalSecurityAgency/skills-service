@@ -27,13 +27,39 @@ export const useTranscriptPdfExport = () => {
   const timeUtils = useTimeUtils()
   const arrowColor1 = '#264653'
   const arrowColor2 = '#2a9d8f'
+  const arrowColor3 = '#e9c369'
   const arrowColor5 = '#e76f51'
+  const lightGray = '#e1e1e1'
 
   const leftPageMargin = 15
   const fontSize = 12
   const fontSizeTitle1 = 14
   const generatePdf = (info) => {
     const doc = new jsPDF()
+    addHeaderLabelIfNeeded(doc, info)
+    addHeader(doc, info)
+    addProgressStats(doc, info)
+    addSubjTable(doc, info)
+    addBadgeTable(doc, info)
+    addSubjectPagesOfSkills(doc,info)
+
+    doc.save(`${info.projectName} - ${info.userName} - Transcript.pdf`)
+  }
+
+  const addHeaderLabelIfNeeded = (doc, info) => {
+    var pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
+
+    if (info.headerAndFooterTextOnEveryPage) {
+      doc.setFontSize(10)
+      doc.setTextColor(arrowColor5)
+      doc.text(info.headerAndFooterTextOnEveryPage, pageWidth / 2, 10, {align: 'center'})
+      doc.text(info.headerAndFooterTextOnEveryPage, pageWidth / 2, 290, {align: 'center'})
+      doc.setFontSize(fontSize)
+      doc.setTextColor(arrowColor1)
+    }
+  }
+
+  const addHeader = (doc, info) => {
     doc.addImage(base64Images.logoArrows, 'PNG', leftPageMargin, 15, 8, 22)
     doc.setTextColor(arrowColor2)
     doc.setFontSize(20)
@@ -43,40 +69,19 @@ export const useTranscriptPdfExport = () => {
     doc.setTextColor(arrowColor1)
     doc.text(info.projectName, 27, 29)
     doc.setFontSize(16)
-    doc.text(info.userName, 27, 35)
+    doc.text(info.userName, 27, 36)
 
     doc.setFontSize(fontSize)
-    doc.text(timeUtils.formatDate(dayjs()), 163, 18)
+    doc.addImage(base64Images.logo, 'PNG', 167, 15, 30, 15)
 
-    addProgressStats(doc, info)
-    addSubjTable(doc, info)
-    addBadgeTable(doc, info)
+    doc.addImage(base64Images.calendarToday, 'PNG', 156, 31, 6, 6)
+    doc.text(timeUtils.formatDate(dayjs()), 163, 36)
 
-    const { labelsConf } = info
-    for (let i = 0; i < info.subjects.length; i++) {
-      const subject = info.subjects[i]
-      if (subject.skills) {
-        doc.addPage()
-        addTitle(doc, subject.name, 30)
+    doc.setDrawColor(lightGray)
+    doc.setLineWidth(0.2);
+    doc.line(27, 39, 197, 39)
+    // doc.line(19, 35, 19, 39)
 
-
-        const body = []
-        for (let i = 0; i < subject.skills.length; i++) {
-          const skill = subject.skills[i]
-          body.push([
-            subject.name,
-            buildNumOutOfOtherNum(skill.userPoints, skill.totalPoints),
-          ])
-        }
-
-        autoTable(doc, {
-          head: [[`${labelsConf.skill}`, 'Points']],
-          body,
-          startY: 35
-        })
-      }
-    }
-    doc.save(`${info.projectName} - ${info.userName} - Transcript.pdf`)
   }
 
   const buildNumOutOfOtherNum = (num, otherNum) => {
@@ -90,16 +95,21 @@ export const useTranscriptPdfExport = () => {
       doc.addImage(image, 'PNG', starX, levelY, 8, 8, `star-${i + 1}`)
       starX += 10
     }
-    addSingleProgressStat(doc, 'Level', leftPageMargin, levelY + 13, info.userLevel, info.totalLevels)
-    addSingleProgressStat(doc, 'Points', leftPageMargin, levelY + 19, info.userPoints, info.totalPoints)
 
-    const secondColumnXAdjustment = 145
-    addSingleProgressStat(doc, 'Skills', leftPageMargin + secondColumnXAdjustment, levelY + 13, info.userSkillsCompleted, info.totalSkills)
+    const row1Y = levelY + 14
+    const row2Y = levelY + 20
+    addSingleProgressStat(doc, 'Level', leftPageMargin, row1Y, info.userLevel, info.totalLevels, base64Images.trophy)
+    addSingleProgressStat(doc, 'Points', leftPageMargin, row2Y, info.userPoints, info.totalPoints, base64Images.arrowUp)
+
+    const secondColumnXAdjustment = 139
+    addSingleProgressStat(doc, 'Skills', leftPageMargin + secondColumnXAdjustment, row1Y, info.userSkillsCompleted, info.totalSkills, base64Images.hat)
     if (info.achievedBadges) {
-      addSingleProgressStat(doc, 'Badges', leftPageMargin + secondColumnXAdjustment, levelY + 19, info.achievedBadges.length, null)
+      addSingleProgressStat(doc, 'Badges', leftPageMargin + secondColumnXAdjustment, row2Y, info.achievedBadges.length, null, base64Images.badge)
     }
   }
-  const addSingleProgressStat = (doc, label, x, y, num, totalNum) => {
+  const addSingleProgressStat = (doc, label, x, y, num, totalNum, icon=base64Images.trophy) => {
+    doc.addImage(icon, 'PNG', x, y-4, 6, 6)
+    x = x + 8
     doc.text(`${label}:`, x, y)
     doc.setFontSize(fontSize + 1)
     doc.setTextColor(arrowColor5)
@@ -114,7 +124,6 @@ export const useTranscriptPdfExport = () => {
   const addTitle = (doc, title, y) => {
     doc.setFontSize(fontSizeTitle1)
     doc.setTextColor(arrowColor2)
-    console.log(`adding title ${title} at y=${y}`)
     doc.text(title, leftPageMargin, y)
     doc.setFontSize(fontSize)
     doc.setTextColor(arrowColor1)
@@ -126,6 +135,7 @@ export const useTranscriptPdfExport = () => {
     addTitle(doc, `${labelsConf.subject} Progress`.toUpperCase(), startY)
 
     const body = []
+    let subjectSkillPage = 2;
     for (let i = 0; i < info.subjects.length; i++) {
       const subject = info.subjects[i]
       body.push([
@@ -134,15 +144,28 @@ export const useTranscriptPdfExport = () => {
         buildNumOutOfOtherNum(subject.userPoints, subject.totalPoints),
         buildNumOutOfOtherNum(subject.userSkillsCompleted, subject.totalSkills)
       ])
+      if (subject.skills && subject.skills.length > 0) {
+        subject.skillsPage = subjectSkillPage
+        subjectSkillPage += 1
+      }
     }
 
     autoTable(doc, {
       head: [[`${labelsConf.subject}`, 'Level', 'Points', 'Skills']],
       body,
-      startY: startY + 3
+      startY: startY + 3,
+      willDrawCell: (data) => {
+        if (data.column.dataKey === 0 && data.cell.section === "body") {
+          const subject = info.subjects[data.row.index]
+          if (subject.skillsPage) {
+            const x = data.cell.x;
+            const y = data.cell.y + 5;
+            doc.textWithLink(`${data.cell.text}`, x, y, { pageNumber: subject.skillsPage });
+          }
+        }
+      }
     })
   }
-
   const addBadgeTable = (doc, info) => {
     if (info.achievedBadges) {
       const startY = 140
@@ -165,6 +188,33 @@ export const useTranscriptPdfExport = () => {
         // margin: { top: (startY+100) }
         startY: startY + 3
       })
+    }
+  }
+  const addSubjectPagesOfSkills = (doc, info) => {
+    const { labelsConf } = info
+    for (let i = 0; i < info.subjects.length; i++) {
+      const subject = info.subjects[i]
+      if (subject.skills) {
+        doc.addPage()
+        addHeaderLabelIfNeeded(doc, info)
+        addTitle(doc, subject.name, 30)
+
+
+        const body = []
+        for (let i = 0; i < subject.skills.length; i++) {
+          const skill = subject.skills[i]
+          body.push([
+            skill.name,
+            buildNumOutOfOtherNum(skill.userPoints, skill.totalPoints),
+          ])
+        }
+
+        autoTable(doc, {
+          head: [[`${labelsConf.skill}`, 'Points']],
+          body,
+          startY: 35
+        })
+      }
     }
   }
 
