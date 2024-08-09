@@ -15,9 +15,9 @@
  */
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { useBase64Images } from '@/skills-display/userTranscript/UseBase64Images.js'
+import { useBase64Images } from '@/skills-display/components/userTranscript/UseBase64Images.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
-import dayjs from '@/common-components/DayJsCustomizer'
+import dayjs from '@/common-components/DayJsCustomizer.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 export const useTranscriptPdfExport = () => {
@@ -194,7 +194,7 @@ export const useTranscriptPdfExport = () => {
     const { labelsConf } = info
     for (let i = 0; i < info.subjects.length; i++) {
       const subject = info.subjects[i]
-      if (subject.skills) {
+      if (subject.skills && subject.skills.length > 0) {
         doc.addPage()
         addHeaderLabelIfNeeded(doc, info)
         addTitle(doc, subject.name, 30)
