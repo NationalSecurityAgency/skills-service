@@ -26,6 +26,7 @@ import SubjectTiles from '@/skills-display/components/subjects/SubjectTiles.vue'
 import ProjectDescription from '@/skills-display/components/home/ProjectDescription.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import MyBadges from '@/skills-display/components/badges/MyBadges.vue'
+import TranscriptCard from '@/skills-display/components/TranscriptCard.vue'
 
 const skillsDisplayTheme = useSkillsDisplayThemeState()
 const userProgress = useUserProgressSummaryState()
@@ -72,6 +73,8 @@ const hasBadges = computed(() => {
       </div>
 
       <subject-tiles class="mt-3"/>
+
+      <transcript-card />
     </div>
 
 
