@@ -381,5 +381,22 @@ describe('Manage My Projects Tests', () => {
 
     });
 
+    it('view button navigates to page', function () {
+
+        cy.intercept('GET', `/admin/projects/proj1`)
+            .as('loadProj1');
+        cy.createProject(1);
+        cy.enableProdMode(1);
+
+        cy.visit('/progress-and-rankings/manage-my-projects');
+
+        cy.get('[data-cy="viewButton-proj1"]').should('exist');
+        cy.get('[data-cy="viewButton-proj1"]').click()
+
+        cy.wait('@loadProj1');
+        cy.get('[data-cy="title"]').should('have.text', 'PROJECT: This is project 1')
+
+
+    });
 });
 

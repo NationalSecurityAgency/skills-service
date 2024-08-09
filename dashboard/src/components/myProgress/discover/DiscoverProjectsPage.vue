@@ -272,14 +272,14 @@ const contactProject = (name, id) => {
                   :aria-label="`add project ${slotProps.data.projectId} to my projects`" />
                 <router-link :to="{ name:'Subjects', params: { projectId: slotProps.data.projectId }}" tabindex="-1" v-if="!slotProps.data.isMyProject">
                   <SkillsButton
-                      label="View"
+                      label="Preview"
                       icon="fas fa-eye"
                       outlined
                       class="fadein animation-duration-300 ml-2"
                       size="small"
                       :data-cy="`viewButton-${slotProps.data.projectId}`"
                       :loading="slotProps.data.loading"
-                      :aria-label="`view project ${slotProps.data.projectId}`" />
+                      :aria-label="`preview project ${slotProps.data.projectId}`" />
                 </router-link>
                 <div v-if="slotProps.data.isMyProject" class="flex align-items-center">
                   <Tag
