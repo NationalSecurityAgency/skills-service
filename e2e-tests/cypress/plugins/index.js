@@ -32,6 +32,8 @@ const fs = require('fs');
 const Path = require('path');
 const { makeBadge, ValidationError } = require('badge-maker');
 const moment = require('moment-timezone');
+const path = require('path')
+const { readPdf } = require('./read-pdf')
 
 const deleteFolderRecursive = function(path) {
     if (fs.existsSync(path)) {
@@ -163,6 +165,7 @@ module.exports = (on, config) => {
             }
             return files;
         },
+        readPdf
     });
 };
 

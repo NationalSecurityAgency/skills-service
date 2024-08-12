@@ -50,7 +50,7 @@ export const useLoadTranscriptData = () => {
           transcriptInfo.totalSkills = transcriptInfo.subjects.map((subj) => subj.totalSkills).reduce((a, b) => a + b, 0)
 
           const badgeRes = endpointsRes.find((r) => r && (r instanceof Array) && r.length > 0 && r[0].badgeId && r[0].badgeId.length > 0)
-          transcriptInfo.achievedBadges = badgeRes.filter((b) => b.badgeAchieved).map((badgeRes) => {
+          transcriptInfo.achievedBadges = badgeRes?.filter((b) => b.badgeAchieved)?.map((badgeRes) => {
             return {
               name: badgeRes.badge,
               dateAchieved: badgeRes.dateAchieved

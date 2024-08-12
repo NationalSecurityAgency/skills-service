@@ -98,6 +98,7 @@
     "moment-timezone": "0.5.45",
     "number-format.js": "2.0.9",
     "object-scan": "14.0.0",
+    "pdf-parse": "1.1.1",
     "stop-only": "3.3.1",
     "wait-on": "5.2.1"
   },

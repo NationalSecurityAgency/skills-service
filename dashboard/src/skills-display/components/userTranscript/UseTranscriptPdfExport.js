@@ -30,6 +30,7 @@ export const useTranscriptPdfExport = () => {
   const arrowColor3 = '#e9c369'
   const arrowColor5 = '#e76f51'
   const lightGray = '#e1e1e1'
+  const darkGray = '#504e4e'
   const successColor = '#097151'
 
   const leftPageMargin = 15
@@ -37,7 +38,8 @@ export const useTranscriptPdfExport = () => {
   const fontSizeTitle1 = 14
   const generatePdf = (info) => {
     const doc = new jsPDF()
-    addHeaderLabelIfNeeded(doc, info)
+    doc.page=1
+    addHeaderAndFooter(doc, info)
     addHeader(doc, info)
     addProgressStats(doc, info, info.labelsConf)
     addSubjTable(doc, info)
@@ -47,9 +49,8 @@ export const useTranscriptPdfExport = () => {
     doc.save(`${info.projectName} - ${info.userName} - Transcript.pdf`)
   }
 
-  const addHeaderLabelIfNeeded = (doc, info) => {
+  const addHeaderAndFooter = (doc, info) => {
     var pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
-
     if (info.headerAndFooterTextOnEveryPage) {
       doc.setFontSize(10)
       doc.setTextColor(arrowColor5)
@@ -58,6 +59,13 @@ export const useTranscriptPdfExport = () => {
       doc.setFontSize(fontSize)
       doc.setTextColor(arrowColor1)
     }
+
+    doc.setFontSize(10)
+    doc.setTextColor(darkGray)
+    doc.text(`Page ${doc.page}`, 180, 290)
+    doc.setFontSize(fontSize)
+    doc.setTextColor(arrowColor1)
+    doc.page++;
   }
 
   const addHeader = (doc, info) => {
@@ -95,7 +103,8 @@ export const useTranscriptPdfExport = () => {
     let starX = leftPageMargin
     for (let i = 1; i <= info.totalLevels; i++) {
       const image = i <= info.userLevel ? base64Images.filledStar : base64Images.star
-      doc.addImage(image, 'PNG', starX, levelY, 8, 8, `star-${i + 1}`)
+      const starName = i <= info.userLevel ? 'star-completed' : 'star-not-completed'
+      doc.addImage(image, 'PNG', starX, levelY, 8, 8, starName)
       starX += 10
     }
 
@@ -171,7 +180,12 @@ export const useTranscriptPdfExport = () => {
   }
   const addBadgeTable = (doc, info) => {
     if (info.achievedBadges) {
-      const startY = 140
+      let startY = 105 + ((info.subjects.length-1) * 8)
+      if (info.subjects.length > 15) {
+        doc.addPage()
+        addHeaderAndFooter(doc, info)
+        startY = 30
+      }
       const { labelsConf } = info
 
       addTitle(doc, `Earned ${labelsConf.badge}s`.toUpperCase(), startY)
@@ -198,7 +212,7 @@ export const useTranscriptPdfExport = () => {
       const subject = info.subjects[i]
       if (subject.skills && subject.skills.length > 0) {
         doc.addPage()
-        addHeaderLabelIfNeeded(doc, info)
+        addHeaderAndFooter(doc, info)
         addTitle(doc, `${labelsConf.subject}: ${subject.name}`, 30)
         addProgressStats(doc, subject, labelsConf,33)
 

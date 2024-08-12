@@ -41,7 +41,8 @@ const exportTranscriptToPdf = () => {
             icon="fas fa-download"
             label="Download Transcript"
             :loading="loadTranscriptData.isLoading.value"
-            @click="exportTranscriptToPdf" />
+            @click="exportTranscriptToPdf"
+            data-cy="downloadTranscriptBtn" />
         </div>
       </div>
     </template>
