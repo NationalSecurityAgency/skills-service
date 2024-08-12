@@ -30,6 +30,7 @@ export const useTranscriptPdfExport = () => {
   const arrowColor3 = '#e9c369'
   const arrowColor5 = '#e76f51'
   const lightGray = '#e1e1e1'
+  const successColor = '#097151'
 
   const leftPageMargin = 15
   const fontSize = 12
@@ -38,7 +39,7 @@ export const useTranscriptPdfExport = () => {
     const doc = new jsPDF()
     addHeaderLabelIfNeeded(doc, info)
     addHeader(doc, info)
-    addProgressStats(doc, info)
+    addProgressStats(doc, info, info.labelsConf)
     addSubjTable(doc, info)
     addBadgeTable(doc, info)
     addSubjectPagesOfSkills(doc,info)
@@ -80,15 +81,17 @@ export const useTranscriptPdfExport = () => {
     doc.setDrawColor(lightGray)
     doc.setLineWidth(0.2);
     doc.line(27, 39, 197, 39)
-    // doc.line(19, 35, 19, 39)
-
   }
 
   const buildNumOutOfOtherNum = (num, otherNum) => {
-    return `${num} / ${otherNum}`
+    let res = `${num} / ${otherNum}`
+    if (num === otherNum && otherNum > 0) {
+      res += ` (Achieved)`
+    }
+    return res
   }
-  const addProgressStats = (doc, info) => {
-    const levelY = 43
+  const addProgressStats = (doc, info, labelsConf, levelY=43) => {
+
     let starX = leftPageMargin
     for (let i = 1; i <= info.totalLevels; i++) {
       const image = i <= info.userLevel ? base64Images.filledStar : base64Images.star
@@ -98,13 +101,13 @@ export const useTranscriptPdfExport = () => {
 
     const row1Y = levelY + 14
     const row2Y = levelY + 20
-    addSingleProgressStat(doc, 'Level', leftPageMargin, row1Y, info.userLevel, info.totalLevels, base64Images.trophy)
+    addSingleProgressStat(doc, labelsConf.level, leftPageMargin, row1Y, info.userLevel, info.totalLevels, base64Images.trophy)
     addSingleProgressStat(doc, 'Points', leftPageMargin, row2Y, info.userPoints, info.totalPoints, base64Images.arrowUp)
 
     const secondColumnXAdjustment = 139
-    addSingleProgressStat(doc, 'Skills', leftPageMargin + secondColumnXAdjustment, row1Y, info.userSkillsCompleted, info.totalSkills, base64Images.hat)
+    addSingleProgressStat(doc, `${labelsConf.skill}s`, leftPageMargin + secondColumnXAdjustment, row1Y, info.userSkillsCompleted, info.totalSkills, base64Images.hat)
     if (info.achievedBadges) {
-      addSingleProgressStat(doc, 'Badges', leftPageMargin + secondColumnXAdjustment, row2Y, info.achievedBadges.length, null, base64Images.badge)
+      addSingleProgressStat(doc, `${labelsConf.badge}s`, leftPageMargin + secondColumnXAdjustment, row2Y, info.achievedBadges.length, null, base64Images.badge)
     }
   }
   const addSingleProgressStat = (doc, label, x, y, num, totalNum, icon=base64Images.trophy) => {
@@ -151,7 +154,7 @@ export const useTranscriptPdfExport = () => {
     }
 
     autoTable(doc, {
-      head: [[`${labelsConf.subject}`, 'Level', 'Points', 'Skills']],
+      head: [[`${labelsConf.subject}`, `${labelsConf.level}`, 'Points', `${labelsConf.skill}s`]],
       body,
       startY: startY + 3,
       willDrawCell: (data) => {
@@ -178,14 +181,13 @@ export const useTranscriptPdfExport = () => {
         const badge = info.achievedBadges[i]
         body.push([
           badge.name,
-          badge.dateAchieved
+          timeUtils.formatDate(dayjs(badge.dateAchieved))
         ])
       }
 
       autoTable(doc, {
-        head: [[`${labelsConf.badge}`, 'Date Achieved']],
+        head: [[`${labelsConf.badge}`, 'Achieved On']],
         body,
-        // margin: { top: (startY+100) }
         startY: startY + 3
       })
     }
@@ -197,22 +199,23 @@ export const useTranscriptPdfExport = () => {
       if (subject.skills && subject.skills.length > 0) {
         doc.addPage()
         addHeaderLabelIfNeeded(doc, info)
-        addTitle(doc, subject.name, 30)
-
+        addTitle(doc, `${labelsConf.subject}: ${subject.name}`, 30)
+        addProgressStats(doc, subject, labelsConf,33)
 
         const body = []
         for (let i = 0; i < subject.skills.length; i++) {
           const skill = subject.skills[i]
+          const styles = skill.totalPoints === skill.userPoints ? { textColor: successColor } : {}
           body.push([
             skill.name,
-            buildNumOutOfOtherNum(skill.userPoints, skill.totalPoints),
+            { content: buildNumOutOfOtherNum(skill.userPoints, skill.totalPoints), styles },
           ])
         }
 
         autoTable(doc, {
           head: [[`${labelsConf.skill}`, 'Points']],
           body,
-          startY: 35
+          startY: 60
         })
       }
     }

@@ -1,119 +1,32 @@
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import { ref } from 'vue'
+import { useAuthState } from '@/stores/UseAuthState.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 export const useLoadTranscriptData = () => {
   const skillsDisplayService = useSkillsDisplayService()
+  const userAuthState = useAuthState()
+  const skillsDisplayAttributesState = useSkillsDisplayAttributesState()
   const isLoading = ref(false)
   const loadTranscriptData = () => {
     isLoading.value = true
-    const transcriptInfo = {
-      labelsConf: {
-        subject: 'Subject',
-        skill: 'Skill',
-        level: 'Level',
-        badge: 'Badge'
-      },
-      userName: '<Placeholder - John Doe>',
-      userLevel: 1,
-      totalLevels: 5,
-      userPoints: 200,
-      totalPoints: 1500,
-      userSkillsCompleted: 3,
-      totalSkills: 26,
-      subjects: [{
-        name: 'Subject A',
-        userLevel: 1,
-        totalLevels: 5,
-        userPoints: 200,
-        totalPoints: 1500,
-        userSkillsCompleted: 3,
-        totalSkills: 5,
-        skills: [
-          {
-            name: 'Skill A',
-            userPoints: 200,
-            totalPoints: 1500
-          },
-          {
-            name: 'Skill B',
-            userPoints: 200,
-            totalPoints: 1500
-          }
-        ]
-      }, {
-        name: 'Subject B',
-        userLevel: 1,
-        totalLevels: 5,
-        userPoints: 200,
-        totalPoints: 1500,
-        userSkillsCompleted: 3,
-        totalSkills: 5
-      }, {
-        name: 'Subject C',
-        userLevel: 1,
-        totalLevels: 5,
-        userPoints: 200,
-        totalPoints: 1500,
-        userSkillsCompleted: 3,
-        totalSkills: 5,
-        skills: [
-          {
-            name: 'Skill A',
-            userPoints: 200,
-            totalPoints: 1500
-          },
-          {
-            name: 'Skill B',
-            userPoints: 200,
-            totalPoints: 1500
-          }
-        ]
-      }, {
-        name: 'Subject D',
-        userLevel: 1,
-        totalLevels: 5,
-        userPoints: 200,
-        totalPoints: 1500,
-        userSkillsCompleted: 3,
-        totalSkills: 5
-      }, {
-        name: 'Subject E',
-        userLevel: 1,
-        totalLevels: 5,
-        userPoints: 200,
-        totalPoints: 1500,
-        userSkillsCompleted: 3,
-        totalSkills: 5
-      }, {
-        name: 'Subject F',
-        userLevel: 1,
-        totalLevels: 5,
-        userPoints: 200,
-        totalPoints: 1500,
-        userSkillsCompleted: 3,
-        totalSkills: 5
-      }],
-      achievedBadges: [
-        {
-          name: 'Badge 1',
-          dateAchieved: '2020-01-01'
-        }
-      ]
-    }
-
 
     return skillsDisplayService.loadUserProjectSummary()
       .then((projRes) => {
-
-        const getSubjectPromises = transcriptInfo.subjects = projRes.subjects.map((subjRes) => skillsDisplayService.loadSubjectSummary(subjRes.subjectId, true))
-        return Promise.all(getSubjectPromises).then((subjRes) => {
-          console.log(subjRes)
-
+        const getSubjectPromises = projRes.subjects.map((subjRes) => skillsDisplayService.loadSubjectSummary(subjRes.subjectId, true))
+        getSubjectPromises.push(skillsDisplayService.getBadgeSummaries())
+        return Promise.all(getSubjectPromises).then((endpointsRes) => {
+          const transcriptInfo = {}
+          transcriptInfo.labelsConf = buildLabelConf()
+          transcriptInfo.userName = `${userAuthState.userInfo.nickname} (${userAuthState.userInfo.userIdForDisplay})`
           transcriptInfo.projectName = projRes.projectName
           transcriptInfo.userLevel = projRes.skillsLevel
           transcriptInfo.totalLevels = projRes.totalLevels
           transcriptInfo.userPoints = projRes.points
           transcriptInfo.totalPoints = projRes.totalPoints
+
+          const subjRes = endpointsRes.filter((r) => r && r.subjectId && r.subjectId.length > 0)
+
           transcriptInfo.subjects = subjRes.map((subjRes) => {
             return {
               name: subjRes.subject,
@@ -121,8 +34,8 @@ export const useLoadTranscriptData = () => {
               totalLevels: subjRes.totalLevels,
               userPoints: subjRes.points,
               totalPoints: subjRes.totalPoints,
-              userSkillsCompleted: -1,
-              totalSkills: -1,
+              userSkillsCompleted: subjRes.skills ? subjRes.skills.filter((s) => s.points === s.totalPoints).length : 0,
+              totalSkills: subjRes.skills ? subjRes.skills.length : 0,
               skills: subjRes.skills?.map((skillRes) => {
                 return {
                   name: skillRes.skill,
@@ -132,6 +45,18 @@ export const useLoadTranscriptData = () => {
               })
             }
           })
+
+          transcriptInfo.userSkillsCompleted = transcriptInfo.subjects.map((subj) => subj.userSkillsCompleted).reduce((a, b) => a + b, 0)
+          transcriptInfo.totalSkills = transcriptInfo.subjects.map((subj) => subj.totalSkills).reduce((a, b) => a + b, 0)
+
+          const badgeRes = endpointsRes.find((r) => r && (r instanceof Array) && r.length > 0 && r[0].badgeId && r[0].badgeId.length > 0)
+          transcriptInfo.achievedBadges = badgeRes.filter((b) => b.badgeAchieved).map((badgeRes) => {
+            return {
+              name: badgeRes.badge,
+              dateAchieved: badgeRes.dateAchieved
+            }
+          })
+
           return transcriptInfo
         })
 
@@ -141,6 +66,15 @@ export const useLoadTranscriptData = () => {
       .finally(() => {
         isLoading.value = false
       })
+  }
+
+  const buildLabelConf = () => {
+    return {
+      subject: skillsDisplayAttributesState.subjectDisplayName,
+      skill: skillsDisplayAttributesState.skillDisplayName,
+      level: skillsDisplayAttributesState.levelDisplayName,
+      badge: 'Badge'
+    }
   }
 
   return {
