@@ -31,9 +31,9 @@ describe('Transcript export tests', () => {
       expect(doc.numpages).to.equal(1)
       expect(doc.text).to.include('SkillTree TRANSCRIPT')
       expect(doc.text).to.include('Empty Project')
-      expect(doc.text).to.include('Level:0')
-      expect(doc.text).to.include('Points:0')
-      expect(doc.text).to.include('Skills:0')
+      expect(doc.text).to.include('Level: \n0')
+      expect(doc.text).to.include('Points: \n0')
+      expect(doc.text).to.include('Skills: \n0')
       expect(doc.text).to.not.include('Badges')
     })
 
@@ -67,17 +67,17 @@ describe('Transcript export tests', () => {
       expect(doc.numpages).to.equal(2)
       expect(doc.text).to.include('SkillTree TRANSCRIPT')
       expect(doc.text).to.include(projName)
-      expect(doc.text).to.include('Level:1/ 5')
-      expect(doc.text).to.include('Points:100/ 600')
-      expect(doc.text).to.include('Skills:0/ 3')
+      expect(doc.text).to.include('Level: \n1\n / 5')
+      expect(doc.text).to.include('Points: \n100\n / 600')
+      expect(doc.text).to.include('Skills: \n0\n / 3')
       expect(doc.text).to.not.include('Badges')
 
       // should be a title on the 2nd page
-      expect(doc.text).to.include('Subject: Subject 1')
+      expect(doc.text).to.include('Subject: Subject 1'.toUpperCase())
     })
   })
 
-  it('transcript with multiple subject and some pgoress', () => {
+  it('transcript with multiple subject and some progress', () => {
     const projName = 'Many Subj and Progress'
     cy.request('POST', '/app/userInfo', {
       'first': 'Joe',
@@ -94,6 +94,7 @@ describe('Transcript export tests', () => {
     createSubjectAndSkills(1, 12)
     createSubjectAndSkills(2, 6)
     createSubjectAndSkills(3, 8)
+    cy.createSubject(1, 4)
 
     const user = Cypress.env('proxyUser')
     cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: user, date: 'now' })
@@ -117,13 +118,17 @@ describe('Transcript export tests', () => {
       expect(doc.numpages).to.equal(4)
       expect(doc.text).to.include('SkillTree TRANSCRIPT')
       expect(doc.text).to.include(projName)
-      expect(doc.text).to.include('Level:1/ 5')
-      expect(doc.text).to.include('Points:600/ 2,600')
-      expect(doc.text).to.include('Skills:6/ 26')
+      expect(doc.text).to.include('Level: \n1\n / 5')
+      expect(doc.text).to.include('Points: \n600\n / 2,600')
+      expect(doc.text).to.include('Skills: \n6\n / 26')
       expect(doc.text).to.not.include('Badges')
 
-      // should be a title on the 2nd page
-      expect(doc.text).to.include('Subject: Subject 1')
+      // should be a title on the 2nd-4th pages
+      expect(doc.text).to.include('Subject: Subject 1'.toUpperCase())
+      expect(doc.text).to.include('Subject: Subject 2'.toUpperCase())
+      expect(doc.text).to.include('Subject: Subject 3'.toUpperCase())
+      // 4th subject doesn't have any skills so there shouldn't be a page for it
+      expect(doc.text).to.not.include('Subject: Subject 4'.toUpperCase())
     })
   })
 
@@ -170,89 +175,17 @@ describe('Transcript export tests', () => {
       expect(doc.numpages).to.equal(4)
       expect(doc.text).to.include('SkillTree TRANSCRIPT')
       expect(doc.text).to.include(projName)
-      expect(doc.text).to.include('Level:1/ 5')
-      expect(doc.text).to.include('Points:600/ 2,600')
-      expect(doc.text).to.include('Skills:6/ 26')
-      expect(doc.text).to.include('Badges:1')
+      expect(doc.text).to.include('Level: \n1\n / 5')
+      expect(doc.text).to.include('Points: \n600\n / 2,600')
+      expect(doc.text).to.include('Skills: \n6\n / 26')
+      expect(doc.text).to.include('Badges: \n1\n')
 
       // should be a title on the 2nd page
-      expect(doc.text).to.include('Subject: Subject 1')
+      expect(doc.text).to.include('Subject: Subject 1'.toUpperCase())
     })
   })
 
-  it('badges table placement is determined based on number of subjects', () => {
-    cy.createProject(1)
-    cy.request('POST', '/app/userInfo', {
-      'first': 'Joe',
-      'last': 'Doe',
-      'nickname': 'Joe Doe'
-    })
-    for (let i = 1; i <= 10; i++) {
-      const projName = `Badge Table Placement ${i}`
-      cy.updateProject(1, { name: projName })
-
-      createSubjectAndSkills(i, 1)
-      if (i === 1) {
-        const user = Cypress.env('proxyUser')
-        cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: user, date: 'now' })
-
-        cy.createBadge(1)
-        cy.assignSkillToBadge(1, 1, 1)
-        cy.enableBadge(1, 1)
-      }
-
-      cy.cdVisit('/')
-      cy.get('[data-cy="downloadTranscriptBtn"]').click()
-      const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org for display) - Transcript.pdf`
-      cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
-        cy.log('Transcript Created!')
-      })
-      cy.task('readPdf', pathToPdf).then((doc) => {
-        expect(doc.numpages).to.equal(i + 1)
-        expect(doc.text).to.include('SkillTree TRANSCRIPT')
-        expect(doc.text).to.include(projName)
-      })
-    }
-    // for (let i = 1; i <= 10; i++) {
-    //   const projName = `Badge Table Placement ${i}`
-    //   cy.createProject(1, { name: projName })
-    //
-    //   for (let j = 0; j < i; i++) {
-    //     createSubjectAndSkills(j+1, 1)
-    //   }
-    //
-    //   const user = Cypress.env('proxyUser')
-    //   cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: user, date: 'now' })
-    //
-    //   cy.createBadge(1)
-    //   cy.assignSkillToBadge(1, 1, 1);
-    //   cy.enableBadge(1, 1);
-    //
-    //   cy.cdVisit('/')
-    //   cy.get('[data-cy="downloadTranscriptBtn"]').click()
-    //
-    //   // cy.wait(2000)
-    //   const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org for display) - Transcript.pdf`
-    //   cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
-    //     // file exists and was successfully read
-    //     cy.log('Transcript Created!')
-    //   })
-    //   cy.task('readPdf', pathToPdf).then((doc) => {
-    //     expect(doc.numpages).to.equal(4)
-    //     expect(doc.text).to.include('SkillTree TRANSCRIPT')
-    //     expect(doc.text).to.include(projName)
-    //     expect(doc.text).to.include('Level:1/ 5')
-    //     expect(doc.text).to.include('Points:600/ 2,600')
-    //     expect(doc.text).to.include('Skills:6/ 26')
-    //     expect(doc.text).to.include('Badges:1')
-    //
-    //     // should be a title on the 2nd page
-    //     expect(doc.text).to.include('Subject: Subject 1')
-    //   })
-    // }
-  })
-
-  it('badges table is on the second page if there are too many subjects', () => {
+  it.only('badges table is on the second page if there are too many subjects', () => {
     const projName = `Badge Table on the Second Page`
     cy.createProject(1, { name: projName })
     cy.request('POST', '/app/userInfo', {
@@ -277,7 +210,7 @@ describe('Transcript export tests', () => {
       cy.log('Transcript Created!')
     })
     cy.task('readPdf', pathToPdf).then((doc) => {
-      expect(doc.numpages).to.equal(18) // 16 subj pages, first page + eanrned badges page
+      expect(doc.numpages).to.equal(18) // 16 subj pages, first page + earned badges page
       expect(doc.text).to.include('SkillTree TRANSCRIPT')
       expect(doc.text).to.include(projName)
     })

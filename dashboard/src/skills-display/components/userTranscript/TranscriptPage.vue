@@ -14,39 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { useTranscriptPdfExport1 } from '@/skills-display/components/userTranscript/UseTranscriptPdfExport1.js'
+import { onMounted, ref } from 'vue'
 import { useLoadTranscriptData } from '@/skills-display/components/userTranscript/UseLoadTranscriptData.js'
+import { useTranscriptPdfExport1 } from '@/skills-display/components/userTranscript/UseTranscriptPdfExport1.js'
 
 const loadTranscriptData = useLoadTranscriptData()
-const transcriptPdfExport = useTranscriptPdfExport1()
-
-const exportTranscriptToPdf = () => {
+const transcriptPdfExport = useTranscriptPdfExport1(0)
+const pdfViewer = ref(null)
+onMounted(() => {
   loadTranscriptData.loadTranscriptData().then((transcriptInfo) => {
-    transcriptPdfExport.generatePdf(transcriptInfo)
+    transcriptPdfExport.generatePdf(transcriptInfo, pdfViewer.value)
   })
-}
+})
+
+
 </script>
 
 <template>
-  <Card :pt="{ content: { class: 'p-0' } }">
-    <template #content>
-      <div class="flex align-items-center">
-        <div class="flex-1">
-          You have Completed
-          <Tag>10</Tag>
-          out of 70 skills!
-        </div>
-        <div>
-          <SkillsButton
-            icon="fas fa-download"
-            label="Download Transcript"
-            :loading="loadTranscriptData.isLoading.value"
-            @click="exportTranscriptToPdf"
-            data-cy="downloadTranscriptBtn" />
-        </div>
-      </div>
-    </template>
-  </Card>
+<div>
+  <H1>Transcript</H1>
+  <skills-spinner :is-loading="loadTranscriptData.isLoading.value" class="mt-8"/>
+  <iframe ref="pdfViewer" width="600" height="775"></iframe>
+</div>
 </template>
 
 <style scoped>
