@@ -20,11 +20,14 @@ import org.joda.time.format.DateTimeFormatter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.quizLoading.QuizSettings
 import skills.services.attributes.ExpirationAttrs
 import skills.storage.model.ExpiredUserAchievement
+import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
@@ -2050,4 +2053,112 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         secondSubjectInfo.skills[0].lastExpirationDate != laterSubjectInfo.skills[0].lastExpirationDate != null
         subjectInfo.skills[0].lastExpirationDate != secondSubjectInfo.skills[0].lastExpirationDate != null
     }
+
+    def "expiring skill events for a skill with a completed quiz removes the quiz run"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1)
+        def skills = SkillsFactory.createSkills(1, 1, 1, 200, 1)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz.quizId
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        List<String> users = getRandomUsers(1, true)
+        def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0]).body
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, users[0]).body
+
+        def initialQuizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+
+        when:
+        expireSkill(proj.projectId, skills[0], 0)
+        def quizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+
+        then:
+        initialQuizRuns.totalCount == users.size()
+        quizRuns.totalCount == 0
+    }
+
+    def "can complete quiz again after skill has expired"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1)
+        def skills = SkillsFactory.createSkills(1, 1, 1, 200, 1)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz.quizId
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        List<String> users = getRandomUsers(1, true)
+        def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0]).body
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, users[0]).body
+
+        def initialQuizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+        expireSkill(proj.projectId, skills[0], 0)
+        def quizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+
+        when:
+        def quizAttempt2 =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0]).body
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt2.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt2.id, users[0]).body
+
+        then:
+        def newQuizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+        initialQuizRuns.totalCount == 1
+        quizRuns.totalCount == 0
+        newQuizRuns.totalCount == 1
+    }
+
+//    def "expiring skill resets failed attempts"() {
+//        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+//        skillsService.createQuizDef(quiz)
+//        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
+//        skillsService.createQuizQuestionDefs(questions)
+//        skillsService.saveQuizSettings(quiz.quizId, [[setting: QuizSettings.MaxNumAttempts.setting, value: '1']])
+//
+//        def proj = SkillsFactory.createProject(1)
+//        def subj = SkillsFactory.createSubject(1)
+//        def skills = SkillsFactory.createSkills(1, 1, 1, 200, 1)
+//        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+//        skills[0].quizId = quiz.quizId
+//
+//        skillsService.createProject(proj)
+//        skillsService.createSubject(subj)
+//        skillsService.createSkills(skills)
+//
+//        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+//
+//        List<String> users = getRandomUsers(1, true)
+//        def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0]).body
+//        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id, users[0])
+//        skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, users[0]).body
+//
+//        def initialQuizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+//
+//        when:
+//        expireSkill(proj.projectId, skills[0], 0)
+//        def quizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+//
+//        then:
+//        initialQuizRuns.totalCount == users.size()
+//        quizRuns.totalCount == 0
+//    }
 }
