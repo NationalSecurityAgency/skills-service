@@ -65,7 +65,7 @@ describe('Transcript export tests', () => {
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
 
     // cy.wait(2000)
-    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org for display) - Transcript.pdf`
+    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org) - Transcript.pdf`
     cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
       // file exists and was successfully read
       cy.log('Transcript Created!')
@@ -116,7 +116,7 @@ describe('Transcript export tests', () => {
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
 
     // cy.wait(2000)
-    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org for display) - Transcript.pdf`
+    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org) - Transcript.pdf`
     cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
       // file exists and was successfully read
       cy.log('Transcript Created!')
@@ -173,7 +173,7 @@ describe('Transcript export tests', () => {
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
 
     // cy.wait(2000)
-    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org for display) - Transcript.pdf`
+    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org) - Transcript.pdf`
     cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
       // file exists and was successfully read
       cy.log('Transcript Created!')
@@ -212,7 +212,7 @@ describe('Transcript export tests', () => {
 
     cy.cdVisit('/')
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
-    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org for display) - Transcript.pdf`
+    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org) - Transcript.pdf`
     cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
       cy.log('Transcript Created!')
     })
