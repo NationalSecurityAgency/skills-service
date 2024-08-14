@@ -297,12 +297,16 @@ class SkillsLoader {
         int levelTotalPoints
         LevelInfo levelInfo
         int todaysPoints = 0
+        int totalSkills
+        int skillsAchieved
 
         if (subjects) {
             points = (int) subjects.collect({ it.points }).sum()
             totalPoints = (int) subjects.collect({ it.totalPoints }).sum()
             levelInfo = getRealLevelInfo(projDef, userId, points, totalPoints)
             todaysPoints = (Integer) subjects?.collect({ it.todaysPoints })?.sum()
+            skillsAchieved = (Integer) subjects?.collect({ it.skillsAchieved })?.sum()
+            totalSkills = (Integer) subjects?.collect({ it.totalSkills })?.sum()
 
             skillLevel = levelInfo?.level
             levelPoints = levelInfo?.currentPoints
@@ -338,6 +342,8 @@ class SkillsLoader {
                 todaysPoints: todaysPoints,
                 levelPoints: levelPoints,
                 levelTotalPoints: levelTotalPoints,
+                totalSkills: totalSkills,
+                skillsAchieved: skillsAchieved,
                 subjects: subjects,
                 badges: new OverallSkillSummary.BadgeStats(numTotalBadges: numTotalBadges, numBadgesCompleted: numBadgesAchieved, enabled: numTotalBadges > 0),
                 projectDescription: projectDescription
@@ -876,6 +882,8 @@ class SkillsLoader {
         int totalPoints
         Integer points
         Integer todaysPoints
+        Integer skillsAchieved
+        Integer totalSkills
         if (loadSkills) {
             List<SkillRelDef.RelationshipType> relTypes = [
                     SkillRelDef.RelationshipType.RuleSetDefinition, // skills under subject
@@ -896,9 +904,13 @@ class SkillsLoader {
         if (skillsRes && version >= 500) {
             points = skillsRes ? skillsRes.collect({ it.points }).sum() as Integer : 0
             todaysPoints = skillsRes ? skillsRes.collect({ it.todaysPoints }).sum() as Integer : 0
+            skillsAchieved = skillsRes ? skillsRes.collect({ it.points == it.totalPoints ? 1 : 0 }).sum() as Integer : 0
+            totalSkills = skillsRes ? skillsRes.size() : 0
         } else {
             points = calculatePointsForSubject(projDef.projectId, userId, subjectDefinition)
             todaysPoints= calculateTodayPoints(userId, subjectDefinition)
+            skillsAchieved = achievedLevelRepository.countAchievedChildren(userId, projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
+            totalSkills = skillDefRepo.countChildren(projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
         }
 
         // convert null result to 0
@@ -940,6 +952,9 @@ class SkillsLoader {
 
                 totalPoints: totalPoints,
                 todaysPoints: todaysPoints,
+
+                skillsAchieved: skillsAchieved,
+                totalSkills: totalSkills,
 
                 skills: skillsRes,
 

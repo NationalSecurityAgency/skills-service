@@ -33,6 +33,9 @@ class OverallSkillSummary {
 
     int todaysPoints
 
+    int skillsAchieved
+    int totalSkills
+
     // for My Skills page
     String projectId
     int totalUsers

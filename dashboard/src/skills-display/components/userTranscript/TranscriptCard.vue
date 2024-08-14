@@ -14,11 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { computed } from 'vue'
 import { useTranscriptPdfExport1 } from '@/skills-display/components/userTranscript/UseTranscriptPdfExport1.js'
 import { useLoadTranscriptData } from '@/skills-display/components/userTranscript/UseLoadTranscriptData.js'
+import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
+import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
 
 const loadTranscriptData = useLoadTranscriptData()
 const transcriptPdfExport = useTranscriptPdfExport1()
+const userProgressSummaryState = useUserProgressSummaryState()
+const plural = useLanguagePluralSupport()
+
+const totalSkills = computed(() => userProgressSummaryState.userProgressSummary?.totalSkills || 0)
+const skillsAchieved = computed(() => userProgressSummaryState.userProgressSummary?.skillsAchieved || 0)
 
 const exportTranscriptToPdf = () => {
   loadTranscriptData.loadTranscriptData().then((transcriptInfo) => {
@@ -28,13 +36,13 @@ const exportTranscriptToPdf = () => {
 </script>
 
 <template>
-  <Card :pt="{ content: { class: 'p-0' } }">
+  <Card :pt="{ content: { class: 'p-0' } }" data-cy="downloadTranscriptCard">
     <template #content>
       <div class="flex align-items-center">
         <div class="flex-1">
           You have Completed
-          <Tag>10</Tag>
-          out of 70 skills!
+          <Tag>{{ skillsAchieved }}</Tag>
+          out of {{ totalSkills }} skill{{ plural.plural(totalSkills) }}!
         </div>
         <div>
           <SkillsButton

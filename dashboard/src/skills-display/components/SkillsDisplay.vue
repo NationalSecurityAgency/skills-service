@@ -74,7 +74,9 @@ const hasBadges = computed(() => {
 
       <subject-tiles class="mt-3"/>
 
-      <transcript-card />
+      <transcript-card
+        v-if="userProgress.userProgressSummary && userProgress.userProgressSummary.totalSkills > 0"
+        class="mt-2" />
     </div>
 
 

@@ -31,6 +31,9 @@ class SkillSubjectSummary {
     int levelPoints
     int levelTotalPoints
 
+    int skillsAchieved
+    int totalSkills
+
     List<SkillSummaryParent> skills
 
     String iconClass

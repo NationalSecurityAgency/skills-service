@@ -11,6 +11,38 @@ describe('Transcript export tests', () => {
     }
   }
 
+  it('transcript cards is not shown when there are no skills', () => {
+    cy.createProject(1)
+
+    cy.cdVisit('/')
+    cy.get('[data-cy="noContent"]').contains('Subjects have not been added yet')
+    cy.get('[data-cy="downloadTranscriptCard"]').should('not.exist')
+
+    cy.createSubject(1, 1)
+    cy.createSubject(1, 2)
+    cy.cdVisit('/')
+    cy.get('[data-cy="subjectTileBtn"]').should('have.length', 2)
+    cy.get('[data-cy="downloadTranscriptCard"]').should('not.exist')
+  })
+
+  it('transcript cards shows skills counts', () => {
+    cy.createProject(1)
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1, 1, { numPerformToCompletion: 1 })
+    cy.cdVisit('/')
+    cy.get('[data-cy="downloadTranscriptCard"]').contains('You have Completed 0 out of 1 skill!')
+
+    cy.createSkill(1, 1, 2, { numPerformToCompletion: 1 })
+    cy.createSkill(1, 1, 3, { numPerformToCompletion: 1 })
+    cy.cdVisit('/')
+    cy.get('[data-cy="downloadTranscriptCard"]').contains('You have Completed 0 out of 3 skills!')
+
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+    cy.cdVisit('/')
+    cy.get('[data-cy="downloadTranscriptCard"]').contains('You have Completed 2 out of 3 skills!')
+  })
+
   it('empty project - with no skills, subjects or badges', () => {
     cy.request('POST', '/app/userInfo', {
       'first': 'Joe',
@@ -185,7 +217,7 @@ describe('Transcript export tests', () => {
     })
   })
 
-  it.only('badges table is on the second page if there are too many subjects', () => {
+  it('badges table is on the second page if there are too many subjects', () => {
     const projName = `Badge Table on the Second Page`
     cy.createProject(1, { name: projName })
     cy.request('POST', '/app/userInfo', {
