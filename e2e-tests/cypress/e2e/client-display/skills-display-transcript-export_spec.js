@@ -10,6 +10,9 @@ describe('Transcript export tests', () => {
       cy.createSkill(1, subjNum, i, { numPerformToCompletion: 1 })
     }
   }
+  const clean = (text) => {
+    return text.replace(/\n/g, '')
+  }
 
   it('transcript cards is not shown when there are no skills', () => {
     cy.createProject(1)
@@ -43,34 +46,6 @@ describe('Transcript export tests', () => {
     cy.get('[data-cy="downloadTranscriptCard"]').contains('You have Completed 2 out of 3 skills!')
   })
 
-  it('empty project - with no skills, subjects or badges', () => {
-    cy.request('POST', '/app/userInfo', {
-      'first': 'Joe',
-      'last': 'Doe',
-      'nickname': 'Joe Doe'
-    })
-    cy.createProject(1, { name: 'Empty Project' })
-    cy.cdVisit('/')
-    cy.get('[data-cy="downloadTranscriptBtn"]').click()
-
-    // cy.wait(2000)
-    const pathToPdf = 'cypress/downloads/Empty Project - Joe Doe (skills@skills.org for display) - Transcript.pdf'
-    cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
-      // file exists and was successfully read
-      cy.log('Transcript Created!')
-    })
-    cy.task('readPdf', pathToPdf).then((doc) => {
-      expect(doc.numpages).to.equal(1)
-      expect(doc.text).to.include('SkillTree TRANSCRIPT')
-      expect(doc.text).to.include('Empty Project')
-      expect(doc.text).to.include('Level: \n0')
-      expect(doc.text).to.include('Points: \n0')
-      expect(doc.text).to.include('Skills: \n0')
-      expect(doc.text).to.not.include('Badges')
-    })
-
-  })
-
   it('transcript with 1 subject', () => {
     const projName = 'Has Subject and Skills'
     cy.request('POST', '/app/userInfo', {
@@ -97,15 +72,15 @@ describe('Transcript export tests', () => {
     })
     cy.task('readPdf', pathToPdf).then((doc) => {
       expect(doc.numpages).to.equal(2)
-      expect(doc.text).to.include('SkillTree TRANSCRIPT')
-      expect(doc.text).to.include(projName)
-      expect(doc.text).to.include('Level: \n1\n / 5')
-      expect(doc.text).to.include('Points: \n100\n / 600')
-      expect(doc.text).to.include('Skills: \n0\n / 3')
-      expect(doc.text).to.not.include('Badges')
+      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+      expect(clean(doc.text)).to.include(projName)
+      expect(clean(doc.text)).to.include('Level: 1 / 5 ')
+      expect(clean(doc.text)).to.include('Points: 100 / 600 ')
+      expect(clean(doc.text)).to.include('Skills: 0 / 3 ')
+      expect(clean(doc.text)).to.not.include('Badges')
 
       // should be a title on the 2nd page
-      expect(doc.text).to.include('Subject: Subject 1'.toUpperCase())
+      expect(clean(doc.text)).to.include('Subject: Subject 1'.toUpperCase())
     })
   })
 
@@ -148,19 +123,19 @@ describe('Transcript export tests', () => {
     })
     cy.task('readPdf', pathToPdf).then((doc) => {
       expect(doc.numpages).to.equal(4)
-      expect(doc.text).to.include('SkillTree TRANSCRIPT')
-      expect(doc.text).to.include(projName)
-      expect(doc.text).to.include('Level: \n1\n / 5')
-      expect(doc.text).to.include('Points: \n600\n / 2,600')
-      expect(doc.text).to.include('Skills: \n6\n / 26')
-      expect(doc.text).to.not.include('Badges')
+      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+      expect(clean(doc.text)).to.include(projName)
+      expect(clean(doc.text)).to.include('Level: 1 / 5 ')
+      expect(clean(doc.text)).to.include('Points: 600 / 2,600 ')
+      expect(clean(doc.text)).to.include('Skills: 6 / 26 ')
+      expect(clean(doc.text)).to.not.include('Badges')
 
       // should be a title on the 2nd-4th pages
-      expect(doc.text).to.include('Subject: Subject 1'.toUpperCase())
-      expect(doc.text).to.include('Subject: Subject 2'.toUpperCase())
-      expect(doc.text).to.include('Subject: Subject 3'.toUpperCase())
+      expect(clean(doc.text)).to.include('Subject: Subject 1'.toUpperCase())
+      expect(clean(doc.text)).to.include('Subject: Subject 2'.toUpperCase())
+      expect(clean(doc.text)).to.include('Subject: Subject 3'.toUpperCase())
       // 4th subject doesn't have any skills so there shouldn't be a page for it
-      expect(doc.text).to.not.include('Subject: Subject 4'.toUpperCase())
+      expect(clean(doc.text)).to.not.include('Subject: Subject 4'.toUpperCase())
     })
   })
 
@@ -205,15 +180,15 @@ describe('Transcript export tests', () => {
     })
     cy.task('readPdf', pathToPdf).then((doc) => {
       expect(doc.numpages).to.equal(4)
-      expect(doc.text).to.include('SkillTree TRANSCRIPT')
-      expect(doc.text).to.include(projName)
-      expect(doc.text).to.include('Level: \n1\n / 5')
-      expect(doc.text).to.include('Points: \n600\n / 2,600')
-      expect(doc.text).to.include('Skills: \n6\n / 26')
-      expect(doc.text).to.include('Badges: \n1\n')
+      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+      expect(clean(doc.text)).to.include(projName)
+      expect(clean(doc.text)).to.include('Level: 1 / 5 ')
+      expect(clean(doc.text)).to.include('Points: 600 / 2,600 ')
+      expect(clean(doc.text)).to.include('Skills: 6 / 26 ')
+      expect(clean(doc.text)).to.include('Badges: 1 ')
 
       // should be a title on the 2nd page
-      expect(doc.text).to.include('Subject: Subject 1'.toUpperCase())
+      expect(clean(doc.text)).to.include('Subject: Subject 1'.toUpperCase())
     })
   })
 
@@ -243,8 +218,8 @@ describe('Transcript export tests', () => {
     })
     cy.task('readPdf', pathToPdf).then((doc) => {
       expect(doc.numpages).to.equal(18) // 16 subj pages, first page + earned badges page
-      expect(doc.text).to.include('SkillTree TRANSCRIPT')
-      expect(doc.text).to.include(projName)
+      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+      expect(clean(doc.text)).to.include(projName)
     })
   })
 

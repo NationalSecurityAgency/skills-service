@@ -66,7 +66,7 @@ export const useTableBuilder = () => {
         doc.moveUp()
       }
       const cellStruct = doc.struct('TH', { title: `${cell.column} Column Header` }, () => {
-        doc.text(cell.value, cell.x)
+        doc.text(`${cell.value} `, cell.x)
       })
       headerRowConstruct.add(cellStruct)
     })
@@ -86,9 +86,9 @@ export const useTableBuilder = () => {
           if (cell.value instanceof Object) {
             const actualValue = cell.value.value
             const link = cell.value.link
-            doc.text(actualValue, cell.x, null, { link })
+            doc.text(`${actualValue} `, cell.x, null, { link })
           } else {
-            doc.text(cell.value, cell.x)
+            doc.text(`${cell.value} `, cell.x)
           }
         })
         rowStruct.add(cellStruct)

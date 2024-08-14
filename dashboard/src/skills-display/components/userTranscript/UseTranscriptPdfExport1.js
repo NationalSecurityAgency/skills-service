@@ -187,7 +187,7 @@ export const useTranscriptPdfExport1 = () => {
     )
     titlePageHeader.add(
       doc.struct('H', () => {
-        doc.fontSize(20).fillColor(darkGreen).text('SkillTree TRANSCRIPT')
+        doc.fontSize(20).fillColor(darkGreen).text('SkillTree TRANSCRIPT ')
       })
     )
     resetTextStyle(doc)
@@ -200,10 +200,10 @@ export const useTranscriptPdfExport1 = () => {
 
     titlePageHeader.add(
       doc.struct('P', () => {
-        doc.fontSize(17).text(info.projectName)
-        doc.fontSize(16).text(info.userName)
+        doc.fontSize(17).text(`${info.projectName} `)
+        doc.fontSize(16).text(`${info.userName} `)
         resetTextStyle(doc)
-        doc.text(timeUtils.formatDate(dayjs()), 400, 125, { align: 'right', width: 163 })
+        doc.text(`${timeUtils.formatDate(dayjs())} `, 400, 125, { align: 'right', width: 163 })
       })
     )
 
@@ -238,10 +238,10 @@ export const useTranscriptPdfExport1 = () => {
         doc.struct('Span', () => {
           doc.text(`${label}: `, x + 20, currentY, { continued: true })
             .fillColor(arrowColor5).fontSize(13)
-            .text(`${numFormat.pretty(num)}`, { continued: totalNum !== null })
+            .text(`${numFormat.pretty(num)} `, { continued: totalNum !== null })
           resetTextStyle(doc)
           if (totalNum !== null) {
-            doc.text(` / ${numFormat.pretty(totalNum)}`, {})
+            doc.text(`/ ${numFormat.pretty(totalNum)} `, {})
           }
         })
       ])
@@ -261,7 +261,7 @@ export const useTranscriptPdfExport1 = () => {
     doc.moveDown(1)
     section.add(
       doc.struct('H', () => {
-        doc.fontSize(15).fillColor(darkGreen).text(title.toUpperCase(), 50, y)
+        doc.fontSize(15).fillColor(darkGreen).text(`${title.toUpperCase()} `, 50, y)
       })
     )
     resetTextStyle(doc)
