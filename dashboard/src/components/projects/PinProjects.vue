@@ -15,6 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { useDebounceFn } from '@vueuse/core'
 import SettingsService from '@/components/settings/SettingsService.js';
 import ProjectService from '@/components/projects/ProjectService';
 import DateCell from "@/components/utils/table/DateCell.vue";
@@ -116,12 +117,10 @@ const unpinProject = (item) => {
         itemRef.pinned = false;
       });
 };
-// searchValue(newValue) {
-//   this.searchData(newValue);
-// },
-watch(searchValue, (newValue) => {
+
+watch(() => searchValue.value, useDebounceFn((newValue) => {
   searchData(newValue);
-})
+}, 500))
 </script>
 
 <template>
@@ -154,6 +153,7 @@ watch(searchValue, (newValue) => {
           :rowsPerPageOptions="[5, 10, 15, 20]"
           data-cy="pinProjectsSearchResults"
           aria-label="Projects"
+          :loading="isLoading"
           striped-rows
           paginator
           :nullSortOrder="-1"
