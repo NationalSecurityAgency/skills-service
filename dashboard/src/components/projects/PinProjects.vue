@@ -120,7 +120,7 @@ const unpinProject = (item) => {
 
 watch(() => searchValue.value, useDebounceFn((newValue) => {
   searchData(newValue);
-}, 500))
+}, 250))
 </script>
 
 <template>
