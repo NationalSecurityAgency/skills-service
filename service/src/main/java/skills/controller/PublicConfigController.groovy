@@ -183,6 +183,10 @@ class PublicConfigController {
 
             String name = projAdminService.lookupProjectName(projectId)
             res["projectName"] = name
+
+            if (userCommunityService.isUserCommunityConfigured()) {
+                res["projectUserCommunityDescriptor"] = userCommunityService.getProjectUserCommunity(projectId)
+            }
         }
         res['enablePageVisitReporting'] = enablePageVisitReporting
         return res

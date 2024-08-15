@@ -19,6 +19,7 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import dayjs from '@/common-components/DayJsCustomizer.js'
 import { useTableBuilder } from '@/skills-display/components/userTranscript/UseTableBuilder.js'
+import { usePdfBuilderHelper } from '@/skills-display/components/userTranscript/UsePdfBuilderHelper.js'
 
 export const useTranscriptPdfExport1 = () => {
 
@@ -26,29 +27,17 @@ export const useTranscriptPdfExport1 = () => {
   const numFormat = useNumberFormat()
   const timeUtils = useTimeUtils()
   const tableBuilder = useTableBuilder()
+  const pdfHelper = usePdfBuilderHelper()
 
-  const arrowColor1 = '#264653'
-  const arrowColor2 = '#2a9d8f'
-  const arrowColor3 = '#e9c369'
-  const arrowColor5 = '#e76f51'
-  const lightGray = '#e1e1e1'
-  const darkGreen = '#097151'
-  const darkGray = '#504e4e'
-  const successColor = '#097151'
+
   const margin = 50
   const lineGap = 3
-  const numSubjectWhenEarnedBadgesOnNewPage = 16
-
-
-  const resetTextStyle = (doc) => {
-    doc.fillColor(arrowColor1)
-    doc.fontSize(12)
-  }
+  const pageStartY = 70
 
   const buildNumOutOfOtherNum = (num, otherNum, addAchievedWord = true) => {
     let res = `${numFormat.pretty(num)} / ${numFormat.pretty(otherNum)}`
     if (addAchievedWord && num === otherNum && otherNum > 0) {
-      res += ` (Achieved)`
+      res += ` (Achieved) `
     }
     return res
   }
@@ -59,7 +48,8 @@ export const useTranscriptPdfExport1 = () => {
       lang: 'en-US',
       tagged: true,
       displayTitle: true,
-      bufferPages: true
+      bufferPages: true,
+      margin: 10
     })
     doc.pageNum = 1
     doc.lineGap(lineGap)
@@ -69,17 +59,16 @@ export const useTranscriptPdfExport1 = () => {
     const overallTranscript = doc.struct('Document')
     doc.addStructure(overallTranscript)
 
+    pdfHelper.addHeader(doc, overallTranscript, info)
+
     // Transcript -> header
-    addHeader(doc, overallTranscript, info)
+    addTitleSection(doc, overallTranscript, info)
+    addOverallStats(doc, overallTranscript, info, info.labelsConf)
+    addSubjectsProgress(doc, overallTranscript, info)
+    pdfHelper.addFooter(doc, overallTranscript, info)
 
     // Transcript -> subject pages
     addSubjectPagesOfSkills(doc, overallTranscript, info)
-
-    // Transcript -> subjects progress
-    doc.switchToPage(0)
-    // Transcript -> stats
-    addOverallStats(doc, overallTranscript, info, info.labelsConf)
-    addSubjectsProgress(doc, overallTranscript, info)
 
     // Transcript -> earned badge
     addEarnBadges(doc, overallTranscript, info)
@@ -87,25 +76,34 @@ export const useTranscriptPdfExport1 = () => {
     download(doc, info)
   }
 
+  const setDocMetaData = (doc, info) => {
+    // Set some meta data
+    doc.info['Title'] = `SkillTree ${info.userName} TRANSCRIPT for ${info.userName}`
+    doc.info['Author'] = 'SkillTree'
+    doc.info['Subject'] = 'Project Transcript'
+    doc.info['Keywords'] = 'skilltree,transcript,pdf,project'
+  }
+
+
   const addSubjectsProgress = (doc, overallTranscript, info) => {
     if (info.subjects && info.subjects.length > 0) {
       const subjectsProgress = doc.struct('Sect', { title: `Subjects Progress` })
       overallTranscript.add(subjectsProgress)
-      addTitle(doc, subjectsProgress, 'Subjects Progress')
+      pdfHelper.addTitle(doc, subjectsProgress, 'Subjects Progress')
 
       const tableInfo = {
         title: 'Subjects Progress Table',
         headers: [`${info.labelsConf.subject}`, `${info.labelsConf.level}`, 'Points', `${info.labelsConf.skill}s`],
         rows: info.subjects.map((subject) => {
           return [
-            (subject.pageNum >= 0) ? { value: subject.name, link: subject.pageNum } : subject.name,
+            subject.name,
             buildNumOutOfOtherNum(subject.userLevel, subject.totalLevels, false),
             buildNumOutOfOtherNum(subject.userPoints, subject.totalPoints, false),
             buildNumOutOfOtherNum(subject.userSkillsCompleted, subject.totalSkills, false)
           ]
         })
       }
-      tableBuilder.addTable(doc, subjectsProgress, tableInfo)
+      tableBuilder.addTable(doc, overallTranscript, subjectsProgress, tableInfo)
 
       subjectsProgress.end()
     }
@@ -113,13 +111,13 @@ export const useTranscriptPdfExport1 = () => {
 
   const addEarnBadges = (doc, overallTranscript, info) => {
     if (info.achievedBadges) {
-      if (info.subjects.length >= numSubjectWhenEarnedBadgesOnNewPage) {
-        doc.addPage()
-        doc.pageNum++
-      }
+      doc.addPage({ margin: 10 })
+      doc.pageNum++
+      pdfHelper.addHeader(doc, overallTranscript, info)
+
       const earnedBadgesStruct = doc.struct('Sect', { title: `Earned Badges` })
       overallTranscript.add(earnedBadgesStruct)
-      addTitle(doc, earnedBadgesStruct, 'Earned Badges')
+      pdfHelper.addTitle(doc, earnedBadgesStruct, 'Earned Badges')
 
       const tableInfo = {
         title: 'Earned Badges Table',
@@ -131,27 +129,34 @@ export const useTranscriptPdfExport1 = () => {
           ]
         })
       }
-      tableBuilder.addTable(doc, earnedBadgesStruct, tableInfo)
+      tableBuilder.addTable(doc, overallTranscript, earnedBadgesStruct, tableInfo)
 
       earnedBadgesStruct.end()
+
+      pdfHelper.addFooter(doc, overallTranscript, info)
     }
   }
 
   const addSubjectPagesOfSkills = (doc, overallTranscript, info) => {
     info.subjects.forEach((subject) => {
       if (subject.skills && subject.skills.length > 0) {
-        doc.addPage()
+        doc.addPage({ margin: 10 })
         subject.pageNum = doc.pageNum
+        pdfHelper.addHeader(doc, overallTranscript, info)
+
         const subjectStruct = doc.struct('Sect', { title: `${subject.name} Subject` })
         overallTranscript.add(subjectStruct)
         doc.pageNum++
 
-        addTitle(doc, subjectStruct, `Subject: ${subject.name}`)
+        const sectionTitle = `Subject: ${subject.name}`
+        pdfHelper.addTitle(doc, subjectStruct, sectionTitle, pageStartY)
 
         addOverallStats(doc, subjectStruct, subject, info.labelsConf, false)
 
         const tableInfo = {
-          title: `Skill Progress Table for ${subject.name} subject`,
+          headerAndFooter: info.headerAndFooter,
+          structTitle: `Skill Progress Table for ${subject.name} subject`,
+          sectionTitle,
           headers: [`${info.labelsConf.skill}`, 'Points'],
           rows: subject.skills.map((skill) => {
             return [
@@ -161,23 +166,14 @@ export const useTranscriptPdfExport1 = () => {
           })
         }
         doc.moveDown(0.5)
-        tableBuilder.addTable(doc, subjectStruct, tableInfo)
-
-        subjectStruct.end()
+        tableBuilder.addTable(doc, overallTranscript, subjectStruct, tableInfo)
+        pdfHelper.addFooter(doc, overallTranscript, info)
       }
     })
   }
 
-  const setDocMetaData = (doc, info) => {
-    // Set some meta data
-    doc.info['Title'] = `SkillTree ${info.userName} TRANSCRIPT for ${info.userName}`
-    doc.info['Author'] = 'SkillTree'
-    doc.info['Subject'] = 'Project Transcript'
-    doc.info['Keywords'] = 'skilltree,transcript,pdf,project'
-  }
-
-  const addHeader = (doc, overallTranscript, info) => {
-    const titlePageHeader = doc.struct('Sect')
+  const addTitleSection = (doc, overallTranscript, info) => {
+    const titlePageHeader = doc.struct('Sect', { title: 'Transcript Title Section' })
     overallTranscript.add(titlePageHeader)
 
     titlePageHeader.add(
@@ -187,10 +183,10 @@ export const useTranscriptPdfExport1 = () => {
     )
     titlePageHeader.add(
       doc.struct('H', () => {
-        doc.fontSize(20).fillColor(darkGreen).text('SkillTree TRANSCRIPT ')
+        doc.fontSize(20).fillColor(pdfHelper.darkGreen).text('SkillTree TRANSCRIPT ', 73, pageStartY)
       })
     )
-    resetTextStyle(doc)
+    pdfHelper.resetTextStyle(doc)
 
     titlePageHeader.add(
       doc.struct('Span', { alt: 'SkillTree Logo Image' }, () => {
@@ -202,20 +198,20 @@ export const useTranscriptPdfExport1 = () => {
       doc.struct('P', () => {
         doc.fontSize(17).text(`${info.projectName} `)
         doc.fontSize(16).text(`${info.userName} `)
-        resetTextStyle(doc)
+        pdfHelper.resetTextStyle(doc)
         doc.text(`${timeUtils.formatDate(dayjs())} `, 400, 125, { align: 'right', width: 163 })
       })
     )
 
     // visual separator
     const separatorStruct = doc.struct('Artifact', { type: 'Layout' }, () => {
-      doc.fillColor(lightGray)
+      doc.fillColor(pdfHelper.lightGray)
       doc.markContent('Artifact', { type: 'Layout' })
       const startX = 70
       const width = doc.page.width - startX - margin
       doc.rect(startX, doc.y - lineGap, width, 1)
       doc.fill()
-      resetTextStyle(doc)
+      pdfHelper.resetTextStyle(doc)
     })
     titlePageHeader.add(separatorStruct)
 
@@ -226,7 +222,7 @@ export const useTranscriptPdfExport1 = () => {
     const overallStats = doc.struct('Sect', { title: `Overall Stats` })
     overallTranscript.add(overallStats)
     if (shouldAddTitle) {
-      addTitle(doc, overallStats, 'Progress Snapshot', 165)
+      pdfHelper.addTitle(doc, overallStats, 'Progress Snapshot', 165)
     }
 
     const addStat = (label, icon, x, num, totalNum = null) => {
@@ -237,9 +233,9 @@ export const useTranscriptPdfExport1 = () => {
         }),
         doc.struct('Span', () => {
           doc.text(`${label}: `, x + 20, currentY, { continued: true })
-            .fillColor(arrowColor5).fontSize(13)
+            .fillColor(pdfHelper.arrowColor5).fontSize(13)
             .text(`${numFormat.pretty(num)} `, { continued: totalNum !== null })
-          resetTextStyle(doc)
+          pdfHelper.resetTextStyle(doc)
           if (totalNum !== null) {
             doc.text(`/ ${numFormat.pretty(totalNum)} `, {})
           }
@@ -257,15 +253,6 @@ export const useTranscriptPdfExport1 = () => {
     overallStats.end()
   }
 
-  const addTitle = (doc, section, title, y = null) => {
-    doc.moveDown(1)
-    section.add(
-      doc.struct('H', () => {
-        doc.fontSize(15).fillColor(darkGreen).text(`${title.toUpperCase()} `, 50, y)
-      })
-    )
-    resetTextStyle(doc)
-  }
 
   const download = (doc, info) => {
     const filename = `${info.projectName} - ${info.userName} - Transcript.pdf`

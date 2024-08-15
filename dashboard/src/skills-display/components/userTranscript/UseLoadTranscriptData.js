@@ -17,14 +17,24 @@ import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisp
 import { ref } from 'vue'
 import { useAuthState } from '@/stores/UseAuthState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useProjectCommunityReplacement } from '@/components/customization/UseProjectCommunityReplacement.js'
 
 export const useLoadTranscriptData = () => {
   const skillsDisplayService = useSkillsDisplayService()
   const userAuthState = useAuthState()
   const skillsDisplayAttributesState = useSkillsDisplayAttributesState()
+  const projectCommunityReplacement = useProjectCommunityReplacement()
+
   const isLoading = ref(false)
+  const appConfig = useAppConfig()
+
   const loadTranscriptData = () => {
     isLoading.value = true
+
+    const headerAndFooter = appConfig.exportHeaderAndFooter ?
+      projectCommunityReplacement.populateProjectCommunity(appConfig.exportHeaderAndFooter, skillsDisplayAttributesState.projectUserCommunityDescriptor)
+      : null
 
     return skillsDisplayService.loadUserProjectSummary()
       .then((projRes) => {
@@ -33,6 +43,7 @@ export const useLoadTranscriptData = () => {
         return Promise.all(getSubjectPromises).then((endpointsRes) => {
           const transcriptInfo = {}
           transcriptInfo.labelsConf = buildLabelConf()
+          transcriptInfo.headerAndFooter = headerAndFooter
           transcriptInfo.userName = `${userAuthState.userInfo.nickname} (${userAuthState.userInfo.userIdForDisplay})`
           transcriptInfo.projectName = projRes.projectName
           transcriptInfo.userLevel = projRes.skillsLevel
