@@ -267,7 +267,13 @@ describe('Transcript export tests', () => {
       cy.register(allDragonsUser, vars.defaultPass);
       cy.logout();
 
-      cy.login(vars.defaultUser, vars.defaultPass);
+      if (!Cypress.env('oauthMode')) {
+        cy.log('NOT in oauthMode, using form login')
+        cy.login(vars.defaultUser, vars.defaultPass);
+      } else {
+        cy.log('oauthMode, using loginBySingleSignOn')
+        cy.loginBySingleSignOn()
+      }
     });
 
     const projName = `Footer and Header for User Community`
@@ -315,7 +321,13 @@ describe('Transcript export tests', () => {
       cy.register(allDragonsUser, vars.defaultPass);
       cy.logout();
 
-      cy.login(vars.defaultUser, vars.defaultPass);
+      if (!Cypress.env('oauthMode')) {
+        cy.log('NOT in oauthMode, using form login')
+        cy.login(vars.defaultUser, vars.defaultPass);
+      } else {
+        cy.log('oauthMode, using loginBySingleSignOn')
+        cy.loginBySingleSignOn()
+      }
     });
 
     const projName = `Footer and Header Badge on its own page`
