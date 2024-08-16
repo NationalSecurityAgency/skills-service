@@ -110,7 +110,7 @@ export const useTranscriptPdfExport1 = () => {
   }
 
   const addEarnBadges = (doc, overallTranscript, info) => {
-    if (info.achievedBadges) {
+    if (info.achievedBadges && info.achievedBadges.length > 0) {
       doc.addPage({ margin: 10 })
       doc.pageNum++
       pdfHelper.addHeader(doc, overallTranscript, info)
@@ -246,7 +246,7 @@ export const useTranscriptPdfExport1 = () => {
     doc.moveUp()
     overallStats.add(addStat(`${labelsConf.skill}s`, base64Images.arrowUp, 300, info.userSkillsCompleted, info.totalSkills))
     overallStats.add(addStat('Points', base64Images.hat, 50, info.userPoints, info.totalPoints))
-    if (info.achievedBadges) {
+    if (info.achievedBadges && info.achievedBadges.length > 0) {
       doc.moveUp()
       overallStats.add(addStat(`${labelsConf.badge}s`, base64Images.badge, 300, info.achievedBadges.length))
     }
@@ -255,7 +255,10 @@ export const useTranscriptPdfExport1 = () => {
 
 
   const download = (doc, info) => {
-    const filename = `${info.projectName} - ${info.userName} - Transcript.pdf`
+    const cleanUpRegex = /[^a-zA-Z0-9@.()\s]/g
+    const cleanProjName = info.projectName.replace(cleanUpRegex, '');
+    const cleanUserName = info.userName.replace(cleanUpRegex, '');
+    const filename = `${cleanProjName} - ${cleanUserName} - Transcript.pdf`
 
     // Write the PDF content to a buffer
     const buffer = []

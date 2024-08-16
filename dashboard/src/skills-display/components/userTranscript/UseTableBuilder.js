@@ -46,14 +46,25 @@ export const useTableBuilder = () => {
 
   const doAddTable = (doc, sectionToAddTo, tableInfo) => {
     const startX = 50
-    const totalWidth = doc.page.width - startX
-    const columnWidth = totalWidth / tableInfo.headers.length
-
+    const totalWidth = doc.page.width - (startX*2)
+    // allocate fixed with for 2-N column, first column would take the res
     doc.lineGap(lineGap)
 
+    const additionalWidthForSmallColumns = 30
+    const columnWidths =tableInfo.headers.map((header, index) => {
+      const cellsInColumnWidths = tableInfo.rows.map((row) => Math.trunc(doc.widthOfString(row[index])))
+      const maxCellInColumnWidth = Math.max(...cellsInColumnWidths)
+      return maxCellInColumnWidth + additionalWidthForSmallColumns
+    })
+    // adjust the first column to be the remaining of the rest
+    columnWidths[0] = totalWidth - columnWidths.slice(1).reduce((a, b) => a + b, 0)
+    let currentColumnX = startX
     const headersWrapped = tableInfo.headers.map((header, index) => {
+      if (index > 0) {
+        currentColumnX += columnWidths[index - 1]
+      }
       return {
-        value: header, x: (startX + (index * columnWidth))
+        value: header, x: currentColumnX, width: columnWidths[index]
       }
     })
     const rowsWrapped = tableInfo.rows.map((row) => {
@@ -91,21 +102,22 @@ export const useTableBuilder = () => {
       const rowStruct = doc.struct('TR', { title: `Row ${rowIndex}` })
       table.add(rowStruct)
       if (rowIndex === 0 || rowIndex % 2 === 0) {
-        addRectangle(doc, rowStruct)
+        const longCellValue = row.reduce((longest, current) => {
+          return current.value.length > longest.length ? current.value : longest;
+        }, '');
+        const widthOfLongestCell = doc.widthOfString(longCellValue)
+        const maxWidth = headersWrapped[0].width
+        const numRows = Math.trunc(widthOfLongestCell / maxWidth) + 1
+        addRectangle(doc, rowStruct, false, numRows)
       }
 
       row.forEach((cell, cellIndex) => {
+        const myHeading = headersWrapped[cellIndex]
         if (cellIndex > 0) {
           doc.moveUp()
         }
         const cellStruct = doc.struct('TD', { title: `Row ${rowIndex} ${cell.column} Column` }, () => {
-          if (cell.value instanceof Object) {
-            const actualValue = cell.value.value
-            const link = cell.value.link
-            doc.text(`${actualValue} `, cell.x, null, { link })
-          } else {
-            doc.text(`${cell.value} `, cell.x)
-          }
+          doc.text(`${cell.value} `, cell.x, null, { width: myHeading.width })
         })
         rowStruct.add(cellStruct)
       })
@@ -117,7 +129,7 @@ export const useTableBuilder = () => {
     return null
   }
 
-  const addRectangle = (doc, parentSection, isHeader = false) => {
+  const addRectangle = (doc, parentSection, isHeader = false, numRows = 1) => {
     const rowBackgroundStruct = doc.struct('Artifact', { type: 'Layout' }, () => {
       doc.fillColor(isHeader ? darkBlue : lightGray)
       const lineHeight = doc.currentLineHeight() + lineGap
@@ -126,7 +138,7 @@ export const useTableBuilder = () => {
       const totalWidth = doc.page.width - (startX * 2)
 
       const y = doc.y
-      doc.rect(startX, y - lineGap, totalWidth, lineHeight + 2)
+      doc.rect(startX, y - lineGap, totalWidth, (lineHeight + 2) * numRows)
       doc.fill()
       doc.fillColor(isHeader ? 'white' : arrowColor1)
     })

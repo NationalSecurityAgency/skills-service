@@ -26,7 +26,8 @@ describe('Transcript export tests', () => {
     user = Cypress.env('proxyUser')
     const userIdInFileName = Cypress.env('oauthMode') ? 'foo' : user
     const buildPath = (projName) => {
-      return `cypress/downloads/${projName} - ${userInfo.nickname} (${userIdInFileName}) - Transcript.pdf`
+      const cleanUpRegex = /[^a-zA-Z0-9@.()\s]/g
+      return `cypress/downloads/${projName.replace(cleanUpRegex, '')} - ${userInfo.nickname} (${userIdInFileName}) - Transcript.pdf`
     }
     Cypress.Commands.add("readTranscript", (projName) => {
       const pathToPdf = buildPath(projName)
@@ -248,120 +249,110 @@ describe('Transcript export tests', () => {
     })
   })
 
-  it('ability to configure footer and header text - community protected', () => {
-    cy.intercept('GET', '/public/config', (req) => {
-      req.reply((res) => {
-        const conf = res.body;
-        conf.exportHeaderAndFooter = 'For {{community.project.descriptor}} enjoyment';
-        res.send(conf);
-      });
-    })
-    const allDragonsUser = 'allDragons@email.org'
-    cy.fixture('vars.json').then((vars) => {
-      cy.logout();
-      cy.login(vars.rootUser, vars.defaultPass, true);
-      cy.request('POST', `/root/users/${vars.rootUser}/tags/dragons`, { tags: ['DivineDragon'] });
-      cy.request('POST', `/root/users/${vars.defaultUser}/tags/dragons`, { tags: ['DivineDragon'] });
-      cy.logout();
+  if (!Cypress.env('oauthMode')) {
+    it('ability to configure footer and header text - community protected', () => {
+      cy.intercept('GET', '/public/config', (req) => {
+        req.reply((res) => {
+          const conf = res.body;
+          conf.exportHeaderAndFooter = 'For {{community.project.descriptor}} enjoyment';
+          res.send(conf);
+        });
+      })
+      const allDragonsUser = 'allDragons@email.org'
+      cy.fixture('vars.json').then((vars) => {
+        cy.logout();
+        cy.login(vars.rootUser, vars.defaultPass, true);
+        cy.request('POST', `/root/users/${vars.rootUser}/tags/dragons`, { tags: ['DivineDragon'] });
+        cy.request('POST', `/root/users/${vars.defaultUser}/tags/dragons`, { tags: ['DivineDragon'] });
+        cy.logout();
 
-      cy.register(allDragonsUser, vars.defaultPass);
-      cy.logout();
+        cy.register(allDragonsUser, vars.defaultPass);
+        cy.logout();
 
-      if (!Cypress.env('oauthMode')) {
-        cy.log('NOT in oauthMode, using form login')
         cy.login(vars.defaultUser, vars.defaultPass);
-      } else {
-        cy.log('oauthMode, using loginBySingleSignOn')
-        cy.loginBySingleSignOn()
-      }
-    });
-
-    const projName = `Footer and Header for User Community`
-    cy.createProject(1, { name: projName, enableProtectedUserCommunity: true })
-    cy.request('POST', '/app/userInfo', {
-      'first': 'Joe',
-      'last': 'Doe',
-      'nickname': 'Joe Doe'
-    })
-    cy.createSubject(1)
-    cy.createSkill(1, 1, 1)
-    cy.createSkill(1, 1, 2)
-    cy.createSkill(1, 1, 3)
-
-    cy.cdVisit('/')
-    cy.get('[data-cy="downloadTranscriptBtn"]').click()
-    const numExpectedPages = 2
-    cy.readTranscript(projName).then((doc) => {
-      expect(doc.numpages).to.equal(numExpectedPages)
-      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
-      expect(clean(doc.text)).to.include(projName)
-      expect(clean(doc.text)).to.not.include(expectedHeaderAndFooter)
-      expect((clean(doc.text).match(new RegExp(expectedHeaderAndFooterCommunityProtected, 'g')) || []).length).to.equal(numExpectedPages*2)
-
-      expect(clean(doc.text)).to.not.include('null')
-    })
-  })
-
-  it('ability to configure footer and header text with badges', () => {
-    cy.intercept('GET', '/public/config', (req) => {
-      req.reply((res) => {
-        const conf = res.body;
-        conf.exportHeaderAndFooter = 'For {{community.project.descriptor}} enjoyment';
-        res.send(conf);
       });
+
+      const projName = `Footer and Header for User Community`
+      cy.createProject(1, { name: projName, enableProtectedUserCommunity: true })
+      cy.request('POST', '/app/userInfo', {
+        'first': 'Joe',
+        'last': 'Doe',
+        'nickname': 'Joe Doe'
+      })
+      cy.createSubject(1)
+      cy.createSkill(1, 1, 1)
+      cy.createSkill(1, 1, 2)
+      cy.createSkill(1, 1, 3)
+
+      cy.cdVisit('/')
+      cy.get('[data-cy="downloadTranscriptBtn"]').click()
+      const numExpectedPages = 2
+      cy.readTranscript(projName).then((doc) => {
+        expect(doc.numpages).to.equal(numExpectedPages)
+        expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+        expect(clean(doc.text)).to.include(projName)
+        expect(clean(doc.text)).to.not.include(expectedHeaderAndFooter)
+        expect((clean(doc.text).match(new RegExp(expectedHeaderAndFooterCommunityProtected, 'g')) || []).length).to.equal(numExpectedPages * 2)
+
+        expect(clean(doc.text)).to.not.include('null')
+      })
     })
-    const allDragonsUser = 'allDragons@email.org'
-    cy.fixture('vars.json').then((vars) => {
-      cy.logout();
-      cy.login(vars.rootUser, vars.defaultPass, true);
-      cy.request('POST', `/root/users/${vars.rootUser}/tags/dragons`, { tags: ['DivineDragon'] });
-      cy.request('POST', `/root/users/${vars.defaultUser}/tags/dragons`, { tags: ['DivineDragon'] });
-      cy.logout();
 
-      cy.register(allDragonsUser, vars.defaultPass);
-      cy.logout();
+    it('ability to configure footer and header text with badges', () => {
+      cy.intercept('GET', '/public/config', (req) => {
+        req.reply((res) => {
+          const conf = res.body;
+          conf.exportHeaderAndFooter = 'For {{community.project.descriptor}} enjoyment';
+          res.send(conf);
+        });
+      })
+      const allDragonsUser = 'allDragons@email.org'
+      cy.fixture('vars.json').then((vars) => {
+        cy.logout();
+        cy.login(vars.rootUser, vars.defaultPass, true);
+        cy.request('POST', `/root/users/${vars.rootUser}/tags/dragons`, { tags: ['DivineDragon'] });
+        cy.request('POST', `/root/users/${vars.defaultUser}/tags/dragons`, { tags: ['DivineDragon'] });
+        cy.logout();
 
-      if (!Cypress.env('oauthMode')) {
-        cy.log('NOT in oauthMode, using form login')
+        cy.register(allDragonsUser, vars.defaultPass);
+        cy.logout();
+
         cy.login(vars.defaultUser, vars.defaultPass);
-      } else {
-        cy.log('oauthMode, using loginBySingleSignOn')
-        cy.loginBySingleSignOn()
+      });
+
+      const projName = `Footer and Header Badge on its own page`
+      cy.createProject(1, { name: projName, enableProtectedUserCommunity: true })
+      cy.request('POST', '/app/userInfo', {
+        'first': 'Joe',
+        'last': 'Doe',
+        'nickname': 'Joe Doe'
+      })
+      for (let i = 1; i <= 16; i++) {
+        createSubjectAndSkills(i, 1)
       }
-    });
+      const user = Cypress.env('proxyUser')
+      cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: user, date: 'now' })
+      cy.createBadge(1)
+      cy.assignSkillToBadge(1, 1, 1)
+      cy.enableBadge(1, 1)
 
-    const projName = `Footer and Header Badge on its own page`
-    cy.createProject(1, { name: projName, enableProtectedUserCommunity: true })
-    cy.request('POST', '/app/userInfo', {
-      'first': 'Joe',
-      'last': 'Doe',
-      'nickname': 'Joe Doe'
+      cy.cdVisit('/')
+      cy.get('[data-cy="downloadTranscriptBtn"]').click()
+
+      // 16 subj pages, first page + earned badges page
+      const numExpectedPages = 18
+      cy.readTranscript(projName).then((doc) => {
+        expect(doc.numpages).to.equal(numExpectedPages)
+        expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+        expect(clean(doc.text)).to.include(projName)
+        // 18 pages * 2
+        expect((clean(doc.text).match(new RegExp(expectedHeaderAndFooterCommunityProtected, 'g')) || []).length).to.equal(numExpectedPages * 2)
+        expect(clean(doc.text)).to.not.include(expectedHeaderAndFooter)
+
+        expect(clean(doc.text)).to.not.include('null')
+      })
     })
-    for (let i = 1; i <= 16; i++) {
-      createSubjectAndSkills(i, 1)
-    }
-    const user = Cypress.env('proxyUser')
-    cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: user, date: 'now' })
-    cy.createBadge(1)
-    cy.assignSkillToBadge(1, 1, 1)
-    cy.enableBadge(1, 1)
-
-    cy.cdVisit('/')
-    cy.get('[data-cy="downloadTranscriptBtn"]').click()
-
-    // 16 subj pages, first page + earned badges page
-    const numExpectedPages = 18
-    cy.readTranscript(projName).then((doc) => {
-      expect(doc.numpages).to.equal(numExpectedPages)
-      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
-      expect(clean(doc.text)).to.include(projName)
-      // 18 pages * 2
-      expect((clean(doc.text).match(new RegExp(expectedHeaderAndFooterCommunityProtected, 'g')) || []).length).to.equal(numExpectedPages*2)
-      expect(clean(doc.text)).to.not.include(expectedHeaderAndFooter)
-
-      expect(clean(doc.text)).to.not.include('null')
-    })
-  })
+  }
 
   it('transcript with multiple subject and many skills in each subject', () => {
     cy.intercept('GET', '/public/config', (req) => {
@@ -434,5 +425,48 @@ describe('Transcript export tests', () => {
       expect(clean(doc.text)).to.include('Very Great Skill 100 Subj3')
     })
   })
+
+  it('long names for project, subjects, skills, badges and labels', () => {
+    const projName = 'This is a very long project name yes it is there!'
+    cy.request('POST', '/app/userInfo', {
+      'first': 'Joe',
+      'last': 'Doe',
+      'nickname': 'Joe Doe'
+    })
+    cy.createProject(1, { name: projName })
+    cy.createSubject(1, 1, { name: 'Very long but yet respectful Subject # 1; how far?'})
+    cy.createSkill(1, 1, 1, { name: 'Very long but yet respectful Skill # 1; how far can it really go?', pointIncrement: 4500, numPerformToCompletion: 100 })
+    cy.createSkill(1, 1, 2, { name: 'Very long but yet respectful Skill # 2; how far can it really go?'})
+    cy.createSkill(1, 1, 3, { name: 'Very long but yet respectful Skill # 3; how far can it really go?', numPerformToCompletion: 1})
+    cy.createSkill(1, 1, 4, { name: 'Very long but yet respectful Skill # 4; how far can it really go?'})
+    cy.createSkill(1, 1, 5, { name: 'short name'})
+    cy.createSkill(1, 1, 6, { name: 'tiny'})
+    cy.createSkill(1, 1, 7, { name: 'Very long but respectful Skill # 7; how far can it really go? Let us keep on going and see 100 chars'})
+    cy.createSkill(1, 1, 8, { name: 'small again'})
+    cy.createSkill(1, 1, 9, { name: 'Very long but respectful Skill # 9; how far can it really go? Let us keep on going and see 100 chars'})
+
+    cy.createSubject(1, 2, { name: 'Very long but yet respectful Subject # 2; how far?'})
+
+    const user = Cypress.env('proxyUser')
+    cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: user, date: 'now' })
+    cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: user, date: 'now' })
+
+    cy.createBadge(1, 1, { name: 'Very long but yet respectful Badge # 1; how far?'})
+    cy.assignSkillToBadge(1, 1, 3)
+    cy.enableBadge(1, 1, { name: 'Very long but yet respectful Badge # 1; how far?'})
+
+    cy.createBadge(1, 2, { name: 'Very long but yet respectful Badge # 2; how far?'})
+    cy.assignSkillToBadge(1, 2, 3)
+    cy.enableBadge(1, 2, { name: 'Very long but yet respectful Badge # 2; how far?'})
+
+    cy.cdVisit('/')
+    cy.get('[data-cy="downloadTranscriptBtn"]').click()
+
+    cy.readTranscript(projName).then((doc) => {
+      expect(doc.numpages).to.equal(3)
+      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+    })
+  })
+
 
 })
