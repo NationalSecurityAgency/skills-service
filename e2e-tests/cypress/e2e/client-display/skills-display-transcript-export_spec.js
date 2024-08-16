@@ -15,9 +15,29 @@
  */
 describe('Transcript export tests', () => {
 
+  let user
+  let name
   beforeEach(() => {
+    user = Cypress.env('proxyUser')
+    let userInfoResponseStatus = -1
+    cy.request( '/app/userInfo')
+      .then((response) => {
+        userInfoResponseStatus = response.status;
+        name = response.body.nickname
+    })
+    cy.waitUntil(() => userInfoResponseStatus === 200, {
+      timeout: 30000, // waits up to 30 seconds, default is 5 seconds
+    });
 
+    const buildPath = (projName) => {
+      return `cypress/downloads/${projName} - ${name} (${user}) - Transcript.pdf`
+    }
+    Cypress.Commands.add("readTranscript", (projName) => {
+      const pathToPdf = buildPath(projName)
+      return cy.readPdf(pathToPdf)
+    });
   })
+
   const expectedHeaderAndFooter = 'For All Dragons enjoyment'
   const expectedHeaderAndFooterCommunityProtected = 'For Divine Dragon enjoyment'
 
@@ -76,17 +96,12 @@ describe('Transcript export tests', () => {
     cy.createSkill(1, 1, 2)
     cy.createSkill(1, 1, 3)
 
-    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 1, user, 'now')
 
     cy.cdVisit('/')
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
 
-    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org) - Transcript.pdf`
-    cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
-      // file exists and was successfully read
-      cy.log('Transcript Created!')
-    })
-    cy.task('readPdf', pathToPdf).then((doc) => {
+    cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(2)
       expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
       expect(clean(doc.text)).to.include(projName)
@@ -135,12 +150,7 @@ describe('Transcript export tests', () => {
     cy.cdVisit('/')
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
 
-    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org) - Transcript.pdf`
-    cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
-      // file exists and was successfully read
-      cy.log('Transcript Created!')
-    })
-    cy.task('readPdf', pathToPdf).then((doc) => {
+    cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(4)
       expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
       expect(clean(doc.text)).to.include(projName)
@@ -195,12 +205,7 @@ describe('Transcript export tests', () => {
     cy.cdVisit('/')
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
 
-    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org) - Transcript.pdf`
-    cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
-      // file exists and was successfully read
-      cy.log('Transcript Created!')
-    })
-    cy.task('readPdf', pathToPdf).then((doc) => {
+    cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(5)
       expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
       expect(clean(doc.text)).to.include(projName)
@@ -240,12 +245,8 @@ describe('Transcript export tests', () => {
 
     cy.cdVisit('/')
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
-    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org) - Transcript.pdf`
-    cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
-      cy.log('Transcript Created!')
-    })
     const numExpectedPages = 2
-    cy.task('readPdf', pathToPdf).then((doc) => {
+    cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(numExpectedPages)
       expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
       expect(clean(doc.text)).to.include(projName)
@@ -292,12 +293,8 @@ describe('Transcript export tests', () => {
 
     cy.cdVisit('/')
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
-    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org) - Transcript.pdf`
-    cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
-      cy.log('Transcript Created!')
-    })
     const numExpectedPages = 2
-    cy.task('readPdf', pathToPdf).then((doc) => {
+    cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(numExpectedPages)
       expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
       expect(clean(doc.text)).to.include(projName)
@@ -348,14 +345,10 @@ describe('Transcript export tests', () => {
 
     cy.cdVisit('/')
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
-    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org) - Transcript.pdf`
-    cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
-      cy.log('Transcript Created!')
-    })
 
     // 16 subj pages, first page + earned badges page
     const numExpectedPages = 18
-    cy.task('readPdf', pathToPdf).then((doc) => {
+    cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(numExpectedPages)
       expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
       expect(clean(doc.text)).to.include(projName)
@@ -404,12 +397,8 @@ describe('Transcript export tests', () => {
     cy.cdVisit('/')
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
 
-    const pathToPdf = `cypress/downloads/${projName} - Joe Doe (skills@skills.org) - Transcript.pdf`
-    cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
-      cy.log('Transcript Created!')
-    })
     const numExpectedPages = 9
-    cy.task('readPdf', pathToPdf).then((doc) => {
+    cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(numExpectedPages)
       expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
       expect(clean(doc.text)).to.include(projName)
