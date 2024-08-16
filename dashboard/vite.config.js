@@ -44,6 +44,8 @@ function getChunkId(id) {
     return 'skillClient';
   } else if (id.includes('skills-display/')) {
     return 'skillsDisplay';
+  } else if (id.includes('pdfkit')) {
+    return 'pdfkit';
   }
 }
 

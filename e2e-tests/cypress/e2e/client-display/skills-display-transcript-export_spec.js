@@ -16,21 +16,17 @@
 describe('Transcript export tests', () => {
 
   let user
-  let name
   beforeEach(() => {
+    const userInfo = {
+      'first': 'Joe',
+      'last': 'Doe',
+      'nickname': 'Joe Doe'
+    }
+    cy.request('POST', '/app/userInfo', userInfo)
     user = Cypress.env('proxyUser')
-    let userInfoResponseStatus = -1
-    cy.request( '/app/userInfo')
-      .then((response) => {
-        userInfoResponseStatus = response.status;
-        name = response.body.nickname
-    })
-    cy.waitUntil(() => userInfoResponseStatus === 200, {
-      timeout: 30000, // waits up to 30 seconds, default is 5 seconds
-    });
-
+    const userIdInFileName = Cypress.env('oauthMode') ? 'foo' : user
     const buildPath = (projName) => {
-      return `cypress/downloads/${projName} - ${name} (${user}) - Transcript.pdf`
+      return `cypress/downloads/${projName} - ${userInfo.nickname} (${userIdInFileName}) - Transcript.pdf`
     }
     Cypress.Commands.add("readTranscript", (projName) => {
       const pathToPdf = buildPath(projName)
@@ -85,11 +81,6 @@ describe('Transcript export tests', () => {
 
   it('transcript with 1 subject', () => {
     const projName = 'Has Subject and Skills'
-    cy.request('POST', '/app/userInfo', {
-      'first': 'Joe',
-      'last': 'Doe',
-      'nickname': 'Joe Doe'
-    })
     cy.createProject(1, { name: projName })
     cy.createSubject(1)
     cy.createSkill(1, 1, 1)

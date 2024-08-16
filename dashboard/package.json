@@ -30,8 +30,6 @@
     "dompurify": "3.0.9",
     "enquire.js": "2.1.6",
     "idb-keyval": "6.2.1",
-    "jspdf": "2.5.1",
-    "jspdf-autotable": "3.8.2",
     "loglevel": "1.9.1",
     "material-icons": "0.7.6",
     "node-emoji": "2.1.3",
