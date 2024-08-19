@@ -56,10 +56,10 @@ const navToProgressAndRanking = () => {
     <div v-if="!loadingQuizInfo">
       <SubPageHeader :title="quizInfo.quizType" class="pt-4 pl-3">
       </SubPageHeader>
-
       <QuizRun v-if="quizId"
       :quiz-id="quizId"
       :quiz="quizInfo"
+      :multipleTakes="quizInfo.multipleTakes"
       class="mb-5"
       @testWasTaken="navToProgressAndRanking"
       @cancelled="navToProgressAndRanking"/>

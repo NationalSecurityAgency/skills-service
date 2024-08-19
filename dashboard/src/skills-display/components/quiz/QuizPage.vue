@@ -108,7 +108,7 @@ const loadQuizInfo = () => {
       <div class="text-left mt-3">
         <QuizRun :quiz-id="quizId"
                  :quiz="quizInfo"
-                 :multipleTakes="skillInternal.daysOfInactivityBeforeExp === 1 ? true : false"
+                 :multipleTakes="quizInfo.multipleTakes || skillInternal.daysOfInactivityBeforeExp === 1 ? true : false"
                  @testWasTaken="done"
                  @cancelled="done">
           <template #splashPageTitle>

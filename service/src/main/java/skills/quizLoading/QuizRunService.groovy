@@ -94,6 +94,7 @@ class QuizRunService {
         List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
         boolean randomizeQuestionsSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeQuestions.setting })?.value?.toBoolean()
         boolean randomizeAnswersSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeAnswers.setting })?.value?.toBoolean()
+        boolean multipleTakes = quizSettings?.find( { it.setting == QuizSettings.MultipleTakes.setting })?.value?.toBoolean()
         List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId, randomizeQuestionsSetting, randomizeAnswersSetting)
 
         UserQuizAttemptRepo.UserQuizAttemptStats userAttemptsStats =
@@ -122,6 +123,7 @@ class QuizRunService {
                 minNumQuestionsToPass: minNumQuestionsToPassSetting ? Integer.valueOf(minNumQuestionsToPassSetting.value) : -1,
                 quizLength: lengthSetting,
                 quizTimeLimit: quizTimeLimit ? Integer.valueOf(quizTimeLimit.value) : -1,
+                multipleTakes: multipleTakes,
         )
     }
 
@@ -277,12 +279,13 @@ class QuizRunService {
         UserQuizAttemptRepo.UserQuizAttemptStats userAttemptsStats = quizAttemptRepo.getUserAttemptsStats(userId, quizDef.id,
                 UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED)
         Integer numCurrentAttempts = userAttemptsStats?.getUserNumPreviousQuizAttempts() ?: 0
+        boolean allowMultipleTakes = allowMultipleTakes(quizDef.id)
         if (quizDef.type == QuizDefParent.QuizType.Survey) {
             if (numCurrentAttempts > 0) {
                 throw new SkillQuizException("User [${userId}] has already taken this survey", quizId, ErrorCode.BadParam)
             }
         } else {
-            if (userAttemptsStats?.getUserQuizPassed()) {
+            if (userAttemptsStats?.getUserQuizPassed() && !allowMultipleTakes) {
                 throw new SkillQuizException("User [${userId}] already took and passed this quiz.", quizId, ErrorCode.UserQuizAttemptsExhausted)
             }
 
@@ -296,7 +299,7 @@ class QuizRunService {
 
     @Profile
     private List<QuizSetting> loadQuizSettings(Integer quizRefId) {
-        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId, [QuizSettings.MaxNumAttempts.setting, QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.RandomizeQuestions.setting, QuizSettings.RandomizeAnswers.setting, QuizSettings.QuizLength.setting, QuizSettings.QuizTimeLimit.setting])
+        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId, [QuizSettings.MaxNumAttempts.setting, QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.RandomizeQuestions.setting, QuizSettings.RandomizeAnswers.setting, QuizSettings.QuizLength.setting, QuizSettings.QuizTimeLimit.setting, QuizSettings.MultipleTakes.setting])
     }
 
     @Profile
@@ -312,9 +315,18 @@ class QuizRunService {
         return getQuizSettingAsInteger(quizRefId, QuizSettings.QuizLength.setting)
     }
     @Profile
+    private boolean allowMultipleTakes(Integer quizRefId) {
+        return getQuizSettingAsBoolean(quizRefId, QuizSettings.MultipleTakes.setting)
+    }
+    @Profile
     private Integer getQuizSettingAsInteger(Integer quizRefId, String setting) {
         QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(setting, quizRefId)
         return quizSetting ? Integer.valueOf(quizSetting.value) : -1
+    }
+    @Profile
+    private boolean getQuizSettingAsBoolean(Integer quizRefId, String setting) {
+        QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(setting, quizRefId)
+        return quizSetting?.value?.toBoolean()
     }
 
     boolean shouldQuizBeFailed(UserQuizAttempt attempt) {
