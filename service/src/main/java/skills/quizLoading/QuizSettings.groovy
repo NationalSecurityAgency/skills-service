@@ -22,7 +22,8 @@ enum QuizSettings {
     RandomizeQuestions('quizRandomizeQuestions'),
     RandomizeAnswers('quizRandomizeAnswers'),
     QuizLength('quizLength'),
-    QuizTimeLimit('quizTimeLimit');
+    QuizTimeLimit('quizTimeLimit'),
+    MultipleTakes('quizMultipleTakes');
 
     String setting;
 

@@ -84,6 +84,7 @@ const loadSkillInfo = () => {
         skillInternal.value = res;
       }).finally(() => {
         loadingSkillInfo.value = false;
+        console.log(skillInternal.value);
       });
 }
 const loadQuizInfo = () => {
@@ -96,6 +97,7 @@ const loadQuizInfo = () => {
         loadingQuizInfo.value = false;
       });
 }
+
 </script>
 
 <template>
@@ -106,6 +108,7 @@ const loadQuizInfo = () => {
       <div class="text-left mt-3">
         <QuizRun :quiz-id="quizId"
                  :quiz="quizInfo"
+                 :multipleTakes="skillInternal.daysOfInactivityBeforeExp === 1 ? true : false"
                  @testWasTaken="done"
                  @cancelled="done">
           <template #splashPageTitle>

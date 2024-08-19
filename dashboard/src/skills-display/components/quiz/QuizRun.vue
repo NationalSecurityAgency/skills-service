@@ -37,6 +37,10 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  multipleTakes: {
+    type: Boolean,
+    default: false,
+  }
 })
 const emit = defineEmits(['cancelled', 'testWasTaken'])
 const announcer = useSkillsAnnouncer()
@@ -340,7 +344,7 @@ const doneWithThisRun = () => {
   <div>
     <SkillsSpinner :is-loading="isLoading" class="mt-3"/>
     <div v-if="!isLoading">
-      <QuizRunSplashScreen v-if="splashScreen.show" :quiz-info="quizInfo" @cancelQuizAttempt="cancelQuizAttempt" @start="startQuizAttempt">
+      <QuizRunSplashScreen v-if="splashScreen.show" :quiz-info="quizInfo" @cancelQuizAttempt="cancelQuizAttempt" @start="startQuizAttempt" :multipleTakes="multipleTakes">
         <template #aboveTitle>
           <slot name="splashPageTitle">
             <span v-if="isSurveyType">Thank you for taking the time to take this survey!</span>

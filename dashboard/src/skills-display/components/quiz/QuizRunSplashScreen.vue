@@ -21,8 +21,13 @@ import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
 
 const props = defineProps({
   quizInfo: Object,
+  multipleTakes: {
+    type: Boolean,
+    default: false,
+  },
 })
 const emit = defineEmits(['cancelQuizAttempt', 'start'])
+console.log(props.quizInfo);
 
 const timeUtils = useTimeUtils()
 
@@ -45,7 +50,7 @@ const minNumQuestionsToPass = computed(() => {
   return props.quizInfo.minNumQuestionsToPass > 0 ? props.quizInfo.minNumQuestionsToPass : numQuestions.value;
 })
 const canStartQuiz = computed(() => {
-  return !props.quizInfo.userQuizPassed && !allAttemptsExhausted.value && numQuestions.value > 0;
+  return (!props.quizInfo.userQuizPassed || props.multipleTakes) && !allAttemptsExhausted.value && numQuestions.value > 0;
 })
 const cancel = () => {
   emit('cancelQuizAttempt');
@@ -59,7 +64,7 @@ const start = () => {
   <Card data-cy="quizSplashScreen" :pt="{ content: { class: 'p-0' } }">
     <template #content>
       <div class="text-xl">
-        <Message v-if="quizInfo.userQuizPassed" :closable="false" severity="success">
+        <Message v-if="quizInfo.userQuizPassed && !multipleTakes" :closable="false" severity="success">
           <template #messageicon>
             <i class="fas fa-gift" aria-hidden="true"></i>
           </template>
