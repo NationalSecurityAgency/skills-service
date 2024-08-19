@@ -29,6 +29,8 @@ import skills.quizLoading.model.*
 import skills.services.CustomValidationResult
 import skills.services.CustomValidator
 import skills.services.LockingService
+import skills.services.attributes.ExpirationAttrs
+import skills.services.attributes.SkillAttributeService
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.services.quiz.QuizQuestionType
@@ -83,6 +85,9 @@ class QuizRunService {
 
     @Autowired
     UserInfoService userInfoService
+
+    @Autowired
+    SkillAttributeService skillAttributeService
 
     @Transactional
     QuizInfo loadQuizInfo(String userId, String quizId) {
@@ -169,7 +174,7 @@ class QuizRunService {
     }
 
     @Transactional
-    QuizAttemptStartResult startQuizAttempt(String userId, String quizId) {
+    QuizAttemptStartResult startQuizAttempt(String userId, String quizId, String skillId = null, String projectId = null) {
         QuizDefWithDescription quizDefWithDesc = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizId)
         List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
         boolean randomizeQuestionsSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeQuestions.setting })?.value?.toBoolean()
@@ -238,7 +243,7 @@ class QuizRunService {
         }
 
         QuizDef quizDef = getQuizDef(quizId)
-        validateQuizAttempts(quizDef, userId, quizId)
+        validateQuizAttempts(quizDef, userId, quizId, skillId, projectId)
         int numQuestions = quizQuestionRepo.countByQuizId(quizDef.quizId)
         QuizValidator.isTrue(numQuestions > 0, "Must have at least 1 question declared in order to start.", quizDef.quizId)
 
@@ -275,17 +280,24 @@ class QuizRunService {
     }
 
     @Profile
-    private void validateQuizAttempts(QuizDef quizDef, String userId, String quizId) {
+    private void validateQuizAttempts(QuizDef quizDef, String userId, String quizId, String skillId = null, String projectId = null) {
         UserQuizAttemptRepo.UserQuizAttemptStats userAttemptsStats = quizAttemptRepo.getUserAttemptsStats(userId, quizDef.id,
                 UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED)
         Integer numCurrentAttempts = userAttemptsStats?.getUserNumPreviousQuizAttempts() ?: 0
         boolean allowMultipleTakes = allowMultipleTakes(quizDef.id)
+        boolean aboutToExpire = false
+
+        if (skillId && projectId) {
+            ExpirationAttrs attrs = skillAttributeService.getExpirationAttrs( projectId, skillId )
+            aboutToExpire = attrs.every == 1
+            // daysOfInactivityBeforeExp
+        }
         if (quizDef.type == QuizDefParent.QuizType.Survey) {
             if (numCurrentAttempts > 0) {
                 throw new SkillQuizException("User [${userId}] has already taken this survey", quizId, ErrorCode.BadParam)
             }
         } else {
-            if (userAttemptsStats?.getUserQuizPassed() && !allowMultipleTakes) {
+            if (userAttemptsStats?.getUserQuizPassed() && !allowMultipleTakes && !aboutToExpire) {
                 throw new SkillQuizException("User [${userId}] already took and passed this quiz.", quizId, ErrorCode.UserQuizAttemptsExhausted)
             }
 

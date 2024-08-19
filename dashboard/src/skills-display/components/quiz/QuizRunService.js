@@ -37,8 +37,8 @@ export default {
     return axios.get(`/api/quizzes/${quizId}`, { params: this.getUserIdParams() })
       .then((response) => response.data);
   },
-  startQuizAttempt(quizId) {
-    return axios.post(`/api/quizzes/${quizId}/attempt`, { ...this.getUserIdParams() })
+  startQuizAttempt(quizId, skillId, projectId) {
+    return axios.post(`/api/quizzes/${quizId}/attempt`, { ...this.getUserIdParams(), skillId, projectId })
         .then((response) => response.data);
   },
   reportAnswer(quizId, attemptId, answerId, isSelected, answerText = null) {

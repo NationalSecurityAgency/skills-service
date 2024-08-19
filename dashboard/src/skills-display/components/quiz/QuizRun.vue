@@ -40,6 +40,14 @@ const props = defineProps({
   multipleTakes: {
     type: Boolean,
     default: false,
+  },
+  skillId: {
+    type: String,
+    default: null,
+  },
+  projectId: {
+    type: String,
+    default: null,
   }
 })
 const emit = defineEmits(['cancelled', 'testWasTaken'])
@@ -206,7 +214,7 @@ const startQuizAttempt = () => {
   isLoading.value = true;
   splashScreen.value.show = false;
 
-  QuizRunService.startQuizAttempt(props.quizId)
+  QuizRunService.startQuizAttempt(props.quizId, props.skillId, props.projectId)
       .then((startQuizAttemptRes) => {
         if (startQuizAttemptRes.existingAttemptFailed) {
           failQuizAttempt();

@@ -29,6 +29,12 @@ const loadingQuizInfo = ref(true);
 const quizId = computed(() => {
   return route.params.quizId
 })
+const skillId = computed(() => {
+  return route.params.skillId
+})
+const projectId = computed(() => {
+  return route.params.projectId
+})
 
 onMounted(() => {
   loadQuizInfo();
@@ -59,6 +65,8 @@ const navToProgressAndRanking = () => {
       <QuizRun v-if="quizId"
       :quiz-id="quizId"
       :quiz="quizInfo"
+      :skillId="skillId"
+      :projectId="projectId"
       :multipleTakes="quizInfo.multipleTakes"
       class="mb-5"
       @testWasTaken="navToProgressAndRanking"
