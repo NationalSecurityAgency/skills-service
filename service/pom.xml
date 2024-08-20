@@ -161,8 +161,14 @@
         </dependency>
 
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-access</artifactId>
+            <groupId>ch.qos.logback.access</groupId>
+            <artifactId>common</artifactId>
+            <version>2.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback.access</groupId>
+            <artifactId>tomcat</artifactId>
+            <version>2.0.2</version>
         </dependency>
 
         <dependency>
@@ -509,7 +515,7 @@
 <!--                mvn license:add-third-party-->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>2.0.0</version>
+                <version>2.4.0</version>
                 <executions>
                     <execution>
                         <id>default-cli</id>
@@ -551,6 +557,7 @@
                                 <includedLicense>The GNU General Public License (GPL) Version 2.1</includedLicense>
                                 <includedLicense>ICU License</includedLicense>
                                 <includedLicense>Bouncy Castle Licence</includedLicense>
+                                <includedLicense>Apache License, Version 2.0 and Common Development And Distribution License (CDDL) Version 1.0 and Eclipse Public License - v 2.0</includedLicense>
                             </includedLicenses>
                             <licenseMerges>
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache License, Version 2.0</licenseMerge>
@@ -580,6 +587,7 @@
                                 <licenseMerge>The 3-Clause BSD License|BSD 3-clause New License|The BSD 3-Clause License|BSD-3-Clause</licenseMerge>
                                 <licenseMerge>The 3-Clause BSD License|BSD 3-Clause "New" or "Revised" License (BSD-3-Clause)</licenseMerge>
                                 <licenseMerge>Common Development and Distribution License 1.0 (CDDL-1.0)|Common Development and Distribution License (CDDL) v1.0</licenseMerge>
+                                <licenseMerge>Common Development and Distribution License 1.0 (CDDL-1.0)|Common Development And Distribution License (CDDL) Version 1.0</licenseMerge>
                                 <licenseMerge>The GNU General Public License (GPL) Version 2.1|GNU Lesser General Public License v2.1 or later</licenseMerge>
                                 <licenseMerge>The GNU General Public License (GPL) Version 2.1|GNU Library General Public License v2.1 or later</licenseMerge>
                                 <licenseMerge>Eclipse Public License - Version 1.0|Eclipse Public License v1.0</licenseMerge>
