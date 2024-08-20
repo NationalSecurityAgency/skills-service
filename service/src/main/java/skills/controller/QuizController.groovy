@@ -31,6 +31,7 @@ import skills.quizLoading.QuizRunService
 import skills.quizLoading.model.QuizAttemptStartResult
 import skills.quizLoading.model.QuizGradedResult
 import skills.quizLoading.model.QuizReportAnswerReq
+import skills.quizLoading.model.StartQuizAttemptReq
 import skills.services.quiz.QuizDefService
 import skills.services.quiz.QuizRoleService
 import skills.services.quiz.QuizSettingsService
@@ -209,8 +210,13 @@ class QuizController {
     @RequestMapping(value = "/{quizId}/users/{userId}/attempt", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     @ResponseBody
     QuizAttemptStartResult startQuizAttempt(@PathVariable("quizId") String quizId,
-                                            @PathVariable("userId") String userId) {
-        return quizRunService.startQuizAttempt(userId, quizId);
+                                            @PathVariable("userId") String userId,
+                                            @RequestBody(required = false) StartQuizAttemptReq startQuizAttemptReq) {
+
+        String skillId = startQuizAttemptReq?.skillId
+        String projectId = startQuizAttemptReq?.projectId
+
+        return quizRunService.startQuizAttempt(userId, quizId, skillId, projectId);
     }
 
     @RequestMapping(value = "/{quizId}/users/{userId}/attempt/{attemptId}/answers/{answerId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")

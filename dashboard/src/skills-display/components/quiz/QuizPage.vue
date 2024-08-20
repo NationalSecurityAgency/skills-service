@@ -87,7 +87,6 @@ const loadSkillInfo = () => {
         skillInternal.value = res;
       }).finally(() => {
         loadingSkillInfo.value = false;
-        console.log(skillInternal.value);
       });
 }
 const loadQuizInfo = () => {

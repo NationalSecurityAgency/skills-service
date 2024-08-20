@@ -290,7 +290,6 @@ class QuizRunService {
         if (skillId && projectId) {
             ExpirationAttrs attrs = skillAttributeService.getExpirationAttrs( projectId, skillId )
             aboutToExpire = attrs.every == 1
-            // daysOfInactivityBeforeExp
         }
         if (quizDef.type == QuizDefParent.QuizType.Survey) {
             if (numCurrentAttempts > 0) {

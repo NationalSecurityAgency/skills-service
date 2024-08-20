@@ -1861,9 +1861,9 @@ class SkillsService {
         return wsHelper.apiPost(url, userId ? [userId : userId] : null)
     }
 
-    def startQuizAttemptForUserId(String quizId, String userId) {
+    def startQuizAttemptForUserId(String quizId, String userId, String skillId = null, String projectId = null) {
         String url = "/quiz-definitions/${quizId}/users/${userId}/attempt"
-        return wsHelper.adminPost(url, [])
+        return wsHelper.adminPost(url, [skillId: skillId, projectId: projectId])
     }
     def reportQuizAnswerForUserId(String quizId, Integer attemptId, Integer answerId, String userId, Map params = [isSelected:true]) {
         String url = "/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}"
