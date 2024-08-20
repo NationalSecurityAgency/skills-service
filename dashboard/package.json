@@ -24,7 +24,7 @@
     "@vue-a11y/announcer": "3.1.5",
     "@vueuse/core": "10.9.0",
     "apexcharts": "3.47.0",
-    "axios": "1.6.7",
+    "axios": "1.7.4",
     "dayjs": "1.11.11",
     "deep-equal": "2.2.3",
     "dompurify": "3.0.9",
