@@ -362,5 +362,41 @@ describe('Manage My Projects Tests', () => {
 
     });
 
+    it('view button is removed when project is added', function () {
+        for (let i = 1; i <= 3; i += 1) {
+            cy.createProject(i);
+            cy.enableProdMode(i);
+        }
+
+        cy.addToMyProjects(1);
+        cy.addToMyProjects(3);
+
+        cy.visit('/progress-and-rankings/manage-my-projects');
+
+        cy.get('[data-cy="viewButton-proj2"]').should('exist');
+        cy.get('[data-cy="addButton-proj2"]').click()
+        cy.get('[data-cy="viewButton-proj2"]').should('not.exist');
+        cy.get('[data-cy="removeBtn-proj2"]').click()
+        cy.get('[data-cy="viewButton-proj2"]').should('exist');
+
+    });
+
+    it('view button navigates to page', function () {
+
+        cy.intercept('GET', `/admin/projects/proj1`)
+            .as('loadProj1');
+        cy.createProject(1);
+        cy.enableProdMode(1);
+
+        cy.visit('/progress-and-rankings/manage-my-projects');
+
+        cy.get('[data-cy="viewButton-proj1"]').should('exist');
+        cy.get('[data-cy="viewButton-proj1"]').click()
+
+        cy.wait('@loadProj1');
+        cy.get('[data-cy="title"]').should('have.text', 'PROJECT: This is project 1')
+
+
+    });
 });
 
