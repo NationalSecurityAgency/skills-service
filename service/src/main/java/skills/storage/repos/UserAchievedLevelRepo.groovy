@@ -874,7 +874,7 @@ select count(distinct ua) from UserAchievement ua where ua.projectId = :projectI
                 from Setting s, User uu
                 where (s.setting = 'my_project' and uu.userId=:userId and uu.id = s.userRefId and s.projectId = skillDef.projectId)
             ) 
-    ''')
+    ''', nativeQuery = true)
     AchievedSkillsCount countAchievedProductionSkillsForUserByDayWeekMonth(@Param('userId') String userId)
 
     @Modifying

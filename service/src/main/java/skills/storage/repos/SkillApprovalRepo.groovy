@@ -299,7 +299,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     SkillApproval findByUserIdProjectIdAndSkillIdAndApproverActionTakenOnIsNull(String userId, String projectId, Integer skillRefId)
 
     @Modifying
-    @Query('''update SkillApproval s set s.rejectionAcknowledgedOn = CURRENT_DATE
+    @Query('''update SkillApproval s set s.rejectionAcknowledgedOn = CURRENT_TIMESTAMP
         where 
             s.userId = ?1 and s.projectId = ?2 and s.skillRefId = ?3 and  
             s.approverActionTakenOn is not null 
