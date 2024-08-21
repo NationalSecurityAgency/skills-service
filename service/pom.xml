@@ -345,6 +345,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <parameters>true</parameters>
+                    <compilerArgument>-parameters</compilerArgument>
+                    <testCompilerArgument>-parameters</testCompilerArgument>
                 </configuration>
             </plugin>
             <plugin>

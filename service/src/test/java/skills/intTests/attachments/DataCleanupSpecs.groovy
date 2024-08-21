@@ -108,14 +108,14 @@ class DataCleanupSpecs extends DefaultIntSpec {
     }
 
     private Boolean doesAttachmentExist(String uuid) {
-        String query = "SELECT count(*) from Attachment a where a.uuid = '${uuid}'"
-        Query getAttachmentsCount = entityManager.createQuery(query, Attachment)
+        String query = "SELECT count(a) from Attachment a where a.uuid = '${uuid}'"
+        Query getAttachmentsCount = entityManager.createQuery(query, Long)
         return getAttachmentsCount.getSingleResult() > 0
     }
 
     private Long countAllAttachments() {
-        String query = "SELECT count(*) from Attachment a"
-        Query getAttachmentsCount = entityManager.createQuery(query, Attachment)
-        return getAttachmentsCount.getSingleResult()
+        String query = "SELECT count(a) from Attachment a"
+        Query getAttachmentsCount = entityManager.createQuery(query, Long)
+        return  getAttachmentsCount.getSingleResult()
     }
 }
