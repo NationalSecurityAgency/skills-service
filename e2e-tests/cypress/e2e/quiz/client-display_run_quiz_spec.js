@@ -16,6 +16,7 @@
 import dayjs from 'dayjs';
 import relativeTimePlugin from 'dayjs/plugin/relativeTime';
 import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
+import moment from "moment-timezone";
 
 dayjs.extend(relativeTimePlugin);
 dayjs.extend(advancedFormatPlugin);
@@ -711,6 +712,118 @@ describe('Client Display Quiz Tests', () => {
         cy.wait(1000);
         cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
         cy.get('[data-cy="completionSummaryTitle"]').should('not.exist');
+    });
+
+    it('quiz allows multiple attempts if enabled', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.setQuizMultipleTakes(1, false);
+
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, {
+            selfReportingType: 'Quiz',
+            quizId: 'quiz1',
+            pointIncrement: '150',
+            numPerformToCompletion: 1
+        });
+
+        cy.runQuizForUser(1, Cypress.env('proxyUser'), [{selectedIndex: [1]}]);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
+
+        cy.setQuizMultipleTakes(1, true);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="startQuizAttempt"]').should('exist')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+    });
+
+    it('quiz attached to skill expiring in a day can be retaken', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.setQuizMultipleTakes(1, false);
+
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, {
+            selfReportingType: 'Quiz',
+            quizId: 'quiz1',
+            pointIncrement: '150',
+            numPerformToCompletion: 1
+        });
+
+        cy.configureExpiration(1, 0, 1, 'DAILY');
+
+        cy.runQuizForUser(1, Cypress.env('proxyUser'), [{selectedIndex: [1]}]);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="expirationDate"]').contains('Expires in a day, perform this skill to keep your points!');
+        cy.get('[data-cy="takeQuizBtn"]').click()
+
+        cy.get('[data-cy="startQuizAttempt"]').should('exist')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+    });
+
+    it('quiz attached to skill expiring in more than a day can not be retaken', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.setQuizMultipleTakes(1, false);
+
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, {
+            selfReportingType: 'Quiz',
+            quizId: 'quiz1',
+            pointIncrement: '150',
+            numPerformToCompletion: 1
+        });
+
+        cy.configureExpiration(1, 0, 3, 'DAILY');
+
+        cy.runQuizForUser(1, Cypress.env('proxyUser'), [{selectedIndex: [1]}]);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="expirationDate"]').contains('Expires in 3 days, perform this skill to keep your points!');
+        cy.get('[data-cy="takeQuizBtn"]').click()
+
+        cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
+
     });
 });
 

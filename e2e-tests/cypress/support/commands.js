@@ -340,6 +340,12 @@ Cypress.Commands.add("setMinNumQuestionsToPass", (quizNum = 1, numQuestions) => 
         value: `${numQuestions}`
     }]);
 });
+Cypress.Commands.add("setQuizMultipleTakes", (quizNum = 1, enabled) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
+        setting: 'quizMultipleTakes',
+        value: `${enabled}`
+    }]);
+});
 
 Cypress.Commands.add("setNumQuestionsForQuiz", (quizNum = 1, numQuestions) => {
     cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
