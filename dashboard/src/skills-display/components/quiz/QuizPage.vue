@@ -50,6 +50,9 @@ const skillId = computed(() => {
 const subjectId = computed(() => {
   return route.params.subjectId
 })
+const projectId = computed(() => {
+  return route.params.projectId
+})
 const isSurveySkill = computed(() => {
   return skillInternal.value.selfReporting.type === 'Survey';
 })
@@ -96,6 +99,7 @@ const loadQuizInfo = () => {
         loadingQuizInfo.value = false;
       });
 }
+
 </script>
 
 <template>
@@ -106,6 +110,9 @@ const loadQuizInfo = () => {
       <div class="text-left mt-3">
         <QuizRun :quiz-id="quizId"
                  :quiz="quizInfo"
+                 :skillId="skillId"
+                 :projectId="projectId"
+                 :multipleTakes="quizInfo.multipleTakes || skillInternal.daysOfInactivityBeforeExp === 1"
                  @testWasTaken="done"
                  @cancelled="done">
           <template #splashPageTitle>

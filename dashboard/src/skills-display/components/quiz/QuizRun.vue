@@ -37,6 +37,18 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  multipleTakes: {
+    type: Boolean,
+    default: false,
+  },
+  skillId: {
+    type: String,
+    default: null,
+  },
+  projectId: {
+    type: String,
+    default: null,
+  }
 })
 const emit = defineEmits(['cancelled', 'testWasTaken'])
 const announcer = useSkillsAnnouncer()
@@ -202,7 +214,7 @@ const startQuizAttempt = () => {
   isLoading.value = true;
   splashScreen.value.show = false;
 
-  QuizRunService.startQuizAttempt(props.quizId)
+  QuizRunService.startQuizAttempt(props.quizId, props.skillId, props.projectId)
       .then((startQuizAttemptRes) => {
         if (startQuizAttemptRes.existingAttemptFailed) {
           failQuizAttempt();
@@ -340,7 +352,7 @@ const doneWithThisRun = () => {
   <div>
     <SkillsSpinner :is-loading="isLoading" class="mt-3"/>
     <div v-if="!isLoading">
-      <QuizRunSplashScreen v-if="splashScreen.show" :quiz-info="quizInfo" @cancelQuizAttempt="cancelQuizAttempt" @start="startQuizAttempt">
+      <QuizRunSplashScreen v-if="splashScreen.show" :quiz-info="quizInfo" @cancelQuizAttempt="cancelQuizAttempt" @start="startQuizAttempt" :multipleTakes="multipleTakes">
         <template #aboveTitle>
           <slot name="splashPageTitle">
             <span v-if="isSurveyType">Thank you for taking the time to take this survey!</span>
