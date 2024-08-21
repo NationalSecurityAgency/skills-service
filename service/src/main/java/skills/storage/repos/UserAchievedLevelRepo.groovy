@@ -850,29 +850,29 @@ select count(distinct ua) from UserAchievement ua where ua.projectId = :projectI
     int countNumAchievedForSkill(@Param("projectId") String projectId, @Param("skillId") String skillId)
 
     @Query(value = '''select count(ua) as totalCount,
-                      sum(case when ua.achievedOn >= (current_date - 30) then 1 end) as monthCount,
-                      sum(case when ua.achievedOn >= (current_date - 7) then 1 end) as weekCount,
-                      sum(case when ua.achievedOn >= (current_date - 1) then 1 end) as todayCount,
-                      max(ua.achievedOn) as lastAchieved
-        from SkillDef skillDef, UserAchievement ua
+                      sum(case when ua.achieved_on >= (current_date - 30) then 1 end) as monthCount,
+                      sum(case when ua.achieved_on >= (current_date - 7) then 1 end) as weekCount,
+                      sum(case when ua.achieved_on >= (current_date - 1) then 1 end) as todayCount,
+                      max(ua.achieved_on) as lastAchieved
+        from skill_definition skillDef, user_achievement ua
         where
             ua.level is null and
-            ua.userId= :userId and
-            skillDef.skillId = ua.skillId and
-            skillDef.projectId = ua.projectId and
+            ua.user_id= :userId and
+            skillDef.skill_id = ua.skill_id and
+            skillDef.project_id = ua.project_id and
             skillDef.type='Skill' and 
-            skillDef.projectId IN 
+            skillDef.project_id IN 
             (
-                select s.projectId
-                from Setting s
-                where s.projectId = skillDef.projectId
+                select s.project_id
+                from settings s
+                where s.project_id = skillDef.project_id
                   and s.setting = 'production.mode.enabled'
                   and s.value = 'true'
             ) and 
-            skillDef.projectId IN (
-                select s.projectId
-                from Setting s, User uu
-                where (s.setting = 'my_project' and uu.userId=:userId and uu.id = s.userRefId and s.projectId = skillDef.projectId)
+            skillDef.project_id IN (
+                select s.project_id
+                from settings s, users uu
+                where (s.setting = 'my_project' and uu.user_id=:userId and uu.id = s.user_ref_id and s.project_id = skillDef.project_id)
             ) 
     ''', nativeQuery = true)
     AchievedSkillsCount countAchievedProductionSkillsForUserByDayWeekMonth(@Param('userId') String userId)

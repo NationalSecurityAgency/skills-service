@@ -557,7 +557,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
     left join SkillAttributesDef attributes on sdChild.id = attributes.skillRefId
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
-    left join SkillApproval approval on sdChild.id = approval.skillRefId and approval.userId=?1 and approval.rejectedOn=null and approval.approverUserId=null
+    left join SkillApproval approval on sdChild.id = approval.skillRefId and approval.userId=?1 and approval.rejectedOn is null and approval.approverUserId is null
       where srd.parent=sdParent and  srd.child=sdChild and sdChild.enabled = 'true' and
       sdParent.projectId is null and sdParent.skillId=?2 and srd.type in ?3 and sdChild.version<=?4''')
     List<Object []> findGlobalChildrenAndTheirUserPoints(String userId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version)
