@@ -38,6 +38,7 @@ import skills.storage.model.*
 import skills.storage.repos.*
 import skills.utils.InputSanitizer
 
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -289,7 +290,14 @@ class QuizRunService {
 
         if (skillId && projectId) {
             ExpirationAttrs attrs = skillAttributeService.getExpirationAttrs( projectId, skillId )
-            aboutToExpire = attrs.every == 1
+            if(attrs && attrs?.nextExpirationDate) {
+                LocalDateTime now = LocalDateTime.now()
+                LocalDateTime expirationDate = attrs.nextExpirationDate.toLocalDateTime()
+                Duration difference = Duration.between(now, expirationDate)
+                aboutToExpire = difference.toHours() <= 24
+            } else if(attrs && attrs?.expirationType == "DAILY") {
+                aboutToExpire = attrs.every <= 1
+            }
         }
         if (quizDef.type == QuizDefParent.QuizType.Survey) {
             if (numCurrentAttempts > 0) {
