@@ -72,7 +72,7 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         final Authentication auth = SecurityContextHolder.getContext()?.getAuthentication()
 
-        final HttpMethod method = HttpMethod.resolve(request.getMethod())
+        final HttpMethod method = HttpMethod.valueOf(request.getMethod())
         final String uri = request.getRequestURI()
 
         if (!auth?.isAuthenticated() || ANONYMOUS_USER.equals(auth.getPrincipal())) {
