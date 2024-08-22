@@ -112,7 +112,7 @@ const loadQuizInfo = () => {
                  :quiz="quizInfo"
                  :skillId="skillId"
                  :projectId="projectId"
-                 :multipleTakes="quizInfo.multipleTakes || skillInternal.daysOfInactivityBeforeExp === 1"
+                 :multipleTakes="quizInfo.multipleTakes || (skillInternal.expirationDate && skillInternal.daysOfInactivityBeforeExp <= 1)"
                  @testWasTaken="done"
                  @cancelled="done">
           <template #splashPageTitle>

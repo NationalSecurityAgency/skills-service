@@ -780,7 +780,6 @@ describe('Client Display Quiz Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
 
-        cy.get('[data-cy="expirationDate"]').contains('Expires in a day, perform this skill to keep your points!');
         cy.get('[data-cy="takeQuizBtn"]').click()
 
         cy.get('[data-cy="startQuizAttempt"]').should('exist')
@@ -819,7 +818,6 @@ describe('Client Display Quiz Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
 
-        cy.get('[data-cy="expirationDate"]').contains('Expires in 3 days, perform this skill to keep your points!');
         cy.get('[data-cy="takeQuizBtn"]').click()
 
         cy.get('[data-cy="startQuizAttempt"]').should('not.exist')

@@ -27,7 +27,6 @@ const props = defineProps({
   },
 })
 const emit = defineEmits(['cancelQuizAttempt', 'start'])
-console.log(props.quizInfo);
 
 const timeUtils = useTimeUtils()
 
