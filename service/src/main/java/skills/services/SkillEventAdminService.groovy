@@ -361,6 +361,54 @@ class SkillEventAdminService {
 
     @Transactional
     @Profile
+    RequestResult deleteSkillEventBatch(String projectId, String userId, List<SimpleSkillEvent> skillEvents) {
+
+//        if (skillCatalogService.isSkillImportedFromCatalog(projectId, skillId)) {
+//            throw new SkillException("Cannot delete skill events on skills imported from the catalog", projectId, skillId)
+//        }
+//
+//        List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(projectId, skillId, userId, new Date(timestamp))
+//        if (!performedSkills) {
+//            throw new SkillException("This skill event does not exist", projectId, skillId, ErrorCode.BadParam)
+//        }
+//        // may have more than 1 event with the same exact timestamp, this happens when multiple events may fall
+//        // within configured time window and client send the same timestamp (example UI calendar control)
+//        UserPerformedSkill performedSkill = performedSkills.first()
+//        log.debug("Deleting skill [{}] for user [{}]", performedSkill, userId)
+//
+//        RequestResult res = new RequestResult()
+//
+//        List<SkillDef> performedDependencies = performedSkillRepository.findPerformedParentSkills(userId, projectId, skillId)
+//        if (performedDependencies) {
+//            res.success = false
+//            res.explanation = "You cannot delete a skill event when a parent skill dependency has already been performed. You must first delete " +
+//                    "the performed skills for the parent dependencies: ${performedDependencies.collect({ it.projectId + ":" + it.skillId })}."
+//            return res
+//        }
+//
+//        SkillEventResult skillEventResult = removePerformedSkillEvent(performedSkill)
+//        removeAssociatedQuizAttempts(performedSkill)
+//
+//        String userIdToDisplay = userAttrsRepo.findByUserIdIgnoreCase(userId)?.userIdForDisplay ?: userId
+//        userActionsHistoryService.saveUserAction(new UserActionInfo(
+//                action: DashboardAction.Delete,
+//                item: DashboardItem.SkillEvents,
+//                actionAttributes: [
+//                        deletedAllForThisUser: false,
+//                        timeOfSkillEvent: performedSkill.performedOn.time,
+//                        userId: userIdToDisplay,
+//                ],
+//                itemId: userIdToDisplay,
+//                projectId: projectId,
+//        ))
+//
+//        res.success = skillEventResult.skillApplied
+//        res.explanation = skillEventResult.explanation
+//        return res
+    }
+
+    @Transactional
+    @Profile
     void deleteAllSkillEventsForSkill(Integer skillRefId) {
         SkillDefMin skillDef = skillEventsSupportRepo.findBySkillRefId(skillRefId)
         String projectId = skillDef.projectId

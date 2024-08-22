@@ -54,7 +54,7 @@ import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionsHistoryService
 import skills.services.video.AdminVideoService
-import skills.storage.model.ExpiredUserAchievement
+import skills.storage.model.SimpleSkillEvent
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.utils.ClientSecretGenerator
@@ -825,6 +825,15 @@ class AdminController {
                                               @PathVariable("userId") String userId) {
 
         return skillEventService.bulkDeleteSkillEventsForUser(projectId, userId?.toLowerCase())
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/users/{userId}/events/bulkDelete", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult deleteSkillEventBatchForUser(@PathVariable("projectId") String projectId,
+                                               @PathVariable("userId") String userId,
+                                               @RequestBody List<SimpleSkillEvent> skills) {
+
+        return skillEventService.deleteSkillEventBatch(projectId, userId?.toLowerCase(), skills)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/users/{userId}/events/{timestamp}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -45,6 +45,19 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     @Nullable
     List<UserPerformedSkill> findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(String projectId, String skillId, String userId, Date performedOn)
 
+//    @Query('''select u from UserPerformedSkill u
+//              where
+//              u.skillRefId in (
+//                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
+//                where s.projectId = ?1 and
+//                s.skillId = ?2 and
+//                s.enabled = 'true'
+//              ) and
+//              u.userId = ?3 and
+//              u.performedOn = ?4''')
+//    @Nullable
+//    List<UserPerformedSkill> findAllByProjectIdAndUserIdByBatch(String projectId, String userId, )
+
     @Query('''select count(distinct(u.userId)) as userCount, ut.value as tagValue 
               from UserPerformedSkill u
               join UserTag ut on ut.userId = u.userId
