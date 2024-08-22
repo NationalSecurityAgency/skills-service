@@ -15,8 +15,8 @@
  */
 package skills
 
-import ch.qos.logback.access.common.pattern.AccessConverter
-import ch.qos.logback.access.common.spi.IAccessEvent
+import ch.qos.logback.access.pattern.AccessConverter
+import ch.qos.logback.access.spi.IAccessEvent
 import ch.qos.logback.access.tomcat.LogbackValve
 import org.apache.catalina.connector.Connector
 import org.apache.coyote.http2.Http2Protocol

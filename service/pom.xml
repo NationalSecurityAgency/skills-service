@@ -161,14 +161,8 @@
         </dependency>
 
         <dependency>
-            <groupId>ch.qos.logback.access</groupId>
-            <artifactId>common</artifactId>
-            <version>2.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback.access</groupId>
-            <artifactId>tomcat</artifactId>
-            <version>2.0.3</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-access</artifactId>
         </dependency>
 
         <dependency>
