@@ -186,11 +186,10 @@ const deleteSelectedSkills = () => {
     rejectLabel: 'Cancel',
     accept: () => {
       table.value.options.busy = true;
-      const performedSkills = selectedSkills.value.map((it) => {
-        return { skillId: it.skillId, timestamp: dayjs(it.performedOn).valueOf() }
-      })
+      const performedSkills = selectedSkills.value.map((it) => it.id)
       UsersService.bulkDeleteSkillEvents(projectId.value, userId.value, performedSkills).then((data) => {
         if (data.success) {
+          selectedSkills.value = [];
           loadData();
           projectUserState.loadUserDetailsState(projectId.value, userId.value);
         } else {

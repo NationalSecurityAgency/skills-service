@@ -57,6 +57,7 @@ class UserAdminService {
             List<UserPerformedSkillRepo.PerformedSkillQRes> performedSkills = performedSkillRepository.findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, query, pageRequest)
             result.data = performedSkills.collect({
                 new SkillPerformed(
+                        id: it.getId(),
                         skillName: it.getSkillName(),
                         skillId: it.getSkillId(),
                         performedOn: it.getPerformedOn(),
