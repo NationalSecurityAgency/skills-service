@@ -186,18 +186,25 @@ const deleteSelectedSkills = () => {
     rejectLabel: 'Cancel',
     accept: () => {
       table.value.options.busy = true;
-      const performedSkills = selectedSkills.value.map((it) => it.id)
-      UsersService.bulkDeleteSkillEvents(projectId.value, userId.value, performedSkills).then((data) => {
-        if (data.success) {
-          selectedSkills.value = [];
-          loadData();
-          projectUserState.loadUserDetailsState(projectId.value, userId.value);
-        } else {
-          overallErrMsg.value = `Skills were not removed.  ${data.explanation}`;
-        }
-      }).finally(() => {
+      const filteredSkills = selectedSkills.value.filter((it) => !it.importedSkill);
+      const performedSkills = filteredSkills?.map((it) => it.id)
+
+      if(performedSkills.length > 0) {
+        UsersService.bulkDeleteSkillEvents(projectId.value, userId.value, performedSkills).then((data) => {
+          if (data.success) {
+            selectedSkills.value = [];
+            loadData();
+            projectUserState.loadUserDetailsState(projectId.value, userId.value);
+          } else {
+            overallErrMsg.value = `Skills were not removed.  ${data.explanation}`;
+          }
+        }).finally(() => {
+          table.value.options.busy = false;
+        });
+      } else {
+        overallErrMsg.value = `Cannot delete skill events for skills imported from the catalog.`;
         table.value.options.busy = false;
-      });
+      }
     },
   });
 }

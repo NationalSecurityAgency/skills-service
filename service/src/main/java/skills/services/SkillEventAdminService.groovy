@@ -363,19 +363,22 @@ class SkillEventAdminService {
     @Profile
     RequestResult deleteSkillEventBatch(String projectId, String userId, List<Integer> ids) {
 
-//        if (skillCatalogService.isSkillImportedFromCatalog(projectId, skillId)) {
-//            throw new SkillException("Cannot delete skill events on skills imported from the catalog", projectId, skillId)
-//        }
-//
         List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllByProjectIdAndUserIdAndIdList(projectId, userId, ids)
         if (!performedSkills) {
             throw new SkillException("These skill events do not exist", ErrorCode.BadParam)
+        }
+
+        performedSkills.each{ skill ->
+            if (skillCatalogService.isSkillImportedFromCatalog(projectId, skill.skillId)) {
+                throw new SkillException("Cannot delete skill events on skills imported from the catalog", projectId, skill.skillId)
+            }
         }
 
         log.debug("Deleting skills with ids [{}] for user [{}]", ids, userId)
 
         List<SkillDef> performedDependencies = performedSkillRepository.findPerformedParentSkillsById(userId, projectId, ids)
         if (performedDependencies) {
+            RequestResult res = new RequestResult()
             res.success = false
             res.explanation = "You cannot delete a skill event when a parent skill dependency has already been performed. You must first delete " +
                     "the performed skills for the parent dependencies: ${performedDependencies.collect({ it.projectId + ":" + it.skillId })}."

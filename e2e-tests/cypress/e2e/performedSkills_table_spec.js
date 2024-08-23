@@ -680,5 +680,118 @@ describe('Performed Skills Table Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '0');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '0');
     });
+
+    it('delete batch of skill events', () => {
+        cy.createSkills(3);
+        cy.report(3, false);
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents');
+
+        cy.intercept('DELETE', '/admin/projects/proj1/users/*/events/**')
+            .as('delete');
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'skill3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill1'
+            }],
+        ], 5);
+
+        cy.get('[data-cy="performedSkillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="performedSkills-deleteSelected"]').click()
+        cy.contains('Removing all selected skills.');
+        cy.contains('YES, Delete Them!').click();
+
+        cy.wait('@delete');
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'skill3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill1'
+            }],
+        ], 5);
+
+        cy.get('[data-cy="performedSkillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="performedSkillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="performedSkills-deleteSelected"]').click()
+        cy.contains('Removing all selected skills.');
+        cy.contains('YES, Delete Them!').click();
+
+        cy.wait('@delete');
+
+        cy.get(tableSelector).contains('There are no records to show').should('exist')
+
+    });
+
+    it('can not delete batch of skill events with dependencies', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
+        cy.createSkill(2, 1, 2, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
+        cy.createSkill(2, 1, 3, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+        cy.exportSkillToCatalog(2, 1, 3);
+
+        cy.reportSkill(2, 1, 'user6Good@skills.org', '2020-09-12 11:00');
+        cy.reportSkill(2, 2, 'user6Good@skills.org', '2020-09-12 11:05');
+        cy.reportSkill(2, 3, 'user6Good@skills.org', '2020-09-12 11:10');
+        cy.importSkillFromCatalog(1, 1, 2, 1);
+        cy.importSkillFromCatalog(1, 1, 2, 2);
+        cy.importSkillFromCatalog(1, 1, 2, 3);
+        cy.finalizeCatalogImport(1);
+
+        cy.visit('/administrator/projects/proj1/users/user6Good@skills.org/skillEvents');
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'skill3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill1'
+            }],
+        ], 5);
+
+        cy.get('[data-cy="performedSkillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="performedSkillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="performedSkillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="performedSkills-deleteSelected"]').click()
+        cy.contains('Removing all selected skills.');
+        cy.contains('YES, Delete Them!').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'skill3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'skill1'
+            }],
+        ], 5);
+
+        cy.contains('Cannot delete skill events for skills imported from the catalog.')
+    });
 });
 
