@@ -386,8 +386,7 @@ class SkillEventAdminService {
         }
 
         removePerformedSkillEvents(performedSkills)
-//        removeAssociatedQuizAttempts(performedSkill)
-//
+
         String userIdToDisplay = userAttrsRepo.findByUserIdIgnoreCase(userId)?.userIdForDisplay ?: userId
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: DashboardAction.Delete,
