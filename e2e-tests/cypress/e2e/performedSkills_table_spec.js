@@ -64,87 +64,87 @@ describe('Performed Skills Table Tests', () => {
         // default sort by date desc
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-23'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-22'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-21'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-20'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-19'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-18'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-17'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-16'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-15'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-14'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-13'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-12'
             }],
         ], 10);
@@ -154,87 +154,87 @@ describe('Performed Skills Table Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-12'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-13'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-14'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-15'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-16'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-17'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-18'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-19'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-20'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-21'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-22'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 1,
+                colIndex: 2,
                 value: '2020-09-23'
             }],
         ], 10);
@@ -307,23 +307,23 @@ describe('Performed Skills Table Tests', () => {
 
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'a few seconds ago'
             }],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'minutes ago'
             }],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'hours ago'
             }],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'days ago'
             }],
             [{
-                colIndex: 1,
+                colIndex: 2,
                 value: 'months ago'
             }],
         ], 5);
@@ -341,51 +341,51 @@ describe('Performed Skills Table Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill10'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill11'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill12'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill3'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill4'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill5'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill6'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill7'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill8'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill9'
             }],
         ], 10);
@@ -395,51 +395,51 @@ describe('Performed Skills Table Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill9'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill8'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill7'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill6'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill5'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill4'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill3'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill12'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill11'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill10'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }],
         ], 10);
@@ -459,19 +459,19 @@ describe('Performed Skills Table Tests', () => {
 
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill12'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill11'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill10'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }],
         ], 5);
@@ -482,7 +482,7 @@ describe('Performed Skills Table Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill10'
             }],
         ], 5);
@@ -498,7 +498,7 @@ describe('Performed Skills Table Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill2'
             }],
         ], 5);
@@ -518,7 +518,7 @@ describe('Performed Skills Table Tests', () => {
 
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill12'
             }],
         ], 5);
@@ -537,7 +537,7 @@ describe('Performed Skills Table Tests', () => {
             .should('have.value', 'Very Great Skill # 11');
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'Very Great Skill # 11'
             }],
         ], 5);
@@ -567,7 +567,7 @@ describe('Performed Skills Table Tests', () => {
 
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'what a crazy long id that comes back it should... >> more'
             }],
         ], 5);
@@ -577,7 +577,7 @@ describe('Performed Skills Table Tests', () => {
             .click();
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'what a crazy long id that comes back it should get truncated sure hope so << less'
             }],
         ], 5);
@@ -593,15 +593,15 @@ describe('Performed Skills Table Tests', () => {
 
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill3'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }],
         ], 5);
@@ -619,11 +619,11 @@ describe('Performed Skills Table Tests', () => {
 
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill3'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }],
         ], 5);
@@ -656,15 +656,15 @@ describe('Performed Skills Table Tests', () => {
 
         cy.validateTable(tableSelector, [
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill3'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill2'
             }],
             [{
-                colIndex: 0,
+                colIndex: 1,
                 value: 'skill1'
             }],
         ], 5);
