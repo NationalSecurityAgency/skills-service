@@ -45,6 +45,18 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     @Nullable
     List<UserPerformedSkill> findAllByProjectIdAndSkillIdAndUserIdAndPerformedOn(String projectId, String skillId, String userId, Date performedOn)
 
+    @Query('''select u from UserPerformedSkill u
+              where
+              u.skillRefId in (
+                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
+                where s.projectId = ?1 and
+                s.enabled = 'true'
+              ) and
+              u.userId = ?2 and
+              u.id in ?3''')
+    @Nullable
+    List<UserPerformedSkill> findAllByProjectIdAndUserIdAndIdList(String projectId, String userId, List<Integer> ids)
+
     @Query('''select count(distinct(u.userId)) as userCount, ut.value as tagValue 
               from UserPerformedSkill u
               join UserTag ut on ut.userId = u.userId
@@ -131,12 +143,13 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     Boolean existsByProjectIdAndUserId(String userId, String projectId)
 
     static interface PerformedSkillQRes {
+        String getId()
         String getProjectId()
         String getSkillName()
         String getSkillId()
         Date getPerformedOn()
     }
-    @Query('''select u.projectId as projectId, s.name as skillName, u.skillId as skillId, u.performedOn as performedOn 
+    @Query('''select u.projectId as projectId, s.name as skillName, u.skillId as skillId, u.performedOn as performedOn, u.id as id
               from UserPerformedSkill u, SkillDef s
               where u.skillRefId in (
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
@@ -198,6 +211,23 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
             ) and 
             srd.type='Dependence' ''')
     List<SkillDef> findPerformedParentSkills(String userId, String projectId, String skillId)
+
+    @Query(''' select DISTINCT(sdParent)
+        from SkillRelDef srd, SkillDef sdChild, SkillDef sdParent
+            inner join UserPerformedSkill ups on sdParent.id = ups.skillRefId and ups.userId=?1
+        where 
+            srd.parent.id = sdParent.id and 
+            srd.child.id=sdChild.id and
+            sdChild.id in (
+                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s 
+                where
+                s.projectId=?2 and
+                type = 'Skill' and
+                s.enabled = 'true'
+            ) and 
+            ups.id in ?3 and
+            srd.type='Dependence' ''')
+    List<SkillDef> findPerformedParentSkillsById(String userId, String projectId, List<Integer> ids)
 
     @Nullable
     @Query(value = '''

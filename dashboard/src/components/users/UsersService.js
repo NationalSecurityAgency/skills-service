@@ -41,6 +41,11 @@ export default {
       .then((response) => response.data)
   },
 
+  bulkDeleteSkillEvents(projectId, userId, skills) {
+    return axios.delete(
+        `/admin/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userId)}/events/bulkDelete`, { data: skills }
+    ).then((res) => res.data)
+  },
   deleteSkillEvent(projectId, skill, userId) {
     const timestamp = dayjs(skill.performedOn).valueOf()
     return axios

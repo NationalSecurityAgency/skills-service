@@ -173,9 +173,41 @@ const deleteSkill = (row) => {
     header: 'Please Confirm!',
     acceptLabel: 'YES, Delete It!',
     rejectLabel: 'Cancel',
-    accept: doDeleteSkill(row),
+    accept: () => {
+      doDeleteSkill(row);
+    },
   });
 };
+const deleteSelectedSkills = () => {
+  dialogMessages.msgConfirm({
+    message: `Removing all selected skills. This will permanently remove this user's performed skills and cannot be undone.`,
+    header: 'Please Confirm!',
+    acceptLabel: 'YES, Delete Them!',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      table.value.options.busy = true;
+      const filteredSkills = selectedSkills.value.filter((it) => !it.importedSkill);
+      const performedSkills = filteredSkills?.map((it) => it.id)
+
+      if(performedSkills.length > 0) {
+        UsersService.bulkDeleteSkillEvents(projectId.value, userId.value, performedSkills).then((data) => {
+          if (data.success) {
+            selectedSkills.value = [];
+            loadData();
+            projectUserState.loadUserDetailsState(projectId.value, userId.value);
+          } else {
+            overallErrMsg.value = `Skills were not removed.  ${data.explanation}`;
+          }
+        }).finally(() => {
+          table.value.options.busy = false;
+        });
+      } else {
+        overallErrMsg.value = `Cannot delete skill events for skills imported from the catalog.`;
+        table.value.options.busy = false;
+      }
+    },
+  });
+}
 const deleteAllSkills = () => {
   showDeleteDialog.value = true;
 };
@@ -221,6 +253,8 @@ const highlight = (value) => {
     return value;
   }
 }
+
+const selectedSkills = ref([]);
 </script>
 
 <template>
@@ -237,6 +271,7 @@ const highlight = (value) => {
             tableStoredStateId="performedSkillsTable"
             :value="table.items"
             :loading="table.options.busy"
+            v-model:selection="selectedSkills"
             show-gridlines
             striped-rows
             lazy
@@ -287,10 +322,19 @@ const highlight = (value) => {
                               data-cy="performedSkills-resetBtn"/>
               </div>
               <div class="flex">
+                <SkillsButton label="Delete Selected"
+                              icon="fa fa-trash"
+                              size="small"
+                              outlined
+                              :disabled="selectedSkills.length === 0"
+                              @click="deleteSelectedSkills"
+                              aria-label="Remove selected performed skills from user"
+                              data-cy="performedSkills-deleteSelected"/>
                 <SkillsButton label="Delete All"
                               icon="fa fa-trash"
                               size="small"
                               outlined
+                              class="ml-2"
                               :disabled="table.items.length === 0"
                               @click="deleteAllSkills"
                               aria-label="Remove all performed skills from user"
@@ -321,6 +365,13 @@ const highlight = (value) => {
               </span>
             </div>
           </template>
+          <Column selectionMode="multiple" :class="{'flex': responsive.md.value }">
+            <template #header>
+              <span class="mr-1 lg:mr-0 md:hidden">
+                <i class="fas fa-check-double" aria-hidden="true"></i> Select Skills:
+              </span>
+            </template>
+          </Column>
           <Column v-for="(col, index) in table.options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
                   :class="{'flex': responsive.md.value }">
             <template #header>

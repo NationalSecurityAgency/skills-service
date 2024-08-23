@@ -19,6 +19,7 @@ import groovy.transform.Canonical
 
 @Canonical
 class SkillPerformed {
+    String id
     String skillName
     String skillId
     Date performedOn

@@ -361,6 +361,50 @@ class SkillEventAdminService {
 
     @Transactional
     @Profile
+    RequestResult deleteSkillEventBatch(String projectId, String userId, List<Integer> ids) {
+
+        List<UserPerformedSkill> performedSkills = performedSkillRepository.findAllByProjectIdAndUserIdAndIdList(projectId, userId, ids)
+        if (!performedSkills) {
+            throw new SkillException("These skill events do not exist", ErrorCode.BadParam)
+        }
+
+        performedSkills.each{ skill ->
+            if (skillCatalogService.isSkillImportedFromCatalog(projectId, skill.skillId)) {
+                throw new SkillException("Cannot delete skill events on skills imported from the catalog", projectId, skill.skillId)
+            }
+        }
+
+        log.debug("Deleting skills with ids [{}] for user [{}]", ids, userId)
+
+        List<SkillDef> performedDependencies = performedSkillRepository.findPerformedParentSkillsById(userId, projectId, ids)
+        if (performedDependencies) {
+            RequestResult res = new RequestResult()
+            res.success = false
+            res.explanation = "You cannot delete a skill event when a parent skill dependency has already been performed. You must first delete " +
+                    "the performed skills for the parent dependencies: ${performedDependencies.collect({ it.projectId + ":" + it.skillId })}."
+            return res
+        }
+
+        removePerformedSkillEvents(performedSkills)
+
+        String userIdToDisplay = userAttrsRepo.findByUserIdIgnoreCase(userId)?.userIdForDisplay ?: userId
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.SkillEvents,
+                actionAttributes: [
+                        deletedAllForThisUser: false,
+                        userId: userIdToDisplay,
+                        skillIds: performedSkills.collect{ it.skillId}
+                ],
+                itemId: userIdToDisplay,
+                projectId: projectId,
+        ))
+
+        return RequestResult.success()
+    }
+
+    @Transactional
+    @Profile
     void deleteAllSkillEventsForSkill(Integer skillRefId) {
         SkillDefMin skillDef = skillEventsSupportRepo.findBySkillRefId(skillRefId)
         String projectId = skillDef.projectId

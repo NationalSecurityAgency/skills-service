@@ -91,7 +91,7 @@ describe('Self Report Skills Management Tests', () => {
     cy.visit('/administrator/projects/proj1/users/user1/skillEvents');
     cy.validateTable('[data-cy="performedSkillsTable"]', [
       [{
-        colIndex: 0,
+        colIndex: 1,
         value: 'skill3'
       }],
     ]);
