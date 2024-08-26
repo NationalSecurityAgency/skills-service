@@ -162,6 +162,9 @@ const headerOptions = computed(() => {
 })
 
 const isInsufficientPoints = computed(() => {
+  if (!project.value) {
+    return false
+  }
   const projPoints = project.value?.totalPoints || 0
   return projPoints < appConfig.minimumProjectPoints
 })
