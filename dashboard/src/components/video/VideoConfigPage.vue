@@ -38,6 +38,7 @@ import VideoFileInput from '@/components/video/VideoFileInput.vue';
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
+import { useProjectCommunityReplacement } from '@/components/customization/UseProjectCommunityReplacement.js'
 
 const dialogMessages = useDialogMessages()
 const VideoPlayer = defineAsyncComponent(() =>
@@ -50,6 +51,7 @@ const router = useRouter()
 const upgradeInProgressErrorChecker = useUpgradeInProgressErrorChecker()
 const appConfig = useAppConfig()
 const projConfig = useProjConfig()
+const projectCommunityReplacement = useProjectCommunityReplacement()
 const timeUtils = useTimeUtils()
 const announcer = useSkillsAnnouncer()
 const byteFormat = useByteFormat()
@@ -113,20 +115,14 @@ const isReadOnly = computed(() => {
   return isReused.value || isImported.value;
 });
 const videoUploadWarningMessage = computed(() => {
-  const communityProjDescriptor = /\{\{\s?community.project.descriptor\s?\}\}/gi;
-  const projCommunityValue = projConfig.getProjectCommunityValue()
   const warningMessageValue = appConfig?.videoUploadWarningMessage;
-  let result = warningMessageValue;
-  if (warningMessageValue) {
-    const found = warningMessageValue.match(communityProjDescriptor);
-    if (found && !projCommunityValue) {
-      const errorMessage = `projId=[${route.params.projectId}], skillId=[${route.params.skillId}] config.videoUploadWarningMessage contained {{community.project.descriptor}} property but failed to load [project_community_value] configuration for the replacement.`;
-      MsgLogService.log('ERROR', errorMessage);
-      router.push({ name: 'ErrorPage', query: { errorMessage } });
-    }
-    result = result.replace(communityProjDescriptor, projCommunityValue);
+  try {
+    return projectCommunityReplacement.populateProjectCommunity(warningMessageValue, projConfig.getProjectCommunityValue(), `projId=[${route.params.projectId}], skillId=[${route.params.skillId}] config.videoUploadWarningMessage `);
+  } catch(err) {
+    // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+    router.push({ name: 'ErrorPage', query: { err } });
   }
-  return result;
+  return warningMessageValue
 });
 
 onMounted(() => {

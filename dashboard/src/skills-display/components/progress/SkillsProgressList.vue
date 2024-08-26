@@ -116,29 +116,6 @@ const findLastViewedSkill = (skillsToCheck) => {
 const descriptionsLoaded = ref(false)
 const loading = ref(false)
 const descriptions = ref([])
-// const updateSkillForLoadedDescription = (skills, desc) => {
-//   let foundSkill = null
-//   console.log(desc)
-//   for (let i = 0; i < skills.length; i += 1) {
-//     const skill = skills[i]
-//     if (desc.skillId === skill.skillId) {
-//       foundSkill = skill
-//     } else if (skill.isSkillsGroupType) {
-//       foundSkill = skill.children.find((child) => desc.skillId === child.skillId)
-//     }
-//     if (foundSkill) {
-//       break
-//     }
-//   }
-//
-//   console.log(foundSkill)
-//   console.log('----------------------')
-//   if (foundSkill) {
-//     foundSkill.description = desc
-//     foundSkill.achievedOn = desc.achievedOn
-//     foundSkill.videoSummary = desc.videoSummary
-//   }
-// }
 const onDetailsToggle = () => {
   if (!descriptionsLoaded.value) {
     loading.value = true

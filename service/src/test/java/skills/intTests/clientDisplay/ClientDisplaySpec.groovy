@@ -306,5 +306,84 @@ class ClientDisplaySpec extends DefaultIntSpec {
         summary.projectDescription == desc
     }
 
+    def "project summary includes skill counts"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def skillsSubj2 = SkillsFactory.createSkills(2, 1, 2, 100)
+
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(skillsSubj2)
+
+        def users = getRandomUsers(3)
+        skillsService.addSkill(skills[0], users[0])
+        skillsService.addSkill(skills[1], users[0])
+        skillsService.addSkill(skillsSubj2[0], users[0])
+
+        3.times {  Integer index -> skillsService.addSkill(skills[index], users[1])}
+        2.times {  Integer index -> skillsService.addSkill(skillsSubj2[index], users[1])}
+
+        when:
+        def user1Summary = skillsService.getSkillSummary(users[0], proj.projectId)
+        def user2Summary = skillsService.getSkillSummary(users[1], proj.projectId)
+        def user3Summary = skillsService.getSkillSummary(users[2], proj.projectId)
+
+        def user1Subj1Summary = skillsService.getSkillSummary(users[0], proj.projectId, subj.subjectId)
+        def user2Subj1Summary = skillsService.getSkillSummary(users[1], proj.projectId, subj.subjectId)
+        def user3Subj1Summary = skillsService.getSkillSummary(users[2], proj.projectId, subj.subjectId)
+
+        def user1Subj2Summary = skillsService.getSkillSummary(users[0], proj.projectId, subj2.subjectId)
+        def user2Subj2Summary = skillsService.getSkillSummary(users[1], proj.projectId, subj2.subjectId)
+        def user3Subj2Summary = skillsService.getSkillSummary(users[2], proj.projectId, subj2.subjectId)
+
+        def user1Subj1SummaryWithoutSkills = skillsService.getSkillSummary(users[0], proj.projectId, subj.subjectId, -1, false)
+        def user2Subj1SummaryWithoutSkills = skillsService.getSkillSummary(users[1], proj.projectId, subj.subjectId, -1, false)
+        def user3Subj1SummaryWithoutSkills = skillsService.getSkillSummary(users[2], proj.projectId, subj.subjectId, -1, false)
+
+        def user1Subj2SummaryWithoutSkills = skillsService.getSkillSummary(users[0], proj.projectId, subj2.subjectId, -1, false)
+        def user2Subj2SummaryWithoutSkills = skillsService.getSkillSummary(users[1], proj.projectId, subj2.subjectId, -1, false)
+        def user3Subj2SummaryWithoutSkills = skillsService.getSkillSummary(users[2], proj.projectId, subj2.subjectId, -1, false)
+
+
+        then:
+        user1Summary.skillsAchieved == 3
+        user1Summary.totalSkills == 5
+        user2Summary.skillsAchieved == 5
+        user2Summary.totalSkills == 5
+        user3Summary.skillsAchieved == 0
+        user3Summary.totalSkills == 5
+
+        user1Subj1Summary.skillsAchieved == 2
+        user1Subj1Summary.totalSkills == 3
+        user2Subj1Summary.skillsAchieved == 3
+        user2Subj1Summary.totalSkills == 3
+        user3Subj1Summary.skillsAchieved == 0
+        user3Subj1Summary.totalSkills == 3
+
+        user1Subj2Summary.skillsAchieved == 1
+        user1Subj2Summary.totalSkills == 2
+        user2Subj2Summary.skillsAchieved == 2
+        user2Subj2Summary.totalSkills == 2
+        user3Subj2Summary.skillsAchieved == 0
+        user3Subj2Summary.totalSkills == 2
+
+        user1Subj1SummaryWithoutSkills.skillsAchieved == 2
+        user1Subj1SummaryWithoutSkills.totalSkills == 3
+        user2Subj1SummaryWithoutSkills.skillsAchieved == 3
+        user2Subj1SummaryWithoutSkills.totalSkills == 3
+        user3Subj1SummaryWithoutSkills.skillsAchieved == 0
+        user3Subj1SummaryWithoutSkills.totalSkills == 3
+
+        user1Subj2SummaryWithoutSkills.skillsAchieved == 1
+        user1Subj2SummaryWithoutSkills.totalSkills == 2
+        user2Subj2SummaryWithoutSkills.skillsAchieved == 2
+        user2Subj2SummaryWithoutSkills.totalSkills == 2
+        user3Subj2SummaryWithoutSkills.skillsAchieved == 0
+        user3Subj2SummaryWithoutSkills.totalSkills == 2
+    }
+
 }
 

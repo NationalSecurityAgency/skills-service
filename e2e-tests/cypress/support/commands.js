@@ -522,6 +522,13 @@ Cypress.Commands.add("createProject", (projNum = 1, overrideProps = {}) => {
     }, overrideProps));
 });
 
+Cypress.Commands.add("updateProject", (projNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/admin/projects/proj${projNum}`, Object.assign({
+        projectId: `proj${projNum}`,
+        name: `This is project ${projNum}`
+    }, overrideProps));
+});
+
 Cypress.Commands.add("createSubject", (projNum = 1, subjNum = 1, overrideProps = {}) => {
     cy.request('POST', `/admin/projects/proj${projNum}/subjects/subj${subjNum}`, Object.assign({
         projectId: `proj${projNum}`,
@@ -1470,3 +1477,11 @@ Cypress.Commands.add('filterSelection', (selector, filter) => {
     cy.get(itemToSelect).click();
     cy.get('[data-pc-section="filterinput"]').type(filter);
 })
+
+Cypress.Commands.add("readPdf", (pathToPdf) => {
+    cy.readFile(pathToPdf, { timeout: 10000 }).then(() => {
+        // file exists and was successfully read
+        cy.log(`Transcript [${pathToPdf}] Found!`)
+    })
+    return cy.task('readPdf', pathToPdf)
+});

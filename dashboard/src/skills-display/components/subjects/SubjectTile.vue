@@ -20,10 +20,9 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import CardWithVericalSections from '@/components/utils/cards/CardWithVericalSections.vue'
 import LevelsProgress from '@/skills-display/components/utilities/LevelsProgress.vue'
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 const props = defineProps({
   subject: {
@@ -40,7 +39,6 @@ const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const numFormat = useNumberFormat()
 const ribbonColor = ['#4472ba', '#c74a41', '#44843E', '#BE5A09', '#A15E9A', '#23806A'][props.tileIndex % 6]
-const themeState = useSkillsDisplayThemeState()
 const themeHelper = useThemesHelper()
 
 const progress = computed(() => {

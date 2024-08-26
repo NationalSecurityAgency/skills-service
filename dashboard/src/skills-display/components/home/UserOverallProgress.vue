@@ -23,6 +23,7 @@ import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePlu
 import SkillLevel from '@/skills-display/components/progress/MySkillLevel.vue'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
 
 const props = defineProps({
   isSubject: {
@@ -40,6 +41,10 @@ const themeState = useSkillsDisplayThemeState()
 const attributes = useSkillsDisplayAttributesState()
 const numFormat = useNumberFormat()
 const pluralSupport = useLanguagePluralSupport()
+
+const totalSkills = computed(() => userProgressSummaryState.userProgressSummary?.totalSkills || 0)
+const skillsAchieved = computed(() => userProgressSummaryState.userProgressSummary?.skillsAchieved || 0)
+const skillsPercentAchieved = computed(() => totalSkills.value > 0 ? Math.round((skillsAchieved.value / totalSkills.value) * 100) : 0)
 
 const beforeTodayColor = computed(() => themeState.theme.progressIndicators?.beforeTodayColor || '#14a3d2')
 const earnedTodayColor = computed(() => themeState.theme.progressIndicators?.earnedTodayColor || '#7ed6f3')
@@ -110,6 +115,20 @@ const levelStats = computed(() => {
               </div>
             </template>
           </circle-progress>
+        </div>
+      </div>
+      <div class="mt-6 mx-5 flex justify-content-center">
+        <div class="w-11">
+        <div class="flex mb-1" :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`">
+          <div class="flex-1 text-lg font-medium">Achieved Skills</div>
+          <div><span class="text-color-warn font-medium sd-theme-primary-color">{{skillsAchieved}}</span> / {{totalSkills}}</div>
+        </div>
+        <vertical-progress-bar
+          :total-progress="skillsPercentAchieved"
+          :barSize="8"
+          beforeTodayBarColor="bg-primary"
+          :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`"
+        />
         </div>
       </div>
     </template>

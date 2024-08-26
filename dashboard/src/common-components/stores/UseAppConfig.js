@@ -144,6 +144,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const numProjectsToStartShowingAsCards = computed(() => config.value.numProjectsToStartShowingAsCards)
   const disableScrollToTop = computed(() => config.value.disableScrollToTop)
   const dbUpgradeInProgress = computed(() => isTrue(config.value.dbUpgradeInProgress))
+  const exportHeaderAndFooter = computed(() => config.value.exportHeaderAndFooter)
   return {
     loadConfigState,
     refreshConfig,
@@ -229,5 +230,6 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     numProjectsToStartShowingAsCards,
     disableScrollToTop,
     dbUpgradeInProgress,
+    exportHeaderAndFooter,
   }
 })
