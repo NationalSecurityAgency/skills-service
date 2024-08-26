@@ -15,13 +15,13 @@ limitations under the License.
 */
 <script setup>
 import { computed } from 'vue'
-import { useTranscriptPdfExport1 } from '@/skills-display/components/userTranscript/UseTranscriptPdfExport1.js'
+import { useTranscriptPdfExport } from '@/skills-display/components/userTranscript/UseTranscriptPdfExport.js'
 import { useLoadTranscriptData } from '@/skills-display/components/userTranscript/UseLoadTranscriptData.js'
 import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
 import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
 
 const loadTranscriptData = useLoadTranscriptData()
-const transcriptPdfExport = useTranscriptPdfExport1()
+const transcriptPdfExport = useTranscriptPdfExport()
 const userProgressSummaryState = useUserProgressSummaryState()
 const plural = useLanguagePluralSupport()
 

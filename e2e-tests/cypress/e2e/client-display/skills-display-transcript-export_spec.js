@@ -427,6 +427,7 @@ describe('Transcript export tests', () => {
   })
 
   it('long names for project, subjects, skills, badges and labels', () => {
+
     const projName = 'This is a very long project name yes it is there!'
     cy.request('POST', '/app/userInfo', {
       'first': 'Joe',
@@ -434,6 +435,33 @@ describe('Transcript export tests', () => {
       'nickname': 'Joe Doe'
     })
     cy.createProject(1, { name: projName })
+    cy.request('POST', '/admin/projects/proj1/settings', [
+      {
+        value: 'Very Silly and Long Project Label',
+        setting: 'project.displayName',
+        projectId: 'proj1',
+      },
+      {
+        value: 'Very Silly and Long Subject Label',
+        setting: 'subject.displayName',
+        projectId: 'proj1',
+      },
+      {
+        value: 'KSA',
+        setting: 'group.displayName',
+        projectId: 'proj1',
+      },
+      {
+        value: 'Very Silly and Long Skill Label',
+        setting: 'skill.displayName',
+        projectId: 'proj1',
+      },
+      {
+        value: 'Very Silly and Long Level Label',
+        setting: 'level.displayName',
+        projectId: 'proj1',
+      },
+    ]);
     cy.createSubject(1, 1, { name: 'Very long but yet respectful Subject # 1; how far?'})
     cy.createSkill(1, 1, 1, { name: 'Very long but yet respectful Skill # 1; how far can it really go?', pointIncrement: 4500, numPerformToCompletion: 100 })
     cy.createSkill(1, 1, 2, { name: 'Very long but yet respectful Skill # 2; how far can it really go?'})
@@ -468,5 +496,74 @@ describe('Transcript export tests', () => {
     })
   })
 
+  it('long names for project, subjects, skills, badges and labels', () => {
+
+    const projName = 'Long names but not spaces sadly'
+    cy.request('POST', '/app/userInfo', {
+      'first': 'Joe',
+      'last': 'Doe',
+      'nickname': 'Joe Doe'
+    })
+    cy.createProject(1, { name: projName })
+    cy.request('POST', '/admin/projects/proj1/settings', [
+      {
+        value: 'VerySillyandLongProjectLabel',
+        setting: 'project.displayName',
+        projectId: 'proj1',
+      },
+      {
+        value: 'VerySillyandLongSubjectLabel',
+        setting: 'subject.displayName',
+        projectId: 'proj1',
+      },
+      {
+        value: 'KSA',
+        setting: 'group.displayName',
+        projectId: 'proj1',
+      },
+      {
+        value: 'VerySillyandLongSkillLabel',
+        setting: 'skill.displayName',
+        projectId: 'proj1',
+      },
+      {
+        value: 'VerySillyandLongLevelLabel',
+        setting: 'level.displayName',
+        projectId: 'proj1',
+      },
+    ]);
+    cy.createSubject(1, 1, { name: 'VerylongbutyetrespectfulSubject#1;howfar?'})
+    cy.createSkill(1, 1, 1, { name: 'VerylongbutyetrespectfulSkill#1;howfarcanitreallygo?', pointIncrement: 4500, numPerformToCompletion: 100 })
+    cy.createSkill(1, 1, 2, { name: 'VerylongbutyetrespectfulSkill#2;howfarcanitreallygo?'})
+    cy.createSkill(1, 1, 3, { name: 'VerylongbutyetrespectfulSkill#3;howfarcanitreallygo?', numPerformToCompletion: 1})
+    cy.createSkill(1, 1, 4, { name: 'VerylongbutyetrespectfulSkill#4;howfarcanitreallygo?'})
+    cy.createSkill(1, 1, 5, { name: 'shortname'})
+    cy.createSkill(1, 1, 6, { name: 'tiny'})
+    cy.createSkill(1, 1, 7, { name: 'VerylongbutrespectfulSkill#7;howfarcanitreallygo?Letuskeepongoingandsee100chars'})
+    cy.createSkill(1, 1, 8, { name: 'smallagain'})
+    cy.createSkill(1, 1, 9, { name: 'VerylongbutrespectfulSkill#9;howfarcanitreallygo?Letuskeepongoingandsee100chars'})
+
+    cy.createSubject(1, 2, { name: 'Very long but yet respectful Subject # 2; how far?'})
+
+    const user = Cypress.env('proxyUser')
+    cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: user, date: 'now' })
+    cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: user, date: 'now' })
+
+    cy.createBadge(1, 1, { name: 'VerylongbutyetrespectfulBadge#1;howfar?'})
+    cy.assignSkillToBadge(1, 1, 3)
+    cy.enableBadge(1, 1, { name: 'VerylongbutyetrespectfulBadge#1;howfar?'})
+
+    cy.createBadge(1, 2, { name: 'VerylongbutyetrespectfulBadge#2;howfar?'})
+    cy.assignSkillToBadge(1, 2, 3)
+    cy.enableBadge(1, 2, { name: 'VerylongbutyetrespectfulBadge#2;howfar?'})
+
+    cy.cdVisit('/')
+    cy.get('[data-cy="downloadTranscriptBtn"]').click()
+
+    cy.readTranscript(projName).then((doc) => {
+      expect(doc.numpages).to.equal(3)
+      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+    })
+  })
 
 })

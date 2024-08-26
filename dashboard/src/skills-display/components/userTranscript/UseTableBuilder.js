@@ -51,7 +51,10 @@ export const useTableBuilder = () => {
     doc.lineGap(lineGap)
 
     const additionalWidthForSmallColumns = 30
-    const columnWidths =tableInfo.headers.map((header, index) => {
+    const columnWidths = tableInfo.headers.map((header, index) => {
+      if (doc.widthOfString(header) > 50) {
+        return 90
+      }
       const cellsInColumnWidths = tableInfo.rows.map((row) => Math.trunc(doc.widthOfString(row[index])))
       const maxCellInColumnWidth = Math.max(...cellsInColumnWidths)
       return maxCellInColumnWidth + additionalWidthForSmallColumns
@@ -59,14 +62,48 @@ export const useTableBuilder = () => {
     // adjust the first column to be the remaining of the rest
     columnWidths[0] = totalWidth - columnWidths.slice(1).reduce((a, b) => a + b, 0)
     let currentColumnX = startX
+
+    const calculateNumRows = (doc, colValue, colWidth) => {
+      if (doc.widthOfString(colValue) <= colWidth) {
+        return 1
+      }
+
+      const words = colValue.split(' ');
+      let numRows = 1
+      let currentRowWidth = 0
+      console.log(`calculating num rows for [${colValue}] with width ${colWidth}`)
+      while (words.length > 0) {
+        let word = words.shift()
+        const wordToCheck = (currentRowWidth > 0) ? ` ${word} ` : word
+        console.log(`  word to check: [${wordToCheck}], currentRowWidth: ${currentRowWidth}, colWidth: ${colWidth}`)
+        // check if fits current row
+        if( currentRowWidth + doc.widthOfString(wordToCheck) <= colWidth) {
+          currentRowWidth += doc.widthOfString(wordToCheck)
+          console.log(`    word ${wordToCheck} fits in current row, currentRowWidth: ${currentRowWidth}, colWidth: ${colWidth}, numRows: ${numRows}`)
+        } else {
+          const currWordWith = doc.widthOfString(`${word} `)
+          const numRowsToAdd = (currWordWith <= colWidth ) ? 1 : Math.trunc(currWordWith / colWidth)
+          numRows = numRows + numRowsToAdd
+          currentRowWidth = currWordWith % colWidth
+          console.log(`    word ${wordToCheck} does not fit in current row, currentRowWidth: ${currentRowWidth}, colWidth: ${colWidth},numRows: ${numRows}, currWordWith: ${currWordWith}`)
+        }
+      }
+
+      return numRows
+    }
+
     const headersWrapped = tableInfo.headers.map((header, index) => {
       if (index > 0) {
         currentColumnX += columnWidths[index - 1]
       }
+      const width = columnWidths[index]
+      const valueWidth = doc.widthOfString(header)
+      const numRows = calculateNumRows(doc, header, width)
       return {
-        value: header, x: currentColumnX, width: columnWidths[index]
+        value: header, x: currentColumnX, width, valueWidth, numRows
       }
     })
+    console.log(headersWrapped)
     const rowsWrapped = tableInfo.rows.map((row) => {
       return row.map((cell, index) => {
         const column = tableInfo.headers[index]
@@ -82,13 +119,23 @@ export const useTableBuilder = () => {
     const addTableHeaders = () => {
       const headerRowConstruct = doc.struct('TR', { title: `Header Row` })
       table.add(headerRowConstruct)
-      addRectangle(doc, headerRowConstruct, true)
+      const numRowsArray = headersWrapped.map((header) => header.numRows)
+      const maxRows = Math.max(...numRowsArray)
+      addRectangle(doc, headerRowConstruct, true, maxRows)
+
       headersWrapped.forEach((cell, cellIndex) => {
         if (cellIndex > 0) {
-          doc.moveUp()
+          const numToMoveUp = headersWrapped[cellIndex - 1].numRows
+          console.log(cell)
+          for(let i = 0; i < numToMoveUp; i++) {
+            console.log(` moving up ${i}`)
+            doc.moveUp()
+          }
         }
         const cellStruct = doc.struct('TH', { title: `${cell.column} Column Header` }, () => {
-          doc.text(`${cell.value} `, cell.x)
+          const startY = doc.y
+          doc.text(`${cell.value} `, cell.x, null, { width: cell.width, align: 'left' })
+          console.log(`cell: [${cell.value}], height=${doc.y-startY}, y=[${startY}]=>[${doc.y}], width=${cell.width}, rows=${cell.numRows}, valWidth=${cell.valueWidth}`)
         })
         headerRowConstruct.add(cellStruct)
       })
@@ -96,18 +143,27 @@ export const useTableBuilder = () => {
       doc.fillColor(arrowColor1)
     }
     addTableHeaders()
+    const maxHeaderRows = Math.max(...headersWrapped.map((header) => header.numRows))
+    const lastColumnRows = headersWrapped[headersWrapped.length - 1].numRows
+    console.log(`lastColumnRows: ${lastColumnRows}, maxHeaderRows: ${maxHeaderRows}`)
+    if (lastColumnRows < maxHeaderRows) {
+      const moveDown = maxHeaderRows - lastColumnRows
+      for (let i = 0; i < moveDown; i++) {
+        doc.moveDown()
+      }
+    }
 
     for (let rowIndex = 0; rowIndex < rowsWrapped.length; rowIndex++) {
       const row = rowsWrapped[rowIndex]
       const rowStruct = doc.struct('TR', { title: `Row ${rowIndex}` })
       table.add(rowStruct)
-      if (rowIndex === 0 || rowIndex % 2 === 0) {
+      const isEvenRow = rowIndex === 0 || rowIndex % 2 === 0
+      if (!isEvenRow) {
         const longCellValue = row.reduce((longest, current) => {
           return current.value.length > longest.length ? current.value : longest;
         }, '');
-        const widthOfLongestCell = doc.widthOfString(longCellValue)
         const maxWidth = headersWrapped[0].width
-        const numRows = Math.trunc(widthOfLongestCell / maxWidth) + 1
+        const numRows = calculateNumRows(doc, longCellValue, maxWidth)
         addRectangle(doc, rowStruct, false, numRows)
       }
 

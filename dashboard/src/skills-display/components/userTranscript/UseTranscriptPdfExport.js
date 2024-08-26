@@ -21,7 +21,7 @@ import dayjs from '@/common-components/DayJsCustomizer.js'
 import { useTableBuilder } from '@/skills-display/components/userTranscript/UseTableBuilder.js'
 import { usePdfBuilderHelper } from '@/skills-display/components/userTranscript/UsePdfBuilderHelper.js'
 
-export const useTranscriptPdfExport1 = () => {
+export const useTranscriptPdfExport = () => {
 
   const base64Images = useBase64Images()
   const numFormat = useNumberFormat()
@@ -117,18 +117,22 @@ export const useTranscriptPdfExport1 = () => {
 
       const earnedBadgesStruct = doc.struct('Sect', { title: `Earned Badges` })
       overallTranscript.add(earnedBadgesStruct)
-      pdfHelper.addTitle(doc, earnedBadgesStruct, 'Earned Badges')
+      pdfHelper.addTitle(doc, earnedBadgesStruct, 'Earned Badges', pageStartY)
 
       const tableInfo = {
-        title: 'Earned Badges Table',
+        headerAndFooter: info.headerAndFooter,
+        structTitle: 'Earned Badges Table',
+        sectionTitle: 'Earned Badges Table',
         headers: [`${info.labelsConf.badge}`, 'Achieved On'],
         rows: info.achievedBadges.map((badge) => {
           return [
             badge.name,
-            timeUtils.formatDate(dayjs(badge.dateAchieved))
+            dayjs(badge.dateAchieved).format('YYYY-MM-DD')
           ]
         })
       }
+      doc.moveDown(0.5)
+
       tableBuilder.addTable(doc, overallTranscript, earnedBadgesStruct, tableInfo)
 
       earnedBadgesStruct.end()

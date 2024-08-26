@@ -21,7 +21,6 @@ import SkillPage from '@/skills-display/components/skill/SkillPage.vue'
 import BadgesDetailsPage from '@/skills-display/components/badges/BadgesDetailsPage.vue'
 import BadgeDetailsPage from '@/skills-display/components/badges/BadgeDetailsPage.vue'
 import QuizPage from '@/skills-display/components/quiz/QuizPage.vue'
-import TranscriptPage from '@/skills-display/components/userTranscript/TranscriptPage.vue'
 
 const createSkillsDisplayChildRoutes = (appendToName) => {
 
@@ -158,17 +157,6 @@ const createSkillsDisplayChildRoutes = (appendToName) => {
       nonAdmin: true,
       announcer: {
         message: 'Error Page'
-      }
-    }
-  }, {
-    path: 'transcript',
-    component: TranscriptPage,
-    name: `userTranscript${appendToName}`,
-    meta: {
-      requiresAuth: true,
-      nonAdmin: true,
-      announcer: {
-        message: 'My Transcript'
       }
     }
   }]
