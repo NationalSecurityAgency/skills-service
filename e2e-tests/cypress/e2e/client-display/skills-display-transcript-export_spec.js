@@ -95,7 +95,7 @@ describe('Transcript export tests', () => {
 
     cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(2)
-      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+      expect(clean(doc.text)).to.include('SkillTree Transcript')
       expect(clean(doc.text)).to.include(projName)
       expect(clean(doc.text)).to.include('Level: 1 / 5 ')
       expect(clean(doc.text)).to.include('Points: 100 / 600 ')
@@ -144,7 +144,7 @@ describe('Transcript export tests', () => {
 
     cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(4)
-      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+      expect(clean(doc.text)).to.include('SkillTree Transcript')
       expect(clean(doc.text)).to.include(projName)
       expect(clean(doc.text)).to.include('Level: 1 / 5 ')
       expect(clean(doc.text)).to.include('Points: 600 / 2,600 ')
@@ -199,7 +199,7 @@ describe('Transcript export tests', () => {
 
     cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(5)
-      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+      expect(clean(doc.text)).to.include('SkillTree Transcript')
       expect(clean(doc.text)).to.include(projName)
       expect(clean(doc.text)).to.include('Level: 1 / 5 ')
       expect(clean(doc.text)).to.include('Points: 600 / 2,600 ')
@@ -240,7 +240,7 @@ describe('Transcript export tests', () => {
     const numExpectedPages = 2
     cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(numExpectedPages)
-      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+      expect(clean(doc.text)).to.include('SkillTree Transcript')
       expect(clean(doc.text)).to.include(projName)
       expect((clean(doc.text).match(new RegExp(expectedHeaderAndFooter, 'g')) || []).length).to.equal(numExpectedPages*2)
       expect(clean(doc.text)).to.not.include(expectedHeaderAndFooterCommunityProtected)
@@ -289,7 +289,7 @@ describe('Transcript export tests', () => {
       const numExpectedPages = 2
       cy.readTranscript(projName).then((doc) => {
         expect(doc.numpages).to.equal(numExpectedPages)
-        expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+        expect(clean(doc.text)).to.include('SkillTree Transcript')
         expect(clean(doc.text)).to.include(projName)
         expect(clean(doc.text)).to.not.include(expectedHeaderAndFooter)
         expect((clean(doc.text).match(new RegExp(expectedHeaderAndFooterCommunityProtected, 'g')) || []).length).to.equal(numExpectedPages * 2)
@@ -343,7 +343,7 @@ describe('Transcript export tests', () => {
       const numExpectedPages = 18
       cy.readTranscript(projName).then((doc) => {
         expect(doc.numpages).to.equal(numExpectedPages)
-        expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+        expect(clean(doc.text)).to.include('SkillTree Transcript')
         expect(clean(doc.text)).to.include(projName)
         // 18 pages * 2
         expect((clean(doc.text).match(new RegExp(expectedHeaderAndFooterCommunityProtected, 'g')) || []).length).to.equal(numExpectedPages * 2)
@@ -394,7 +394,7 @@ describe('Transcript export tests', () => {
     const numExpectedPages = 9
     cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(numExpectedPages)
-      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+      expect(clean(doc.text)).to.include('SkillTree Transcript')
       expect(clean(doc.text)).to.include(projName)
       expect(clean(doc.text)).to.include('Level: 0 / 5 ')
       expect(clean(doc.text)).to.include('Points: 600 / 21,000 ')
@@ -492,7 +492,7 @@ describe('Transcript export tests', () => {
 
     cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(3)
-      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+      expect(clean(doc.text)).to.include('SkillTree Transcript')
     })
   })
 
@@ -562,8 +562,74 @@ describe('Transcript export tests', () => {
 
     cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(3)
-      expect(clean(doc.text)).to.include('SkillTree TRANSCRIPT')
+      expect(clean(doc.text)).to.include('SkillTree Transcript')
     })
   })
+
+  it('admins can export transcript of users', () => {
+    const projName = 'Proj with multiple users'
+    cy.request('POST', '/app/userInfo', {
+      'first': 'Joe',
+      'last': 'Doe',
+      'nickname': 'Joe Doe'
+    })
+    cy.createProject(1, { name: projName })
+    const createSubjectAndSkills = (subjNum, numOfSkills) => {
+      cy.createSubject(1, subjNum)
+      for (let i = 1; i <= numOfSkills; i++) {
+        cy.createSkill(1, subjNum, i, { numPerformToCompletion: 1 })
+      }
+    }
+    createSubjectAndSkills(1, 12)
+    createSubjectAndSkills(2, 6)
+    createSubjectAndSkills(3, 8)
+    cy.createSubject(1, 4)
+
+    const user1 = "user1"
+    const user2 = "user2"
+    cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: user1, date: 'now' })
+    cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: user1, date: 'now' })
+    cy.doReportSkill({ project: 1, skill: 3, subjNum: 3, userId: user1, date: 'now' })
+    cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: user1, date: 'now' })
+    cy.doReportSkill({ project: 1, skill: 5, subjNum: 3, userId: user2, date: 'now' })
+    cy.doReportSkill({ project: 1, skill: 7, subjNum: 3, userId: user2, date: 'now' })
+
+
+    cy.visit('/administrator/projects/proj1/users/')
+    cy.get('[data-cy="usersTable_viewDetailsLink"]').contains('user1').click()
+    cy.get('[data-cy="pageHeader"]').contains('ID: user1')
+    cy.get('[data-cy="skillsDisplayHome"] [data-cy="downloadTranscriptBtn"]').click()
+
+    cy.readPdf('cypress/downloads/Proj with multiple users - user1 - Transcript.pdf').then((doc) => {
+      expect(doc.numpages).to.equal(4)
+      expect(clean(doc.text)).to.include('SkillTree Transcript')
+      expect(clean(doc.text)).to.include(projName)
+      expect(clean(doc.text)).to.include(user1)
+      expect(clean(doc.text)).to.not.include(user2)
+      expect(clean(doc.text)).to.include('Level: 1 / 5 ')
+      expect(clean(doc.text)).to.include('Points: 400 / 2,600 ')
+      expect(clean(doc.text)).to.include('Skills: 4 / 26 ')
+      expect(clean(doc.text)).to.not.include('Badges')
+    })
+
+    cy.get('[data-cy="breadcrumb-Users"]').click()
+    cy.get('[data-cy="usersTable_viewDetailsLink"]').contains('user2').click()
+    cy.get('[data-cy="pageHeader"]').contains('ID: user2')
+    cy.get('[data-cy="skillsDisplayHome"] [data-cy="downloadTranscriptBtn"]').click()
+
+    cy.readPdf('cypress/downloads/Proj with multiple users - user2 - Transcript.pdf').then((doc) => {
+      expect(doc.numpages).to.equal(4)
+      expect(clean(doc.text)).to.include('SkillTree Transcript')
+      expect(clean(doc.text)).to.include(projName)
+      expect(clean(doc.text)).to.include(user2)
+      expect(clean(doc.text)).to.not.include(user1)
+      expect(clean(doc.text)).to.include('Level: 0 / 5 ')
+      expect(clean(doc.text)).to.include('Points: 200 / 2,600 ')
+      expect(clean(doc.text)).to.include('Skills: 2 / 26 ')
+      expect(clean(doc.text)).to.not.include('Badges')
+    })
+
+  })
+
 
 })

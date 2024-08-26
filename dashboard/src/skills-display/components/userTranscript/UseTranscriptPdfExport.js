@@ -78,7 +78,7 @@ export const useTranscriptPdfExport = () => {
 
   const setDocMetaData = (doc, info) => {
     // Set some meta data
-    doc.info['Title'] = `SkillTree ${info.userName} TRANSCRIPT for ${info.userName}`
+    doc.info['Title'] = `SkillTree ${info.projectName} Transcript for ${info.userName}`
     doc.info['Author'] = 'SkillTree'
     doc.info['Subject'] = 'Project Transcript'
     doc.info['Keywords'] = 'skilltree,transcript,pdf,project'
@@ -187,7 +187,7 @@ export const useTranscriptPdfExport = () => {
     )
     titlePageHeader.add(
       doc.struct('H', () => {
-        doc.fontSize(20).fillColor(pdfHelper.darkGreen).text('SkillTree TRANSCRIPT ', 73, pageStartY)
+        doc.fontSize(20).fillColor(pdfHelper.darkGreen).text('SkillTree Transcript ', 73, pageStartY)
       })
     )
     pdfHelper.resetTextStyle(doc)
