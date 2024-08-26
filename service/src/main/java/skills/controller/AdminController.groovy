@@ -27,6 +27,8 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.servlet.view.document.AbstractXlsxView
 import skills.PublicProps
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
@@ -1010,6 +1012,19 @@ class AdminController {
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest, minimumPoints)
+    }
+
+    @GetMapping(value = "/projects/{projectId}/users/excelExport")//, produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", name = "exportUsers")
+    @CompileStatic
+    ModelAndView exportProjectUsers(@PathVariable("projectId") String projectId,
+                                    @RequestParam String query,
+                                    @RequestParam String orderBy,
+                                    @RequestParam Boolean ascending,
+                                    @RequestParam int minimumPoints) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
+        PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE, ascending ? ASC : DESC, orderBy)
+        return adminUsersService.exportUsersForProject(projectId, query, pageRequest, minimumPoints);
     }
 
     @GetMapping(value="/projects/{projectId}/{userId}/canAccess", produces='application/json')

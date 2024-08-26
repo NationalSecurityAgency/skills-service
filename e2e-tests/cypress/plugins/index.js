@@ -47,6 +47,7 @@ const deleteFolderRecursive = function(path) {
         });
         fs.rmdirSync(path);
     }
+    return null;
 };
 
 const a11yScoresDir = 'a11y_scores';
@@ -165,7 +166,8 @@ module.exports = (on, config) => {
             }
             return files;
         },
-        readPdf
+        deleteFolderRecursive,
+        readPdf,
     });
 };
 

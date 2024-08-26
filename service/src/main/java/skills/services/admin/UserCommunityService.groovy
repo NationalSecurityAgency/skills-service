@@ -37,6 +37,8 @@ import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRoleRepo
 import skills.storage.repos.UserTagRepo
 
+import java.util.regex.Pattern
+
 @Service
 @Slf4j
 class UserCommunityService {
@@ -72,6 +74,9 @@ class UserCommunityService {
     String userCommunityUserTagValue
     String defaultUserCommunityName
     String restrictedUserCommunityName
+
+    private static final Pattern COMMUNITY_DESCRIPTOR = ~/(?i)\{\{\s?community.descriptor\s?\}\}/
+    private static final Pattern PROJECT_COMMUNITY_DESCRIPTOR = ~/(?i)\{\{\s?community.project.descriptor\s?\}\}/
 
     @PostConstruct
     void init() {
@@ -156,4 +161,16 @@ class UserCommunityService {
         return isUserCommunityOnlyProject ? restrictedUserCommunityName : defaultUserCommunityName;
     }
 
+    Boolean containsProjectUserCommunityDescriptorVar(String text) {
+        return text =~ PROJECT_COMMUNITY_DESCRIPTOR
+    }
+
+    String replaceProjectDescriptorVar(String value, String communityHeaderDescriptor) {
+        if (value && containsProjectUserCommunityDescriptorVar(value)) {
+            assert communityHeaderDescriptor, "Project User Community Header variable found in header/footer, but no replace value found in encodedParams"
+            return PROJECT_COMMUNITY_DESCRIPTOR.matcher(value).replaceAll(communityHeaderDescriptor)
+        } else {
+            return value
+        }
+    }
 }

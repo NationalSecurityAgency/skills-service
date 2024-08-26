@@ -24,7 +24,10 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.servlet.view.document.AbstractXlsxView
 import skills.controller.result.model.*
+import skills.services.admin.UserCommunityService
 import skills.skillLoading.RankingLoader
 import skills.skillLoading.model.UsersPerLevel
 import skills.storage.model.DayCountItem
@@ -70,8 +73,17 @@ class AdminUsersService {
     @Autowired
     PostgresQlNativeRepo PostgresQlNativeRepo
 
-    @Value('${skills.config.ui.usersTableAdditionalUserTagKey:""}')
+    @Autowired
+    UserCommunityService userCommunityService
+
+    @Value('${skills.config.ui.usersTableAdditionalUserTagKey:}')
     String usersTableAdditionalUserTagKey
+
+    @Value('${skills.config.ui.usersTableAdditionalUserTagLabel:}')
+    String usersTableAdditionalUserTagLabel
+
+    @Value('${skills.config.ui.exportHeaderAndFooter:}')
+    String exportHeaderAndFooter
 
     List<TimestampCountItem> getUsage(String projectId, String skillId, Date start) {
         Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
@@ -175,6 +187,19 @@ class AdminUsersService {
             }
         }
         return result
+    }
+
+    ModelAndView exportUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints) {
+        AbstractXlsxView xlsxView = new UserProgressExportResult();
+        ModelAndView mav = new ModelAndView(xlsxView);
+
+        List<ProjectUser> projectUsers = findDistinctUsersForProject(projectId, query, pageRequest, minimumPoints)
+        mav.addObject(UserProgressExportResult.HEADER_AND_FOOTER, userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getProjectUserCommunity(projectId)))
+        mav.addObject(UserProgressExportResult.PROJECT_ID, projectId)
+        mav.addObject(UserProgressExportResult.USER_TAG_LABEL, usersTableAdditionalUserTagLabel)
+        mav.addObject(UserProgressExportResult.USERS_DATA, projectUsers)
+
+        return mav;
     }
 
     @Profile

@@ -630,6 +630,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     @Query(value = '''SELECT 
                 up.user_id as userId, 
+                min(upa.performedOn) as firstUpdated, 
                 max(upa.performedOn) as lastUpdated, 
                 sum(up.points) as totalPoints,
                 max(ua.first_name) as firstName,

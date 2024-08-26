@@ -159,6 +159,20 @@ const sortField = () => {
   currentPage.value = 1
   loadData()
 }
+
+const exportUsers = () => {
+  const url = `${getUrl()}/excelExport`
+  isLoading.value = true
+  return UsersService.ajaxDownload(url, {
+    query: filters.value.user,
+    ascending: sortInfo.value.sortOrder !== -1,
+    page: currentPage.value,
+    orderBy: sortInfo.value.sortBy,
+    minimumPoints: filters.value.minimumPoints
+  }).then((res) => {
+    isLoading.value = false
+  })
+}
 </script>
 
 <template>
@@ -211,6 +225,16 @@ const sortField = () => {
         v-model:sort-order="sortInfo.sortOrder"
         @sort="sortField"
       >
+        <template #header>
+          <div style="text-align: right">
+            <SkillsButton
+                size="small"
+                icon="fas fa-download"
+                label="Export"
+                @click="exportUsers"
+                data-cy="exportUsersTableBtn" />
+          </div>
+        </template>
         <Column field="userId" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="fas fa-user skills-color-users mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
