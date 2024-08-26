@@ -99,7 +99,10 @@ const headerOptions = computed(() => {
 })
 
 const isInsufficientPoints = computed(() => {
-  return subjectState.subject.totalPoints < appConfig.minimumSubjectPoints
+  if (!subjectState.subject) {
+    return false
+  }
+  return subjectState.subject?.totalPoints < appConfig.minimumSubjectPoints
 })
 
 const minimumPoints = computed(() => {
