@@ -111,6 +111,10 @@ const getUrl = () => {
   return url
 }
 
+const isProjectLevel = computed(() => {
+  return !(route.params.skillId || route.params.badgeId || route.params.subjectId || (route.params.tagKey && route.params.tagFilter))
+})
+
 const calculateClientDisplayRoute = (props) => {
   return {
     name: `SkillsDisplay${SkillsDisplayPathAppendValues.SkillsDisplayPreview}`,
@@ -225,8 +229,8 @@ const exportUsers = () => {
         v-model:sort-order="sortInfo.sortOrder"
         @sort="sortField"
       >
-        <template #header>
-          <div style="text-align: right">
+        <template v-if="isProjectLevel" #header>
+          <div class="flex justify-content-end flex-wrap">
             <SkillsButton
                 size="small"
                 icon="fas fa-download"
