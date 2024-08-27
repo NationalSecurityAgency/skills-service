@@ -99,7 +99,7 @@ const moveUp = () => {
 }
 const remove = () => {
   dialogMessages.msgConfirm({
-    message: 'Remove this project from My Projects?',
+    message: `Remove ${props.proj.projectName} from My Projects?`,
     header: 'Please Confirm!',
     acceptLabel: 'YES, Remove It',
     accept: () => {
