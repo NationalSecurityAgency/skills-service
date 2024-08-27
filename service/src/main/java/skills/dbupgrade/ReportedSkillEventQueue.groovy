@@ -16,15 +16,22 @@
 package skills.dbupgrade
 
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Component
-import skills.controller.AddSkillHelper
-import skills.controller.exceptions.SkillException
-
+import io.awspring.cloud.s3.DiskBufferingS3OutputStreamProvider
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
-import java.nio.file.Files
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Condition
+import org.springframework.context.annotation.ConditionContext
+import org.springframework.context.annotation.Conditional
+import org.springframework.core.env.ConfigurableEnvironment
+import org.springframework.core.type.AnnotatedTypeMetadata
+import org.springframework.stereotype.Component
+import skills.controller.AddSkillHelper
+import software.amazon.awssdk.services.s3.S3Client
+
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.concurrent.BlockingQueue
@@ -43,24 +50,53 @@ class ReportedSkillEventQueue implements Closeable {
     @Value('#{"${skills.queued-event-path:/tmp}"}')
     String queuedEventFileDir
 
+    @Value('#{"${skills.queued-event-path.commit-every-n-records:100}"}')
+    Integer reopenFileEveryNRecords
+
     BlockingQueue<QueuedSkillEvent> internalQueuedRequests
 
     @Autowired
     AddSkillHelper addSkillHelper
 
+    @Autowired
+    ApplicationContext applicationContext
+
     QueuedEventSerializer queueWriter
+
+    S3Client s3Client;
+    /**
+     *  from awspring docs: you can use io.awspring.cloud.s3.DiskBufferingS3OutputStream by defining
+     *  a bean of type DiskBufferingS3OutputStreamProvider which will override the default output stream provider.
+     *  With DiskBufferingS3OutputStream when data is written to the resource,
+     *  first it is stored on the disk in a tmp directory in the OS.
+     * @return
+     */
+    static class S3EventStorageUtilized implements Condition {
+        @Override
+        boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            ConfigurableEnvironment environment = context.getEnvironment();
+            String eventPath = environment.getProperty("skills.queued-event-path");
+            String dbInProgress = environment.getProperty("skills.config.db-upgrade-in-progress");
+            return eventPath.startsWith("s3:/") && dbInProgress?.toLowerCase()?.equals("true");
+        }
+    }
+    @Bean
+    @Conditional(S3EventStorageUtilized)
+    DiskBufferingS3OutputStreamProvider getDiskBufferingS3OutputStreamProvider() {
+        log.info("Using DiskBufferingS3OutputStreamProvider")
+        return new DiskBufferingS3OutputStreamProvider((S3Client)s3Client, null)
+    }
+
+    ReportedSkillEventQueue(S3Client s3Client) {
+        this.s3Client = s3Client;
+    }
 
     @PostConstruct
     public void init() {
         Boolean upgrading = Boolean.valueOf(dbUpgradeInProgress)
         if (upgrading) {
-            Path outDir = Paths.get(queuedEventFileDir)
-            if (!Files.isDirectory(outDir)) {
-                throw new SkillException("[${queuedEventFileDir}] does not exist or is not a directory")
-            }
-
             internalQueuedRequests = new LinkedBlockingQueue<>()
-            queueWriter = new QueuedEventSerializer(BASE_NAME, FILE_EXT, outDir, internalQueuedRequests)
+            queueWriter = new QueuedEventSerializer(applicationContext, queuedEventFileDir, internalQueuedRequests, reopenFileEveryNRecords)
             queueWriter.start()
         } else {
             Path outDir = Paths.get(queuedEventFileDir)
