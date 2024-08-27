@@ -270,7 +270,7 @@ const contactProject = (name, id) => {
                   :data-cy="`addButton-${slotProps.data.projectId}`"
                   :loading="slotProps.data.loading"
                   :aria-label="`add project ${slotProps.data.projectId} to my projects`" />
-                <router-link :to="{ name:'Subjects', params: { projectId: slotProps.data.projectId }}" tabindex="-1" v-if="!slotProps.data.isMyProject">
+                <router-link :to="{ path: `/progress-and-rankings/projects/${slotProps.data.projectId}` }" tabindex="-1" v-if="!slotProps.data.isMyProject">
                   <SkillsButton
                       label="Preview"
                       icon="fas fa-eye"
