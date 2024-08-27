@@ -13,10 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const { rmdirSync } = require('fs');
+
 describe('Transcript export tests', () => {
+
+  const deleteDownloadDir = () => {
+    try {
+      rmdirSync('cypress/downloads', { maxRetries: 5, recursive: true });
+    } catch (error) {
+      throw Error(`Failed to remove [${path}] with ${error}`);
+    } finally {
+      return null;
+    }
+  };
 
   let user
   beforeEach(() => {
+    deleteDownloadDir()
     const userInfo = {
       'first': 'Joe',
       'last': 'Doe',
@@ -631,5 +644,44 @@ describe('Transcript export tests', () => {
 
   })
 
+  it('generate transcript for dashboard skills', () => {
+    cy.request('POST', '/app/userInfo', {
+      'first': 'Joe',
+      'last': 'Doe',
+      'nickname': 'Joe Doe'
+    })
+
+    cy.visit('/administrator/skills/Inception')
+    cy.get('[data-cy="downloadTranscriptBtn"]').click()
+
+    cy.readTranscript('Dashboard Skills').then((doc) => {
+      expect(clean(doc.text)).to.include('SkillTree Transcript')
+      expect(clean(doc.text)).to.include('Dashboard Skills')
+      expect(clean(doc.text)).to.include('Level: ')
+      expect(clean(doc.text)).to.include('Subject: Projects'.toUpperCase())
+      expect(clean(doc.text)).to.include('Subject: Skills'.toUpperCase())
+      expect(clean(doc.text)).to.include('Subject: Dashboard'.toUpperCase())
+    })
+  })
+
+  it('utilize user first and last names when nickname is not set', () => {
+    cy.request('POST', '/app/userInfo', {
+      'first': 'Joe',
+      'last': 'Doe',
+      'nickname': ''
+    })
+
+    cy.visit('/administrator/skills/Inception')
+    cy.get('[data-cy="downloadTranscriptBtn"]').click()
+
+    cy.readTranscript('Dashboard Skills').then((doc) => {
+      expect(clean(doc.text)).to.include('SkillTree Transcript')
+      expect(clean(doc.text)).to.include('Dashboard Skills')
+      expect(clean(doc.text)).to.include('Level: ')
+      expect(clean(doc.text)).to.include('Subject: Projects'.toUpperCase())
+      expect(clean(doc.text)).to.include('Subject: Skills'.toUpperCase())
+      expect(clean(doc.text)).to.include('Subject: Dashboard'.toUpperCase())
+    })
+  })
 
 })
