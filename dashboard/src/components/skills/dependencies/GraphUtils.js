@@ -24,10 +24,17 @@ export default {
       crossProjInfo = `<span style="border-bottom: 1px dotted black; font-weight: bold;"><i class="fas fa-handshake"></i> Cross Project Dependency</span><br/>
                            <span>Project ID: ${skillItem.projectId}</span><br/>`;
     }
-    const html = `${crossProjInfo}<span style="font-style: italic; color: #444444">Name:</span> ${skillItem.name}<br/>
-                <span style="font-style: italic; color: #444444">ID:</span> ${skillItem.skillId}<br/>
-                <span style="font-style: italic; color: #444444">Point Increment:</span> ${skillItem.pointIncrement}<br/>
-                <span style="font-style: italic; color: #444444">Total Points:</span> ${skillItem.totalPoints}`;
+    let html = `${crossProjInfo}<span style="font-style: italic; color: #444444">Name:</span> ${skillItem.name}<br/>
+                <span style="font-style: italic; color: #444444">ID:</span> ${skillItem.skillId}<br/>`;
+    if(skillItem.type === 'Badge') {
+      html += `<hr /><div style="font-style: italic; color: #444444">Requires the following skills:</div>`;
+      skillItem.containedSkills.forEach((skill) => {
+        html += `<div>${skill.name}</div>`;
+      });
+    } else if(skillItem.type === 'Skill') {
+      html += `<span style="font-style: italic; color: #444444">Point Increment:</span> ${skillItem.pointIncrement}<br/>
+      <span style="font-style: italic; color: #444444">Total Points:</span> ${skillItem.totalPoints}`;
+    }
     container.innerHTML = html;
     return container;
   },
