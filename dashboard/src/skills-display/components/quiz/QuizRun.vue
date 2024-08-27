@@ -443,7 +443,7 @@ const doneWithThisRun = () => {
           </div>
 
           <div v-if="quizResult && quizResult.gradedRes && quizResult.gradedRes.passed" class="text-left mt-5">
-            <SkillsButton severity="danger" outlined
+            <SkillsButton :severity="quizResult.gradedRes.passed ? 'success' : 'danger'" outlined
                           label="Close"
                           icon="fas fa-times-circle"
                           @click="doneWithThisRun"
