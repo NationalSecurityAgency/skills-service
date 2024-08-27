@@ -40,7 +40,9 @@ export const useLoadTranscriptData = () => {
       : null
 
     const loadUserInfo = () => {
-      const isAdminPath = route.path?.toLowerCase()?.startsWith('/administrator')
+      const currPath = route.path?.toLowerCase() || ''
+      const isInceptionProject = currPath.startsWith('/administrator/skills/inception')
+      const isAdminPath = currPath.startsWith('/administrator') && !isInceptionProject
 
       if (isAdminPath) {
         return UsersService.getUserInfo(skillsDisplayAttributesState.projectId, skillsDisplayAttributesState.userId).then((userInfo) => {
@@ -52,15 +54,24 @@ export const useLoadTranscriptData = () => {
     }
 
     const buildUserName = (userInfo) => {
-      if (userInfo.nickname && userInfo.nickname.length > 0 && userInfo.userIdForDisplay && userInfo.userIdForDisplay.length > 0) {
-        return `${userInfo.nickname} (${userInfo.userIdForDisplay})`
+      const hasUserIdForDisplay = userInfo.userIdForDisplay && userInfo.userIdForDisplay.length > 0
+      const userIdToPrint = hasUserIdForDisplay ? userInfo.userIdForDisplay : userInfo.userId
+
+      if (userInfo.nickname && userInfo.nickname.length > 0) {
+        return `${userInfo.nickname} (${userIdToPrint})`
       }
 
-      if (userInfo.userIdForDisplay && userInfo.userIdForDisplay.length > 0) {
-        return userInfo.userIdForDisplay
+      const hasLastName = userInfo.last && userInfo.last.length > 0
+      const hasFirstName = userInfo.first && userInfo.first.length > 0
+      if (hasLastName && hasFirstName) {
+        return `${userInfo.first} ${userInfo.last} (${userIdToPrint})`
       }
 
-      return userInfo.userId
+      return userIdToPrint
+    }
+
+    const buildProjectName = (projRes) => {
+      return projRes.projectName?.toLowerCase() === 'inception' ? 'Dashboard Skills' : projRes.projectName
     }
 
     return loadUserInfo().then((userInfo) => {
@@ -73,7 +84,7 @@ export const useLoadTranscriptData = () => {
             transcriptInfo.labelsConf = buildLabelConf()
             transcriptInfo.headerAndFooter = headerAndFooter
             transcriptInfo.userName = buildUserName(userInfo)
-            transcriptInfo.projectName = projRes.projectName
+            transcriptInfo.projectName = buildProjectName(projRes)
             transcriptInfo.userLevel = projRes.skillsLevel
             transcriptInfo.totalLevels = projRes.totalLevels
             transcriptInfo.userPoints = projRes.points
