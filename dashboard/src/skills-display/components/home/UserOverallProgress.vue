@@ -79,7 +79,7 @@ const levelStats = computed(() => {
                 <p v-if="userProgress.points > 0 && userProgress.points === userProgress.totalPoints">All Points earned</p>
                 <div v-else>
                   <div><Tag data-cy="earnedPoints">{{ numFormat.pretty(userProgress.points) }}</Tag> / <Tag severity="secondary" data-cy="totalPoints">{{ numFormat.pretty(userProgress.totalPoints) }}</Tag> Points</div>
-                  <div data-cy="overallPointsEarnedToday">
+                  <div data-cy="overallPointsEarnedToday" class="mt-1">
                     <Tag severity="info" data-cy="pointsEarnedToday">{{ numFormat.pretty(userProgress.todaysPoints) }}</Tag> Points earned Today
                   </div>
                 </div>
@@ -109,7 +109,7 @@ const levelStats = computed(() => {
                   <Tag data-cy="pointsTillNextLevel">{{ numFormat.pretty(levelStats.pointsTillNextLevel) }}</Tag>
                   Point{{ pluralSupport.plural(levelStats.pointsTillNextLevel) }} to {{ attributes.levelDisplayName }} {{levelStats.nextLevel }}
                 </div>
-                <div>
+                <div class="mt-1">
                   You can do it!
                 </div>
               </div>
