@@ -38,11 +38,12 @@ class UserProgressExportResult extends AbstractXlsxStreamingView {
         Integer rowNum = 0
         Integer columnNumber = 0
         if (exportHeaderAndFooter) {
-            addDataHeader(workbook, sheet, rowNum++, userTagLabel ? 7 : 6, exportHeaderAndFooter)
+            addDataHeader(workbook, sheet, rowNum++, userTagLabel ? 8 : 7, exportHeaderAndFooter)
         }
         Row headerRow = sheet.createRow(rowNum++)
         headerRow.createCell(columnNumber++).setCellValue("User ID")
-        headerRow.createCell(columnNumber++).setCellValue("User Name")
+        headerRow.createCell(columnNumber++).setCellValue("Last Name")
+        headerRow.createCell(columnNumber++).setCellValue("First Name")
         if (userTagLabel) {
             headerRow.createCell(columnNumber++).setCellValue(userTagLabel)
         }
@@ -59,7 +60,8 @@ class UserProgressExportResult extends AbstractXlsxStreamingView {
             columnNumber = 0
             Row row = sheet.createRow(rowNum++)
             row.createCell(columnNumber++).setCellValue(user.userIdForDisplay)
-            row.createCell(columnNumber++).setCellValue("${user.lastName ?: ''}${user.firstName && user.lastName ? ', ': ''}${user.firstName ?: ''}")
+            row.createCell(columnNumber++).setCellValue(user.lastName ?: '')
+            row.createCell(columnNumber++).setCellValue(user.firstName ?: '')
             if (userTagLabel) {
                 row.createCell(columnNumber++).setCellValue(user.userTag)
             }
@@ -75,7 +77,7 @@ class UserProgressExportResult extends AbstractXlsxStreamingView {
         }
 
         if (exportHeaderAndFooter) {
-            addDataHeader(workbook, sheet, rowNum++, userTagLabel ? 7 : 6, exportHeaderAndFooter)
+            addDataHeader(workbook, sheet, rowNum++, userTagLabel ? 8 : 7, exportHeaderAndFooter)
         }
     }
 
