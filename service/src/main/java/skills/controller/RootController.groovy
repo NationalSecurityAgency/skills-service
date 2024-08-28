@@ -36,6 +36,7 @@ import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SuggestRequest
 import skills.controller.request.model.UserTagRequest
 import skills.controller.result.model.*
+import skills.dbupgrade.ReportedSkillEventQueue
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
 import skills.services.ContactUsersService
@@ -120,6 +121,9 @@ class RootController {
     @Autowired
     ExpireUserAchievementsTaskExecutor expireUserAchievementsTaskExecutor
 
+    @Autowired
+    ReportedSkillEventQueue reportedSkillEventQueue
+
     @GetMapping('/rootUsers')
     @ResponseBody
     List<UserRoleRes> getRootUsers() {
@@ -173,6 +177,11 @@ class RootController {
     @PostMapping('/runSkillExpiration')
     void runSkillExpiration() {
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+    }
+
+    @PostMapping('/runReplayEventsAfterUpgrade')
+    void runReplayEventsAfterUpgrade() {
+        reportedSkillEventQueue.replayEvents()
     }
 
     @GetMapping('/isRoot')

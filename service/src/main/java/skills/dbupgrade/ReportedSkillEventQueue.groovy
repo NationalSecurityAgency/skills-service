@@ -26,19 +26,20 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Condition
 import org.springframework.context.annotation.ConditionContext
 import org.springframework.context.annotation.Conditional
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.core.env.ConfigurableEnvironment
 import org.springframework.core.type.AnnotatedTypeMetadata
 import org.springframework.stereotype.Component
 import skills.controller.AddSkillHelper
 import software.amazon.awssdk.services.s3.S3Client
 
-import java.nio.file.Path
-import java.nio.file.Paths
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
 @Slf4j
 @Component
+@Order(Ordered.LOWEST_PRECEDENCE)
 class ReportedSkillEventQueue implements Closeable {
 
     public static final String FILE_EXT = "jsonsequence"
@@ -52,6 +53,7 @@ class ReportedSkillEventQueue implements Closeable {
 
     @Value('#{"${skills.queued-event-path.commit-every-n-records:100}"}')
     Integer reopenFileEveryNRecords
+
 
     BlockingQueue<QueuedSkillEvent> internalQueuedRequests
 
@@ -76,36 +78,48 @@ class ReportedSkillEventQueue implements Closeable {
         boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
             ConfigurableEnvironment environment = context.getEnvironment();
             String eventPath = environment.getProperty("skills.queued-event-path");
-            String dbInProgress = environment.getProperty("skills.config.db-upgrade-in-progress");
-            return eventPath.startsWith("s3:/") && dbInProgress?.toLowerCase()?.equals("true");
+            String upgradeInProgress = environment.getProperty("skills.config.db-upgrade-in-progress");
+            return eventPath?.startsWith("s3:/") && upgradeInProgress?.toLowerCase()?.equals("true")
         }
     }
+
     @Bean
     @Conditional(S3EventStorageUtilized)
     DiskBufferingS3OutputStreamProvider getDiskBufferingS3OutputStreamProvider() {
         log.info("Using DiskBufferingS3OutputStreamProvider")
-        return new DiskBufferingS3OutputStreamProvider((S3Client)s3Client, null)
+        return new DiskBufferingS3OutputStreamProvider((S3Client) s3Client, null)
     }
+
+    @Autowired
+    S3SerializedEventsReader s3SerializedEventsReader
+
+    @Autowired
+    FsSerializedEventReader fsSerializedEventReader
 
     ReportedSkillEventQueue(S3Client s3Client) {
         this.s3Client = s3Client;
     }
 
     @PostConstruct
-    public void init() {
+    void init() {
         Boolean upgrading = Boolean.valueOf(dbUpgradeInProgress)
         if (upgrading) {
+            log.info("Started in upgrade mode, storing events in a WAL")
             internalQueuedRequests = new LinkedBlockingQueue<>()
             queueWriter = new QueuedEventSerializer(applicationContext, queuedEventFileDir, internalQueuedRequests, reopenFileEveryNRecords)
             queueWriter.start()
-        } else {
-            Path outDir = Paths.get(queuedEventFileDir)
-            SerializedEventReader serializedEventReader = new SerializedEventReader(outDir, FILE_EXT, addSkillHelper)
-            serializedEventReader.run()
         }
     }
 
-    public void queueEvent(QueuedSkillEvent queuedSkillEvent) {
+    void replayEvents() {
+        if (queuedEventFileDir.startsWith("s3:/")) {
+            s3SerializedEventsReader.readAndProcess(queuedEventFileDir)
+        } else {
+            fsSerializedEventReader.readAndProcess(queuedEventFileDir)
+        }
+    }
+
+    void queueEvent(QueuedSkillEvent queuedSkillEvent) {
         internalQueuedRequests?.put(queuedSkillEvent)
     }
 

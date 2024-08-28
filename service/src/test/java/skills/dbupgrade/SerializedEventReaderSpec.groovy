@@ -51,7 +51,7 @@ class SerializedEventReaderSpec extends Specification {
         def addSkillHelper = Mock(AddSkillHelper)
 
         when:
-        SerializedEventReader serializedEventReader = new SerializedEventReader(processingDirectory, ".jsonsequence", addSkillHelper)
+        FsSerializedEventReader serializedEventReader = new FsSerializedEventReader(processingDirectory, ".jsonsequence", addSkillHelper)
         serializedEventReader.run()
         WaitFor.wait(750, {
             return Files.list(processingDirectory).findFirst().isEmpty()
@@ -72,7 +72,7 @@ class SerializedEventReaderSpec extends Specification {
         Path processingDirectory = fs.getPath("/processDir")
 
         when:
-        SerializedEventReader serializedEventReader = new SerializedEventReader(processingDirectory, ".jsonsequence", addSkillHelper)
+        FsSerializedEventReader serializedEventReader = new FsSerializedEventReader(processingDirectory, ".jsonsequence", addSkillHelper)
         serializedEventReader.run()
         Thread.sleep(50)
 
@@ -87,7 +87,7 @@ class SerializedEventReaderSpec extends Specification {
         Files.createDirectory(processingDirectory)
 
         when:
-        SerializedEventReader serializedEventReader = new SerializedEventReader(processingDirectory, ".jsonsequence", addSkillHelper)
+        FsSerializedEventReader serializedEventReader = new FsSerializedEventReader(processingDirectory, ".jsonsequence", addSkillHelper)
         serializedEventReader.run()
         Thread.sleep(50)
 
@@ -106,7 +106,7 @@ class SerializedEventReaderSpec extends Specification {
         pw.close()
 
         when:
-        SerializedEventReader serializedEventReader = new SerializedEventReader(processingDirectory, ".jsonsequence", addSkillHelper)
+        FsSerializedEventReader serializedEventReader = new FsSerializedEventReader(processingDirectory, ".jsonsequence", addSkillHelper)
         serializedEventReader.run()
         Thread.sleep(250)
 
@@ -121,7 +121,7 @@ class SerializedEventReaderSpec extends Specification {
         Files.createDirectory(processingDirectory)
 
         when:
-        new SerializedEventReader(processingDirectory, "", addSkillHelper)
+        new FsSerializedEventReader(processingDirectory, "", addSkillHelper)
 
         then:
         thrown(SkillException)
@@ -134,7 +134,7 @@ class SerializedEventReaderSpec extends Specification {
         Files.createDirectory(processingDirectory)
 
         when:
-        new SerializedEventReader(processingDirectory, ".jsonseqeuence", addSkillHelper)
+        new FsSerializedEventReader(processingDirectory, ".jsonseqeuence", addSkillHelper)
 
         then:
         thrown(SkillException)
