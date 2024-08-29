@@ -15,19 +15,20 @@
  */
 package skills.dbupgrade
 
-import com.fasterxml.jackson.databind.MappingIterator
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.ObjectWriter
 import com.fasterxml.jackson.databind.SequenceWriter
-import com.fasterxml.jackson.databind.json.JsonMapper
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import org.apache.commons.io.FileUtils
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.PathResource
 import org.springframework.core.io.WritableResource
 import skills.SpringBootApp
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
+import skills.utils.WaitFor
 import spock.lang.Shared
 
 @Slf4j
@@ -40,15 +41,8 @@ class ReplayWALEventsIT extends DefaultIntSpec {
     @Shared
     File dir = new File('./target')
 
-    def cleanup() {
-        List<File> files = dir.listFiles().findAll({ it.name.endsWith('.jsonsequence') })
-        files.each {
-            log.info("deleting ${it}")
-            FileUtils.forceDelete(it)
-        }
-    }
-
-    def "replay events from multiple files"() {
+    def "replay an event"() {
+        SkillsService rootUser = createRootSkillService("rootUser")
         Map proj = SkillsFactory.createProject()
         Map subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(2, 1, 1, 100)
@@ -64,28 +58,21 @@ class ReplayWALEventsIT extends DefaultIntSpec {
                 projectId: proj.projectId,
                 skillId: skills[0].skillId,
                 userId: 'user1',
+                requestTime: new Date(),
         )
         sequenceWriter.write(queuedSkillEvent)
         sequenceWriter.close()
 
+        int numRecordsToExpect = 1
         when:
-        true
-
+        rootUser.runReplayEventsAfterUpgrade()
+        WaitFor.wait { skillsService.getProjectUsers(proj.projectId).data.size() == numRecordsToExpect }
+        def projectUsers = skillsService.getProjectUsers(proj.projectId)
+        println JsonOutput.toJson(projectUsers)
         then:
-        true
+        projectUsers.data.size() == numRecordsToExpect
+        projectUsers.data[0].userId == 'user1'
     }
 
-    private  List<QueuedSkillEvent> getEvents(String text) {
-        JsonMapper jsonMapper = new JsonMapper()
-        List<QueuedSkillEvent> res = []
-        MappingIterator<QueuedSkillEvent> itr = jsonMapper.readerFor(QueuedSkillEvent).readValues(text)
-        while (itr.hasNext()) {
-            QueuedSkillEvent queuedSkillEvent = itr.nextValue()
-            res.add(queuedSkillEvent)
-        }
-        itr.close()
-
-        return res
-    }
 
 }
