@@ -1015,7 +1015,7 @@ class AdminController {
         return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest, minimumPoints)
     }
 
-    @GetMapping(value = "/projects/{projectId}/users/excelExport")//, produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", name = "exportUsers")
+    @GetMapping(value = "/projects/{projectId}/users/export/excel")//, produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", name = "exportUsers")
     @CompileStatic
     ModelAndView exportProjectUsers(@PathVariable("projectId") String projectId,
                                     @RequestParam String query,

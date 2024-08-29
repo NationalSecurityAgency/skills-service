@@ -30,6 +30,7 @@ import SkillsDisplayPathAppendValues from '@/router/SkillsDisplayPathAppendValue
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import {useUserInfo} from "@/components/utils/UseUserInfo.js";
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
@@ -46,6 +47,7 @@ let filters = ref({
 
 const data = ref([])
 const isLoading = ref(true)
+const isExporting = ref(false)
 const totalPoints = ref(0)
 const currentPage = ref(1)
 const totalRows = ref(1)
@@ -165,8 +167,9 @@ const sortField = () => {
 }
 
 const exportUsers = () => {
-  const url = `${getUrl()}/excelExport`
+  const url = `${getUrl()}/export/excel`
   isLoading.value = true
+  isExporting.value = true
   return UsersService.ajaxDownload(url, {
     query: filters.value.user,
     ascending: sortInfo.value.sortOrder !== -1,
@@ -175,6 +178,7 @@ const exportUsers = () => {
     minimumPoints: filters.value.minimumPoints
   }).then((res) => {
     isLoading.value = false
+    isExporting.value = false
   })
 }
 </script>
@@ -229,6 +233,12 @@ const exportUsers = () => {
         v-model:sort-order="sortInfo.sortOrder"
         @sort="sortField"
       >
+        <template #loading>
+          <div>
+            <Message v-if="isExporting" severity="contrast" :closable="false">Exporting, Please wait...</Message>
+            <SkillsSpinner :is-loading="true"></SkillsSpinner>
+          </div>
+        </template>
         <template v-if="isProjectLevel" #header>
           <div class="flex justify-content-end flex-wrap">
             <SkillsButton
