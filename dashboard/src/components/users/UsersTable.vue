@@ -242,6 +242,7 @@ const exportUsers = () => {
         <template v-if="isProjectLevel" #header>
           <div class="flex justify-content-end flex-wrap">
             <SkillsButton
+                :disabled="totalRows <= 0"
                 size="small"
                 icon="fas fa-download"
                 label="Export"
