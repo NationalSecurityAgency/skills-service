@@ -199,7 +199,7 @@ const buildData = () => {
   sortedNodes.forEach((node) => {
     const isCrossProject = node.projectId !== route.params.projectId;
     if(node.type === 'Badge') {
-      if(node.containedSkills) {
+      if(node.containedSkills && node.containedSkills.length > 0) {
         const skillIds = node.containedSkills.map((it) => it.name);
         const childNode = {
           id: node.id + '-skills',
