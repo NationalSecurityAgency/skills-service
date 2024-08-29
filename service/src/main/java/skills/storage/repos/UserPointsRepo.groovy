@@ -16,7 +16,6 @@
 package skills.storage.repos
 
 import groovy.transform.CompileStatic
-import org.apache.commons.lang3.ObjectUtils
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -25,10 +24,10 @@ import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.controller.result.model.ProjectUser
 import skills.storage.model.SkillRelDef
-import skills.storage.model.DayCountItem
 import skills.storage.model.UserPoints
 
 import java.time.LocalDateTime
+import java.util.stream.Stream
 
 @CompileStatic
 interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
@@ -671,6 +670,50 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 up.points >= ?4
             GROUP BY up.user_id''', nativeQuery = true)
     List<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, Pageable pageable)
+
+    @Query(value = '''SELECT 
+                up.user_id as userId, 
+                min(upa.firstPerformedOn) as firstUpdated, 
+                max(upa.lastPerformedOn) as lastUpdated, 
+                sum(up.points) as totalPoints,
+                max(ua.first_name) as firstName,
+                max(ua.last_name) as lastName,
+                max(ua.dn) as dn,
+                max(ua.email) as email,
+                max(ua.user_id_for_display) as userIdForDisplay,
+                case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel, 
+                max(ut.value) as userTag
+            FROM user_points up
+            LEFT JOIN (
+                SELECT upa.user_id, 
+                min(upa.performed_on) AS firstPerformedOn, 
+                max(upa.performed_on) AS lastPerformedOn 
+                FROM user_performed_skill upa 
+                WHERE upa.skill_ref_id in (
+                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = ?1 and enabled = 'true'
+                )
+                GROUP BY upa.user_id
+            ) upa ON upa.user_id = up.user_id
+            LEFT JOIN (
+                SELECT uAchievement.user_id, max(uAchievement.level) as level
+                FROM user_achievement uAchievement 
+                WHERE uAchievement.project_id = ?1
+                    and uAchievement.skill_id is null
+                    and uAchievement.level is not null
+                GROUP BY uAchievement.user_id
+            ) uAchievement ON uAchievement.user_id = up.user_id
+            JOIN user_attrs ua ON ua.user_id=up.user_id
+            LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = ?2 group by ut.user_id) ut ON ut.user_id=ua.user_id
+            WHERE 
+                up.project_id=?1 and 
+                ((lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?3, \'%\'))) OR
+                (lower(CONCAT(ua.user_id_for_display, ' (', ua.last_name, ', ', ua.first_name,  ')')) like lower(CONCAT(\'%\', ?3, \'%\'))) OR
+                 (lower(ua.user_id_for_display) like lower(CONCAT('%', ?3, '%')))
+                ) and 
+                up.skill_id is null and
+                up.points >= ?4
+            GROUP BY up.user_id''', nativeQuery = true)
+    Stream<ProjectUser> findAllDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, Pageable pageable)
 
     @Query(value='''SELECT COUNT(*)
         FROM (SELECT DISTINCT up.user_id from user_points up where up.project_id=?1 and up.skill_id in (?2)) AS temp''',

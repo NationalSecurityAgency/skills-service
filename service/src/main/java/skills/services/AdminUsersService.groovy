@@ -24,10 +24,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.servlet.ModelAndView
-import org.springframework.web.servlet.view.document.AbstractXlsxView
 import skills.controller.result.model.*
-import skills.services.admin.UserCommunityService
 import skills.skillLoading.RankingLoader
 import skills.skillLoading.model.UsersPerLevel
 import skills.storage.model.DayCountItem
@@ -44,6 +41,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.Month
 import java.time.format.TextStyle
+import java.util.stream.Stream
 
 @Service
 @Slf4j
@@ -73,17 +71,8 @@ class AdminUsersService {
     @Autowired
     PostgresQlNativeRepo PostgresQlNativeRepo
 
-    @Autowired
-    UserCommunityService userCommunityService
-
     @Value('${skills.config.ui.usersTableAdditionalUserTagKey:}')
     String usersTableAdditionalUserTagKey
-
-    @Value('${skills.config.ui.usersTableAdditionalUserTagLabel:}')
-    String usersTableAdditionalUserTagLabel
-
-    @Value('${skills.config.ui.exportHeaderAndFooter:}')
-    String exportHeaderAndFooter
 
     List<TimestampCountItem> getUsage(String projectId, String skillId, Date start) {
         Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
@@ -189,22 +178,14 @@ class AdminUsersService {
         return result
     }
 
-    ModelAndView exportUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints) {
-        AbstractXlsxView xlsxView = new UserProgressExportResult();
-        ModelAndView mav = new ModelAndView(xlsxView);
-
-        List<ProjectUser> projectUsers = findDistinctUsersForProject(projectId, query, pageRequest, minimumPoints)
-        mav.addObject(UserProgressExportResult.HEADER_AND_FOOTER, userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getProjectUserCommunity(projectId)))
-        mav.addObject(UserProgressExportResult.PROJECT_ID, projectId)
-        mav.addObject(UserProgressExportResult.USER_TAG_LABEL, usersTableAdditionalUserTagLabel)
-        mav.addObject(UserProgressExportResult.USERS_DATA, projectUsers)
-
-        return mav;
-    }
-
     @Profile
     private List<ProjectUser> findDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints) {
         userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, pageRequest)
+    }
+
+    @Profile
+    Stream<ProjectUser> streamAllDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints) {
+        return userPointsRepo.findAllDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, pageRequest)
     }
 
     @Profile
