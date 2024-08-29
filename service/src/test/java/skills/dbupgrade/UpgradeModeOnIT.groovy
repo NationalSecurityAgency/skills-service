@@ -44,9 +44,11 @@ class UpgradeModeOnIT extends DefaultIntSpec {
     }
 
     def "store skill events in WAL when in upgrade mode"() {
+        List<String> users = getRandomUsers(2)
         when:
-        skillsService.addSkill(['projectId': 'Proj1', skillId: 'CreateProject'], 'user1', new Date())
-        SkillsService user2 = createService('user2')
+        SkillsService user1 = createService(users[0])
+        user1.addSkill(['projectId': 'Proj1', skillId: 'CreateProject'], 'user1', new Date())
+        SkillsService user2 = createService(users[1])
         user2.addSkill(['projectId': 'Proj2', skillId: 'CreateSubject'], 'user2', new Date())
 
         4.times {
@@ -62,28 +64,28 @@ class UpgradeModeOnIT extends DefaultIntSpec {
         file1SkillEvents.size() == 5
         file1SkillEvents[0].skillId == 'CreateProject'
         file1SkillEvents[0].projectId == 'Proj1'
-        file1SkillEvents[0].userId == skillsService.userName
+        file1SkillEvents[0].userId == users[0]
 
         file1SkillEvents[1].skillId == 'CreateSubject'
         file1SkillEvents[1].projectId == 'Proj2'
-        file1SkillEvents[1].userId == user2.userName
+        file1SkillEvents[1].userId == users[1]
 
         file1SkillEvents[2].skillId == 'Skill0'
         file1SkillEvents[2].projectId == 'Proj3'
-        file1SkillEvents[2].userId == user2.userName
+        file1SkillEvents[2].userId == users[1]
 
         file1SkillEvents[3].skillId == 'Skill1'
         file1SkillEvents[3].projectId == 'Proj3'
-        file1SkillEvents[3].userId == user2.userName
+        file1SkillEvents[3].userId == users[1]
 
         file1SkillEvents[4].skillId == 'Skill2'
         file1SkillEvents[4].projectId == 'Proj3'
-        file1SkillEvents[4].userId == user2.userName
+        file1SkillEvents[4].userId == users[1]
 
         file2SkillEvents.size() == 1
         file2SkillEvents[0].skillId == 'Skill3'
         file2SkillEvents[0].projectId == 'Proj3'
-        file2SkillEvents[0].userId == user2.userName
+        file2SkillEvents[0].userId == users[1]
     }
 
     private  List<QueuedSkillEvent> getEvents(String text) {

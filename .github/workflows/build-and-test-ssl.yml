@@ -87,7 +87,7 @@ jobs:
           MAVEN_OPTS: -Xmx3G -XX:+UnlockDiagnosticVMOptions -XX:GCLockerRetryAllocationCount=100
         run: |
           cd service
-          ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword"
+          ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword -Dspring.cloud.aws.s3.enabled=false"
 
       - name: upload result artifacts
         if: ${{ always() }}
