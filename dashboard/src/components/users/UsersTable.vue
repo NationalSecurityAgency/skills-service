@@ -235,7 +235,7 @@ const exportUsers = () => {
       >
         <template #loading>
           <div>
-            <Message v-if="isExporting" icon="fas fa-download" severity="contrast" :closable="false">Exporting, Please wait...</Message>
+            <Message v-if="isExporting" icon="fas fa-download" severity="contrast" :closable="false">Exporting, please wait...</Message>
             <SkillsSpinner :is-loading="true"></SkillsSpinner>
           </div>
         </template>
