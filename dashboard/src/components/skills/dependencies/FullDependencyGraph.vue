@@ -191,10 +191,6 @@ const createGraph = () => {
 };
 
 const buildData = () => {
-  if(nodes && edges) {
-    edges = [];
-    nodes = [];
-  }
   const sortedNodes = graph.value.nodes.sort((a, b) => a.id - b.id);
   sortedNodes.forEach((node) => {
     const isCrossProject = node.projectId !== route.params.projectId;
