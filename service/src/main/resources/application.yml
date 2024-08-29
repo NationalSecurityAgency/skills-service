@@ -183,7 +183,12 @@ db-scheduler:
   threads: 3
 ---
 spring:
+  cloud:
+    aws:
+      s3:
+        enabled: false
   config:
     activate:
       on-profile: default
+
 ---

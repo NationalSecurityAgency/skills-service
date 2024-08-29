@@ -16,23 +16,17 @@
 package skills.dbupgrade
 
 import groovy.util.logging.Slf4j
-import io.awspring.cloud.s3.DiskBufferingS3OutputStreamProvider
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationContext
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Condition
-import org.springframework.context.annotation.ConditionContext
-import org.springframework.context.annotation.Conditional
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
-import org.springframework.core.env.ConfigurableEnvironment
-import org.springframework.core.type.AnnotatedTypeMetadata
 import org.springframework.stereotype.Component
 import skills.controller.AddSkillHelper
-import software.amazon.awssdk.services.s3.S3Client
+import skills.dbupgrade.s3.DiskBufferingS3OutputStreamProviderConfigurer
+import skills.dbupgrade.s3.S3SerializedEventsReader
 
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
@@ -65,40 +59,14 @@ class ReportedSkillEventQueue implements Closeable {
 
     QueuedEventSerializer queueWriter
 
-    S3Client s3Client;
-    /**
-     *  from awspring docs: you can use io.awspring.cloud.s3.DiskBufferingS3OutputStream by defining
-     *  a bean of type DiskBufferingS3OutputStreamProvider which will override the default output stream provider.
-     *  With DiskBufferingS3OutputStream when data is written to the resource,
-     *  first it is stored on the disk in a tmp directory in the OS.
-     * @return
-     */
-    static class S3EventStorageUtilized implements Condition {
-        @Override
-        boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-            ConfigurableEnvironment environment = context.getEnvironment();
-            String eventPath = environment.getProperty("skills.queued-event-path");
-            String upgradeInProgress = environment.getProperty("skills.config.db-upgrade-in-progress");
-            return eventPath?.startsWith("s3:/") && upgradeInProgress?.toLowerCase()?.equals("true")
-        }
-    }
+    @Autowired(required = false)
+    DiskBufferingS3OutputStreamProviderConfigurer s3ClientProvider
 
-    @Bean
-    @Conditional(S3EventStorageUtilized)
-    DiskBufferingS3OutputStreamProvider getDiskBufferingS3OutputStreamProvider() {
-        log.info("Using DiskBufferingS3OutputStreamProvider")
-        return new DiskBufferingS3OutputStreamProvider((S3Client) s3Client, null)
-    }
-
-    @Autowired
+    @Autowired(required = false)
     S3SerializedEventsReader s3SerializedEventsReader
 
     @Autowired
     FsSerializedEventReader fsSerializedEventReader
-
-    ReportedSkillEventQueue(S3Client s3Client) {
-        this.s3Client = s3Client;
-    }
 
     @PostConstruct
     void init() {

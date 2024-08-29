@@ -13,22 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.dbupgrade
+package skills.dbupgrade.s3
 
 import groovy.util.logging.Slf4j
 import io.awspring.cloud.s3.S3PathMatchingResourcePatternResolver
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Conditional
 import org.springframework.core.io.Resource
 import org.springframework.core.io.support.ResourcePatternResolver
 import org.springframework.stereotype.Component
 import skills.controller.AddSkillHelper
+import skills.dbupgrade.EventsResourceProcessor
+import skills.dbupgrade.ReportedSkillEventQueue
 import skills.services.LockingService
 import software.amazon.awssdk.services.s3.S3Client
 
 @Slf4j
 @Component
+@Conditional(S3QueuedEventPathCondition)
 class S3SerializedEventsReader {
 
     private ResourcePatternResolver resourcePatternResolver;
