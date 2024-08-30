@@ -27,6 +27,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.servlet.ModelAndView
 import skills.PublicProps
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
@@ -54,7 +55,6 @@ import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionsHistoryService
 import skills.services.video.AdminVideoService
-
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.utils.ClientSecretGenerator
@@ -179,6 +179,9 @@ class AdminController {
 
     @Autowired
     UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    UserProgressExportResult userProgressExportResult
 
     @Value('#{"${skills.config.ui.maxSkillsInBulkImport}"}')
     int maxBulkImport
@@ -1010,6 +1013,25 @@ class AdminController {
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest, minimumPoints)
+    }
+
+    @GetMapping(value = "/projects/{projectId}/users/export/excel")//, produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", name = "exportUsers")
+    @CompileStatic
+    ModelAndView exportProjectUsers(@PathVariable("projectId") String projectId,
+                                    @RequestParam String query,
+                                    @RequestParam String orderBy,
+                                    @RequestParam Boolean ascending,
+                                    @RequestParam int minimumPoints) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
+
+        PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE, ascending ? ASC : DESC, orderBy)
+        ModelAndView mav = new ModelAndView(userProgressExportResult);
+        mav.addObject(UserProgressExportResult.PROJECT_ID, projectId)
+        mav.addObject(UserProgressExportResult.QUERY, query)
+        mav.addObject(UserProgressExportResult.MINIMUM_POINTS, minimumPoints)
+        mav.addObject(UserProgressExportResult.PAGE_REQUEST, pageRequest)
+        return mav;
     }
 
     @GetMapping(value="/projects/{projectId}/{userId}/canAccess", produces='application/json')

@@ -49,6 +49,9 @@ public class MockUserInfoService {
     @Autowired
     UserAttrsRepo userAttrsRepo
 
+    @Autowired
+    CertificateRegistry certificateRegistry
+
     static final Map<String, FirstnameLastname> DN_TO_NAME = [
             "cn=jdoe@email.foo, ou=integration tests, o=skilltree test, c=us": new FirstnameLastname("John", "Doe"),
             "cn=jadoe@email.foo, ou=integration tests, o=skilltree test, c=us": new FirstnameLastname("Jane", "Doe"),
@@ -185,7 +188,15 @@ public class MockUserInfoService {
         }
     }
 
-    public static class FirstnameLastname {
+    FirstnameLastname getFirstNameLastnameForUserId(String userId) {
+        return DN_TO_NAME.get(certificateRegistry.loadDnFromUserId(userId)?.toLowerCase())
+    }
+
+    String getUserIdWithCase(String userId) {
+        return certificateRegistry.loadCNFromCert(certificateRegistry.getCertificate(userId))
+    }
+
+    static class FirstnameLastname {
         String firstname=""
         String lastname=""
         public FirstnameLastname(String firstname, String lastname){

@@ -16,19 +16,21 @@
 package skills.storage.repos
 
 import groovy.transform.CompileStatic
-import org.apache.commons.lang3.ObjectUtils
+import jakarta.persistence.QueryHint
+import org.hibernate.jpa.AvailableHints
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.jpa.repository.QueryHints
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.controller.result.model.ProjectUser
 import skills.storage.model.SkillRelDef
-import skills.storage.model.DayCountItem
 import skills.storage.model.UserPoints
 
 import java.time.LocalDateTime
+import java.util.stream.Stream
 
 @CompileStatic
 interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
@@ -628,9 +630,13 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndUserTagAndUserIdLike(String projectId, String userTagKey, String userTagValue, String userId)
 
+    @QueryHints(
+            @QueryHint(name = AvailableHints.HINT_FETCH_SIZE, value = "100")
+    )
     @Query(value = '''SELECT 
                 up.user_id as userId, 
-                max(upa.performedOn) as lastUpdated, 
+                min(upa.firstPerformedOn) as firstUpdated, 
+                max(upa.lastPerformedOn) as lastUpdated, 
                 sum(up.points) as totalPoints,
                 max(ua.first_name) as firstName,
                 max(ua.last_name) as lastName,
@@ -642,7 +648,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             FROM user_points up
             LEFT JOIN (
                 SELECT upa.user_id, 
-                max(upa.performed_on) AS performedOn 
+                min(upa.performed_on) AS firstPerformedOn, 
+                max(upa.performed_on) AS lastPerformedOn 
                 FROM user_performed_skill upa 
                 WHERE upa.skill_ref_id in (
                     select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = ?1 and enabled = 'true'
@@ -668,7 +675,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 up.skill_id is null and
                 up.points >= ?4
             GROUP BY up.user_id''', nativeQuery = true)
-    List<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, Pageable pageable)
+    Stream<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, Pageable pageable)
 
     @Query(value='''SELECT COUNT(*)
         FROM (SELECT DISTINCT up.user_id from user_points up where up.project_id=?1 and up.skill_id in (?2)) AS temp''',

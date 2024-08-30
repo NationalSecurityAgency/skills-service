@@ -30,6 +30,7 @@ import SkillsDisplayPathAppendValues from '@/router/SkillsDisplayPathAppendValue
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import {useUserInfo} from "@/components/utils/UseUserInfo.js";
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
@@ -46,6 +47,7 @@ let filters = ref({
 
 const data = ref([])
 const isLoading = ref(true)
+const isExporting = ref(false)
 const totalPoints = ref(0)
 const currentPage = ref(1)
 const totalRows = ref(1)
@@ -111,6 +113,10 @@ const getUrl = () => {
   return url
 }
 
+const isProjectLevel = computed(() => {
+  return !(route.params.skillId || route.params.badgeId || route.params.subjectId || (route.params.tagKey && route.params.tagFilter))
+})
+
 const calculateClientDisplayRoute = (props) => {
   return {
     name: `SkillsDisplay${SkillsDisplayPathAppendValues.SkillsDisplayPreview}`,
@@ -158,6 +164,22 @@ const sortField = () => {
   // set to the first page
   currentPage.value = 1
   loadData()
+}
+
+const exportUsers = () => {
+  const url = `${getUrl()}/export/excel`
+  isLoading.value = true
+  isExporting.value = true
+  return UsersService.ajaxDownload(url, {
+    query: filters.value.user,
+    ascending: sortInfo.value.sortOrder !== -1,
+    page: currentPage.value,
+    orderBy: sortInfo.value.sortBy,
+    minimumPoints: filters.value.minimumPoints
+  }).then((res) => {
+    isLoading.value = false
+    isExporting.value = false
+  })
 }
 </script>
 
@@ -211,6 +233,23 @@ const sortField = () => {
         v-model:sort-order="sortInfo.sortOrder"
         @sort="sortField"
       >
+        <template #loading>
+          <div>
+            <Message v-if="isExporting" icon="fas fa-download" severity="contrast" :closable="false">Exporting, please wait...</Message>
+            <SkillsSpinner :is-loading="true"></SkillsSpinner>
+          </div>
+        </template>
+        <template v-if="isProjectLevel" #header>
+          <div class="flex justify-content-end flex-wrap">
+            <SkillsButton
+                :disabled="totalRows <= 0"
+                size="small"
+                icon="fas fa-download"
+                label="Export"
+                @click="exportUsers"
+                data-cy="exportUsersTableBtn" />
+          </div>
+        </template>
         <Column field="userId" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="fas fa-user skills-color-users mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>

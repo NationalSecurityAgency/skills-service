@@ -20,6 +20,8 @@ describe('Users Tests', () => {
     const tableSelector = '[data-cy=usersTable]'
     const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
 
+    const exportedFileName = `cypress/downloads/proj1-users-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
+
     beforeEach(() => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -39,6 +41,8 @@ describe('Users Tests', () => {
             pointIncrement: '1500',
             numPerformToCompletion: '10',
         });
+
+        cy.cleanupDownloadsDir()
     });
 
     it('sort and page', () => {
@@ -109,6 +113,11 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'user1@skills.org' }, { colIndex: 2,  value: '6,000' }],
             [{ colIndex: 0,  value: 'user0@skills.org' }, { colIndex: 2,  value: '4,500' }],
         ], 5);
+
+        // export users and verify that the file exists
+        cy.readFile(exportedFileName).should('not.exist');
+        cy.get('[data-cy="exportUsersTableBtn"]').click();
+        cy.readFile(exportedFileName).should('exist');
     });
 
     it('different page sizes', () => {

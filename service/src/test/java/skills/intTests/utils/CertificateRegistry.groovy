@@ -123,4 +123,8 @@ class CertificateRegistry {
             return dn
         }
     }
+
+    String loadDnFromUserId(String userId) {
+        return loadDNFromCert(getCertificate(userId))
+    }
 }
