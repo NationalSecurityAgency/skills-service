@@ -18,73 +18,107 @@ package skills.dbupgrade
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.ObjectWriter
 import com.fasterxml.jackson.databind.SequenceWriter
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.ApplicationContext
+import org.springframework.core.io.PathResource
+import org.springframework.core.io.Resource
+import org.springframework.core.io.WritableResource
 import skills.controller.exceptions.SkillException
-import skills.controller.exceptions.SkillsValidator
 
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.nio.file.StandardOpenOption
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 @Slf4j
 class QueuedEventSerializer implements AutoCloseable{
 
-    String extension
-    String baseName
     BlockingQueue<QueuedSkillEvent> queuedSkillEvents
-    Path queuedEventDir
     ExecutorService fileWriterService
     SequenceWriter sequenceWriter
+    Resource eventsDestination
+    Integer reopenFileEveryNRecords
+    String queuedEventFileDir
+    ApplicationContext applicationContext
 
-    public QueuedEventSerializer(String baseName, String extension, Path queuedEventDir, BlockingQueue<QueuedSkillEvent> queuedSkillEvents) {
-        if (StringUtils.isEmpty(baseName)) {
-            throw new SkillException("baseName is required")
-        }
-        if (StringUtils.isEmpty(extension)) {
-            throw new SkillException("extension is required")
-        }
-        if (!Files.isDirectory(queuedEventDir)) {
-            throw new SkillException("[${queuedEventDir}] does not exist or is not a directory")
-        }
+    private int currentNumRecords = 0
+
+    QueuedEventSerializer(ApplicationContext applicationContext, String queuedEventFileDir, BlockingQueue<QueuedSkillEvent> queuedSkillEvents, Integer reopenFileEveryNRecords) {
         if (queuedSkillEvents == null) {
             throw new SkillException("queuedSkillEvents is required")
         }
-        this.baseName = baseName
-        this.extension = extension.startsWith(".") ? extension.subSequence(1, extension.length()) : extension
-        this.queuedEventDir = queuedEventDir
-        this.queuedSkillEvents = queuedSkillEvents
-
-
+        this.applicationContext = applicationContext
+        this.queuedEventFileDir = queuedEventFileDir
+        this.reopenFileEveryNRecords = reopenFileEveryNRecords
 
         fileWriterService = Executors.newFixedThreadPool(1)
+
+        this.eventsDestination = getOutputResource()
+        this.queuedSkillEvents = queuedSkillEvents
     }
 
-    public void start() {
-        ObjectWriter writer = new ObjectMapper().writerFor(QueuedSkillEvent)
-        Path outputFile = getNextFile(queuedEventDir)
+    private SequenceWriter openSequenceWriter() {
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(((WritableResource) eventsDestination).getOutputStream(), "UTF-8"))
+        ObjectWriter objectWriter = new ObjectMapper().writerFor(QueuedSkillEvent)
+        return objectWriter.writeValues(bufferedWriter)
+    }
 
-        log.info("writing queued skill events to [{}]", outputFile)
-        sequenceWriter = writer.writeValues(Files.newBufferedWriter(outputFile,  StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE))
+    private Resource getOutputResource() {
+        if (queuedEventFileDir == null) {
+            throw new SkillException("outputDirPath is required")
+        }
+        Resource res = queuedEventFileDir.startsWith("s3:") ? getS3OutputResource() : getLocalFileOutputResource()
+        log.info("Opened output path [{}]", res.filename)
+        return res
+    }
 
+    private Resource getS3OutputResource() {
+        String s3FilePath = "${queuedEventFileDir}/${createFileName()}"
+        log.info("initializing s3 output path [{}]", s3FilePath)
+        return applicationContext.getResource(s3FilePath)
+    }
+
+    private Resource getLocalFileOutputResource() {
+        Path queuedEventDir = Paths.get(queuedEventFileDir)
+        if (!Files.isDirectory(queuedEventDir)) {
+            throw new SkillException("[${queuedEventFileDir}] does not exist or is not a directory")
+        }
+        Path outputFile = queuedEventDir.resolve(createFileName())
+        Files.createFile(outputFile);
+        return new PathResource(outputFile)
+    }
+    private String createFileName() {
+        return "${ReportedSkillEventQueue.BASE_NAME}-${UUID.randomUUID().toString()}.${ReportedSkillEventQueue.FILE_EXT}"
+    }
+
+    void start() {
+        sequenceWriter = openSequenceWriter()
         fileWriterService.submit(new Runnable() {
-            public void run() {
+            void run() {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         QueuedSkillEvent queuedSkillEvent = queuedSkillEvents.take()
-                        log.trace("writing queued skill event to SequenceWriter")
-                        sequenceWriter.write(queuedSkillEvent)
+                        if (log.isTraceEnabled()) {
+                            log.trace("writing queued skill event to SequenceWriter [{}]", JsonOutput.toJson(queuedSkillEvent))
+                        }
+                        if (queuedSkillEvent.projectId && queuedSkillEvent.userId && queuedSkillEvent.skillId) {
+                            sequenceWriter.write(queuedSkillEvent)
+                            currentNumRecords++
+                            if (currentNumRecords % reopenFileEveryNRecords == 0) {
+                                log.info("Closing [${eventsDestination.filename}]")
+                                sequenceWriter.close()
+                                eventsDestination = getOutputResource()
+                                sequenceWriter = openSequenceWriter()
+                            }
+                        }
                     } catch (InterruptedException interruptedException) {
                         Thread.currentThread().interrupt()
+                    } catch (IOException e) {
+                        log.error("Failed to write queued skill event", e)
                     }
                 }
             }
@@ -98,32 +132,9 @@ class QueuedEventSerializer implements AutoCloseable{
             fileWriterService.awaitTermination(5, TimeUnit.SECONDS)
         }
         if (sequenceWriter) {
-            log.info("finished writing queued events to directory [${queuedEventDir}")
+            log.info("finished writing queued events [${eventsDestination.filename}]")
             sequenceWriter.close()
         }
     }
 
-    private Path getNextFile(Path rootDir) {
-        Pattern numberedFiles = Pattern.compile("${baseName}(?:\\.(\\d+))?\\.${extension}")
-        int currentFileCount = 0
-        boolean existing = false
-
-        Files.list(rootDir).each {
-            String name = it.getFileName().toString()
-            Matcher match = numberedFiles.matcher(name)
-            if (match.matches()) {
-                if (match.groupCount() > 0 && match.group(1) != null) {
-                    currentFileCount = Math.max(currentFileCount, Integer.valueOf(match.group(1)))
-                }
-                existing = true
-            }
-        }
-
-        String finalName = "${baseName}.${extension}"
-        if (existing) {
-            finalName = "${baseName}.${++currentFileCount}.${extension}"
-        }
-
-        return rootDir.resolve(finalName)
-    }
 }

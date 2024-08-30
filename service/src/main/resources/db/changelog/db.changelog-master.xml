@@ -2663,4 +2663,11 @@
         </sql>
     </changeSet>
 
+    <changeSet id="46" author="skills team">
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="upgrade_replay_skill_events"/>
+        </insert>
+    </changeSet>
+
+
 </databaseChangeLog>

@@ -72,6 +72,12 @@ class LockingService {
         return res
     }
 
+    SkillsDBLock lockForReplayingSkillEvents() {
+        SkillsDBLock res = skillsDBLockRepo.findByLock("upgrade_replay_skill_events")
+        assert res
+        return res
+    }
+
     SkillsDBLock lockForUpdatingCatalogSkills() {
         SkillsDBLock res = skillsDBLockRepo.findByLock('catalog_skill_update_lock')
         assert res

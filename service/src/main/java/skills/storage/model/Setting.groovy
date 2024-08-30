@@ -38,7 +38,7 @@ import jakarta.persistence.TemporalType
 @EntityListeners(AuditingEntityListener)
 class Setting {
 
-    static enum SettingType { User, Project, Global, UserProject, RootUser }
+    static enum SettingType { User, Project, Global, UserProject, RootUser, UpgradeCheckpoint }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

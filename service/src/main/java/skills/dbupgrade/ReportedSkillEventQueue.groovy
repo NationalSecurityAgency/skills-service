@@ -16,22 +16,24 @@
 package skills.dbupgrade
 
 import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Component
-import skills.controller.AddSkillHelper
-import skills.controller.exceptions.SkillException
-
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.ApplicationContext
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
+import org.springframework.stereotype.Component
+import skills.controller.AddSkillHelper
+import skills.dbupgrade.s3.DiskBufferingS3OutputStreamProviderConfigurer
+import skills.dbupgrade.s3.S3SerializedEventsReader
+
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
 @Slf4j
 @Component
+@Order(Ordered.LOWEST_PRECEDENCE)
 class ReportedSkillEventQueue implements Closeable {
 
     public static final String FILE_EXT = "jsonsequence"
@@ -43,33 +45,49 @@ class ReportedSkillEventQueue implements Closeable {
     @Value('#{"${skills.queued-event-path:/tmp}"}')
     String queuedEventFileDir
 
+    @Value('#{"${skills.queued-event-path.commit-every-n-records:100}"}')
+    Integer reopenFileEveryNRecords
+
+
     BlockingQueue<QueuedSkillEvent> internalQueuedRequests
 
     @Autowired
     AddSkillHelper addSkillHelper
 
+    @Autowired
+    ApplicationContext applicationContext
+
     QueuedEventSerializer queueWriter
 
+    @Autowired(required = false)
+    DiskBufferingS3OutputStreamProviderConfigurer s3ClientProvider
+
+    @Autowired(required = false)
+    S3SerializedEventsReader s3SerializedEventsReader
+
+    @Autowired
+    FsSerializedEventReader fsSerializedEventReader
+
     @PostConstruct
-    public void init() {
+    void init() {
         Boolean upgrading = Boolean.valueOf(dbUpgradeInProgress)
         if (upgrading) {
-            Path outDir = Paths.get(queuedEventFileDir)
-            if (!Files.isDirectory(outDir)) {
-                throw new SkillException("[${queuedEventFileDir}] does not exist or is not a directory")
-            }
-
+            log.info("Started in upgrade mode, storing events in a WAL")
             internalQueuedRequests = new LinkedBlockingQueue<>()
-            queueWriter = new QueuedEventSerializer(BASE_NAME, FILE_EXT, outDir, internalQueuedRequests)
+            queueWriter = new QueuedEventSerializer(applicationContext, queuedEventFileDir, internalQueuedRequests, reopenFileEveryNRecords)
             queueWriter.start()
-        } else {
-            Path outDir = Paths.get(queuedEventFileDir)
-            SerializedEventReader serializedEventReader = new SerializedEventReader(outDir, FILE_EXT, addSkillHelper)
-            serializedEventReader.run()
         }
     }
 
-    public void queueEvent(QueuedSkillEvent queuedSkillEvent) {
+    void replayEvents() {
+        if (queuedEventFileDir.startsWith("s3:/")) {
+            s3SerializedEventsReader.readAndProcess(queuedEventFileDir)
+        } else {
+            fsSerializedEventReader.readAndProcess(queuedEventFileDir)
+        }
+    }
+
+    void queueEvent(QueuedSkillEvent queuedSkillEvent) {
         internalQueuedRequests?.put(queuedSkillEvent)
     }
 

@@ -1159,6 +1159,10 @@ class SkillsService {
         return wsHelper.rootPost("/users", [suggestQuery: query])?.body
     }
 
+    def runReplayEventsAfterUpgrade() {
+        return wsHelper.rootPost("/runReplayEventsAfterUpgrade")?.body
+    }
+
     def saveUserTag(String userId, String tagKey, List<String> tags) {
         return wsHelper.rootPost("/users/${userId}/tags/${tagKey}", [tags: tags])?.body
     }

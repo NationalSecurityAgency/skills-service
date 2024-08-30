@@ -15,6 +15,9 @@
  */
 package skills.dbupgrade
 
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletResponse
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
@@ -26,14 +29,9 @@ import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import skills.auth.UserInfo
 import skills.controller.exceptions.ErrorCode
-import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillEventRequest
 import skills.services.events.SkillEventResult
-import spock.lang.IgnoreRest
 import spock.lang.Specification
-
-import jakarta.servlet.FilterChain
-import jakarta.servlet.http.HttpServletResponse
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 
