@@ -499,6 +499,47 @@ describe('Client Display Survey Tests', () => {
         cy.get('[data-cy="closeQuizAttempt"]').click()
         cy.get('[data-cy="skillDescription-skill1"]')
     })
+
+    it('taken survey can be taken again in client-display when setting is enabled', () => {
+        cy.createSurveyDef(1);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 1);
+        cy.setQuizMultipleTakes(1, false);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.runQuizForUser(1, Cypress.env('proxyUser'), [{selectedIndex: [0]}]);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"]').contains('You already completed this survey')
+        cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="cancelQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="quizPassInfo"]').should('not.exist')
+        cy.get('[data-cy="closeQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="closeQuizAttemptInAlert"]').should('be.enabled')
+        cy.get('[data-cy="closeQuizAttemptInAlert"]').contains('Close Survey')
+
+        // close in alert
+        cy.get('[data-cy="closeQuizAttemptInAlert"]').click()
+        cy.get('[data-cy="skillDescription-skill1"]')
+
+        // close on the bottom
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"]').contains('You already completed this survey')
+        cy.get('[data-cy="closeQuizAttempt"]').click()
+        cy.get('[data-cy="skillDescription-skill1"]')
+
+        cy.setQuizMultipleTakes(1, true);
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+
+        cy.get('[data-cy="startQuizAttempt"]').should('exist')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="surveyCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by completing the survey.')
+    })
 });
 
 
