@@ -141,6 +141,7 @@ const loadData = () => {
 };
 const loadTableData = () => {
   table.value.options.busy = true;
+  overallErrMsg.value = null;
   const url = getUrl();
   UsersService.ajaxCall(url, {
     query: filters.value.global.value ? filters.value.global.value.trim() : '',
@@ -168,6 +169,7 @@ const getDate = (row) => {
       .format('LLL');
 };
 const deleteSkill = (row) => {
+  overallErrMsg.value = null;
   dialogMessages.msgConfirm({
     message: `Removing skill [${row.skillId}] performed on [${getDate(row)}]. This will permanently remove this user's performed skill and cannot be undone.`,
     header: 'Please Confirm!',
@@ -179,8 +181,9 @@ const deleteSkill = (row) => {
   });
 };
 const deleteSelectedSkills = () => {
+  overallErrMsg.value = null;
   dialogMessages.msgConfirm({
-    message: `Removing all selected skills. This will permanently remove this user's performed skills and cannot be undone.`,
+    message: `Removing ${selectedSkills.value.length} selected skill(s). This will permanently remove this user's performed skills and cannot be undone.`,
     header: 'Please Confirm!',
     acceptLabel: 'YES, Delete Them!',
     rejectLabel: 'Cancel',
@@ -213,6 +216,7 @@ const deleteAllSkills = () => {
 };
 const doDeleteSkill = (skill) => {
   table.value.options.busy = true;
+  overallErrMsg.value = null;
   UsersService.deleteSkillEvent(projectId.value, skill, userId.value)
       .then((data) => {
         if (data.success) {
@@ -228,6 +232,7 @@ const doDeleteSkill = (skill) => {
 };
 const doDeleteAllSkills = () => {
   table.value.options.busy = true;
+  overallErrMsg.value = null;
   UsersService.deleteAllSkillEvents(projectId.value, userId.value)
       .then((data) => {
         if (data.success) {
@@ -261,7 +266,7 @@ const selectedSkills = ref([]);
 <div>
   <SubPageHeader title="Performed Skills" aria-label="Performed Skills" />
 
-  <Message v-if="overallErrMsg" severity="error" :sticky="false" :life="10000">{{overallErrMsg}}</Message>
+  <Message v-if="overallErrMsg" severity="error">{{overallErrMsg}}</Message>
   <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #content>
 

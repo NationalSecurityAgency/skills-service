@@ -706,7 +706,7 @@ describe('Performed Skills Table Tests', () => {
 
         cy.get('[data-cy="performedSkillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="performedSkills-deleteSelected"]').click()
-        cy.contains('Removing all selected skills.');
+        cy.contains('Removing 1 selected skill(s).');
         cy.contains('YES, Delete Them!').click();
 
         cy.wait('@delete');
@@ -725,7 +725,7 @@ describe('Performed Skills Table Tests', () => {
         cy.get('[data-cy="performedSkillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="performedSkillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="performedSkills-deleteSelected"]').click()
-        cy.contains('Removing all selected skills.');
+        cy.contains('Removing 2 selected skill(s)');
         cy.contains('YES, Delete Them!').click();
 
         cy.wait('@delete');
@@ -773,7 +773,7 @@ describe('Performed Skills Table Tests', () => {
         cy.get('[data-cy="performedSkillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="performedSkillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
         cy.get('[data-cy="performedSkills-deleteSelected"]').click()
-        cy.contains('Removing all selected skills.');
+        cy.contains('Removing 3 selected skill(s).');
         cy.contains('YES, Delete Them!').click();
 
         cy.validateTable(tableSelector, [
