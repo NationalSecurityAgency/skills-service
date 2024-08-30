@@ -159,6 +159,7 @@ class AdminUsersService {
         }
     }
 
+    @Transactional(readOnly = true)
     TableResultWithTotalPoints loadUsersPageForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints) {
         TableResultWithTotalPoints result = new TableResultWithTotalPoints()
         result.totalPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
