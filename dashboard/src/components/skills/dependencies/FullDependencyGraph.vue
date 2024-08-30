@@ -43,9 +43,9 @@ const showGraph = ref(true);
 const selectedFromSkills = ref({});
 const data = ref([]);
 const graph = ref({});
-const network = ref(null);
-const nodes = ref({});
-const edges = ref({});
+let network = null;
+let nodes = [];
+let edges = [];
 const legendItems = [
   { label: 'Skill', color: 'lightgreen', iconClass: 'fa-graduation-cap' },
   { label: 'Badge', color: '#88a9fc', iconClass: 'fa-award' },
@@ -73,20 +73,20 @@ const displayOptions = ref({
     },
     color: {
       border: 'green',
-          background: 'lightgreen',
+      background: 'lightgreen',
     },
   },
 });
 
 onMounted(() => {
-  nodes.value = [];
-  edges.value = [];
+  nodes = [];
+  edges = [];
   loadGraphDataAndCreateGraph();
 })
 
 onBeforeUnmount(() => {
-  if (network.value) {
-    network.value.destroy();
+  if (network) {
+    network.destroy();
   }
 })
 
@@ -110,9 +110,9 @@ const clearSelectedFromSkills = () => {
 const handleUpdate = () => {
   clearSelectedFromSkills();
   graph.value = [];
-  network.value = null;
-  nodes.value = [];
-  edges.value = [];
+  network = null;
+  nodes = [];
+  edges = [];
   isLoading.value = true;
 
   loadGraphDataAndCreateGraph();
@@ -135,48 +135,55 @@ const onSortNodeStrategyChange = (newStrategy) => {
   createGraph();
 };
 
+const selectNode = (params) => {
+  const selectedNode = params.nodes[0];
+  const nodeValue = nodes.find((node) => node.id === selectedNode);
+  updateSelectedFromSkills(nodeValue.details);
+}
+
+const selectEdge = (params) => {
+  const allNodes = graph.value.nodes;
+  const selectedEdge = params.edges[0];
+  const connectedNodes = network.getConnectedNodes(selectedEdge);
+
+  const fromNode = allNodes.find((node) => node.id === connectedNodes[0]);
+  const toNode = allNodes.find((node) => node.id === connectedNodes[1]);
+
+  if(fromNode.belongsToBadge || toNode.belongsToBadge) {
+    return;
+  }
+
+  const message = `Do you want to remove the path from ${fromNode.name} to ${toNode.name}?`;
+  dialogMessages.msgConfirm({
+    message: message,
+    header: 'Remove Learning Path?',
+    acceptLabel: 'Remove',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      SkillsService.removeDependency(toNode.projectId, toNode.skillId, fromNode.skillId, fromNode.projectId).then(() => {
+        handleUpdate();
+      });
+    }
+  });
+}
+
 const createGraph = () => {
-  if (network.value) {
-    network.value.destroy();
-    network.value = null;
-    nodes.value = [];
-    edges.value = [];
+  if (network) {
+    network.destroy();
+    network = null;
+    nodes = [];
+    edges = [];
   }
 
   data.value = buildData();
   if (hasGraphData.value) {
     showGraph.value = true;
     const container = document.getElementById('dependency-graph');
-    network.value = new Network(container, data.value, displayOptions.value);
+    network = new Network(container, data.value, displayOptions.value);
 
-    network.value.on('selectNode', (params) => {
-      const selectedNode = params.nodes[0];
-      const nodeValue = nodes.value.find((node) => node.id === selectedNode);
-      // selectedFromSkills.value = [nodeValue.details];
-      updateSelectedFromSkills(nodeValue.details);
-    });
+    network.on('selectNode', selectNode);
+    network.on('selectEdge', selectEdge);
 
-    network.value.on('selectEdge', (params) => {
-      const allNodes = graph.value.nodes;
-      const selectedEdge = params.edges[0];
-      const connectedNodes = network.value.getConnectedNodes(selectedEdge);
-
-      const fromNode = allNodes.find((node) => node.id === connectedNodes[0]);
-      const toNode = allNodes.find((node) => node.id === connectedNodes[1]);
-
-      const message = `Do you want to remove the path from ${fromNode.name} to ${toNode.name}?`;
-      dialogMessages.msgConfirm({
-        message: message,
-        header: 'Remove Learning Path?',
-        acceptLabel: 'Remove',
-        rejectLabel: 'Cancel',
-        accept: () => {
-          SkillsService.removeDependency(toNode.projectId, toNode.skillId, fromNode.skillId, fromNode.projectId).then(() => {
-            handleUpdate();
-          });
-        }
-      });
-    });
     setVisNetworkTabIndex();
   } else {
     showGraph.value = false;
@@ -187,6 +194,24 @@ const buildData = () => {
   const sortedNodes = graph.value.nodes.sort((a, b) => a.id - b.id);
   sortedNodes.forEach((node) => {
     const isCrossProject = node.projectId !== route.params.projectId;
+    if(node.type === 'Badge') {
+      if(node.containedSkills && node.containedSkills.length > 0) {
+        const skillIds = node.containedSkills.map((it) => it.name);
+        const childNode = {
+          id: node.id + '-skills',
+          label: skillIds.join('\n'),
+          shape: 'box',
+          type: 'Badge-Skills',
+        };
+        nodes.push(childNode);
+        edges.push({
+          to: node.id,
+          from: node.id + '-skills',
+          dashes: true,
+          label: 'contains',
+        });
+      }
+    }
     const newNode = {
       id: node.id,
       label: GraphUtils.getLabel(node, isCrossProject),
@@ -217,11 +242,14 @@ const buildData = () => {
       newNode.icon.code = '\uf559';
       newNode.icon.color = '#88a9fc';
     }
-    nodes.value.push(newNode);
+    if (node.belongsToBadge) {
+      newNode.icon.color = '#88a9fc';
+    }
+    nodes.push(newNode);
   });
   const sortedEdges = graph.value.edges.sort((a, b) => a.toId - b.toId);
   sortedEdges.forEach((edge) => {
-    edges.value.push({
+    edges.push({
       from: edge.toId,
       to: edge.fromId,
       arrows: 'to',
@@ -229,7 +257,7 @@ const buildData = () => {
     });
   });
 
-  return { nodes: nodes.value, edges: edges.value };
+  return { nodes: nodes, edges: edges };
 };
 
 const setVisNetworkTabIndex = () => {

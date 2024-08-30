@@ -29,4 +29,5 @@ class SkillDefGraphRes {
     Integer pointIncrement
     Integer totalPoints
     SkillDef.ContainerType type
+    List<SkillDefGraphRes> containedSkills
 }

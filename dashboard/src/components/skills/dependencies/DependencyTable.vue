@@ -42,15 +42,17 @@ onMounted(() => {
 
     if (edges && edges.length > 0) {
       edges.forEach((edge) => {
-        const fromNode = nodes.find((node) => node.id === edge.from)
-        const toNode = nodes.find((node) => node.id === edge.to)
+        const fromNode = nodes.find((node) => node.id === edge.from && node.type !== 'Badge-Skills')
+        const toNode = nodes.find((node) => node.id === edge.to && node.type !== 'Badge-Skills')
 
-        learningPaths.value.push({
-          fromItem: fromNode.details.name,
-          fromNode: fromNode.details,
-          toItem: toNode.details.name,
-          toNode: toNode.details
-        })
+        if( fromNode && toNode ) {
+          learningPaths.value.push({
+            fromItem: fromNode?.details?.name,
+            fromNode: fromNode?.details,
+            toItem: toNode?.details?.name,
+            toNode: toNode?.details
+          })
+        }
       })
     }
     isProcessing.value = false

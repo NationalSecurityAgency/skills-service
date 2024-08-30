@@ -79,6 +79,9 @@ class SkillsDepsService {
     @Autowired
     UserActionsHistoryService userActionsHistoryService
 
+    @Autowired
+    SkillsAdminService skillsAdminService
+
     @Transactional(readOnly = true)
     List<SkillDepResult> checkIfSkillsHaveDeps(String projectId, List<String> skillIds) {
         List<SkillRelDefRepo.SkillIdAndCount> skillIdsAndCounts = skillRelDefRepo.countChildrenForMultipleSkillIds(projectId, skillIds, [SkillRelDef.RelationshipType.Dependence])
@@ -182,6 +185,7 @@ class SkillsDepsService {
             Props.copy(skillDefRes, graphRes)
             graphRes.id = it.value
             graphRes.projectName = it.key.projectName
+            graphRes.containedSkills = it.key.containedSkills
             return graphRes
         }
         SkillsGraphRes res = new SkillsGraphRes(nodes: nodes, edges: edgesRes)
@@ -245,7 +249,12 @@ class SkillsDepsService {
                     pointIncrement: it[6],
                     totalPoints: it[7],
                     type: it[8],
+                    containedSkills: null,
             )
+
+            if(it[8] == SkillDef.ContainerType.Badge) {
+                from.containedSkills = getSkillsForLearningPathItem(projectId, it[5], it[2])
+            }
 
             SkillDefGraphRes to = new SkillDefGraphRes(
                     id: it[9],
@@ -257,11 +266,32 @@ class SkillsDepsService {
                     pointIncrement: it[15],
                     totalPoints: it[16],
                     type: it[17],
+                    containedSkills: null,
             )
+
+            if(it[17] == SkillDef.ContainerType.Badge) {
+                to.containedSkills = getSkillsForLearningPathItem(projectId, it[14], it[11])
+            }
 
             new GraphSkillDefEdge(from: from, to: to)
 
         })
+    }
+
+    private List<SkillDefGraphRes> getSkillsForLearningPathItem(String projectId, String projectName, String skillId) {
+        List<SkillDefPartialRes> badgeSkills = skillsAdminService.getSkillsByProjectSkillAndType(projectId, skillId, SkillDef.ContainerType.Badge, SkillRelDef.RelationshipType.BadgeRequirement)
+        List<SkillDefGraphRes> skills = badgeSkills.collect{res -> new SkillDefGraphRes(
+                id: null,
+                name: res.name,
+                skillId: res.skillId,
+                subjectId: res.subjectId,
+                projectId: res.projectId,
+                projectName: projectName,
+                pointIncrement: res.pointIncrement,
+                totalPoints: res.totalPoints,
+                type: res.type,
+        ) }
+        return skills
     }
 
     private void validateLearningPathItemAndThrowException(SkillDef skillDef, SkillDef prereqSkillDef) {
