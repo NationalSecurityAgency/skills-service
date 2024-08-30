@@ -1024,6 +1024,7 @@ class AdminController {
                                     @RequestParam int minimumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
+
         PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE, ascending ? ASC : DESC, orderBy)
         ModelAndView mav = new ModelAndView(userProgressExportResult);
         mav.addObject(UserProgressExportResult.PROJECT_ID, projectId)

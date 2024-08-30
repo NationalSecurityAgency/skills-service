@@ -41,6 +41,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.Month
 import java.time.format.TextStyle
+import java.util.stream.Collectors
 import java.util.stream.Stream
 
 @Service
@@ -180,12 +181,17 @@ class AdminUsersService {
 
     @Profile
     private List<ProjectUser> findDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints) {
-        userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, pageRequest)
+        Stream<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, pageRequest)
+        try {
+            return projectUsers.collect(Collectors.toList());
+        } finally {
+            projectUsers.close()
+        }
     }
 
     @Profile
     Stream<ProjectUser> streamAllDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints) {
-        return userPointsRepo.findAllDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, pageRequest)
+        return userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, pageRequest)
     }
 
     @Profile
