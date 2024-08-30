@@ -33,7 +33,10 @@ import spock.lang.Shared
         'server.port=8093',
         'skills.config.db-upgrade-in-progress=true',
         'skills.queued-event-path=./target',
-        'skills.queued-event-path.commit-every-n-records=5'
+        'skills.queued-event-path.commit-every-n-records=5',
+        'skills.authorization.userInfoUri=https://localhost:8185/userInfo?dn={dn}',
+        'skills.authorization.userQueryUri=https://localhost:8185/userQuery?query={query}',
+        'skills.authorization.userInfoHealthCheckUri=https://localhost:8185/status'
 ], webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes = SpringBootApp)
 class UpgradeModeOnIT extends DefaultIntSpec {
     @Shared

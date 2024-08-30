@@ -36,7 +36,10 @@ import spock.lang.Shared
 @SpringBootTest(properties = [
         'skills.config.db-upgrade-in-progress=false',
         'skills.queued-event-path=./target',
-        'skills.queued-event-path.commit-every-n-records=5'
+        'skills.queued-event-path.commit-every-n-records=5',
+        'skills.authorization.userInfoUri=https://localhost:8186/userInfo?dn={dn}',
+        'skills.authorization.userQueryUri=https://localhost:8186/userQuery?query={query}',
+        'skills.authorization.userInfoHealthCheckUri=https://localhost:8186/status'
 ], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class ReplayWALEventsIT extends DefaultIntSpec {
     @Shared
