@@ -65,6 +65,7 @@ const schema = props.isSurvey ? yup.object().shape({'quizMultipleTakes': yup.boo
   'quizRandomizeQuestions': yup.boolean(),
   'quizRandomizeAnswers': yup.boolean(),
   'quizMultipleTakes': yup.boolean(),
+  'quizAlwaysShowCorrectAnswers': yup.boolean(),
   'quizTimeLimitUnlimited': yup.boolean(),
   'quizTimeLimitHours': yup.number()
       .when('quizTimeLimitUnlimited', {
@@ -284,6 +285,20 @@ const updateTimeLimit = () => {
           aria-label="Allow retaking the quiz/survey after passing"
           data-cy="multipleTakesSwitch"/>
       <span class="mx-2 vertical-align-top">Allow</span>
+    </div>
+  </div>
+
+  <div class="field grid align-items-start">
+    <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+      <label for="alwaysShowCorrectAnswers">Show Correct Answers On Failure:</label>
+    </div>
+    <div class="col-12 md:col-9">
+      <SkillsInputSwitch
+          name="quizAlwaysShowCorrectAnswers"
+          inputId="alwaysShowCorrectAnswers"
+          aria-label="Allow retaking the quiz after passing"
+          data-cy="alwaysShowCorrectAnswersSwitch"/>
+      <span class="mx-2 vertical-align-top">Enabled</span>
     </div>
   </div>
 

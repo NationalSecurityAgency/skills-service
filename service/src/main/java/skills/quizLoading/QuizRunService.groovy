@@ -338,6 +338,10 @@ class QuizRunService {
         return getQuizSettingAsBoolean(quizRefId, QuizSettings.MultipleTakes.setting)
     }
     @Profile
+    private boolean alwaysShowCorrectAnswers(Integer quizRefId) {
+        return getQuizSettingAsBoolean(quizRefId, QuizSettings.AlwaysShowCorrectAnswers.setting)
+    }
+    @Profile
     private Integer getQuizSettingAsInteger(Integer quizRefId, String setting) {
         QuizSetting quizSetting = quizSettingsRepo.findBySettingAndQuizRefId(setting, quizRefId)
         return quizSetting ? Integer.valueOf(quizSetting.value) : -1
@@ -556,9 +560,10 @@ class QuizRunService {
         int numCorrect = gradedQuestions.count { it.isCorrect }
         Integer minNumQuestionsToPassConf = getMinNumQuestionsToPassSetting(quizDef.id)
         Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : quizLength;
+        boolean showCorrectAnswers = alwaysShowCorrectAnswers(quizDef.id)
         boolean quizPassed = numCorrect >= minNumQuestionsToPass
 
-        boolean shouldReturnGradedRes = quizPassed && quizDef.type == QuizDefParent.QuizType.Quiz;
+        boolean shouldReturnGradedRes = (quizPassed || showCorrectAnswers) && quizDef.type == QuizDefParent.QuizType.Quiz;
         if (!quizPassed && quizDef.type == QuizDefParent.QuizType.Quiz) {
             UserQuizAttemptRepo.UserQuizAttemptStats userAttemptsStats = quizAttemptRepo.getUserAttemptsStats(userId, quizDef.id,
                     UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED)
@@ -566,7 +571,7 @@ class QuizRunService {
             int numConfiguredAttempts = getMaxQuizAttemptsSetting(quizDef.id)
             // anything 0 or below is considered to be unlimited attempts
             // only return graded results if there are no more attempts available
-            shouldReturnGradedRes = numConfiguredAttempts > 0 && numCurrentAttempts >= numConfiguredAttempts;
+            shouldReturnGradedRes = showCorrectAnswers || (numConfiguredAttempts > 0 && numCurrentAttempts >= numConfiguredAttempts);
         }
 
         QuizGradedResult gradedResult = new QuizGradedResult(passed: quizPassed, numQuestionsGotWrong: quizLength - numCorrect,

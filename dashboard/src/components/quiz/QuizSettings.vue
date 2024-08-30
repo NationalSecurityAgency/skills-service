@@ -54,6 +54,10 @@ const settings = ref({
     value: false,
     setting: 'quizMultipleTakes',
   },
+  alwaysShowCorrectAnswers: {
+    value: false,
+    setting: 'quizAlwaysShowCorrectAnswers',
+  },
   quizLength: {
     value: '-1',
     setting: 'quizLength',
@@ -114,7 +118,7 @@ const loadAndUpdateQuizSettings = () => {
                   minutesForQuiz.value =  remainingTime / 60;
                   settings.value.quizTimeLimit.unlimited = false;
                 }
-              } else if ([settings.value.randomizeQuestions.setting, settings.value.randomizeAnswers.setting, settings.value.multipleTakes.setting].includes(foundFromServer.setting)) {
+              } else if ([settings.value.randomizeQuestions.setting, settings.value.randomizeAnswers.setting, settings.value.multipleTakes.setting, settings.value.alwaysShowCorrectAnswers.setting].includes(foundFromServer.setting)) {
                 settings.value[key].value = (/true/i).test(foundFromServer.value);
               } else {
                 settings.value[key].value = foundFromServer.value;
@@ -130,6 +134,7 @@ const loadAndUpdateQuizSettings = () => {
               quizRandomizeQuestions: settings.value.randomizeQuestions.value,
               quizRandomizeAnswers: settings.value.randomizeAnswers.value,
               quizMultipleTakes: settings.value.multipleTakes.value,
+              quizAlwaysShowCorrectAnswers: settings.value.alwaysShowCorrectAnswers.value,
               quizTimeLimitUnlimited: settings.value.quizTimeLimit.unlimited,
               quizTimeLimitHours: hoursForQuiz.value,
               quizTimeLimitMinutes: minutesForQuiz.value
