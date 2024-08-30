@@ -299,7 +299,7 @@ class QuizRunService {
                 aboutToExpire = attrs.every <= 1
             }
         }
-        if (quizDef.type == QuizDefParent.QuizType.Survey) {
+        if (quizDef.type == QuizDefParent.QuizType.Survey  && !allowMultipleTakes) {
             if (numCurrentAttempts > 0) {
                 throw new SkillQuizException("User [${userId}] has already taken this survey", quizId, ErrorCode.BadParam)
             }
