@@ -288,7 +288,7 @@ const updateTimeLimit = () => {
     </div>
   </div>
 
-  <div class="field grid align-items-start">
+  <div class="field grid align-items-start" v-if="!isSurvey">
     <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
       <label for="alwaysShowCorrectAnswers">Show Correct Answers On Failure:</label>
     </div>
