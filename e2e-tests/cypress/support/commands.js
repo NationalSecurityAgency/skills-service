@@ -347,6 +347,13 @@ Cypress.Commands.add("setQuizMultipleTakes", (quizNum = 1, enabled) => {
     }]);
 });
 
+Cypress.Commands.add("setQuizShowCorrectAnswers", (quizNum = 1, enabled) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
+        setting: 'quizAlwaysShowCorrectAnswers',
+        value: `${enabled}`
+    }]);
+});
+
 Cypress.Commands.add("setNumQuestionsForQuiz", (quizNum = 1, numQuestions) => {
     cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
         setting: 'quizLength',

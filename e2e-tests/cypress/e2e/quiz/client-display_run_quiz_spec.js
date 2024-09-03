@@ -823,6 +823,91 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
 
     });
+
+    it('shows wrong answers if setting is enabled', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizMultipleChoiceQuestionDef(1, 2);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_3"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+
+        cy.get('[data-cy="quizFailed"]')
+        cy.get('[data-cy="quizRunQuestions"]').should('not.exist');
+
+        cy.setQuizShowCorrectAnswers(1, true);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_3"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+
+        cy.get('[data-cy="quizFailed"]')
+
+        cy.validateQuestionAnswer({
+            num: 1,
+            correct: false,
+            answers: [{
+                num: 1,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: true
+            }, {
+                num: 2,
+                selected: true,
+                wrongSelection: true,
+                missedSelection: false
+            }, {
+                num: 3,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+        cy.validateQuestionAnswer({
+            num: 2,
+            correct: false,
+            answers: [{
+                num: 1,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: true
+            }, {
+                num: 2,
+                selected: true,
+                wrongSelection: true,
+                missedSelection: false
+            }, {
+                num: 3,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 4,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+
+
+    });
 });
 
 
