@@ -123,7 +123,7 @@ jobs:
           npm -v
           node -v
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: service jar
           path: ./service/target/
@@ -219,7 +219,7 @@ jobs:
         run: |
           java -version
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: service jar
           path: ./service/target/
