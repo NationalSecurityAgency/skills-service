@@ -117,8 +117,8 @@ class QueuedEventSerializer implements AutoCloseable{
                         }
                     } catch (InterruptedException interruptedException) {
                         Thread.currentThread().interrupt()
-                    } catch (IOException e) {
-                        log.error("Failed to write queued skill event", e)
+                    } catch (Throwable e) {
+                        log.error("Failed while writing queued skill events", e)
                     }
                 }
             }
