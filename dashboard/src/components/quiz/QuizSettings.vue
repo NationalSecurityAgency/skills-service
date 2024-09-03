@@ -170,13 +170,8 @@ const collectAndSave = (values) => {
     <SkillsSpinner :is-loading="isLoadingData"/>
     <Card>
       <template #content>
-        <NoContent2 v-if="isSurveyType"
-                    title="No Settings"
-                    class="my-5"
-                    message="Surveys do not have any available settings."
-                    data-cy="noSettingsAvailable"/>
-        <div v-if="!isSurveyType && !isLoadingData">
-          <QuizSettingsForm :initialValues="initialValues" @saveSettings="collectAndSave" :quizSummaryState="quizSummaryState" :showSavedMsg="showSavedMsg" />
+        <div v-if="!isLoadingData">
+          <QuizSettingsForm :isSurvey="isSurveyType" :initialValues="initialValues" @saveSettings="collectAndSave" :quizSummaryState="quizSummaryState" :showSavedMsg="showSavedMsg" />
         </div>
       </template>
     </Card>

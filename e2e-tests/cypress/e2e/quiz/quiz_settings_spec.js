@@ -206,10 +206,4 @@ describe('Quiz Metrics Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
     });
 
-    it('surveys do not have settings, at least yet...', function () {
-        cy.createQuizDef(1, { type: 'Survey' });
-        cy.visit('/administrator/quizzes/quiz1/settings');
-        cy.get('[data-cy="noSettingsAvailable"]')
-    });
-
 });

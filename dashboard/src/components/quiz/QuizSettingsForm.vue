@@ -34,11 +34,15 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isSurvey: {
+    type: Boolean,
+    default: false,
+  }
 })
 
 const quizTimeLimit = ref(0);
 const errMsg = ref('')
-const schema = yup.object().shape({
+const schema = props.isSurvey ? yup.object().shape({'quizMultipleTakes': yup.boolean()}) : yup.object().shape({
   'quizLength': yup.string()
       .required()
       .test('greaterThanOrEqualToPassing', 'Quiz length must be greater than or equal to the passing requirement', (value) => greaterThanOrEqualToPassing(value))
@@ -152,7 +156,7 @@ const updateTimeLimit = () => {
 </script>
 
 <template>
-  <div class="field grid align-items-start">
+  <div class="field grid align-items-start" v-if="!isSurvey">
     <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
       <label for="quizNumQuestions"># of Questions per Quiz Attempt:</label>
     </div>
@@ -166,7 +170,7 @@ const updateTimeLimit = () => {
           :options="quizLengthOptions" />
     </div>
   </div>
-  <div class="field grid align-items-start">
+  <div class="field grid align-items-start" v-if="!isSurvey">
     <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
       <label for="quizPassingReq">Passing Requirement:</label>
     </div>
@@ -181,7 +185,7 @@ const updateTimeLimit = () => {
     </div>
   </div>
 
-  <div class="field grid align-items-start">
+  <div class="field grid align-items-start" v-if="!isSurvey">
     <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
       <label for="quizNumberOfAttemptsUnlimited">Maximum Number of Attempts:</label>
     </div>
@@ -205,7 +209,7 @@ const updateTimeLimit = () => {
     </div>
   </div>
 
-  <div class="field grid align-items-start">
+  <div class="field grid align-items-start" v-if="!isSurvey">
     <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
       <label for="randomizeQuestions">Randomize Question Order:</label>
     </div>
@@ -219,7 +223,7 @@ const updateTimeLimit = () => {
     </div>
   </div>
 
-  <div class="field grid align-items-start">
+  <div class="field grid align-items-start" v-if="!isSurvey">
     <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
       <label for="randomizeAnswers">
         Randomize Answer Order:
@@ -236,7 +240,7 @@ const updateTimeLimit = () => {
   </div>
 
 
-  <div class="field grid align-items-start">
+  <div class="field grid align-items-start" v-if="!isSurvey">
     <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
       <label for="timeLimitUnlimited">Quiz Time Limit:</label>
     </div>
@@ -271,13 +275,13 @@ const updateTimeLimit = () => {
 
   <div class="field grid align-items-start">
     <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
-      <label for="multipleTakes">Allow Retakes After Passing:</label>
+      <label for="multipleTakes">Allow Retakes After Completion:</label>
     </div>
     <div class="col-12 md:col-9">
       <SkillsInputSwitch
           name="quizMultipleTakes"
           inputId="multipleTakes"
-          aria-label="Allow retaking the quiz after passing"
+          aria-label="Allow retaking the quiz/survey after passing"
           data-cy="multipleTakesSwitch"/>
       <span class="mx-2 vertical-align-top">Allow</span>
     </div>
