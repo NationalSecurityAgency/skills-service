@@ -40,7 +40,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
   const minutes = props.skill.pointIncrementInterval > 60 ? props.skill.pointIncrementInterval % 60 : props.skill.pointIncrementInterval;
   const occur = props.skill.maxOccurrencesWithinIncrementInterval;
   const points = occur * props.skill.pointIncrement;
-  let res = `Up-to ${numFormat.pretty(points)} ${attributes.pointDisplayName} within `;
+  let res = `Up-to ${numFormat.pretty(points)} ${attributes.pointDisplayName.toLowerCase()}s within `;
   if (hours) {
     res = `${res} ${hours} hr${pluralSupport.sOrNone(hours)}`;
   }
