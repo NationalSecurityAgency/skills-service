@@ -215,7 +215,7 @@ const shouldShowCustomLabelsConfig = computed(() => {
       || settings.value.groupDisplayName.value !== 'Group' || settings.value.groupDisplayName.dirty
       || settings.value.skillDisplayName.value !== 'Skill' || settings.value.skillDisplayName.dirty
       || settings.value.levelDisplayName.value !== 'Level' || settings.value.levelDisplayName.dirty
-      || settings.value.pointDisplayName.value !== 'Level' || settings.value.pointDisplayName.dirty;
+      || settings.value.pointDisplayName.value !== 'Point' || settings.value.pointDisplayName.dirty;
 });
 
 const showCustomLabelsConfigLabel = computed(() => {
