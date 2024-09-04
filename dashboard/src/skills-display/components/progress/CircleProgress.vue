@@ -50,6 +50,10 @@ const props = defineProps({
   },
   totalPossiblePoints: {
     type: Number
+  },
+  customLabel: {
+    type: String,
+    default: 'Point',
   }
 })
 
@@ -129,7 +133,7 @@ const chartOptions = computed(() => {
         }
       }
     },
-    labels: [isCompleted ? '✓' : `${numFormat.pretty(props.totalCompletedPoints > 0 ? props.totalCompletedPoints : 0)} Points`]
+    labels: [isCompleted ? '✓' : `${numFormat.pretty(props.totalCompletedPoints > 0 ? props.totalCompletedPoints : 0)} ${props.customLabel}s`]
   }
 })
 

@@ -27,6 +27,7 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
 import DateCell from '@/components/utils/table/DateCell.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
+import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
 
 const skillsDisplayService = useSkillsDisplayService()
 const route = useRoute()
@@ -35,6 +36,7 @@ const responsive = useResponsiveBreakpoints()
 const appConfig = useAppConfig()
 const colors = useColors()
 const numFormat = useNumberFormat()
+const attributes = useSkillsDisplayAttributesState()
 
 const options = ref([{
   value: 'topTen',
@@ -132,7 +134,7 @@ const getProgressPercent = (item) => {
           <template #empty>
             <no-content2
               class="my-5"
-              title="No Users" message="Leaderboard is empty because there no users with points yet..." />
+              title="No Users" :message="`Leaderboard is empty because there no users with ${ attributes.pointDisplayName.toLowerCase() }s yet...`" />
           </template>
 
           <Column field="rank" header="Rank" :sortable="false" :class="{'flex': responsive.md.value }">
@@ -169,7 +171,7 @@ const getProgressPercent = (item) => {
             <template #body="slotProps">
               <div>
                 <span class="font-medium">{{ numFormat.pretty(slotProps.data.points) }}</span> <span
-                class="font-italic">Points</span>
+                class="font-italic">{{ attributes.pointDisplayName }}s</span>
               </div>
               <vertical-progress-bar
                 :total-progress="getProgressPercent(slotProps.data)"

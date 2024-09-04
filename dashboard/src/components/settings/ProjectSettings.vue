@@ -49,6 +49,7 @@ const schema = yup.object({
   groupDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Group Display Text'),
   skillDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Skill Display Text'),
   levelDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Level Display Text'),
+  pointDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Point Display Text'),
 });
 
 const { values, defineField, errors, meta, handleSubmit, setFieldValue } = useForm({
@@ -59,6 +60,7 @@ const { values, defineField, errors, meta, handleSubmit, setFieldValue } = useFo
     groupDisplayName: 'Group',
     subjectDisplayName: 'Subject',
     projectDisplayName: 'Project',
+    pointDisplayName: 'Point',
   }
 });
 
@@ -176,6 +178,13 @@ let settings = ref({
     dirty: false,
     projectId: route.params.projectId,
   },
+  pointDisplayName: {
+    value: 'Point',
+    setting: 'point.displayName',
+    lastLoadedValue: 'Point',
+    dirty: false,
+    projectId: route.params.projectId,
+  },
   hideProjectDescription: {
     value: false,
     setting: 'show_project_description_everywhere',
@@ -205,7 +214,8 @@ const shouldShowCustomLabelsConfig = computed(() => {
       || settings.value.subjectDisplayName.value !== 'Subject' || settings.value.subjectDisplayName.dirty
       || settings.value.groupDisplayName.value !== 'Group' || settings.value.groupDisplayName.dirty
       || settings.value.skillDisplayName.value !== 'Skill' || settings.value.skillDisplayName.dirty
-      || settings.value.levelDisplayName.value !== 'Level' || settings.value.levelDisplayName.dirty;
+      || settings.value.levelDisplayName.value !== 'Level' || settings.value.levelDisplayName.dirty
+      || settings.value.pointDisplayName.value !== 'Level' || settings.value.pointDisplayName.dirty;
 });
 
 const showCustomLabelsConfigLabel = computed(() => {
@@ -587,6 +597,10 @@ const saveSettings = ((dirtyChanges) => {
                                             label="Level Display Text"
                                             @input="updateSettingsField"
                                             help-message='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                    <SkillsSettingTextInput name="pointDisplayName"
+                                            label="Point Display Text"
+                                            @input="updateSettingsField"
+                                            help-message='The word "Point" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
                   </template>
                 </Card>
             </div>
