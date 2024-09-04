@@ -22,6 +22,7 @@ enum RoleName {
     ROLE_SUPERVISOR('Supervisor'),
     ROLE_SUPER_DUPER_USER('Root'),
     ROLE_PROJECT_APPROVER('Approver'),
+    ROLE_DASHBOARD_ADMIN_ACCESS('Admin Access'),
     ROLE_QUIZ_ADMIN('Admin'),
     ROLE_QUIZ_READ_ONLY('Read Only');
 

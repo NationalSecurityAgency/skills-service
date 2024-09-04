@@ -15,7 +15,15 @@
  */
 import axios from 'axios'
 
+const supportedRoles = ['ROLE_SUPER_DUPER_USER', 'ROLE_SUPERVISOR', 'ROLE_DASHBOARD_ADMIN_ACCESS']
+const hasSupportedRole = (roles) => {
+  if (roles instanceof Array) {
+    return roles.some(value => supportedRoles.includes(value));
+  }
+  return supportedRoles.includes(roles);
+}
 export default {
+
   getUserRoles(projectId, roles, params) {
     const strRoles = roles.map((r) => `roles=${encodeURIComponent(r)}`).join('&')
     if (projectId) {
@@ -23,10 +31,7 @@ export default {
         .get(`/admin/projects/${encodeURIComponent(projectId)}/userRoles?${strRoles}`, { params })
         .then((response) => response.data)
     }
-    if (
-      roles.length === 1 &&
-      (roles.includes('ROLE_SUPER_DUPER_USER') || roles.includes('ROLE_SUPERVISOR'))
-    ) {
+    if (roles.length === 1 && hasSupportedRole(roles)) {
       return axios
         .get(`/root/users/roles/${roles[0]}`, { params })
         .then((response) => response.data)
@@ -47,7 +52,7 @@ export default {
         { handleError: false }
       )
     }
-    if (roleName === 'ROLE_SUPER_DUPER_USER' || roleName === 'ROLE_SUPERVISOR') {
+    if (hasSupportedRole(roleName)) {
       return axios.put(`/root/users/${userKey}/roles/${roleName}`, null, { handleError: false })
     }
     throw new Error(`unexpected user role [${roleName}]`)
@@ -58,7 +63,7 @@ export default {
         `/admin/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userId)}/roles/${encodeURIComponent(roleName)}`
       )
     }
-    if (roleName === 'ROLE_SUPER_DUPER_USER' || roleName === 'ROLE_SUPERVISOR') {
+    if (hasSupportedRole(roleName)) {
       return axios
         .delete(`/root/users/${encodeURIComponent(userId)}/roles/${roleName}`)
         .then((response) => response.data)

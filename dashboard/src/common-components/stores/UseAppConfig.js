@@ -145,6 +145,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const disableScrollToTop = computed(() => config.value.disableScrollToTop)
   const dbUpgradeInProgress = computed(() => isTrue(config.value.dbUpgradeInProgress))
   const exportHeaderAndFooter = computed(() => config.value.exportHeaderAndFooter)
+  const limitAdminAccess = computed(() => config.value.limitAdminAccess)
+
   return {
     loadConfigState,
     refreshConfig,
@@ -231,5 +233,6 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     disableScrollToTop,
     dbUpgradeInProgress,
     exportHeaderAndFooter,
+    limitAdminAccess
   }
 })

@@ -35,6 +35,7 @@ const ROLE_PROJECT_ADMIN = 'ROLE_PROJECT_ADMIN';
 const ROLE_SUPERVISOR = 'ROLE_SUPERVISOR';
 const ROLE_SUPER_DUPER_USER = 'ROLE_SUPER_DUPER_USER';
 const ROLE_PROJECT_APPROVER = 'ROLE_PROJECT_APPROVER';
+const ROLE_DASHBOARD_ADMIN_ACCESS = 'ROLE_DASHBOARD_ADMIN_ACCESS'
 const ALL_ROLES = [ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPERVISOR, ROLE_SUPER_DUPER_USER, ROLE_PROJECT_APPROVER];
 
 const appConfig = useAppConfig();
@@ -140,6 +141,8 @@ function getRoleDisplay(roleName) {
   }
   if (roleName === ROLE_PROJECT_APPROVER) {
     return 'Approver';
+  } if (roleName === ROLE_DASHBOARD_ADMIN_ACCESS) {
+    return 'Training Creator';
   }
   return 'Unknown';
 }
@@ -306,6 +309,7 @@ defineExpose({
       <SkillsCardHeader :title="title"></SkillsCardHeader>
     </template>
     <template #content>
+      <slot name="underHeader"/>
       <div>
         <div class="p-3">
           <div>
