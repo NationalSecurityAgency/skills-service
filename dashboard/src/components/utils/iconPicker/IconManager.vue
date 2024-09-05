@@ -105,15 +105,12 @@ let modalWidth = ref("70rem");
 let rowLength = 6;
 let acceptType = 'image/.*';
 const mimeTester = new RegExp(acceptType);
-let selected = '';
 let selectedCss = '';
-let selectedIconPack = '';
 let activePack = ref(0);
 let fontAwesomeIcons = fontAwesomeIconsCanonical;
 let materialIcons = materialIconsCanonical;
-let disableCustomUpload = false;
-let currentCustomIconFile = null;
 let errorMessage = ref('');
+const fileInfo = ref(null);
 
 let active = ref(0);
 
@@ -243,14 +240,14 @@ const beforeUpload = (upload) => {
   const isImageTypeValid = isValidImageType(upload.files[0].type);
 
   if (!isImageTypeValid) {
-    errorMessage.value = 'File is not an image format';
+    displayError('File is not an image format');
     return;
   }
 
   const existingIcons = iconPacks.value[2].icons.flat();
   const uploadName = upload.files[0].name;
   if(existingIcons.find(it => it.filename === uploadName)) {
-    errorMessage.value = 'A file with this name already exists';
+    displayError('A file with this name already exists');
     return;
   }
 
@@ -268,12 +265,21 @@ const beforeUpload = (upload) => {
       FileUploadService.upload(uploadUrl.value, data, (response) => {
         handleUploadedIcon(response.data);
       }, () => {
-        errorMessage.value = 'Encountered error when uploading icon';
+        displayError('Encountered error when uploading icon');
       });
     } else {
-      errorMessage.value = `Invalid image dimensions, dimensions must be square and must be between ${minDimensionsString.value} and ${maxDimensionsString.value}`;
+      displayError(`Invalid image dimensions, dimensions must be square and must be between ${minDimensionsString.value} and ${maxDimensionsString.value}`);
     }
   };
+}
+
+const displayError = (message) => {
+  errorMessage.value = message;
+  fileInfo.value = null;
+}
+
+const closeError = () => {
+  errorMessage.value = null;
 }
 </script>
 
@@ -298,12 +304,12 @@ const beforeUpload = (upload) => {
       <FileUpload ref="uploader" @select="beforeUpload" v-if="activePack === 'Custom'" name="customIcon" :accept="acceptType" :maxFileSize="1000000" customUpload @uploader="beforeUpload">
         <template #header>
           <div class="w-full">
-            <InputText class="w-full" data-cy="fileInput" placeholder="Browse..." type="file" @change="uploadFromInput($event)" />
+            <InputText class="w-full" data-cy="fileInput" placeholder="Browse..." type="file" @change="uploadFromInput($event)" v-model="fileInfo" />
             <p class="text-muted text-right text-primary font-italic">* custom icons must be between {{minDimensionsString}} and {{maxDimensionsString}}</p>
           </div>
         </template>
         <template #content>
-          <Message data-cy="iconErrorMessage" v-if="errorMessage" severity="error">{{ errorMessage }}</Message>
+          <Message data-cy="iconErrorMessage" v-if="errorMessage" @close="closeError" severity="error">{{ errorMessage }}</Message>
           <p>Drag and drop files to here to upload.</p>
           <div v-if="iconPacks[2].icons.length > 0">
             <div class="flex flex-wrap p-0 sm:p-5 gap-5">
