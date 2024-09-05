@@ -303,6 +303,15 @@ Cypress.Commands.add("login", (user, pass) => {
     })
 });
 
+
+Cypress.Commands.add('loginAsRoot', (user, pass) => {
+    cy.logout()
+    cy.fixture('vars.json')
+      .then((vars) => {
+          cy.login(vars.rootUser, vars.defaultPass)
+      })
+})
+
 Cypress.Commands.add("resetEmail", () => {
     cy.request({
        method: "DELETE",
