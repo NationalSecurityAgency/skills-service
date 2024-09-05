@@ -91,7 +91,7 @@ const loadSkillInfo = () => {
 }
 const loadQuizInfo = () => {
   loadingQuizInfo.value = true;
-  QuizRunService.getQuizInfo(quizId.value)
+  QuizRunService.getQuizInfo(quizId.value, skillId.value, projectId.value)
       .then((res) => {
         quizInfo.value = res;
       })

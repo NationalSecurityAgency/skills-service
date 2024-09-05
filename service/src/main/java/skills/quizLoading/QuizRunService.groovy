@@ -90,8 +90,21 @@ class QuizRunService {
     @Autowired
     SkillAttributeService skillAttributeService
 
+    private boolean skillExpiringSoon(skillId, projectId) {
+        ExpirationAttrs attrs = skillAttributeService.getExpirationAttrs( projectId, skillId )
+        if(attrs && attrs?.expirationType == "DAILY") {
+            return true
+        }
+        else if(attrs && attrs?.nextExpirationDate) {
+            LocalDateTime now = LocalDateTime.now()
+            LocalDateTime expirationDate = attrs.nextExpirationDate.toLocalDateTime()
+            Duration difference = Duration.between(now, expirationDate)
+            return difference.toHours() <= 24
+        }
+    }
+
     @Transactional
-    QuizInfo loadQuizInfo(String userId, String quizId) {
+    QuizInfo loadQuizInfo(String userId, String quizId, String skillId = null, String projectId = null) {
         QuizDefWithDescription quizDefWithDesc = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizId)
         if (!quizDefWithDesc) {
             throw new SkillQuizException("Failed to find quiz id.", quizId, ErrorCode.BadParam)
@@ -115,6 +128,10 @@ class QuizRunService {
         QuizSetting quizTimeLimit = quizSettings?.find( { it.setting == QuizSettings.QuizTimeLimit.setting })
         Integer quizLengthAsInteger = quizLength ? Integer.valueOf(quizLength.value) : 0
         Integer lengthSetting = quizLengthAsInteger > 0 ? quizLengthAsInteger : numberOfQuestions
+
+        if(skillId && projectId) {
+            multipleTakes = skillExpiringSoon(skillId, projectId)
+        }
 
         return new QuizInfo(
                 name: quizDefWithDesc.name,
@@ -289,15 +306,7 @@ class QuizRunService {
         boolean aboutToExpire = false
 
         if (skillId && projectId) {
-            ExpirationAttrs attrs = skillAttributeService.getExpirationAttrs( projectId, skillId )
-            if(attrs && attrs?.nextExpirationDate) {
-                LocalDateTime now = LocalDateTime.now()
-                LocalDateTime expirationDate = attrs.nextExpirationDate.toLocalDateTime()
-                Duration difference = Duration.between(now, expirationDate)
-                aboutToExpire = difference.toHours() <= 24
-            } else if(attrs && attrs?.expirationType == "DAILY") {
-                aboutToExpire = attrs.every <= 1
-            }
+            aboutToExpire = skillExpiringSoon(skillId, projectId)
         }
         if (quizDef.type == QuizDefParent.QuizType.Survey  && !allowMultipleTakes) {
             if (numCurrentAttempts > 0) {
