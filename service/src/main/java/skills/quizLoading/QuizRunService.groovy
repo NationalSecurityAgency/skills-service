@@ -90,17 +90,9 @@ class QuizRunService {
     @Autowired
     SkillAttributeService skillAttributeService
 
-    private boolean skillExpiringSoon(skillId, projectId) {
+    private boolean skillExpiringSoon(String skillId, String projectId) {
         ExpirationAttrs attrs = skillAttributeService.getExpirationAttrs( projectId, skillId )
-        if(attrs && attrs?.expirationType == "DAILY") {
-            return true
-        }
-        else if(attrs && attrs?.nextExpirationDate) {
-            LocalDateTime now = LocalDateTime.now()
-            LocalDateTime expirationDate = attrs.nextExpirationDate.toLocalDateTime()
-            Duration difference = Duration.between(now, expirationDate)
-            return difference.toHours() <= 24
-        }
+        return attrs && attrs?.expirationType == "DAILY"
     }
 
     @Transactional
