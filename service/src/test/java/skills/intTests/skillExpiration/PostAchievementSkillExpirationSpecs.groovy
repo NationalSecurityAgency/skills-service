@@ -2248,7 +2248,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         newQuizRuns.totalCount == 2
     }
 
-    def "can not complete quiz again if skill is expiring in more than a day"() {
+    def "can complete quiz again if skill expiration is daily"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
@@ -2278,10 +2278,11 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         initialQuizRuns.totalCount == 1
         initialQuizRuns.data[0].status == "PASSED"
         def quizAttempt2 =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0], "skill1", proj.projectId).body
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, users[0]).body
 
         then:
-        SkillsClientException exception = thrown()
-        exception.httpStatus == HttpStatus.BAD_REQUEST
-        exception.message.contains('User [' + users[0] + '] already took and passed this quiz.')
+        def newQuizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+        newQuizRuns.totalCount == 2
     }
 }

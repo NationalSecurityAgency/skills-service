@@ -129,7 +129,7 @@ class QuizRunService {
         Integer quizLengthAsInteger = quizLength ? Integer.valueOf(quizLength.value) : 0
         Integer lengthSetting = quizLengthAsInteger > 0 ? quizLengthAsInteger : numberOfQuestions
 
-        if(skillId && projectId) {
+        if(!multipleTakes && skillId && projectId) {
             multipleTakes = skillExpiringSoon(skillId, projectId)
         }
 
