@@ -105,7 +105,7 @@ class UserInfoController {
     @Value('#{"${skills.config.ui.defaultLandingPage:admin}"}')
     String defaultLandingPage
 
-    @Value('#{"${skills.config.ui.limitAdminAccess:true}"}')
+    @Value('#{"${skills.config.ui.limitAdminAccess:false}"}')
     boolean limitAdminAccess
 
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
