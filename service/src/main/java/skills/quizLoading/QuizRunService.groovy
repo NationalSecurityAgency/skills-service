@@ -92,7 +92,7 @@ class QuizRunService {
 
     private boolean skillExpiringSoon(String skillId, String projectId) {
         ExpirationAttrs attrs = skillAttributeService.getExpirationAttrs( projectId, skillId )
-        return attrs && attrs?.expirationType == "DAILY"
+        return attrs && attrs?.expirationType == ExpirationAttrs.DAILY
     }
 
     @Transactional
