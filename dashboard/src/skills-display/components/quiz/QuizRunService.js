@@ -33,8 +33,11 @@ export default {
     };
   },
 
-  getQuizInfo(quizId) {
-    return axios.get(`/api/quizzes/${quizId}`, { params: this.getUserIdParams() })
+  getQuizInfo(quizId, skillId, projectId) {
+    let params = this.getUserIdParams()
+    params.skillId = skillId;
+    params.projectId = projectId;
+    return axios.get(`/api/quizzes/${quizId}`, { params: params })
       .then((response) => response.data);
   },
   startQuizAttempt(quizId, skillId, projectId) {

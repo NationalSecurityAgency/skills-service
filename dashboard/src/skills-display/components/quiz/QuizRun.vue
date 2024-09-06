@@ -176,7 +176,7 @@ const destroyDateTimer = () => {
 }
 const loadData = () => {
   isLoading.value = true;
-  QuizRunService.getQuizInfo(props.quizId)
+  QuizRunService.getQuizInfo(props.quizId, props.skillId, props.projectId)
       .then((quizInfoRes) => {
         setQuizInfo(quizInfoRes);
       });

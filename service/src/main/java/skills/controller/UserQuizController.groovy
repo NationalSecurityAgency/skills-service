@@ -50,9 +50,11 @@ class UserQuizController {
     @ResponseBody
     QuizInfo getQuizInfo(@PathVariable("quizId") String quizId,
                          @RequestParam(name = "userId", required = false) String userIdParam,
-                         @RequestParam(name = "idType", required = false) String idType) {
+                         @RequestParam(name = "idType", required = false) String idType,
+                         @RequestParam(name = "skillId", required = false) String skillId,
+                         @RequestParam(name = "projectId", required = false) String projectId) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
-        return quizRunService.loadQuizInfo(userId, quizId);
+        return quizRunService.loadQuizInfo(userId, quizId, skillId, projectId);
     }
 
     @RequestMapping(value = "/quizzes/{quizId}/attempt", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
