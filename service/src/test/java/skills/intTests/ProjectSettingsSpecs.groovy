@@ -58,7 +58,7 @@ class ProjectSettingsSpecs extends DefaultIntSpec {
 
         then:
         def ex = thrown(SkillsClientException)
-        ex.message.contains("[Project Display Text] must not exceed [50]")
+        ex.message.contains("[Project Display Text] must not exceed [20]")
     }
 
     def "save custom subject label setting with value exceeding max"(){
@@ -72,7 +72,7 @@ class ProjectSettingsSpecs extends DefaultIntSpec {
 
         then:
         def ex = thrown(SkillsClientException)
-        ex.message.contains("[Subject Display Text] must not exceed [50]")
+        ex.message.contains("[Subject Display Text] must not exceed [20]")
     }
 
     def "save custom group label setting with value exceeding max"(){
@@ -86,7 +86,7 @@ class ProjectSettingsSpecs extends DefaultIntSpec {
 
         then:
         def ex = thrown(SkillsClientException)
-        ex.message.contains("[Group Display Text] must not exceed [50]")
+        ex.message.contains("[Group Display Text] must not exceed [20]")
     }
 
     def "save custom skill label setting with value exceeding max"(){
@@ -100,7 +100,7 @@ class ProjectSettingsSpecs extends DefaultIntSpec {
 
         then:
         def ex = thrown(SkillsClientException)
-        ex.message.contains("[Skill Display Text] must not exceed [50]")
+        ex.message.contains("[Skill Display Text] must not exceed [20]")
     }
 
     def "save custom level label setting with value exceeding max"(){
@@ -114,7 +114,7 @@ class ProjectSettingsSpecs extends DefaultIntSpec {
 
         then:
         def ex = thrown(SkillsClientException)
-        ex.message.contains("[Level Display Text] must not exceed [50]")
+        ex.message.contains("[Level Display Text] must not exceed [20]")
     }
 
     def "return user community if configured"() {
