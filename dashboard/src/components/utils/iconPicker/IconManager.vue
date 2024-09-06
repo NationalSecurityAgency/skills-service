@@ -310,27 +310,25 @@ const closeError = () => {
         </template>
         <template #content>
           <Message data-cy="iconErrorMessage" v-if="errorMessage" @close="closeError" severity="error">{{ errorMessage }}</Message>
-          <p>Drag and drop files to here to upload.</p>
+          <p>Drag and drop file here to upload.</p>
           <div v-if="iconPacks[2].icons.length > 0">
-            <div class="flex flex-wrap p-0 sm:p-5 gap-5">
-              <div v-for="(icons, index) of iconPacks[2].icons" v-bind:key="index">
-                <div v-for="(file) of icons" :key="file.filename" class="card m-0 px-6 flex flex-column border-1 surface-border align-items-center gap-3">
-                  <div class="icon-item">
-                    <a href="#"
-                       @click.stop.prevent="selectIcon(file.filename, file.cssClassname, 'Custom Icons')"
-                       :class="`item ${selectedCss === file.cssClassname ? 'selected' : ''}`">
-                              <span class="icon is-large text-info">
-                                <i :class="file.cssClassname"></i>
-                              </span>
-                    </a>
-                    <br/>
-                    <span class="iconName">
-                              <a class="delete-icon" ref="#" @click="deleteIcon(file.filename, route.params.projectId)">
-                                <span class="icon is-tiny"><i style="font-size:1rem;height:1rem;width:1rem;" class="fas fa-trash"></i></span>
-                              </a>
-                              <span>{{ file.filename }}</span>
+            <div v-for="(icons, index) of iconPacks[2].icons" v-bind:key="index" class="flex">
+              <div v-for="(file) of icons" :key="file.filename" class="card m-0 px-6 flex flex-wrap border-1 surface-border align-items-center gap-3">
+                <div class="icon-item" style="max-width: 100px;">
+                  <a href="#"
+                     @click.stop.prevent="selectIcon(file.filename, file.cssClassname, 'Custom Icons')"
+                     :class="`item ${selectedCss === file.cssClassname ? 'selected' : ''}`">
+                            <span class="icon is-large text-info">
+                              <i :class="file.cssClassname"></i>
                             </span>
-                  </div>
+                  </a>
+                  <br/>
+                  <span class="iconName">
+                    <a class="delete-icon" ref="#" @click="deleteIcon(file.filename, route.params.projectId)">
+                      <span class="icon is-tiny"><i style="font-size:1rem;height:1rem;width:1rem;" class="fas fa-trash"></i></span>
+                    </a>
+                    <span>{{ file.filename }}</span>
+                  </span>
                 </div>
               </div>
             </div>
@@ -343,6 +341,11 @@ const closeError = () => {
 </template>
 
 <style>
+  .p-fileupload-content {
+    height: 300px;
+    overflow: auto;
+  }
+
   .icon-row {
     display: flex;
     flex-direction: row;
