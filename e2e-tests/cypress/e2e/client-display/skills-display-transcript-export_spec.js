@@ -450,12 +450,12 @@ describe('Transcript export tests', () => {
     cy.createProject(1, { name: projName })
     cy.request('POST', '/admin/projects/proj1/settings', [
       {
-        value: 'Very Silly and Long Project Label',
+        value: 'Long Project Label',
         setting: 'project.displayName',
         projectId: 'proj1',
       },
       {
-        value: 'Very Silly and Long Subject Label',
+        value: 'Long Subject Label',
         setting: 'subject.displayName',
         projectId: 'proj1',
       },
@@ -465,12 +465,12 @@ describe('Transcript export tests', () => {
         projectId: 'proj1',
       },
       {
-        value: 'Very Silly and Long Skill Label',
+        value: 'Long Skill Label',
         setting: 'skill.displayName',
         projectId: 'proj1',
       },
       {
-        value: 'Very Silly and Long Level Label',
+        value: 'Long Level Label',
         setting: 'level.displayName',
         projectId: 'proj1',
       },
@@ -520,12 +520,12 @@ describe('Transcript export tests', () => {
     cy.createProject(1, { name: projName })
     cy.request('POST', '/admin/projects/proj1/settings', [
       {
-        value: 'VerySillyandLongProjectLabel',
+        value: 'LongProjectLabel',
         setting: 'project.displayName',
         projectId: 'proj1',
       },
       {
-        value: 'VerySillyandLongSubjectLabel',
+        value: 'LongSubjectLabel',
         setting: 'subject.displayName',
         projectId: 'proj1',
       },
@@ -535,12 +535,12 @@ describe('Transcript export tests', () => {
         projectId: 'proj1',
       },
       {
-        value: 'VerySillyandLongSkillLabel',
+        value: 'LongSkillLabel',
         setting: 'skill.displayName',
         projectId: 'proj1',
       },
       {
-        value: 'VerySillyandLongLevelLabel',
+        value: 'LongLevelLabel',
         setting: 'level.displayName',
         projectId: 'proj1',
       },
