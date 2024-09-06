@@ -44,6 +44,7 @@ import org.springframework.stereotype.Component
 import org.springframework.util.StringUtils
 import org.springframework.web.filter.OncePerRequestFilter
 import skills.auth.inviteOnly.InviteOnlyProjectAuthorizationManager
+import skills.auth.limitAdminAccess.LimitAdminAccessAuthorizationManager
 import skills.auth.userCommunity.UserCommunityAuthorizationManager
 import skills.storage.model.auth.RoleName
 
@@ -70,6 +71,9 @@ class PortalWebSecurityHelper {
 
     @Autowired
     InviteOnlyProjectAuthorizationManager inviteOnlyProjectAuthorizationManager
+
+    @Autowired
+    LimitAdminAccessAuthorizationManager limitAdminAccessAuthorizationManager
 
     @Autowired
     CookieCsrfTokenRepository cookieCsrfTokenRepository
@@ -117,7 +121,7 @@ class PortalWebSecurityHelper {
                 .requestMatchers('/supervisor/**').access(hasAnyAuthorityPlus([inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager], RoleName.ROLE_SUPERVISOR.name(), RoleName.ROLE_SUPER_DUPER_USER.name()))
                 .requestMatchers('/admin/quiz-definitions/**').hasAnyAuthority(RoleName.ROLE_QUIZ_ADMIN.name(), RoleName.ROLE_QUIZ_READ_ONLY.name(), RoleName.ROLE_SUPER_DUPER_USER.name())
                 .requestMatchers('/admin/**').access(hasAnyAuthorityPlus([inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager], RoleName.ROLE_PROJECT_ADMIN.name(), RoleName.ROLE_SUPER_DUPER_USER.name(), RoleName.ROLE_PROJECT_APPROVER.name()))
-                .requestMatchers('/app/**').access(AuthorizationManagers.allOf(inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager))
+                .requestMatchers('/app/**').access(AuthorizationManagers.allOf(inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager, limitAdminAccessAuthorizationManager))
                 .requestMatchers('/api/**').access(AuthorizationManagers.allOf(inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager))
                 .requestMatchers("/${managementPath}/**").hasAuthority(RoleName.ROLE_SUPER_DUPER_USER.name())
                 .anyRequest().authenticated()

@@ -1220,20 +1220,25 @@ class SkillsService {
 
     def grantSupervisorRole(String userId) {
         userId = getUserId(userId)
-        return wsHelper.rootPut("/users/${userId}/roles/ROLE_SUPERVISOR")
+        return wsHelper.rootPut("/users/${userId}/roles/${RoleName.ROLE_SUPERVISOR.toString()}")
     }
 
     def grantRootRole(String userId) {
         userId = getUserId(userId)
-        return wsHelper.rootPut("/users/${userId}/roles/ROLE_SUPER_DUPER_USER")
+        return wsHelper.rootPut("/users/${userId}/roles/${RoleName.ROLE_SUPER_DUPER_USER.toString()}")
+    }
+
+    def grantDashboardAdminRole(String userId) {
+        userId = getUserId(userId)
+        return wsHelper.rootPut("/users/${userId}/roles/${RoleName.ROLE_DASHBOARD_ADMIN_ACCESS.toString()}")
     }
 
     def removeSupervisorRole(String userId) {
-        return wsHelper.rootDelete("/users/${userId}/roles/ROLE_SUPERVISOR")
+        return wsHelper.rootDelete("/users/${userId}/roles/${RoleName.ROLE_SUPERVISOR.toString()}")
     }
 
     def revokeInviteOnlyProjectAccess(String projectId, String userId) {
-        return wsHelper.adminDelete("/projects/${projectId}/users/${userId}/roles/ROLE_PRIVATE_PROJECT_USER")
+        return wsHelper.adminDelete("/projects/${projectId}/users/${userId}/roles/${RoleName.ROLE_PRIVATE_PROJECT_USER.toString()}")
     }
 
     def canAccessProject(String projectId, String userId) {
