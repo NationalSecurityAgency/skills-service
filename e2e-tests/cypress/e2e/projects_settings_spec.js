@@ -299,7 +299,7 @@ describe('Project Settings Tests', () => {
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
         cy.get('[data-cy=projectDisplayNameError]')
-            .contains('Project Display Text must be at most 50 characters')
+            .contains('Project Display Text must be at most 20 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
@@ -313,7 +313,7 @@ describe('Project Settings Tests', () => {
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
         cy.get('[data-cy=subjectDisplayNameError]')
-            .contains('Subject Display Text must be at most 50 characters')
+            .contains('Subject Display Text must be at most 20 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
@@ -327,7 +327,7 @@ describe('Project Settings Tests', () => {
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
         cy.get('[data-cy=groupDisplayNameError]')
-            .contains('Group Display Text must be at most 50 characters')
+            .contains('Group Display Text must be at most 20 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
@@ -341,7 +341,7 @@ describe('Project Settings Tests', () => {
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
         cy.get('[data-cy=skillDisplayNameError]')
-            .contains('Skill Display Text must be at most 50 characters')
+            .contains('Skill Display Text must be at most 20 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
@@ -355,7 +355,7 @@ describe('Project Settings Tests', () => {
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
         cy.get('[data-cy=levelDisplayNameError]')
-            .contains('Level Display Text must be at most 50 characters')
+            .contains('Level Display Text must be at most 20 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
@@ -369,7 +369,7 @@ describe('Project Settings Tests', () => {
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
         cy.get('[data-cy=pointDisplayNameError]')
-            .contains('Point Display Text must be at most 50 characters')
+            .contains('Point Display Text must be at most 20 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');

@@ -147,7 +147,7 @@ skills:
       maxSkillNameLength: 100
       maxSubjectNameLength: 50
       maxLevelNameLength: 50
-      maxCustomLabelLength: 50
+      maxCustomLabelLength: 20
       maxSkillTagLength: 50
       minIdLength: 3
       maxIdLength: 50
