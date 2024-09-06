@@ -134,6 +134,7 @@ skills:
       nameValidationRegex:
       nameValidationMessage:
       maxFirstNameLength: 30
+      maxHostLength: 50
       maxLastNameLength: 30
       maxNicknameLength: 70
       minUsernameLength: 5

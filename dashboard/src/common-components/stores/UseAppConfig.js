@@ -77,6 +77,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxSubjectNameLength = computed(() => config.value.maxSubjectNameLength)
   const maxBadgeNameLength = computed(() => config.value.maxBadgeNameLength)
   const maxCustomLabelLength = computed(() => config.value.maxCustomLabelLength)
+  const maxHostLength = computed(() => config.value.maxHostLength)
   const maxSkillVersion = computed(() => config.value.maxSkillVersion)
   const maxSkillNameLength = computed(() => config.value.maxSkillNameLength)
   const maxPointIncrement = computed(() => toNumOr0(config.value.maxPointIncrement))
@@ -233,6 +234,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     disableScrollToTop,
     dbUpgradeInProgress,
     exportHeaderAndFooter,
-    limitAdminAccess
+    limitAdminAccess,
+    maxHostLength,
   }
 })
