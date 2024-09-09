@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2024 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model.auth
+package skills.auth.aop;
 
-enum RoleName {
-    ROLE_APP_USER('Application'),
-    ROLE_PRIVATE_PROJECT_USER('Private'),
-    ROLE_PROJECT_ADMIN('Admin'),
-    ROLE_SUPERVISOR('Supervisor'),
-    ROLE_SUPER_DUPER_USER('Root'),
-    ROLE_PROJECT_APPROVER('Approver'),
-    ROLE_DASHBOARD_ADMIN_ACCESS('Admin Access'),
-    ROLE_QUIZ_ADMIN('Admin'),
-    ROLE_QUIZ_READ_ONLY('Read Only');
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    String displayName;
-
-    RoleName(String displayName) {
-        this.displayName = displayName;
-    }
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ExcludeFromLimitDashboardAccess {
+    // works in conjunction with @skills.auth.aop.LimitDashboardAccess annotation
 }

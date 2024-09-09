@@ -42,7 +42,7 @@ let allItems = [
   }
 ]
 const appConfig = useAppConfig()
-if (appConfig.rankingAndProgressViewsEnabled) {
+if (appConfig.rankingAndProgressViewsEnabled && userInfo.userInfo.value.adminDashboardAccess) {
   allItems.push({
     label: 'Progress and Ranking',
     icon: 'fas fa-chart-bar',

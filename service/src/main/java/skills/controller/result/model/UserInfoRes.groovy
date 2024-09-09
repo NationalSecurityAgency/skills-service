@@ -31,6 +31,7 @@ class UserInfoRes {
     String dn
     String landingPage
     String userCommunity
+    Boolean adminDashboardAccess
 
     UserInfoRes() {}
 

@@ -46,6 +46,7 @@ import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.UserTag
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
 import skills.storage.repos.UserTagRepo
@@ -104,6 +105,9 @@ class UserInfoController {
     @Value('#{"${skills.config.ui.defaultLandingPage:admin}"}')
     String defaultLandingPage
 
+    @Value('#{"${skills.config.ui.limitAdminAccess:false}"}')
+    boolean limitAdminAccess
+
     @RequestMapping(value = "/userInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @CrossOrigin(allowCredentials = 'true', originPatterns = ['*'])
     ResponseEntity<UserInfoRes> getUserInfo() {
@@ -126,6 +130,12 @@ class UserInfoController {
             }
             if (userCommunityService.isUserCommunityMember(currentUser.username)) {
                 res.userCommunity = userCommunityService.userCommunityUserTagValue
+            }
+
+            if (limitAdminAccess) {
+                res.adminDashboardAccess = currentUser.authorities.find { it.role.roleName == RoleName.ROLE_SUPER_DUPER_USER || it.role.roleName == RoleName.ROLE_DASHBOARD_ADMIN_ACCESS } != null
+            } else {
+                res.adminDashboardAccess = true
             }
         }
         return new ResponseEntity<>(res, headers, HttpStatus.OK)
@@ -157,6 +167,7 @@ class UserInfoController {
                     actionAttributes: actionAttributes,
                     itemId: DashboardItem.UserPreference.toString(),
             ))
+
         }
         return new RequestResult(success: true)
     }

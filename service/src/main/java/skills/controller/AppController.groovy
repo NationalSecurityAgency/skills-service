@@ -22,6 +22,8 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.UserInfoService
+import skills.auth.aop.ExcludeFromLimitDashboardAccess
+import skills.auth.aop.LimitDashboardAccess
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
@@ -45,6 +47,7 @@ import skills.utils.InputSanitizer
 @RequestMapping("/app")
 @Slf4j
 @EnableCallStackProf
+@LimitDashboardAccess
 class AppController {
 
     @Autowired
@@ -128,6 +131,7 @@ class AppController {
 
     @RequestMapping(value = "/projects/{id}/join/{invite_code}", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
+    @ExcludeFromLimitDashboardAccess
     RequestResult joinProject(@PathVariable("id") String projectId, @PathVariable("invite_code") String inviteCode) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotBlank(inviteCode, "invite_code", projectId)
@@ -137,6 +141,7 @@ class AppController {
 
     @RequestMapping(value = "/projects/{id}/validateInvite/{invite_code}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
+    @ExcludeFromLimitDashboardAccess
     InviteTokenValidationResponse validateProjectInvite(@PathVariable("id") String projectId, @PathVariable("invite_code") String inviteCode) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotBlank(inviteCode, "inviteCode")
@@ -179,18 +184,21 @@ class AppController {
 
     @RequestMapping(value = "/projects/{id}/customIcons", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
+    @ExcludeFromLimitDashboardAccess
     List<CustomIconResult> getCustomIcons(@PathVariable("id") String projectId) {
         return projAdminService.getCustomIcons(projectId)
     }
 
     @RequestMapping(value = "/projects/{id}/versions", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
+    @ExcludeFromLimitDashboardAccess
     List<Integer> listVersions(@PathVariable("id") String projectId) {
         return skillsAdminService.getUniqueSkillVersionList(projectId)
     }
 
     @RequestMapping(value = "/projects/{id}/description", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
+    @ExcludeFromLimitDashboardAccess
     ProjectDescription getProjectDescription(@PathVariable("id") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         return projAdminService.getProjectDescription(projectId)
