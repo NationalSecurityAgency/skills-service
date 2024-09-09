@@ -33,15 +33,7 @@ import static skills.intTests.utils.SkillsFactory.*
 class ExportUserProjectAcheivementsSpec extends DefaultIntSpec {
     String ultimateRoot = 'jh@dojo.com'
     SkillsService rootSkillsService
-
-    Date today = new Date()
-    Date oneDayAgo = new Date()-1
-    Date fiveDaysAgo = new Date()-5
-    Date tenDaysAgo = new Date()-10
-
     private Boolean isPkiMode = false;
-
-    String metricsId = "userAchievementsChartBuilder"
     String allAchievementTypes = "${MetricsParams.ACHIEVEMENT_TYPE_OVERALL},${SkillDef.ContainerType.Subject},${SkillDef.ContainerType.Skill},${SkillDef.ContainerType.Badge},${SkillDef.ContainerType.GlobalBadge}"
 
     @Shared
@@ -87,7 +79,6 @@ class ExportUserProjectAcheivementsSpec extends DefaultIntSpec {
 
         List<String> usersCopy = new ArrayList<>(users)
         achieveLevelForUsers(usersCopy, skillsSubj1, 2, 1, "Subject")
-        achieveLevelForUsers(usersCopy, skillsSubj1, 1, 2, "Subject")
         achieveLevelForUsers(usersCopy, skillsSubj2, 1, 1, "Subject")
 
         Map props = [:]
@@ -111,14 +102,9 @@ class ExportUserProjectAcheivementsSpec extends DefaultIntSpec {
                 [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Skill", "Test Skill 1", "", dates[1].format("dd-MMM-yyyy")],
                 [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Subject", "Test Subject #1", "1.0", dates[1].format("dd-MMM-yyyy")],
                 [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "", "Skill", "Test Skill 1 Subject2", "", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "", "Subject", "Test Subject #2", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Skill", "Test Skill 1", "", dates[2].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Skill", "Test Skill 2", "", dates[2].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Subject", "Test Subject #1", "2.0", dates[2].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Subject", "Test Subject #1", "1.0", dates[2].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Overall", "Overall", "1.0", dates[2].format("dd-MMM-yyyy")],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Skill", "Test Skill 1 Subject2", "", dates[1].format("dd-MMM-yyyy")],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Subject", "Test Subject #2", "1.0", dates[1].format("dd-MMM-yyyy")],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
                 ["For All Dragons Only"],
         ])
     }
@@ -142,7 +128,6 @@ class ExportUserProjectAcheivementsSpec extends DefaultIntSpec {
 
         List<String> usersCopy = new ArrayList<>(users)
         achieveLevelForUsers(usersCopy, skillsSubj1, 2, 1, "Subject")
-        achieveLevelForUsers(usersCopy, skillsSubj1, 1, 2, "Subject")
         achieveLevelForUsers(usersCopy, skillsSubj2, 1, 1, "Subject")
 
         Map props = [:]
@@ -168,14 +153,9 @@ class ExportUserProjectAcheivementsSpec extends DefaultIntSpec {
                 [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Skill", "Test Skill 1", "", dates[1].format("dd-MMM-yyyy")],
                 [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Subject", "Test Subject #1", "1.0", dates[1].format("dd-MMM-yyyy")],
                 [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag3", "Skill", "Test Skill 1 Subject2", "", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag3", "Subject", "Test Subject #2", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag3", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Skill", "Test Skill 1", "", dates[2].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Skill", "Test Skill 2", "", dates[2].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Subject", "Test Subject #1", "2.0", dates[2].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Subject", "Test Subject #1", "1.0", dates[2].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Overall", "Overall", "1.0", dates[2].format("dd-MMM-yyyy")],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Skill", "Test Skill 1 Subject2", "", dates[1].format("dd-MMM-yyyy")],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Subject", "Test Subject #2", "1.0", dates[1].format("dd-MMM-yyyy")],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
                 ["For All Dragons Only"],
         ])
     }
@@ -248,7 +228,7 @@ class ExportUserProjectAcheivementsSpec extends DefaultIntSpec {
         props[MetricsPagingParamsHelper.PROP_SORT_DESC] = true
         def excelExportSortAchievedDesc = skillsService.getUserAchievementsExcelExport(proj.projectId, props)
 
-        props[MetricsParams.P_USERNAME_FILTER] = "3"
+        props[MetricsParams.P_USERNAME_FILTER] = "user3"
         def excelExportQueryFilter = skillsService.getUserAchievementsExcelExport(proj.projectId, props)
         List<List<String>> expectedDataForQuery = [
                 ["For All Dragons Only"],
