@@ -228,7 +228,7 @@ class ExportUserProjectAcheivementsSpec extends DefaultIntSpec {
         props[MetricsPagingParamsHelper.PROP_SORT_DESC] = true
         def excelExportSortAchievedDesc = skillsService.getUserAchievementsExcelExport(proj.projectId, props)
 
-        props[MetricsParams.P_USERNAME_FILTER] = "user3"
+        props[MetricsParams.P_USERNAME_FILTER] = users[0]
         def excelExportQueryFilter = skillsService.getUserAchievementsExcelExport(proj.projectId, props)
         List<List<String>> expectedDataForQuery = [
                 ["For All Dragons Only"],
