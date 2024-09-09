@@ -71,22 +71,30 @@ class LimitAdminDashboardAccessIT extends InviteOnlyBaseSpec {
         // projects
         isForbidden { user1Service.createProject(SkillsFactory.createProject()) }
         user2Service.createProject(SkillsFactory.createProject())
+        def proj2 = SkillsFactory.createProject(2)
+        rootSkillsService.createProject(proj2)
+        rootSkillsService.pinProject(proj2.projectId)
 
         isForbidden { user1Service.getProjects() }
         user2Service.getProjects()
+        rootSkillsService.getProjects()
 
         isForbidden { user1Service.projectIdExists([projectId: "some"]) }
         user2Service.projectIdExists([projectId: "some"])
+        rootSkillsService.projectIdExists([projectId: "some"])
 
         // quizzes
         isForbidden { user1Service.createQuizDef(QuizDefFactory.createQuiz(1)) }
         user2Service.createQuizDef(QuizDefFactory.createQuiz(1))
+        rootSkillsService.createQuizDef(QuizDefFactory.createQuiz(2))
 
         isForbidden { user1Service.getQuizDefs() }
         user2Service.getQuizDefs()
+        rootSkillsService.getQuizDefs()
 
         isForbidden { user1Service.quizIdExist("quizId") }
         user2Service.quizIdExist("quizId")
+        rootSkillsService.quizIdExist("quizId")
 
         // user safe operations for any role
         def currentUser1Info = user1Service.getCurrentUser()
@@ -235,9 +243,11 @@ class LimitAdminDashboardAccessIT extends InviteOnlyBaseSpec {
 
         when:
         def res = skillsService.getProjectDescription(proj.projectId)
+        def res1 = rootSkillsService.getProjectDescription(proj.projectId)
 
         then:
         res.description == "first"
+        res1.description == "first"
     }
 
     boolean isForbidden(Closure c) {

@@ -178,4 +178,36 @@ describe('Limit Admin Dashboard Access Tests', () => {
     cy.get(projAdminNavSelector).should('not.exist');
   })
 
+  it('Default Home Page preference is not available for users with adminDashboardAccess=false', () => {
+    cy.intercept('GET', '/public/config', (req) => {
+      req.continue((res) => {
+        res.body.limitAdminAccess = true
+      })
+    }).as('getConfig');
+    cy.intercept('GET', '/app/userInfo', (req) => {
+      req.continue((res) => {
+        res.body.adminDashboardAccess = true
+      })
+    }).as('getUserInfo1');
+
+    const defaultHomePageSettingSelector = '[data-cy="defaultHomePageSetting"]'
+
+    cy.visit('/settings/preferences')
+    cy.wait('@getConfig')
+    cy.wait('@getUserInfo1')
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
+    cy.get('[data-cy="enableDarkModeSwitch"]')
+    cy.get(defaultHomePageSettingSelector)
+
+    cy.intercept('GET', '/app/userInfo', (req) => {
+      req.continue((res) => {
+        res.body.adminDashboardAccess = false
+      })
+    }).as('getUserInfo2');
+    cy.visit('/settings/preferences')
+    cy.get('[data-cy="rankAndLeaderboardOptOutSwitch"]')
+    cy.get('[data-cy="enableDarkModeSwitch"]')
+    cy.get(defaultHomePageSettingSelector).should('not.exist')
+  })
+
 })

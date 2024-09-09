@@ -134,7 +134,7 @@ function saveUserSettings(dirtyChanges) {
 }
 
 function isProgressAndRankingEnabled() {
-  return appConfig.rankingAndProgressViewsEnabled === true || appConfig.rankingAndProgressViewsEnabled === 'true';
+  return (appConfig.rankingAndProgressViewsEnabled === true || appConfig.rankingAndProgressViewsEnabled === 'true') && userInfo.userInfo.value.adminDashboardAccess;
 }
 
 function homePagePrefChanged() {
@@ -155,7 +155,7 @@ function enableDarkModeChanged() {
 
   <Card v-if="!isLoading">
     <template #content>
-      <div data-cy="defaultHomePageSetting" v-if="isProgressAndRankingEnabled()">
+      <div data-cy="defaultHomePageSetting" v-if="isProgressAndRankingEnabled()" class="pb-4">
         <label :for="settings.homePage.value === 'admin' ? 'progress' : 'admin'">
           <i class="fas fa-home mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i> Default Home Page:
         </label>
@@ -168,7 +168,7 @@ function enableDarkModeChanged() {
           <label for="progress" class="ml-2">Progress and Rankings</label>
         </div>
       </div>
-      <div data-cy="rankOptOut" class="pt-4 pb-2 flex align-content-center align-items-center">
+      <div data-cy="rankOptOut" class="pb-2 flex align-content-center align-items-center">
         <label for="rankAndLeaderboardOptOutSwitch">
           <i class="fas fa-users-slash mr-2" :class="colors.getTextClass(2)" aria-hidden="true"></i> <span id="rankAndLeaderboardOptOutLabel">Rank and Leaderboard Opt-Out:</span>
         </label>
