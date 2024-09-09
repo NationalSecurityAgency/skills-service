@@ -27,7 +27,7 @@ import MyProgressTitle from '@/components/myProgress/MyProgressTitle.vue'
 const myProgressState = useMyProgressState()
 
 onMounted(() => {
-  myProgressState.loadMyProgressSummary(true)
+  myProgressState.loadMyProgressSummary()
 })
 
 </script>
