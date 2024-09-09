@@ -767,48 +767,50 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy="manageMyProjsBtnInNoContent"]').should('exist');
     });
 
-    it('Progress review is refreshed on login', function () {
-        const user2 = 'user2@skills.org'
+    if (!Cypress.env('oauthMode')) {
+        it('Progress view is refreshed on login', function() {
+            const user2 = 'user2@skills.org'
 
-        const user3 = 'user3@skills.org'
-        const pass = 'password';
+            const user3 = 'user3@skills.org'
+            const pass = 'password';
 
-        cy.reportSkill(1, 1, user3, 'now');
+            cy.reportSkill(1, 1, user3, 'now');
 
-        cy.register(user2, pass);
-        cy.register(user3, pass);
-        cy.login(user3, pass);
+            cy.register(user2, pass);
+            cy.register(user3, pass);
+            cy.login(user3, pass);
 
-        cy.addToMyProjects(1);
+            cy.addToMyProjects(1);
 
-        cy.loginAsDefaultUser();
-        cy.visit('/progress-and-rankings');
-        cy.get('[data-cy="project-link-proj2"]')
-        cy.get('[data-cy="project-link-proj1"]')
-        cy.get('[data-cy="numAchievedBadges"]').should('have.text', '1')
-        cy.get('[data-cy="numProjectsContributed"]').should('have.text', '1')
-        cy.get('[data-cy="numProjectsAvailable"]').should('have.text', '/ 2')
+            cy.loginAsDefaultUser();
+            cy.visit('/progress-and-rankings');
+            cy.get('[data-cy="project-link-proj2"]')
+            cy.get('[data-cy="project-link-proj1"]')
+            cy.get('[data-cy="numAchievedBadges"]').should('have.text', '1')
+            cy.get('[data-cy="numProjectsContributed"]').should('have.text', '1')
+            cy.get('[data-cy="numProjectsAvailable"]').should('have.text', '/ 2')
 
-        cy.get('[data-cy="settings-button"] button').click();
-        cy.contains('Log Out').click();
-        cy.get('#username').type(user2);
-        cy.get('#inputPassword').type(pass);
-        cy.get('[data-cy=login]').click();
+            cy.get('[data-cy="settings-button"] button').click();
+            cy.contains('Log Out').click();
+            cy.get('#username').type(user2);
+            cy.get('#inputPassword').type(pass);
+            cy.get('[data-cy=login]').click();
 
-        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
-        cy.get('[data-cy="project-link-proj2"]').should('not.exist')
-        cy.get('[data-cy="numAchievedBadges"]').should('not.exist')
+            cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
+            cy.get('[data-cy="project-link-proj2"]').should('not.exist')
+            cy.get('[data-cy="numAchievedBadges"]').should('not.exist')
 
-        cy.get('[data-cy="settings-button"] button').click();
-        cy.contains('Log Out').click();
-        cy.get('#username').type(user3);
-        cy.get('#inputPassword').type(pass);
-        cy.get('[data-cy=login]').click();
+            cy.get('[data-cy="settings-button"] button').click();
+            cy.contains('Log Out').click();
+            cy.get('#username').type(user3);
+            cy.get('#inputPassword').type(pass);
+            cy.get('[data-cy=login]').click();
 
-        cy.get('[data-cy="project-link-proj1"]')
-        cy.get('[data-cy="project-link-proj2"]').should('not.exist')
-        cy.get('[data-cy="numAchievedBadges"]').should('have.text', '0')
-        cy.get('[data-cy="numProjectsContributed"]').should('have.text', '1')
-        cy.get('[data-cy="numProjectsAvailable"]').should('have.text', '/ 1')
-    })
+            cy.get('[data-cy="project-link-proj1"]')
+            cy.get('[data-cy="project-link-proj2"]').should('not.exist')
+            cy.get('[data-cy="numAchievedBadges"]').should('have.text', '0')
+            cy.get('[data-cy="numProjectsContributed"]').should('have.text', '1')
+            cy.get('[data-cy="numProjectsAvailable"]').should('have.text', '/ 1')
+        })
+    }
 });
