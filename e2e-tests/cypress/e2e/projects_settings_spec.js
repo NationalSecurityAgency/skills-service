@@ -145,6 +145,8 @@ describe('Project Settings Tests', () => {
             .should('have.value', 'Skill');
         cy.get('[data-cy="levelDisplayNameTextInput"]')
             .should('have.value', 'Level');
+        cy.get('[data-cy="pointDisplayNameTextInput"]')
+            .should('have.value', 'Point');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -167,6 +169,9 @@ describe('Project Settings Tests', () => {
         cy.get('[data-cy=levelDisplayNameTextInput]')
             .clear()
             .type('Stage');
+        cy.get('[data-cy=pointDisplayNameTextInput]')
+            .clear()
+            .type('Hour');
 
         cy.get('[data-cy="projectDisplayNameTextInput"]')
             .should('have.value', 'Work Role');
@@ -178,6 +183,8 @@ describe('Project Settings Tests', () => {
             .should('have.value', 'Course');
         cy.get('[data-cy="levelDisplayNameTextInput"]')
             .should('have.value', 'Stage');
+        cy.get('[data-cy="pointDisplayNameTextInput"]')
+            .should('have.value', 'Hour');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .contains('Unsaved Changes');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -209,6 +216,8 @@ describe('Project Settings Tests', () => {
             .should('have.value', 'Course');
         cy.get('[data-cy="levelDisplayNameTextInput"]')
             .should('have.value', 'Stage');
+        cy.get('[data-cy="pointDisplayNameTextInput"]')
+            .should('have.value', 'Hour');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -227,6 +236,8 @@ describe('Project Settings Tests', () => {
             .clear();
         cy.get('[data-cy=levelDisplayNameTextInput]')
             .clear();
+        cy.get('[data-cy="pointDisplayNameTextInput"]')
+            .clear();
 
         cy.get('[data-cy="projectDisplayNameTextInput"]')
             .should('have.value', '');
@@ -237,6 +248,8 @@ describe('Project Settings Tests', () => {
         cy.get('[data-cy="skillDisplayNameTextInput"]')
             .should('have.value', '');
         cy.get('[data-cy="levelDisplayNameTextInput"]')
+            .should('have.value', '');
+        cy.get('[data-cy="pointDisplayNameTextInput"]')
             .should('have.value', '');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .contains('Unsaved Changes');
@@ -273,6 +286,8 @@ describe('Project Settings Tests', () => {
             .should('have.value', 'Skill');
         cy.get('[data-cy="levelDisplayNameTextInput"]')
             .should('have.value', 'Level');
+        cy.get('[data-cy="pointDisplayNameTextInput"]')
+            .should('have.value', 'Point');
         cy.get('[data-cy="unsavedChangesAlert"]')
             .should('not.exist');
         cy.get('[data-cy="settingsSavedAlert"]')
@@ -284,7 +299,7 @@ describe('Project Settings Tests', () => {
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
         cy.get('[data-cy=projectDisplayNameError]')
-            .contains('Project Display Text must be at most 50 characters')
+            .contains('Project Display Text must be at most 20 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
@@ -298,7 +313,7 @@ describe('Project Settings Tests', () => {
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
         cy.get('[data-cy=subjectDisplayNameError]')
-            .contains('Subject Display Text must be at most 50 characters')
+            .contains('Subject Display Text must be at most 20 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
@@ -312,7 +327,7 @@ describe('Project Settings Tests', () => {
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
         cy.get('[data-cy=groupDisplayNameError]')
-            .contains('Group Display Text must be at most 50 characters')
+            .contains('Group Display Text must be at most 20 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
@@ -326,7 +341,7 @@ describe('Project Settings Tests', () => {
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
         cy.get('[data-cy=skillDisplayNameError]')
-            .contains('Skill Display Text must be at most 50 characters')
+            .contains('Skill Display Text must be at most 20 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
@@ -340,7 +355,7 @@ describe('Project Settings Tests', () => {
             .clear()
             .type('123456789012345678901234567890123456789012345678901');
         cy.get('[data-cy=levelDisplayNameError]')
-            .contains('Level Display Text must be at most 50 characters')
+            .contains('Level Display Text must be at most 20 characters')
             .should('be.visible');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.disabled');
@@ -350,6 +365,18 @@ describe('Project Settings Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]')
             .should('be.enabled');
+        cy.get('[data-cy=pointDisplayNameTextInput]')
+            .clear()
+            .type('123456789012345678901234567890123456789012345678901');
+        cy.get('[data-cy=pointDisplayNameError]')
+            .contains('Point Display Text must be at most 20 characters')
+            .should('be.visible');
+        cy.get('[data-cy="saveSettingsBtn"]')
+            .should('be.disabled');
+        cy.get('[data-cy=pointDisplayNameTextInput]')
+            .clear();
+        cy.get('[data-cy=pointDisplayNameError]')
+            .should('not.exist');
     });
 
     it('project-level settings: project visibility', () => {

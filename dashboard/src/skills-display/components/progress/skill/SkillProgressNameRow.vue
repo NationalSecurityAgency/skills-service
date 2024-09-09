@@ -207,13 +207,13 @@ const skillId = computed(() => {
         </span>
         <span v-else class="align-content-end">
           <animated-number :num="skill.points" />
-          / {{ numFormat.pretty(skill.totalPoints) }} Points
+          / {{ numFormat.pretty(skill.totalPoints) }} {{ attributes.pointDisplayName }}s
         </span>
       </div>
 
       <div v-if="skill.points > 0 && expirationDate() && !skill.isMotivationalSkill" data-cy="expirationDate">
         <div class="my-2 text-orange-500">
-          <i class="fas fa-hourglass-end text-orange-600 mr-2" arai-hidden="true"></i>Points will expire on <span
+          <i class="fas fa-hourglass-end text-orange-600 mr-2" aria-hidden="true"></i>{{ attributes.pointDisplayName }}s will expire on <span
           class="font-semibold">{{ expirationDate() }}</span>
         </div>
       </div>
@@ -221,12 +221,12 @@ const skillId = computed(() => {
         <div class="my-2 text-orange-500">
           Expires <span
           class="font-semibold">{{ timeUtils.relativeTime(expirationDate(true)) }}</span>,
-          perform this skill to keep your points!
+          perform this skill to keep your {{ attributes.pointDisplayName.toLowerCase() }}s!
         </div>
       </div>
       <div v-if="showHasExpiredMessage" data-cy="hasExpired">
         <div class="my-2 text-orange-500">
-          <i class="fas fa-clock skills-color-expiration mr-2"></i>Points expired <span
+          <i class="fas fa-clock skills-color-expiration mr-2"></i>{{ attributes.pointDisplayName }}s expired <span
           class="font-weight-bold">{{ timeUtils.relativeTime(skill.lastExpirationDate) }}</span>
         </div>
       </div>

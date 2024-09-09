@@ -69,6 +69,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const subjectDisplayName = computed(() => config.value.subjectDisplayName || 'Subject')
   const groupDisplayName = computed(() => config.value.groupDisplayName || 'Group')
   const skillDisplayName = computed(() => config.value.skillDisplayName || 'Skill')
+  const pointDisplayName = computed(() => config.value.pointDisplayName || 'Point')
   const projectName = computed(() => config.value.projectName || route.params.projectId)
   const projectUserCommunityDescriptor = computed(() => {
     return config.value.projectUserCommunityDescriptor || null
@@ -107,6 +108,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     subjectDisplayName,
     groupDisplayName,
     skillDisplayName,
+    pointDisplayName,
     internalBackButton,
     isSummaryOnly,
     userId,

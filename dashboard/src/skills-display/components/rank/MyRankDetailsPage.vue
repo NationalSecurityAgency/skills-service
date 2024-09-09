@@ -112,7 +112,7 @@ const numUsersBehindMe = computed(() => {
             class="h-full text-center font-bold"
             :icon-class="`fas fa-user-plus ${colors.getTextClass(2)}`"
             data-cy="myRankPointsStatCard">
-            <span class="uppercase font-normal">My Points</span>
+            <span class="uppercase font-normal">My {{ attributes.pointDisplayName }}s</span>
           </media-info-card>
         </div>
 
@@ -152,7 +152,7 @@ const numUsersBehindMe = computed(() => {
                                  data-cy="myRankTotalUsersStatCard">
                   <span class="text-lg">Just
                   <Tag>{{ numFormat.pretty(rankingDistribution.pointsToPassNextUser) }}</Tag>
-                  more points... to pass the next participant.</span>
+                  more {{ attributes.pointDisplayName.toLowerCase() }}s... to pass the next participant.</span>
                 </media-info-card>
               </div>
               <div class="flex-1">
@@ -161,7 +161,7 @@ const numUsersBehindMe = computed(() => {
                                  class="h-full"
                                  :icon-class="`fas fa-running ${colors.getTextClass(5)}`"
                                  data-cy="myRankTotalUsersStatCard">
-                  <span class="text-lg">Exciting times, <i class="fas fa-rocket" aria-hidden="true"></i> enjoy gaining those points!</span>
+                  <span class="text-lg">Exciting times, <i class="fas fa-rocket" aria-hidden="true"></i> enjoy gaining those {{ attributes.pointDisplayName.toLowerCase() }}s!</span>
                 </media-info-card>
                 <media-info-card v-else
                                  title="Your Rank may drop"
@@ -175,7 +175,7 @@ const numUsersBehindMe = computed(() => {
               </div>
               <div class="flex-1">
                 <media-info-card v-if="numUsersBehindMe <= 0"
-                                 title="Earn those point riches!"
+                                 :title="`Earn those ${ attributes.pointDisplayName.toLowerCase() } riches!`"
                                  class="h-full"
                                  :icon-class="`fas fa-glass-cheers ${colors.getTextClass(6)}`"
                                  data-cy="myRankTotalUsersStatCard">
@@ -186,7 +186,7 @@ const numUsersBehindMe = computed(() => {
                                  class="h-full"
                                  :icon-class="`fas fa-glass-cheers ${colors.getTextClass(6)}`"
                                  data-cy="myRankTotalUsersStatCard">
-                  <span class="text-lg">That's how many fellow users have less points than you. Be Proud!!!</span>
+                  <span class="text-lg">That's how many fellow users have less {{ attributes.pointDisplayName.toLowerCase() }}s than you. Be Proud!!!</span>
                 </media-info-card>
               </div>
             </div>

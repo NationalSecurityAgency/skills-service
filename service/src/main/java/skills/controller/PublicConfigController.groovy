@@ -132,6 +132,7 @@ class PublicConfigController {
         res["groupDisplayName"] = 'Group'
         res["skillDisplayName"] = 'Skill'
         res["levelDisplayName"] = 'Level'
+        res["pointDisplayName"] = 'Point'
         res["groupDescriptionsOn"] = false
         res["displayProjectDescription"] = true
         if (Boolean.valueOf(uiConfigProperties.dbUpgradeInProgress)) {
@@ -144,6 +145,7 @@ class PublicConfigController {
                     'group.displayName',
                     'skill.displayName',
                     'level.displayName',
+                    'point.displayName',
                     Settings.GROUP_DESCRIPTIONS.settingName,
                     Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName
             ])?.collectEntries {
@@ -169,6 +171,10 @@ class PublicConfigController {
             String customLevelName = projectSettings?['level.displayName']
             if (customLevelName) {
                 res["levelDisplayName"] = customLevelName
+            }
+            String customPointName = projectSettings?['point.displayName']
+            if (customPointName) {
+                res["pointDisplayName"] = customPointName
             }
             Boolean groupDescriptionsOn = Boolean.valueOf(projectSettings?[Settings.GROUP_DESCRIPTIONS.settingName])
             if (groupDescriptionsOn) {

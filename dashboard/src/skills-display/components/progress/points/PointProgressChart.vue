@@ -23,12 +23,14 @@ import { useRoute } from 'vue-router'
 import PointHistoryChartPlaceholder from '@/skills-display/components/progress/points/PointHistoryChartPlaceholder.vue'
 import ChartOverlayMsg from '@/skills-display/components/utilities/ChartOverlayMsg.vue'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 const pointHistoryState = useSkillsDisplayPointHistoryState()
 const numFormat = useNumberFormat()
 const themeState = useSkillsDisplayThemeState()
 const themeHelper = useThemesHelper()
 const route = useRoute()
+const attributes = useSkillsDisplayAttributesState()
 
 const chartSeries = ref([])
 const loading = ref(true)
@@ -233,7 +235,7 @@ const zoomed = (chartContext, { xaxis, yaxis }) => {
     <template #subtitle>
       <div class="flex">
         <div>
-          Point History
+          {{ attributes.pointDisplayName }} History
           <SkillsButton
             v-if="chartWasZoomed"
             @click="resetZoom"

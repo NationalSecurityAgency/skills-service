@@ -93,7 +93,7 @@ export const useTranscriptPdfExport = () => {
 
       const tableInfo = {
         title: 'Subjects Progress Table',
-        headers: [`${info.labelsConf.subject}`, `${info.labelsConf.level}`, 'Points', `${info.labelsConf.skill}s`],
+        headers: [`${info.labelsConf.subject}`, `${info.labelsConf.level}`, `${info.labelsConf.point}s`, `${info.labelsConf.skill}s`],
         rows: info.subjects.map((subject) => {
           return [
             subject.name,
@@ -161,7 +161,7 @@ export const useTranscriptPdfExport = () => {
           headerAndFooter: info.headerAndFooter,
           structTitle: `Skill Progress Table for ${subject.name} subject`,
           sectionTitle,
-          headers: [`${info.labelsConf.skill}`, 'Points'],
+          headers: [`${info.labelsConf.skill}`, `${info.labelsConf.point}s`],
           rows: subject.skills.map((skill) => {
             return [
               skill.name,
@@ -249,7 +249,7 @@ export const useTranscriptPdfExport = () => {
     overallStats.add(addStat(labelsConf.level, base64Images.trophy, 50, info.userLevel, info.totalLevels))
     doc.moveUp()
     overallStats.add(addStat(`${labelsConf.skill}s`, base64Images.arrowUp, 300, info.userSkillsCompleted, info.totalSkills))
-    overallStats.add(addStat('Points', base64Images.hat, 50, info.userPoints, info.totalPoints))
+    overallStats.add(addStat(`${labelsConf.point}s`, base64Images.hat, 50, info.userPoints, info.totalPoints))
     if (info.achievedBadges && info.achievedBadges.length > 0) {
       doc.moveUp()
       overallStats.add(addStat(`${labelsConf.badge}s`, base64Images.badge, 300, info.achievedBadges.length))

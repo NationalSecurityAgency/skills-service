@@ -74,13 +74,14 @@ const levelStats = computed(() => {
               :incomplete-color="incompleteColor"
               :total-completed-color="userProgress.points === userProgress.totalPoints ? completeColor : earnedTodayColor"
               data-cy="overallPoints"
-              title="Overall Points">
+              :custom-label="attributes.pointDisplayName"
+              :title="`Overall ${ attributes.pointDisplayName }s`">
               <template #footer>
-                <p v-if="userProgress.points > 0 && userProgress.points === userProgress.totalPoints">All Points earned</p>
+                <p v-if="userProgress.points > 0 && userProgress.points === userProgress.totalPoints">All {{ attributes.pointDisplayName }}s earned</p>
                 <div v-else>
-                  <div><Tag data-cy="earnedPoints">{{ numFormat.pretty(userProgress.points) }}</Tag> / <Tag severity="secondary" data-cy="totalPoints">{{ numFormat.pretty(userProgress.totalPoints) }}</Tag> Points</div>
+                  <div><Tag data-cy="earnedPoints">{{ numFormat.pretty(userProgress.points) }}</Tag> / <Tag severity="secondary" data-cy="totalPoints">{{ numFormat.pretty(userProgress.totalPoints) }}</Tag> {{ attributes.pointDisplayName }}s</div>
                   <div data-cy="overallPointsEarnedToday" class="mt-1">
-                    <Tag severity="info" data-cy="pointsEarnedToday">{{ numFormat.pretty(userProgress.todaysPoints) }}</Tag> Points earned Today
+                    <Tag severity="info" data-cy="pointsEarnedToday">{{ numFormat.pretty(userProgress.todaysPoints) }}</Tag> {{ attributes.pointDisplayName }}s earned Today
                   </div>
                 </div>
               </template>
@@ -100,6 +101,7 @@ const levelStats = computed(() => {
             :incomplete-color="incompleteColor"
             :total-completed-color="isLevelComplete ? completeColor : earnedTodayColor"
             :title="levelStats.title"
+            :custom-label="attributes.pointDisplayName"
             data-cy="levelProgress">
             <template #footer>
               <p v-if="isLevelComplete">All {{ attributes.levelDisplayName.toLowerCase() }}s complete</p>
@@ -107,7 +109,7 @@ const levelStats = computed(() => {
               <div v-if="!isLevelComplete">
                 <div data-cy="pointsTillNextLevelSubtitle">
                   <Tag data-cy="pointsTillNextLevel">{{ numFormat.pretty(levelStats.pointsTillNextLevel) }}</Tag>
-                  Point{{ pluralSupport.plural(levelStats.pointsTillNextLevel) }} to {{ attributes.levelDisplayName }} {{levelStats.nextLevel }}
+                  {{ attributes.pointDisplayName }}{{ pluralSupport.plural(levelStats.pointsTillNextLevel) }} to {{ attributes.levelDisplayName }} {{levelStats.nextLevel }}
                 </div>
                 <div class="mt-1">
                   You can do it!

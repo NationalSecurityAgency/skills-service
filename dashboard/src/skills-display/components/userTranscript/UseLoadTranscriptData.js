@@ -135,7 +135,8 @@ export const useLoadTranscriptData = () => {
       subject: skillsDisplayAttributesState.subjectDisplayName,
       skill: skillsDisplayAttributesState.skillDisplayName,
       level: skillsDisplayAttributesState.levelDisplayName,
-      badge: 'Badge'
+      badge: 'Badge',
+      point: skillsDisplayAttributesState.pointDisplayName,
     }
   }
 

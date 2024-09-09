@@ -19,6 +19,7 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 const props = defineProps({
   skill: Object,
@@ -30,6 +31,7 @@ const props = defineProps({
 const numFormat = useNumberFormat()
 const pluralSupport = useLanguagePluralSupport()
 const themeState = useSkillsDisplayThemeState()
+const attributes = useSkillsDisplayAttributesState()
 
 const timeWindowTitle= computed(() => props.skill.pointIncrement * props.skill.maxOccurrencesWithinIncrementInterval)
 const isTimeWindowDisabled = computed(() => props.skill.pointIncrementInterval <= 0 || props.skill.pointIncrement === props.skill.totalPoints)
@@ -38,7 +40,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
   const minutes = props.skill.pointIncrementInterval > 60 ? props.skill.pointIncrementInterval % 60 : props.skill.pointIncrementInterval;
   const occur = props.skill.maxOccurrencesWithinIncrementInterval;
   const points = occur * props.skill.pointIncrement;
-  let res = `Up-to ${numFormat.pretty(points)} points within `;
+  let res = `Up-to ${numFormat.pretty(points)} ${attributes.pointDisplayName.toLowerCase()}s within `;
   if (hours) {
     res = `${res} ${hours} hr${pluralSupport.sOrNone(hours)}`;
   }
@@ -63,7 +65,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
         icon-class="fa fa-running"
         :icon-color="themeState.infoCards().iconColors[0]"
         data-cy="overallPointsEarnedCard">
-        <Tag>Overall</Tag> Points Earned
+        <Tag>Overall</Tag> {{ attributes.pointDisplayName }}s Earned
       </media-info-card>
     </div>
 
@@ -74,7 +76,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
         icon-class="fa fa-clock"
         :icon-color="themeState.infoCards().iconColors[1]"
         data-cy="pointsAchievedTodayCard">
-        Points Achieved <Tag>Today</Tag>
+        {{ attributes.pointDisplayName }}s Achieved <Tag>Today</Tag>
       </media-info-card>
     </div>
 
@@ -85,7 +87,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
         icon-class="fas fa-flag-checkered"
         :icon-color="themeState.infoCards().iconColors[2]"
         data-cy="pointsPerOccurrenceCard">
-        Points per Occurrence
+        {{ attributes.pointDisplayName }}s per Occurrence
       </media-info-card>
     </div>
 
