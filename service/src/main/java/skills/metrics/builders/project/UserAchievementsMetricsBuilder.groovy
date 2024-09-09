@@ -70,8 +70,12 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
     private final static List<String> supportedSortBy = ["achievedOn", PROP_SORT_BY_USER_ID]
 
     @Override
+    UserAchievementsRes build(String projectId, String chartId, Map<String, String> props) {
+        return build(projectId, chartId, props, true)
+    }
+
     @Transactional(readOnly = true)
-    UserAchievementsRes build(String projectId, String chartId, Map<String, String> props, Boolean validatePageSize = true) {
+    UserAchievementsRes build(String projectId, String chartId, Map<String, String> props, Boolean validatePageSize) {
         QueryParams queryParams = getQueryParams(projectId, chartId, props, validatePageSize)
         if (!queryParams) {
             return new UserAchievementsRes(totalNumItems: 0, items: [])
