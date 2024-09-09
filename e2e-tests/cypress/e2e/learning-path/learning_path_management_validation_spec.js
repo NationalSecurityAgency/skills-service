@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 SkillTree
+ * Copyright 2024 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
     });
 
-    it('Cannot add a badge that already has one of its skills on the learning path', () => {
+    it('Cannot add to a badge that already has one of its skills on the learning path', () => {
         cy.createSkill(1, 1, 4)
         cy.createSkill(1, 1, 5)
         cy.createSkill(1, 1, 6)
@@ -209,7 +209,29 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill9')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge3');
 
-        cy.get('[data-cy="learningPathError"]').contains('Provided badge Badge 3 has skill Very Great Skill 2 which already exists on the learning path')
+        cy.get('[data-cy="learningPathError"]').contains('Badge Badge 3 has skill Very Great Skill 2 which already exists on the Learning Path.')
+        cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
+    });
+
+    it('Cannot add from a badge that already has one of its skills on the learning path', () => {
+        cy.createSkill(1, 1, 4)
+        cy.createSkill(1, 1, 5)
+        cy.createSkill(1, 1, 6)
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 4);
+        cy.assignSkillToBadge(1, 1, 5);
+        cy.assignSkillToBadge(1, 1, 6);
+        cy.createBadge(1, 1, { enabled: true });
+
+        cy.addLearningPathItem(1, 4, 5)
+        cy.addLearningPathItem(1, 5, 6)
+
+        visitLearningPath()
+
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'skill1');
+
+        cy.get('[data-cy="learningPathError"]').contains('Badge Badge 1 has skill Very Great Skill 4 which already exists on the Learning Path.')
         cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
     });
 

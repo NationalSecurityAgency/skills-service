@@ -161,7 +161,7 @@ function validate(value, ctx) {
       reason = 'Multiple badges on the same Learning path cannot have overlapping skills. '
       + `Both <b>${res.violatingSkillInBadgeName}</b> badge and <b>${toSkillName.value}</b> badge have <b>${res.violatingSkillName}</b> skill.`;
     } else if (res.failureType && res.failureType === 'BadgeSkillIsAlreadyOnPath') {
-      reason = `Provided badge <b>${toSkillName.value}</b> has skill <b>${res.violatingSkillName}</b> which already exists on the learning path.`;
+      reason = res.reason.replace(/\[/g, "<b>").replace(/\]/g, "</b>");
     } else if (res.failureType && res.failureType === 'AlreadyExist') {
       reason = `Learning path from <b>${res.violatingSkillName}</b> to <b>${toSkillName.value}</b> already exists.`;
     } else if (res.failureType && res.failureType === 'SkillInCatalog') {
