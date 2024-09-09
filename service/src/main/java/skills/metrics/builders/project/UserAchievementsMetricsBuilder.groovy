@@ -70,6 +70,7 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
     private final static List<String> supportedSortBy = ["achievedOn", PROP_SORT_BY_USER_ID]
 
     @Override
+    @Transactional(readOnly = true)
     UserAchievementsRes build(String projectId, String chartId, Map<String, String> props) {
         return build(projectId, chartId, props, true)
     }
