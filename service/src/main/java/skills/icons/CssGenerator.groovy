@@ -37,6 +37,7 @@ class CssGenerator {
             lines.add(cssClass)
             lines.add("\tbackground-image: url(\"${it.dataUri}\");".toString())
             lines.add("\tbackground-repeat: no-repeat;")
+            lines.add("\tbackground-size: contain;")
             lines.add("\twidth: ${it.width}px;".toString())
             lines.add("\theight: ${it.height}px;".toString())
             lines.add("\tdisplay: inline-block;")

@@ -324,7 +324,7 @@ const closeError = () => {
                      @click.stop.prevent="selectIcon(file.filename, file.cssClassname, 'Custom Icons')"
                      :class="`item ${selectedCss === file.cssClassname ? 'selected' : ''}`">
                             <span class="icon is-large text-info">
-                              <i :class="file.cssClassname"></i>
+                              <i :class="file.cssClassname" style="background-size: contain;"></i>
                             </span>
                   </a>
                   <br/>
