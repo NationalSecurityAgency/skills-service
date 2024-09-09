@@ -26,12 +26,12 @@ import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInpu
 import SkillsDropDown from "@/components/utils/inputForm/SkillsDropDown.vue";
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import Column from 'primevue/column'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 
 const route = useRoute();
 const responsive = useResponsiveBreakpoints()
 const isFlex = computed(() => responsive.md.value)
 
-const isLoading = ref(true);
 const usernameFilter = ref('');
 const fromDayFilter = ref();
 const toDayFilter = ref();
@@ -59,6 +59,7 @@ const totalRows = ref(0);
 const pageSize = ref(5);
 const possiblePageSizes = [5, 10, 15, 20, 50];
 const loadingTable = ref(false);
+const isExporting = ref(false)
 
 const items = ref([]);
 
@@ -94,7 +95,28 @@ const reset = () => {
 
 const reloadTable = () => {
   loadingTable.value = true;
-  const params = {
+  const params = getQueryParams();
+  MetricsService.loadChart(route.params.projectId, 'userAchievementsChartBuilder', params)
+      .then((dataFromServer) => {
+        items.value = dataFromServer.items;
+        totalRows.value = dataFromServer.totalNumItems;
+        loadingTable.value = false;
+      });
+};
+
+const exportAchievements = () => {
+  loadingTable.value = true;
+  isExporting.value = true;
+  const params = getQueryParams();
+  MetricsService.exportProjectUserAchievements(route.params.projectId, params)
+      .then((dataFromServer) => {
+        isExporting.value = false;
+        loadingTable.value = false;
+      });
+};
+
+const getQueryParams = () => {
+  return {
     pageSize: pageSize.value,
     currentPage: currentPage.value,
     usernameFilter: usernameFilter.value,
@@ -106,15 +128,7 @@ const reloadTable = () => {
     sortBy: sortBy.value,
     sortDesc: sortOrder.value !== 1,
   };
-
-  MetricsService.loadChart(route.params.projectId, 'userAchievementsChartBuilder', params)
-      .then((dataFromServer) => {
-        isLoading.value = false;
-        items.value = dataFromServer.items;
-        totalRows.value = dataFromServer.totalNumItems;
-        loadingTable.value = false;
-      });
-};
+}
 </script>
 
 <template>
@@ -210,6 +224,23 @@ const reloadTable = () => {
         @sort="sortTable"
         paginator
         tableStoredStateId="achievementsNavigator-table">
+        <template #loading>
+          <div>
+            <Message v-if="isExporting" icon="fas fa-download" severity="contrast" :closable="false">Exporting, please wait...</Message>
+            <SkillsSpinner :is-loading="true"></SkillsSpinner>
+          </div>
+        </template>
+        <template #header>
+          <div class="flex justify-content-end flex-wrap">
+            <SkillsButton
+                :disabled="totalRows <= 0"
+                size="small"
+                icon="fas fa-download"
+                label="Export"
+                @click="exportAchievements"
+                data-cy="exportAchievementsTableBtn" />
+          </div>
+        </template>
         <Column field="userName" header="Username" sortable :class="{'flex': isFlex }">
           <template #body="slotProps">
             <div class="flex">

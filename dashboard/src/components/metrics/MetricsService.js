@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 import axios from 'axios';
+import { useExportUtil } from '@/components/utils/UseExportUtil.js';
+
+const exportUtil = useExportUtil()
 
 function buildUrl(url, params = {}) {
   let res = url;
@@ -40,5 +43,9 @@ export default {
   loadMyMetrics(metricsId, params = {}) {
     const url = buildUrl(`/api/metrics/${encodeURIComponent(metricsId)}`, params);
     return axios.get(url).then((response) => response.data);
+  },
+  exportProjectUserAchievements(projectId, params = {}) {
+    const url = buildUrl(`/admin/projects/${encodeURIComponent(projectId)}/achievements/export/excel`, params);
+    return exportUtil.ajaxDownload(url)
   },
 };

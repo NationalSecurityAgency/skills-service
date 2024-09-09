@@ -281,8 +281,8 @@ class WSHelper {
         return responseEntity.body.accessToken
     }
 
-    ResponseEntity<Resource> getResource(String endpoint) {
-        String url = "${skillsService}/${endpoint}"
+    ResponseEntity<Resource> getResource(String endpoint, Map params=null) {
+        String url = "${skillsService}/${endpoint}${getUrlFromParams(params)}"
         ResponseEntity<Resource> responseEntity = restTemplateWrapper.getForEntity(url, Resource)
         String resBody = responseEntity.body
         if(!resBody || (responseEntity.statusCode != HttpStatus.OK && responseEntity.statusCode != HttpStatus.PARTIAL_CONTENT)){

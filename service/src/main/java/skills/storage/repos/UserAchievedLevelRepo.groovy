@@ -31,6 +31,8 @@ import skills.storage.model.DayCountItem
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserTagCount
 
+import java.util.stream.Stream
+
 @CompileStatic
 interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>, JpaSpecificationExecutor<UserAchievement> {
 
@@ -638,12 +640,19 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         SkillDef.ContainerType getType()
 
         String getUserIdForDisplay()
+
+        String getFirstName()
+
+        String getLastName()
+
+        String getUserTag()
     }
 
     @Query('''select ua.achievedOn as achievedOn, ua.userId as userId, ua.level as level, ua.skillId as skillId,
-            sd.name as name, sd.type as type, uAttrs.userIdForDisplay as userIdForDisplay
+            sd.name as name, sd.type as type, uAttrs.userIdForDisplay as userIdForDisplay, uAttrs.firstName as firstName, uAttrs.lastName as lastName, ut.value as userTag
             from UserAttrs uAttrs, UserAchievement ua 
                 left join SkillDef sd on ua.skillRefId = sd.id 
+            LEFT JOIN (SELECT ut.userId userId, max(ut.value) AS value FROM UserTag ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.userId) ut ON ut.userId=ua.userId
             where 
                 ua.userId = uAttrs.userId and
                 ua.projectId = :projectId and
@@ -656,7 +665,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
                 (ua.skillId is not null OR (:includeOverallType = 'true'))
                 ''')
-    List<AchievementItem> findAllForAchievementNavigator(
+    Stream<AchievementItem> findAllForAchievementNavigator(
             @Param("projectId") String projectId,
             @Param("userNameFilter") String userNameFilter,
             @Param("fromDate") Date fromDate,
@@ -666,6 +675,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param("types") List<SkillDef.ContainerType> types,
             @Param("disableTypes") String disableTypes,
             @Param("includeOverallType") String includeOverallType,
+            @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
             @Param("pageable") Pageable pageable)
 
     @Query('''select count(uAttrs) 

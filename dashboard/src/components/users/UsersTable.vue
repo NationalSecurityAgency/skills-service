@@ -25,7 +25,7 @@ import DateCell from '@/components/utils/table/DateCell.vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
-import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useExportUtil } from '@/components/utils/UseExportUtil.js';
 import SkillsDisplayPathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
@@ -38,6 +38,7 @@ const responsive = useResponsiveBreakpoints()
 const colors = useColors()
 const appConfig = useAppConfig()
 const userInfo = useUserInfo()
+const exportUtil = useExportUtil()
 
 let filters = ref({
   user: '',
@@ -170,7 +171,7 @@ const exportUsers = () => {
   const url = `${getUrl()}/export/excel`
   isLoading.value = true
   isExporting.value = true
-  return UsersService.ajaxDownload(url, {
+  return exportUtil.ajaxDownload(url, {
     query: filters.value.user,
     ascending: sortInfo.value.sortOrder !== -1,
     page: currentPage.value,

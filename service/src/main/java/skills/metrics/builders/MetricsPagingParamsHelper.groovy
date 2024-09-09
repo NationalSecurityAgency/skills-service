@@ -28,19 +28,21 @@ class MetricsPagingParamsHelper {
     private String projectId
     private String chartId
     private Map<String,String> props
-    MetricsPagingParamsHelper(String projectId, String chartId, Map<String,String> props){
+    Boolean validatePageSize
+    MetricsPagingParamsHelper(String projectId, String chartId, Map<String,String> props, Boolean validatePageSize = true) {
         this.projectId = projectId
         this.chartId = chartId
         this.props = props
+        this.validatePageSize = validatePageSize
     }
 
     int getPageSize() {
         String strPage = MetricsParams.getParam(props, PROP_PAGE_SIZE, chartId, projectId)
         int pageSize = Integer.valueOf(strPage)
-        if (pageSize > 100) {
+        if (validatePageSize && pageSize > 100) {
             throw new SkillException("Metrics[${chartId}]: page size must not exceed 100. Provided [${pageSize}]", projectId)
         }
-        if (pageSize < 1) {
+        if (validatePageSize && pageSize < 1) {
             throw new SkillException("Metrics[${chartId}]: page size must not be less than 1. Provided [${pageSize}]", projectId)
         }
 

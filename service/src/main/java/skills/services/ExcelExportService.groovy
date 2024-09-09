@@ -25,7 +25,10 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.result.model.ProjectUser
 import skills.controller.result.model.UserProgressExportResult
+import skills.metrics.builders.project.UserAchievementsMetricsBuilder
+import skills.metrics.builders.project.UserAchievementsMetricsBuilder.QueryParams
 import skills.services.admin.UserCommunityService
+import skills.storage.repos.UserAchievedLevelRepo
 
 import java.util.stream.Stream
 
@@ -51,26 +54,21 @@ class ExcelExportService {
     @Autowired
     private AdminUsersService adminUsersService
 
+    @Autowired
+    UserAchievedLevelRepo userAchievedRepo
+
     @Transactional(readOnly = true)
     void exportUsersProgress(Workbook workbook, String projectId, String query, PageRequest pageRequest, int minimumPoints) {
         String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getProjectUserCommunity(projectId))
         Sheet sheet = workbook.createSheet()
-        Integer rowNum = 0
-        Integer columnNumber = 0
-        if (projectExportHeaderAndFooter) {
-            addDataHeader(workbook, sheet, rowNum++, userTagLabel ? 8 : 7, projectExportHeaderAndFooter)
-        }
-        Row headerRow = sheet.createRow(rowNum++)
-        headerRow.createCell(columnNumber++).setCellValue("User ID")
-        headerRow.createCell(columnNumber++).setCellValue("Last Name")
-        headerRow.createCell(columnNumber++).setCellValue("First Name")
+        List<String> headers
         if (userTagLabel) {
-            headerRow.createCell(columnNumber++).setCellValue(userTagLabel)
+            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Level", "Current Points", "Points First Earned", "Points Last Earned"]
+        } else {
+            headers = ["User ID", "Last Name", "First Name", "Level", "Current Points", "Points First Earned", "Points Last Earned"]
         }
-        headerRow.createCell(columnNumber++).setCellValue("Level")
-        headerRow.createCell(columnNumber++).setCellValue("Current Points")
-        headerRow.createCell(columnNumber++).setCellValue("Points First Earned")
-        headerRow.createCell(columnNumber++).setCellValue("Points Last Earned")
+        Integer columnNumber = 0
+        Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
 
         CellStyle dateStyle = workbook.createCellStyle()
         dateStyle.setDataFormat((short) 14) // NOTE: 14 = "mm/dd/yyyy"
@@ -102,11 +100,75 @@ class ExcelExportService {
         }
 
         if (projectExportHeaderAndFooter) {
-            addDataHeader(workbook, sheet, rowNum++, userTagLabel ? 8 : 7, projectExportHeaderAndFooter)
+            addDataHeaderOrFooter(sheet, rowNum++, headers.size(), projectExportHeaderAndFooter)
         }
     }
 
-    private static void addDataHeader(Workbook workbook, Sheet sheet, Integer rowNum, Integer numCols, String exportHeaderAndFooter) {
+
+    @Transactional(readOnly = true)
+    void exportUsersAchievements(Workbook workbook, String projectId, QueryParams queryParams) {
+        String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getProjectUserCommunity(projectId))
+        Sheet sheet = workbook.createSheet()
+        List<String> headers
+        if (userTagLabel) {
+            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Achievement Type", "Achievement Name", "Level", "Achievement Date"]
+        } else {
+            headers = ["User ID", "Last Name", "First Name", "Achievement Type", "Achievement Name", "Level", "Achievement Date"]
+        }
+        Integer columnNumber = 0
+        Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
+
+        CellStyle dateStyle = workbook.createCellStyle()
+        dateStyle.setDataFormat((short) 14) // NOTE: 14 = "mm/dd/yyyy"
+
+        Cell cell = null
+        if (queryParams) {
+            Stream<UserAchievedLevelRepo.AchievementItem> achievements = userAchievedRepo.findAllForAchievementNavigator(
+                    queryParams.projectId, queryParams.usernameFilter, queryParams.from, queryParams.to,
+                    queryParams.skillNameFilter, queryParams.minLevel, queryParams.achievementTypesWithoutOverall,
+                    queryParams.allNonOverallTypes, queryParams.includeOverallType, usersTableAdditionalUserTagKey, queryParams.pageRequest)
+            try {
+                achievements?.each { UserAchievedLevelRepo.AchievementItem achievementItem ->
+                    UserAchievementsMetricsBuilder.MetricUserAchievement metricUserAchievement = UserAchievementsMetricsBuilder.buildMetricUserAchievement(achievementItem)
+                    columnNumber = 0
+                    Row row = sheet.createRow(rowNum++)
+                    row.createCell(columnNumber++).setCellValue(achievementItem.userIdForDisplay)
+                    row.createCell(columnNumber++).setCellValue(achievementItem.lastName ?: '')
+                    row.createCell(columnNumber++).setCellValue(achievementItem.firstName ?: '')
+                    if (userTagLabel) {
+                        row.createCell(columnNumber++).setCellValue(achievementItem.userTag)
+                    }
+                    row.createCell(columnNumber++).setCellValue(metricUserAchievement.type)
+                    row.createCell(columnNumber++).setCellValue(metricUserAchievement.name)
+                    row.createCell(columnNumber++).setCellValue(metricUserAchievement.level)
+
+                    cell = row.createCell(columnNumber++)
+                    cell.setCellStyle(dateStyle)
+                    cell.setCellValue(achievementItem.achievedOn)
+                }
+            } finally {
+                achievements.close()
+            }
+        }
+        if (projectExportHeaderAndFooter) {
+            addDataHeaderOrFooter(sheet, rowNum++,  headers.size(), projectExportHeaderAndFooter)
+        }
+    }
+
+    private Integer initializeSheet(Sheet sheet, List<String> headers, String projectExportHeaderAndFooter) {
+        Integer rowNum = 0
+        Integer columnNumber = 0
+        if (projectExportHeaderAndFooter) {
+            addDataHeaderOrFooter(sheet, rowNum++, headers.size(), projectExportHeaderAndFooter)
+        }
+        Row headerRow = sheet.createRow(rowNum++)
+        headers.eachWithIndex { String header, int i ->
+            headerRow.createCell(columnNumber++).setCellValue(header)
+        }
+        return rowNum
+    }
+
+    private static void addDataHeaderOrFooter(Sheet sheet, Integer rowNum, Integer numCols, String exportHeaderAndFooter) {
         Row row = sheet.createRow(rowNum);
         Cell cell = row.createCell(0);
         cell.setCellValue(exportHeaderAndFooter)
