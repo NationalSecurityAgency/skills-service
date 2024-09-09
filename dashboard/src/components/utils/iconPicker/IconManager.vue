@@ -111,6 +111,7 @@ let fontAwesomeIcons = fontAwesomeIconsCanonical;
 let materialIcons = materialIconsCanonical;
 let errorMessage = ref('');
 const fileInfo = ref(null);
+const loadingIcons = ref(false);
 
 let active = ref(0);
 
@@ -217,9 +218,11 @@ const handleUploadedIcon = (response) => {
 }
 
 const deleteIcon = (iconName, projectId) => {
+  loadingIcons.value = true;
   IconManagerService.deleteIcon(iconName, projectId).then(() => {
     iconPacks.value[2].defaultIcons = iconPacks.value[2].defaultIcons.filter((element) => element.filename !== iconName);
-    iconPacks.value[2].icons = iconPacks.value[2].defaultIcons;
+    iconPacks.value[2].icons = [iconPacks.value[2].defaultIcons];
+    loadingIcons.value = false;
   });
 };
 
@@ -246,6 +249,7 @@ const beforeUpload = (upload) => {
 
   const existingIcons = iconPacks.value[2].icons.flat();
   const uploadName = upload.files[0].name;
+
   if(existingIcons.find(it => it.filename === uploadName)) {
     displayError('A file with this name already exists');
     return;
@@ -275,6 +279,7 @@ const beforeUpload = (upload) => {
 
 const displayError = (message) => {
   errorMessage.value = message;
+  uploader.value.clear();
   fileInfo.value = null;
 }
 
@@ -311,7 +316,7 @@ const closeError = () => {
         <template #content>
           <Message data-cy="iconErrorMessage" v-if="errorMessage" @close="closeError" severity="error">{{ errorMessage }}</Message>
           <p>Drag and drop file here to upload.</p>
-          <div v-if="iconPacks[2].icons.length > 0">
+          <div v-if="iconPacks[2].icons.length > 0 && !loadingIcons">
             <div v-for="(icons, index) of iconPacks[2].icons" v-bind:key="index" class="flex">
               <div v-for="(file) of icons" :key="file.filename" class="card m-0 px-6 flex flex-wrap border-1 surface-border align-items-center gap-3">
                 <div class="icon-item" style="max-width: 100px;">
