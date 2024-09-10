@@ -17,6 +17,7 @@ var moment = require('moment-timezone');
 
 describe('Metrics Tests - Achievements', () => {
     const waitForSnap = 4000;
+    const exportedFileName = `cypress/downloads/proj1-achievements-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
 
     beforeEach(() => {
         Cypress.Commands.add('filterNextMonth', () => {
@@ -48,6 +49,7 @@ describe('Metrics Tests - Achievements', () => {
             projectId: 'proj1',
             name: 'proj1'
         });
+        cy.cleanupDownloadsDir()
     });
 
     it('overall levels - empty', () => {
@@ -139,7 +141,6 @@ describe('Metrics Tests - Achievements', () => {
                 numPerformToCompletion: skillsCounter < 3 ? '1' : '200',
             });
         }
-        ;
 
         const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
@@ -196,6 +197,11 @@ describe('Metrics Tests - Achievements', () => {
                 value: '2020-09-08 11:00'
             }],
         ]);
+
+        // export users and verify that the file exists
+        cy.readFile(exportedFileName).should('not.exist');
+        cy.get('[data-cy="exportAchievementsTableBtn"]').click();
+        cy.readFile(exportedFileName).should('exist');
 
     });
 

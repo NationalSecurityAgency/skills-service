@@ -25,24 +25,7 @@ import skills.intTests.utils.SkillsService
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class ExportUserProgressSpec extends DefaultIntSpec {
-    String ultimateRoot = 'jh@dojo.com'
-    SkillsService rootSkillsService
-
-    Date today = new Date()
-    Date oneDayAgo = new Date()-1
-    Date fiveDaysAgo = new Date()-5
-    Date tenDaysAgo = new Date()-10
-
-    private Boolean isPkiMode = false;
-    
-    def setup() {
-        rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-        if (!rootSkillsService.isRoot()) {
-            rootSkillsService.grantRoot()
-        }
-        isPkiMode = mockUserInfoService != null
-    }
+class ExportUserProgressSpec extends ExportBaseIntSpec {
 
     def "export users progress"() {
         def project = createProject()

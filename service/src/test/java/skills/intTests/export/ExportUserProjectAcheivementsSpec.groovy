@@ -30,35 +30,7 @@ import spock.lang.Shared
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class ExportUserProjectAcheivementsSpec extends DefaultIntSpec {
-    String ultimateRoot = 'jh@dojo.com'
-    SkillsService rootSkillsService
-    private Boolean isPkiMode = false;
-    String allAchievementTypes = "${MetricsParams.ACHIEVEMENT_TYPE_OVERALL},${SkillDef.ContainerType.Subject},${SkillDef.ContainerType.Skill},${SkillDef.ContainerType.Badge},${SkillDef.ContainerType.GlobalBadge}"
-
-    @Shared
-    List<String> users
-
-    @Shared
-    List<Date> dates
-
-    def setupSpec() {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        use(TimeCategory) {
-            dates = (10..0).collect({
-                return it.days.ago;
-            })
-        }
-    }
-    
-    def setup() {
-        rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-        if (!rootSkillsService.isRoot()) {
-            rootSkillsService.grantRoot()
-        }
-        isPkiMode = mockUserInfoService != null
-        users = new ArrayList<>(getRandomUsers(4))
-    }
+class ExportUserProjectAcheivementsSpec extends ExportBaseIntSpec {
 
     def "export project achievements"() {
         def proj = createProject()
