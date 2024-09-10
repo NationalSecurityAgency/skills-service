@@ -198,7 +198,7 @@ describe('Metrics Tests - Achievements', () => {
             }],
         ]);
 
-        // export users and verify that the file exists
+        // export achievements and verify that the file exists
         cy.readFile(exportedFileName).should('not.exist');
         cy.get('[data-cy="exportAchievementsTableBtn"]').click();
         cy.readFile(exportedFileName).should('exist');
