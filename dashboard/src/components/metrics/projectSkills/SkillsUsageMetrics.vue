@@ -84,7 +84,6 @@ const loadData = () => {
 };
 
 const exportSkills = () => {
-  console.log('exportSkills');
   loading.value = true;
   isExporting.value = true;
   MetricsService.exportProjectSkillsMetrics(route.params.projectId)
