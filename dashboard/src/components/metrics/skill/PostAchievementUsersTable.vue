@@ -23,10 +23,12 @@ import DateCell from "@/components/utils/table/DateCell.vue";
 import { useUserInfo } from '@/components/utils/UseUserInfo.js'
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 import SkillsDisplayPathAppendValues from "@/router/SkillsDisplayPathAppendValues.js";
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 defineProps(['skillName']);
 const route = useRoute();
 const userInfo = useUserInfo()
+const numberFormat = useNumberFormat()
 
 onMounted(() => {
   loadData();
@@ -152,7 +154,7 @@ const calculateClientDisplayRoute = (props) => {
           </Column>
 
           <template #paginatorstart>
-            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
           </template>
         </SkillsDataTable>
       </metrics-overlay>

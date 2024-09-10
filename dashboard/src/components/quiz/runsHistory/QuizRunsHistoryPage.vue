@@ -38,6 +38,7 @@ import QuizService from '@/components/quiz/QuizService.js'
 import InputText from 'primevue/inputtext'
 import QuizRunStatus from '@/components/quiz/runsHistory/QuizRunStatus.vue'
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const route = useRoute()
 const userInfo = useUserInfo()
@@ -48,6 +49,7 @@ const userTagsUtils = useUserTagsUtils()
 const announcer = useSkillsAnnouncer()
 const responsive = useResponsiveBreakpoints()
 const colors = useColors()
+const numberFormat = useNumberFormat()
 
 const quizType = ref('')
 const runsHistory = ref([])
@@ -245,7 +247,7 @@ const deleteRun = () => {
           </template>
 
           <template #paginatorstart>
-            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
           </template>
 
           <template #empty>

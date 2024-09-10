@@ -25,6 +25,7 @@ import RejectSkillModal from "@/components/skills/selfReport/RejectSkillModal.vu
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 
 const route = useRoute();
@@ -33,6 +34,7 @@ const emit = defineEmits(['approval-action']);
 const announcer = useSkillsAnnouncer();
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
+const numberFormat = useNumberFormat()
 
 const approvals = ref([]);
 const loading = ref(true);
@@ -259,7 +261,7 @@ const toggleRow = (row) => {
         </template>
 
         <template #paginatorstart>
-          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
         </template>
 
         <template #empty>

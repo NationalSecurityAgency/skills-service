@@ -29,11 +29,13 @@ import StartRecordingUserActionsDateWarning from '@/components/userActions/Start
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { useContentMaxWidthState } from '@/stores/UseContentMaxWidthState.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const route = useRoute()
 const userInfo = useUserInfo()
 const contentMaxWidthState = useContentMaxWidthState()
 const responsive = useResponsiveBreakpoints()
+const numberFormat = useNumberFormat()
 
 const filters = ref({
   user: '',
@@ -232,7 +234,7 @@ const tableFilters = ref({
             v-model:sort-order="sortInfo.sortOrder">
 
           <template #paginatorstart>
-            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
           </template>
 
           <template #empty>

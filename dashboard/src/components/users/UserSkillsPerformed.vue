@@ -36,6 +36,7 @@ import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import UsersService from '@/components/users/UsersService.js'
 import StringHighlighter from '@/common-components/utilities/StringHighlighter.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const dialogMessages = useDialogMessages()
 const timeUtils = useTimeUtils()
@@ -45,6 +46,7 @@ const colors = useColors()
 const route = useRoute()
 const projectUserState = useProjectUserState()
 const responsive = useResponsiveBreakpoints()
+const numberFormat = useNumberFormat()
 
 const projectId = ref(route.params.projectId)
 const userId = ref(route.params.userId)
@@ -349,7 +351,7 @@ const selectedSkills = ref([]);
           </template>
 
           <template #paginatorstart>
-            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
           </template>
 
           <template #empty>

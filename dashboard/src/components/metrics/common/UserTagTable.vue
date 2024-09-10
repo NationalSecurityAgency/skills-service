@@ -18,11 +18,13 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const props = defineProps({
   tagChart: Object
 })
 const route = useRoute();
+const numberFormat = useNumberFormat()
 
 onMounted(() => {
   loadData();
@@ -159,7 +161,7 @@ const loadData = (shouldHighlight = false) => {
           <Column field="count" header="# Users" sortable></Column>
 
           <template #paginatorstart>
-            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ table.options.pagination.totalRows }}</span>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(table.options.pagination.totalRows) }}</span>
           </template>
 
           <template #empty>

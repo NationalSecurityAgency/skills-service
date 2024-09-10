@@ -24,6 +24,7 @@ import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveB
 import Column from 'primevue/column'
 import QuizService from '@/components/quiz/QuizService.js'
 import DateCell from '@/components/utils/table/DateCell.vue'
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const props = defineProps({
   answerDefId: Number,
@@ -37,6 +38,7 @@ const route = useRoute();
 const truncateFormatter = useTruncateFormatter();
 const userTagsUtils = useUserTagsUtils();
 const userInfo = useUserInfo();
+const numberFormat = useNumberFormat()
 const responsive = useResponsiveBreakpoints()
 const quizId = ref(route.params.quizId);
 const answerHistory = ref([]);
@@ -166,7 +168,7 @@ const expandLabel = (truncated) => {
         data-cy="quizAnswerHistoryTable">
 
     <template #paginatorstart>
-        <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ tableOptions.pagination.totalRows }}</span>
+        <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(tableOptions.pagination.totalRows) }}</span>
       </template>
 
       <template #empty>

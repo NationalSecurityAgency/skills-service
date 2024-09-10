@@ -24,10 +24,13 @@ import Column from "primevue/column";
 import InputGroup from "primevue/inputgroup";
 import InputText from "primevue/inputtext";
 import InputGroupAddon from "primevue/inputgroupaddon";
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const emit = defineEmits(['done']);
 
 const model = defineModel();
+
+const numberFormat = useNumberFormat()
 
 const isLoading = ref(false);
 const searchValue = ref('');
@@ -205,7 +208,7 @@ watch(() => searchValue.value, useDebounceFn((newValue) => {
           </Column>
 
           <template #paginatorstart>
-            <span>Total Rows:</span> <span class="font-semibold" data-cy="skillsBTableTotalRows">{{ result.values.length }}</span>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy="skillsBTableTotalRows">{{ numberFormat.pretty(result.values.length) }}</span>
           </template>
 
           <template #empty>
