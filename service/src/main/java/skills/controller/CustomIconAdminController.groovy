@@ -60,4 +60,11 @@ class CustomIconAdminController {
         iconFacade.deleteIcon(projectId, filename)
         return ResponseEntity.ok(true)
     }
+
+    @RequestMapping(value = "/projects/{projectId}/icons/{iconClass}/usage", method = RequestMethod.GET)
+    List<String> isInUse(@PathVariable("projectId") String projectId, @PathVariable("iconClass") String iconClass) {
+        return iconFacade.findUsages(projectId, iconClass);
+    }
+
+
 }

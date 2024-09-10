@@ -26,6 +26,7 @@ import skills.services.IconService
 import skills.storage.model.CustomIcon
 import skills.storage.model.ProjDef
 import skills.storage.accessors.ProjDefAccessor
+import skills.storage.repos.SkillDefRepo
 
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
@@ -40,6 +41,9 @@ class CustomIconFacade {
 
     @Autowired
     ProjDefAccessor projDefAccessor
+
+    @Autowired
+    SkillDefRepo skillDefRepo
 
     @Autowired
     CssGenerator cssGenerator
@@ -170,5 +174,9 @@ class CustomIconFacade {
     void deleteGlobalIcon(String filename){
         Validate.notNull(filename, "filename is required")
         iconService.deleteGlobalIcon(filename)
+    }
+
+    List<String> findUsages(String projectId, String iconClass) {
+        skillDefRepo.findNameByProjectIdAndIconClass(projectId, iconClass)
     }
 }

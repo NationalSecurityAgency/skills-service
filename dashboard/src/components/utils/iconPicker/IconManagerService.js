@@ -57,5 +57,9 @@ export default {
         existingStyles.innerText = response
       }
     })
+  },
+  findUsages(projectId, iconClass) {
+    let url = `/admin/projects/${encodeURIComponent(projectId)}/icons/${iconClass}/usage`
+    return axios.get(url).then((response) => response.data)
   }
 }

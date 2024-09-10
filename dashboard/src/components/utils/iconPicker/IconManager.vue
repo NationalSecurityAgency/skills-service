@@ -26,9 +26,11 @@ import materialIconsCanonical from './material-index';
 import IconManagerService from './IconManagerService.js';
 import IconRow from './IconRow.vue';
 import TabMenu from "primevue/tabmenu";
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
 const route = useRoute();
-const emit = defineEmits(['selected-icon']);
+const emit = defineEmits(['selected-icon', 'set-dismissable']);
+const dialogMessages = useDialogMessages()
 
 const props = defineProps(
     {
@@ -217,13 +219,38 @@ const handleUploadedIcon = (response) => {
   selectIcon(response.name, response.cssClassName, 'custom-icon');
 }
 
-const deleteIcon = (iconName, projectId) => {
-  loadingIcons.value = true;
-  IconManagerService.deleteIcon(iconName, projectId).then(() => {
-    iconPacks.value[2].defaultIcons = iconPacks.value[2].defaultIcons.filter((element) => element.filename !== iconName);
-    iconPacks.value[2].icons = [iconPacks.value[2].defaultIcons];
-    loadingIcons.value = false;
-  });
+const deleteIcon = (file, projectId) => {
+  const className = file.cssClassname;
+  const iconName = file.filename;
+  emit('set-dismissable', false);
+  IconManagerService.findUsages(projectId, className).then((resp) => {
+    const usages = resp;
+    let msg = `Are you sure you want to delete ${iconName}? `
+    if(usages.length > 0) {
+      msg += ' This icon is currently used by: ';
+      const usedBy = usages.join(', ');
+      msg += usedBy;
+    }
+
+    dialogMessages.msgConfirm({
+      message: msg,
+      header: 'WARNING: Delete Custom Icon',
+      acceptLabel: 'YES, Delete It!',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        IconManagerService.deleteIcon(iconName, projectId).then(() => {
+          iconPacks.value[2].defaultIcons = iconPacks.value[2].defaultIcons.filter((element) => element.filename !== iconName);
+          iconPacks.value[2].icons = [iconPacks.value[2].defaultIcons];
+        });
+      },
+      reject: () => {
+        emit('set-dismissable', true);
+      },
+      onHideHandler: () => {
+        emit('set-dismissable', true);
+      }
+    })
+  })
 };
 
 let uploader = ref();
@@ -329,7 +356,7 @@ const closeError = () => {
                   </a>
                   <br/>
                   <span class="iconName">
-                    <a class="delete-icon" ref="#" @click="deleteIcon(file.filename, route.params.projectId)">
+                    <a class="delete-icon" ref="#" @click="deleteIcon(file, route.params.projectId)">
                       <span class="icon is-tiny"><i style="font-size:1rem;height:1rem;width:1rem;" class="fas fa-trash"></i></span>
                     </a>
                     <span>{{ file.filename }}</span>
