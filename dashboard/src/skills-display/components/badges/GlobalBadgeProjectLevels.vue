@@ -33,7 +33,7 @@ const projectSummaries = computed(() => {
     return []
   }
   return projectsWithLevels.map((item) => {
-    const percentComplete = 0 // calculatePercent(item.projectLevel)
+    const percentComplete = calculatePercent(item.projectLevel)
 
     return {
       badge: props.badge,
