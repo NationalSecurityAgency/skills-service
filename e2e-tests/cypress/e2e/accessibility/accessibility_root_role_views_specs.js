@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 SkillTree
+ * Copyright 2024 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,35 @@
 
 describe('Accessibility for Root Role Page Tests', () => {
 
-    it('user activity history page', () => {
-        cy.createProject(1)
-        cy.createProject(2)
-        cy.createSubject(1, 1)
-        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' })
-        cy.createSkill(1, 1, 2)
-        cy.createSkill(1, 1, 2)
-        cy.createSkill(1, 1, 3)
-        cy.createSkill(1, 1, 3)
-        cy.createSkill(1, 1, 4)
-        cy.createSkill(1, 1, 4)
-        cy.createSkill(1, 1, 5)
-        cy.createSkill(1, 1, 5)
-        cy.fixture('vars.json').then((vars) => {
-            cy.logout();
-            cy.login(vars.rootUser, vars.defaultPass, true);
+    const runWithDarkMode = ['', ' - dark mode']
+
+    runWithDarkMode.forEach((darkMode) => {
+        it(`user activity history page${darkMode}`, () => {
+            cy.createProject(1)
+            cy.createProject(2)
+            cy.createSubject(1, 1)
+            cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' })
+            cy.createSkill(1, 1, 2)
+            cy.createSkill(1, 1, 2)
+            cy.createSkill(1, 1, 3)
+            cy.createSkill(1, 1, 3)
+            cy.createSkill(1, 1, 4)
+            cy.createSkill(1, 1, 4)
+            cy.createSkill(1, 1, 5)
+            cy.createSkill(1, 1, 5)
+            cy.fixture('vars.json').then((vars) => {
+                cy.logout();
+                cy.login(vars.rootUser, vars.defaultPass, true);
+            });
+
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/userActions')
+            cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '13')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y();
         });
-
-        cy.visit('/administrator/userActions')
-        cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '13')
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y();
-    });
+    })
 
 });

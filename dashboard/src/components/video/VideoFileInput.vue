@@ -75,7 +75,6 @@ const openFileDialog = (event) => {
                    data-cy="videoFileInputDropTarget"
                    :disabled="false"
                    variant="filled"
-                   class="bg-gray-100"
                    @click="openFileDialog"
                    placeholder="Upload file from my computer by clicking Browse or drag-n-dropping it here..."/>
         <InputGroupAddon class="p-0 m-0">

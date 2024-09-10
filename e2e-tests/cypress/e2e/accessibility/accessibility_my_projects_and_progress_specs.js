@@ -17,7 +17,7 @@ import dayjs from 'dayjs';
 
 const moment = require('moment-timezone');
 
-describe('Accessibility Tests', () => {
+describe('Accessibility My Projects and Progress And Ranking Home Tests', () => {
 
     beforeEach(() => {
         cy.request('POST', '/app/projects/MyNewtestProject', {
@@ -103,6 +103,7 @@ describe('Accessibility Tests', () => {
         });
 
         cy.request('POST', '/admin/projects/MyNewtestProject/badge/badge1/skills/skill2');
+
         cy.request('POST', `/admin/projects/MyNewtestProject/skill2/prerequisite/MyNewtestProject/skill1`);
 
         const m = moment('2020-05-12 11', 'YYYY-MM-DD HH');
@@ -177,74 +178,183 @@ describe('Accessibility Tests', () => {
                 cy.configureDarkMode()
             }
         })
+
     });
 
     const runWithDarkMode = ['', ' - dark mode']
 
     runWithDarkMode.forEach((darkMode) => {
-        it(`settings - profile${darkMode}`, () => {
-            cy.logout();
-            cy.login('root@skills.org', 'password');
+        it(`"My Progress" landing page with many skills${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/settings');
+            for (let i = 1; i <= 10; i++) {
+                cy.createProject(i);
+                cy.enableProdMode(i);
+                cy.addToMyProjects(i);
+
+                cy.createSubject(i, 1);
+                cy.createSkill(i, 1, 100, {numPerformToCompletion: 1});
+                cy.reportSkill(i, 100, Cypress.env('proxyUser'), 'now')
+
+                cy.createBadge(i, 1);
+                cy.assignSkillToBadge(i, 1, 100);
+                cy.createBadge(i, 1, { enabled: true });
+            }
+
+            cy.createSubject(1, 1);
+            const numSkills = 10
+            for (let i = 0; i < numSkills; i++) {
+                cy.createSkill(1, 1, i, {numPerformToCompletion: 1});
+            }
+            for (let i = 0; i < numSkills; i++) {
+                cy.reportSkill(1, i, Cypress.env('proxyUser'), 'now')
+            }
+
+            cy.visit('/progress-and-rankings');
             cy.injectAxe();
-            cy.get('[data-cy="generalSettingsSave"]');
+            cy.get('[data-cy="numProjectsContributed"]').should('have.text', 10);
+            cy.get('[data-cy="numAchievedSkills"]').should('have.text', 20);
+            cy.get('[data-cy="numAchievedBadges"]').should('have.text', 10);
             cy.customLighthouse();
             cy.customA11y();
         })
 
-        it(`settings - preferences${darkMode}`, () => {
-            cy.logout();
-            cy.login('root@skills.org', 'password');
+        it(`"My Progress" landing page${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/settings/preferences');
-            cy.injectAxe();
-            cy.get('[data-cy="userPrefsSettingsSave"]');
-            cy.customLighthouse();
-            cy.customA11y();
-        })
+            // setup a project for the landing page
+            const dateFormatter = value => moment.utc(value)
+                .format('YYYY-MM-DD[T]HH:mm:ss[Z]');
+            const timeFromNowFormatter = (value) => dayjs(value)
+                .startOf('hour')
+                .fromNow();
+            cy.createProject(1);
+            cy.enableProdMode(1);
+            cy.addToMyProjects(1);
+            cy.createSubject(1, 1);
+            cy.createSubject(1, 2);
+            cy.createSubject(1, 3);
+            cy.createSkill(1, 1, 1);
+            cy.createSkill(1, 1, 2);
+            cy.createSkill(1, 1, 3);
+            cy.createSkill(1, 1, 4);
 
-        it(`settings - security${darkMode}`, () => {
-            cy.logout();
-            cy.login('root@skills.org', 'password');
-            cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/settings/security');
-            cy.injectAxe();
-            cy.get('[data-cy="addUserBtn"]')
-            cy.get('[data-cy="supervisorrm"]')
-              .contains('There are no records to show');
-            cy.customLighthouse();
-            cy.customA11y();
-        })
+            cy.request('POST', `/admin/projects/proj1/skill4/prerequisite/proj1/skill2`);
 
-        it(`settings - email${darkMode}`, () => {
-            cy.logout();
-            cy.login('root@skills.org', 'password');
-            cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/settings/email');
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                userId: Cypress.env('proxyUser'),
+                timestamp: new Date().getTime()
+            });
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                userId: Cypress.env('proxyUser'),
+                timestamp: new Date().getTime() - 1000 * 60 * 60 * 24
+            });
+
+            cy.request('POST', `/api/projects/proj1/skills/skill3`, {
+                userId: Cypress.env('proxyUser'),
+                timestamp: new Date().getTime()
+            });
+            cy.request('POST', `/api/projects/proj1/skills/skill3`, {
+                userId: Cypress.env('proxyUser'),
+                timestamp: new Date().getTime() - 1000 * 60 * 60 * 24
+            });
+
+            cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+                projectId: 'proj1',
+                badgeId: 'badge1',
+                name: 'Badge 1'
+            });
+
+            cy.request('POST', '/admin/projects/proj1/badges/gemBadge', {
+                projectId: 'proj1',
+                badgeId: 'gemBadge',
+                name: 'Gem Badge',
+                startDate: dateFormatter(new Date() - 1000 * 60 * 60 * 24 * 7),
+                endDate: dateFormatter(new Date() + 1000 * 60 * 60 * 24 * 5),
+            });
+
+            cy.visit('/progress-and-rankings');
+            cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
+                .contains('Progress And Rankings')
+                .should('be.visible');
+            cy.get('[data-cy=numSkillsAvailable]')
+                .contains(new RegExp(/^Total: 4$/));
+            cy.get('[data-cy=project-link-proj1]')
+                .should('be.visible');
+
+            cy.customLighthouse();
             cy.injectAxe();
-            cy.contains('Email Connection Settings');
-            cy.contains('TLS Disabled');
-            cy.contains('Public URL');
-            cy.get('[data-cy="emailSettingsTest"]')
+            cy.customA11y();
+        });
+
+        it(`my usage page${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.fixture('vars.json')
+                .then((vars) => {
+                    cy.request('POST', '/logout');
+                    cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+                    cy.loginAsProxyUser();
+                });
+            cy.loginAsProxyUser();
+
+            for (let i = 1; i <= 3; i += 1) {
+                cy.createProject(i);
+                cy.enableProdMode(i);
+                cy.addToMyProjects(i);
+
+                cy.createSubject(i, 1);
+                cy.createSkill(i, 1, 1);
+                cy.createSkill(i, 1, 2);
+            }
+
+            const dateFormat = 'YYYY-MM-DD HH:mm';
+            const user = Cypress.env('proxyUser');
+            cy.reportSkill(1, 1, user, moment.utc()
+                .subtract(2, 'days')
+                .format(dateFormat));
+            cy.reportSkill(1, 1, user, 'yesterday');
+            cy.reportSkill(1, 2, user, 'now');
+            cy.reportSkill(1, 2, user, 'yesterday');
+
+            cy.reportSkill(2, 1, user, moment.utc()
+                .subtract(5, 'days')
+                .format(dateFormat));
+            cy.reportSkill(2, 1, user, moment.utc()
+                .subtract(6, 'days')
+                .format(dateFormat));
+            cy.reportSkill(2, 2, user, moment.utc()
+                .subtract(6, 'days')
+                .format(dateFormat));
+            cy.reportSkill(2, 2, user, moment.utc()
+                .subtract(3, 'days')
+                .format(dateFormat));
+
+            cy.visit('/progress-and-rankings');
+            cy.injectAxe();
+            cy.get('[data-cy="viewUsageBtn"]')
+                .click();
+
+            cy.contains('Your Daily Usage History');
+            cy.contains('6 months');
+            cy.get('[data-cy=eventHistoryChartProjectSelector]')
+                .contains('This is project 2')
+                .should('be.visible');
+
+            cy.wait(1500);
             cy.customLighthouse();
             cy.customA11y();
         });
 
-        it(`settings - system${darkMode}`, () => {
+        it(`splash home page${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
-            cy.intercept('GET', '/root/getSystemSettings')
-              .as('getSettings');
-            cy.logout();
-            cy.login('root@skills.org', 'password');
-            cy.visit('/settings/system');
-            cy.wait('@getSettings')
-            cy.contains('Token Expiration');
-            cy.get('[data-cy="resetTokenExpiration"]').should('have.value', '2H')
-            cy.get('[data-cy="saveSystemSettings"]')
-            cy.injectAxe();
+            cy.visit('/progress-and-rankings');
+            cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
+              .contains('Progress And Rankings')
+              .should('be.visible');
+            cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
+
             cy.customLighthouse();
+            cy.injectAxe();
             cy.customA11y();
         });
+
     })
 });

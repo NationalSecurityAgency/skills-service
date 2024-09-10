@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 SkillTree
+ * Copyright 2024 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,241 +67,182 @@ describe('Accessibility Tests', () => {
         cy.afterTestSuiteThatReusesData()
     });
 
+    const runWithDarkMode = ['', ' - dark mode']
 
-    it('project - subject page', () => {
-        cy.visit('/administrator/');
-        cy.get('[data-cy=projCard_proj1_manageBtn]').click();
-        cy.get('[data-cy=manageBtn_subj1]');
+    runWithDarkMode.forEach((darkMode) => {
 
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    });
+        it(`project - subject page${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/');
+            cy.get('[data-cy=projCard_proj1_manageBtn]').click();
+            cy.get('[data-cy=manageBtn_subj1]');
 
-    it('project and subject reused skills', () => {
-        cy.visit('/administrator');
-        cy.get('[data-cy="projCard_proj1_manageBtn"]')
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-
-        cy.visit('/administrator/projects/proj1');
-        cy.get('[data-cy="manageBtn_subj1"]')
-        cy.get('[data-cy="projectLastReportedSkill"]')
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    });
-
-    it('Edit Project - clicking on a description label puts focus in the description input', () => {
-        cy.visit('/administrator');
-        cy.get('[data-cy="projCard_proj1_manageBtn"]')
-        cy.get('[data-cy="newProjectButton"]').click()
-        cy.get('[data-cy="projectName"]').should('have.focus')
-        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents')
-        cy.get('[data-cy="markdownEditorLabel"]').contains('Description').click()
-        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents').should('have.focus')
-    });
-
-    it('project - new subject modal', () => {
-        cy.visit('/administrator/projects/proj1');
-
-        cy.get('[data-cy="btn_Subjects"]').click();
-        cy.get('[data-cy=subjectName]').type('a');
-        cy.get('[data-cy="markdownEditorInput"]')
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    });
-
-    it('project - badges page', () => {
-        cy.visit('/administrator/projects/proj1/badges');
-        cy.get('[data-cy="manageBtn_badge1"]')
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    });
-
-    it('project - new badge modal', () => {
-        cy.visit('/administrator/projects/proj1/badges');
-        cy.get('[data-cy="btn_Badges"]').click()
-        cy.get('[data-cy=name').type('a');
-        cy.get('[data-cy="markdownEditorInput"]')
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    });
-
-    it('project - self-report page', () => {
-        cy.visit('/administrator/projects/proj1/self-report');
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should("have.text", '3')
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-
-
-        // looks like AXE and PrimeVue lib disagree where `aria-selected="true"` can be applied
-        // TODO: not really an issue but look into this further so this validation can be added back
-        // cy.get('[data-pc-name="headercheckbox"]').click();
-        // cy.get('[data-cy="rejectBtn"]').click();
-        // cy.get('[data-cy="rejectionTitle"]').contains('This will reject user\'s request(s) to get points');
-        // cy.wait(500); // wait for modal to continue loading, if background doesn't load the contract checks will fail
-        // cy.customA11y();
-    });
-
-    it('project - Deps page', () => {
-        cy.visit('/administrator/projects/proj1/learning-path');
-        cy.contains('Legend');
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    });
-
-    it('project - levels', () => {
-        cy.visit('/administrator/projects/proj1/levels');
-        cy.get('[data-cy="levelsTable"]')
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    });
-
-    it('project - users', () => {
-        cy.visit('/administrator/projects/proj1/users');
-        cy.get('[data-cy="pageHeader"]').contains('ID: proj1');
-        cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '6');
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    });
-
-    it('project - metrics', () => {
-        cy.visit('/administrator/projects/proj1/metrics');
-        cy.get('[data-cy="card-header"]').contains('Users per day');
-        cy.get('[data-cy="distinctNumUsersOverTime"]').contains('This chart needs at least 2 days of user activity.');
-        cy.get('[data-cy="projectLastReportedSkillValue"]')
-        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '4')
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    });
-
-    it('project - achievements metrics', () => {
-        cy.visit('/administrator/projects/proj1/metrics/achievements');
-        cy.contains('Level 2: 1 users');
-        cy.contains('Level 1: 5 users');
-
-        const headerSelector = `[data-cy="achievementsNavigator"] thead tr th`;
-        cy.get(headerSelector)
-            .contains('Username')
-            .click();
-        cy.get('[data-cy=achievementsNavigator-table]')
-            .contains('u1');
-        cy.wait(2000); // wait for charts to finish loading
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    })
-
-    it('project - subject metrics', () => {
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
-
-        cy.get('[data-cy="Subjects-metrics-link"]')
-            .click();
-        cy.contains('Number of users for each level over time');
-        cy.wait(4000); // wait for charts to finish loading
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-
-    });
-
-    it('project - skills metrics', () => {
-        cy.visit('/administrator/projects/proj1/metrics/skills');
-        cy.get('[data-cy="skillsNavigator-table"] [data-cy="skillsBTableTotalRows"]').should('have.text', '4')
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    });
-
-    it('project - access page', () => {
-        cy.visit('/administrator/projects/proj1/access');
-
-        const tableSelector = '[data-cy="roleManagerTable"]';
-        cy.get(`${tableSelector} tbody tr`).should('have.length', 1);
-        cy.get('[data-cy="trusted-client-props-panel"]').contains('proj1')
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    });
-
-    it('project - settings page', () => {
-        cy.visit('/administrator/projects/proj1/settings');
-
-        cy.get('[data-cy="helpUrlHostTextInput"]')
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    });
-
-    it('project - issues page', () => {
-        cy.visit('/administrator/projects/proj1/issues');
-
-        cy.get('[data-cy="projectErrorsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '3')
-
-        cy.customLighthouse();
-        cy.injectAxe();
-        cy.customA11y()
-    });
-
-
-    it('create restricted community project', () => {
-        cy.intercept('GET', '/public/config', (req) => {
-            req.reply((res) => {
-                const conf = res.body;
-                conf.userCommunityDocsLabel = 'User Community Docs';
-                conf.userCommunityDocsLink = 'https://somedocs.com';
-                res.send(conf);
-            });
-        })
-
-        const allDragonsUser = 'allDragons@email.org'
-        cy.fixture('vars.json').then((vars) => {
-            cy.logout();
-            cy.login(vars.rootUser, vars.defaultPass, true);
-            cy.request('POST', `/root/users/${vars.rootUser}/tags/dragons`, { tags: ['DivineDragon'] });
-            cy.request('POST', `/root/users/${vars.defaultUser}/tags/dragons`, { tags: ['DivineDragon'] });
-            cy.logout();
-
-            cy.register(allDragonsUser, vars.defaultPass);
-            cy.logout();
-
-            cy.login(vars.defaultUser, vars.defaultPass);
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y()
         });
 
-        cy.visit('/administrator')
-        cy.get('[data-cy="inception-button"]').contains('Level');
-        cy.get('[data-cy="newProjectButton"]').click()
-        cy.injectAxe();
-        cy.get('[data-cy="projectName"]').type('one')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="userCommunityDocsLink"] a').contains( 'User Community Docs')
+        it(`project and subject reused skills${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator');
+            cy.get('[data-cy="projCard_proj1_manageBtn"]')
 
-        cy.customLighthouse();
-        cy.customA11y()
-    });
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y()
 
+            cy.visit('/administrator/projects/proj1');
+            cy.get('[data-cy="manageBtn_subj1"]')
+            cy.get('[data-cy="projectLastReportedSkill"]')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y()
+        });
+
+        it(`Edit Project - clicking on a description label puts focus in the description input${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator');
+            cy.get('[data-cy="projCard_proj1_manageBtn"]')
+            cy.get('[data-cy="newProjectButton"]').click()
+            cy.get('[data-cy="projectName"]').should('have.focus')
+            cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents')
+            cy.get('[data-cy="markdownEditorLabel"]').contains('Description').click()
+            cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents').should('have.focus')
+        });
+
+        it(`project - new subject modal${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/proj1');
+
+            cy.get('[data-cy="btn_Subjects"]').click();
+            cy.get('[data-cy=subjectName]').type('a');
+            cy.get('[data-cy="markdownEditorInput"]')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y()
+        });
+
+        it(`project - self-report page${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/proj1/self-report');
+            cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should("have.text", '3')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y()
+
+
+            // looks like AXE and PrimeVue lib disagree where `aria-selected="true"` can be applied
+            // TODO: not really an issue but look into this further so this validation can be added back
+            // cy.get('[data-pc-name="headercheckbox"]').click();
+            // cy.get('[data-cy="rejectBtn"]').click();
+            // cy.get('[data-cy="rejectionTitle"]').contains('This will reject user\'s request(s) to get points');
+            // cy.wait(500); // wait for modal to continue loading, if background doesn't load the contract checks will fail
+            // cy.customA11y();
+        });
+
+        it(`project - learning path${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/proj1/learning-path');
+            cy.contains('Legend');
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y()
+        });
+
+        it(`project - levels${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/proj1/levels');
+            cy.get('[data-cy="levelsTable"]')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y()
+        });
+
+        it(`project - users${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/proj1/users');
+            cy.get('[data-cy="pageHeader"]').contains('ID: proj1');
+            cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '6');
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y()
+        });
+
+        it(`project - access page${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/proj1/access');
+
+            const tableSelector = '[data-cy="roleManagerTable"]';
+            cy.get(`${tableSelector} tbody tr`).should('have.length', 1);
+            cy.get('[data-cy="trusted-client-props-panel"]').contains('proj1')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y()
+        });
+
+        it(`project - settings page${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/proj1/settings');
+
+            cy.get('[data-cy="helpUrlHostTextInput"]')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y()
+        });
+
+        it(`project - issues page${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/proj1/issues');
+
+            cy.get('[data-cy="projectErrorsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '3')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y()
+        });
+
+        it(`create restricted community project${darkMode}`, () => {
+            cy.intercept('GET', '/public/config', (req) => {
+                req.reply((res) => {
+                    const conf = res.body;
+                    conf.userCommunityDocsLabel = 'User Community Docs';
+                    conf.userCommunityDocsLink = 'https://somedocs.com';
+                    res.send(conf);
+                });
+            })
+
+            const allDragonsUser = 'allDragons@email.org'
+            cy.fixture('vars.json').then((vars) => {
+                cy.logout();
+                cy.login(vars.rootUser, vars.defaultPass, true);
+                cy.request('POST', `/root/users/${vars.rootUser}/tags/dragons`, { tags: ['DivineDragon'] });
+                cy.request('POST', `/root/users/${vars.defaultUser}/tags/dragons`, { tags: ['DivineDragon'] });
+                cy.logout();
+
+                cy.register(allDragonsUser, vars.defaultPass);
+                cy.logout();
+
+                cy.login(vars.defaultUser, vars.defaultPass);
+            });
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator')
+            cy.get('[data-cy="inception-button"]').contains('Level');
+            cy.get('[data-cy="newProjectButton"]').click()
+            cy.injectAxe();
+            cy.get('[data-cy="projectName"]').type('one')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.get('[data-cy="userCommunityDocsLink"] a').contains('User Community Docs')
+
+            cy.customLighthouse();
+            cy.customA11y()
+        });
+    })
 });
