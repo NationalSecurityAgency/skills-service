@@ -582,7 +582,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains( '150')
     });
 
-    it.only('subset of randomized questions is consistent on refresh', () => {
+    it('subset of randomized questions is consistent on refresh', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1);
         cy.createQuizQuestionDef(1, 2);
