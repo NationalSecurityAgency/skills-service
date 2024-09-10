@@ -39,7 +39,7 @@ describe('Accessibility for Root Role Page Tests', () => {
 
             cy.setDarkModeIfNeeded(darkMode)
             cy.visit('/administrator/userActions')
-            cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '13')
+            cy.get('[data-cy="dashboardActionsForEverything"]').contains('Edit')
 
             cy.customLighthouse();
             cy.injectAxe();

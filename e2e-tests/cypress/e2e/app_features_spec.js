@@ -52,7 +52,7 @@ describe('App Features Tests', () => {
 
         cy.contains(upgradeMsg);
 
-        cy.contains('Here')
+        cy.get('[data-cy="newSoftwareVersionReload"]')
             .click();
         cy.contains(upgradeMsg)
             .should('not.exist');
