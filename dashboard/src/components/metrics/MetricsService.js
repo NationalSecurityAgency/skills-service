@@ -48,4 +48,8 @@ export default {
     const url = buildUrl(`/admin/projects/${encodeURIComponent(projectId)}/achievements/export/excel`, params);
     return exportUtil.ajaxDownload(url)
   },
+  exportProjectSkillsMetrics(projectId = {}) {
+    const url = buildUrl(`/admin/projects/${encodeURIComponent(projectId)}/skills/export/excel`);
+    return exportUtil.ajaxDownload(url)
+  },
 };

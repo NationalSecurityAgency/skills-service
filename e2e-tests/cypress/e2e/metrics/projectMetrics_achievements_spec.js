@@ -202,7 +202,6 @@ describe('Metrics Tests - Achievements', () => {
         cy.readFile(exportedFileName).should('not.exist');
         cy.get('[data-cy="exportAchievementsTableBtn"]').click();
         cy.readFile(exportedFileName).should('exist');
-
     });
 
     it('achievements table - validate the link to user client display', () => {

@@ -191,6 +191,9 @@ class AdminController {
     @Autowired
     UserAchievementsMetricsBuilder userAchievementsMetricsBuilder
 
+    @Autowired
+    SkillMetricsExportResult skillMetricsExportResult
+
     @Value('#{"${skills.config.ui.maxSkillsInBulkImport}"}')
     int maxBulkImport
 
@@ -1053,7 +1056,17 @@ class AdminController {
         ModelAndView mav = new ModelAndView(userAchievementsExportResult);
         mav.addObject(UserAchievementsExportResult.PROJECT_ID, projectId)
         mav.addObject(UserAchievementsExportResult.QUERY_PARAMS, queryParams)
-        return mav;
+        return mav
+    }
+
+    @GetMapping(value = "/projects/{projectId}/skills/export/excel")
+    @CompileStatic
+    ModelAndView exportProjectSkillsMetrics(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+
+        ModelAndView mav = new ModelAndView(skillMetricsExportResult);
+        mav.addObject(UserProgressExportResult.PROJECT_ID, projectId)
+        return mav
     }
 
     @GetMapping(value="/projects/{projectId}/{userId}/canAccess", produces='application/json')

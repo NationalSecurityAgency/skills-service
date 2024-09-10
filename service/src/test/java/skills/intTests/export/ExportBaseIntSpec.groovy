@@ -66,7 +66,7 @@ class ExportBaseIntSpec extends DefaultIntSpec {
         users = new ArrayList<>(getRandomUsers(4))
     }
 
-    void validateExport(File file, List<List<String>> data) {
+    protected void validateExport(File file, List<List<String>> data) {
         assert file.exists()
         assert data
         Workbook workbook = WorkbookFactory.create(file)
@@ -81,7 +81,7 @@ class ExportBaseIntSpec extends DefaultIntSpec {
         }
     }
 
-    void validateSortAchievedOn(File file, String firstDate, String lastDate) {
+    protected void validateSortAchievedOn(File file, String firstDate, String lastDate) {
         assert file.exists()
         assert firstDate
         assert lastDate
@@ -94,7 +94,7 @@ class ExportBaseIntSpec extends DefaultIntSpec {
 
     }
 
-    void validateHeaderAndFooter(File file, String header) {
+    protected void validateHeaderAndFooter(File file, String header) {
         assert file.exists()
         assert header
         Workbook workbook = WorkbookFactory.create(file)
@@ -105,11 +105,11 @@ class ExportBaseIntSpec extends DefaultIntSpec {
         assert lastRow.getCell(0).toString() == header
     }
 
-    String getUserIdForDisplay(String userId) {
+    protected String getUserIdForDisplay(String userId) {
         return isPkiMode ? "${mockUserInfoService.getUserIdWithCase(userId)} for display" : userId
     }
 
-    String getName(String userId, firstName = true) {
+    protected String getName(String userId, firstName = true) {
         if (!isPkiMode) {
             return firstName ? "${userId.toUpperCase()}_first" : "${userId.toUpperCase()}_last"
         } else {
@@ -118,7 +118,7 @@ class ExportBaseIntSpec extends DefaultIntSpec {
         }
 
     }
-    private void achieveLevelForUsers(List<String> users, List<Map> skills, int numUsers, int level, String type = "Overall") {
+    protected void achieveLevelForUsers(List<String> users, List<Map> skills, int numUsers, int level, String type = "Overall") {
         List<String> usersToUse = (1..numUsers).collect({
             String user = users.pop()
             assert user
@@ -131,7 +131,7 @@ class ExportBaseIntSpec extends DefaultIntSpec {
         }
     }
 
-    private void achieveLevel(List<Map> skills, String user, int userIndex, int level, String type = "Overall") {
+    protected void achieveLevel(List<Map> skills, String user, int userIndex, int level, String type = "Overall") {
         use(TimeCategory) {
             boolean found = false
             int skillIndex = 0

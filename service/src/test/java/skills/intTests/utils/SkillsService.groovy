@@ -1029,8 +1029,10 @@ class SkillsService {
     }
 
     def getUserAchievementsExcelExport(String projectId, Map params=null) {
-//    String url = "${skillsService}/${type}${endpoint}${getUrlFromParams(params)}"
         return downloadAttachment("/admin${getProjectUrl(projectId)}/achievements/export/excel".toString(), params)
+    }
+    def getSkillMetricsExcelExport(String projectId) {
+        return downloadAttachment("/admin${getProjectUrl(projectId)}/skills/export/excel".toString())
     }
 
     def getSubjectUsers(String projectId, String subjectId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0) {

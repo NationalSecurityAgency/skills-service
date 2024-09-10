@@ -829,7 +829,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                   and ups.skill_ref_id = case when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref else skill.id end
                 group by skill.skill_id
             ) performedSkills
-                on sd.skillId = performedSkills.skill_id
+                on sd.skillId = performedSkills.skill_id order by sd.skillId
            ''', nativeQuery = true)
     List<SkillUsageItem> findAllForSkillsNavigator(@Param("projectId") String projectId)
 
