@@ -478,7 +478,7 @@ limitations under the License.
 </head>
 <body class="overall-container">
 <h1>SkillTree Points <span>Approved!</span></h1>
-<p>Congratulations! Your request for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1?skillsClientDisplayPath=/subjects/TestSubject1/skills/skill1">Test Skill 1</a> skill in the <b>Test Project#1</b> project has been approved!</p>
+<p>Congratulations! Your request for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1/subjects/TestSubject1/skills/skill1">Test Skill 1</a> skill in the <b>Test Project#1</b> project has been approved!</p>
 
 
 <ul>
@@ -696,7 +696,7 @@ limitations under the License.
 <body class="overall-container">
 <h1>SkillTree Points <span>Denied</span></h1>
 
-<p>Your request for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1?skillsClientDisplayPath=/subjects/TestSubject1/skills/skill1">Test Skill 1</a> skill in the <b>Test Project#1</b> project has been denied.</p>
+<p>Your request for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1/subjects/TestSubject1/skills/skill1">Test Skill 1</a> skill in the <b>Test Project#1</b> project has been denied.</p>
 
 <ul>
     <li><span class="label">Project</span>: Test Project#1</li>
@@ -833,7 +833,7 @@ limitations under the License.
 <body class="overall-container">
 <h1>SkillTree Points <span>Denied</span></h1>
 
-<p>Your request for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1?skillsClientDisplayPath=/subjects/TestSubject1/skills/skill1">Test Skill 1</a> skill in the <b>Test Project#1</b> project has been denied.</p>
+<p>Your request for the <a href="http://localhost:{{port}}/progress-and-rankings/projects/TestProject1/subjects/TestSubject1/skills/skill1">Test Skill 1</a> skill in the <b>Test Project#1</b> project has been denied.</p>
 
 <ul>
     <li><span class="label">Project</span>: Test Project#1</li>

@@ -29,8 +29,8 @@ limitations under the License.
 <body class="overall-container">
 <div th:remove="tag" th:utext="${htmlHeader}" th:if= "${htmlHeader != null}">[[${htmlHeader}]]</div>
 <h1>SkillTree Points <span th:text="${approved} ? 'Approved!' : 'Denied'"></span></h1>
-<p th:if="${approved}">Congratulations! Your request for the <a th:href="@{${publicUrl}+'progress-and-rankings/projects/'+${projectId}+'?skillsClientDisplayPath=/subjects/'+${subjectId}+'/skills/'+${skillId}}">[[${skillName}]]</a> skill in the <b>[[${projectName}]]</b> project has been approved!</p>
-<p th:if="${!approved}">Your request for the <a th:href="@{${publicUrl}+'progress-and-rankings/projects/'+${projectId}+'?skillsClientDisplayPath=/subjects/'+${subjectId}+'/skills/'+${skillId}}">[[${skillName}]]</a> skill in the <b>[[${projectName}]]</b> project has been denied.</p>
+<p th:if="${approved}">Congratulations! Your request for the <a th:href="@{${publicUrl}+'progress-and-rankings/projects/'+${projectId}+'/subjects/'+${subjectId}+'/skills/'+${skillId}}">[[${skillName}]]</a> skill in the <b>[[${projectName}]]</b> project has been approved!</p>
+<p th:if="${!approved}">Your request for the <a th:href="@{${publicUrl}+'progress-and-rankings/projects/'+${projectId}+'/subjects/'+${subjectId}+'/skills/'+${skillId}}">[[${skillName}]]</a> skill in the <b>[[${projectName}]]</b> project has been denied.</p>
 
 <ul>
     <li><span class="label">Project</span>: [[${projectName}]]</li>
