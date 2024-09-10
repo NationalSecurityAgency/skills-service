@@ -39,12 +39,14 @@ const genLink = (b) => {
 const addTagFilter = (tag) => {
   emit('add-tag-filter', tag)
 }
+
+const hasBadges = computed(() => props.skill.badges && props.skill.badges.length > 0 && skillsDisplayInfo.isSubjectPage.value)
+const hasTags = computed(()=> props.skill.tags && props.skill.tags.length > 0)
 </script>
 
 <template>
-  <div v-if="showBadgesAndTagsRow" class="row" style="padding-top:8px;">
-    <div v-if="skill.badges && skill.badges.length > 0 && skillsDisplayInfo.isSubjectPage.value" class="col-auto pr-0" style="font-size: 0.9rem"
-         data-cy="skillBadges">
+  <div v-if="showBadgesAndTagsRow" class="row pt-1">
+    <div v-if="hasBadges" class="col-auto pr-0" data-cy="skillBadges">
       <i class="fa fa-award text-purple-500" aria-hidden="true"></i> Badges:
       <span v-for="(badge, index) in skill.badges" :data-cy="`skillBadge-${index}`" class="overflow-hidden"
             v-bind:key="badge.badgeId">
@@ -53,7 +55,7 @@ const addTagFilter = (tag) => {
               <span v-if="index != (skill.badges.length - 1)">, </span>
             </span>
     </div>
-    <div v-if="skill.tags && skill.tags.length > 0" data-cy="skillTags">
+    <div v-if="hasTags" data-cy="skillTags" :class="{ 'mt-2': hasBadges }">
       <Chip v-for="(tag, index) in skill.tags"
             :data-cy="`skillTag-${index}`"
             v-bind:key="tag.tagId"
