@@ -32,6 +32,7 @@ import SkillAlreadyExistingWarning from '@/components/skills/catalog/SkillAlread
 import { useFinalizeInfoState } from '@/stores/UseFinalizeInfoState.js'
 import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const model = defineModel()
 const props = defineProps({
@@ -46,6 +47,7 @@ const responsive = useResponsiveBreakpoints()
 const subjectState = useSubjectsState()
 const skillsState = useSubjectSkillsState()
 const finalizeState = useFinalizeInfoState()
+const numberFormat = useNumberFormat()
 
 const initialLoad = ref(true)
 const reloadData = ref(false)
@@ -369,7 +371,7 @@ const onUpdateVisible = (newVal) => {
           </Column>
 
           <template #paginatorstart>
-            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
           </template>
           <template #expansion="slotProps">
             <skill-to-import-info :skill="slotProps.data" />

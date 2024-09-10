@@ -23,8 +23,10 @@ import InputText from "primevue/inputtext";
 import NumberFormatter from '@/components/utils/NumberFormatter.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import Column from 'primevue/column'
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const route = useRoute();
+const numberFormat = useNumberFormat()
 const responsive = useResponsiveBreakpoints()
 const isFlex = computed(() => responsive.lg.value)
 
@@ -200,7 +202,7 @@ const loadData = () => {
         </Column>
 
         <template #paginatorstart>
-          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ items.length }}</span>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(items.length) }}</span>
         </template>
 
         <template #empty>

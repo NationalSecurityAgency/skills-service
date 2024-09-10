@@ -31,6 +31,7 @@ import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
@@ -39,6 +40,7 @@ const colors = useColors()
 const appConfig = useAppConfig()
 const userInfo = useUserInfo()
 const exportUtil = useExportUtil()
+const numberFormat = useNumberFormat()
 
 let filters = ref({
   user: '',
@@ -327,7 +329,7 @@ const exportUsers = () => {
         </Column>
 
         <template #paginatorstart>
-          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
         </template>
 
         <template #empty>

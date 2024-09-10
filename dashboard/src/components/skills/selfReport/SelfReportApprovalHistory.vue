@@ -24,11 +24,13 @@ import ShowMore from "@/components/skills/selfReport/ShowMore.vue";
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
+const numberFormat = useNumberFormat()
 
 const loading = ref(true);
 const pageSize = ref(5);
@@ -246,7 +248,7 @@ defineExpose( {
         </template>
 
         <template #paginatorstart>
-          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
         </template>
 
         <template #empty>

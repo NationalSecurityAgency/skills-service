@@ -27,8 +27,10 @@ import SkillsDropDown from "@/components/utils/inputForm/SkillsDropDown.vue";
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import Column from 'primevue/column'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const route = useRoute();
+const numberFormat = useNumberFormat()
 const responsive = useResponsiveBreakpoints()
 const isFlex = computed(() => responsive.md.value)
 
@@ -289,7 +291,7 @@ const getQueryParams = () => {
         </Column>
 
         <template #paginatorstart>
-          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
         </template>
 
         <template #empty>

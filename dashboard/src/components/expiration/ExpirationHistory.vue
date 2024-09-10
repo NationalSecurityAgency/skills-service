@@ -14,23 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { FilterMatchMode } from 'primevue/api';
-import { useUserInfo } from '@/components/utils/UseUserInfo.js';
-import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
-import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js';
-import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
-import ExpirationService from '@/components/expiration/ExpirationService.js';
-import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
-import InputText from 'primevue/inputtext';
-import Column from 'primevue/column';
-import DateCell from '@/components/utils/table/DateCell.vue';
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { FilterMatchMode } from 'primevue/api'
+import { useUserInfo } from '@/components/utils/UseUserInfo.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import ExpirationService from '@/components/expiration/ExpirationService.js'
+import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
+import InputText from 'primevue/inputtext'
+import Column from 'primevue/column'
+import DateCell from '@/components/utils/table/DateCell.vue'
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 
 const route = useRoute()
 const userInfo = useUserInfo()
-const announcer = useSkillsAnnouncer()
 const responsive = useResponsiveBreakpoints()
+const numberFormat = useNumberFormat()
 
 const projectId = route.params.projectId;
 const sortInfo = ref({ sortOrder: -1, sortBy: 'userIdForDisplay' })
@@ -162,7 +162,7 @@ const calculateClientDisplayRoute = (props) => {
           v-model:sort-order="sortInfo.sortOrder">
 
         <template #paginatorstart>
-          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
         </template>
 
         <template #empty>
