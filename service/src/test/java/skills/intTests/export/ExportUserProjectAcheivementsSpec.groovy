@@ -16,10 +16,6 @@
 package skills.intTests.export
 
 import groovy.time.TimeCategory
-import org.apache.poi.ss.usermodel.Row
-import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.ss.usermodel.Workbook
-import org.apache.poi.ss.usermodel.WorkbookFactory
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.MockUserInfoService
 import skills.intTests.utils.SkillsService
@@ -217,80 +213,4 @@ class ExportUserProjectAcheivementsSpec extends ExportBaseIntSpec {
         validateExport(excelExportQueryFilter.file, expectedDataForQuery)
     }
 
-    void validateExport(File file, List<List<String>> data) {
-        assert file.exists()
-        assert data
-        Workbook workbook = WorkbookFactory.create(file)
-        Sheet sheet = workbook.getSheetAt(0)
-        assert sheet.getPhysicalNumberOfRows() == data.size()
-
-        data.eachWithIndex { dataRow, rowIndex ->
-            Row row = sheet.getRow(rowIndex)
-            for (int i = 0; i < dataRow.size(); i++) {
-                assert row.getCell(i).toString() == dataRow.get(i)
-            }
-        }
-    }
-
-    void validateSortAchievedOn(File file, String firstDate, String lastDate) {
-        assert file.exists()
-        assert firstDate
-        assert lastDate
-        Workbook workbook = WorkbookFactory.create(file)
-        Sheet sheet = workbook.getSheetAt(0)
-        Row firstDateRow = sheet.getRow(2)
-        Row lastDateRow = sheet.getRow(sheet.getPhysicalNumberOfRows()-2)
-        assert firstDateRow.getCell(7).toString() == firstDate
-        assert lastDateRow.getCell(7).toString() == lastDate
-
-    }
-
-    void validateHeaderAndFooter(File file, String header) {
-        assert file.exists()
-        assert header
-        Workbook workbook = WorkbookFactory.create(file)
-        Sheet sheet = workbook.getSheetAt(0)
-        Row firstRow = sheet.getRow(0)
-        Row lastRow = sheet.getRow(sheet.getPhysicalNumberOfRows()-1)
-        assert firstRow.getCell(0).toString() == header
-        assert lastRow.getCell(0).toString() == header
-    }
-
-    String getUserIdForDisplay(String userId) {
-        return isPkiMode ? "${mockUserInfoService.getUserIdWithCase(userId)} for display" : userId
-    }
-
-    String getName(String userId, firstName = true) {
-        if (!isPkiMode) {
-            return firstName ? "${userId.toUpperCase()}_first" : "${userId.toUpperCase()}_last"
-        } else {
-            MockUserInfoService.FirstnameLastname firstnameLastname = mockUserInfoService.getFirstNameLastnameForUserId(userId)
-            return firstnameLastname ? (firstName ? firstnameLastname.firstname : firstnameLastname.lastname) : 'Fake'
-        }
-
-    }
-    private void achieveLevelForUsers(List<String> users, List<Map> skills, int numUsers, int level, String type = "Overall") {
-        List<String> usersToUse = (1..numUsers).collect({
-            String user = users.pop()
-            assert user
-            return user
-        })
-
-        usersToUse.each { user ->
-            int userIndex = this.users.findIndexOf({ it == user })
-            achieveLevel(skills, user, userIndex, level, type)
-        }
-    }
-
-    private void achieveLevel(List<Map> skills, String user, int userIndex, int level, String type = "Overall") {
-        use(TimeCategory) {
-            boolean found = false
-            int skillIndex = 0
-            while (!found) {
-                def res = skillsService.addSkill([projectId: skills[skillIndex].projectId, skillId: skills[skillIndex].skillId], user, dates[level] + userIndex.hour)
-                found = res.body.completed.findAll({ it.type == type })?.find { it.level == level }
-                skillIndex++
-            }
-        }
-    }
 }

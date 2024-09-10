@@ -17,13 +17,8 @@ package skills.intTests.export
 
 import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
-import org.apache.poi.ss.usermodel.Row
-import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.ss.usermodel.Workbook
-import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.springframework.boot.test.context.SpringBootTest
 import skills.SpringBootApp
-import skills.intTests.utils.MockUserInfoService
 import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 
@@ -117,55 +112,45 @@ class ExportWithoutHeaderIT extends ExportBaseIntSpec {
         ])
     }
 
-    void validateExport(File file, List<List<String>> data) {
-        assert file.exists()
-        assert data
-        Workbook workbook = WorkbookFactory.create(file)
-        Sheet sheet = workbook.getSheetAt(0)
-        assert sheet.getPhysicalNumberOfRows() == data.size()
+    def "export project skill metrics, no headers set"() {
+        List<String> users = getRandomUsers(10)
+        def proj = createProject()
+        def subj = createSubject()
+        List<Map> skills = createSkills(9)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 5 }
 
-        data.eachWithIndex { dataRow, rowIndex ->
-            Row row = sheet.getRow(rowIndex)
-            for (int i = 0; i < dataRow.size(); i++) {
-                assert row.getCell(i).toString() == dataRow.get(i)
-            }
-        }
-    }
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
 
-    String getUserIdForDisplay(String userId) {
-        return isPkiMode ? "${mockUserInfoService.getUserIdWithCase(userId)} for display" : userId
-    }
+        List<Date> days
 
-    String getName(String userId, firstName = true) {
-        if (!isPkiMode) {
-            return firstName ? "${userId.toUpperCase()}_first" : "${userId.toUpperCase()}_last"
-        } else {
-            MockUserInfoService.FirstnameLastname firstnameLastname = mockUserInfoService.getFirstNameLastnameForUserId(userId)
-            return firstnameLastname ? (firstName ? firstnameLastname.firstname : firstnameLastname.lastname) : 'Fake'
-        }
-    }
-    private void achieveLevelForUsers(List<String> users, List<Map> skills, int numUsers, int level, String type = "Overall") {
-        List<String> usersToUse = (1..numUsers).collect({
-            String user = users.pop()
-            assert user
-            return user
-        })
-
-        usersToUse.each { user ->
-            int userIndex = this.users.findIndexOf({ it == user })
-            achieveLevel(skills, user, userIndex, level, type)
-        }
-    }
-
-    private void achieveLevel(List<Map> skills, String user, int userIndex, int level, String type = "Overall") {
         use(TimeCategory) {
-            boolean found = false
-            int skillIndex = 0
-            while (!found) {
-                def res = skillsService.addSkill([projectId: skills[skillIndex].projectId, skillId: skills[skillIndex].skillId], user, dates[level] + userIndex.hour)
-                found = res.body.completed.findAll({ it.type == type })?.find { it.level == level }
-                skillIndex++
+            days = (5..0).collect { int day -> day.days.ago }
+            days.eachWithIndex { Date date, int index ->
+                users.subList(0, index).each { String user ->
+                    skills.subList(0, index).each { skill ->
+                        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                    }
+                }
             }
         }
+
+        when:
+        def excelExport = skillsService.getSkillMetricsExcelExport(proj.projectId)
+
+        then:
+        validateExport(excelExport.file, [
+                ["Skill Name", "Skill ID", "# Users Achieved", "# Users In Progress", "Date Last Reported", "Date Last Achieved"],
+                ["Test Skill 1", "skill1", "1.0", "4.0",  today.format("dd-MMM-yyyy"), today.format("dd-MMM-yyyy")],
+                ["Test Skill 2", "skill2", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
+                ["Test Skill 3", "skill3", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
+                ["Test Skill 4", "skill4", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
+                ["Test Skill 5", "skill5", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
+                ["Test Skill 6", "skill6", "0.0", "0.0",  "", ""],
+                ["Test Skill 7", "skill7", "0.0", "0.0",  "", ""],
+                ["Test Skill 8", "skill8", "0.0", "0.0",  "", ""],
+                ["Test Skill 9", "skill9", "0.0", "0.0",  "", ""],
+        ])
     }
 }

@@ -43,6 +43,7 @@ const filters = ref({
   skillTags: [],
 });
 const loading = ref(false);
+const isExporting = ref(false)
 
 const pageSize = 5;
 const possiblePageSizes = [5, 10, 15, 20, 50];
@@ -81,6 +82,19 @@ const loadData = () => {
         loading.value = false;
       });
 };
+
+const exportSkills = () => {
+  console.log('exportSkills');
+  loading.value = true;
+  isExporting.value = true;
+  MetricsService.exportProjectSkillsMetrics(route.params.projectId)
+      .then((dataFromServer) => {
+        isExporting.value = false;
+        loading.value = false;
+      });
+}
+
+const totalRows = computed(() => items.value.length);
 </script>
 
 <template>
@@ -118,7 +132,7 @@ const loadData = () => {
             </div>
           </div>
         </div>
-        <div class="flex flex-1 flex-column gap-2 px-3" v-if="tags.length > 0">
+        <div class="flex flex-1 flex-column gap-2 px-3 pb-3" v-if="tags.length > 0">
           <label>Skill Tags</label>
           <div class="flex gap-2" data-cy="skillTag-filters">
             <div v-for="tag in tags" :key="tag.tagId">
@@ -146,6 +160,22 @@ const loadData = () => {
                        striped-rows
                        :rows="pageSize"
                        :rowsPerPageOptions="possiblePageSizes">
+        <template #loading>
+￼          <div>
+￼            <Message v-if="isExporting" icon="fas fa-download" severity="contrast" :closable="false">Exporting, please wait...</Message>
+￼            <SkillsSpinner :is-loading="true"></SkillsSpinner>
+￼          </div>
+        </template>
+        <template #header>
+          <div class="flex justify-content-end flex-wrap">
+            <SkillsButton :disabled="totalRows <= 0"
+                          size="small"
+                          icon="fas fa-download"
+                          label="Export All Rows"
+                          @click="exportSkills"
+                          data-cy="exportSkillsTableBtn" />
+          </div>
+        </template>
         <Column field="skillName" header="Skill" sortable :class="{'flex': isFlex }">
           <template #body="slotProps">
             <div class="flex gap-2 flex-wrap">

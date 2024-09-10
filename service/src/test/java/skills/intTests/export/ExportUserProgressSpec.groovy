@@ -15,12 +15,7 @@
  */
 package skills.intTests.export
 
-import org.apache.poi.ss.usermodel.Row
-import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.ss.usermodel.Workbook
-import org.apache.poi.ss.usermodel.WorkbookFactory
-import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.MockUserInfoService
+
 import skills.intTests.utils.SkillsService
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -269,34 +264,5 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
         validateExport(excelExportSortPointsDesc.file, expectedDataForSortDesc)
         validateExport(excelExportQueryFilter.file, expectedDataForQuery)
         validateExport(excelExportMinPointsFilter.file, expectedDataForMinPointsFilter)
-    }
-
-    void validateExport(File file, List<List<String>> data) {
-        assert file.exists()
-        assert data
-        Workbook workbook = WorkbookFactory.create(file)
-        Sheet sheet = workbook.getSheetAt(0)
-        assert sheet.getPhysicalNumberOfRows() == data.size()
-
-        data.eachWithIndex { dataRow, rowIndex ->
-            Row row = sheet.getRow(rowIndex)
-            for (int i = 0; i < dataRow.size(); i++) {
-                assert row.getCell(i).toString() == dataRow.get(i)
-            }
-        }
-    }
-
-    String getUserIdForDisplay(String userId) {
-        return isPkiMode ? "${mockUserInfoService.getUserIdWithCase(userId)} for display" : userId
-    }
-
-    String getName(String userId, firstName = true) {
-        if (!isPkiMode) {
-            return firstName ? "${userId.toUpperCase()}_first" : "${userId.toUpperCase()}_last"
-        } else {
-            MockUserInfoService.FirstnameLastname firstnameLastname = mockUserInfoService.getFirstNameLastnameForUserId(userId)
-            return firstnameLastname ? (firstName ? firstnameLastname.firstname : firstnameLastname.lastname) : 'Fake'
-        }
-
     }
 }

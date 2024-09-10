@@ -28,7 +28,9 @@ import skills.controller.result.model.UserProgressExportResult
 import skills.metrics.builders.project.UserAchievementsMetricsBuilder
 import skills.metrics.builders.project.UserAchievementsMetricsBuilder.QueryParams
 import skills.services.admin.UserCommunityService
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.storage.repos.UserAchievedLevelRepo
+import skills.utils.InputSanitizer
 
 import java.util.stream.Stream
 
@@ -155,7 +157,43 @@ class ExcelExportService {
         }
     }
 
-    private Integer initializeSheet(Sheet sheet, List<String> headers, String projectExportHeaderAndFooter) {
+    @Transactional(readOnly = true)
+    void exportSkillMetrics(Workbook workbook, String projectId) {
+        String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getProjectUserCommunity(projectId))
+        Sheet sheet = workbook.createSheet()
+        List<String> headers = ["Skill Name", "Skill ID", "# Users Achieved", "# Users In Progress", "Date Last Reported", "Date Last Achieved"]
+        Integer columnNumber = 0
+        Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
+
+        CellStyle dateStyle = workbook.createCellStyle()
+        dateStyle.setDataFormat((short) 14) // NOTE: 14 = "mm/dd/yyyy"
+
+        Cell cell = null
+        List<UserAchievedLevelRepo.SkillUsageItem> skillUsageItems = userAchievedRepo.findAllForSkillsNavigator(projectId)
+        skillUsageItems?.each { UserAchievedLevelRepo.SkillUsageItem skillUsageItem ->
+            Integer numAchieved = skillUsageItem.getNumUserAchieved() ?: 0
+            Integer numProgress = skillUsageItem.getNumUsersInProgress() ?: 0
+            columnNumber = 0
+            Row row = sheet.createRow(rowNum++)
+            row.createCell(columnNumber++).setCellValue(SkillReuseIdUtil.removeTag(InputSanitizer.unsanitizeName(skillUsageItem.skillName)))
+            row.createCell(columnNumber++).setCellValue(skillUsageItem.skillId)
+            row.createCell(columnNumber++).setCellValue(numAchieved)
+            row.createCell(columnNumber++).setCellValue(numProgress - numAchieved)
+
+            cell = row.createCell(columnNumber++)
+            cell.setCellStyle(dateStyle)
+            cell.setCellValue(skillUsageItem.lastReported)
+
+            cell = row.createCell(columnNumber++)
+            cell.setCellStyle(dateStyle)
+            cell.setCellValue(skillUsageItem.lastAchieved)
+        }
+        if (projectExportHeaderAndFooter) {
+            addDataHeaderOrFooter(sheet, rowNum++,  headers.size(), projectExportHeaderAndFooter)
+        }
+    }
+
+    private static Integer initializeSheet(Sheet sheet, List<String> headers, String projectExportHeaderAndFooter) {
         Integer rowNum = 0
         Integer columnNumber = 0
         if (projectExportHeaderAndFooter) {
