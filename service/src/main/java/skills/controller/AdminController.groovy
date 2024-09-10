@@ -36,6 +36,8 @@ import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
 import skills.controller.result.model.*
 import skills.dbupgrade.DBUpgradeSafe
+import skills.metrics.builders.MetricsPagingParamsHelper
+import skills.metrics.builders.project.UserAchievementsMetricsBuilder
 import skills.services.*
 import skills.services.admin.*
 import skills.services.admin.moveSkills.SkillsMoveService
@@ -182,6 +184,12 @@ class AdminController {
 
     @Autowired
     UserProgressExportResult userProgressExportResult
+
+    @Autowired
+    UserAchievementsExportResult userAchievementsExportResult
+
+    @Autowired
+    UserAchievementsMetricsBuilder userAchievementsMetricsBuilder
 
     @Value('#{"${skills.config.ui.maxSkillsInBulkImport}"}')
     int maxBulkImport
@@ -1031,6 +1039,20 @@ class AdminController {
         mav.addObject(UserProgressExportResult.QUERY, query)
         mav.addObject(UserProgressExportResult.MINIMUM_POINTS, minimumPoints)
         mav.addObject(UserProgressExportResult.PAGE_REQUEST, pageRequest)
+        return mav;
+    }
+
+    @GetMapping(value = "/projects/{projectId}/achievements/export/excel")
+    @CompileStatic
+    ModelAndView exportProjectUserAchievements(@PathVariable("projectId") String projectId,
+                                               @RequestParam Map<String,String> metricsProps) {
+
+        metricsProps.put(MetricsPagingParamsHelper.PROP_CURRENT_PAGE, 1.toString())
+        metricsProps.put(MetricsPagingParamsHelper.PROP_PAGE_SIZE, Integer.MAX_VALUE.toString())
+        UserAchievementsMetricsBuilder.QueryParams queryParams = userAchievementsMetricsBuilder.getQueryParams(projectId, userAchievementsMetricsBuilder.getId(), metricsProps, false)
+        ModelAndView mav = new ModelAndView(userAchievementsExportResult);
+        mav.addObject(UserAchievementsExportResult.PROJECT_ID, projectId)
+        mav.addObject(UserAchievementsExportResult.QUERY_PARAMS, queryParams)
         return mav;
     }
 

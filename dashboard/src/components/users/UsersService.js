@@ -21,32 +21,6 @@ export default {
     return axios.get(url, { params }).then((response) => response.data)
   },
 
-  ajaxDownload(url, params) {
-    return axios.get(url, { params, responseType: 'blob' }).then((response) => {
-      // response.data
-      // create file link in browser's memory
-      const href = URL.createObjectURL(response.data);
-
-      // create "a" HTML element with href to file & click
-      const link = document.createElement('a');
-      link.href = href;
-      let filename = "";
-      const disposition = response.headers['content-disposition']
-      if (disposition && disposition.indexOf('attachment') !== -1) {
-        const filenameRegex = /fileName[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-        const matches = filenameRegex.exec(disposition);
-        if (matches != null && matches[1]) {
-          filename = matches[1].replace(/['"]/g, '');
-        }
-      }
-      link.setAttribute('download', filename); //or any other extension
-      link.click();
-
-      // remove ObjectURL
-      URL.revokeObjectURL(href);
-    })
-  },
-
   getUserSkillsMetrics(projectId, userId) {
     return axios
       .get(

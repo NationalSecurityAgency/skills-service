@@ -25,24 +25,7 @@ import skills.intTests.utils.SkillsService
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class ExportUserProgressSpec extends DefaultIntSpec {
-    String ultimateRoot = 'jh@dojo.com'
-    SkillsService rootSkillsService
-
-    Date today = new Date()
-    Date oneDayAgo = new Date()-1
-    Date fiveDaysAgo = new Date()-5
-    Date tenDaysAgo = new Date()-10
-
-    private Boolean isPkiMode = false;
-    
-    def setup() {
-        rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-        if (!rootSkillsService.isRoot()) {
-            rootSkillsService.grantRoot()
-        }
-        isPkiMode = mockUserInfoService != null
-    }
+class ExportUserProgressSpec extends ExportBaseIntSpec {
 
     def "export users progress"() {
         def project = createProject()
@@ -66,10 +49,10 @@ class ExportUserProgressSpec extends DefaultIntSpec {
         skillsService.addSkill(skill1, user2, today)
         skillsService.addSkill(skill2, user2, today)
 
-        def excelExport = skillsService.getProjectUsersExcelExport(project.projectId)
+        def excelExport = skillsService.getUserProgressExcelExport(project.projectId)
         skillsService.deleteSkill(skill1)
 
-        def excelExportAfterDelete = skillsService.getProjectUsersExcelExport(project.projectId)
+        def excelExportAfterDelete = skillsService.getUserProgressExcelExport(project.projectId)
 
 
         then:
@@ -137,7 +120,7 @@ class ExportUserProgressSpec extends DefaultIntSpec {
         }
 
         when:
-        def excelExport = skillsService.getProjectUsersExcelExport(p2.projectId)
+        def excelExport = skillsService.getUserProgressExcelExport(p2.projectId)
 
         then:
         validateExport(excelExport.file, [
@@ -176,7 +159,7 @@ class ExportUserProgressSpec extends DefaultIntSpec {
         pristineDragonsUser.addSkill(skill1, user2, today)
         pristineDragonsUser.addSkill(skill2, user2, today)
 
-        def excelExport = pristineDragonsUser.getProjectUsersExcelExport(project.projectId)
+        def excelExport = pristineDragonsUser.getUserProgressExcelExport(project.projectId)
 
         then:
         validateExport(excelExport.file, [
@@ -239,10 +222,10 @@ class ExportUserProgressSpec extends DefaultIntSpec {
 
         when:
         boolean ascending = true
-        def excelExportSortPointsAsc = skillsService.getProjectUsersExcelExport(p2.projectId)
-        def excelExportSortPointsDesc = skillsService.getProjectUsersExcelExport(p2.projectId, 'totalPoints', !ascending)
-        def excelExportQueryFilter = skillsService.getProjectUsersExcelExport(p2.projectId, 'totalPoints', ascending, users[0])
-        def excelExportMinPointsFilter = skillsService.getProjectUsersExcelExport(p2.projectId, 'totalPoints', ascending, "", 50)
+        def excelExportSortPointsAsc = skillsService.getUserProgressExcelExport(p2.projectId)
+        def excelExportSortPointsDesc = skillsService.getUserProgressExcelExport(p2.projectId, 'totalPoints', !ascending)
+        def excelExportQueryFilter = skillsService.getUserProgressExcelExport(p2.projectId, 'totalPoints', ascending, users[0])
+        def excelExportMinPointsFilter = skillsService.getUserProgressExcelExport(p2.projectId, 'totalPoints', ascending, "", 50)
 
         List<List<String>> expectedDataForSortAsc = [
                 ["For All Dragons Only"],

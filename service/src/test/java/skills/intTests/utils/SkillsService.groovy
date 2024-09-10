@@ -22,11 +22,11 @@ import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.util.StreamUtils
+import org.springframework.web.bind.annotation.GetMapping
 import skills.controller.request.model.ActionPatchRequest
 import skills.services.settings.Settings
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
-import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 
 @Slf4j
@@ -937,8 +937,8 @@ class SkillsService {
         HttpHeaders headers
     }
 
-    FileAndHeaders downloadAttachment(String downloadUrl) {
-        ResponseEntity<Resource> responseEntity = wsHelper.getResource(downloadUrl)
+    FileAndHeaders downloadAttachment(String downloadUrl, Map params=null) {
+        ResponseEntity<Resource> responseEntity = wsHelper.getResource(downloadUrl, params)
         File file = File.createTempFile('download', 'tmp')
         StreamUtils.copy(responseEntity.getBody().getInputStream(), new FileOutputStream(file))
         return new FileAndHeaders(file: file, headers: responseEntity.headers)
@@ -1024,8 +1024,13 @@ class SkillsService {
         return wsHelper.adminGet("${getProjectUrl(projectId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}".toString())
     }
 
-    def getProjectUsersExcelExport(String projectId, String orderBy = 'totalPoints', boolean ascending = true, String query = "", int minimumPoints = 0) {
+    def getUserProgressExcelExport(String projectId, String orderBy = 'totalPoints', boolean ascending = true, String query = "", int minimumPoints = 0) {
         return downloadAttachment("/admin${getProjectUrl(projectId)}/users/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}".toString())
+    }
+
+    def getUserAchievementsExcelExport(String projectId, Map params=null) {
+//    String url = "${skillsService}/${type}${endpoint}${getUrlFromParams(params)}"
+        return downloadAttachment("/admin${getProjectUrl(projectId)}/achievements/export/excel".toString(), params)
     }
 
     def getSubjectUsers(String projectId, String subjectId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0) {
@@ -1066,8 +1071,6 @@ class SkillsService {
         userId = getUserId(userId)
         return wsHelper.apiGet(getUserLevelForProjectUrl(projectId, userId))
     }
-
-
 
     def editLevel(String projectId, String subjectId, String level, Map props){
         return wsHelper.adminPost(getEditLevelUrl(projectId, subjectId, level), props)
