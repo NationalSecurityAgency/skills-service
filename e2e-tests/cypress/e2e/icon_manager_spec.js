@@ -308,6 +308,50 @@ describe('Icon Manager Tests', () => {
         cy.get('.proj1-validiconpng');
     });
 
+    it('subject - warns before deleting the icon', () => {
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+
+        cy.visit('/administrator/projects/proj1/');
+
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
+
+        cy.get('[data-cy="iconPicker"]').click();
+
+        cy.get('.p-menuitem-link').contains('Custom').click();
+
+        const filename = 'valid_icon.png';
+        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.wait('@uploadIcon')
+
+        cy.get('[data-cy=saveDialogBtn]').click();
+
+        cy.wait('@saveSubject');
+        cy.reload();
+
+        cy.get('.proj1-validiconpng');
+
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
+
+        cy.get('[data-cy="iconPicker"]').click();
+
+        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('.delete-icon').click();
+
+        cy.contains('Are you sure you want to delete valid_icon.png? This icon is currently used by: Subject 1');
+        cy.contains('Cancel').click();
+
+        cy.get('.delete-icon').should('exist');
+        cy.get('.delete-icon').click();
+
+        cy.contains('Are you sure you want to delete valid_icon.png? This icon is currently used by: Subject 1');
+        cy.contains('YES, Delete It').click();
+        cy.get('.delete-icon').should('not.exist');
+    });
+
     it('subject - upload custom icon - persists when navigating from another project', () => {
         cy.request('POST', '/app/projects/proj2', {
             projectId: 'proj2',
@@ -440,6 +484,50 @@ describe('Icon Manager Tests', () => {
         cy.reload();
 
         cy.get('.proj1-validiconpng');
+    });
+
+    it('badge - warns before deleting the icon', () => {
+        cy.request('POST', '/admin/projects/proj1/badges/badge1', {
+            projectId: 'proj1',
+            badgeId: 'badge1',
+            name: 'Badge 1'
+        });
+
+        cy.visit('/administrator/projects/proj1/badges');
+
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]').click();
+
+        cy.get('[data-cy="iconPicker"]').click();
+
+        cy.get('.p-menuitem-link').contains('Custom').click();
+
+        const filename = 'valid_icon.png';
+        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.wait('@uploadIcon')
+
+        cy.get('[data-cy=saveDialogBtn]').click();
+
+        cy.wait('@saveBadge')
+        cy.reload();
+
+        cy.get('.proj1-validiconpng');
+
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]').click();
+
+        cy.get('[data-cy="iconPicker"]').click();
+
+        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('.delete-icon').click();
+
+        cy.contains('Are you sure you want to delete valid_icon.png? This icon is currently used by: Badge 1');
+        cy.contains('Cancel').click();
+
+        cy.get('.delete-icon').should('exist');
+        cy.get('.delete-icon').click();
+
+        cy.contains('Are you sure you want to delete valid_icon.png? This icon is currently used by: Badge 1');
+        cy.contains('YES, Delete It').click();
+        cy.get('.delete-icon').should('not.exist');
     });
 
     it('badge - upload custom icon - persists when navigating from another project', () => {
