@@ -522,4 +522,39 @@ describe('Icon Manager Tests', () => {
 
         cy.get('.proj1-validiconpng');
     });
+
+    it('upload custom icon - error displays after being closed', () => {
+        cy.intercept('/app/projects/proj1/customIcons').as('getCustomIcons')
+        cy.intercept('/api/projects/proj1/customIconCss').as('getCustomIconsCss')
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+
+        cy.visit('/administrator/projects/proj1/');
+        // cy.wait('@getCustomIconsCss')
+
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
+
+        cy.get('[data-cy="iconPicker"]').click();
+        // cy.wait('@getCustomIcons')
+
+        cy.get('.p-menuitem-link').contains('Custom').click();
+        // cy.get('[data-cy="customIconUpload"]').contains('Drag your file here to upload')
+        cy.wait(2000)
+
+        const filename = 'invalid_file.txt';
+        cy.get('[data-cy="fileInput"]').attachFile(filename);
+
+        cy.get('[data-cy="iconErrorMessage"]').contains('File is not an image format');
+
+        cy.get('.p-message-close').click();
+        cy.get('[data-cy="iconErrorMessage"]').should('not.exist');
+
+        cy.get('[data-cy="fileInput"]').attachFile(filename);
+
+        cy.get('[data-cy="iconErrorMessage"]').contains('File is not an image format');
+    });
 });
