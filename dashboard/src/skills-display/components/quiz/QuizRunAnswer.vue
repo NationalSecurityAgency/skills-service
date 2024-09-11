@@ -107,7 +107,7 @@ const flipSelected = () => {
        @keydown.prevent.space="flipSelected"
        @click="flipSelected"
        :tabindex="a.isGraded ? -1 : 0"
-       :class="{ 'selected-answer': selected, 'point-cursor answer-row-editable skills-theme-quiz-selected-answer-row' : !a.isGraded }"
+       :class="{ 'surface-200 border-primary border-round-sm font-semibold': selected, 'point-cursor hover:border-primary answer-row-editable skills-theme-quiz-selected-answer-row' : !a.isGraded }"
        :style="styleObject"
        :aria-label="ariaLabel">
     <div class="flex gap-0" :data-cy="`selected_${selected}`">
@@ -140,8 +140,7 @@ const flipSelected = () => {
 }
 
 .answer-row-editable:hover {
-  border: 1px dotted #007c49;
-  border-radius: 5px;
+  border-radius: 0.25rem;
 }
 
 .point-cursor {
@@ -153,13 +152,6 @@ i {
 }
 .checkmark {
   font-size: 1.2rem;
-}
-
-.selected-answer {
-  background-color: lightgray;
-  border: 1px dotted #007c49;
-  border-radius: 5px;
-  font-weight: bold;
 }
 
 .answerText {

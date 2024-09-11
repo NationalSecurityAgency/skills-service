@@ -324,7 +324,7 @@ const saveSettings = handleSubmit((values) => {
           </Message>
           <div class="flex flex-column" data-cy="expirationTypeSelector">
 
-            <div class="border-round p-3" :class="{ 'bg-gray-100' : expirationType === NEVER}">
+            <div class="border-round p-3" :class="{ 'surface-100' : expirationType === NEVER}">
               <div class="flex align-items-center justify-content-start">
                 <div class="flex flex-wrap">
                   <div class="flex align-items-center">
@@ -341,7 +341,7 @@ const saveSettings = handleSubmit((values) => {
 
             <Divider />
 
-            <div class="border-round p-3 mb-3" :class="{ 'bg-gray-100' : expirationType === YEARLY}">
+            <div class="border-round p-3 mb-3" :class="{ 'surface-100' : expirationType === YEARLY}">
               <div class="flex align-items-center justify-content-start">
                 <div class="flex flex-wrap">
                   <div class="flex align-items-center">
@@ -397,7 +397,7 @@ const saveSettings = handleSubmit((values) => {
               </div>
             </div>
 
-            <div class="border-round p-3" :class="{ 'bg-gray-100' : expirationType === MONTHLY}" data-cy="monthlyFormGroup">
+            <div class="border-round p-3" :class="{ 'surface-100' : expirationType === MONTHLY}" data-cy="monthlyFormGroup">
               <div class="flex align-items-center justify-content-start">
                 <div class="flex flex-wrap">
                   <div class="flex align-items-center">
@@ -455,7 +455,7 @@ const saveSettings = handleSubmit((values) => {
 
             <Divider/>
 
-            <div class="border-round p-3" :class="{ 'bg-gray-100' : expirationType === DAILY}" data-cy="dailyFormGroup">
+            <div class="border-round p-3" :class="{ 'surface-100' : expirationType === DAILY}" data-cy="dailyFormGroup">
               <div class="flex align-items-center justify-content-start">
                 <div class="flex flex-wrap">
                   <div class="flex align-items-center mb-2 md:mb-0">

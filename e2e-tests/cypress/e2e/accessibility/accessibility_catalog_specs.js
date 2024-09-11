@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 SkillTree
+ * Copyright 2024 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,125 +174,132 @@ describe('Accessibility Tests', () => {
         });
     });
 
-    it('catalog page', () => {
-        cy.createProject(1);
-        cy.createSubject(1, 1);
+    const runWithDarkMode = ['', ' - dark mode']
 
-        cy.createSkill(1, 1, 1);
-        cy.createSkill(1, 1, 2);
-        cy.createSkill(1, 1, 3);
+    runWithDarkMode.forEach((darkMode) => {
+        it(`catalog page${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.createProject(1);
+            cy.createSubject(1, 1);
 
-        cy.exportSkillToCatalog(1, 1, 1);
-        cy.exportSkillToCatalog(1, 1, 2);
-        cy.exportSkillToCatalog(1, 1, 3);
+            cy.createSkill(1, 1, 1);
+            cy.createSkill(1, 1, 2);
+            cy.createSkill(1, 1, 3);
 
-        cy.visit('/administrator/projects/proj1/skills-catalog');
-        cy.injectAxe();
-        cy.validateTable('[data-cy="exportedSkillsTable"]', [
-            [{
-                colIndex: 1,
-                value: 'Very Great Skill 3'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Very Great Skill 2'
-            }],
-            [{
-                colIndex: 1,
-                value: 'Very Great Skill 1'
-            }],
-        ], 5);
-        cy.customLighthouse();
-        cy.customA11y();
+            cy.exportSkillToCatalog(1, 1, 1);
+            cy.exportSkillToCatalog(1, 1, 2);
+            cy.exportSkillToCatalog(1, 1, 3);
 
-        // Delete from Catalog modal
-        cy.get('[data-cy="deleteSkillButton_skill2"]')
-            .click();
-        cy.contains('This will PERMANENTLY remove [Very Great Skill 2] Skill');
-        cy.customLighthouse();
-        cy.customA11y();
-    });
+            cy.visit('/administrator/projects/proj1/skills-catalog');
+            cy.injectAxe();
+            cy.validateTable('[data-cy="exportedSkillsTable"]', [
+                [{
+                    colIndex: 1,
+                    value: 'Very Great Skill 3'
+                }],
+                [{
+                    colIndex: 1,
+                    value: 'Very Great Skill 2'
+                }],
+                [{
+                    colIndex: 1,
+                    value: 'Very Great Skill 1'
+                }],
+            ], 5);
+            cy.customLighthouse();
+            cy.customA11y();
 
-    it('import from catalog modal', () => {
-        cy.createProject(1);
-        cy.createSubject(1, 1);
+            // Delete from Catalog modal
+            cy.get('[data-cy="deleteSkillButton_skill2"]')
+              .click();
+            cy.contains('This will PERMANENTLY remove [Very Great Skill 2] Skill');
+            cy.customLighthouse();
+            cy.customA11y();
+        });
 
-        cy.createSkill(1, 1, 1, { description: '# This is where description goes\n\ntest test' });
-        cy.createSkill(1, 1, 2);
-        cy.createSkill(1, 1, 3);
+        it(`import from catalog modal${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.createProject(1);
+            cy.createSubject(1, 1);
 
-        cy.exportSkillToCatalog(1, 1, 1);
-        cy.exportSkillToCatalog(1, 1, 2);
-        cy.exportSkillToCatalog(1, 1, 3);
+            cy.createSkill(1, 1, 1, { description: '# This is where description goes\n\ntest test' });
+            cy.createSkill(1, 1, 2);
+            cy.createSkill(1, 1, 3);
 
-        cy.createProject(2);
-        cy.createSubject(2, 1);
+            cy.exportSkillToCatalog(1, 1, 1);
+            cy.exportSkillToCatalog(1, 1, 2);
+            cy.exportSkillToCatalog(1, 1, 3);
 
-        cy.visit('/administrator/projects/proj2/subjects/subj1');
-        cy.injectAxe();
-        cy.get('[data-cy="importFromCatalogBtn"]')
-            .click();
-        // cy.get('[data-cy="expandDetailsBtn_proj1_skill1"]')
-        //     .click();
-        cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
-        cy.contains('This is where description goes');
+            cy.createProject(2);
+            cy.createSubject(2, 1);
 
-        cy.customLighthouse();
-        cy.customA11y();
-    });
+            cy.visit('/administrator/projects/proj2/subjects/subj1');
+            cy.injectAxe();
+            cy.get('[data-cy="importFromCatalogBtn"]')
+              .click();
+            // cy.get('[data-cy="expandDetailsBtn_proj1_skill1"]')
+            //     .click();
+            cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+            cy.contains('This is where description goes');
 
-    it('export to catalog modal', () => {
-        cy.createProject(1);
-        cy.createSubject(1, 1);
+            cy.customLighthouse();
+            cy.customA11y();
+        });
 
-        cy.createSkill(1, 1, 1);
-        cy.createSkill(1, 1, 2);
-        cy.createSkill(1, 1, 3);
+        it(`export to catalog modal${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.createProject(1);
+            cy.createSubject(1, 1);
 
-        cy.exportSkillToCatalog(1, 1, 1);
-        cy.exportSkillToCatalog(1, 1, 2);
-        cy.exportSkillToCatalog(1, 1, 3);
+            cy.createSkill(1, 1, 1);
+            cy.createSkill(1, 1, 2);
+            cy.createSkill(1, 1, 3);
 
-        cy.createProject(2);
-        cy.createSubject(2, 1);
-        cy.createSkill(2, 1, 1);
-        cy.createSkill(2, 1, 2, { name: 'Something Else' });
-        cy.createSkill(2, 1, 3, { skillId: 'diffId' });
-        cy.createSkill(2, 1, 4);
-        cy.createSkill(2, 1, 5);
-        cy.createSkill(2, 1, 6);
-        cy.addLearningPathItem(2, 6, 5)
-        cy.createSkill(2, 1, 7);
-        cy.exportSkillToCatalog(2, 1, 7);
+            cy.exportSkillToCatalog(1, 1, 1);
+            cy.exportSkillToCatalog(1, 1, 2);
+            cy.exportSkillToCatalog(1, 1, 3);
 
-        cy.visit('/administrator/projects/proj2/subjects/subj1');
-        cy.get('[data-cy="skillActionsBtn"]')
-        cy.injectAxe();
+            cy.createProject(2);
+            cy.createSubject(2, 1);
+            cy.createSkill(2, 1, 1);
+            cy.createSkill(2, 1, 2, { name: 'Something Else' });
+            cy.createSkill(2, 1, 3, { skillId: 'diffId' });
+            cy.createSkill(2, 1, 4);
+            cy.createSkill(2, 1, 5);
+            cy.createSkill(2, 1, 6);
+            cy.addLearningPathItem(2, 6, 5)
+            cy.createSkill(2, 1, 7);
+            cy.exportSkillToCatalog(2, 1, 7);
 
-        cy.customLighthouse();
-        cy.customA11y();
+            cy.visit('/administrator/projects/proj2/subjects/subj1');
+            cy.get('[data-cy="skillActionsBtn"]')
+            cy.injectAxe();
 
-        // looks like AXE and PrimeVue lib disagree where `aria-selected="true"` can be applied
-        // TODO: not really an issue but look into this further so this validation can be added back
-        // cy.get('[data-cy="skillsTable"]  [data-pc-name="headercheckbox"]').click()
-        //
-        // cy.get('[data-cy="skillActionsBtn"]')
-        //     .click();
-        // cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click()
-        // cy.contains('Note: The are already 1 skill(s) in the Skill Catalog from the provided selection.');
-        // cy.contains('This will export 2 Skills');
-        // cy.get('[data-cy="dupSkill-skill1"]')
-        //     .contains('ID Conflict');
-        // cy.get('[data-cy="dupSkill-skill1"]')
-        //     .contains('Name Conflict');
-        // cy.get('[data-cy="dupSkill-skill2"]')
-        //     .contains('ID Conflict');
-        // cy.get('[data-cy="dupSkill-diffId"]')
-        //     .contains('Name Conflict');
-        // cy.get('[data-cy="dupSkill-skill5"]')
-        //     .contains('Has Prerequisites');
-        //
-        // cy.customLighthouse();
-        // cy.customA11y();
-    });
+            cy.customLighthouse();
+            cy.customA11y();
+
+            // looks like AXE and PrimeVue lib disagree where `aria-selected="true"` can be applied
+            // TODO: not really an issue but look into this further so this validation can be added back
+            // cy.get('[data-cy="skillsTable"]  [data-pc-name="headercheckbox"]').click()
+            //
+            // cy.get('[data-cy="skillActionsBtn"]')
+            //     .click();
+            // cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click()
+            // cy.contains('Note: The are already 1 skill(s) in the Skill Catalog from the provided selection.');
+            // cy.contains('This will export 2 Skills');
+            // cy.get('[data-cy="dupSkill-skill1"]')
+            //     .contains('ID Conflict');
+            // cy.get('[data-cy="dupSkill-skill1"]')
+            //     .contains('Name Conflict');
+            // cy.get('[data-cy="dupSkill-skill2"]')
+            //     .contains('ID Conflict');
+            // cy.get('[data-cy="dupSkill-diffId"]')
+            //     .contains('Name Conflict');
+            // cy.get('[data-cy="dupSkill-skill5"]')
+            //     .contains('Has Prerequisites');
+            //
+            // cy.customLighthouse();
+            // cy.customA11y();
+        });
+    })
 });

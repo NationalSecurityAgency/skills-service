@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 SkillTree
+ * Copyright 2024 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import dayjs from 'dayjs';
 
 const moment = require('moment-timezone');
 
-describe('Accessibility Tests', () => {
+describe('Accessibility Subject Tests', () => {
 
     beforeEach(() => {
         cy.request('POST', '/app/projects/MyNewtestProject', {
@@ -172,97 +172,113 @@ describe('Accessibility Tests', () => {
             timestamp: m.subtract(5, 'day')
                 .format('x')
         });
+
+        Cypress.Commands.add("setDarkModeIfNeeded", (darkMode) => {
+            if (darkMode && darkMode.length > 0) {
+                cy.configureDarkMode()
+            }
+        })
     });
 
-    it('subject', () => {
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects')
-            .as('getSubjects');
-        cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills')
-            .as('getSkills');
+    const runWithDarkMode = ['', ' - dark mode']
 
-        cy.visit('/administrator/');
-        cy.injectAxe();
-        //view project
-        cy.get('[data-cy=projCard_MyNewtestProject_manageBtn]')
-            .click();
-        cy.wait('@getSubjects');
-        //view subject
-        cy.get('[data-cy=manageBtn_subj1]')
-            .click();
-        cy.wait('@getSkills');
-        cy.contains('This is 2');
-        cy.customLighthouse();
-        cy.customA11y();
-    });
+    runWithDarkMode.forEach((darkMode) => {
+        it(`subject${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects')
+              .as('getSubjects');
+            cy.intercept('GET', '/admin/projects/MyNewtestProject/subjects/subj1/skills')
+              .as('getSkills');
 
-    it('subject - create skill', () => {
-        cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1');
-        cy.injectAxe();
+            cy.visit('/administrator/');
+            cy.injectAxe();
+            //view project
+            cy.get('[data-cy=projCard_MyNewtestProject_manageBtn]')
+              .click();
+            cy.wait('@getSubjects');
+            //view subject
+            cy.get('[data-cy=manageBtn_subj1]')
+              .click();
+            cy.wait('@getSkills');
+            cy.contains('This is 2');
+            cy.customLighthouse();
+            cy.customA11y();
+        });
 
-        cy.get('[aria-label="new skill"]')
-            .click();
-        cy.get('[data-cy=skillName]')
-            .type('1');
-        cy.contains('Skill Name must be at least 3 characters');
-        cy.customA11y();
+        it(`subject - create skill${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1');
+            cy.injectAxe();
+
+            cy.get('[aria-label="new skill"]')
+              .click();
+            cy.get('[data-cy=skillName]')
+              .type('1');
+            cy.contains('Skill Name must be at least 3 characters');
+            cy.customA11y();
+        })
+
+        it(`subject - levels${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/levels');
+            cy.injectAxe();
+
+            cy.get('[data-cy="levelsTable"]').contains('67')
+            // cy.contains('Black Belt');r
+            cy.customLighthouse();
+            cy.customA11y();
+            cy.get('[data-cy=addLevel]')
+              .click();
+            cy.get('[data-cy="percent"]')
+              .type('105');
+            cy.contains('Percent must be less than or equal to 100');
+            cy.customA11y();
+
+        })
+
+        it(`subject - users${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/users');
+            cy.injectAxe();
+
+            cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '6')
+            cy.contains('u1');
+            cy.customLighthouse();
+            cy.customA11y();
+        })
+
+        it(`subject - user - client display${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/MyNewtestProject/users/u1');
+            cy.injectAxe();
+
+            cy.contains('Client Display');
+            cy.wait(4000);
+            cy.customLighthouse();
+            // enable once a11y issues with client display are addressed, needs an H1 initially
+            // also has contrast issues
+            // cy.customA11y();
+        })
+
+        it(`subject - user - performed skills${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/MyNewtestProject/users/u1/skillEvents');
+            cy.injectAxe();
+            cy.get('[data-cy="performedSkillsTable"]').contains('ID: skill1');
+            cy.customLighthouse();
+            cy.customA11y();
+        })
+
+        it(`subject - metrics${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1');
+            cy.injectAxe();
+            cy.get('[data-cy=nav-Metrics]')
+              .click();
+            cy.contains('This chart needs at least 2 days of user activity.');
+            cy.contains('Level 2: 1 users');
+            cy.customLighthouse();
+            cy.customA11y();
+        })
     })
-
-    it('subject - levels', () => {
-        cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/levels');
-        cy.injectAxe();
-
-        cy.get('[data-cy="levelsTable"]').contains('67')
-        // cy.contains('Black Belt');r
-        cy.customLighthouse();
-        cy.customA11y();
-        cy.get('[data-cy=addLevel]')
-            .click();
-        cy.get('[data-cy="percent"]')
-            .type('105');
-        cy.contains('Percent must be less than or equal to 100');
-        cy.customA11y();
-
-    })
-
-    it('subject - users', () => {
-        cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/users');
-        cy.injectAxe();
-
-        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '6')
-        cy.contains('u1');
-        cy.customLighthouse();
-        cy.customA11y();
-    })
-
-    it('subject - user - client display', () => {
-        cy.visit('/administrator/projects/MyNewtestProject/users/u1');
-        cy.injectAxe();
-
-        cy.contains('Client Display');
-        cy.wait(4000);
-        cy.customLighthouse();
-        // enable once a11y issues with client display are addressed, needs an H1 initially
-        // also has contrast issues
-        // cy.customA11y();
-    })
-
-    it('subject - user - performed skills', () => {
-        cy.visit('/administrator/projects/MyNewtestProject/users/u1/skillEvents');
-        cy.injectAxe();
-        cy.get('[data-cy="performedSkillsTable"]').contains('ID: skill1');
-        cy.customLighthouse();
-        cy.customA11y();
-    })
-
-    it('subject - metrics', () => {
-        cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1');
-        cy.injectAxe();
-        cy.get('[data-cy=nav-Metrics]')
-            .click();
-        cy.contains('This chart needs at least 2 days of user activity.');
-        cy.contains('Level 2: 1 users');
-        cy.customLighthouse();
-        cy.customA11y();
-    })
-
 });

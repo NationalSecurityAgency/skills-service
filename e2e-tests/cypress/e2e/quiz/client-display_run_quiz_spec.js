@@ -621,9 +621,13 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
         cy.get('[data-cy="takeQuizBtn"]').click();
 
-        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').should('have.class', 'selected-answer')
-        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').should('have.class', 'selected-answer')
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"] [data-cy="selected_true"]')
+        cy.get('[data-cy="question_1"] [data-cy="answer_2"] [data-cy="selected_true"]').should('not.exist')
+        cy.get('[data-cy="question_1"] [data-cy="answer_3"] [data-cy="selected_true"]').should('not.exist')
 
+        cy.get('[data-cy="question_2"] [data-cy="answer_1"] [data-cy="selected_true"]').should('not.exist')
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"] [data-cy="selected_true"]')
+        cy.get('[data-cy="question_2"] [data-cy="answer_3"] [data-cy="selected_true"]').should('not.exist')
     });
 
     it('quiz redirects to failure page when time runs out', () => {

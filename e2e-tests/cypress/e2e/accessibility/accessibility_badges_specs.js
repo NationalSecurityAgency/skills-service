@@ -17,7 +17,7 @@ import dayjs from 'dayjs';
 
 const moment = require('moment-timezone');
 
-describe('Accessibility Tests', () => {
+describe('Accessibility Badges Tests', () => {
 
     beforeEach(() => {
         cy.request('POST', '/app/projects/MyNewtestProject', {
@@ -103,6 +103,7 @@ describe('Accessibility Tests', () => {
         });
 
         cy.request('POST', '/admin/projects/MyNewtestProject/badge/badge1/skills/skill2');
+
         cy.request('POST', `/admin/projects/MyNewtestProject/skill2/prerequisite/MyNewtestProject/skill1`);
 
         const m = moment('2020-05-12 11', 'YYYY-MM-DD HH');
@@ -177,74 +178,98 @@ describe('Accessibility Tests', () => {
                 cy.configureDarkMode()
             }
         })
+
     });
 
     const runWithDarkMode = ['', ' - dark mode']
 
     runWithDarkMode.forEach((darkMode) => {
-        it(`settings - profile${darkMode}`, () => {
-            cy.logout();
-            cy.login('root@skills.org', 'password');
-            cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/settings');
-            cy.injectAxe();
-            cy.get('[data-cy="generalSettingsSave"]');
-            cy.customLighthouse();
-            cy.customA11y();
-        })
 
-        it(`settings - preferences${darkMode}`, () => {
-            cy.logout();
-            cy.login('root@skills.org', 'password');
+        it(`badge modal${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/settings/preferences');
+            cy.visit('/administrator/projects/MyNewtestProject/badges');
             cy.injectAxe();
-            cy.get('[data-cy="userPrefsSettingsSave"]');
-            cy.customLighthouse();
-            cy.customA11y();
-        })
 
-        it(`settings - security${darkMode}`, () => {
-            cy.logout();
-            cy.login('root@skills.org', 'password');
-            cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/settings/security');
-            cy.injectAxe();
-            cy.get('[data-cy="addUserBtn"]')
-            cy.get('[data-cy="supervisorrm"]')
-              .contains('There are no records to show');
-            cy.customLighthouse();
-            cy.customA11y();
-        })
-
-        it(`settings - email${darkMode}`, () => {
-            cy.logout();
-            cy.login('root@skills.org', 'password');
-            cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/settings/email');
-            cy.injectAxe();
-            cy.contains('Email Connection Settings');
-            cy.contains('TLS Disabled');
-            cy.contains('Public URL');
-            cy.get('[data-cy="emailSettingsTest"]')
+            cy.get('[aria-label="new badge"]').click();
+            cy.get('[data-cy=name]').type('a');
             cy.customLighthouse();
             cy.customA11y();
         });
 
-        it(`settings - system${darkMode}`, () => {
+        it(`badge page${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
-            cy.intercept('GET', '/root/getSystemSettings')
-              .as('getSettings');
-            cy.logout();
-            cy.login('root@skills.org', 'password');
-            cy.visit('/settings/system');
-            cy.wait('@getSettings')
-            cy.contains('Token Expiration');
-            cy.get('[data-cy="resetTokenExpiration"]').should('have.value', '2H')
-            cy.get('[data-cy="saveSystemSettings"]')
+            cy.visit('/administrator/projects/MyNewtestProject/badges/badge1');
             cy.injectAxe();
+
+            cy.get('[data-cy="pageHeaderStat_Status"]')
+            cy.get('[data-cy="badgeSkillsTable"]').contains('This is 2');
             cy.customLighthouse();
             cy.customA11y();
         });
+
+        it(`badge users${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/MyNewtestProject/badges/badge1/users');
+            cy.injectAxe();
+            cy.contains('There are no records to show');
+            cy.customLighthouse();
+            cy.customA11y();
+        });
+
+        it(`global badges${darkMode}`, () => {
+            cy.logout();
+            cy.login('root@skills.org', 'password');
+            cy.setDarkModeIfNeeded(darkMode)
+
+            cy.intercept('POST', ' /supervisor/badges/globalbadgeBadge/projects/MyNewtestProject/level/1')
+                .as('saveGlobalBadgeLevel');
+            cy.intercept('/supervisor/badges/globalbadgeBadge/skills/available?query=').as('getAvailableSkills')
+            cy.intercept('/supervisor/badges/globalbadgeBadge/projects/available?query=').as('getAvailableProjects')
+            cy.intercept('/supervisor/projects/MyNewtestProject/levels').as('getProjectLevels')
+            cy.request('PUT', `/root/users/root@skills.org/roles/ROLE_SUPERVISOR`);
+            cy.visit('/administrator/globalBadges');
+            cy.injectAxe();
+            cy.get('[data-cy="noContent"]').contains('No Badges Yet')
+            cy.customLighthouse();
+            cy.customA11y();
+
+            cy.get('[aria-label="new global badge"]')
+                .click();
+            cy.get('[data-cy=name]')
+                .type('global badge');
+            cy.get('[data-cy=saveDialogBtn]')
+                .click();
+            cy.contains('Manage')
+                .click();
+            cy.wait('@getAvailableSkills')
+            cy.customLighthouse();
+            cy.customA11y();
+
+            cy.selectSkill('[data-cy="skillsSelector"]', 'skill1', 'This is 1', 'MyNewtestProject');
+            cy.customA11y();
+            cy.get('[data-cy=nav-Levels]')
+                .click();
+            cy.contains('No Levels Added Yet');
+            cy.customLighthouse();
+
+            cy.wait('@getAvailableProjects')
+            cy.get('#project-selector')
+                .click();
+            cy.get('[data-cy="MyNewtestProject_option"]').click();
+            cy.get('#level-selector').click();
+            cy.wait('@getProjectLevels')
+            cy.get('[data-pc-section="item"]').contains(2).click();
+            // cy.get('.multiselect__select').eq(0).click();
+            // cy.get('.multiselect__element').eq(0).click();
+            // cy.get('.multiselect__select').eq(1).click();
+            // cy.get('.multiselect__element').eq(1).click();
+
+            cy.get('[data-cy=addGlobalBadgeLevel]')
+                .click();
+            cy.get('[data-cy="simpleLevelsTable"] [data-cy="skillsBTableTotalRows"]')
+                .should('have.text', '1');
+            cy.customA11y();
+        });
+
     })
 });

@@ -1505,3 +1505,19 @@ Cypress.Commands.add("readPdf", (pathToPdf) => {
   })
   return cy.task('readPdf', pathToPdf)
 });
+
+Cypress.Commands.add("configureDarkMode", () => {
+    cy.request('POST', '/app/userInfo/settings', [{
+        'settingGroup': 'user.prefs',
+        'value': true,
+        'setting': 'enable_dark_mode',
+        'lastLoadedValue': 'true',
+        'dirty': true
+    }]);
+})
+
+Cypress.Commands.add("setDarkModeIfNeeded", (darkMode) => {
+    if (darkMode && darkMode.length > 0) {
+        cy.configureDarkMode()
+    }
+})

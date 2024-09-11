@@ -17,7 +17,7 @@ import dayjs from 'dayjs';
 
 const moment = require('moment-timezone');
 
-describe('Accessibility Tests', () => {
+describe('Accessibility Skill Tests', () => {
 
     beforeEach(() => {
         cy.request('POST', '/app/projects/MyNewtestProject', {
@@ -103,6 +103,7 @@ describe('Accessibility Tests', () => {
         });
 
         cy.request('POST', '/admin/projects/MyNewtestProject/badge/badge1/skills/skill2');
+
         cy.request('POST', `/admin/projects/MyNewtestProject/skill2/prerequisite/MyNewtestProject/skill1`);
 
         const m = moment('2020-05-12 11', 'YYYY-MM-DD HH');
@@ -177,72 +178,89 @@ describe('Accessibility Tests', () => {
                 cy.configureDarkMode()
             }
         })
+
     });
 
     const runWithDarkMode = ['', ' - dark mode']
 
     runWithDarkMode.forEach((darkMode) => {
-        it(`settings - profile${darkMode}`, () => {
-            cy.logout();
-            cy.login('root@skills.org', 'password');
+        it(`skill overview ${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/settings');
+            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/skills/skill1');
             cy.injectAxe();
-            cy.get('[data-cy="generalSettingsSave"]');
-            cy.customLighthouse();
-            cy.customA11y();
-        })
-
-        it(`settings - preferences${darkMode}`, () => {
-            cy.logout();
-            cy.login('root@skills.org', 'password');
-            cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/settings/preferences');
-            cy.injectAxe();
-            cy.get('[data-cy="userPrefsSettingsSave"]');
-            cy.customLighthouse();
-            cy.customA11y();
-        })
-
-        it(`settings - security${darkMode}`, () => {
-            cy.logout();
-            cy.login('root@skills.org', 'password');
-            cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/settings/security');
-            cy.injectAxe();
-            cy.get('[data-cy="addUserBtn"]')
-            cy.get('[data-cy="supervisorrm"]')
-              .contains('There are no records to show');
-            cy.customLighthouse();
-            cy.customA11y();
-        })
-
-        it(`settings - email${darkMode}`, () => {
-            cy.logout();
-            cy.login('root@skills.org', 'password');
-            cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/settings/email');
-            cy.injectAxe();
-            cy.contains('Email Connection Settings');
-            cy.contains('TLS Disabled');
-            cy.contains('Public URL');
-            cy.get('[data-cy="emailSettingsTest"]')
+            cy.contains('Help URL');
+            cy.contains('http://doHelpOnThisSkill.com');
+            cy.contains('Lorem ipsum dolor sit amet, consectetur adipiscing elit,');
+            cy.contains('500 Points');
             cy.customLighthouse();
             cy.customA11y();
         });
 
-        it(`settings - system${darkMode}`, () => {
+        it(`configure video for a skill${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
-            cy.intercept('GET', '/root/getSystemSettings')
-              .as('getSettings');
-            cy.logout();
-            cy.login('root@skills.org', 'password');
-            cy.visit('/settings/system');
-            cy.wait('@getSettings')
-            cy.contains('Token Expiration');
-            cy.get('[data-cy="resetTokenExpiration"]').should('have.value', '2H')
-            cy.get('[data-cy="saveSystemSettings"]')
+            cy.createProject(1);
+            cy.createSubject(1, 1);
+            cy.createSkill(1, 1, 1);
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-video');
             cy.injectAxe();
+
+            cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+            cy.get('[data-cy="showExternalUrlBtn"]')
+            cy.customLighthouse();
+            cy.customA11y();
+        });
+
+        it(`configure expiration for a skill${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.createProject(1);
+            cy.createSubject(1, 1);
+            cy.createSkill(1, 1, 1);
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-expiration');
+            cy.injectAxe();
+
+            cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+            cy.get('[data-cy="expirationNeverRadio"]')
+            cy.customLighthouse();
+            cy.customA11y();
+        });
+
+        it(`skill users ${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/skills/skill1/users');
+            cy.injectAxe();
+            cy.contains('u1');
+            cy.customLighthouse();
+            cy.customA11y();
+        });
+
+        it(`skill add event ${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/skills/skill1/addSkillEvent');
+            cy.injectAxe();
+            cy.get('[data-cy="userIdInput"]')
+            cy.customLighthouse();
+            cy.customA11y();
+
+            cy.get('[data-cy="userIdInput"]').click();
+            cy.get('[data-cy="existingUserInputDropdown"]').type('u4');
+            cy.get('#existingUserInput_0').contains('u4').click()
+            cy.get('[data-cy="eventDatePicker"]').click();
+            cy.get('[aria-label="Choose Date"] [aria-label="1"]').not('[data-p-other-month="true"]').click()
+            cy.get('[data-cy=addSkillEventButton]').click();
+            cy.contains('Added points');
+            cy.customA11y();
+        });
+
+        it(`skill metrics ${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/skills/skill1/metrics');
+            cy.injectAxe();
+            cy.contains('Achievements over time');
+            cy.get('[data-cy="numUsersPostAchievement"]')
+              .contains('No achievements yet for this skill.');
+            cy.get('[data-cy="numUsersPostAchievement"]')
+              .contains('No achievements yet for this skill.');
+
             cy.customLighthouse();
             cy.customA11y();
         });
