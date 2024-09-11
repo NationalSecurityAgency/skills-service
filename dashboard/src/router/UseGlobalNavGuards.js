@@ -53,6 +53,7 @@ export const useGlobalNavGuards = () => {
   const log = useLog()
 
   const isAdminPage = (route) => route.path.startsWith('/administrator') && !route.path.startsWith('/administrator/skills')
+  const isGlobalAdminPage = (route) => route.path.startsWith('/administrator/globalBadges')
   const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId
   const isLoggedIn = () => authState.isAuthenticated
   const isPki = () => appConfig.isPkiAuthenticated
@@ -107,6 +108,9 @@ export const useGlobalNavGuards = () => {
             inviteOnlyProjectState.loadInviteOnlySetting(to.params.projectId)
           }
           IconManagerService.refreshCustomIconCss(to.params.projectId, accessState.isSupervisor)
+        }
+        if (isGlobalAdminPage(to)) {
+          IconManagerService.refreshCustomIconCss(null, true)
         }
         if (
           to.path.startsWith('/administrator/quizzes/') &&

@@ -14,9 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, onBeforeMount, watch, ref } from 'vue'
+import { computed, onBeforeMount, onMounted, ref, watch } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
-import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import DashboardHeader from '@/components/header/DashboardHeader.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useCustomGlobalValidators } from '@/validators/UseCustomGlobalValidators.js'
@@ -40,8 +39,8 @@ import { invoke, until } from '@vueuse/core'
 import DashboardFooter from '@/components/header/DashboardFooter.vue'
 import { useUserAgreementInterceptor } from '@/interceptors/UseUserAgreementInterceptor.js'
 import PkiAppBootstrap from '@/components/access/PkiAppBootstrap.vue'
-import {usePrimeVue} from "primevue/config";
-import ScrollToTop from "@/common-components/utilities/ScrollToTop.vue";
+import { usePrimeVue } from 'primevue/config'
+import ScrollToTop from '@/common-components/utilities/ScrollToTop.vue'
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -56,12 +55,6 @@ const PrimeVue = usePrimeVue()
 const customGlobalValidators = useCustomGlobalValidators()
 const globalNavGuards = useGlobalNavGuards()
 const skillsDisplayAttributes = useSkillsDisplayAttributesState()
-
-const addCustomIconCSS = () => {
-  // This must be done here AFTER authentication
-  const projectId = skillsDisplayInfo.isSkillsClientPath() ? skillsDisplayAttributes.projectId : route.params.projectId
-  IconManagerService.refreshCustomIconCss(projectId, accessState.isSupervisor)
-}
 
 const isAppLoaded = ref(false)
 const isScrollToTopDisabled = computed(() => {
@@ -78,9 +71,10 @@ watch(() => authState.userInfo, async (newUserInfo) => {
   if (newUserInfo) {
     inceptionConfigurer.configure()
     pageVisitService.reportPageVisit(route.path, route.fullPath)
-    loadUserRoles()
-    appInfoState.loadEmailEnabled()
-    themeHelper.loadTheme().then(() => {
+    const loadRoot = accessState.loadIsRoot()
+    const loadEmailEnabled = appInfoState.loadEmailEnabled()
+    const loadTheme = themeHelper.loadTheme()
+    Promise.all([loadRoot, loadEmailEnabled, loadTheme]).then(() => {
       isAppLoaded.value = true
     })
   } else {
@@ -109,13 +103,6 @@ onMounted(() => {
   })
 })
 
-const loadUserRoles = () => {
-  const loadSuperVisorRole = accessState.loadIsSupervisor().then(() => {
-    addCustomIconCSS()
-  })
-  const loadRootRole = accessState.loadIsRoot()
-  return Promise.all([loadSuperVisorRole, loadRootRole])
-}
 const loadConfigs = () => {
   appConfig.loadConfigState().finally(() => {
     authState.restoreSessionIfAvailable().finally(() => {

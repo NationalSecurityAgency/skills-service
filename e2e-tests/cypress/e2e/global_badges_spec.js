@@ -2280,4 +2280,45 @@ describe('Global Badges Tests', () => {
         cy.get('#level-selector > .p-dropdown').should('have.class', 'p-disabled');
 
     });
+
+    it('custom icons are loaded', function () {
+        cy.logout()
+        cy.loginAsRootUser();
+
+        cy.uploadCustomIcon('valid_icon.png', '/supervisor/icons/upload')
+        cy.createGlobalBadge(1);
+        cy.createProject(1)
+        cy.assignProjectToGlobalBadge(1, 1);
+        cy.enableGlobalBadge(1, { iconClass: 'GLOBAL-validiconpng' });
+
+        cy.intercept('/api/icons/customIconCss').as('customIcons')
+        cy.visit('/administrator');
+        cy.get('[data-cy="nav-Global Badges"]').click()
+        cy.wait('@customIcons')
+        cy.wait(1000)
+        cy.get('[data-cy="badgeCard-globalBadge1"] .GLOBAL-validiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+
+        cy.visit('/administrator/globalBadges/');
+        cy.wait('@customIcons')
+        cy.wait(1000)
+        cy.get('[data-cy="badgeCard-globalBadge1"] .GLOBAL-validiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+
+        cy.visit('/administrator/globalBadges/globalBadge1')
+        cy.wait('@customIcons')
+        cy.get('[data-cy="btn_edit-badge"]').click()
+        cy.wait(1000)
+        cy.get('[data-cy="iconPicker"] .GLOBAL-validiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+    });
 });

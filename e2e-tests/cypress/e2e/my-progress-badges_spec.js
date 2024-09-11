@@ -466,4 +466,171 @@ describe('My Progress Badges Tests', () => {
     cy.get('[data-cy=numAchievedGemBadges]')
       .should('not.exist');
   });
+
+
+  it('custom badge icons are loaded on My Badges', function () {
+    cy.intercept(' /api/projects/proj1/customIconCss').as('proj1CustomIcons')
+    cy.intercept(' /api/projects/proj2/customIconCss').as('proj2CustomIcons')
+    cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj1/icons/upload')
+
+    cy.enableBadge(1, 1, { iconClass: 'proj1-validiconpng' })
+
+    cy.createBadge(2, 1)
+    cy.createSubject(2, 1)
+    cy.createSkill(2, 1, 1)
+    cy.assignSkillToBadge(2, 1, 1)
+    cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj2/icons/upload')
+    cy.enableBadge(2, 1, { iconClass: 'proj2-validiconpng' })
+
+    cy.visit('/progress-and-rankings/');
+    cy.get('[data-cy="project-link-proj1"]')
+    cy.get('[data-cy="viewBadges"]').click()
+    cy.wait('@proj1CustomIcons')
+    cy.wait('@proj2CustomIcons')
+    cy.wait(1000)
+    cy.get('[data-cy="achievedBadge-badge1"] .proj1-validiconpng')
+      .invoke('css', 'background-image')
+      .then((bgImage) => {
+        expect(bgImage).to.contain('data:image/png;base64')
+      })
+
+    cy.visit('/progress-and-rankings/my-badges');
+    cy.wait('@proj1CustomIcons')
+    cy.wait('@proj2CustomIcons')
+    cy.wait(1000)
+    cy.get('[data-cy="achievedBadge-badge1"] .proj1-validiconpng')
+      .invoke('css', 'background-image')
+      .then((bgImage) => {
+        expect(bgImage).to.contain('data:image/png;base64')
+      })
+    cy.get('[data-cy="badge_badge1"] .proj2-validiconpng')
+      .invoke('css', 'background-image')
+      .then((bgImage) => {
+        expect(bgImage).to.contain('data:image/png;base64')
+      })
+  });
+
+  it('custom badge icons are loaded for multiple projects', function () {
+    cy.intercept(' /api/projects/proj1/customIconCss').as('proj1CustomIcons')
+    cy.intercept(' /api/projects/proj2/customIconCss').as('proj2CustomIcons')
+    cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj1/icons/upload')
+
+    cy.enableBadge(1, 1, { iconClass: 'proj1-validiconpng' })
+
+    cy.createBadge(2, 1)
+    cy.createSubject(2, 1)
+    cy.createSkill(2, 1, 1)
+    cy.assignSkillToBadge(2, 1, 1)
+    cy.uploadCustomIcon('anothervalid_icon.png', '/admin/projects/proj2/icons/upload')
+    cy.enableBadge(2, 1, { iconClass: 'proj2-anothervalidiconpng' })
+
+    cy.visit('/progress-and-rankings/');
+    cy.get('[data-cy="project-link-proj1"]').click()
+    cy.wait('@proj1CustomIcons')
+    cy.get('[data-cy="myBadgesBtn"]').click()
+    cy.wait(1000)
+    cy.get('[data-cy="achievedBadge-badge1"] .proj1-validiconpng')
+      .invoke('css', 'background-image')
+      .then((bgImage) => {
+        expect(bgImage).to.contain('data:image/png;base64')
+      })
+
+    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').click()
+    cy.get('[data-cy="project-link-proj2"]').click()
+    cy.wait('@proj2CustomIcons')
+    cy.get('[data-cy="myBadgesBtn"]').click()
+    cy.wait(1000)
+    cy.get('[data-cy="badge_badge1"] .proj2-anothervalidiconpng')
+      .invoke('css', 'background-image')
+      .then((bgImage) => {
+        expect(bgImage).to.contain('data:image/png;base64')
+      })
+  });
+
+  it('custom badge icons are loaded for a single project', function () {
+    cy.intercept(' /api/projects/proj2/customIconCss').as('proj2CustomIcons')
+    cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj1/icons/upload')
+
+    cy.enableBadge(1, 1, { iconClass: 'proj1-validiconpng' })
+
+    cy.createBadge(2, 1)
+    cy.createSubject(2, 1)
+    cy.createSkill(2, 1, 1)
+    cy.assignSkillToBadge(2, 1, 1)
+    cy.uploadCustomIcon('anothervalid_icon.png', '/admin/projects/proj2/icons/upload')
+    cy.enableBadge(2, 1, { iconClass: 'proj2-anothervalidiconpng' })
+
+    cy.visit('/progress-and-rankings/projects/proj2')
+    cy.wait('@proj2CustomIcons')
+    cy.get('[data-cy="myBadgesBtn"]').click()
+    cy.wait(1000)
+    cy.get('[data-cy="badge_badge1"] .proj2-anothervalidiconpng')
+      .invoke('css', 'background-image')
+      .then((bgImage) => {
+        expect(bgImage).to.contain('data:image/png;base64')
+      })
+
+    cy.visit('/progress-and-rankings/projects/proj2/badges')
+    cy.wait('@proj2CustomIcons')
+    cy.wait(1000)
+    cy.get('[data-cy="badge_badge1"] .proj2-anothervalidiconpng')
+      .invoke('css', 'background-image')
+      .then((bgImage) => {
+        expect(bgImage).to.contain('data:image/png;base64')
+      })
+
+    cy.visit('/progress-and-rankings/projects/proj2/badges/badge1')
+    cy.wait('@proj2CustomIcons')
+    cy.wait(1000)
+    cy.get('[data-cy="badge_badge1"] .proj2-anothervalidiconpng')
+      .invoke('css', 'background-image')
+      .then((bgImage) => {
+        expect(bgImage).to.contain('data:image/png;base64')
+      })
+  });
+
+  it('custom badge icons are loaded for global badges', function () {
+    cy.logout()
+    cy.loginAsRootUser();
+
+    cy.uploadCustomIcon('valid_icon.png', '/supervisor/icons/upload')
+    cy.createGlobalBadge(1);
+    cy.assignSkillToGlobalBadge(1, 1, 1);
+    cy.assignProjectToGlobalBadge(1, 1);
+    cy.enableGlobalBadge(1, { iconClass: 'GLOBAL-validiconpng' });
+
+    cy.logout()
+    cy.loginAsProxyUser();
+    cy.intercept('/api/icons/customIconCss').as('customIcons')
+
+    cy.visit('/progress-and-rankings/');
+    cy.get('[data-cy="project-link-proj1"]')
+    cy.get('[data-cy="viewBadges"]').click()
+    cy.wait('@customIcons')
+    cy.wait(1000)
+    cy.get('[data-cy="achievedBadge-globalBadge1"] .GLOBAL-validiconpng')
+      .invoke('css', 'background-image')
+      .then((bgImage) => {
+        expect(bgImage).to.contain('data:image/png;base64')
+      })
+
+    cy.visit('/progress-and-rankings/my-badges');
+    cy.wait('@customIcons')
+    cy.wait(1000)
+    cy.get('[data-cy="achievedBadge-globalBadge1"] .GLOBAL-validiconpng')
+      .invoke('css', 'background-image')
+      .then((bgImage) => {
+        expect(bgImage).to.contain('data:image/png;base64')
+      })
+
+    cy.visit('/progress-and-rankings/projects/proj1/badges/global/globalBadge1')
+    cy.wait('@customIcons')
+    cy.wait(1000)
+    cy.get('[data-cy="badge_globalBadge1"] .GLOBAL-validiconpng')
+      .invoke('css', 'background-image')
+      .then((bgImage) => {
+        expect(bgImage).to.contain('data:image/png;base64')
+      })
+
+  });
 })

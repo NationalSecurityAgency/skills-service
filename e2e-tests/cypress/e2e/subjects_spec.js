@@ -987,4 +987,84 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subPageHeaderDisabledMsg"]').contains('The maximum number of Subjects allowed is 3')
         cy.get('[data-cy="btn_Subjects"]').should('be.disabled')
     })
+
+    it('custom subject icons are loaded for multiple projects', function () {
+        cy.intercept(' /api/projects/proj10/customIconCss').as('proj1CustomIcons')
+        cy.intercept(' /api/projects/proj20/customIconCss').as('proj2CustomIcons')
+
+        cy.createProject(10);
+        cy.createProject(20);
+
+        cy.enableProdMode(10);
+        cy.enableProdMode(20);
+
+        cy.addToMyProjects(10);
+        cy.addToMyProjects(20);
+
+        cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj10/icons/upload')
+        cy.uploadCustomIcon('anothervalid_icon.png', '/admin/projects/proj20/icons/upload')
+
+        cy.createSubject(10, 1, { iconClass: 'proj10-validiconpng' })
+        cy.createSubject(20, 1, { iconClass: 'proj20-anothervalidiconpng' })
+
+        cy.visit('/administrator');
+        cy.get('[data-cy="projCard_proj10_manageBtn"]').click()
+        cy.wait('@proj1CustomIcons')
+        cy.wait(1000)
+        cy.get('[data-cy="subjectCard-subj1"] .proj10-validiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+
+        cy.get('[data-cy="breadcrumb-Projects"]').click()
+        cy.get('[data-cy="projCard_proj20_manageBtn"]').click()
+        cy.wait('@proj2CustomIcons')
+        cy.wait(1000)
+        cy.get('[data-cy="subjectCard-subj1"] .proj20-anothervalidiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+    });
+
+    it('custom subject icons are loaded when navigating to a project directly', function () {
+        cy.intercept(' /api/projects/proj10/customIconCss').as('proj1CustomIcons')
+        cy.intercept(' /api/projects/proj20/customIconCss').as('proj2CustomIcons')
+
+        cy.createProject(10);
+        cy.createProject(20);
+
+        cy.enableProdMode(10);
+        cy.enableProdMode(20);
+
+        cy.addToMyProjects(10);
+        cy.addToMyProjects(20);
+
+        cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj10/icons/upload')
+        cy.uploadCustomIcon('anothervalid_icon.png', '/admin/projects/proj20/icons/upload')
+
+        cy.createSubject(10, 1, { iconClass: 'proj10-validiconpng' })
+        cy.createSubject(20, 1, { iconClass: 'proj20-anothervalidiconpng' })
+
+        cy.visit('/administrator/projects/proj10');
+        cy.wait('@proj1CustomIcons')
+        cy.wait(1000)
+        cy.get('[data-cy="subjectCard-subj1"] .proj10-validiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+
+        cy.visit('/administrator/projects/proj10/subjects/subj1');
+        cy.wait('@proj1CustomIcons')
+        cy.get('[data-cy="btn_edit-subject"]').click()
+        cy.wait(1000)
+        cy.get('[data-cy="iconPicker"] .proj10-validiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+
+    });
 });

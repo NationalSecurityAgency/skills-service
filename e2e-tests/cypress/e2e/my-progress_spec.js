@@ -813,4 +813,73 @@ describe('My Progress Tests', () => {
             cy.get('[data-cy="numProjectsAvailable"]').should('have.text', '/ 1')
         })
     }
+
+    it('custom subject icons are loaded for multiple projects', function () {
+        cy.intercept(' /api/projects/proj10/customIconCss').as('proj1CustomIcons')
+        cy.intercept(' /api/projects/proj20/customIconCss').as('proj2CustomIcons')
+
+        cy.createProject(10);
+        cy.createProject(20);
+
+        cy.enableProdMode(10);
+        cy.enableProdMode(20);
+
+        cy.addToMyProjects(10);
+        cy.addToMyProjects(20);
+
+        cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj10/icons/upload')
+        cy.uploadCustomIcon('anothervalid_icon.png', '/admin/projects/proj20/icons/upload')
+
+        cy.createSubject(10, 1, { iconClass: 'proj10-validiconpng' })
+        cy.createSubject(20, 1, { iconClass: 'proj20-anothervalidiconpng' })
+
+        cy.visit('/progress-and-rankings/');
+        cy.get('[data-cy="project-link-proj10"]').click()
+        cy.wait('@proj1CustomIcons')
+        cy.wait(1000)
+        cy.get('[data-cy="subjectTile-subj1"] .proj10-validiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+
+        cy.get('[data-cy="breadcrumb-Progress And Rankings"]').click()
+        cy.get('[data-cy="project-link-proj20"]').click()
+        cy.wait('@proj2CustomIcons')
+        cy.wait(1000)
+        cy.get('[data-cy="subjectTile-subj1"] .proj20-anothervalidiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+    });
+
+    it('custom subject icons are loaded by going directly to a project', function () {
+        cy.intercept(' /api/projects/proj10/customIconCss').as('proj1CustomIcons')
+        cy.intercept(' /api/projects/proj20/customIconCss').as('proj2CustomIcons')
+
+        cy.createProject(10);
+        cy.createProject(20);
+
+        cy.enableProdMode(10);
+        cy.enableProdMode(20);
+
+        cy.addToMyProjects(10);
+        cy.addToMyProjects(20);
+
+        cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj10/icons/upload')
+        cy.uploadCustomIcon('anothervalid_icon.png', '/admin/projects/proj20/icons/upload')
+
+        cy.createSubject(10, 1, { iconClass: 'proj10-validiconpng' })
+        cy.createSubject(20, 1, { iconClass: 'proj20-anothervalidiconpng' })
+
+        cy.visit('/progress-and-rankings/projects/proj10');
+        cy.wait('@proj1CustomIcons')
+        cy.wait(1000)
+        cy.get('[data-cy="subjectTile-subj1"] .proj10-validiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+    })
 });

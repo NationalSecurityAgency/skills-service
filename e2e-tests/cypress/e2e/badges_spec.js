@@ -2355,4 +2355,95 @@ describe('Badges Tests', () => {
         cy.wait('@loadSkills');
         cy.get('[data-cy="skillsSelector"]').type('a{backspace}');
     })
+
+    it('custom badge icons are loaded for multiple projects', function () {
+        cy.intercept(' /api/projects/proj1/customIconCss').as('proj1CustomIcons')
+        cy.intercept(' /api/projects/proj2/customIconCss').as('proj2CustomIcons')
+        cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj1/icons/upload')
+
+        cy.enableBadge(1, 1, { iconClass: 'proj1-validiconpng' })
+
+        cy.createProject(2)
+
+        cy.createBadge(2, 1)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 1)
+        cy.assignSkillToBadge(2, 1, 1)
+        cy.uploadCustomIcon('anothervalid_icon.png', '/admin/projects/proj2/icons/upload')
+        cy.enableBadge(2, 1, { iconClass: 'proj2-anothervalidiconpng' })
+
+        cy.visit('/administrator/');
+        cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
+        cy.wait('@proj1CustomIcons')
+        cy.get('[data-cy="noContent"]')
+        cy.get('[data-cy="nav-Badges"]').click()
+        cy.wait(1000)
+        cy.get('[data-cy="badgeCard-badge1"] .proj1-validiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+
+        cy.get('[data-cy="breadcrumb-Projects"]').click()
+        cy.get('[data-cy="projCard_proj2_manageBtn"]').click()
+        cy.wait('@proj2CustomIcons')
+        cy.get('[data-cy="subjectCard-subj1"]')
+        cy.get('[data-cy="nav-Badges"]').click()
+        cy.wait(1000)
+        cy.get('[data-cy="badgeCard-badge1"] .proj2-anothervalidiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+    });
+
+    it('custom badge icons are loaded when navigating to a project directly', function () {
+        cy.intercept(' /api/projects/proj1/customIconCss').as('proj1CustomIcons')
+        cy.intercept(' /api/projects/proj2/customIconCss').as('proj2CustomIcons')
+        cy.uploadCustomIcon('valid_icon.png', '/admin/projects/proj1/icons/upload')
+
+        cy.enableBadge(1, 1, { iconClass: 'proj1-validiconpng' })
+
+        cy.createProject(2)
+
+        cy.createBadge(2, 1)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 1)
+        cy.assignSkillToBadge(2, 1, 1)
+        cy.uploadCustomIcon('anothervalid_icon.png', '/admin/projects/proj2/icons/upload')
+        cy.enableBadge(2, 1, { iconClass: 'proj2-anothervalidiconpng' })
+
+        cy.visit('/administrator/projects/proj1');
+        cy.wait('@proj1CustomIcons')
+        cy.get('[data-cy="noContent"]')
+        cy.get('[data-cy="projectInsufficientPoints"]')
+        cy.get('[data-cy="nav-Badges"]').click()
+        cy.wait(1000)
+        cy.get('[data-cy="badgeCard-badge1"] .proj1-validiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.wait('@proj1CustomIcons')
+        cy.wait(1000)
+        cy.get('[data-cy="badgeCard-badge1"] .proj1-validiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+        cy.wait('@proj1CustomIcons')
+        cy.get('[data-cy="btn_edit-badge"]').click()
+        cy.wait(1000)
+        cy.get('[data-cy="iconPicker"] .proj1-validiconpng')
+          .invoke('css', 'background-image')
+          .then((bgImage) => {
+              expect(bgImage).to.contain('data:image/png;base64')
+          })
+
+
+    });
 });

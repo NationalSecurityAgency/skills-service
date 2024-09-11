@@ -19,6 +19,7 @@ import { computed, onMounted, ref } from 'vue'
 import MyBadgesDetails from '@/skills-display/components/badges/MyBadgesDetails.vue'
 import BadgesCatalog from '@/skills-display/components/badges/BadgesCatalog.vue'
 import MyProgressTitle from '@/components/myProgress/MyProgressTitle.vue'
+import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 
 const loading = ref(true)
 const badges = ref([])
@@ -35,6 +36,16 @@ const loadBadges = () => {
   loading.value = true
   MyProgressService.loadMyBadges().then((res) => {
     badges.value = res
+    const filterWithCustomIcons = (badge) => badge.iconClass &&
+      (
+        (badge.projectId && badge.iconClass.startsWith(`${badge.projectId}-`)) ||
+        (!badge.projectId && badge.iconClass.startsWith(`GLOBAL-`))
+      )
+    const projectIds = res.filter(filterWithCustomIcons).map((badge) => badge.projectId)
+    const refreshIcons = [...new Set(projectIds)].map((projId) => {
+      return IconManagerService.refreshCustomIconCss(projId, !projId)
+    })
+    return Promise.all(refreshIcons)
   }).finally(() => {
     loading.value = false
   })

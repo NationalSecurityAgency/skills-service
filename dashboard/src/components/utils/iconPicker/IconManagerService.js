@@ -17,10 +17,11 @@ import axios from 'axios'
 
 import CustomIconService from '@/components/icons/CustomIconService.js'
 
-const createCustomIconStyleElementIfNotExist = () => {
+const createCustomIconStyleElementIfNotExist = (projectId) => {
   const head = document.getElementsByTagName('head')[0]
 
-  let existingStyles = document.getElementById('skill-custom-icons')
+  const lookupId = `skill-custom-icons${projectId ? `-${projectId}` : ''}`
+  let existingStyles = document.getElementById(lookupId)
   if (!existingStyles) {
     existingStyles = document.createElement('style')
     existingStyles.id = 'skill-custom-icons'
@@ -51,7 +52,7 @@ export default {
     existingStyles.innerText += css
   },
   refreshCustomIconCss(projectId, isSupervisor) {
-    const existingStyles = createCustomIconStyleElementIfNotExist()
+    const existingStyles = createCustomIconStyleElementIfNotExist(projectId)
     CustomIconService.getCustomIconCss(projectId, isSupervisor).then((response) => {
       if (response) {
         existingStyles.innerText = response
