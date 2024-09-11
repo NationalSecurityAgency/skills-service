@@ -45,8 +45,8 @@ const hasTags = computed(()=> props.skill.tags && props.skill.tags.length > 0)
 </script>
 
 <template>
-  <div v-if="showBadgesAndTagsRow" class="row pt-1">
-    <div v-if="hasBadges" class="col-auto pr-0" data-cy="skillBadges">
+  <div v-if="showBadgesAndTagsRow" class="pt-1">
+    <div v-if="hasBadges" class="pr-0" data-cy="skillBadges">
       <i class="fa fa-award text-purple-500" aria-hidden="true"></i> Badges:
       <span v-for="(badge, index) in skill.badges" :data-cy="`skillBadge-${index}`" class="overflow-hidden"
             v-bind:key="badge.badgeId">
