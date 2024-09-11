@@ -904,6 +904,10 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    def getIconUsages(String projId, String cssClass) {
+        return wsHelper.adminGet("/projects/${projId}/icons/${cssClass}/usage")
+    }
+
     def uploadIcon(Map props, File icon){
         Map body = [:]
         body.put("customIcon", icon)

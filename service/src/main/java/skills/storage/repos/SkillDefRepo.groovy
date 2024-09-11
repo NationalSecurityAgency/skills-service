@@ -185,6 +185,10 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     @Nullable
     SkillDef findByProjectIdAndSkillId(String projectId, String skillId)
 
+    @Nullable
+    @Query(value='''select name from SkillDef where projectId=?1 and iconClass=?2''')
+    List<String> findNameByProjectIdAndIconClass(String projectId, String iconClass)
+
     @Query(value = '''SELECT max(sdChild.displayOrder) from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
       where srd.parent.id = sdParent.id and srd.child.id=sdChild.id and srd.type IN ('RuleSetDefinition', 'SkillsGroupRequirement') and 
       sdParent.projectId=?1 and sdParent.skillId=?2''' )

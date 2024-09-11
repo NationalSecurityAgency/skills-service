@@ -40,6 +40,11 @@ const props = defineProps({
 })
 
 const iconManagerOverlayPanel = ref()
+const dismissable = ref(true);
+
+const setDismissable = (setting) => {
+  dismissable.value = setting;
+}
 
 const toggleIconDisplay = (event) => {
   iconManagerOverlayPanel.value.toggle(event)
@@ -77,9 +82,10 @@ const themeHelper = useThemesHelper()
 
     <OverlayPanel ref="iconManagerOverlayPanel"
                   :show-close-icon="true"
+                  :dismissable="dismissable"
                   @hide="panelHidden"
                   :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }">
-      <icon-manager @selected-icon="onSelectedIcon" name="iconClass"></icon-manager>
+      <icon-manager @selected-icon="onSelectedIcon" name="iconClass" @set-dismissable="setDismissable"></icon-manager>
     </OverlayPanel>
   </div>
 </template>

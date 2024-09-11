@@ -22,6 +22,10 @@ import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import spock.lang.Specification
 
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSkills
+import static skills.intTests.utils.SkillsFactory.createSubject
+
 class CustomIconsSpec extends DefaultIntSpec {
 
     String projId = SkillsFactory.defaultProjId
@@ -73,4 +77,38 @@ class CustomIconsSpec extends DefaultIntSpec {
         clientDisplayRes.toString().startsWith(".TestProject1-dot2png {\tbackground-image: url(")
     }
 
+    def "get icon usages when not used"() {
+        ClassPathResource resource = new ClassPathResource("/dot2.png")
+
+        when:
+        skillsService.createProject([projectId: projId, name: "Test Icon Project"])
+        def file = resource.getFile()
+        def iconInfo = skillsService.uploadIcon([projectId:(projId)], file)
+
+        def result = skillsService.getIconUsages(projId, iconInfo.cssClassName)
+
+        then:
+        result == []
+    }
+
+    def "get icon usages when used"() {
+        ClassPathResource resource = new ClassPathResource("/dot2.png")
+
+        when:
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [])
+        def file = resource.getFile()
+        def iconInfo = skillsService.uploadIcon([projectId:(projId)], file)
+
+        def originalSubjectId = p1subj1.subjectId
+        p1subj1.iconClass = iconInfo.cssClassName
+        skillsService.updateSubject(p1subj1, originalSubjectId)
+
+        def result = skillsService.getIconUsages(p1.projectId, iconInfo.cssClassName)
+
+        then:
+        result
+        result[0] == p1subj1.name
+    }
 }

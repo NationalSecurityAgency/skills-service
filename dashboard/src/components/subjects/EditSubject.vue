@@ -61,10 +61,6 @@ const trackFocus = () => {
   currentFocus.value = document.activeElement
 }
 
-const title = computed(() => {
-  return props.isEdit ? 'Editing Existing Subject' : 'New Subject'
-})
-
 const close = () => {
   model.value = false
   focusState.setElementId(originalFocusedElement);

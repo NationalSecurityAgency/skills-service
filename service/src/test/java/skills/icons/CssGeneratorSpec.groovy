@@ -35,7 +35,7 @@ class CssGeneratorSpec extends Specification {
         String css = new CssGenerator().cssify(icons)
 
         then:
-        css == '''.proj-filepng {\tbackground-image: url("''' + mockDataUri1 + '''");\tbackground-repeat: no-repeat;\twidth: 48px;\theight: 48px;\tdisplay: inline-block;}.proj-file2jpg {\tbackground-image: url("''' + mockDataUri2 + '''");\tbackground-repeat: no-repeat;\twidth: 48px;\theight: 48px;\tdisplay: inline-block;}'''
+        css == '''.proj-filepng {\tbackground-image: url("''' + mockDataUri1 + '''");\tbackground-repeat: no-repeat;\tbackground-size: contain;\twidth: 48px;\theight: 48px;\tdisplay: inline-block;}.proj-file2jpg {\tbackground-image: url("''' + mockDataUri2 + '''");\tbackground-repeat: no-repeat;\tbackground-size: contain;\twidth: 48px;\theight: 48px;\tdisplay: inline-block;}'''
     }
 
     def "generates css no host"(){
@@ -52,7 +52,7 @@ class CssGeneratorSpec extends Specification {
         String css = new CssGenerator().cssify(icons)
 
         then:
-        css == '''.proj-filepng {\tbackground-image: url("''' + mockDataUri1 + '''");\tbackground-repeat: no-repeat;\twidth: 48px;\theight: 48px;\tdisplay: inline-block;}.proj-file2jpg {\tbackground-image: url("''' + mockDataUri2 + '''");\tbackground-repeat: no-repeat;\twidth: 48px;\theight: 48px;\tdisplay: inline-block;}'''
+        css == '''.proj-filepng {\tbackground-image: url("''' + mockDataUri1 + '''");\tbackground-repeat: no-repeat;\tbackground-size: contain;\twidth: 48px;\theight: 48px;\tdisplay: inline-block;}.proj-file2jpg {\tbackground-image: url("''' + mockDataUri2 + '''");\tbackground-repeat: no-repeat;\tbackground-size: contain;\twidth: 48px;\theight: 48px;\tdisplay: inline-block;}'''
     }
 
     def "generates empty css when empty icons"(){

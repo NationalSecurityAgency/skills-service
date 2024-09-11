@@ -56,6 +56,7 @@ export const useDialogMessages = () => {
                         rejectLabel = 'Cancel',
                         targetElement = undefined,
                         onShowHandler = () => {},
+                        onHideHandler = () => {},
                       }) => {
     confirm.require({
       target: targetElement,
@@ -81,6 +82,7 @@ export const useDialogMessages = () => {
       },
       onHide: () => {
         focusState.focusOnLastElement()
+        onHideHandler.call()
       },
       defaultFocus: 'accept',
     });

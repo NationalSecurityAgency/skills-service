@@ -26,9 +26,11 @@ import materialIconsCanonical from './material-index';
 import IconManagerService from './IconManagerService.js';
 import IconRow from './IconRow.vue';
 import TabMenu from "primevue/tabmenu";
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
 const route = useRoute();
-const emit = defineEmits(['selected-icon']);
+const emit = defineEmits(['selected-icon', 'set-dismissable']);
+const dialogMessages = useDialogMessages()
 
 const props = defineProps(
     {
@@ -105,15 +107,13 @@ let modalWidth = ref("70rem");
 let rowLength = 6;
 let acceptType = 'image/.*';
 const mimeTester = new RegExp(acceptType);
-let selected = '';
 let selectedCss = '';
-let selectedIconPack = '';
 let activePack = ref(0);
 let fontAwesomeIcons = fontAwesomeIconsCanonical;
 let materialIcons = materialIconsCanonical;
-let disableCustomUpload = false;
-let currentCustomIconFile = null;
 let errorMessage = ref('');
+const fileInfo = ref(null);
+const loadingIcons = ref(false);
 
 let active = ref(0);
 
@@ -219,11 +219,38 @@ const handleUploadedIcon = (response) => {
   selectIcon(response.name, response.cssClassName, 'custom-icon');
 }
 
-const deleteIcon = (iconName, projectId) => {
-  IconManagerService.deleteIcon(iconName, projectId).then(() => {
-    iconPacks.value[2].defaultIcons = iconPacks.value[2].defaultIcons.filter((element) => element.filename !== iconName);
-    iconPacks.value[2].icons = iconPacks.value[2].defaultIcons;
-  });
+const deleteIcon = (file, projectId) => {
+  const className = file.cssClassname;
+  const iconName = file.filename;
+  emit('set-dismissable', false);
+  IconManagerService.findUsages(projectId, className).then((resp) => {
+    const usages = resp;
+    let msg = `Are you sure you want to delete ${iconName}? `
+    if(usages.length > 0) {
+      msg += ' This icon is currently used by: ';
+      const usedBy = usages.join(', ');
+      msg += usedBy;
+    }
+
+    dialogMessages.msgConfirm({
+      message: msg,
+      header: 'WARNING: Delete Custom Icon',
+      acceptLabel: 'YES, Delete It!',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        IconManagerService.deleteIcon(iconName, projectId).then(() => {
+          iconPacks.value[2].defaultIcons = iconPacks.value[2].defaultIcons.filter((element) => element.filename !== iconName);
+          iconPacks.value[2].icons = [iconPacks.value[2].defaultIcons];
+        });
+      },
+      reject: () => {
+        emit('set-dismissable', true);
+      },
+      onHideHandler: () => {
+        emit('set-dismissable', true);
+      }
+    })
+  })
 };
 
 let uploader = ref();
@@ -243,14 +270,15 @@ const beforeUpload = (upload) => {
   const isImageTypeValid = isValidImageType(upload.files[0].type);
 
   if (!isImageTypeValid) {
-    errorMessage.value = 'File is not an image format';
+    displayError('File is not an image format');
     return;
   }
 
   const existingIcons = iconPacks.value[2].icons.flat();
   const uploadName = upload.files[0].name;
+
   if(existingIcons.find(it => it.filename === uploadName)) {
-    errorMessage.value = 'A file with this name already exists';
+    displayError('A file with this name already exists');
     return;
   }
 
@@ -268,12 +296,22 @@ const beforeUpload = (upload) => {
       FileUploadService.upload(uploadUrl.value, data, (response) => {
         handleUploadedIcon(response.data);
       }, () => {
-        errorMessage.value = 'Encountered error when uploading icon';
+        displayError('Encountered error when uploading icon');
       });
     } else {
-      errorMessage.value = `Invalid image dimensions, dimensions must be square and must be between ${minDimensionsString.value} and ${maxDimensionsString.value}`;
+      displayError(`Invalid image dimensions, dimensions must be square and must be between ${minDimensionsString.value} and ${maxDimensionsString.value}`);
     }
   };
+}
+
+const displayError = (message) => {
+  errorMessage.value = message;
+  uploader.value.clear();
+  fileInfo.value = null;
+}
+
+const closeError = () => {
+  errorMessage.value = null;
 }
 </script>
 
@@ -298,33 +336,31 @@ const beforeUpload = (upload) => {
       <FileUpload ref="uploader" @select="beforeUpload" v-if="activePack === 'Custom'" name="customIcon" :accept="acceptType" :maxFileSize="1000000" customUpload @uploader="beforeUpload">
         <template #header>
           <div class="w-full">
-            <InputText class="w-full" data-cy="fileInput" placeholder="Browse..." type="file" @change="uploadFromInput($event)" />
+            <InputText class="w-full" data-cy="fileInput" placeholder="Browse..." type="file" @change="uploadFromInput($event)" v-model="fileInfo" />
             <p class="text-muted text-right text-primary font-italic">* custom icons must be between {{minDimensionsString}} and {{maxDimensionsString}}</p>
           </div>
         </template>
         <template #content>
-          <Message data-cy="iconErrorMessage" v-if="errorMessage" severity="error">{{ errorMessage }}</Message>
-          <p>Drag and drop files to here to upload.</p>
-          <div v-if="iconPacks[2].icons.length > 0">
-            <div class="flex flex-wrap p-0 sm:p-5 gap-5">
-              <div v-for="(icons, index) of iconPacks[2].icons" v-bind:key="index">
-                <div v-for="(file) of icons" :key="file.filename" class="card m-0 px-6 flex flex-column border-1 surface-border align-items-center gap-3">
-                  <div class="icon-item">
-                    <a href="#"
-                       @click.stop.prevent="selectIcon(file.filename, file.cssClassname, 'Custom Icons')"
-                       :class="`item ${selectedCss === file.cssClassname ? 'selected' : ''}`">
-                              <span class="icon is-large text-info">
-                                <i :class="file.cssClassname"></i>
-                              </span>
-                    </a>
-                    <br/>
-                    <span class="iconName">
-                              <a class="delete-icon" ref="#" @click="deleteIcon(file.filename, route.params.projectId)">
-                                <span class="icon is-tiny"><i style="font-size:1rem;height:1rem;width:1rem;" class="fas fa-trash"></i></span>
-                              </a>
-                              <span>{{ file.filename }}</span>
+          <Message data-cy="iconErrorMessage" v-if="errorMessage" @close="closeError" severity="error">{{ errorMessage }}</Message>
+          <p>Drag and drop file here to upload.</p>
+          <div v-if="iconPacks[2].icons.length > 0 && !loadingIcons">
+            <div v-for="(icons, index) of iconPacks[2].icons" v-bind:key="index" class="flex">
+              <div v-for="(file) of icons" :key="file.filename" class="card m-0 px-6 flex flex-wrap border-1 surface-border align-items-center gap-3">
+                <div class="icon-item" style="max-width: 100px;">
+                  <a href="#"
+                     @click.stop.prevent="selectIcon(file.filename, file.cssClassname, 'Custom Icons')"
+                     :class="`item ${selectedCss === file.cssClassname ? 'selected' : ''}`">
+                            <span class="icon is-large text-info">
+                              <i :class="file.cssClassname" style="background-size: contain;"></i>
                             </span>
-                  </div>
+                  </a>
+                  <br/>
+                  <span class="iconName">
+                    <a class="delete-icon" ref="#" @click="deleteIcon(file, route.params.projectId)">
+                      <span class="icon is-tiny"><i style="font-size:1rem;height:1rem;width:1rem;" class="fas fa-trash"></i></span>
+                    </a>
+                    <span>{{ file.filename }}</span>
+                  </span>
                 </div>
               </div>
             </div>
@@ -337,6 +373,11 @@ const beforeUpload = (upload) => {
 </template>
 
 <style>
+  .p-fileupload-content {
+    height: 300px;
+    overflow: auto;
+  }
+
   .icon-row {
     display: flex;
     flex-direction: row;
