@@ -99,7 +99,7 @@ const totalRows = computed(() => items.value.length);
 </script>
 
 <template>
-  <Card data-cy="skillsNavigator"  :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+  <Card data-cy="skillsNavigator" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #header>
       <SkillsCardHeader title="Skills"></SkillsCardHeader>
     </template>
@@ -159,10 +159,11 @@ const totalRows = computed(() => items.value.length);
                        paginator
                        show-grid-lines
                        striped-rows
+                       :loading="loading"
                        :rows="pageSize"
                        :rowsPerPageOptions="possiblePageSizes">
         <template #loading>
-￼          <div>
+￼          <div data-cy="skillsNavigator-loading">
 ￼            <Message v-if="isExporting" icon="fas fa-download" severity="contrast" :closable="false">Exporting, please wait...</Message>
 ￼            <SkillsSpinner :is-loading="true"></SkillsSpinner>
 ￼          </div>
