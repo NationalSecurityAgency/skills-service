@@ -72,9 +72,10 @@ watch(() => authState.userInfo, async (newUserInfo) => {
     inceptionConfigurer.configure()
     pageVisitService.reportPageVisit(route.path, route.fullPath)
     const loadRoot = accessState.loadIsRoot()
+    const loadSupervisor = accessState.loadIsSupervisor()
     const loadEmailEnabled = appInfoState.loadEmailEnabled()
     const loadTheme = themeHelper.loadTheme()
-    Promise.all([loadRoot, loadEmailEnabled, loadTheme]).then(() => {
+    Promise.all([loadRoot, loadSupervisor, loadEmailEnabled, loadTheme]).then(() => {
       isAppLoaded.value = true
     })
   } else {
