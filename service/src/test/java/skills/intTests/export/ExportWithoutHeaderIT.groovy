@@ -59,7 +59,7 @@ class ExportWithoutHeaderIT extends ExportBaseIntSpec {
 
         then:
         validateExport(excelExport.file, [
-                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Points First Earned", "Points Last Earned"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
                 [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "60.0", today.format("dd-MMM-yyyy"), today.format("dd-MMM-yyyy")],
                 [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "2.0", "100.0", fiveDaysAgo.format("dd-MMM-yyyy"), oneDayAgo.format("dd-MMM-yyyy")],
         ])
@@ -99,7 +99,7 @@ class ExportWithoutHeaderIT extends ExportBaseIntSpec {
 
         excelExport
         validateExport(excelExport.file, [
-                ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date"],
+                ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 1", "", dates[1].format("dd-MMM-yyyy")],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "1.0", dates[1].format("dd-MMM-yyyy")],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
@@ -141,7 +141,7 @@ class ExportWithoutHeaderIT extends ExportBaseIntSpec {
 
         then:
         validateExport(excelExport.file, [
-                ["Skill Name", "Skill ID", "# Users Achieved", "# Users In Progress", "Date Last Reported", "Date Last Achieved"],
+                ["Skill Name", "Skill ID", "# Users Achieved", "# Users In Progress", "Date Last Reported (UTC)", "Date Last Achieved (UTC)"],
                 ["Test Skill 1", "skill1", "1.0", "4.0",  today.format("dd-MMM-yyyy"), today.format("dd-MMM-yyyy")],
                 ["Test Skill 2", "skill2", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
                 ["Test Skill 3", "skill3", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],

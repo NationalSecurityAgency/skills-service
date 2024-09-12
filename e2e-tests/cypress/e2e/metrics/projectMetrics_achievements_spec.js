@@ -118,7 +118,7 @@ describe('Metrics Tests - Achievements', () => {
             .contains('There are no records to show');
     });
 
-    it('achievements table - few rows', () => {
+    it.only('achievements table - few rows', () => {
         cy.viewport(1500, 750);
 
         cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
