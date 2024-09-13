@@ -68,13 +68,13 @@ describe('Quiz Metrics With Reused Data Tests', () => {
         cy.get('[data-cy="metrics-q1"] [data-cy="qType"]').should('have.text', 'Single Choice')
 
         cy.get('[data-cy="metrics-q1"] [data-cy="row0-colAnswer"]').contains("Question 1 - First Answer")
-        cy.get('[data-cy="metrics-q1"] [data-cy="row0-colAnswer"] [data-cy="checkbox-true"]')
+        cy.get('[data-cy="metrics-q1"] [data-cy="row0-colAnswer"] [data-cy="checkbox-true"] .fa-check-square')
 
         cy.get('[data-cy="metrics-q1"] [data-cy="row1-colAnswer"]').contains("Question 1 - Second Answer")
-        cy.get('[data-cy="metrics-q1"] [data-cy="row1-colAnswer"] [data-cy="checkbox-false"]')
+        cy.get('[data-cy="metrics-q1"] [data-cy="row1-colAnswer"] [data-cy="checkbox-false"] .fa-square')
 
         cy.get('[data-cy="metrics-q1"] [data-cy="row2-colAnswer"]').contains("Question 1 - Third Answer")
-        cy.get('[data-cy="metrics-q1"] [data-cy="row2-colAnswer"] [data-cy="checkbox-false"]')
+        cy.get('[data-cy="metrics-q1"] [data-cy="row2-colAnswer"] [data-cy="checkbox-false"] .fa-square')
 
         cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-cy="num"]').should('have.text', '6')
         cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-cy="percent"]').should('have.text', '54%')

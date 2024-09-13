@@ -212,7 +212,7 @@ const numberOfStars = computed(() => {
         </template>
         <template #body="slotProps">
           <div v-if="slotProps.field === 'answer'" :data-cy="`row${slotProps.index}-colAnswer`">
-            <CheckSelector v-if="!isSurvey" :value="slotProps.data.isCorrect" :read-only="true" font-size="1.5rem"
+            <CheckSelector v-if="!isSurvey" v-model="slotProps.data.isCorrect" :read-only="true" font-size="1.5rem"
                            :data-cy="`checkbox-${slotProps.data.isCorrect}`" />
             {{ slotProps.data[col.key] }}
           </div>
