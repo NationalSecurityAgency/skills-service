@@ -200,6 +200,7 @@ describe('Client Display Theme Components Tests', () => {
 
     // let's wait for animation to complete
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+    cy.wait(3000)
     cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
   })
 
@@ -208,6 +209,7 @@ describe('Client Display Theme Components Tests', () => {
 
     // let's wait for animation to complete
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+    cy.wait(3000)
     cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
   })
 
@@ -216,10 +218,12 @@ describe('Client Display Theme Components Tests', () => {
 
     // // let's wait for animation to complete
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+    cy.wait(3000)
     cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]', 'chartLabels-pointsHistory')
     cy.cdClickRank()
 
     cy.get('[data-cy="levelBreakdownChart-animationEnded"]')
+    cy.wait(3000)
     cy.matchSnapshotImageForElement('[data-cy="levelBreakdownChart"]', 'chartLabels-levelBreakdown')
 
   })
@@ -368,7 +372,7 @@ describe('Client Display Theme Components Tests', () => {
     cy.cdVisit(url)
 
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-    cy.wait(1111)
+    cy.wait(3000)
     cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', { blackout: '[data-cy=achievementDate]' })
   })
 

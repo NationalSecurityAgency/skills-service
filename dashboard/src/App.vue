@@ -41,6 +41,7 @@ import { useUserAgreementInterceptor } from '@/interceptors/UseUserAgreementInte
 import PkiAppBootstrap from '@/components/access/PkiAppBootstrap.vue'
 import { usePrimeVue } from 'primevue/config'
 import ScrollToTop from '@/common-components/utilities/ScrollToTop.vue'
+import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -65,6 +66,11 @@ const isLoadingApp = computed(() => !isAppLoaded.value || appConfig.isLoadingCon
 const themeHelper = useThemesHelper()
 themeHelper.configureDefaultThemeFileInHeadTag()
 
+const addCustomIconCSSForClientDisplay = () => {
+  if (skillsDisplayInfo.isSkillsClientPath()) {
+    IconManagerService.refreshCustomIconCss(skillsDisplayAttributes.projectId, false)
+  }
+}
 const inceptionConfigurer = useInceptionConfigurer()
 const pageVisitService = usePageVisitService()
 watch(() => authState.userInfo, async (newUserInfo) => {
@@ -75,7 +81,8 @@ watch(() => authState.userInfo, async (newUserInfo) => {
     const loadSupervisor = accessState.loadIsSupervisor()
     const loadEmailEnabled = appInfoState.loadEmailEnabled()
     const loadTheme = themeHelper.loadTheme()
-    Promise.all([loadRoot, loadSupervisor, loadEmailEnabled, loadTheme]).then(() => {
+    const loadCustomIconCSS = addCustomIconCSSForClientDisplay()
+    Promise.all([loadRoot, loadSupervisor, loadEmailEnabled, loadTheme, loadCustomIconCSS]).then(() => {
       isAppLoaded.value = true
     })
   } else {

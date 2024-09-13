@@ -21,3 +21,4 @@ delete from skill_definition;
 delete from settings;
 delete from user_tags;
 delete from user_actions_history;
+delete from custom_icons;
