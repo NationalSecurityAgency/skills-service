@@ -22,6 +22,8 @@ describe('Metrics Tests - Skills', () => {
             projectId: 'proj1',
             name: 'proj1'
         });
+
+        cy.cleanupDownloadsDir()
     });
 
     it('skills table - empty table', () => {
@@ -251,7 +253,45 @@ describe('Metrics Tests - Skills', () => {
         cy.readFile(exportedFileName).should('not.exist');
         cy.get('[data-cy="exportSkillsTableBtn"]').click();
         cy.readFile(exportedFileName).should('exist');
+    });
 
+    it('skills table - exporting shows loading indicator', () => {
+        cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
+          .as('skillUsageNavigatorChartBuilder');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Interesting Subject 1',
+        });
+
+        const numSkills = 8;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '50',
+                numPerformToCompletion: '1',
+            });
+        }
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.clickNav('Metrics');
+        cy.get('[data-cy=metricsNav-Skills]')
+          .click();
+        cy.wait('@skillUsageNavigatorChartBuilder');
+
+        // delay export and verify loading indicator is showing
+        cy.intercept('GET', 'admin/projects/proj1/skills/export/excel', {
+            delay: 1000
+        }).as('exportSkillsTable');
+        const exportedFileName = `cypress/downloads/proj1-skills-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
+        cy.get('[data-cy="exportSkillsTableBtn"]').click();
+        cy.get('[data-cy="skillsNavigator-loading"]').should('exist');
+        cy.wait('@exportSkillsTable');
+        cy.get('[data-cy="skillsNavigator-loading"]').should('not.exist');
     });
 
     it('skills table - skill usage filtering', () => {
