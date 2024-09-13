@@ -24,15 +24,21 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.result.model.ProjectUser
+import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.UserProgressExportResult
 import skills.metrics.builders.project.UserAchievementsMetricsBuilder
 import skills.metrics.builders.project.UserAchievementsMetricsBuilder.QueryParams
+import skills.services.admin.SkillsAdminService
 import skills.services.admin.UserCommunityService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.storage.model.SkillDef
+import skills.storage.model.SkillRelDef
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.utils.InputSanitizer
 
 import java.util.stream.Stream
+
+import static skills.services.attributes.ExpirationAttrs.NEVER
 
 @Service
 @Slf4j
@@ -58,6 +64,9 @@ class ExcelExportService {
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo
+
+    @Autowired
+    SkillsAdminService skillsAdminService
 
     @Transactional(readOnly = true)
     void exportUsersProgress(Workbook workbook, String projectId, String query, PageRequest pageRequest, int minimumPoints) {
@@ -191,6 +200,104 @@ class ExcelExportService {
         if (projectExportHeaderAndFooter) {
             addDataHeaderOrFooter(sheet, rowNum++,  headers.size(), projectExportHeaderAndFooter)
         }
+    }
+
+    @Transactional(readOnly = true)
+    void exportSubjectSkills(Workbook workbook, String projectId, String subjectId) {
+
+        String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getProjectUserCommunity(projectId))
+        Sheet sheet = workbook.createSheet()
+        List<String> headers = ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)", "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version"]
+        Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
+
+        CellStyle dateStyle = workbook.createCellStyle()
+        dateStyle.setDataFormat((short) 22) // NOTE: 14 = "mm/dd/yyyy"
+
+        List<SkillDefPartialRes> subjectSkills = skillsAdminService.getSkillsForSubjectWithCatalogStatus(projectId, subjectId, false)
+        subjectSkills?.each { SkillDefPartialRes skillDef ->
+            rowNum = addSkill(sheet, rowNum, dateStyle, skillDef)
+        }
+        if (projectExportHeaderAndFooter) {
+            addDataHeaderOrFooter(sheet, rowNum++,  headers.size(), projectExportHeaderAndFooter)
+        }
+    }
+
+    private Integer addSkill(Sheet sheet, Integer rowNum, CellStyle dateStyle, SkillDefPartialRes skillDef) {
+        Row row = sheet.createRow(rowNum++)
+        Integer columnNumber = 0
+        row.createCell(columnNumber++).setCellValue(SkillReuseIdUtil.removeTag(InputSanitizer.unsanitizeName(skillDef.name)))
+        row.createCell(columnNumber++).setCellValue(skillDef.skillId)
+        row.createCell(columnNumber++).setCellValue(skillDef.groupName)
+        row.createCell(columnNumber++).setCellValue(skillDef.tags?.collect {it.tagValue}?.join(','))
+
+        Cell cell = row.createCell(columnNumber++)
+        cell.setCellStyle(dateStyle)
+        cell.setCellValue(skillDef.created)
+
+        row.createCell(columnNumber++).setCellValue(skillDef.totalPoints)
+        row.createCell(columnNumber++).setCellValue(skillDef.pointIncrement)
+        row.createCell(columnNumber++).setCellValue(skillDef.numPerformToCompletion)
+        row.createCell(columnNumber++).setCellValue(getSelfReportType(skillDef))
+        row.createCell(columnNumber++).setCellValue(getCatalogStatus(skillDef))
+        row.createCell(columnNumber++).setCellValue(skillDef.expirationType && skillDef.expirationType != NEVER ? skillDef.expirationType : "")
+        row.createCell(columnNumber++).setCellValue(getTimeWindow(skillDef))
+        row.createCell(columnNumber++).setCellValue(skillDef.version)
+
+        if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
+            skillsAdminService.getSkillsByProjectSkillAndType(skillDef.projectId, skillDef.skillId, SkillDef.ContainerType.SkillsGroup, SkillRelDef.RelationshipType.SkillsGroupRequirement).each {
+                it.setGroupId(skillDef.skillId)
+                it.setGroupName(skillDef.name)
+                rowNum = addSkill(sheet, rowNum, dateStyle, it)
+            }
+        }
+        return rowNum
+    }
+
+
+    private static String getSelfReportType(SkillDefPartialRes skillDef) {
+        String selfReportType = ""
+        if (skillDef.selfReportingType) {
+            if (skillDef.selfReportingType == SkillDef.SelfReportingType.HonorSystem) {
+                selfReportType = "Honor System"
+            } else {
+                selfReportType = skillDef.selfReportingType
+            }
+        }
+        return selfReportType
+    }
+
+    private static String getCatalogStatus(SkillDefPartialRes skillDef) {
+        String catalogStatus = ""
+        if (skillDef.copiedFromProjectId && !skillDef.isReused) {
+            catalogStatus = "Imported"
+        } else if (skillDef.sharedToCatalog) {
+            catalogStatus = "Exported"
+        }
+        return catalogStatus
+    }
+
+    private static String getTimeWindow(SkillDefPartialRes skillDef) {
+        String timeWindow = ""
+        if (skillDef.type == SkillDef.ContainerType.Skill) {
+            Boolean timeWindowEnabled = skillDef.pointIncrementInterval > 0
+            if (timeWindowEnabled && skillDef.numPerformToCompletion != 1) {
+                if (skillDef.numPerformToCompletion != 1) {
+                    Integer hours = Math.floor(skillDef.pointIncrementInterval / 60)
+                    Integer minutes = skillDef.pointIncrementInterval % 60
+                    timeWindow = "${hours} Hour"
+                    if (hours > 1) {
+                        timeWindow = "${timeWindow}s"
+                    }
+                    if (minutes > 0) {
+                        timeWindow = "${timeWindow} ${minutes} Minute"
+                        if (minutes > 1) {
+                            timeWindow = "${timeWindow}s"
+                        }
+                    }
+                }
+            }
+        }
+        return timeWindow
     }
 
     private static Integer initializeSheet(Sheet sheet, List<String> headers, String projectExportHeaderAndFooter) {

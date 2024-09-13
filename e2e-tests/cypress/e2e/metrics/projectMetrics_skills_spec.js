@@ -249,7 +249,7 @@ describe('Metrics Tests - Skills', () => {
         ], 10, true, 8);
 
         // export skill metrics and verify that the file exists
-        const exportedFileName = `cypress/downloads/proj1-skills-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
+        const exportedFileName = `cypress/downloads/proj1-skill-metrics-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
         cy.readFile(exportedFileName).should('not.exist');
         cy.get('[data-cy="exportSkillsTableBtn"]').click();
         cy.readFile(exportedFileName).should('exist');

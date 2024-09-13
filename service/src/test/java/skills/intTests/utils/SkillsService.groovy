@@ -1038,6 +1038,9 @@ class SkillsService {
     def getSkillMetricsExcelExport(String projectId) {
         return downloadAttachment("/admin${getProjectUrl(projectId)}/skills/export/excel".toString())
     }
+    def getSkillsForSubjectExport(String projectId, String subjectId) {
+        return downloadAttachment("/admin${getSubjectUrl(projectId, subjectId)}/skills/export/excel".toString())
+    }
 
     def getSubjectUsers(String projectId, String subjectId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0) {
         return wsHelper.adminGet("${getSubjectUrl(projectId, subjectId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}".toString())

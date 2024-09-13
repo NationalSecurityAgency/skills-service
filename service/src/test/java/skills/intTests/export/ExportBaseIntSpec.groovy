@@ -76,7 +76,7 @@ class ExportBaseIntSpec extends DefaultIntSpec {
         data.eachWithIndex { dataRow, rowIndex ->
             Row row = sheet.getRow(rowIndex)
             for (int i = 0; i < dataRow.size(); i++) {
-                assert row.getCell(i).toString() == dataRow.get(i)
+                assert row.getCell(i).toString() == dataRow.get(i), "row: ${rowIndex} col: ${i} expected: ${dataRow.get(i)} actual: ${row.getCell(i).toString()}"
             }
         }
     }

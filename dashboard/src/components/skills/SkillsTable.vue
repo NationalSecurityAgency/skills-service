@@ -48,6 +48,7 @@ import { useLog } from '@/components/utils/misc/useLog.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import SkillNameRouterLink from '@/components/skills/SkillNameRouterLink.vue';
 import { useFocusState } from '@/stores/UseFocusState.js'
+import skillsService from '@/components/skills/SkillsService.js';
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -72,6 +73,7 @@ const focusState = useFocusState()
 const log = useLog()
 
 const subjectId = computed(() => route.params.subjectId)
+const projectId = computed(() => route.params.projectId)
 const tableId = props.groupId || route.params.subjectId
 const pagination = {
   pageSize: 10,
@@ -329,6 +331,7 @@ const showExportToCatalogDialog = ref(false)
 const showAddSkillsToBadgeDialog = ref(false)
 const showAddSkillsTag = ref(false)
 const showRemoveSkillsTag = ref(false)
+const isExporting = ref(false)
 
 // const skillsTable = ref(null)
 // const exportCSV = () => {
@@ -450,14 +453,97 @@ const actionMenuOnBlur = () => {
 }
 // done with actions fix
 
+const exportSkills = () => {
+  isExporting.value = true
+  return skillsService.exportSubjectSkills(projectId.value, subjectId.value).then((dataFromServer) => {
+    isExporting.value = false
+  })
+}
 </script>
 
 <template>
   <div>
+    <div class="p-3 bg-primary-reverse">
+      <div class="flex gap-1">
+        <InputGroup>
+          <InputGroupAddon>
+            <i class="fas fa-search" aria-hidden="true"/>
+          </InputGroupAddon>
+          <InputText
+              class="flex flex-grow-1"
+              v-model="filters['global'].value"
+              data-cy="skillsTable-skillFilter"
+              aria-label="Skill Search"
+              placeholder="Skill Search"/>
+          <InputGroupAddon class="p-0 m-0">
+            <SkillsButton
+                id="skillsFilterResetBtn"
+                icon="fa fa-times"
+                text
+                outlined
+                @click="clearFilter"
+                aria-label="Reset skills filter"
+                data-cy="filterResetBtn"/>
+          </InputGroupAddon>
+        </InputGroup>
+      </div>
+      <div class="mt-4">
+        <div class="mt-2 flex flex-wrap">
+          <div class="flex-1 w-full lg:w-auto">
+            <MultiSelect
+                class="w-full lg:w-auto"
+                v-model="additionalSelectedColumns"
+                :options="additionalColumns"
+                display="chip"
+                :max-selected-labels="3"
+                optionLabel="label"
+                @update:modelValue="onToggle"
+                placeholder="Optional Fields"
+                data-cy="skillsTable-additionalColumns"/>
+          </div>
+          <div v-if="!projConfig.isReadOnlyProj" class="w-full lg:w-auto flex mt-3 lg:mt-0 flex-column sm:flex-row gap-2">
+            <div class="flex-1 align-items-center flex">
+              <label for="sortEnabledSwitch" class="lg:ml-3 mr-1">Reorder:</label>
+              <InputSwitch
+                  id="sortEnabledSwitch"
+                  inputId="sortEnabledSwitch"
+                  data-cy="enableDisplayOrderSort"
+                  @update:modelValue="onReorderSwitchChanged"
+                  aria-label="Sorting Control - when enabled move-up and move-down buttons will be visible within each display order cell"
+                  v-model="reorderEnable"/>
+            </div>
+            <SkillsButton
+                :id="`skillActionsBtn${groupId || ''}`"
+                severity="info"
+                class="ml-3"
+                @click="toggleActionsMenu"
+                aria-label="Skill's actions button"
+                aria-haspopup="true"
+                :disabled="selectedSkills.length === 0"
+                :track-for-focus="true"
+                data-cy="skillActionsBtn">
+              <i class="fas fa-tools mr-1" aria-hidden="true"></i>
+              <span>Action</span>
+              <Tag data-cy="skillActionsNumSelected" class="ml-1" severity="info">{{ selectedSkills.length }}</Tag>
+              <i class="fas fa-caret-down ml-2"></i>
+            </SkillsButton>
+            <Menu ref="skillsActionsMenu"
+                  id="skills-actions-menu"
+                  data-cy="skillsActionsMenu"
+                  :model="actionsMenu"
+                  @focus="actionMenuOnFocus"
+                  @blur="actionMenuOnBlur"
+                  aria-label="Menu to perform actions on selected skills"
+                  :popup="true">
+            </Menu>
+          </div>
+        </div>
+      </div>
+    </div>
     <SkillsDataTable
       :id="tableId"
       :tableStoredStateId="tableId"
-      :loading="isLoading"
+      :loading="isLoading || isExporting"
       :value="tableSkills"
       dataKey="skillId"
       :reorderableColumns="true"
@@ -479,81 +565,21 @@ const actionMenuOnBlur = () => {
       aria-label="Skills"
       data-cy="skillsTable">
 
+      <template #loading>
+￼          <div data-cy="skillsTable-loading">
+￼            <Message v-if="isExporting" icon="fas fa-download" severity="contrast" :closable="false">Exporting, please wait...</Message>
+￼            <SkillsSpinner :is-loading="true"></SkillsSpinner>
+￼          </div>
+      </template>
+
       <template #header>
-        <div class="flex gap-1">
-          <InputGroup>
-            <InputGroupAddon>
-              <i class="fas fa-search" aria-hidden="true" />
-            </InputGroupAddon>
-            <InputText
-              class="flex flex-grow-1"
-              v-model="filters['global'].value"
-              data-cy="skillsTable-skillFilter"
-              aria-label="Skill Search"
-              placeholder="Skill Search" />
-            <InputGroupAddon class="p-0 m-0">
-              <SkillsButton
-                id="skillsFilterResetBtn"
-                icon="fa fa-times"
-                text
-                outlined
-                @click="clearFilter"
-                aria-label="Reset skills filter"
-                data-cy="filterResetBtn" />
-            </InputGroupAddon>
-          </InputGroup>
-        </div>
-        <div class="mt-4">
-          <div class="mt-2 flex flex-wrap">
-            <div class="flex-1 w-full lg:w-auto">
-              <MultiSelect
-                class="w-full lg:w-auto"
-                v-model="additionalSelectedColumns"
-                :options="additionalColumns"
-                display="chip"
-                :max-selected-labels="3"
-                optionLabel="label"
-                @update:modelValue="onToggle"
-                placeholder="Optional Fields"
-                data-cy="skillsTable-additionalColumns" />
-            </div>
-            <div v-if="!projConfig.isReadOnlyProj" class="w-full lg:w-auto flex mt-3 lg:mt-0 flex-column sm:flex-row gap-2">
-              <div class="flex-1 align-items-center flex">
-                <label for="sortEnabledSwitch" class="lg:ml-3 mr-1">Reorder:</label>
-                <InputSwitch
-                  id="sortEnabledSwitch"
-                  inputId="sortEnabledSwitch"
-                  data-cy="enableDisplayOrderSort"
-                  @update:modelValue="onReorderSwitchChanged"
-                  aria-label="Sorting Control - when enabled move-up and move-down buttons will be visible within each display order cell"
-                  v-model="reorderEnable" />
-              </div>
-              <SkillsButton
-                :id="`skillActionsBtn${groupId || ''}`"
-                severity="info"
-                class="ml-3"
-                @click="toggleActionsMenu"
-                aria-label="Skill's actions button"
-                aria-haspopup="true"
-                :disabled="selectedSkills.length === 0"
-                :track-for-focus="true"
-                data-cy="skillActionsBtn">
-                <i class="fas fa-tools mr-1" aria-hidden="true"></i>
-                <span>Action</span>
-                <Tag data-cy="skillActionsNumSelected" class="ml-1" severity="info">{{ selectedSkills.length }}</Tag>
-                <i class="fas fa-caret-down ml-2"></i>
-              </SkillsButton>
-              <Menu ref="skillsActionsMenu"
-                    id="skills-actions-menu"
-                    data-cy="skillsActionsMenu"
-                    :model="actionsMenu"
-                    @focus="actionMenuOnFocus"
-                    @blur="actionMenuOnBlur"
-                    aria-label="Menu to perform actions on selected skills"
-                    :popup="true">
-              </Menu>
-            </div>
-          </div>
+        <div class="flex justify-content-end flex-wrap mt-2">
+          <SkillsButton :disabled="totalRows <= 0"
+                        size="small"
+                        icon="fas fa-download"
+                        label="Export All Rows"
+                        @click="exportSkills"
+                        data-cy="exportSkillsTableBtn" />
         </div>
       </template>
 

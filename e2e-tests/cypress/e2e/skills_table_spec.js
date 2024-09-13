@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const moment = require('moment-timezone');
 describe('Skills Table Tests', () => {
   const tableSelector = '[data-cy="skillsTable"]'
 
@@ -26,6 +27,8 @@ describe('Skills Table Tests', () => {
       subjectId: 'subj1',
       name: 'Subject 1'
     })
+
+    cy.cleanupDownloadsDir()
   })
 
   it('create first skill then remove it', () => {
@@ -141,7 +144,6 @@ describe('Skills Table Tests', () => {
       })
     }
 
-
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
     // force the order
@@ -169,7 +171,6 @@ describe('Skills Table Tests', () => {
   })
 
   it('sort by skill and order', () => {
-
     const numSkills = 13
     const expected = []
     for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
@@ -184,7 +185,6 @@ describe('Skills Table Tests', () => {
         numPerformToCompletion: skillsCounter < 3 ? '1' : '200'
       })
     }
-
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
@@ -201,7 +201,43 @@ describe('Skills Table Tests', () => {
 
     cy.get(`${tableSelector} th`).contains('Display').click()
     cy.validateTable(tableSelector, expected.map((item) => item).reverse(), 10)
+
+    // export skill metrics and verify that the file exists
+    const exportedFileName = `cypress/downloads/proj1-skills-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
+    cy.readFile(exportedFileName).should('not.exist');
+    cy.get('[data-cy="exportSkillsTableBtn"]').click();
+    cy.readFile(exportedFileName).should('exist');
   })
+
+  it('skills table - exporting shows loading indicator', () => {
+    const numSkills = 13
+    const expected = []
+    for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+      const skillName = `Skill # ${skillsCounter}`
+      expected.push([{ colIndex: 2, value: skillName }, { colIndex: 3, value: skillsCounter }])
+      cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+        projectId: 'proj1',
+        subjectId: 'subj1',
+        skillId: `skill${skillsCounter}`,
+        name: skillName,
+        pointIncrement: '150',
+        numPerformToCompletion: skillsCounter < 3 ? '1' : '200'
+      })
+    }
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1')
+
+    // delay export and verify loading indicator is showing
+    cy.intercept('GET', 'admin/projects/proj1/subjects/subj1/skills/export/excel', {
+      delay: 1000
+    }).as('exportSkillsTable');
+    const exportedFileName = `cypress/downloads/proj1-skills-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
+    cy.get('[data-cy="exportSkillsTableBtn"]').click();
+    cy.get('[data-cy="skillsTable-loading"]').should('exist');
+    cy.wait('@exportSkillsTable');
+    cy.get('[data-cy="skillsTable-loading"]').should('not.exist');
+  });
+
 
   it('sort by created date', () => {
 

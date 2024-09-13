@@ -15,6 +15,9 @@
  */
 import axios from 'axios'
 import dayjs from '@/common-components/DayJsCustomizer'
+import { useExportUtil } from '@/components/utils/UseExportUtil.js';
+
+const exportUtil = useExportUtil()
 
 const enrichSkillObjWithRequiredAtts = (skill) => {
   const copy = { ...skill }
@@ -91,6 +94,10 @@ export default {
         `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills${queryParam}`
       )
       .then((response) => response.data.map((item) => this.addMetaToSkillObj(item)))
+  },
+  exportSubjectSkills(projectId, subjectId) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills/export/excel`;
+    return exportUtil.ajaxDownload(url)
   },
   getProjectSkills(
     projectId,
