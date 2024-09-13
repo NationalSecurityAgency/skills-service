@@ -38,8 +38,6 @@ import skills.utils.InputSanitizer
 
 import java.util.stream.Stream
 
-import static skills.services.attributes.ExpirationAttrs.NEVER
-
 @Service
 @Slf4j
 class ExcelExportService {
@@ -239,7 +237,7 @@ class ExcelExportService {
         row.createCell(columnNumber++).setCellValue(skillDef.numPerformToCompletion)
         row.createCell(columnNumber++).setCellValue(getSelfReportType(skillDef))
         row.createCell(columnNumber++).setCellValue(getCatalogStatus(skillDef))
-        row.createCell(columnNumber++).setCellValue(skillDef.expirationType && skillDef.expirationType != NEVER ? skillDef.expirationType : "")
+        row.createCell(columnNumber++).setCellValue(skillDef.expirationType && skillDef.expirationType != skills.services.attributes.ExpirationAttrs.NEVER ? skillDef.expirationType : "")
         row.createCell(columnNumber++).setCellValue(getTimeWindow(skillDef))
         row.createCell(columnNumber++).setCellValue(skillDef.version)
 
