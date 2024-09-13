@@ -159,6 +159,7 @@ watch(() => searchValue.value, useDebounceFn((newValue) => {
           :loading="isLoading"
           striped-rows
           paginator
+          :auto-max-width="false"
           :nullSortOrder="-1"
           :rows="5"
           :table-stored-state-id="tableStoredStateId">

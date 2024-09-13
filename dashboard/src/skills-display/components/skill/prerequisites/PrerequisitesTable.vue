@@ -69,6 +69,7 @@ const getTypeIconColor = (type) => {
       tableStoredStateId="skillsDisplayPrerequisitesTable"
       :paginator="prerequisites.length > 8"
       :rows="5"
+      :auto-max-width="false"
       :value="prerequisites"
       aria-label="Prerequisites"
       data-cy="prereqTable">

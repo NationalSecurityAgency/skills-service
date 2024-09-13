@@ -129,6 +129,7 @@ const getProgressPercent = (item) => {
           :loading="loading"
           tableStoredStateId="skillsDisplayLeaderboard"
           :value="items"
+          :auto-max-width="false"
           aria-label="Leaderboard"
           data-cy="leaderboardTable">
           <template #empty>
