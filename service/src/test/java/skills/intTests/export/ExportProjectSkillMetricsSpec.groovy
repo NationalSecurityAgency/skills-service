@@ -52,7 +52,7 @@ class ExportProjectSkillMetricsSpec extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["Skill Name", "Skill ID", "# Users Achieved", "# Users In Progress", "Date Last Reported", "Date Last Achieved"],
+                ["Skill Name", "Skill ID", "# Users Achieved", "# Users In Progress", "Date Last Reported (UTC)", "Date Last Achieved (UTC)"],
                 ["Test Skill 1", "skill1", "1.0", "4.0",  today.format("dd-MMM-yyyy"), today.format("dd-MMM-yyyy")],
                 ["Test Skill 2", "skill2", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
                 ["Test Skill 3", "skill3", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
@@ -102,7 +102,7 @@ class ExportProjectSkillMetricsSpec extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["For Divine Dragon Only"],
-                ["Skill Name", "Skill ID", "# Users Achieved", "# Users In Progress", "Date Last Reported", "Date Last Achieved"],
+                ["Skill Name", "Skill ID", "# Users Achieved", "# Users In Progress", "Date Last Reported (UTC)", "Date Last Achieved (UTC)"],
                 ["Test Skill 1", "skill1", "1.0", "4.0",  today.format("dd-MMM-yyyy"), today.format("dd-MMM-yyyy")],
                 ["Test Skill 2", "skill2", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
                 ["Test Skill 3", "skill3", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],

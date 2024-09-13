@@ -63,7 +63,7 @@ class ExportUserProjectAcheivementsSpec extends ExportBaseIntSpec {
         excelExport
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date"],
+                ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 1", "", dates[1].format("dd-MMM-yyyy")],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "1.0", dates[1].format("dd-MMM-yyyy")],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
@@ -114,7 +114,7 @@ class ExportUserProjectAcheivementsSpec extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date"],
+                ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "Skill", "Test Skill 1", "", dates[1].format("dd-MMM-yyyy")],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "Subject", "Test Subject #1", "1.0", dates[1].format("dd-MMM-yyyy")],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
@@ -200,7 +200,7 @@ class ExportUserProjectAcheivementsSpec extends ExportBaseIntSpec {
         def excelExportQueryFilter = skillsService.getUserAchievementsExcelExport(proj.projectId, props)
         List<List<String>> expectedDataForQuery = [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date"],
+                ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "1.0", dates[1].format("dd-MMM-yyyy")],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 1", "", dates[1].format("dd-MMM-yyyy")],

@@ -65,15 +65,15 @@ class ExcelExportService {
         Sheet sheet = workbook.createSheet()
         List<String> headers
         if (userTagLabel) {
-            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Level", "Current Points", "Points First Earned", "Points Last Earned"]
+            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Level", "Current Points", "Points First Earned (UTC)", "Points Last Earned (UTC)"]
         } else {
-            headers = ["User ID", "Last Name", "First Name", "Level", "Current Points", "Points First Earned", "Points Last Earned"]
+            headers = ["User ID", "Last Name", "First Name", "Level", "Current Points", "Points First Earned (UTC)", "Points Last Earned (UTC)"]
         }
         Integer columnNumber = 0
         Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
 
         CellStyle dateStyle = workbook.createCellStyle()
-        dateStyle.setDataFormat((short) 14) // NOTE: 14 = "mm/dd/yyyy"
+        dateStyle.setDataFormat((short) 22) // NOTE: 14 = "mm/dd/yyyy"
 
         Cell cell = null
         Stream<ProjectUser> projectUsers = adminUsersService.streamAllDistinctUsersForProject(projectId, query, pageRequest, minimumPoints)
@@ -113,15 +113,15 @@ class ExcelExportService {
         Sheet sheet = workbook.createSheet()
         List<String> headers
         if (userTagLabel) {
-            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Achievement Type", "Achievement Name", "Level", "Achievement Date"]
+            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"]
         } else {
-            headers = ["User ID", "Last Name", "First Name", "Achievement Type", "Achievement Name", "Level", "Achievement Date"]
+            headers = ["User ID", "Last Name", "First Name", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"]
         }
         Integer columnNumber = 0
         Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
 
         CellStyle dateStyle = workbook.createCellStyle()
-        dateStyle.setDataFormat((short) 14) // NOTE: 14 = "mm/dd/yyyy"
+        dateStyle.setDataFormat((short) 22) // NOTE: 14 = "mm/dd/yyyy"
 
         Cell cell = null
         if (queryParams) {
@@ -161,12 +161,12 @@ class ExcelExportService {
     void exportSkillMetrics(Workbook workbook, String projectId) {
         String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getProjectUserCommunity(projectId))
         Sheet sheet = workbook.createSheet()
-        List<String> headers = ["Skill Name", "Skill ID", "# Users Achieved", "# Users In Progress", "Date Last Reported", "Date Last Achieved"]
+        List<String> headers = ["Skill Name", "Skill ID", "# Users Achieved", "# Users In Progress", "Date Last Reported (UTC)", "Date Last Achieved (UTC)"]
         Integer columnNumber = 0
         Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
 
         CellStyle dateStyle = workbook.createCellStyle()
-        dateStyle.setDataFormat((short) 14) // NOTE: 14 = "mm/dd/yyyy"
+        dateStyle.setDataFormat((short) 22) // NOTE: 14 = "mm/dd/yyyy"
 
         Cell cell = null
         List<UserAchievedLevelRepo.SkillUsageItem> skillUsageItems = userAchievedRepo.findAllForSkillsNavigator(projectId)
