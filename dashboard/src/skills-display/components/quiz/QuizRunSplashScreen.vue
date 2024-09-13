@@ -135,7 +135,7 @@ const start = () => {
           </template>
           <span class="mx-2 text-2xl">This {{ quizInfo.quizType }} has no questions declared and unfortunately cannot be completed.</span>
         </Message>
-        <Message v-if="!quizInfo.canStartQuiz" severity="error" :closable="false" data-cy="quizHasNoQuestions">
+        <Message v-if="!quizInfo.canStartQuiz" severity="error" :closable="false" data-cy="cantStartQuiz">
           <template #messageicon>
             <i class="fas fa-exclamation-triangle text-2xl" aria-hidden="true"></i>
           </template>
