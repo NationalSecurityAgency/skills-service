@@ -28,3 +28,4 @@ delete from user_events where project_id = 'Inception';
 delete from user_tags;
 delete from notifications;
 delete from user_actions_history;
+delete from custom_icons;

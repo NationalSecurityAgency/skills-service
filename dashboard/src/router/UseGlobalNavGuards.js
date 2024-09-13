@@ -16,7 +16,6 @@
 import { nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuizConfig } from '@/stores/UseQuizConfig.js'
-import { useClientDisplayPath } from '@/stores/UseClientDisplayPath.js'
 import { usePageVisitService } from '@/components/utils/services/UsePageVisitService.js'
 import { useAuthState } from '@/stores/UseAuthState.js'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
@@ -35,7 +34,6 @@ import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkil
 export const useGlobalNavGuards = () => {
 
   const quizConfig = useQuizConfig()
-  const clientDisplayPath = useClientDisplayPath()
   const pageVisitService = usePageVisitService()
   const authState = useAuthState()
   const appInfoState = useAppInfoState()
@@ -52,7 +50,8 @@ export const useGlobalNavGuards = () => {
 
   const log = useLog()
 
-  const isAdminPage = (route) => route.path.startsWith('/administrator') && !route.path.startsWith('/administrator/skills')
+  const isAdminPage = (route) => route.path?.toLowerCase().startsWith('/administrator') && !route.path?.toLowerCase().startsWith('/administrator/skills')
+  const isGlobalAdminPage = (route) => route.path?.toLowerCase().startsWith('/administrator/globalbadges')
   const isActiveProjectIdChange = (to, from) => to.params.projectId !== from.params.projectId
   const isLoggedIn = () => authState.isAuthenticated
   const isPki = () => appConfig.isPkiAuthenticated
@@ -65,13 +64,13 @@ export const useGlobalNavGuards = () => {
     if (
       !isPki() &&
       !isLoggedIn() &&
-      to.path !== requestAccountPath &&
+      to.path?.toLowerCase() !== requestAccountPath &&
       appConfig.needToBootstrap
     ) {
       next({ path: requestAccountPath })
     } else if (
       !isPki() &&
-      to.path === requestAccountPath &&
+      to.path?.toLowerCase() === requestAccountPath &&
       !appConfig.needToBootstrap
     ) {
       next({ name: getLandingPage() })
@@ -82,7 +81,7 @@ export const useGlobalNavGuards = () => {
       next(route.query.redirect || { name: getLandingPage() })
     } else {
       /* eslint-disable no-lonely-if */
-      if (appInfoState.showUa && to.path !== '/user-agreement' && to.path !== '/skills-login') {
+      if (appInfoState.showUa && to.path?.toLowerCase() !== '/user-agreement' && to.path?.toLowerCase() !== '/skills-login') {
         let p = ''
         if (to.query?.redirect) {
           p = to.query.redirect
@@ -108,8 +107,11 @@ export const useGlobalNavGuards = () => {
           }
           IconManagerService.refreshCustomIconCss(to.params.projectId, accessState.isSupervisor)
         }
+        if (isGlobalAdminPage(to)) {
+          IconManagerService.refreshCustomIconCss(null, true)
+        }
         if (
-          to.path.startsWith('/administrator/quizzes/') &&
+          to.path?.toLowerCase().startsWith('/administrator/quizzes/') &&
           to.params.quizId &&
           (!quizConfig.quizConfig || to.params.quizId !== from.params.quizId)
         ) {

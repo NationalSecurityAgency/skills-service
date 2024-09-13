@@ -94,4 +94,6 @@ drop table IF EXISTS user_quiz_question_attempt CASCADE;
 
 drop table IF EXISTS expired_user_achievement CASCADE;
 
+drop table IF EXISTS custom_icons CASCADE;
+
 drop function IF EXISTS f_select_lock_and_insert;

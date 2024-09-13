@@ -23,6 +23,7 @@ import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsD
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import GlobalBadgeProjectLevels from '@/skills-display/components/badges/GlobalBadgeProjectLevels.vue'
 import Prerequisites from '@/skills-display/components/skill/prerequisites/Prerequisites.vue'
+import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 
 const route = useRoute()
 const summaryAndSkillsState = useSkillsDisplaySubjectState()
@@ -40,6 +41,12 @@ watch( () => route.params.badgeId, () => {
 const loadBadgeInfo = () => {
   const isGlobalBadge = skillsDisplayInfo.isGlobalBadgePage.value
   summaryAndSkillsState.loadBadgeSummary(route.params.badgeId, isGlobalBadge)
+    .then((badgeSummary) => {
+      if (isGlobalBadge && badgeSummary?.iconClass && badgeSummary.iconClass.startsWith('GLOBAL-')) {
+        IconManagerService.refreshCustomIconCss(null, true)
+      }
+    })
+
 }
 
 const locked = computed(() => {
