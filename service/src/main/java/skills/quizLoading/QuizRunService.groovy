@@ -19,12 +19,14 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
+import skills.controller.result.model.QuizSkillResult
 import skills.quizLoading.model.*
 import skills.services.CustomValidationResult
 import skills.services.CustomValidator
@@ -90,6 +92,12 @@ class QuizRunService {
     @Autowired
     SkillAttributeService skillAttributeService
 
+    @Value('#{"${skills.config.ui.minimumSubjectPoints}"}')
+    int minimumSubjectPoints
+
+    @Value('#{"${skills.config.ui.minimumProjectPoints}"}')
+    int minimumProjectPoints
+
     private boolean skillExpiringSoon(String skillId, String projectId) {
         ExpirationAttrs attrs = skillAttributeService.getExpirationAttrs( projectId, skillId )
         return attrs && attrs?.expirationType == ExpirationAttrs.DAILY
@@ -125,6 +133,20 @@ class QuizRunService {
             multipleTakes = skillExpiringSoon(skillId, projectId)
         }
 
+        boolean canStartQuiz = true
+        String errorMessage = null
+        List<QuizSkillResult> skills = quizToSkillDefRepo.getSkillsForQuizWithSubjects(quizDefWithDesc.id, userId)
+        skills.forEach(skill -> {
+          if(skill.subjectPoints < minimumSubjectPoints) {
+              canStartQuiz = false
+              errorMessage = "This ${quizDefWithDesc.getType().toString()} is assigned to a Skill (${skill.skillId}) that does not have enough points to be completed. The Subject (${skill.subjectId}) that contains this skill must have at least ${ minimumSubjectPoints } points."
+          }
+            if(skill.projectPoints < minimumProjectPoints) {
+                canStartQuiz = false
+                errorMessage = "This ${quizDefWithDesc.getType().toString()} is assigned to a Skill (${skill.skillId}) that does not have enough points to be completed. The Project (${skill.projectId}) that contains this skill must have at least ${ minimumProjectPoints } points."
+            }
+        })
+
         return new QuizInfo(
                 name: quizDefWithDesc.name,
                 description: InputSanitizer.unsanitizeForMarkdown(quizDefWithDesc.description),
@@ -139,6 +161,8 @@ class QuizRunService {
                 quizLength: lengthSetting,
                 quizTimeLimit: quizTimeLimit ? Integer.valueOf(quizTimeLimit.value) : -1,
                 multipleTakes: multipleTakes,
+                canStartQuiz: canStartQuiz,
+                errorMessage: errorMessage,
         )
     }
 
