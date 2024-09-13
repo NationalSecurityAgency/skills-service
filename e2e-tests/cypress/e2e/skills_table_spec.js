@@ -780,7 +780,7 @@ describe('Skills Table Tests', () => {
     cy.focused().tab()
     cy.get('[data-cy="skillActionsBtn"]').should('have.focus')
     cy.focused().tab()
-    cy.get('[data-pc-name="headercheckbox"] input').should('have.focus')
+    cy.get('[data-cy="exportSkillsTableBtn"]').should('have.focus')
   })
 
 })
