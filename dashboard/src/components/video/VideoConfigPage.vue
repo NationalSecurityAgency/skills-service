@@ -153,7 +153,6 @@ const submitSaveSettingsForm = () => {
 const onFileSelectedEvent = (selectFileEvent) => {
   const newFile = selectFileEvent.file
   videoConf.value.file = newFile;
-  showFileUpload.value = false;
   videoConf.value.isInternallyHosted = true;
   videoConf.value.hostedFileName = newFile.name;
   // basically a placeholder
