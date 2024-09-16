@@ -427,6 +427,10 @@ const isLoading = computed(() => {
   return skillsState.loadingSubjectSkills
 })
 
+const isSkillsGroupTable = computed(() => {
+  return !!props.groupId
+})
+
 
 // Actions Men Tab fix
 // the following functions handle when pressing tab after Action Menu is open
@@ -572,7 +576,7 @@ const exportSkills = () => {
 ￼          </div>
       </template>
 
-      <template #header>
+      <template #header v-if="!isSkillsGroupTable">
         <div class="flex justify-content-end flex-wrap mt-2">
           <SkillsButton :disabled="totalRows <= 0"
                         size="small"
