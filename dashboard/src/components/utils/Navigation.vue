@@ -43,7 +43,6 @@ const navOnSmallScreen = (changeEvent) => {
 
 const skillsNavigation = ref(null)
 const handleResize = () => {
-  console.log(`[Navigation] handleResize ${skillsNavigation.value.getBoundingClientRect().width}`)
   layoutSizes.updateNavbarWidth(skillsNavigation.value.getBoundingClientRect().width)
 }
 onMounted(() => {
