@@ -407,7 +407,6 @@ describe('Markdown Tests', () => {
         cy.get('[data-cy="skillOverviewDescription"]').contains('Emojis');
         cy.get('[data-cy="skillOverviewDescription"]').contains('👍 👍 👍 👍');
         cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]', {
-            name: 'Markdown-SkillsPage-Overview',
             errorThreshold: 0.1
         });
     })
@@ -420,12 +419,9 @@ describe('Markdown Tests', () => {
         cy.wait('@inceptionLevel');
         cy.get('[data-cy="inception-button"]').contains('Level 0');
         cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
-        cy.get('[data-cy="skillOverviewDescription"]').contains('Emojis');
-        cy.get('[data-cy="skillOverviewDescription"]').contains('👍 👍 👍 👍');
-        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]', {
-            name: 'Markdown-SkillsPage-SkillPreview',
-            errorThreshold: 0.1
-        });
+        cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]').contains('Emojis');
+        cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]').contains('👍 👍 👍 👍');
+        cy.matchSnapshotImageForElement('[id="mainContent2"]', { errorThreshold: 0.1 })
     });
 
     it('enter a block quote', () => {
