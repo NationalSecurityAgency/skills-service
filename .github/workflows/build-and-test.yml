@@ -252,7 +252,7 @@ jobs:
           group: 'skills-service tests'
           tag: "${{ github.workflow }}"
           browser: chrome
-          spec: cypress/e2e/client-display/skills-display-transcript-export_spec.js
+          spec: cypress/e2e/markdown_spec.js
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
