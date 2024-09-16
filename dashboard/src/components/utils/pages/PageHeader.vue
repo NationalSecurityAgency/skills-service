@@ -17,14 +17,30 @@ limitations under the License.
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import { onMounted, onUnmounted, ref } from 'vue'
+import { useLayoutSizesState } from '@/stores/UseLayoutSizesState.js'
 
-const props = defineProps(['loading', 'options'])
+defineProps(['loading', 'options'])
 const numberFormat = useNumberFormat()
 const colors = useColors()
+const layoutSizes = useLayoutSizesState()
+
+const pageHeader = ref(null)
+const handleResize = () => {
+  layoutSizes.updatePageHeaderWidth(pageHeader.value.getBoundingClientRect().width)
+}
+onMounted(() => {
+  handleResize()
+  window.addEventListener('resize', handleResize);
+})
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+})
+
 </script>
 
 <template>
-  <div data-cy="pageHeader" class="border-1 border-round-md surface-border font-medium surface-0 mt-2 px-3 py-3">
+  <div ref="pageHeader" data-cy="pageHeader" class="border-1 border-round-md surface-border font-medium surface-0 mt-2 px-3 py-3">
     <skills-spinner v-if="loading" :is-loading="loading" />
     <div v-if="!loading">
       <slot name="banner"></slot>

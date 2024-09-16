@@ -14,12 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { useSlots, toRef } from 'vue'
+import { useSlots, toRef, computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column';
+import { useLayoutSizesState } from '@/stores/UseLayoutSizesState.js'
 
 const sortField = defineModel('sortField')
 const sortOrder = defineModel('sortOrder')
@@ -47,11 +48,17 @@ const props = defineProps({
   ariaLabel: {
     type: String,
     required: true,
+  },
+  autoMaxWidth: {
+    type: Boolean,
+    required: false,
+    default: true,
   }
 })
 const slots = useSlots()
 const announcer = useSkillsAnnouncer()
 const responsive = useResponsiveBreakpoints()
+const layoutSizesState = useLayoutSizesState()
 
 const sortInfo = useStorage(`skillsTable-sort-${props.tableStoredStateId}`, { sortOrder: sortOrder.value, sortBy: sortField.value })
 const tableProps = {
@@ -81,6 +88,13 @@ const onPage = (pageEvent) => {
   announcer.polite(`Showing up to ${pageEvent.rows} rows on page ${pageEvent.page + 1}`)
 }
 
+const maxWidthStyle = computed(() => {
+  if (props.autoMaxWidth && layoutSizesState.tableMaxWidth > 0) {
+    return `max-width: ${layoutSizesState.tableMaxWidth}px !important;`
+  }
+
+  return ''
+})
 </script>
 
 <template>
@@ -91,6 +105,7 @@ const onPage = (pageEvent) => {
     @filter="onFilter"
     @page="onPage"
     :tableProps="tableProps"
+    :style="maxWidthStyle"
   >
     <template v-for="(_, name) in slots" v-slot:[name]="slotData">
       <Column v-if="expander"

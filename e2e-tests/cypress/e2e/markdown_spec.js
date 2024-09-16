@@ -342,97 +342,86 @@ describe('Markdown Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]');
     });
 
-    it('on skills pages', () => {
+    const markdown = '# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n' +
+      '---\n' +
+      '# Emphasis\n' +
+      'italics: *italicized* or _italicized_\n\n' +
+      'bold: **bolded** or __bolded__\n\n' +
+      'combination **_bolded & italicized_**\n\n' +
+      'strikethrough: ~~struck~~\n\n' +
+      '---\n' +
+      '# Inline\n' +
+      'Inline `code` has `back-ticks around` it\n\n' +
+      '---\n' +
+      '# Multiline\n' +
+      '\n' +
+      '\n' +
+      '```\n' +
+      'import { SkillsDirective } from \'@skilltree/skills-client-vue\';\n' +
+      'Vue.use(SkillsDirective);\n' +
+      '```\n' +
+      '# Lists\n' +
+      'Ordered Lists:\n' +
+      '1. Item one\n' +
+      '1. Item two\n' +
+      '1. Item three (actual number does not matter)\n\n' +
+      'If List item has multiple lines of text, subsequent lines must be idented four spaces, otherwise list item numbers will reset, e.g.,\n' +
+      '1. item one\n' +
+      '    paragrah one\n' +
+      '1. item two\n' +
+      '1. item three\n' +
+      '\n' +
+      'Unordered Lists\n' +
+      '* Item\n' +
+      '* Item\n' +
+      '* Item\n' +
+      '___\n' +
+      '# Links\n' +
+      '[in line link](https://www.somewebsite.com)\n' +
+      '___\n' +
+      '# Blockquotes\n' +
+      '> Blockquotes are very handy to emulate reply text.\n' +
+      '> This line is part of the same quote.\n\n' +
+      '# Horizontal rule\n' +
+      'Use three or more dashes, asterisks, or underscores to generate a horizontal rule line\n' +
+      '\n' +
+      'Separate me\n\n' +
+      '___\n\n' +
+      'Separate me\n\n' +
+      '---\n\n' +
+      'Separate me\n\n' +
+      '***\n\n' +
+      '# Emojis\n' +
+      ':+1: :+1: :+1: :+1:\n' +
+      '';
 
-        const markdown = '# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n' +
-            '---\n' +
-            '# Emphasis\n' +
-            'italics: *italicized* or _italicized_\n\n' +
-            'bold: **bolded** or __bolded__\n\n' +
-            'combination **_bolded & italicized_**\n\n' +
-            'strikethrough: ~~struck~~\n\n' +
-            '---\n' +
-            '# Inline\n' +
-            'Inline `code` has `back-ticks around` it\n\n' +
-            '---\n' +
-            '# Multiline\n' +
-            '\n' +
-            '\n' +
-            '```\n' +
-            'import { SkillsDirective } from \'@skilltree/skills-client-vue\';\n' +
-            'Vue.use(SkillsDirective);\n' +
-            '```\n' +
-            '# Lists\n' +
-            'Ordered Lists:\n' +
-            '1. Item one\n' +
-            '1. Item two\n' +
-            '1. Item three (actual number does not matter)\n\n' +
-            'If List item has multiple lines of text, subsequent lines must be idented four spaces, otherwise list item numbers will reset, e.g.,\n' +
-            '1. item one\n' +
-            '    paragrah one\n' +
-            '1. item two\n' +
-            '1. item three\n' +
-            '\n' +
-            'Unordered Lists\n' +
-            '* Item\n' +
-            '* Item\n' +
-            '* Item\n' +
-            '___\n' +
-            '# Links\n' +
-            '[in line link](https://www.somewebsite.com)\n' +
-            '___\n' +
-            '# Blockquotes\n' +
-            '> Blockquotes are very handy to emulate reply text.\n' +
-            '> This line is part of the same quote.\n\n' +
-            '# Horizontal rule\n' +
-            'Use three or more dashes, asterisks, or underscores to generate a horizontal rule line\n' +
-            '\n' +
-            'Separate me\n\n' +
-            '___\n\n' +
-            'Separate me\n\n' +
-            '---\n\n' +
-            'Separate me\n\n' +
-            '***\n\n' +
-            '# Emojis\n' +
-            ':+1: :+1: :+1: :+1:\n' +
-            '';
-        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            skillId: 'skill1',
-            name: 'Skill 1',
-            pointIncrement: '50',
-            numPerformToCompletion: '5',
-            description: markdown
-        });
+    it('markdown on skill page', () => {
+        cy.createSkill(1, 1, 1, { description: markdown })
         cy.intercept('GET', '/api/projects/Inception/level')
-            .as('inceptionLevel');
+          .as('inceptionLevel');
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
 
-        cy.contains('Description');
+        cy.get('[data-cy="skillOverviewTotalpoints"] [data-cy="mediaInfoCardTitle"').should('have.text', '200 Points')
         cy.wait('@inceptionLevel');
-        cy.contains('Level');
-        cy.contains('Emojis');
-        cy.contains('👍 👍 👍 👍');
-        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', {
-            name: 'Markdown-SkillsPage-Overview',
+        cy.get('[data-cy="inception-button"]').contains('Level 0');
+        cy.get('[data-cy="skillOverviewDescription"]').contains('Emojis');
+        cy.get('[data-cy="skillOverviewDescription"]').contains('👍 👍 👍 👍');
+        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]', {
             errorThreshold: 0.1
         });
+    })
 
+    it('markdown on skills page with skill expanded', () => {
+        cy.createSkill(1, 1, 1, { description: markdown })
+        cy.intercept('GET', '/api/projects/Inception/level')
+          .as('inceptionLevel');
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@inceptionLevel');
-        cy.contains('Level');
-        // const selectorSkillsRowToggle = '[data-cy="expandDetailsBtn_skill1"]';
-        // cy.get(selectorSkillsRowToggle)
-        //     .click();
+        cy.get('[data-cy="inception-button"]').contains('Level 0');
         cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
-        cy.contains('Description');
-        cy.contains('Emojis');
-        cy.contains('👍 👍 👍 👍');
-        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', {
-            name: 'Markdown-SkillsPage-SkillPreview',
-            errorThreshold: 0.1
-        });
+        cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]').contains('Emojis');
+        cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]').contains('👍 👍 👍 👍');
+        cy.matchSnapshotImageForElement('[id="mainContent2"]', { errorThreshold: 0.1 })
     });
 
     it('enter a block quote', () => {

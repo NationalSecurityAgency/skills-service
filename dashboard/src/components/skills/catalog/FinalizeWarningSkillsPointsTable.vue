@@ -40,6 +40,7 @@ const numberFormat = useNumberFormat()
     :value="skillsWithOutOfBoundsPoints"
     aria-label="Skills"
     sortField="skillName"
+    auto-max-width="false"
     :sortOrder="1"
     data-cy="skillsWithOutOfBoundsPoints">
     <Column field="skillName" header="Skill"></Column>

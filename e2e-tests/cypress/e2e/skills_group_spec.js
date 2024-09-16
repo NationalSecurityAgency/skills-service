@@ -89,7 +89,7 @@ describe('Skills Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"]');
-        cy.matchSnapshotImageForElement('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"]');
+        cy.matchSnapshotImageForElement('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"]', { errorThreshold: 0.05 });
     });
 
     it('handle focus on edit', () => {

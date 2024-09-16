@@ -14,31 +14,45 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStorage } from '@vueuse/core'
-import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useContentMaxWidthState } from '@/stores/UseContentMaxWidthState.js'
+import { useLayoutSizesState } from '@/stores/UseLayoutSizesState.js'
 
 const router = useRouter();
 defineProps(['navItems']);
 const collapsed = useStorage('navigationCollapsed', false)
-const responsive = useResponsiveBreakpoints()
 const mainContentWidth = useContentMaxWidthState()
 const colors = useColors()
+const layoutSizes = useLayoutSizesState()
 const showCollapsed = computed(() => collapsed.value)
 
 function flipCollapsed() {
   collapsed.value = !collapsed.value;
   nextTick(() => {
     mainContentWidth.updateWidth()
+    handleResize()
   })
 }
 
 const navOnSmallScreen = (changeEvent) => {
   router.push({ name: changeEvent.value.page })
 }
+
+const skillsNavigation = ref(null)
+const handleResize = () => {
+  layoutSizes.updateNavbarWidth(skillsNavigation.value.getBoundingClientRect().width)
+}
+onMounted(() => {
+  handleResize()
+  window.addEventListener('resize', handleResize);
+})
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+})
+
 </script>
 
 <template>
@@ -65,7 +79,7 @@ const navOnSmallScreen = (changeEvent) => {
     </div>
 
     <div class="flex">
-      <div id="skillsNavigation" class="flex-none hidden md:flex" data-cy="nav-col">
+      <div id="skillsNavigation" ref="skillsNavigation" class="flex-none hidden md:flex" data-cy="nav-col">
         <div class="border-1 border-300 border-round-md surface-border font-medium surface-0" style="min-height: calc(100vh - 20rem); !important">
             <div class="text-900 font-semibold flex">
               <div v-if="!showCollapsed" class="pt-3 px-3">Navigate</div>

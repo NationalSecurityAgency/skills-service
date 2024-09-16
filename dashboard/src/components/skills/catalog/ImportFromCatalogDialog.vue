@@ -295,6 +295,7 @@ const onUpdateVisible = (newVal) => {
           v-model:expandedRows="expandedRows"
           v-model:sort-field="sortInfo.sortBy"
           v-model:sort-order="sortInfo.sortOrder"
+          :auto-max-width="false"
           stripedRows
           paginator
           lazy
