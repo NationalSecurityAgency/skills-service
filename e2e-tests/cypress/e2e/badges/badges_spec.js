@@ -839,4 +839,27 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="projectLastReportedSkillValue"]').contains('Never')
         cy.get('[data-cy="badgeCard-customIconBadge"] .proj1-validiconpng');
     });
+
+    it('cancelling delete dialog should return focus to delete button', () => {
+        cy.createBadge(1, 1);
+        cy.createBadge(1, 2);
+        cy.createBadge(1, 3);
+        cy.createBadge(1, 4);
+        cy.createBadge(1, 5);
+
+        cy.intercept('GET', '/admin/projects/proj1/badges')
+          .as('getBadges');
+        cy.visit('/administrator/projects/proj1/badges');
+        // // cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.wait('@getBadges');
+
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="deleteBtn"]')
+          .click();
+        cy.contains('Removal Safety Check');
+        cy.get('[data-cy=closeDialogBtn]')
+          .click();
+        cy.get('[data-cy="badgeCard-badge2"] [data-cy="deleteBtn"]')
+          .should('have.focus');
+
+    });
 });

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, nextTick } from 'vue'
 import AutoComplete from 'primevue/autocomplete'
 import Badge from 'primevue/badge';
 // import Fluid from 'primevue/fluid';
@@ -72,6 +72,10 @@ const props = defineProps({
     default: false,
   },
   showClear: {
+    type: Boolean,
+    default: true,
+  },
+  showDropdown: {
     type: Boolean,
     default: true,
   },
@@ -149,6 +153,12 @@ const clearValue = () => {
   selectedInternal.value = null
   currentSearch.value = ''
 }
+const focus = () => {
+  const skillsInput = document.querySelector('[data-cy="skillsSelector"] button')
+  if (skillsInput) {
+    skillsInput.focus()
+  }
+}
 
 onMounted(() => {
   setSelectedInternal();
@@ -158,6 +168,7 @@ onMounted(() => {
 
 defineExpose({
   clearValue,
+  focus
 })
 </script>
 
@@ -171,6 +182,7 @@ defineExpose({
           class="st-skills-selector"
           :class="props.class"
           :fluid="true"
+          :dropdown="showDropdown"
           data-cy="skillsSelector"
           :disabled="disabled"
           :loading="isLoading"

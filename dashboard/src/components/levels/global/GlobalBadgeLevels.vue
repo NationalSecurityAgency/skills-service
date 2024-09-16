@@ -190,10 +190,10 @@ const selectLevel = (level) => {
   <div>
     <sub-page-header title="Levels"/>
 
-    <Card>
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
         <loading-container v-model="isLoading">
-          <div class="mb-4 m-3">
+          <div class="mb-4 m-3 px-3 py-4">
             <div class="flex gap-2">
               <div class="flex-1">
                 <project-selector ref="projectSelectorRef" v-model="selectedProject"
@@ -217,7 +217,7 @@ const selectLevel = (level) => {
           </div>
           <simple-levels-table ref="globalLevelsTable" v-if="badgeLevels && badgeLevels.length > 0"
                                @change-level="changeLevel" :levels="badgeLevels" @level-removed="deleteLevel"></simple-levels-table>
-          <no-content2 v-else title="No Levels Added Yet..." icon="fas fa-trophy" class="mb-5"
+          <no-content2 v-else title="No Levels Added Yet..." icon="fas fa-trophy" class="pb-5"
                        message="Please select a project and level from drop-down menus above to start adding levels to this badge!"></no-content2>
 
         </loading-container>

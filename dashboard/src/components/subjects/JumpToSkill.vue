@@ -59,6 +59,7 @@ const navToSkill = (selectedItem) => {
                         v-on:search-change="searchChanged"
                         v-on:added="navToSkill"
                         :is-loading="loading"
+                        :show-dropdown="false"
                         placeholder="Search and Navigate directly to a skill"
                         placeholder-icon="fas fa-search"
                         select-label="Click to navigate"

@@ -945,28 +945,7 @@ describe('Badges Tests', () => {
           .should('have.focus');
     });
 
-    it('cancelling delete dialog should return focus to delete button', () => {
-        cy.createBadge(1, 1);
-        cy.createBadge(1, 2);
-        cy.createBadge(1, 3);
-        cy.createBadge(1, 4);
-        cy.createBadge(1, 5);
 
-        cy.intercept('GET', '/admin/projects/proj1/badges')
-          .as('getBadges');
-        cy.visit('/administrator/projects/proj1/badges');
-        // // cy.get('[data-cy="inception-button"]').contains('Level');
-        cy.wait('@getBadges');
-
-        cy.get('[data-cy="badgeCard-badge2"] [data-cy="deleteBtn"]')
-          .click();
-        cy.contains('Removal Safety Check');
-        cy.get('[data-cy=closeDialogBtn]')
-          .click();
-        cy.get('[data-cy="badgeCard-badge2"] [data-cy="deleteBtn"]')
-          .should('have.focus');
-
-    });
 
     it('typing into skill search input and then erasing the text should not cause an error', () => {
         cy.visit('/administrator/projects/proj1/badges');
@@ -981,5 +960,42 @@ describe('Badges Tests', () => {
         cy.wait(500);
         cy.wait('@loadSkills');
         cy.get('[data-cy="skillsSelector"]').type('a{backspace}');
+    })
+
+    it('adding a skill returns focus to the select input', () => {
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        cy.createSkill(1, 1, 4)
+        cy.createBadge(1, 1)
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+        cy.get('[data-cy="noContent"]').contains('No Skills Selected Yet');
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
+        cy.get('[data-cy="skillsSelector"] button').should('have.focus');
+    })
+
+    it('removing a skill returns focus to the select input', () => {
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createBadge(1, 1)
+        cy.assignSkillToBadge(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+        cy.get('[data-cy="deleteSkill_skill1"]').click();
+        cy.contains('Remove Required Skill');
+        cy.get('[data-pc-name="acceptbutton"]').click();
+        cy.get('[data-cy="skillsSelector"] button').should('have.focus');
+    })
+
+    it('cancel delete dialog should return focus to delete button', () => {
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createBadge(1, 1)
+        cy.assignSkillToBadge(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+        cy.get('[data-cy="deleteSkill_skill1"]').click();
+        cy.contains('Remove Required Skill');
+        cy.get('[data-pc-name="rejectbutton"]').click();
+        cy.get('[data-cy="deleteSkill_skill1"]').should('have.focus');
     })
 });

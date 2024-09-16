@@ -240,6 +240,45 @@ describe('Global Badges Tests', () => {
             .should('be.visible');
     });
 
+    it('Add skill dependencies to badge places focus on the select button', () => {
+        cy.createGlobalBadge(1)
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/globalBadges/globalBadge1')
+        cy.get('[data-cy="noContent"]').contains('No Skills Added Yet');
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
+        cy.get('[data-cy="skillsSelector"] button').should('have.focus');
+    })
+
+    it('Remove skill dependency from a badge places focus on the select button', () => {
+        cy.createGlobalBadge(1)
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.assignSkillToGlobalBadge(1, 1, 1);
+        cy.visit('/administrator/globalBadges/globalBadge1')
+        cy.get('[data-cy="badgeSkillsTable"] tr').contains('proj1')
+        cy.get('[data-cy="deleteSkill_skill1"]').click()
+        cy.contains('Remove Required Skill');
+        cy.get('[data-pc-name="acceptbutton"]').click();
+        cy.get('[data-cy="skillsSelector"] button').should('have.focus');
+    })
+
+    it('Cancel Delete dialog of a skill returns focus to the delete button', () => {
+        cy.createGlobalBadge(1)
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.assignSkillToGlobalBadge(1, 1, 1);
+        cy.visit('/administrator/globalBadges/globalBadge1')
+        cy.get('[data-cy="badgeSkillsTable"] tr').contains('proj1')
+        cy.get('[data-cy="deleteSkill_skill1"]').click()
+        cy.contains('Remove Required Skill');
+        cy.get('[data-pc-name="rejectbutton"]').click();
+        cy.get('[data-cy="deleteSkill_skill1"]').should('have.focus');
+    })
+
     it('Add dependencies to badge', () => {
         //proj/subj/skill1
         cy.request('POST', '/app/projects/proj1', {
