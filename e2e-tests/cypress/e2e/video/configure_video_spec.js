@@ -60,13 +60,16 @@ describe('Configure Video Tests', () => {
         cy.visitVideoConfPage();
 
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.visible')
         cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile(`cypress/fixtures/${videoFile}`,  { force: true })
         // cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
         cy.get('[data-cy="videoCaptions"]').type('captions', {delay: 0})
         cy.get('[data-cy="videoTranscript"]').type('transcript', {delay: 0})
         cy.get('[data-cy="saveVideoSettingsBtn"]').click()
         cy.get('[data-cy="savedMsg"]')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.visible')
 
         cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', videoFile)
         cy.get('[data-cy="videoCaptions"]').should('have.value','captions')
