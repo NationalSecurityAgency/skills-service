@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
 import Card from 'primevue/card';
 import Column from 'primevue/column';
@@ -125,6 +125,14 @@ const deleteSkill = (skill) => {
     rejectLabel: 'Cancel',
     accept: () => {
       skillDeleted(skill);
+    },
+    reject: () => {
+      nextTick(() => {
+        const deleteButton = document.getElementById(`deleteSkill_${skill.skillId}`)
+        if (deleteButton) {
+          deleteButton.focus()
+        }
+      })
     }
   });
 };
@@ -138,9 +146,17 @@ const skillDeleted = (deletedItem) => {
         badgeState.loadBadgeDetailsState(projectId.value, badgeId.value);
         loading.value.skillOp = false;
         badge.value = badgeState.badge.value;
+      }).finally(() => {
+        focusOnSkillsSelector()
       });
 };
 
+const skillsSelector = ref(null)
+const focusOnSkillsSelector = () => {
+  nextTick(() => {
+    skillsSelector.value?.focus()
+  })
+}
 const skillAdded = (newItem) => {
   if (newItem) {
     loading.value.skillOp = true;
@@ -164,6 +180,8 @@ const skillAdded = (newItem) => {
         const errorMessage = (e.response && e.response.data && e.response.data.explanation) ? e.response.data.explanation : undefined;
         router.push({ name: 'ErrorPage', query: { errorMessage } });
       }
+    }).finally(() => {
+      focusOnSkillsSelector()
     });
   }
 };
@@ -184,6 +202,7 @@ const filterSkills = (searchQuery) => {
         <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp || loading.badgeInfo">
           <div class="p-3">
             <skills-selector :options="availableSkills"
+                             ref="skillsSelector"
                              v-if="!projConf.isReadOnlyProj"
                              class="search-and-nav border rounded"
                              v-on:added="skillAdded"
@@ -224,6 +243,7 @@ const filterSkills = (searchQuery) => {
               <Column header="Delete" :class="{'flex': responsive.md.value }">
                 <template #body="slotProps">
                   <SkillsButton v-if="!projConf.isReadOnlyProj" v-on:click="deleteSkill(slotProps.data)" size="small"
+                                :id="`deleteSkill_${slotProps.data.skillId}`"
                           :data-cy="`deleteSkill_${slotProps.data.skillId}`" icon="fas fa-trash" label="Delete"
                           :aria-label="`remove dependency on ${slotProps.data.skillId}`">
                   </SkillsButton>

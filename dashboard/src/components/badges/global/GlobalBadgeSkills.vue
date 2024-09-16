@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router';
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import GlobalBadgeService from "@/components/badges/global/GlobalBadgeService.js";
@@ -106,6 +106,14 @@ const deleteSkill = (skill) => {
     rejectLabel: 'Cancel',
     accept: () => {
       skillDeleted(skill);
+    },
+    reject: () => {
+      nextTick(() => {
+        const deleteButton = document.getElementById(`deleteSkill_${skill.skillId}`)
+        if (deleteButton) {
+          deleteButton.focus()
+        }
+      })
     }
   });
 };
@@ -122,9 +130,17 @@ const skillDeleted = (deletedItem) => {
         });
         loading.value.skillOp = false;
         emit('skills-changed', deletedItem);
+      }).finally(() => {
+        focusOnSkillsSelector()
       });
 };
 
+const skillsSelector = ref(null)
+const focusOnSkillsSelector = () => {
+  nextTick(() => {
+    skillsSelector.value?.focus()
+  })
+}
 const skillAdded = (newItem) => {
   loading.value.skillOp = true;
   GlobalBadgeService.assignSkillToBadge(badgeId.value, newItem.projectId, newItem.skillId)
@@ -137,7 +153,10 @@ const skillAdded = (newItem) => {
         });
         loading.value.skillOp = false;
         emit('skills-changed', newItem);
-      });
+      })
+      .finally(() => {
+        focusOnSkillsSelector()
+      })
   searchChanged('');
 };
 
@@ -151,14 +170,16 @@ const searchChanged = (query) => {
   <div>
     <sub-page-header title="Skills"/>
 
-    <Card>
+    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
         <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp">
-          <skills-selector :options="availableSkills" class="mb-4"
+          <div class="px-3 py-4">
+           <skills-selector :options="availableSkills"
+                            ref="skillsSelector"
                             v-on:added="skillAdded" v-on:search-change="searchChanged"
                             :internal-search="false" :show-project="true"
                             :after-list-slot-text="afterListSlotText"></skills-selector>
-
+          </div>
           <div v-if="badgeSkills && badgeSkills.length > 0">
             <SkillsDataTable
                 tableStoredStateId="globalBadgeSkillsTable"
@@ -200,7 +221,7 @@ const searchChanged = (query) => {
             </SkillsDataTable>
           </div>
 
-          <no-content2 v-else title="No Skills Added Yet..." icon="fas fa-award" class="my-5"
+          <no-content2 v-else title="No Skills Added Yet..." icon="fas fa-award" class="py-5"
                        message="Please use drop-down above to start adding skills to this badge!"></no-content2>
         </loading-container>
       </template>
