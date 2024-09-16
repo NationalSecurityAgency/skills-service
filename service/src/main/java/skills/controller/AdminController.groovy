@@ -193,6 +193,8 @@ class AdminController {
 
     @Autowired
     SkillMetricsExportResult skillMetricsExportResult
+    @Autowired
+    SubjectSkillsExportResult subjectSkillsExportResult
 
     @Value('#{"${skills.config.ui.maxSkillsInBulkImport}"}')
     int maxBulkImport
@@ -537,6 +539,20 @@ class AdminController {
         SkillsValidator.isNotNull(badgePatchRequest.action, "Action must be provided", projectId)
 
         badgeAdminService.setBadgeDisplayOrder(projectId, badgeId, badgePatchRequest)
+    }
+
+    @GetMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/export/excel")
+    @CompileStatic
+    ModelAndView exportSubjectSkillsTable(@PathVariable("projectId") String projectId,
+                                          @PathVariable("subjectId") String subjectId) {
+
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(subjectId, "Subject Id")
+
+        ModelAndView mav = new ModelAndView(subjectSkillsExportResult)
+        mav.addObject(SubjectSkillsExportResult.PROJECT_ID, projectId)
+        mav.addObject(SubjectSkillsExportResult.SUBJECT_ID, subjectId)
+        return mav
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -1065,7 +1081,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
         ModelAndView mav = new ModelAndView(skillMetricsExportResult);
-        mav.addObject(UserProgressExportResult.PROJECT_ID, projectId)
+        mav.addObject(SkillMetricsExportResult.PROJECT_ID, projectId)
         return mav
     }
 

@@ -232,7 +232,7 @@ describe('Group Skill Reuse Tests', () => {
             .should('have.text', '400');
 
         const tableSelector = '[data-cy="ChildRowSkillGroupDisplay_group12Subj2"] [data-cy="skillsTable"]';
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group12Subj2"] [data-cy="skillsTable"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group12Subj2"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
         cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
         cy.get('[data-pc-section="panel"] [data-pc-section="closeicon"]').click()
         cy.validateTable(tableSelector, [
@@ -301,7 +301,7 @@ describe('Group Skill Reuse Tests', () => {
             .should('have.text', '400');
 
         const tableSelector = '[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="skillsTable"]';
-        cy.get(`${tableSelector} [data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]`).click()
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]`).click()
         cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
         cy.get('[data-pc-section="panel"] [data-pc-section="closeicon"]').click()
         cy.validateTable(tableSelector, [

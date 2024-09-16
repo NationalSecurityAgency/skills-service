@@ -24,8 +24,9 @@ import org.springframework.web.servlet.view.document.AbstractXlsxStreamingView
 import skills.services.ExcelExportService
 
 @Component
-class SkillMetricsExportResult extends AbstractXlsxStreamingView {
+class SubjectSkillsExportResult extends AbstractXlsxStreamingView {
     static final String PROJECT_ID = "projectId"
+    static final String SUBJECT_ID = "subjectId"
 
     @Autowired
     private ExcelExportService excelExportService
@@ -33,9 +34,10 @@ class SkillMetricsExportResult extends AbstractXlsxStreamingView {
     @Override
     protected void buildExcelDocument(Map<String, Object> model, Workbook workbook, HttpServletRequest request, HttpServletResponse response) throws Exception {
         String projectId = model.get(PROJECT_ID) as String
+        String subjectId = model.get(SUBJECT_ID) as String
 
         // define excel file name to be exported
-        response.addHeader("Content-Disposition", "attachment;fileName=${projectId}-skill-metrics-${new Date().format("yyyy-MM-dd")}.xlsx")
-        excelExportService.exportSkillMetrics(workbook, projectId)
+        response.addHeader("Content-Disposition", "attachment;fileName=${projectId}-skills-${new Date().format("yyyy-MM-dd")}.xlsx")
+        excelExportService.exportSubjectSkills(workbook, projectId, subjectId)
     }
 }

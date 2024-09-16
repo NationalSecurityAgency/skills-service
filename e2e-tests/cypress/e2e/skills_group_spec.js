@@ -47,6 +47,7 @@ describe('Skills Group Tests', () => {
             cy.get(`[data-cy="manageSkillLink_Skill${skillNum}Skill"]`).should('have.text', skillName);
         });
 
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/*').as('getSkill')
     });
     const tableSelector = '[data-cy="skillsTable"]';
 
@@ -195,7 +196,9 @@ describe('Skills Group Tests', () => {
         cy.get('[data-pc-section="headercontent"]').contains('Display').click()
         cy.get('[data-cy="enableDisplayOrderSort"]').click()
         cy.get('[data-cy="orderMoveDown_group1"]').click();
+        cy.wait('@getSkill')
         cy.get('[data-cy="orderMoveDown_group3"]').click();
+        cy.wait('@getSkill')
         cy.validateTable(tableSelector, [
             [{ colIndex: 2,  value: 'Awesome Group 2' },  { colIndex: 3, value: '1' }],
             [{ colIndex: 2,  value: 'Awesome Group 1' },  { colIndex: 3, value: '2' }],
@@ -261,6 +264,7 @@ describe('Skills Group Tests', () => {
 
         const skillsTableSelector = '[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="skillsTable"]'
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="enableDisplayOrderSort"]').click()
+        cy.wait('@getSkill')
 
         // cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-pc-section="headercontent"]').contains('Display').click()
 
@@ -271,6 +275,7 @@ describe('Skills Group Tests', () => {
         ], 5, true, null, false);
 
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill4"]').click()
+        cy.wait('@getSkill')
         cy.validateTable(skillsTableSelector, [
             [{ colIndex: 2,  value: 'Very Great Skill 5' }],
             [{ colIndex: 2,  value: 'Very Great Skill 4' }],
@@ -278,6 +283,7 @@ describe('Skills Group Tests', () => {
         ], 5, true, null, false);
 
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveDown_skill4"]').click()
+        cy.wait('@getSkill')
         cy.validateTable(skillsTableSelector, [
             [{ colIndex: 2,  value: 'Very Great Skill 5' }],
             [{ colIndex: 2,  value: 'Very Great Skill 6' }],
@@ -285,6 +291,7 @@ describe('Skills Group Tests', () => {
         ], 5, true, null, false);
 
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="orderMoveUp_skill6"]').click()
+        cy.wait('@getSkill')
         cy.validateTable(skillsTableSelector, [
             [{ colIndex: 2,  value: 'Very Great Skill 6' }],
             [{ colIndex: 2,  value: 'Very Great Skill 5' }],
@@ -301,6 +308,7 @@ describe('Skills Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="enableDisplayOrderSort"]').click()
+        cy.wait('@getSkill')
         cy.validateTable(skillsTableSelector, [
             [{ colIndex: 2,  value: 'Very Great Skill 6' }],
             [{ colIndex: 2,  value: 'Very Great Skill 5' }],
