@@ -154,7 +154,7 @@ const skillDeleted = (deletedItem) => {
 const skillsSelector = ref(null)
 const focusOnSkillsSelector = () => {
   nextTick(() => {
-    skillsSelector.value.focus()
+    skillsSelector.value?.focus()
   })
 }
 const skillAdded = (newItem) => {
