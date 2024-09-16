@@ -461,7 +461,9 @@ describe('Skills Table Tests', () => {
     cy.get('[data-cy="orderMoveDown_skill3"]').should('be.enabled')
     cy.get('[data-cy="orderMoveDown_skill4"]').should('be.disabled')
 
+    cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/*').as('getSkill')
     cy.get('[data-cy="orderMoveUp_skill3"]').click()
+    cy.wait('@getSkill')
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Skill # 1' }, { colIndex: 3, value: 1 }],
       [{ colIndex: 2, value: 'Skill # 3' }, { colIndex: 3, value: 2 }],
@@ -471,6 +473,7 @@ describe('Skills Table Tests', () => {
     cy.get(`${tableSelector} tbody tr`).should('have.length', 4)
 
     cy.get('[data-cy="orderMoveDown_skill1"]').click()
+    cy.wait('@getSkill')
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Skill # 3' }, { colIndex: 3, value: 1 }],
       [{ colIndex: 2, value: 'Skill # 1' }, { colIndex: 3, value: 2 }],
