@@ -170,8 +170,9 @@ class ExportWithoutHeaderIT extends ExportBaseIntSpec {
 
         proj1_skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
         proj1_skills[1].selfReportingType = SkillDef.SelfReportingType.Approval
-        proj1_skills[1].numPerformToCompletion = 2
+        proj1_skills[1].numPerformToCompletion = 4
         proj1_skills[1].pointIncrementInterval = 487
+        proj1_skills[1].numMaxOccurrencesIncrementInterval = 2
         proj1_skills[1].version = 1
         proj1_skills[2].selfReportingType = SkillDef.SelfReportingType.HonorSystem
 
@@ -209,9 +210,8 @@ class ExportWithoutHeaderIT extends ExportBaseIntSpec {
         validateExport(excelExport.file, [
                 ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)", "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version"],
                 ["Test Skill 1", "skill1", "", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "Approval", "Exported", "", "", "0.0"],
-                ["Test Skill 2", "skill2", "", "New Tag",  today.format("dd-MMM-yyyy"), "100.0", "50.0", "2.0", "Approval", "", "YEARLY", "8 Hours 7 Minutes", "1.0"],
+                ["Test Skill 2", "skill2", "", "New Tag",  today.format("dd-MMM-yyyy"), "200.0", "50.0", "4.0", "Approval", "", "Every year on ${expirationDate.format("MM/dd")}", "8 Hours 7 Minutes, Up to 2 Occurrences", "1.0"],
                 ["Test Skill 3", "skill3", "", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "Honor System", "", "", "", "0.0"],
-                ["Test Skill 10", "skill10", "", "",  today.format("dd-MMM-yyyy"), "100.0", "0.0", "1.0", "", "", "", "", "0.0"],
                 ["Test Skill 4", "skill4", "Test Skill 10", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
                 ["Test Skill 5", "skill5", "Test Skill 10", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
                 ["Test Skill 1 Subject2", "skill1subj2", "", "",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "", "Imported", "", "", "1.0"],

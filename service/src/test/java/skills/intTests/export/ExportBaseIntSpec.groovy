@@ -81,6 +81,19 @@ class ExportBaseIntSpec extends DefaultIntSpec {
         }
     }
 
+    protected void validateExportForCell(File file, List<String> data, Integer cellIndex) {
+        assert file.exists()
+        assert data
+        Workbook workbook = WorkbookFactory.create(file)
+        Sheet sheet = workbook.getSheetAt(0)
+        assert sheet.getPhysicalNumberOfRows() == data.size() + 3
+
+        data.eachWithIndex { expectedValue, rowIndex ->
+            Row row = sheet.getRow(rowIndex + 2)
+            assert row.getCell(cellIndex).toString() == expectedValue, "row: ${rowIndex} col: ${cellIndex} expected: ${expectedValue} actual: ${row.getCell(cellIndex).toString()}"
+        }
+    }
+
     protected void validateSortAchievedOn(File file, String firstDate, String lastDate) {
         assert file.exists()
         assert firstDate

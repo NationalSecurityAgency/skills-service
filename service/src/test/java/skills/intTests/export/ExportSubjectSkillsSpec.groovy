@@ -16,6 +16,7 @@
 package skills.intTests.export
 
 import skills.intTests.utils.SkillsService
+import skills.services.ExcelExportService
 import skills.services.attributes.ExpirationAttrs
 import skills.storage.model.SkillDef
 
@@ -37,8 +38,9 @@ class ExportSubjectSkillsSpec extends ExportBaseIntSpec {
 
         proj1_skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
         proj1_skills[1].selfReportingType = SkillDef.SelfReportingType.Approval
-        proj1_skills[1].numPerformToCompletion = 2
+        proj1_skills[1].numPerformToCompletion = 4
         proj1_skills[1].pointIncrementInterval = 487
+        proj1_skills[1].numMaxOccurrencesIncrementInterval = 2
         proj1_skills[1].version = 1
         proj1_skills[2].selfReportingType = SkillDef.SelfReportingType.HonorSystem
 
@@ -77,9 +79,8 @@ class ExportSubjectSkillsSpec extends ExportBaseIntSpec {
                 ["For All Dragons Only"],
                 ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)", "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version"],
                 ["Test Skill 1", "skill1", "", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "Approval", "Exported", "", "", "0.0"],
-                ["Test Skill 2", "skill2", "", "New Tag",  today.format("dd-MMM-yyyy"), "100.0", "50.0", "2.0", "Approval", "", "YEARLY", "8 Hours 7 Minutes", "1.0"],
+                ["Test Skill 2", "skill2", "", "New Tag",  today.format("dd-MMM-yyyy"), "200.0", "50.0", "4.0", "Approval", "", "Every year on ${expirationDate.format("MM/dd")}", "8 Hours 7 Minutes, Up to 2 Occurrences", "1.0"],
                 ["Test Skill 3", "skill3", "", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "Honor System", "", "", "", "0.0"],
-                ["Test Skill 10", "skill10", "", "",  today.format("dd-MMM-yyyy"), "100.0", "0.0", "1.0", "", "", "", "", "0.0"],
                 ["Test Skill 4", "skill4", "Test Skill 10", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
                 ["Test Skill 5", "skill5", "Test Skill 10", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
                 ["Test Skill 1 Subject2", "skill1subj2", "", "",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "", "Imported", "", "", "1.0"],
@@ -105,8 +106,9 @@ class ExportSubjectSkillsSpec extends ExportBaseIntSpec {
 
         proj1_skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
         proj1_skills[1].selfReportingType = SkillDef.SelfReportingType.Approval
-        proj1_skills[1].numPerformToCompletion = 2
+        proj1_skills[1].numPerformToCompletion = 4
         proj1_skills[1].pointIncrementInterval = 487
+        proj1_skills[1].numMaxOccurrencesIncrementInterval = 2
         proj1_skills[1].version = 1
         proj1_skills[2].selfReportingType = SkillDef.SelfReportingType.HonorSystem
 
@@ -142,13 +144,74 @@ class ExportSubjectSkillsSpec extends ExportBaseIntSpec {
                 ["For Divine Dragon Only"],
                 ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)", "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version"],
                 ["Test Skill 1", "skill1", "", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "Approval", "", "", "", "0.0"],
-                ["Test Skill 2", "skill2", "", "New Tag",  today.format("dd-MMM-yyyy"), "100.0", "50.0", "2.0", "Approval", "", "YEARLY", "8 Hours 7 Minutes", "1.0"],
+                ["Test Skill 2", "skill2", "", "New Tag",  today.format("dd-MMM-yyyy"), "200.0", "50.0", "4.0", "Approval", "", "Every year on ${expirationDate.format("MM/dd")}", "8 Hours 7 Minutes, Up to 2 Occurrences", "1.0"],
                 ["Test Skill 3", "skill3", "", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "Honor System", "", "", "", "0.0"],
-                ["Test Skill 10", "skill10", "", "",  today.format("dd-MMM-yyyy"), "100.0", "0.0", "1.0", "", "", "", "", "0.0"],
                 ["Test Skill 4", "skill4", "Test Skill 10", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
                 ["Test Skill 5", "skill5", "Test Skill 10", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
                 ["Test Skill 1 Subject2", "skill1subj2", "", "",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "", "Imported", "", "", "1.0"],
                 ["For Divine Dragon Only"],
         ])
+    }
+
+    def "export subject skills, validate expiration formatting"() {
+
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(6, 1, 1, 50)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        LocalDateTime expirationDate = (new Date() - 1).toLocalDateTime() // yesterday
+        skillsService.saveSkillExpirationAttributes(proj1.projectId, proj1_skills[0].skillId as String, [
+                expirationType: ExpirationAttrs.YEARLY,
+                every: 2,
+                monthlyDay: expirationDate.dayOfMonth,
+                nextExpirationDate: expirationDate.toDate(),
+        ])
+        skillsService.saveSkillExpirationAttributes(proj1.projectId, proj1_skills[1].skillId as String, [
+                expirationType: ExpirationAttrs.MONTHLY,
+                every: 1,
+                monthlyDay: expirationDate.dayOfMonth,
+                nextExpirationDate: expirationDate.toDate(),
+        ])
+        skillsService.saveSkillExpirationAttributes(proj1.projectId, proj1_skills[2].skillId as String, [
+                expirationType: ExpirationAttrs.MONTHLY,
+                every: 3,
+                monthlyDay: expirationDate.dayOfMonth,
+                nextExpirationDate: expirationDate.toDate(),
+        ])
+        skillsService.saveSkillExpirationAttributes(proj1.projectId, proj1_skills[3].skillId as String, [
+                expirationType: ExpirationAttrs.MONTHLY,
+                every: 3,
+                monthlyDay: ExpirationAttrs.LAST_DAY_OF_MONTH,
+                nextExpirationDate: expirationDate.toDate(),
+        ])
+        skillsService.saveSkillExpirationAttributes(proj1.projectId, proj1_skills[4].skillId as String, [
+                expirationType: ExpirationAttrs.DAILY,
+                every: 1,
+                monthlyDay: expirationDate.dayOfMonth,
+                nextExpirationDate: expirationDate.toDate(),
+        ])
+        skillsService.saveSkillExpirationAttributes(proj1.projectId, proj1_skills[5].skillId as String, [
+                expirationType: ExpirationAttrs.DAILY,
+                every: 90,
+                monthlyDay: expirationDate.dayOfMonth,
+                nextExpirationDate: expirationDate.toDate(),
+        ])
+
+        when:
+        def excelExport = skillsService.getSkillsForSubjectExport(proj1.projectId, proj1_subj.subjectId)
+
+        then:
+        validateExportForCell(excelExport.file, [
+                "Every 2 years on ${expirationDate.format("MM/dd")}",
+                "Every month on the ${ExcelExportService.getDayOfMonthWithSuffix(expirationDate.dayOfMonth)}",
+                "Every 3 months on the ${ExcelExportService.getDayOfMonthWithSuffix(expirationDate.dayOfMonth)}",
+                "Every 3 months on the last day",
+                "After 1 day of inactivity",
+                "After 90 days of inactivity",
+        ], 10)
     }
 }
