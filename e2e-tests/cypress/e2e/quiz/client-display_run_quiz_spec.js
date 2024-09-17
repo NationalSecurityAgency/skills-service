@@ -912,6 +912,42 @@ describe('Client Display Quiz Tests', () => {
 
 
     });
+
+    it('visit quiz connected to skill with insufficient project points', () => {
+        cy.createQuizDef(1);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '1', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="cantStartQuiz"]').contains('This Quiz is assigned to a Skill (skill1) that does not have enough points to be completed. The Project (proj1) that contains this skill must have at least 100 points.')
+        cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="cancelQuizAttempt"]').should('not.exist')
+
+        cy.get('[data-cy="closeQuizAttempt"]').click()
+        cy.get('[data-cy="skillDescription-skill1"]')
+    });
+
+    it('visit quiz connected to skill with insufficient subject points', () => {
+        cy.createQuizDef(1);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSubject(1,2)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '1', numPerformToCompletion: 1 });
+        cy.createSkill(1, 2, 1, { pointIncrement: '200', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="cantStartQuiz"]').contains('This Quiz is assigned to a Skill (skill1) that does not have enough points to be completed. The Subject (subj1) that contains this skill must have at least 100 points.')
+        cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="cancelQuizAttempt"]').should('not.exist')
+
+        cy.get('[data-cy="closeQuizAttempt"]').click()
+        cy.get('[data-cy="skillDescription-skill1"]')
+    });
 });
 
 

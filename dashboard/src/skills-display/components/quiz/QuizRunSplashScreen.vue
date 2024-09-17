@@ -27,7 +27,6 @@ const props = defineProps({
   },
 })
 const emit = defineEmits(['cancelQuizAttempt', 'start'])
-
 const timeUtils = useTimeUtils()
 
 const quizTimeLimit = computed(() => {
@@ -49,7 +48,7 @@ const minNumQuestionsToPass = computed(() => {
   return props.quizInfo.minNumQuestionsToPass > 0 ? props.quizInfo.minNumQuestionsToPass : numQuestions.value;
 })
 const canStartQuiz = computed(() => {
-  return (!props.quizInfo.userQuizPassed || props.multipleTakes) && !allAttemptsExhausted.value && numQuestions.value > 0;
+  return (!props.quizInfo.userQuizPassed || props.multipleTakes) && !allAttemptsExhausted.value && numQuestions.value > 0 && props.quizInfo.canStartQuiz;
 })
 const cancel = () => {
   emit('cancelQuizAttempt');
@@ -135,6 +134,12 @@ const start = () => {
             <i class="fas fa-exclamation-triangle text-2xl" aria-hidden="true"></i>
           </template>
           <span class="mx-2 text-2xl">This {{ quizInfo.quizType }} has no questions declared and unfortunately cannot be completed.</span>
+        </Message>
+        <Message v-if="!quizInfo.canStartQuiz" severity="error" :closable="false" data-cy="cantStartQuiz">
+          <template #messageicon>
+            <i class="fas fa-exclamation-triangle text-2xl" aria-hidden="true"></i>
+          </template>
+          <span class="mx-2 text-2xl">{{ quizInfo.errorMessage }}</span>
         </Message>
 
         <p v-if="quizInfo.description && !allAttemptsExhausted" class="mt-5" data-cy="quizDescription">

@@ -22,4 +22,6 @@ interface QuizSkillResult {
     String getSubjectName()
     String getProjectId()
     Boolean getCanUserAccess()
+    Integer getSubjectPoints()
+    Integer getProjectPoints()
 }

@@ -33,4 +33,6 @@ class QuizInfo {
     Integer quizLength
     Integer quizTimeLimit
     Boolean multipleTakes
+    Boolean canStartQuiz
+    String errorMessage
 }

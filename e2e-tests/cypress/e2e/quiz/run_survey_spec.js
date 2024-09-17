@@ -540,6 +540,45 @@ describe('Client Display Survey Tests', () => {
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="surveyCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by completing the survey.')
     })
+
+
+    it('visit survey connected to skill with insufficient project points', () => {
+        cy.createSurveyDef(1);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 1);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '1', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="title"]').contains('Survey')
+        cy.get('[data-cy="cantStartQuiz"]').contains('This Survey is assigned to a Skill (skill1) that does not have enough points to be completed. The Project (proj1) that contains this skill must have at least 100 points.')
+        cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="cancelQuizAttempt"]').should('not.exist')
+
+        cy.get('[data-cy="closeQuizAttempt"]').click()
+        cy.get('[data-cy="skillDescription-skill1"]')
+    });
+
+    it('visit survey connected to skill with insufficient subject points', () => {
+        cy.createSurveyDef(1);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 1);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSubject(1,2)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '1', numPerformToCompletion: 1 });
+        cy.createSkill(1, 2, 1, { pointIncrement: '200', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="title"]').contains('Survey')
+        cy.get('[data-cy="cantStartQuiz"]').contains('This Survey is assigned to a Skill (skill1) that does not have enough points to be completed. The Subject (subj1) that contains this skill must have at least 100 points.')
+        cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="cancelQuizAttempt"]').should('not.exist')
+
+        cy.get('[data-cy="closeQuizAttempt"]').click()
+        cy.get('[data-cy="skillDescription-skill1"]')
+    });
 });
 
 
