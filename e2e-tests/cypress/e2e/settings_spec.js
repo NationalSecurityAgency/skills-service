@@ -940,6 +940,36 @@ describe('Settings Tests', () => {
             .contains('Script tags are not allowed');
         cy.get('[data-cy=saveSystemSettings]')
             .should('be.disabled');
+
+        cy.get('[data-cy=customHeader]')
+          .type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red"><SCRIPT src="somewhere"/>HEADER</div>');
+        cy.get('[data-cy=customFooter]')
+          .type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red"><SCRIPT type="text/javascript">alert("foo");</SCRIPT>FOOTER</div>');
+        cy.get('[data-cy=customHeaderError]')
+          .should('be.visible');
+        cy.get('[data-cy=customHeaderError]')
+          .contains('Script tags are not allowed');
+        cy.get('[data-cy=customFooterError]')
+          .should('be.visible');
+        cy.get('[data-cy=customFooterError]')
+          .contains('Script tags are not allowed');
+        cy.get('[data-cy=saveSystemSettings]')
+          .should('be.disabled');
+
+        cy.get('[data-cy=customHeader]')
+          .type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red"><sCrIPt src="somewhere"/>HEADER</div>');
+        cy.get('[data-cy=customFooter]')
+          .type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red"><ScRiPT type="text/javascript">alert("foo");</ScRiPT>FOOTER</div>');
+        cy.get('[data-cy=customHeaderError]')
+          .should('be.visible');
+        cy.get('[data-cy=customHeaderError]')
+          .contains('Script tags are not allowed');
+        cy.get('[data-cy=customFooterError]')
+          .should('be.visible');
+        cy.get('[data-cy=customFooterError]')
+          .contains('Script tags are not allowed');
+        cy.get('[data-cy=saveSystemSettings]')
+          .should('be.disabled');
     });
 
     it('custom header/custom footer must be 3000 characters or less', () => {
