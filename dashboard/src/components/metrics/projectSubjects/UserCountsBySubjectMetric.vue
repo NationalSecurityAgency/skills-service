@@ -14,9 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
+import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue'
+import NumberFormatter from '@/components/utils/NumberFormatter.js'
 
 const route = useRoute();
 
@@ -73,6 +75,13 @@ const chartOptions = ref({
     title: {
       text: '# of users',
     },
+    labels: {
+      formatter(val) {
+        return NumberFormatter.format(val);
+      },
+    },
+    min: 0,
+    forceNiceScale: true,
   },
   fill: {
     opacity: 1,
@@ -89,10 +98,15 @@ const chartOptions = ref({
   },
 });
 
+const chartRef = ref(null)
 const updateChart = (res) => {
   const localSeries = [];
   const sortedSubjects = res.sort((subj) => subj.subject);
-  chartOptions.value.xaxis.categories = sortedSubjects.map((subj) => subj.subject);
+  chartRef.value.updateOptions({
+    xaxis: {
+      categories: sortedSubjects.map((subj) => subj.subject),
+    },
+  })
   const allLevels = sortedSubjects.map((subj) => subj.numUsersPerLevels.length);
   if (allLevels) {
     const maxLevel = Math.max(...allLevels);
@@ -113,6 +127,8 @@ const updateChart = (res) => {
   }
   series.value = localSeries;
 };
+
+const hasData = computed(() => !loading.value && series.value && series.value?.length > 0)
 </script>
 
 <template>
@@ -121,15 +137,9 @@ const updateChart = (res) => {
       <SkillsCardHeader title="Number of users for each level for each subject"></SkillsCardHeader>
     </template>
     <template #content>
-      <BlockUI :blocked="loading" opacity=".5">
-        <apexchart v-if="loading" type="bar" height="350" :options="{}" :series="[]" class="mt-4"></apexchart>
-      </BlockUI>
-      <BlockUI :blocked="loading" opacity=".5">
-        <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series" class="mt-4"></apexchart>
-        <div class="alert alert-info" v-if="!loading && series.length === 0">
-          <i class="fas fa-user-clock"></i> Users have not achieved any levels, yet...
-        </div>
-      </BlockUI>
+        <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="Users have not achieved any levels, yet..." class="mt-4">
+          <apexchart ref="chartRef" type="bar" height="350" :options="chartOptions" :series="series" class="mt-4"></apexchart>
+        </metrics-overlay>
     </template>
   </Card>
 </template>

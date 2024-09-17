@@ -64,6 +64,8 @@ const chartOptions = {
     type: 'datetime',
   },
   yaxis: {
+    forceNiceScale: true,
+    min: 0,
     labels: {
       formatter(val) {
         return NumberFormatter.format(val);
