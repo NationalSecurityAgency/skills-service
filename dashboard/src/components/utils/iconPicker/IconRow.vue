@@ -46,7 +46,7 @@ const handleClick = (name, cssClass) => {
   <div :class="['flex p-2 align-items-center', { 'surface-hover': options.odd }]" style="height: 100px">
     <template v-for="(el, index) of item" :key="index">
       <div class="icon-item flex-1">
-        <a href="#"
+        <button class="p-link text-blue-400"
            @click.stop.prevent="handleClick(el.name, el.cssClass)"
            :class="`icon-${el.name}`"
            :data-cy="`${el.cssClass}-link`"
@@ -54,7 +54,7 @@ const handleClick = (name, cssClass) => {
                <span class="icon is-large">
                    <i :class="el.cssClass"></i>
                </span>
-        </a><br/>
+        </button><br/>
         <span class="iconName">{{ el.name }}</span>
       </div>
     </template>
