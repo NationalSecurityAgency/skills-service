@@ -47,13 +47,13 @@ describe('Test persistence of table sorting', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         // test skill name sorting
-        cy.get('[data-cy="skillsTable"]').contains('Skill').click();
+        cy.get('[data-cy="skillsTable"] th').contains('Skill').click();
         cy.validateTable('[data-cy="skillsTable"]', expected, 10);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.validateTable('[data-cy="skillsTable"]', expected, 10);
-        cy.get('[data-cy="skillsTable"]').contains('Skill').click();
+        cy.get('[data-cy="skillsTable"] th').contains('Skill').click();
         cy.validateTable('[data-cy="skillsTable"]', expected.map((item) => item).reverse(), 10);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
@@ -80,11 +80,11 @@ describe('Test persistence of table sorting', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         // test skill name sorting
-        cy.get('[data-cy="skillsTable"]').contains('Skill').click();
+        cy.get('[data-cy="skillsTable"] th').contains('Skill').click();
         cy.validateTable('[data-cy="skillsTable"]', expected, 10);
 
         cy.visit('/administrator/projects/proj1/users');
-        cy.get('[data-cy="usersTable"]').contains('Progress').click();
+        cy.get('[data-cy="usersTable"] th').contains('Progress').click();
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.validateTable('[data-cy="skillsTable"]', expected, 10);

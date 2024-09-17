@@ -581,7 +581,7 @@ const exportSkills = () => {
           <SkillsButton :disabled="totalRows <= 0"
                         size="small"
                         icon="fas fa-download"
-                        label="Export All Rows"
+                        label="Export All Skills"
                         @click="exportSkills"
                         data-cy="exportSkillsTableBtn" />
         </div>

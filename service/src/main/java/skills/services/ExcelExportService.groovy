@@ -31,6 +31,7 @@ import skills.metrics.builders.project.UserAchievementsMetricsBuilder.QueryParam
 import skills.services.admin.SkillsAdminService
 import skills.services.admin.UserCommunityService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.attributes.ExpirationAttrs
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.UserAchievedLevelRepo
@@ -221,25 +222,6 @@ class ExcelExportService {
     }
 
     private Integer addSkill(Sheet sheet, Integer rowNum, CellStyle dateStyle, SkillDefPartialRes skillDef) {
-        Row row = sheet.createRow(rowNum++)
-        Integer columnNumber = 0
-        row.createCell(columnNumber++).setCellValue(SkillReuseIdUtil.removeTag(InputSanitizer.unsanitizeName(skillDef.name)))
-        row.createCell(columnNumber++).setCellValue(skillDef.skillId)
-        row.createCell(columnNumber++).setCellValue(skillDef.groupName)
-        row.createCell(columnNumber++).setCellValue(skillDef.tags?.collect {it.tagValue}?.join(','))
-
-        Cell cell = row.createCell(columnNumber++)
-        cell.setCellStyle(dateStyle)
-        cell.setCellValue(skillDef.created)
-
-        row.createCell(columnNumber++).setCellValue(skillDef.totalPoints)
-        row.createCell(columnNumber++).setCellValue(skillDef.pointIncrement)
-        row.createCell(columnNumber++).setCellValue(skillDef.numPerformToCompletion)
-        row.createCell(columnNumber++).setCellValue(getSelfReportType(skillDef))
-        row.createCell(columnNumber++).setCellValue(getCatalogStatus(skillDef))
-        row.createCell(columnNumber++).setCellValue(skillDef.expirationType && skillDef.expirationType != skills.services.attributes.ExpirationAttrs.NEVER ? skillDef.expirationType : "")
-        row.createCell(columnNumber++).setCellValue(getTimeWindow(skillDef))
-        row.createCell(columnNumber++).setCellValue(skillDef.version)
 
         if (skillDef.type == SkillDef.ContainerType.SkillsGroup) {
             skillsAdminService.getSkillsByProjectSkillAndType(skillDef.projectId, skillDef.skillId, SkillDef.ContainerType.SkillsGroup, SkillRelDef.RelationshipType.SkillsGroupRequirement).each {
@@ -247,7 +229,28 @@ class ExcelExportService {
                 it.setGroupName(skillDef.name)
                 rowNum = addSkill(sheet, rowNum, dateStyle, it)
             }
+        } else {
+            Row row = sheet.createRow(rowNum++)
+            Integer columnNumber = 0
+            row.createCell(columnNumber++).setCellValue(SkillReuseIdUtil.removeTag(InputSanitizer.unsanitizeName(skillDef.name)))
+            row.createCell(columnNumber++).setCellValue(skillDef.skillId)
+            row.createCell(columnNumber++).setCellValue(skillDef.groupName)
+            row.createCell(columnNumber++).setCellValue(skillDef.tags?.collect {it.tagValue}?.join(','))
+
+            Cell cell = row.createCell(columnNumber++)
+            cell.setCellStyle(dateStyle)
+            cell.setCellValue(skillDef.created)
+
+            row.createCell(columnNumber++).setCellValue(skillDef.totalPoints)
+            row.createCell(columnNumber++).setCellValue(skillDef.pointIncrement)
+            row.createCell(columnNumber++).setCellValue(skillDef.numPerformToCompletion)
+            row.createCell(columnNumber++).setCellValue(getSelfReportType(skillDef))
+            row.createCell(columnNumber++).setCellValue(getCatalogStatus(skillDef))
+            row.createCell(columnNumber++).setCellValue(getExpiration(skillDef))
+            row.createCell(columnNumber++).setCellValue(getTimeWindow(skillDef))
+            row.createCell(columnNumber++).setCellValue(skillDef.version)
         }
+
         return rowNum
     }
 
@@ -274,28 +277,56 @@ class ExcelExportService {
         return catalogStatus
     }
 
+    private static String getExpiration(SkillDefPartialRes skillDef) {
+        String expiration = ""
+        if (skillDef.expirationType && skillDef.expirationType != ExpirationAttrs.NEVER) {
+            Boolean plural = skillDef.every > 1
+            if (skillDef.expirationType == ExpirationAttrs.YEARLY) {
+                expiration = "Every${plural ? " ${skillDef.every}" : ''} ${pluralize(skillDef.every, 'year')} on ${skillDef.nextExpirationDate.format("MM/dd")}"
+            } else if (skillDef.expirationType == ExpirationAttrs.MONTHLY) {
+                String dayOfMonth = skillDef.monthlyDay == ExpirationAttrs.LAST_DAY_OF_MONTH ? "last day" : getDayOfMonthWithSuffix(skillDef.nextExpirationDate.toMonthDay().dayOfMonth)
+                expiration = "Every${plural ? " ${skillDef.every}" : ''} ${pluralize(skillDef.every, 'month')} on the ${dayOfMonth}"
+            } else if (skillDef.expirationType == ExpirationAttrs.DAILY) {
+                expiration = "After ${skillDef.every} ${pluralize(skillDef.every, 'day')} of inactivity"
+            }
+        }
+        return expiration
+    }
+    private static String getDayOfMonthWithSuffix(final int n) {
+        assert n >= 1 && n <= 31, "illegal day of month: ${n}"
+        String dayOfMonth = Integer.toString(n)
+        if (n >= 11 && n <= 13) {
+            return "${dayOfMonth}th";
+        }
+        switch (n % 10) {
+            case 1:  return "${dayOfMonth}st";
+            case 2:  return "${dayOfMonth}nd";
+            case 3:  return "${dayOfMonth}rd";
+            default: return "${dayOfMonth}th";
+        }
+    }
     private static String getTimeWindow(SkillDefPartialRes skillDef) {
         String timeWindow = ""
         if (skillDef.type == SkillDef.ContainerType.Skill) {
             Boolean timeWindowEnabled = skillDef.pointIncrementInterval > 0
             if (timeWindowEnabled && skillDef.numPerformToCompletion != 1) {
-                if (skillDef.numPerformToCompletion != 1) {
-                    Integer hours = Math.floor(skillDef.pointIncrementInterval / 60)
-                    Integer minutes = skillDef.pointIncrementInterval % 60
-                    timeWindow = "${hours} Hour"
-                    if (hours > 1) {
-                        timeWindow = "${timeWindow}s"
-                    }
-                    if (minutes > 0) {
-                        timeWindow = "${timeWindow} ${minutes} Minute"
-                        if (minutes > 1) {
-                            timeWindow = "${timeWindow}s"
-                        }
-                    }
+                Integer hours = Math.floor(skillDef.pointIncrementInterval / 60)
+                timeWindow = "${hours} ${pluralize(hours, 'Hour')}"
+                Integer minutes = skillDef.pointIncrementInterval % 60
+                if (minutes > 0) {
+                    timeWindow = "${timeWindow} ${minutes} ${pluralize(minutes, 'Minute')}"
+                }
+
+                if (skillDef.numMaxOccurrencesIncrementInterval > 0) {
+                    timeWindow = "${timeWindow}, Up to ${skillDef.numMaxOccurrencesIncrementInterval} ${pluralize(skillDef.numMaxOccurrencesIncrementInterval, 'Occurrence')}"
                 }
             }
         }
         return timeWindow
+    }
+
+    private static String pluralize(int count, String value) {
+        return count == 1 ? value : "${value}s"
     }
 
     private static Integer initializeSheet(Sheet sheet, List<String> headers, String projectExportHeaderAndFooter) {
