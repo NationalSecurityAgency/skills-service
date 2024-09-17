@@ -101,7 +101,7 @@ describe('Accessibility Project Metrics Tests', () => {
             cy.customA11y()
         })
 
-        it.only(`project - subject metrics${darkMode}`, () => {
+        it(`project - subject metrics${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
             cy.visit('/administrator/projects/proj1/metrics/subjects');
 
