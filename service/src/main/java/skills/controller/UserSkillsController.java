@@ -100,7 +100,7 @@ class UserSkillsController {
     @Autowired
     SelfReportingService selfReportingService;
 
-    @Value("${skills.config.ui.pointHistoryInDays:1825}")
+    @Value("${skills.config.ui.pointHistoryInDays:3650}")
     Integer maxDaysBack;
 
     @Autowired

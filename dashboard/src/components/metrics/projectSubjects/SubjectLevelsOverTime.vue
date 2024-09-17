@@ -20,6 +20,7 @@ import MetricsService from "@/components/metrics/MetricsService.js";
 import SubjectsService from "@/components/subjects/SubjectsService.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import NumberFormatter from '@/components/utils/NumberFormatter.js'
+import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue'
 
 const route = useRoute();
 
@@ -50,6 +51,8 @@ const chartOptions = ref({
         return NumberFormatter.format(val);
       },
     },
+    min: 0,
+    forceNiceScale: true,
   },
   xaxis: {
     type: 'datetime',
@@ -97,6 +100,16 @@ const loadChart = () => {
         loading.value.generatedAtLeastOnce = true;
       });
 };
+
+const overlayMessage  = computed(() => {
+  if (!loading.value.generatedAtLeastOnce && isSeriesEmpty.value) {
+    return 'Generate the chart using controls above!'
+  }
+  if (loading.value.generatedAtLeastOnce && isSeriesEmpty.value) {
+    return 'Zero users achieved levels for this subject!'
+  }
+  return ''
+})
 </script>
 
 <template>
@@ -118,20 +131,9 @@ const loadChart = () => {
         </BlockUI>
         <SkillsButton variant="outline-info" class="ml-2" :disabled="!subjects.selected" @click="loadChart" icon="fas fa-paint-roller" label="Generate" />
       </div>
-      <BlockUI :blocked="loading.charts || isSeriesEmpty" opacity=".5">
+      <metrics-overlay :loading="loading.charts" :has-data="!isSeriesEmpty" :no-data-msg="overlayMessage" class="mt-4">
         <apexchart type="area" height="300" :options="chartOptions" :series="series"></apexchart>
-        <div class="absolute z-4 top-50 w-full text-center" v-if="loading.charts || isSeriesEmpty">
-          <div v-if="loading.charts">
-            <SkillsSpinner :is-loading="loading.charts" />
-          </div>
-          <div v-if="!loading.charts && !loading.generatedAtLeastOnce && isSeriesEmpty" class="alert alert-info">
-            <i class="fas fa-chart-line"></i> Generate the chart using controls above!
-          </div>
-          <div v-if="!loading.charts && loading.generatedAtLeastOnce && isSeriesEmpty" class="alert alert-info">
-            <i class="fas fa-cat"></i> Zero users achieved levels for this subject!
-          </div>
-        </div>
-      </BlockUI>
+      </metrics-overlay>
     </template>
   </Card>
 </template>

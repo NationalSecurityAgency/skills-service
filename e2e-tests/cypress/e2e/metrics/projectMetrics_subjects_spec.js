@@ -606,10 +606,16 @@ describe('Metrics Tests', () => {
     });
 
     it('subjects - num users per level - many levels', () => {
+        // cy.viewport(3800, 1280);
         const response = [];
-        for (let i = 0; i < 6; i += 1) {
-            response.push(createSubjectObj(`Subject # ${i}`, [1265, 852, 493, 625, 293, 392, 293, 983, 1923, 1209]));
-        }
+        // for (let i = 0; i < 6; i += 1) {
+        //     response.push(createSubjectObj(`Subject # ${i}`, [1265, 852, 493, 625, 293, 392, 293, 983, 1923, 1209]));
+        // }
+        response.push(createSubjectObj(`Subject # 1`, [1265, 852, 493, 625, 293, 392, 293, 983, 1923, 1209]))
+        response.push(createSubjectObj(`Subject # 2`, [850, 852, 493, 625, 293, 392, 293, 983, 1923, 1209]))
+        response.push(createSubjectObj(`Subject # 3`, [520, 852, 493, 625, 293, 392, 293, 983, 523, 1209]))
+        response.push(createSubjectObj(`Subject # 4`, [360, 852, 493, 625, 293, 392, 293, 983, 1923, 1209]))
+        response.push(createSubjectObj(`Subject # 5`, [126, 852, 493, 625, 293, 392, 293, 983, 1245, 1209]))
 
         cy.intercept('/admin/projects/proj1/metrics/numUsersPerSubjectPerLevelChartBuilder',
             {
