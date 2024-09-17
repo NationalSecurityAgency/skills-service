@@ -73,7 +73,6 @@ const chartOptions = {
   },
   xaxis: {
     type: 'datetime',
-    tickAmount: 1,
     labels: {
       style: {
         colors: chartAxisColor()

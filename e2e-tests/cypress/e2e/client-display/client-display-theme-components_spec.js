@@ -26,8 +26,8 @@ describe('Client Display Theme Components Tests', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2, { selfReportingType: 'HonorSystem' })
     cy.createSkill(1, 1, 3)
-    cy.reportSkill(1, 1, Cypress.env('proxyUser'), '2019-09-12 11:00')
-    cy.reportSkill(1, 1, Cypress.env('proxyUser'), '2019-09-19 11:00')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), '2023-08-12 11:00')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), '2023-08-19 11:00')
   })
 
   it('breadcrumb - linkColor and currentPageColor ', () => {
@@ -93,8 +93,8 @@ describe('Client Display Theme Components Tests', () => {
 
   it('progressIndicators config', () => {
     cy.createSkill(1, 1, 3, { numPerformToCompletion: 5 })
-    cy.reportSkill(1, 3, Cypress.env('proxyUser'), '2019-09-12 11:00')
-    cy.reportSkill(1, 3, Cypress.env('proxyUser'), '2019-09-19 11:00')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), '2023-08-12 11:00')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), '2023-08-19 11:00')
     cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
 
     cy.createSubject(1, 2, { name: 'Unused' })
@@ -146,8 +146,8 @@ describe('Client Display Theme Components Tests', () => {
 
   it('stars config', () => {
     cy.createSkill(1, 1, 3, { numPerformToCompletion: 5 })
-    cy.reportSkill(1, 3, Cypress.env('proxyUser'), '2019-09-12 11:00')
-    cy.reportSkill(1, 3, Cypress.env('proxyUser'), '2019-09-19 11:00')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), '2023-08-12 11:00')
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), '2023-08-19 11:00')
     cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now')
 
     cy.createSubject(1, 2, { name: 'Unused' })
