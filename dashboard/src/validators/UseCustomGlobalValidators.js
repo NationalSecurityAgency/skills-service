@@ -98,7 +98,7 @@ export const useCustomGlobalValidators = () => {
   }
 
   function noScript() {
-    const scriptRegex = /<[^>]*script/;
+    const scriptRegex = /<[^>]*script/i;
     return this.test('noScript', 'Script tags are not allowed', (value) => {
       if (value) {
         return value.match(scriptRegex) === null;
