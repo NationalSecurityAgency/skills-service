@@ -20,9 +20,19 @@ import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
+import skills.services.StartDateUtil
+import skills.services.WeekNumberUtil
 import skills.services.quiz.QuizQuestionType
+import skills.storage.model.EventType
 import skills.storage.model.SkillDef
+import skills.storage.model.UserAchievement
+import skills.storage.model.UserEvent
+import skills.storage.model.UserPerformedSkill
+import skills.storage.model.UserPoints
+import skills.storage.model.UserQuizAttempt
 import skills.storage.repos.*
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -446,5 +456,53 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         gradedQuizAttempt.gradedQuestions.isCorrect == [true, true]
         gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
         gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[0].id]
+    }
+
+    def "quiz can not be taken if the project does not have enough points"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skills = createSkills(1, 1, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz.quizId
+        skillsService.createSkill(skills[0])
+
+        when:
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        then:
+        quizInfo
+        quizInfo.canStartQuiz == false
+        quizInfo.errorMessage == "This Quiz is assigned to a Skill (skill1) that does not have enough points to be completed. The Project (TestProject1) that contains this skill must have at least 100 points."
+    }
+
+    def "quiz can not be taken if the subject does not have enough points"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def subj2 = createSubject(1, 2)
+
+        def skills = createSkills(1, 1, 1, 1)
+        def otherSkills = createSkills(1, 1, 2, 100)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        skillsService.createSubject(subj2)
+        skillsService.createSkill(otherSkills[0])
+
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz.quizId
+        skillsService.createSkill(skills[0])
+
+        when:
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        then:
+        quizInfo
+        quizInfo.canStartQuiz == false
+        quizInfo.errorMessage == "This Quiz is assigned to a Skill (skill1) that does not have enough points to be completed. The Subject (TestSubject1) that contains this skill must have at least 100 points."
     }
 }
