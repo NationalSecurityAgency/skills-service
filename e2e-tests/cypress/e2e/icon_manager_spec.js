@@ -51,7 +51,7 @@ describe('Icon Manager Tests', () => {
         cy.wait(1500);
         // cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
         cy.get('[data-cy=virtualIconList]').scrollTo(0,540);
-        cy.get('.icon-item>a:visible', {timeout:10000}).should('be.visible').last().then(($el)=> {
+        cy.get('.icon-item>button:visible', {timeout:10000}).should('be.visible').last().then(($el)=> {
             const clazz = $el.attr('data-cy');
             cy.get(`[data-cy="${clazz}"]`).should('have.length', '1').click({force:true});
             cy.get('[data-cy=saveDialogBtn]').scrollIntoView().should('be.visible').click();
@@ -77,7 +77,7 @@ describe('Icon Manager Tests', () => {
         cy.wait(2500);
         // cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
         cy.get('[data-cy=virtualIconList]').scrollTo(0,540);
-        cy.get('.icon-item>a:visible',{timeout:1000}).last().then(($el)=> {
+        cy.get('.icon-item>button:visible',{timeout:1000}).last().then(($el)=> {
             const clazz = $el.attr('data-cy');
             cy.get(`[data-cy="${clazz}"]`).should('have.length', '1').click({ force: true });
             cy.get('[data-cy=saveDialogBtn]').scrollIntoView().should('be.visible').click();
@@ -104,7 +104,7 @@ describe('Icon Manager Tests', () => {
         cy.wait(1500);
         // cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
         cy.get('[data-cy=virtualIconList]').scrollTo(0,540);
-        cy.get('.icon-item>a:visible', {timeout:10000}).should('be.visible').last().then(($el)=> {
+        cy.get('.icon-item>button:visible', {timeout:10000}).should('be.visible').last().then(($el)=> {
             const clazz = $el.attr('data-cy');
             cy.get(`[data-cy="${clazz}"]`).should('have.length', '1').click({force:true});
             cy.get('[data-cy=saveDialogBtn]').scrollIntoView().should('be.visible').click();
@@ -130,7 +130,7 @@ describe('Icon Manager Tests', () => {
         cy.wait(2500);
         // cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
         cy.get('[data-cy=virtualIconList]').scrollTo(0,540);
-        cy.get('.icon-item>a:visible',{timeout:1000}).last().then(($el)=> {
+        cy.get('.icon-item>button:visible',{timeout:1000}).last().then(($el)=> {
             const clazz = $el.attr('data-cy');
             cy.get(`[data-cy="${clazz}"]`).should('have.length', '1').click({ force: true });
             cy.get('[data-cy=saveDialogBtn]').scrollIntoView().should('be.visible').click();
