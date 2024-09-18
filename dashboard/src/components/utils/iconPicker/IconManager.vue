@@ -348,6 +348,7 @@ const closeError = () => {
               <div v-for="(file) of icons" :key="file.filename" class="card m-0 px-6 flex flex-wrap border-1 surface-border align-items-center gap-3">
                 <div class="icon-item" style="max-width: 100px;">
                   <button class="p-link text-blue-400"
+                     :aria-label="`Select icon ${file.cssClassname}`"
                      @click.stop.prevent="selectIcon(file.filename, file.cssClassname, 'Custom Icons')"
                      :class="`item ${selectedCss === file.cssClassname ? 'selected' : ''}`">
                             <span class="icon is-large text-info">
@@ -356,7 +357,7 @@ const closeError = () => {
                   </button>
                   <br/>
                   <span class="iconName">
-                    <button class="p-link text-blue-400 delete-icon" @click="deleteIcon(file, route.params.projectId)">
+                    <button class="p-link text-blue-400 delete-icon" @click="deleteIcon(file, route.params.projectId)" :aria-label="`Delete icon ${file.cssClassname}`">
                       <span class="icon is-tiny"><i style="font-size:1rem;height:1rem;width:1rem;" class="fas fa-trash"></i></span>
                     </button>
                     <span>{{ file.filename }}</span>
