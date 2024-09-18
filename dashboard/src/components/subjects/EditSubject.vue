@@ -45,8 +45,6 @@ if (props.isEdit) {
   modalTitle = 'Editing Existing Subject'
 }
 
-let canAutoGenerateId = ref(true)
-let restoredFromStorage = ref(false)
 let currentFocus = ref(null)
 let previousFocus = ref(null)
 let originalFocusedElement = null;
@@ -135,6 +133,7 @@ const updateSubject = (values) => {
     subjectId: InputSanitizer.sanitize(values.subjectId)
   }
   return SubjectsService.saveSubject(subjToSave).then((subjRes) => {
+
     return {
       ...subjRes,
       originalSubjectId: props.subject.subjectId

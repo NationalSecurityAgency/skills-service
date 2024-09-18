@@ -131,8 +131,7 @@ const subjectEdited = (updatedSubject) => {
   } else {
     focusState.focusOnLastElement()
   }
-  subjectState.subject.subjectId = updatedSubject.subjectId
-  subjectState.subject.name = updatedSubject.name
+  subjectState.subject = updatedSubject;
   announcer.polite(`Subject ${updatedSubject.name} has been edited`)
 }
 
