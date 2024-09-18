@@ -150,6 +150,21 @@ const options = ref({
 const additionalColumns = ref(options.value.fields.filter((f) => !f.isSticky))
 const additionalSelectedColumnKeys = useStorage('subjectSkillsTableAdditionalSelectedColumnKeys', [])
 const additionalSelectedColumns = ref(options.value.fields.filter((f) => additionalSelectedColumnKeys.value.includes(f.key)))
+const additionalColumnsNumSelectedLabels = computed (() => {
+  if (responsive.currentWidth.value < 400) {
+    return 1
+  }
+  if (responsive.currentWidth.value < 600) {
+    return 2
+  }
+  if (responsive.currentWidth.value < 1400) {
+    return 3
+  }
+  if (responsive.currentWidth.value < 1600) {
+    return 4
+  }
+  return 5
+})
 const displayedColumns = ref(options.value.fields.filter((f) => f.isSticky || additionalSelectedColumnKeys.value.includes(f.key)))
 const onToggle = (currentSelection) => {
   additionalSelectedColumnKeys.value = currentSelection.map((c) => c.key)
@@ -499,7 +514,7 @@ const exportSkills = () => {
                 v-model="additionalSelectedColumns"
                 :options="additionalColumns"
                 display="chip"
-                :max-selected-labels="3"
+                :max-selected-labels="additionalColumnsNumSelectedLabels"
                 optionLabel="label"
                 @update:modelValue="onToggle"
                 placeholder="Optional Fields"
