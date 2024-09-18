@@ -645,4 +645,34 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconErrorMessage"]').contains('File is not an image format');
     });
+
+    it('subject - selecting new icon from subject page saves correctly', () => {
+        cy.intercept({
+            method: 'POST',
+            url: '/admin/projects/proj1/subjects/subj1'
+        }).as('saveSubject');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="btn_edit-subject"]').click();
+        cy.get('[data-cy="iconPicker"]').click();
+
+        cy.get('.p-menuitem-link').contains('Custom').click();
+
+        const filename = 'valid_icon.png';
+        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.wait('@uploadIcon')
+
+        cy.get('[data-cy=saveDialogBtn]').click();
+
+        cy.wait('@saveSubject');
+        cy.get('[data-cy="btn_edit-subject"]').click();
+        cy.get('[data-cy="iconPicker"] .proj1-validiconpng').should('be.visible');
+
+    });
 });
