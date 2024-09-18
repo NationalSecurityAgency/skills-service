@@ -282,11 +282,11 @@ const toDate = (value) => {
         <div>
           <div v-if="badges && badges.length"
                id="badgeCards"
-               class="flex flex-wrap gap-3 justify-content-center">
+               class="grid">
             <div v-for="(badge) of badges"
                  :id="badge.badgeId"
                  :key="badge.badgeId"
-                 class="flex-1 lg:w-min-20rem lg:max-w-30rem">
+                 class="col-12 xl:col-6 xlPlus:col-4 xlPlusPlus:col-3">
               <BlockUI :blocked="sortOrder.loading">
                 <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${badge.badgeId}_overlayShown`">
                   <div v-if="badge.badgeId===sortOrder.loadingBadgeId" data-cy="updatingSortMsg">
@@ -319,4 +319,20 @@ const toDate = (value) => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+@media screen and (min-width: 1600px) {
+  .xlPlus\:col-4 {
+    flex: 0 0 auto;
+    padding: 0.5rem;
+    width: 33.3333%;
+  }
+}
+
+@media screen and (min-width: 2000px) {
+  .xlPlusPlus\:col-3 {
+    flex: 0 0 auto;
+    padding: 0.5rem;
+    width: 25%;
+  }
+}
+</style>

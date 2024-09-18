@@ -129,9 +129,10 @@ defineExpose({
 </script>
 
 <template>
-  <div data-cy="subjectCard">
+  <div data-cy="subjectCard" class="h-full">
     <loading-card :loading="isLoading"/>
     <nav-card-with-stats-and-controls v-if="!isLoading"
+                                      class="h-full"
                                       ref="navCardWithStatsAndControlsRef"
                                       :disable-sort-control="disableSortControl"
                                       @sort-changed-requested="sortRequested"

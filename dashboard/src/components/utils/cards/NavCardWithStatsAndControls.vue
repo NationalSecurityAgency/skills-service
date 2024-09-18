@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, ref} from 'vue';
-import Badge from 'primevue/badge';
-import Card from 'primevue/card';
+import { computed, ref } from 'vue'
+import Badge from 'primevue/badge'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
+import CardWithVericalSections from '@/components/utils/cards/CardWithVericalSections.vue'
 
 const projConfig = useProjConfig();
 const props = defineProps(['options', 'disableSortControl']);
@@ -49,37 +49,55 @@ defineExpose({
 </script>
 
 <template>
-  <Card class="relative">
+  <CardWithVericalSections class="h-full">
     <template #content>
-      <div class="flex mb-2 nav-cards-header">
-        <div class="col">
-          <div class="flex">
-            <router-link v-if="options.icon"
-                         :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink" aria-hidden="true"
-                         tabindex="-1" class="">
-              <div class="d-inline-block mr-2 border-1 text-center border-round w-4rem subject-icon-container" aria-hidden="true">
-                <i :class="[`${options.icon} subject-icon`]" aria-hidden="true" />
-              </div>
-            </router-link>
-            <div class="media-body" style="min-width: 0px; margin-left: 8px;">
-              <div class="text-info mb-0 pb-0 preview-card-title no-underline overflow-hidden text-overflow-ellipsis white-space-nowrap" style="max-width:20rem">
-                <router-link v-if="options.icon" :to="options.navTo" data-cy="titleLink" class="no-underline" :aria-label="`${isReadOnlyProj ? 'View' : 'Manage'} ${options.controls.type} ${options.controls.name}`">
-                  {{ options.title }}
-                </router-link>
-              </div>
-              <div class="text-secondary preview-card-subTitle overflow-hidden text-overflow-ellipsis white-space-nowrap"
-                   style="max-width:15rem"
-                   data-cy="subTitle">{{ options.subTitle }}</div>
+      <div class="flex mb-2">
+        <div class="flex flex-1 pt-4 pl-4">
+          <router-link v-if="options.icon"
+                       :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink" aria-hidden="true"
+                       tabindex="-1" class="">
+            <div class="d-inline-block mr-2 border-1 text-center border-round w-4rem subject-icon-container"
+                 aria-hidden="true">
+              <i :class="[`${options.icon} subject-icon`]" aria-hidden="true" />
             </div>
+          </router-link>
+          <div class="media-body">
+            <div
+              class="text-xl font-semibold no-underline overflow-hidden text-overflow-ellipsis white-space-nowrap"
+              style="max-width:17rem">
+              <router-link v-if="options.icon" :to="options.navTo" data-cy="titleLink" class="no-underline"
+                           :aria-label="`${isReadOnlyProj ? 'View' : 'Manage'} ${options.controls.type} ${options.controls.name}`">
+                {{ options.title }}
+              </router-link>
+            </div>
+            <div class="text-secondary text-xs overflow-hidden text-overflow-ellipsis white-space-nowrap"
+                 style="max-width:15rem"
+                 data-cy="subTitle">{{ options.subTitle }}
+            </div>
+          </div>
+        </div>
+        <div>
+          <div v-if="!disableSortControl && !isReadOnlyProj"
+               ref="sortControl"
+               @mouseover="overSortControl = true"
+               @mouseleave="overSortControl = false"
+               @keyup.down="moveDown"
+               @keyup.up="moveUp"
+               @click.prevent.self
+               class="px-2 py-1 text-xl border-left-1 border-bottom-1 border-round-bottom-left-md surface-border text-color-secondary hover:shadow-3 hover:text-primary"
+               tabindex="0"
+               :aria-label="`Sort Control. Current position for ${options.title} is ${options.displayOrder}. Press up or down to change the order.`"
+               role="button"
+               data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i>
           </div>
         </div>
       </div>
 
-      <div class="mt-3">
+      <div class="mt-4 px-4">
         <slot name="underTitle"></slot>
       </div>
 
-      <div class="flex gap-2 flex-column sm:flex-row text-center justify-content-center my-3">
+      <div class="flex gap-2 flex-column sm:flex-row text-center justify-content-center my-3 px-4">
         <div v-for="(stat) in options.stats" :key="stat.label" class="flex-1" style="min-width: 10rem;">
           <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="h-full border-round border-1 border-300 surface-100 p-3">
             <i :class="stat.icon" class="text-xl"></i>
@@ -99,69 +117,23 @@ defineExpose({
           </div>
         </div>
       </div>
-      <div v-if="options.warnMsg" class="mt-1">
+      <div v-if="options.warnMsg" class="mt-1 px-4 pb-3">
         <InlineMessage icon="fas fa-exclamation-circle" severity="warn">{{ options.warnMsg}}</InlineMessage>
       </div>
-      <div>
+    </template>
+    <template #footer>
+      <div class="px-4 pb-4">
         <slot name="footer"></slot>
       </div>
-
-      <div v-if="!disableSortControl && !isReadOnlyProj"
-           ref="sortControl"
-           @mouseover="overSortControl = true"
-           @mouseleave="overSortControl = false"
-           @keyup.down="moveDown"
-           @keyup.up="moveUp"
-           @click.prevent.self
-           class="absolute px-2 py-1 sort-control border-left-1 border-bottom-1 surface-border text-color-secondary"
-           tabindex="0"
-           :aria-label="`Sort Control. Current position for ${options.title} is ${options.displayOrder}. Press up or down to change the order.`"
-           role="button"
-           data-cy="sortControlHandle"><i class="fas fa-arrows-alt"></i></div>
     </template>
-  </Card>
+
+
+  </CardWithVericalSections>
 </template>
 
 <style scoped>
-.preview-card-title {
-  font-size: 1.4rem;
-  font-weight: bold;
-}
-
-.preview-card-subTitle {
-  max-width: 12rem;
-  font-size: 0.8rem;
-}
-
-.count-label {
-  font-size: 0.9rem;
-}
-
-.nav-cards-header i {
-  font-size: 1.8rem;
-  display: inline-block;
-}
-
-.stat-card {
-  background-color: #f8f9fa;
-  padding: 1rem;
-}
-
-.icon-link:hover {
-  border-color: black !important;
-}
-
-.sort-control {
-  font-size: 1.3rem !important;
-  top: 0rem;
-  right: 0rem;
-  border-bottom-left-radius:.25rem!important
-}
-
-.sort-control:hover, .sort-control i:hover {
-  cursor: grab !important;
-  color: $info !important;
-  font-size: 1.5rem;
+.border-round-bottom-left-md {
+  border-bottom-left-radius: 0.375rem !important;
 }
 
 .subject-icon {
