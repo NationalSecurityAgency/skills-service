@@ -282,14 +282,14 @@ const hasData = computed(() => {
 
     <div v-if="hasData" id="projectCards"
          :class="{
-      'flex gap-3 flex-wrap justify-content-center': projectsState.shouldTileProjectsCards,
+      'grid': projectsState.shouldTileProjectsCards,
       '': !projectsState.shouldTileProjectsCards
     }">
       <div v-for="project of projects"
            :key="project.projectId"
            class="mb-3"
            :class="{
-            'max-w-25rem': projectsState.shouldTileProjectsCards,
+            'col-12 xl:col-6 xlPlus:col-4 xlPlusPlus:col-3': projectsState.shouldTileProjectsCards,
             '': !projectsState.shouldTileProjectsCards
             }"
            :id="project.projectId">
@@ -351,5 +351,21 @@ const hasData = computed(() => {
   left: 0;
   bottom: 0;
   right: 0;
+}
+
+@media screen and (min-width: 1600px) {
+  .xlPlus\:col-4 {
+    flex: 0 0 auto;
+    padding: 0.5rem;
+    width: 33.3333%;
+  }
+}
+
+@media screen and (min-width: 2000px) {
+  .xlPlusPlus\:col-3 {
+    flex: 0 0 auto;
+    padding: 0.5rem;
+    width: 25%;
+  }
 }
 </style>

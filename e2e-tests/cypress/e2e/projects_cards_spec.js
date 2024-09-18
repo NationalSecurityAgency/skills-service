@@ -23,6 +23,7 @@ describe('Projects Cards Tests', () => {
     });
 
     it('more than 5 projects will convert to cards', () => {
+        cy.viewport(1500, 800)
         cy.createProject(1);
         cy.createProject(2);
         cy.createProject(3);
@@ -37,7 +38,7 @@ describe('Projects Cards Tests', () => {
         cy.get('[data-cy="projCard_proj4_manageLink"]')
         cy.get('[data-cy="projCard_proj5_manageLink"]')
 
-        cy.get('#projectCards').should('not.have.class', 'flex')
+        cy.get('#projectCards.grid').should('not.exist')
 
         cy.get('[data-cy="newProjectButton"]').click();
         cy.get('[data-cy="projectName"]').type('Another');
@@ -50,7 +51,7 @@ describe('Projects Cards Tests', () => {
         cy.get('[data-cy="projCard_proj5_manageLink"]')
         cy.get('[data-cy="projCard_Another_manageLink"]')
 
-        cy.get('#projectCards').should('have.class', 'flex')
+        cy.get('#projectCards.grid').should('exist')
 
         // refresh and re-validate
         cy.visit('/administrator/');
@@ -61,7 +62,7 @@ describe('Projects Cards Tests', () => {
         cy.get('[data-cy="projCard_proj4_manageLink"]')
         cy.get('[data-cy="projCard_proj5_manageLink"]')
         cy.get('[data-cy="projCard_Another_manageLink"]')
-        cy.get('#projectCards').should('have.class', 'flex')
+        cy.get('#projectCards.grid').should('exist')
     });
 
 

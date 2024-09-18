@@ -899,7 +899,7 @@ describe('Badges Tests', () => {
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 1', 'Badge 2', 'Badge 3']);
 
         // move down
-        cy.get('[data-cy="badgeCard-badge1"] [data-cy="goLive"]')
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="titleLink"]')
           .tab()
           .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 1', 'Badge 3']);
@@ -907,7 +907,7 @@ describe('Badges Tests', () => {
           .should('have.focus');
 
         // move down
-        cy.get('[data-cy="badgeCard-badge1"] [data-cy="goLive"]')
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="titleLink"]')
           .tab()
           .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 3', 'Badge 1']);
@@ -915,7 +915,7 @@ describe('Badges Tests', () => {
           .should('have.focus');
 
         // move down - already the last item
-        cy.get('[data-cy="badgeCard-badge1"] [data-cy="goLive"]')
+        cy.get('[data-cy="badgeCard-badge1"] [data-cy="titleLink"]')
           .tab()
           .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 2', 'Badge 3', 'Badge 1']);
@@ -929,7 +929,7 @@ describe('Badges Tests', () => {
           .should('not.have.focus');
 
         // move up
-        cy.get('[data-cy="badgeCard-badge3"] [data-cy="goLive"]')
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="titleLink"]')
           .tab()
           .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 3', 'Badge 2', 'Badge 1']);
@@ -937,7 +937,7 @@ describe('Badges Tests', () => {
           .should('have.focus');
 
         // move up - already first
-        cy.get('[data-cy="badgeCard-badge3"] [data-cy="goLive"]')
+        cy.get('[data-cy="badgeCard-badge3"] [data-cy="titleLink"]')
           .tab()
           .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="badgeCard"] [data-cy="titleLink"]', ['Badge 3', 'Badge 2', 'Badge 1']);

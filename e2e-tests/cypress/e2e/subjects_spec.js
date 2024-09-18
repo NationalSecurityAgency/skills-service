@@ -870,7 +870,7 @@ describe('Subjects Tests', () => {
         cy.validateElementsOrder('[data-cy="titleLink"]', ['Subject 1', 'Subject 2', 'Subject 3']);
 
         // move down
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="deleteBtn"]')
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="titleLink"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="titleLink"]', ['Subject 2', 'Subject 1', 'Subject 3']);
@@ -878,7 +878,7 @@ describe('Subjects Tests', () => {
             .should('have.focus');
 
         // move down
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="deleteBtn"]')
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="titleLink"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="titleLink"]', ['Subject 2', 'Subject 3', 'Subject 1']);
@@ -886,7 +886,7 @@ describe('Subjects Tests', () => {
             .should('have.focus');
 
         // move down - already the last item
-        cy.get('[data-cy="subjectCard-subj1"] [data-cy="deleteBtn"]')
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="titleLink"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="titleLink"]', ['Subject 2', 'Subject 3', 'Subject 1']);
@@ -900,7 +900,7 @@ describe('Subjects Tests', () => {
             .should('not.have.focus');
 
         // move up
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="deleteBtn"]')
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="titleLink"]')
             .tab()
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="titleLink"]', ['Subject 3', 'Subject 2', 'Subject 1']);
@@ -908,7 +908,7 @@ describe('Subjects Tests', () => {
             .should('have.focus');
 
         // move up - already first
-        cy.get('[data-cy="subjectCard-subj3"] [data-cy="deleteBtn"]')
+        cy.get('[data-cy="subjectCard-subj3"] [data-cy="titleLink"]')
             .tab()
             .type('{upArrow}');
         cy.validateElementsOrder('[data-cy="titleLink"]', ['Subject 3', 'Subject 2', 'Subject 1']);
