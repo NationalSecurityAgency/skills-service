@@ -55,7 +55,7 @@ describe('Icon Manager Tests', () => {
             const clazz = $el.attr('data-cy');
             cy.get(`[data-cy="${clazz}"]`).should('have.length', '1').click({force:true});
             cy.get('[data-cy=saveDialogBtn]').scrollIntoView().should('be.visible').click();
-            cy.get('.preview-card-title').contains('Subject 1').should('be.visible');
+            cy.get('[data-cy="subjectCard-subj1"]').contains('Subject 1').should('be.visible');
             const classes = clazz.split(' ');
             let iconClass = classes[classes.length-1];
             iconClass = iconClass.replace(/-link$/, '')
@@ -81,7 +81,7 @@ describe('Icon Manager Tests', () => {
             const clazz = $el.attr('data-cy');
             cy.get(`[data-cy="${clazz}"]`).should('have.length', '1').click({ force: true });
             cy.get('[data-cy=saveDialogBtn]').scrollIntoView().should('be.visible').click();
-            cy.get('.preview-card-title').contains('Subject 1').should('be.visible');
+            cy.get('[data-cy="subjectCard-subj1"]').contains('Subject 1').should('be.visible');
             const classes = clazz.split(' ');
             let iconClass = classes[classes.length - 1];
             iconClass = iconClass.replace(/-link$/, '')
@@ -108,7 +108,7 @@ describe('Icon Manager Tests', () => {
             const clazz = $el.attr('data-cy');
             cy.get(`[data-cy="${clazz}"]`).should('have.length', '1').click({force:true});
             cy.get('[data-cy=saveDialogBtn]').scrollIntoView().should('be.visible').click();
-            cy.get('.preview-card-title').contains('Badge 1').should('be.visible');
+            cy.get('[data-cy="badgeCard-badge1"]').contains('Badge 1').should('be.visible');
             const classes = clazz.split(' ');
             let iconClass = classes[classes.length-1];
             iconClass = iconClass.replace(/-link$/, '')
@@ -134,7 +134,7 @@ describe('Icon Manager Tests', () => {
             const clazz = $el.attr('data-cy');
             cy.get(`[data-cy="${clazz}"]`).should('have.length', '1').click({ force: true });
             cy.get('[data-cy=saveDialogBtn]').scrollIntoView().should('be.visible').click();
-            cy.get('.preview-card-title').contains('Badge 1').should('be.visible');
+            cy.get('[data-cy="badgeCard-badge1"]').contains('Badge 1').should('be.visible');
             const classes = clazz.split(' ');
             let iconClass = classes[classes.length - 1];
             iconClass = iconClass.replace(/-link$/, '')

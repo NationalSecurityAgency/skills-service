@@ -14,17 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import MetricsService from "@/components/metrics/MetricsService.js";
-import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import MetricsService from '@/components/metrics/MetricsService.js'
+import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue'
 
 const route = useRoute();
 
 const loading = ref(true);
 const isEmpty = ref(true);
 const series = ref([]);
-const colors = ['#17a2b8', '#28a745'];
 const chartOptions = ref({
   chart: {
     type: 'bar',

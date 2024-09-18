@@ -24,11 +24,13 @@ import { useUserInfo } from '@/components/utils/UseUserInfo.js'
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 import SkillsDisplayPathAppendValues from "@/router/SkillsDisplayPathAppendValues.js";
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 
 defineProps(['skillName']);
 const route = useRoute();
 const userInfo = useUserInfo()
 const numberFormat = useNumberFormat()
+const responsive = useResponsiveBreakpoints()
 
 onMounted(() => {
   loadData();
@@ -112,7 +114,7 @@ const calculateClientDisplayRoute = (props) => {
 </script>
 
 <template>
-  <Card data-cy="postAchievementUserList" :no-padding="true">
+  <Card data-cy="postAchievementUserList" :no-padding="true" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #header>
       <SkillsCardHeader title="Users that Achieved this Skill">
         <template #headerContent>
@@ -139,15 +141,15 @@ const calculateClientDisplayRoute = (props) => {
                          :rowsPerPageOptions="possiblePageSizes"
                          v-model:sort-field="sortField"
                          v-model:sort-order="sortOrder">
-          <Column field="userId" header="User" sortable>
+          <Column field="userId" header="User" sortable :class="{'flex': responsive.md.value }">
             <template #body="slotProps">
               <router-link :to="calculateClientDisplayRoute(slotProps.data)" tabindex="-1">
                 {{ userInfo.getUserDisplay(slotProps.data, true) }}
               </router-link>
             </template>
           </Column>
-          <Column field="count" header="Times Performed" sortable></Column>
-          <Column field="date" header="Date Last Used" sortable>
+          <Column field="count" header="Times Performed" sortable :class="{'flex': responsive.md.value }"></Column>
+          <Column field="date" header="Date Last Used" sortable :class="{'flex': responsive.md.value }">
             <template #body="slotProps">
               <date-cell :value="slotProps.data.date" />
             </template>

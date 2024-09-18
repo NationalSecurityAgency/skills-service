@@ -44,10 +44,10 @@ defineProps({
 </script>
 
 <template>
-  <CardWithVericalSections :pt="{ body: { class: 'p-2' }, content: { class: 'p-2' } }">
+  <CardWithVericalSections :pt="{ body: { class: 'p-2 w-full' }, content: { class: 'p-2' } }">
     <template #content>
-      <div class="grid w-full">
-        <div class="col">
+      <div class="flex">
+        <div class="flex-1">
           <div class="uppercase font-light card-title text-sm mb-1">{{ title }}</div>
           <slot name="card-value">
             <span class="text-2xl font-bold mb-0" data-cy="statCardValue">
@@ -56,8 +56,8 @@ defineProps({
             </span>
           </slot>
         </div>
-        <div class="col-auto">
-          <i :class="icon" style="font-size: 2.2rem;"/>
+        <div class="">
+          <i :class="icon" style="font-size: 2.2rem;" aria-hidden="true"/>
         </div>
       </div>
 

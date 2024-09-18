@@ -36,9 +36,9 @@ const handleClick = (index) => {
 </script>
 
 <template>
-  <span data-cy="modeSelector" class="mode-selector">
+  <span data-cy="modeSelector">
     <Badge v-for="(item, index) in options" :key="`${index}`"
-             class="ml-2" :class="{'can-select' : (index !== selectedIndex) }"
+             :class="{'can-select' : (index !== selectedIndex) }"
              :severity="getVariant(index)" @click="handleClick(index)" @keyup.enter="handleClick(index)" tabindex="0">
       {{ item.label }}
     </Badge>
@@ -48,9 +48,5 @@ const handleClick = (index) => {
 <style scoped>
 .can-select {
   cursor: pointer;
-}
-
-.mode-selector {
-  padding-right: 8em;
 }
 </style>

@@ -27,6 +27,7 @@ import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import SkillEventsOverTime from "@/components/metrics/skill/SkillEventsOverTime.vue";
 import SkillAchievedByUsersOverTime from "@/components/metrics/skill/SkillAchievedByUsersOverTime.vue";
 import UsersByTagChart from "@/components/metrics/skill/UsersByTagChart.vue";
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 
 const appConfig = useAppConfig();
 const route = useRoute();
@@ -37,6 +38,7 @@ const numUsersAchieved = ref(0);
 const numUsersInProgress = ref(0);
 const lastAchieved = ref(0);
 const tags = ref([]);
+const colors = useColors()
 
 onMounted(() => {
   const localTags = [];
@@ -67,15 +69,15 @@ onMounted(() => {
 
     <!-- on FF charts end up pushing column to the next row; this is a workaround -->
     <div v-if="!loading" style="width: 99%;">
-      <div class="flex mb-3 gap-4">
-        <stats-card class="flex flex-1" title="Achieved" :statNum="numUsersAchieved" icon="fa fa-trophy text-info" data-cy="numUserAchievedStatCard">
+      <div class="flex flex-column lg:flex-row mb-3 gap-4">
+        <stats-card class="flex flex-1" title="Achieved" :statNum="numUsersAchieved" :icon="`fa fa-trophy ${colors.getTextClass(0)}`" data-cy="numUserAchievedStatCard">
           Number of users that achieved this skill
         </stats-card>
-        <stats-card class="flex flex-1" title="In Progress" :statNum="numUsersInProgress" icon="fa fa-running text-primary" data-cy="inProgressStatCard">
+        <stats-card class="flex flex-1" title="In Progress" :statNum="numUsersInProgress" :icon="`fa fa-running ${colors.getTextClass(1)}`" data-cy="inProgressStatCard">
           Number of Users with some points earned toward the skill
         </stats-card>
         <stats-card class="flex flex-1" title="Last Achieved" :statNum="lastAchieved" :calculate-time-from-now="true"
-                    icon="fa fa-clock text-warning"  data-cy="lastAchievedStatCard">
+                    :icon="`fa fa-clock ${colors.getTextClass(2)}`"  data-cy="lastAchievedStatCard">
           <span v-if="lastAchieved">This skill was last achieved on <span class="text-success">{{ timeUtils.formatDate(lastAchieved) }}</span></span>
           <span v-else>This skill was <span class="text-info">never</span> achieved.</span>
         </stats-card>
@@ -92,12 +94,12 @@ onMounted(() => {
           <SkillsCardHeader title="Post Achievement Metrics"></SkillsCardHeader>
         </template>
         <template #content>
-          <div class="flex gap-4">
-            <div class="flex mb-3">
-              <post-achievement-users-pie-chart class="h-100"/>
+          <div class="flex flex-column lg:flex-row gap-4">
+            <div class="mb-3">
+              <post-achievement-users-pie-chart class="h-full" style="min-width: 16rem"/>
             </div>
-            <div class="flex flex-1 mb-3">
-              <binned-post-achievement-usage class="h-100 w-full"/>
+            <div class="flex-1 mb-3">
+              <binned-post-achievement-usage class="h-full"/>
             </div>
           </div>
           <div class="flex">
