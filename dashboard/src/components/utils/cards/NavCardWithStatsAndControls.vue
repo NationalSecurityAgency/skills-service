@@ -84,7 +84,7 @@ defineExpose({
                @keyup.down="moveDown"
                @keyup.up="moveUp"
                @click.prevent.self
-               class="px-2 py-1 text-xl border-left-1 border-bottom-1 border-round-bottom-left-md surface-border text-color-secondary hover:shadow-3 hover:text-primary"
+               class="sort-control px-2 py-1 text-xl border-left-1 border-bottom-1 border-round-bottom-left-md surface-border text-color-secondary hover:shadow-3 hover:text-primary"
                tabindex="0"
                :aria-label="`Sort Control. Current position for ${options.title} is ${options.displayOrder}. Press up or down to change the order.`"
                role="button"
@@ -134,6 +134,10 @@ defineExpose({
 <style scoped>
 .border-round-bottom-left-md {
   border-bottom-left-radius: 0.375rem !important;
+}
+
+.sort-control {
+  cursor: grab;
 }
 
 .subject-icon {
