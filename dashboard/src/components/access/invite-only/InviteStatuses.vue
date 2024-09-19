@@ -160,6 +160,18 @@ const doDeletePendingInvite = () => {
   })
 }
 
+const pageChanged = (pagingInfo) => {
+  pageSize.value = pagingInfo.rows
+  currentPage.value = pagingInfo.page + 1
+  loadData()
+}
+
+const sortField = () => {
+  // set to the first page
+  currentPage.value = 1
+  loadData()
+}
+
 defineExpose({
   loadData
 })
@@ -179,6 +191,10 @@ defineExpose({
         :loading="busy"
         data-cy="projectInviteStatusTable"
         paginator
+        lazy
+        @page="pageChanged"
+        @sort="sortField"
+        :totalRecords="totalRows"
         :rows="pageSize"
         :rowsPerPageOptions="possiblePageSizes"
         v-model:sort-field="sortInfo.sortBy"
@@ -237,7 +253,7 @@ defineExpose({
                   icon="fas fa-hourglass-half"
                   :aria-label="`Extend invite expiration for ${slotProps.data.recipientEmail}`"
                   :id="`extend-${slotProps.index}`"
-                  data-cy="extendInvite"
+                  :data-cy="`extendInvite-${slotProps.data.recipientEmail}`"
                   :title="`Extend invite expiration for ${slotProps.data.recipientEmail}`"
                   @click="toggleInviteExtensionMenu($event, slotProps.data.recipientEmail)" />
                 <Menu ref="inviteExtensionMenu"
@@ -255,7 +271,7 @@ defineExpose({
                 <SkillsButton
                   icon="fas fa-paper-plane"
                   aria-label="remind user"
-                  data-cy="remindUser"
+                  :data-cy="`remindUser-${slotProps.data.recipientEmail}`"
                   :disabled="isExpired(slotProps.data.expires)"
                   :title="`Send ${slotProps.data.recipientEmail} a reminder`"
                   @click="remindUser(slotProps.data.recipientEmail)" />
@@ -275,6 +291,10 @@ defineExpose({
             </div>
           </template>
         </Column>
+
+        <template #paginatorstart>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+        </template>
       </SkillsDataTable>
       <Message
         v-if="showNotificationSending || showNotificationSuccess"
