@@ -42,6 +42,9 @@ import PkiAppBootstrap from '@/components/access/PkiAppBootstrap.vue'
 import { usePrimeVue } from 'primevue/config'
 import ScrollToTop from '@/common-components/utilities/ScrollToTop.vue'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
+import log from 'loglevel';
+
+log.setLevel('WARN')
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -96,7 +99,9 @@ watch(() => themeHelper.currentTheme, (newTheme, oldTheme) => {
 
 const iframeInit = useIframeInit()
 onBeforeMount(() => {
-  iframeInit.handleHandshake()
+  if (skillsDisplayInfo.isSkillsClientPath()) {
+    iframeInit.handleHandshake()
+  }
   errorHandling.registerErrorHandling()
   userAgreementInterceptor.register()
   customGlobalValidators.addValidators()
@@ -106,6 +111,7 @@ onMounted(() => {
   invoke(async () => {
     if (skillsDisplayInfo.isSkillsClientPath()) {
       await until(iframeInit.loadedIframe).toBe(true)
+      log.debug('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, loaded iframe!')
     }
     loadConfigs()
   })
