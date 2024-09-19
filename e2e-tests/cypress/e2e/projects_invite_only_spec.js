@@ -472,15 +472,15 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@loadInviteStatus');
         cy.contains('abc@abc.org').should('be.visible');
         cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'expired');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(2).should('contain.text', 'expired');
 
-        cy.get('[data-cy="projectInviteStatusTable"] [data-cy="extendInvite"]').eq(0).click()
+        cy.get('[data-cy="projectInviteStatusTable"] [data-cy="extendInvite-abc@abc.org"]').eq(0).click()
         cy.get('[data-pc-name="menu"] [aria-label="30 minutes"]').click()
         cy.wait('@extendInviteExpiration');
         cy.wait('@loadInviteStatus');
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'in 30 minutes');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(2).should('contain.text', 'in 30 minutes');
     });
 
     it('Extend un-expired invite', () => {
@@ -543,17 +543,17 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@loadInviteStatus');
         cy.contains('abc@abc.org').should('be.visible');
         cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'in a day');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(2).should('contain.text', 'in a day');
 
-        cy.get('[data-cy="projectInviteStatusTable"] [data-cy="extendInvite"]').eq(0).click()
+        cy.get('[data-cy="projectInviteStatusTable"] [data-cy="extendInvite-abc@abc.org"]').eq(0).click()
         cy.get('[data-pc-name="menu"] [aria-label="7 days"] [data-cy="invite-3-extension"]').click()
         //
         cy.wait('@extendInviteExpiration');
         cy.wait('@loadInviteStatus');
         cy.contains('abc1@abc.org').should('be.visible');
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'in 8 days');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(2).should('contain.text', 'in 8 days');
     });
 
     it('delete expired invite', () => {
@@ -620,8 +620,8 @@ describe('Projects Invite-Only Tests', () => {
         cy.contains('abc@abc.org').should('be.visible');
         cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 5); //account for header row
         cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'expired');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(2).should('contain.text', 'expired');
         cy.get('[data-cy="deleteInvite"]').eq(0).click();
         cy.contains('Removal Safety Check').should('be.visible');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me');
@@ -695,8 +695,8 @@ describe('Projects Invite-Only Tests', () => {
         cy.contains('abc@abc.org').should('be.visible');
         cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 5); //account for header row
         cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('not.contain.text', 'expired');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(2).should('not.contain.text', 'expired');
         cy.get('[data-cy="deleteInvite"]').eq(0).click();
         cy.contains('Removal Safety Check').should('be.visible');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me');
@@ -773,7 +773,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@loadInviteStatus');
         cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
         cy.contains('abc@abc.org').should('be.visible');
-        cy.get('[data-cy="remindUser"]').eq(0).click();
+        cy.get('[data-cy="remindUser-abc@abc.org"]').click();
         cy.wait('@remindUser');
         cy.get('[id="accessNotificationPanel"]').should('be.visible');
         cy.get('[id=accessNotificationPanel]').should('contain.text', 'Invite reminder sent!');
@@ -848,13 +848,13 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@loadInviteStatus');
         cy.contains('abc@abc.org').should('be.visible');
         cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
-        cy.get('[data-cy="remindUser"]').eq(0).should('be.disabled');
-        cy.get('[id="extend-0"]').click();
+        cy.get('[data-cy="remindUser-abc@abc.org"]').should('be.disabled');
+        cy.get('[data-cy="extendInvite-abc@abc.org"]').click();
         cy.get('[data-pc-name="menu"] [aria-label="30 minutes"] [data-cy="invite-3-extension"]').click()
         // cy.get('[data-cy="invite-0-extension"]').eq(0).click();
         cy.wait('@loadInviteStatus')
         cy.contains('abc@abc.org').should('be.visible');
-        cy.get('[data-cy="remindUser"]').eq(0).should('be.enabled').click();
+        cy.get('[data-cy="remindUser-abc@abc.org"]').should('be.enabled').click();
         cy.wait('@remindUser');
         cy.get('[id="accessNotificationPanel"]').should('be.visible');
         cy.get('[id=accessNotificationPanel]').should('contain.text', 'Invite reminder sent!');
@@ -930,16 +930,16 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait(5000);
 
         cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 5); //account for header row
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('not.contain.text', 'expired');
-        cy.get('[data-cy="remindUser"]').eq(0).should('be.enabled');
-        cy.get('[data-cy="remindUser"]').eq(0).should('be.enabled').click();
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(2).should('not.contain.text', 'expired');
+        cy.get('[data-cy="remindUser-abc@abc.org"]').eq(0).should('be.enabled');
+        cy.get('[data-cy="remindUser-abc@abc.org"]').eq(0).should('be.enabled').click();
         cy.get('[data-pc-section="title"]').should('contain.text', 'Expired Invite');
         cy.wait('@loadInviteStatus');
         cy.get('[data-pc-name="acceptbutton"]').click()
         cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 5); //account for header row
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc@abc.org');
-        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(2).should('contain.text', 'expired');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(0).should('contain.text', 'abc@abc.org');
+        cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(2).should('contain.text', 'expired');
     });
 
     it('warn users when admins are added', () => {
@@ -1060,4 +1060,105 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-cy="inviteEmailInput"]').should('have.value', "email1@email.com\nemail2@email.com")
     });
 
+    it('Paging works appropriately', () => {
+        cy.createProject(1);
+        cy.intercept('GET', '/admin/projects/proj1/settings')
+            .as('getSettings');
+        cy.intercept('POST', '/admin/projects/proj1/settings')
+            .as('saveSettings');
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+            .as('emailSupported');
+        cy.intercept('POST', '/admin/projects/proj1/invite', (req) => {
+            req.reply((res) => {
+                const result = res.body;
+                result.successful = ['abc@cba.org'];
+                result.unsuccessful = ['bsmith@fake.email'];
+                res.send(result);
+            });
+        })
+            .as('sendInvites');
+        cy.intercept('GET', '/api/myprojects/proj1/name')
+            .as('getName');
+        cy.intercept('GET', '/api/projects/proj1/token')
+            .as('getToken');
+        cy.intercept('GET', '/admin/projects/proj1/userRoles/ROLE_PRIVATE_PROJECT_USER*')
+            .as('getApprovedUsers');
+        cy.intercept('DELETE', '/admin/projects/proj1/users/*/roles/ROLE_PRIVATE_PROJECT_USER')
+            .as('removeAccess');
+        cy.intercept('GET', '/admin/projects/proj1/errors*')
+            .as('loadIssues');
+        cy.intercept('POST', '/admin/projects/proj1/invites/extend').as('extendInviteExpiration');
+
+        cy.intercept('GET', '/admin/projects/proj1/invites/status**').as('loadInviteStatus');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.wait('@getSettings');
+
+        cy.get('[data-cy="projectVisibilitySelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
+            .should('be.visible')
+            .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-cy="saveSettingsBtn"').click()
+        cy.wait('@saveSettings');
+        cy.wait('@getSettings');
+
+        cy.request('POST', '/admin/projects/proj1/invite', {
+            recipients: ['abc1@abc.org', 'cba1@cba.org', 'foo1@foo.org', 'abc@abc.org', 'abc2@abc.org', 'abc3@abc.org', 'abc4@abc.org', 'abc5@abc.org', 'abc6@abc.org', 'abc7@abc.org'],
+            validityDuration: 'P90D'
+        });
+
+        cy.get('[data-cy="nav-Access"')
+            .click();
+        cy.wait('@emailSupported');
+        cy.wait('@loadInviteStatus');
+
+        cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
+
+        const tableSelector = '[data-cy=projectInviteStatusTable]';
+        const expected = [
+            [{
+                colIndex: 0,
+                value: 'abc1@abc.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'abc2@abc.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'abc3@abc.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'abc4@abc.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'abc5@abc.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'abc6@abc.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'abc7@abc.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'abc@abc.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'cba1@cba.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'foo1@foo.org'
+            }],
+        ];
+        cy.validateTable(tableSelector, expected, 5, false);
+    });
 });
