@@ -684,4 +684,39 @@ describe('Transcript export tests', () => {
     })
   })
 
+  it('ability to export transcript from skills-client', () => {
+    const projName = 'Has Subject and Skills'
+    cy.createProject(1, { name: projName })
+    cy.createSubject(1)
+    cy.createSkill(1, 1, 1)
+    cy.createSkill(1, 1, 2)
+    cy.createSkill(1, 1, 3)
+
+    cy.reportSkill(1, 1, user, 'now')
+
+    cy.ignoreSkillsClientError()
+    cy.intercept('/api/projects/proj1/pointHistory').as('getProjPointsHistory')
+    cy.visit('/test-skills-client/proj1')
+    cy.wait('@getProjPointsHistory')
+    cy.wrapIframe().find('[data-cy="downloadTranscriptBtn"]').click()
+
+    cy.readTranscript(projName).then((doc) => {
+      expect(doc.numpages).to.equal(2)
+      expect(clean(doc.text)).to.include('SkillTree Transcript')
+      expect(clean(doc.text)).to.include(projName)
+      expect(clean(doc.text)).to.include('Level: 1 / 5 ')
+      expect(clean(doc.text)).to.include('Points: 100 / 600 ')
+      expect(clean(doc.text)).to.include('Skills: 0 / 3 ')
+      expect(clean(doc.text)).to.not.include('Badges')
+
+      // should be a title on the 2nd page
+      expect(clean(doc.text)).to.include('Subject: Subject 1'.toUpperCase())
+
+      expect(clean(doc.text)).to.not.include(expectedHeaderAndFooter)
+      expect(clean(doc.text)).to.not.include(expectedHeaderAndFooterCommunityProtected)
+      expect(clean(doc.text)).to.not.include('null')
+    })
+  })
+
+
 })

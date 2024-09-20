@@ -72,11 +72,11 @@ export const useIframeInit = () => {
       // whether to use an internal back button as opposed to the browser back button
       // displayAttributes.internalBackButton = parent.model.internalBackButton == null || parent.model.internalBackButton
 
-      log.debug(`UseIframeInit.js: serviceUrl: [${displayAttributes.serviceUrl}], projectId: [${displayAttributes.projectId}]`)
       parentState.serviceUrl = parent.model.serviceUrl
 
       displayAttributes.projectId = parent.model.projectId
       displayAttributes.serviceUrl = parent.model.serviceUrl
+      log.debug(`UseIframeInit.js: serviceUrl: [${displayAttributes.serviceUrl}], projectId: [${displayAttributes.projectId}]`)
 
       if (parent.model.options) {
         parentState.options = { ...parent.model.options }

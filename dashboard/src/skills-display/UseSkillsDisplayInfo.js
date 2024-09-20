@@ -31,7 +31,7 @@ export const useSkillsDisplayInfo = () => {
   const localTestContextAppend = SkillsDisplayPathAppendValues.LocalTest
 
   const isSkillsClientPath = () => {
-    return route.path.startsWith('/static/clientPortal/')
+    return window?.location?.pathname.startsWith('/static/clientPortal/')
   }
   const getContextSpecificRouteName = (name) => {
     if (isSkillsClientPath()) {
