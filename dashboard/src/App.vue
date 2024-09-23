@@ -76,18 +76,25 @@ const addCustomIconCSSForClientDisplay = () => {
 }
 const inceptionConfigurer = useInceptionConfigurer()
 const pageVisitService = usePageVisitService()
+const loadUserAndDisplayInfo = () => {
+  inceptionConfigurer.configure()
+  pageVisitService.reportPageVisit(route.path, route.fullPath)
+  const loadRoot = accessState.loadIsRoot()
+  const loadSupervisor = accessState.loadIsSupervisor()
+  const loadEmailEnabled = appInfoState.loadEmailEnabled()
+  const loadCustomIconCSS = addCustomIconCSSForClientDisplay()
+  const promises = [loadRoot, loadSupervisor, loadEmailEnabled, loadCustomIconCSS]
+  if (!skillsDisplayInfo.isSkillsClientPath()) {
+    const loadTheme = themeHelper.loadTheme()
+    promises.push(loadTheme)
+  }
+  return Promise.all(promises).then(() => {
+    isAppLoaded.value = true
+  })
+}
 watch(() => authState.userInfo, async (newUserInfo) => {
   if (newUserInfo) {
-    inceptionConfigurer.configure()
-    pageVisitService.reportPageVisit(route.path, route.fullPath)
-    const loadRoot = accessState.loadIsRoot()
-    const loadSupervisor = accessState.loadIsSupervisor()
-    const loadEmailEnabled = appInfoState.loadEmailEnabled()
-    const loadTheme = themeHelper.loadTheme()
-    const loadCustomIconCSS = addCustomIconCSSForClientDisplay()
-    Promise.all([loadRoot, loadSupervisor, loadEmailEnabled, loadTheme, loadCustomIconCSS]).then(() => {
-      isAppLoaded.value = true
-    })
+    await loadUserAndDisplayInfo()
   } else {
     isAppLoaded.value = true
   }
@@ -117,18 +124,32 @@ onMounted(() => {
   })
 })
 
+const restoreSessionIfAvailable = () => {
+  if (skillsDisplayInfo.isSkillsClientPath()) {
+    authState.setRestoringSession(false)
+    return Promise.resolve()
+  }
+  return authState.restoreSessionIfAvailable()
+}
+
 const loadConfigs = () => {
   appConfig.loadConfigState().finally(() => {
-    authState.restoreSessionIfAvailable().finally(() => {
+    restoreSessionIfAvailable().finally(() => {
       skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
 
         inceptionConfigurer.configure()
-        globalNavGuards.addNavGuards()
+        if (!skillsDisplayInfo.isSkillsClientPath()) {
+          globalNavGuards.addNavGuards()
+        }
         if (!authState.isAuthenticated) {
           isAppLoaded.value = true
         }
-        // do not need to set isAppLoaded to true here because it will be handled
-        // by the watch of authState.userInfo
+        if (skillsDisplayInfo.isSkillsClientPath()) {
+          loadUserAndDisplayInfo()
+        } else {
+          // do not need to set isAppLoaded to true here because it will be handled
+          // by the watch of authState.userInfo
+        }
       })
     })
   })
