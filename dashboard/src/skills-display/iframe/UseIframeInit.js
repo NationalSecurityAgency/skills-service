@@ -17,16 +17,21 @@ import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSki
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import Postmate from 'postmate'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import ThemeHelper from '@/skills-display/theme/ThemeHelper.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 export const useIframeInit = () => {
 
   const parentState = useSkillsDisplayParentFrameState()
   const displayAttributes = useSkillsDisplayAttributesState()
+  const appConfig = useAppConfig()
   const log = useLog()
-  const loadedIframe = ref(false)
+  const completedHandshake = ref(false)
+  const updatedAuthToken = ref(false)
+
+  const loadedIframe = computed(() => completedHandshake.value && updatedAuthToken.value)
 
   const registerHeightListener = (resizeObserver) => {
     const elementToObserve = document.querySelector("#skills-display-app")
@@ -43,12 +48,16 @@ export const useIframeInit = () => {
     log.debug('UseIframeInit.js: handleHandshake')
     const handshake = new Postmate.Model({
       updateAuthenticationToken(authToken) {
-        parentState.authToken = authToken
+        parentState.setAuthToken(authToken)
         if (log.isTraceEnabled()) {
           log.trace(`UseIframeInit.js: updateAuthenticationToken: ${authToken}`)
         }
+        updatedAuthToken.value = true
       }
     })
+    if (appConfig.isPkiAuthenticated) {
+      updatedAuthToken.value = true
+    }
     handshake.then((parent) => {
       log.debug('UseIframeInit.js: handshake.then')
       // Make sure to freeze the parent object so Pinia won't try to make it reactive
@@ -102,7 +111,7 @@ export const useIframeInit = () => {
       displayAttributes.loadingConfig = false
       // this.getCustomIconCss();
 
-      loadedIframe.value = true
+      completedHandshake.value = true
     })
   }
 
