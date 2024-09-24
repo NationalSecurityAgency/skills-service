@@ -25,15 +25,15 @@ export const useSkillsDisplayService = () => {
   const appConfig = useAppConfig()
 
   const getUserIdAndVersionParams = () => {
-    // const params = this.getUserIdParams();
-    // params.version = this.version;
-    //
     let config = {}
     if (attributes.userId) {
       config.userId = attributes.userId
     }
     if (appConfig.isPkiAuthenticated) {
       config.idType = 'ID'
+    }
+    if (attributes.version) {
+      config.version = attributes.version
     }
     return config
   }

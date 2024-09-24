@@ -21,12 +21,17 @@ import { ref, computed } from 'vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import ThemeHelper from '@/skills-display/theme/ThemeHelper.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useRouter } from 'vue-router'
+import SkillsClientPath from '@/router/SkillsClientPath.js'
 
 export const useIframeInit = () => {
 
   const parentState = useSkillsDisplayParentFrameState()
   const displayAttributes = useSkillsDisplayAttributesState()
+  const displayInfo = useSkillsDisplayInfo()
   const appConfig = useAppConfig()
+  const router = useRouter()
   const log = useLog()
   const completedHandshake = ref(false)
   const updatedAuthToken = ref(false)
@@ -53,7 +58,20 @@ export const useIframeInit = () => {
           log.trace(`UseIframeInit.js: updateAuthenticationToken: ${authToken}`)
         }
         updatedAuthToken.value = true
-      }
+      },
+      updateVersion(newVersion) {
+        displayAttributes.version = newVersion
+        if (log.isTraceEnabled()) {
+          log.trace(`UseIframeInit.js: updateVersion: ${newVersion}`)
+        }
+        displayInfo.routerPush('SkillsDisplayInIframe')
+      },
+      navigate(route) {
+        if (log.isTraceEnabled()) {
+          log.trace(`UseIframeInit.js: navigate: ${JSON.stringify(route)}`)
+        }
+        router.push(`${SkillsClientPath.HomePath}${route.path}`)
+      },
     })
     if (appConfig.isPkiAuthenticated) {
       updatedAuthToken.value = true
@@ -79,7 +97,10 @@ export const useIframeInit = () => {
       displayAttributes.isSummaryOnly = parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false
 
       // whether to use an internal back button as opposed to the browser back button
-      // displayAttributes.internalBackButton = parent.model.internalBackButton == null || parent.model.internalBackButton
+      displayAttributes.internalBackButton = parent.model.internalBackButton == null || parent.model.internalBackButton
+      if (log.isTraceEnabled()) {
+        log.trace(`UseIframeInit.js: internalBackButton: ${displayAttributes.internalBackButton}`)
+      }
 
       parentState.serviceUrl = parent.model.serviceUrl
 
@@ -91,7 +112,9 @@ export const useIframeInit = () => {
         parentState.options = { ...parent.model.options }
       }
 
-      // UserSkillsService.setVersion(parent.model.version);
+      if (parent.model.version) {
+        displayAttributes.version = parent.model.version
+      }
       // UserSkillsService.setUserId(parent.model.userId);
       // QuizRunService.setUserId(parent.model.userId);
       //

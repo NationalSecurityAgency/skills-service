@@ -30,6 +30,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const isSummaryOnly = ref(false)
   const internalBackButton = ref(true)
   const userId = ref(null)
+  const version = ref(null)
 
   const log = useLog()
   const skillsDisplayInfo = useSkillsDisplayInfo()
@@ -112,6 +113,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     internalBackButton,
     isSummaryOnly,
     userId,
+    version,
     projectName,
     projectUserCommunityDescriptor
   }

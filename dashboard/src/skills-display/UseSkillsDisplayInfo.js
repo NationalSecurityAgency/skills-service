@@ -16,6 +16,7 @@
 import { useRoute, useRouter } from 'vue-router'
 import { computed } from 'vue'
 import SkillsDisplayPathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
+import SkillsClientPath from '@/router/SkillsClientPath.js'
 
 export const useSkillsDisplayInfo = () => {
   const route = useRoute()
@@ -31,7 +32,7 @@ export const useSkillsDisplayInfo = () => {
   const localTestContextAppend = SkillsDisplayPathAppendValues.LocalTest
 
   const isSkillsClientPath = () => {
-    return window?.location?.pathname.startsWith('/static/clientPortal/')
+    return window?.location?.pathname.startsWith(SkillsClientPath.RootUrl) || route.path?.startsWith('/test-skills-client/')
   }
   const getContextSpecificRouteName = (name) => {
     if (isSkillsClientPath()) {
