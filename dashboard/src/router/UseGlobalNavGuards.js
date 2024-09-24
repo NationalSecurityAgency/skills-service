@@ -44,8 +44,6 @@ export const useGlobalNavGuards = () => {
   const projConfig = useProjConfig()
   const router = useRouter()
   const route = useRoute()
-  const skillDisplayParentFrameState = useSkillsDisplayParentFrameState()
-  const skillsDisplayInfo = useSkillsDisplayInfo()
   const skillsDisplayAttributes = useSkillsDisplayAttributesState()
 
   const log = useLog()
@@ -58,7 +56,6 @@ export const useGlobalNavGuards = () => {
   const getLandingPage = () => authState.userInfo?.landingPage === 'admin' ? 'AdminHomePage' : 'MyProgressPage'
 
   const beforeEachNavGuard = (to, from, next) => {
-    const { skillsClientDisplayPath } = to.query
     const requestAccountPath = '/request-root-account'
     const skillsLoginPath = '/skills-login'
     if (
@@ -128,14 +125,7 @@ export const useGlobalNavGuards = () => {
             }
             next(newRoute)
           } else {
-            if(skillsClientDisplayPath) {
-              const newRoute = to.path + skillsClientDisplayPath;
-              const nextRoute = '/redirect?nextPage=' + newRoute
-              next(nextRoute)
-            }
-            else {
-              next()
-            }
+            next()
           }
         } else {
           next()
@@ -188,20 +178,6 @@ export const useGlobalNavGuards = () => {
             }
           })
         }, 150)
-      }
-      if (skillDisplayParentFrameState.parentFrame) {
-        const params = {
-          path: skillsDisplayInfo.cleanPath(to.path),
-          fullPath: skillsDisplayInfo.cleanPath(to.fullPath),
-          name: to.name,
-          query: to.query,
-          currentLocation: window.location.toString(),
-          historySize: window.history.length,
-        };
-        if (log.isDebugEnabled()) {
-          log.debug(`emit route-change event to parent frame with ${JSON.stringify(params)}`)
-        }
-        skillDisplayParentFrameState.parentFrame.emit('route-changed', params);
       }
     })
 

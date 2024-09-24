@@ -16,8 +16,41 @@ limitations under the License.
 <script setup>
 import { ref } from 'vue'
 import SkillsDisplayHome from '@/skills-display/components/SkillsDisplayHome.vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useLog } from '@/components/utils/misc/useLog.js'
 
 const appStyleObject = ref({})
+
+const skillDisplayParentFrameState = useSkillsDisplayParentFrameState()
+const skillsDisplayInfo = useSkillsDisplayInfo()
+const router = useRouter()
+const route = useRoute()
+const log = useLog()
+
+const handleRoute = (route) => {
+  if (skillDisplayParentFrameState.parentFrame) {
+    const params = {
+      path: skillsDisplayInfo.cleanPath(route.path)  || '/',
+      fullPath: skillsDisplayInfo.cleanPath(route.fullPath) || '/',
+      name: route.name,
+      query: route.query,
+      currentLocation: window.location.toString(),
+      historySize: window.history.length
+    }
+    if (log.isDebugEnabled()) {
+      log.debug(`SkillsDisplayInIframe.vue: emit route-change event to parent frame with ${JSON.stringify(params)}`)
+    }
+    skillDisplayParentFrameState.parentFrame.emit('route-changed', params)
+  }
+}
+
+router.afterEach((to, from) => {
+  handleRoute(to)
+})
+handleRoute(route)
+
 </script>
 
 <template>

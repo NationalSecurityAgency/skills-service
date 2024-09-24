@@ -45,6 +45,11 @@ onMounted(() => {
     skillsDisplayAttributes.internalBackButton = false
   }
 
+  if (route.query.skillsVersion) {
+    log.info(`TestSkillsDisplay.vue: version=[${route.query.skillsVersion}]`)
+    skillsDisplayAttributes.version = route.query.skillsVersion
+  }
+
   const theme = testThemeUtils.constructThemeForTest()
   if (theme) {
     themeState.initThemeObjInStyleTag(theme)
