@@ -25,6 +25,7 @@ export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParent
   const parentFrame = ref(null)
   const serviceUrl = ref('')
   const options = ref ({})
+  const navigateMethodCalled = ref(false)
   const isLastViewedScrollSupported = computed(() => {
     if (!parentFrame.value) {
       return true
@@ -46,6 +47,7 @@ export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParent
     parentFrame,
     serviceUrl,
     options,
-    isLastViewedScrollSupported
+    isLastViewedScrollSupported,
+    navigateMethodCalled
   }
 })

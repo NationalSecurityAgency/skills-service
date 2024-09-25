@@ -44,7 +44,7 @@ import ScrollToTop from '@/common-components/utilities/ScrollToTop.vue'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import log from 'loglevel';
 
-log.setLevel('WARN')
+log.setLevel('TRACE')
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()

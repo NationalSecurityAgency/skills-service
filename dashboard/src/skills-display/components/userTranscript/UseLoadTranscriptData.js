@@ -21,6 +21,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useProjectCommunityReplacement } from '@/components/customization/UseProjectCommunityReplacement.js'
 import { useRoute } from 'vue-router'
 import UsersService from '@/components/users/UsersService.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 export const useLoadTranscriptData = () => {
   const skillsDisplayService = useSkillsDisplayService()
@@ -31,6 +32,7 @@ export const useLoadTranscriptData = () => {
   const isLoading = ref(false)
   const appConfig = useAppConfig()
   const route = useRoute()
+  const skillsDisplayInfo = useSkillsDisplayInfo()
 
   const loadTranscriptData = () => {
     isLoading.value = true
@@ -54,20 +56,27 @@ export const useLoadTranscriptData = () => {
     }
 
     const buildUserName = (userInfo) => {
-      const hasUserIdForDisplay = userInfo.userIdForDisplay && userInfo.userIdForDisplay.length > 0
-      const userIdToPrint = hasUserIdForDisplay ? userInfo.userIdForDisplay : userInfo.userId
-
-      if (userInfo.nickname && userInfo.nickname.length > 0) {
-        return `${userInfo.nickname} (${userIdToPrint})`
+      if(!userInfo && skillsDisplayInfo.isSkillsClientPath()) {
+        return skillsDisplayAttributesState.userId || ''
       }
 
-      const hasLastName = userInfo.last && userInfo.last.length > 0
-      const hasFirstName = userInfo.first && userInfo.first.length > 0
-      if (hasLastName && hasFirstName) {
-        return `${userInfo.first} ${userInfo.last} (${userIdToPrint})`
-      }
+      if(userInfo) {
+        const hasUserIdForDisplay = userInfo.userIdForDisplay && userInfo.userIdForDisplay.length > 0
+        const userIdToPrint = hasUserIdForDisplay ? userInfo.userIdForDisplay : userInfo.userId
 
-      return userIdToPrint
+        if (userInfo.nickname && userInfo.nickname.length > 0) {
+          return `${userInfo.nickname} (${userIdToPrint})`
+        }
+
+        const hasLastName = userInfo.last && userInfo.last.length > 0
+        const hasFirstName = userInfo.first && userInfo.first.length > 0
+        if (hasLastName && hasFirstName) {
+          return `${userInfo.first} ${userInfo.last} (${userIdToPrint})`
+        }
+
+        return userIdToPrint
+      }
+      return ''
     }
 
     const buildProjectName = (projRes) => {
