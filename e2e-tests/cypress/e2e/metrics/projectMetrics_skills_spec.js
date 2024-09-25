@@ -287,7 +287,7 @@ describe('Metrics Tests - Skills', () => {
         cy.intercept('GET', 'admin/projects/proj1/skills/export/excel', {
             delay: 1000
         }).as('exportSkillsTable');
-        const exportedFileName = `cypress/downloads/proj1-skills-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
+        const exportedFileName = `cypress/downloads/proj1-subj1-skills-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
         cy.get('[data-cy="exportSkillsTableBtn"]').click();
         cy.get('[data-cy="skillsNavigator-loading"]').should('exist');
         cy.wait('@exportSkillsTable');
