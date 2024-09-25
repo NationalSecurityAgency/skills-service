@@ -143,8 +143,8 @@ const isFlex = computed(() => responsive.md.value)
                          :rows="pageSize"
                          @page="pageChanged"
                          @sort="sortTable"
-                         :sort-field="sortBy"
-                         :sort-order="sortOrder"
+                         v-model:sort-field="sortBy"
+                         v-model:sort-order="sortOrder"
                          :rowsPerPageOptions="possiblePageSizes">
           <Column header="Error" field="typeAndError" sortable  :class="{'flex': isFlex }">
             <template #body="slotProps">

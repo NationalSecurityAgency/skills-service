@@ -108,7 +108,7 @@ const maxWidthStyle = computed(() => {
     :style="maxWidthStyle"
   >
     <template v-for="(_, name) in slots" v-slot:[name]="slotData">
-      <Column v-if="expander"
+      <Column v-if="expander" v-bind:key="name"
               expander
               :pt="expanderPt"
               :class="{'flex': responsive.md.value }">

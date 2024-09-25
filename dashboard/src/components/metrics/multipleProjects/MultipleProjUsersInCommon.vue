@@ -299,8 +299,8 @@ const filterProjects = (event) => {
                            :totalRecords="resultTableOptions.
                            pagination.totalRows"
                            :rows="resultTableOptions.pagination.pageSize"
-                           :sort-field="resultTableOptions.sortBy"
-                           :sort-order="resultTableOptions.sortOrder"
+                           v-model:sort-field="resultTableOptions.sortBy"
+                           v-model:sort-order="resultTableOptions.sortOrder"
                            :rowsPerPageOptions="resultTableOptions.pagination.possiblePageSizes"
                            paginator
                            lazy
