@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 import NumberFormatter from '@/components/utils/NumberFormatter.js';
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 
 export function useUserTagChartConfig() {
+
+    const themeHelper = useThemesHelper()
 
     const pieChartOptions = {
         chart: {
@@ -117,6 +120,7 @@ export function useUserTagChartConfig() {
             opacity: 1,
         },
         tooltip: {
+            theme: themeHelper.isDarkTheme ? 'dark' : 'light',
             y: {
                 formatter(val) {
                     return NumberFormatter.format(val);
