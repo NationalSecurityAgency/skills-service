@@ -20,6 +20,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
+import { usePageVisitService } from '@/components/utils/services/UsePageVisitService.js'
 
 const appStyleObject = ref({})
 
@@ -28,8 +29,9 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 const router = useRouter()
 const route = useRoute()
 const log = useLog()
+const pageVisitService = usePageVisitService()
 
-const handleRoute = (route) => {
+const reportRouteChangeToParentFrame = (route) => {
   if (skillDisplayParentFrameState.parentFrame) {
     const params = {
       path: skillsDisplayInfo.cleanPath(route.path)  || '/',
@@ -39,18 +41,34 @@ const handleRoute = (route) => {
       currentLocation: window.location.toString(),
       historySize: window.history.length
     }
+
     if (log.isDebugEnabled()) {
-      log.debug(`SkillsDisplayInIframe.vue: emit route-change event to parent frame with ${JSON.stringify(params)}`)
+      log.debug(`SkillsDisplayInIframe.vue: emit route-change event to parent frame with ${JSON.stringify(params)} current window is ${JSON.stringify(window.history.state)}`)
     }
     skillDisplayParentFrameState.parentFrame.emit('route-changed', params)
   }
 }
 
 router.afterEach((to, from) => {
-  handleRoute(to)
-})
-handleRoute(route)
+  console.log(`Route changed from ${JSON.stringify(from.fullPath)} to ${JSON.stringify(to.fullPath)}`)
 
+  if (!skillDisplayParentFrameState.navigateMethodCalled) {
+    reportRouteChangeToParentFrame(to)
+  }
+    // if (!skillDisplayParentFrameState.navigateMethodCalled) {
+    //   reportRouteChangeToParentFrame(to)
+    //   navHistory.push({ toPath: to.path, fromPath: from.path })
+    //   console.log(`Route, new history is ${JSON.stringify(navHistory)}`)
+    // } else {
+    //   console.log(` ----------> ignored due to ${skillDisplayParentFrameState.navigateMethodCalled}`)
+    //   skillDisplayParentFrameState.navigateMethodCalled = false
+    // }
+
+  // console.log(window.history.state)
+  pageVisitService.reportPageVisit(to.path, to.fullPath)
+})
+reportRouteChangeToParentFrame(route)
+pageVisitService.reportPageVisit(route.path, route.fullPath)
 </script>
 
 <template>

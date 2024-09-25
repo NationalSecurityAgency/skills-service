@@ -22,7 +22,7 @@ import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDis
 import ThemeHelper from '@/skills-display/theme/ThemeHelper.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import SkillsClientPath from '@/router/SkillsClientPath.js'
 
 export const useIframeInit = () => {
@@ -32,6 +32,7 @@ export const useIframeInit = () => {
   const displayInfo = useSkillsDisplayInfo()
   const appConfig = useAppConfig()
   const router = useRouter()
+  const currentRoute = useRoute()
   const log = useLog()
   const completedHandshake = ref(false)
   const updatedAuthToken = ref(false)
@@ -68,9 +69,24 @@ export const useIframeInit = () => {
       },
       navigate(route) {
         if (log.isTraceEnabled()) {
-          log.trace(`UseIframeInit.js: navigate: ${JSON.stringify(route)}`)
+          log.trace(`UseIframeInit.js: navigate: ${JSON.stringify(route)} vs ${JSON.stringify(window.history.state)}`)
         }
-        router.push(`${SkillsClientPath.HomePath}${route.path}`)
+        const toPage = `${SkillsClientPath.HomePath}${route.path}`
+        parentState.navigateMethodCalled = true
+        // const lastPage = window.history?.state?.back
+        // if (lastPage && lastPage === toPage) {
+        //   router.go(-1)
+        //   if (log.isTraceEnabled()) {
+        //     log.trace(`UseIframeInit.js: router.go(-1) because lsatPate=[${lastPage}]`)
+        //   }
+        // } else {
+        //   if (log.isTraceEnabled()) {
+        //     log.trace(`UseIframeInit.js: navigate to=[${toPage}]`)
+        //   }
+        //   router.replace(toPage)
+        // }
+
+        router.push({...route, path: toPage})
       },
     })
     if (appConfig.isPkiAuthenticated) {
@@ -117,7 +133,8 @@ export const useIframeInit = () => {
       }
       // UserSkillsService.setUserId(parent.model.userId);
       // QuizRunService.setUserId(parent.model.userId);
-      //
+      displayAttributes.userId = parent.model.userId
+
       handleTheming(parent.model.theme);
 
       parentState.parentFrame.emit('needs-authentication')

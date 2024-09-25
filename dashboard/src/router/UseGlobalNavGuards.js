@@ -143,7 +143,9 @@ export const useGlobalNavGuards = () => {
     const DEFAULT_TITLE = 'SkillTree Dashboard'
     router.afterEach((to, from) => {
 
-      log.debug(`GlobalNavGuard: afterEach nav to:${to.path}`)
+      if (log.isDebugEnabled()) {
+        log.debug(`GlobalNavGuard: afterEach nav from:${from.path} to:${to.path}`)
+      }
       if (to.meta.reportSkillId) {
         SkillsConfiguration.afterConfigure().then(() => {
           SkillsReporter.reportSkill(to.meta.reportSkillId)
