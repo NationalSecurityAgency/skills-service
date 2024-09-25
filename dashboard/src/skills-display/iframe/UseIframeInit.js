@@ -70,7 +70,10 @@ export const useIframeInit = () => {
         if (log.isTraceEnabled()) {
           log.trace(`UseIframeInit.js: navigate: ${JSON.stringify(route)}`)
         }
-        router.push(`${SkillsClientPath.HomePath}${route.path}`)
+        parentState.navigateMethodCalled = true
+        const toPage = `${SkillsClientPath.HomePath}${route.path}`
+        router.push({...route, path: toPage})
+        // router.push(`${SkillsClientPath.HomePath}${route.path}`)
       },
     })
     if (appConfig.isPkiAuthenticated) {
@@ -117,7 +120,8 @@ export const useIframeInit = () => {
       }
       // UserSkillsService.setUserId(parent.model.userId);
       // QuizRunService.setUserId(parent.model.userId);
-      //
+      displayAttributes.userId = parent.model.userId
+
       handleTheming(parent.model.theme);
 
       parentState.parentFrame.emit('needs-authentication')

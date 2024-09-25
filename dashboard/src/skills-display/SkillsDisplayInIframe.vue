@@ -20,6 +20,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
+import { usePageVisitService } from '@/components/utils/services/UsePageVisitService.js'
 
 const appStyleObject = ref({})
 
@@ -28,8 +29,9 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 const router = useRouter()
 const route = useRoute()
 const log = useLog()
+const pageVisitService = usePageVisitService()
 
-const handleRoute = (route) => {
+const reportRouteChangeToParentFrame = (route) => {
   if (skillDisplayParentFrameState.parentFrame) {
     const params = {
       path: skillsDisplayInfo.cleanPath(route.path)  || '/',
@@ -39,6 +41,7 @@ const handleRoute = (route) => {
       currentLocation: window.location.toString(),
       historySize: window.history.length
     }
+
     if (log.isDebugEnabled()) {
       log.debug(`SkillsDisplayInIframe.vue: emit route-change event to parent frame with ${JSON.stringify(params)}`)
     }
@@ -47,9 +50,17 @@ const handleRoute = (route) => {
 }
 
 router.afterEach((to, from) => {
-  handleRoute(to)
+  if (log.isDebugEnabled()) {
+    log.debug(`Route changed from ${JSON.stringify(from.fullPath)} to ${JSON.stringify(to.fullPath)}`)
+  }
+  if (!skillDisplayParentFrameState.navigateMethodCalled) {
+    reportRouteChangeToParentFrame(to)
+    skillDisplayParentFrameState.navigateMethodCalled = false
+  }
+  pageVisitService.reportPageVisit(to.path, to.fullPath)
 })
-handleRoute(route)
+pageVisitService.reportPageVisit(route)
+reportRouteChangeToParentFrame(route)
 
 </script>
 
