@@ -218,6 +218,7 @@ const sortTable = (sortContext) => {
       <SkillsSpinner :is-loading="loading" />
 
       <SkillsDataTable :value="data"
+                       v-if="totalRows > 1"
                        :loading="loading"
                        v-model:expandedRows="expandedRows"
                        dataKey="userId"
@@ -315,7 +316,7 @@ const sortTable = (sortContext) => {
         </template>
       </SkillsDataTable>
 
-      <no-content2 v-if="!totalRows > 1 && !loading" title="Not Available" class="py-8" icon="fas fa-cogs" data-cy="approvalConfNotAvailable">
+      <no-content2 v-if="totalRows <= 1 && !loading" title="Not Available" class="py-8" icon="fas fa-cogs" data-cy="approvalConfNotAvailable">
         The ability to split the approval workload is unavailable because there is only <Badge variant="info">1</Badge> Admin for this project.
         Please add <b>Admins</b> or <b>Approvers</b> on the <router-link :to="{ name: 'ProjectAccess' }" style="text-decoration: underline" class="font-bold" data-cy="navToAccessPage"><i class="fas fa-shield-alt skills-color-access" aria-hidden="true"/>Access</router-link> page in order to start using this feature.
       </no-content2>
