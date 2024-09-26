@@ -57,6 +57,19 @@
         <relativePath/>
     </parent>
 
+    <repositories>
+
+        <repository>
+            <id>jboss-community</id>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
     <distributionManagement>
         <repository>
             <id>nexus-releases</id>

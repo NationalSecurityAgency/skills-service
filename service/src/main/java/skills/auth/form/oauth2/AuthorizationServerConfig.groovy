@@ -55,7 +55,7 @@ import java.security.interfaces.RSAPublicKey
 import java.time.Duration
 
 @Configuration
-@Conditional(SecurityMode.FormAuth)
+@Conditional(SecurityMode.FormOrSAML2Auth)
 @Slf4j
 class AuthorizationServerConfig {
 

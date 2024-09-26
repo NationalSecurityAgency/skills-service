@@ -100,6 +100,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const docsHost = computed(() => config.value.docsHost)
   const maxBadgesPerProject = computed(() => config.value.maxBadgesPerProject)
   const isPkiAuthenticated = computed(() => config.value.authMode === 'PKI')
+  const isSAML2Authenticated = computed(() => config.value.authMode === 'SAML2')
+  const saml2RegistrationId = computed(() => config.value.saml2RegistrationId)
   const expirationGracePeriod = computed(() => config.value.expirationGracePeriod)
   const expireUnusedProjectsOlderThan = computed(() => config.value.expireUnusedProjectsOlderThan)
   const minimumProjectPoints = computed(() => config.value.minimumProjectPoints)
@@ -190,6 +192,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     allowedAttachmentMimeTypes,
     maxBadgesPerProject,
     isPkiAuthenticated,
+    isSAML2Authenticated,
+    saml2RegistrationId,
     expirationGracePeriod,
     expireUnusedProjectsOlderThan,
     minimumProjectPoints,

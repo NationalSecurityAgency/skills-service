@@ -111,7 +111,7 @@ class PortalWebSecurityHelper {
                     "/index.html", "index.html", "/public/**",
                     "/skills-websocket/**", "/requestPasswordReset",
                     "/resetPassword/**", "/performPasswordReset",
-                    "/resendEmailVerification/**", "/verifyEmail", "/userEmailIsVerified/*").permitAll()
+                    "/resendEmailVerification/**", "/verifyEmail", "/userEmailIsVerified/*","/saml2/**").permitAll()
                 .requestMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
                 .requestMatchers('/root/**').access(hasAnyAuthorityPlus([inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager], RoleName.ROLE_SUPER_DUPER_USER.name()))
                 .requestMatchers('/supervisor/**').access(hasAnyAuthorityPlus([inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager], RoleName.ROLE_SUPERVISOR.name(), RoleName.ROLE_SUPER_DUPER_USER.name()))

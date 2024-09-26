@@ -35,7 +35,7 @@ public class VueEntryPointFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+            HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String requestUri = httpServletRequest.getRequestURI();
         if (vueEntryPointFilterUtils.isFrontendResource(requestUri)) {
             // frontend resource, forward to the UI for vue-js to handle
