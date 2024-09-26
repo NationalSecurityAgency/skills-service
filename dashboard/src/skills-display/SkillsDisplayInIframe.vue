@@ -73,6 +73,7 @@ reportRouteChangeToParentFrame(route)
     role="main"
     :style="appStyleObject"
     aria-label="SkillTree Skills Display">
+    <div>hiii?</div>
       <skills-display-home class="skills-display-home"/>
   </div>
 </template>

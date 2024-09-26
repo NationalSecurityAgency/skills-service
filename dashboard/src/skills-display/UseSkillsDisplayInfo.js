@@ -17,6 +17,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { computed } from 'vue'
 import SkillsDisplayPathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
 import SkillsClientPath from '@/router/SkillsClientPath.js'
+import PathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
 
 export const useSkillsDisplayInfo = () => {
   const route = useRoute()
@@ -32,7 +33,7 @@ export const useSkillsDisplayInfo = () => {
   const localTestContextAppend = SkillsDisplayPathAppendValues.LocalTest
 
   const isSkillsClientPath = () => {
-    return window?.location?.pathname.startsWith(SkillsClientPath.RootUrl) || route.path?.startsWith('/test-skills-client/')
+    return SkillsClientPath.isSkillsClientPath()
   }
   const getContextSpecificRouteName = (name) => {
     if (isSkillsClientPath()) {
@@ -69,9 +70,20 @@ export const useSkillsDisplayInfo = () => {
   }
 
   const isSkillsDisplayPath = (optionalpath = null) => {
+    // if (SkillsClientPath.isSkillsClientPath()) {
+    //   return true
+    // }
+    console.log(`route name: ${JSON.stringify(route)}`)
+    if (route.name?.endsWith(PathAppendValues.SkillsClient)) {
+      console.log('----------------> return true')
+      return true
+    }
+
+
     const pathToCheck = optionalpath || route.path
     for (const regex of regexes) {
       let found = pathToCheck.match(regex)
+      console.log(`found: ${JSON.stringify(found)} checked path: ${pathToCheck} with regex: ${regex}`)
       if (found) {
         return true
       }

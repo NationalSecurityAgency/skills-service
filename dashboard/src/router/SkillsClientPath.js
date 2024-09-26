@@ -18,4 +18,15 @@ const rootUrl = '/static/clientPortal/'
 export default {
   RootUrl: rootUrl,
   HomePath: `${rootUrl}index.html`,
+  TestSkillsClientPath: '/test-skills-client/',
+
+  isSkillsClientIframePath(){
+    const path = window?.location?.pathname
+    return path?.startsWith(this.RootUrl)
+  },
+
+  isSkillsClientPath(){
+    const path = window?.location?.pathname
+    return this.isSkillsClientIframePath() //|| path?.startsWith(this.TestSkillsClientPath)
+  }
 }

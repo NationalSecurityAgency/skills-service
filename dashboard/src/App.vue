@@ -44,8 +44,6 @@ import ScrollToTop from '@/common-components/utilities/ScrollToTop.vue'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import log from 'loglevel';
 
-log.setLevel('TRACE')
-
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
 const appConfig = useAppConfig()
@@ -107,6 +105,7 @@ watch(() => themeHelper.currentTheme, (newTheme, oldTheme) => {
 const iframeInit = useIframeInit()
 onBeforeMount(() => {
   if (skillsDisplayInfo.isSkillsClientPath()) {
+    log.trace('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, initiating iframe handshake')
     iframeInit.handleHandshake()
   }
   errorHandling.registerErrorHandling()
@@ -117,6 +116,7 @@ onBeforeMount(() => {
 onMounted(() => {
   invoke(async () => {
     if (skillsDisplayInfo.isSkillsClientPath()) {
+      log.trace('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, waiting for iframe to load')
       await until(iframeInit.loadedIframe).toBe(true)
       log.debug('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, loaded iframe!')
     }
@@ -167,10 +167,14 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
   <div role="presentation"
        :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }"
        class="m-0 surface-ground">
+    <pre>how come this doesn't show up???</pre>
     <VueAnnouncer class="sr-only" />
 
     <customizable-header v-if="isCustomizableHeader" role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="skilltree-main-container">
+      <pre>isLoadingApp: {{ isLoadingApp }}</pre>
+      <pre>{{!isAppLoaded.value}} || {{appConfig.isLoadingConfig}} || {{authState.restoringSession}} || {{ (skillsDisplayAttributes.loadingConfig && skillsDisplayInfo.isSkillsDisplayPath()) }}</pre>
+      <pre>{{skillsDisplayAttributes.loadingConfig}} && {{skillsDisplayInfo.isSkillsDisplayPath()}}</pre>
       <div v-if="isLoadingApp" role="main" class="text-center">
         <skills-spinner :is-loading="true" class="mt-8 text-center"/>
         <h1 class="text-sm sr-only">Loading...</h1>
