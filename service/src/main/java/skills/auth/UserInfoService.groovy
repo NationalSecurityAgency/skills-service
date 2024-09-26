@@ -20,15 +20,18 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.saml2.provider.service.authentication.DefaultSaml2AuthenticatedPrincipal
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import skills.auth.pki.PkiUserLookup
+import skills.auth.saml.SAML2Utils
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.services.UserAttrsService
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.utils.RetryUtil
+import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal
 
 @Component
 @Slf4j
@@ -49,6 +52,9 @@ class UserInfoService {
     @Autowired
     UserAttrsService userAttrsService
 
+    @Autowired
+    SAML2Utils saml2Utils;
+
     @Profile
     UserInfo getCurrentUser() {
         UserInfo currentUser
@@ -57,7 +63,10 @@ class UserInfoService {
             if (principal instanceof UserInfo) {
                 log.trace("User principal {}", principal)
                 currentUser = principal
-            } else {
+            } else if(principal instanceof Saml2AuthenticatedPrincipal){
+                log.trace("User principal {}", principal);
+                currentUser = userAuthService.loadByUserId(principal.getName())
+            }else {
                 log.info("Unexpected/Unauthenticated princial [${principal}]")
             }
         }

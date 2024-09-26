@@ -66,6 +66,9 @@ class PublicConfigController {
     @Value('${skills.config.ui.enablePageVisitReporting:#{false}}')
     Boolean enablePageVisitReporting
 
+    @Value('${spring.security.saml2.registrationId}')
+    String saml2RegistrationId;
+
     @Autowired
     SettingsService settingsService
 
@@ -106,6 +109,10 @@ class PublicConfigController {
         def oAuthProviders = clientRegistrationRepository?.collect {it?.registrationId }
         if (oAuthProviders) {
             res['oAuthProviders'] = oAuthProviders
+        }
+
+        if(authMode.name() == 'SAML2'){
+            res['saml2RegistrationId'] = saml2RegistrationId;
         }
         return res
     }

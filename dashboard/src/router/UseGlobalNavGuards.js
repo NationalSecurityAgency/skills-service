@@ -54,25 +54,33 @@ export const useGlobalNavGuards = () => {
   const isPki = () => appConfig.isPkiAuthenticated
   const getLandingPage = () => authState.userInfo?.landingPage === 'admin' ? 'AdminHomePage' : 'MyProgressPage'
 
+  const registrationId = () => appConfig.saml2RegistrationId;
+  const isSaml2 = () => appConfig.isSAML2Authenticated;
+
   const beforeEachNavGuard = (to, from, next) => {
     const { skillsClientDisplayPath } = to.query
     const requestAccountPath = '/request-root-account'
     const skillsLoginPath = '/skills-login'
+    const saml2LoginPath = '/sso-login'
+   
+    console.log('From :' + from.path + ' To :'+to.path)
+    console.log('Is Logged In :: '+isLoggedIn())
+
     if (
-      !isPki() &&
+      !isPki() && !isSaml2() &&
       !isLoggedIn() &&
       to.path?.toLowerCase() !== requestAccountPath &&
       appConfig.needToBootstrap
     ) {
       next({ path: requestAccountPath })
     } else if (
-      !isPki() &&
-      to.path?.toLowerCase() === requestAccountPath &&
+      !isPki() && !isSaml2() &&
+      to.path === requestAccountPath &&
       !appConfig.needToBootstrap
     ) {
       next({ name: getLandingPage() })
     } else if (
-      ((isPki() || isLoggedIn()) &&
+      ((isPki() || isSaml2() || isLoggedIn()) &&
       (to.path === skillsLoginPath || to.path === `${skillsLoginPath}/`))
     ) {
       next(route.query.redirect || { name: getLandingPage() })
@@ -89,10 +97,11 @@ export const useGlobalNavGuards = () => {
           p !== '/' ? { name: 'UserAgreement', query: { redirect: p } } : { name: 'UserAgreement' }
         next(ua)
       } else {
-        if (to.path === '/') {
-          const landingPageRoute = { name: getLandingPage() }
-          next(landingPageRoute)
-        }
+       if (to.path === '/' && isLoggedIn()) {
+         console.log('Route to Landing Page ::: '+ getLandingPage());
+         const landingPageRoute = { name: getLandingPage() }
+         next(landingPageRoute)
+        } 
         if (from && from.path !== '/error') {
           appInfoState.setPreviousUrl(from.fullPath)
         }
@@ -114,15 +123,24 @@ export const useGlobalNavGuards = () => {
         ) {
           quizConfig.loadQuizConfigState({ quizId: to.params.quizId })
         }
+
         if (to.matched.some((record) => record.meta.requiresAuth)) {
           // this route requires auth, check if logged in if not, redirect to login page.
-          if (!isLoggedIn()) {
+          if (isSaml2() && !isLoggedIn()) {
+            // SAML2 login redirection
+            console.log('Redirecting to SAML2 Login Path');
+            //next({ path: saml2LoginPath, query: { redirect: to.fullPath } });
+            window.location = `/saml2/authenticate/${registrationId()}`;
+          } else if (!isLoggedIn()) {
             const newRoute = { query: { redirect: to.fullPath } }
-            if (isPki()) {
-              newRoute.name = getLandingPage()
-            } else {
-              newRoute.name = 'Login'
-            }
+              if (isPki()) {
+          		newRoute.name = getLandingPage();
+	          } else if(isSaml2()){
+                window.location = `/saml2/authenticate/${registrationId()}`;
+              } else
+              {
+	            newRoute.name = 'Login';
+	          }
             next(newRoute)
           } else {
             if((to.name?.endsWith(PathAppendValues.Local) || to.name?.endsWith(PathAppendValues.Inception)) && skillsClientDisplayPath) {
@@ -139,6 +157,7 @@ export const useGlobalNavGuards = () => {
         }
       }
     }
+
   }
 
   const addNavGuards = () => {

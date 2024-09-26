@@ -36,4 +36,20 @@ class SecurityMode {
             return authMode == AuthMode.FORM
         }
     }
+
+    static class SAML2Auth implements Condition {
+        @Override
+        boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            AuthMode authMode = AuthMode.getFromContext(context)
+            return authMode == AuthMode.SAML2
+        }
+    }
+
+    static class FormOrSAML2Auth implements Condition {
+        @Override
+        boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            AuthMode authMode = AuthMode.getFromContext(context)
+            return authMode == AuthMode.FORM || AuthMode.SAML2
+        }
+    }
 }
