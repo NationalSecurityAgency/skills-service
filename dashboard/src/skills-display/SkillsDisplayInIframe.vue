@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import { ref } from 'vue'
 import SkillsDisplayHome from '@/skills-display/components/SkillsDisplayHome.vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
@@ -27,7 +27,6 @@ const appStyleObject = ref({})
 const skillDisplayParentFrameState = useSkillsDisplayParentFrameState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const router = useRouter()
-const route = useRoute()
 const log = useLog()
 const pageVisitService = usePageVisitService()
 
@@ -46,21 +45,19 @@ const reportRouteChangeToParentFrame = (route) => {
       log.debug(`SkillsDisplayInIframe.vue: emit route-change event to parent frame with ${JSON.stringify(params)}`)
     }
     skillDisplayParentFrameState.parentFrame.emit('route-changed', params)
+  } else {
+    log.debug(`SkillsDisplayInIframe.vue: called reportRouteChangeToParentFrame but parentFrame was undefined`)
   }
 }
 
 router.afterEach((to, from) => {
   if (log.isDebugEnabled()) {
-    log.debug(`Route changed from ${JSON.stringify(from.fullPath)} to ${JSON.stringify(to.fullPath)}`)
+    log.debug(`SkillsDisplayInIframe.vue: Route changed from ${JSON.stringify(from.fullPath)} to ${JSON.stringify(to.fullPath)}`)
   }
-  if (!skillDisplayParentFrameState.navigateMethodCalled) {
-    reportRouteChangeToParentFrame(to)
-    skillDisplayParentFrameState.navigateMethodCalled = false
-  }
+  reportRouteChangeToParentFrame(to)
   pageVisitService.reportPageVisit(to.path, to.fullPath)
 })
 // pageVisitService.reportPageVisit(route)
-reportRouteChangeToParentFrame(route)
 
 </script>
 

@@ -70,7 +70,6 @@ export const useIframeInit = () => {
         if (log.isTraceEnabled()) {
           log.trace(`UseIframeInit.js: navigate: ${JSON.stringify(route)}`)
         }
-        parentState.navigateMethodCalled = true
         router.push(route)
       },
     })
