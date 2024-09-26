@@ -167,14 +167,10 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
   <div role="presentation"
        :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }"
        class="m-0 surface-ground">
-    <pre>how come this doesn't show up???</pre>
     <VueAnnouncer class="sr-only" />
 
     <customizable-header v-if="isCustomizableHeader" role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="skilltree-main-container">
-      <pre>isLoadingApp: {{ isLoadingApp }}</pre>
-      <pre>{{!isAppLoaded.value}} || {{appConfig.isLoadingConfig}} || {{authState.restoringSession}} || {{ (skillsDisplayAttributes.loadingConfig && skillsDisplayInfo.isSkillsDisplayPath()) }}</pre>
-      <pre>{{skillsDisplayAttributes.loadingConfig}} && {{skillsDisplayInfo.isSkillsDisplayPath()}}</pre>
       <div v-if="isLoadingApp" role="main" class="text-center">
         <skills-spinner :is-loading="true" class="mt-8 text-center"/>
         <h1 class="text-sm sr-only">Loading...</h1>

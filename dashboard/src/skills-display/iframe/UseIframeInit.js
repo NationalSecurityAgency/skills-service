@@ -71,9 +71,7 @@ export const useIframeInit = () => {
           log.trace(`UseIframeInit.js: navigate: ${JSON.stringify(route)}`)
         }
         parentState.navigateMethodCalled = true
-        const toPage = `${SkillsClientPath.HomePath}${route.path}`
-        router.push({...route, path: toPage})
-        // router.push(`${SkillsClientPath.HomePath}${route.path}`)
+        router.push(route)
       },
     })
     if (appConfig.isPkiAuthenticated) {

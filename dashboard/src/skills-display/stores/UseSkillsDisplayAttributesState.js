@@ -36,7 +36,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const skillsDisplayInfo = useSkillsDisplayInfo()
   const route = useRoute()
   const loadConfigStateIfNeeded = (optionalToPathObj = null) => {
-    if (skillsDisplayInfo.isSkillsDisplayPath(optionalToPathObj?.path)) {
+    if (skillsDisplayInfo.isSkillsDisplayPath(optionalToPathObj)) {
       if (route.params.projectId) {
         projectId.value = route.params.projectId
       }

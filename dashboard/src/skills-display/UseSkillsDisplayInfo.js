@@ -31,7 +31,7 @@ export const useSkillsDisplayInfo = () => {
   const skillDisplayPreviewRegex = /\/administrator\/projects\/.*\/users\/.*/i
   const regexes = [progressAndRankingsRegex, localTestRegex, clientDisplayRegex, inceptionRegex, skillDisplayPreviewRegex]
   const localTestContextAppend = SkillsDisplayPathAppendValues.LocalTest
-
+  const skillsDisplayNameAppendValues = [SkillsDisplayPathAppendValues.Local, SkillsDisplayPathAppendValues.SkillsClient, SkillsDisplayPathAppendValues.LocalTest, SkillsDisplayPathAppendValues.SkillsDisplayPreview]
   const isSkillsClientPath = () => {
     return SkillsClientPath.isSkillsClientPath()
   }
@@ -69,26 +69,10 @@ export const useSkillsDisplayInfo = () => {
     return '/'
   }
 
-  const isSkillsDisplayPath = (optionalpath = null) => {
-    // if (SkillsClientPath.isSkillsClientPath()) {
-    //   return true
-    // }
-    console.log(`route name: ${JSON.stringify(route)}`)
-    if (route.name?.endsWith(PathAppendValues.SkillsClient)) {
-      console.log('----------------> return true')
-      return true
-    }
-
-
-    const pathToCheck = optionalpath || route.path
-    for (const regex of regexes) {
-      let found = pathToCheck.match(regex)
-      console.log(`found: ${JSON.stringify(found)} checked path: ${pathToCheck} with regex: ${regex}`)
-      if (found) {
-        return true
-      }
-    }
-    return false
+  const isSkillsDisplayPath = (optionalRoute = null) => {
+    const routeToCheck = optionalRoute || route
+    const foundPath = skillsDisplayNameAppendValues.find((path) => routeToCheck.name?.endsWith(path))
+    return foundPath !== undefined && foundPath !== null
   }
 
   const isLocalTestPath = () => {
