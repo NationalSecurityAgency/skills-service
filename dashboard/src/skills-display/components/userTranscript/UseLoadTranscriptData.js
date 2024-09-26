@@ -22,6 +22,7 @@ import { useProjectCommunityReplacement } from '@/components/customization/UsePr
 import { useRoute } from 'vue-router'
 import UsersService from '@/components/users/UsersService.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useLog } from '@/components/utils/misc/useLog.js'
 
 export const useLoadTranscriptData = () => {
   const skillsDisplayService = useSkillsDisplayService()
@@ -33,6 +34,7 @@ export const useLoadTranscriptData = () => {
   const appConfig = useAppConfig()
   const route = useRoute()
   const skillsDisplayInfo = useSkillsDisplayInfo()
+  const log = useLog()
 
   const loadTranscriptData = () => {
     isLoading.value = true
@@ -52,6 +54,12 @@ export const useLoadTranscriptData = () => {
         })
       }
 
+      if (skillsDisplayInfo.isSkillsClientPath()) {
+        return skillsDisplayService.getLoggedInUserInfo().then((userInfo) => {
+          return userInfo
+        })
+      }
+
       return Promise.resolve(userAuthState.userInfo)
     }
 
@@ -60,6 +68,9 @@ export const useLoadTranscriptData = () => {
         return skillsDisplayAttributesState.userId || ''
       }
 
+      if (log.isTraceEnabled()) {
+        log.trace(`UseLoadTranscriptData.js: userinfo=${JSON.stringify(userInfo)}`)
+      }
       if(userInfo) {
         const hasUserIdForDisplay = userInfo.userIdForDisplay && userInfo.userIdForDisplay.length > 0
         const userIdToPrint = hasUserIdForDisplay ? userInfo.userIdForDisplay : userInfo.userId

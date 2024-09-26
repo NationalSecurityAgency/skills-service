@@ -61,8 +61,8 @@ class OAuthUtils {
                     username: proxyUserId,
                     proxied: true,
                     proxyingSystemId: auth.name,
-                    firstName: "${proxyUserId.substring(0,1)}.",
-                    lastName: proxyUserId
+                    firstName: null,
+                    lastName: null
             )
 
             // if the user exists, make sure to load them so that user roles are populated

@@ -244,6 +244,10 @@ export const useSkillsDisplayService = () => {
       .then((result) => result.data);
   }
 
+  const getLoggedInUserInfo = () => {
+    return axios.get('/app/userInfo').then((response) => response.data)
+  }
+
   return {
     loadUserProjectSummary,
     loadSubjectSummary,
@@ -261,6 +265,7 @@ export const useSkillsDisplayService = () => {
     getUserSkillsRankingDistribution,
     getRankingDistributionUsersPerLevel,
     getLeaderboard,
-    getVideoTranscript
+    getVideoTranscript,
+    getLoggedInUserInfo
   }
 }
