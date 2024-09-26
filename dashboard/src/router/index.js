@@ -896,8 +896,8 @@ routes.push({
 })
 
 const isSkillsClient = SkillsClientPath.isSkillsClientIframePath()
-const history = isSkillsClient ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL)
-const actualRoutes = isSkillsClient ? createSkillsDisplayChildRoutes(PathAppendValues.SkillsClient, true) : routes
+const history = isSkillsClient ? createMemoryHistory(import.meta.env.BASE_URL) : createWebHistory(import.meta.env.BASE_URL)
+const actualRoutes = isSkillsClient ? [createSkillsClientRoutes(createSkillsDisplayChildRoutes(PathAppendValues.SkillsClient, true))] : routes
 const constructRouter = () => {
   const router =  createRouter({
     history,
