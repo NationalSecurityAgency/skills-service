@@ -16,17 +16,20 @@ limitations under the License.
 <script setup>
 import { ref } from 'vue'
 import SkillsDisplayHome from '@/skills-display/components/SkillsDisplayHome.vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { usePageVisitService } from '@/components/utils/services/UsePageVisitService.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 const appStyleObject = ref({})
 
 const skillDisplayParentFrameState = useSkillsDisplayParentFrameState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
+const displayAttributes = useSkillsDisplayAttributesState()
 const router = useRouter()
+const route = useRoute()
 const log = useLog()
 const pageVisitService = usePageVisitService()
 
@@ -55,9 +58,9 @@ router.afterEach((to, from) => {
     log.debug(`SkillsDisplayInIframe.vue: Route changed from ${JSON.stringify(from.fullPath)} to ${JSON.stringify(to.fullPath)}`)
   }
   reportRouteChangeToParentFrame(to)
-  pageVisitService.reportPageVisit(to.path, to.fullPath)
+  pageVisitService.reportPageVisit(to.path, to.fullPath, true, displayAttributes.projectId)
 })
-// pageVisitService.reportPageVisit(route)
+pageVisitService.reportPageVisit(route.path, route.fullPath, true, displayAttributes.projectId)
 
 </script>
 

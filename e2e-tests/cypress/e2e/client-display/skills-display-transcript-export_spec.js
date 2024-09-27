@@ -21,7 +21,7 @@ describe('Transcript export tests', () => {
     try {
       rmdirSync('cypress/downloads', { maxRetries: 5, recursive: true });
     } catch (error) {
-      throw Error(`Failed to remove [${path}] with ${error}`);
+      throw Error(`Failed to remove cypress/downloads with ${error}`);
     } finally {
       return null;
     }
