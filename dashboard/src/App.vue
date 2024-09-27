@@ -39,8 +39,6 @@ import { invoke, until } from '@vueuse/core'
 import DashboardFooter from '@/components/header/DashboardFooter.vue'
 import { useUserAgreementInterceptor } from '@/interceptors/UseUserAgreementInterceptor.js'
 import PkiAppBootstrap from '@/components/access/PkiAppBootstrap.vue'
-import { usePrimeVue } from 'primevue/config'
-import ScrollToTop from '@/common-components/utilities/ScrollToTop.vue'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import log from 'loglevel';
 
