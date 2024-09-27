@@ -28,7 +28,7 @@ export const useSkillsDisplayBreadcrumbState = defineStore('skillsDisplayBreadcr
   const breadcrumbItems = ref([])
 
   const navUpBreadcrumb = () => {
-    const url = (breadcrumbItems.value.length > 1 ? breadcrumbItems.value[breadcrumbItems.value.length - 2].contextUrl : skillsDisplayInfo.getRootUrl()).replace(/\/{2,}/g, '/')
+    const url = (breadcrumbItems.value.length > 1 ? breadcrumbItems.value[breadcrumbItems.value.length - 2].contextUrl : skillsDisplayInfo.getRootUrl())
     log.trace(`navUpBreadcrumb: ${url}`)
     router.push({ path: url })
   }

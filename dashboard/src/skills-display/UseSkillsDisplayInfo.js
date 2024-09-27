@@ -66,7 +66,7 @@ export const useSkillsDisplayInfo = () => {
         return found[0]
       }
     }
-    return '/'
+    return isSkillsClientPath() ? '' : '/'
   }
 
   const isSkillsDisplayPath = (optionalRoute = null) => {
