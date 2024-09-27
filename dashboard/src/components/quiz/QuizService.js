@@ -26,6 +26,10 @@ export default {
       .post(`/${opType}/quiz-definitions/${quizId}`, quizDef)
       .then((response) => response.data)
   },
+  copyQuiz(quizDef) {
+    const quizId = quizDef.originalQuizId;
+    return axios.post(`/admin/quiz-definitions/${quizId}/copy`, quizDef).then((response) => response.data)
+  },
   deleteQuizId(quizId) {
     return axios.delete(`/admin/quiz-definitions/${quizId}`).then((response) => response.data)
   },

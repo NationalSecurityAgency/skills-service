@@ -155,6 +155,11 @@ const showUpdateModal = (quizDef, isEdit = true) => {
   editQuizInfo.value.isEdit = isEdit;
   editQuizInfo.value.showDialog = true;
 };
+const showCopyModal = (quizDef, isCopy = true) => {
+  editQuizInfo.value.quizDef = quizDef;
+  editQuizInfo.value.isCopy = isCopy;
+  editQuizInfo.value.showDialog = true;
+};
 
 defineExpose({
   showUpdateModal,
@@ -260,6 +265,16 @@ defineExpose({
                                 :track-for-focus="true"
                                 title="Edit Quiz">
                   </SkillsButton>
+                  <SkillsButton @click="showCopyModal(slotProps.data)"
+                                icon="fas fa-copy"
+                                outlined
+                                :data-cy="`copyQuizButton_${slotProps.data.quizId}`"
+                                :aria-label="`Copy Quiz ${slotProps.data.name}`"
+                                :ref="`copy_${slotProps.data.quizId}`"
+                                :id="`copy_${slotProps.data.quizId}`"
+                                :track-for-focus="true"
+                                title="Copy Quiz">
+                  </SkillsButton>
                   <SkillsButton @click="showDeleteWarningModal(slotProps.data)"
                                 icon="text-warning fas fa-trash"
                                 outlined
@@ -292,6 +307,7 @@ defineExpose({
         v-model="editQuizInfo.showDialog"
         :quiz="editQuizInfo.quizDef"
         :is-edit="editQuizInfo.isEdit"
+        :is-copy="editQuizInfo.isCopy"
         @quiz-saved="updateQuizDef"
         :enable-return-focus="true"/>
 

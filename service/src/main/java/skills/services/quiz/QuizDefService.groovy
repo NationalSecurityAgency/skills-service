@@ -168,6 +168,70 @@ class QuizDefService {
     }
 
     @Transactional()
+    QuizDefResult copyQuiz(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest, String userIdParam = null) {
+        validateQuizDefRequest(newQuizId, quizDefRequest)
+
+        newQuizId = InputSanitizer.sanitize(newQuizId)
+        quizDefRequest.name = InputSanitizer.sanitize(quizDefRequest.name)?.trim()
+        quizDefRequest.description = StringUtils.trimToNull(InputSanitizer.sanitize(quizDefRequest.description))
+
+        lockingService.lockQuizDefs()
+
+        QuizDefWithDescription quizDefWithDescription = originalQuizId ? quizDefWithDescRepo.findByQuizIdIgnoreCase(originalQuizId) : null
+        if (!quizDefWithDescription || !quizDefWithDescription.quizId.equalsIgnoreCase(originalQuizId)) {
+            serviceValidatorHelper.validateQuizIdDoesNotExist(newQuizId)
+        }
+        if (!quizDefWithDescription || !quizDefWithDescription.name.equalsIgnoreCase(quizDefWithDescription.name)) {
+            serviceValidatorHelper.validateQuizNameDoesNotExist(quizDefRequest.name, newQuizId)
+        }
+
+        quizDefWithDescription = new QuizDefWithDescription(quizId: newQuizId, name: quizDefRequest.name,
+                description: quizDefRequest.description, type: QuizDefParent.QuizType.valueOf(quizDefRequest.type))
+        log.debug("Created quiz [{}]", quizDefWithDescription)
+
+        String userId = userIdParam ?: userInfoService.getCurrentUserId()
+
+        if (!userInfoService.isCurrentUserASuperDuperUser()) {
+            createdResourceLimitsValidator.validateNumQuizDefsCreated(userId)
+        }
+
+        DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null, null, quizDefWithDescription.quizId) {
+            quizDefWithDescription = quizDefWithDescRepo.save(quizDefWithDescription)
+        }
+
+        QuizQuestionsResult originalQuestions = getQuestionDefs(originalQuizId)
+        originalQuestions.questions.forEach(question -> {
+            List<QuizAnswerDefResult> answers = question.answers
+            QuizQuestionDefRequest newQuestion = new QuizQuestionDefRequest()
+            newQuestion.question = question.question
+            newQuestion.questionType = question.questionType
+            List<QuizAnswerDefRequest> newAnswers = answers.collect( it -> {
+                return new QuizAnswerDefRequest(answer: it.answer, isCorrect: it.isCorrect)
+            })
+            newQuestion.answers = newAnswers
+            saveQuestion(newQuizId, newQuestion)
+        })
+
+        log.debug("Saved [{}]", quizDefWithDescription)
+
+        attachmentService.updateAttachmentsFoundInMarkdown(quizDefRequest.description, null, newQuizId, null)
+
+        accessSettingsStorageService.addQuizDefUserRole(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Create,
+                item: DashboardItem.Quiz,
+                actionAttributes: quizDefWithDescription,
+                itemId: quizDefWithDescription.quizId,
+                itemRefId: quizDefWithDescription.id,
+                quizId: quizDefWithDescription.quizId,
+        ))
+
+        QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)
+        return convert(updatedDef)
+    }
+
+    @Transactional()
     QuizDefResult saveQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest, String userIdParam = null) {
         validateQuizDefRequest(newQuizId, quizDefRequest)
 
