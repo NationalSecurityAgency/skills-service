@@ -19,10 +19,21 @@ import { useRoute } from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import NumberFormatter from '@/components/utils/NumberFormatter.js'
+import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 
 const route = useRoute();
 const props = defineProps(['tag']);
 
+const themeState = useSkillsDisplayThemeState()
+const themeHelper = useThemesHelper()
+
+const chartAxisColor = () => {
+  if (themeState.theme.charts.axisLabelColor) {
+    return themeState.theme.charts.axisLabelColor
+  }
+  return themeHelper.isDarkTheme ? 'white' : undefined
+}
 
 const inProgressSeries = ref([]);
 const achievedSeries = ref([]);
@@ -38,6 +49,7 @@ const chartOptions = {
     },
   },
   tooltip: {
+    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
     y: {
       formatter(val) {
         return NumberFormatter.format(val);
@@ -62,20 +74,32 @@ const chartOptions = {
   xaxis: {
     categories: [],
     title: {
+      style: {
+        color: chartAxisColor()
+      },
       text: '# of Users',
     },
     labels: {
       style: {
         fontSize: '13px',
         fontWeight: 600,
+        colors: chartAxisColor(),
       },
     },
   },
   yaxis: {
     categories: [],
     title: {
+      style: {
+        color: chartAxisColor()
+      },
       text: props.tag.label,
     },
+    labels: {
+      style: {
+        colors: chartAxisColor()
+      }
+    }
   },
   dataLabels: {
     enabled: false,
