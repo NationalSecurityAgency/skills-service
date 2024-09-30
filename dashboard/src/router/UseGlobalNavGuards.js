@@ -125,7 +125,7 @@ export const useGlobalNavGuards = () => {
             }
             next(newRoute)
           } else {
-            if(to.name?.endsWith(PathAppendValues.Local) || to.name?.endsWith(PathAppendValues.Inception) && skillsClientDisplayPath) {
+            if((to.name?.endsWith(PathAppendValues.Local) || to.name?.endsWith(PathAppendValues.Inception)) && skillsClientDisplayPath) {
               const newRoute = to.path + skillsClientDisplayPath;
               const nextRoute = '/redirect?nextPage=' + newRoute
               next(nextRoute)
