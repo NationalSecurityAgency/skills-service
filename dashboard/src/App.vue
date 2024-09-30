@@ -171,9 +171,11 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
 
     <customizable-header v-if="isCustomizableHeader" role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="skilltree-main-container">
-      <div v-if="isLoadingApp" role="main" class="text-center">
-        <skills-spinner :is-loading="true" class="mt-8 text-center"/>
-        <h1 class="text-sm sr-only">Loading...</h1>
+      <div v-if="isLoadingApp" role="main" class="flex align-content-center justify-content-center flex-wrap" style="min-height: 40rem">
+        <div class="flex align-items-center justify-content-center m-2">
+          <skills-spinner :is-loading="true" class="text-center"/>
+          <h1 class="text-sm sr-only">Loading...</h1>
+        </div>
       </div>
       <div v-if="!isLoadingApp" class="m-0">
         <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
@@ -187,12 +189,12 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
             <RouterView />
           </div>
         </div>
+        <ConfirmDialog></ConfirmDialog>
+        <dashboard-footer v-if="isDashboardFooter" role="region" />
+        <customizable-footer v-if="isDashboardFooter" role="region" aria-label="dynamic customizable footer"></customizable-footer>
+        <scroll-to-top v-if="!isScrollToTopDisabled && !inBootstrapMode" />
       </div>
     </div>
-    <ConfirmDialog></ConfirmDialog>
-    <dashboard-footer v-if="isDashboardFooter" role="region" />
-    <customizable-footer v-if="isDashboardFooter" role="region" aria-label="dynamic customizable footer"></customizable-footer>
-    <scroll-to-top v-if="!isScrollToTopDisabled && !inBootstrapMode" />
   </div>
 </template>
 
