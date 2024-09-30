@@ -19,58 +19,43 @@ import MetricsService from "@/components/metrics/MetricsService.js";
 import { useRoute } from 'vue-router';
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import NumberFormatter from '@/components/utils/NumberFormatter.js';
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 
 const props = defineProps(['tag']);
 const route = useRoute();
 
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
-
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
 const series = ref([]);
 const loading = ref(true);
 const chartOptions = ref({
   chart: {
     width: 250,
-    type: 'bar',
-    toolbar: {
+        type: 'bar',
+        toolbar: {
       show: true,
-      offsetX: 0,
-      offsetY: 0,
+          offsetX: 0,
+          offsetY: 0,
     },
   },
   plotOptions: {
     bar: {
       horizontal: true,
-      dataLabels: {
+          dataLabels: {
         position: 'bottom',
       },
     },
   },
   stroke: {
     show: true,
-    width: 2,
-    colors: ['transparent'],
+        width: 2,
+        colors: ['transparent'],
   },
   xaxis: {
     title: {
-      style: {
-        color: chartAxisColor()
-      },
       text: '# of Users',
     },
     labels: {
       style: {
         fontSize: '13px',
-        fontWeight: 600,
-        colors: chartAxisColor(),
+            fontWeight: 600,
       },
     },
   },
@@ -78,14 +63,8 @@ const chartOptions = ref({
     title: {
       text: props.tag.label,
     },
-    labels: {
-      style: {
-        colors: chartAxisColor()
-      }
-    }
   },
   tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
     y: {
       formatter(val) {
         return NumberFormatter.format(val);

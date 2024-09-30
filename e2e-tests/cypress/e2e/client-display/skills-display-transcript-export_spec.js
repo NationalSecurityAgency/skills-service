@@ -21,7 +21,7 @@ describe('Transcript export tests', () => {
     try {
       rmdirSync('cypress/downloads', { maxRetries: 5, recursive: true });
     } catch (error) {
-      throw Error(`Failed to remove cypress/downloads with ${error}`);
+      throw Error(`Failed to remove [${path}] with ${error}`);
     } finally {
       return null;
     }
@@ -132,6 +132,12 @@ describe('Transcript export tests', () => {
       'nickname': 'Joe Doe'
     })
     cy.createProject(1, { name: projName })
+    const createSubjectAndSkills = (subjNum, numOfSkills) => {
+      cy.createSubject(1, subjNum)
+      for (let i = 1; i <= numOfSkills; i++) {
+        cy.createSkill(1, subjNum, i, { numPerformToCompletion: 1 })
+      }
+    }
     createSubjectAndSkills(1, 12)
     createSubjectAndSkills(2, 6)
     createSubjectAndSkills(3, 8)
@@ -179,6 +185,12 @@ describe('Transcript export tests', () => {
       'nickname': 'Joe Doe'
     })
     cy.createProject(1, { name: projName })
+    const createSubjectAndSkills = (subjNum, numOfSkills) => {
+      cy.createSubject(1, subjNum)
+      for (let i = 1; i <= numOfSkills; i++) {
+        cy.createSkill(1, subjNum, i, { numPerformToCompletion: 1 })
+      }
+    }
     createSubjectAndSkills(1, 12)
     createSubjectAndSkills(2, 6)
     createSubjectAndSkills(3, 8)
@@ -231,24 +243,14 @@ describe('Transcript export tests', () => {
       'last': 'Doe',
       'nickname': 'Joe Doe'
     })
-    createSubjectAndSkills(1, 40)
-    createSubjectAndSkills(2, 6)
-    createSubjectAndSkills(3, 80)
-    cy.createBadge(1)
-    cy.assignSkillToBadge(1, 1, 1)
-    cy.enableBadge(1, 1)
-
-    const user = Cypress.env('proxyUser')
-    cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: user, date: 'now' })
-    cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: user, date: 'now' })
-    cy.doReportSkill({ project: 1, skill: 3, subjNum: 3, userId: user, date: 'now' })
-    cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: user, date: 'now' })
-    cy.doReportSkill({ project: 1, skill: 5, subjNum: 3, userId: user, date: 'now' })
-    cy.doReportSkill({ project: 1, skill: 7, subjNum: 3, userId: user, date: 'now' })
+    cy.createSubject(1)
+    cy.createSkill(1, 1, 1)
+    cy.createSkill(1, 1, 2)
+    cy.createSkill(1, 1, 3)
 
     cy.cdVisit('/')
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
-    const numExpectedPages = 8
+    const numExpectedPages = 2
     cy.readTranscript(projName).then((doc) => {
       expect(doc.numpages).to.equal(numExpectedPages)
       expect(clean(doc.text)).to.include('SkillTree Transcript')
@@ -380,6 +382,12 @@ describe('Transcript export tests', () => {
       'nickname': 'Joe Doe'
     })
     cy.createProject(1, { name: projName })
+    const createSubjectAndSkills = (subjNum, numOfSkills) => {
+      cy.createSubject(1, subjNum)
+      for (let i = 1; i <= numOfSkills; i++) {
+        cy.createSkill(1, subjNum, i, { numPerformToCompletion: 1 })
+      }
+    }
     createSubjectAndSkills(1, 80)
     createSubjectAndSkills(2, 30)
     createSubjectAndSkills(3, 100)
@@ -579,6 +587,12 @@ describe('Transcript export tests', () => {
       'nickname': 'Joe Doe'
     })
     cy.createProject(1, { name: projName })
+    const createSubjectAndSkills = (subjNum, numOfSkills) => {
+      cy.createSubject(1, subjNum)
+      for (let i = 1; i <= numOfSkills; i++) {
+        cy.createSkill(1, subjNum, i, { numPerformToCompletion: 1 })
+      }
+    }
     createSubjectAndSkills(1, 12)
     createSubjectAndSkills(2, 6)
     createSubjectAndSkills(3, 8)
@@ -669,5 +683,40 @@ describe('Transcript export tests', () => {
       expect(clean(doc.text)).to.include('Subject: Dashboard'.toUpperCase())
     })
   })
+
+  it('ability to export transcript from skills-client', () => {
+    const projName = 'Has Subject and Skills'
+    cy.createProject(1, { name: projName })
+    cy.createSubject(1)
+    cy.createSkill(1, 1, 1)
+    cy.createSkill(1, 1, 2)
+    cy.createSkill(1, 1, 3)
+
+    cy.reportSkill(1, 1, user, 'now')
+
+    cy.ignoreSkillsClientError()
+    cy.intercept('/api/projects/proj1/pointHistory').as('getProjPointsHistory')
+    cy.visit('/test-skills-client/proj1')
+    cy.wait('@getProjPointsHistory')
+    cy.wrapIframe().find('[data-cy="downloadTranscriptBtn"]').click()
+
+    cy.readTranscript(projName).then((doc) => {
+      expect(doc.numpages).to.equal(2)
+      expect(clean(doc.text)).to.include('SkillTree Transcript')
+      expect(clean(doc.text)).to.include(projName)
+      expect(clean(doc.text)).to.include('Level: 1 / 5 ')
+      expect(clean(doc.text)).to.include('Points: 100 / 600 ')
+      expect(clean(doc.text)).to.include('Skills: 0 / 3 ')
+      expect(clean(doc.text)).to.not.include('Badges')
+
+      // should be a title on the 2nd page
+      expect(clean(doc.text)).to.include('Subject: Subject 1'.toUpperCase())
+
+      expect(clean(doc.text)).to.not.include(expectedHeaderAndFooter)
+      expect(clean(doc.text)).to.not.include(expectedHeaderAndFooterCommunityProtected)
+      expect(clean(doc.text)).to.not.include('null')
+    })
+  })
+
 
 })

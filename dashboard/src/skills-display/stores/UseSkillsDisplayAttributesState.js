@@ -30,13 +30,12 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const isSummaryOnly = ref(false)
   const internalBackButton = ref(true)
   const userId = ref(null)
-  const version = ref(null)
 
   const log = useLog()
   const skillsDisplayInfo = useSkillsDisplayInfo()
   const route = useRoute()
   const loadConfigStateIfNeeded = (optionalToPathObj = null) => {
-    if (skillsDisplayInfo.isSkillsDisplayPath(optionalToPathObj)) {
+    if (skillsDisplayInfo.isSkillsDisplayPath(optionalToPathObj?.path)) {
       if (route.params.projectId) {
         projectId.value = route.params.projectId
       }
@@ -113,7 +112,6 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     internalBackButton,
     isSummaryOnly,
     userId,
-    version,
     projectName,
     projectUserCommunityDescriptor
   }

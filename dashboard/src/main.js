@@ -20,7 +20,7 @@ import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
 import App from './App.vue'
-import constructRouter from './router'
+import router from './router'
 import VueAnnouncer from '@vue-a11y/announcer'
 import VueApexCharts from 'vue3-apexcharts'
 import log from 'loglevel'
@@ -89,12 +89,11 @@ import '@toast-ui/editor/dist/toastui-editor.css'
 import 'video.js/dist/video-js.css'
 
 
-log.setLevel('info')
+log.setLevel('warn')
 
 const pinia = createPinia()
 
 const app = createApp(App)
-const router = constructRouter()
 
 app.use(router)
 app.use(pinia)

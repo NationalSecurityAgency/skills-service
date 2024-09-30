@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import Login from '@/components/access/Login.vue'
 import MyProgress from '@/components/myProgress/MyProgress.vue'
 import createAdminRoutes from './AdminRoutes.js'
@@ -86,8 +86,6 @@ import EmailVerifiedConfirmation from "@/components/access/EmailVerifiedConfirma
 import RequestEmailVerification from "@/components/access/RequestEmailVerification.vue";
 import RedirectPage from "@/components/utils/RedirectPage.vue";
 import UpgradeInProgressPage from '@/components/utils/errors/UpgradeInProgressPage.vue'
-import SkillsClientPath from '@/router/SkillsClientPath.js'
-import log from 'loglevel'
 
 const routes = [
   {
@@ -895,22 +893,9 @@ routes.push({
   children: createSkillsDisplayChildRoutes(PathAppendValues.LocalTest)
 })
 
-const isSkillsClient = SkillsClientPath.isSkillsClientIframePath()
-const history = isSkillsClient ? createMemoryHistory(import.meta.env.BASE_URL) : createWebHistory(import.meta.env.BASE_URL)
-const actualRoutes = isSkillsClient ? [createSkillsClientRoutes(createSkillsDisplayChildRoutes(PathAppendValues.SkillsClient, true))] : routes
-const constructRouter = () => {
-  const router =  createRouter({
-    history,
-    routes: actualRoutes
-  })
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes
+})
 
-  if (isSkillsClient) {
-    router.push('/')
-  }
-
-  log.trace(`Constructed router for path [${window?.location?.pathname}] isSkillsClient: [${isSkillsClient}]`)
-
-  return router
-}
-
-export default constructRouter
+export default router
