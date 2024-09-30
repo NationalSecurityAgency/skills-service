@@ -172,6 +172,17 @@ describe('Self Report Skills Management Tests', () => {
             .contains('For User')
             .click();
         cy.validateTable(tableSelector, expectedReversed);
+
+        // Very sorting persists
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.validateTable(tableSelector, expectedReversed);
+
+        cy.get(`${tableSelector} th`)
+            .contains('For User')
+            .click();
+        cy.validateTable(tableSelector, expected);
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.validateTable(tableSelector, expected);
     });
 
     it('change page size of the approval table', () => {

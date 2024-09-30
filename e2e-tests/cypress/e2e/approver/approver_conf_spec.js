@@ -182,6 +182,51 @@ describe('Approver Config Tests', () => {
             cy.get('[data-pc-section="pagebutton"]').contains('2').click();
             cy.get('[data-cy="approvalConfNotAvailable"]').should('not.exist');
 
+            const tableSelector = '[data-cy="skillApprovalConfTable"]'
+            cy.validateTable(tableSelector, [
+                [{
+                    colIndex: 0,
+                    value: 'user5'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user4'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user3'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user2'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user1'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'skills@skills.org'
+                }, {
+                    colIndex: 1,
+                    value: 'Admin'
+                }],
+            ], 5);
         });
     });
 });

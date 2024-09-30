@@ -80,13 +80,6 @@ const enoughOverallProjects = computed(() => {
   return props.availableProjects && props.availableProjects.length >= 2;
 });
 
-const beforeListSlotText = computed(() => {
-  if (projects.value.selected.length >= 5) {
-    return 'Maximum of 5 options selected. First remove a selected option to select another.';
-  }
-  return '';
-});
-
 onMounted(() => {
   loadProjects();
 });
@@ -94,14 +87,14 @@ onMounted(() => {
 const pageChanged = (pagingInfo) => {
   resultTableOptions.value.pagination.pageSize = pagingInfo.rows
   resultTableOptions.value.pagination.currentPage = pagingInfo.page + 1
-  locateUsers()
+  loadTableData()
 }
 const sortTable = (sortContext) => {
   resultTableOptions.value.sortOrder = sortContext.sortOrder;
   resultTableOptions.value.sortBy = sortContext.sortField;
   // set to the first page
   resultTableOptions.value.pagination.currentPage = 1;
-  locateUsers();
+  loadTableData();
 };
 
 const projAdded = (addedItem) => {
@@ -144,28 +137,11 @@ const clearRes = () => {
 };
 
 const locateUsers = () => {
-  resultTableOptions.value.busy = true;
-  resultsLoaded.value = true;
-
-  const params = {
-    pageSize: resultTableOptions.value.pagination.pageSize,
-    currentPage: resultTableOptions.value.pagination.currentPage,
-    sortDesc: resultTableOptions.value.sortOrder === -1,
-    projIdsAndLevel: projects.value.selected.map((item) => `${item.projectId}AndLevel${item.minLevel}`).join(','),
-  };
-  MetricsService.loadGlobalMetrics('findExpertsForMultipleProjectsChartBuilder', params)
-      .then((dataFromServer) => {
-        resultTableOptions.value.busy = false;
-        resultTableOptions.value.pagination.totalRows = dataFromServer.totalNum;
-        results.value = dataFromServer.data.map((item) => {
-          const res = { userId: item.userId };
-          item.levels.forEach((level) => {
-            const keyForLevel = resultTableOptions.value.fields.find((p) => p.projectId === level.projectId);
-            res[`${keyForLevel.projectId}`] = level.level;
-          });
-          return res;
-        });
-      });
+  if(!resultsLoaded.value) {
+    resultsLoaded.value = true;
+  } else {
+    loadTableData();
+  }
 };
 
 const loadProjects = (filter) => {
@@ -197,6 +173,31 @@ const syncOtherLevels = (level) => {
 
 const filterProjects = (event) => {
   loadProjects(event.query.toLowerCase());
+}
+
+const loadTableData = () => {
+  resultTableOptions.value.busy = true;
+
+  const params = {
+    pageSize: resultTableOptions.value.pagination.pageSize,
+    currentPage: resultTableOptions.value.pagination.currentPage,
+    sortDesc: resultTableOptions.value.sortOrder === -1,
+    projIdsAndLevel: projects.value.selected.map((item) => `${item.projectId}AndLevel${item.minLevel}`).join(','),
+  };
+
+  MetricsService.loadGlobalMetrics('findExpertsForMultipleProjectsChartBuilder', params)
+      .then((dataFromServer) => {
+        resultTableOptions.value.busy = false;
+        resultTableOptions.value.pagination.totalRows = dataFromServer.totalNum;
+        results.value = dataFromServer.data.map((item) => {
+          const res = { userId: item.userId };
+          item.levels.forEach((level) => {
+            const keyForLevel = resultTableOptions.value.fields.find((p) => p.projectId === level.projectId);
+            res[`${keyForLevel.projectId}`] = level.level;
+          });
+          return res;
+        });
+      });
 }
 </script>
 
@@ -291,13 +292,14 @@ const filterProjects = (event) => {
           </SkillsButton>
         </div>
         <div class="flex mt-4">
-          <SkillsDataTable v-if="hasResults || resultsLoaded"
+          <SkillsDataTable v-if="resultsLoaded"
                            :value="results"
+                           :busy="resultTableOptions.busy"
                            class="w-full"
+                           @tableReady="loadTableData"
                            @page="pageChanged"
                            @sort="sortTable"
-                           :totalRecords="resultTableOptions.
-                           pagination.totalRows"
+                           :totalRecords="resultTableOptions.pagination.totalRows"
                            :rows="resultTableOptions.pagination.pageSize"
                            v-model:sort-field="resultTableOptions.sortBy"
                            v-model:sort-order="resultTableOptions.sortOrder"
