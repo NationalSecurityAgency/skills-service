@@ -28,6 +28,7 @@ import { useAccessState } from '@/stores/UseAccessState.js'
 import { useInviteOnlyProjectState } from '@/stores/UseInviteOnlyProjectState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import PathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
 
 export const useGlobalNavGuards = () => {
 
@@ -124,7 +125,7 @@ export const useGlobalNavGuards = () => {
             }
             next(newRoute)
           } else {
-            if(skillsClientDisplayPath) {
+            if(to.name?.endsWith(PathAppendValues.Local) || to.name?.endsWith(PathAppendValues.Inception) && skillsClientDisplayPath) {
               const newRoute = to.path + skillsClientDisplayPath;
               const nextRoute = '/redirect?nextPage=' + newRoute
               next(nextRoute)
