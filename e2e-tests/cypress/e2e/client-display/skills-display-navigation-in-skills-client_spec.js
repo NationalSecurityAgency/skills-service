@@ -60,7 +60,7 @@ describe('Navigation in skills-client tests', () => {
     cy.wrapIframe().find('[data-cy="myRankPosition"]')
   })
 
-  it.only('browser back after reload', () => {
+  it('browser back after reload', () => {
     cy.createProject(1)
     cy.createSubject(1, 1)
     cy.createSkill(1, 1,1 )
