@@ -470,6 +470,31 @@ describe('Self Report Approval History Tests', () => {
                 value: 'Very Great Skill 2'
             }],
         ], 5, true, 7);
+
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.validateTable(approvalHistoryTableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 3'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 2'
+            }],
+        ], 5, true, 7);
+
     });
 
     it('sorting on the 2nd page+ should re-set paging', () => {

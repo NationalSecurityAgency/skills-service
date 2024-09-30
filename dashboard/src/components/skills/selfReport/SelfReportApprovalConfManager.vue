@@ -293,6 +293,10 @@ const sortTable = (sortContext) => {
           </template>
         </Column>
 
+        <template #paginatorstart>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+        </template>
+
         <template #expansion="slotProps">
           <div :data-cy="`expandedChild_${slotProps.data.userId}`">
             <self-report-approval-conf-user-tag v-if="userTagConfKey"
