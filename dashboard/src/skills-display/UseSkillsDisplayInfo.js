@@ -16,6 +16,8 @@
 import { useRoute, useRouter } from 'vue-router'
 import { computed } from 'vue'
 import SkillsDisplayPathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
+import SkillsClientPath from '@/router/SkillsClientPath.js'
+import PathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
 
 export const useSkillsDisplayInfo = () => {
   const route = useRoute()
@@ -29,9 +31,9 @@ export const useSkillsDisplayInfo = () => {
   const skillDisplayPreviewRegex = /\/administrator\/projects\/.*\/users\/.*/i
   const regexes = [progressAndRankingsRegex, localTestRegex, clientDisplayRegex, inceptionRegex, skillDisplayPreviewRegex]
   const localTestContextAppend = SkillsDisplayPathAppendValues.LocalTest
-
+  const skillsDisplayNameAppendValues = [SkillsDisplayPathAppendValues.Local, SkillsDisplayPathAppendValues.SkillsClient, SkillsDisplayPathAppendValues.LocalTest, SkillsDisplayPathAppendValues.SkillsDisplayPreview]
   const isSkillsClientPath = () => {
-    return window?.location?.pathname.startsWith('/static/clientPortal/')
+    return SkillsClientPath.isSkillsClientPath()
   }
   const getContextSpecificRouteName = (name) => {
     if (isSkillsClientPath()) {
@@ -64,18 +66,13 @@ export const useSkillsDisplayInfo = () => {
         return found[0]
       }
     }
-    return '/'
+    return isSkillsClientPath() ? '' : '/'
   }
 
-  const isSkillsDisplayPath = (optionalpath = null) => {
-    const pathToCheck = optionalpath || route.path
-    for (const regex of regexes) {
-      let found = pathToCheck.match(regex)
-      if (found) {
-        return true
-      }
-    }
-    return false
+  const isSkillsDisplayPath = (optionalRoute = null) => {
+    const routeToCheck = optionalRoute || route
+    const foundPath = skillsDisplayNameAppendValues.find((path) => routeToCheck.name?.endsWith(path))
+    return foundPath !== undefined && foundPath !== null
   }
 
   const isLocalTestPath = () => {

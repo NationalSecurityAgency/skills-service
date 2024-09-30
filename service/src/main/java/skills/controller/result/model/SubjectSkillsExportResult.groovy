@@ -37,7 +37,7 @@ class SubjectSkillsExportResult extends AbstractXlsxStreamingView {
         String subjectId = model.get(SUBJECT_ID) as String
 
         // define excel file name to be exported
-        response.addHeader("Content-Disposition", "attachment;fileName=${projectId}-skills-${new Date().format("yyyy-MM-dd")}.xlsx")
+        response.addHeader("Content-Disposition", "attachment;fileName=${projectId}-${subjectId}-skills-${new Date().format("yyyy-MM-dd")}.xlsx")
         excelExportService.exportSubjectSkills(workbook, projectId, subjectId)
     }
 }

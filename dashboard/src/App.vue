@@ -44,8 +44,6 @@ import ScrollToTop from '@/common-components/utilities/ScrollToTop.vue'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import log from 'loglevel';
 
-log.setLevel('WARN')
-
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
 const appConfig = useAppConfig()
@@ -76,18 +74,25 @@ const addCustomIconCSSForClientDisplay = () => {
 }
 const inceptionConfigurer = useInceptionConfigurer()
 const pageVisitService = usePageVisitService()
+const loadUserAndDisplayInfo = () => {
+  inceptionConfigurer.configure()
+  pageVisitService.reportPageVisit(route.path, route.fullPath)
+  const loadRoot = accessState.loadIsRoot()
+  const loadSupervisor = accessState.loadIsSupervisor()
+  const loadEmailEnabled = appInfoState.loadEmailEnabled()
+  const loadCustomIconCSS = addCustomIconCSSForClientDisplay()
+  const promises = [loadRoot, loadSupervisor, loadEmailEnabled, loadCustomIconCSS]
+  if (!skillsDisplayInfo.isSkillsClientPath()) {
+    const loadTheme = themeHelper.loadTheme()
+    promises.push(loadTheme)
+  }
+  return Promise.all(promises).then(() => {
+    isAppLoaded.value = true
+  })
+}
 watch(() => authState.userInfo, async (newUserInfo) => {
   if (newUserInfo) {
-    inceptionConfigurer.configure()
-    pageVisitService.reportPageVisit(route.path, route.fullPath)
-    const loadRoot = accessState.loadIsRoot()
-    const loadSupervisor = accessState.loadIsSupervisor()
-    const loadEmailEnabled = appInfoState.loadEmailEnabled()
-    const loadTheme = themeHelper.loadTheme()
-    const loadCustomIconCSS = addCustomIconCSSForClientDisplay()
-    Promise.all([loadRoot, loadSupervisor, loadEmailEnabled, loadTheme, loadCustomIconCSS]).then(() => {
-      isAppLoaded.value = true
-    })
+    await loadUserAndDisplayInfo()
   } else {
     isAppLoaded.value = true
   }
@@ -100,6 +105,7 @@ watch(() => themeHelper.currentTheme, (newTheme, oldTheme) => {
 const iframeInit = useIframeInit()
 onBeforeMount(() => {
   if (skillsDisplayInfo.isSkillsClientPath()) {
+    log.trace('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, initiating iframe handshake')
     iframeInit.handleHandshake()
   }
   errorHandling.registerErrorHandling()
@@ -110,6 +116,7 @@ onBeforeMount(() => {
 onMounted(() => {
   invoke(async () => {
     if (skillsDisplayInfo.isSkillsClientPath()) {
+      log.trace('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, waiting for iframe to load')
       await until(iframeInit.loadedIframe).toBe(true)
       log.debug('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, loaded iframe!')
     }
@@ -117,18 +124,32 @@ onMounted(() => {
   })
 })
 
+const restoreSessionIfAvailable = () => {
+  if (skillsDisplayInfo.isSkillsClientPath()) {
+    authState.setRestoringSession(false)
+    return Promise.resolve()
+  }
+  return authState.restoreSessionIfAvailable()
+}
+
 const loadConfigs = () => {
   appConfig.loadConfigState().finally(() => {
-    authState.restoreSessionIfAvailable().finally(() => {
+    restoreSessionIfAvailable().finally(() => {
       skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
 
         inceptionConfigurer.configure()
-        globalNavGuards.addNavGuards()
+        if (!skillsDisplayInfo.isSkillsClientPath()) {
+          globalNavGuards.addNavGuards()
+        }
         if (!authState.isAuthenticated) {
           isAppLoaded.value = true
         }
-        // do not need to set isAppLoaded to true here because it will be handled
-        // by the watch of authState.userInfo
+        if (skillsDisplayInfo.isSkillsClientPath()) {
+          loadUserAndDisplayInfo()
+        } else {
+          // do not need to set isAppLoaded to true here because it will be handled
+          // by the watch of authState.userInfo
+        }
       })
     })
   })
@@ -150,9 +171,11 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
 
     <customizable-header v-if="isCustomizableHeader" role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="skilltree-main-container">
-      <div v-if="isLoadingApp" role="main" class="text-center">
-        <skills-spinner :is-loading="true" class="mt-8 text-center"/>
-        <h1 class="text-sm sr-only">Loading...</h1>
+      <div v-if="isLoadingApp" role="main" class="flex align-content-center justify-content-center flex-wrap" style="min-height: 40rem">
+        <div class="flex align-items-center justify-content-center m-2">
+          <skills-spinner :is-loading="true" class="text-center"/>
+          <h1 class="text-sm sr-only">Loading...</h1>
+        </div>
       </div>
       <div v-if="!isLoadingApp" class="m-0">
         <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
@@ -166,12 +189,12 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
             <RouterView />
           </div>
         </div>
+        <ConfirmDialog></ConfirmDialog>
+        <dashboard-footer v-if="isDashboardFooter" role="region" />
+        <customizable-footer v-if="isDashboardFooter" role="region" aria-label="dynamic customizable footer"></customizable-footer>
+        <scroll-to-top v-if="!isScrollToTopDisabled && !inBootstrapMode" />
       </div>
     </div>
-    <ConfirmDialog></ConfirmDialog>
-    <dashboard-footer v-if="isDashboardFooter" role="region" />
-    <customizable-footer v-if="isDashboardFooter" role="region" aria-label="dynamic customizable footer"></customizable-footer>
-    <scroll-to-top v-if="!isScrollToTopDisabled && !inBootstrapMode" />
   </div>
 </template>
 
