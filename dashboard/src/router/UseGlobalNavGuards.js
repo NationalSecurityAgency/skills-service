@@ -26,9 +26,7 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import { useAccessState } from '@/stores/UseAccessState.js'
 import { useInviteOnlyProjectState } from '@/stores/UseInviteOnlyProjectState.js'
-import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
-import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 export const useGlobalNavGuards = () => {
@@ -56,6 +54,7 @@ export const useGlobalNavGuards = () => {
   const getLandingPage = () => authState.userInfo?.landingPage === 'admin' ? 'AdminHomePage' : 'MyProgressPage'
 
   const beforeEachNavGuard = (to, from, next) => {
+    const { skillsClientDisplayPath } = to.query
     const requestAccountPath = '/request-root-account'
     const skillsLoginPath = '/skills-login'
     if (
@@ -125,7 +124,14 @@ export const useGlobalNavGuards = () => {
             }
             next(newRoute)
           } else {
-            next()
+            if(skillsClientDisplayPath) {
+              const newRoute = to.path + skillsClientDisplayPath;
+              const nextRoute = '/redirect?nextPage=' + newRoute
+              next(nextRoute)
+            }
+            else {
+              next()
+            }
           }
         } else {
           next()
