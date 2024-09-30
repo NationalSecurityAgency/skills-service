@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { useSlots, toRef, computed, onBeforeMount, ref } from 'vue'
+import { useSlots, toRef, computed, onMounted } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
@@ -71,7 +71,9 @@ sortInfo.value.sortBy = toRef(() => sortField.value)
 sortOrder.value = sortInfo.value.sortOrder
 sortInfo.value.sortOrder = toRef(() => sortOrder.value)
 
-emit('table-ready');
+onMounted(() => {
+  emit('table-ready');
+})
 
 const onColumnSort = (sortEvent) => {
   emit('sort', sortEvent)
