@@ -130,7 +130,7 @@ describe('Client Display Features Tests', () => {
   })
 
   it('skills-client: display new version banner when software is updated', () => {
-    cy.intercept('/api/projects/proj1/summary*').as('proj1Summary')
+    cy.intercept('/api/projects/proj1/summary').as('proj1Summary')
     cy.intercept('/api/projects/proj1/subjects/subj1/summary*', (req) => {
       req.reply((res) => {
         res.send(200, {

@@ -235,7 +235,6 @@ export const useAuthState = defineStore('authState', () => {
         login,
         oAuth2Login,
         restoreSessionIfAvailable,
-        setRestoringSession,
         logout,
         configureSkillsClientForInception,
         isAuthenticated,

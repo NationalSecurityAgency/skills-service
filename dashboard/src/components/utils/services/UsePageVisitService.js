@@ -20,7 +20,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 export const usePageVisitService = () => {
 
   const appConfig = useAppConfig()
-  const reportPageVisit = (path, fullPath, skillDisplay = false, projectId = null) => {
+  const reportPageVisit = (path, fullPath) => {
      if (appConfig.enablePageVisitReporting) {
       const domain = new URL(window.location)
       axios.put(
@@ -31,8 +31,7 @@ export const usePageVisitService = () => {
           hostname: domain.hostname,
           port: domain.port,
           protocol: domain.protocol,
-          skillDisplay,
-          projectId,
+          skillDisplay: false
         },
         { handleError: false }
       )

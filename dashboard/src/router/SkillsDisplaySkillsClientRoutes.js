@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 import SkillsDisplayInIframe from '@/skills-display/SkillsDisplayInIframe.vue'
-import SkillsClientPath from '@/router/SkillsClientPath.js'
 
 const createSkillsClientRoutes = (skillsDisplayChildRoutes) => {
   return {
-    path: SkillsClientPath.HomePath,
+    path: '/static/clientPortal/index.html',
     component: SkillsDisplayInIframe,
     name: 'SkillsDisplayInIframe',
     meta: {

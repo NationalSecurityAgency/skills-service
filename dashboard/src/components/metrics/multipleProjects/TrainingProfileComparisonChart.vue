@@ -17,8 +17,6 @@ limitations under the License.
 import { ref, onMounted, watch } from 'vue';
 import NumberFormatter from "@/components/utils/NumberFormatter.js";
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 
 const props = defineProps({
   title: {
@@ -43,15 +41,6 @@ const props = defineProps({
   },
 });
 
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
-
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
 
 const chartId = ref(props.title.replace(/\s+/g, ''));
 const chartRef = ref();
@@ -61,8 +50,8 @@ const seriesInternal = ref([]);
 const options = {
   chart: {
     type: 'bar',
-    height: 350,
-    toolbar: {
+        height: 350,
+        toolbar: {
       show: false,
     },
   },
@@ -82,26 +71,15 @@ const options = {
   },
   xaxis: {
     categories: props.labels,
-    labels: {
-      style: {
-        colors: chartAxisColor()
-      }
-    }
   },
   yaxis: {
     min: 0,
     labels: {
-      style: {
-        colors: chartAxisColor()
-      },
       formatter(val) {
         return typeof val === 'number' ? NumberFormatter.format(val) : val;
       },
     },
   },
-  tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
-  }
 };
 
 onMounted(() => {

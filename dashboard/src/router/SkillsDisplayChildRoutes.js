@@ -22,7 +22,7 @@ import BadgesDetailsPage from '@/skills-display/components/badges/BadgesDetailsP
 import BadgeDetailsPage from '@/skills-display/components/badges/BadgeDetailsPage.vue'
 import QuizPage from '@/skills-display/components/quiz/QuizPage.vue'
 
-const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) => {
+const createSkillsDisplayChildRoutes = (appendToName) => {
 
   const projectPlaceholder = '##PROJECT##'
   const projectPlaceholderRegex = new RegExp(projectPlaceholder, 'g')
@@ -33,10 +33,10 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
   const skillPlaceholder = '##SKILL##'
   const skillPlaceholderRegex = new RegExp(skillPlaceholder, 'g')
 
-  const prependToPath = startWithSlash ? '/' : ''
+
   return [{
     name: `SkillsDisplay${appendToName}`,
-    path: `${prependToPath}`,
+    path: '',
     component: SkillsDisplay,
     meta: {
       requiresAuth: true,
@@ -46,7 +46,7 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
       }
     }
   }, {
-    path: `${prependToPath}rank`,
+    path: 'rank',
     component: MyRankDetailsPage,
     name: `myRankDetails${appendToName}`,
     meta: {
@@ -57,7 +57,7 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
       }
     }
   }, {
-    path: `${prependToPath}subjects/:subjectId/rank`,
+    path: 'subjects/:subjectId/rank',
     component: MyRankDetailsPage,
     name: `subjectRankDetails${appendToName}`,
     props: true,
@@ -66,7 +66,7 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
     }
   }, {
     name: `BadgesDetailsPage${appendToName}`,
-    path: `${prependToPath}badges`,
+    path: 'badges',
     component: BadgesDetailsPage,
     meta: {
       requiresAuth: true,
@@ -76,7 +76,7 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
       }
     }
   }, {
-    path: `${prependToPath}badges/:badgeId`,
+    path: 'badges/:badgeId',
     component: BadgeDetailsPage,
     name: `badgeDetails${appendToName}`,
     props: true,
@@ -84,7 +84,7 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
       title: 'Badge Details'
     }
   }, {
-    path: `${prependToPath}badges/global/:badgeId`,
+    path: 'badges/global/:badgeId',
     component: BadgeDetailsPage,
     name: `globalBadgeDetails${appendToName}`,
     props: true,
@@ -92,21 +92,21 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
       title: 'Global Badge Details'
     }
   }, {
-    path: `${prependToPath}badges/global/:badgeId/skills/:skillId`,
+    path: 'badges/global/:badgeId/skills/:skillId',
     component: SkillPage,
     name: `globalBadgeSkillDetails${appendToName}`,
     meta: {
       title: `Global Badge ${skillPlaceholder} Details`
     }
   }, {
-    path: `${prependToPath}badges/:badgeId/skills/:skillId`,
+    path: 'badges/:badgeId/skills/:skillId',
     component: SkillPage,
     name: `badgeSkillDetails${appendToName}`,
     meta: {
       title: `Badge ${skillPlaceholder} Details`
     }
   }, {
-    path: `${prependToPath}badges/:badgeId/crossProject/:crossProjectId/:dependentSkillId`,
+    path: 'badges/:badgeId/crossProject/:crossProjectId/:dependentSkillId',
     component: SkillPage,
     name: `crossProjectSkillDetailsUnderBadge${appendToName}`,
     meta: {
@@ -114,7 +114,7 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
     }
   }, {
     name: `SubjectDetailsPage${appendToName}`,
-    path: `${prependToPath}subjects/:subjectId`,
+    path: 'subjects/:subjectId',
     component: SubjectDetailsPage,
     meta: {
       requiresAuth: true,
@@ -124,14 +124,14 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
       }
     }
   }, {
-    path: `${prependToPath}subjects/:subjectId/skills/:skillId`,
+    path: 'subjects/:subjectId/skills/:skillId',
     component: SkillPage,
     name: `skillDetails${appendToName}`,
     meta: {
       title: `${skillPlaceholder} Details`
     }
   }, {
-    path: `${prependToPath}subjects/:subjectId/skills/:skillId/crossProject/:crossProjectId/:dependentSkillId`,
+    path: 'subjects/:subjectId/skills/:skillId/crossProject/:crossProjectId/:dependentSkillId',
     component: SkillPage,
     name: `crossProjectSkillDetails${appendToName}`,
     meta: {
@@ -139,7 +139,7 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
     }
   }, {
     name: `quizPage${appendToName}`,
-    path: `${prependToPath}subjects/:subjectId/skills/:skillId/quizzes/:quizId`,
+    path: 'subjects/:subjectId/skills/:skillId/quizzes/:quizId',
     component: QuizPage,
     meta: {
       requiresAuth: true,
@@ -150,7 +150,7 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
     }
   }, {
     name: `SkillsDisplayErrorPage${appendToName}`,
-    path: `${prependToPath}error`,
+    path: 'error',
     component: SkillsDisplayErrorPage,
     meta: {
       requiresAuth: false,

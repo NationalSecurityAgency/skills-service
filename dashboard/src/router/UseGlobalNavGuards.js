@@ -26,9 +26,10 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import { useAccessState } from '@/stores/UseAccessState.js'
 import { useInviteOnlyProjectState } from '@/stores/UseInviteOnlyProjectState.js'
+import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
-import PathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
 
 export const useGlobalNavGuards = () => {
 
@@ -43,6 +44,8 @@ export const useGlobalNavGuards = () => {
   const projConfig = useProjConfig()
   const router = useRouter()
   const route = useRoute()
+  const skillDisplayParentFrameState = useSkillsDisplayParentFrameState()
+  const skillsDisplayInfo = useSkillsDisplayInfo()
   const skillsDisplayAttributes = useSkillsDisplayAttributesState()
 
   const log = useLog()
@@ -125,7 +128,7 @@ export const useGlobalNavGuards = () => {
             }
             next(newRoute)
           } else {
-            if((to.name?.endsWith(PathAppendValues.Local) || to.name?.endsWith(PathAppendValues.Inception)) && skillsClientDisplayPath) {
+            if(skillsClientDisplayPath) {
               const newRoute = to.path + skillsClientDisplayPath;
               const nextRoute = '/redirect?nextPage=' + newRoute
               next(nextRoute)
@@ -185,6 +188,20 @@ export const useGlobalNavGuards = () => {
             }
           })
         }, 150)
+      }
+      if (skillDisplayParentFrameState.parentFrame) {
+        const params = {
+          path: skillsDisplayInfo.cleanPath(to.path),
+          fullPath: skillsDisplayInfo.cleanPath(to.fullPath),
+          name: to.name,
+          query: to.query,
+          currentLocation: window.location.toString(),
+          historySize: window.history.length,
+        };
+        if (log.isDebugEnabled()) {
+          log.debug(`emit route-change event to parent frame with ${JSON.stringify(params)}`)
+        }
+        skillDisplayParentFrameState.parentFrame.emit('route-changed', params);
       }
     })
 

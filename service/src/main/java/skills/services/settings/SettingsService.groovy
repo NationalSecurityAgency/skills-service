@@ -203,12 +203,12 @@ class SettingsService {
         return request instanceof UserSettingsRequest || request instanceof UserProjectSettingsRequest
     }
 
-    private Integer getUserRefId(String userId, boolean failIfNotFound = true) {
+    private Integer getUserRefId(String userId) {
         User user = userRepo.findByUserId(userId.toLowerCase())
-        if (failIfNotFound && !user) {
+        if (!user) {
             throw new SkillException("Failed to find user with id [${userId.toLowerCase()}]")
         }
-        return user?.id
+        return user.id
     }
 
     private UserInfo loadCurrentUser(boolean failIfNoCurrentUser=true) {
@@ -339,13 +339,13 @@ class SettingsService {
     }
 
     @Transactional(readOnly = true)
-    SettingsResult getUserSetting(String userId, String setting, String settingGroup, boolean failIfNotFound = true){
-        Setting settingDB = settingsDataAccessor.getUserSetting(getUserRefId(userId, failIfNotFound), setting, settingGroup)
+    SettingsResult getUserSetting(String userId, String setting, String settingGroup){
+        Setting settingDB = settingsDataAccessor.getUserSetting(getUserRefId(userId), setting, settingGroup)
         if (settingDB != null) {
             return convertToRes(settingDB, userId)
+        } else {
+            log.debug("User Setting is null for userId [{}], setting [{}], settingGroup [{}], settingDB [{}]", userId, setting, settingGroup, settingDB)
         }
-        log.debug("User Setting is null for userId [{}], setting [{}], settingGroup [{}], settingDB [{}]", userId, setting, settingGroup, settingDB)
-        return null
     }
 
     @Transactional(readOnly = true)

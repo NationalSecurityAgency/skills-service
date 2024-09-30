@@ -25,15 +25,15 @@ export const useSkillsDisplayService = () => {
   const appConfig = useAppConfig()
 
   const getUserIdAndVersionParams = () => {
+    // const params = this.getUserIdParams();
+    // params.version = this.version;
+    //
     let config = {}
     if (attributes.userId) {
       config.userId = attributes.userId
     }
     if (appConfig.isPkiAuthenticated) {
       config.idType = 'ID'
-    }
-    if (attributes.version) {
-      config.version = attributes.version
     }
     return config
   }
@@ -244,10 +244,6 @@ export const useSkillsDisplayService = () => {
       .then((result) => result.data);
   }
 
-  const getLoggedInUserInfo = () => {
-    return axios.get('/app/userInfo').then((response) => response.data)
-  }
-
   return {
     loadUserProjectSummary,
     loadSubjectSummary,
@@ -265,7 +261,6 @@ export const useSkillsDisplayService = () => {
     getUserSkillsRankingDistribution,
     getRankingDistributionUsersPerLevel,
     getLeaderboard,
-    getVideoTranscript,
-    getLoggedInUserInfo
+    getVideoTranscript
   }
 }

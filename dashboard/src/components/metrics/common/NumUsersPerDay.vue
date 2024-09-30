@@ -22,9 +22,6 @@ import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import MetricsService from "@/components/metrics/MetricsService.js";
 import TimeLengthSelector from "@/components/metrics/common/TimeLengthSelector.vue";
 import NumberFormatter from '@/components/utils/NumberFormatter.js'
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
-
 
 const appConfig = useAppConfig();
 const route = useRoute();
@@ -35,16 +32,6 @@ const props = defineProps({
     default: 'Users per day',
   },
 });
-
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
-
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
 
 onMounted(() => {
   if (route.params.skillId) {
@@ -109,9 +96,6 @@ const chartOptions = ref({
   },
   yaxis: {
     labels: {
-      style: {
-        colors: chartAxisColor()
-      },
       formatter(val) {
         return NumberFormatter.format(val);
       },
@@ -122,14 +106,8 @@ const chartOptions = ref({
   },
   xaxis: {
     type: 'datetime',
-    labels: {
-      style: {
-        colors: chartAxisColor()
-      }
-    }
   },
   tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
     shared: false,
         y: {
       formatter(val) {
