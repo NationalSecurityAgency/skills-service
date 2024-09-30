@@ -29,11 +29,12 @@ const log = useLog()
 const testThemeUtils = useTestThemeUtils()
 
 // const clientDisplay = ref(null)
-const skillsVersion = 2147483647 // max int
+let skillsVersion = 2147483647 // max int
 
 const projectId = route.params.projectId
 log.info(`TestSkillsClient.vue: Using project id [${projectId}]`)
 const isSummaryOnly = route.query.isSummaryOnly && route.query.isSummaryOnly === 'true'
+const skillsVersionParam = route.query.skillsVersion
 const serviceUrl = browserLocation.value.origin
 const authenticator = appConfig.isPkiAuthenticated ? 'pki' : `${serviceUrl}/api/projects/${encodeURIComponent(projectId)}/token`
 const options = {
@@ -45,6 +46,11 @@ const options = {
 
 if (isSummaryOnly) {
   options.isSummaryOnly = true
+  log.info(`TestSkillsClient.vue: isSummaryOnly=true`)
+}
+if (skillsVersionParam) {
+  skillsVersion = skillsVersionParam
+  log.info(`TestSkillsClient.vue: Using version [${skillsVersion}]`)
 }
 
 log.info(`Running skills-client in test mode with params ${JSON.stringify(options)}`)

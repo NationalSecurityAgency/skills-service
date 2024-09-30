@@ -119,7 +119,7 @@ class UserInfoController {
             if (!rankingAndProgressViewsEnabled) {
                 res.landingPage = "admin"
             } else {
-                SettingsResult settingsResult = settingsService.getUserSetting(currentUser.username, HOME_PAGE_PREF, USER_PREFS_GROUP)
+                SettingsResult settingsResult = settingsService.getUserSetting(currentUser.username, HOME_PAGE_PREF, USER_PREFS_GROUP, false)
                 res.landingPage = settingsResult?.value ?: defaultLandingPage
             }
             log.trace("Assigned landing page of [{}] to user [{}]", res.landingPage, currentUser.username )
