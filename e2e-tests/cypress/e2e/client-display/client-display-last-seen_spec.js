@@ -69,7 +69,7 @@ describe('Client Display Skills Last Viewed', () => {
         cy.wrapIframe().find('[data-cy="skillProgress_index-0"] [data-cy="skillProgressBar"]').click();
         cy.wrapIframe().find('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
 
-        cy.wrapIframe().find('[data-cy=back]').click()
+        cy.go('back')
         cy.wrapIframe().find('[data-cy="lastViewedIndicator"]').should('exist');
         cy.wrapIframe().find('[data-cy="jumpToLastViewedButton"]').should('exist');
         cy.wrapIframe().find('#skillProgressTitleLink-skill1').should('have.focus');
