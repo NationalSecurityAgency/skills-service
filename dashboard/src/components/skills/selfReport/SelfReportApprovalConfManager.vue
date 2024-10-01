@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import SelfReportService from '@/components/skills/selfReport/SelfReportService';
@@ -44,10 +44,6 @@ const currentPage = ref(1);
 const totalRows = ref(0);
 const sortBy = ref('userId');
 const sortOrder = ref(-1);
-
-onMounted(() => {
-  loadData();
-});
 
 const userTagConfKey = computed(() => {
   return appConfig.approvalConfUserTagKey;
@@ -218,7 +214,7 @@ const sortTable = (sortContext) => {
       <SkillsSpinner :is-loading="loading" />
 
       <SkillsDataTable :value="data"
-                       v-if="totalRows > 1"
+                       v-if="totalRows !== 1"
                        :loading="loading"
                        v-model:expandedRows="expandedRows"
                        dataKey="userId"
@@ -230,6 +226,7 @@ const sortTable = (sortContext) => {
                        :rowsPerPageOptions="possiblePageSizes"
                        @page="pageChanged"
                        @sort="sortTable"
+                       @tableReady="loadData"
                        :totalRecords="totalRows"
                        v-model:sort-field="sortBy"
                        v-model:sort-order="sortOrder"
