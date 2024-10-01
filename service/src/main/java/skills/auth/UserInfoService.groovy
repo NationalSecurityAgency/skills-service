@@ -20,11 +20,9 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.saml2.provider.service.authentication.DefaultSaml2AuthenticatedPrincipal
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import skills.auth.pki.PkiUserLookup
-import skills.auth.saml.SAML2Utils
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.services.UserAttrsService
@@ -51,9 +49,6 @@ class UserInfoService {
 
     @Autowired
     UserAttrsService userAttrsService
-
-    @Autowired
-    SAML2Utils saml2Utils;
 
     @Profile
     UserInfo getCurrentUser() {
