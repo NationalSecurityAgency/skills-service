@@ -21,6 +21,7 @@ import WatchedSegmentsUtil from '@/common-components/video/WatchedSegmentsUtil';
 const props = defineProps({
   options: Object,
 })
+const vidPlayerId = props.options.videoId ? `vidPlayer${props.options.videoId}` : 'vidPlayer1'
 const emit = defineEmits(['player-destroyed', 'watched-progress'])
 const watchProgress = ref({
   watchSegments: [],
@@ -33,7 +34,7 @@ const watchProgress = ref({
 })
 const playerContainer = { player: null }
 onMounted(() => {
-  const player = videojs('vidPlayer1', {
+  const player = videojs(vidPlayerId, {
     playbackRates: [0.5, 1, 1.5, 2],
     enableSmoothSeeking: true,
   }, () => {
@@ -67,7 +68,7 @@ const updateProgress = (currentTime) => {
 
 <template>
   <div data-cy="videoPlayer">
-    <video id="vidPlayer1"
+    <video :id="vidPlayerId"
            ref="videoPlayer"
            class="video-js vjs-fluid"
            data-setup='{}'
