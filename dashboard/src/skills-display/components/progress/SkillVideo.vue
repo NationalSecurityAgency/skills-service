@@ -72,6 +72,7 @@ const videoConf = computed(() => {
       ? `/api/projects/${props.skill.projectId}/skills/${props.skill.skillId}/videoCaptions`
       : null;
   return {
+    videoId: props.skill.skillId,
     url: props.skill.videoSummary.videoUrl,
     videoType: props.skill.videoSummary.videoType ? props.skill.videoSummary.videoType : null,
     captionsUrl,
