@@ -211,8 +211,6 @@ const sortTable = (sortContext) => {
       <SkillsCardHeader title="Configure Approval Workload"></SkillsCardHeader>
     </template>
     <template #content>
-      <SkillsSpinner :is-loading="loading" />
-
       <SkillsDataTable :value="data"
                        v-if="totalRows !== 1"
                        :loading="loading"
