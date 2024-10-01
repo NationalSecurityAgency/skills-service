@@ -14,15 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import SubjectsService from "@/components/subjects/SubjectsService.js";
-import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import NumberFormatter from '@/components/utils/NumberFormatter.js'
 import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue'
 
 const route = useRoute();
+const themeState = useSkillsDisplayThemeState()
+const themeHelper = useThemesHelper()
+
+const chartAxisColor = () => {
+  if (themeState.theme.charts.axisLabelColor) {
+    return themeState.theme.charts.axisLabelColor
+  }
+  return themeHelper.isDarkTheme ? 'white' : undefined
+}
 
 const loading = ref({
   subjects: true,
@@ -47,6 +57,9 @@ const chartOptions = ref({
       text: '# of users',
     },
     labels: {
+      style: {
+        colors: chartAxisColor()
+      },
       formatter(val) {
         return NumberFormatter.format(val);
       },
@@ -56,12 +69,20 @@ const chartOptions = ref({
   },
   xaxis: {
     type: 'datetime',
+    labels: {
+      style: {
+        colors: chartAxisColor()
+      }
+    }
   },
   dataLabels: {
     enabled: false,
   },
   legend: {
     showForSingleSeries: true,
+  },
+  tooltip: {
+    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
   },
 });
 
