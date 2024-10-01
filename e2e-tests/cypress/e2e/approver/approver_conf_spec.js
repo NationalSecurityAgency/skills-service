@@ -182,6 +182,8 @@ describe('Approver Config Tests', () => {
             cy.get('[data-pc-section="pagebutton"]').contains('2').click();
             cy.get('[data-cy="approvalConfNotAvailable"]').should('not.exist');
 
+            cy.get('[data-pc-section="pagebutton"]').contains('1').click();
+
             const tableSelector = '[data-cy="skillApprovalConfTable"]'
             cy.validateTable(tableSelector, [
                 [{
