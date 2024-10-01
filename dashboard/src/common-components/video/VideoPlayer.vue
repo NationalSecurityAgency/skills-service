@@ -22,21 +22,6 @@ const props = defineProps({
   options: Object,
 })
 const emit = defineEmits(['player-destroyed', 'watched-progress'])
-const player = ref(null)
-const videoPlayer = ref(null)
-const videoOptions = ref({
-  autoplay: false,
-  controls: true,
-  responsive: true,
-  playbackRates: [0.5, 1, 1.5, 2],
-  sources: [
-    {
-      src: props.options.url,
-      type: props.options.videoType,
-    },
-  ],
-  captionsUrl: props.options.captionsUrl,
-})
 const watchProgress = ref({
   watchSegments: [],
   currentStart: null,
@@ -46,34 +31,29 @@ const watchProgress = ref({
   percentWatched: 0,
   currentPosition: 0,
 })
-
+const playerContainer = { player: null }
 onMounted(() => {
-  player.value = videojs(videoPlayer.value, videoOptions.value, () => {
-    const thePlayer = player.value;
-    thePlayer.on('durationchange', () => {
-      watchProgress.value.videoDuration = thePlayer.duration();
-      updateProgress(thePlayer.currentTime());
+  const player = videojs('vidPlayer1', {
+    playbackRates: [0.5, 1, 1.5, 2],
+    enableSmoothSeeking: true,
+  }, () => {
+    player.on('durationchange', () => {
+      watchProgress.value.videoDuration = player.duration();
+      updateProgress(player.currentTime());
     });
-    thePlayer.on('loadedmetadata', () => {
-      watchProgress.value.videoDuration = thePlayer.duration();
+    player.on('loadedmetadata', () => {
+      watchProgress.value.videoDuration = player.duration();
       emit('watched-progress', watchProgress.value);
     });
-    thePlayer.on('timeupdate', () => {
-      updateProgress(thePlayer.currentTime());
+    player.on('timeupdate', () => {
+      updateProgress(player.currentTime());
     });
-    if (props.options.captionsUrl) {
-      thePlayer.addRemoteTextTrack({
-        src: props.options.captionsUrl,
-        kind: 'subtitles',
-        srclang: 'en',
-        label: 'English',
-      });
-    }
+    playerContainer.player = player
   });
 })
 onBeforeUnmount(() => {
-  if (player.value) {
-    player.value.dispose()
+  if (playerContainer.player) {
+    playerContainer.player.dispose()
   }
 })
 onUnmounted(() => {
@@ -87,7 +67,15 @@ const updateProgress = (currentTime) => {
 
 <template>
   <div data-cy="videoPlayer">
-    <video ref="videoPlayer" class="video-js vjs-fluid"></video>
+    <video id="vidPlayer1"
+           ref="videoPlayer"
+           class="video-js vjs-fluid"
+           data-setup='{}'
+           responsive
+           controls>
+      <source :src="options.url" :type="options.videoType">
+      <track v-if="props.options.captionsUrl" :src="props.options.captionsUrl" kind="captions" srclang="en" label="English">
+    </video>
   </div>
 </template>
 

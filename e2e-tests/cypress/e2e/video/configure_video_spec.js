@@ -18,6 +18,7 @@ describe('Configure Video Tests', () => {
 
     const testVideo = '/static/videos/create-quiz.mp4'
     const videoFile = 'create-subject.webm';
+    const captionsButtonSelector = '.vjs-menu-button  button[title="Captions"]'
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
@@ -53,7 +54,6 @@ describe('Configure Video Tests', () => {
     });
 
     it('upload a video, set transcript and captions, preview the video', () => {
-
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
@@ -95,6 +95,7 @@ describe('Configure Video Tests', () => {
         cy.wait(7000)
         cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', '100%')
         cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTimeWatched"]').should('have.text', '7 seconds')
+        cy.get(captionsButtonSelector)
     });
 
     it('clear attributes', () => {
@@ -168,6 +169,7 @@ describe('Configure Video Tests', () => {
         // video is 15 seconds
         cy.wait(15000)
         cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', '100%')
+        cy.get(captionsButtonSelector).should('not.be.visible')
     });
 
     it('discard changes - Video URL is configured', () => {
