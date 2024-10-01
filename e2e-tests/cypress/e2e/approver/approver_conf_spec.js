@@ -184,6 +184,8 @@ describe('Approver Config Tests', () => {
 
             cy.get('[data-pc-section="pagebutton"]').contains('1').click();
 
+            const defaultUser = Cypress.env('oauthMode') ? 'foo-hydra': vars.defaultUser
+
             const tableSelector = '[data-cy="skillApprovalConfTable"]'
             cy.validateTable(tableSelector, [
                 [{
@@ -223,7 +225,7 @@ describe('Approver Config Tests', () => {
                 }],
                 [{
                     colIndex: 0,
-                    value: 'skills@skills.org'
+                    value: defaultUser
                 }, {
                     colIndex: 1,
                     value: 'Admin'
