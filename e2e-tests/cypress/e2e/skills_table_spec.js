@@ -546,6 +546,8 @@ describe('Skills Table Tests', () => {
   })
 
   it('change display order and validate that manage skill navigation still works', () => {
+    cy.intercept('PATCH', '/admin/projects/proj1/subjects/subj1/skills/skill3').as('changeSkillDisplayOrder')
+    cy.intercept('POST', '/api/projects/Inception/skills/ChangeSkillDisplayOrder').as('inceptionChangeDisplayOrder')
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2)
     cy.createSkill(1, 1, 3)
@@ -554,6 +556,8 @@ describe('Skills Table Tests', () => {
 
     cy.get('[data-cy="enableDisplayOrderSort"]').click()
     cy.get('[data-cy="orderMoveUp_skill3"]').click()
+    cy.wait('@changeSkillDisplayOrder')
+    cy.wait('@inceptionChangeDisplayOrder')
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Very Great Skill 1' }, { colIndex: 3, value: 1 }],
       [{ colIndex: 2, value: 'Very Great Skill 3' }, { colIndex: 3, value: 2 }],
