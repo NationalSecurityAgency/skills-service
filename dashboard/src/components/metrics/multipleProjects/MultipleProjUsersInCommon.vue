@@ -21,19 +21,15 @@ import SupervisorService from "@/components/utils/SupervisorService.js";
 import AutoComplete from "primevue/autocomplete";
 import NumberFormatter from "../../utils/NumberFormatter.js";
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
-import ColumnGroup from 'primevue/columngroup';
-import Row from 'primevue/row';
 import LevelBadge from "@/components/metrics/multipleProjects/LevelBadge.vue";
 
 const props = defineProps(['availableProjects']);
 
-const fields = ref(['name', 'numSubjects', 'numBadges', 'numSkills', 'totalPoints', 'minLevel']);
 const projects = ref({
   loading: true,
   available: [],
   selected: [],
 });
-const selectProjects = ref([]);
 const results = ref([]);
 const resultsLoaded = ref(false);
 const resultTableOptions = ref({
@@ -70,10 +66,6 @@ const atLeast1Proj = computed(() => {
 
 const atLeast2Proj = computed(() => {
   return projects.value.selected && projects.value.selected.length > 1;
-});
-
-const hasResults = computed(() => {
-  return results.value && results.value.length > 0;
 });
 
 const enoughOverallProjects = computed(() => {
