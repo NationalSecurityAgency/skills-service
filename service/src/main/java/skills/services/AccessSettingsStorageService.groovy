@@ -115,6 +115,11 @@ class AccessSettingsStorageService {
         return tableResult
     }
 
+    @Transactional(readOnly = true)
+    Integer countUserRolesForProjectId(String projectId, List<RoleName> roles) {
+        return userRoleRepository.countUserRolesByProjectIdAndUserRoles(projectId, roles)
+    }
+
     List<UserRoleRes> findAllQuizRoles(String quizId) {
         List<UserRoleRepo.UserRoleWithAttrs> rolesFromDB = userRoleRepository.findRoleWithAttrsByQuizId(quizId)
         return rolesFromDB.collect { convert(it)}

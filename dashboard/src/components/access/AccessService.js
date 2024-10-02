@@ -24,6 +24,12 @@ const hasSupportedRole = (roles) => {
 }
 export default {
 
+  countUserRolesForProject(projectId, roles) {
+    const strRoles = roles.map((r) => `roles=${encodeURIComponent(r)}`).join('&')
+      return axios
+          .get(`/admin/projects/${encodeURIComponent(projectId)}/countUserRoles?${strRoles}`)
+          .then((response) => response.data)
+  },
   getUserRoles(projectId, roles, params) {
     const strRoles = roles.map((r) => `roles=${encodeURIComponent(r)}`).join('&')
     if (projectId) {
