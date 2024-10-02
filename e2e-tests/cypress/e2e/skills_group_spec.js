@@ -85,11 +85,18 @@ describe('Skills Group Tests', () => {
         const markdown = "# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n";
         cy.createSkillsGroup(1, 1, 1, { description : markdown });
 
+        cy.intercept('/admin/projects/proj1/subjects/subj1/skills/group1').as('getGroup')
+
         cy.viewport(1200, 1800)
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"]').contains('Title 6');
-        cy.matchSnapshotImageForElement('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"]', { errorThreshold: 0.05 });
+        cy.wait('@getGroup')
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"] h1').contains('Title1');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"] h2').contains('Title2');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"] h3').contains('Title 3');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"] h4').contains('Title 4');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"] h5').contains('Title 5');
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"] p').contains('Title 6');
     });
 
     it('handle focus on edit', () => {
