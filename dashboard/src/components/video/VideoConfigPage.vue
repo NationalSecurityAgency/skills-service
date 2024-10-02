@@ -557,7 +557,7 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
           <!-- Video Preview -->
           <Card v-if="preview" class="mt-3" data-cy="videoPreviewCard" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
             <template #header>
-              <div class="border-1 surface-border border-round-top bg-gray-100 p-3">Video Preview</div>
+              <div class="border-1 surface-border border-round-top surface-100 p-3">Video Preview</div>
             </template>
             <template #content>
               <VideoPlayer v-if="!refreshingPreview"
