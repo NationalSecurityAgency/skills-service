@@ -16,11 +16,22 @@ limitations under the License.
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import NumberFormatter from '@/components/utils/NumberFormatter.js'
 
 const route = useRoute();
+const themeState = useSkillsDisplayThemeState()
+const themeHelper = useThemesHelper()
+
+const chartAxisColor = () => {
+  if (themeState.theme.charts.axisLabelColor) {
+    return themeState.theme.charts.axisLabelColor
+  }
+  return themeHelper.isDarkTheme ? 'white' : undefined
+}
 
 const series = ref([]);
 const chartOptions = {
@@ -70,6 +81,9 @@ const chartOptions = {
       formatter(val) {
         return NumberFormatter.format(val);
       },
+      style: {
+        colors: chartAxisColor()
+      }
     },
     title: {
       text: '# Users',
@@ -77,6 +91,9 @@ const chartOptions = {
   },
   legend: {
     position: 'top',
+  },
+  tooltip: {
+    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
   },
 };
 const loading = ref(true);

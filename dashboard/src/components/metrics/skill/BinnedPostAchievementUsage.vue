@@ -16,10 +16,21 @@ limitations under the License.
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 import MetricsService from '@/components/metrics/MetricsService.js'
 import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue'
 
 const route = useRoute();
+const themeState = useSkillsDisplayThemeState()
+const themeHelper = useThemesHelper()
+
+const chartAxisColor = () => {
+  if (themeState.theme.charts.axisLabelColor) {
+    return themeState.theme.charts.axisLabelColor
+  }
+  return themeHelper.isDarkTheme ? 'white' : undefined
+}
 
 const loading = ref(true);
 const isEmpty = ref(true);
@@ -27,11 +38,11 @@ const series = ref([]);
 const chartOptions = ref({
   chart: {
     type: 'bar',
-        height: 250,
-        toolbar: {
-      show: true,
-          offsetX: 0,
-          offsetY: -60,
+      height: 250,
+      toolbar: {
+        show: true,
+        offsetX: 0,
+        offsetY: -30,
     },
   },
   plotOptions: {
@@ -49,13 +60,17 @@ const chartOptions = ref({
   },
   xaxis: {
     categories: [],
-        title: {
+    title: {
       text: '# of times Skill performed',
+      style: {
+        color: chartAxisColor(),
+      },
     },
     labels: {
       style: {
         fontSize: '13px',
-            fontWeight: 600,
+        fontWeight: 600,
+        colors: chartAxisColor(),
       },
     },
   },
@@ -63,11 +78,17 @@ const chartOptions = ref({
     title: {
       text: '# of distinct users',
     },
+    labels: {
+      style: {
+        colors: chartAxisColor(),
+      },
+    },
   },
   fill: {
     opacity: 1,
   },
   tooltip: {
+    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
     y: {
       formatter(val) {
         return `${val}`;
