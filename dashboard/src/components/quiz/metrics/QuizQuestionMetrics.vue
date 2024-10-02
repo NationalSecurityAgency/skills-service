@@ -85,10 +85,10 @@ const chartOptions = {
   }
 }
 
-const quetionCorrectChartRef = ref()
+const questionCorrectChartRef = ref()
 watch(() => responsive.sm.value, (newValue) => {
   if (!props.isSurvey) {
-    quetionCorrectChartRef.value.updateOptions({
+    questionCorrectChartRef.value.updateOptions({
       legend: {
         position: newValue ? 'bottom' : 'left',
       },
@@ -178,7 +178,7 @@ const numberOfStars = computed(() => {
       <div v-if="!isSurvey">
         <div>
           <apexchart :type="chartOptions.chart.type" :width="chartOptions.chart.width" :options="chartOptions"
-                     ref="quetionCorrectChartRef"
+                     ref="questionCorrectChartRef"
                      :series="series"></apexchart>
         </div>
       </div>
@@ -234,7 +234,7 @@ const numberOfStars = computed(() => {
 
     <div v-if="!isSurvey && isMultipleChoice" class="surface-100 p-2 text-sm" data-cy="multipleChoiceQuestionWarning">
       *** All of the required choices must be selected for the question to be counted as <span
-      class="text-success uppercase">correct</span> ***
+      class="text-primary uppercase">correct</span> ***
     </div>
 
     <QuizAnswerHistory v-if="isSurvey && isTextInput"
