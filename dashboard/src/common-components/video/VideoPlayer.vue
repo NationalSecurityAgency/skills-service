@@ -69,7 +69,6 @@ const updateProgress = (currentTime) => {
 <template>
   <div data-cy="videoPlayer">
     <video :id="vidPlayerId"
-           ref="videoPlayer"
            class="video-js vjs-fluid"
            data-setup='{}'
            responsive
