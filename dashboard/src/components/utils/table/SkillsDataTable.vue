@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { useSlots, toRef, computed } from 'vue'
+import { useSlots, toRef, computed, onMounted } from 'vue'
 import { useStorage } from '@vueuse/core'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
@@ -24,7 +24,7 @@ import { useLayoutSizesState } from '@/stores/UseLayoutSizesState.js'
 
 const sortField = defineModel('sortField')
 const sortOrder = defineModel('sortOrder')
-const emit = defineEmits(['sort', 'filter', 'page'])
+const emit = defineEmits(['sort', 'filter', 'page', 'table-ready'])
 const props = defineProps({
   tableStoredStateId: {
     type: String,
@@ -60,16 +60,20 @@ const announcer = useSkillsAnnouncer()
 const responsive = useResponsiveBreakpoints()
 const layoutSizesState = useLayoutSizesState()
 
-const sortInfo = useStorage(`skillsTable-sort-${props.tableStoredStateId}`, { sortOrder: sortOrder.value, sortBy: sortField.value })
 const tableProps = {
   'aria-label': props.ariaLabel
 };
+const sortInfo = useStorage(`skillsTable-sort-${props.tableStoredStateId}`, { sortOrder: sortOrder.value, sortBy: sortField.value })
 
 sortField.value = sortInfo.value.sortBy
 sortInfo.value.sortBy = toRef(() => sortField.value)
 
 sortOrder.value = sortInfo.value.sortOrder
 sortInfo.value.sortOrder = toRef(() => sortOrder.value)
+
+onMounted(() => {
+  emit('table-ready');
+})
 
 const onColumnSort = (sortEvent) => {
   emit('sort', sortEvent)
@@ -108,7 +112,7 @@ const maxWidthStyle = computed(() => {
     :style="maxWidthStyle"
   >
     <template v-for="(_, name) in slots" v-slot:[name]="slotData">
-      <Column v-if="expander"
+      <Column v-if="expander" v-bind:key="name"
               expander
               :pt="expanderPt"
               :class="{'flex': responsive.md.value }">

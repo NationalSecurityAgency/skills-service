@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, nextTick, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import SelfReportService from '@/components/skills/selfReport/SelfReportService';
@@ -44,14 +44,7 @@ const currentPage = ref(1);
 const totalRows = ref(0);
 const sortBy = ref('userId');
 const sortOrder = ref(-1);
-
-onMounted(() => {
-  loadData();
-});
-
-const hasMoreThanOneApprover = computed(() => {
-  return data.value && data.value.length > 1;
-});
+const roleCount = ref(null);
 
 const userTagConfKey = computed(() => {
   return appConfig.approvalConfUserTagKey;
@@ -61,9 +54,25 @@ const userTagConfLabel = computed(() => {
   return appConfig.approvalConfUserTagLabel ? appConfig.approvalConfUserTagLabel : appConfig.approvalConfUserTagKey;
 });
 
+onMounted(() => {
+  countUserRoles();
+})
+
 const toggleConfDetails = (dataToToggle) => {
   toggleRow(dataToToggle.userId);
 };
+
+const countUserRoles = () => {
+  const roles = ['ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER'];
+  AccessService.countUserRolesForProject(route.params.projectId, roles).then((count) => {
+    roleCount.value = count;
+    loading.value = false;
+  })
+}
+
+const shouldLoadTable = computed(() => {
+  return roleCount.value > 1;
+})
 
 const loadData = () => {
   const pageParams = {
@@ -221,8 +230,9 @@ const sortTable = (sortContext) => {
     <template #content>
       <SkillsSpinner :is-loading="loading" />
 
-      <SkillsDataTable v-if="hasMoreThanOneApprover"
-                       :value="data"
+      <SkillsDataTable :value="data"
+                       v-if="shouldLoadTable"
+                       :loading="loading"
                        v-model:expandedRows="expandedRows"
                        dataKey="userId"
                        show-gridlines
@@ -233,11 +243,12 @@ const sortTable = (sortContext) => {
                        :rowsPerPageOptions="possiblePageSizes"
                        @page="pageChanged"
                        @sort="sortTable"
+                       @tableReady="loadData"
                        :totalRecords="totalRows"
-                       :sort-field="sortBy"
-                       :sort-order="sortOrder"
+                       v-model:sort-field="sortBy"
+                       v-model:sort-order="sortOrder"
                        tableStoredStateId="skillApprovalConfTable"
-                       aria-label="Confogire Approval Workload"
+                       aria-label="Configure Approval Workload"
                        data-cy="skillApprovalConfTable">
         <Column field="userId" sortable :class="{'flex': responsive.md.value }">
           <template #header>
@@ -296,6 +307,10 @@ const sortTable = (sortContext) => {
           </template>
         </Column>
 
+        <template #paginatorstart>
+          <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
+        </template>
+
         <template #expansion="slotProps">
           <div :data-cy="`expandedChild_${slotProps.data.userId}`">
             <self-report-approval-conf-user-tag v-if="userTagConfKey"
@@ -319,8 +334,8 @@ const sortTable = (sortContext) => {
         </template>
       </SkillsDataTable>
 
-      <no-content2 v-if="!hasMoreThanOneApprover && !loading" title="Not Available" class="py-8" icon="fas fa-cogs" data-cy="approvalConfNotAvailable">
-        The ability to split the approval workload is unavailable because there is only <Badge variant="info">1</Badge> Admin for this project.
+      <no-content2 v-if="!shouldLoadTable && !loading" title="Not Available" class="py-8" icon="fas fa-cogs" data-cy="approvalConfNotAvailable">
+        The ability to split the approval workload is unavailable because <span v-if="roleCount === 1">there is only <Badge variant="info">1</Badge> Admin</span><span v-else>there are no admins</span> for this project.
         Please add <b>Admins</b> or <b>Approvers</b> on the <router-link :to="{ name: 'ProjectAccess' }" style="text-decoration: underline" class="font-bold" data-cy="navToAccessPage"><i class="fas fa-shield-alt skills-color-access" aria-hidden="true"/>Access</router-link> page in order to start using this feature.
       </no-content2>
     </template>

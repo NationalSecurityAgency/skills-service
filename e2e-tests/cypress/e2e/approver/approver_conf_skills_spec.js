@@ -65,7 +65,6 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.disabled')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).click();
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('skill 3');
         cy.get(`[data-cy="skillsSelectionItem-proj1-skill3"]`).click()
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.enabled')
@@ -84,7 +83,6 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).should('not.have.value')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).click();
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('skill 5');
         cy.get(`[data-cy="skillsSelectionItem-proj1-skill5"]`).click()
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
         cy.validateTable(tableSelector, [
@@ -272,7 +270,7 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
 
         cy.get(`${tableSelector} tr th`).contains('Skill').click();
-        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '12')
+        cy.get('[data-cy="skillApprovalSkillConfTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '12')
 
         // has 3 pages
         cy.get('[data-cy="skillCell-skill1"]')
@@ -300,18 +298,17 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).click();
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('skill 3');
-        cy.get(`[data-cy="skillsSelectionItem-proj1-skill3"]`).click()
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill3"]').click()
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
         cy.get('[data-cy="skillCell-skill3"]')
-        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '1')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).click();
         cy.get(`[data-pc-section="filterinput"]`).type('s');
         cy.get(`[data-cy="subjectSelectionItem-proj1-subj1"]`).click()
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
 
-        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '5')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '5')
 
         // re-add again
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).click();
@@ -319,7 +316,7 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="subjectSelectionItem-proj1-subj1"]`).click()
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
 
-        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '5')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '5')
     });
 
     it('added skills are not presented in the skills selector', function () {
@@ -330,19 +327,15 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).click();
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('skill 3');
         cy.get(`[data-cy="skillsSelectionItem-proj1-skill3"]`).click()
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
         cy.get('[data-cy="skillCell-skill3"]')
-        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '1')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).click();
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('skill 3');
         cy.wait(1000)
         cy.get(`[data-cy="skillsSelectionItem-proj1-skill3"]`).should('not.exist')
 
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).click();
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('{selectall}skill 4');
         cy.get(`[data-cy="skillsSelectionItem-proj1-skill4"]`).should('exist');
         cy.get(`[data-cy="skillsSelectionItem-proj1-skill4"]`).click()
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
@@ -356,7 +349,7 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="subjectSelectionItem-proj1-subj1"]`).click()
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
 
-        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '5')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '5')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).click();
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('ski');
@@ -367,7 +360,7 @@ describe('Approver Config Skills Tests', () => {
         // refresh and re-test
         cy.visit('/administrator/projects/proj1/self-report/configure');
         cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
-        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '5')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '5')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).click();
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).type('ski');
         cy.wait(1000)

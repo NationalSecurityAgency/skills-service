@@ -370,8 +370,23 @@ describe('Project Errors Tests', () => {
         cy.wait('@getErrors');
         cy.validateTable(tableSelector, sortByFirstSeenExpected);
 
+        // Ensure the sorting remains when navigating away/refreshing
+        cy.visit('/administrator/projects/proj1/');
+        cy.wait('@getProject');
+        cy.get('[data-cy=nav-Issues]')
+            .click();
+        cy.wait('@getErrors');
+        cy.validateTable(tableSelector, sortByFirstSeenExpected);
+
         cy.get(`${tableSelector} th`)
             .contains('First Seen')
+            .click();
+        cy.wait('@getErrors');
+        cy.validateTable(tableSelector, expected);
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.wait('@getProject');
+        cy.get('[data-cy=nav-Issues]')
             .click();
         cy.wait('@getErrors');
         cy.validateTable(tableSelector, expected);
