@@ -232,7 +232,7 @@ const numberOfStars = computed(() => {
       </template>
     </SkillsDataTable>
 
-    <div v-if="!isSurvey && isMultipleChoice" class="bg-gray-100 p-2 text-sm" data-cy="multipleChoiceQuestionWarning">
+    <div v-if="!isSurvey && isMultipleChoice" class="surface-100 p-2 text-sm" data-cy="multipleChoiceQuestionWarning">
       *** All of the required choices must be selected for the question to be counted as <span
       class="text-success uppercase">correct</span> ***
     </div>
