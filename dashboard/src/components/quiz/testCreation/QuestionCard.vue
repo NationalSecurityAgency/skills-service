@@ -102,7 +102,7 @@ const moveQuestion = (changeIndexBy) => {
           </div>
         </div>
         <div v-if="isRatingType" class="flex">
-          <Rating class="flex-initial bg-gray-100 border-round py-3 px-4" :stars="numberOfStars" disabled :cancel="false"/>
+          <Rating class="flex-initial surface-100 border-round py-3 px-4" :stars="numberOfStars" disabled :cancel="false"/>
         </div>
         <div v-if="isTextInputType" class="flex">
           <label :for="`q${questionNum}textInputPlaceholder`" hidden>Text Input Answer Placeholder:</label>
