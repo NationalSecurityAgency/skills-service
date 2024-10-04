@@ -58,7 +58,7 @@ class SAML2Utils {
                 String displayName = firstName + ' ' + lastName
 
                 if (!username) {
-                    throw new SkillsAuthorizationException("Username must be available for you Okta profile")
+                    throw new SkillsAuthorizationException("Username must be available for your SSO profile")
                 }
                 UserInfo currentUser = new UserInfo(
                                                 username: username,
@@ -91,7 +91,7 @@ class SAML2Utils {
                 String displayName = firstName + ' ' + lastName
 
                 if (!username) {
-                    throw new SkillsAuthorizationException("Username must be available for you Okta profile")
+                    throw new SkillsAuthorizationException("Username must be available for your SSO profile")
                 }
                 currentUser = new UserInfo(
                         username: username,
