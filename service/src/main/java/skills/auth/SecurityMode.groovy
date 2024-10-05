@@ -17,6 +17,7 @@ package skills.auth
 
 import org.springframework.context.annotation.Condition
 import org.springframework.context.annotation.ConditionContext
+import org.springframework.core.env.Environment
 import org.springframework.core.type.AnnotatedTypeMetadata
 
 class SecurityMode {
@@ -45,6 +46,14 @@ class SecurityMode {
         }
     }
 
+    static class NonSAML2Auth implements Condition {
+        @Override
+        boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            AuthMode authMode = AuthMode.getFromContext(context)
+            return authMode !== AuthMode.SAML2
+        }
+    }
+
     static class FormOrSAML2Auth implements Condition {
         @Override
         boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
@@ -52,4 +61,7 @@ class SecurityMode {
             return authMode == AuthMode.FORM || AuthMode.SAML2
         }
     }
+
+
+
 }
