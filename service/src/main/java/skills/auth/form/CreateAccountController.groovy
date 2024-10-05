@@ -47,7 +47,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 
 //@Conditional(SecurityConfiguration.FormAuth)
-@Conditional(SecurityMode.FormAuth)
+@Conditional(SecurityMode.NonSAML2Auth)
 @RestController
 @RequestMapping("/")
 @Slf4j
