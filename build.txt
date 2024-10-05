@@ -1,0 +1,553 @@
+[[1;34mINFO[m] Scanning for projects...
+[[1;33mWARNING[m] 
+[[1;33mWARNING[m] Some problems were encountered while building the effective model for skill-tree:dashboard:jar:3.2.0-SNAPSHOT
+[[1;33mWARNING[m] 'build.plugins.plugin.version' for org.codehaus.mojo:exec-maven-plugin is missing. @ line 113, column 21
+[[1;33mWARNING[m] 
+[[1;33mWARNING[m] It is highly recommended to fix these problems because they threaten the stability of your build.
+[[1;33mWARNING[m] 
+[[1;33mWARNING[m] For this reason, future Maven versions might no longer support building such malformed projects.
+[[1;33mWARNING[m] 
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1mReactor Build Order:[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] skills-service-parent                                              [pom]
+[[1;34mINFO[m] dashboard                                                          [jar]
+[[1;34mINFO[m] skills-service                                                     [jar]
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------< [0;36mskill-tree:skills-service-parent[0;1m >------------------[m
+[[1;34mINFO[m] [1mBuilding skills-service-parent 3.2.0-SNAPSHOT                      [1/3][m
+[[1;34mINFO[m] [1m--------------------------------[ pom ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-clean-plugin:3.3.2:clean[m [1m(default-clean)[m @ [36mskills-service-parent[0;1m ---[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-install-plugin:3.1.3:install[m [1m(default-install)[m @ [36mskills-service-parent[0;1m ---[m
+[[1;34mINFO[m] Installing /Users/govindaraja.vanga/SSDL/devsnc/skills-service/pom.xml to /Users/govindaraja.vanga/.m2/repository/skill-tree/skills-service-parent/3.2.0-SNAPSHOT/skills-service-parent-3.2.0-SNAPSHOT.pom
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------------< [0;36mskill-tree:dashboard[0;1m >------------------------[m
+[[1;34mINFO[m] [1mBuilding dashboard 3.2.0-SNAPSHOT                                  [2/3][m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-clean-plugin:3.3.2:clean[m [1m(default-clean)[m @ [36mdashboard[0;1m ---[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.3.1:resources[m [1m(default-resources)[m @ [36mdashboard[0;1m ---[m
+[[1;34mINFO[m] skip non existing resourceDirectory /Users/govindaraja.vanga/SSDL/devsnc/skills-service/dashboard/src/main/resources
+[[1;34mINFO[m] skip non existing resourceDirectory /Users/govindaraja.vanga/SSDL/devsnc/skills-service/dashboard/src/main/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.11.0:compile[m [1m(default-compile)[m @ [36mdashboard[0;1m ---[m
+[[1;34mINFO[m] No sources to compile
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.3.1:testResources[m [1m(default-testResources)[m @ [36mdashboard[0;1m ---[m
+[[1;34mINFO[m] skip non existing resourceDirectory /Users/govindaraja.vanga/SSDL/devsnc/skills-service/dashboard/src/test/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.11.0:testCompile[m [1m(default-testCompile)[m @ [36mdashboard[0;1m ---[m
+[[1;34mINFO[m] No sources to compile
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-surefire-plugin:3.1.2:test[m [1m(default-test)[m @ [36mdashboard[0;1m ---[m
+[[1;34mINFO[m] No tests to run.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mlicense-maven-plugin:3.0:check[m [1m(default)[m @ [36mdashboard[0;1m ---[m
+[[1;34mINFO[m] Checking licenses...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mexec-maven-plugin:3.4.1:exec[m [1m(exec-npm-install)[m @ [36mdashboard[0;1m ---[m
+
+> dashboard@0.0.0 build
+> npm install && npm run licenseCheck && npm run getDashboardVersion && vite build
+
+
+up to date, audited 533 packages in 3s
+
+132 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+> dashboard@0.0.0 licenseCheck
+> npm run licenseDepCheck
+
+
+> dashboard@0.0.0 licenseDepCheck
+> license-checker --excludePrivatePackages --production --onlyAllow='MIT;ISC;Apache-2.0;0BSD;BSD-2-Clause;BSD-3-Clause;Unlicense;Custom: https://travis-ci.org/component/emitter.png' --summary
+
+├─ MIT: 179
+├─ Apache-2.0: 19
+├─ (Apache-2.0 OR MIT): 4
+├─ MIT*: 2
+├─ (MPL-2.0 OR Apache-2.0): 2
+├─ ISC: 2
+├─ (MIT OR CC0-1.0): 2
+├─ (CC-BY-4.0 AND OFL-1.1 AND MIT): 1
+├─ BSD-2-Clause: 1
+├─ BSD-3-Clause: 1
+└─ 0BSD: 1
+
+
+> dashboard@0.0.0 getDashboardVersion
+> node ../scripts/getDashboardVersion.js
+
+vite v5.2.14 building for production...
+transforming...
+✓ 1120 modules transformed.
+warnings when minifying css:
+▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    <stdin>:308:2:
+      308 │   //position: absolute !important;
+          ╵   ~~
+
+
+▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    <stdin>:309:2:
+      309 │   //bottom: 0.8rem;
+          ╵   ~~
+
+
+▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    <stdin>:312:2:
+      312 │   //width: 4.5rem;
+          ╵   ~~
+
+
+▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    <stdin>:456:2:
+      456 │   //color: #0fcc15d1;
+          ╵   ~~
+
+
+▲ [WARNING] Comments in CSS use "/* ... */" instead of "//" [js-comment-in-css]
+
+    <stdin>:551:2:
+      551 │   //color: #0fcc15d1;
+          ╵   ~~
+
+
+rendering chunks...
+computing gzip size...
+dist/index.html                                         2.11 kB │ gzip:   0.86 kB
+dist/assets/skilltree_logo-B1q-FTaQ.png                11.30 kB
+dist/assets/fa-regular-400-DGzu1beS.woff2              13.22 kB
+dist/assets/fa-regular-400-DFnMcJPd.woff               16.28 kB
+dist/assets/fa-regular-400-D1vz6WBx.ttf                33.74 kB
+dist/assets/fa-regular-400-BhTwtT8w.eot                34.03 kB
+dist/assets/fa-brands-400-UxlILjvJ.woff2               76.74 kB
+dist/assets/fa-solid-900-BUswJgRo.woff2                78.27 kB
+dist/assets/fa-brands-400-CEJbCg16.woff                89.99 kB
+dist/assets/fa-solid-900-DOXgCApm.woff                101.65 kB
+dist/assets/material-icons-D4sHZdEx.woff2             104.95 kB
+dist/assets/material-icons-sharp-DSChcAWK.woff2       112.95 kB
+dist/assets/material-icons-outlined-B8SuWf0o.woff2    129.50 kB
+dist/assets/material-icons-sharp-B070VGQc.woff        129.65 kB
+dist/assets/fa-brands-400-CSYNqBb_.ttf                133.99 kB
+dist/assets/fa-brands-400-DnkPfk3o.eot                134.29 kB
+dist/assets/material-icons-D53OSTMa.woff              134.47 kB
+dist/assets/fa-regular-400-gwj8Pxq-.svg               144.71 kB │ gzip:  37.36 kB
+dist/assets/material-icons-round-_3Pw-Dmi.woff2       146.35 kB
+dist/assets/material-icons-outlined-FZ83hvrT.woff     151.14 kB
+dist/assets/material-icons-round-BnFgUB1o.woff        172.21 kB
+dist/assets/material-icons-two-tone-CkW5Ve7n.woff2    178.89 kB
+dist/assets/fa-solid-900-mxuxnBEa.ttf                 202.74 kB
+dist/assets/fa-solid-900-B6Axprfb.eot                 203.03 kB
+dist/assets/material-icons-two-tone-BfQ7N-Ga.woff     282.57 kB
+dist/assets/fa-brands-400-cH1MgKbP.svg                747.93 kB │ gzip: 255.18 kB
+dist/assets/fa-solid-900-B4ZZ7kfP.svg                 918.99 kB │ gzip: 257.13 kB
+dist/assets/skillsDisplay-DoXiasQl.css                 11.38 kB │ gzip:   2.75 kB
+dist/assets/toastUI-C1Ttwfzs.css                      172.93 kB │ gzip: 110.07 kB
+dist/assets/visNetwork-Dfn_CqSH.css                   220.21 kB │ gzip:  31.15 kB
+dist/assets/index-CgC19FaM.css                        522.94 kB │ gzip:  77.81 kB
+dist/assets/primevueCalendar-CuzekbeP.js               72.66 kB │ gzip:  16.53 kB
+dist/assets/skillClient-Dvz_RDqD.js                   106.47 kB │ gzip:  33.56 kB
+dist/assets/primevueDatatable-CA1W7m4A.js             163.27 kB │ gzip:  32.70 kB
+dist/assets/nodeEmoji-C3M-aNDh.js                     219.90 kB │ gzip:  47.33 kB
+dist/assets/skillsDisplay-BNEs0xdr.js                 510.97 kB │ gzip: 188.94 kB
+dist/assets/primevueComponents-YlVUcyW3.js            529.96 kB │ gzip: 124.25 kB
+dist/assets/visNetwork-o3WIFPbZ.js                    544.26 kB │ gzip: 160.47 kB
+dist/assets/apexCharts-BMOnlwVY.js                    614.92 kB │ gzip: 171.57 kB
+dist/assets/VideoPlayer-BEw96BhB.js                   659.94 kB │ gzip: 198.74 kB
+dist/assets/toastUI-CzVNyEIs.js                       718.32 kB │ gzip: 232.66 kB
+dist/assets/index-DKarE9PV.js                       1,054.20 kB │ gzip: 295.41 kB
+dist/assets/pdfkit-D0ygNEIj.js                      1,483.13 kB │ gzip: 409.92 kB
+
+(!) Some chunks are larger than 1200 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.57s
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m---------------------< [0;36mskill-tree:skills-service[0;1m >----------------------[m
+[[1;34mINFO[m] [1mBuilding skills-service 3.2.0-SNAPSHOT                             [3/3][m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-clean-plugin:3.3.2:clean[m [1m(default-clean)[m @ [36mskills-service[0;1m ---[m
+[[1;34mINFO[m] Deleting /Users/govindaraja.vanga/SSDL/devsnc/skills-service/service/target
+[[1;34mINFO[m] Deleting /Users/govindaraja.vanga/SSDL/devsnc/skills-service/service/src/main/resources/public
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mproperties-maven-plugin:1.0.0:set-system-properties[m [1m(default)[m @ [36mskills-service[0;1m ---[m
+[[1;34mINFO[m] Set 1 system property
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mgmavenplus-plugin:2.1.0:addSources[m [1m(default)[m @ [36mskills-service[0;1m ---[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mgmavenplus-plugin:2.1.0:addTestSources[m [1m(default)[m @ [36mskills-service[0;1m ---[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mgmavenplus-plugin:2.1.0:generateStubs[m [1m(default)[m @ [36mskills-service[0;1m ---[m
+[[1;34mINFO[m] Using isolated classloader, without GMavenPlus classpath.
+[[1;34mINFO[m] Using Groovy 4.0.22 to perform generateStubs.
+[[1;34mINFO[m] Generated 609 stubs.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.3.1:copy-resources[m [1m(copy Vue.js dashboard content)[m @ [36mskills-service[0;1m ---[m
+[[1;34mINFO[m] Copying 57 resources from ../dashboard/dist to src/main/resources/public
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.3.1:resources[m [1m(default-resources)[m @ [36mskills-service[0;1m ---[m
+[[1;34mINFO[m] Copying 1 resource from src/main/resources to target/classes
+[[1;34mINFO[m] Copying 131 resources from src/main/resources to target/classes
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.11.0:compile[m [1m(default-compile)[m @ [36mskills-service[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module! :source
+[[1;34mINFO[m] Compiling 638 source files with javac [debug release 19] to target/classes
+[[1;33mWARNING[m] /Users/govindaraja.vanga/SSDL/devsnc/skills-service/service/src/main/java/skills/controller/AddSkillHelper.java:[80,21] non-varargs call of varargs method with inexact argument type for last parameter;
+  cast to java.lang.Object for a varargs call
+  cast to java.lang.Object[] for a non-varargs call and to suppress this warning
+[[1;34mINFO[m] /Users/govindaraja.vanga/SSDL/devsnc/skills-service/service/target/generated-sources/groovy-stubs/main/skills/auth/saml/Saml2HttpSessionSecurityContextRepository.java: Some input files use or override a deprecated API.
+[[1;34mINFO[m] /Users/govindaraja.vanga/SSDL/devsnc/skills-service/service/target/generated-sources/groovy-stubs/main/skills/auth/saml/Saml2HttpSessionSecurityContextRepository.java: Recompile with -Xlint:deprecation for details.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mgmavenplus-plugin:2.1.0:compile[m [1m(default)[m @ [36mskills-service[0;1m ---[m
+[[1;34mINFO[m] Using isolated classloader, without GMavenPlus classpath.
+[[1;34mINFO[m] Using Groovy 4.0.22 to perform compile.
+[[1;34mINFO[m] invokedynamic enabled.
+[[1;34mINFO[m] Parallel parsing enabled.
+09:59:07.982 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAuthService.loadByUserId
+09:59:07.991 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAuthService.createOrUpdateUser
+09:59:07.992 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAuthService.get
+09:59:07.992 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserInfoService.getCurrentUser
+09:59:07.992 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserInfoService.getCurrentUserAttrs
+09:59:07.993 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserInfoService.isCurrentUserASuperDuperUser
+09:59:07.993 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserInfoService.doGetUserName
+09:59:07.994 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PkiUserLookup.lookupUserDn
+09:59:07.995 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PkiUserLookup.suggestUsers
+09:59:07.995 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PkiUserLookup.isServiceAvailable
+09:59:07.995 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AccessSettingsController.saveUserAction
+09:59:07.995 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AccessSettingsController.handleNewRoleEmail
+09:59:07.997 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is MyProgressController.getMyProgressSummary
+09:59:07.997 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is MyProgressController.getAvailableForMyProjects
+09:59:08.000 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is NumberUsersPerTagMetricsBuilder.getUserCountsForTag
+09:59:08.000 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is NumberUsersPerTagMetricsBuilder.findDistinctUserIdByProjectIdAndUserTag
+09:59:08.001 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is NumberUsersPerTagMetricsBuilder.countDistinctUserTag
+09:59:08.002 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is EmailNotifier.sendNotification
+09:59:08.002 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizRunService.validateQuizAttempts
+09:59:08.003 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizRunService.loadQuizSettings
+09:59:08.003 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizRunService.getMaxQuizAttemptsSetting
+09:59:08.003 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizRunService.getMinNumQuestionsToPassSetting
+09:59:08.003 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizRunService.getQuizLength
+09:59:08.003 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizRunService.allowMultipleTakes
+09:59:08.003 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizRunService.alwaysShowCorrectAnswers
+09:59:08.003 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizRunService.getQuizSettingAsInteger
+09:59:08.003 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizRunService.getQuizSettingAsBoolean
+09:59:08.004 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizRunService.reportAnyAssociatedSkills
+09:59:08.004 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AccessSettingsStorageService.saveUserRoleActions
+09:59:08.005 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AccessSettingsStorageService.createAppUser
+09:59:08.005 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AccessSettingsStorageService.getOrCreate
+09:59:08.005 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AccessSettingsStorageService.get
+09:59:08.005 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AccessSettingsStorageService.loadUserFromLocalDb
+09:59:08.005 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AccessSettingsStorageService.createNewUser
+09:59:08.005 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AccessSettingsStorageService.updateUser
+09:59:08.006 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AdminUsersService.findDistinctUsersForProject
+09:59:08.006 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AdminUsersService.streamAllDistinctUsersForProject
+09:59:08.006 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AdminUsersService.countTotalProjUsers
+09:59:08.008 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is CreatedResourceLimitsValidator.validateNumSkillsCreated_SkillDef
+09:59:08.008 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is CustomValidator.validate_SkillRequest
+09:59:08.009 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is GlobalBadgesService.convertToBadge
+09:59:08.009 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is LevelDefinitionStorageService.getLevelInfo_SkillDefParent_int
+09:59:08.010 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is LevelDefinitionStorageService.getOverallLevelInfo
+09:59:08.010 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is LevelDefinitionStorageService.getLevelInfo_String_List_int_int
+09:59:08.010 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is LevelDefinitionStorageService.getProjLevelDefs
+09:59:08.010 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is LevelDefinitionStorageService.getSubjectLevelDefs
+09:59:08.010 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is LockingService.lockProject
+09:59:08.010 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is LockingService.lockQuizDef
+09:59:08.011 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RuleSetDefGraphService.assignGraphRelationship_String_String_SkillDef$ContainerType_String_SkillRelDef$RelationshipType_boolean
+09:59:08.011 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RuleSetDefinitionScoreUpdater.updateFromLeaf
+09:59:08.011 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RuleSetDefinitionScoreUpdater.updateGroupDef
+09:59:08.012 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RuleSetDefinitionScoreUpdater.updateProjDef
+09:59:08.012 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RuleSetDefinitionScoreUpdater.updateSubjectSkillDef
+09:59:08.012 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RuleSetDefinitionScoreUpdater.updateSubjectTotalPoints
+09:59:08.012 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RuleSetDefinitionScoreUpdater.updateGroupTotalPoints
+09:59:08.013 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillApprovalService.getConfExistForApprover
+09:59:08.013 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillApprovalService.modifyApprovalsWhenSelfReportingTypeChanged
+09:59:08.013 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillApprovalService.validatePresenceOfFallbackApprover
+09:59:08.013 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillApprovalService.validateApproverAccess
+09:59:08.013 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.bulkReportSkills
+09:59:08.014 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.bulkLookupUserNames
+09:59:08.014 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.bulkReportSkillsInternal
+09:59:08.014 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.bulkDeleteSkillEventsForUser
+09:59:08.014 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.handleImportedSkills
+09:59:08.014 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.propagateUpdatesToQuizSkillsAndImportedSkills
+09:59:08.014 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.deleteSkillEvent
+09:59:08.014 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.deleteSkillEventBatch
+09:59:08.014 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.deleteAllSkillEventsForSkill
+09:59:08.014 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.deleteAllSkillEventsForSkillAndUser
+09:59:08.014 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.removeAssociatedQuizAttempts
+09:59:08.015 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.removePerformedSkillEvents
+09:59:08.015 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.removePerformedSkillEvent
+09:59:08.015 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.removeGroupAchievementIfNeeded
+09:59:08.015 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.performBulkReportSkillNotifications
+09:59:08.015 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventAdminService.deleteProjectLevelIfNecessary
+09:59:08.015 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SplitWorkloadService.findUsersForThisRequest
+09:59:08.015 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SplitWorkloadService.matchByConf
+09:59:08.015 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SplitWorkloadService.loadUserTags
+09:59:08.016 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.adjustUserPointsAfterModification
+09:59:08.016 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser
+09:59:08.016 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.insertUserAchievementWhenDecreaseOfOccurrencesCausesUsersToAchieve
+09:59:08.016 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.identifyAndAddLevelAchievements
+09:59:08.016 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.identifyAndAddProjectLevelAchievements
+09:59:08.016 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.identifyAndAddProjectLevelAchievementsForSingleUser
+09:59:08.016 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.identifyAndAddSubjectLevelAchievements
+09:59:08.016 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.identifyAndAddSubjectLevelAchievementsForSingleUser
+09:59:08.016 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfUsersDoNotQualify
+09:59:08.016 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfThisUserDoesNotQualify
+09:59:08.017 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.removeProjectLevelAchievementsIfUsersDoNotQualify
+09:59:08.017 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.removeProjectLevelAchievementsIfUserDoesNotQualify
+09:59:08.017 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve
+09:59:08.017 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAchievementsAndPointsManagement.removeUserAchievementsThatDoNotMeetNewNumberOfOccurrences
+09:59:08.017 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAttrsService.saveUserAttrs
+09:59:08.017 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAttrsService.getOrCreate
+09:59:08.017 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAttrsService.get
+09:59:08.017 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAttrsService.updateIfNecessary
+09:59:08.017 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAttrsService.lockUser
+09:59:08.017 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAttrsService.replaceUserTags
+09:59:08.018 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAttrsService.shouldUpdateUserAttrs
+09:59:08.018 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAttrsService.shouldUpdateUserTags
+09:59:08.018 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAttrsService.findByUserId
+09:59:08.018 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAttrsService.saveUserAttrsInLocalDb
+09:59:08.018 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is UserAttrsService.loadUserAttrsFromLocalDb
+09:59:08.019 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BadgeAdminService.saveUserDashboardAction
+09:59:08.019 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BadgeAdminService.addSkillToBadge
+09:59:08.019 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BadgeAdminService.addSkillsToBadge
+09:59:08.019 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BadgeAdminService.validateAgainstLearningPath
+09:59:08.019 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BadgeAdminService.convertToBadge
+09:59:08.020 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.enableSkills
+09:59:08.020 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.updateSubjectTotalPoints
+09:59:08.020 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.updateGroupTotalPoints
+09:59:08.020 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.updateProjectsTotalPoints
+09:59:08.020 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.copySkillUserPointsToTheImportedProjects
+09:59:08.020 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.copySingleUserSkillUserPointsToTheImportedProjects
+09:59:08.020 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.copySkillAchievementsToTheImportedProjects
+09:59:08.020 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.copyForSingleUserSkillAchievementsToTheImportedProjects
+09:59:08.020 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.createSubjectUserPointsForTheNewUsers
+09:59:08.020 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.createSubjectUserPointsForSingleNewUser
+09:59:08.020 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.createSkillUserPointsFromPassedQuizzes
+09:59:08.021 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.createSkillUserPointsFromPassedQuizzesForProject
+09:59:08.021 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.createUserPerformedEntriesFromPassedQuizzes
+09:59:08.021 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.createUserEventEntriesFromPassedQuizzes
+09:59:08.021 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.createUserPerformedEntriesFromPassedQuizzesForProject
+09:59:08.021 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.createUserAchievementsFromPassedQuizzes_Integer_Integer
+09:59:08.021 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.createUserAchievementsFromPassedQuizzes_String
+09:59:08.021 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.updateUserPointsForSubject
+09:59:08.021 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.removeSubjectUserPointsForNonExistentSkillDef
+09:59:08.023 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.identifyAndAddGroupAchievements
+09:59:08.024 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.identifyAndAddGroupAchievementsForSingleUser
+09:59:08.024 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.identifyAndAddSubjectLevelAchievements
+09:59:08.024 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.identifyAndAddSubjectLevelAchievementsForSingleUser
+09:59:08.025 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.createProjectUserPointsForTheNewUsers
+09:59:08.025 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.createProjectUserPointsForSingleNewUser
+09:59:08.025 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.updateUserPointsForProject
+09:59:08.025 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.identifyAndAddProjectLevelAchievements_String_boolean
+09:59:08.025 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.identifyAndAddProjectLevelAchievements_String_String
+09:59:08.025 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.batchRemovePerformedSkillsForUserAndSpecificSkills
+09:59:08.025 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.removeGlobalBadgeAchievementsForSkillsAndSpecificUser
+09:59:08.025 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.removeBadgeAchievementsForSkillsAndSpecificUser
+09:59:08.025 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.updateSubjectPointsAndRemoveAchievementsForSkillsAndSpecificUser
+09:59:08.025 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is BatchOperationsTransactionalAccessor.removeGroupAchievementsForSkillsForASpecificUser
+09:59:08.025 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is CircularLearningPathChecker.check
+09:59:08.026 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjAdminService.validateUserCommunityProps
+09:59:08.026 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjAdminService.convert
+09:59:08.027 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjAdminService.countNumSkillsForProject
+09:59:08.027 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjAdminService.loadCurrentUser
+09:59:08.027 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.copyProject
+09:59:08.027 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.pinProjectForRootUser
+09:59:08.027 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.saveProjectSettings
+09:59:08.027 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.updateProjectAndSubjectLevels
+09:59:08.027 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.updateLevels
+09:59:08.027 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.saveReusedSkills
+09:59:08.028 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.handleQuizBasedUserPointsAndAchievements
+09:59:08.028 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.saveDependencies
+09:59:08.028 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.saveBadgesAndTheirSkills
+09:59:08.028 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.saveSubjectsAndSkills
+09:59:08.028 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.createSkills
+09:59:08.028 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.handleAttachmentsInDescription
+09:59:08.028 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.handleVideoAttributes
+09:59:08.028 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.saveToProject
+09:59:08.028 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.loadProject
+09:59:08.028 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ProjectCopyService.validate
+09:59:08.029 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillCatalogFinalizationService.requestFinalizationOfImportedSkills
+09:59:08.029 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillCatalogFinalizationService.finalizeCatalogSkillsImport
+09:59:08.029 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun
+09:59:08.029 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillCatalogFinalizationService.validateNotInFinalizationState
+09:59:08.029 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillCatalogFinalizationService.validateFinalizationIsNotPending
+09:59:08.030 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillCatalogService.importSkillsFromCatalog
+09:59:08.030 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillCatalogService.isAvailableInCatalog_String_String
+09:59:08.030 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillCatalogService.doGetRelatedSkills
+09:59:08.030 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillCatalogService.getRelatedSkills_SkillDefMin
+09:59:08.031 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.saveSkill
+09:59:08.031 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.updatePointsAndAchievements
+09:59:08.031 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.removeCatalogImportedSkills
+09:59:08.031 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.convertToSkillDefRes_SkillDef
+09:59:08.031 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.convertToSkillDefRes_SkillDefWithExtra
+09:59:08.031 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.convertToSkillDefSkinnyRes
+09:59:08.031 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.convertToSkillDefPartialRes
+09:59:08.031 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.calculateDistinctUsersForSkill
+09:59:08.032 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.loadSkinnySkills_String_String_boolean_boolean
+09:59:08.032 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.loadSkinnySkillsAndBadges
+09:59:08.032 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.loadSkinnySkill
+09:59:08.032 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.loadSkinnySkills_String
+09:59:08.032 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.validateSkillVersion
+09:59:08.032 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.validateSelfReportVideo
+09:59:08.032 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsAdminService.assignToParent
+09:59:08.032 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsDepsService.loadSkillDefForLearningPath
+09:59:08.033 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsDepsService.getDependentSkillsGraph
+09:59:08.033 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsDepsService.collectDescendants
+09:59:08.033 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsDepsService.convertToSkillDefRes_SkillDefGraphRes
+09:59:08.033 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsDepsService.convertToSkillDefRes_SkillDef
+09:59:08.033 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsDepsService.loadGraphEdges
+09:59:08.033 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsDepsService.validateLearningPathItem
+09:59:08.033 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsDepsService.loadBadgeSkills
+09:59:08.033 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsGroupAdminService.addSkillToSkillsGroup
+09:59:08.033 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsGroupAdminService.getSkillsGroupChildSkills
+09:59:08.033 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsGroupAdminService.getActualNumSkillsRequred
+09:59:08.033 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsGroupAdminService.validateSkillsGroupAndReturnChildren_SkillRequest_SkillDefWithExtra
+09:59:08.034 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsGroupAdminService.validateSkillsGroupAndReturnChildren_Integer_Integer
+09:59:08.034 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsGroupAdminService.isParentSkillsGroupEnabled
+09:59:08.034 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsGroupAdminService.getSkillsGroup
+09:59:08.034 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsGroupAdminService.getGroupTotalPoints
+09:59:08.034 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SubjAdminService.convertToSubject
+09:59:08.034 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SubjAdminService.getSkillsStatsForSubjects
+09:59:08.035 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SubjAdminService.calculatePercentages
+09:59:08.035 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsMoveService.moveSkills
+09:59:08.035 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsMoveService.handleTrackingUserActions
+09:59:08.035 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsMoveService.handleDestGroupAchievements
+09:59:08.035 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsMoveService.handleEmptyOrigGroup
+09:59:08.035 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsMoveService.updateDestSubjectUserLevelAchievements
+09:59:08.035 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsMoveService.updateOrigSubjectUserLevelAchievements
+09:59:08.035 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsMoveService.updateUserPointsInDestSubject
+09:59:08.036 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsMoveService.updateUserPointsInOrigSubject
+09:59:08.036 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsMoveService.removeSubjectUserPointsForNonExistentSkillDef
+09:59:08.036 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsMoveService.moveDefinitionToDestParent
+09:59:08.036 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsMoveService.updateOrigDefinitionPoints
+09:59:08.036 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsMoveService.updateDestDefinitionPoints
+09:59:08.036 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillReuseService.reuseSkill
+09:59:08.036 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillReuseService.handleTrackingUserActions
+09:59:08.036 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillReuseService.validateNoAlreadyReusedInDestination
+09:59:08.036 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillReuseService.validateParentIsNotDestination
+09:59:08.036 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillReuseService.validateSkillsHaveNoDeps
+09:59:08.037 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AchievedBadgeHandler.checkForBadges
+09:59:08.037 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AchievedBadgeHandler.getAchievedOnDate
+09:59:08.037 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AchievedGlobalBadgeHandler.checkForGlobalBadges
+09:59:08.037 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AchievedGlobalBadgeHandler.loadOverallLevelAchievements
+09:59:08.037 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AchievedSkillsGroupHandler.checkForSkillsGroup
+09:59:08.037 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is AchievedSkillsGroupHandler.getAchievedOnDate
+09:59:08.039 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is CheckDependenciesHelper.check
+09:59:08.039 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventPublisher.publishSkillUpdate
+09:59:08.039 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventsService.reportSkill
+09:59:08.040 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventsTransactionalService.reportSkillInternal
+09:59:08.040 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventsTransactionalService.scheduleImportedSkills
+09:59:08.040 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventsTransactionalService.recordEvent
+09:59:08.040 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventsTransactionalService.lockTransaction
+09:59:08.040 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventsTransactionalService.checkIfSkillApplied
+09:59:08.040 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventsTransactionalService.savePerformedSkill
+09:59:08.040 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventsTransactionalService.getNumExistingSkills
+09:59:08.040 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventsTransactionalService.getSkillDef
+09:59:08.041 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillEventsTransactionalService.getCopiedFromSkillDef
+09:59:08.041 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is TimeWindowHelper.checkTimeWindow
+09:59:08.041 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ImportedSkillsAchievementsHandler.lockTransaction
+09:59:08.041 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsBuilder.build
+09:59:08.041 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsBuilder.checkForAchievements
+09:59:08.041 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsBuilder.getAchievedOnDate
+09:59:08.042 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsDataLoader.loadData
+09:59:08.042 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsDataLoader.loadAchievements
+09:59:08.042 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsDataLoader.loadLevels
+09:59:08.042 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsDataLoader.loadProject
+09:59:08.042 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsDataLoader.loadPoints
+09:59:08.042 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsDataLoader.loadParents_SkillDefMin
+09:59:08.042 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsDataLoader.loadParents_Integer
+09:59:08.042 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsHandler.updatePointsAndAchievements
+09:59:08.042 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsHandler.documentSkillAchieved
+09:59:08.042 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsHandler.getAchievedOnDate
+09:59:08.043 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsSaver.save
+09:59:08.043 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsSaver.saveAchievements
+09:59:08.043 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsSaver.addToExistingPoints
+09:59:08.043 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsSaver.saveNewPoints
+09:59:08.043 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is PointsAndAchievementsSaver.loadChildPoints
+09:59:08.044 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizDefService.findUserQuizAttempt
+09:59:08.044 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizDefService.createQuizQuestionAnswerDefs
+09:59:08.044 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizDefService.updateQuizQuestionAnswerDefs
+09:59:08.045 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizDefService.createQuizQuestionDef
+09:59:08.045 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizDefService.updateQuizQuestionDef
+09:59:08.045 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizDefService.getQuestionDef
+09:59:08.045 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizDefService.getQuestingDef
+09:59:08.045 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizDefService.getMinNumQuestionsToPassSetting
+09:59:08.045 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizSettingsService.getQuizDefRefId
+09:59:08.045 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizToSkillService.updateAffectedUserPointsAndAchievements
+09:59:08.045 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizToSkillService.removeQuizToSkillAssignment
+09:59:08.045 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizToSkillService.removeGroupAchievements
+09:59:08.046 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is QuizToSkillService.removeBadgeAchievements
+09:59:08.046 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SettingsService.saveUserAction
+09:59:08.047 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is DependencySummaryLoader.loadDependencySummary
+09:59:08.047 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RankingLoader.getLeaderboard
+09:59:08.047 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RankingLoader.doGetUserSkillsRanking
+09:59:08.047 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RankingLoader.getOptOutInfo
+09:59:08.047 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RankingLoader.calculateNumberOfUsersWithGreaterPoints
+09:59:08.047 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RankingLoader.findNumberOfUsers
+09:59:08.047 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RankingLoader.loadUserPoints
+09:59:08.048 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RankingLoader.loadUserAchievements
+09:59:08.048 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RankingLoader.findLowestUserPoints
+09:59:08.048 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RankingLoader.findHighestUserPoints
+09:59:08.048 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is RankingLoader.getUserCountsPerLevel
+09:59:08.049 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.getAvailableForMyProjects
+09:59:08.049 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.loadMyProgressSummary
+09:59:08.049 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.getBadgesForUserMyProjects
+09:59:08.049 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.loadOverallSummary
+09:59:08.049 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.getRealLevelInfo
+09:59:08.049 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.loadSubjectsSummaries
+09:59:08.049 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.getProjectsAchievedLevels
+09:59:08.050 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.loadSubjectsFromDB
+09:59:08.050 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.loadPointHistorySummary
+09:59:08.050 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.loadLevelAchievements
+09:59:08.050 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.getVideoSummary
+09:59:08.050 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.loadSelfReporting
+09:59:08.050 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.loadSkillDependencyInfo
+09:59:08.050 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.processDependenciesForBadges
+09:59:08.050 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.loadSubjectSummary
+09:59:08.050 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.calculateTotalForSubject
+09:59:08.050 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.locateAchievedLevels
+09:59:08.050 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.calculateTodayPoints
+09:59:08.050 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.calculatePointsForSubject
+09:59:08.050 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.calculatePointsForProject
+09:59:08.051 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.loadBadgeSummary
+09:59:08.051 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.loadGlobalBadgeSummary
+09:59:08.051 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.createSkillSummaries_ProjDef_List_boolean_String
+09:59:08.051 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.loadSkillTags
+09:59:08.051 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.createSkillSummaries_ProjDef_List_boolean_String_Integer
+09:59:08.051 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.updateLevelBasedOnLastAchieved
+09:59:08.051 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SkillsLoader.getProjDef
+09:59:08.053 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SubjectDataLoader.loadData
+09:59:08.053 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SubjectDataLoader.updateLastViewedSkill
+09:59:08.054 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SubjectDataLoader.handleBadges
+09:59:08.054 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SubjectDataLoader.handleSkillTags
+09:59:08.054 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SubjectDataLoader.handleSkillQuizInfo
+09:59:08.054 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SubjectDataLoader.loadAllDepsWithAchievementIndicator
+09:59:08.054 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SubjectDataLoader.loadChildren
+09:59:08.054 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SubjectDataLoader.loadChildrenDayPoints
+09:59:08.054 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is SubjectDataLoader.findChildrenPoints
+09:59:08.054 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is ExpireUserAchievementsTaskExecutor.execute
+09:59:08.055 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is MetricsLogger.logSkillReported
+09:59:08.055 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is MetricsLogger.logPageVisit
+09:59:08.055 [main] INFO callStack.profiler.ProfileASTTransformation -- profile key is MetricsLogger.log
+[[1;34mINFO[m] Compiled 1744 files.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mgmavenplus-plugin:2.1.0:removeStubs[m [1m(default)[m @ [36mskills-service[0;1m ---[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mgmavenplus-plugin:2.1.0:generateTestStubs[m [1m(default)[m @ [36mskills-service[0;1m ---[m
+[[1;34mINFO[m] Using isolated classloader, without GMavenPlus classpath.
+[[1;34mINFO[m] Using Groovy 4.0.22 to perform generateTestStubs.
+[[1;34mINFO[m] Generated 293 stubs.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.3.1:testResources[m [1m(default-testResources)[m @ [36mskills-service[0;1m ---[m
