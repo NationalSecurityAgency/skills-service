@@ -203,7 +203,7 @@ describe('Skills Table Tests', () => {
     cy.validateTable(tableSelector, expected.map((item) => item).reverse(), 10)
 
     // export skill metrics and verify that the file exists
-    const exportedFileName = `cypress/downloads/proj1-skills-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
+    const exportedFileName = `cypress/downloads/proj1-subj1-skills-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
     cy.readFile(exportedFileName).should('not.exist');
     cy.get('[data-cy="exportSkillsTableBtn"]').click();
     cy.readFile(exportedFileName).should('exist');
@@ -231,7 +231,7 @@ describe('Skills Table Tests', () => {
     cy.intercept('GET', 'admin/projects/proj1/subjects/subj1/skills/export/excel', {
       delay: 1000
     }).as('exportSkillsTable');
-    const exportedFileName = `cypress/downloads/proj1-skills-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
+    const exportedFileName = `cypress/downloads/proj1-subj1-skills-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
     cy.get('[data-cy="exportSkillsTableBtn"]').click();
     cy.get('[data-cy="skillsTable-loading"]').should('exist');
     cy.wait('@exportSkillsTable');

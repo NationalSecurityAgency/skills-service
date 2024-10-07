@@ -13,23 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import SkillsDisplayInIframe from '@/skills-display/SkillsDisplayInIframe.vue'
 import SkillsClientPath from '@/router/SkillsClientPath.js'
 
-const createSkillsClientRoutes = (skillsDisplayChildRoutes) => {
-  return {
-    path: SkillsClientPath.HomePath,
-    component: SkillsDisplayInIframe,
-    name: 'SkillsDisplayInIframe',
-    meta: {
-      requiresAuth: true,
-      nonAdmin: true,
-      announcer: {
-        message: 'Skills Display'
-      }
-    },
-    children: skillsDisplayChildRoutes
+export default {
+
+  isSkillsClientPath(){
+    const path = window?.location?.pathname
+    return path?.startsWith(SkillsClientPath.RootUrl) || path?.startsWith('/test-skills-client/')
   }
 }
-
-export default createSkillsClientRoutes
