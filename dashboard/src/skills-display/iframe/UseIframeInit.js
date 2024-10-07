@@ -17,16 +17,26 @@ import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSki
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import Postmate from 'postmate'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import ThemeHelper from '@/skills-display/theme/ThemeHelper.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useRouter } from 'vue-router'
+import SkillsClientPath from '@/router/SkillsClientPath.js'
 
 export const useIframeInit = () => {
 
   const parentState = useSkillsDisplayParentFrameState()
   const displayAttributes = useSkillsDisplayAttributesState()
+  const displayInfo = useSkillsDisplayInfo()
+  const appConfig = useAppConfig()
+  const router = useRouter()
   const log = useLog()
-  const loadedIframe = ref(false)
+  const completedHandshake = ref(false)
+  const updatedAuthToken = ref(false)
+
+  const loadedIframe = computed(() => completedHandshake.value && updatedAuthToken.value)
 
   const registerHeightListener = (resizeObserver) => {
     const elementToObserve = document.querySelector("#skills-display-app")
@@ -43,12 +53,29 @@ export const useIframeInit = () => {
     log.debug('UseIframeInit.js: handleHandshake')
     const handshake = new Postmate.Model({
       updateAuthenticationToken(authToken) {
-        parentState.authToken = authToken
+        parentState.setAuthToken(authToken)
         if (log.isTraceEnabled()) {
           log.trace(`UseIframeInit.js: updateAuthenticationToken: ${authToken}`)
         }
-      }
+        updatedAuthToken.value = true
+      },
+      updateVersion(newVersion) {
+        displayAttributes.version = newVersion
+        if (log.isTraceEnabled()) {
+          log.trace(`UseIframeInit.js: updateVersion: ${newVersion}`)
+        }
+        displayInfo.routerPush('SkillsDisplayInIframe')
+      },
+      navigate(route) {
+        if (log.isTraceEnabled()) {
+          log.trace(`UseIframeInit.js: navigate: ${JSON.stringify(route)}`)
+        }
+        router.push(route)
+      },
     })
+    if (appConfig.isPkiAuthenticated) {
+      updatedAuthToken.value = true
+    }
     handshake.then((parent) => {
       log.debug('UseIframeInit.js: handshake.then')
       // Make sure to freeze the parent object so Pinia won't try to make it reactive
@@ -70,7 +97,10 @@ export const useIframeInit = () => {
       displayAttributes.isSummaryOnly = parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false
 
       // whether to use an internal back button as opposed to the browser back button
-      // displayAttributes.internalBackButton = parent.model.internalBackButton == null || parent.model.internalBackButton
+      displayAttributes.internalBackButton = parent.model.internalBackButton == null || parent.model.internalBackButton
+      if (log.isTraceEnabled()) {
+        log.trace(`UseIframeInit.js: internalBackButton: ${displayAttributes.internalBackButton}`)
+      }
 
       parentState.serviceUrl = parent.model.serviceUrl
 
@@ -82,10 +112,13 @@ export const useIframeInit = () => {
         parentState.options = { ...parent.model.options }
       }
 
-      // UserSkillsService.setVersion(parent.model.version);
+      if (parent.model.version) {
+        displayAttributes.version = parent.model.version
+      }
       // UserSkillsService.setUserId(parent.model.userId);
       // QuizRunService.setUserId(parent.model.userId);
-      //
+      displayAttributes.userId = parent.model.userId
+
       handleTheming(parent.model.theme);
 
       parentState.parentFrame.emit('needs-authentication')
@@ -102,7 +135,7 @@ export const useIframeInit = () => {
       displayAttributes.loadingConfig = false
       // this.getCustomIconCss();
 
-      loadedIframe.value = true
+      completedHandshake.value = true
     })
   }
 

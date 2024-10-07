@@ -46,6 +46,7 @@ service/src/main/resources/public/**
 .history
 /e2e-tests/cypress/screenshots/
 /e2e-tests/cypress/snapshots/**/__diff_output__
+/e2e-tests/cypress/downloads/*
 
 /dashboard/build/
 
