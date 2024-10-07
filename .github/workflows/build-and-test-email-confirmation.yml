@@ -59,6 +59,7 @@ jobs:
 
     - uses: actions/setup-java@v4
       with:
+        distribution: 'temurin'
         java-version: '19' # The JDK version to make available on the path.
 
     - name: Print Versions
