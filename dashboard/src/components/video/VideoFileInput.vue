@@ -96,7 +96,7 @@ const openFileDialog = (event) => {
     <div v-if="isInternallyHosted" class="flex align-items-start">
       <InputGroup>
         <InputGroupAddon style="height: 1%">
-          <div><i class="fas fa-server mr-1"></i>SkillTree Hosted</div>
+          <label class="text-600" for="videoFileInput"><i class="fas fa-server mr-1"></i>SkillTree Hosted</label>
         </InputGroupAddon>
         <SkillsTextInput id="videoFileInput"
                          class="flex-1"

@@ -117,6 +117,14 @@ class AccessSettingsController {
         return accessSettingsStorageService.getUserRolesForProjectId(projectId, roles, pageRequest)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/countUserRoles", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    Integer countProjectUserRoles(
+            @PathVariable("projectId") String projectId,
+            @RequestParam List<RoleName> roles) {
+        return accessSettingsStorageService.countUserRolesForProjectId(projectId, roles)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/userRoles/{roleName}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     TableResult getProjectUserRolesWithPaging(@PathVariable("projectId") String projectId, @PathVariable("roleName") String roleName,

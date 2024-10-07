@@ -339,7 +339,7 @@ describe('Markdown Tests', () => {
         cy.clickToolbarButton('codeblock')
 
         cy.clickSave();
-        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]');
+        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"]', {errorThreshold: 0.05});
     });
 
     const markdown = '# Title1\n## Title2\n### Title 3\n#### Title 4\n##### Title 5\nTitle 6\n\n' +

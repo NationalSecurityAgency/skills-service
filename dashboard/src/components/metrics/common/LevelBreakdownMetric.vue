@@ -15,10 +15,12 @@ limitations under the License.
 */
 <script setup>
 import { ref, onMounted } from 'vue';
-import MetricsService from "@/components/metrics/MetricsService.js";
+import MetricsService from '@/components/metrics/MetricsService.js';
 import { useRoute } from 'vue-router';
+import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
+import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 import NumberFormatter from '@/components/utils/NumberFormatter.js'
-import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
+import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue';
 
 const route = useRoute();
 const props = defineProps({
@@ -28,6 +30,15 @@ const props = defineProps({
     default: 'Overall Levels',
   },
 });
+const themeState = useSkillsDisplayThemeState()
+const themeHelper = useThemesHelper()
+
+const chartAxisColor = () => {
+  if (themeState.theme.charts.axisLabelColor) {
+    return themeState.theme.charts.axisLabelColor
+  }
+  return themeHelper.isDarkTheme ? 'white' : undefined
+}
 
 const isLoading = ref(true);
 const isEmpty = ref(false);
@@ -93,6 +104,9 @@ const chartOptions = ref({
       formatter(val) {
         return NumberFormatter.format(val);
       },
+      style: {
+        colors: chartAxisColor()
+      }
     },
   },
   yaxis: {
@@ -111,6 +125,7 @@ const chartOptions = ref({
     opacity: 1,
   },
   tooltip: {
+    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
     y: {
       formatter(val) {
         return NumberFormatter.format(val);

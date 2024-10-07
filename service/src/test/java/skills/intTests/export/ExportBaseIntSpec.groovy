@@ -16,6 +16,7 @@
 package skills.intTests.export
 
 import groovy.time.TimeCategory
+import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Workbook
@@ -71,6 +72,7 @@ class ExportBaseIntSpec extends DefaultIntSpec {
         assert data
         Workbook workbook = WorkbookFactory.create(file)
         Sheet sheet = workbook.getSheetAt(0)
+        printSheet(sheet)
         assert sheet.getPhysicalNumberOfRows() == data.size()
 
         data.eachWithIndex { dataRow, rowIndex ->
@@ -78,6 +80,15 @@ class ExportBaseIntSpec extends DefaultIntSpec {
             for (int i = 0; i < dataRow.size(); i++) {
                 assert row.getCell(i).toString() == dataRow.get(i), "row: ${rowIndex} col: ${i} expected: ${dataRow.get(i)} actual: ${row.getCell(i).toString()}"
             }
+        }
+    }
+
+    void printSheet(Sheet sheet) {
+        for (Row row : sheet) {
+            for (Cell cell : row) {
+                print "${cell}, "
+            }
+            println ""
         }
     }
 

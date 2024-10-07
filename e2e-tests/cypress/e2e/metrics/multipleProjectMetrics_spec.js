@@ -1066,4 +1066,146 @@ describe('Multiple Project Metrics', () => {
             .should('not.exist');
     });
 
+    it('sorting remains on refresh', () => {
+        cy.visit('/administrator/');
+        cy.clickNav('Metrics');
+        cy.usrsInCommon()
+            .contains('No Projects Selected');
+
+        for (let i = 0; i < 2; i += 1) {
+            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
+            cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project ${i}`).click();
+        }
+
+
+        const tableSelector = `${multiProjSel} tbody tr`;
+        cy.get(tableSelector)
+            .should('have.length', 2);
+
+        cy.get('[data-cy=findUsersBtn]')
+            .click();
+
+        const resTable = '[data-cy=usersInCommonResultTable]';
+        const expected = [
+            [{
+                colIndex: 0,
+                value: 'user1@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user2@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user3@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user4@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user5@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user6@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user7@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user8@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user9@skills.org'
+            }],
+        ];
+        cy.validateTable(resTable, expected);
+
+        // sort
+        cy.get(resTable)
+            .contains('User')
+            .click();
+        const expected1 = [
+            [{
+                colIndex: 0,
+                value: 'user9@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user8@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user7@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user6@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user5@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user4@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user3@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user2@skills.org'
+            }],
+            [{
+                colIndex: 0,
+                value: 'user1@skills.org'
+            }],
+        ];
+        cy.validateTable(resTable, expected1);
+
+        cy.visit('/administrator/');
+        cy.clickNav('Metrics');
+        cy.usrsInCommon()
+            .contains('No Projects Selected');
+
+        for (let i = 0; i < 2; i += 1) {
+            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
+            cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project ${i}`).click();
+        }
+
+        cy.get(tableSelector)
+            .should('have.length', 2);
+
+        cy.get('[data-cy=findUsersBtn]')
+            .click();
+
+        cy.validateTable(resTable, expected1);
+
+        cy.get(resTable).contains('User').click();
+
+        cy.visit('/administrator/');
+        cy.clickNav('Metrics');
+        cy.usrsInCommon()
+            .contains('No Projects Selected');
+
+        for (let i = 0; i < 2; i += 1) {
+            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
+            cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project ${i}`).click();
+        }
+
+        cy.get(tableSelector)
+            .should('have.length', 2);
+
+        cy.get('[data-cy=findUsersBtn]')
+            .click();
+
+        cy.validateTable(resTable, expected);
+    });
 });

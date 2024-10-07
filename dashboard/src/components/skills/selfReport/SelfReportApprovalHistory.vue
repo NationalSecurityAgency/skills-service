@@ -171,8 +171,8 @@ defineExpose( {
                        :rowsPerPageOptions="possiblePageSizes"
                        :totalRecords="totalRows"
                        :busy="loading"
-                       :sort-field="sortBy"
-                       :sort-order="sortOrder"
+                       v-model:sort-field="sortBy"
+                       v-model:sort-order="sortOrder"
                        @page="pageChanged"
                        data-key="id"
                        @sort="sortTable">

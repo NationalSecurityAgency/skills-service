@@ -106,7 +106,7 @@ const numUsersBehindMe = computed(() => {
           </media-info-card>
         </div>
 
-        <div class="w-min-13rem flex-1">
+        <div class="flex-1">
           <media-info-card
             :title="`${numFormat.pretty(rankingDistribution.myPoints)}`"
             class="h-full text-center font-bold"
@@ -116,7 +116,7 @@ const numUsersBehindMe = computed(() => {
           </media-info-card>
         </div>
 
-        <div class="w-min-13rem flex-1">
+        <div class="flex-1">
           <media-info-card
             :title="`${numFormat.pretty(totalNumUsers)}`"
             class="h-full  text-center font-bold"

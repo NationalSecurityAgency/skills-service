@@ -38,6 +38,8 @@ describe('Approver Config Tests', () => {
         cy.register('user1', pass);
         cy.register('user2', pass);
         cy.register('user3', pass);
+        cy.register('user4', pass);
+        cy.register('user5', pass);
         cy.fixture('vars.json')
             .then((vars) => {
                 if (!Cypress.env('oauthMode')) {
@@ -167,4 +169,68 @@ describe('Approver Config Tests', () => {
         });
     });
 
+    it('paging works appropriately and does not display incorrect result component', function () {
+        cy.fixture('vars.json').then((vars) => {
+            cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user3/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user4/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user5/roles/ROLE_PROJECT_APPROVER`);
+
+            cy.visit('/administrator/projects/proj1/self-report/configure');
+
+            cy.get('[data-pc-section="pagebutton"]').contains('2').click();
+            cy.get('[data-cy="approvalConfNotAvailable"]').should('not.exist');
+
+            cy.get('[data-pc-section="pagebutton"]').contains('1').click();
+
+            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
+
+            const tableSelector = '[data-cy="skillApprovalConfTable"]'
+            cy.validateTable(tableSelector, [
+                [{
+                    colIndex: 0,
+                    value: 'user5'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user4'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user3'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user2'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user1'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: defaultUser
+                }, {
+                    colIndex: 1,
+                    value: 'Admin'
+                }],
+            ], 5);
+        });
+    });
 });
