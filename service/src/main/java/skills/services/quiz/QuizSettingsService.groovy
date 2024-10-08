@@ -61,6 +61,19 @@ class QuizSettingsService {
     UserActionsHistoryService userActionsHistoryService
 
     @Transactional
+    void copySettings(String fromQuizId, String toQuizId) {
+        List<QuizSettingsRes> fromSettings = getSettings(fromQuizId)
+        List<QuizSettingsRequest> toSettings = new ArrayList<QuizSettingsRequest>()
+
+        fromSettings.forEach( setting -> {
+            QuizSettingsRequest request = new QuizSettingsRequest(value: setting.value, setting: setting.setting)
+            toSettings.add(request)
+        })
+
+        saveSettings(toQuizId, toSettings)
+    }
+
+    @Transactional
     void saveSettings(String quizId, List<QuizSettingsRequest> settingsRequests) {
         Integer quizRefId = getQuizDefRefId(quizId)
         settingsRequests.each {

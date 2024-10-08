@@ -83,6 +83,9 @@ class QuizDefService {
     QuizSettingsRepo quizSettingsRepo
 
     @Autowired
+    QuizSettingsService quizSettingsService
+
+    @Autowired
     LockingService lockingService
 
     @Autowired
@@ -177,46 +180,16 @@ class QuizDefService {
 
         lockingService.lockQuizDefs()
 
-        QuizDefWithDescription quizDefWithDescription = originalQuizId ? quizDefWithDescRepo.findByQuizIdIgnoreCase(originalQuizId) : null
-        if (!quizDefWithDescription || !quizDefWithDescription.quizId.equalsIgnoreCase(originalQuizId)) {
-            serviceValidatorHelper.validateQuizIdDoesNotExist(newQuizId)
-        }
-        if (!quizDefWithDescription || !quizDefWithDescription.name.equalsIgnoreCase(quizDefWithDescription.name)) {
-            serviceValidatorHelper.validateQuizNameDoesNotExist(quizDefRequest.name, newQuizId)
-        }
-
-        quizDefWithDescription = new QuizDefWithDescription(quizId: newQuizId, name: quizDefRequest.name,
-                description: quizDefRequest.description, type: QuizDefParent.QuizType.valueOf(quizDefRequest.type))
-        log.debug("Created quiz [{}]", quizDefWithDescription)
-
         String userId = userIdParam ?: userInfoService.getCurrentUserId()
-
-        if (!userInfoService.isCurrentUserASuperDuperUser()) {
-            createdResourceLimitsValidator.validateNumQuizDefsCreated(userId)
-        }
-
-        DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null, null, quizDefWithDescription.quizId) {
-            quizDefWithDescription = quizDefWithDescRepo.save(quizDefWithDescription)
-        }
-
-        QuizQuestionsResult originalQuestions = getQuestionDefs(originalQuizId)
-        originalQuestions.questions.forEach(question -> {
-            List<QuizAnswerDefResult> answers = question.answers
-            QuizQuestionDefRequest newQuestion = new QuizQuestionDefRequest()
-            newQuestion.question = question.question
-            newQuestion.questionType = question.questionType
-            List<QuizAnswerDefRequest> newAnswers = answers.collect( it -> {
-                return new QuizAnswerDefRequest(answer: it.answer, isCorrect: it.isCorrect)
-            })
-            newQuestion.answers = newAnswers
-            saveQuestion(newQuizId, newQuestion)
-        })
-
-        log.debug("Saved [{}]", quizDefWithDescription)
+        QuizDefWithDescription quizDefWithDescription = copyQuizDef(originalQuizId, newQuizId, quizDefRequest, userId)
+        copyQuestions(originalQuizId, newQuizId)
+        quizSettingsService.copySettings(originalQuizId, newQuizId)
 
         attachmentService.updateAttachmentsFoundInMarkdown(quizDefRequest.description, null, newQuizId, null)
 
         accessSettingsStorageService.addQuizDefUserRole(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
+
+        log.debug("Copied [{}]", quizDefWithDescription)
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: DashboardAction.Create,
@@ -229,6 +202,47 @@ class QuizDefService {
 
         QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)
         return convert(updatedDef)
+    }
+
+    QuizDefWithDescription copyQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest, String userId) {
+        QuizDefWithDescription quizDefWithDescription = originalQuizId ? quizDefWithDescRepo.findByQuizIdIgnoreCase(originalQuizId) : null
+        if (!quizDefWithDescription || !quizDefWithDescription.quizId.equalsIgnoreCase(originalQuizId)) {
+            serviceValidatorHelper.validateQuizIdDoesNotExist(newQuizId)
+        }
+        if (!quizDefWithDescription || !quizDefWithDescription.name.equalsIgnoreCase(quizDefWithDescription.name)) {
+            serviceValidatorHelper.validateQuizNameDoesNotExist(quizDefRequest.name, newQuizId)
+        }
+
+        quizDefWithDescription = new QuizDefWithDescription(quizId: newQuizId, name: quizDefRequest.name,
+                description: quizDefRequest.description, type: QuizDefParent.QuizType.valueOf(quizDefRequest.type))
+        log.debug("Created quiz [{}]", quizDefWithDescription)
+
+        if (!userInfoService.isCurrentUserASuperDuperUser()) {
+            createdResourceLimitsValidator.validateNumQuizDefsCreated(userId)
+        }
+
+        DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null, null, quizDefWithDescription.quizId) {
+            quizDefWithDescription = quizDefWithDescRepo.save(quizDefWithDescription)
+        }
+        return quizDefWithDescription
+    }
+
+    void copyQuestions(String originalQuizId, String newQuizId) {
+        QuizQuestionsResult originalQuestions = getQuestionDefs(originalQuizId)
+        List<QuizQuestionDefRequest> newQuestions = new ArrayList<QuizQuestionDefRequest>()
+        originalQuestions.questions.forEach(question -> {
+            List<QuizAnswerDefResult> answers = question.answers
+            QuizQuestionDefRequest newQuestion = new QuizQuestionDefRequest()
+            newQuestion.question = question.question
+            newQuestion.questionType = question.questionType
+            List<QuizAnswerDefRequest> newAnswers = answers.collect( it -> {
+                return new QuizAnswerDefRequest(answer: it.answer, isCorrect: it.isCorrect)
+            })
+            newQuestion.answers = newAnswers
+            newQuestions.add(newQuestion)
+        })
+
+        saveQuestionBatch(newQuizId, newQuestions)
     }
 
     @Transactional()
@@ -334,6 +348,20 @@ class QuizDefService {
                 quizSettingsRepo.save(retrievedSetting)
             }
         }
+    }
+
+    @Transactional()
+    void saveQuestionBatch(String quizId, List<QuizQuestionDefRequest> questions) {
+        QuizDef quizDef = findQuizDef(quizId)
+
+        lockingService.lockQuizDef(quizDef.quizId)
+
+        questions.forEach( questionRequest -> {
+            QuizQuestionDef savedQuestion
+            List<QuizAnswerDef> savedAnswers
+            savedQuestion = createQuizQuestionDef(quizDef, questionRequest)
+            savedAnswers = createQuizQuestionAnswerDefs(questionRequest, savedQuestion)
+        })
     }
 
     @Transactional()
