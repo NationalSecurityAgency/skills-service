@@ -23,6 +23,11 @@ on:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
       - '.github/workflows/publish-image-snapshot.yml'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - '.github/workflows/build-and-test-postgres.yml'
+      - '.github/workflows/publish-image-snapshot.yml'
 
 jobs:
   build-skills-service-for-ui-tests:

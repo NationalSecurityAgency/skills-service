@@ -14,21 +14,14 @@
 
 name: Continuous Integration with OAuth
 
-#on:
-#  push:
-#    paths-ignore:
-#      - 'README.md'
-#  pull_request:
-#    paths-ignore:
-#      - 'README.md'
 on:
-  schedule:
-   - cron: '0 6 * * *'
   workflow_dispatch:
   push:
-#  pull_request:
-#    paths-ignore:
-#      - 'README.md'
+    paths-ignore:
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
 
 jobs:
   build-skills-service-for-ui-tests:
