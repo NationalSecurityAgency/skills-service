@@ -102,7 +102,7 @@ const schema = object({
 
 const asyncLoadData = () => {
   const loadDescription = () => {
-    if(props.isEdit) {
+    if(props.isEdit || props.isCopy) {
       return QuizService.getQuizDef(props.quiz.quizId).then((data) => {
         initialQuizData.value.description = data.description ? data.description : ''
         initialQuizData.value = { ...initialQuizData.value }

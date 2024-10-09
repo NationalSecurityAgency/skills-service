@@ -153,11 +153,13 @@ function deleteQuiz() {
 const showUpdateModal = (quizDef, isEdit = true) => {
   editQuizInfo.value.quizDef = quizDef;
   editQuizInfo.value.isEdit = isEdit;
+  editQuizInfo.value.isCopy = false;
   editQuizInfo.value.showDialog = true;
 };
 const showCopyModal = (quizDef, isCopy = true) => {
   editQuizInfo.value.quizDef = quizDef;
   editQuizInfo.value.isCopy = isCopy;
+  editQuizInfo.value.isEdit = false;
   editQuizInfo.value.showDialog = true;
 };
 
