@@ -1776,6 +1776,10 @@ class SkillsService {
         String url = "${getQuizDefUrl(quizId)}/questions/${questionRefId}"
         return wsHelper.adminDelete(url)
     }
+    def copyQuiz(String quizId, Map props) {
+         String url = "${getQuizDefUrl(quizId)}/copy"
+         wsHelper.adminPost(url, props)
+    }
 
     def changeQuizQuestionDisplayOrder(String quizId, Integer questionId, Integer newDisplayOrderIndex){
         assert quizId
