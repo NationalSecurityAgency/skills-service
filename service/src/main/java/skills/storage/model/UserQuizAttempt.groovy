@@ -30,7 +30,7 @@ import jakarta.persistence.*
 class UserQuizAttempt {
 
     static enum QuizAttemptStatus {
-        INPROGRESS, PASSED, FAILED,
+        INPROGRESS, PASSED, FAILED, NEEDS_GRADING
     }
 
     @Id

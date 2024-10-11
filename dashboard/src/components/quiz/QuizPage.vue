@@ -25,6 +25,7 @@ import PageHeader from '@/components/utils/pages/PageHeader.vue';
 import Navigation from '@/components/utils/Navigation.vue';
 import UserRolesUtil from '@/components/utils/UserRolesUtil.js';
 import EditQuiz from '@/components/quiz/testCreation/EditQuiz.vue';
+import QuizType from "@/skills-display/components/quiz/QuizType.js";
 
 const announcer = useSkillsAnnouncer()
 const router = useRouter()
@@ -43,19 +44,24 @@ onMounted(() => {
   }
 })
 
+const isQuiz = computed(() => QuizType.isQuiz(quizSummaryState.quizSummary?.type))
+const isSurvey = computed(() => QuizType.isSurvey(quizSummaryState.quizSummary?.type))
 const isLoading = computed(() => quizSummaryState.loadingQuizSummary || quizConfig.loadingQuizConfig)
 const navItems = computed(() => {
   const res = [
-    { name: 'Questions', iconClass: 'fa-graduation-cap skills-color-skills', page: 'Questions' },
-    { name: 'Results', iconClass: 'fa-chart-bar skills-color-metrics', page: 'QuizMetrics' },
-    { name: 'Runs', iconClass: 'fa-users skills-color-users', page: 'QuizRunsHistoryPage' },
+    { name: 'Questions', iconClass: 'fa-graduation-cap', page: 'Questions' },
+    { name: 'Results', iconClass: 'fa-chart-bar', page: 'QuizMetrics' },
+    { name: 'Runs', iconClass: 'fa-users', page: 'QuizRunsHistoryPage' },
     { name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'QuizSkillsPage' },
   ];
 
   if (!quizConfig.isReadOnlyQuiz) {
-    res.push({ name: 'Access', iconClass: 'fas fa-shield-alt skills-color-access', page: 'QuizAccessPage' });
-    res.push({ name: 'Settings', iconClass: 'fa-cogs skills-color-settings', page: 'QuizSettings' });
-    res.push({ name: 'Activity History', iconClass: 'fa-users-cog text-success', page: 'QuizActivityHistory' });
+    if (isQuiz.value) {
+      res.push({ name: 'Grading', iconClass: 'fas fa-user-check', page: 'GradeQuizzesPage' });
+    }
+    res.push({ name: 'Access', iconClass: 'fas fa-shield-alt', page: 'QuizAccessPage' });
+    res.push({ name: 'Settings', iconClass: 'fa-cogs', page: 'QuizSettings' });
+    res.push({ name: 'Activity History', iconClass: 'fa-users-cog', page: 'QuizActivityHistory' });
   }
 
   return res;
@@ -65,9 +71,8 @@ const headerOptions = computed(() => {
   if (!quizSummary) {
     return {};
   }
-  const isSurvey = quizSummary.type === 'Survey';
-  const typeDesc = isSurvey ? 'Collect Info' : 'Graded Questions';
-  const typeIcon = isSurvey ? 'fas fa-chart-pie' : 'fas fa-tasks';
+  const typeDesc = isSurvey.value ? 'Collect Info' : 'Graded Questions';
+  const typeIcon = isSurvey.value ? 'fas fa-chart-pie' : 'fas fa-tasks';
   return {
     icon: 'fas fa-spell-check skills-color-subjects',
     title: `${quizSummary.name}`,

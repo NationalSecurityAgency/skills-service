@@ -18,13 +18,18 @@ import { computed } from 'vue'
 import { useFieldArray } from "vee-validate";
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
+import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 
 const model = defineModel()
 const props = defineProps({
   quizType: {
     type: String,
     required: true,
-  }
+  },
+  questionType: {
+    type: String,
+    required: true,
+  },
 })
 const { remove, insert, push, replace, fields } = useFieldArray('answers');
 const appConfig = useAppConfig()
@@ -70,6 +75,7 @@ defineExpose( {
           :answer-number="index+1"
           :name="`answers[${index}].isCorrect`"
           v-model="answer.value.isCorrect"
+          :is-radio-icon="QuestionType.isSingleChoice(questionType)"
           class="flex flex-initial mr-2 field"/>
       <SkillsTextInput
           class="flex flex-1"

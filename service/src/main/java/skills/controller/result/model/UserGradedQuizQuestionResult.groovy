@@ -24,4 +24,5 @@ class UserGradedQuizQuestionResult {
 
     List<UserGradedQuizAnswerResult> answers
     Boolean isCorrect
+    Boolean needsGrading = false
 }

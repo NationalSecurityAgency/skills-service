@@ -2669,5 +2669,36 @@
         </insert>
     </changeSet>
 
+    <changeSet id="47" author="skills team">
+        <createTable tableName="user_quiz_answer_graded">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_quiz_answer_attempt_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="feedback" type="text" />
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="index_user_quiz_answer_graded_user_quiz_answer_attempt_ref_id"
+                     tableName="user_quiz_answer_graded" unique="true">
+            <column name="user_quiz_answer_attempt_ref_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_quiz_answer_attempt_ref_id"
+                                 baseTableName="user_quiz_answer_graded"
+                                 constraintName="fk_user_quiz_answer_graded_user_quiz_answer_attempt_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_quiz_answer_attempt"/>
+    </changeSet>
+
 
 </databaseChangeLog>

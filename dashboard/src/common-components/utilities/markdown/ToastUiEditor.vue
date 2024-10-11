@@ -27,6 +27,10 @@ import Editor from '@toast-ui/editor';
 import { onMounted } from 'vue';
 
 const props = defineProps({
+  id: {
+    type: String,
+    default: 'toastui-editor',
+  },
   options: Object,
   initialValue: String,
   initialEditType: {
@@ -55,7 +59,7 @@ const editorContainer = {
   editor: null,
 };
 onMounted(() => {
-  const el = document.querySelector('#editor');
+  const el = document.querySelector(`#${props.id}`);
   const options = {
     ...props.options,
     initialValue: props.initialValue,
@@ -85,7 +89,7 @@ defineExpose({
 
 <template>
   <div>
-    <div id="editor"></div>
+    <div :id="id"></div>
   </div>
 </template>
 

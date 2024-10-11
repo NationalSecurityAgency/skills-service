@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+package skills.storage.repos
 
-class UserGradedQuizAnswerResult {
-    Integer id
-    String answer
-    Boolean isConfiguredCorrect
-    Boolean isSelected
-    Boolean needsGrading = false
+import org.springframework.data.jpa.repository.JpaRepository
+import skills.storage.model.UserQuizAnswerGraded
+
+interface UserQuizAnswerGradedRepo extends JpaRepository<UserQuizAnswerGraded, Long> {
+
+
 }
