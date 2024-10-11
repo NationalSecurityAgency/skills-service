@@ -33,8 +33,8 @@ export const useMarkdownAccessibilityFixes = () => {
     }
   }
 
-  function clickOnHeaderToolbarButton() {
-    const btn = commonMarkdownOptions.getHeaderButton()
+  function clickOnHeaderToolbarButton(id) {
+    const btn = commonMarkdownOptions.getHeaderButton(id)
     if (btn) {
       btn.dispatchEvent(commonMarkdownOptions.getMouseEvent())
       btn.focus()
@@ -57,17 +57,19 @@ export const useMarkdownAccessibilityFixes = () => {
     doClickOnToolbarButton('.attachment-button')
   }
 
-  function fixAccessibilityIssues() {
-    fixHeaderButtonIssues()
+  function fixAccessibilityIssues(id, allowInsertImages=true) {
+    fixHeaderButtonIssues(id)
     fixMoreButtonAriaLabel(1)
-    fixFontSizeButtonIssues()
-    fixInsertImageButtonIssues()
-    fixInsertUrlButtonIssues()
+    fixFontSizeButtonIssues(id)
+    if (allowInsertImages) {
+      fixInsertImageButtonIssues(id)
+    }
+    fixInsertUrlButtonIssues(id)
   }
 
-  function fixInsertUrlButtonIssues() {
+  function fixInsertUrlButtonIssues(id) {
     nextTick(() => {
-      const markdownEditor = commonMarkdownOptions.getMarkdownEditor()
+      const markdownEditor = commonMarkdownOptions.getMarkdownEditor(id)
       if (markdownEditor) {
         const imageButton = markdownEditor.querySelector('.link')
         imageButton.addEventListener('click', handleUrlButtonClick)
@@ -83,51 +85,53 @@ export const useMarkdownAccessibilityFixes = () => {
     })
   }
 
-  function fixInsertImageButtonIssues() {
+  function fixInsertImageButtonIssues(id) {
     nextTick(() => {
-      const markdownEditor = commonMarkdownOptions.getMarkdownEditor()
+      const markdownEditor = commonMarkdownOptions.getMarkdownEditor(id)
       if (markdownEditor) {
         const imageButton = markdownEditor.querySelector('.image')
+
+        const handleImageButtonClick = () => {
+          nextTick(() => {
+            nextTick(() => announcer.polite('Insert image by uploading a file or via an external URL. File Tab is currently active but please use left and right keys to switch between the tabs.'))
+            const menuPopup = commonMarkdownOptions.getMenuPopup(id)
+            const activeTab = menuPopup.querySelector('.tab-item.active')
+            activeTab.focus()
+            const hiddenFileUploadInput = menuPopup.querySelector('#toastuiImageFileInput')
+            hiddenFileUploadInput.setAttribute('tabindex', -1)
+
+            const tabs = menuPopup.querySelectorAll('.tab-item')
+            tabs.forEach((tab) => {
+              tab.addEventListener('keydown', (event) => {
+                if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+                  const otherTab = menuPopup.querySelector('.tab-item:not(.active)')
+                  otherTab.dispatchEvent(commonMarkdownOptions.getMouseEvent())
+                  otherTab.focus()
+                }
+              })
+            })
+            const okButton = menuPopup.querySelector('.toastui-editor-ok-button')
+            okButton.setAttribute('tabindex', 0)
+            const cancelButton = menuPopup.querySelector('.toastui-editor-close-button')
+            cancelButton.setAttribute('tabindex', 0)
+            const descriptonInput = menuPopup.querySelector('#toastuiAltTextInput')
+            descriptonInput.setAttribute('tabindex', 0)
+            const selectFileButton = menuPopup.querySelector('.toastui-editor-file-select-button')
+            selectFileButton.setAttribute('tabindex', 0)
+          })
+        }
+
         imageButton.addEventListener('click', handleImageButtonClick)
       }
     })
   }
 
-  function handleImageButtonClick() {
-    nextTick(() => {
-      nextTick(() => announcer.polite('Insert image by uploading a file or via an external URL. File Tab is currently active but please use left and right keys to switch between the tabs.'))
-      const menuPopup = commonMarkdownOptions.getMenuPopup()
-      const activeTab = menuPopup.querySelector('.tab-item.active')
-      activeTab.focus()
-      const hiddenFileUploadInput = menuPopup.querySelector('#toastuiImageFileInput')
-      hiddenFileUploadInput.setAttribute('tabindex', -1)
 
-      const tabs = menuPopup.querySelectorAll('.tab-item')
-      tabs.forEach((tab) => {
-        tab.addEventListener('keydown', (event) => {
-          if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-            const otherTab = menuPopup.querySelector('.tab-item:not(.active)')
-            otherTab.dispatchEvent(commonMarkdownOptions.getMouseEvent())
-            otherTab.focus()
-          }
-        })
-      })
-      const okButton = menuPopup.querySelector('.toastui-editor-ok-button')
-      okButton.setAttribute('tabindex', 0)
-      const cancelButton = menuPopup.querySelector('.toastui-editor-close-button')
-      cancelButton.setAttribute('tabindex', 0)
-      const descriptonInput = menuPopup.querySelector('#toastuiAltTextInput')
-      descriptonInput.setAttribute('tabindex', 0)
-      const selectFileButton = menuPopup.querySelector('.toastui-editor-file-select-button')
-      selectFileButton.setAttribute('tabindex', 0)
-    })
-  }
-
-  function fixFontSizeButtonIssues() {
-    nextTick(() => {
-      const markdownEditor = commonMarkdownOptions.getMarkdownEditor()
+  function fixFontSizeButtonIssues(id) {
+    return nextTick(() => {
+      const markdownEditor = commonMarkdownOptions.getMarkdownEditor(id)
       if (markdownEditor) {
-        const fontButton = markdownEditor.querySelector('[aria-label="F"]')
+        const fontButton = markdownEditor.querySelector(`#${id} [aria-label="F"]`)
         fontButton.setAttribute('aria-label', 'Font Size')
         fontButton.setAttribute('skilltree-id', 'fontSizeBtn')
         fontButton.addEventListener('click', handleFontSizeButtonClick)
@@ -178,10 +182,10 @@ export const useMarkdownAccessibilityFixes = () => {
     }
   }
 
-  function fixHeaderButtonIssues() {
+  function fixHeaderButtonIssues(id) {
     nextTick(() => {
       nextTick(() => {
-        const headerButton = commonMarkdownOptions.getHeaderButton()
+        const headerButton = commonMarkdownOptions.getHeaderButton(id)
         if (headerButton) {
           headerButton.setAttribute('aria-haspopup', 'menu')
           headerButton.setAttribute('aria-expanded', false)

@@ -40,8 +40,11 @@ const isRatingType = computed(() => {
 const hasAnswer = computed(() => {
   return props.question.answers.find((a) => a.isSelected === true) !== undefined;
 })
+const needsGrading = computed(() => {
+  return props.question.needsGrading
+})
 const isWrong = computed(() => {
-  return props.question.answers.find((a) => hasAnswer.value && a.isConfiguredCorrect !== a.isSelected) !== undefined;
+  return !needsGrading.value && props.question.answers.find((a) => hasAnswer.value && a.isConfiguredCorrect !== a.isSelected) !== undefined;
 })
 const isSurvey = computed(() => {
   return props.quizType === 'Survey';
@@ -58,6 +61,9 @@ const numberOfStars = computed(() => {
 <template>
   <div data-cy="questionDisplayCard">
     <div :data-cy="`questionDisplayCard-${questionNum}`">
+      <div v-if="needsGrading" class="flex flex-row" data-cy="noAnswer">
+        <Tag severity="warning" class="uppercase"><i class="fas fa-user-check mr-1" aria-hidden="true"></i> Needs Grading</Tag>
+      </div>
       <div v-if="!hasAnswer" class="flex flex-row" data-cy="noAnswer">
         <Tag severity="warning">No Answer</Tag>
       </div>

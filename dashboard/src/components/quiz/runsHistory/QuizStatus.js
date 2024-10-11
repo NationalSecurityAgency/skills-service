@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
-
-class UserGradedQuizAnswerResult {
-    Integer id
-    String answer
-    Boolean isConfiguredCorrect
-    Boolean isSelected
-    Boolean needsGrading = false
-}
+export default {
+    Failed: 'FAILED',
+    Passed: 'PASSED',
+    InProgress: 'INPROGRESS',
+    NeedsGrading: 'NEEDS_GRADING',
+    isFailed: (status) => status === 'FAILED',
+    isPassed: (status) => status === 'PASSED',
+    isInProgress: (status) => status === 'INPROGRESS',
+    isNeedsGrading: (status) => status === 'NEEDS_GRADING',
+};

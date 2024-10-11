@@ -29,9 +29,10 @@ interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt,
     static interface AnswerIdAndAnswerText {
         Integer getAnswerId()
         String getAnswerText()
+        UserQuizAnswerAttempt.QuizAnswerStatus getAnswerStatus()
     }
 
-    @Query('''select answerAttempt.quizAnswerDefinitionRefId as answerId, answerAttempt.answer as answerText
+    @Query('''select answerAttempt.quizAnswerDefinitionRefId as answerId, answerAttempt.answer as answerText, answerAttempt.status as answerStatus
         from UserQuizAnswerAttempt answerAttempt
         where answerAttempt.userQuizAttemptRefId = ?1
      ''')

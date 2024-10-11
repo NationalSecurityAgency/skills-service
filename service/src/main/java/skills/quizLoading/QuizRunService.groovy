@@ -84,6 +84,9 @@ class QuizRunService {
     UserQuizQuestionAttemptRepo quizQuestionAttemptRepo
 
     @Autowired
+    UserQuizAnswerGradedRepo userQuizAnswerGradedRepo
+
+    @Autowired
     UserQuizAnswerAttemptRepo quizAttemptAnswerRepo
 
     @Autowired
@@ -410,13 +413,7 @@ class QuizRunService {
             }
         }
 
-        QuizAnswerDefRepo.AnswerDefPartialInfo answerDefPartialInfo = quizAnswerRepo.getPartialDefByAnswerDefId(answerDefId)
-        if (!answerDefPartialInfo) {
-            throw new SkillQuizException("Provided answer id [${answerDefId}] does not exist", ErrorCode.BadParam)
-        }
-        if (answerDefPartialInfo.getQuizId() != quizId) {
-            throw new SkillQuizException("Supplied quizId of [${quizId}] does not match answer's quiz id  of [${answerDefPartialInfo.getQuizId()}]", ErrorCode.BadParam)
-        }
+        QuizAnswerDefRepo.AnswerDefPartialInfo answerDefPartialInfo = getAnswerDefPartialInfo(quizId, answerDefId)
 
         if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.TextInput) {
             if (quizReportAnswerReq.isSelected) {
@@ -428,13 +425,14 @@ class QuizRunService {
             } else {
                 QuizValidator.isTrue(StringUtils.isBlank(quizReportAnswerReq.getAnswerText()), "For TextInput type, if isSelected=false then the answer must be null or blank", quizId)
             }
-            handleReportingTextInputQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq)
+            QuizDef quizDef = getQuizDef(quizId)
+            handleReportingTextInputQuestion(quizDef, userId, quizAttemptId, answerDefId, quizReportAnswerReq)
         } else {
             handleReportingAChoiceBasedQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq, answerDefPartialInfo)
         }
     }
 
-    private void handleReportingTextInputQuestion(String userId, Integer quizAttemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
+    private void handleReportfingTextInputQuestion(QuizDef quizDef, String userId, Integer quizAttemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
         UserQuizAnswerAttempt existingAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
         if (existingAnswerAttempt) {
             if (quizReportAnswerReq.isSelected) {
@@ -448,7 +446,7 @@ class QuizRunService {
                     userQuizAttemptRefId: quizAttemptId,
                     quizAnswerDefinitionRefId: answerDefId,
                     userId: userId,
-                    status: UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT,
+                    status: quizDef.type == QuizDefParent.QuizType.Quiz ? UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING : UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT,
                     answer: quizReportAnswerReq.getAnswerText(),
             )
             quizAttemptAnswerRepo.save(newAnswerAttempt)
@@ -484,19 +482,51 @@ class QuizRunService {
         }
     }
 
+    @Transactional
+    QuizAnswerGradingResult gradeQuestionAnswer(String userId, String quizId, Integer quizAttemptId, Integer answerDefId, QuizGradeAnswerReq gradeAnswerReq) {
+        QuizDef quizDef = getQuizDef(quizId)
+        UserQuizAttempt userQuizAttempt = getQuizAttempt(quizAttemptId)
+        validateAttempt(userQuizAttempt, quizDef, quizAttemptId, quizId, userId)
+
+        Optional<QuizAnswerDef> quizAnswerDefOptional = quizAnswerRepo.findById(answerDefId)
+        if (!quizAnswerDefOptional.isPresent()) {
+            throw new SkillQuizException("Provided answer deffinition id [${quizAttemptId}] does not exist", ErrorCode.BadParam)
+        }
+        QuizAnswerDef answerDef = quizAnswerDefOptional.get()
+
+        UserQuizAnswerAttempt userQuizAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
+        if (!userQuizAnswerAttempt) {
+            throw new SkillQuizException("Could not find answer attempt for quizAttemptId=[${quizAttemptId}] and answerDefId=[${answerDefId}]", ErrorCode.BadParam)
+        }
+        if (userQuizAnswerAttempt.userQuizAttemptRefId != userQuizAttempt.id) {
+            throw new SkillQuizException("Supplied quiz answer attempt id  [${userQuizAnswerAttempt.userQuizAttemptRefId}] does not match user quiz attempt id [${userQuizAttempt.id}]", ErrorCode.BadParam)
+        }
+
+        List<UserQuizQuestionAttempt> questionAttempts = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(userQuizAttempt.id)
+
+        userQuizAnswerAttempt.status = gradeAnswerReq.isCorrect ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT : UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
+        quizAttemptAnswerRepo.save(userQuizAnswerAttempt)
+
+        UserQuizQuestionAttempt questionAttempt = questionAttempts.find { it.quizQuestionDefinitionRefId == answerDef.questionRefId }
+        questionAttempt.status = gradeAnswerReq.isCorrect ? UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT : UserQuizQuestionAttempt.QuizQuestionStatus.WRONG
+        quizQuestionAttemptRepo.save(questionAttempt)
+
+        boolean doneGradingAttempt = questionAttempts.find({ it.status == UserQuizQuestionAttempt.QuizQuestionStatus.NEEDS_GRADING }) == null
+        if (doneGradingAttempt) {
+            boolean isQuizPassed = questionAttempts.every {it.status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT}
+            userQuizAttempt.status = isQuizPassed ? UserQuizAttempt.QuizAttemptStatus.PASSED : UserQuizAttempt.QuizAttemptStatus.FAILED
+            quizAttemptRepo.save(userQuizAttempt)
+        }
+
+        userQuizAnswerGradedRepo.save(new UserQuizAnswerGraded(userQuizAnswerAttemptRefId: userQuizAnswerAttempt.id, feedback: gradeAnswerReq.feedback))
+
+        return new QuizAnswerGradingResult(doneGradingAttempt: doneGradingAttempt)
+    }
+
     QuizGradedResult failQuizAttempt(String userId, String quizId, Integer quizAttemptId) {
         QuizDef quizDef = getQuizDef(quizId)
-        Optional<UserQuizAttempt> optionalUserQuizAttempt = quizAttemptRepo.findById(quizAttemptId)
-        if (!optionalUserQuizAttempt.isPresent()) {
-            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] does not exist", ErrorCode.BadParam)
-        }
-        UserQuizAttempt userQuizAttempt = optionalUserQuizAttempt.get()
-        if (userQuizAttempt.quizDefinitionRefId != quizDef.id) {
-            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${quizId}] quiz", ErrorCode.BadParam)
-        }
-        if (userQuizAttempt.userId != userId) {
-            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${userId}] user", ErrorCode.BadParam)
-        }
+        UserQuizAttempt userQuizAttempt = getQuizAttempt(quizAttemptId)
+        validateAttempt(userQuizAttempt, quizDef, quizAttemptId, quizId, userId)
 
         QuizGradedResult gradedResult = new QuizGradedResult(passed: false, numQuestionsGotWrong: 0,
                 gradedQuestions: [])
@@ -511,26 +541,26 @@ class QuizRunService {
         return gradedResult
     }
 
-    @Transactional
-    QuizGradedResult completeQuizAttempt(String userId, String quizId, Integer quizAttemptId) {
-        QuizDef quizDef = getQuizDef(quizId)
-        boolean isSurvey = quizDef.type == QuizDefParent.QuizType.Survey
-        Optional<UserQuizAttempt> optionalUserQuizAttempt = quizAttemptRepo.findById(quizAttemptId)
-        if (!optionalUserQuizAttempt.isPresent()) {
-            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] does not exist", ErrorCode.BadParam)
-        }
-
-        if (quizAttemptRepo.checkQuizStatus(userId, quizAttemptId, quizId, UserQuizAttempt.QuizAttemptStatus.FAILED)) {
-            throw new SkillQuizException("Provided attempt id [${quizAttemptId}], which corresponds to a failed quiz", ErrorCode.BadParam)
-        }
-
-        UserQuizAttempt userQuizAttempt = optionalUserQuizAttempt.get()
+    private static void validateAttempt(UserQuizAttempt userQuizAttempt, QuizDef quizDef, int quizAttemptId, String quizId, String userId) {
         if (userQuizAttempt.quizDefinitionRefId != quizDef.id) {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${quizId}] quiz", ErrorCode.BadParam)
         }
         if (userQuizAttempt.userId != userId) {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${userId}] user", ErrorCode.BadParam)
         }
+    }
+
+    @Transactional
+    QuizGradedResult completeQuizAttempt(String userId, String quizId, Integer quizAttemptId) {
+        QuizDef quizDef = getQuizDef(quizId)
+        boolean isSurvey = quizDef.type == QuizDefParent.QuizType.Survey
+
+        if (quizAttemptRepo.checkQuizStatus(userId, quizAttemptId, quizId, UserQuizAttempt.QuizAttemptStatus.FAILED)) {
+            throw new SkillQuizException("Provided attempt id [${quizAttemptId}], which corresponds to a failed quiz", ErrorCode.BadParam)
+        }
+
+        UserQuizAttempt userQuizAttempt = getQuizAttempt(quizAttemptId)
+        validateAttempt(userQuizAttempt, quizDef, quizAttemptId, quizId, userId)
 
         if(shouldQuizBeFailed(userQuizAttempt)) {
             failQuizAttempt(userId, quizId, quizAttemptId)
@@ -550,13 +580,18 @@ class QuizRunService {
             List<Integer> correctIds = quizAnswerDefs.findAll({ Boolean.valueOf(it.isCorrectAnswer) }).collect { it.id }.sort()
             List<Integer> selectedIds = quizAnswerDefs.findAll { selectedAnswerIds.contains(it.id) }?.collect { it.id }
             UserQuizQuestionAttempt.QuizQuestionStatus status
-            if (!selectedIds) {
-                status = UserQuizQuestionAttempt.QuizQuestionStatus.INCOMPLETE
-            }
-
-            boolean isCorrect = isSurvey ?: selectedIds.containsAll(correctIds) && correctIds.containsAll(selectedIds)
-            if (status != UserQuizQuestionAttempt.QuizQuestionStatus.INCOMPLETE) {
-                status = isCorrect ? UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT : UserQuizQuestionAttempt.QuizQuestionStatus.WRONG
+            boolean isCorrect
+            if (!isSurvey && quizQuestionDef.type == QuizQuestionType.TextInput) {
+                status = UserQuizQuestionAttempt.QuizQuestionStatus.NEEDS_GRADING
+                isCorrect = false
+            } else {
+                if (!selectedIds) {
+                    status = UserQuizQuestionAttempt.QuizQuestionStatus.INCOMPLETE
+                }
+                isCorrect = isSurvey ?: selectedIds.containsAll(correctIds) && correctIds.containsAll(selectedIds)
+                if (!status || status != UserQuizQuestionAttempt.QuizQuestionStatus.INCOMPLETE) {
+                    status = isCorrect ? UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT : UserQuizQuestionAttempt.QuizQuestionStatus.WRONG
+                }
             }
 
             UserQuizQuestionAttempt attemptedQuestion = existingAttempt.find { it.quizQuestionDefinitionRefId == quizQuestionDef.id && it.userId == userId && it.userQuizAttemptRefId == quizAttemptId }
@@ -576,13 +611,14 @@ class QuizRunService {
                 quizQuestionAttemptRepo.save(userQuizQuestionAttempt)
             }
 
-            return new QuizQuestionGradedResult(questionId: quizQuestionDef.id, isCorrect: isCorrect, selectedAnswerIds: selectedIds, correctAnswerIds: correctIds)
+            return new QuizQuestionGradedResult(questionId: quizQuestionDef.id, isCorrect: isCorrect, selectedAnswerIds: selectedIds, correctAnswerIds: correctIds, status: status)
         }
         Integer quizLength = getQuizLength(quizDef.id)
         if(quizLength == -1) {
             quizLength = gradedQuestions.size()
         }
         int numCorrect = gradedQuestions.count { it.isCorrect }
+        int numQuestionsNeedGrading = gradedQuestions.count { it.status == UserQuizQuestionAttempt.QuizQuestionStatus.NEEDS_GRADING }
         Integer minNumQuestionsToPassConf = getMinNumQuestionsToPassSetting(quizDef.id)
         Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : quizLength;
         boolean showCorrectAnswers = alwaysShowCorrectAnswers(quizDef.id)
@@ -599,10 +635,16 @@ class QuizRunService {
             shouldReturnGradedRes = showCorrectAnswers || (numConfiguredAttempts > 0 && numCurrentAttempts >= numConfiguredAttempts);
         }
 
-        QuizGradedResult gradedResult = new QuizGradedResult(passed: quizPassed, numQuestionsGotWrong: quizLength - numCorrect,
+        QuizGradedResult gradedResult = new QuizGradedResult(passed: quizPassed, numQuestionsGotWrong: quizLength - numCorrect - numQuestionsNeedGrading,
                 gradedQuestions: shouldReturnGradedRes ? gradedQuestions : [])
 
-        userQuizAttempt.status = quizPassed ? UserQuizAttempt.QuizAttemptStatus.PASSED : UserQuizAttempt.QuizAttemptStatus.FAILED
+        if (numQuestionsNeedGrading > 0) {
+            userQuizAttempt.status = UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING
+            gradedResult.numQuestionsNeedGrading = numQuestionsNeedGrading
+            gradedResult.needsGrading = true
+        } else {
+            userQuizAttempt.status = quizPassed ? UserQuizAttempt.QuizAttemptStatus.PASSED : UserQuizAttempt.QuizAttemptStatus.FAILED
+        }
         userQuizAttempt.completed = new Date()
         userQuizAttempt.numQuestionsToPass = minNumQuestionsToPass
         quizAttemptRepo.save(userQuizAttempt)
@@ -636,4 +678,22 @@ class QuizRunService {
         }
         return quizDef
     }
+    private UserQuizAttempt getQuizAttempt(Long quizAttemptId) {
+        Optional<UserQuizAttempt> optionalUserQuizAttempt = quizAttemptRepo.findById(quizAttemptId)
+        if (!optionalUserQuizAttempt.isPresent()) {
+            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] does not exist", ErrorCode.BadParam)
+        }
+        return optionalUserQuizAttempt.get()
+    }
+    private QuizAnswerDefRepo.AnswerDefPartialInfo getAnswerDefPartialInfo(String quizId, Integer answerDefId) {
+        QuizAnswerDefRepo.AnswerDefPartialInfo answerDefPartialInfo = quizAnswerRepo.getPartialDefByAnswerDefId(answerDefId)
+        if (!answerDefPartialInfo) {
+            throw new SkillQuizException("Provided answer id [${answerDefId}] does not exist", ErrorCode.BadParam)
+        }
+        if (answerDefPartialInfo.getQuizId() != quizId) {
+            throw new SkillQuizException("Supplied quizId of [${quizId}] does not match answer's quiz id  of [${answerDefPartialInfo.getQuizId()}]", ErrorCode.BadParam)
+        }
+        return answerDefPartialInfo
+    }
+
 }

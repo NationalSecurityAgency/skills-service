@@ -97,6 +97,11 @@ export default {
       .get(`/admin/quiz-definitions/${quizId}/runs/${attemptId}`)
       .then((response) => response.data)
   },
+  gradeQuizAnswerAttempt(quizId, userId, quizAttemptId, answerDefId, gradingInfo) {
+    return axios
+        .post(`/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${quizAttemptId}/gradeAnswer/${answerDefId}`, gradingInfo)
+        .then((response) => response.data)
+  },
   deleteQuizRunHistoryItem(quizId, attemptId) {
     return axios
       .delete(`/admin/quiz-definitions/${quizId}/runs/${attemptId}`)

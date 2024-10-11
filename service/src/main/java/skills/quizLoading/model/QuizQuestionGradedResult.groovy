@@ -15,8 +15,11 @@
  */
 package skills.quizLoading.model
 
+import skills.storage.model.UserQuizQuestionAttempt
+
 class QuizQuestionGradedResult {
     Integer questionId
+    UserQuizQuestionAttempt.QuizQuestionStatus status
     boolean isCorrect
     List<Integer> selectedAnswerIds
     List<Integer> correctAnswerIds

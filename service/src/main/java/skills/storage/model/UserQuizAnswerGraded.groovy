@@ -17,37 +17,25 @@ package skills.storage.model
 
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
+import jakarta.persistence.*
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
-import jakarta.persistence.*
-
 @Entity
-@Table(name = 'user_quiz_answer_attempt')
+@Table(name = 'user_quiz_answer_graded')
 @EntityListeners(AuditingEntityListener)
 @CompileStatic
 @ToString(includeNames = true)
-class UserQuizAnswerAttempt {
-
-    static enum QuizAnswerStatus {
-        CORRECT, WRONG, NEEDS_GRADING
-    }
+class UserQuizAnswerGraded {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id
 
-    // link it back to the quiz rather than question
-    // to document user's current progress answers will exist before a question is completed
-    Integer userQuizAttemptRefId
-    Integer quizAnswerDefinitionRefId
+    Integer userQuizAnswerAttemptRefId
 
-    String userId
-    @Enumerated(EnumType.STRING)
-    QuizAnswerStatus status
-
-    // optional - used for QuizQuestionType.TextInput
-    String answer
+    // optional
+    String feedback
 
     @Column(name="created", updatable = false, insertable = false)
     Date created
@@ -55,5 +43,4 @@ class UserQuizAnswerAttempt {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
-
 }

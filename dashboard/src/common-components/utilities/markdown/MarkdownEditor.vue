@@ -36,11 +36,19 @@ const props = defineProps({
     type: String,
     required: true
   },
+  id: {
+    type: String,
+    required: false
+  },
   resizable: {
     type: Boolean,
     default: false
   },
   allowAttachments: {
+    type: Boolean,
+    default: true
+  },
+  allowInsertImages: {
     type: Boolean,
     default: true
   },
@@ -85,6 +93,7 @@ const props = defineProps({
     default: false
   },
 })
+const emit = defineEmits(['value-changed'])
 const themeHelper = useThemesHelper()
 
 //  build editor options
@@ -92,7 +101,7 @@ const toolbarItems = [
   ['heading', 'bold', 'italic', 'strike'],
   ['hr', 'quote'],
   ['ul', 'ol', 'indent', 'outdent'],
-  ['image', 'link'],
+  props.allowInsertImages ? ['image', 'link'] : ['link'],
   ['code', 'codeblock'],
   ['scrollSync']
 ]
@@ -156,7 +165,7 @@ onMounted(() => {
   }
 })
 function onLoad() {
-  markdownAccessibilityFixes.fixAccessibilityIssues()
+  markdownAccessibilityFixes.fixAccessibilityIssues(props.id, props.allowInsertImages)
 }
 
 function onEditorChange() {
@@ -173,12 +182,11 @@ function onEditorChange() {
   }
 
   if (props.useHtml) {
-    // emit('input', htmlText())
     value.value = htmlText()
   } else {
-    // emit('input', markdownText())
     value.value = markdownText()
   }
+  emit('value-changed', value.value)
 }
 
 const editorFeatureLinkRef = ref(null)
@@ -191,7 +199,7 @@ function onKeydown(mode, event) {
     }
   } else if (event.ctrlKey && event.altKey && !event.shiftKey) {
     if (event.key === 't') {
-      markdownAccessibilityFixes.clickOnHeaderToolbarButton()
+      markdownAccessibilityFixes.clickOnHeaderToolbarButton(props.id)
     } else if (event.key === 's') {
       markdownAccessibilityFixes.clickOnFontSizeToolbarButton()
     } else if (event.key === 'i') {
@@ -272,9 +280,9 @@ function attachFile(event) {
            :for="name" @click="focusOnMarkdownEditor">{{ label }}</label>
     <BlockUI :blocked="disabled">
 
-      <toast-ui-editor :id="name"
+      <toast-ui-editor :id="id || name"
                        :style="resizable ? {resize: 'vertical', overflow: 'auto', 'min-height': '285px'} : {}"
-                       class="markdown"
+                       class="no-bottom-border"
                        :class="{'editor-theme-dark' : themeHelper.isDarkTheme, 'is-resizable': resizable }"
                        data-cy="markdownEditorInput"
                        ref="toastuiEditor"
@@ -289,8 +297,8 @@ function attachFile(event) {
                        @focus="handleFocus"
                        @load="onLoad" />
       <div class="border-1 surface-border surface-100 border-round-bottom px-2 py-2 sd-theme-tile-background">
-      <div class="flex text-xs">
-        <div class="">
+      <div  class="flex text-xs">
+        <div v-if="allowInsertImages" class="">
           Insert images and attach files by pasting, dragging & dropping, or selecting from toolbar.
         </div>
         <div class="flex-1 text-right">
@@ -396,7 +404,7 @@ function attachFile(event) {
   border: 1px solid #424b57
 }
 
-.markdown .toastui-editor-defaultUI {
+.no-bottom-border .toastui-editor-defaultUI {
   border-bottom: none !important;
   border-bottom-left-radius: 0 !important;
   border-bottom-right-radius: 0 !important;

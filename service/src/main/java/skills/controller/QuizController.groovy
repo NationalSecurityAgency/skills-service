@@ -28,7 +28,9 @@ import skills.controller.request.model.QuizQuestionDefRequest
 import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.*
 import skills.quizLoading.QuizRunService
+import skills.quizLoading.model.QuizAnswerGradingResult
 import skills.quizLoading.model.QuizAttemptStartResult
+import skills.quizLoading.model.QuizGradeAnswerReq
 import skills.quizLoading.model.QuizGradedResult
 import skills.quizLoading.model.QuizReportAnswerReq
 import skills.quizLoading.model.StartQuizAttemptReq
@@ -41,6 +43,7 @@ import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.LabeledCount
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefSkinny
+import skills.storage.model.UserQuizAttempt
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserQuizAttemptRepo
 
@@ -168,11 +171,7 @@ class QuizController {
                                        @RequestParam int page,
                                        @RequestParam String orderBy,
                                        @RequestParam Boolean ascending) {
-        QuizValidator.isTrue(limit > 0, '[limit] must be > 0')
-        QuizValidator.isTrue(limit <= 500, '[limit] must be <= 500')
-        QuizValidator.isTrue(page >= 0, '[page] must be >= 0')
-        QuizValidator.isTrue(page < 10000, '[page] must be < 10000')
-        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        PageRequest pageRequest = validateQuizRunsParamsAndConstructPageRequest(limit, page, orderBy, ascending)
         return quizDefService.getUserQuestionAnswers(quizId, answerDefId, pageRequest)
     }
 
@@ -186,16 +185,21 @@ class QuizController {
     @ResponseBody
     TableResult getQuizRuns(@PathVariable("quizId") String quizId,
                             @RequestParam String query,
+                            @RequestParam(required = false) UserQuizAttempt.QuizAttemptStatus quizAttemptStatus,
                             @RequestParam int limit,
                             @RequestParam int page,
                             @RequestParam String orderBy,
                             @RequestParam Boolean ascending) {
+        PageRequest pageRequest = validateQuizRunsParamsAndConstructPageRequest(limit, page, orderBy, ascending)
+        return quizDefService.getQuizRuns(quizId, query, quizAttemptStatus, pageRequest);
+    }
+    private static validateQuizRunsParamsAndConstructPageRequest(int limit, int page, String orderBy, Boolean ascending) {
         QuizValidator.isTrue(limit > 0, '[limit] must be > 0')
         QuizValidator.isTrue(limit <= 500, '[limit] must be <= 500')
         QuizValidator.isTrue(page >= 0, '[page] must be >= 0')
         QuizValidator.isTrue(page < 10000, '[page] must be < 10000')
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return quizDefService.getQuizRuns(quizId, query, pageRequest);
+        return pageRequest
     }
 
     @RequestMapping(value = "/{quizId}/runs/{attemptId}", method = RequestMethod.DELETE, produces = "application/json")
@@ -234,6 +238,17 @@ class QuizController {
         quizRunService.reportQuestionAnswer(userId, quizId, attemptId, answerId, quizReportAnswerReq);
         return RequestResult.success()
     }
+
+    @RequestMapping(value = "/{quizId}/users/{userId}/attempt/{attemptId}/gradeAnswer/{answerDefId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
+    @ResponseBody
+    QuizAnswerGradingResult gradeQuizAnswer(@PathVariable("quizId") String quizId,
+                                            @PathVariable("userId") String userId,
+                                            @PathVariable("attemptId") Integer attemptId,
+                                            @PathVariable("answerDefId") Integer answerDefId,
+                                            @RequestBody QuizGradeAnswerReq quizGradeAnswerReq) {
+        return quizRunService.gradeQuestionAnswer(userId, quizId, attemptId, answerDefId, quizGradeAnswerReq);
+    }
+
 
     @RequestMapping(value = "/{quizId}/users/{userId}/attempt/{quizAttempId}/fail", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     @ResponseBody

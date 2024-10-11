@@ -20,6 +20,7 @@ import SkillsRating from "@/components/utils/inputForm/SkillsRating.vue";
 import QuizRunAnswers from '@/skills-display/components/quiz/QuizRunAnswers.vue';
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import QuizRunService from '@/skills-display/components/quiz/QuizRunService.js';
+import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEditor.vue";
 
 const props = defineProps({
   q: Object,
@@ -89,8 +90,11 @@ onMounted(() => {
   isLoading.value = false;
 })
 
-const textAnswerChanged = () => {
+const textAnswerChanged = (providedAnswerText) => {
   const selectedAnswerIds = answerOptions.value.map((a) => a.id);
+  if (providedAnswerText) {
+    answerText.value = providedAnswerText;
+  }
   const isAnswerBlank = !answerText.value || answerText.value.trimEnd() === '';
   const currentAnswer = {
     questionId: props.q.id,
@@ -168,15 +172,19 @@ const reportAnswer = (answer) => {
       <div class="flex flex-column w-full">
         <markdown-text :text="q.question" data-cy="questionsText" :instance-id="`${q.id}`" />
         <div v-if="isTextInput">
-            <SkillsTextarea
-                :id="`question-${num}`"
-                data-cy="textInputAnswer"
-                v-model="answerText"
-                @update:modelValue="textAnswerChanged"
-                :name="fieldName"
-                :aria-label="`Please enter text to answer question number ${num}`"
-                placeholder="Please enter your response here..."
-                rows="10" />
+          <markdown-editor class="form-text"
+                           :id="`question-${num}`"
+                           data-cy="textInputAnswer"
+                           markdownHeight="250px"
+                           label="Answer"
+                           @value-changed="textAnswerChanged"
+                           :show-label="false"
+                           :name="fieldName"
+                           :allow-attachments="false"
+                           :allow-insert-images="false"
+                           :aria-label="`Please enter text to answer question number ${num}`"
+                           placeholder="Please enter your response here..."
+                           :resizable="true" />
         </div>
         <div v-else-if="isRating">
           <SkillsRating @update:modelValue="ratingChanged" class="flex-initial border-round py-3 px-4" v-model="answerRating" :stars="numberOfStars" :cancel="false" :name="fieldName"/>
