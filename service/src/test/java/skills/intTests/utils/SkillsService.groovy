@@ -1806,7 +1806,6 @@ class SkillsService {
         return wsHelper.adminGet(url)
     }
 
-
     def getQuizQuestionDefs(String quizId) {
         String url = "${getQuizDefUrl(quizId)}/questions"
         return wsHelper.adminGet(url)

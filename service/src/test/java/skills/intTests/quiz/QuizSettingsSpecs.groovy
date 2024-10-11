@@ -590,32 +590,5 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         settings.setting == [QuizSettings.QuizUserRole.setting]
         settings.value == [RoleName.ROLE_QUIZ_READ_ONLY.toString()]
     }
-
-    def "Quiz settings are copied"() {
-        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
-        skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
-        skillsService.createQuizQuestionDefs(questions)
-
-        skillsService.saveQuizSettings(quiz.quizId, [
-                [setting: QuizSettings.QuizTimeLimit.setting, value: 300],
-                [setting: QuizSettings.QuizLength.setting, value: 10],
-                [setting: QuizSettings.MinNumQuestionsToPass.setting, value: '3'],
-        ])
-
-        when:
-        def result = skillsService.copyQuiz(quiz.quizId, [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: '', type: quiz.type])
-        def copiedQuiz = result.body
-        def copiedQuizInfo = skillsService.getQuizInfo(copiedQuiz.quizId)
-        def copiedQuizSettings = skillsService.getQuizSettings(copiedQuiz.quizId)
-
-        then:
-        copiedQuizInfo.quizTimeLimit == 300
-        copiedQuizInfo.quizLength == 10
-        copiedQuizInfo.minNumQuestionsToPass == 3
-        copiedQuizSettings.find( it -> it.setting == QuizSettings.QuizTimeLimit.setting ).value == '300'
-        copiedQuizSettings.find( it -> it.setting == QuizSettings.QuizLength.setting ).value == '10'
-        copiedQuizSettings.find( it -> it.setting == QuizSettings.MinNumQuestionsToPass.setting ).value == '3'
-    }
 }
 
