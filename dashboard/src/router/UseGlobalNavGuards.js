@@ -62,9 +62,6 @@ export const useGlobalNavGuards = () => {
     const requestAccountPath = '/request-root-account'
     const skillsLoginPath = '/skills-login'
     const saml2LoginPath = '/sso-login'
-   
-    console.log('From :' + from.path + ' To :'+to.path)
-    console.log('Is Logged In :: '+isLoggedIn())
 
     if (
         !isPki() && !isSaml2() &&
@@ -97,8 +94,7 @@ export const useGlobalNavGuards = () => {
           p !== '/' ? { name: 'UserAgreement', query: { redirect: p } } : { name: 'UserAgreement' }
         next(ua)
       } else {
-       if (to.path === '/' && isLoggedIn()) {
-         console.log('Route to Landing Page ::: '+ getLandingPage());
+       if (to.path === '/') {
          const landingPageRoute = { name: getLandingPage() }
          next(landingPageRoute)
         } 
@@ -128,8 +124,6 @@ export const useGlobalNavGuards = () => {
           // this route requires auth, check if logged in if not, redirect to login page.
           if (isSaml2() && !isLoggedIn()) {
             // SAML2 login redirection
-            console.log('Redirecting to SAML2 Login Path');
-            //next({ path: saml2LoginPath, query: { redirect: to.fullPath } });
             window.location = `/saml2/authenticate/${registrationId()}`;
           } else if (!isLoggedIn()) {
             const newRoute = { query: { redirect: to.fullPath } }

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 package skills.auth.saml
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.mock.web.MockHttpServletRequest
 import skills.auth.UserAuthService
+import skills.auth.form.CreateAccountController
 import spock.lang.Specification
 import spock.lang.Unroll
 import java.security.Principal
@@ -25,7 +24,7 @@ import java.security.Principal
 class UserControllerSpec extends Specification {
 
     UserAuthService userAuthService = Mock()
-    UserController userController = new UserController(userAuthService: userAuthService)
+    CreateAccountController userController = new CreateAccountController(userAuthService : userAuthService)
 
     def "userExists should return true when user exists"() {
         given: "A user exists in the system"
