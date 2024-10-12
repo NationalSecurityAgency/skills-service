@@ -46,14 +46,6 @@ class SecurityMode {
         }
     }
 
-    static class NonSAML2Auth implements Condition {
-        @Override
-        boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-            AuthMode authMode = AuthMode.getFromContext(context)
-            return authMode !== AuthMode.SAML2
-        }
-    }
-
     static class FormOrSAML2Auth implements Condition {
         @Override
         boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {

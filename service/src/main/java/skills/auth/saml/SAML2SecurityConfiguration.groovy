@@ -39,6 +39,7 @@ import org.springframework.stereotype.Component
 import skills.auth.PortalWebSecurityHelper
 import skills.auth.SecurityMode
 import skills.auth.UserInfo
+import skills.auth.form.LocalUserDetailsService
 
 @Slf4j
 @Conditional(SecurityMode.SAML2Auth)
@@ -58,9 +59,6 @@ class SAML2SecurityConfiguration{
 
     @Autowired
     PortalWebSecurityHelper portalWebSecurityHelper
-
-    @Autowired
-    private RelyingPartyRegistrationRepository relyingPartyRegistrationRepository;
 
     @Autowired
     SAML2Utils saml2Utils;
@@ -89,7 +87,7 @@ class SAML2SecurityConfiguration{
          http.logout((logout) -> logout.logoutSuccessUrl("/local/logout"));
          return http.build();
     }
-    @Bean
+   @Bean
     RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
         RelyingPartyRegistration registration = RelyingPartyRegistrations.fromMetadataLocation(assertingPartyMetadataLocation)
                 .registrationId(registrationId)
@@ -104,7 +102,7 @@ class SAML2SecurityConfiguration{
 
     @Bean
     UserDetailsService saml2UserDetailsService(){
-        return new CustomSAML2UserDetailsService();
+        return new LocalUserDetailsService();
     }
 
 
