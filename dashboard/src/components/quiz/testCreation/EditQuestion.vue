@@ -31,6 +31,10 @@ const props = defineProps({
   isEdit: {
     type: Boolean,
     default: false,
+  },
+  isCopy: {
+    type: Boolean,
+    default: false,
   }
 })
 const emit = defineEmits(['question-saved'])
@@ -40,16 +44,21 @@ const currentScaleOptions = ref([3, 4, 5, 6, 7, 8, 9, 10])
 const answersRef = ref(null)
 
 const modalTitle = computed(() => {
-  return props.isEdit ? 'Editing Existing Question' : 'New Question'
+  if( props.isEdit ) {
+    return 'Editing Existing Question';
+  } else if( props.isCopy ) {
+    return 'Copy Question'
+  }
+  return 'New Question'
 })
-const modalId = props.isEdit ? `questionEditModal${props.questionDef.id}` : 'questionEditModal'
+const modalId = props.isEdit || props.isCopy ? `questionEditModal${props.questionDef.id}` : 'questionEditModal'
 const appConfig = useAppConfig()
 
 onMounted(() => {
-  if (props.questionDef.questionType === QuestionType.Rating && props.isEdit) {
+  if (props.questionDef.questionType === QuestionType.Rating && (props.isEdit || props.isCopy)) {
     initialQuestionData.currentScaleValue = props.questionDef.answers.length;
   }
-  if (props.isEdit) {
+  if (props.isEdit || props.isCopy) {
     questionType.value.selectedType = questionType.value.options.find((o) => o.id === props.questionDef.questionType)
   }
 });
@@ -115,7 +124,12 @@ const quizType = computed(() => {
   return props.questionDef.quizType;
 })
 const title = computed(() => {
-  return props.isEdit ? 'Editing Existing Question' : 'New Question';
+  if ( props.isEdit ) {
+    return 'Editing Existing Question';
+  } else if( props.isCopy ) {
+    return 'Copy Question';
+  }
+  return 'New Question';
 })
 const quizId = computed(() => {
   return props.questionDef.quizId ? props.questionDef.quizId : route.params.quizId;
@@ -176,10 +190,10 @@ const schema = object({
   ,
 })
 const initialQuestionData = {
-  questionType: props.isEdit ? questionType.value.options.find((o) => o.id === props.questionDef.questionType) : questionType.value.selectedType,
+  questionType: props.isEdit || props.isCopy ? questionType.value.options.find((o) => o.id === props.questionDef.questionType) : questionType.value.selectedType,
   question: props.questionDef.question || '',
   answers: props.questionDef.answers || [],
-  currentScaleValue: props.questionDef.questionType === QuestionType.Rating && props.isEdit ?  props.questionDef.answers.length : 5,
+  currentScaleValue: props.questionDef.questionType === QuestionType.Rating && props.isEdit || props.isCopy ? props.questionDef.answers.length : 5,
 }
 
 const close = () => { model.value = false }
@@ -233,6 +247,7 @@ const onSavedQuestion = (savedQuestion) => {
       :id="modalId"
       v-model="model"
       :is-edit="isEdit"
+      :is-copy="isCopy"
       :header="modalTitle"
       :loading="loadingComponent"
       :validation-schema="schema"
