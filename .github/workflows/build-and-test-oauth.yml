@@ -16,9 +16,9 @@ name: Continuous Integration with OAuth
 
 on:
   workflow_dispatch:
-  push:
-    paths-ignore:
-      - 'README.md'
+#  push:
+#    paths-ignore:
+#      - 'README.md'
   pull_request:
     paths-ignore:
       - 'README.md'

@@ -129,6 +129,7 @@ jobs:
           npm -v
           node -v
           google-chrome --version
+          fc-list > font-list.txt
 
       - uses: actions/download-artifact@v4
         with:
@@ -162,6 +163,7 @@ jobs:
             ./e2e-tests/cypress/videos
             ./e2e-tests/cypress/screenshots
             ./e2e-tests/cypress/visualRegression/diff
+            ./font-list.txt
 
       - name: verify that new screenshot snapshots were not created
         run: |

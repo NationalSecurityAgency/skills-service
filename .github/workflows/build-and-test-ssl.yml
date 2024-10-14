@@ -18,7 +18,7 @@ on:
   schedule:
     - cron: '0 7 * * *'
   workflow_dispatch:
-  push:
+#  push:
   pull_request:
     paths-ignore:
       - 'README.md'
