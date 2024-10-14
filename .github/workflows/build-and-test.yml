@@ -22,12 +22,12 @@ on:
     paths-ignore:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
-      - '.github/workflows/publish-image-snapshot.yml'
+      - '.github/workflows/generate-images-for-regression-tests.yml'
   pull_request:
     paths-ignore:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
-      - '.github/workflows/publish-image-snapshot.yml'
+      - '.github/workflows/generate-images-for-regression-tests.yml'
 
 jobs:
   build-skills-service-for-ui-tests:
