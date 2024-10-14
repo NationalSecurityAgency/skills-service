@@ -90,7 +90,7 @@ jobs:
       - name: Run Cypress tests
         run: |
           cd e2e-tests
-          npm run cy:run:dev:updateSnapshots -- --config baseUrl=http://localhost:8080
+          npm run cy:run:dev:updateClientDisplaySnapshots -- --config baseUrl=http://localhost:8080
           cd ..
         env:
           ELECTRON_EXTRA_LAUNCH_ARGS: '--disable-gpu'
