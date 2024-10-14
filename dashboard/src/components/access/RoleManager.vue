@@ -334,6 +334,7 @@ defineExpose({
           </Message>
         </div>
         <SkillsDataTable
+            :loading="table.options.busy"
           :value="data"
           :rowsPerPageOptions="possiblePageSizes"
           data-cy="roleManagerTable"

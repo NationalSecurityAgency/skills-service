@@ -392,4 +392,37 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-pc-section="list"] [data-pc-section="item"]').should('have.length', 0)
     });
 
+
+    it('Role manager shows loading indicator', () => {
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: 'proj1'
+        });
+
+        cy.intercept('GET', '/admin/projects/proj1/userRoles**'
+            , {
+                delay: 1000,
+                body: {
+                    "data": [
+                        {
+                            "userId": "skills@skills.org",
+                            "userIdForDisplay": "skills@skills.org",
+                            "firstName": "Bill",
+                            "lastName": "Gosling",
+                            "projectId": "proj1",
+                            "roleName": "ROLE_PROJECT_ADMIN",
+                            "email": "skills@skills.org",
+                            "dn": null
+                        }
+                    ],
+                    "count": 1,
+                    "totalCount": 1
+                }
+            }).as('loadUserRoles');
+        cy.visit('/administrator/projects/proj1/access');
+        cy.get('[data-cy="roleManagerTable"] [data-pc-section="loadingoverlay"]').should('exist');
+        cy.wait('@loadUserRoles');
+        cy.get('[data-cy="roleManagerTable"] [data-pc-section="loadingoverlay"]').should('not.exist');
+    });
+
 })
