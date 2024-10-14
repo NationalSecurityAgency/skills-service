@@ -30,7 +30,7 @@
     "cy:run:oauth": "TZ=UTC  cypress run --browser chrome --env oauthMode=true --config video=true",
     "cy:run:accessibility": "TZ=UTC  cypress run --browser chrome --env enableLighthouse=true,enableAvgLighthouseScore=true --browser chrome --headless --spec \"cypress/e2e/accessibility/*.js\" --config video=true",
     "cy:run:dev": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173  --env visualRegressionType=base",
-    "cy:run:dev:specificTest": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173 --spec \"cypress/e2e/metrics/skillMetrics_spec.js\" --env visualRegressionType=base",
+    "cy:run:dev:specificTest": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173 --spec \"cypress/e2e/metrics/projectMetrics_projects_spec.js\" --env visualRegressionType=base",
     "cy:run:dev:updateSnapshotForSpecificTests": "TZ=UTC cypress run --browser chrome --env visualRegressionType=base --config baseUrl=http://localhost:5173 --spec \"cypress/e2e/metrics/skillMetrics_spec.js\"",
     "cy:run:dev:metrics": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173 --spec \"cypress/e2e/metrics/projectMetrics_projects_spec.js,cypress/e2e/metrics/projectMetrics_subjects_spec.js,cypress/e2e/metrics/skillMetrics_spec.js,cypress/e2e/metrics/subjectMetrics_spec.js\"",
     "cy:run:dev:updateAdminSnapshots": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173  --env visualRegressionType=base --spec \"cypress/e2e/markdown_spec.js\"",
@@ -75,7 +75,7 @@
     "cyServices:kill:client-display:1": "for procid in $(ps -aux | grep \"client-display\" | grep \"vue-cli-service serve\" | grep -v \"grep\" | awk '{print $2}'); do echo \"killing skills-display  ${procid}\"; kill -9 $procid; done",
     "cyServices:kill": "npm run cyServices:kill:skills-service && npm run cyServices:kill:client-display && npm run cyServices:kill:client-display:1 && npm run fake-smtp:stop",
     "print-env": "print-env",
-    "fake-smtp:start": "docker run -p 1080:1080 -p 1025:1025 --restart unless-stopped maildev/maildev",
+    "fake-smtp:start": "docker run -p 1080:1080 -p 1025:1025 --restart unless-stopped maildev/maildev:2.1.0",
     "fake-smtp:start:ci": "mkdir -p ./logs && nohup npm run fake-smtp:start > ./logs/fake-smtp.log &",
     "fake-smtp:stop": "fuser -k 1081/tcp"
   },
