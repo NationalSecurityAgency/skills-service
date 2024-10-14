@@ -629,4 +629,151 @@ describe('Quiz Question CRUD Tests', () => {
         cy.visit('/administrator/quizzes/quiz1');
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
     });
+
+// copy
+    it('copy a question with answer edits', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.createQuizQuestionDef(1, 2)
+        cy.createQuizMultipleChoiceQuestionDef(1, 3)
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_2"]').click();
+        cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="notSelected"]')
+
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'Question 2 - Second Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selected"]')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="notSelected"]').should('not.exist')
+
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').should('have.value', 'Question 2 - Third Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="selected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="notSelected"]')
+
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').type('-more')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').clear().type('b')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').clear().type('c')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').type('-more')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="questionDisplayCard-4"]').should('exist')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('This is a question # 2-more')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-0_displayText"]').should('have.text', 'Question 2 - First Answer-more')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-1_displayText"]').should('have.text', 'b')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-2_displayText"]').should('have.text', 'c')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-3_displayText"]').should('not.exist')
+        cy.validateDisplayAnswer(4, 0, true, true)
+        cy.validateDisplayAnswer(4, 1, false, true)
+        cy.validateDisplayAnswer(4, 2, false, true)
+
+        cy.get('[data-cy="copyQuestionButton_2"]').should('have.focus')
+        cy.get('[data-cy="questionDisplayCard-1"]')
+        cy.get('[data-cy="questionDisplayCard-3"]')
+        cy.get('[data-cy="questionDisplayCard-5"]').should('not.exist')
+
+        cy.get('[data-cy="copyQuestionButton_4"]').click();
+        cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2-more')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer-more')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selected"]')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="notSelected"]').should('not.exist')
+
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'b')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="notSelected"]')
+
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').should('have.value', 'c')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="selected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="notSelected"]')
+    });
+
+    it('copy a question - will change question type', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.createQuizQuestionDef(1, 2)
+        cy.createQuizMultipleChoiceQuestionDef(1, 3)
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_2"]').click();
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.validateDisplayAnswer(4, 0, true, false)
+        cy.validateDisplayAnswer(4, 1, true, false)
+        cy.validateDisplayAnswer(4, 2, false, false)
+    });
+
+    it('copy a question - add an answer', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.createQuizQuestionDef(1, 2)
+        cy.createQuizMultipleChoiceQuestionDef(1, 3)
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_3"]').click();
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').type( 'new')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.validateDisplayAnswer(4, 0, true, false)
+        cy.validateDisplayAnswer(4, 1, false, false)
+        cy.validateDisplayAnswer(4, 2, true, false)
+        cy.validateDisplayAnswer(4, 3, true, false)
+        cy.validateDisplayAnswer(4, 4, false, false)
+
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-0_displayText"]').should('have.text', 'First Answer')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-1_displayText"]').should('have.text', 'Second Answer')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-2_displayText"]').should('have.text', 'new')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-3_displayText"]').should('have.text', 'Third Answer')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-4_displayText"]').should('have.text', 'Fourth Answer')
+    });
+
+    it('copy a question - remove answer', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.createQuizQuestionDef(1, 2)
+        cy.createQuizMultipleChoiceQuestionDef(1, 3)
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_3"]').click();
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="removeAnswer"]').click()
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="removeAnswer"]').click()
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-0_displayText"]').should('have.text', 'Third Answer')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-1_displayText"]').should('have.text', 'Fourth Answer')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-2_displayText"]').should('not.exist')
+    });
+
+    it('return focus to the copy button if copy is closed or cancelled', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.createQuizQuestionDef(1, 2)
+        cy.createQuizMultipleChoiceQuestionDef(1, 3)
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="pageHeaderStat_Type"] [data-cy="statPreformatted"]').should('have.text', 'Quiz')
+        cy.get('[data-cy="copyQuestionButton_1"]').should('be.visible')
+        cy.get('[data-cy="copyQuestionButton_2"]').should('be.visible')
+        cy.get('[data-cy="copyQuestionButton_3"]').should('be.visible')
+
+        // initiate via bottom btn
+        cy.get('[data-cy="copyQuestionButton_2"]').click();
+        cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"]').contains('This is a question # 2')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').should('exist')
+        cy.get('[data-cy="closeDialogBtn"]').click()
+        cy.get('[data-cy="closeDialogBtn"]').should('not.exist')
+        cy.get('[data-cy="copyQuestionButton_2"]').should('have.focus')
+
+        // using modal X on the top right
+        cy.get('[data-cy="copyQuestionButton_1"]').click();
+        cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"]').contains('This is a question # 1')
+        cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').should('exist')
+        cy.get('.p-dialog-header [aria-label="Close"]').click()
+        cy.get('.p-dialog-header [aria-label="Close"]').should('not.exist')
+        cy.get('[data-cy="copyQuestionButton_1"]').should('have.focus')
+    });
 });
