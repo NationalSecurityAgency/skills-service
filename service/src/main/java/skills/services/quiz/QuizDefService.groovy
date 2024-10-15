@@ -77,6 +77,9 @@ class QuizDefService {
     UserQuizAnswerAttemptRepo userQuizAnswerAttemptRepo
 
     @Autowired
+    UserQuizAnswerGradedRepo userQuizAnswerGradedRepo
+
+    @Autowired
     QuizAnswerDefRepo quizAnswerRepo
 
     @Autowired
@@ -760,11 +763,13 @@ class QuizDefService {
         }
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userQuizAttempt.userId)
         List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = userQuizAnswerAttemptRepo.getSelectedAnswerIdsAndText(userQuizAttempt.id)
+        List<UserQuizAnswerGradedRepo.GradedInfo> manuallyGradedAnswers = userQuizAnswerGradedRepo.getGradedAnswersForQuizAttemptId(userQuizAttempt.id)
 
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)
         List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
         List<UserQuizQuestionAttempt> questionAttempts = userQuizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(userQuizAttempt.id)
         Map<Integer, List<QuizAnswerDef>> byQuestionId = dbAnswersDef.groupBy {it.questionRefId }
+        Map<Integer, List<UserQuizAnswerGradedRepo.GradedInfo>> manuallyGradedAnswersByAnswerAttemptId = manuallyGradedAnswers.groupBy {it.answerAttemptId }
 
         List<UserGradedQuizQuestionResult> questions = dbQuestionDefs
                 .sort { it.displayOrder }
@@ -775,12 +780,28 @@ class QuizDefService {
                     boolean isRating = questionDef.type == QuizQuestionType.Rating
                     List<UserGradedQuizAnswerResult> answers = quizAnswerDefs.collect { QuizAnswerDef answerDef ->
                         UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText foundSelected = alreadySelected.find { it.answerId == answerDef.id }
+
+                        AnswerGradingResult gradingResult = null
+                        if (isTextInput && foundSelected) {
+                            UserQuizAnswerGradedRepo.GradedInfo gradedInfo = manuallyGradedAnswersByAnswerAttemptId[foundSelected.answerAttemptId]?.first()
+                            if (gradedInfo) {
+                                gradingResult = new AnswerGradingResult(
+                                        graderUserId: gradedInfo.getGraderUserId(),
+                                        graderUserIdForDisplay: gradedInfo.getGraderUserIdForDisplay(),
+                                        graderFirstname: gradedInfo.getGraderFirstname(),
+                                        graderLastname: gradedInfo.getGraderLastname(),
+                                        feedback: gradedInfo.getFeedback(),
+                                        gradedOn: gradedInfo.getGradedOn(),
+                                )
+                            }
+                        }
                         return new UserGradedQuizAnswerResult(
                                 id: answerDef.id,
                                 answer: isTextInput ? foundSelected?.answerText : answerDef.answer,
                                 isConfiguredCorrect: Boolean.valueOf(answerDef.isCorrectAnswer),
                                 isSelected: foundSelected != null,
-                                needsGrading: foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING
+                                needsGrading: foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING,
+                                gradingResult: gradingResult
                         )
                     }
 

@@ -1313,6 +1313,7 @@ Cypress.Commands.add("validateElementsOrder", (selector, containsValues) => {
     for (const [i, value] of containsValues.entries()) {
         cy.get('@elements').eq(i).contains(value);
     }
+    cy.wait(500)
 });
 
 Cypress.Commands.add('formRequest', (method, url, formData, onComplete, includeXSRF = false) => {

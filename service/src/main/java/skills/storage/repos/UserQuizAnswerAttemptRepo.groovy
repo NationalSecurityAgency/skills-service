@@ -27,12 +27,17 @@ import skills.storage.model.UserQuizAttempt
 interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt, Long> {
 
     static interface AnswerIdAndAnswerText {
+        Integer getAnswerAttemptId()
         Integer getAnswerId()
         String getAnswerText()
         UserQuizAnswerAttempt.QuizAnswerStatus getAnswerStatus()
     }
 
-    @Query('''select answerAttempt.quizAnswerDefinitionRefId as answerId, answerAttempt.answer as answerText, answerAttempt.status as answerStatus
+    @Query('''select 
+            answerAttempt.id as answerAttemptId,
+            answerAttempt.quizAnswerDefinitionRefId as answerId, 
+            answerAttempt.answer as answerText, 
+            answerAttempt.status as answerStatus
         from UserQuizAnswerAttempt answerAttempt
         where answerAttempt.userQuizAttemptRefId = ?1
      ''')

@@ -19,12 +19,17 @@ import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vu
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
+import DateCell from "@/components/utils/table/DateCell.vue";
+import SlimDateCell from "@/components/utils/table/SlimDateCell.vue";
+import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 
 const props = defineProps({
   quizType: String,
   question: Object,
   questionNum: Number,
 })
+
+const timeUtils = useTimeUtils();
 
 const answerText = ref(props.question.answers[0].answer)
 
@@ -55,6 +60,12 @@ const surveyScore = computed(() => {
 })
 const numberOfStars = computed(() => {
   return props.question.answers ? props.question.answers.length : 3;
+})
+const manuallyGradedInfo = computed(() => {
+  if (!props.question || props.question.length === 0) {
+    return null
+  }
+  return props.question.answers[0].gradingResult
 })
 </script>
 
@@ -105,6 +116,24 @@ const numberOfStars = computed(() => {
           <div v-if="isTextInputType" class="flex border-1 border-300 border-round p-3" data-cy="TextInputAnswer">
             <pre>{{ answerText }}</pre>
           </div>
+          <div v-if="manuallyGradedInfo" class="mt-3 w-full">
+            <Fieldset legend="Manually Graded"
+                      :pt="{ legend: { class: 'py-0 px-3 surface-0 border-none' }}">
+
+            <div class="flex gap-3">
+              <div class="flex-1">Grader: {{ manuallyGradedInfo.graderUserIdForDisplay || manuallyGradedInfo.graderUserId }}</div>
+              <div>On: {{ timeUtils.formatDate(manuallyGradedInfo.gradedOn) }}</div>
+            </div>
+            <div class="mt-3">Feedback:</div>
+            <div v-if="manuallyGradedInfo.feedback" class="border-1 border-300 border-round p-3 mt-1">
+              <MarkdownText
+                  :text="manuallyGradedInfo.feedback"
+                  :instance-id="`${question.id}_feedback`"
+                  :data-cy="`feedbackDisplayText_q${question.id}`"/>
+            </div>
+            </Fieldset>
+          </div>
+
         </div>
       </div>
     </div>

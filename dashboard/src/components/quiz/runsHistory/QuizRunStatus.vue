@@ -24,7 +24,7 @@ const props = defineProps({
 
 <template>
   <div>
-    <div v-if="QuizStatus.isFailed(status)" class="text-red-500">
+    <div v-if="QuizStatus.isFailed(status)" class="text-color-error">
       <i class="far fa-times-circle" aria-hidden="true"></i> Failed
     </div>
     <div v-if="QuizStatus.isPassed(status)" class="text-color-success">

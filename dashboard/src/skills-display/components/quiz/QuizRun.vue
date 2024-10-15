@@ -30,6 +30,7 @@ import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
 import QuizRunQuestion from '@/skills-display/components/quiz/QuizRunQuestion.vue';
 import { useForm } from "vee-validate";
+import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 
 const props = defineProps({
   quizId: String,
@@ -315,7 +316,7 @@ const reportTestRunToBackend = () => {
             const answerOptions = q.answerOptions.map((a) => ({
               ...a,
               selected: gradedQuestion.selectedAnswerIds.includes(a.id),
-              isGraded: true,
+              isGraded: !QuizStatus.isNeedsGrading(gradedQuestion.status),
               isCorrect: gradedQuestion.correctAnswerIds.includes(a.id),
             }));
             return ({
@@ -420,15 +421,6 @@ const doneWithThisRun = () => {
           <QuizRunValidationWarnings v-if="!meta.valid" :errors-to-show="errorsToShow" />
 
           <div v-if="!quizResult" class="text-left mt-5 flex flex-wrap">
-<!--            <SkillsButton severity="info" outlined-->
-<!--                          label="Save and Close"-->
-<!--                          icon="fas fa-save"-->
-<!--                          @click="saveAndCloseThisRun"-->
-<!--                          class="text-uppercase mr-2 font-weight-bold skills-theme-btn"-->
-<!--                          :disabled="isCompleting"-->
-<!--                          :aria-label="`Save and close this ${quizInfo.quizType}`"-->
-<!--                          data-cy="saveAndCloseQuizAttemptBtn">-->
-<!--            </SkillsButton>-->
             <SkillsOverlay :show="isCompleting" opacity="0.6">
               <SkillsButton severity="success" outlined
                             :label="`Complete ${quizInfo.quizType}`"
