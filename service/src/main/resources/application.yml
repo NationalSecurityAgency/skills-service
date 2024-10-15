@@ -162,6 +162,7 @@ skills:
       defaultLandingPage: "admin"
       maxSelfReportMessageLength: ${skills.config.ui.descriptionMaxLength}
       maxSelfReportRejectionMessageLength: 250
+      maxGraderFeedbackMessageLength: ${skills.config.ui.descriptionMaxLength}
       artifactBuildTimestamp: @maven.build.timestamp@
       maxSkillsInBulkImport: 50
       enablePageVisitReporting: false

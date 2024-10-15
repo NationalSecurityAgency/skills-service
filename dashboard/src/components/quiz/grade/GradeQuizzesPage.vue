@@ -73,7 +73,7 @@ const loadQuizRuns = () => {
   }
 
   return QuizService.getQuizRunsHistory(route.params.quizId, params).then((res) => {
-    quizRunsThatNeedGrading.value = res.data
+    quizRunsThatNeedGrading.value = res.data.map((q) => ({ ...q, isGraded: false }))
     pagination.value.totalRows = res.count
   }).finally(() => {
     loadingQuizRuns.value = false
@@ -115,6 +115,9 @@ onMounted(() => {
   })
 })
 
+const onGraded = (quizAttempt, gradedInfo) => {
+  quizAttempt.isGraded = gradedInfo.doneGradingAttempt
+}
 const isLoading = computed(() => runningQuizDefinitionCheck.value || loadingQuizRunsFirstTime.value)
 </script>
 
@@ -156,13 +159,15 @@ const isLoading = computed(() => runningQuizDefinitionCheck.value || loadingQuiz
                     {{ userInfo.getUserDisplay(slotProps.data, true) }}
                   </div>
                   <div class="flex flex-grow-1 align-items-start justify-content-end">
-                    <SkillsButton icon="fas fa-pencil-alt"
+                    <SkillsButton v-if="!slotProps.data.isGraded"
+                                  icon="fas fa-pencil-alt"
                                   label="Grade"
                                   @click="toggleRow(slotProps.data.attemptId)"
                                   class="ml-2"
                                   outlined
                                   :aria-label="`Grade Quiz for ${slotProps.data.userIdForDisplay}`"
                                   size="small"/>
+                    <div v-else><Tag severity="success"><i class="fas fa-check mr-1" aria-hidden="true" /> Graded</Tag></div>
                   </div>
                 </div>
               </template>
@@ -185,7 +190,11 @@ const isLoading = computed(() => runningQuizDefinitionCheck.value || loadingQuiz
               </div>
             </template>
             <template #expansion="slotProps">
-              <grade-quiz-attempt :quiz-attempt-id="slotProps.data.attemptId" :user-id="slotProps.data.userId"/>
+              <grade-quiz-attempt
+                  :quiz-attempt-id="slotProps.data.attemptId"
+                  :user-id="slotProps.data.userId"
+                  @on-graded="onGraded(slotProps.data, $event)"
+              />
             </template>
           </SkillsDataTable>
 

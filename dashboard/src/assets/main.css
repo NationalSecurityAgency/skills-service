@@ -107,3 +107,11 @@
 .st-light-theme .text-color-warn {
     color: #893f0c !important;
 }
+
+.st-dark-theme .text-color-error {
+    color: #ff6259 !important;
+}
+
+.st-light-theme .text-color-error {
+    color: #d9342b !important;
+}

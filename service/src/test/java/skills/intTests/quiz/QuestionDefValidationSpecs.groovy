@@ -52,17 +52,6 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
         skillsClientException.message.contains("For questionType=[MultipleChoice] must provide >= 2 correct answers")
     }
 
-    def "TextInput question type is not supported for a quiz"() {
-        def quiz = QuizDefFactory.createQuiz(1)
-        skillsService.createQuizDef(quiz)
-        def question =  QuizDefFactory.createChoiceQuestion(1, 1, 4, QuizQuestionType.TextInput)
-        when:
-        skillsService.createQuizQuestionDefs([question])
-        then:
-        SkillsClientException skillsClientException = thrown()
-        skillsClientException.message.contains("questionType=[TextInput] is not supported for quiz.type of Quiz")
-    }
-
     def "quiz SingleChoice question must have at least 2 answers"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)

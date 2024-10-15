@@ -16,9 +16,36 @@
 package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import skills.storage.model.UserQuizAnswerAttempt
 import skills.storage.model.UserQuizAnswerGraded
 
 interface UserQuizAnswerGradedRepo extends JpaRepository<UserQuizAnswerGraded, Long> {
 
 
+    static interface GradedInfo {
+        Integer getAnswerAttemptId()
+        Date getGradedOn()
+        String getFeedback()
+        String getGraderUserId()
+        String getGraderUserIdForDisplay()
+        String getGraderFirstname()
+        String getGraderLastname()
+
+    }
+
+    @Query('''select 
+            answerAttempt.id as answerAttemptId,    
+            graded.created as gradedOn, 
+            graded.feedback as feedback,
+            userAttrs.userId as graderUserId, 
+            userAttrs.userIdForDisplay as graderUserIdForDisplay, 
+            userAttrs.firstName as graderFirstname, 
+            userAttrs.lastName as graderLastname
+        from UserQuizAnswerGraded graded, UserQuizAnswerAttempt answerAttempt, UserAttrs userAttrs
+        where graded.userQuizAnswerAttemptRefId = answerAttempt.id
+          and graded.graderUserAttrsRefId = userAttrs.id
+          and answerAttempt.userQuizAttemptRefId = ?1
+     ''')
+    List<GradedInfo> getGradedAnswersForQuizAttemptId(Integer attemptId)
 }

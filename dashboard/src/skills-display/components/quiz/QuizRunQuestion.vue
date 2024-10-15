@@ -21,6 +21,7 @@ import QuizRunAnswers from '@/skills-display/components/quiz/QuizRunAnswers.vue'
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import QuizRunService from '@/skills-display/components/quiz/QuizRunService.js';
 import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEditor.vue";
+import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 
 const props = defineProps({
   q: Object,
@@ -152,52 +153,64 @@ const reportAnswer = (answer) => {
     resolve(null);
   });
 }
-
+const needsGrading = computed(() => QuizStatus.isNeedsGrading(props.q.gradedInfo?.status))
 </script>
 
 <template>
-  <div class="flex gap-0 mb-4" :data-cy="`question_${num}`">
-    <div class="flex align-items-start pt-2 pr-2">
-      <Tag class="inline-block"
-               :aria-label="questionNumAriaLabel"
-               :severity="`${q.gradedInfo ? (q.gradedInfo.isCorrect ? 'success' : 'danger') : 'secondary'}`">
-        {{ num }}
-      </Tag>
-      <span v-if="q.gradedInfo" class="ml-1 pt-1">
-        <span v-if="q.gradedInfo.isCorrect" class="text-success skills-theme-quiz-correct-answer" style="font-size: 1.1rem;" data-cy="questionAnsweredCorrectly"><i class="fas fa-check-double" aria-hidden="true"></i></span>
-        <span v-if="!q.gradedInfo.isCorrect" class="text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1.1rem;" data-cy="questionAnsweredWrong"><i class="fas fa-times-circle" aria-hidden="true"></i></span>
-      </span>
+  <div :data-cy="`question_${num}`">
+    <div v-if="needsGrading">
+      <Tag severity="warning" class="uppercase"><i class="fas fa-user-check mr-1" aria-hidden="true"></i> Needs Grading</Tag>
     </div>
-    <div class="flex flex-1">
-      <div class="flex flex-column w-full">
-        <markdown-text :text="q.question" data-cy="questionsText" :instance-id="`${q.id}`" />
-        <div v-if="isTextInput">
-          <markdown-editor class="form-text"
-                           :id="`question-${num}`"
-                           data-cy="textInputAnswer"
-                           markdownHeight="250px"
-                           label="Answer"
-                           @value-changed="textAnswerChanged"
-                           :show-label="false"
-                           :name="fieldName"
-                           :allow-attachments="false"
-                           :allow-insert-images="false"
-                           :aria-label="`Please enter text to answer question number ${num}`"
-                           placeholder="Please enter your response here..."
-                           :resizable="true" />
-        </div>
-        <div v-else-if="isRating">
-          <SkillsRating @update:modelValue="ratingChanged" class="flex-initial border-round py-3 px-4" v-model="answerRating" :stars="numberOfStars" :cancel="false" :name="fieldName"/>
-        </div>
-        <div v-else>
-          <div v-if="isMultipleChoice" class="text-secondary font-italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>
-          <QuizRunAnswers class="mt-1 pl-1"
-                          :name="fieldName"
-                          @selected-answer="selectionChanged"
-                          :value="answerOptions"
-                          :q="q"
-                          :q-num="num"
-                          :can-select-more-than-one="isMultipleChoice"/>
+    <div class="flex gap-0 mb-4">
+      <div class="flex align-items-start pt-2 pr-2">
+        <Tag class="inline-block"
+                 :aria-label="questionNumAriaLabel"
+                 :severity="`${q.gradedInfo && !needsGrading ? (q.gradedInfo.isCorrect ? 'success' : 'danger') : 'secondary'}`">
+          {{ num }}
+        </Tag>
+        <span v-if="q.gradedInfo && !needsGrading" class="ml-1 pt-1">
+          <span v-if="q.gradedInfo.isCorrect" class="text-success skills-theme-quiz-correct-answer" style="font-size: 1.1rem;" data-cy="questionAnsweredCorrectly"><i class="fas fa-check-double" aria-hidden="true"></i></span>
+          <span v-if="!q.gradedInfo.isCorrect" class="text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1.1rem;" data-cy="questionAnsweredWrong"><i class="fas fa-times-circle" aria-hidden="true"></i></span>
+        </span>
+      </div>
+      <div class="flex flex-1">
+        <div class="flex flex-column w-full">
+          <markdown-text :text="q.question" data-cy="questionsText" :instance-id="`${q.id}`" />
+          <div v-if="isTextInput">
+            <div v-if="needsGrading" class="border-1 border-round surface-border px-3">
+              <markdown-text
+                  :text="answerText"
+                  data-cy="textInputAnswer"
+                  :instance-id="`question-${num}`" />
+            </div>
+            <markdown-editor v-else
+                             class="form-text"
+                             :id="`question-${num}`"
+                             data-cy="textInputAnswer"
+                             markdownHeight="250px"
+                             label="Answer"
+                             @value-changed="textAnswerChanged"
+                             :show-label="false"
+                             :name="fieldName"
+                             :allow-attachments="false"
+                             :allow-insert-images="false"
+                             :aria-label="`Please enter text to answer question number ${num}`"
+                             placeholder="Please enter your response here..."
+                             :resizable="true" />
+          </div>
+          <div v-else-if="isRating">
+            <SkillsRating @update:modelValue="ratingChanged" class="flex-initial border-round py-3 px-4" v-model="answerRating" :stars="numberOfStars" :cancel="false" :name="fieldName"/>
+          </div>
+          <div v-else>
+            <div v-if="isMultipleChoice" class="text-secondary font-italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>
+            <QuizRunAnswers class="mt-1 pl-1"
+                            :name="fieldName"
+                            @selected-answer="selectionChanged"
+                            :value="answerOptions"
+                            :q="q"
+                            :q-num="num"
+                            :can-select-more-than-one="isMultipleChoice"/>
+          </div>
         </div>
       </div>
     </div>

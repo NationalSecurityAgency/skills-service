@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
@@ -91,6 +92,9 @@ class QuizRunService {
 
     @Autowired
     UserInfoService userInfoService
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     @Autowired
     SkillAttributeService skillAttributeService
@@ -484,6 +488,9 @@ class QuizRunService {
 
     @Transactional
     QuizAnswerGradingResult gradeQuestionAnswer(String userId, String quizId, Integer quizAttemptId, Integer answerDefId, QuizGradeAnswerReq gradeAnswerReq) {
+        UserInfo graderUserInfo = userInfoService.getCurrentUser()
+        UserAttrs graderUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(graderUserInfo.username)
+
         QuizDef quizDef = getQuizDef(quizId)
         UserQuizAttempt userQuizAttempt = getQuizAttempt(quizAttemptId)
         validateAttempt(userQuizAttempt, quizDef, quizAttemptId, quizId, userId)
@@ -518,7 +525,11 @@ class QuizRunService {
             quizAttemptRepo.save(userQuizAttempt)
         }
 
-        userQuizAnswerGradedRepo.save(new UserQuizAnswerGraded(userQuizAnswerAttemptRefId: userQuizAnswerAttempt.id, feedback: gradeAnswerReq.feedback))
+        UserQuizAnswerGraded userQuizAnswerGraded = new UserQuizAnswerGraded(
+                graderUserAttrsRefId: graderUserAttrs.id,
+                userQuizAnswerAttemptRefId: userQuizAnswerAttempt.id,
+                feedback: gradeAnswerReq.feedback)
+        userQuizAnswerGradedRepo.save(userQuizAnswerGraded)
 
         return new QuizAnswerGradingResult(doneGradingAttempt: doneGradingAttempt)
     }

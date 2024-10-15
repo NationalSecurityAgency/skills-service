@@ -15,11 +15,11 @@
  */
 package skills.controller.result.model
 
-class UserGradedQuizAnswerResult {
-    Integer id
-    String answer
-    Boolean isConfiguredCorrect
-    Boolean isSelected
-    Boolean needsGrading = false
-    AnswerGradingResult gradingResult
+class AnswerGradingResult {
+    String graderUserId
+    String graderUserIdForDisplay
+    String graderFirstname
+    String graderLastname
+    String feedback
+    Date gradedOn
 }

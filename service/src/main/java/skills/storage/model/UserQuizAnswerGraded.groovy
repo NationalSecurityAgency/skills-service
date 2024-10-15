@@ -33,6 +33,7 @@ class UserQuizAnswerGraded {
     Integer id
 
     Integer userQuizAnswerAttemptRefId
+    Integer graderUserAttrsRefId
 
     // optional
     String feedback

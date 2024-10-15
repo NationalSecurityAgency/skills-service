@@ -2677,6 +2677,9 @@
             <column name="user_quiz_answer_attempt_ref_id" type="int">
                 <constraints nullable="false"/>
             </column>
+            <column name="grader_user_attrs_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
             <column name="feedback" type="text" />
 
             <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
@@ -2698,6 +2701,19 @@
                                  onUpdate="CASCADE"
                                  referencedColumnNames="id"
                                  referencedTableName="user_quiz_answer_attempt"/>
+
+        <createIndex indexName="index_user_quiz_answer_graded_grader_user_attrs_ref_id"
+                     tableName="user_quiz_answer_graded">
+            <column name="grader_user_attrs_ref_id" type="int"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="grader_user_attrs_ref_id"
+                                 baseTableName="user_quiz_answer_graded"
+                                 constraintName="fk_user_quiz_answer_graded_grader_user_attrs_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_attrs"/>
+
     </changeSet>
 
 

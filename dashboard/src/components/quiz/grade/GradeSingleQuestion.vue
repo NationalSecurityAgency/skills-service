@@ -19,6 +19,9 @@ import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vu
 import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEditor.vue";
 import QuizService from "@/components/quiz/QuizService.js";
 import {useRoute} from "vue-router";
+import { useForm } from 'vee-validate'
+import {object, string} from "yup";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
 const props = defineProps({
   question: Object,
@@ -31,18 +34,37 @@ const props = defineProps({
     required: true,
   },
 })
+const emit = defineEmits(['on-graded'])
 const route = useRoute()
+const appConfig = useAppConfig()
 
-const isSubmitting = ref(false)
+const validationSchema = object({
+  'feedbackTxt': string()
+      .max(appConfig.maxGraderFeedbackMessageLength)
+      .customDescriptionValidator('Feedback')
+      .label('Feedback'),
+})
+const { meta, handleSubmit, isSubmitting } = useForm({
+  validationSchema: validationSchema,
+  initialValues: { feedbackTxt : ''}
+})
+const submitCorrect = handleSubmit(formValues => {
+  return grade(true, formValues.feedbackTxt)
+})
+const submitWrong = handleSubmit(formValues => {
+  return grade(false, formValues.feedbackTxt)
+})
+
 const isGraded = ref(false)
-const grade = (isCorrect) => {
+const grade = (isCorrect, feedback) => {
   const gradingInfo = {
     isCorrect,
-    feedback: null
+    feedback
   }
   return QuizService.gradeQuizAnswerAttempt(route.params.quizId, props.userId, props.quizAttemptId, props.question.answers[0].id, gradingInfo)
       .then((result) => {
-        console.log(result)
+        emit('on-graded', result);
+        return result
       }).finally(() => {
         isGraded.value = true
       })
@@ -60,10 +82,6 @@ const grade = (isCorrect) => {
             data-cy="questionDisplayText"/>
       </div>
     </div>
-    <pre>quizId: {{ route.params.quizId }}</pre>
-    <pre>userId: {{ userId }}</pre>
-    <pre>attemptid: {{ quizAttemptId }}</pre>
-    <pre>question id: {{ question.answers[0].id }}</pre>
     <div v-if="!isGraded">
       <div class="">
         <div class="font-bold">User's Answer:</div>
@@ -81,6 +99,7 @@ const grade = (isCorrect) => {
                        markdownHeight="120px"
                        label="Your Feedback (optional):"
                        name="feedbackTxt"
+                       :disabled="isSubmitting"
                        :allow-attachments="false"
                        :allow-insert-images="false"
                        :aria-label="`optionally provide feedback for answer of question # ${question.questionNumber}`"
@@ -91,13 +110,17 @@ const grade = (isCorrect) => {
           label="Wrong"
           icon="fas fa-times"
           severity="danger"
-          @click="grade(false)"
+          @click="submitWrong"
+          :loading="isSubmitting"
+          :disabled="!meta.valid || isSubmitting"
       />
       <SkillsButton
           label="Correct"
-          @click="grade(true)"
+          @click="submitCorrect"
           icon="fas fa-check"
           size="small"
+          :disabled="!meta.valid || isSubmitting"
+          :loading="isSubmitting"
       />
     </div>
     </div>

@@ -32,6 +32,7 @@ const props = defineProps({
     required: true,
   },
 })
+const emit = defineEmits(['on-graded'])
 const route = useRoute()
 
 const quizType = ref('')
@@ -52,6 +53,10 @@ const loadQuizAttempt = () => {
 onMounted(() => {
   loadQuizAttempt()
 })
+
+const onGraded = (gradedInfo) => {
+  emit('on-graded', gradedInfo)
+}
 </script>
 
 <template>
@@ -59,7 +64,12 @@ onMounted(() => {
     <skills-spinner v-if="loadingQuestionsToGrade" :is-loading="loadingQuestionsToGrade"/>
     <div v-else>
       <div v-for="(q, index) in questionsToGrade" :key="q.id">
-        <grade-single-question :question="q" :user-id="userId" :quiz-attempt-id="quizAttemptId"/>
+        <grade-single-question
+            :question="q"
+            :user-id="userId"
+            :quiz-attempt-id="quizAttemptId"
+            @on-graded="onGraded"
+        />
         <hr v-if="index < questionsToGrade.length - 1" class="mb-6"/>
       </div>
     </div>
