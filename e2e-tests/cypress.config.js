@@ -46,8 +46,8 @@ module.exports = defineConfig({
   },
   env: {
     "visualRegressionType": "regression",
-    "SNAPSHOT_BASE_DIRECTORY": "./cypress/visualRegression/base",
-    "SNAPSHOT_DIFF_DIRECTORY": "./cypress/visualRegression/diff",
-    "ALWAYS_GENERATE_DIFF": false
+    "visualRegressionBaseDirectory": "cypress/visualRegression/base",
+    "visualRegressionDiffDirectory": "cypress/visualRegression/diff",
+    "visualRegressionGenerateDiff": "fail"
   }
 })

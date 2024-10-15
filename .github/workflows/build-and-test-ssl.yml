@@ -61,7 +61,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.11.0'
+          node-version: '20.17.0'
 
       - uses: actions/setup-java@v4
         with:

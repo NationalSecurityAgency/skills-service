@@ -44,7 +44,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.11.0'
+          node-version: '20.17.0'
 
       - uses: actions/setup-java@v4
         with:
@@ -90,7 +90,11 @@ jobs:
       - name: Run Cypress tests
         run: |
           cd e2e-tests
-          npm run cy:run:dev:updateSnapshots 
+          npm run cy:run:dev:updateClientDisplaySnapshots -- --config baseUrl=http://localhost:8080
+          npm run cy:run:dev:updateLearningPathSnapshots -- --config baseUrl=http://localhost:8080
+          npm run cy:run:dev:updateQuizSnapshots -- --config baseUrl=http://localhost:8080
+          npm run cy:run:dev:updateAdminSnapshots -- --config baseUrl=http://localhost:8080
+          npm run cy:run:dev:updateMetricsSnapshots -- --config baseUrl=http://localhost:8080
           cd ..
         env:
           ELECTRON_EXTRA_LAUNCH_ARGS: '--disable-gpu'

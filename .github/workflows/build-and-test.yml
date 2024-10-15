@@ -22,12 +22,12 @@ on:
     paths-ignore:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
-      - '.github/workflows/publish-image-snapshot.yml'
+      - '.github/workflows/generate-images-for-regression-tests.yml'
   pull_request:
     paths-ignore:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
-      - '.github/workflows/publish-image-snapshot.yml'
+      - '.github/workflows/generate-images-for-regression-tests.yml'
 
 jobs:
   build-skills-service-for-ui-tests:
@@ -38,7 +38,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.11.0'
+          node-version: '20.17.0'
 
       - uses: actions/setup-java@v4
         with:
@@ -49,6 +49,7 @@ jobs:
         run: |
           java -version
           mvn --version
+          google-chrome --version 
 
       - name: Cache local Maven repository
         uses: actions/cache@v4
@@ -115,7 +116,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.11.0'
+          node-version: '20.17.0'
 
       - uses: actions/setup-java@v4
         with:
@@ -127,6 +128,8 @@ jobs:
           java -version
           npm -v
           node -v
+          google-chrome --version
+          fc-list > font-list.txt
 
       - uses: actions/download-artifact@v4
         with:
@@ -160,6 +163,7 @@ jobs:
             ./e2e-tests/cypress/videos
             ./e2e-tests/cypress/screenshots
             ./e2e-tests/cypress/visualRegression/diff
+            ./font-list.txt
 
       - name: verify that new screenshot snapshots were not created
         run: |
@@ -213,7 +217,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.11.0'
+          node-version: '20.17.0'
 
       - uses: actions/setup-java@v4
         with:
@@ -311,7 +315,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.11.0'
+          node-version: '20.17.0'
 
       - uses: actions/setup-java@v4
         with:
