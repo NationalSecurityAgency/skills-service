@@ -432,7 +432,7 @@ class QuizRunService {
         }
     }
 
-    private void handleReportfingTextInputQuestion(QuizDef quizDef, String userId, Integer quizAttemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
+    private void handleReportingTextInputQuestion(QuizDef quizDef, String userId, Integer quizAttemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
         UserQuizAnswerAttempt existingAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
         if (existingAnswerAttempt) {
             if (quizReportAnswerReq.isSelected) {
