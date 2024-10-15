@@ -1,0 +1,119 @@
+# Copyright 2024 SkillTree
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Generate Images for Regression Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-images-for-regression-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: skillsPassword
+          POSTGRES_DB: skills
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.17.0'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '19' # The JDK version to make available on the path.
+
+      - name: Install libs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          sudo psql --version
+          sudo apt-get install fonts-noto-color-emoji
+
+      - name: Print Versions
+        run: |
+          java -version
+          mvn --version
+          google-chrome --version 
+          fc-list > font-list.txt
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build skills-service
+        env:
+          MAVEN_OPTS: -Xmx2048m
+        run: |
+          mvn --batch-mode install -DskipTests
+
+      - name: Prep Services for Cypress tests
+        run: |
+          cd e2e-tests
+          npm install
+          npm run backend:dropAllDBTables
+          npm run cyServices:start
+          cd ..
+
+      - name: Run Cypress tests
+        run: |
+          cd e2e-tests
+          npm run cy:run:dev:updateClientDisplaySnapshots -- --config baseUrl=http://localhost:8080
+          npm run cy:run:dev:updateLearningPathSnapshots -- --config baseUrl=http://localhost:8080
+          npm run cy:run:dev:updateQuizSnapshots -- --config baseUrl=http://localhost:8080
+          npm run cy:run:dev:updateAdminSnapshots -- --config baseUrl=http://localhost:8080
+          npm run cy:run:dev:updateMetricsSnapshots -- --config baseUrl=http://localhost:8080
+          cd ..
+        env:
+          ELECTRON_EXTRA_LAUNCH_ARGS: '--disable-gpu'
+
+
+      - name: upload result artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Generated Images and Logs
+          path: |
+            ./e2e-tests/logs
+            ./e2e-tests/cypress/videos
+            ./e2e-tests/cypress/screenshots
+            ./e2e-tests/cypress/visualRegression/base
+            ./e2e-tests/cypress/visualRegression/diff
+            ./font-list.txt
+
+      - name: verify that new screenshot snapshots were not created
+        run: |
+          cd e2e-tests
+          npm run verifyThatNewSnapshotsAreNotCreated
