@@ -297,11 +297,12 @@ const onSavedQuestion = (savedQuestion) => {
             name="questionType"
             data-cy="answerTypeSelector"
             v-model="questionType.selectedType"
+            aria-label="Selection Question Type"
             @update:modelValue="questionTypeChanged"
             :isRequired="true"
             :options="questionType.options">
           <template #value="slotProps">
-            <div v-if="slotProps.value" class="p-1" :data-cy="`selectionItem_${slotProps.value.id}`">
+            <div v-if="slotProps.value" class="p-1" :data-cy="`selectionItem_${slotProps.value.id}`" :aria-label="`Select ${slotProps.value.label}`">
               <i :class="slotProps.value.icon" style="min-width: 1.2rem" class="border rounded p-1 mr-2" aria-hidden="true"></i>
               <span class="">{{ slotProps.value.label }}</span>
             </div>
