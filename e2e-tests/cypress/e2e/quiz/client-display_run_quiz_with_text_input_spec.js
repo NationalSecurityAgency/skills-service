@@ -163,6 +163,55 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="takeQuizBtn"]').should('not.exist')
     });
 
+    it('cannot start previously taken quiz that needs grading', () => {
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.runQuizForTheCurrentUser(1, [{selectedIndex: [0]}], 'My Answer')
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '1')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '1 / Unlimited')
+
+        cy.get('[data-cy="quizRequiresGradingMsg"]')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="closeQuizAttempt"]').should('be.enabled')
+    });
+
+    it('cannot start previously taken quiz that needs grading even if quizMultipleTakes=true', () => {
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.setQuizMultipleTakes(1, true);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.runQuizForTheCurrentUser(1, [{selectedIndex: [0]}], 'My Answer')
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '1')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '1 / Unlimited')
+
+        cy.get('[data-cy="quizRequiresGradingMsg"]')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
+        cy.get('[data-cy="closeQuizAttempt"]').should('be.enabled')
+    });
+
 });
 
 
