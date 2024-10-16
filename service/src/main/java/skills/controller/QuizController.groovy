@@ -76,6 +76,11 @@ class QuizController {
         return quizDefService.saveQuizDef(quizId, quizDefRequest.quizId, quizDefRequest)
     }
 
+    @RequestMapping(value = "/{quizId}/copy", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    QuizDefResult copyQuiz(@PathVariable("quizId") String quizId, @RequestBody QuizDefRequest quizDefRequest) {
+        return quizDefService.copyQuiz(quizId, quizDefRequest.quizId, quizDefRequest)
+    }
 
     @RequestMapping(value = "/{quizId}", method = RequestMethod.DELETE)
     void deleteQuiz(@PathVariable("quizId") String quizId) {

@@ -24,7 +24,6 @@ import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEdito
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
-import ProjectService from "@/components/projects/ProjectService.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -32,15 +31,25 @@ const props = defineProps({
   isEdit: {
     type: Boolean,
     default: false,
+  },
+  isCopy: {
+    type: Boolean,
+    default: false,
   }
 })
 const emit = defineEmits(['quiz-saved'])
 const loadingComponent = ref(false)
 
-const modalTitle = computed(() => {
-  return props.isEdit ? 'Editing Existing Quiz/Survey' : 'New Quiz/Survey'
-})
-const modalId = props.isEdit ? `editQuizDialog${props.quiz.quizId}` : 'newQuizDialog'
+const modalTitle = ref('New Quiz/Survey');
+const modalId = ref('newQuizDialog');
+if(props.isEdit) {
+  modalTitle.value = 'Editing Existing Quiz/Survey'
+  modalId.value = `editQuizDialog${props.quiz.quizId}`
+} else if(props.isCopy) {
+  modalTitle.value = 'Copy Quiz/Survey'
+  modalId.value = `copyQuizDialog${props.quiz.quizId}`
+}
+
 const appConfig = useAppConfig()
 
 
@@ -93,7 +102,7 @@ const schema = object({
 
 const asyncLoadData = () => {
   const loadDescription = () => {
-    if(props.isEdit) {
+    if(props.isEdit || props.isCopy) {
       return QuizService.getQuizDef(props.quiz.quizId).then((data) => {
         initialQuizData.value.description = data.description ? data.description : ''
         initialQuizData.value = { ...initialQuizData.value }
@@ -107,8 +116,8 @@ const asyncLoadData = () => {
 }
 
 const initialQuizData = ref({
-  quizId: props.quiz.quizId || '',
-  quizName: props.quiz.name || '',
+  quizId: props.isCopy ? `Copyof${props.quiz.quizId}` : (props.quiz.quizId || ''),
+  quizName: props.isCopy ? `Copy of ${props.quiz.name}` : (props.quiz.name || ''),
   type: props.quiz.type || '',
   description: props.quiz.description || '',
 })
@@ -120,6 +129,14 @@ const saveQuiz = (values) => {
     originalQuizId: props.quiz.quizId,
     name: InputSanitizer.sanitize(values.quizName),
     quizId: InputSanitizer.sanitize(values.quizId),
+  }
+  if(props.isCopy) {
+    return QuizService.copyQuiz(quizToSave).then((newQuizDef) => {
+      return {
+        ...newQuizDef,
+        originalQuizId: newQuizDef.quizId
+      }
+    })
   }
   return QuizService.updateQuizDef(quizToSave)
     .then((updatedQuizDef) => {
@@ -165,9 +182,9 @@ const onSavedQuiz = (savedQuiz) => {
             name="type"
             data-cy="quizTypeSelector"
             :isRequired="true"
-            :disabled="isEdit"
+            :disabled="isEdit || isCopy"
             :options="['Quiz', 'Survey']" />
-          <div v-if="isEdit" class="text-color-secondary font-italic text-ms">** Can only be modified for a new quiz/survey **</div>
+          <div v-if="isEdit || isCopy" class="text-color-secondary font-italic text-ms">** Can only be modified for a new quiz/survey **</div>
       </div>
 
       <markdown-editor

@@ -546,6 +546,5 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         updatedQuestion.answers.isCorrect == [false, true, true]
         updatedQuestion.answers.displayOrder == [1, 2, 3]
     }
-
 }
 

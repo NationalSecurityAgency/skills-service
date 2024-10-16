@@ -563,5 +563,146 @@ describe('Quiz CRUD Tests', () => {
         ], 5);
     });
 
+    it('copy an empty quiz and an empty survey', function () {
+        cy.createQuizDef(1, { name: 'Quiz 1' });
+        cy.createSurveyDef(2, { name: 'Survey 1' });
+
+        cy.visit('/administrator/quizzes/')
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Survey 1' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'Copy of Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+        ], 5);
+
+        cy.get('[data-cy="copyQuizButton_quiz2"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Survey 1')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Survey 1' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'Copy of Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Copy of Survey 1' }, { colIndex: 1, value: 'Survey' }],
+        ], 5);
+    });
+
+    it('copy a quiz and a survey with questions', function () {
+        cy.createQuizDef(1, { name: 'Quiz 1' });
+        cy.createSurveyDef(2, { name: 'Survey 1' });
+
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createSurveyMultipleChoiceQuestionDef(2, 1);
+        cy.createTextInputQuestionDef(2, 2);
+        cy.createRatingQuestionDef(2, 3);
+
+        cy.visit('/administrator/quizzes/')
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Survey 1' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'Copy of Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+        ], 5);
+
+        cy.get('[data-cy="copyQuizButton_quiz2"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Survey 1')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Survey 1' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'Copy of Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Copy of Survey 1' }, { colIndex: 1, value: 'Survey' }],
+        ], 5);
+
+        cy.get('[data-cy="managesQuizLink_Copyofquiz1"]').click()
+        cy.get('[data-cy="questionDisplayCard-1"]').contains('This is a question # 1')
+        cy.get('[data-cy="questionDisplayCard-2"]').contains('This is a question # 2')
+
+        cy.visit('/administrator/quizzes/')
+        cy.get('[data-cy="managesQuizLink_Copyofquiz2"]').click()
+
+        cy.get('[data-cy="questionDisplayCard-1"]').contains('This is a question # 1')
+        cy.get('[data-cy="questionDisplayCard-2"]').contains('This is a question # 2')
+        cy.get('[data-cy="questionDisplayCard-3"]').contains('This is a question # 3')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="textAreaPlaceHolder"]').should('exist')
+        cy.get('[data-cy="questionDisplayCard-3"] [data-pc-name="rating"]').should('exist')
+
+    });
+
+    it('copy a quiz and a survey with settings', function () {
+        cy.createQuizDef(1, { name: 'Quiz 1' });
+        cy.createSurveyDef(2, { name: 'Survey 1' });
+
+        cy.setQuizMaxNumAttempts(1, 3);
+        cy.setQuizMultipleTakes(1, true);
+        cy.setQuizShowCorrectAnswers(1, true);
+
+        cy.setQuizMultipleTakes(2, true);
+
+        cy.visit('/administrator/quizzes/')
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.get('[data-cy="copyQuizButton_quiz2"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Survey 1')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Survey 1' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'Copy of Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Copy of Survey 1' }, { colIndex: 1, value: 'Survey' }],
+        ], 5);
+
+        cy.visit('/administrator/quizzes/Copyofquiz1/settings')
+        cy.get('[data-cy="numAttemptsInput"] input').should('have.value', 3);
+        cy.get('[data-cy="multipleTakesSwitch"] input').should('be.checked');
+        cy.get('[data-cy="alwaysShowCorrectAnswersSwitch"] input').should('be.checked');
+
+        cy.visit('/administrator/quizzes/Copyofquiz2/settings')
+        cy.get('[data-cy="multipleTakesSwitch"] input').should('be.checked');
+
+    });
+
+    it('focus is returned to button', function () {
+        cy.createQuizDef(1, { name: 'Quiz 1' });
+        cy.createSurveyDef(2, { name: 'Survey 1' });
+
+        cy.visit('/administrator/quizzes/')
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="closeDialogBtn"]').click()
+        cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="closeDialogBtn"]').type('{esc}');
+        cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-pc-section="closebuttonicon"]').click()
+        cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
+
+    });
 });
 

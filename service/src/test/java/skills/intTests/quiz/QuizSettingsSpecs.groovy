@@ -590,6 +590,5 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         settings.setting == [QuizSettings.QuizUserRole.setting]
         settings.value == [RoleName.ROLE_QUIZ_READ_ONLY.toString()]
     }
-
 }
 
