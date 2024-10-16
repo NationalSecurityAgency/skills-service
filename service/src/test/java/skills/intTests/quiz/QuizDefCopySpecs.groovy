@@ -624,6 +624,53 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         copiedRuns.data.size() == 0
     }
 
+    def "Copied quiz creates new activity history"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice))
+        skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice))
+
+        def result = skillsService.copyQuiz(quiz.quizId, [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: '', type: quiz.type])
+        def copiedQuiz = result.body
+
+        quiz.name = "Cool New Name"
+        skillsService.createQuizDef(quiz, quiz.quizId)
+
+        when:
+        def copiedHistory = skillsService.getUserActionsForQuiz(copiedQuiz.quizId)
+        def questionOneAttributes = skillsService.getQuizUserActionAttributes(copiedQuiz.quizId, copiedHistory.data[1].id)
+
+        then:
+        copiedHistory.totalCount == 4
+        copiedHistory.data[0].action == 'Create'
+        copiedHistory.data[0].item == 'Settings'
+        copiedHistory.data[0].itemId == 'newQuizCopy'
+        copiedHistory.data[0].quizId == copiedQuiz.quizId
+        copiedHistory.data[1].action == 'Create'
+        copiedHistory.data[1].item == 'Question'
+        copiedHistory.data[1].itemId == 'newQuizCopy'
+        copiedHistory.data[1].quizId == copiedQuiz.quizId
+        copiedHistory.data[2].action == 'Create'
+        copiedHistory.data[2].item == 'Question'
+        copiedHistory.data[2].itemId == 'newQuizCopy'
+        copiedHistory.data[2].quizId == copiedQuiz.quizId
+        copiedHistory.data[3].action == 'Create'
+        copiedHistory.data[3].item == 'Quiz'
+        copiedHistory.data[3].itemId == 'newQuizCopy'
+        copiedHistory.data[3].quizId == copiedQuiz.quizId
+        questionOneAttributes.question == "This is questions #2"
+        questionOneAttributes.questionType == "SingleChoice"
+        questionOneAttributes["Answer1:text"] == "Answer #1"
+        questionOneAttributes["Answer1:isCorrectAnswer"] == "true"
+        questionOneAttributes["Answer2:text"] == "Answer #2"
+        questionOneAttributes["Answer2:isCorrectAnswer"] == "false"
+        questionOneAttributes["Answer3:text"] == "Answer #3"
+        questionOneAttributes["Answer3:isCorrectAnswer"] == "false"
+        questionOneAttributes["Answer4:text"] == "Answer #4"
+        questionOneAttributes["Answer4:isCorrectAnswer"] == "false"
+
+    }
+
     void runQuiz(String userId, def quiz, def quizInfo, boolean pass) {
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, userId).body
         skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, userId)

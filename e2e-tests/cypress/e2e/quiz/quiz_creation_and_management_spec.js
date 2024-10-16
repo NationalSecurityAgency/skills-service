@@ -679,5 +679,30 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="multipleTakesSwitch"] input').should('be.checked');
 
     });
+
+    it('focus is returned to button', function () {
+        cy.createQuizDef(1, { name: 'Quiz 1' });
+        cy.createSurveyDef(2, { name: 'Survey 1' });
+
+        cy.visit('/administrator/quizzes/')
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="closeDialogBtn"]').click()
+        cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="closeDialogBtn"]').type('{esc}');
+        cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-pc-section="closebuttonicon"]').click()
+        cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
+
+    });
 });
 
