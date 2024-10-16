@@ -418,7 +418,7 @@ const doneWithThisRun = () => {
             </div>
           </SkillsOverlay>
 
-          <QuizRunValidationWarnings v-if="!meta.valid" :errors-to-show="errorsToShow" />
+          <QuizRunValidationWarnings v-if="!meta.valid && !quizResult.gradedRes.needsGrading" :errors-to-show="errorsToShow" />
 
           <div v-if="!quizResult" class="text-left mt-5 flex flex-wrap">
             <SkillsOverlay :show="isCompleting" opacity="0.6">
@@ -435,7 +435,7 @@ const doneWithThisRun = () => {
           </div>
 
           <div v-if="quizResult && quizResult.gradedRes && quizResult.gradedRes.passed" class="text-left mt-5">
-            <SkillsButton :severity="quizResult.gradedRes.passed ? 'success' : 'danger'" outlined
+            <SkillsButton :severity="quizResult.gradedRes.passed || quizResult.gradedRes.needsGrading ? 'success' : 'danger'" outlined
                           label="Close"
                           icon="fas fa-times-circle"
                           @click="doneWithThisRun"
@@ -444,7 +444,8 @@ const doneWithThisRun = () => {
           </div>
           <div v-if="quizResult && quizResult.gradedRes && !quizResult.gradedRes.passed" class="mt-5">
             <div class="my-2" v-if="(quizInfo.maxAttemptsAllowed - quizInfo.userNumPreviousQuizAttempts - 1) > 0"><span class="text-info">No worries!</span> Would you like to try again?</div>
-            <SkillsButton severity="danger" outlined
+            <SkillsButton :severity="quizResult.gradedRes.needsGrading ? 'success' : 'danger'"
+                          outlined
                           label="Close"
                           icon="fas fa-times-circle"
                           @click="doneWithThisRun"

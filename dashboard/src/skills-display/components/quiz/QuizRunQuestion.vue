@@ -159,7 +159,7 @@ const needsGrading = computed(() => QuizStatus.isNeedsGrading(props.q.gradedInfo
 <template>
   <div :data-cy="`question_${num}`">
     <div v-if="needsGrading">
-      <Tag severity="warning" class="uppercase"><i class="fas fa-user-check mr-1" aria-hidden="true"></i> Needs Grading</Tag>
+      <Tag severity="warning" class="uppercase" data-cy="needsGradingTag"><i class="fas fa-user-check mr-1" aria-hidden="true"></i> Needs Grading</Tag>
     </div>
     <div class="flex gap-0 mb-4">
       <div class="flex align-items-start pt-2 pr-2">

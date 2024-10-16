@@ -122,6 +122,9 @@ class SkillsLoader {
     QuizToSkillDefRepo quizToSkillDefRepo
 
     @Autowired
+    UserQuizAttemptRepo userQuizAttemptRepo
+
+    @Autowired
     PostgresQlNativeRepo postgresQlNativeRepo
 
     @Autowired
@@ -618,7 +621,7 @@ class SkillsLoader {
                 badgeDependencyInfo: badgeDependencySummary,
                 crossProject: crossProjectId != null,
                 achievedOn: achievedOn,
-                selfReporting: loadSelfReporting(userId, skillDef, quizNameAndId),
+                selfReporting: loadSelfReporting(userId, skillDef, quizNameAndId, achievedOn),
                 type: skillDef.type,
                 copiedFromProjectId: isReusedSkill ? null : skillDef.copiedFromProjectId,
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
@@ -676,13 +679,25 @@ class SkillsLoader {
     }
 
     @Profile
-    private SelfReportingInfo loadSelfReporting(String userId, SkillDefParent skillDef, QuizToSkillDefRepo.QuizNameAndId quizNameAndId){
+    private SelfReportingInfo loadSelfReporting(String userId, SkillDefParent skillDef, QuizToSkillDefRepo.QuizNameAndId quizNameAndId, Date achievedOn){
         boolean enabled = skillDef.selfReportingType != null
         Pageable oneRowPlease = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "requestedOn"))
         String queryProjId = skillDef.copiedFrom ? skillDef.copiedFromProjectId : skillDef.projectId
         Integer querySkillRefId = skillDef.copiedFrom ? skillDef.copiedFrom : skillDef.id
         List<SkillApproval> skillApprovals = skillApprovalRepo.findApprovalForSkillsDisplay(userId, queryProjId, querySkillRefId, oneRowPlease )
         SkillApproval skillApproval = skillApprovals?.size() > 0 ? skillApprovals.first() : null
+
+        Boolean quizNeedsGrading = false
+        Date quizNeedsGradingAttemptDate
+        if (!achievedOn && quizNameAndId) {
+            PageRequest onePlease = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "updated"))
+            List<UserQuizAttempt> gradingAttempts = userQuizAttemptRepo.findByQuizRefIdByStatus(quizNameAndId.getQuizRefId(), UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING, onePlease)
+            if (gradingAttempts) {
+                quizNeedsGrading = true
+                quizNeedsGradingAttemptDate = gradingAttempts.first().getUpdated()
+            }
+        }
+
 
         SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
                 approvalId: skillApproval?.getId(),
@@ -695,6 +710,8 @@ class SkillsLoader {
                 quizId: quizNameAndId?.quizId,
                 quizName: quizNameAndId?.quizName,
                 numQuizQuestions: quizNameAndId?.numQuestions ?: 0,
+                quizNeedsGrading: quizNeedsGrading,
+                quizNeedsGradingAttemptDate: quizNeedsGradingAttemptDate
         )
 
         return selfReportingInfo
