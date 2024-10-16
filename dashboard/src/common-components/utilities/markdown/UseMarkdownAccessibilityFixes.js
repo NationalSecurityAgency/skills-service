@@ -24,8 +24,8 @@ export const useMarkdownAccessibilityFixes = () => {
   const announcer = useSkillsAnnouncer()
   const windowSize = useWindowSize()
 
-  function doClickOnToolbarButton(selector) {
-    const markdownEditor = commonMarkdownOptions.getMarkdownEditor()
+  function doClickOnToolbarButton(markdownEditorId, selector) {
+    const markdownEditor = commonMarkdownOptions.getMarkdownEditor(markdownEditorId)
     if (markdownEditor) {
       const btn = markdownEditor.querySelector(selector)
       btn.dispatchEvent(commonMarkdownOptions.getMouseEvent())
@@ -41,25 +41,25 @@ export const useMarkdownAccessibilityFixes = () => {
     }
   }
 
-  function clickOnFontSizeToolbarButton() {
-    doClickOnToolbarButton('[skilltree-id="fontSizeBtn"]')
+  function clickOnFontSizeToolbarButton(markdownEditorId) {
+    doClickOnToolbarButton(markdownEditorId, '[skilltree-id="fontSizeBtn"]')
   }
 
-  function clickOnImageToolbarButton() {
-    doClickOnToolbarButton('.image')
+  function clickOnImageToolbarButton(markdownEditorId) {
+    doClickOnToolbarButton(markdownEditorId, '.image')
   }
 
-  function clickOnLinkToolbarButton() {
-    doClickOnToolbarButton('.link')
+  function clickOnLinkToolbarButton(markdownEditorId) {
+    doClickOnToolbarButton(markdownEditorId, '.link')
   }
 
-  function clickOnAttachmentToolbarButton() {
-    doClickOnToolbarButton('.attachment-button')
+  function clickOnAttachmentToolbarButton(markdownEditorId) {
+    doClickOnToolbarButton(markdownEditorId, '.attachment-button')
   }
 
   function fixAccessibilityIssues(id, allowInsertImages=true) {
     fixHeaderButtonIssues(id)
-    fixMoreButtonAriaLabel(1)
+    fixMoreButtonAriaLabel(1, id)
     fixFontSizeButtonIssues(id)
     if (allowInsertImages) {
       fixInsertImageButtonIssues(id)
@@ -68,6 +68,14 @@ export const useMarkdownAccessibilityFixes = () => {
   }
 
   function fixInsertUrlButtonIssues(id) {
+    const handleUrlButtonClick = () => {
+      nextTick(() => {
+        nextTick(() => announcer.polite('Insert hyperlink into text'))
+        const urlInput = commonMarkdownOptions.getMenuPopup(id).querySelector('#toastuiLinkUrlInput')
+        urlInput.focus()
+      })
+    }
+
     nextTick(() => {
       const markdownEditor = commonMarkdownOptions.getMarkdownEditor(id)
       if (markdownEditor) {
@@ -77,13 +85,7 @@ export const useMarkdownAccessibilityFixes = () => {
     })
   }
 
-  function handleUrlButtonClick() {
-    nextTick(() => {
-      nextTick(() => announcer.polite('Insert hyperlink into text'))
-      const urlInput = commonMarkdownOptions.getMenuPopup().querySelector('#toastuiLinkUrlInput')
-      urlInput.focus()
-    })
-  }
+
 
   function fixInsertImageButtonIssues(id) {
     nextTick(() => {
@@ -128,6 +130,21 @@ export const useMarkdownAccessibilityFixes = () => {
 
 
   function fixFontSizeButtonIssues(id) {
+
+    const handleFontSizeButtonClick = () => {
+      nextTick(() => {
+        const sizeInput = commonMarkdownOptions.getMenuPopup(id).querySelector('.size-input')
+        sizeInput.setAttribute('aria-label', 'Set Font Size in pixels')
+        sizeInput.classList.add('w-100')
+        const menuitems = commonMarkdownOptions.getMenuPopup(id).querySelectorAll('.drop-down .drop-down-item')
+        menuitems.forEach((item) => {
+          item.setAttribute('aria-hidden', true)
+        })
+        sizeInput.focus()
+      })
+    }
+
+
     return nextTick(() => {
       const markdownEditor = commonMarkdownOptions.getMarkdownEditor(id)
       if (markdownEditor) {
@@ -139,18 +156,7 @@ export const useMarkdownAccessibilityFixes = () => {
     })
   }
 
-  function handleFontSizeButtonClick() {
-    nextTick(() => {
-      const sizeInput = commonMarkdownOptions.getMenuPopup().querySelector('.size-input')
-      sizeInput.setAttribute('aria-label', 'Set Font Size in pixels')
-      sizeInput.classList.add('w-100')
-      const menuitems = commonMarkdownOptions.getMenuPopup().querySelectorAll('.drop-down .drop-down-item')
-      menuitems.forEach((item) => {
-        item.setAttribute('aria-hidden', true)
-      })
-      sizeInput.focus()
-    })
-  }
+
 
   const debouncedFixMoreButtonAriaLabel = useDebounceFn(() => {
     fixMoreButtonAriaLabel(1)
@@ -164,17 +170,17 @@ export const useMarkdownAccessibilityFixes = () => {
     }
   )
 
-  function fixMoreButtonAriaLabel(attemptNum) {
+  function fixMoreButtonAriaLabel(attemptNum, id) {
     if (attemptNum <= 10) {
       setTimeout(() => {
         nextTick(() => {
-          const markdownEditor = commonMarkdownOptions.getMarkdownEditor()
+          const markdownEditor = commonMarkdownOptions.getMarkdownEditor(id)
           if (markdownEditor) {
             const moreButton = markdownEditor.querySelector('.more')
             if (moreButton) {
               moreButton.setAttribute('aria-label', 'More Toolbar Controls')
             } else {
-              fixMoreButtonAriaLabel(attemptNum + 1)
+              fixMoreButtonAriaLabel(attemptNum + 1, id)
             }
           }
         })

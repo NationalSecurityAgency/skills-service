@@ -38,7 +38,7 @@ const props = defineProps({
   },
   id: {
     type: String,
-    required: false
+    required: false,
   },
   resizable: {
     type: Boolean,
@@ -95,7 +95,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['value-changed'])
 const themeHelper = useThemesHelper()
-
+const idForToastUIEditor = props.id || props.name
 //  build editor options
 const toolbarItems = [
   ['heading', 'bold', 'italic', 'strike'],
@@ -165,7 +165,7 @@ onMounted(() => {
   }
 })
 function onLoad() {
-  markdownAccessibilityFixes.fixAccessibilityIssues(props.id, props.allowInsertImages)
+  markdownAccessibilityFixes.fixAccessibilityIssues(idForToastUIEditor, props.allowInsertImages)
 }
 
 function onEditorChange() {
@@ -199,15 +199,15 @@ function onKeydown(mode, event) {
     }
   } else if (event.ctrlKey && event.altKey && !event.shiftKey) {
     if (event.key === 't') {
-      markdownAccessibilityFixes.clickOnHeaderToolbarButton(props.id)
+      markdownAccessibilityFixes.clickOnHeaderToolbarButton(idForToastUIEditor)
     } else if (event.key === 's') {
-      markdownAccessibilityFixes.clickOnFontSizeToolbarButton()
+      markdownAccessibilityFixes.clickOnFontSizeToolbarButton(idForToastUIEditor)
     } else if (event.key === 'i') {
-      markdownAccessibilityFixes.clickOnImageToolbarButton()
+      markdownAccessibilityFixes.clickOnImageToolbarButton(idForToastUIEditor)
     } else if (event.key === 'r') {
-      markdownAccessibilityFixes.clickOnLinkToolbarButton()
+      markdownAccessibilityFixes.clickOnLinkToolbarButton(idForToastUIEditor)
     } else if (event.key === 'a') {
-      markdownAccessibilityFixes.clickOnAttachmentToolbarButton()
+      markdownAccessibilityFixes.clickOnAttachmentToolbarButton(idForToastUIEditor)
     }
   }
 }
@@ -280,7 +280,7 @@ function attachFile(event) {
            :for="name" @click="focusOnMarkdownEditor">{{ label }}</label>
     <BlockUI :blocked="disabled">
 
-      <toast-ui-editor :id="id || name"
+      <toast-ui-editor :id="idForToastUIEditor"
                        :style="resizable ? {resize: 'vertical', overflow: 'auto', 'min-height': '285px'} : {}"
                        class="no-bottom-border"
                        :class="{'editor-theme-dark' : themeHelper.isDarkTheme, 'is-resizable': resizable }"

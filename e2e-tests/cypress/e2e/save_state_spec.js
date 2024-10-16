@@ -501,6 +501,8 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="btn_Questions"]').click()
 
     cy.get('[data-cy="questionText"]').type('My new quiz question')
+    cy.get('[data-cy="answerTypeSelector"]').click()
+    cy.get('[data-cy="selectionItem_SingleChoice"]').click()
     cy.get('[data-cy="answer-0"]').type('Answer One')
     cy.get('[data-cy="answer-1"]').type('Answer Two')
 
@@ -540,5 +542,6 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="answer-2"] [data-cy="answerText"]').should('have.value', 'Answer Three')
     cy.get('[data-cy="answer-3"] [data-cy="answerText"]').should('not.exist')
     cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('exist');
+    cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('not.exist');
   })
 });
