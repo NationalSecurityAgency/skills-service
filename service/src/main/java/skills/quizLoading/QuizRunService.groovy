@@ -154,6 +154,15 @@ class QuizRunService {
             }
         })
 
+        UserQuizAttempt needsGradingAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING)
+        boolean needsGrading = false
+        Date needsGradingAttemptDate = null
+        if (needsGradingAttempt) {
+            canStartQuiz = false
+            needsGrading = true
+            needsGradingAttemptDate = needsGradingAttempt.updated
+        }
+
         return new QuizInfo(
                 name: quizDefWithDesc.name,
                 description: InputSanitizer.unsanitizeForMarkdown(quizDefWithDesc.description),
@@ -170,6 +179,8 @@ class QuizRunService {
                 multipleTakes: multipleTakes,
                 canStartQuiz: canStartQuiz,
                 errorMessage: errorMessage,
+                needsGrading: needsGrading,
+                needsGradingAttemptDate: needsGradingAttemptDate
         )
     }
 
@@ -226,6 +237,8 @@ class QuizRunService {
         List<QuizQuestionInfo> questionsForQuiz = []
         Integer quizLengthAsInteger = quizLength ? Integer.valueOf(quizLength.value) : 0
         Integer lengthSetting = quizLengthAsInteger > 0 ? quizLengthAsInteger : questions.size()
+
+        validateNoPendingGradingAttempt(userId, quizId)
 
         log.info("Starting [{}] quiz attempt for [{}] user", quizId, userId)
         UserQuizAttempt inProgressAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
@@ -318,6 +331,14 @@ class QuizRunService {
         }
 
         return new QuizAttemptStartResult(id: savedAttempt.id, questions: questionsForQuiz.sort{ it.displayOrder }, deadline: deadline?.toDate())
+    }
+
+    private void validateNoPendingGradingAttempt(String userId, String quizId) {
+        // do not allow to start a new attempt if there is a pending attempt that needs grading
+        UserQuizAttempt needsGradingAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING)
+        if (needsGradingAttempt) {
+            throw new SkillQuizException("There is curerntly a pending attempt for  [${userId}] that awaiting grading. Cannot start a new attempt", quizId, ErrorCode.BadParam)
+        }
     }
 
     @Profile

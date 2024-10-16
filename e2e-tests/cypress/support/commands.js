@@ -408,7 +408,7 @@ Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAtt
     });
 });
 
-Cypress.Commands.add('runQuizForTheCurrentUser', (quizNum = 1, quizAttemptInfo) => {
+Cypress.Commands.add('runQuizForTheCurrentUser', (quizNum = 1, quizAttemptInfo,  userAnswerTxt = null) => {
     cy.fixture('vars.json')
         .then((vars) => {
             const userId = vars.defaultUser;
