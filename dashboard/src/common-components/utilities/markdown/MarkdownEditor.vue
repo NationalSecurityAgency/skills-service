@@ -273,7 +273,7 @@ function attachFile(event) {
     <BlockUI :blocked="disabled">
 
       <toast-ui-editor :id="name"
-                       :style="resizable ? {resize: 'vertical', overflow: 'auto'} : {}"
+                       :style="resizable ? {resize: 'vertical', overflow: 'auto', 'min-height': '202px'} : {}"
                        class="markdown"
                        :class="{'editor-theme-dark' : themeHelper.isDarkTheme }"
                        data-cy="markdownEditorInput"
@@ -339,6 +339,14 @@ function attachFile(event) {
 </style>
 
 <style>
+#editor {
+  height: 100% !important;
+  min-height: 150px !important;
+}
+
+.toastui-editor-main, .toastui-editor-main-container, .toastui-editor {
+  min-height: 150px !important;
+}
 
 .editor-theme-dark .toastui-editor-ww-container {
   background-color: #1f2937 !important;
