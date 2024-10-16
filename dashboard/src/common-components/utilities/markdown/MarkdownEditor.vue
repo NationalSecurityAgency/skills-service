@@ -111,7 +111,7 @@ const options = {
   autofocus: false,
   placeholder: props.placeholder,
   toolbarItems,
-  plugins: [fontSize]
+  plugins: [fontSize],
 }
 const announcer = useSkillsAnnouncer()
 const commonOptions = useCommonMarkdownOptions()
@@ -275,7 +275,7 @@ function attachFile(event) {
       <toast-ui-editor :id="name"
                        :style="resizable ? {resize: 'vertical', overflow: 'auto', 'min-height': '200px'} : {}"
                        class="markdown"
-                       :class="{'editor-theme-dark' : themeHelper.isDarkTheme }"
+                       :class="{'editor-theme-dark' : themeHelper.isDarkTheme, 'is-resizable': resizable }"
                        data-cy="markdownEditorInput"
                        ref="toastuiEditor"
                        initialEditType="wysiwyg"
@@ -339,12 +339,14 @@ function attachFile(event) {
 </style>
 
 <style>
-#editor {
+.is-resizable > #editor {
   height: 100% !important;
   min-height: 150px !important;
 }
 
-.toastui-editor-main, .toastui-editor-main-container, .toastui-editor {
+.is-resizable > #editor > .toastui-editor-defaultUI > .toastui-editor-main,
+.is-resizable > #editor > .toastui-editor-defaultUI > .toastui-editor-main > .toastui-editor-main-container,
+.is-resizable > #editor > .toastui-editor-defaultUI > .toastui-editor-main > .toastui-editor-main-container > .toastui-editor-ww-container > .toastui-editor {
   min-height: 150px !important;
 }
 
