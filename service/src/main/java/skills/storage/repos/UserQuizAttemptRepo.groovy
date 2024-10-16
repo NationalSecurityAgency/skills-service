@@ -162,6 +162,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                                @Nullable@Param('quizAttemptStatus') String quizAttemptStatus,
                                PageRequest pageRequest)
 
+    @Nullable
     @Query('''select quizAttempt from UserQuizAttempt quizAttempt where quizAttempt.quizDefinitionRefId = ?1 and quizAttempt.status = ?2''')
     List<UserQuizAttempt> findByQuizRefIdByStatus(Integer quizRefId, QuizAttemptStatus status, PageRequest pageRequest)
 

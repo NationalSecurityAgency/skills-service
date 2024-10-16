@@ -79,4 +79,27 @@ describe('Quiz Input Text Question Tests', () => {
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('This is a question # 2')
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="textAreaPlaceHolder"]')
     })
+
+    it('delete input text question', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.createQuizQuestionDef(1, 2)
+        cy.createTextInputQuestionDef(1, 3)
+
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '3')
+        cy.get('[data-cy="deleteQuestionButton_1"]').should('exist')
+        cy.get('[data-cy="deleteQuestionButton_2"]').should('exist')
+        cy.get('[data-cy="deleteQuestionButton_3"]').should('exist')
+
+        cy.get('[data-cy="deleteQuestionButton_3"]').click()
+        cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.get('[data-cy="deleteQuestionButton_1"]').should('exist')
+        cy.get('[data-cy="deleteQuestionButton_2"]').should('exist')
+        cy.get('[data-cy="deleteQuestionButton_3"]').should('not.exist')
+        cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '2')
+        cy.get('[data-cy="btn_Questions"]').should('have.focus')
+    })
 })

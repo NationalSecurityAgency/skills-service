@@ -52,6 +52,7 @@ const isRejected = computed(() => skillInternal.value.selfReporting && skillInte
 const isQuizSkill = computed(() => skillInternal.value && skillInternal.value.selfReporting && skillInternal.value.selfReporting.type === 'Quiz')
 const isSurveySkill = computed(() => skillInternal.value && skillInternal.value.selfReporting && skillInternal.value.selfReporting.type === 'Survey')
 const isQuizOrSurveySkill = computed(() => isQuizSkill.value || isSurveySkill.value)
+const isQuizPendingGrading = computed(() => isQuizOrSurveySkill.value && skillInternal.value.selfReporting?.quizNeedsGrading)
 const isMotivationalSkill = computed(() => skillInternal.value && skillInternal.value.isMotivationalSkill)
 
 const showApprovalJustification = ref(false)
@@ -185,7 +186,7 @@ defineExpose({
       <Message :closable="false">
         <template #container>
           <div class="p-3">
-            <div class="flex gap-2 align-items-center">
+            <div v-if="!isQuizPendingGrading" class="flex gap-2 align-items-center" data-cy="takeQuizMsg">
               <div>
                 <i class="fas fa-user-check text-2xl" aria-hidden="true"></i>
               </div>
@@ -208,6 +209,15 @@ defineExpose({
                 size="small"
                 @click="navToQuiz"
                 data-cy="takeQuizBtn" />
+            </div>
+            <div v-if="isQuizPendingGrading" class="flex gap-2 align-items-center" data-cy="quizRequiresGradingMsg">
+              <div>
+                <i class="fas fa-user-clock text-2xl" aria-hidden="true" />
+              </div>
+              <div>
+                <div>You completed the quiz on <Tag>{{ timeUtils.formatDate(skillInternal.selfReporting.quizNeedsGradingAttemptDate) }}</Tag> but it <b>requires grading</b>.</div>
+                <div class="mt-3">It will be assessed by a quiz administrator, so there is nothing to do but wait for the grades to roll in!</div>
+              </div>
             </div>
           </div>
         </template>

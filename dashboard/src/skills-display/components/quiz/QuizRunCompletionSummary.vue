@@ -127,7 +127,7 @@ const runAgain = () => {
         </Card>
       </div>
 
-      <Message v-if="needsGrading" icon="fas fa-user-clock" :closable="false">
+      <Message v-if="needsGrading" icon="fas fa-user-clock" :closable="false" data-cy="requiresManualGradingMsg">
         <div>
           This quiz contains questions that require manual grading and will be assessed by quiz administrators.
         </div>
