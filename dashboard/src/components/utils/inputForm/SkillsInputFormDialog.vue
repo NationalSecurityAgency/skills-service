@@ -72,6 +72,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  isCopy: {
+    type: Boolean,
+    default: false
+  },
   dialogClass: {
     type: String,
     default: 'w-11 xl:w-10'
@@ -174,7 +178,7 @@ const validateIfEditOrNotEmpty = () => {
   if (!props.initialValues) {
     console.error(`Initial values for SkillsInputFormDialog id=[${props.id}] not provided.`)
   }
-  if (props.isEdit) {
+  if (props.isEdit || props.isCopy) {
     validate()
   } else {
     const foundNonEmpty = Object.entries(values)

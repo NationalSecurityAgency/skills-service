@@ -48,6 +48,7 @@ const sortOrder = ref({
 const editQuestionInfo = ref({
   showDialog: false,
   isEdit: true,
+  isCopy: false,
   questionDef: {},
 })
 const isLoading = computed(() => quizConfig.loadingQuizConfig || loadingQuestions.value);
@@ -118,13 +119,14 @@ function openNewQuestionModal() {
       isCorrect: false,
     }],
   };
-  editQuestionInfo.value.isEdit =  false;
+  editQuestionInfo.value.isEdit = false;
+  editQuestionInfo.value.isCopy = false;
   editQuestionInfo.value.showDialog = true;
 }
 function questionDefSaved(questionDef) {
   try {
     operationInProgress.value = true;
-    if (questionDef.isEdit) {
+    if (questionDef.isEdit || questionDef.isCopy) {
       // is edit
       questions.value = questions.value.map((q) => {
         if (q.id === questionDef.id) {
@@ -147,7 +149,14 @@ function questionDefSaved(questionDef) {
 }
 function initiatedEditQuestionDef(questionDef) {
   editQuestionInfo.value.questionDef = { ...questionDef, quizId: route.params.quizId, quizType: quizType.value };
-  editQuestionInfo.value.isEdit =  true;
+  editQuestionInfo.value.isEdit = true;
+  editQuestionInfo.value.isCopy = false;
+  editQuestionInfo.value.showDialog = true;
+}
+function copyQuestion(questionDef) {
+  editQuestionInfo.value.questionDef = { ...questionDef, quizId: route.params.quizId, quizType: quizType.value };
+  editQuestionInfo.value.isCopy = true;
+  editQuestionInfo.value.isEdit = false;
   editQuestionInfo.value.showDialog = true;
 }
 
@@ -241,6 +250,7 @@ function handleNewQuestionBtnFocus() {
                     </div>
                     <QuestionCard
                         @edit-question="initiatedEditQuestionDef"
+                        @copy-question="copyQuestion"
                         @delete-question="deleteQuestion"
                         @sort-change-requested="handleKeySortRequest"
                         :question="q"
@@ -279,6 +289,7 @@ function handleNewQuestionBtnFocus() {
         v-model="editQuestionInfo.showDialog"
         :question-def="editQuestionInfo.questionDef"
         :is-edit="editQuestionInfo.isEdit"
+        :is-copy="editQuestionInfo.isCopy"
         :enable-return-focus="true"
         @question-saved="questionDefSaved" />
   </div>

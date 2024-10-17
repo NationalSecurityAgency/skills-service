@@ -31,7 +31,7 @@ const props = defineProps({
   showDragAndDropControls: Boolean
 })
 
-const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested'])
+const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested', 'copyQuestion'])
 
 const showDeleteDialog = ref(false)
 
@@ -52,6 +52,9 @@ const numberOfStars = computed(() => {
 })
 const editQuestion = () => {
   emit('editQuestion', props.question)
+}
+const copyQuestion = () => {
+  emit('copyQuestion', props.question)
 }
 const deleteQuestion = () => {
   emit('deleteQuestion', props.question)
@@ -130,6 +133,18 @@ const moveQuestion = (changeIndexBy) => {
                         :id="`editQuestion_${question.id}`"
                         :track-for-focus="true"
                         title="Edit Question">
+          </SkillsButton>
+          <SkillsButton @click="copyQuestion"
+                        icon="fas fa-copy"
+                        label="Copy"
+                        outlined
+                        size="small"
+                        :data-cy="`copyQuestionButton_${questionNum}`"
+                        :aria-label="`Copy Question Number ${questionNum}`"
+                        :ref="`copyQuestion_${question.id}`"
+                        :id="`copyQuestion_${question.id}`"
+                        :track-for-focus="true"
+                        title="Copy Question">
           </SkillsButton>
           <SkillsButton @click="showDeleteDialog = true"
                         icon="text-warning fas fa-trash"

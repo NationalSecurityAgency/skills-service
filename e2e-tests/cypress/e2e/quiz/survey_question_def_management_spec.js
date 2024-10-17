@@ -622,4 +622,224 @@ describe('Survey Question CRUD Tests', () => {
         cy.visit('/administrator/quizzes/quiz1');
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
     });
+
+    // copy
+    it('copy a multiple choice question', function () {
+        cy.createSurveyDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 2)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_2"]').click();
+        cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"]').should('have.value', 'Question 2 - Second Answer')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"]').should('have.value', 'Question 2 - Third Answer')
+
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').type('-more')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').clear().type('b')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').clear().type('c')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').type('-more')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('This is a question # 2-more')
+        cy.validateChoiceAnswer(4, 0, 'Question 2 - First Answer-more', false)
+        cy.validateChoiceAnswer(4, 1, 'b', false)
+        cy.validateChoiceAnswer(4, 2, 'c', false)
+        cy.get('[data-cy="copyQuestionButton_2"]').should('have.focus')
+
+        cy.get('[data-cy="copyQuestionButton_4"]').click();
+        cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2-more')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer-more')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"]').should('have.value', 'b')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"]').should('have.value', 'c')
+    });
+
+    it('copy a question - change the scale of a rating', function () {
+        cy.createSurveyDef(1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="noQuestionsYet"]')
+        cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '0')
+
+        // multiple choice question
+        cy.get('[data-cy="btn_Questions"]').click()
+
+        cy.get('[data-cy="questionText"]').type('How is this quiz?')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_Rating"]').click()
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('How is this quiz?')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-pc-name="rating"]').find('.p-rating-item').should('have.length', 5)
+
+        cy.get('[data-cy="copyQuestionButton_1"]').click();
+        cy.get('[data-cy="questionText"]').type(' With more description')
+        cy.get('[data-cy="ratingScaleSelect"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="item"]').contains('8').click();
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('How is this quiz? With more description')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-pc-name="rating"]').find('.p-rating-item').should('have.length', 8)
+
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('How is this quiz? With more description')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-pc-name="rating"]').find('.p-rating-item').should('have.length', 8)
+    });
+
+    it('copy a question - will change question type from MultipleChoice to SingleChoice', function () {
+        cy.createSurveyDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 2)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_2"]').click();
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.validateChoiceAnswer(4, 0, 'Question 2 - First Answer', true)
+        cy.validateChoiceAnswer(4, 1, 'Question 2 - Second Answer', true)
+        cy.validateChoiceAnswer(4, 2, 'Question 2 - Third Answer', true)
+    });
+
+    it('copy a question - will change question type from SingleChoice to MultipleChoice', function () {
+        cy.createSurveyDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 2)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_3"]').click();
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_MultipleChoice"]').click()
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.validateChoiceAnswer(4, 0, 'Question 3 - First Answer', false)
+        cy.validateChoiceAnswer(4, 1, 'Question 3 - Second Answer', false)
+        cy.validateChoiceAnswer(4, 2, 'Question 3 - Third Answer', false)
+    });
+
+    it('copy a question - change question type from MultipleChoice to TextInput', function () {
+        cy.createSurveyDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 2)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_2"]').click();
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_TextInput"]').click()
+
+        cy.get('[data-cy="textAreaPlaceHolder"]')
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('not.exist')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('not.exist')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="answerTypeSelector"]').should('not.exist')
+        cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '4')
+
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('This is a question # 2')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="textAreaPlaceHolder"]')
+        cy.get(`[data-cy="questionDisplayCard-4"] [data-cy="answer-0_displayText"]`).should('not.exist')
+    });
+
+    it('copy a question - change question type from SingleChoice to TextInput', function () {
+        cy.createSurveyDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 2)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_3"]').click();
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_TextInput"]').click()
+
+        cy.get('[data-cy="textAreaPlaceHolder"]')
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('not.exist')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('not.exist')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="answerTypeSelector"]').should('not.exist')
+        cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '4')
+
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('This is a question # 3')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="textAreaPlaceHolder"]')
+        cy.get(`[data-cy="questionDisplayCard-4"] [data-cy="answer-0_displayText"]`).should('not.exist')
+    });
+
+    it('copy a question - change question type from TextInput to SingleChoice', function () {
+        cy.createSurveyDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 2)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_1"]').click();
+        cy.get('[data-cy="answerTypeSelector"]').contains('Input Text')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('a')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('b')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.validateChoiceAnswer(4, 0, 'a', true)
+        cy.validateChoiceAnswer(4, 1, 'b', true)
+    });
+
+    it('copy a question - change question type from TextInput to MultipleChoice', function () {
+        cy.createSurveyDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 2)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_1"]').click();
+        cy.get('[data-cy="answerTypeSelector"]').contains('Input Text')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_MultipleChoice"]').click()
+
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('a')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('b')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.validateChoiceAnswer(4, 0, 'a', false)
+        cy.validateChoiceAnswer(4, 1, 'b', false)
+    });
+
+    it('copy a question - add an answer', function () {
+        cy.createSurveyDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 2)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_3"]').click();
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').type( 'new')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.validateChoiceAnswer(4, 0, 'Question 3 - First Answer', true)
+        cy.validateChoiceAnswer(4, 1, 'Question 3 - Second Answer', true)
+        cy.validateChoiceAnswer(4, 2, 'new', true)
+        cy.validateChoiceAnswer(4, 3, 'Question 3 - Third Answer', true)
+    });
+
+    it('copy a question - remove answer', function () {
+        cy.createSurveyDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 2)
+        cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_3"]').click();
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="removeAnswer"]').click()
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.validateChoiceAnswer(4, 0, 'Question 3 - Second Answer', true)
+        cy.validateChoiceAnswer(4, 1, 'Question 3 - Third Answer', true)
+    });
 });
