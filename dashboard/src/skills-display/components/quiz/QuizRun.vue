@@ -31,6 +31,8 @@ import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
 import QuizRunQuestion from '@/skills-display/components/quiz/QuizRunQuestion.vue';
 import { useForm } from "vee-validate";
 import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 
 const props = defineProps({
   quizId: String,
@@ -54,6 +56,8 @@ const props = defineProps({
 const emit = defineEmits(['cancelled', 'testWasTaken'])
 const announcer = useSkillsAnnouncer()
 const timeUtils = useTimeUtils()
+const appConfig = useAppConfig()
+const numFormat = useNumberFormat()
 
 const isLoading = ref(true);
 const isCompleting = ref(false);
@@ -85,6 +89,7 @@ const schema = object({
           object({
             'questionType': string(),
             'answerText': string()
+                .max(appConfig.maxTakeQuizInputTextAnswerLength, (d) => `Answer to question #${getQuestionNumFromPath(d.path)} must not exceed ${numFormat.pretty(appConfig.maxTakeQuizInputTextAnswerLength)} characters`)
                 .when('questionType', {
                   is: QuestionType.TextInput,
                   then: (sch)  => sch
