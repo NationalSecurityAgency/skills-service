@@ -212,6 +212,33 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="closeQuizAttempt"]').should('be.enabled')
     });
 
+    it('can retake a graded and passed quiz when quizMultipleTakes=true', () => {
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.setQuizMultipleTakes(1, true);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.runQuizForTheCurrentUser(1, [{selectedIndex: [0]}], 'My Answer')
+        cy.gradeQuizAttempt(1, true)
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"]').should( 'not.contain', 'You will earn')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '1')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '1 / Unlimited')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer # 1')
+
+        cy.get('[data-cy="completeQuizBtn"]').should('be.enabled').click()
+
+        cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
+        cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
+        cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
+    });
+
 });
 
 
