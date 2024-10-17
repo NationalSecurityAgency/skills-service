@@ -311,7 +311,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         copiedQuizSettings.find( it -> it.setting == QuizSettings.MultipleTakes.setting ).value == 'true'
     }
 
-    def "Quiz admins are copied"() {
+    def "Quiz admins are not copied"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
 
@@ -329,11 +329,10 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         then:
         roles.size() == 6
-        copiedRoles.size() == 6
-        roles == copiedRoles
+        copiedRoles.size() == 1
     }
 
-    def "Survey admins are copied"() {
+    def "Survey admins are not copied"() {
         def quiz = QuizDefFactory.createQuizSurvey(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
 
@@ -351,8 +350,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         then:
         roles.size() == 6
-        copiedRoles.size() == 6
-        roles == copiedRoles
+        copiedRoles.size() == 1
     }
 
     def "Changing quiz admins does not change admins in copied quiz"() {
@@ -378,8 +376,6 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         then:
         roles.size() == 6
-        copiedRoles.size() == 6
-        roles == copiedRoles
         updatedRoles.size() == 1
     }
 
@@ -406,8 +402,6 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         then:
         roles.size() == 6
-        copiedRoles.size() == 6
-        roles == copiedRoles
         updatedRoles.size() == 1
     }
 
@@ -423,6 +417,12 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         def result = skillsService.copyQuiz(quiz.quizId, [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: '', type: quiz.type])
         def copiedQuiz = result.body
+
+        users.forEach{ user ->
+            SkillsService newUser = createService(user)
+            skillsService.addQuizUserRole(copiedQuiz.quizId, newUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        }
+
         def roles = skillsService.getQuizUserRoles(quiz.quizId).findAll{ it -> it.roleName == RoleName.ROLE_QUIZ_ADMIN.toString() }
         def copiedRoles = skillsService.getQuizUserRoles(copiedQuiz.quizId).findAll{ it -> it.roleName == RoleName.ROLE_QUIZ_ADMIN.toString() }
 
@@ -434,8 +434,6 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         then:
         roles.size() == 6
-        copiedRoles.size() == 6
-        roles == copiedRoles
         updatedRoles.size() == 1
     }
 
@@ -451,6 +449,12 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         def result = skillsService.copyQuiz(quiz.quizId, [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: '', type: quiz.type])
         def copiedQuiz = result.body
+
+        users.forEach{ user ->
+            SkillsService newUser = createService(user)
+            skillsService.addQuizUserRole(copiedQuiz.quizId, newUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        }
+
         def roles = skillsService.getQuizUserRoles(quiz.quizId).findAll{ it -> it.roleName == RoleName.ROLE_QUIZ_ADMIN.toString() }
         def copiedRoles = skillsService.getQuizUserRoles(copiedQuiz.quizId).findAll{ it -> it.roleName == RoleName.ROLE_QUIZ_ADMIN.toString() }
 
@@ -462,8 +466,6 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         then:
         roles.size() == 6
-        copiedRoles.size() == 6
-        roles == copiedRoles
         updatedRoles.size() == 1
     }
 
