@@ -552,6 +552,10 @@ class QuizRunService {
                 feedback: gradeAnswerReq.feedback)
         userQuizAnswerGradedRepo.save(userQuizAnswerGraded)
 
+        if (doneGradingAttempt) {
+            reportAnyAssociatedSkills(userQuizAttempt, quizDef)
+        }
+
         return new QuizAnswerGradingResult(doneGradingAttempt: doneGradingAttempt)
     }
 
