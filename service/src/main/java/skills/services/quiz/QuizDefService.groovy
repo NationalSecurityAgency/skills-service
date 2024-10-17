@@ -196,11 +196,7 @@ class QuizDefService {
         copyQuestions(originalQuizId, newQuizId)
         quizSettingsService.copySettings(originalQuizId, newQuizId)
         attachmentService.updateAttachmentsFoundInMarkdown(quizDefRequest.description, null, newQuizId, null)
-
-        List<UserRoleRes> existingRoles = accessSettingsStorageService.findAllQuizRoles(originalQuizId)
-        existingRoles.forEach{ role ->
-            accessSettingsStorageService.addQuizDefUserRole(role.userId, newQuizId, role.getRoleName())
-        }
+        accessSettingsStorageService.addQuizDefUserRole(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
 
         QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)
         return convert(updatedDef)
