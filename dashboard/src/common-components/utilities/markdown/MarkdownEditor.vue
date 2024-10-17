@@ -341,13 +341,13 @@ function attachFile(event) {
 <style>
 .is-resizable > #editor {
   height: 100% !important;
-  min-height: 235px !important;
+  min-height: 238px !important;
 }
 
 .is-resizable > #editor > .toastui-editor-defaultUI > .toastui-editor-main,
 .is-resizable > #editor > .toastui-editor-defaultUI > .toastui-editor-main > .toastui-editor-main-container,
 .is-resizable > #editor > .toastui-editor-defaultUI > .toastui-editor-main > .toastui-editor-main-container > .toastui-editor-ww-container > .toastui-editor {
-  min-height: 235px !important;
+  min-height: 238px !important;
 }
 
 .editor-theme-dark .toastui-editor-ww-container {
