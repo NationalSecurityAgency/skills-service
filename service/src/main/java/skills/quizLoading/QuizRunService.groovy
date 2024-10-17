@@ -22,8 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.PublicProps
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
+import skills.controller.PublicPropsBasedValidator
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
@@ -71,6 +73,9 @@ class QuizRunService {
 
     @Autowired
     CustomValidator validator
+
+    @Autowired
+    PublicPropsBasedValidator propsBasedValidator
 
     @Autowired
     QuizSettingsRepo quizSettingsRepo
@@ -442,6 +447,8 @@ class QuizRunService {
 
         if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.TextInput) {
             if (quizReportAnswerReq.isSelected) {
+                propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength,
+                        "Answer", quizReportAnswerReq.answerText, quizId)
                 QuizValidator.isNotBlank(quizReportAnswerReq.getAnswerText(), "answerText", quizId)
                 CustomValidationResult customValidationResult = validator.validateDescription(quizReportAnswerReq.getAnswerText())
                 if (!customValidationResult.valid) {

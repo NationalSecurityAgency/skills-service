@@ -66,6 +66,7 @@ class PublicProps {
         maxQuizDefsPerAdmin,
         maxQuestionsPerQuiz,
         maxQuizTextAnswerLength,
+        maxTakeQuizInputTextAnswerLength,
         maxVideoCaptionsLength,
         maxVideoTranscriptLength,
         motivationalSkillWarningGracePeriod,
