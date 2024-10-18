@@ -23,6 +23,7 @@ import { useRoute } from 'vue-router'
 import UsersService from '@/components/users/UsersService.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
+import dayjs from 'dayjs'
 
 export const useLoadTranscriptData = () => {
   const skillsDisplayService = useSkillsDisplayService()
@@ -125,7 +126,9 @@ export const useLoadTranscriptData = () => {
                   return {
                     name: skillRes.skill,
                     userPoints: skillRes.points,
-                    totalPoints: skillRes.totalPoints
+                    totalPoints: skillRes.totalPoints,
+                    achievedOn: skillRes.achievedOn ? dayjs(skillRes.achievedOn).format('YYYY-MM-DD') : null,
+                    approvedBy: skillRes.selfReporting && skillRes.selfReporting.approvedBy ? skillRes.selfReporting.approvedBy : '',
                   }
                 })
               }

@@ -542,7 +542,10 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     left join SkillApproval approval on (
             (sdChild.id = approval.skillRefId OR sdChild.copiedFrom = approval.skillRefId)
             and approval.userId=?1
-            and (approval.approverUserId is null OR (approval.rejectedOn is not null AND approval.rejectionAcknowledgedOn is null))
+            and (
+                (approval.approverUserId is null OR (approval.rejectedOn is not null AND approval.rejectionAcknowledgedOn is null))
+                or (approval.approverUserId is not null and approval.approverActionTakenOn is not null and userPoints.points = sdChild.totalPoints)
+            )
       )
       where srd.parent=sdParent and  srd.child=sdChild and (sdChild.enabled = 'true' or sdChild.type = 'SkillsGroup') and
       sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type in ?4 and sdChild.version<=?5 ''')
