@@ -155,7 +155,7 @@ const isLoading = computed(() => runningQuizDefinitionCheck.value || loadingQuiz
               </template>
               <template #body="slotProps">
                 <div :data-cy="`userCell_${slotProps.data.userId}`" class="flex flex-row flex-wrap">
-                  <div class="flex align-items-start justify-content-start">
+                  <div class="flex align-items-start justify-content-start font-medium">
                     {{ userInfo.getUserDisplay(slotProps.data, true) }}
                   </div>
                   <div class="flex flex-grow-1 align-items-start justify-content-end">
@@ -165,9 +165,10 @@ const isLoading = computed(() => runningQuizDefinitionCheck.value || loadingQuiz
                                   @click="toggleRow(slotProps.data.attemptId)"
                                   class="ml-2"
                                   outlined
+                                  :data-cy="`gradeBtn_${slotProps.data.userId}`"
                                   :aria-label="`Grade Quiz for ${slotProps.data.userIdForDisplay}`"
                                   size="small"/>
-                    <div v-else><Tag severity="success"><i class="fas fa-check mr-1" aria-hidden="true" /> Graded</Tag></div>
+                    <div v-else><Tag severity="success" :data-cy="`attemptGradedFor_${slotProps.data.userId}`"><i class="fas fa-check mr-1" aria-hidden="true" /> Graded</Tag></div>
                   </div>
                 </div>
               </template>
@@ -191,9 +192,11 @@ const isLoading = computed(() => runningQuizDefinitionCheck.value || loadingQuiz
             </template>
             <template #expansion="slotProps">
               <grade-quiz-attempt
+                  class="ml-4"
                   :quiz-attempt-id="slotProps.data.attemptId"
                   :user-id="slotProps.data.userId"
                   @on-graded="onGraded(slotProps.data, $event)"
+                  :data-cy="`gradeAttemptFor_${slotProps.data.userId}`"
               />
             </template>
           </SkillsDataTable>

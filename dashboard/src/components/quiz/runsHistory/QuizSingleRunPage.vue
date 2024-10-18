@@ -23,6 +23,7 @@ import QuizService from '@/components/quiz/QuizService.js';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import QuizRunStatus from '@/components/quiz/runsHistory/QuizRunStatus.vue';
 import QuizRunQuestionCard from '@/components/quiz/runsHistory/QuizRunQuestionCard.vue';
+import QuestionType from "@/skills-display/components/quiz/QuestionType.js";
 
 const timeUtils = useTimeUtils();
 const userTagsUtils = useUserTagsUtils();
@@ -44,13 +45,7 @@ const numQuestionsAnswered = computed(() => {
   return nums.reduce((partialSum, a) => partialSum + a, 0);
 });
 const numQuestionsRight = computed(() => {
-  const nums = runInfo.value.questions.map((q) => {
-    const incorrectAnswer = q.answers.find((a) => a.isSelected !== a.isConfiguredCorrect) !== undefined;
-    if (incorrectAnswer) {
-      return 0;
-    }
-    return 1;
-  });
+  const nums = runInfo.value.questions.map((q) => q.isCorrect ? 1 :0 )
   return nums.reduce((partialSum, a) => partialSum + a, 0);
 });
 

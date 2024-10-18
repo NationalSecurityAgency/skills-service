@@ -72,30 +72,29 @@ const grade = (isCorrect, feedback) => {
 </script>
 
 <template>
-  <div class="mb-4">
+  <div class="mb-3" :data-cy="`question_${question.questionNumber}`">
     <div class="">
-      <div class="font-bold text-xl">Question #{{ question.questionNumber }}:  <Tag v-if="isGraded">GRADED</Tag></div>
+      <div class="font-bold text-lg">Question #{{ question.questionNumber }}:  <Tag v-if="isGraded" data-cy="gradedTag"><i class="fas fa-check mr-1" aria-hidden="true" /> GRADED</Tag></div>
       <div v-if="!isGraded" class="">
         <MarkdownText
             :text="question.question"
-            :instance-id="`${question.id}_question`"
+            :instance-id="`${quizAttemptId}_${question.id}_question`"
             data-cy="questionDisplayText"/>
       </div>
     </div>
     <div v-if="!isGraded">
       <div class="">
-        <div class="font-bold">User's Answer:</div>
+        <div class="font-semibold">User's Answer:</div>
         <div class="mt-2 border-1 border-round border-dotted surface-border px-4 py-2">
         <MarkdownText
             :data-cy="`answer_${question.questionNumber}displayText`"
             :text="question.answers[0].answer"
-            :instance-id="`${question.id}_answer`"
+            :instance-id="`${quizAttemptId}_${question.id}_answer`"
             data-cy="answerText"/>
         </div>
       </div>
       <markdown-editor class="form-text mt-3"
-                       :id="`qFeedback-${question.questionNumber}`"
-                       :data-cy="`qFeedback-${question.questionNumber}`"
+                       :id="`qFeedback-${quizAttemptId}_${question.questionNumber}`"
                        markdownHeight="120px"
                        label="Your Feedback (optional):"
                        name="feedbackTxt"
@@ -113,6 +112,7 @@ const grade = (isCorrect, feedback) => {
           @click="submitWrong"
           :loading="isSubmitting"
           :disabled="!meta.valid || isSubmitting"
+          data-cy="markWrongBtn"
       />
       <SkillsButton
           label="Correct"
@@ -121,6 +121,7 @@ const grade = (isCorrect, feedback) => {
           size="small"
           :disabled="!meta.valid || isSubmitting"
           :loading="isSubmitting"
+          data-cy="markCorrectBtn"
       />
     </div>
     </div>

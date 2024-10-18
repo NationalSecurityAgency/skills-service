@@ -548,7 +548,11 @@ class QuizRunService {
 
         boolean doneGradingAttempt = questionAttempts.find({ it.status == UserQuizQuestionAttempt.QuizQuestionStatus.NEEDS_GRADING }) == null
         if (doneGradingAttempt) {
-            boolean isQuizPassed = questionAttempts.every {it.status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT}
+            int numCorrect = (int)questionAttempts.count {it.status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT}
+            Integer minNumQuestionsToPassConf = getMinNumQuestionsToPassSetting(quizDef.id)
+            Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : questionAttempts.size();
+            boolean isQuizPassed = numCorrect >= minNumQuestionsToPass
+
             userQuizAttempt.status = isQuizPassed ? UserQuizAttempt.QuizAttemptStatus.PASSED : UserQuizAttempt.QuizAttemptStatus.FAILED
             quizAttemptRepo.save(userQuizAttempt)
         }
@@ -660,8 +664,8 @@ class QuizRunService {
         if(quizLength == -1) {
             quizLength = gradedQuestions.size()
         }
-        int numCorrect = gradedQuestions.count { it.isCorrect }
-        int numQuestionsNeedGrading = gradedQuestions.count { it.status == UserQuizQuestionAttempt.QuizQuestionStatus.NEEDS_GRADING }
+        int numCorrect = (int)gradedQuestions.count { it.isCorrect }
+        int numQuestionsNeedGrading = (int)gradedQuestions.count { it.status == UserQuizQuestionAttempt.QuizQuestionStatus.NEEDS_GRADING }
         Integer minNumQuestionsToPassConf = getMinNumQuestionsToPassSetting(quizDef.id)
         Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : quizLength;
         boolean showCorrectAnswers = alwaysShowCorrectAnswers(quizDef.id)
@@ -696,6 +700,12 @@ class QuizRunService {
         gradedResult.started = userQuizAttempt.started
         gradedResult.completed = userQuizAttempt.completed
         return gradedResult
+    }
+
+    private Integer getMinNumQuestionsRequiredToPass(QuizDef quizDef, int numTotalQuestions) {
+        Integer minNumQuestionsToPassConf = getMinNumQuestionsToPassSetting(quizDef.id)
+        Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : numTotalQuestions;
+        return minNumQuestionsToPass
     }
 
     @Profile

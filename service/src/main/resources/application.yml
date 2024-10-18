@@ -163,11 +163,11 @@ skills:
       defaultLandingPage: "admin"
       maxSelfReportMessageLength: ${skills.config.ui.descriptionMaxLength}
       maxSelfReportRejectionMessageLength: 250
-      maxGraderFeedbackMessageLength: ${skills.config.ui.descriptionMaxLength}
+      maxGraderFeedbackMessageLength: 50000
       artifactBuildTimestamp: @maven.build.timestamp@
       maxSkillsInBulkImport: 50
       enablePageVisitReporting: false
-      maxProjectInviteEmails: 50
+      maxProjectInviteEmails: 50s
       maxContactOwnersMessageLength: 2500
       maxTagKeyLengthInApprovalWorkloadConfig: 15
       maxTagValueLengthInApprovalWorkloadConfig: 10
