@@ -678,6 +678,7 @@ class SkillsLoader {
                 quizId: skillDefAndUserPoints?.quizId,
                 quizName: skillDefAndUserPoints?.quizName,
                 numQuizQuestions: skillDefAndUserPoints?.quizNumQuestions ?: 0,
+                approvedBy: skillApproval?.approverUserId,
         )
 
         return selfReportingInfo
@@ -1337,7 +1338,7 @@ class SkillsLoader {
                         isMotivationalSkill: isMotivationalSkill,
                         daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
                         mostRecentlyPerformedOn: mostRecentlyPerformedOn,
-                        lastExpirationDate: lastExpirationDate
+                        lastExpirationDate: lastExpirationDate,
                 )
             }
         }
