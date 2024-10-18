@@ -167,7 +167,7 @@ skills:
       artifactBuildTimestamp: @maven.build.timestamp@
       maxSkillsInBulkImport: 50
       enablePageVisitReporting: false
-      maxProjectInviteEmails: 50s
+      maxProjectInviteEmails: 50
       maxContactOwnersMessageLength: 2500
       maxTagKeyLengthInApprovalWorkloadConfig: 15
       maxTagValueLengthInApprovalWorkloadConfig: 10
