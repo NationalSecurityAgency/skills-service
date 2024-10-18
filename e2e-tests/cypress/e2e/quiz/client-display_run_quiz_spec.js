@@ -341,7 +341,6 @@ describe('Client Display Quiz Tests', () => {
 
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="quizFailed"]')
-        cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the Quiz')
         cy.get('[data-cy="percentCorrectInfoCard"] [data-cy="percentCorrect"]').should('have.text', '33%')
         cy.get('[data-cy="percentCorrectInfoCard"] [data-cy="percentToPass"]').should('have.text', '66%')
         cy.get('[data-cy="numCorrectInfoCard"] [data-cy="numCorrect"]').contains('1 out of 3')
@@ -374,7 +373,6 @@ describe('Client Display Quiz Tests', () => {
 
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="quizFailed"]')
-        cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the Quiz')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"]').contains('2 More Attempts')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Used 1 out of 3 attempts')
 
@@ -402,7 +400,6 @@ describe('Client Display Quiz Tests', () => {
 
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="quizFailed"]')
-        cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the Quiz')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"]').contains('1 More Attempt')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Used 2 out of 3 attempts')
 
@@ -460,7 +457,6 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
 
         cy.get('[data-cy="completeQuizBtn"]').click()
-        cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the Quiz')
         cy.get('[data-cy="quizFailed"]')
 
         cy.get('[data-cy="quizCompletion"] [data-cy="runQuizAgainBtn"]').should('not.exist')

@@ -360,12 +360,7 @@ const doneWithThisRun = () => {
     <div v-if="!isLoading">
       <QuizRunSplashScreen v-if="splashScreen.show" :quiz-info="quizInfo" @cancelQuizAttempt="cancelQuizAttempt" @start="startQuizAttempt" :multipleTakes="multipleTakes">
         <template #aboveTitle>
-          <slot name="splashPageTitle">
-            <Message severity="success" icon="fas fa-handshake">
-              <span v-if="isSurveyType">Thank you for taking the time to take this survey!</span>
-              <span v-else>You are about to begin the quiz!</span>
-            </Message>
-          </slot>
+          <slot name="splashPageTitle" />
         </template>
       </QuizRunSplashScreen>
 
