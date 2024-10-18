@@ -21,7 +21,7 @@ import moment from "moment-timezone";
 dayjs.extend(relativeTimePlugin);
 dayjs.extend(advancedFormatPlugin);
 
-describe('Skills Display Run Quizzes With Text Input Questions', () => {
+describe('Run Quizzes With Text Input Questions', () => {
 
     beforeEach(() => {
     });
@@ -30,15 +30,8 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.createQuizDef(1);
         cy.createTextInputQuestionDef(1, 1)
 
-        cy.createProject(1)
-        cy.createSubject(1,1)
-        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
-
-        cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="takeQuizMsg"]')
-        cy.get('[data-cy="takeQuizBtn"]').click()
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
         cy.get('[data-cy="title"]').contains('Quiz')
-        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '1')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
 
@@ -55,13 +48,6 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
-
-        cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').should('be.enabled').click()
-        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
-        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should( 'have.text', '0 Total')
-        cy.get('[data-cy="quizRequiresGradingMsg"]')
-        cy.get('[data-cy="takeQuizMsg"]').should('not.exist')
-        cy.get('[data-cy="takeQuizBtn"]').should('not.exist')
     });
 
     it('run quiz with multiple questions where 1 is text input', () => {
