@@ -83,7 +83,7 @@ const start = () => {
           </div>
         </Message>
         <slot name="aboveTitle" />
-        <div class="mb-1 mt-4 text-3xl">
+        <div class="mb-1 mt-1 text-3xl">
           <span class="font-bold text-success skills-page-title-text-color">{{ quizInfo.name }}</span>
         </div>
 

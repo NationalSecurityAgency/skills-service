@@ -17,6 +17,7 @@ limitations under the License.
 import { computed } from 'vue'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js';
 import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue';
+import QuizType from "@/skills-display/components/quiz/QuizType.js";
 
 const props = defineProps({
   quizResult: Object,
@@ -47,11 +48,13 @@ const runAgain = () => {
   <Card data-cy="quizCompletion" :pt="{ content: { class: 'p-0' } }">
     <template #content>
       <div class="text-2xl" tabindex="-1" ref="completionSummaryTitle" data-cy="completionSummaryTitle">
-        <slot name="completeAboveTitle" v-if="quizResult.gradedRes.passed">
-          <i class="fas fa-handshake text-info skills-page-title-text-color" aria-hidden="true"></i> Thank you for completing the {{ quizInfo.quizType }}!
+        <slot name="completeAboveTitle" v-if="!quizResult.outOfTime">
+          <Message v-if="quizResult.gradedRes.passed || QuizType.isSurvey(quizInfo.quizType)" severity="success" icon="fas fa-handshake">
+            <span v-if="QuizType.isSurvey(quizInfo.quizType)">Thank you for taking time to take this survey! </span>
+            <span v-else>Thank you for completing the Quiz!</span>
+          </Message>
         </slot>
-        <span v-else-if="!quizResult.outOfTime"><i class="fas fa-handshake text-info skills-page-title-text-color"></i> Thank you for completing the {{ quizInfo.quizType }}!</span>
-        <span v-else>You've run out of time!</span>
+        <Message severity="danger" v-if="quizResult.outOfTime">You've run out of time!</Message>
       </div>
       <div class="mb-1 mt-4 text-3xl">
         <span class="font-bold text-success mb-2 skills-page-title-text-color">{{ quizInfo.name }}</span>

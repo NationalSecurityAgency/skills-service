@@ -28,7 +28,7 @@ describe('Run Quiz Tests', () => {
         cy.createQuizQuestionDef(1, 1);
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="quizSplashScreen"]').contains('You are about to begin the quiz!')
+        cy.get('[data-cy="quizSplashScreen"]').contains('This is quiz 1')
 
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()

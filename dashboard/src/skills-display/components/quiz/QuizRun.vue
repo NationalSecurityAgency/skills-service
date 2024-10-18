@@ -358,14 +358,7 @@ const doneWithThisRun = () => {
   <div>
     <SkillsSpinner :is-loading="isLoading" class="mt-3"/>
     <div v-if="!isLoading">
-      <QuizRunSplashScreen v-if="splashScreen.show" :quiz-info="quizInfo" @cancelQuizAttempt="cancelQuizAttempt" @start="startQuizAttempt" :multipleTakes="multipleTakes">
-        <template #aboveTitle>
-          <slot name="splashPageTitle">
-            <span v-if="isSurveyType">Thank you for taking the time to take this survey!</span>
-            <span v-else>You are about to begin the quiz!</span>
-          </slot>
-        </template>
-      </QuizRunSplashScreen>
+      <QuizRunSplashScreen v-if="splashScreen.show" :quiz-info="quizInfo" @cancelQuizAttempt="cancelQuizAttempt" @start="startQuizAttempt" :multipleTakes="multipleTakes" />
 
       <SurveyRunCompletionSummary
           ref="surveyRunCompletionSummary"
@@ -374,11 +367,6 @@ const doneWithThisRun = () => {
           :quiz-info="quizInfo"
           :quiz-result="quizResult"
           @close="doneWithThisRun">
-        <template #completeAboveTitle>
-          <slot name="completeAboveTitle">
-            <i class="fas fa-handshake text-primary" aria-hidden="true"></i> Thank you for taking the time to complete the survey!
-          </slot>
-        </template>
       </SurveyRunCompletionSummary>
 
       <QuizRunCompletionSummary
@@ -392,8 +380,10 @@ const doneWithThisRun = () => {
           @run-again="tryAgain">
         <template #completeAboveTitle>
           <slot name="completeAboveTitle">
-            <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
-            <span v-else>Thank you for completing the Quiz!</span>
+            <Message v-if="quizResult.gradedRes.passed || isSurveyType" severity="success" icon="fas fa-handshake">
+              <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
+              <span v-else>Thank you for completing the Quiz!</span>
+            </Message>
           </slot>
         </template>
       </QuizRunCompletionSummary>
