@@ -29,6 +29,7 @@ import skills.services.UserAttrsService
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.utils.RetryUtil
+import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal
 
 @Component
 @Slf4j
@@ -57,7 +58,10 @@ class UserInfoService {
             if (principal instanceof UserInfo) {
                 log.trace("User principal {}", principal)
                 currentUser = principal
-            } else {
+            } else if(principal instanceof Saml2AuthenticatedPrincipal){
+                log.trace("User principal {}", principal);
+                currentUser = userAuthService.loadByUserId(principal.getName())
+            }else {
                 log.info("Unexpected/Unauthenticated princial [${principal}]")
             }
         }
