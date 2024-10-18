@@ -303,13 +303,13 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
 
         cy.get('[data-cy="startQuizAttempt"]').click()
-        const str = 'a'.repeat(100)
+        const str = 'a'.repeat(2000)
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"] .toastui-editor-contents').invoke('text', str)
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('b')
-        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 must not exceed 100 characters')
+        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 must not exceed 2,000 characters')
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.wait(1000)
-        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 must not exceed 100 characters')
+        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 must not exceed 2,000 characters')
 
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('{backspace}')
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').should('not.be.visible')
