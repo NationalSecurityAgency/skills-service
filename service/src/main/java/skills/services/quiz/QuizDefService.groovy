@@ -806,12 +806,7 @@ class QuizDefService {
                     }
 
                     UserQuizQuestionAttempt userQuizQuestionAttempt = questionAttempts.find { it.quizQuestionDefinitionRefId == questionDef.id}
-                    boolean isCorrect
-                    if (userQuizQuestionAttempt?.status != null) {
-                        isCorrect = userQuizQuestionAttempt.status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
-                    } else {
-                        isCorrect = isSurvey ? true : !answers.find { it.isConfiguredCorrect != it.isSelected}
-                    }
+                    boolean isCorrect = isSurvey ? true : !answers.find { it.isConfiguredCorrect != it.isSelected}
                     boolean needsGrading = answers.find {it.needsGrading } != null
                     return new UserGradedQuizQuestionResult(
                             id: questionDef.id,

@@ -388,8 +388,8 @@ const doneWithThisRun = () => {
           @close="doneWithThisRun"
           @run-again="tryAgain">
         <template #completeAboveTitle>
-          <slot name="completeAboveTitle">
-            <Message v-if="quizResult.gradedRes.passed || isSurveyType" severity="success" icon="fas fa-handshake">
+          <slot name="aboveTitleWhenPassed" v-if="quizResult.gradedRes.passed">
+            <Message severity="success" icon="fas fa-handshake">
               <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
               <span v-else>Thank you for completing the Quiz!</span>
             </Message>
