@@ -330,6 +330,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         then:
         roles.size() == 6
         copiedRoles.size() == 1
+        copiedRoles[0].userId == 'skills@skills.org'
     }
 
     def "Survey admins are not copied"() {
@@ -351,6 +352,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         then:
         roles.size() == 6
         copiedRoles.size() == 1
+        copiedRoles[0].userId == 'skills@skills.org'
     }
 
     def "Changing quiz admins does not change admins in copied quiz"() {
@@ -377,6 +379,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         then:
         roles.size() == 6
         updatedRoles.size() == 1
+        updatedRoles[0].userId == 'skills@skills.org'
     }
 
     def "Changing survey admins does not change admins in copied survey"() {
@@ -403,6 +406,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         then:
         roles.size() == 6
         updatedRoles.size() == 1
+        updatedRoles[0].userId == 'skills@skills.org'
     }
 
     def "Changing copied quiz admins does not change admins in original quiz"() {
@@ -435,6 +439,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         then:
         roles.size() == 6
         updatedRoles.size() == 1
+        updatedRoles[0].userId == 'skills@skills.org'
     }
 
     def "Changing copied survey admins does not change admins in original survey"() {
@@ -467,6 +472,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         then:
         roles.size() == 6
         updatedRoles.size() == 1
+        updatedRoles[0].userId == 'skills@skills.org'
     }
 
     def "Copied quiz does not copy activity history"() {
