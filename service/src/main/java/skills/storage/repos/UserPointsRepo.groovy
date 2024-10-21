@@ -544,7 +544,13 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             and approval.userId=?1
             and (
                 (approval.approverUserId is null OR (approval.rejectedOn is not null AND approval.rejectionAcknowledgedOn is null))
-                or (approval.approverUserId is not null and approval.approverActionTakenOn is not null and userPoints.points = sdChild.totalPoints)
+                or (
+                    approval.approverUserId is not null
+                    and approval.approverActionTakenOn is not null
+                    and userPoints.points = sdChild.totalPoints
+                    and approval.rejectedOn is not null
+                    and approval.rejectionAcknowledgedOn is null
+                )
             )
       )
       where srd.parent=sdParent and  srd.child=sdChild and (sdChild.enabled = 'true' or sdChild.type = 'SkillsGroup') and
