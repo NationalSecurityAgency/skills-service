@@ -25,9 +25,11 @@ import Column from 'primevue/column'
 import QuizService from '@/components/quiz/QuizService.js'
 import DateCell from '@/components/utils/table/DateCell.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 
 const props = defineProps({
   answerDefId: Number,
+  isSurvey: Boolean,
   questionType: {
     type: String,
     default: '',
@@ -64,14 +66,6 @@ const answerTxtTruncate = {
 
 onMounted(() => {
   const fields = [];
-  if (isTextInput.value) {
-    fields.push({
-      key: 'answerTxt',
-      label: 'Answer',
-      sortable: false,
-      imageClass: 'fas fa-check-double skills-color-projects',
-    });
-  }
   fields.push({
     key: 'userIdForDisplay',
     label: 'User',
@@ -79,6 +73,15 @@ onMounted(() => {
     imageClass: 'fas fa-user skills-color-users',
     dataCy: 'usrColumnHeader',
   });
+  if (isTextInput.value && !props.isSurvey) {
+    fields.push({
+      key: 'status',
+      label: 'Result',
+      sortable: true,
+      imageClass: 'far fa-check-square',
+      dataCy: 'answerCorrectCol',
+    });
+  }
   if (userTagsUtils.showUserTagColumn()) {
     fields.push({
       key: 'userTag',
@@ -120,6 +123,9 @@ const loadData = () => {
         });
         tableOptions.value.pagination.totalRows = res.count;
         tableOptions.value.pagination.hideUnnecessary = res.totalCount <= tableOptions.value.pagination.pageSize;
+        if (expanded.value) {
+          expandAll()
+        }
       })
       .finally(() => {
         tableOptions.value.busy = false;
@@ -138,13 +144,18 @@ const sortField = (column) => {
   loadData();
 };
 
-const expandIcon = (truncated) => {
-  return truncated ? 'fas fa-expand-arrows-alt' : 'fas fa-compress-arrows-alt';
-};
-const expandLabel = (truncated) => {
-  return truncated ? 'Expand Text' : 'Collapse';
-};
-
+const expandedRows = ref({});
+const expanded = ref(false)
+const expandAll = () => {
+  expanded.value = true
+  answerHistory.value.forEach((item) => {
+    expandedRows.value[item.userQuizAttemptId] = true;
+  })
+}
+const collapseAll = () => {
+  expanded.value = false
+  expandedRows.value = {}
+}
 </script>
 
 <template>
@@ -157,6 +168,8 @@ const expandLabel = (truncated) => {
         showGridlines
         lazy
         :paginator="true"
+        dataKey="userQuizAttemptId"
+        v-model:expandedRows="expandedRows"
         :rows="tableOptions.pagination.pageSize"
         :rowsPerPageOptions="tableOptions.pagination.possiblePageSizes"
         :total-records="tableOptions.pagination.totalRows"
@@ -167,7 +180,25 @@ const expandLabel = (truncated) => {
         aria-label="Answer History"
         data-cy="quizAnswerHistoryTable">
 
-    <template #paginatorstart>
+      <template v-if="isTextInput" #header>
+        <div class="text-right">
+          <SkillsButton v-if="expanded" label="Collapse All"
+                        icon="fas fa-compress-alt"
+                        class="mr-2"
+                        data-cy="collapseAll"
+                        @click="collapseAll"
+                        outlined
+                        size="small"/>
+          <SkillsButton v-if="!expanded" label="Expand All"
+                        icon="fas fa-expand-alt"
+                        data-cy="expandAll"
+                        @click="expandAll"
+                        outlined
+                        size="small"/>
+        </div>
+      </template>
+
+      <template #paginatorstart>
         <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(tableOptions.pagination.totalRows) }}</span>
       </template>
 
@@ -177,7 +208,13 @@ const expandLabel = (truncated) => {
           <span class="flex align-items-center justify-content-center">There are no records to show</span>
         </div>
       </template>
-
+      <template #expansion="slotProps">
+        <MarkdownText
+            :text="slotProps.data.answerTxt"
+            :instance-id="`${answerDefId}-${slotProps.index}-answerTxt`"
+            :data-cy="`row${slotProps.index}-colAnswerTxt`"/>
+      </template>
+      <Column v-if="isTextInput" expander style="width: 5rem" />
       <Column v-for="col of tableOptions.fields"
               :key="col.key"
               :field="col.key"
@@ -188,21 +225,7 @@ const expandLabel = (truncated) => {
           <span :data-cy="col.dataCy" ><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
         </template>
         <template #body="slotProps">
-          <div v-if="slotProps.field === 'answerTxt'" :data-cy="`row${slotProps.index}-colAnswerTxt`">
-            <pre v-if="slotProps.data.truncated" data-cy="textTruncated">{{ truncateFormatter.truncate(slotProps.data[col.key], answerTxtTruncate.truncateTo) }}</pre>
-            <pre v-else data-cy="text">{{ slotProps.data[col.key] }}</pre>
-            <div class="text-right">
-              <SkillsButton v-if="slotProps.data.truncationEnabled"
-                            :label="expandLabel(slotProps.data.truncated)"
-                            :icon="expandIcon(slotProps.data.truncated)"
-                            outlined
-                            size="small"
-                            data-cy="expandCollapseTextBtn"
-                            @click="slotProps.data.truncated = !slotProps.data.truncated">
-              </SkillsButton>
-            </div>
-          </div>
-          <div v-else-if="slotProps.field === 'userIdForDisplay'" class="flex flex-row flex-wrap align-items-center"  :data-cy="`row${slotProps.index}-colUserId`">
+          <div v-if="slotProps.field === 'userIdForDisplay'" class="flex flex-row flex-wrap align-items-center"  :data-cy="`row${slotProps.index}-colUserId`">
             <div class="flex flex-grow-1 justify-content-start mb-2">
               {{ userInfo.getUserDisplay(slotProps.data, true) }}
             </div>

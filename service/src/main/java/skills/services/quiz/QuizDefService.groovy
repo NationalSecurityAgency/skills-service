@@ -20,6 +20,7 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -597,11 +598,9 @@ class QuizDefService {
         }
 
         query = query ?: ''
-        List<QuizRun> quizRuns = userQuizAttemptRepo.findQuizRuns(quizId, query, usersTableAdditionalUserTagKey, quizAttemptStatus?.toString(), pageRequest)
-        long count = totalCount > pageRequest.pageSize ? totalCount : quizRuns.size()
-        if (totalCount > pageRequest.pageSize && query) {
-            count = userQuizAttemptRepo.countQuizRuns(quizId, query)
-        }
+        Page<QuizRun> quizRunsPage = userQuizAttemptRepo.findQuizRuns(quizId, query, usersTableAdditionalUserTagKey, quizAttemptStatus?.toString(), pageRequest)
+        long count = quizRunsPage.getTotalElements()
+        List<QuizRun> quizRuns = quizRunsPage.getContent()
 
         return new TableResult(totalCount: totalCount, data: quizRuns, count: count)
     }
@@ -617,12 +616,9 @@ class QuizDefService {
             throw new SkillQuizException("Provided answer id [${answerDefId}] does not belong to quiz [${quizId}]", ErrorCode.BadParam)
         }
 
-        List<UserQuizAnswer> answerAttempts = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, usersTableAdditionalUserTagKey, pageRequest)
-        int count = answerAttempts.size()
-        // pages are 0 based
-        if (pageRequest.pageNumber > 0 || count >= pageRequest.pageSize) {
-            count = userQuizAnswerAttemptRepo.countByQuizAnswerDefinitionRefId(answerDefId)
-        }
+        Page<UserQuizAnswer> answerAttemptsPage = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, usersTableAdditionalUserTagKey, pageRequest)
+        long count = answerAttemptsPage.getTotalElements()
+        List<UserQuizAnswer> answerAttempts = answerAttemptsPage.getContent()
         return new TableResult(totalCount: count, data: answerAttempts, count: count)
     }
 
@@ -806,7 +802,17 @@ class QuizDefService {
                     }
 
                     UserQuizQuestionAttempt userQuizQuestionAttempt = questionAttempts.find { it.quizQuestionDefinitionRefId == questionDef.id}
-                    boolean isCorrect = isSurvey ? true : !answers.find { it.isConfiguredCorrect != it.isSelected}
+                    boolean isCorrect = false
+                    if (isSurvey ) {
+                        isCorrect = true
+                    } else {
+                        if (questionDef.type == QuizQuestionType.TextInput) {
+                            isCorrect = userQuizQuestionAttempt?.status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
+                        } else {
+                            isCorrect = !answers.find { it.isConfiguredCorrect != it.isSelected }
+                        }
+                    }
+
                     boolean needsGrading = answers.find {it.needsGrading } != null
                     return new UserGradedQuizQuestionResult(
                             id: questionDef.id,

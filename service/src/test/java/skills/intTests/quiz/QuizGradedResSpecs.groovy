@@ -244,7 +244,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
-        quizAttemptRes.questions.isCorrect == [false, false]
+        quizAttemptRes.questions.isCorrect == [true, true]
         quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [true, false]
         quizAttemptRes.questions[0].answers.isSelected == [true, false]
@@ -394,7 +394,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [ QuizQuestionType.MultipleChoice.toString(), QuizQuestionType.SingleChoice.toString(), QuizQuestionType.TextInput.toString()]
-        quizAttemptRes.questions.isCorrect == [false, false, false]
+        quizAttemptRes.questions.isCorrect == [true, true, true]
 
         quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [false, false, false]
@@ -433,7 +433,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [ QuizQuestionType.MultipleChoice.toString(), QuizQuestionType.SingleChoice.toString(), QuizQuestionType.TextInput.toString()]
-        quizAttemptRes.questions.isCorrect == [false, false, false]
+        quizAttemptRes.questions.isCorrect == [true, true, true]
 
         quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [false, false, false]

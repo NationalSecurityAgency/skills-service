@@ -422,12 +422,13 @@ Cypress.Commands.add('gradeQuizAttempt', (quizNum = 1, isCorrect = true, feedbac
     cy.request(`/admin/quiz-definitions/${quizId}/runs?query=&quizAttemptStatus=NEEDS_GRADING&limit=10&ascending=false&page=1&orderBy=started`)
         .then((response) => {
             const firstAttemptId = response.body.data[0].attemptId;
+            const userId = response.body.data[0].userId;
             cy.request(`/admin/quiz-definitions/${quizId}/questions`).then((questionsInfoResponse) => {
                 const questions = questionsInfoResponse.body.questions.filter((question) => question.questionType === 'TextInput')
                 const gradedInfo = { isCorrect, feedback }
                 questions.forEach((question) => {
                     const answerDefId = question.answers[0].id
-                    cy.request('POST', `/admin/quiz-definitions/quiz1/users/skills@skills.org/attempt/${firstAttemptId}/gradeAnswer/${answerDefId}`, gradedInfo)
+                    cy.request('POST', `/admin/quiz-definitions/quiz1/users/${userId}/attempt/${firstAttemptId}/gradeAnswer/${answerDefId}`, gradedInfo)
                 });
             })
 

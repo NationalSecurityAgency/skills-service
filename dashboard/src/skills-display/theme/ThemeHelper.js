@@ -379,6 +379,8 @@ export default {
         throw new Error(`Skills Theme Error! Failed to process provided custom theme due to invalid format! JSON key of [${key}] ${keyMsg}. Theme is ${JSON.stringify(theme)}`)
       }
     }
+
+
     const cssBasedOnKeyPathMapping = {
       'tiles.borderColor': '.sd-theme-home .p-card, .p-autocomplete-panel.p-component { border-style: solid !important; border-width: 1px !important; }',
       'tiles.backgroundColor': '.sd-theme-home .sd-theme-summary-cards .p-card.p-component { border-style: solid !important; border-width: 1px !important; } ' +
@@ -387,6 +389,10 @@ export default {
         '.sd-theme-home .attachment-button.toastui-editor-toolbar-icons { color: #454545 !important; }',
       'textPrimaryColor': '.sd-theme-home .p-avatar.p-component { border-style: solid !important; border-width: 1px !important; } body #app .sd-theme-home .p-chip.p-component  { border-style: solid !important; border-width: 1px !important; }  body #app .sd-theme-home .skills-card-theme-border { border-style: solid !important; border-width: 1px !important; }'
     }
+
+    const lighterTilesBackgroundColor = tinycolor(theme.tiles.backgroundColor).lighten(10).toString();
+    res.css += `body #app .sd-theme-home .answer-row.surface-200 { background-color: ${lighterTilesBackgroundColor} !important; } `
+
     const addCssBasedOnKeyPath = (keyPath) => {
       const cssToAdd = cssBasedOnKeyPathMapping[keyPath]
       if (cssToAdd) {
@@ -468,8 +474,7 @@ export default {
 
     const handleMenuItemLinkHoverColor = (theme, selectorKey) => {
       if (theme?.tiles?.backgroundColor && theme?.tiles?.backgroundColor !== '#fff') {
-        const hoverColor = tinycolor(theme.tiles.backgroundColor).lighten(10).toString();
-        theme.tilesMenuLinkHoverCalculatedColor=hoverColor
+        theme.tilesMenuLinkHoverCalculatedColor=lighterTilesBackgroundColor
         selectorKey.tilesMenuLinkHoverCalculatedColor = {
           selector: '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link:hover',
           styleName: 'background-color'
