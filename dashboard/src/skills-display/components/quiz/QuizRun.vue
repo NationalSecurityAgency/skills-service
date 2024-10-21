@@ -372,7 +372,7 @@ const doneWithThisRun = () => {
           :quiz-result="quizResult"
           @close="doneWithThisRun">
         <template #completeAboveTitle>
-          <slot name="completeAboveTitle">
+          <slot name="aboveTitleWhenPassed" v-if="quizResult.gradedRes.passed">
             <Message severity="success" icon="fas fa-handshake">Thank you for taking the time to complete the survey!</Message>
           </slot>
         </template>

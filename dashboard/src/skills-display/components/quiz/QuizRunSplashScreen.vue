@@ -126,22 +126,13 @@ const start = () => {
         </div>
 
         <Message v-if="!quizInfo.userQuizPassed && allAttemptsExhausted" severity="error" :closable="false" data-cy="noMoreAttemptsAlert">
-          <template #messageicon>
-            <i class="fas fa-exclamation-triangle text-2xl" aria-hidden="true"></i>
-          </template>
-          <span class="mx-2 text-2xl">No more attempts available. This quiz allows <Tag severity="secondary">{{quizInfo.maxAttemptsAllowed}}</Tag> maximum attempt<span v-if="quizInfo.maxAttemptsAllowed > 1">s</span>.</span>
+          No more attempts available. This quiz allows <Tag severity="secondary">{{quizInfo.maxAttemptsAllowed}}</Tag> maximum attempt<span v-if="quizInfo.maxAttemptsAllowed > 1">s</span>.
         </Message>
         <Message v-if="numQuestions === 0" severity="error" :closable="false" data-cy="quizHasNoQuestions">
-          <template #messageicon>
-            <i class="fas fa-exclamation-triangle text-2xl" aria-hidden="true"></i>
-          </template>
-          <span class="mx-2 text-2xl">This {{ quizInfo.quizType }} has no questions declared and unfortunately cannot be completed.</span>
+          This {{ quizInfo.quizType }} has no questions declared and unfortunately cannot be completed.
         </Message>
         <Message v-if="!quizInfo.canStartQuiz && quizInfo.errorMessage" severity="error" :closable="false" data-cy="cantStartQuiz">
-          <template #messageicon>
-            <i class="fas fa-exclamation-triangle text-2xl" aria-hidden="true"></i>
-          </template>
-          <span class="mx-2 text-2xl">{{ quizInfo.errorMessage }}</span>
+          {{ quizInfo.errorMessage }}
         </Message>
         <Message v-if="needsGrading" :closable="false" severity="warn" icon="fas fa-user-clock" data-cy="quizRequiresGradingMsg">
           <div>You completed the quiz on <Tag>{{ timeUtils.formatDate(quizInfo.needsGradingAttemptDate) }}</Tag> but it <b>requires grading</b>.</div>

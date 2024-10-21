@@ -30,14 +30,14 @@ describe('Client Display Survey Tests', () => {
                 cy.visit('/progress-and-rankings/quizzes/quiz1')
                 if (validateSplash) {
                     cy.get('[data-cy="subPageHeader"]').contains('Survey')
-                    cy.get('[data-cy="quizSplashScreen"]').contains('Thank you for taking the time to take this survey')
+                    cy.get('[data-cy="quizSplashScreen"] [data-cy="startQuizAttempt"]').should('be.enabled')
                 }
             } else {
                 cy.log('Visiting Quiz Page in client display')
                 cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
                 if (validateSplash) {
                     cy.get('[data-cy="title"]').contains('Survey')
-                    cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by completing this survey')
+                    cy.get('[data-cy="quizSplashScreen"] [data-cy="startQuizAttempt"]').should('be.enabled')
                 }
             }
         });
@@ -151,7 +151,7 @@ describe('Client Display Survey Tests', () => {
             cy.createSubject(1,1)
             cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-            cy.visitQuizPage(env)
+            cy.visitQuizPage(env, false)
             cy.get('[data-cy="quizHasNoQuestions"]').contains('This Survey has no questions declared ')
             cy.get('[data-cy="startQuizAttempt"]').should('not.exist')
             cy.get('[data-cy="cancelQuizAttempt"]').should('not.exist')
