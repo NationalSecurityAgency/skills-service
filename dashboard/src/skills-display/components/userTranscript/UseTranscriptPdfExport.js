@@ -155,12 +155,7 @@ export const useTranscriptPdfExport = () => {
         addOverallStats(doc, subjectStruct, subject, info.labelsConf, false)
 
         const hasApprovals = !!subject.skills.find(skill => skill.approvedBy !== '')
-        const hasCompletedSkills = !!subject.skills.find(skill => skill.achievedOn !== null)
-        const headerRow = [`${info.labelsConf.skill}`, `${info.labelsConf.point}s`];
-
-        if(hasCompletedSkills) {
-          headerRow.push('Achieved On');
-        }
+        const headerRow = [`${info.labelsConf.skill}`, `${info.labelsConf.point}s`, 'Achieved On'];
 
         if(hasApprovals) {
           headerRow.push('Approver');
@@ -175,10 +170,8 @@ export const useTranscriptPdfExport = () => {
             const skillRow = [
               skill.name,
               buildNumOutOfOtherNum(skill.userPoints, skill.totalPoints),
+              skill.achievedOn ? skill.achievedOn : ''
             ]
-            if(hasCompletedSkills) {
-              skillRow.push(skill.achievedOn ? skill.achievedOn : '')
-            }
             if(hasApprovals) {
               skillRow.push(skill.approvedBy ? skill.approvedBy : '')
             }
