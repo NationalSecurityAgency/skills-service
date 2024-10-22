@@ -231,12 +231,13 @@ const skillId = computed(() => {
         </div>
       </div>
 
-      <div v-if="skill.selfReporting && skill.selfReporting.requestedOn"
-           data-cy="approvalPending">
-        <span v-if="!skill.selfReporting.rejectedOn" class="text-orange-500"><i class="far fa-clock"
-                                                                                aria-hidden="true" /> Pending Approval</span>
-        <span v-else-if="skill.selfReporting.rejectedOn" class="text-red-500"><i class="fas fa-heart-broken skills-theme-primary-color"
-                                             aria-hidden="true"></i> Request Rejected</span>
+      <div v-if="skill.selfReporting && skill.selfReporting.requestedOn && !skill.selfReporting.approved" data-cy="approvalPending">
+        <span v-if="!skill.selfReporting.rejectedOn" class="text-orange-500">
+          <i class="far fa-clock" aria-hidden="true" /> Pending Approval
+        </span>
+        <span v-else-if="skill.selfReporting.rejectedOn" class="text-red-500">
+          <i class="fas fa-heart-broken skills-theme-primary-color" aria-hidden="true"></i> Request Rejected
+        </span>
       </div>
     </div>
   </div>

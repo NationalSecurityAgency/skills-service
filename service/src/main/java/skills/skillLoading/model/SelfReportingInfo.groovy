@@ -37,4 +37,5 @@ class SelfReportingInfo {
     Date quizNeedsGradingAttemptDate
 
     String approvedBy
+    boolean approved
 }

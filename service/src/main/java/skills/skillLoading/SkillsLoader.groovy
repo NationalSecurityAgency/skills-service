@@ -674,6 +674,7 @@ class SkillsLoader {
                 quizName: skillDefAndUserPoints?.quizName,
                 numQuizQuestions: skillDefAndUserPoints?.quizNumQuestions ?: 0,
                 approvedBy: skillApproval?.approverUserId,
+                approved: !skillApproval?.rejectedOn && skillApproval?.approverUserId,
         )
 
         return selfReportingInfo
