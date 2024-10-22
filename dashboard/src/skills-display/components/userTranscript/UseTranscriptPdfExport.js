@@ -36,9 +36,6 @@ export const useTranscriptPdfExport = () => {
 
   const buildNumOutOfOtherNum = (num, otherNum, addAchievedWord = true) => {
     let res = `${numFormat.pretty(num)} / ${numFormat.pretty(otherNum)}`
-    if (addAchievedWord && num === otherNum && otherNum > 0) {
-      res += ` (Achieved) `
-    }
     return res
   }
 
@@ -157,16 +154,28 @@ export const useTranscriptPdfExport = () => {
 
         addOverallStats(doc, subjectStruct, subject, info.labelsConf, false)
 
+        const hasApprovals = !!subject.skills.find(skill => skill.approvedBy !== '')
+        const headerRow = [`${info.labelsConf.skill}`, `${info.labelsConf.point}s`, 'Achieved On'];
+
+        if(hasApprovals) {
+          headerRow.push('Approver');
+        }
+
         const tableInfo = {
           headerAndFooter: info.headerAndFooter,
           structTitle: `Skill Progress Table for ${subject.name} subject`,
           sectionTitle,
-          headers: [`${info.labelsConf.skill}`, `${info.labelsConf.point}s`],
+          headers: headerRow,
           rows: subject.skills.map((skill) => {
-            return [
+            const skillRow = [
               skill.name,
-              buildNumOutOfOtherNum(skill.userPoints, skill.totalPoints)
+              buildNumOutOfOtherNum(skill.userPoints, skill.totalPoints),
+              skill.achievedOn ? skill.achievedOn : ''
             ]
+            if(hasApprovals) {
+              skillRow.push(skill.approvedBy ? skill.approvedBy : '')
+            }
+            return skillRow;
           })
         }
         doc.moveDown(0.5)
