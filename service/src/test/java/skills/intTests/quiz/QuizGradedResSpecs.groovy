@@ -329,7 +329,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 
@@ -373,7 +373,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 
@@ -415,7 +415,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 

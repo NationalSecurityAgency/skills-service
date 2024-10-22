@@ -178,7 +178,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         skillsService.createQuizQuestionDef(QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 5))
         skillsService.createQuizQuestionDef(QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4))
-        skillsService.createQuizQuestionDef(QuizDefFactory.createTextInputSurveyQuestion(1, 3))
+        skillsService.createQuizQuestionDef(QuizDefFactory.createTextInputQuestion(1, 3))
         skillsService.createQuizQuestionDef(QuizDefFactory.createRatingSurveyQuestion(1, 4))
 
         when:

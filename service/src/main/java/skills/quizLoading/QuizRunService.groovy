@@ -342,7 +342,7 @@ class QuizRunService {
         // do not allow to start a new attempt if there is a pending attempt that needs grading
         UserQuizAttempt needsGradingAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING)
         if (needsGradingAttempt) {
-            throw new SkillQuizException("There is curerntly a pending attempt for  [${userId}] that awaiting grading. Cannot start a new attempt", quizId, ErrorCode.BadParam)
+            throw new SkillQuizException("There is currently a pending attempt for  [${userId}] that awaiting grading. Cannot start a new attempt", quizId, ErrorCode.BadParam)
         }
     }
 
@@ -594,6 +594,9 @@ class QuizRunService {
         }
         if (userQuizAttempt.userId != userId) {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${userId}] user", ErrorCode.BadParam)
+        }
+        if (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED || userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.FAILED) {
+            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] was already completed", ErrorCode.BadParam)
         }
     }
 
