@@ -36,4 +36,5 @@ class SelfReportingInfo {
     Integer numQuizQuestions
 
     String approvedBy
+    boolean approved
 }

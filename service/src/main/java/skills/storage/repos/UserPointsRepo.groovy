@@ -548,7 +548,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     approval.approverUserId is not null
                     and approval.approverActionTakenOn is not null
                     and userPoints.points = sdChild.totalPoints
-                    and approval.rejectedOn is not null
+                    and approval.rejectedOn is null
                     and approval.rejectionAcknowledgedOn is null
                 )
             )
