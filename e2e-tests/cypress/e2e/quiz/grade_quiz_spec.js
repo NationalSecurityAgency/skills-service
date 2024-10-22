@@ -17,6 +17,10 @@
 
 describe('Grade Quizzes', () => {
 
+    let defaultUser
+    beforeEach(() => {
+        defaultUser = Cypress.env('oauthMode') ? 'foo': Cypress.env('proxyUser')
+    })
 
     it('mark quiz with 1 question as correct', () => {
         cy.createQuizDef(1);
@@ -53,7 +57,7 @@ describe('Grade Quizzes', () => {
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="TextInputAnswer"]').contains('My Answer')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]').should('not.exist')
 
-        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(Cypress.env('proxyUser'))
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(defaultUser)
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').should('not.exist')
     });
 
@@ -92,7 +96,7 @@ describe('Grade Quizzes', () => {
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="TextInputAnswer"]').contains('My Answer')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]')
 
-        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(Cypress.env('proxyUser'))
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(defaultUser)
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').should('not.exist')
     });
 
@@ -154,19 +158,19 @@ describe('Grade Quizzes', () => {
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="TextInputAnswer"]').contains('My Answer')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]').should('not.exist')
-        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(Cypress.env('proxyUser'))
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(defaultUser)
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').contains('Question 1 is correct')
 
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('This is a question # 2')
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="TextInputAnswer"]').contains('My Answer')
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="wrongAnswer"]').should('not.exist')
-        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(Cypress.env('proxyUser'))
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(defaultUser)
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').should('not.exist')
 
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]').contains('This is a question # 3')
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="TextInputAnswer"]').contains('My Answer')
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="wrongAnswer"]')
-        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(Cypress.env('proxyUser'))
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(defaultUser)
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').contains('Question 3 is wrong')
     });
 
@@ -219,7 +223,7 @@ describe('Grade Quizzes', () => {
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="TextInputAnswer"]').contains('My Answer')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]').should('not.exist')
-        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(Cypress.env('proxyUser'))
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(defaultUser)
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').contains('Question 1 is correct')
 
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('This is a question # 2')
@@ -231,7 +235,7 @@ describe('Grade Quizzes', () => {
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]').contains('This is a question # 3')
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="TextInputAnswer"]').contains('My Answer')
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="wrongAnswer"]')
-        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(Cypress.env('proxyUser'))
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(defaultUser)
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').contains('Question 3 is wrong')
     });
 
@@ -288,7 +292,7 @@ describe('Grade Quizzes', () => {
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="TextInputAnswer"]').contains('My Answer')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]').should('not.exist')
-        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(Cypress.env('proxyUser'))
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(defaultUser)
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').contains('Question 1 is correct')
 
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('This is a question # 2')
@@ -297,7 +301,7 @@ describe('Grade Quizzes', () => {
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]').contains('This is a question # 3')
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="TextInputAnswer"]').contains('My Answer')
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="wrongAnswer"]')
-        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(Cypress.env('proxyUser'))
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(defaultUser)
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').contains('Question 3 is wrong')
 
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('This is a question # 4')

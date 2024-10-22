@@ -408,12 +408,9 @@ Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAtt
     });
 });
 
-Cypress.Commands.add('runQuizForTheCurrentUser', (quizNum = 1, quizAttemptInfo,  userAnswerTxt = null) => {
-    cy.fixture('vars.json')
-        .then((vars) => {
-            const userId = vars.defaultUser;
-            cy.runQuiz(quizNum, userId, quizAttemptInfo)
-        });
+Cypress.Commands.add('runQuizForTheCurrentUser', (quizNum = 1, quizAttemptInfo, userAnswerTxt = null) => {
+    const userId = Cypress.env('proxyUser')
+    cy.runQuiz(quizNum, userId, quizAttemptInfo)
 });
 
 Cypress.Commands.add('gradeQuizAttempt', (quizNum = 1, isCorrect = true, feedback='Good answer') => {
