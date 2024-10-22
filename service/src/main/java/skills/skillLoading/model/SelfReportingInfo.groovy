@@ -39,4 +39,5 @@ class SelfReportingInfo {
     Integer quizAttemptId = null
 
     String approvedBy
+    boolean approved
 }
