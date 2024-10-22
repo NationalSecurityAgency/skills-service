@@ -390,8 +390,10 @@ export default {
       'textPrimaryColor': '.sd-theme-home .p-avatar.p-component { border-style: solid !important; border-width: 1px !important; } body #app .sd-theme-home .p-chip.p-component  { border-style: solid !important; border-width: 1px !important; }  body #app .sd-theme-home .skills-card-theme-border { border-style: solid !important; border-width: 1px !important; }'
     }
 
-    const lighterTilesBackgroundColor = tinycolor(theme.tiles.backgroundColor).lighten(10).toString();
-    res.css += `body #app .sd-theme-home .answer-row.surface-200 { background-color: ${lighterTilesBackgroundColor} !important; } `
+    if (theme?.tiles?.backgroundColor) {
+      const lighterTilesBackgroundColor = tinycolor(theme.tiles.backgroundColor).lighten(10).toString();
+      res.css += `body #app .sd-theme-home .answer-row.surface-200 { background-color: ${lighterTilesBackgroundColor} !important; } `
+    }
 
     const addCssBasedOnKeyPath = (keyPath) => {
       const cssToAdd = cssBasedOnKeyPathMapping[keyPath]
@@ -474,7 +476,8 @@ export default {
 
     const handleMenuItemLinkHoverColor = (theme, selectorKey) => {
       if (theme?.tiles?.backgroundColor && theme?.tiles?.backgroundColor !== '#fff') {
-        theme.tilesMenuLinkHoverCalculatedColor=lighterTilesBackgroundColor
+        const tilesMenuHoverColor = tinycolor(theme.tiles.backgroundColor).lighten(10).toString();
+        theme.tilesMenuLinkHoverCalculatedColor=tilesMenuHoverColor
         selectorKey.tilesMenuLinkHoverCalculatedColor = {
           selector: '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link:hover',
           styleName: 'background-color'

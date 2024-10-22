@@ -165,7 +165,6 @@ const collapseAll = () => {
         :value="answerHistory"
         :loading="tableOptions.busy"
         stripedRows
-        showGridlines
         lazy
         :paginator="true"
         dataKey="userQuizAttemptId"
@@ -214,7 +213,11 @@ const collapseAll = () => {
             :instance-id="`${answerDefId}-${slotProps.index}-answerTxt`"
             :data-cy="`row${slotProps.index}-colAnswerTxt`"/>
       </template>
-      <Column v-if="isTextInput" expander style="width: 5rem" />
+      <Column v-if="isTextInput" expander style="width: 5rem">
+        <template #header>
+          <span class="sr-only">Expander Control</span>
+        </template>
+      </Column>
       <Column v-for="col of tableOptions.fields"
               :key="col.key"
               :field="col.key"
