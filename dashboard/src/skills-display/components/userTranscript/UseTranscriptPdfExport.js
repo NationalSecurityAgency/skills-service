@@ -154,8 +154,8 @@ export const useTranscriptPdfExport = () => {
 
         addOverallStats(doc, subjectStruct, subject, info.labelsConf, false)
 
-        const hasApprovals = subject.skills.find(skill => skill.approvedBy !== "")
-        const hasCompletedSkills = subject.skills.find(skill => skill.achievedOn !== null)
+        const hasApprovals = !!subject.skills.find(skill => skill.approvedBy !== '')
+        const hasCompletedSkills = !!subject.skills.find(skill => skill.achievedOn !== null)
         const headerRow = [`${info.labelsConf.skill}`, `${info.labelsConf.point}s`];
 
         if(hasCompletedSkills) {
