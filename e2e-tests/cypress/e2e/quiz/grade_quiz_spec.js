@@ -41,7 +41,7 @@ describe('Grade Quizzes', () => {
 
         const tableSelector = '[data-cy="quizRunsHistoryTable"]';
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user1' }, { colIndex: 1, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Passed' }],
         ], 10);
 
         cy.get('[data-cy="row0-viewRun"]').click()
@@ -80,7 +80,7 @@ describe('Grade Quizzes', () => {
 
         const tableSelector = '[data-cy="quizRunsHistoryTable"]';
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user1' }, { colIndex: 1, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Failed' }],
         ], 10);
 
         cy.get('[data-cy="row0-viewRun"]').click()
@@ -143,7 +143,7 @@ describe('Grade Quizzes', () => {
 
         const tableSelector = '[data-cy="quizRunsHistoryTable"]';
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user1' }, { colIndex: 1, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Failed' }],
         ], 10);
 
         cy.get('[data-cy="row0-viewRun"]').click()
@@ -208,7 +208,7 @@ describe('Grade Quizzes', () => {
 
         const tableSelector = '[data-cy="quizRunsHistoryTable"]';
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user1' }, { colIndex: 1, value: 'Needs Grading' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Needs Grading' }],
         ], 10);
 
         cy.get('[data-cy="row0-viewRun"]').click()
@@ -277,7 +277,7 @@ describe('Grade Quizzes', () => {
 
         const tableSelector = '[data-cy="quizRunsHistoryTable"]';
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user1' }, { colIndex: 1, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Passed' }],
         ], 10);
 
         cy.get('[data-cy="row0-viewRun"]').click()
@@ -462,9 +462,9 @@ describe('Grade Quizzes', () => {
 
         const tableSelector = '[data-cy="quizRunsHistoryTable"]';
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user3' }, { colIndex: 1, value: 'Passed' }],
-            [{ colIndex: 0, value: 'user2' }, { colIndex: 1, value: 'Failed' }],
-            [{ colIndex: 0, value: 'user1' }, { colIndex: 1, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user3' }, { colIndex: 2, value: 'Passed' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Passed' }],
         ], 10);
     });
 
