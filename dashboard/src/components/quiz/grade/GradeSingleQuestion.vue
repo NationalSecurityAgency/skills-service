@@ -102,7 +102,7 @@ const grade = (isCorrect, feedback) => {
                        :allow-attachments="false"
                        :allow-insert-images="false"
                        :aria-label="`optionally provide feedback for answer of question # ${question.questionNumber}`"
-                       :resizable="true" />
+                       :resizable="false" />
       <div class="flex gap-2 mt-3">
       <SkillsButton
           size="small"

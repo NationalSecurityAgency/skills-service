@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useField } from 'vee-validate'
 import ToastUiEditor from '@/common-components/utilities/markdown/ToastUiEditor.vue'
 
@@ -268,7 +268,16 @@ function attachFile(event) {
     }
   }
 }
-
+const editorStyle = computed(() => {
+  if (!props.resizable) {
+    return {}
+  }
+  return {
+    resize: 'vertical',
+    overflow: 'auto',
+    'min-height': '285px'
+  }
+})
 </script>
 
 <template>
@@ -281,7 +290,7 @@ function attachFile(event) {
     <BlockUI :blocked="disabled">
 
       <toast-ui-editor :id="idForToastUIEditor"
-                       :style="resizable ? {resize: 'vertical', overflow: 'auto', 'min-height': '285px'} : {}"
+                       :style="editorStyle"
                        class="no-bottom-border"
                        :class="{'editor-theme-dark' : themeHelper.isDarkTheme, 'is-resizable': resizable }"
                        data-cy="markdownEditorInput"
@@ -347,14 +356,14 @@ function attachFile(event) {
 </style>
 
 <style>
-.is-resizable > #editor {
+.is-resizable > div {
   height: 100% !important;
   min-height: 238px !important;
 }
 
-.is-resizable > #editor > .toastui-editor-defaultUI > .toastui-editor-main,
-.is-resizable > #editor > .toastui-editor-defaultUI > .toastui-editor-main > .toastui-editor-main-container,
-.is-resizable > #editor > .toastui-editor-defaultUI > .toastui-editor-main > .toastui-editor-main-container > .toastui-editor-ww-container > .toastui-editor {
+.is-resizable .toastui-editor-defaultUI > .toastui-editor-main,
+.is-resizable .toastui-editor-defaultUI > .toastui-editor-main > .toastui-editor-main-container,
+.is-resizable .toastui-editor-defaultUI > .toastui-editor-main > .toastui-editor-main-container > .toastui-editor-ww-container > .toastui-editor {
   min-height: 238px !important;
 }
 

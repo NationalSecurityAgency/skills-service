@@ -734,6 +734,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.visit('/administrator/quizzes/quiz1');
 
         cy.get('[data-cy="copyQuestionButton_2"]').click();
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_MultipleChoice"]').click()
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
 
         cy.get('[data-cy="saveDialogBtn"]').click()
@@ -778,6 +780,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="copyQuestionButton_3"]').click();
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="removeAnswer"]').click()
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="removeAnswer"]').click()
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
 
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-0_displayText"]').should('have.text', 'Third Answer')
