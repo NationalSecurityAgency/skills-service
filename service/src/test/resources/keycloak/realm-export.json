@@ -1,0 +1,26 @@
+{
+  "realm": "saml-test",
+  "clients": [
+    {
+      "clientId": "saml-client",
+      "protocol": "saml",
+      "attributes": {
+        "saml.assertion.signature": "true",
+        "saml.force.post.binding": "true",
+        "saml.authnstatement": "true"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "test-user",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test-password"
+        }
+      ]
+    }
+  ]
+}

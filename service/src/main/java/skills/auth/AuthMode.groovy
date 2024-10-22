@@ -19,7 +19,7 @@ import org.springframework.context.annotation.ConditionContext
 
 enum AuthMode {
 
-    FORM, PKI
+    FORM, PKI, SAML2
 
     static final String AUTH_MODE_PROPERTY = 'skills.authorization.authMode'
     static final String DEFAULT_AUTH_MODE = AuthMode.FORM

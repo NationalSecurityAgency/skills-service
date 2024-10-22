@@ -37,7 +37,7 @@ import java.security.interfaces.RSAPrivateCrtKey
 import java.security.spec.RSAPublicKeySpec
 
 @Configuration
-@Conditional(SecurityMode.FormAuth)
+@Conditional(SecurityMode.FormOrSAML2Auth)
 @Slf4j
 class KeyStoreKeyFactory implements ResourceLoaderAware {
 
