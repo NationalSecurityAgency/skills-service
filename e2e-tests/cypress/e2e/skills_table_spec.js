@@ -569,7 +569,7 @@ describe('Skills Table Tests', () => {
     cy.get('[data-cy="pageHeader"]').contains('ID: skill3')
   })
 
-  it.only('change display order with the last item on the current page', () => {
+  it('change display order with the last item on the current page', () => {
     const numSkills = 12
     for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
       const skillName = `Skill # ${skillsCounter}`
