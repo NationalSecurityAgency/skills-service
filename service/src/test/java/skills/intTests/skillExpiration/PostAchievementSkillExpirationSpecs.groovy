@@ -31,6 +31,7 @@ import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
+import skills.storage.model.UserQuizAttempt
 import skills.storage.repos.ExpiredUserAchievementRepo
 import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
 
@@ -2275,14 +2276,19 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
 
         when:
         def initialQuizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
-        initialQuizRuns.totalCount == 1
-        initialQuizRuns.data[0].status == "PASSED"
         def quizAttempt2 =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0], "skill1", proj.projectId).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, users[0])
-        skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, users[0]).body
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt2.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt2.id, users[0]).body
+        def newQuizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
 
         then:
-        def newQuizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
+        initialQuizRuns.totalCount == 1
+        initialQuizRuns.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString()]
+
         newQuizRuns.totalCount == 2
+        newQuizRuns.data.status == [
+                UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        ]
     }
 }
