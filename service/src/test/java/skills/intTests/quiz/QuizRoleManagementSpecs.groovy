@@ -48,7 +48,6 @@ class QuizRoleManagementSpecs extends DefaultIntSpec {
         otherUser.createQuizQuestionDefs(questions[2..2])
         def questions_t1 = skillsService.getQuizQuestionDefs(quiz1.quizId)
 
-        println JsonOutput.prettyPrint(JsonOutput.toJson(questions_t1))
         then:
         roles_t0.userId == [skillsService.userName]
         roles_t0.roleName == [RoleName.ROLE_QUIZ_ADMIN.toString()]

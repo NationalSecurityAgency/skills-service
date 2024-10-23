@@ -16,6 +16,7 @@ limitations under the License.
 <script setup>
 
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js';
+import QuizType from "@/skills-display/components/quiz/QuizType.js";
 
 const props = defineProps({
   quizResult: Object,
@@ -36,7 +37,7 @@ const close = () => {
     <template #content>
       <div class="text-2xl">
         <slot name="completeAboveTitle">
-          <i class="fas fa-handshake text-primary" aria-hidden="true"></i> Thank you for taking the time to complete the survey!
+          <Message severity="success" icon="fas fa-handshake">Thank you for taking the time to complete the survey!</Message>
         </slot>
       </div>
 

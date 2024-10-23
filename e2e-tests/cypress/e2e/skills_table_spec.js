@@ -584,11 +584,30 @@ describe('Skills Table Tests', () => {
       })
     }
 
-
+    cy.intercept('/admin/projects/proj1/subjects/subj1/skills/skill10').as('loadSkill')
+    cy.intercept('PATCH', '/admin/projects/proj1/subjects/subj1/skills/skill10').as('changeOrder')
+    cy.intercept('POST', '/api/projects/Inception/skills/ChangeSkillDisplayOrder').as('inceptionSkill')
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
     cy.get('[data-cy="enableDisplayOrderSort"]').click()
+    cy.validateTable(tableSelector, [
+      [{ colIndex: 2, value: 'Skill # 1' }, { colIndex: 3, value: 1 }],
+      [{ colIndex: 2, value: 'Skill # 2' }, { colIndex: 3, value: 2 }],
+      [{ colIndex: 2, value: 'Skill # 3' }, { colIndex: 3, value: 3 }],
+      [{ colIndex: 2, value: 'Skill # 4' }, { colIndex: 3, value: 4 }],
+      [{ colIndex: 2, value: 'Skill # 5' }, { colIndex: 3, value: 5 }],
+      [{ colIndex: 2, value: 'Skill # 6' }, { colIndex: 3, value: 6 }],
+      [{ colIndex: 2, value: 'Skill # 7' }, { colIndex: 3, value: 7 }],
+      [{ colIndex: 2, value: 'Skill # 8' }, { colIndex: 3, value: 8 }],
+      [{ colIndex: 2, value: 'Skill # 9' }, { colIndex: 3, value: 9 }],
+      [{ colIndex: 2, value: 'Skill # 10' }, { colIndex: 3, value: 10 }],
+    ], 10, true, 12, false)
+
     cy.get('[data-cy="orderMoveDown_skill10"]').click()
+    cy.wait('@changeOrder')
+    cy.wait('@loadSkill')
+    cy.wait('@inceptionSkill')
+    cy.wait(3000)
 
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Skill # 1' }, { colIndex: 3, value: 1 }],

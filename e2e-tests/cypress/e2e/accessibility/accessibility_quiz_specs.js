@@ -183,6 +183,35 @@ describe('Accessibility Quiz Tests', () => {
             cy.customA11y();
         });
 
+        it(`grading page${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.createQuizDef(1);
+            cy.createTextInputQuestionDef(1, 1)
+            cy.runQuizForUser(1, 1, [{selectedIndex: [0]}], true, 'My Answer')
+
+
+            cy.visit('/administrator/quizzes/quiz1/grading')
+            cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled').click()
+            cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
+            cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="answer_1displayText"]').contains('My Answer')
+            cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="gradedTag"]').should('not.exist')
+            cy.get('[data-cy="attemptGradedFor_user1"]').should('not.exist')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y();
+
+            cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="markCorrectBtn"]').should('be.enabled').click()
+            cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="questionDisplayText"]').should('not.exist')
+            cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="answer_1displayText"]').should('not.exist')
+            cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="gradedTag"]')
+            cy.get('[data-cy="attemptGradedFor_user1"]')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y();
+        });
+
         it(`quiz access page${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
             cy.createSurveyDef(1);

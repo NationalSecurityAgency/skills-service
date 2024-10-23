@@ -227,6 +227,7 @@ const numberOfStars = computed(() => {
       </Column>
       <template #expansion="slotProps">
         <QuizAnswerHistory :answer-def-id="slotProps.data.id"
+                           :is-survey="isSurvey"
                            :data-cy="`row${slotProps.index}-answerHistory`"
                            class="mb-4" />
       </template>
@@ -237,7 +238,8 @@ const numberOfStars = computed(() => {
       class="text-primary uppercase">correct</span> ***
     </div>
 
-    <QuizAnswerHistory v-if="isSurvey && isTextInput"
+    <QuizAnswerHistory v-if="isTextInput"
+                       :is-survey="isSurvey"
                        :question-type="q.questionType"
                        :answer-def-id="q.answers[0].id" />
 

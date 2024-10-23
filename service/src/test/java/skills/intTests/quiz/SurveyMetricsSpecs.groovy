@@ -470,7 +470,7 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createSingleChoiceSurveyQuestion(num, 1, 3),
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(num, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(num, 3),
+                QuizDefFactory.createTextInputQuestion(num, 3),
                 QuizDefFactory.createRatingSurveyQuestion(num, 4)
         ]
         skillsService.createQuizQuestionDefs(questions)

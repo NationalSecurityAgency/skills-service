@@ -15,6 +15,7 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -27,11 +28,17 @@ import skills.storage.model.UserQuizAttempt
 interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt, Long> {
 
     static interface AnswerIdAndAnswerText {
+        Integer getAnswerAttemptId()
         Integer getAnswerId()
         String getAnswerText()
+        UserQuizAnswerAttempt.QuizAnswerStatus getAnswerStatus()
     }
 
-    @Query('''select answerAttempt.quizAnswerDefinitionRefId as answerId, answerAttempt.answer as answerText
+    @Query('''select 
+            answerAttempt.id as answerAttemptId,
+            answerAttempt.quizAnswerDefinitionRefId as answerId, 
+            answerAttempt.answer as answerText, 
+            answerAttempt.status as answerStatus
         from UserQuizAnswerAttempt answerAttempt
         where answerAttempt.userQuizAttemptRefId = ?1
      ''')
@@ -69,16 +76,10 @@ interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt,
                                 group by ut.user_id) ut ON ut.user_id = userAttrs.user_id
             where answerAttempt.user_id = userAttrs.user_id
               and answerAttempt.user_quiz_attempt_ref_id = quizAttempt.id
-              and quizAttempt.status <> 'INPROGRESS'
+              and quizAttempt.status in ('PASSED', 'FAILED')
               and answerAttempt.quiz_answer_definition_ref_id = ?1
      ''', nativeQuery = true)
-    List<UserQuizAnswer> findUserAnswers(Integer quizAnswerDefinitionRefId, String usersTableAdditionalUserTagKey, PageRequest pageRequest)
+    Page<UserQuizAnswer> findUserAnswers(Integer quizAnswerDefinitionRefId, String usersTableAdditionalUserTagKey, PageRequest pageRequest)
 
-    @Query('''select count (answerAttempt)
-        from UserQuizAnswerAttempt answerAttempt, UserQuizAttempt quizAttempt
-        where answerAttempt.userQuizAttemptRefId = quizAttempt.id
-            and quizAttempt.status <> 'INPROGRESS'
-            and answerAttempt.quizAnswerDefinitionRefId = ?1
-     ''')
-    long countByQuizAnswerDefinitionRefId(Integer quizAnswerDefinitionRefId)
+
 }

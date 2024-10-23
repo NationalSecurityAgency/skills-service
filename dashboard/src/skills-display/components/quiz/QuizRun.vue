@@ -30,6 +30,9 @@ import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
 import QuizRunQuestion from '@/skills-display/components/quiz/QuizRunQuestion.vue';
 import { useForm } from "vee-validate";
+import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 
 const props = defineProps({
   quizId: String,
@@ -53,6 +56,8 @@ const props = defineProps({
 const emit = defineEmits(['cancelled', 'testWasTaken'])
 const announcer = useSkillsAnnouncer()
 const timeUtils = useTimeUtils()
+const appConfig = useAppConfig()
+const numFormat = useNumberFormat()
 
 const isLoading = ref(true);
 const isCompleting = ref(false);
@@ -84,6 +89,7 @@ const schema = object({
           object({
             'questionType': string(),
             'answerText': string()
+                .max(appConfig.maxTakeQuizInputTextAnswerLength, (d) => `Answer to question #${getQuestionNumFromPath(d.path)} must not exceed ${numFormat.pretty(appConfig.maxTakeQuizInputTextAnswerLength)} characters`)
                 .when('questionType', {
                   is: QuestionType.TextInput,
                   then: (sch)  => sch
@@ -315,7 +321,7 @@ const reportTestRunToBackend = () => {
             const answerOptions = q.answerOptions.map((a) => ({
               ...a,
               selected: gradedQuestion.selectedAnswerIds.includes(a.id),
-              isGraded: true,
+              isGraded: !QuizStatus.isNeedsGrading(gradedQuestion.status),
               isCorrect: gradedQuestion.correctAnswerIds.includes(a.id),
             }));
             return ({
@@ -354,10 +360,7 @@ const doneWithThisRun = () => {
     <div v-if="!isLoading">
       <QuizRunSplashScreen v-if="splashScreen.show" :quiz-info="quizInfo" @cancelQuizAttempt="cancelQuizAttempt" @start="startQuizAttempt" :multipleTakes="multipleTakes">
         <template #aboveTitle>
-          <slot name="splashPageTitle">
-            <span v-if="isSurveyType">Thank you for taking the time to take this survey!</span>
-            <span v-else>You are about to begin the quiz!</span>
-          </slot>
+          <slot name="splashPageTitle" />
         </template>
       </QuizRunSplashScreen>
 
@@ -369,8 +372,8 @@ const doneWithThisRun = () => {
           :quiz-result="quizResult"
           @close="doneWithThisRun">
         <template #completeAboveTitle>
-          <slot name="completeAboveTitle">
-            <i class="fas fa-handshake text-primary" aria-hidden="true"></i> Thank you for taking the time to complete the survey!
+          <slot name="aboveTitleWhenPassed" v-if="quizResult.gradedRes.passed">
+            <Message severity="success" icon="fas fa-handshake">Thank you for taking the time to complete the survey!</Message>
           </slot>
         </template>
       </SurveyRunCompletionSummary>
@@ -385,9 +388,11 @@ const doneWithThisRun = () => {
           @close="doneWithThisRun"
           @run-again="tryAgain">
         <template #completeAboveTitle>
-          <slot name="completeAboveTitle">
-            <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
-            <span v-else>Thank you for completing the Quiz!</span>
+          <slot name="aboveTitleWhenPassed" v-if="quizResult.gradedRes.passed">
+            <Message severity="success" icon="fas fa-handshake">
+              <span v-if="isSurveyType">Thank you for taking time to take this survey! </span>
+              <span v-else>Thank you for completing the Quiz!</span>
+            </Message>
           </slot>
         </template>
       </QuizRunCompletionSummary>
@@ -417,18 +422,9 @@ const doneWithThisRun = () => {
             </div>
           </SkillsOverlay>
 
-          <QuizRunValidationWarnings v-if="!meta.valid" :errors-to-show="errorsToShow" />
+          <QuizRunValidationWarnings v-if="!meta.valid && !quizResult?.gradedRes?.needsGrading" :errors-to-show="errorsToShow" />
 
           <div v-if="!quizResult" class="text-left mt-5 flex flex-wrap">
-<!--            <SkillsButton severity="info" outlined-->
-<!--                          label="Save and Close"-->
-<!--                          icon="fas fa-save"-->
-<!--                          @click="saveAndCloseThisRun"-->
-<!--                          class="text-uppercase mr-2 font-weight-bold skills-theme-btn"-->
-<!--                          :disabled="isCompleting"-->
-<!--                          :aria-label="`Save and close this ${quizInfo.quizType}`"-->
-<!--                          data-cy="saveAndCloseQuizAttemptBtn">-->
-<!--            </SkillsButton>-->
             <SkillsOverlay :show="isCompleting" opacity="0.6">
               <SkillsButton severity="success" outlined
                             :label="`Complete ${quizInfo.quizType}`"
@@ -443,7 +439,7 @@ const doneWithThisRun = () => {
           </div>
 
           <div v-if="quizResult && quizResult.gradedRes && quizResult.gradedRes.passed" class="text-left mt-5">
-            <SkillsButton :severity="quizResult.gradedRes.passed ? 'success' : 'danger'" outlined
+            <SkillsButton :severity="quizResult.gradedRes.passed || quizResult.gradedRes.needsGrading ? 'success' : 'danger'" outlined
                           label="Close"
                           icon="fas fa-times-circle"
                           @click="doneWithThisRun"
@@ -452,7 +448,8 @@ const doneWithThisRun = () => {
           </div>
           <div v-if="quizResult && quizResult.gradedRes && !quizResult.gradedRes.passed" class="mt-5">
             <div class="my-2" v-if="(quizInfo.maxAttemptsAllowed - quizInfo.userNumPreviousQuizAttempts - 1) > 0"><span class="text-info">No worries!</span> Would you like to try again?</div>
-            <SkillsButton severity="danger" outlined
+            <SkillsButton :severity="quizResult.gradedRes.needsGrading ? 'success' : 'danger'"
+                          outlined
                           label="Close"
                           icon="fas fa-times-circle"
                           @click="doneWithThisRun"

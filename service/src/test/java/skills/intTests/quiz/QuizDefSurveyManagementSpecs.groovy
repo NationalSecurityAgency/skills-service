@@ -48,7 +48,7 @@ class QuizDefSurveyManagementSpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3, QuizDefParent.QuizType.Survey),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4, QuizDefParent.QuizType.Survey),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 
@@ -114,7 +114,7 @@ class QuizDefSurveyManagementSpecs extends DefaultIntSpec {
         def quiz = QuizDefFactory.createQuizSurvey(1)
         def newQuiz = skillsService.createQuizDef(quiz)
 
-        def question = QuizDefFactory.createTextInputSurveyQuestion(1, 1)
+        def question = QuizDefFactory.createTextInputQuestion(1, 1)
 
         when:
         def newQuestion = skillsService.createQuizQuestionDef(question)
@@ -241,8 +241,8 @@ class QuizDefSurveyManagementSpecs extends DefaultIntSpec {
     def "update question definition - change question type - TextInput -> SingleChoice"() {
         def quiz = QuizDefFactory.createQuizSurvey(1)
         skillsService.createQuizDef(quiz)
-        skillsService.createQuizQuestionDef(QuizDefFactory.createTextInputSurveyQuestion(1, 1)).body
-        def questionDef = QuizDefFactory.createTextInputSurveyQuestion(1, 2)
+        skillsService.createQuizQuestionDef(QuizDefFactory.createTextInputQuestion(1, 1)).body
+        def questionDef = QuizDefFactory.createTextInputQuestion(1, 2)
         def q2 = skillsService.createQuizQuestionDef(questionDef).body
         q2.questionType = QuizQuestionType.SingleChoice.toString()
         q2.quizId = quiz.quizId

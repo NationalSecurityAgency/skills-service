@@ -46,7 +46,7 @@ describe('Quiz Question CRUD Tests', () => {
         });
     });
 
-    it('create choice questions', function () {
+    it('create single choice questions', function () {
         cy.createQuizDef(1);
         cy.visit('/administrator/quizzes/quiz1');
         cy.get('[data-cy="noQuestionsYet"]')
@@ -54,6 +54,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '0')
 
         cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
@@ -182,6 +184,7 @@ describe('Quiz Question CRUD Tests', () => {
 
         cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
 
         cy.get('[data-cy="answersError"]').should('not.be.visible')
         cy.get('[data-cy="saveDialogBtn"]').click()
@@ -190,7 +193,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answersError"]').should('not.be.visible')
     });
 
-    it('modal validation: at least 1 correct answer is selected', function () {
+    it('modal validation: multiple choice must have 2 correct answers', function () {
         cy.createQuizDef(1);
         cy.visit('/administrator/quizzes/quiz1');
         cy.get('[data-cy="btn_Questions"]').click()
@@ -198,6 +201,26 @@ describe('Quiz Question CRUD Tests', () => {
 
         cy.get('[data-cy="questionText"]').type('a')
 
+        cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('2')
+
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="answersError"]').contains('Multiple Choice Question must have at least 2 correct answers')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+    });
+
+    it('modal validation: single choice must have at least 1 correct answer is selected', function () {
+        cy.createQuizDef(1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+
+        cy.get('[data-cy="questionText"]').type('a')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('2')
 
@@ -215,6 +238,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
         cy.get('[data-cy="questionText"]').type('a')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
 
         cy.get('[data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
@@ -286,6 +311,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
         cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
 
         cy.get(`[data-cy="answer-0"] [data-cy="addNewAnswer"]`).click()
         cy.get(`[data-cy="answer-2"] [data-cy="addNewAnswer"]`).click()
@@ -426,6 +453,10 @@ describe('Quiz Question CRUD Tests', () => {
         cy.visit('/administrator/quizzes/quiz1');
 
         cy.get('[data-cy="editQuestionButton_2"]').click();
+        // previous type
+        cy.get('[data-cy="answerTypeSelector"] [data-cy="selectionItem_SingleChoice"]')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_MultipleChoice"]').click()
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
 
         cy.get('[data-cy="saveDialogBtn"]').click()
@@ -470,6 +501,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="editQuestionButton_3"]').click();
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="removeAnswer"]').click()
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="removeAnswer"]').click()
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
 
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="answer-0_displayText"]').should('have.text', 'Third Answer')
@@ -557,6 +590,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.visit('/administrator/quizzes/quiz1');
 
         cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
         cy.get('[data-cy="questionText"]').type('question # 1')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
@@ -567,6 +602,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="questionText"]').type('question # 2')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('a')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('b')
+        cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="saveDialogBtn"]').click()
 
@@ -698,6 +734,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.visit('/administrator/quizzes/quiz1');
 
         cy.get('[data-cy="copyQuestionButton_2"]').click();
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_MultipleChoice"]').click()
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
 
         cy.get('[data-cy="saveDialogBtn"]').click()
@@ -742,6 +780,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="copyQuestionButton_3"]').click();
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="removeAnswer"]').click()
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="removeAnswer"]').click()
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
 
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-0_displayText"]').should('have.text', 'Third Answer')

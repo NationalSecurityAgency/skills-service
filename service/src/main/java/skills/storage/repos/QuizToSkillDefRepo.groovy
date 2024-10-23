@@ -31,6 +31,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
         Integer getSkillRefId()
         String getQuizName()
         String getQuizId()
+        Integer getQuizRefId()
         QuizDefParent.QuizType getQuizType()
         Integer getNumQuestions()
     }
@@ -43,6 +44,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
 
     @Nullable
     @Query(value = '''select q.quiz_id as quizId,
+                   max(q.id) as quizRefId, 
                    max(q.name) as quizName,
                    max(q.type) as quizType,
                    max(qToS.skill_ref_id) as skillRefId,

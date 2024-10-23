@@ -18,4 +18,7 @@ export default {
     SingleChoice: 'SingleChoice',
     TextInput: 'TextInput',
     Rating: 'Rating',
+    isMultipleChoice: (questionType) => questionType === 'MultipleChoice',
+    isSingleChoice: (questionType) => questionType === 'SingleChoice',
+    isTextInput: (questionType) => questionType === 'TextInput',
 };

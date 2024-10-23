@@ -23,12 +23,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.storage.model.SkillDef
 
 import static skills.intTests.utils.SkillsFactory.createProject
-import static skills.intTests.utils.SkillsFactory.createProject
 import static skills.intTests.utils.SkillsFactory.createSkills
-import static skills.intTests.utils.SkillsFactory.createSkills
-import static skills.intTests.utils.SkillsFactory.createSkills
-import static skills.intTests.utils.SkillsFactory.createSubject
-import static skills.intTests.utils.SkillsFactory.createSubject
 import static skills.intTests.utils.SkillsFactory.createSubject
 
 class QuizApi_RunSurveySpecs extends DefaultIntSpec {
@@ -39,7 +34,7 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 
@@ -64,7 +59,7 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 
@@ -87,7 +82,7 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 
@@ -127,7 +122,7 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 
@@ -148,7 +143,7 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 
@@ -169,7 +164,7 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 
@@ -190,7 +185,7 @@ class QuizApi_RunSurveySpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 

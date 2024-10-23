@@ -15,7 +15,7 @@
  */
 package skills.intTests.quiz
 
-
+import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Value
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
@@ -244,7 +244,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
-        quizAttemptRes.questions.isCorrect == [false, false]
+        quizAttemptRes.questions.isCorrect == [true, true]
         quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [true, false]
         quizAttemptRes.questions[0].answers.isSelected == [true, false]
@@ -329,7 +329,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 
@@ -373,7 +373,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 
@@ -394,7 +394,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [ QuizQuestionType.MultipleChoice.toString(), QuizQuestionType.SingleChoice.toString(), QuizQuestionType.TextInput.toString()]
-        quizAttemptRes.questions.isCorrect == [false, false, false]
+        quizAttemptRes.questions.isCorrect == [true, true, true]
 
         quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [false, false, false]
@@ -415,7 +415,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         def questions = [
                 QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3),
                 QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 4),
-                QuizDefFactory.createTextInputSurveyQuestion(1, 3),
+                QuizDefFactory.createTextInputQuestion(1, 3),
         ]
         skillsService.createQuizQuestionDefs(questions)
 
@@ -433,7 +433,7 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.questions.id == quizAttempt.questions.id
         quizAttemptRes.questions.question == questions.question
         quizAttemptRes.questions.questionType == [ QuizQuestionType.MultipleChoice.toString(), QuizQuestionType.SingleChoice.toString(), QuizQuestionType.TextInput.toString()]
-        quizAttemptRes.questions.isCorrect == [false, false, false]
+        quizAttemptRes.questions.isCorrect == [true, true, true]
 
         quizAttemptRes.questions[0].answers.answer == questions[0].answers.answer
         quizAttemptRes.questions[0].answers.isConfiguredCorrect == [false, false, false]
@@ -506,5 +506,74 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         quizAttemptRes.completed
         quizAttemptRes.userTag == "ABC"
     }
+
+    def "quiz: TextInput grading info"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDefs([
+                QuizDefFactory.createTextInputQuestion(1, 1),
+                QuizDefFactory.createTextInputQuestion(1, 2),
+        ])
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        when:
+        def quizAttemptRes_t1 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected:true, answerText: 'Answer'])
+        def quizAttemptRes_t2 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected:true, answerText: 'Answer'])
+        def quizAttemptRes_t3 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        def quizAttemptRes_t4 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, true, "Good answer")
+        def quizAttemptRes_t5 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, true, "Another answer")
+        def quizAttemptRes_t6 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        then:
+        quizAttemptRes_t1.status == UserQuizAttempt.QuizAttemptStatus.INPROGRESS.toString()
+        quizAttemptRes_t1.questions.needsGrading == [false, false]
+        quizAttemptRes_t1.questions[0].answers.needsGrading == [false]
+        quizAttemptRes_t1.questions[0].answers.gradingResult == [null]
+        quizAttemptRes_t1.questions[1].answers.needsGrading == [false]
+        quizAttemptRes_t1.questions[1].answers.gradingResult == [null]
+
+        quizAttemptRes_t2.status == UserQuizAttempt.QuizAttemptStatus.INPROGRESS.toString()
+        quizAttemptRes_t2.questions.needsGrading == [true, false]
+        quizAttemptRes_t2.questions[0].answers.needsGrading == [true]
+        quizAttemptRes_t2.questions[0].answers.gradingResult == [null]
+        quizAttemptRes_t2.questions[1].answers.needsGrading == [false]
+        quizAttemptRes_t2.questions[1].answers.gradingResult == [null]
+
+        quizAttemptRes_t3.status == UserQuizAttempt.QuizAttemptStatus.INPROGRESS.toString()
+        quizAttemptRes_t3.questions.needsGrading == [true, true]
+        quizAttemptRes_t3.questions[0].answers.needsGrading == [true]
+        quizAttemptRes_t3.questions[0].answers.gradingResult == [null]
+        quizAttemptRes_t3.questions[1].answers.needsGrading == [true]
+        quizAttemptRes_t3.questions[1].answers.gradingResult == [null]
+
+        quizAttemptRes_t4.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        quizAttemptRes_t4.questions.needsGrading == [true, true]
+        quizAttemptRes_t4.questions[0].answers.needsGrading == [true]
+        quizAttemptRes_t4.questions[0].answers.gradingResult == [null]
+        quizAttemptRes_t4.questions[1].answers.needsGrading == [true]
+        quizAttemptRes_t4.questions[1].answers.gradingResult == [null]
+
+        quizAttemptRes_t5.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        quizAttemptRes_t5.questions.needsGrading == [false, true]
+        quizAttemptRes_t5.questions[0].answers.needsGrading == [false]
+        quizAttemptRes_t5.questions[0].answers.gradingResult.feedback == ["Good answer"]
+        quizAttemptRes_t5.questions[0].answers.gradingResult.graderUserId == [skillsService.userName]
+        quizAttemptRes_t5.questions[1].answers.needsGrading == [true]
+        quizAttemptRes_t5.questions[1].answers.gradingResult == [null]
+
+        quizAttemptRes_t6.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        quizAttemptRes_t6.questions.needsGrading == [false, false]
+        quizAttemptRes_t6.questions[0].answers.needsGrading == [false]
+        quizAttemptRes_t6.questions[0].answers.gradingResult.feedback == ["Good answer"]
+        quizAttemptRes_t6.questions[0].answers.gradingResult.graderUserId == [skillsService.userName]
+        quizAttemptRes_t6.questions[1].answers.gradingResult.feedback == ["Another answer"]
+        quizAttemptRes_t6.questions[1].answers.gradingResult.graderUserId == [skillsService.userName]
+    }
+
 }
 

@@ -74,7 +74,7 @@ class QuizDefFactory {
         return this.createChoiceQuestion(quizNumber, questionsNumber, numberOfAnswers, QuizQuestionType.SingleChoice, quizType)
     }
 
-    static createTextInputSurveyQuestion(int quizNumber = 1, int questionsNumber = 1) {
+    static createTextInputQuestion(int quizNumber = 1, int questionsNumber = 1) {
         return this.createChoiceQuestion(quizNumber, questionsNumber, 0, QuizQuestionType.TextInput, QuizType.Survey)
     }
 

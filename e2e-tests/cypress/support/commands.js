@@ -408,13 +408,43 @@ Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAtt
     });
 });
 
-Cypress.Commands.add('runQuizForTheCurrentUser', (quizNum = 1, quizAttemptInfo) => {
-    cy.fixture('vars.json')
-        .then((vars) => {
-            const userId = vars.defaultUser;
-            cy.runQuiz(quizNum, userId, quizAttemptInfo)
-        });
+Cypress.Commands.add('runQuizForTheCurrentUser', (quizNum = 1, quizAttemptInfo, userAnswerTxt = null) => {
+    const userId = Cypress.env('proxyUser')
+    cy.runQuiz(quizNum, userId, quizAttemptInfo)
 });
+
+Cypress.Commands.add('gradeQuizAttempt', (quizNum = 1, isCorrect = true, feedback='Good answer') => {
+    const quizId = `quiz${quizNum}`;
+    let completed = false
+    cy.request(`/admin/quiz-definitions/${quizId}/runs?query=&quizAttemptStatus=NEEDS_GRADING&limit=10&ascending=false&page=1&orderBy=started`)
+        .then((response) => {
+            const firstAttemptId = response.body.data[0].attemptId;
+            const userId = response.body.data[0].userId;
+            cy.request(`/admin/quiz-definitions/${quizId}/questions`).then((questionsInfoResponse) => {
+                const questions = questionsInfoResponse.body.questions.filter((question) => question.questionType === 'TextInput')
+                const gradedInfo = { isCorrect, feedback }
+                questions.forEach((question) => {
+                    const answerDefId = question.answers[0].id
+                    cy.request('POST', `/admin/quiz-definitions/quiz1/users/${userId}/attempt/${firstAttemptId}/gradeAnswer/${answerDefId}`, gradedInfo)
+                });
+            })
+
+            const expectedStatus = isCorrect ? "PASSED" : "FAILED";
+            cy.waitUntil(() => cy.request(`/admin/quiz-definitions/${quizId}/runs/${firstAttemptId}`).then((response) => response.body.status === expectedStatus), {
+                timeout: 60000, // waits up to 1 minutes
+                interval: 500 // performs the check every 500 ms, default to 200
+            });
+
+            completed = true
+        })
+
+    cy.waitUntil(() => completed, {
+        timeout: 60000, // waits up to 1 minutes
+        interval: 500 // performs the check every 500 ms, default to 200
+    });
+
+});
+
 
 Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldComplete = true, userAnswerTxt = null) => {
     const quizId = `quiz${quizNum}`;
@@ -1313,6 +1343,7 @@ Cypress.Commands.add("validateElementsOrder", (selector, containsValues) => {
     for (const [i, value] of containsValues.entries()) {
         cy.get('@elements').eq(i).contains(value);
     }
+    cy.wait(500)
 });
 
 Cypress.Commands.add('formRequest', (method, url, formData, onComplete, includeXSRF = false) => {

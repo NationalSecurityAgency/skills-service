@@ -20,6 +20,7 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -75,6 +76,9 @@ class QuizDefService {
 
     @Autowired
     UserQuizAnswerAttemptRepo userQuizAnswerAttemptRepo
+
+    @Autowired
+    UserQuizAnswerGradedRepo userQuizAnswerGradedRepo
 
     @Autowired
     QuizAnswerDefRepo quizAnswerRepo
@@ -587,18 +591,16 @@ class QuizDefService {
     }
 
     @Transactional
-    TableResult getQuizRuns(String quizId, String query, PageRequest pageRequest) {
+    TableResult getQuizRuns(String quizId, String query, UserQuizAttempt.QuizAttemptStatus quizAttemptStatus, PageRequest pageRequest) {
         long totalCount = userQuizAttemptRepo.countByQuizId(quizId)
         if (totalCount == 0) {
             return new TableResult(totalCount: totalCount, count: 0, data: [])
         }
 
         query = query ?: ''
-        List<QuizRun> quizRuns = userQuizAttemptRepo.findQuizRuns(quizId, query, usersTableAdditionalUserTagKey, pageRequest)
-        int count = totalCount > pageRequest.pageSize ? totalCount : quizRuns.size()
-        if (totalCount > pageRequest.pageSize && query) {
-            count = userQuizAttemptRepo.countQuizRuns(quizId, query)
-        }
+        Page<QuizRun> quizRunsPage = userQuizAttemptRepo.findQuizRuns(quizId, query, usersTableAdditionalUserTagKey, quizAttemptStatus?.toString(), pageRequest)
+        long count = quizRunsPage.getTotalElements()
+        List<QuizRun> quizRuns = quizRunsPage.getContent()
 
         return new TableResult(totalCount: totalCount, data: quizRuns, count: count)
     }
@@ -614,12 +616,9 @@ class QuizDefService {
             throw new SkillQuizException("Provided answer id [${answerDefId}] does not belong to quiz [${quizId}]", ErrorCode.BadParam)
         }
 
-        List<UserQuizAnswer> answerAttempts = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, usersTableAdditionalUserTagKey, pageRequest)
-        int count = answerAttempts.size()
-        // pages are 0 based
-        if (pageRequest.pageNumber > 0 || count >= pageRequest.pageSize) {
-            count = userQuizAnswerAttemptRepo.countByQuizAnswerDefinitionRefId(answerDefId)
-        }
+        Page<UserQuizAnswer> answerAttemptsPage = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, usersTableAdditionalUserTagKey, pageRequest)
+        long count = answerAttemptsPage.getTotalElements()
+        List<UserQuizAnswer> answerAttempts = answerAttemptsPage.getContent()
         return new TableResult(totalCount: count, data: answerAttempts, count: count)
     }
 
@@ -760,13 +759,15 @@ class QuizDefService {
         }
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userQuizAttempt.userId)
         List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = userQuizAnswerAttemptRepo.getSelectedAnswerIdsAndText(userQuizAttempt.id)
+        List<UserQuizAnswerGradedRepo.GradedInfo> manuallyGradedAnswers = userQuizAnswerGradedRepo.getGradedAnswersForQuizAttemptId(userQuizAttempt.id)
 
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)
         List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
         List<UserQuizQuestionAttempt> questionAttempts = userQuizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(userQuizAttempt.id)
         Map<Integer, List<QuizAnswerDef>> byQuestionId = dbAnswersDef.groupBy {it.questionRefId }
+        Map<Integer, List<UserQuizAnswerGradedRepo.GradedInfo>> manuallyGradedAnswersByAnswerAttemptId = manuallyGradedAnswers.groupBy {it.answerAttemptId }
 
-        List<QuizQuestionDefResult> questions = dbQuestionDefs
+        List<UserGradedQuizQuestionResult> questions = dbQuestionDefs
                 .sort { it.displayOrder }
                 .collect { QuizQuestionDef questionDef ->
                     List<QuizAnswerDef> quizAnswerDefs = byQuestionId[questionDef.id]
@@ -775,27 +776,51 @@ class QuizDefService {
                     boolean isRating = questionDef.type == QuizQuestionType.Rating
                     List<UserGradedQuizAnswerResult> answers = quizAnswerDefs.collect { QuizAnswerDef answerDef ->
                         UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText foundSelected = alreadySelected.find { it.answerId == answerDef.id }
+
+                        AnswerGradingResult gradingResult = null
+                        if (isTextInput && foundSelected) {
+                            UserQuizAnswerGradedRepo.GradedInfo gradedInfo = manuallyGradedAnswersByAnswerAttemptId[foundSelected.answerAttemptId]?.first()
+                            if (gradedInfo) {
+                                gradingResult = new AnswerGradingResult(
+                                        graderUserId: gradedInfo.getGraderUserId(),
+                                        graderUserIdForDisplay: gradedInfo.getGraderUserIdForDisplay(),
+                                        graderFirstname: gradedInfo.getGraderFirstname(),
+                                        graderLastname: gradedInfo.getGraderLastname(),
+                                        feedback: gradedInfo.getFeedback(),
+                                        gradedOn: gradedInfo.getGradedOn(),
+                                )
+                            }
+                        }
                         return new UserGradedQuizAnswerResult(
                                 id: answerDef.id,
                                 answer: isTextInput ? foundSelected?.answerText : answerDef.answer,
                                 isConfiguredCorrect: Boolean.valueOf(answerDef.isCorrectAnswer),
                                 isSelected: foundSelected != null,
+                                needsGrading: foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING,
+                                gradingResult: gradingResult
                         )
                     }
 
                     UserQuizQuestionAttempt userQuizQuestionAttempt = questionAttempts.find { it.quizQuestionDefinitionRefId == questionDef.id}
-                    boolean isCorrect
-                    if (userQuizQuestionAttempt?.status != null) {
-                        isCorrect = userQuizQuestionAttempt.status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
+                    boolean isCorrect = false
+                    if (isSurvey ) {
+                        isCorrect = true
                     } else {
-                        isCorrect = isSurvey ? true : !answers.find { it.isConfiguredCorrect != it.isSelected}
+                        if (questionDef.type == QuizQuestionType.TextInput) {
+                            isCorrect = userQuizQuestionAttempt?.status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
+                        } else {
+                            isCorrect = !answers.find { it.isConfiguredCorrect != it.isSelected }
+                        }
                     }
+
+                    boolean needsGrading = answers.find {it.needsGrading } != null
                     return new UserGradedQuizQuestionResult(
                             id: questionDef.id,
                             question: InputSanitizer.unsanitizeForMarkdown(questionDef.question),
                             questionType: questionDef.type,
                             answers: answers,
                             isCorrect: isCorrect,
+                            needsGrading: needsGrading
                     )
                 }
 
@@ -862,21 +887,18 @@ class QuizDefService {
             }
         }
         if (quizDef.type == QuizDefParent.QuizType.Quiz) {
-            QuizValidator.isTrue(questionDefRequest.answers.find({ it.isCorrect }) != null, "For quiz.type of Quiz must set isCorrect=true on at least 1 question", quizId)
-
             if (questionDefRequest.questionType == QuizQuestionType.MultipleChoice) {
                 QuizValidator.isTrue(questionDefRequest.answers.count({ it.isCorrect }) >= 2, "For questionType=[${QuizQuestionType.MultipleChoice}] must provide >= 2 correct answers", quizId)
             } else if (questionDefRequest.questionType == QuizQuestionType.SingleChoice) {
                 QuizValidator.isTrue(questionDefRequest.answers.count({ it.isCorrect }) == 1, "For questionType=[${QuizQuestionType.SingleChoice}] must provide exactly 1 correct answer", quizId)
-            } else {
-                QuizValidator.isTrue(false, "questionType=[${questionDefRequest.questionType}] is not supported for quiz.type of Quiz", quizId)
             }
         } else {
             QuizValidator.isTrue(questionDefRequest.answers.find({ it.isCorrect }) == null, "All answers for a survey questions must set to isCorrect=false", quizId)
-            if (questionDefRequest.questionType == QuizQuestionType.TextInput || questionDefRequest.questionType == QuizQuestionType.Rating) {
-                if (questionDefRequest.answers) {
-                    throw new SkillQuizException("Questions with type of ${QuizQuestionType.TextInput} must not provide an answer]", quizId, ErrorCode.BadParam)
-                }
+        }
+
+        if (questionDefRequest.questionType == QuizQuestionType.TextInput || questionDefRequest.questionType == QuizQuestionType.Rating) {
+            if (questionDefRequest.answers) {
+                throw new SkillQuizException("Questions with type of ${QuizQuestionType.TextInput} must not provide an answer]", quizId, ErrorCode.BadParam)
             }
         }
 

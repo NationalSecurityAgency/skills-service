@@ -19,12 +19,17 @@ import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vu
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
+import DateCell from "@/components/utils/table/DateCell.vue";
+import SlimDateCell from "@/components/utils/table/SlimDateCell.vue";
+import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 
 const props = defineProps({
   quizType: String,
   question: Object,
   questionNum: Number,
 })
+
+const timeUtils = useTimeUtils();
 
 const answerText = ref(props.question.answers[0].answer)
 
@@ -40,8 +45,11 @@ const isRatingType = computed(() => {
 const hasAnswer = computed(() => {
   return props.question.answers.find((a) => a.isSelected === true) !== undefined;
 })
+const needsGrading = computed(() => {
+  return props.question.needsGrading
+})
 const isWrong = computed(() => {
-  return props.question.answers.find((a) => hasAnswer.value && a.isConfiguredCorrect !== a.isSelected) !== undefined;
+  return !needsGrading.value && !props.question.isCorrect
 })
 const isSurvey = computed(() => {
   return props.quizType === 'Survey';
@@ -53,16 +61,25 @@ const surveyScore = computed(() => {
 const numberOfStars = computed(() => {
   return props.question.answers ? props.question.answers.length : 3;
 })
+const manuallyGradedInfo = computed(() => {
+  if (!props.question || props.question.length === 0) {
+    return null
+  }
+  return props.question.answers[0].gradingResult
+})
 </script>
 
 <template>
   <div data-cy="questionDisplayCard">
     <div :data-cy="`questionDisplayCard-${questionNum}`">
+      <div v-if="needsGrading" class="flex flex-row" data-cy="noAnswer">
+        <Tag severity="warning" class="uppercase" data-cy="needsGradingTag"><i class="fas fa-user-check mr-1" aria-hidden="true"></i> Needs Grading</Tag>
+      </div>
       <div v-if="!hasAnswer" class="flex flex-row" data-cy="noAnswer">
         <Tag severity="warning">No Answer</Tag>
       </div>
       <div class="flex flex-row flex-wrap gap-0 mb-3">
-        <div class="col-auto py-2 pr-2">
+        <div class="col-auto py-3 pr-2">
           <SkillsOverlay :show="!isSurvey && isWrong" opacity="0">
             <template #overlay>
               <i class="fa fa-ban text-danger text-red-500" style="font-size: 2.1rem; opacity: 0.8"
@@ -75,7 +92,7 @@ const numberOfStars = computed(() => {
           <div class="flex flex-1">
             <MarkdownText
                 :text="question.question"
-                :instance-id="`${question.id}`"
+                :instance-id="`question_${question.id}`"
                 data-cy="questionDisplayText"/>
           </div>
           <div v-if="!isTextInputType && !isRatingType">
@@ -96,9 +113,28 @@ const numberOfStars = computed(() => {
           <div v-if="isRatingType" class="flex">
             <Rating class="flex-initial py-3 px-4" v-model="surveyScore" :stars="numberOfStars" readonly :cancel="false"/>
           </div>
-          <div v-if="isTextInputType" class="flex border-1 border-300 border-round p-3" data-cy="TextInputAnswer">
+          <div v-if="isTextInputType" class="border-1 border-300 border-round p-3 w-full" data-cy="TextInputAnswer">
             <pre>{{ answerText }}</pre>
           </div>
+          <div v-if="manuallyGradedInfo" class="mt-3 w-full" data-cy="manuallyGradedInfo">
+            <Fieldset legend="Manually Graded"
+                      :pt="{ legend: { class: 'py-0 px-3 surface-0 border-none' }}">
+
+            <div class="flex gap-3">
+              <div class="flex-1" data-cy="grader">Grader: {{ manuallyGradedInfo.graderUserIdForDisplay || manuallyGradedInfo.graderUserId }}</div>
+              <div>On: {{ timeUtils.formatDate(manuallyGradedInfo.gradedOn) }}</div>
+            </div>
+            <div class="mt-3">Feedback:</div>
+            <div v-if="manuallyGradedInfo.feedback" class="border-1 border-300 border-round border-dashed p-3 mt-1">
+              <MarkdownText
+                  data-cy="feedback"
+                  :text="manuallyGradedInfo.feedback"
+                  :instance-id="`${question.id}_feedback`"
+                  :data-cy="`feedbackDisplayText_q${question.id}`"/>
+            </div>
+            </Fieldset>
+          </div>
+
         </div>
       </div>
     </div>

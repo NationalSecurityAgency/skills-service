@@ -50,9 +50,9 @@ export const useCommonMarkdownOptions = () => {
   }
 
   const getMenuItem = () => document.querySelector('.toastui-editor-popup-body [aria-role="menu"]')
-  const getMenuPopup = () => document.querySelector('.toastui-editor-popup-body')
-  const getMarkdownEditor = () => document.querySelector('[data-cy="markdownEditorInput"]')
-  const getHeaderButton = () => getMarkdownEditor()?.querySelector('.heading')
+  const getMenuPopup = (id) => document.querySelector(`#${id} .toastui-editor-popup-body`)
+  const getMarkdownEditor = (id) => document.querySelector(`[data-cy="markdownEditorInput"] #${id}`)
+  const getHeaderButton = (id) => getMarkdownEditor(id)?.querySelector(`#${id} [aria-label="Headings"]`)
   const getMouseEvent = () => new MouseEvent('click', { view: window, bubbles: true, cancelable: true })
 
   return {

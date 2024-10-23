@@ -20,4 +20,6 @@ class UserGradedQuizAnswerResult {
     String answer
     Boolean isConfiguredCorrect
     Boolean isSelected
+    Boolean needsGrading = false
+    AnswerGradingResult gradingResult
 }

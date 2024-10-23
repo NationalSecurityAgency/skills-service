@@ -35,4 +35,7 @@ class QuizInfo {
     Boolean multipleTakes
     Boolean canStartQuiz
     String errorMessage
+
+    Boolean needsGrading
+    Date needsGradingAttemptDate
 }

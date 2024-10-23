@@ -35,7 +35,7 @@ interface UserQuizQuestionAttemptRepo extends JpaRepository<UserQuizQuestionAtte
         where questionAttempt.quizQuestionDefinitionRefId = questionDef.id
             and questionDef.quizId = ?1
             and quizAttempt.id = questionAttempt.userQuizAttemptRefId
-            and quizAttempt.status <> 'INPROGRESS'
+            and quizAttempt.status in ('PASSED', 'FAILED')
         group by questionAttempt.quizQuestionDefinitionRefId, questionAttempt.status
      ''')
     List<IdAndStatusCount> getUserQuizQuestionAttemptCounts(String quizId)
@@ -46,7 +46,7 @@ interface UserQuizQuestionAttemptRepo extends JpaRepository<UserQuizQuestionAtte
         where answerAttempt.quizAnswerDefinitionRefId = answerDef.id
             and answerDef.quizId = ?1
             and quizAttempt.id = answerAttempt.userQuizAttemptRefId
-            and quizAttempt.status <> 'INPROGRESS' 
+            and quizAttempt.status in ('PASSED', 'FAILED')
         group by answerAttempt.quizAnswerDefinitionRefId, answerAttempt.status
      ''')
     List<IdAndStatusCount> getUserQuizAnswerAttemptCounts(String quizId)

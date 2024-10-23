@@ -145,6 +145,7 @@ skills:
       maxProjectNameLength: 50
       maxQuizNameLength: 75
       maxQuizTextAnswerLength: 2000
+      maxTakeQuizInputTextAnswerLength: 50000
       maxSkillNameLength: 100
       maxSubjectNameLength: 50
       maxLevelNameLength: 50
@@ -162,6 +163,7 @@ skills:
       defaultLandingPage: "admin"
       maxSelfReportMessageLength: ${skills.config.ui.descriptionMaxLength}
       maxSelfReportRejectionMessageLength: 250
+      maxGraderFeedbackMessageLength: 50000
       artifactBuildTimestamp: @maven.build.timestamp@
       maxSkillsInBulkImport: 50
       enablePageVisitReporting: false

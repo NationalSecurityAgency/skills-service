@@ -24,8 +24,8 @@ export const useMarkdownAccessibilityFixes = () => {
   const announcer = useSkillsAnnouncer()
   const windowSize = useWindowSize()
 
-  function doClickOnToolbarButton(selector) {
-    const markdownEditor = commonMarkdownOptions.getMarkdownEditor()
+  function doClickOnToolbarButton(markdownEditorId, selector) {
+    const markdownEditor = commonMarkdownOptions.getMarkdownEditor(markdownEditorId)
     if (markdownEditor) {
       const btn = markdownEditor.querySelector(selector)
       btn.dispatchEvent(commonMarkdownOptions.getMouseEvent())
@@ -33,41 +33,51 @@ export const useMarkdownAccessibilityFixes = () => {
     }
   }
 
-  function clickOnHeaderToolbarButton() {
-    const btn = commonMarkdownOptions.getHeaderButton()
+  function clickOnHeaderToolbarButton(id) {
+    const btn = commonMarkdownOptions.getHeaderButton(id)
     if (btn) {
       btn.dispatchEvent(commonMarkdownOptions.getMouseEvent())
       btn.focus()
     }
   }
 
-  function clickOnFontSizeToolbarButton() {
-    doClickOnToolbarButton('[skilltree-id="fontSizeBtn"]')
+  function clickOnFontSizeToolbarButton(markdownEditorId) {
+    doClickOnToolbarButton(markdownEditorId, '[skilltree-id="fontSizeBtn"]')
   }
 
-  function clickOnImageToolbarButton() {
-    doClickOnToolbarButton('.image')
+  function clickOnImageToolbarButton(markdownEditorId) {
+    doClickOnToolbarButton(markdownEditorId, '.image')
   }
 
-  function clickOnLinkToolbarButton() {
-    doClickOnToolbarButton('.link')
+  function clickOnLinkToolbarButton(markdownEditorId) {
+    doClickOnToolbarButton(markdownEditorId, '.link')
   }
 
-  function clickOnAttachmentToolbarButton() {
-    doClickOnToolbarButton('.attachment-button')
+  function clickOnAttachmentToolbarButton(markdownEditorId) {
+    doClickOnToolbarButton(markdownEditorId, '.attachment-button')
   }
 
-  function fixAccessibilityIssues() {
-    fixHeaderButtonIssues()
-    fixMoreButtonAriaLabel(1)
-    fixFontSizeButtonIssues()
-    fixInsertImageButtonIssues()
-    fixInsertUrlButtonIssues()
+  function fixAccessibilityIssues(id, allowInsertImages=true) {
+    fixHeaderButtonIssues(id)
+    fixMoreButtonAriaLabel(1, id)
+    fixFontSizeButtonIssues(id)
+    if (allowInsertImages) {
+      fixInsertImageButtonIssues(id)
+    }
+    fixInsertUrlButtonIssues(id)
   }
 
-  function fixInsertUrlButtonIssues() {
+  function fixInsertUrlButtonIssues(id) {
+    const handleUrlButtonClick = () => {
+      nextTick(() => {
+        nextTick(() => announcer.polite('Insert hyperlink into text'))
+        const urlInput = commonMarkdownOptions.getMenuPopup(id).querySelector('#toastuiLinkUrlInput')
+        urlInput.focus()
+      })
+    }
+
     nextTick(() => {
-      const markdownEditor = commonMarkdownOptions.getMarkdownEditor()
+      const markdownEditor = commonMarkdownOptions.getMarkdownEditor(id)
       if (markdownEditor) {
         const imageButton = markdownEditor.querySelector('.link')
         imageButton.addEventListener('click', handleUrlButtonClick)
@@ -75,59 +85,70 @@ export const useMarkdownAccessibilityFixes = () => {
     })
   }
 
-  function handleUrlButtonClick() {
-    nextTick(() => {
-      nextTick(() => announcer.polite('Insert hyperlink into text'))
-      const urlInput = commonMarkdownOptions.getMenuPopup().querySelector('#toastuiLinkUrlInput')
-      urlInput.focus()
-    })
-  }
 
-  function fixInsertImageButtonIssues() {
+
+  function fixInsertImageButtonIssues(id) {
     nextTick(() => {
-      const markdownEditor = commonMarkdownOptions.getMarkdownEditor()
+      const markdownEditor = commonMarkdownOptions.getMarkdownEditor(id)
       if (markdownEditor) {
         const imageButton = markdownEditor.querySelector('.image')
+
+        const handleImageButtonClick = () => {
+          nextTick(() => {
+            nextTick(() => announcer.polite('Insert image by uploading a file or via an external URL. File Tab is currently active but please use left and right keys to switch between the tabs.'))
+            const menuPopup = commonMarkdownOptions.getMenuPopup(id)
+            const activeTab = menuPopup.querySelector('.tab-item.active')
+            activeTab.focus()
+            const hiddenFileUploadInput = menuPopup.querySelector('#toastuiImageFileInput')
+            hiddenFileUploadInput.setAttribute('tabindex', -1)
+
+            const tabs = menuPopup.querySelectorAll('.tab-item')
+            tabs.forEach((tab) => {
+              tab.addEventListener('keydown', (event) => {
+                if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+                  const otherTab = menuPopup.querySelector('.tab-item:not(.active)')
+                  otherTab.dispatchEvent(commonMarkdownOptions.getMouseEvent())
+                  otherTab.focus()
+                }
+              })
+            })
+            const okButton = menuPopup.querySelector('.toastui-editor-ok-button')
+            okButton.setAttribute('tabindex', 0)
+            const cancelButton = menuPopup.querySelector('.toastui-editor-close-button')
+            cancelButton.setAttribute('tabindex', 0)
+            const descriptonInput = menuPopup.querySelector('#toastuiAltTextInput')
+            descriptonInput.setAttribute('tabindex', 0)
+            const selectFileButton = menuPopup.querySelector('.toastui-editor-file-select-button')
+            selectFileButton.setAttribute('tabindex', 0)
+          })
+        }
+
         imageButton.addEventListener('click', handleImageButtonClick)
       }
     })
   }
 
-  function handleImageButtonClick() {
-    nextTick(() => {
-      nextTick(() => announcer.polite('Insert image by uploading a file or via an external URL. File Tab is currently active but please use left and right keys to switch between the tabs.'))
-      const menuPopup = commonMarkdownOptions.getMenuPopup()
-      const activeTab = menuPopup.querySelector('.tab-item.active')
-      activeTab.focus()
-      const hiddenFileUploadInput = menuPopup.querySelector('#toastuiImageFileInput')
-      hiddenFileUploadInput.setAttribute('tabindex', -1)
 
-      const tabs = menuPopup.querySelectorAll('.tab-item')
-      tabs.forEach((tab) => {
-        tab.addEventListener('keydown', (event) => {
-          if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-            const otherTab = menuPopup.querySelector('.tab-item:not(.active)')
-            otherTab.dispatchEvent(commonMarkdownOptions.getMouseEvent())
-            otherTab.focus()
-          }
+  function fixFontSizeButtonIssues(id) {
+
+    const handleFontSizeButtonClick = () => {
+      nextTick(() => {
+        const sizeInput = commonMarkdownOptions.getMenuPopup(id).querySelector('.size-input')
+        sizeInput.setAttribute('aria-label', 'Set Font Size in pixels')
+        sizeInput.classList.add('w-100')
+        const menuitems = commonMarkdownOptions.getMenuPopup(id).querySelectorAll('.drop-down .drop-down-item')
+        menuitems.forEach((item) => {
+          item.setAttribute('aria-hidden', true)
         })
+        sizeInput.focus()
       })
-      const okButton = menuPopup.querySelector('.toastui-editor-ok-button')
-      okButton.setAttribute('tabindex', 0)
-      const cancelButton = menuPopup.querySelector('.toastui-editor-close-button')
-      cancelButton.setAttribute('tabindex', 0)
-      const descriptonInput = menuPopup.querySelector('#toastuiAltTextInput')
-      descriptonInput.setAttribute('tabindex', 0)
-      const selectFileButton = menuPopup.querySelector('.toastui-editor-file-select-button')
-      selectFileButton.setAttribute('tabindex', 0)
-    })
-  }
+    }
 
-  function fixFontSizeButtonIssues() {
-    nextTick(() => {
-      const markdownEditor = commonMarkdownOptions.getMarkdownEditor()
+
+    return nextTick(() => {
+      const markdownEditor = commonMarkdownOptions.getMarkdownEditor(id)
       if (markdownEditor) {
-        const fontButton = markdownEditor.querySelector('[aria-label="F"]')
+        const fontButton = markdownEditor.querySelector(`#${id} [aria-label="F"]`)
         fontButton.setAttribute('aria-label', 'Font Size')
         fontButton.setAttribute('skilltree-id', 'fontSizeBtn')
         fontButton.addEventListener('click', handleFontSizeButtonClick)
@@ -135,18 +156,7 @@ export const useMarkdownAccessibilityFixes = () => {
     })
   }
 
-  function handleFontSizeButtonClick() {
-    nextTick(() => {
-      const sizeInput = commonMarkdownOptions.getMenuPopup().querySelector('.size-input')
-      sizeInput.setAttribute('aria-label', 'Set Font Size in pixels')
-      sizeInput.classList.add('w-100')
-      const menuitems = commonMarkdownOptions.getMenuPopup().querySelectorAll('.drop-down .drop-down-item')
-      menuitems.forEach((item) => {
-        item.setAttribute('aria-hidden', true)
-      })
-      sizeInput.focus()
-    })
-  }
+
 
   const debouncedFixMoreButtonAriaLabel = useDebounceFn(() => {
     fixMoreButtonAriaLabel(1)
@@ -160,17 +170,17 @@ export const useMarkdownAccessibilityFixes = () => {
     }
   )
 
-  function fixMoreButtonAriaLabel(attemptNum) {
+  function fixMoreButtonAriaLabel(attemptNum, id) {
     if (attemptNum <= 10) {
       setTimeout(() => {
         nextTick(() => {
-          const markdownEditor = commonMarkdownOptions.getMarkdownEditor()
+          const markdownEditor = commonMarkdownOptions.getMarkdownEditor(id)
           if (markdownEditor) {
             const moreButton = markdownEditor.querySelector('.more')
             if (moreButton) {
               moreButton.setAttribute('aria-label', 'More Toolbar Controls')
             } else {
-              fixMoreButtonAriaLabel(attemptNum + 1)
+              fixMoreButtonAriaLabel(attemptNum + 1, id)
             }
           }
         })
@@ -178,10 +188,10 @@ export const useMarkdownAccessibilityFixes = () => {
     }
   }
 
-  function fixHeaderButtonIssues() {
+  function fixHeaderButtonIssues(id) {
     nextTick(() => {
       nextTick(() => {
-        const headerButton = commonMarkdownOptions.getHeaderButton()
+        const headerButton = commonMarkdownOptions.getHeaderButton(id)
         if (headerButton) {
           headerButton.setAttribute('aria-haspopup', 'menu')
           headerButton.setAttribute('aria-expanded', false)

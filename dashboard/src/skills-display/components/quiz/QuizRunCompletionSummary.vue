@@ -17,6 +17,7 @@ limitations under the License.
 import { computed } from 'vue'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js';
 import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue';
+import QuizType from "@/skills-display/components/quiz/QuizType.js";
 
 const props = defineProps({
   quizResult: Object,
@@ -31,6 +32,7 @@ const unlimitedAttempts = computed(() => {
 const numAttemptsLeft = computed(() => {
   return props.quizInfo.maxAttemptsAllowed - props.quizInfo.userNumPreviousQuizAttempts - 1;
 })
+const needsGrading = computed(() => props.quizResult.gradedRes.needsGrading )
 
 const close = () => {
   emit('close')
@@ -38,6 +40,7 @@ const close = () => {
 const runAgain = () => {
   emit('run-again')
 }
+
 </script>
 
 <template>
@@ -45,21 +48,23 @@ const runAgain = () => {
   <Card data-cy="quizCompletion" :pt="{ content: { class: 'p-0' } }">
     <template #content>
       <div class="text-2xl" tabindex="-1" ref="completionSummaryTitle" data-cy="completionSummaryTitle">
-        <slot name="completeAboveTitle" v-if="quizResult.gradedRes.passed">
-          <i class="fas fa-handshake text-info skills-page-title-text-color" aria-hidden="true"></i> Thank you for completing the {{ quizInfo.quizType }}!
+        <slot name="completeAboveTitle" v-if="!quizResult.outOfTime">
+          <Message v-if="quizResult.gradedRes.passed || QuizType.isSurvey(quizInfo.quizType)" severity="success" icon="fas fa-handshake">
+            <span v-if="QuizType.isSurvey(quizInfo.quizType)">Thank you for taking time to take this survey! </span>
+            <span v-else>Thank you for completing the Quiz!</span>
+          </Message>
         </slot>
-        <span v-else-if="!quizResult.outOfTime"><i class="fas fa-handshake text-info skills-page-title-text-color"></i> Thank you for completing the {{ quizInfo.quizType }}!</span>
-        <span v-else>You've run out of time!</span>
+        <Message severity="danger" v-if="quizResult.outOfTime">You've run out of time!</Message>
       </div>
       <div class="mb-1 mt-4 text-3xl">
         <span class="font-bold text-success mb-2 skills-page-title-text-color">{{ quizInfo.name }}</span>
-        <div class="text-3xl inline-block ml-2">
+        <div v-if="!needsGrading" class="text-3xl inline-block ml-2">
           <Tag v-if="!quizResult.gradedRes.passed" class="uppercase text-2xl" severity="warning" data-cy="quizFailed"><i class="far fa-times-circle" aria-hidden="true"></i> Failed</Tag>
           <Tag v-if="quizResult.gradedRes.passed" class="uppercase text-2xl" severity="success" data-cy="quizPassed"><i class="fas fa-check-double" aria-hidden="true"></i> Passed</Tag>
         </div>
       </div>
       
-      <div class="flex flex-wrap flex-column md:flex-row gap-4 pt-2">
+      <div v-if="!needsGrading" class="flex flex-wrap flex-column md:flex-row gap-4 pt-2">
         <Card class="text-center surface-50 skills-card-theme-border flex-1" data-cy="numCorrectInfoCard">
           <template #content>
             <div class="text-2xl" data-cy="numCorrect" v-if="!quizResult.outOfTime">
@@ -125,7 +130,16 @@ const runAgain = () => {
         </Card>
       </div>
 
-      <div v-if="!quizResult.gradedRes.passed" class="mt-4">
+      <Message v-if="needsGrading" icon="fas fa-user-clock" :closable="false" data-cy="requiresManualGradingMsg">
+        <div>
+          This quiz contains questions that require manual grading and will be assessed by quiz administrators.
+        </div>
+        <div class="mt-1">
+          Let's sit tight and wait for the grades to roll in!
+        </div>
+      </Message>
+
+      <div v-if="!quizResult.gradedRes.passed && !needsGrading" class="mt-4">
         <div class="my-2" v-if="unlimitedAttempts || numAttemptsLeft > 0"><span class="text-primary">No worries!</span> Would you like to try again?</div>
         <SkillsButton icon="fas fa-times-circle"
                       outlined
@@ -146,7 +160,7 @@ const runAgain = () => {
         </SkillsButton>
       </div>
 
-      <div v-if="quizResult.gradedRes.passed" class="mt-4">
+      <div v-if="quizResult.gradedRes.passed || needsGrading" class="mt-4">
         <SkillsButton icon="fas fa-times-circle"
                       outlined
                       severity="success"

@@ -138,28 +138,27 @@ describe('Survey Metrics With Reused Data Tests', () => {
             .contains('User')
             .click();
 
-        cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'A1:' }, { colIndex: 1, value: 'user1' }],
-            [{ colIndex: 0, value: 'A8:' },{ colIndex: 1, value: 'user10' }],
-            [{ colIndex: 0, value: 'A2:' },{ colIndex: 1, value: 'user2' }],
-            [{ colIndex: 0, value: 'A3:' },{ colIndex: 1, value: 'user3' }],
-            [{ colIndex: 0, value: 'A4:' },{ colIndex: 1, value: 'user6' }],
-            [{ colIndex: 0, value: 'A5:' },{ colIndex: 1, value: 'user7' }],
-            [{ colIndex: 0, value: 'A6:' },{ colIndex: 1, value: 'user8' }],
-            [{ colIndex: 0, value: 'A7:' },{ colIndex: 1, value: 'user9' }],
-        ], 5);
+        const qNum= 2
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="expandAll"]`).click()
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row0-colAnswerTxt"]`).should('contain', 'A1:')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row1-colAnswerTxt"]`).should('contain', 'A8:')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row2-colAnswerTxt"]`).should('contain', 'A2:')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row3-colAnswerTxt"]`).should('contain', 'A3:')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row4-colAnswerTxt"]`).should('contain', 'A4:')
 
-        cy.get(`${tableSelector} [data-cy="row0-colAnswerTxt"] [data-cy="expandCollapseTextBtn"]`).should('exist')
-        cy.get(`${tableSelector} [data-cy="row1-colAnswerTxt"] [data-cy="expandCollapseTextBtn"]`).should('not.exist')
-        cy.get(`${tableSelector} [data-cy="row2-colAnswerTxt"] [data-cy="expandCollapseTextBtn"]`).should('not.exist')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-p-index="0"]`).contains('user1')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-p-index="1"]`).contains('user10')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-p-index="2"]`).contains('user2')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-p-index="3"]`).contains('user3')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-p-index="4"]`).contains('user6')
 
-        cy.get(`${tableSelector} [data-cy="row0-colAnswerTxt"]`).contains('aliqua...')
-        cy.get(`${tableSelector} [data-cy="row0-colAnswerTxt"]`).contains('End is truncated').should('not.exist')
-        cy.get(`${tableSelector} [data-cy="row0-colAnswerTxt"] [data-cy="expandCollapseTextBtn"]`).contains('Expand')
-        cy.get(`${tableSelector} [data-cy="row0-colAnswerTxt"] [data-cy="expandCollapseTextBtn"]`).click()
-        cy.get(`${tableSelector} [data-cy="row0-colAnswerTxt"]`).contains('aliqua...').should('not.exist')
-        cy.get(`${tableSelector} [data-cy="row0-colAnswerTxt"]`).contains('End is truncated')
-        cy.get(`${tableSelector} [data-cy="row0-colAnswerTxt"] [data-cy="expandCollapseTextBtn"]`).contains('Collapse')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-pc-name="paginator"] [aria-label="Page 2"]`).click()
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row0-colAnswerTxt"]`).should('contain', 'A5:')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row1-colAnswerTxt"]`).should('contain', 'A6:')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row2-colAnswerTxt"]`).should('contain', 'A7:')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-p-index="0"]`).contains('user7')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-p-index="1"]`).contains('user8')
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-p-index="2"]`).contains('user9')
     });
 
     it('single choice question metrics', function () {
