@@ -529,7 +529,6 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         def quizAttemptRes_t5 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, true, "Another answer")
         def quizAttemptRes_t6 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizAttemptRes_t6))
         then:
         quizAttemptRes_t1.status == UserQuizAttempt.QuizAttemptStatus.INPROGRESS.toString()
         quizAttemptRes_t1.questions.needsGrading == [false, false]

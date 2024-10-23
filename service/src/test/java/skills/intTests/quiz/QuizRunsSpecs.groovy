@@ -141,7 +141,6 @@ class QuizRunsSpecs extends DefaultIntSpec {
         when:
         def quizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, 'uSeR1')
         def quizRuns_pg1 = skillsService.getQuizRuns(quiz.quizId, 3, 1, 'started', true, 'R1')
-        println JsonOutput.prettyPrint(JsonOutput.toJson(quizRuns))
         then:
         quizRuns.totalCount == users.size()
         quizRuns.count == 2

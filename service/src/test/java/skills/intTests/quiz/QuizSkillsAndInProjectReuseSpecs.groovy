@@ -314,7 +314,6 @@ class QuizSkillsAndInProjectReuseSpecs extends DefaultIntSpec {
         def apiSkills_t1 = skillsService.getSkillSummary(userId, proj.projectId, subj2.subjectId)
         def p1_apiSkills_t1 = skillsService.getSkillSummary(userId, proj.projectId, subj.subjectId)
         def apiSkill2_t1 = skillsService.getSingleSkillSummary(userId, proj.projectId, SkillReuseIdUtil.addTag(skills[1].skillId, 0))
-        println JsonOutput.prettyPrint(JsonOutput.toJson(apiSkills_t1))
         then:
         skillsRes_t0.selfReportingType == [SkillDef.SelfReportingType.Quiz.toString(), SkillDef.SelfReportingType.HonorSystem.toString(), null, SkillDef.SelfReportingType.Quiz.toString()]
         skillsRes_t0.quizId == [quiz.quizId, null, null, survey.quizId]
