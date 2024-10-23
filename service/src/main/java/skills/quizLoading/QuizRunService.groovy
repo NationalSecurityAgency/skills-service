@@ -520,8 +520,17 @@ class QuizRunService {
         UserAttrs graderUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(graderUserInfo.username)
 
         QuizDef quizDef = getQuizDef(quizId)
+        if (quizDef.type != QuizDefParent.QuizType.Quiz) {
+            throw new SkillQuizException("Provided quizId [${quizId}] is not a quiz", ErrorCode.BadParam)
+        }
         UserQuizAttempt userQuizAttempt = getQuizAttempt(quizAttemptId)
         validateAttempt(userQuizAttempt, quizDef, quizAttemptId, quizId, userId)
+
+        propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxGraderFeedbackMessageLength, "Feedback", gradeAnswerReq.feedback, quizId)
+        CustomValidationResult customValidationResult = validator.validateDescription(gradeAnswerReq.feedback)
+        if (!customValidationResult.valid) {
+            throw new SkillQuizException("Feedback is invalid: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
+        }
 
         Optional<QuizAnswerDef> quizAnswerDefOptional = quizAnswerRepo.findById(answerDefId)
         if (!quizAnswerDefOptional.isPresent()) {
@@ -535,6 +544,11 @@ class QuizRunService {
         }
         if (userQuizAnswerAttempt.userQuizAttemptRefId != userQuizAttempt.id) {
             throw new SkillQuizException("Supplied quiz answer attempt id  [${userQuizAnswerAttempt.userQuizAttemptRefId}] does not match user quiz attempt id [${userQuizAttempt.id}]", ErrorCode.BadParam)
+        }
+
+        UserQuizAnswerGraded alreadyGraded = userQuizAnswerGradedRepo.findByUserQuizAnswerAttemptRefId(userQuizAnswerAttempt.id)
+        if (alreadyGraded) {
+            throw new SkillQuizException("Question for quiz [${quizId}] attemptId [${quizAttemptId}] answerDefId [${answerDefId}] has already been graded", ErrorCode.BadParam)
         }
 
         List<UserQuizQuestionAttempt> questionAttempts = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(userQuizAttempt.id)

@@ -17,6 +17,7 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.lang.Nullable
 import skills.storage.model.UserQuizAnswerAttempt
 import skills.storage.model.UserQuizAnswerGraded
 
@@ -48,4 +49,8 @@ interface UserQuizAnswerGradedRepo extends JpaRepository<UserQuizAnswerGraded, L
           and answerAttempt.userQuizAttemptRefId = ?1
      ''')
     List<GradedInfo> getGradedAnswersForQuizAttemptId(Integer attemptId)
+
+
+    @Nullable
+    UserQuizAnswerGraded findByUserQuizAnswerAttemptRefId(Integer userQuizAnswerAttemptRefId)
 }

@@ -70,6 +70,7 @@ class PublicProps {
         maxVideoCaptionsLength,
         maxVideoTranscriptLength,
         motivationalSkillWarningGracePeriod,
+        maxGraderFeedbackMessageLength,
     }
 
     @Autowired

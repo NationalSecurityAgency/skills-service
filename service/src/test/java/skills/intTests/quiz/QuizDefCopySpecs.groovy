@@ -35,6 +35,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         skillsService.createQuizDef(quiz)
         skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice))
         skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice))
+        skillsService.createQuizQuestionDef(QuizDefFactory.createTextInputQuestion(1, 3))
 
         when:
         def result = skillsService.copyQuiz(quiz.quizId, [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: '', type: quiz.type])
@@ -46,7 +47,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         then:
         copiedQuiz.quizId == 'newQuizCopy'
         copiedQuiz.name == 'Copy of Quiz'
-        quizDefSummary.numQuestions == 2
+        quizDefSummary.numQuestions == 3
         quizDefSummary.quizId == 'newQuizCopy'
         quizDefSummary.name == 'Copy of Quiz'
         originalQuestions.size() == copiedQuestions.size()
