@@ -1,0 +1,172 @@
+<script setup>
+
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router';
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
+import AdminGroupsService from '@/components/access/groups/AdminGroupsService.js';
+import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
+import LoadingContainer from '@/components/utils/LoadingContainer.vue';
+import Column from 'primevue/column';
+import NoContent2 from '@/components/utils/NoContent2.vue';
+import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
+import { useUserInfo } from '@/components/utils/UseUserInfo.js';
+
+const route = useRoute()
+const userInfo = useUserInfo();
+
+const isLoading = ref(true)
+const availableQuizzes = ref([])
+const assignedQuizzes = ref([])
+
+const removeQuizInfo = ref({
+  showDialog: false,
+  quiz: {}
+})
+
+const adminGroupId = computed(() => route.params.adminGroupId)
+
+const noQuizzesAvailable = computed(() => {
+  return availableQuizzes.value && availableQuizzes.value.length === 0;
+})
+const quizzesAssigned = computed(() => {
+  return availableQuizzes.value && availableQuizzes.value.length > 0;
+})
+const emptyMessage = computed(() => {
+  if (!noQuizzesAvailable.value) {
+    return 'No results. Please refine your search string.'
+  } else {
+    if (quizzesAssigned.value) {
+      return 'You currently do not administer any quizzes or surveys.'
+    }
+    return 'All of your available quizzes and surveys have already been assigned to this admin group.'
+  }
+})
+
+onMounted(() => {
+  loadData()
+})
+const loadData = () => {
+  isLoading.value = true
+  AdminGroupsService.getAdminGroupQuizzes(adminGroupId.value)
+      .then((res) => {
+        availableQuizzes.value = res.availableQuizzes;
+        assignedQuizzes.value = res.assignedQuizzes;
+      }).finally(() => {
+    isLoading.value = false
+  });
+}
+const addQuizToAdminGroup = (quiz) => {
+  isLoading.value = true
+  AdminGroupsService.addQuizToAdminGroup(adminGroupId.value, quiz.quizId)
+      .then((res) => {
+        availableQuizzes.value = res.availableQuizzes;
+        assignedQuizzes.value = res.assignedQuizzes;
+      }).finally(() => {
+    isLoading.value = false
+  });
+}
+const removeQuizFromAdminGroupConfirm = (quiz) => {
+  removeQuizInfo.value.quiz = quiz
+  removeQuizInfo.value.showDialog = true
+}
+
+const removeQuizFromAdminGroup = () => {
+  isLoading.value = true
+  const { quizId } = removeQuizInfo.value.quiz
+  AdminGroupsService.removeQuizFromAdminGroup(adminGroupId.value, quizId)
+      .then((res) => {
+        availableQuizzes.value = res.availableQuizzes;
+        assignedQuizzes.value = res.assignedQuizzes;
+      }).finally(() => {
+    isLoading.value = false
+  });
+}
+</script>
+
+<template>
+  <sub-page-header title="Group Quizzes and Surveys" />
+
+  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <template #content>
+      <loading-container :is-loading="isLoading" class="">
+        <div class="w-full px-3 py-4">
+          <SkillsDropDown
+              name="associatedQuiz"
+              data-cy="quizSelector"
+              showClear
+              filter
+              optionLabel="name"
+              @update:modelValue="addQuizToAdminGroup"
+              :emptyMessage=emptyMessage
+              :isRequired="true"
+              :options="availableQuizzes">
+            <template #value="slotProps">
+              <div v-if="slotProps.value" class="p-1" :data-cy="`quizSelected-${slotProps.value.quizId}`">
+                <span class="text-secondary">{{ slotProps.value.type }}:</span><span class="ml-1">{{ slotProps.value.name }}</span>
+              </div>
+              <span v-else> Search available quizzes and surveys...</span>
+            </template>
+            <template #option="slotProps">
+              <div :data-cy="`availableQuizSelection-${slotProps.option.quizId}`">
+                <span class="text-secondary">{{ slotProps.option.type }}:</span><span class="h6 ml-2">{{ slotProps.option.name }}</span>
+              </div>
+            </template>
+          </SkillsDropDown>
+        </div>
+        <div v-if="assignedQuizzes && assignedQuizzes.length > 0">
+          <SkillsDataTable
+              :loading="isLoading"
+              tableStoredStateId="adminGroupQuizzesTable"
+              aria-label="Admin Group Quizzes and Surveys"
+              :value="assignedQuizzes"
+              paginator
+              :rows="5"
+              :totalRecords="assignedQuizzes.length"
+              :rowsPerPageOptions="[5, 10, 15, 20]"
+              data-cy="adminGroupQuizzesTable">
+            <Column header="Name" field="name" style="width: 40%;" sortable>
+              <template #body="slotProps">
+                <router-link :id="slotProps.data.quizId" :to="{ name:'QuizOverview',
+                    params: { quizId: slotProps.data.quizId }}"
+                             class="btn btn-sm btn-outline-hc ml-2" :data-cy="`manage_${slotProps.data.quizId}`">
+                  {{ slotProps.data.name }}
+                </router-link>
+              </template>
+            </Column>
+            <Column header="Delete">
+              <template #body="slotProps">
+                <SkillsButton v-on:click="removeQuizFromAdminGroupConfirm(slotProps.data)" size="small"
+                              :id="`removeQuiz_${slotProps.data.quizId}`"
+                              :track-for-focus="true"
+                              :data-cy="`removeQuiz_${slotProps.data.quizId}`" icon="fas fa-trash" label="Delete"
+                              :aria-label="`remove quiz on ${slotProps.data.quizId} from admin group`">
+                </SkillsButton>
+              </template>
+            </Column>
+
+            <template #paginatorstart>
+              <span>Total Rows:</span> <span class="font-semibold" data-cy=adminGroupQuizzesTableTotalRows>{{ assignedQuizzes.length }}</span>
+            </template>
+          </SkillsDataTable>
+        </div>
+
+        <no-content2 v-else title="No Quizzes or Surveys Added Yet..." icon="fas fa-spell-check" class="py-5"
+                     message="Please use the drop-down above to start adding quizzes and surveys to this admin group!"></no-content2>
+      </loading-container>
+    </template>
+  </Card>
+
+  <RemovalValidation
+      v-if="removeQuizInfo.showDialog"
+      v-model="removeQuizInfo.showDialog"
+      @do-remove="removeQuizFromAdminGroup"
+      :item-name="removeQuizInfo.quiz.name"
+      removalTextPrefix="This will remove the "
+      :item-type="`quiz from this admin group.  All members of this admin group other than ${userInfo.userInfo.value.userId} will lose admin access to this quiz`"
+      :enable-return-focus="true">
+  </RemovalValidation>
+</template>
+
+<style scoped>
+
+</style>

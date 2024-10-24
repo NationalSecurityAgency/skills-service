@@ -26,6 +26,7 @@ import GradeQuizzesPage  from "@/components/quiz/grade/GradeQuizzesPage.vue";
 
 const createQuizRoutes = () => {
   return {
+    name: 'QuizOverview',
     path: '/administrator/quizzes/:quizId',
     component: QuizPage,
     meta: {

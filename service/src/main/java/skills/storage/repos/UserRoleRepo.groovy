@@ -34,10 +34,27 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     }
 
     @Nullable
-    UserRole findByUserIdAndRoleNameAndProjectId(String userId, RoleName roleName, @Nullable String projectId)
+    UserRole findByUserIdAndRoleNameAndProjectIdAndAdminGroupId(String userId, RoleName roleName, @Nullable String projectId, @Nullable String adminGroupId)
 
     @Nullable
-    UserRole findByUserIdAndRoleNameAndQuizId(String userId, RoleName roleName, String quizId)
+    UserRole findByUserIdAndRoleNameAndQuizIdAndAdminGroupId(String userId, RoleName roleName, String quizId, @Nullable String adminGroupId)
+
+    @Nullable
+    UserRole findByUserIdAndRoleNameAndAdminGroupId(String userId, RoleName roleName, String adminGroupId)
+
+    @Nullable
+    @Query('''SELECT 'true' from UserRole ur where ur.userId = ?1 and ur.roleName = 'ROLE_QUIZ_ADMIN' and ur.quizId = ?2 and ur.adminGroupId is not null''')
+    Boolean isUserQuizGroupAdmin(String userId, String quizId)
+
+    @Nullable
+    @Query('''SELECT 'true' from UserRole ur where ur.userId = ?1 and ur.roleName = 'ROLE_PROJECT_ADMIN' and ur.projectId = ?2 and ur.adminGroupId is not null''')
+    Boolean isUserProjectGroupAdmin(String userId, String projectId)
+
+    void deleteByQuizIdAndAdminGroupIdAndRoleName(String quizId, String adminGroupId, RoleName roleName)
+
+    void deleteByProjectIdAndAdminGroupIdAndRoleName(String quizId, String adminGroupId, RoleName roleName)
+
+    void deleteByUserIdAndAdminGroupIdAndRoleNameIn(String userId, String adminGroupId, List<RoleName> roleName)
 
     @Nullable
     List<UserRole> findAllByUserId(String userId)
@@ -53,6 +70,15 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.roleName in ?2 ''')
     Integer countUserRolesByProjectIdAndUserRoles(String projectId, List<RoleName> roles)
 
+
+    @Query('''SELECT count(ur.id)
+        from UserRole ur, UserAttrs ua 
+        where
+            ur.userId = ua.userId and 
+            ur.adminGroupId = ?1 and 
+            ur.roleName in ?2 ''')
+    Integer countUserRolesByAdminGroupIdAndUserRoles(String projectId, List<RoleName> roles)
+
     @Query('''SELECT ur as role, ua as attrs
         from UserRole ur, UserAttrs ua 
         where
@@ -60,6 +86,14 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.projectId = ?1 and 
             ur.roleName in ?2 ''')
     List<UserRoleWithAttrs> findRoleWithAttrsByProjectIdAndUserRoles(String projectId, List<RoleName> roles, PageRequest pageRequest)
+
+    @Query('''SELECT ur as role, ua as attrs
+        from UserRole ur, UserAttrs ua 
+        where
+            ur.userId = ua.userId and 
+            ur.adminGroupId = ?1 and 
+            ur.roleName in ?2 ''')
+    List<UserRoleWithAttrs> findRoleWithAttrsByAdminGroupIdAndUserRoles(String adminGroupId, List<RoleName> roles, PageRequest pageRequest)
 
     @Query('''SELECT ur as role, ua as attrs
         from UserRole ur, UserAttrs ua 
@@ -169,4 +203,23 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.userId = ua.userId and 
             ur.quizId = ?1''')
     List<UserRoleWithAttrs> findRoleWithAttrsByQuizId(String quizId)
+
+    @Query('''SELECT ur as role, ua as attrs
+        from UserRole ur, UserAttrs ua 
+        where
+            ur.userId = ua.userId and
+            ur.roleName IN (:#{#roleNames.![name()]}) and
+            ur.adminGroupId = ?1''')
+    List<UserRoleWithAttrs> findRoleWithAttrsByAdminGroupIdAndRoleNameIn(String adminGroupId, List<RoleName> roleNames)
+
+    @Query(value='''
+        select distinct(ur.quizId) from UserRole ur where ur.adminGroupId=?1 and ur.roleName=skills.storage.model.auth.RoleName.ROLE_QUIZ_ADMIN
+    ''')
+    List<String> findQuizIdsByAdminGroupId(String adminGroupId)
+
+    @Query(value='''
+        select distinct(ur.projectId) from UserRole ur where ur.adminGroupId=?1 and ur.roleName=skills.storage.model.auth.RoleName.ROLE_PROJECT_ADMIN
+    ''')
+    List<String> findProjectIdsByAdminGroupId(String adminGroupId)
+
 }

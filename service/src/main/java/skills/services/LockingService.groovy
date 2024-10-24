@@ -54,6 +54,12 @@ class LockingService {
         return res
     }
 
+    SkillsDBLock lockAdminGroupDefs() {
+        SkillsDBLock res = skillsDBLockRepo.findByLock("adminGroupDefs_lock")
+        assert res
+        return res
+    }
+
     SkillsDBLock lockGlobalBadges() {
         SkillsDBLock res = skillsDBLockRepo.findByLock("global_badges_lock")
         assert res

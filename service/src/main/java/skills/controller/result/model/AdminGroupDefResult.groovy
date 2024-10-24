@@ -13,24 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model.auth
+package skills.controller.result.model
 
-enum RoleName {
-    ROLE_APP_USER('Application'),
-    ROLE_PRIVATE_PROJECT_USER('Private'),
-    ROLE_PROJECT_ADMIN('Admin'),
-    ROLE_SUPERVISOR('Supervisor'),
-    ROLE_SUPER_DUPER_USER('Root'),
-    ROLE_PROJECT_APPROVER('Approver'),
-    ROLE_DASHBOARD_ADMIN_ACCESS('Admin Access'),
-    ROLE_QUIZ_ADMIN('Admin'),
-    ROLE_QUIZ_READ_ONLY('Read Only'),
-    ROLE_ADMIN_GROUP_OWNER('Admin Group Owner'),
-    ROLE_ADMIN_GROUP_MEMBER('Admin Group Member');
+class AdminGroupDefResult {
 
-    String displayName;
-
-    RoleName(String displayName) {
-        this.displayName = displayName;
-    }
+    String adminGroupId
+    String name
+    Integer numberOfOwners
+    Integer numberOfMembers
+    Integer numberOfProjects
+    Integer numberOfQuizzesAndSurveys
+    Date created
+    String userCommunity
 }

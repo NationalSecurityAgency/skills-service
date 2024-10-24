@@ -39,6 +39,11 @@ const items = computed(() => {
     iconClass: 'fa-spell-check skills-color-subjects',
     page: 'QuizzesAndSurveys',
   });
+  res.push({
+    name: 'Admin Groups',
+    iconClass: 'fa-solid fa-users skills-color-access',
+    page: 'AdminGroups',
+  });
 
   if (isSupervisor.value || isRoot.value) {
     res.push({
@@ -66,6 +71,7 @@ const items = computed(() => {
       page: 'UserActions',
     });
   }
+
   return res;
 });
 </script>

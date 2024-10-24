@@ -13,32 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model.auth
+package skills.storage.model
 
-import groovy.transform.Canonical
+import groovy.transform.CompileStatic
 import groovy.transform.ToString
-
 import jakarta.persistence.*
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
-@ToString(includeNames = true)
 @Entity
-@Table(name = 'user_roles')
-@Canonical
-class UserRole implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+@Table(name = 'admin_group_definition')
+@EntityListeners(AuditingEntityListener)
+@CompileStatic
+@ToString(includeNames = true)
+class AdminGroupDef implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id
 
-    Integer userRefId
-    String userId
-
-    String projectId
-    String quizId
     String adminGroupId
 
-    @Enumerated(EnumType.STRING)
-    RoleName roleName
+    String name
+
+    Boolean protectedCommunityEnabled
+
+    @Column(name="created", updatable = false, insertable = false)
+    Date created
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @LastModifiedDate
+    Date updated
+
 }
