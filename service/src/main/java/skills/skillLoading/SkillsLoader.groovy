@@ -662,18 +662,19 @@ class SkillsLoader {
             return new SelfReportingInfo(enabled: false)
         }
         SkillApproval skillApproval = skillDefAndUserPoints.approval
+        boolean isFinished = skillDefAndUserPoints.points === skillDef.totalPoints
         SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
                 approvalId: skillApproval?.id,
                 enabled: skillDef.selfReportingType != null,
                 type: skillDefAndUserPoints.quizType == QuizDefParent.QuizType.Survey ? 'Survey' : skillDef.selfReportingType.toString(),
                 justificationRequired: Boolean.valueOf(skillDef.justificationRequired),
                 requestedOn: skillApproval?.requestedOn?.time,
-                rejectedOn: skillApproval?.rejectedOn?.time,
-                rejectionMsg: skillApproval?.rejectionMsg,
+                rejectedOn: !isFinished ? skillApproval?.rejectedOn?.time : null,
+                rejectionMsg: !isFinished ? skillApproval?.rejectionMsg : null,
                 quizId: skillDefAndUserPoints?.quizId,
                 quizName: skillDefAndUserPoints?.quizName,
                 numQuizQuestions: skillDefAndUserPoints?.quizNumQuestions ?: 0,
-                approvedBy: skillApproval?.approverUserId,
+                approvedBy: isFinished ? skillApproval?.approverUserId : '',
                 approved: !skillApproval?.rejectedOn && skillApproval?.approverUserId,
         )
 

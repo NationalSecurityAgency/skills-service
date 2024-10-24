@@ -366,6 +366,24 @@ class SubjectDataLoader {
                     skillDef: it[0] as SkillDef, points: userPoints, copiedFromProjectName: it.length > 3 ? (String)it[3] : null, approval: skillApproval, attributes: attributes
             )
         }
+
+        HashMap<String, SkillDefAndUserPoints> skillList = new HashMap<String, SkillDefAndUserPoints>()
+
+        res.forEach {
+          if(!skillList.containsKey(it.skillDef.skillId)) {
+              skillList[it.skillDef.skillId] = it
+          } else {
+              def tempSkill = skillList[it.skillDef.skillId]
+              if(tempSkill.approval.updated > it.approval.updated) {
+                  skillList[tempSkill.skillDef.skillId] = tempSkill
+              } else {
+                  skillList[it.skillDef.skillId] = it
+              }
+          }
+        }
+
+        res = skillList.values().toList()
+
         return res?.findAll {it.skillDef.type != SkillDef.ContainerType.SkillsGroup || it.skillDef.totalPoints > 0 }.sort { it.skillDef.displayOrder }
     }
 
