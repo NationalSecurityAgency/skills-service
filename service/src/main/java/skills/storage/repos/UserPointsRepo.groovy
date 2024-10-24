@@ -539,24 +539,15 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     left join SkillAttributesDef attributes on sdChild.id = attributes.skillRefId
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
     left join ProjDef pd on sdChild.copiedFromProjectId = pd.projectId
-    left join SkillApproval approval on (
-            (sdChild.id = approval.skillRefId OR sdChild.copiedFrom = approval.skillRefId)
-            and approval.userId=?1
-            and (
-                (approval.approverUserId is null OR (approval.rejectedOn is not null AND approval.rejectionAcknowledgedOn is null))
-                or (
-                    approval.approverUserId is not null
-                    and approval.approverActionTakenOn is not null
-                    and userPoints.points = sdChild.totalPoints
-                    and approval.rejectedOn is null
-                    and approval.rejectionAcknowledgedOn is null
-                )
-            )
-      )
+    left join SkillApproval approval on approval.skillRefId = (
+        select approval.skillRefId from SkillApproval approval where 
+        (sdChild.id = approval.skillRefId OR sdChild.copiedFrom = approval.skillRefId)
+        and approval.userId=?1
+        order by approval.updated desc limit 1
+    )
       where srd.parent=sdParent and  srd.child=sdChild and (sdChild.enabled = 'true' or sdChild.type = 'SkillsGroup') and
-      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type in ?4 and sdChild.version<=?5 ''')
+      sdParent.projectId=?2 and sdParent.skillId=?3 and srd.type in ?4 and sdChild.version<=?5''')
     List<Object []> findChildrenAndTheirUserPoints(String userId, String projectId, String skillId, List<SkillRelDef.RelationshipType> types, Integer version)
-
 
     /**
      *  NOTE: this is query is identical to the above query the only difference is 'userPoints.day is null', if you change this query you MUST change the one above
