@@ -59,7 +59,7 @@ class QuizRoleService {
     UserAttrsRepo userAttrsRepo
 
     @Transactional
-    void addQuizRole(String userIdParam, String quizId, RoleName roleName) {
+    void addQuizRole(String userIdParam, String quizId, RoleName roleName, String adminGroupId = null) {
         QuizDef quizDef = findQuizDef(quizId)
         ensureValidRole(roleName, quizDef.quizId)
         String userId = userNameService.normalizeUserId(userIdParam)
@@ -67,7 +67,7 @@ class QuizRoleService {
         if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
             throw new SkillQuizException("Cannot add roles to myself. userId=[${userId}]", quizId, ErrorCode.AccessDenied)
         }
-        accessSettingsStorageService.addQuizDefUserRole(userId, quizDef.quizId, roleName)
+        accessSettingsStorageService.addQuizDefUserRoleForUser(userId, quizDef.quizId, roleName, adminGroupId)
 
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
         String userIdForDisplay = userAttrs?.userIdForDisplay ?: userId

@@ -249,6 +249,13 @@ class UserAuthService {
                 shouldAddRole = true
             }
         }
+        if (userRole.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER) {
+            shouldAddRole = false
+            String adminGroupId = AuthUtils.getAdminGroupIdFromRequest(servletRequest)
+            if (adminGroupId && userRole.adminGroupId && adminGroupId.equalsIgnoreCase(userRole.adminGroupId)) {
+                shouldAddRole = true
+            }
+        }
         if (userRole.roleName == RoleName.ROLE_PRIVATE_PROJECT_USER) {
             shouldAddRole = false
             String projectId = AuthUtils.getProjectIdFromRequest(servletRequest)

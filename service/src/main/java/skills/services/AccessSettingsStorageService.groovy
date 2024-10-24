@@ -213,7 +213,7 @@ class AccessSettingsStorageService {
     @Transactional
     UserRoleRes addRoot(String userId) {
         UserRole userRole = addUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
-        UserRole supervisorRole = userRoleRepository.findByUserIdAndRoleNameAndProjectId(userId, RoleName.ROLE_SUPERVISOR, null)
+        UserRole supervisorRole = userRoleRepository.findByUserIdAndRoleNameAndProjectIdAndAdminGroupId(userId, RoleName.ROLE_SUPERVISOR, null, null)
         if (!supervisorRole) {
             addUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
         }
@@ -230,7 +230,7 @@ class AccessSettingsStorageService {
         userId = userId?.toLowerCase()
         deleteUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
 
-        UserRole supervisorRole = userRoleRepository.findByUserIdAndRoleNameAndProjectId(userId, RoleName.ROLE_SUPERVISOR, null)
+        UserRole supervisorRole = userRoleRepository.findByUserIdAndRoleNameAndProjectIdAndAdminGroupId(userId, RoleName.ROLE_SUPERVISOR, null, null)
         if (supervisorRole) {
             deleteUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
         }
@@ -271,18 +271,18 @@ class AccessSettingsStorageService {
         return userRoleRepository.countByRoleName(RoleName.ROLE_SUPER_DUPER_USER)
     }
 
-    private void deleteUserRoleInternal(String userId, String projectId, RoleName roleName) {
+    private void deleteUserRoleInternal(String userId, String projectId, RoleName roleName, String adminGroupId = null) {
         log.debug('Deleting user-role for userId [{}] and role [{}] on project [{}]', userId, roleName, projectId)
-        UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndProjectId(userId, roleName, projectId)
+        UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndProjectIdAndAdminGroupId(userId, roleName, projectId, adminGroupId)
         assert userRole, "DELETE FAILED -> no user-role with project id [$projectId], userId [$userId] and roleName [$roleName]"
 
         userRoleRepository.delete(userRole)
         log.debug("Deleted userRole [{}]", userRole)
     }
 
-    void deleteQuizUserRole(String userId, String quizId, RoleName roleName) {
+    void deleteQuizUserRole(String userId, String quizId, RoleName roleName, String adminGroupId = null) {
         log.debug('Deleting user-role for userId [{}] and role [{}] on quiz [{}]', userId, roleName, quizId)
-        UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndQuizId(userId, roleName, quizId)
+        UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndQuizIdAndAdminGroupId(userId, roleName, quizId, adminGroupId)
         assert userRole, "DELETE FAILED -> no user-role with quiz id [$quizId], userId [$userId] and roleName [$roleName]"
 
         userRoleRepository.delete(userRole)
@@ -290,8 +290,8 @@ class AccessSettingsStorageService {
     }
 
     @Transactional()
-    UserRoleRes addUserRole(String userId, String projectId, RoleName roleName, boolean saveRoleAction = false) {
-        UserRole role = addUserRoleInternal(userId, projectId, roleName)
+    UserRoleRes addUserRole(String userId, String projectId, RoleName roleName, boolean saveRoleAction = false, String adminGroupId = null) {
+        UserRole role = addUserRoleInternal(userId, projectId, roleName, adminGroupId)
         if (saveRoleAction) {
             saveUserRoleActions(userId, roleName, DashboardAction.Create)
         }
@@ -307,71 +307,167 @@ class AccessSettingsStorageService {
     private static List<List<RoleName>> mutuallyExclusiveRoles = [
             [RoleName.ROLE_PROJECT_APPROVER, RoleName.ROLE_PROJECT_ADMIN],
     ]
-    private UserRole addUserRoleInternal(String userId, String projectId, RoleName roleName) {
+    private UserRole addUserRoleInternal(String userId, String projectId, RoleName roleName, String adminGroupId = null) {
         log.debug('Creating user-role for ID [{}] and role [{}] on project [{}]', userId, roleName, projectId)
         String userIdLower = userId?.toLowerCase()
         User user = userRepository.findByUserId(userIdLower)
         if (user) {
+            UserRole userRole = new UserRole(userRefId: user.id, userId: userIdLower, roleName: roleName, projectId: projectId, adminGroupId: adminGroupId)
             // check that the new user role does not already exist
-            UserRole existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndProjectId(userId, roleName, projectId)
-            assert !existingUserRole, "CREATE FAILED -> user-role with project id [$projectId], userIdLower [$userIdLower] and roleName [$roleName] already exists"
-        } else {
-            throw new SkillException("User [$userIdLower]  does not exist", (String) projectId ?: SkillException.NA, SkillException.NA, ErrorCode.UserNotFound)
-        }
+            UserRole existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndProjectIdAndAdminGroupId(userId, roleName, projectId, adminGroupId)
+            assert !existingUserRole, "CREATE FAILED -> user-role with project id [$projectId], userIdLower [$userIdLower] and roleName [$roleName], adming group id [${adminGroupId}] already exists"
 
-        if (projectId && !userCommunityService.isUserCommunityMember(userIdLower) && userCommunityService.isUserCommunityOnlyProject(projectId)) {
             String userIdForDisplay = loadUserInfo(userId)?.userIdForDisplay
-            throw new SkillException("User [${userIdForDisplay}] is not allowed to be assigned [${roleName?.displayName}] user role", projectId, null, ErrorCode.AccessDenied)
-        }
+            if (projectId && !userCommunityService.isUserCommunityMember(userIdLower) && userCommunityService.isUserCommunityOnlyProject(projectId)) {
+                throw new SkillException("User [${userIdForDisplay}] is not allowed to be assigned [${roleName?.displayName}] user role", projectId, null, ErrorCode.AccessDenied)
+            }
 
-        // remove mutually exclusive roles
-        mutuallyExclusiveRoles.each {List<RoleName> roles ->
-            if (roles.contains(roleName)) {
-                List<RoleName> rolesToRemove = roles.findAll { it != roleName}
-                if (rolesToRemove) {
-                    rolesToRemove.each { RoleName roleToRemove ->
-                        UserRole found = userRoleRepository.findByUserIdAndRoleNameAndProjectId(userId, roleToRemove, projectId)
-                        if (found) {
-                            log.info("Removing [{}] role for userId=[{}] and projectId=[{}]", found.roleName, userId, projectId)
-                            userRoleRepository.delete(found)
+            // if assigning ROLE_PROJECT_APPROVER, need to make sure they are not already a group admin, and if so not allow it.  "local" admin to approver is okay
+            if (adminGroupId && roleName == RoleName.ROLE_PROJECT_APPROVER && userRoleRepository.isUserProjectGroupAdmin(userId, projectId)) {
+                throw new SkillException("User [${userIdForDisplay}] is already assigned as a group admin and must first be removed from all groups", projectId, null, ErrorCode.AccessDenied)
+            }
+            if (adminGroupId && roleName == RoleName.ROLE_PROJECT_ADMIN) {
+                // need to check if the role already exists outside of the admin group (ie, local project admin)
+                existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndProjectIdAndAdminGroupId(userId, roleName, projectId, null)
+                if (existingUserRole) {
+                    log.debug("Assigning admin group [{}] to existing local project admin [{}]", adminGroupId, userIdLower)
+                    existingUserRole.adminGroupId = adminGroupId
+                    userRole = existingUserRole
+                }
+            }
+
+            // remove mutually exclusive roles (non-group)
+            mutuallyExclusiveRoles.each {List<RoleName> roles ->
+                if (roles.contains(roleName)) {
+                    List<RoleName> rolesToRemove = roles.findAll { it != roleName}
+                    if (rolesToRemove) {
+                        rolesToRemove.each { RoleName roleToRemove ->
+                            UserRole found = userRoleRepository.findByUserIdAndRoleNameAndProjectIdAndAdminGroupId(userId, roleToRemove, projectId, null)
+                            if (found) {
+                                log.info("Removing [{}] role for userId=[{}] and projectId=[{}]", found.roleName, userId, projectId)
+                                userRoleRepository.delete(found)
+                            }
                         }
                     }
                 }
             }
+
+            userRoleRepository.save(userRole)
+            log.debug("Created userRole [{}]", userRole)
+
+            log.debug("setting sort order for user [{}] on project [{}]", userIdLower, projectId)
+            sortingService.setNewProjectDisplayOrder(projectId, userIdLower)
+            return userRole
+        } else {
+            throw new SkillException("User [$userIdLower]  does not exist", (String) projectId ?: SkillException.NA, SkillException.NA, ErrorCode.UserNotFound)
         }
-
-        UserRole userRole = new UserRole(userRefId: user.id, userId: userIdLower, roleName: roleName, projectId: projectId)
-        userRoleRepository.save(userRole)
-        log.debug("Created userRole [{}]", userRole)
-
-        log.debug("setting sort order for user [{}] on project [{}]", userIdLower, projectId)
-        sortingService.setNewProjectDisplayOrder(projectId, userIdLower)
-        return userRole
     }
 
-    UserRole addQuizDefUserRole(String userId, String quizId, RoleName roleName) {
-        log.debug('Creating quiz id user-role for ID [{}] and role [{}] on quiz [{}]', userId, roleName, quizId)
+    UserRole addQuizDefUserRoleForUser(String userId, String quizId, RoleName roleName, String adminGroupId = null) {
+        log.debug('Creating quiz id user-role for ID [{}] and role [{}] on quiz [{}]', userId, roleName, quizId, adminGroupId)
         String userIdLower = userId?.toLowerCase()
         User user = userRepository.findByUserId(userIdLower)
         if (user) {
+            UserRole userRole = new UserRole(userRefId: user.id, userId: userIdLower, roleName: roleName, quizId: quizId, adminGroupId: adminGroupId)
             // check that the new user role does not already exist
-            UserRole existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndQuizId(userId, roleName, quizId)
+            UserRole existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndQuizIdAndAdminGroupId(userId, roleName, quizId, adminGroupId)
             if (existingUserRole) {
-                throw new SkillQuizException("CREATE FAILED -> user-role with quiz id [$quizId], userIdLower [$userIdLower] and roleName [$roleName] already exists", quizId, ErrorCode.BadParam)
+                throw new SkillQuizException("CREATE FAILED -> user-role with quiz id [$quizId], userIdLower [$userIdLower] and roleName [$roleName], adming group id [${adminGroupId}] already exists", quizId, ErrorCode.BadParam)
             }
-        } else {
-            throw new SkillQuizException("User [$userIdLower] does not exist", (String) quizId ?: SkillException.NA, ErrorCode.UserNotFound)
-        }
-
-        UserRole userRole = new UserRole(userRefId: user.id, userId: userIdLower, roleName: roleName, quizId: quizId)
-        userRoleRepository.save(userRole)
-        log.debug("Created userRole [{}]", userRole)
+            if (adminGroupId && roleName == RoleName.ROLE_QUIZ_ADMIN) {
+                // need to check if the role already exists outside of the admin group (ie, local quiz admin)
+                existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndQuizIdAndAdminGroupId(userId, roleName, quizId, null)
+                if (existingUserRole) {
+                    log.debug("Assigning admin group [{}] to existing local quiz admin [{}]", adminGroupId, userIdLower)
+                    existingUserRole.adminGroupId = adminGroupId
+                    userRole = existingUserRole
+                }
+            }
+            userRoleRepository.save(userRole)
+            log.debug("Created userRole [{}]", userRole)
 
 //        log.debug("setting sort order for user [{}] on project [{}]", userIdLower, projectId)
 //        sortingService.setNewProjectDisplayOrder(projectId, userIdLower)
-        return userRole
+            return userRole
+        } else {
+            throw new SkillQuizException("User [$userIdLower] does not exist", (String) quizId ?: SkillException.NA, ErrorCode.UserNotFound)
+        }
     }
 
+    UserRole addAdminGroupDefUserRoleForUser(String userId, String adminGroupId, RoleName roleName) {
+        log.debug('Creating admin group user-role for ID [{}] and role [{}] on admin group [{}]', userId, roleName, adminGroupId)
+        String userIdLower = userId?.toLowerCase()
+        User user = userRepository.findByUserId(userIdLower)
+        if (user) {
+            UserRole userRole = new UserRole(userRefId: user.id, userId: userIdLower, roleName: roleName, adminGroupId: adminGroupId)
+            // check that the new user role does not already exist
+            UserRole existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndAdminGroupId(userId, roleName, adminGroupId)
+            if (existingUserRole) {
+                throw new SkillException("CREATE FAILED -> user-role with admin group id [$adminGroupId], userIdLower [$userIdLower] and roleName [$roleName] already exists", ErrorCode.BadParam)
+            }
+
+            if (!userCommunityService.isUserCommunityMember(userIdLower) && userCommunityService.isUserCommunityOnlyAdminGroup(adminGroupId)) {
+                String userIdForDisplay = loadUserInfo(userId)?.userIdForDisplay
+                throw new SkillException("User [${userIdForDisplay}] is not allowed to be assigned [${roleName?.displayName}] user role for admin group [${adminGroupId}]", ErrorCode.AccessDenied)
+            }
+
+            if (roleName == RoleName.ROLE_ADMIN_GROUP_OWNER) {
+                // check if the user is already a group member
+                existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndAdminGroupId(userId, RoleName.ROLE_ADMIN_GROUP_MEMBER, adminGroupId)
+                if (existingUserRole) {
+                    log.debug("Changing existing group member [{}] to group owner", userIdLower)
+                    existingUserRole.roleName = RoleName.ROLE_ADMIN_GROUP_OWNER
+                    userRole = existingUserRole
+                }
+            } else if (roleName == RoleName.ROLE_ADMIN_GROUP_MEMBER) {
+                existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndAdminGroupId(userId, RoleName.ROLE_ADMIN_GROUP_OWNER, adminGroupId)
+                if (existingUserRole) {
+//                    throw new SkillException("CREATE FAILED -> user-role with admin group id [$adminGroupId], userIdLower [$userIdLower] and roleName [$roleName] is already a group admin", ErrorCode.BadParam)
+                    log.debug("Changing existing group owner [{}] to group member", userIdLower)
+                    existingUserRole.roleName = RoleName.ROLE_ADMIN_GROUP_MEMBER
+                    userRole = existingUserRole
+                }
+            } else {
+                throw new SkillException("Provided [${roleName}] is not a admin group role, admin group id [${adminGroupId}].", ErrorCode.BadParam)
+            }
+            userRoleRepository.save(userRole)
+            log.debug("Created userRole [{}]", userRole)
+            return userRole
+        } else {
+            throw new SkillException("User [$userIdLower] does not exist", ErrorCode.UserNotFound)
+        }
+    }
+
+    void deleteAdminGroupUserRole(String userId, String adminGroupId, RoleName roleName) {
+        log.debug('Deleting user-role for userId [{}] and role [{}] in admin group [{}]', userId, roleName, adminGroupId)
+        UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndAdminGroupId(userId, roleName, adminGroupId)
+        assert userRole, "DELETE FAILED -> no user-role with admin group id [$adminGroupId], userId [$userId] and roleName [$roleName]"
+
+        userRoleRepository.delete(userRole)
+        log.debug("Deleted userRole [{}]", userRole)
+    }
+
+    void deleteProjectAndQuizAdminUserRolesWithAdminGroupIdForUser(String userId, String adminGroupId) {
+        log.debug('Deleting project and quiz admin user-role for userId [{}] in admin group [{}]', userId, adminGroupId)
+        userRoleRepository.deleteByUserIdAndAdminGroupIdAndRoleNameIn(userId, adminGroupId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_QUIZ_ADMIN])
+    }
+
+    List<UserRoleRes> findAllAdminGroupMembers(String adminGroupId) {
+        List<UserRoleRepo.UserRoleWithAttrs> rolesFromDB = userRoleRepository.findRoleWithAttrsByAdminGroupIdAndRoleNameIn(adminGroupId, [RoleName.ROLE_ADMIN_GROUP_OWNER, RoleName.ROLE_ADMIN_GROUP_MEMBER])
+        return rolesFromDB.collect { convert(it)}
+    }
+
+    @Transactional(readOnly = true)
+    TableResult getUserRolesForAdminGroupId(String adminGroupId, List<RoleName> roles, PageRequest pageRequest) {
+        TableResult tableResult = new TableResult()
+        tableResult.totalCount = userRoleRepository.countUserRolesByAdminGroupIdAndUserRoles(adminGroupId, roles)
+        if (tableResult.totalCount > 0) {
+            List<UserRoleRepo.UserRoleWithAttrs> res = userRoleRepository.findRoleWithAttrsByAdminGroupIdAndUserRoles(adminGroupId, roles, pageRequest)
+            tableResult.data = res.collect { convert(it) }
+            tableResult.count = res?.size()
+        }
+        return tableResult
+    }
 
     @Transactional()
     @Profile

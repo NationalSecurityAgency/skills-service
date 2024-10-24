@@ -36,6 +36,8 @@ const ROLE_SUPERVISOR = 'ROLE_SUPERVISOR';
 const ROLE_SUPER_DUPER_USER = 'ROLE_SUPER_DUPER_USER';
 const ROLE_PROJECT_APPROVER = 'ROLE_PROJECT_APPROVER';
 const ROLE_DASHBOARD_ADMIN_ACCESS = 'ROLE_DASHBOARD_ADMIN_ACCESS'
+const ROLE_ADMIN_GROUP_MEMBER = 'ROLE_ADMIN_GROUP_MEMBER'
+const ROLE_ADMIN_GROUP_OWNER = 'ROLE_ADMIN_GROUP_OWNER'
 const ALL_ROLES = [ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPERVISOR, ROLE_SUPER_DUPER_USER, ROLE_PROJECT_APPROVER];
 
 const appConfig = useAppConfig();
@@ -79,6 +81,10 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  adminGroupId: {
+    type: String,
+    default: null,
+  },
 });
 
 onMounted(() => {
@@ -112,10 +118,7 @@ const errNotification = ref({
 });
 const userRole = ref({
   selected: null,
-  options: [
-    { value: ROLE_PROJECT_ADMIN, text: getRoleDisplay(ROLE_PROJECT_ADMIN) },
-    { value: ROLE_PROJECT_APPROVER, text: getRoleDisplay(ROLE_PROJECT_APPROVER) },
-  ],
+  options: props.roles.map((role) => ({ value: role, text: getRoleDisplay(role) })),
 });
 
 let addUsrBtnDisabled = computed(() => {
@@ -143,6 +146,10 @@ function getRoleDisplay(roleName) {
     return 'Approver';
   } if (roleName === ROLE_DASHBOARD_ADMIN_ACCESS) {
     return 'Training Creator';
+  } if (roleName === ROLE_ADMIN_GROUP_MEMBER) {
+    return 'Group Member';
+  } if (roleName === ROLE_ADMIN_GROUP_OWNER) {
+    return 'Group Owner';
   }
   return 'Unknown';
 }
@@ -155,7 +162,7 @@ const loadData = () => {
     ascending: sortInfo.value.sortOrder === 1,
     orderBy: sortInfo.value.sortBy
   };
-  AccessService.getUserRoles(props.projectId, props.roles, pageParams).then((result) => {
+  AccessService.getUserRoles(props.projectId, props.roles, pageParams, props.adminGroupId).then((result) => {
     table.value.options.busy = false;
     data.value = result.data;
     table.value.options.pagination.totalRows = result.totalCount;
@@ -192,7 +199,7 @@ function doAddUserRole() {
   const pkiAuthenticated = appConfig.isPkiAuthenticated;
 
   const role = isOnlyOneRole.value ? props.roles[0] : userRole.value.selected;
-  AccessService.saveUserRole(props.projectId, selectedUser.value, role, pkiAuthenticated).then(() => {
+  AccessService.saveUserRole(props.projectId, selectedUser.value, role, pkiAuthenticated, props.adminGroupId).then(() => {
     announcer.polite(`${getRoleDisplay(role)} role was added for ${getUserDisplay({ ...selectedUser.value, firstName: selectedUser.value.first, lastName: selectedUser.value.last })}`);
     emit('role-added', { userId: selectedUser.value.userId, role });
     loadData();
@@ -276,7 +283,7 @@ function updateUserRole(selectedRole) {
     });
 
     const pkiAuthenticated = appConfig.isPkiAuthenticated;
-    AccessService.saveUserRole(props.projectId, userRoleToUpdate, newRole, pkiAuthenticated)
+    AccessService.saveUserRole(props.projectId, userRoleToUpdate, newRole, pkiAuthenticated, props.adminGroupId)
         .then(() => {
           data.value = data.value.map((user) => {
             if (user.isEdited) {
@@ -306,7 +313,7 @@ defineExpose({
 <template>
   <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #header>
-      <SkillsCardHeader :title="title"></SkillsCardHeader>
+      <SkillsCardHeader v-if="title" :title="title"></SkillsCardHeader>
     </template>
     <template #content>
       <slot name="underHeader"/>

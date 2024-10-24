@@ -219,7 +219,7 @@ class ProjAdminService {
                     throw new SkillException("User [${userId}] is not allowed to set [enableProtectedUserCommunity] to true", projId, null, ErrorCode.AccessDenied)
                 }
 
-                EnableProjValidationRes enableProjValidationRes = userCommunityService.validateProjectForCommunity(projId)
+                EnableUserCommunityValidationRes enableProjValidationRes = userCommunityService.validateProjectForCommunity(projId)
                 if (!enableProjValidationRes.isAllowed) {
                     String reasons = enableProjValidationRes.unmetRequirements.join("\n")
                     throw new SkillException("Not Allowed to set [enableProtectedUserCommunity] to true. Reasons are:\n${reasons}", projId, null, ErrorCode.AccessDenied)
@@ -670,7 +670,7 @@ class ProjAdminService {
     }
 
     @Transactional(readOnly = true)
-    EnableProjValidationRes validateProjectForEnablingCommunity(String projectId) {
+    EnableUserCommunityValidationRes validateProjectForEnablingCommunity(String projectId) {
         return userCommunityService.validateProjectForCommunity(projectId)
     }
 

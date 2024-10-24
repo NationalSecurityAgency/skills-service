@@ -25,6 +25,7 @@ import { syncRef } from '@vueuse/core'
 const props = defineProps({
   project: {
     type: Object,
+    default: null,
   },
   isCopy: {
     type: Boolean,
@@ -33,8 +34,15 @@ const props = defineProps({
   isEdit: {
     type: Boolean,
     default: false
-  }
+  },
+  adminGroup: {
+    type: Object,
+    default: null
+  },
 })
+if (!props.project && !props.adminGroup) {
+  throw new Error('Either project or adminGroup must be provided')
+}
 const authState = useAuthState()
 const appConfig = useAppConfig()
 const communityLabels = useCommunityLabels()
@@ -48,7 +56,7 @@ const invalid = ref(false)
 const pending = ref(false)
 
 onMounted(() => {
-  initialValueForEnableProtectedUserCommunity.value = communityLabels.isRestrictedUserCommunity(props.project.userCommunity)
+  initialValueForEnableProtectedUserCommunity.value = communityLabels.isRestrictedUserCommunity(props.project?.userCommunity) || communityLabels.isRestrictedUserCommunity(props.adminGroup?.userCommunity)
   enableProtectedUserCommunitySynced.value = initialValueForEnableProtectedUserCommunity.value
 
   // enableProtectedUserCommunity.value = this.isRestrictedUserCommunity(this.project.userCommunity);

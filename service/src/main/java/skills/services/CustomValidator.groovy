@@ -129,6 +129,10 @@ class CustomValidator {
         return validateDescriptionAndName(quizDefRequest.description, quizDefRequest.name)
     }
 
+    CustomValidationResult validate(AdminGroupDefRequest adminGroupDefRequest) {
+        return validateName(adminGroupDefRequest.name)
+    }
+
     @Profile
     CustomValidationResult validate(SkillRequest skillRequest) {
         return validateDescriptionAndName(skillRequest.description, skillRequest.name, skillRequest.projectId)

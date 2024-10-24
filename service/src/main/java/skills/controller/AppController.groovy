@@ -27,6 +27,8 @@ import skills.auth.aop.LimitDashboardAccess
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.AdminGroupDefExistsRequest
+import skills.controller.request.model.AdminGroupDefRequest
 import skills.controller.request.model.ProjectExistsRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.QuizDefExistsRequest
@@ -40,6 +42,7 @@ import skills.services.admin.InviteOnlyProjectService
 import skills.services.admin.ProjAdminService
 import skills.services.admin.ShareSkillsService
 import skills.services.admin.SkillsAdminService
+import skills.services.adminGroup.AdminGroupService
 import skills.services.quiz.QuizDefService
 import skills.utils.InputSanitizer
 
@@ -55,6 +58,9 @@ class AppController {
 
     @Autowired
     QuizDefService quizDefService
+
+    @Autowired
+    AdminGroupService adminGroupService
 
     @Autowired
     CustomIconFacade customIconFacade
@@ -83,6 +89,12 @@ class AppController {
     @ResponseBody
     List<QuizDefResult> getQuizDefs() {
         return quizDefService.getCurrentUsersTestDefs()
+    }
+
+    @RequestMapping(value = "/admin-group-definitions", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    List<AdminGroupDefResult> getAdminGroupDefs() {
+        return adminGroupService.getCurrentUsersAdminGroupDefs()
     }
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
@@ -127,6 +139,15 @@ class AppController {
     @ResponseBody
     QuizDefResult saveQuizDef(@PathVariable("id") String quizId, @RequestBody QuizDefRequest quizDefRequest) {
         return quizDefService.saveQuizDef(null, quizId, quizDefRequest)
+    }
+
+    @RequestMapping(value = "/admin-group-definitions/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    AdminGroupDefResult insertAdminGroupDef(@PathVariable("id") String adminGroupId, @RequestBody AdminGroupDefRequest adminGroupDefRequest) {
+        SkillsValidator.isFirstOrMustEqualToSecond(adminGroupDefRequest.adminGroupId, adminGroupId, "Admin Group Id")
+        SkillsValidator.isNotBlank(adminGroupId, "adminGroupId")
+        SkillsValidator.isNotBlank(adminGroupDefRequest.adminGroupId, "adminGroupId")
+        return adminGroupService.saveAdminGroupDef(false, adminGroupDefRequest)
     }
 
     @RequestMapping(value = "/projects/{id}/join/{invite_code}", method = RequestMethod.POST, produces = "application/json")
@@ -180,6 +201,23 @@ class AppController {
         }
 
         return quizDefService.existsByQuizName(InputSanitizer.sanitize(name))
+    }
+
+    @DBUpgradeSafe
+    @RequestMapping(value = "/adminGroupDefExist", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    boolean doesAdminGroupExist(@RequestBody AdminGroupDefExistsRequest existsRequest) {
+        String quizId = existsRequest.adminGroupId?.trim()
+        String name = existsRequest.name?.trim()
+
+        SkillsValidator.isTrue((quizId || name), "One of Admin Group Id or Admin Group Name must be provided.")
+        SkillsValidator.isTrue(!(quizId && name), "Only Admin Group Id Admin Group Quiz Name may be provided, not both.")
+
+        if (quizId) {
+            return adminGroupService.existsByAdminGroupId(InputSanitizer.sanitize(quizId))
+        }
+
+        return adminGroupService.existsByAdminGroupName(InputSanitizer.sanitize(name))
     }
 
     @RequestMapping(value = "/projects/{id}/customIcons", method = RequestMethod.GET, produces = "application/json")

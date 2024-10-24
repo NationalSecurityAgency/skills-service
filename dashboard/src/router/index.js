@@ -84,6 +84,10 @@ import UserAgreement from '@/components/access/UserAgreement.vue'
 import EmailVerificationSent from "@/components/access/EmailVerificationSent.vue";
 import EmailVerifiedConfirmation from "@/components/access/EmailVerifiedConfirmation.vue";
 import RequestEmailVerification from "@/components/access/RequestEmailVerification.vue";
+import AdminGroupPage from '@/components/access/groups/AdminGroupPage.vue';
+import AdminGroupMembers from '@/components/access/groups/AdminGroupMembers.vue';
+import AdminGroupProjects from '@/components/access/groups/AdminGroupProjects.vue';
+import AdminGroupQuizzes from '@/components/access/groups/AdminGroupQuizzes.vue';
 import RedirectPage from "@/components/utils/RedirectPage.vue";
 import UpgradeInProgressPage from '@/components/utils/errors/UpgradeInProgressPage.vue'
 import SkillsClientPath from '@/router/SkillsClientPath.js'
@@ -795,6 +799,47 @@ const routes = [
         requiresAuth: true,
         announcer: {
           message: 'Global Badge Levels',
+        },
+      },
+    }],
+  },
+  {
+    path: '/administrator/adminGroups/:adminGroupId',
+    component: AdminGroupPage,
+    meta: {
+      requiresAuth: true,
+      announcer: {
+        message: 'Manage Admin Group',
+      },
+    },
+    children: [{
+      name: 'AdminGroupMembers',
+      path: '',
+      component: AdminGroupMembers,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Admin Group Members',
+        },
+      },
+    }, {
+      name: 'AdminGroupProjects',
+      path: 'group-projects',
+      component: AdminGroupProjects,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Admin Group Projects',
+        },
+      },
+    }, {
+      name: 'AdminGroupQuizzes',
+      path: 'group-quizzes',
+      component: AdminGroupQuizzes,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Admin Group Quizzes and Surveys',
         },
       },
     }],

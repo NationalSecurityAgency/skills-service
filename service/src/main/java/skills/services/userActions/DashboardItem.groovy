@@ -22,6 +22,7 @@ enum DashboardItem {
     GlobalBadge,
     Skill,
     SkillsGroup,
+    AdminGroup,
     Quiz,
     QuizAttempt,
     Question,

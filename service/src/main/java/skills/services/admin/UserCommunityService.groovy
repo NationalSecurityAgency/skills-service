@@ -23,12 +23,16 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.UIConfigProperties
 import skills.controller.exceptions.SkillsValidator
-import skills.controller.result.model.EnableProjValidationRes
+import skills.controller.result.model.EnableUserCommunityValidationRes
+import skills.controller.result.model.UserRoleRes
+import skills.services.AccessSettingsStorageService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsDataAccessor
+import skills.storage.model.AdminGroupDef
 import skills.storage.model.ProjDef
 import skills.storage.model.UserTag
 import skills.storage.model.auth.UserRole
+import skills.storage.repos.AdminGroupDefRepo
 import skills.storage.repos.ExportedSkillRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillRelDefRepo
@@ -70,6 +74,12 @@ class UserCommunityService {
     @Autowired
     SkillRelDefRepo skillRelDefRepo
 
+    @Autowired
+    AdminGroupDefRepo adminGroupDefRepo
+
+    @Autowired
+    AccessSettingsStorageService accessSettingsStorageService
+
     String userCommunityUserTagKey
     String userCommunityUserTagValue
     String defaultUserCommunityName
@@ -99,8 +109,29 @@ class UserCommunityService {
         return belongsToUserCommunity as Boolean
     }
 
-    EnableProjValidationRes validateProjectForCommunity(String projId) {
-        EnableProjValidationRes res = new EnableProjValidationRes(isAllowed: true, unmetRequirements: [])
+    EnableUserCommunityValidationRes validateAdminGroupForCommunity(String adminGroupId) {
+        EnableUserCommunityValidationRes res = new EnableUserCommunityValidationRes(isAllowed: true, unmetRequirements: [])
+        userRoleRepo.findProjectIdsByAdminGroupId(adminGroupId).each { projectId ->
+            res = validateProjectForCommunity(projectId, res)
+        }
+        List<UserRoleRes> allAdminGroupMembers = accessSettingsStorageService.findAllAdminGroupMembers(adminGroupId)
+        if (allAdminGroupMembers) {
+            List<UserRoleRes> unique = allAdminGroupMembers.unique { it.userId }
+            unique.each { UserRoleRes userWithRole ->
+                if (!isUserCommunityMember(userWithRole.userId)) {
+                    String userIdForDisplay = userWithRole.userIdForDisplay
+
+                    res.isAllowed = false
+                    res.unmetRequirements.add("Has existing ${userIdForDisplay} user that is not authorized".toString())
+                }
+            }
+        }
+
+        return res
+    }
+
+    EnableUserCommunityValidationRes validateProjectForCommunity(String projId, EnableUserCommunityValidationRes enableProjValidationRes = null) {
+        EnableUserCommunityValidationRes res = enableProjValidationRes ? enableProjValidationRes : new EnableUserCommunityValidationRes(isAllowed: true, unmetRequirements: [])
 
         // only applicable if project already exist; also normalizes project ids case
         ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(projId)
@@ -136,6 +167,17 @@ class UserCommunityService {
         return res;
     }
 
+    /**
+     * Checks if the specified adminGroupId is configured as a user community only admin group
+     * @param adminGroupId - not null
+     * @return true if the adminGroupId exists and has been configured as a user community only admin group
+     */
+    @Transactional(readOnly = true)
+    boolean isUserCommunityOnlyAdminGroup(String adminGroupId) {
+        SkillsValidator.isNotBlank(adminGroupId, "adminGroupId")
+        AdminGroupDef adminGroupDef = adminGroupDefRepo.findByAdminGroupIdIgnoreCase(adminGroupId)
+        return adminGroupDef && adminGroupDef.protectedCommunityEnabled
+    }
 
     /**
      * Checks if the specified projectId is configured as a user community only project

@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+package skills.controller.request.model
 
 import groovy.transform.Canonical
 
 @Canonical
-class EnableProjValidationRes {
-    boolean isAllowed
-    List<String> unmetRequirements
+class AdminGroupDefExistsRequest {
+    String adminGroupId
+    String name
 }

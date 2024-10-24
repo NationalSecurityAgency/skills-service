@@ -50,7 +50,11 @@ const props = defineProps({
   idSuffix: {
     type: String,
     default: ''
-  }
+  },
+  showIdField: {
+    type: Boolean,
+    default: true
+  },
 })
 const emit = defineEmits(['keydown-enter'])
 
@@ -91,7 +95,7 @@ const isSubmitting = useIsSubmitting()
         </div>
       </div>
     </div>
-    <div :class="{ 'md:ml-1 w-full md:w-min lg:w-auto' : isInline }" class="">
+    <div v-show="showIdField" :class="{ 'md:ml-1 w-full md:w-min lg:w-auto' : isInline }" class="">
       <SkillsIdInput
         ref="skillsIdInput"
         style="min-width: 14rem;"

@@ -141,6 +141,7 @@ skills:
       minPasswordLength: 8
       maxPasswordLength: 40
       minNameLength: 3
+      maxAdminGroupNameLength: 100
       maxBadgeNameLength: 50
       maxProjectNameLength: 50
       maxQuizNameLength: 75

@@ -66,6 +66,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
 
   const maxBadgeBonusInMinutes = computed(() => config.value.maxBadgeBonusInMinutes)
   const minNameLength = computed(() => config.value.minNameLength)
+  const maxAdminGroupNameLength = computed(() => config.value.maxAdminGroupNameLength)
   const maxProjectNameLength = computed(() => config.value.maxProjectNameLength)
   const maxQuizNameLength = computed(() => config.value.maxQuizNameLength)
   const nameValidationRegex = computed(() => config.value.nameValidationRegex)
@@ -158,6 +159,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     rankingAndProgressViewsEnabled,
     docsHost,
     minNameLength,
+    maxAdminGroupNameLength,
     maxProjectNameLength,
     maxQuizNameLength,
     nameValidationRegex,

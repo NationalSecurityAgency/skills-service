@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.web.bind.annotation.*
 import skills.UIConfigProperties
+import skills.auth.UserInfoService
 import skills.auth.UserNameService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
@@ -60,7 +61,7 @@ class AccessSettingsController {
     private static List<RoleName> projectSupportedRoles = [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER]
 
     @Autowired
-    skills.auth.UserInfoService userInfoService
+    UserInfoService userInfoService
 
     @Autowired
     UserDetailsService userDetailsService
@@ -115,6 +116,19 @@ class AccessSettingsController {
             @RequestParam Boolean ascending) {
         PageRequest pageRequest = createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending)
         return accessSettingsStorageService.getUserRolesForProjectId(projectId, roles, pageRequest)
+    }
+
+    @RequestMapping(value = "/admin-group-definitions/{adminGroupId}/userRoles", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    TableResult getAdminGroupUserRoles(
+            @PathVariable("adminGroupId") String adminGroupId,
+            @RequestParam List<RoleName> roles,
+            @RequestParam int limit,
+            @RequestParam int page,
+            @RequestParam String orderBy,
+            @RequestParam Boolean ascending) {
+        PageRequest pageRequest = createPagingRequestWithValidation(adminGroupId, limit, page, orderBy, ascending, 'Admin Group')
+        return accessSettingsStorageService.getUserRolesForAdminGroupId(adminGroupId, roles, pageRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/countUserRoles", method = RequestMethod.GET, produces = "application/json")
@@ -243,8 +257,8 @@ class AccessSettingsController {
 
     }
 
-    private PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
+    private PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending, String type='Project') {
+        SkillsValidator.isNotBlank(projectId, "${type} Id")
         SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
         SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]", projectId)
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)

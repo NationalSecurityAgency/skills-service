@@ -20,6 +20,7 @@ import UserActionsPage from '@/components/userActions/UserActionsPage.vue'
 import MultipleProjectsMetricsPage from '@/components/metrics/multipleProjects/MultipleProjectsMetricsPage.vue'
 import EmaillProjectAdmins from '@/components/projects/EmaillProjectAdmins.vue'
 import GlobalBadges from '@/components/badges/global/GlobalBadges.vue'
+import AdminGroupsPage from "@/components/access/groups/AdminGroupsPage.vue";
 
 const createAdminRoutes = () => {
   return {
@@ -80,6 +81,16 @@ const createAdminRoutes = () => {
           requiresAuth: true,
           announcer: {
             message: 'All Projects Metrics',
+          },
+        },
+      }, {
+        name: 'AdminGroups',
+        path: 'adminGroups',
+        component: AdminGroupsPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Administrator Groups',
           },
         },
       }, {

@@ -2717,4 +2717,64 @@
     </changeSet>
 
 
+    <changeSet id="48" author="skills team">
+        <createTable tableName="admin_group_definition">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="admin_group_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="protected_community_enabled" type="varchar(255)" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="adminGroupDefs_lock"/>
+        </insert>
+
+        <createIndex indexName="index_admin_group_definition_admin_group_id"
+                     tableName="admin_group_definition" unique="true">
+            <column name="admin_group_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_admin_group_definition_name"
+                     tableName="admin_group_definition" unique="true">
+            <column name="name" type="varchar(255)"/>
+        </createIndex>
+
+        <addColumn tableName="user_roles">
+            <!-- optional -->
+            <column name="admin_group_id" type="varchar(255)"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="admin_group_id"
+                                 baseTableName="user_roles"
+                                 constraintName="fk_user_roles_admin_group_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="admin_group_id"
+                                 referencedTableName="admin_group_definition"/>
+
+        <dropIndex tableName="user_roles" indexName="index_user_roles_user_id_role_name_project_id" />
+
+        <createIndex indexName="index_user_roles_user_id_role_name_project_id_quiz_id_admin_group_id"
+                     tableName="user_roles" unique="true">
+            <column name="user_id" type="varchar(255)"/>
+            <column name="role_name" type="varchar(255)"/>
+            <column name="project_id" type="varchar(255)"/>
+            <column name="quiz_id" type="varchar(255)"/>
+            <column name="admin_group_id" type="varchar(255)"/>
+        </createIndex>
+
+    </changeSet>
+
 </databaseChangeLog>

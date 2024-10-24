@@ -44,12 +44,6 @@ import java.util.function.Supplier
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-/**
- * If a project is defined as inviteOnly, only root users, project admins, or
- * users with ROLE_PRIVATE_PROJECT_USER for the project should be allowed to access
- * /api/* methods for that project
- *
- */
 @CompileStatic
 @Slf4j
 @Component
@@ -58,9 +52,11 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
 
     private static final Pattern PROJECT_ID = ~/(?i)\/.*\/(?:my)?projects\/([^\/]+).*/
     private static final Pattern ATTACHMENT_UUID = ~/(?i)\/api\/download\/(.+)/
+    private static final Pattern ADMIN_GROUP_ID = ~/(?i)\/.*\/admin-group-definitions\/([^\/]+).*/
 
     private RequestMatcher projectsRequestMatcher
     private RequestMatcher attachmentsRequestMatcher
+    private RequestMatcher adminGroupRequestMatcher
 
     @Autowired
     @Lazy
@@ -81,6 +77,7 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
         projectsRequestMatcher = new AntPathRequestMatcher("/**/*projects/**")
         attachmentsRequestMatcher = new AntPathRequestMatcher("/api/download/**")
+        adminGroupRequestMatcher = new AntPathRequestMatcher("/**/admin-group-definitions/**")
     }
 
     @Override
@@ -94,21 +91,25 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         }
         AuthorizationDecision vote = null // ACCESS_ABSTAIN
         String projectId = null
+        String adminGroupId = null
         if (projectsRequestMatcher.matches(request)) {
             projectId = extractProjectId(request)
         } else if (attachmentsRequestMatcher.matches(request)) {
             projectId = extractProjectIdForAttachment(request)
+        } else if (adminGroupRequestMatcher.matches(request)) {
+            adminGroupId = extractAdminGroupId(request)
         }
-        if (projectId) {
+        if (projectId || adminGroupId) {
             log.debug("evaluating request [{}] for user community protection", request.getRequestURI())
             Boolean isUserCommunityOnlyProject = projectId && userCommunityService.isUserCommunityOnlyProject(projectId)
-            if (isUserCommunityOnlyProject) {
-                log.debug("project id [{}] requires user community only access", projectId)
+            Boolean isUserCommunityOnlyAdminGroup = adminGroupId && userCommunityService.isUserCommunityOnlyAdminGroup(adminGroupId)
+            if (isUserCommunityOnlyProject || isUserCommunityOnlyAdminGroup) {
+                log.debug("project id [{}] or admin group id [{}] requires user community only access", projectId, adminGroupId)
                 Boolean belongsToUserCommunity = userCommunityService.isUserCommunityMember(getUsername(authentication.get()))
                 if (belongsToUserCommunity) {
                     return new AuthorizationDecision(true) // ACCESS_GRANTED;
                 } else {
-                    log.debug("user [{}] is not permitted to access project [{}]", authentication.get().getPrincipal(), projectId)
+                    log.debug("user [{}] is not permitted to access project [{}] or admin group [{}]", authentication.get().getPrincipal(), projectId, adminGroupId)
                     throw new AccessDeniedException("Access is denied")
                 }
             }
@@ -133,6 +134,15 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
             String uuid = pid.group(1)
             Attachment attachment = attachmentService.getAttachment(uuid);
             return attachment?.projectId
+        }
+        return StringUtils.EMPTY
+    }
+
+    private String extractAdminGroupId(HttpServletRequest request) {
+        String url = getRequestUrl(request)
+        Matcher gid = ADMIN_GROUP_ID.matcher(url)
+        if (gid.matches()) {
+            return gid.group(1)
         }
         return StringUtils.EMPTY
     }
