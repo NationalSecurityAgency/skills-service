@@ -47,7 +47,7 @@ import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.AdminGroupDef
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.AdminGroupDefRepo
-import skills.storage.repos.AdminGroupToUserRepo
+
 import skills.storage.repos.UserRoleRepo
 import skills.utils.InputSanitizer
 import skills.utils.Props
@@ -73,9 +73,6 @@ class AdminGroupService {
 
     @Autowired
     AdminGroupDefRepo adminGroupDefRepo
-
-    @Autowired
-    AdminGroupToUserRepo adminGroupToUserRepo
 
     @Autowired
     UserRoleRepo userRoleRepository
@@ -203,9 +200,6 @@ class AdminGroupService {
 
     @Transactional(readOnly = true)
     AdminGroupProjectResult getAdminGroupProjects(String adminGroupId) {
-        UserInfo userInfo = userInfoService.getCurrentUser()
-        boolean isNotCommunityMember = !userCommunityService.isUserCommunityMember(userInfoService.currentUserId)
-
         List<ProjectResult> projects = projAdminService.getProjects()
         List<String> assignedProjectIds = userRoleRepository.findProjectIdsByAdminGroupId(adminGroupId)
         return new AdminGroupProjectResult(
