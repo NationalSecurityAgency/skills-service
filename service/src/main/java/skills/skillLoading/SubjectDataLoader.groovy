@@ -371,16 +371,8 @@ class SubjectDataLoader {
 
         res.forEach {
           def id = it.skillDef.skillId + '-' + it.skillDef.projectId
-          if(!skillList.containsKey(id)) {
+          if(!skillList.containsKey(id) || it.approval.updated > skillList[id].approval.updated) {
               skillList[id] = it
-          } else {
-              def tempSkill = skillList[id]
-              if(tempSkill.approval?.updated > it.approval?.updated) {
-                  def newId = tempSkill.skillDef.skillId + '-' + tempSkill.skillDef.projectId;
-                  skillList[newId] = tempSkill
-              } else {
-                  skillList[id] = it
-              }
           }
         }
 
