@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {onMounted, ref} from "vue";
+import {onMounted, ref, computed} from "vue";
 import MyProgressTitle from "@/components/myProgress/MyProgressTitle.vue";
 import QuizRunService from "@/skills-display/components/quiz/QuizRunService.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
@@ -30,6 +30,7 @@ import InputText from "primevue/inputtext";
 import InputGroupAddon from "primevue/inputgroupaddon";
 import {FilterMatchMode} from "primevue/api";
 import HighlightedValue from "@/components/utils/table/HighlightedValue.vue";
+import NoContent2 from "@/components/utils/NoContent2.vue";
 
 const responsive = useResponsiveBreakpoints()
 const colors = useColors()
@@ -89,37 +90,19 @@ const clearFilter = () => {
 const onFilter = (filterEvent) => {
   loadQuizAttempts().then(() => filtering.value = true)
 }
+
+const hasAttempts = computed(() => attemptHistory.value.length > 0)
 </script>
 
 <template>
   <div>
-    <my-progress-title title="My Quiz and Survey Attempts"/>
+    <my-progress-title title="My Quizzes and Surveys" data-cy="myQuizAndSurveysTitle"/>
     <Card class="my-4" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
         <SkillsSpinner v-if="loadingQuizAttemptsInitially" :is-loading="true" class="my-8"/>
-        <SkillsDataTable
-            v-if="!loadingQuizAttemptsInitially"
-            tableStoredStateId="myQuizAttemptsTable"
-            aria-label="Quiz and Survey Attempts History"
-            :value="attemptHistory"
-            :loading="loadingQuizAttempts"
-            show-gridlines
-            striped-rows
-            lazy
-            paginator
-            v-model:filters="filters"
-            :globalFilterFields="['userIdForDisplay']"
-            @filter="onFilter"
-            data-cy="quizAttemptsTable"
-            @page="pageChanged"
-            @sort="sortField"
-            :rows="pageSize"
-            :rowsPerPageOptions="possiblePageSizes"
-            :total-records="totalRows"
-            v-model:sort-field="sortInfo.sortBy"
-            v-model:sort-order="sortInfo.sortOrder">
+        <div v-else>
 
-          <template #header>
+          <div class="p-3">
             <div class="flex gap-1">
               <InputGroup>
                 <InputGroupAddon>
@@ -151,63 +134,103 @@ const onFilter = (filterEvent) => {
                             :aria-label="`Reset filter for quiz/survey results`"
                             data-cy="userResetBtn"/>
             </div>
-          </template>
+          </div>
 
-          <Column header="Name" field="quizName" :sortable="true"
-                  :class="{'flex': responsive.md.value }">
-            <template #header>
-              <div class="mr-2"><i class="fas fa-user skills-color-users" :class="colors.getTextClass(1)"
-                                   aria-hidden="true"></i></div>
-            </template>
-            <template #body="slotProps">
-              <router-link data-cy="viewQuizAttempt"
-                           :to="{ name:'MySingleQuizAttemptPage', params: { attemptId: slotProps.data.attemptId }}"
-                           :aria-label="`View attempt for ${slotProps.data.quizName} quiz`">
-                <highlighted-value :value="slotProps.data.quizName"
-                                   :filter="filters.global.value"/>
-              </router-link>
-            </template>
-          </Column>
-          <Column header="Status" field="status" :sortable="true"
-                  :class="{'flex': responsive.md.value }">
-            <template #header>
-              <div class="mr-2"><i class="fas fa-user skills-color-users" :class="colors.getTextClass(2)"
-                                   aria-hidden="true"></i></div>
-            </template>
-            <template #body="slotProps">
-              {{ slotProps.data.quizType }}
-              <QuizRunStatus :quiz-type="slotProps.data.quizType" :status="slotProps.data.status"/>
-            </template>
-          </Column>
-          <Column header="Runtime" field="completed"
-                  :class="{'flex': responsive.md.value }">
-            <template #header>
-              <div class="mr-2"><i class="fas fa-user skills-color-users" :class="colors.getTextClass(3)"
-                                   aria-hidden="true"></i></div>
-            </template>
-            <template #body="slotProps">
+          <SkillsDataTable
+              v-if="hasAttempts"
+              tableStoredStateId="myQuizAttemptsTable"
+              aria-label="Quiz and Survey Attempts History"
+              :value="attemptHistory"
+              :loading="loadingQuizAttempts"
+              show-gridlines
+              striped-rows
+              lazy
+              paginator
+              v-model:filters="filters"
+              :globalFilterFields="['userIdForDisplay']"
+              @filter="onFilter"
+              data-cy="myQuizAttemptsTable"
+              @page="pageChanged"
+              @sort="sortField"
+              :rows="pageSize"
+              :rowsPerPageOptions="possiblePageSizes"
+              :total-records="totalRows"
+              v-model:sort-field="sortInfo.sortBy"
+              v-model:sort-order="sortInfo.sortOrder">
+
+            <Column header="Name" field="quizName" :sortable="true"
+                    :class="{'flex': responsive.md.value }">
+              <template #header>
+                <div class="mr-2"><i class="fas fa-user skills-color-users" :class="colors.getTextClass(0)"
+                                     aria-hidden="true"></i></div>
+              </template>
+              <template #body="slotProps">
+                <router-link data-cy="viewQuizAttempt"
+                             :to="{ name:'MySingleQuizAttemptPage', params: { attemptId: slotProps.data.attemptId }}"
+                             :aria-label="`View attempt for ${slotProps.data.quizName} quiz`">
+                  <highlighted-value :value="slotProps.data.quizName"
+                                     :filter="filters.global.value"/>
+                </router-link>
+              </template>
+            </Column>
+            <Column header="Type" field="quizType" :sortable="true"
+                    :class="{'flex': responsive.md.value }">
+              <template #header>
+                <div class="mr-2"><i class="fas fa-pencil-ruler" :class="colors.getTextClass(1)"
+                                     aria-hidden="true"></i></div>
+              </template>
+              <template #body="slotProps">
+                {{ slotProps.data.quizType }}
+              </template>
+            </Column>
+            <Column header="Status" field="status" :sortable="true"
+                    :class="{'flex': responsive.md.value }">
+              <template #header>
+                <div class="mr-2"><i class="fas fa-trophy" :class="colors.getTextClass(2)"
+                                     aria-hidden="true"></i></div>
+              </template>
+              <template #body="slotProps">
+                <QuizRunStatus :quiz-type="slotProps.data.quizType" :status="slotProps.data.status"/>
+              </template>
+            </Column>
+            <Column header="Runtime" field="completed"
+                    :class="{'flex': responsive.md.value }">
+              <template #header>
+                <div class="mr-2"><i class="fas fa-user-clock" :class="colors.getTextClass(3)"
+                                     aria-hidden="true"></i></div>
+              </template>
+              <template #body="slotProps">
            <span
                :data-cy="`row${slotProps.index}-runtime`">{{
                timeUtils.formatDurationDiff(slotProps.data.started, slotProps.data.completed)
              }}</span>
-            </template>
-          </Column>
-          <Column header="Started" field="started" :sortable="true"
-                  :class="{'flex': responsive.md.value }">
-            <template #header>
-              <div class="mr-2"><i class="fas fa-user skills-color-users" :class="colors.getTextClass(3)"
-                                   aria-hidden="true"></i></div>
-            </template>
-            <template #body="slotProps">
-              <DateCell :value="slotProps.data.started"/>
-            </template>
-          </Column>
+              </template>
+            </Column>
+            <Column header="Started" field="started" :sortable="true"
+                    :class="{'flex': responsive.md.value }">
+              <template #header>
+                <div class="mr-2"><i class="fas fa-clock" :class="colors.getTextClass(3)"
+                                     aria-hidden="true"></i></div>
+              </template>
+              <template #body="slotProps">
+                <DateCell :value="slotProps.data.started"/>
+              </template>
+            </Column>
 
-          <template #paginatorstart>
-            <span>Total Attempts:</span> <span class="font-semibold"
-                                               data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
-          </template>
-        </SkillsDataTable>
+            <template #paginatorstart>
+              <span>Total Attempts:</span> <span class="font-semibold"
+                                                 data-cy=skillsBTableTotalRows>{{
+                numberFormat.pretty(totalRows)
+              }}</span>
+            </template>
+          </SkillsDataTable>
+
+          <NoContent2 v-if="!hasAttempts"
+                      data-cy="noQuizzesOrSurveys"
+                      title="No Quizzes or Surveys Completed Yet" class="py-8"
+                      message="Quizzes and Surveys are often associated to projects' skills and once completed will be listed on this page. "
+          />
+        </div>
       </template>
     </Card>
   </div>

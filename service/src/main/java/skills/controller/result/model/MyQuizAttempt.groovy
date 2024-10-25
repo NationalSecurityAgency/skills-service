@@ -24,4 +24,5 @@ interface MyQuizAttempt {
     UserQuizAttempt.QuizAttemptStatus getStatus()
     String getQuizName()
     String getQuizId()
+    String getQuizType()
 }
