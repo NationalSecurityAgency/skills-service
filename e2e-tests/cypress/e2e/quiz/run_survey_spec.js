@@ -157,7 +157,7 @@ describe('Client Display Survey Tests', () => {
             cy.get('[data-cy="cancelQuizAttempt"]').should('not.exist')
         });
 
-        it.only(`run a survey in [${env}]`, () => {
+        it(`run a survey in [${env}]`, () => {
             cy.createSurveyDef(1);
             cy.createSurveyMultipleChoiceQuestionDef(1, 1);
             cy.createSurveyMultipleChoiceQuestionDef(1, 2);
