@@ -45,7 +45,7 @@ class DefaultIntSpec extends Specification {
     static {
         // must call in the main method and not in @PostConstruct method as H2 jdbc driver will cache timezone prior @PostConstruct method is called
         // alternatively we could pass in -Duser.timezone=UTC
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
     };
 
     SkillsService skillsService
@@ -115,6 +115,9 @@ class DefaultIntSpec extends Specification {
     @Autowired
     UserActionsHistoryRepo userActionsHistoryRepo
 
+    @Autowired
+    AdminGroupDefRepo adminGroupDefRepo
+
     private UserUtil userUtil
 
     @PostConstruct
@@ -124,7 +127,7 @@ class DefaultIntSpec extends Specification {
 
     def setup() {
         // allows for over-ridding the setup method
-        doSetup();
+        doSetup()
     }
 
     def doSetup() {
@@ -137,6 +140,7 @@ class DefaultIntSpec extends Specification {
          */
         projDefRepo.deleteAll()
         quizDefRepo.deleteAll()
+        adminGroupDefRepo.deleteAll()
         userAttrsRepo.deleteAll()
         // global badges don't have references to a project so must delete those manually
         skillDefRepo.deleteAll()

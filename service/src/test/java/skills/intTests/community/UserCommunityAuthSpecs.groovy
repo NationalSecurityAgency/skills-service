@@ -23,8 +23,10 @@ import skills.storage.model.auth.RoleName
 import skills.utils.GroovyToJavaByteUtils
 import skills.utils.WaitFor
 
+import static skills.intTests.utils.AdminGroupDefFactory.createAdminGroup
 import static skills.intTests.utils.SkillsFactory.createProject
 import static skills.intTests.utils.SkillsFactory.createSubject
+
 
 @Slf4j
 class UserCommunityAuthSpecs extends DefaultIntSpec {
@@ -39,7 +41,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
 
         when:
         String userCommunityUserId =  skillsService.userName
-        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon']);
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
 
         def proj = createProject(1)
         proj.enableProtectedUserCommunity = true
@@ -85,7 +87,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
     def "can access project endpoints with UC protection enabled when the user does belong to the user community"() {
         when:
         String userCommunityUserId =  skillsService.userName
-        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon']);
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
 
         def proj = createProject(1)
         proj.enableProtectedUserCommunity = true
@@ -98,7 +100,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
 
         def otherUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
         SkillsService otherUserCommunityUser = createService(otherUserCommunityUserId)
-        rootSkillsService.saveUserTag(otherUserCommunityUserId, 'dragons', ['DivineDragon']);
+        rootSkillsService.saveUserTag(otherUserCommunityUserId, 'dragons', ['DivineDragon'])
 
         then:
         !validateForbidden { otherUserCommunityUser.apiGetUserLevelForProject(proj.projectId, null) }
@@ -203,9 +205,9 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         SkillsService allDragonsUser = createService(users[0])
         SkillsService pristineDragonsUser = createService(users[1])
         rootSkillsService.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
-        Map proj = SkillsFactory.createProject()
+        Map proj = createProject()
         proj.enableProtectedUserCommunity = true
-        Map subject = SkillsFactory.createSubject()
+        Map subject = createSubject()
         Map skill = SkillsFactory.createSkill()
         def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 2)
         def badge = SkillsFactory.createBadge()
@@ -232,20 +234,113 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         validateForbidden { allDragonsUser.downloadAttachment(badgeAttachment.href) }
     }
 
+    def "cannot access group admin endpoints with UC protection enabled if the user does not belong to the user community"() {
+
+        when:
+        String userCommunityUserId =  skillsService.userName
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def adminGroup = createAdminGroup(1)
+        adminGroup.enableProtectedUserCommunity = true
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def proj = createProject(1)
+        proj.enableProtectedUserCommunity = true
+        def subj = createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+        Map badge = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, skill.skillId)
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+
+        def nonUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService nonUserCommunityUser = createService(nonUserCommunityUserId)
+
+        then:
+
+        // get admin groups should not receive 403, but should filter out any UC protected projects
+        !validateForbidden { nonUserCommunityUser.getAdminGroupDefs() }
+        nonUserCommunityUser.getAdminGroupDefs() == []
+
+        validateForbidden { nonUserCommunityUser.getAdminGroupDef(adminGroup.adminGroupId) }
+        validateForbidden { nonUserCommunityUser.updateAdminGroupDef(adminGroup) }
+        validateForbidden { nonUserCommunityUser.removeAdminGroupDef(adminGroup.adminGroupId) }
+        validateForbidden { nonUserCommunityUser.getAdminGroupMembers(adminGroup.adminGroupId) }
+        validateForbidden { nonUserCommunityUser.addAdminGroupOwner(adminGroup.adminGroupId, nonUserCommunityUserId) }
+        validateForbidden { nonUserCommunityUser.addAdminGroupMember(adminGroup.adminGroupId, nonUserCommunityUserId) }
+        validateForbidden { nonUserCommunityUser.deleteAdminGroupOwner(adminGroup.adminGroupId, nonUserCommunityUserId) }
+        validateForbidden { nonUserCommunityUser.deleteAdminGroupMember(adminGroup.adminGroupId, nonUserCommunityUserId) }
+        validateForbidden { nonUserCommunityUser.getAdminGroupQuizzesAndSurveys(adminGroup.adminGroupId) }
+        validateForbidden { nonUserCommunityUser.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
+        validateForbidden { nonUserCommunityUser.deleteQuizFromAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
+        validateForbidden { nonUserCommunityUser.getAdminGroupProjects(adminGroup.adminGroupId) }
+        validateForbidden { nonUserCommunityUser.addProjectToAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
+        validateForbidden { nonUserCommunityUser.deleteProjectFromAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
+    }
+
+    def "can access group admin endpoints with UC protection enabled if the user does not belong to the user community"() {
+
+        when:
+        String userCommunityUserId =  skillsService.userName
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def adminGroup = createAdminGroup(1)
+        adminGroup.enableProtectedUserCommunity = true
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def proj = createProject(1)
+        proj.enableProtectedUserCommunity = true
+        def subj = createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+        Map badge = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, skill.skillId)
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+
+        def nonUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService nonUserCommunityUser = createService(nonUserCommunityUserId)
+
+        then:
+
+        // get admin groups should not receive 403, but should filter out any UC protected projects
+        !validateForbidden { nonUserCommunityUser.getAdminGroupDefs() }
+        nonUserCommunityUser.getAdminGroupDefs().size() == 1
+
+        !validateForbidden { nonUserCommunityUser.getAdminGroupDef(adminGroup.adminGroupId) }
+        !validateForbidden { nonUserCommunityUser.updateAdminGroupDef(adminGroup) }
+        !validateForbidden { nonUserCommunityUser.removeAdminGroupDef(adminGroup.adminGroupId) }
+        !validateForbidden { nonUserCommunityUser.getAdminGroupMembers(adminGroup.adminGroupId) }
+        !validateForbidden { nonUserCommunityUser.addAdminGroupOwner(adminGroup.adminGroupId, nonUserCommunityUserId) }
+        !validateForbidden { nonUserCommunityUser.addAdminGroupMember(adminGroup.adminGroupId, nonUserCommunityUserId) }
+        !validateForbidden { nonUserCommunityUser.deleteAdminGroupOwner(adminGroup.adminGroupId, nonUserCommunityUserId) }
+        !validateForbidden { nonUserCommunityUser.deleteAdminGroupMember(adminGroup.adminGroupId, nonUserCommunityUserId) }
+        !validateForbidden { nonUserCommunityUser.getAdminGroupQuizzesAndSurveys(adminGroup.adminGroupId) }
+        !validateForbidden { nonUserCommunityUser.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
+        !validateForbidden { nonUserCommunityUser.deleteQuizFromAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
+        !validateForbidden { nonUserCommunityUser.getAdminGroupProjects(adminGroup.adminGroupId) }
+        !validateForbidden { nonUserCommunityUser.addProjectToAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
+        !validateForbidden { nonUserCommunityUser.deleteProjectFromAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
+    }
+
     String extractInviteFromEmail(String emailBody) {
         def regex = /join-project\/([^\/]+)\/([^?]+)/
         def matcher = emailBody =~ regex
         return matcher[0][2]
     }
 
-    private boolean validateForbidden(Closure c) {
+    private static boolean validateForbidden(Closure c) {
         try {
             c.call()
             return false
         } catch (SkillsClientException skillsClientException) {
-            return skillsClientException.httpStatus == org.springframework.http.HttpStatus.FORBIDDEN
+            return skillsClientException.httpStatus == HttpStatus.FORBIDDEN
         }
-        return false
     }
 
 }
