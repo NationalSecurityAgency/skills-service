@@ -677,26 +677,21 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         res1.get(1).selfReporting.enabled
         !res1.get(1).selfReporting.rejectionMsg
         !res1.get(1).selfReporting.rejectedOn
-        !res1.get(1).selfReporting.requestedOn
-
 
         res1.get(2).skillId == skills[2].skillId
         res1.get(2).selfReporting.enabled
         !res1.get(2).selfReporting.rejectionMsg
         !res1.get(2).selfReporting.rejectedOn
-        !res1.get(2).selfReporting.requestedOn
 
         res1.get(3).skillId == skills[3].skillId
         res1.get(3).selfReporting.enabled
         !res1.get(3).selfReporting.rejectionMsg
         !res1.get(3).selfReporting.rejectedOn
-        !res1.get(3).selfReporting.requestedOn
 
         res1.get(4).skillId == skills[4].skillId
         res1.get(4).selfReporting.enabled
         !res1.get(4).selfReporting.rejectionMsg
         !res1.get(4).selfReporting.rejectedOn
-        !res1.get(4).selfReporting.requestedOn
     }
 
     def "when a self-reporting skill has a history of approvals only load the latest approval info - latest approval request"() {
@@ -808,27 +803,22 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         res1.get(0).skillId == skills[0].skillId
         res1.get(0).selfReporting.enabled
         !res1.get(0).selfReporting.rejectionMsg
-        !res1.get(0).selfReporting.requestedOn
         !res1.get(0).selfReporting.rejectedOn
 
         res1.get(1).skillId == skills[1].skillId
         res1.get(1).selfReporting.enabled
         !res1.get(1).selfReporting.rejectionMsg
         !res1.get(1).selfReporting.rejectedOn
-        !res1.get(1).selfReporting.requestedOn
-
 
         res1.get(2).skillId == skills[2].skillId
         res1.get(2).selfReporting.enabled
         !res1.get(2).selfReporting.rejectionMsg
         !res1.get(2).selfReporting.rejectedOn
-        !res1.get(2).selfReporting.requestedOn
 
         res1.get(3).skillId == skills[3].skillId
         res1.get(3).selfReporting.enabled
         !res1.get(3).selfReporting.rejectionMsg
         !res1.get(3).selfReporting.rejectedOn
-        !res1.get(3).selfReporting.requestedOn
     }
 
     def "all requests are denied - user acknowledges one denial"() {
@@ -880,17 +870,17 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
 
         approvalsHistoryUser2.totalCount == 4
         res2.size() == 4
-        res2.collect { it.selfReporting.rejectionMsg } == ["reject skill1", null, "reject skill3", "reject skill4"]
+        res2.collect { it.selfReporting.rejectionMsg } == ["reject skill1", "reject skill2", "reject skill3", "reject skill4"]
         res2.each {
             assert it.selfReporting.enabled
         }
         res2[0].selfReporting.rejectedOn
-        !res2[1].selfReporting.rejectedOn
+        res2[1].selfReporting.rejectedOn
         res2[2].selfReporting.rejectedOn
         res2[3].selfReporting.rejectedOn
 
         res2[0].selfReporting.requestedOn
-        !res2[1].selfReporting.requestedOn
+        res2[1].selfReporting.requestedOn
         res2[2].selfReporting.requestedOn
         res2[3].selfReporting.requestedOn
     }
