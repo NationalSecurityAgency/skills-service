@@ -249,9 +249,6 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         def subj = createSubject(1, 1)
         def skill = SkillsFactory.createSkill(1, 1)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
-        Map badge = SkillsFactory.createBadge(1, 1)
-        skillsService.createBadge(badge)
-        skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, skill.skillId)
 
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
@@ -276,8 +273,8 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         validateForbidden { nonUserCommunityUser.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
         validateForbidden { nonUserCommunityUser.deleteQuizFromAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
         validateForbidden { nonUserCommunityUser.getAdminGroupProjects(adminGroup.adminGroupId) }
-        validateForbidden { nonUserCommunityUser.addProjectToAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
-        validateForbidden { nonUserCommunityUser.deleteProjectFromAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
+        validateForbidden { nonUserCommunityUser.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId) }
+        validateForbidden { nonUserCommunityUser.deleteProjectFromAdminGroup(adminGroup.adminGroupId, proj.projectId) }
         validateForbidden { nonUserCommunityUser.updateAdminGroupDef(adminGroup) }
         validateForbidden { nonUserCommunityUser.removeAdminGroupDef(adminGroup.adminGroupId) }
     }
@@ -297,15 +294,11 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         def subj = createSubject(1, 1)
         def skill = SkillsFactory.createSkill(1, 1)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
-        Map badge = SkillsFactory.createBadge(1, 1)
-        skillsService.createBadge(badge)
-        skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, skill.skillId)
 
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
 
         def otherUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
-//        SkillsService otherUserCommunityUser = createService(otherUserCommunityUserId)
         rootSkillsService.saveUserTag(otherUserCommunityUserId, 'dragons', ['DivineDragon'])
 
         then:
@@ -324,11 +317,132 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         !validateForbidden { skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
         !validateForbidden { skillsService.deleteQuizFromAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
         !validateForbidden { skillsService.getAdminGroupProjects(adminGroup.adminGroupId) }
-        !validateForbidden { skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
-        !validateForbidden { skillsService.deleteProjectFromAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
+        !validateForbidden { skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId) }
+        !validateForbidden { skillsService.deleteProjectFromAdminGroup(adminGroup.adminGroupId, proj.projectId) }
         !validateForbidden { skillsService.updateAdminGroupDef(adminGroup) }
         !validateForbidden { skillsService.removeAdminGroupDef(adminGroup.adminGroupId) }
     }
+
+    def "cannot add non-UC user as owner to UC protected admin group"() {
+
+        String userCommunityUserId =  skillsService.userName
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def adminGroup = createAdminGroup(1)
+        adminGroup.enableProtectedUserCommunity = true
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def proj = createProject(1)
+        proj.enableProtectedUserCommunity = true
+        def subj = createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        def nonUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        createService(nonUserCommunityUserId)
+
+        when:
+
+        skillsService.addAdminGroupOwner(adminGroup.adminGroupId, nonUserCommunityUserId)
+
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("User [${nonUserCommunityUserId} for display] is not allowed to be assigned [Admin Group Owner] user role for admin group [${adminGroup.adminGroupId}]")
+    }
+
+    def "cannot add a non-UC user as member to UC protected admin group"() {
+
+        String userCommunityUserId =  skillsService.userName
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def adminGroup = createAdminGroup(1)
+        adminGroup.enableProtectedUserCommunity = true
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        def nonUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        createService(nonUserCommunityUserId)
+        when:
+
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, nonUserCommunityUserId)
+
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("User [${nonUserCommunityUserId} for display] is not allowed to be assigned [Admin Group Member] user role for admin group [${adminGroup.adminGroupId}]")
+    }
+
+    def "cannot add UC protected project to a non-UC admin group"() {
+
+        String userCommunityUserId =  skillsService.userName
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def proj = createProject(1)
+        proj.enableProtectedUserCommunity = true
+        def subj = createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        when:
+
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Project [${proj.name}] is not allowed to be assigned [${adminGroup.name}] Admin Group")
+    }
+
+    def "cannot enable UC protection for admin group if it contains a non UC member"() {
+
+        String userCommunityUserId =  skillsService.userName
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def nonUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        createService(nonUserCommunityUserId)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, nonUserCommunityUserId)
+
+        when:
+        adminGroup.enableProtectedUserCommunity = true
+        skillsService.updateAdminGroupDef(adminGroup)
+
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Not Allowed to set [enableProtectedUserCommunity] to true for adminGroupId [${adminGroup.adminGroupId}]")
+        e.message.contains("Has existing ${nonUserCommunityUserId} for display user that is not authorized")
+    }
+
+    def "cannot disable UC protection for admin group after it has already been enabled"() {
+
+        String userCommunityUserId =  skillsService.userName
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def adminGroup = createAdminGroup(1)
+        adminGroup.enableProtectedUserCommunity = true
+        skillsService.createAdminGroupDef(adminGroup)
+
+        when:
+        adminGroup.enableProtectedUserCommunity = false
+        skillsService.updateAdminGroupDef(adminGroup)
+
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Once admin group [enableProtectedUserCommunity=true] it cannot be flipped to false.  adminGroupId [${adminGroup.adminGroupId}]")
+    }
+
 
     String extractInviteFromEmail(String emailBody) {
         def regex = /join-project\/([^\/]+)\/([^?]+)/
