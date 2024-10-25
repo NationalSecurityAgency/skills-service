@@ -27,4 +27,5 @@ interface QuizRun {
     String getUserTag()
     String getFirstName()
     String getLastName()
+    String getQuizType()
 }

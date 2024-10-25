@@ -22,6 +22,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
+import skills.controller.result.model.MyQuizAttempt
 import skills.controller.result.model.QuizRun
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.UserQuizAttempt.QuizAttemptStatus
@@ -151,6 +152,22 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                                @Param('usersTableAdditionalUserTagKey') String usersTableAdditionalUserTagKey,
                                @Nullable@Param('quizAttemptStatus') String quizAttemptStatus,
                                PageRequest pageRequest)
+
+    @Query(value = '''
+        select attempts.id as attemptId,
+               attempts.status as status,
+               attempts.started as started,
+               attempts.completed as completed,
+               quizDef.name as quizName,
+               quizDef.quizId as quizId,
+               quizDef.type as quizType
+        from UserQuizAttempt attempts, QuizDef quizDef
+        where attempts.userId=:userId and 
+            attempts.quizDefinitionRefId = quizDef.id and 
+            lower(quizDef.name) LIKE %:quizNameQuery% 
+     ''')
+    @Nullable
+    Page<MyQuizAttempt> findUserQuizAttempts(String userId, String quizNameQuery, PageRequest pageRequest)
 
     @Nullable
     @Query('''select quizAttempt from UserQuizAttempt quizAttempt where quizAttempt.quizDefinitionRefId = ?1 and quizAttempt.status = ?2''')

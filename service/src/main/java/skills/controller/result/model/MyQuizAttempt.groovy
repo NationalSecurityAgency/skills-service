@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2024 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,13 @@
  */
 package skills.controller.result.model
 
-
-import skills.storage.model.QuizDefParent
 import skills.storage.model.UserQuizAttempt
 
-class UserGradedQuizQuestionsResult {
-    String quizName
-    String userId
-    String userIdForDisplay
-    QuizDefParent.QuizType quizType
-    List<UserGradedQuizQuestionResult> questions
-    UserQuizAttempt.QuizAttemptStatus status
-    Boolean allQuestionsReturned
-    Integer numQuestions
-    Integer numQuestionsToPass
-    Integer numQuestionsPassed
-    Date started
-    Date completed
-    String userTag
+interface MyQuizAttempt {
+    Integer getAttemptId()
+    Date getStarted()
+    Date getCompleted()
+    UserQuizAttempt.QuizAttemptStatus getStatus()
+    String getQuizName()
+    String getQuizId()
 }

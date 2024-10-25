@@ -15,6 +15,7 @@ limitations under the License.
 */
 <script setup>
 import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
+import QuizType from "@/skills-display/components/quiz/QuizType.js";
 
 const props = defineProps({
   quizType: String,
@@ -28,7 +29,7 @@ const props = defineProps({
       <i class="far fa-times-circle" aria-hidden="true"></i> Failed
     </div>
     <div v-if="QuizStatus.isPassed(status)" class="text-color-success">
-      <i class="fas fa-check-double" aria-hidden="true"></i> <span v-if="quizType === 'Survey'">Completed</span><span v-else>Passed</span>
+      <i class="fas fa-check-double" aria-hidden="true"></i> <span v-if="QuizType.isSurvey(quizType)">Completed</span><span v-else>Passed</span>
     </div>
     <div v-if="QuizStatus.isInProgress(status)" class="text-color-warn">
       <i class="fas fa-running" aria-hidden="true"></i> In Progress

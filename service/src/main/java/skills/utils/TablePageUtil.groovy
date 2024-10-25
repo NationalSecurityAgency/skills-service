@@ -17,6 +17,7 @@ package skills.utils
 
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.domain.JpaSort
+import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillsValidator
 
 import static org.springframework.data.domain.Sort.Direction.ASC
@@ -36,4 +37,14 @@ class TablePageUtil {
 
         return pageRequest
     }
+
+    static PageRequest validateAndConstructQuizPageRequest(int limit, int page, String orderBy, Boolean ascending, int maxLimit = 500, int maxPage = 10000) {
+        QuizValidator.isTrue(limit > 0, '[limit] must be > 0')
+        QuizValidator.isTrue(limit <= maxLimit, '[limit] must be <= 500')
+        QuizValidator.isTrue(page >= 0, '[page] must be >= 0')
+        QuizValidator.isTrue(page < maxPage, '[page] must be < 10000')
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        return pageRequest
+    }
+
 }
