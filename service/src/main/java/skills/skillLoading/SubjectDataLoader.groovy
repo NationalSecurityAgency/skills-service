@@ -370,14 +370,16 @@ class SubjectDataLoader {
         HashMap<String, SkillDefAndUserPoints> skillList = new HashMap<String, SkillDefAndUserPoints>()
 
         res.forEach {
-          if(!skillList.containsKey(it.skillDef.skillId)) {
-              skillList[it.skillDef.skillId] = it
+          def id = it.skillDef.skillId + '-' + it.skillDef.projectId
+          if(!skillList.containsKey(id)) {
+              skillList[id] = it
           } else {
-              def tempSkill = skillList[it.skillDef.skillId]
-              if(tempSkill.approval.updated > it.approval.updated) {
-                  skillList[tempSkill.skillDef.skillId] = tempSkill
+              def tempSkill = skillList[id]
+              if(tempSkill.approval?.updated > it.approval?.updated) {
+                  def newId = tempSkill.skillDef.skillId + '-' + tempSkill.skillDef.projectId;
+                  skillList[newId] = tempSkill
               } else {
-                  skillList[it.skillDef.skillId] = it
+                  skillList[id] = it
               }
           }
         }
