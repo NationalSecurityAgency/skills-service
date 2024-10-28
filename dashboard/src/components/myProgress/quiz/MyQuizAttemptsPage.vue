@@ -31,6 +31,7 @@ import InputGroupAddon from "primevue/inputgroupaddon";
 import {FilterMatchMode} from "primevue/api";
 import HighlightedValue from "@/components/utils/table/HighlightedValue.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
+import BackToMyProgressBtn from "@/components/myProgress/BackToMyProgressBtn.vue";
 
 const responsive = useResponsiveBreakpoints()
 const colors = useColors()
@@ -96,7 +97,11 @@ const hasAttempts = computed(() => attemptHistory.value.length > 0)
 
 <template>
   <div>
-    <my-progress-title title="My Quizzes and Surveys" data-cy="myQuizAndSurveysTitle"/>
+    <my-progress-title title="My Quizzes and Surveys" data-cy="myQuizAndSurveysTitle">
+      <template #rightContent>
+        <back-to-my-progress-btn />
+      </template>
+    </my-progress-title>
     <Card class="my-4" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
         <SkillsSpinner v-if="loadingQuizAttemptsInitially" :is-loading="true" class="my-8"/>

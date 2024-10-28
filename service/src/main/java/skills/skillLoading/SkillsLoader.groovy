@@ -258,6 +258,11 @@ class SkillsLoader {
         myProgressSummary.numAchievedSkillsLastMonth = achievedSkillsCount.monthCount ?: 0
         myProgressSummary.numAchievedSkillsLastWeek = achievedSkillsCount.weekCount ?: 0
         myProgressSummary.mostRecentAchievedSkill = achievedSkillsCount.lastAchieved
+
+        UserQuizAttemptRepo.AttemptCounts attemptCounts = userQuizAttemptRepo.getAttemptCountsForUser(userId)
+        myProgressSummary.numQuizAttempts = attemptCounts.numQuizAttempts ?: 0
+        myProgressSummary.numSurveyAttempts = attemptCounts.numAttempts ? attemptCounts.numAttempts - myProgressSummary.numQuizAttempts : 0
+
         return myProgressSummary
     }
 

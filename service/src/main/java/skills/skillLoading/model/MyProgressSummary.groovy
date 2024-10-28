@@ -37,5 +37,7 @@ class MyProgressSummary {
     Integer numAchievedGemBadges = 0
     Integer numAchievedGlobalBadges = 0
 
+    Integer numQuizAttempts = 0
+    Integer numSurveyAttempts = 0
 }
 

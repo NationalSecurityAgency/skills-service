@@ -1,0 +1,73 @@
+/*
+Copyright 2024 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+<script setup>
+import MyProgressInfoCardUtil from '@/components/myProgress/MyProgressInfoCardUtil.vue'
+import {useMyProgressState} from '@/stores/UseMyProgressState.js'
+import {computed} from 'vue'
+
+const myProgressState = useMyProgressState()
+const myProgress = computed(() => myProgressState.myProgress)
+
+const totalRuns = computed(() => myProgress.value.numQuizAttempts + myProgress.value.numSurveyAttempts)
+
+</script>
+
+<template>
+  <my-progress-info-card-util title="Quizzes and Surveys">
+    <template #left-content>
+      <div>
+        <div class="text-4xl text-color-warn" data-cy="numQuizAndSurveyRuns">{{ totalRuns }}</div>
+        <div class="flex">
+          <span class="mr-1 w-5rem">Quizzes:</span> <Tag severity="info" data-cy="numQuizzes">{{ myProgress.numQuizAttempts }}</Tag>
+        </div>
+        <div class="flex my-1">
+          <span class="mr-1 w-5rem">Surveys:</span> <Tag severity="success" data-cy="numSurveys">{{ myProgress.numSurveyAttempts }}</Tag>
+        </div>
+      </div>
+    </template>
+    <template #right-content>
+      <div class="flex justify-content-center sm:justify-content-end">
+        <div class="flex justify-content-center">
+          <div class="border-circle w-7rem h-7rem m-2 bg-bluegray-600 font-bold flex align-items-center justify-content-center">
+            <i class="text-green-500 text-7xl fas fa-spell-check"></i>
+          </div>
+        </div>
+      </div>
+    </template>
+    <template #footer>
+      <div class="flex gap-2 align-items-center flex-column sm:flex-row">
+        <div data-cy="badges-num-footer" class="flex-1 w-min-10rem">
+          Explore quiz and survey history!
+        </div>
+        <div>
+          <router-link :to="{ name: 'MyQuizAttemptsPage' }">
+            <SkillsButton
+                label="History"
+                icon="fas fa-spell-check"
+                outlined
+                size="small"
+                aria-label="View my quiz and survey hisotyr"
+                data-cy="viewQuizzesAttemptsBtn" />
+          </router-link>
+        </div>
+      </div>
+    </template>
+  </my-progress-info-card-util>
+</template>
+
+<style scoped>
+
+</style>

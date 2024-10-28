@@ -233,4 +233,17 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                 group by DATE_TRUNC ('day', attempt.started)
                 order by dateVal''', nativeQuery = true)
     List<DateCount> getUsageOverTime(String quizId)
+
+    static interface AttemptCounts {
+        Integer getNumAttempts()
+        Integer getNumQuizAttempts()
+    }
+    @Query('''select 
+            count(*) as numAttempts,
+            sum(case when quizDef.type = 'Quiz' then 1 else 0 end) as numQuizAttempts 
+        from UserQuizAttempt attempt, QuizDef quizDef 
+        where attempt.userId = ?1
+            and attempt.quizDefinitionRefId = quizDef.id''')
+    AttemptCounts getAttemptCountsForUser(String userId)
+
 }

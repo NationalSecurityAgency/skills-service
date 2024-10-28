@@ -23,6 +23,7 @@ import LastEarnedCard from '@/components/myProgress/LastEarnedCard.vue'
 import BadgeNumCard from '@/components/myProgress/BadgeNumCard.vue'
 import MyCurrentProjects from '@/components/myProgress/MyCurrentProjects.vue'
 import MyProgressTitle from '@/components/myProgress/MyProgressTitle.vue'
+import MuQuizzesCard from "@/components/myProgress/MuQuizzesCard.vue";
 
 const myProgressState = useMyProgressState()
 
@@ -44,6 +45,7 @@ onMounted(() => {
               <SkillsButton
                 label="Projects Catalog"
                 outlined
+                size="small"
                 icon="fas fa-tasks"
                 data-cy="manageMyProjsBtn"
                 variant="outline-primary" />
@@ -56,7 +58,7 @@ onMounted(() => {
             <info-snapshot-card />
           </div>
           <div class="flex-1">
-            <num-skills />
+            <mu-quizzes-card />
           </div>
           <div class="flex-1">
             <last-earned-card />
