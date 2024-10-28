@@ -157,10 +157,9 @@ describe('My Progress Tests', () => {
 
         cy.get('[data-cy=numAchievedSkills]')
             .contains(new RegExp(/^2$/));
-        cy.get('[data-cy=numSkillsAvailable]')
-            .contains(new RegExp(/^Total: 10$/));
-        cy.get('[data-cy=num-skills-footer]')
-            .contains('So many skills... so little time! Good luck!');
+        cy.get('[data-cy=numSkillsAvailable]').should('have.text', 10)
+        cy.get('[data-cy="quizzes-card-footer"]')
+            .contains('Explore quiz and survey history');
 
         cy.get('[data-cy=mostRecentAchievedSkill]')
             .contains(`Last Achieved skill${timeFromNowFormatter(testTime)}`);
@@ -382,8 +381,7 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy=info-snap-footer]')
             .contains('You still have 1 project to explore.');
 
-        cy.get('[data-cy=numSkillsAvailable]')
-            .contains(new RegExp(/^Total: 10$/));
+        cy.get('[data-cy=numSkillsAvailable]').should('have.text', '10')
         cy.get('[data-cy=numBadgesAvailable]')
             .contains(new RegExp(/^\/ 2$/));
 
@@ -427,8 +425,7 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy=info-snap-footer]')
             .contains('You still have 1 project to explore.');
 
-        cy.get('[data-cy=numSkillsAvailable]')
-            .contains(new RegExp(/^Total: 10$/));
+        cy.get('[data-cy=numSkillsAvailable]').should('have.text', '10')
         cy.get('[data-cy=numBadgesAvailable]')
             .contains(new RegExp(/^\/ 2$/));
 

@@ -49,7 +49,7 @@ const totalRuns = computed(() => myProgress.value.numQuizAttempts + myProgress.v
     </template>
     <template #footer>
       <div class="flex gap-2 align-items-center flex-column sm:flex-row">
-        <div data-cy="badges-num-footer" class="flex-1 w-min-10rem">
+        <div data-cy="quizzes-card-footer" class="flex-1 w-min-10rem">
           Explore quiz and survey history!
         </div>
         <div>
