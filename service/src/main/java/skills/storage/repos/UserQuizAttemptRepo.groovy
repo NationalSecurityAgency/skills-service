@@ -163,7 +163,8 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                quizDef.type as quizType
         from UserQuizAttempt attempts, QuizDef quizDef
         where attempts.userId=:userId and 
-            attempts.quizDefinitionRefId = quizDef.id and 
+            attempts.quizDefinitionRefId = quizDef.id and
+            attempts.status != 'INPROGRESS' and
             lower(quizDef.name) LIKE lower(CONCAT('%', :quizNameQuery, '%'))
      ''')
     @Nullable
