@@ -294,6 +294,76 @@ describe('Display Single Quiz Attempt Tests', () => {
         cy.get('[data-cy="quizRequiresGradingMsg"]')
     });
 
+    it('passed quiz show its correct answers ', () => {
+        const quizNum = 1
+        cy.createSurveyDef(quizNum);
+        cy.createSurveyMultipleChoiceQuestionDef(quizNum, 1, { questionType: 'SingleChoice' });
+        cy.createSurveyMultipleChoiceQuestionDef(quizNum, 2);
+        cy.createTextInputQuestionDef(quizNum, 3)
+        cy.createRatingQuestionDef(quizNum, 4)
+        cy.runQuizForUser(1, defaultUser, [
+            {selectedIndex: [0]},
+            {selectedIndex: [0, 2]},
+            {selectedIndex: [0]},
+            {selectedIndex: [0]},
+        ], true, 'My Answer')
+
+        cy.visit('/progress-and-rankings/my-quiz-attempts');
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="viewQuizAttempt"]`).first().click()
+        cy.get('[data-cy="quizName"]').should('have.text', 'This is survey 1')
+        cy.get('[data-cy="quizRunStatus"]').contains('Completed')
+        cy.get('[data-cy="numQuestionsToPass"]').should('not.exist')
+
+        // q1
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-0_displayText"]').contains('Question 1 - First Answer')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-1_displayText"]').contains('Question 1 - Second Answer')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-2_displayText"]').contains('Question 1 - Third Answer')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-1"] [data-cy="notSelected"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-2"] [data-cy="notSelected"]')
+
+        // q2
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('This is a question # 2')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="wrongAnswer"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-0_displayText"]').contains('First Answer')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-1_displayText"]').contains('Second Answer')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-2_displayText"]').contains('Third Answer')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answerDisplay-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answerDisplay-1"] [data-cy="notSelected"]')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answerDisplay-2"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]')
+
+        // q3
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]').contains('This is a question # 3')
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="wrongAnswer"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="TextInputAnswer"]').contains('My Answer')
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="manuallyGradedInfo"]').should('not.exist')
+
+        // q4
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('This is a question # 4')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-pc-name="rating"] [data-pc-section="item"]')
+            .should('have.length', 5).as('ratingItems');
+
+        cy.get('@ratingItems')
+            .eq(0)
+            .should( 'have.attr', 'data-p-active', 'true')
+        cy.get('@ratingItems')
+            .eq(1)
+            .should( 'have.attr', 'data-p-active', 'false')
+        cy.get('@ratingItems')
+            .eq(2)
+            .should( 'have.attr', 'data-p-active', 'false')
+        cy.get('@ratingItems')
+            .eq(3)
+            .should( 'have.attr', 'data-p-active', 'false')
+        cy.get('@ratingItems')
+            .eq(4)
+            .should( 'have.attr', 'data-p-active', 'false')
+
+
+    });
+
 });
 
 
