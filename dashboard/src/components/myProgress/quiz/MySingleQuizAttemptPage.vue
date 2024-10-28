@@ -44,10 +44,23 @@ onMounted(() => {
   <div>
     <SkillsSpinner v-if="loadingAttempt" :is-loading="true" class="my-8"/>
     <div v-else>
-      <my-progress-title :title="`My ${attempt.quizType}`"/>
+      <my-progress-title :title="`My ${attempt.quizType}`">
+        <template #rightContent>
+          <router-link :to="{ name: 'MyQuizAttemptsPage' }">
+            <SkillsButton
+                label="Back to the List"
+                icon="fas fa-arrow-alt-circle-left"
+                outlined
+                size="small"
+                aria-label="Back to the list of my quiz and survey attempts"
+                data-cy="backToQuizzesBtn"
+                variant="outline-primary" />
+          </router-link>
+        </template>
+      </my-progress-title>
       <Card class="my-4">
         <template #content>
-          <div class="text-2xl mb-3 font-medium">{{ attempt.quizName }}</div>
+          <div class="text-2xl mb-3 font-medium" data-cy="quizName">{{ attempt.quizName }}</div>
           <quiz-single-run :run-info="attempt"  :show-user-card="false" :show-question-card="!QuizStatus.isNeedsGrading(attempt.status)"/>
         </template>
       </Card>

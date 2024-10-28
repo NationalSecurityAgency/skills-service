@@ -22,18 +22,16 @@ dayjs.extend(advancedFormatPlugin);
 
 describe('Display History of My quiz attempts Tests', () => {
 
+    const tableSelector = '[data-cy="myQuizAttemptsTable"]'
     let defaultUser
     beforeEach(() => {
-        defaultUser = Cypress.env('oauthMode') ? 'foo': Cypress.env('proxyUser')
+        defaultUser = Cypress.env('proxyUser')
     })
-
 
     it('No Attempts', () => {
         cy.visit('/progress-and-rankings/my-quiz-attempts');
         cy.get('[data-cy="noQuizzesOrSurveys"]')
     })
-
-    const tableSelector = '[data-cy="myQuizAttemptsTable"]'
 
     it('one quiz', () => {
         cy.createQuizDef(1);
@@ -99,6 +97,57 @@ describe('Display History of My quiz attempts Tests', () => {
 
     });
 
+    it('filter by quiz name', () => {
+
+        cy.createQuizDef(1, {name: `Find me If you Can`});
+        cy.createQuizDef(2, {name: `CAN you find me?`});
+        cy.createQuizDef(3, {name: `Third quiz I am`});
+        for (let i = 0; i < 3; i++) {
+            const quizNum = i + 1
+            cy.createQuizQuestionDef(quizNum, 1)
+            cy.runQuizForUser(quizNum, defaultUser, [{selectedIndex: [i % 2 === 0 ? 0 : 1]}], true, 'My Answer')
+        }
+
+        cy.visit('/progress-and-rankings/my-quiz-attempts');
+
+        const expectedRows = [
+            [{ colIndex: 0, value: 'Third quiz I am'}, { colIndex: 1, value: 'Quiz'}, { colIndex: 2, value: 'Passed'}],
+            [{ colIndex: 0, value: 'CAN you find me?'}, { colIndex: 1, value: 'Quiz'}, { colIndex: 2, value: 'Failed'}],
+            [{ colIndex: 0, value: 'Find me If you Can'}, { colIndex: 1, value: 'Quiz'}, { colIndex: 2, value: 'Passed'}],
+        ]
+        cy.validateTable(tableSelector, expectedRows, 10);
+
+        cy.get('[data-cy="quizNameFilter"]').type('cAn')
+        cy.get('[data-cy="userFilterBtn"]').click()
+        cy.validateTable(tableSelector, [expectedRows[1], expectedRows[2]], 10);
+
+        cy.get('[data-cy="filterResetBtn"]').click()
+        cy.validateTable(tableSelector, expectedRows, 10);
+    });
+
+    it('navigate to single quiz and back', () => {
+        for (let i = 0; i < 3; i++) {
+            const quizNum = i + 1
+            cy.createQuizDef(quizNum);
+            cy.createQuizQuestionDef(quizNum, 1)
+            cy.runQuizForUser(quizNum, defaultUser, [{selectedIndex: [i % 2 === 0 ? 0 : 1]}], true, 'My Answer')
+        }
+
+        cy.visit('/progress-and-rankings/my-quiz-attempts');
+
+        cy.get(`${tableSelector} [data-p-index="1"] [data-cy="viewQuizAttempt"]`).first().click()
+        cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 2')
+        cy.get('[data-cy="quizRunStatus"]').contains('Failed')
+        cy.get('[data-cy="backToQuizzesBtn"]').click()
+        cy.get(`${tableSelector} [data-p-index="1"] [data-cy="viewQuizAttempt"]`)
+
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="viewQuizAttempt"]`).first().click()
+        cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 3')
+        cy.get('[data-cy="quizRunStatus"]').contains('Passed')
+        cy.get('[data-cy="backToQuizzesBtn"]').click()
+        cy.get(`${tableSelector} [data-p-index="1"] [data-cy="viewQuizAttempt"]`)
+
+    });
 
 });
 

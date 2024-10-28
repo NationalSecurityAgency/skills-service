@@ -164,10 +164,13 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
         from UserQuizAttempt attempts, QuizDef quizDef
         where attempts.userId=:userId and 
             attempts.quizDefinitionRefId = quizDef.id and 
-            lower(quizDef.name) LIKE %:quizNameQuery% 
+            lower(quizDef.name) LIKE lower(CONCAT('%', :quizNameQuery, '%'))
      ''')
     @Nullable
-    Page<MyQuizAttempt> findUserQuizAttempts(String userId, String quizNameQuery, PageRequest pageRequest)
+    Page<MyQuizAttempt> findUserQuizAttempts(
+            @Param('userId') String userId,
+            @Param('quizNameQuery') String quizNameQuery,
+            PageRequest pageRequest)
 
     @Nullable
     @Query('''select quizAttempt from UserQuizAttempt quizAttempt where quizAttempt.quizDefinitionRefId = ?1 and quizAttempt.status = ?2''')

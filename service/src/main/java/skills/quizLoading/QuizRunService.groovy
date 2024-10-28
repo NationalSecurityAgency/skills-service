@@ -748,7 +748,7 @@ class QuizRunService {
     @Transactional
     TableResult getCurrentUserQuizRuns(String quizNameQuery, PageRequest pageRequest) {
         UserInfo currentUser = userInfoService.currentUser
-        Page<QuizRun> quizAttemptsPage = quizAttemptRepo.findUserQuizAttempts(currentUser.username, quizNameQuery ?: "",pageRequest)
+        Page<QuizRun> quizAttemptsPage = quizAttemptRepo.findUserQuizAttempts(currentUser.username, quizNameQuery ?: "", pageRequest)
         long count = quizAttemptsPage.getTotalElements()
         List<QuizRun> quizAttempts = quizAttemptsPage.getContent()
         return new TableResult(totalCount: count, data: quizAttempts, count: count)

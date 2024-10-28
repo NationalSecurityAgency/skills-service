@@ -132,7 +132,7 @@ const hasAttempts = computed(() => attemptHistory.value.length > 0)
                             outlined
                             @click="clearFilter"
                             :aria-label="`Reset filter for quiz/survey results`"
-                            data-cy="userResetBtn"/>
+                            data-cy="filterResetBtn"/>
             </div>
           </div>
 
