@@ -723,6 +723,7 @@ describe('Transcript export tests', () => {
       cy.createSkill(1, 1, i, { numPerformToCompletion: 1, selfReportingType: 'Approval' })
     }
 
+    const defaultUser = Cypress.env('oauthMode') ? 'foo-hydra': 'skills@skills.org'
     const user = Cypress.env('proxyUser')
     const today = moment.utc().format('YYYY-MM-DD')
     cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: user, date: 'now' })
@@ -737,9 +738,7 @@ describe('Transcript export tests', () => {
       expect(clean(doc.text)).to.include('Achieved On')
       expect(clean(doc.text)).to.include('Approver')
       expect(clean(doc.text)).to.include(today)
-      expect(clean(doc.text)).to.include('skills@skills.org')
-      expect(clean(doc.text)).to.include(today)
-      expect(clean(doc.text)).to.include('skills@skills.org')
+      expect(clean(doc.text)).to.include(defaultUser)
     })
   })
 
