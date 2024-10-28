@@ -785,7 +785,8 @@ class QuizDefService {
 
         List<UserGradedQuizQuestionResult> questions = dbQuestionDefs
                 .sort { it.displayOrder }
-                .collect { QuizQuestionDef questionDef ->
+                .withIndex()
+                .collect { QuizQuestionDef questionDef, int index ->
                     List<QuizAnswerDef> quizAnswerDefs = byQuestionId[questionDef.id]
 
                     boolean isTextInput = questionDef.type == QuizQuestionType.TextInput
@@ -832,6 +833,7 @@ class QuizDefService {
                     boolean needsGrading = answers.find {it.needsGrading } != null
                     return new UserGradedQuizQuestionResult(
                             id: questionDef.id,
+                            questionNum: index + 1,
                             question: InputSanitizer.unsanitizeForMarkdown(questionDef.question),
                             questionType: questionDef.type,
                             answers: answers,

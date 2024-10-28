@@ -413,7 +413,7 @@ Cypress.Commands.add('runQuizForTheCurrentUser', (quizNum = 1, quizAttemptInfo, 
     cy.runQuiz(quizNum, userId, quizAttemptInfo)
 });
 
-Cypress.Commands.add('gradeQuizAttempt', (quizNum = 1, isCorrect = true, feedback='Good answer') => {
+Cypress.Commands.add('gradeQuizAttempt', (quizNum = 1, isCorrect = true, feedback='Good answer', quizFinalResult = null) => {
     const quizId = `quiz${quizNum}`;
     let completed = false
     cy.request(`/admin/quiz-definitions/${quizId}/runs?query=&quizAttemptStatus=NEEDS_GRADING&limit=10&ascending=false&page=1&orderBy=started`)
@@ -429,7 +429,9 @@ Cypress.Commands.add('gradeQuizAttempt', (quizNum = 1, isCorrect = true, feedbac
                 });
             })
 
-            const expectedStatus = isCorrect ? "PASSED" : "FAILED";
+            quizFinalResult = quizFinalResult || isCorrect
+            const expectedStatus = quizFinalResult ? "PASSED" : "FAILED";
+            cy.log(`Waiting for attempt ${firstAttemptId} to be ${expectedStatus}`);
             cy.waitUntil(() => cy.request(`/admin/quiz-definitions/${quizId}/runs/${firstAttemptId}`).then((response) => response.body.status === expectedStatus), {
                 timeout: 60000, // waits up to 1 minutes
                 interval: 500 // performs the check every 500 ms, default to 200

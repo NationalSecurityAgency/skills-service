@@ -86,7 +86,7 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
               /
               <Tag>{{ runInfo.numQuestions }}</Tag>
             </div>
-            <div>Need <span class="text-info font-italic">{{ runInfo.numQuestionsToPass }}</span> questions to pass
+            <div>Need <span class="text-info font-italic">{{ runInfo.numQuestionsToPass }}</span> question{{ runInfo.numQuestionsToPass > 1 ? 's' : ''}} to pass
             </div>
         </quiz-single-run-card>
       </div>
@@ -104,19 +104,19 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
       </div>
     </div>
 
-    <div v-if="runInfo.questions" v-for="(q, index) in runInfo.questions" :key="q.id">
+    <div v-if="runInfo.questions" v-for="q in runInfo.questions" :key="q.id">
       <div class="mt-4">
-        <QuizRunQuestionCard :question="q" :question-num="index+1" :quiz-type="runInfo.quizType"/>
+        <QuizRunQuestionCard :question="q" :question-num="q.questionNum" :quiz-type="runInfo.quizType"/>
       </div>
     </div>
     <Message v-if="QuizStatus.isNeedsGrading(runInfo.status)" :closable="false" severity="warn" icon="fas fa-user-clock" data-cy="quizRequiresGradingMsg">
       <div>You completed the quiz but it <b>requires grading</b>.</div>
       <div class="mt-2">It will be assessed by a quiz administrator, so there is nothing to do but wait for the grades to roll in!</div>
     </Message>
-    <Message v-if="!runInfo.questions && QuizStatus.isFailed(runInfo.status)" severity="warn" :closable="false">
+    <Message v-if="!runInfo.questions && QuizStatus.isFailed(runInfo.status)" severity="warn" :closable="false" data-cy="allQuestionsNotDisplayedMsg">
       Questions and answers are not displayed so not to give away the correct answers.
     </Message>
-    <Message v-if="runInfo.questions && !runInfo.allQuestionsReturned" severity="warn" :closable="false" class="mt-5">
+    <Message v-if="runInfo.questions && !runInfo.allQuestionsReturned" severity="warn" :closable="false" class="mt-5" data-cy="someQuestionsNotDisplayedMsg">
       The rest of the questions and answers are not displayed so not to give away the correct answers.
     </Message>
   </div>
