@@ -58,7 +58,7 @@ describe('Display Single Quiz Attempt Tests', () => {
         cy.get('[data-cy="numSurveys"]').should('have.text', 1)
     })
 
-    it.only('has surveys and quizzes', () => {
+    it('has surveys and quizzes', () => {
         cy.createQuizzesForThisTest(5)
         cy.visit('/progress-and-rankings');
         cy.get('[data-cy="numQuizAndSurveyRuns"]').should('have.text', 5)
