@@ -15,14 +15,19 @@
  */
 package skills.intTests.adminGroups
 
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.storage.model.auth.RoleName
+import skills.storage.repos.UserRoleRepo
 
 import static skills.intTests.utils.AdminGroupDefFactory.createAdminGroup
 import static skills.intTests.utils.SkillsFactory.*
 
 class AdminGroupDefManagementSpecs extends DefaultIntSpec {
+
+    @Autowired
+    UserRoleRepo userRoleRepository
 
     def "no admin group definitions"() {
         when:
@@ -235,4 +240,58 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
                 && adminGroupQuizzesAndSurveysAfterRemove.availableQuizzes.find { it.quizId == quiz.quizId }
                 && adminGroupQuizzesAndSurveysAfterRemove.availableQuizzes.find { it.quizId == quiz2.quizId }
     }
+
+    def "removing an admin group removes all other members/owners from quiz/project admin roles except current user, who remains as a 'local' admin"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        createService(otherUserId)
+        def adminGroup = createAdminGroup(1)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        when:
+
+        skillsService.createAdminGroupDef(adminGroup)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
+        skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        def projectAdminsBeforeRemove = userRoleRepository.findAllByProjectIdIgnoreCase(proj.projectId)
+        def quizAdminsBeforeRemove = userRoleRepository.findAllByQuizIdIgnoreCase(quiz.quizId)
+        def adminGroupRolesBeforeRemove = userRoleRepository.findAllByAdminGroupIdIgnoreCase(adminGroup.adminGroupId)
+        def adminGroupDefsBeforeRemove = skillsService.getAdminGroupDefs()
+
+        skillsService.removeAdminGroupDef(adminGroup.adminGroupId)
+
+        def projectAdminsAfterRemove = userRoleRepository.findAllByProjectIdIgnoreCase(proj.projectId)
+        def quizAdminsAfterRemove = userRoleRepository.findAllByQuizIdIgnoreCase(quiz.quizId)
+        def adminGroupRolesAfterRemove = userRoleRepository.findAllByAdminGroupIdIgnoreCase(adminGroup.adminGroupId)
+        def adminGroupDefsAfterRemove = skillsService.getAdminGroupDefs()
+
+        then:
+        adminGroupDefsBeforeRemove && adminGroupDefsBeforeRemove.size() == 1 && adminGroupDefsBeforeRemove[0].adminGroupId == adminGroup.adminGroupId
+        projectAdminsBeforeRemove.size() == 2
+        projectAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == adminGroup.adminGroupId }
+        projectAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == adminGroup.adminGroupId }
+        quizAdminsBeforeRemove.size() == 2
+        quizAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup.adminGroupId }
+        quizAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup.adminGroupId }
+        adminGroupRolesBeforeRemove.size() == 6
+        adminGroupRolesBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER && it.adminGroupId == adminGroup.adminGroupId }
+        adminGroupRolesBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_MEMBER && it.adminGroupId == adminGroup.adminGroupId }
+
+
+        projectAdminsAfterRemove.size() == 1
+        projectAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == null }
+        quizAdminsAfterRemove.size() == 1
+        quizAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == null }
+        adminGroupRolesAfterRemove.size() == 0
+
+        !adminGroupDefsAfterRemove
+    }
+
 }
