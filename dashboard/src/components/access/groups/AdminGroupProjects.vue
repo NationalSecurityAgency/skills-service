@@ -27,11 +27,13 @@ import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import { useUserInfo } from '@/components/utils/UseUserInfo.js';
 import { userErrorState } from '@/stores/UserErrorState.js';
 import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js';
+import { useAdminGroupState } from '@/stores/UseAdminGroupState.js';
 
 const route = useRoute()
 const userInfo = useUserInfo();
 const errorState = userErrorState()
 const upgradeInProgressErrorChecker = useUpgradeInProgressErrorChecker()
+const adminGroupState = useAdminGroupState()
 
 const isLoading = ref(true)
 const availableProjects = ref([])
@@ -44,20 +46,20 @@ const removeProjectInfo = ref({
 
 const adminGroupId = computed(() => route.params.adminGroupId)
 
-const noProjectsAvailable = computed(() => {
-  return availableProjects.value && availableProjects.value.length === 0;
-})
-const projectsAssigned = computed(() => {
+const projectsAvailable = computed(() => {
   return availableProjects.value && availableProjects.value.length > 0;
 })
+const projectsAssigned = computed(() => {
+  return assignedProjects.value && assignedProjects.value.length > 0;
+})
 const emptyMessage = computed(() => {
-  if (!noProjectsAvailable.value) {
+  if (projectsAvailable.value) {
     return 'No results. Please refine your search string.'
   } else {
     if (projectsAssigned.value) {
-      return 'You currently do not administer any projects.'
+      return 'All of your available projects have already been assigned to this admin group.'
     }
-    return 'All of your available projects have already been assigned to this admin group.'
+    return 'You currently do not administer any projects.'
   }
 })
 const errNotification = ref({
@@ -83,6 +85,7 @@ const addProjectToAdminGroup = (project) => {
   AdminGroupsService.addProjectToAdminGroup(adminGroupId.value, project.projectId).then((res) => {
     availableProjects.value = res.availableProjects;
     assignedProjects.value = res.assignedProjects;
+    adminGroupState.adminGroup.numberOfProjects++;
   }).catch((e) => {
     handleError(e);
   }).finally(() => {
@@ -101,6 +104,7 @@ const removeProjectFromAdminGroup = () => {
       .then((res) => {
         availableProjects.value = res.availableProjects;
         assignedProjects.value = res.assignedProjects;
+        adminGroupState.adminGroup.numberOfProjects--;
       }).finally(() => {
     isLoading.value = false
   });
@@ -188,7 +192,7 @@ const clearErrorMessage = () => {
             </Column>
 
             <template #paginatorstart>
-              <span>Total Rows:</span> <span class="font-semibold" data-cy=adminGroupProjectsTableTotalRows>{{ assignedProjects.length }}</span>
+              <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ assignedProjects.length }}</span>
             </template>
           </SkillsDataTable>
         </div>
