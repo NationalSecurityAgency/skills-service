@@ -1174,4 +1174,99 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         !performedBefore
         !performedAfter
     }
+
+    void "approver information included on approvals"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills.each {
+            it.pointIncrement = 200
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(1)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date(), "Please approve this 1 ")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date() - 10, "Please approve this 2")
+
+        when:
+        def summaries = skillsService.getSubjectSummaryForUser(users[0], proj.projectId, subj.subjectId)
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 20, 1, 'requestedOn', false)
+        List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
+        skillsService.approve(proj.projectId, ids)
+
+        def approvedSummaries = skillsService.getSubjectSummaryForUser(users[0], proj.projectId, subj.subjectId)
+
+        then:
+        summaries.skills[0].selfReporting.approvedBy == ''
+        summaries.skills[0].selfReporting.approved == false
+        approvedSummaries.skills[0].selfReporting.approved == true
+        approvedSummaries.skills[0].selfReporting.approvedBy == 'skills@skills.org'
+    }
+
+    void "approver information not included on rejections"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills.each {
+            it.pointIncrement = 200
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(1)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date(), "Please approve this 1 ")
+
+        when:
+        def summaries = skillsService.getSubjectSummaryForUser(users[0], proj.projectId, subj.subjectId)
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 20, 1, 'requestedOn', false)
+        List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
+        skillsService.rejectSkillApprovals(proj.projectId, ids)
+
+        def approvedSummaries = skillsService.getSubjectSummaryForUser(users[0], proj.projectId, subj.subjectId)
+
+        then:
+        summaries.skills[0].selfReporting.approvedBy == ''
+        summaries.skills[0].selfReporting.approved == false
+        approvedSummaries.skills[0].selfReporting.approved == false
+        approvedSummaries.skills[0].selfReporting.approvedBy == ''
+    }
+
+    void "approver information not included if skill is not complete"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills.each {
+            it.pointIncrement = 200
+            it.numPerformToCompletion = 2
+            it.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(1)
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date(), "Please approve this 1 ")
+
+        when:
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 20, 1, 'requestedOn', false)
+        List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
+        skillsService.approve(proj.projectId, ids)
+
+        def approvedSummaries = skillsService.getSubjectSummaryForUser(users[0], proj.projectId, subj.subjectId)
+
+        then:
+        approvedSummaries.skills[0].selfReporting.approved == true
+        approvedSummaries.skills[0].selfReporting.approvedBy == ''
+    }
 }
