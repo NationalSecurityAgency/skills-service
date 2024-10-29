@@ -118,32 +118,12 @@ class SAML2IntegrationIT extends Specification{
 
     def cleanupSpec() {
         keycloak.stop()
+        System.clearProperty("skills.authorization.authMode");
+        System.clearProperty("spring.security.saml2.metadata-location");
+        System.clearProperty("spring.security.saml2.registrationId");
+        System.clearProperty("saml2.rp.signing.key-location");
+        System.clearProperty("saml2.rp.signing.cert-location");
     }
-
-    def "userExists should return true when user exists"() {
-        given: "A user exists in the system"
-        def username = "test"
-        userController.userExists(username) >> true
-
-        when: "userExists is called"
-        def result = userController.userExists(username)
-
-        then: "The result should be true"
-        result == true
-    }
-
-    def "userExists should return false when user does not exist"() {
-        given: "A user does not exist in the system"
-        def username = "unknownUser"
-        userController.userExists(username) >> false
-
-        when: "userExists is called"
-        def result = userController.userExists(username)
-
-        then: "The result should be false"
-        result == false
-    }
-
 
     def "grantFirstRoot should grant root privileges when no root user exists and user is authenticated"() {
         given: "No root user exists and a valid authenticated request"
@@ -154,6 +134,9 @@ class SAML2IntegrationIT extends Specification{
             String sessionCookie = getSessionCookieFromWebDriver(loginUrl, "test", "test")
 
             HttpHeaders headers = new HttpHeaders()
+
+
+
             headers.set("Cookie", sessionCookie)
 
             HttpEntity<Void> entity = new HttpEntity<>(headers)
@@ -195,6 +178,31 @@ class SAML2IntegrationIT extends Specification{
 
         then: "The user is successfully authenticated and can access the protected resource"
         assert protectedResponse.statusCode == HttpStatus.OK
+    }
+
+    def "userExists should return true when user exists"() {
+        given: "A user exists in the system"
+        def username = "test"
+        userController.userExists(username) >> true
+
+        when: "userExists is called"
+        def result = userController.userExists(username)
+
+        then: "The result should be true"
+        result == true
+    }
+
+
+    def "userExists should return false when user does not exist"() {
+        given: "A user does not exist in the system"
+        def username = "unknownUser"
+        userController.userExists(username) >> false
+
+        when: "userExists is called"
+        def result = userController.userExists(username)
+
+        then: "The result should be false"
+        result == false
     }
 
     def getSessionCookieFromWebDriver(String loginUrl, String username, String password) {
