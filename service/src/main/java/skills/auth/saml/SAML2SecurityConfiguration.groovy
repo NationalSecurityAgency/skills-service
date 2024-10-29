@@ -19,12 +19,15 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.*
+import org.springframework.core.io.Resource
+import org.springframework.core.io.ResourceLoader
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.ProviderManager
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.saml2.core.Saml2X509Credential
 import org.springframework.security.saml2.provider.service.registration.InMemoryRelyingPartyRegistrationRepository
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository
@@ -41,6 +44,12 @@ import skills.auth.SecurityMode
 import skills.auth.UserInfo
 import skills.auth.form.LocalUserDetailsService
 
+import java.security.KeyFactory
+import java.security.PrivateKey
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
+import java.security.spec.PKCS8EncodedKeySpec
+
 @Slf4j
 @Conditional(SecurityMode.SAML2Auth)
 @Component
@@ -54,14 +63,29 @@ class SAML2SecurityConfiguration{
     @Value('${spring.security.saml2.metadata-location}')
     String assertingPartyMetadataLocation;
 
-    @Value('#{"${spring.security.saml2.registrationId:okta-saml}"}')
+    @Value('#{"${spring.security.saml2.registrationId}"}')
     String registrationId;
+
+    // Custom properties using for configuring signing credentials
+
+    @Value('${saml2.rp.signing.key-location:#{null}}')
+    private String privateKeyLocation;
+
+    @Value('${saml2.rp.signing.cert-location:#{null}}')
+    private String certificateLocation;
 
     @Autowired
     PortalWebSecurityHelper portalWebSecurityHelper
 
     @Autowired
     SAML2Utils saml2Utils;
+
+    private final ResourceLoader resourceLoader;
+
+    @Autowired
+    public SAML2SecurityConfiguration(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 
 
      @Bean
@@ -89,9 +113,23 @@ class SAML2SecurityConfiguration{
     }
    @Bean
     RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
-        RelyingPartyRegistration registration = RelyingPartyRegistrations.fromMetadataLocation(assertingPartyMetadataLocation)
-                .registrationId(registrationId)
-                .build()
+        RelyingPartyRegistration registration = null;
+
+        if(privateKeyLocation!=null && certificateLocation!=null){
+            PrivateKey privateKey = loadPrivateKey(privateKeyLocation);
+            X509Certificate certificate = loadCertificate(certificateLocation);
+
+            // Create the signing credential
+            Saml2X509Credential signingCredential = new Saml2X509Credential(privateKey, certificate, Saml2X509Credential.Saml2X509CredentialType.SIGNING);
+            registration = RelyingPartyRegistrations.fromMetadataLocation(assertingPartyMetadataLocation)
+                    .registrationId(registrationId)
+                    .signingX509Credentials(c -> c.add(signingCredential))
+                    .build()
+        }else{
+            registration = RelyingPartyRegistrations.fromMetadataLocation(assertingPartyMetadataLocation)
+                    .registrationId(registrationId)
+                    .build()
+        }
         return new InMemoryRelyingPartyRegistrationRepository(registration);
     }
 
@@ -105,5 +143,32 @@ class SAML2SecurityConfiguration{
         return new LocalUserDetailsService();
     }
 
+    private PrivateKey loadPrivateKey(String location) throws Exception {
+        Resource resource = resourceLoader.getResource("classpath:"+location);
+        if (!resource.exists()) {
+            resource = resourceLoader.getResource("file:" + location);
+        }
+        try (InputStream inputStream = resource.getInputStream()) {
+            String key = new String(inputStream.readAllBytes())
+                    .replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "")
+                    .replaceAll("\\s", "");
+            byte[] keyBytes = Base64.getDecoder().decode(key);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            return keyFactory.generatePrivate(keySpec);
+        }
+    }
+
+    private X509Certificate loadCertificate(String location) throws Exception {
+        Resource resource = resourceLoader.getResource("classpath:"+location);
+        if (!resource.exists()) {
+            resource = resourceLoader.getResource("file:" + location);
+        }
+        try (InputStream inputStream = resource.getInputStream()) {
+            CertificateFactory factory = CertificateFactory.getInstance("X.509");
+            return (X509Certificate) factory.generateCertificate(inputStream);
+        }
+    }
 
 }
