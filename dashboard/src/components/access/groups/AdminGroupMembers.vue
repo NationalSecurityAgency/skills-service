@@ -30,7 +30,7 @@ const updateMemberCount = (event, updateValue) => {
   if (event.role === 'ROLE_ADMIN_GROUP_MEMBER') {
     adminGroupState.adminGroup.numberOfMembers += updateValue
   } else if (event.role === 'ROLE_ADMIN_GROUP_OWNER') {
-    adminGroupState.adminGroup.numberOfOwers += updateValue
+    adminGroupState.adminGroup.numberOfOwners += updateValue
   }
 }
 </script>

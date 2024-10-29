@@ -25,9 +25,11 @@ import Column from 'primevue/column';
 import NoContent2 from '@/components/utils/NoContent2.vue';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import { useUserInfo } from '@/components/utils/UseUserInfo.js';
+import { useAdminGroupState } from '@/stores/UseAdminGroupState.js';
 
 const route = useRoute()
 const userInfo = useUserInfo();
+const adminGroupState = useAdminGroupState()
 
 const isLoading = ref(true)
 const availableQuizzes = ref([])
@@ -40,20 +42,20 @@ const removeQuizInfo = ref({
 
 const adminGroupId = computed(() => route.params.adminGroupId)
 
-const noQuizzesAvailable = computed(() => {
-  return availableQuizzes.value && availableQuizzes.value.length === 0;
-})
-const quizzesAssigned = computed(() => {
+const quizzesAvailable = computed(() => {
   return availableQuizzes.value && availableQuizzes.value.length > 0;
 })
+const quizzesAssigned = computed(() => {
+  return assignedQuizzes.value && assignedQuizzes.value.length > 0;
+})
 const emptyMessage = computed(() => {
-  if (!noQuizzesAvailable.value) {
+  if (quizzesAvailable.value) {
     return 'No results. Please refine your search string.'
   } else {
     if (quizzesAssigned.value) {
-      return 'You currently do not administer any quizzes or surveys.'
+      return 'All of your available quizzes and surveys have already been assigned to this admin group.'
     }
-    return 'All of your available quizzes and surveys have already been assigned to this admin group.'
+    return 'You currently do not administer any quizzes or surveys.'
   }
 })
 
@@ -76,6 +78,7 @@ const addQuizToAdminGroup = (quiz) => {
       .then((res) => {
         availableQuizzes.value = res.availableQuizzes;
         assignedQuizzes.value = res.assignedQuizzes;
+        adminGroupState.adminGroup.numberOfQuizzesAndSurveys++;
       }).finally(() => {
     isLoading.value = false
   });
@@ -92,6 +95,7 @@ const removeQuizFromAdminGroup = () => {
       .then((res) => {
         availableQuizzes.value = res.availableQuizzes;
         assignedQuizzes.value = res.assignedQuizzes;
+        adminGroupState.adminGroup.numberOfQuizzesAndSurveys--;
       }).finally(() => {
     isLoading.value = false
   });
@@ -161,7 +165,7 @@ const removeQuizFromAdminGroup = () => {
             </Column>
 
             <template #paginatorstart>
-              <span>Total Rows:</span> <span class="font-semibold" data-cy=adminGroupQuizzesTableTotalRows>{{ assignedQuizzes.length }}</span>
+              <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ assignedQuizzes.length }}</span>
             </template>
           </SkillsDataTable>
         </div>

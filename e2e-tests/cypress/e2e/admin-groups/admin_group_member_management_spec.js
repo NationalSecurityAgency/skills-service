@@ -36,6 +36,7 @@ describe('Admin Group Member Management Tests', () => {
         cy.visit('/administrator/adminGroups/adminGroup1');
         cy.wait('@loadUserRoles');
 
+        cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '1');
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
         cy.wait(500);
@@ -45,6 +46,7 @@ describe('Admin Group Member Management Tests', () => {
         cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
         cy.get('[data-cy="addUserBtn"]').click()
         cy.get('[data-cy="userCell_root@skills.org"]')
+        cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '2');
 
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
@@ -79,6 +81,7 @@ describe('Admin Group Member Management Tests', () => {
           cy.visit('/administrator/adminGroups/adminGroup1');
           cy.wait('@loadUserRoles');
 
+          cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '3');
           cy.get(`${tableSelector} [data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.be.enabled')
           cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('be.enabled')
           cy.get('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
@@ -86,15 +89,86 @@ describe('Admin Group Member Management Tests', () => {
           cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').click()
 
           cy.get('.p-confirm-dialog').should('be.visible').should('include.text', 'Are you absolutely sure you want to remove Firstname LastName (user1) as a Group Member?');
-          cy.contains('YES, Delete It')
-                .click();
+          cy.contains('YES, Delete It').click();
 
+            cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '2');
           cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.be.enabled')
           cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('not.exist')
           cy.get('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
 
           cy.get('[data-cy="existingUserInput"] [data-pc-section="input"]').should('have.focus')
         });
+    })
+
+    it('add group member', function () {
+
+        cy.createAdminGroupDef(1, { name: 'My Awesome Admin Group' });
+
+        cy.visit('/administrator/adminGroups/adminGroup1');
+        cy.wait('@loadUserRoles');
+
+        cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '1');
+        cy.get('[data-cy="existingUserInput"]').type('root');
+        cy.wait('@suggest');
+        cy.wait(500);
+        cy.get('[data-pc-section="item"]').contains('root@skills.org').click();
+        cy.get('[data-cy="userRoleSelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Group Member"]').click();
+        cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
+        cy.get('[data-cy="addUserBtn"]').click()
+        cy.get('[data-cy="userCell_root@skills.org"]')
+        cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '2');
+
+        cy.get('[data-cy="existingUserInput"]').type('root');
+        cy.wait('@suggest');
+        cy.wait(500);
+        cy.contains('No results found')
+    });
+
+    it('delete group member', function () {
+        cy.fixture('vars.json')
+            .then((vars) => {
+                const pass = 'password';
+                cy.register('user1', pass);
+                cy.register('user2', pass);
+                cy.fixture('vars.json')
+                    .then((vars) => {
+                        if (!Cypress.env('oauthMode')) {
+                            cy.log('NOT in oauthMode, using form login');
+                            cy.login(vars.defaultUser, vars.defaultPass);
+                        } else {
+                            cy.log('oauthMode, using loginBySingleSignOn');
+                            cy.loginBySingleSignOn();
+                        }
+                    });
+                cy.createAdminGroupDef(1, { name: 'My Awesome Admin Group' });
+
+                const oauthMode = Cypress.env('oauthMode');
+                const defaultUser = oauthMode ? Cypress.env('proxyUser') : vars.defaultUser;
+
+                cy.request('PUT', `/admin/admin-group-definitions/adminGroup1/users/user1/roles/ROLE_ADMIN_GROUP_MEMBER`);
+                cy.request('PUT', `/admin/admin-group-definitions/adminGroup1/users/user2/roles/ROLE_ADMIN_GROUP_MEMBER`);
+
+                cy.visit('/administrator/adminGroups/adminGroup1');
+                cy.wait('@loadUserRoles');
+
+                cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '3');
+                cy.get(`${tableSelector} [data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.be.enabled')
+                cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('be.enabled')
+                cy.get('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
+
+                cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').click()
+
+                cy.get('.p-confirm-dialog').should('be.visible').should('include.text', 'Are you absolutely sure you want to remove Firstname LastName (user1) as a Group Member?');
+                cy.contains('YES, Delete It').click();
+
+                cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '2');
+                cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.be.enabled')
+                cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('not.exist')
+                cy.get('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
+
+                cy.get('[data-cy="existingUserInput"] [data-pc-section="input"]').should('have.focus')
+            });
     })
 
     it('cancelling delete safety check returns focus to the delete button', function () {
