@@ -289,7 +289,7 @@ defineExpose({
     <removal-validation
       v-if="deleteAdminGroupInfo.showDialog"
       :item-name="deleteAdminGroupInfo.adminGroupDef.name"
-      :item-type="deleteAdminGroupInfo.adminGroupDef.type"
+      item-type="Admin Group"
       v-model="deleteAdminGroupInfo.showDialog"
       :enable-return-focus="true"
       @do-remove="deleteAdminGroup">

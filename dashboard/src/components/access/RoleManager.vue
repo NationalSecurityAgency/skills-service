@@ -249,12 +249,13 @@ function deleteUserRoleConfirm(row) {
 
 function deleteUserRole(row) {
   table.value.options.busy = true;
-  AccessService.deleteUserRole(row.projectId, row.userId, row.roleName).then(() => {
+  AccessService.deleteUserRole(row.projectId, row.userId, row.roleName, props.adminGroupId).then(() => {
     announcer.polite(`${getRoleDisplay(row.roleName)} role was removed from ${getUserDisplay(row)}`);
     data.value = data.value.filter((item) => item.userId !== row.userId);
     emit('role-deleted', { userId: row.userId, role: row.roleName });
     table.value.options.busy = false;
     table.value.options.pagination.totalRows = data.value.length;
+    document.getElementById('existingUserInput').firstElementChild.focus()
   });
 }
 
@@ -400,7 +401,7 @@ defineExpose({
                   </SkillsButton>
                   <SkillsButton @click="deleteUserRoleConfirm(slotProps.data)"
                                 :disabled="!notCurrentUser(slotProps.data.userId)"
-                                id="removeUserBtn"
+                                :id="`removeUserBtn_${slotProps.data.userId}`"
                                 :track-for-focus="true"
                                 :aria-label="`remove access role from user ${getUserDisplay(slotProps.data)}`"
                                 data-cy="removeUserBtn" icon="fas fa-trash" label="Delete" size="small">

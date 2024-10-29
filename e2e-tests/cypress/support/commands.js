@@ -563,6 +563,22 @@ Cypress.Commands.add("createRatingQuestionDef", (quizNum = 1, questionNum = 1, q
     }, overrideProps));
 });
 
+Cypress.Commands.add("createAdminGroupDef", (adminGroupNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/app/admin-group-definitions/adminGroup${adminGroupNum}`, Object.assign({
+        adminGroupId: `adminGroup${adminGroupNum}`,
+        name: `This is admin group ${adminGroupNum}`,
+    }, overrideProps));
+});
+
+Cypress.Commands.add("addProjectToAdminGroupDef", (adminGroupNum = 1, projNum = 1) => {
+    cy.request('POST', `/admin/admin-group-definitions/adminGroup${adminGroupNum}/projects/proj${projNum}`, {});
+});
+
+Cypress.Commands.add("addQuizToAdminGroupDef", (adminGroupNum = 1, quizNum = 1) => {
+    cy.request('POST', `/admin/admin-group-definitions/adminGroup${adminGroupNum}/quizzes/quiz${quizNum}`, {});
+});
+
+
 Cypress.Commands.add("createProject", (projNum = 1, overrideProps = {}) => {
     cy.request('POST', `/app/projects/proj${projNum}`, Object.assign({
         projectId: `proj${projNum}`,

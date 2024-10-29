@@ -83,7 +83,7 @@ export default {
     }
     if (adminGroupId) {
       return axios.delete(
-          `/admin/admin-group-definitions/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userId)}/roles/${encodeURIComponent(roleName)}`
+          `/admin/admin-group-definitions/${encodeURIComponent(adminGroupId)}/users/${encodeURIComponent(userId)}/roles/${encodeURIComponent(roleName)}`
       )
     }
     if (hasSupportedRole(roleName)) {

@@ -130,6 +130,7 @@ const clearErrorMessage = () => {
       <loading-container :is-loading="isLoading" class="">
         <div class="w-full px-3 py-4">
           <SkillsDropDown
+              aria-label="Select Project to add to Admin Group"
               name="associatedProject"
               data-cy="projectSelector"
               showClear

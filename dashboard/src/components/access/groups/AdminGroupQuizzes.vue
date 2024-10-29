@@ -108,6 +108,7 @@ const removeQuizFromAdminGroup = () => {
           <SkillsDropDown
               name="associatedQuiz"
               data-cy="quizSelector"
+              aria-label="Select Quiz/Survey to add to Admin Group"
               showClear
               filter
               optionLabel="name"
