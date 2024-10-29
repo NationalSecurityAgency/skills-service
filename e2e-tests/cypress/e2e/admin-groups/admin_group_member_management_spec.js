@@ -128,7 +128,7 @@ describe('Admin Group Member Management Tests', () => {
         cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('have.focus')
     })
 
-    it.only('paging users', function () {
+    it('paging users', function () {
         cy.fixture('vars.json')
             .then((vars) => {
                 const pass = 'password';
