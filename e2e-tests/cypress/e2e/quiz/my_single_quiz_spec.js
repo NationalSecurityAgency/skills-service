@@ -294,7 +294,7 @@ describe('Display Single Quiz Attempt Tests', () => {
         cy.get('[data-cy="quizRequiresGradingMsg"]')
     });
 
-    it('passed quiz show its correct answers ', () => {
+    it('completed survey answers answers ', () => {
         const quizNum = 1
         cy.createSurveyDef(quizNum);
         cy.createSurveyMultipleChoiceQuestionDef(quizNum, 1, { questionType: 'SingleChoice' });

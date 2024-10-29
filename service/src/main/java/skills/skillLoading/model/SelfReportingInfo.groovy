@@ -34,5 +34,7 @@ class SelfReportingInfo {
     Integer numQuizQuestions
     Boolean quizNeedsGrading = false
     Date quizNeedsGradingAttemptDate
+    Boolean quizOrSurveyPassed = false
+    Integer quizAttemptId = null
 
 }

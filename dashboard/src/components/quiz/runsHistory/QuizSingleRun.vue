@@ -26,6 +26,10 @@ import QuizSingleRunCard from "@/components/quiz/runsHistory/QuizSingleRunCard.v
 
 const props = defineProps({
   runInfo: Object,
+  showCards: {
+    type: Boolean,
+    default: true,
+  },
   showUserCard: {
     type: Boolean,
     default: true,
@@ -53,7 +57,7 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
 
 <template>
   <div>
-    <div class="flex flex-column md:flex-row flex-wrap gap-3">
+    <div v-if="showCards" class="flex flex-column md:flex-row flex-wrap gap-3">
       <div v-if="showUserCard" class="flex-1 w-min-12rem">
         <quiz-single-run-card title="User" data-cy="userInfoCard">
           <div class="text-color-success font-bold">{{ runInfo.userIdForDisplay }}</div>
@@ -105,7 +109,7 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
     </div>
 
     <div v-if="runInfo.questions" v-for="q in runInfo.questions" :key="q.id">
-      <div class="mt-4">
+      <div :class="{ 'mt-4' : showCards }">
         <QuizRunQuestionCard :question="q" :question-num="q.questionNum" :quiz-type="runInfo.quizType"/>
       </div>
     </div>

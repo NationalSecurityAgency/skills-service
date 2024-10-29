@@ -23,6 +23,7 @@ import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsD
 import JustificationInput from '@/skills-display/components/skill/JustificationInput.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
+import QuizFooter from "@/skills-display/components/skill/QuizFooter.vue";
 
 const props = defineProps({
   skill: Object
@@ -49,10 +50,6 @@ const isHonorSystem = computed(() => skillInternal.value.selfReporting && skillI
 const isApprovalRequired = computed(() => skillInternal.value.selfReporting && skillInternal.value.selfReporting.type === 'Approval')
 const isJustificationRequired = computed(() => skillInternal.value.selfReporting && skillInternal.value.selfReporting.justificationRequired)
 const isRejected = computed(() => skillInternal.value.selfReporting && skillInternal.value.selfReporting.rejectedOn !== null && skillInternal.value.selfReporting.rejectedOn !== undefined)
-const isQuizSkill = computed(() => skillInternal.value && skillInternal.value.selfReporting && skillInternal.value.selfReporting.type === 'Quiz')
-const isSurveySkill = computed(() => skillInternal.value && skillInternal.value.selfReporting && skillInternal.value.selfReporting.type === 'Survey')
-const isQuizOrSurveySkill = computed(() => isQuizSkill.value || isSurveySkill.value)
-const isQuizPendingGrading = computed(() => isQuizOrSurveySkill.value && skillInternal.value.selfReporting?.quizNeedsGrading)
 const isMotivationalSkill = computed(() => skillInternal.value && skillInternal.value.isMotivationalSkill)
 
 const showApprovalJustification = ref(false)
@@ -66,15 +63,7 @@ const displayApprovalJustificationInput = () => {
   showApprovalJustification.value = true
   // nextTick(() => justificationInput.value.focusOnMarkdownEditor())
 }
-const navToQuiz = () => {
-  skillsDisplayInfo.routerPush('quizPage',
-    {
-      skillInternal: skillInternal.value.subjectId,
-      skillId: skillInternal.value.skillId,
-      quizId: skillInternal.value.selfReporting.quizId,
-    }
-  )
-}
+
 const isPendingApproval = () => {
   const res = skillInternal.value.selfReporting && skillInternal.value.selfReporting.requestedOn !== null && skillInternal.value.selfReporting.requestedOn !== undefined && !isRejected.value
   return res
@@ -182,47 +171,7 @@ defineExpose({
 
 <template>
   <div>
-    <div v-if="isQuizOrSurveySkill && selfReportAvailable" class="mb-2 alert alert-info">
-      <Message :closable="false">
-        <template #container>
-          <div class="p-3">
-            <div v-if="!isQuizPendingGrading" class="flex gap-2 align-items-center" data-cy="takeQuizMsg">
-              <div>
-                <i class="fas fa-user-check text-2xl" aria-hidden="true"></i>
-              </div>
-              <div class="flex-1" data-cy="quizAlert">
-                {{ isSurveySkill ? 'Complete' : 'Pass' }} the<span
-                v-if="skillInternal.selfReporting.numQuizQuestions && skillInternal.selfReporting.numQuizQuestions > 0">&nbsp;{{
-                  skillInternal.selfReporting.numQuizQuestions
-                }}-question</span>&nbsp;<b>{{ skillInternal.selfReporting.quizName
-                }}</b>&nbsp;{{ isSurveySkill ? 'Survey' : 'Quiz' }} and earn <span class="font-size-1"><Tag
-                severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> points!
-              </div>
-              <SkillsButton
-                :label="isQuizSkill ? 'Take Quiz' : 'Complete Survey'"
-                icon="far fa-arrow-alt-circle-right"
-                v-if="selfReportAvailable && isQuizOrSurveySkill"
-                class="skills-theme-btn"
-                :disabled="selfReportDisabled"
-                severity="info"
-                outlined
-                size="small"
-                @click="navToQuiz"
-                data-cy="takeQuizBtn" />
-            </div>
-            <div v-if="isQuizPendingGrading" class="flex gap-2 align-items-center" data-cy="quizRequiresGradingMsg">
-              <div>
-                <i class="fas fa-user-clock text-2xl" aria-hidden="true" />
-              </div>
-              <div>
-                <div>You completed the quiz on <Tag>{{ timeUtils.formatDate(skillInternal.selfReporting.quizNeedsGradingAttemptDate) }}</Tag> but it <b>requires grading</b>.</div>
-                <div class="mt-3">It will be assessed by a quiz administrator, so there is nothing to do but wait for the grades to roll in!</div>
-              </div>
-            </div>
-          </div>
-        </template>
-      </Message>
-    </div>
+    <quiz-footer :skill="skillInternal"/>
     <Message v-if="isHonorSystem && selfReportAvailable" class="mb-2 alert alert-info">
       <template #container>
         <div class="flex gap-2 p-3 align-content-center">
@@ -376,13 +325,6 @@ defineExpose({
             </div>
           </Message>
         </div>
-        <!--        <div class="col-auto">-->
-        <!--          <SkillsButton-->
-        <!--            icon="fas fa-times-circle"-->
-        <!--            aria-label="Close"-->
-        <!--            @click="selfReport.msgHidden = true"-->
-        <!--            data-cy="dismissSuccessfulSubmissionBtn" />-->
-        <!--        </div>-->
       </div>
     </div>
 
