@@ -20,6 +20,7 @@ import org.apache.commons.lang3.BooleanUtils
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.env.Environment
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.web.bind.annotation.*
 import skills.HealthChecker
@@ -66,9 +67,6 @@ class PublicConfigController {
     @Value('${skills.config.ui.enablePageVisitReporting:#{false}}')
     Boolean enablePageVisitReporting
 
-    @Value('${spring.security.saml2.registrationId}')
-    String saml2RegistrationId;
-
     @Autowired
     SettingsService settingsService
 
@@ -86,6 +84,9 @@ class PublicConfigController {
 
     @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
+
+    @Autowired
+    private Environment environment;
 
     @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
@@ -112,7 +113,8 @@ class PublicConfigController {
         }
 
         if(authMode.name() == 'SAML2'){
-            res['saml2RegistrationId'] = saml2RegistrationId;
+            String regId = environment.getProperty("spring.security.saml2.registrationId");
+            res['saml2RegistrationId'] = regId;
         }
         return res
     }
