@@ -202,7 +202,7 @@ defineExpose({
         </div>
       </template>
     </Message>
-    <Message v-else-if="!isPointsEarned && isHonorSystem && selfReportAvailable && !firstReport && isMotivationalSkill">
+    <Message v-else-if="isHonorSystem && selfReportAvailable && !firstReport && isMotivationalSkill && skillInternal.expirationDate">
       <template #container>
         <div class="flex gap-2 p-3 align-content-center">
           <div>
@@ -330,9 +330,7 @@ defineExpose({
                 <b>{{ timeUtils.formatDate(skillInternal.selfReporting.requestedOn, 'MM/DD/YYYY') }}</b> was rejected
                 <span
                   class="text-info">{{ timeUtils.relativeTime(skillInternal.selfReporting.rejectedOn) }}</span>.
-                <span
-                  v-if="skillInternal.selfReporting.rejectionMsg">The reason is: <b>"{{ skillInternal.selfReporting.rejectionMsg
-                  }}"</b></span>
+                <span v-if="skillInternal.selfReporting.rejectionMsg">The reason is: <b>"{{ skillInternal.selfReporting.rejectionMsg}}"</b></span>
               </div>
               <div class="">
                 <SkillsButton
