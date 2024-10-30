@@ -49,5 +49,12 @@ module.exports = defineConfig({
     "visualRegressionBaseDirectory": "cypress/visualRegression/base",
     "visualRegressionDiffDirectory": "cypress/visualRegression/diff",
     "visualRegressionGenerateDiff": "fail"
-  }
+  },
+  reporter: 'mochawesome',
+  reporterOptions: {
+    reportDir: 'cypress/results',
+    overwrite: false,
+    html: false,
+    json: true,
+  },
 })

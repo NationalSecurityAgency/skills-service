@@ -53,3 +53,7 @@ service/src/main/resources/public/**
 .run
 /dashboard/.vite/
 /service/config/application.properties
+
+/e2e-tests/cypress/results/**
+/e2e-tests/mochawesome-report/**
+/e2e-tests/mochawesome.json

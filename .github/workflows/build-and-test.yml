@@ -144,13 +144,13 @@ jobs:
           npm run cyServices:start
           cd ..
 
-#      - name: Run Cypress tests
-#        run: |
-#          cd e2e-tests
-#          ../.github/scripts/runSubsetOfCypressTests.sh -t 10 -c ${{ matrix.container }}
-#          cd ..
-#        env:
-#          ELECTRON_EXTRA_LAUNCH_ARGS: '--disable-gpu'
+      - name: Run Cypress tests
+        run: |
+          cd e2e-tests
+          ../.github/scripts/runSubsetOfCypressTests.sh -t 10 -c ${{ matrix.container }}
+          cd ..
+        env:
+          ELECTRON_EXTRA_LAUNCH_ARGS: '--disable-gpu'
 
       - name: Display Job Summary
         run: |
@@ -159,20 +159,6 @@ jobs:
           echo "- Lets add a bullet point" >> $GITHUB_STEP_SUMMARY
           echo "- Lets add a second bullet point" >> $GITHUB_STEP_SUMMARY
           echo "- How about a third one?" >> $GITHUB_STEP_SUMMARY
-          echo "| Test    | Passsed | Failed |" >> $GITHUB_STEP_SUMMARY
-          echo "| ------- | ------- | ------- |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test 1  | 5 | 0 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test 2  | 4 | 3 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test 3  | 4 | 7 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test 1  | 5 | 0 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test 2  | 4 | 3 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test 3  | 4 | 7 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test 1  | 5 | 0 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test 2  | 4 | 3 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test 3  | 4 | 7 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test 1  | 5 | 0 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test 2  | 4 | 3 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test 3  | 4 | 7 |" >> $GITHUB_STEP_SUMMARY
 
       - name: upload result artifacts
         if: ${{ always() }}
@@ -186,11 +172,47 @@ jobs:
             ./e2e-tests/cypress/visualRegression/diff
             ./font-list.txt
 
+      - name: merge mochawesome results
+        run: |
+          cd e2e-tests
+          npx mochawesome-merge "cypress/results/*.json" > mochawesome.json
+          mv mochawesome.json mochawesome-${{ matrix.container }}.json
+          cd ../
+
+      - name: Upload mochawesome results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mochawesome(${{ matrix.container }}).json
+          path: |
+            ./e2e-tests/mochawesome-${{ matrix.container }}.json
+
       - name: verify that new screenshot snapshots were not created
         run: |
           cd e2e-tests
           npm run verifyThatNewSnapshotsAreNotCreated
 
+  combine-cypress-mochawesome-results:
+    runs-on: ubuntu-latest
+    needs: [ui-tests-against-postgres]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.17.0'
+
+      - name: Print Versions
+        run: |
+          mvn --version
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: mochawesome-artifacts
+          pattern: mochawesome*
+          merge-multiple: true
+      - run: ls -R mochawesome-artifacts
 
   ui-tests-against-postgres-cypress-dashboard:
     if: github.event_name == 'schedule-never'
