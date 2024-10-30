@@ -262,23 +262,67 @@ class QuizApi_LoadSkillInfoSpecs extends DefaultIntSpec {
         skillRes.selfReporting.numQuizQuestions == 2
         skillRes.selfReporting.quizNeedsGrading == false
         skillRes.selfReporting.quizNeedsGradingAttemptDate == null
+        skillRes.selfReporting.quizOrSurveyPassed == false
+        skillRes.selfReporting.quizAttemptId == null
 
         skillRes_t1.selfReporting.quizNeedsGrading == false
         skillRes_t1.selfReporting.quizNeedsGradingAttemptDate == null
+        skillRes_t1.selfReporting.quizOrSurveyPassed == false
+        skillRes_t1.selfReporting.quizAttemptId == null
 
         skillRes_t2.selfReporting.quizNeedsGrading == false
         skillRes_t2.selfReporting.quizNeedsGradingAttemptDate == null
+        skillRes_t2.selfReporting.quizOrSurveyPassed == false
+        skillRes_t2.selfReporting.quizAttemptId == null
 
         skillRes_t3.selfReporting.quizNeedsGrading == true
         skillRes_t3.selfReporting.quizNeedsGradingAttemptDate != null
+        skillRes_t3.selfReporting.quizOrSurveyPassed == false
+        skillRes_t3.selfReporting.quizAttemptId == quizAttempt.id
 
         skillRes_t4.selfReporting.quizNeedsGrading == true
         skillRes_t4.selfReporting.quizNeedsGradingAttemptDate != null
+        skillRes_t4.selfReporting.quizOrSurveyPassed == false
+        skillRes_t4.selfReporting.quizAttemptId == quizAttempt.id
 
         skillRes_t5.selfReporting.quizNeedsGrading == false
         skillRes_t5.selfReporting.quizNeedsGradingAttemptDate == null
+        skillRes_t2.selfReporting.quizOrSurveyPassed == false
+        skillRes_t2.selfReporting.quizAttemptId == null
     }
 
+    def "return quiz grading information for a single skill - passed"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skills = createSkills(3, 1, 1, 100, 1)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz.quizId
+        skillsService.createSkills(skills)
+
+        String user = skillsService.userName
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        when:
+        def skillRes = skillsService.getSingleSkillSummary(user, proj.projectId, skills[0].skillId)
+        then:
+        skillRes.selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        skillRes.selfReporting.quizId == quiz.quizId
+        skillRes.selfReporting.quizName == quiz.name
+        skillRes.selfReporting.numQuizQuestions == 1
+        skillRes.selfReporting.quizNeedsGrading == false
+        skillRes.selfReporting.quizNeedsGradingAttemptDate == null
+        skillRes.selfReporting.quizOrSurveyPassed == true
+        skillRes.selfReporting.quizAttemptId == quizAttempt.id
+    }
 }
 
 

@@ -106,6 +106,75 @@ describe('My Quizzes Accessibility Tests', () => {
             cy.injectAxe();
             cy.customA11y();
         })
+
+        it(`display quiz results on completed skill${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.createQuizDef(1, { name: 'Trivia Knowledge' });
+            cy.createQuizQuestionDef(1, 1)
+            cy.createQuizMultipleChoiceQuestionDef(1, 2);
+            cy.createTextInputQuestionDef(1, 3)
+            cy.runQuizForUser(1, defaultUser, [{selectedIndex: [0]}, {selectedIndex: [0, 2]}, {selectedIndex: [0]}], true, 'My Answer')
+            cy.gradeQuizAttempt(1, true)
+
+            cy.createProject(1)
+            cy.createSubject(1,1)
+            cy.createSkill(1, 1, 1,
+                {
+                    selfReportingType: 'Quiz',
+                    quizId: 'quiz1',
+                    pointIncrement: '150',
+                    numPerformToCompletion: 1,
+                });
+
+            cy.cdVisit('/subjects/subj1/skills/skill1');
+            cy.get('[data-cy="quizCompletedMsg"]').contains('Congratulations! You have passed Trivia Knowledge Quiz')
+            cy.get('[data-cy="viewQuizAttemptInfo"]').should('be.enabled').click()
+            cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
+            cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('This is a question # 2')
+            cy.get('[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]').contains('This is a question # 3')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y();
+        })
+
+        it(`display survey results on completed skill${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            const quizNum = 1
+            cy.createSurveyDef(quizNum);
+            cy.createSurveyMultipleChoiceQuestionDef(quizNum, 1, { questionType: 'SingleChoice' });
+            cy.createSurveyMultipleChoiceQuestionDef(quizNum, 2);
+            cy.createTextInputQuestionDef(quizNum, 3)
+            cy.createRatingQuestionDef(quizNum, 4)
+            cy.runQuizForUser(1, defaultUser, [
+                {selectedIndex: [0]},
+                {selectedIndex: [0, 2]},
+                {selectedIndex: [0]},
+                {selectedIndex: [0]},
+            ], true, 'My Answer')
+
+            cy.createProject(1)
+            cy.createSubject(1,1)
+            cy.createSkill(1, 1, 1,
+                {
+                    selfReportingType: 'Quiz',
+                    quizId: 'quiz1',
+                    pointIncrement: '150',
+                    numPerformToCompletion: 1,
+                });
+
+            cy.cdVisit('/subjects/subj1/skills/skill1');
+            cy.get('[data-cy="viewQuizAttemptInfo"]').should('be.enabled').click()
+            cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
+            cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('This is a question # 2')
+            cy.get('[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]').contains('This is a question # 3')
+            cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('This is a question # 4')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y();
+        })
+
     })
 
 });
