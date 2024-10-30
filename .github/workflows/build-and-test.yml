@@ -217,7 +217,7 @@ jobs:
           ls -R mochawesome-artifacts
           npm install
           npx mochawesome-merge "mochawesome-artifacts/*.json" > mochawesome.json
-          npx marge cypress/results/mochawesome.json
+          npx marge mochawesome.json
           cd ../
 
       - name: upload result artifacts
