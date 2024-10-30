@@ -126,7 +126,7 @@ class QuizToSkillService {
     }
 
     private boolean doesQuizHasAtLeastOneRun(QuizDef quizDef) {
-        List<UserQuizAttempt> firstPassedRun = quizAttemptRepo.findByQuizRefIdByStatus(quizDef.id, UserQuizAttempt.QuizAttemptStatus.PASSED, PageRequest.of(0, 1))
+        List<UserQuizAttempt> firstPassedRun = quizAttemptRepo.findByQuizRefIdByStatus(quizDef.id, [UserQuizAttempt.QuizAttemptStatus.PASSED], PageRequest.of(0, 1))
         return firstPassedRun
     }
 

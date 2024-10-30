@@ -20,6 +20,8 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.PublicProps
@@ -29,7 +31,9 @@ import skills.controller.PublicPropsBasedValidator
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
+import skills.controller.result.model.QuizRun
 import skills.controller.result.model.QuizSkillResult
+import skills.controller.result.model.TableResult
 import skills.quizLoading.model.*
 import skills.services.CustomValidationResult
 import skills.services.CustomValidator
@@ -739,6 +743,15 @@ class QuizRunService {
             }
         }
         return res
+    }
+
+    @Transactional
+    TableResult getCurrentUserQuizRuns(String quizNameQuery, PageRequest pageRequest) {
+        UserInfo currentUser = userInfoService.currentUser
+        Page<QuizRun> quizAttemptsPage = quizAttemptRepo.findUserQuizAttempts(currentUser.username, quizNameQuery ?: "", pageRequest)
+        long count = quizAttemptsPage.getTotalElements()
+        List<QuizRun> quizAttempts = quizAttemptsPage.getContent()
+        return new TableResult(totalCount: count, data: quizAttempts, count: count)
     }
 
     private QuizDef getQuizDef(String quizId) {

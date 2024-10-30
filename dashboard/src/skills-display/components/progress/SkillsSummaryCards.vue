@@ -20,6 +20,8 @@ import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePlu
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import SelfReportType from "@/components/skills/selfReport/SelfReportType.js";
+import QuizType from "@/skills-display/components/quiz/QuizType.js";
 
 const props = defineProps({
   skill: Object,
@@ -80,7 +82,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
       </media-info-card>
     </div>
 
-    <div class="flex-1">
+    <div v-if="!SelfReportType.isQuizOrSurvey(skill.selfReporting?.type)" class="flex-1">
       <media-info-card
         :title="`${numFormat.pretty(skill.pointIncrement)} Increment`"
         class="h-full sm:w-min-13rem"
@@ -88,6 +90,34 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
         :icon-color="themeState.infoCards().iconColors[2]"
         data-cy="pointsPerOccurrenceCard">
         {{ attributes.pointDisplayName }}s per Occurrence
+      </media-info-card>
+    </div>
+
+    <div v-if="SelfReportType.isQuizOrSurvey(skill.selfReporting?.type)" class="flex-1">
+      <media-info-card
+          title="Quiz Requirement"
+          class="h-full sm:w-min-13rem"
+          icon-class="fas fa-spell-check"
+          :icon-color="themeState.infoCards().iconColors[2]"
+          data-cy="quizRequirementCard">
+        <div v-if="QuizType.isQuiz(skill.selfReporting.type)">
+          <div v-if="skill.selfReporting.quizOrSurveyPassed">
+            You passed <b>{{ skill.selfReporting.quizName }}</b> quiz. Well done!
+          </div>
+          <div v-else>
+            Pass <b>{{ skill.selfReporting.quizName }}</b> quiz to earn the skill
+          </div>
+        </div>
+
+        <div v-if="QuizType.isSurvey(skill.selfReporting.type)">
+          <div v-if="skill.selfReporting.quizOrSurveyPassed">
+            You completed <b>{{ skill.selfReporting.quizName }}</b> survey. Well done!
+          </div>
+          <div v-else>
+            Complete <b>{{ skill.selfReporting.quizName }}</b> survey to earn the skill
+          </div>
+        </div>
+
       </media-info-card>
     </div>
 

@@ -23,6 +23,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.util.StreamUtils
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestParam
 import skills.controller.request.model.ActionPatchRequest
 import skills.services.settings.Settings
 import skills.services.userActions.DashboardAction
@@ -1836,6 +1837,18 @@ class SkillsService {
         return wsHelper.apiGet(url, userId ? [userId: userId] : null)
     }
 
+    def getCurrentUserQuizAttempts(String quizNameQuery = '', int limit=10,
+                                   int page=1,
+                                   String orderBy='started',
+                                   Boolean ascending=true) {
+        return wsHelper.apiGet("/quizAttempts", [quizNameQuery: quizNameQuery, limit: limit, page: page, orderBy: orderBy, ascending: ascending])
+    }
+
+    def getCurrentUserSingleQuizAttempt(Integer quizAttempt) {
+        return wsHelper.apiGet("/quizAttempts/${quizAttempt}")
+    }
+
+
     def getQuizAttemptResult(String quizId, Integer attemptId) {
         String url = "${getQuizDefUrl(quizId)}/runs/${attemptId}"
         return wsHelper.adminGet(url)
@@ -1873,6 +1886,7 @@ class SkillsService {
     }
 
     def startQuizAttempt(String quizId, String userId = null) {
+        assert quizId
         String url = "/quizzes/${quizId}/attempt"
         return wsHelper.apiPost(url, userId ? [userId : userId] : null)
     }

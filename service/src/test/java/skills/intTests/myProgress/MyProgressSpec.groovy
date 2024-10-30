@@ -23,10 +23,13 @@ import org.apache.commons.lang3.builder.ToStringBuilder
 import org.apache.commons.lang3.builder.ToStringStyle
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
+import skills.quizLoading.QuizSettings
+import skills.services.quiz.QuizQuestionType
 import skills.services.settings.Settings
 import skills.storage.repos.UserAchievedLevelRepo
 import spock.lang.IgnoreRest
@@ -1257,7 +1260,77 @@ class MyProgressSpec extends DefaultIntSpec {
         res.name == proj2.name
     }
 
+    def "my progress summary - quizzes and surveys"() {
+        def declareQuiz = { Integer num, boolean isSurvey = false ->
+            def quiz = isSurvey ? QuizDefFactory.createQuizSurvey(num) : QuizDefFactory.createQuiz(num)
+            skillsService.createQuizDef(quiz)
+            def questions = [
+                  isSurvey ? QuizDefFactory.createSingleChoiceSurveyQuestion(num) :  QuizDefFactory.createChoiceQuestion(num, 1, 4, QuizQuestionType.SingleChoice)
+            ]
+            skillsService.createQuizQuestionDefs(questions)
+            skillsService.saveQuizSettings(quiz.quizId, [
+                    [setting: QuizSettings.MultipleTakes.setting, value: true],
+            ])
+            return quiz.quizId
+        }
+        def runQuiz = { String quizId ->
+            def quizInfo = skillsService.getQuizInfo(quizId)
+            def quizAttempt =  skillsService.startQuizAttempt(quizId).body
+            skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+            skillsService.completeQuizAttempt(quizId, quizAttempt.id)
+        }
 
+        def quiz1Id = declareQuiz(1)
+        def quiz2Id = declareQuiz(2)
+        def quiz3Id = declareQuiz(3)
+        def quiz4Id = declareQuiz(4)
+
+        def survey1Id = declareQuiz(5, true)
+        def survey2Id = declareQuiz(6, true)
+        def survey3Id = declareQuiz(7, true)
+
+        when:
+        def summary_t1 = skillsService.getMyProgressSummary()
+        runQuiz(quiz1Id)
+        def summary_t2 = skillsService.getMyProgressSummary()
+        runQuiz(quiz2Id)
+        runQuiz(quiz3Id)
+        runQuiz(quiz4Id)
+        def summary_t3 = skillsService.getMyProgressSummary()
+        runQuiz(quiz1Id)
+        runQuiz(quiz2Id)
+        def summary_t4 = skillsService.getMyProgressSummary()
+        runQuiz(survey1Id)
+        def summary_t5 = skillsService.getMyProgressSummary()
+        runQuiz(survey2Id)
+        runQuiz(survey3Id)
+        def summary_t6 = skillsService.getMyProgressSummary()
+        runQuiz(survey2Id)
+        runQuiz(survey3Id)
+        def summary_t7 = skillsService.getMyProgressSummary()
+
+        then:
+        summary_t1.numQuizAttempts == 0
+        summary_t1.numSurveyAttempts == 0
+
+        summary_t2.numQuizAttempts == 1
+        summary_t2.numSurveyAttempts == 0
+
+        summary_t3.numQuizAttempts == 4
+        summary_t3.numSurveyAttempts == 0
+
+        summary_t4.numQuizAttempts == 6
+        summary_t4.numSurveyAttempts == 0
+
+        summary_t5.numQuizAttempts == 6
+        summary_t5.numSurveyAttempts == 1
+
+        summary_t6.numQuizAttempts == 6
+        summary_t6.numSurveyAttempts == 3
+
+        summary_t7.numQuizAttempts == 6
+        summary_t7.numSurveyAttempts == 5
+    }
 
 }
 

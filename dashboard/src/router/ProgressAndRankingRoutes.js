@@ -20,8 +20,8 @@ import QuizRun from '@/components/quiz/QuizRunInDashboard.vue';
 import DiscoverProjectsPage from '@/components/myProgress/discover/DiscoverProjectsPage.vue'
 import MyUsagePage from '@/components/myProgress/usage/MyUsagePage.vue'
 import MyBadges from '@/components/myProgress/badges/MyBadges.vue'
-import BadgeDetailsPage from '@/skills-display/components/badges/BadgeDetailsPage.vue'
-import SkillPage from '@/components/skills/SkillPage.vue'
+import MyQuizAttemptsPage   from "@/components/myProgress/quiz/MyQuizAttemptsPage.vue";
+import MySingleQuizAttemptPage from "@/components/myProgress/quiz/MySingleQuizAttemptPage.vue";
 
 const createProgressAndRankingRoutes = (skillsDisplayChildRoutes) => {
 
@@ -72,6 +72,28 @@ const createProgressAndRankingRoutes = (skillsDisplayChildRoutes) => {
             message: 'My Test Run',
           },
         },
+      }, {
+        name: 'MyQuizAttemptsPage',
+        path: 'my-quiz-attempts',
+        component: MyQuizAttemptsPage,
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'My Quiz and Survey Run',
+          },
+        },
+      }, {
+        name: 'MySingleQuizAttemptPage',
+        path: 'my-quiz-attempts/:attemptId',
+        component: MySingleQuizAttemptPage,
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'My Quiz or Survey Attempt',
+          },
+        }
       }, {
         name: 'MyUsagePage',
         path: 'my-usage',

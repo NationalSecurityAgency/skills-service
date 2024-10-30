@@ -749,14 +749,30 @@ class QuizDefService {
         )
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     UserGradedQuizQuestionsResult getUsersGradedResult(String quizId, Integer quizAttemptId) {
         QuizDef quizDef = findQuizDef(quizId)
-        boolean isSurvey = quizDef.type == QuizDefParent.QuizType.Survey
         UserQuizAttempt userQuizAttempt = findUserQuizAttempt(quizAttemptId)
         if (userQuizAttempt.quizDefinitionRefId != quizDef.id) {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${quizId}] quiz", ErrorCode.BadParam)
         }
+        return getAttemptGradedResult(quizDef, userQuizAttempt)
+    }
+
+    @Transactional(readOnly = true)
+    UserGradedQuizQuestionsResult getCurrentUserAttemptGradedResult(Integer quizAttemptId) {
+        UserInfo currentUser = userInfoService.currentUser
+        UserQuizAttempt userQuizAttempt = findUserQuizAttempt(quizAttemptId)
+        if (!currentUser.username.equalsIgnoreCase(userQuizAttempt.userId)) {
+            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${currentUser.username}] user", ErrorCode.BadParam)
+        }
+        QuizDef quizDef = quizDefRepo.findById(userQuizAttempt.quizDefinitionRefId).get()
+        return getAttemptGradedResult(quizDef, userQuizAttempt, false)
+    }
+
+    UserGradedQuizQuestionsResult getAttemptGradedResult(QuizDef quizDef, UserQuizAttempt userQuizAttempt, boolean alwaysReturnQuestions = true) {
+        String quizId = quizDef.quizId
+        boolean isSurvey = quizDef.type == QuizDefParent.QuizType.Survey
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userQuizAttempt.userId)
         List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = userQuizAnswerAttemptRepo.getSelectedAnswerIdsAndText(userQuizAttempt.id)
         List<UserQuizAnswerGradedRepo.GradedInfo> manuallyGradedAnswers = userQuizAnswerGradedRepo.getGradedAnswersForQuizAttemptId(userQuizAttempt.id)
@@ -769,7 +785,8 @@ class QuizDefService {
 
         List<UserGradedQuizQuestionResult> questions = dbQuestionDefs
                 .sort { it.displayOrder }
-                .collect { QuizQuestionDef questionDef ->
+                .withIndex()
+                .collect { QuizQuestionDef questionDef, int index ->
                     List<QuizAnswerDef> quizAnswerDefs = byQuestionId[questionDef.id]
 
                     boolean isTextInput = questionDef.type == QuizQuestionType.TextInput
@@ -816,6 +833,7 @@ class QuizDefService {
                     boolean needsGrading = answers.find {it.needsGrading } != null
                     return new UserGradedQuizQuestionResult(
                             id: questionDef.id,
+                            questionNum: index + 1,
                             question: InputSanitizer.unsanitizeForMarkdown(questionDef.question),
                             questionType: questionDef.type,
                             answers: answers,
@@ -838,12 +856,27 @@ class QuizDefService {
             userTag = userTags ? userTags.first()?.value : null
         }
 
+        boolean isPassed = userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED
+        boolean shouldReturnAllQuestions = (alwaysReturnQuestions || isPassed) ?: quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.AlwaysShowCorrectAnswers.setting, quizDef.id)
+        List<UserGradedQuizQuestionResult> questionsToReturn = questions
+        if (!shouldReturnAllQuestions) {
+            if (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING) {
+                questionsToReturn = []
+            } else {
+                questionsToReturn = questions.findAll { it.questionType == QuizQuestionType.TextInput }
+            }
+        }
+        Integer numQuestionsPassed = questions.count { it.isCorrect }
         return new UserGradedQuizQuestionsResult(quizType: quizDef.type,
+                quizName: quizDef.name,
                 userId: userAttrs.userId,
                 userIdForDisplay: userAttrs.userIdForDisplay,
                 status: userQuizAttempt.status,
-                questions: questions,
+                questions: questionsToReturn ?: null,
+                allQuestionsReturned: questionsToReturn.size() == questions.size(),
+                numQuestions: questions.size(),
                 numQuestionsToPass: numQuestionsToPass,
+                numQuestionsPassed: numQuestionsPassed,
                 started: userQuizAttempt.started,
                 completed: userQuizAttempt.completed,
                 userTag: userTag,

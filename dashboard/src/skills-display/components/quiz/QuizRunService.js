@@ -60,6 +60,16 @@ export default {
     return axios.post('/api/validation/description', { value: description })
         .then((response) => response.data);
   },
+  getQuizAttempts(params) {
+    return axios
+        .get(`/api/quizAttempts`, { params })
+        .then((response) => response.data)
+  },
+  getSingleQuizAttempt(attemptId) {
+    return axios
+        .get(`/api/quizAttempts/${attemptId}`)
+        .then((response) => response.data)
+  },
 
   setUserId(userId) {
     this.userId = userId;

@@ -58,10 +58,15 @@ const getFooterText = () => {
           <Tag severity="info" style="font-size: 1rem;">{{ myProgress.numAchievedSkillsLastMonth }}</Tag> skills
           in the last month
         </div>
+        <div class="my-2">
+          <span class="font-italic">Total Skills:</span> <Tag severity="success" data-cy="numAchievedSkills">{{ myProgress.numAchievedSkills }}</Tag> / <Tag severity="info" data-cy="numSkillsAvailable">{{ myProgress.totalSkills }}</Tag>
+        </div>
       </div>
     </template>
     <template #footer>
-      <span data-cy="last-earned-footer" class="w-min-10rem">{{ getFooterText() }}</span>
+      <div class="align-items-center">
+        <span data-cy="last-earned-footer" class="w-min-10rem">{{ getFooterText() }}</span>
+      </div>
     </template>
   </my-progress-info-card-util>
 </template>

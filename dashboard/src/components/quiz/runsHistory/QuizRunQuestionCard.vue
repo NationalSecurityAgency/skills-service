@@ -116,12 +116,13 @@ const manuallyGradedInfo = computed(() => {
           <div v-if="isTextInputType" class="border-1 border-300 border-round p-3 w-full" data-cy="TextInputAnswer">
             <pre>{{ answerText }}</pre>
           </div>
-          <div v-if="manuallyGradedInfo" class="mt-3 w-full" data-cy="manuallyGradedInfo">
-            <Fieldset legend="Manually Graded"
-                      :pt="{ legend: { class: 'py-0 px-3 surface-0 border-none' }}">
+          <div v-if="manuallyGradedInfo" class="mt-3 w-full border-1 p-3 border-round surface-border" data-cy="manuallyGradedInfo">
+            <div class="text-xl mb-3 font-semibold">Manually Graded</div>
 
             <div class="flex gap-3">
-              <div class="flex-1" data-cy="grader">Grader: {{ manuallyGradedInfo.graderUserIdForDisplay || manuallyGradedInfo.graderUserId }}</div>
+              <div class="flex-1" data-cy="grader">Grader:
+                {{ manuallyGradedInfo.graderUserIdForDisplay || manuallyGradedInfo.graderUserId }}
+              </div>
               <div>On: {{ timeUtils.formatDate(manuallyGradedInfo.gradedOn) }}</div>
             </div>
             <div class="mt-3">Feedback:</div>
@@ -132,7 +133,6 @@ const manuallyGradedInfo = computed(() => {
                   :instance-id="`${question.id}_feedback`"
                   :data-cy="`feedbackDisplayText_q${question.id}`"/>
             </div>
-            </Fieldset>
           </div>
 
         </div>

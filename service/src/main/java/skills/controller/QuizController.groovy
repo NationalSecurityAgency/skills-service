@@ -46,6 +46,7 @@ import skills.storage.model.SkillDefSkinny
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserQuizAttemptRepo
+import skills.utils.TablePageUtil
 
 import java.nio.charset.StandardCharsets
 
@@ -171,7 +172,7 @@ class QuizController {
                                        @RequestParam int page,
                                        @RequestParam String orderBy,
                                        @RequestParam Boolean ascending) {
-        PageRequest pageRequest = validateQuizRunsParamsAndConstructPageRequest(limit, page, orderBy, ascending)
+        PageRequest pageRequest = TablePageUtil.validateAndConstructQuizPageRequest(limit, page, orderBy, ascending)
         return quizDefService.getUserQuestionAnswers(quizId, answerDefId, pageRequest)
     }
 
@@ -190,16 +191,8 @@ class QuizController {
                             @RequestParam int page,
                             @RequestParam String orderBy,
                             @RequestParam Boolean ascending) {
-        PageRequest pageRequest = validateQuizRunsParamsAndConstructPageRequest(limit, page, orderBy, ascending)
+        PageRequest pageRequest = TablePageUtil.validateAndConstructQuizPageRequest(limit, page, orderBy, ascending)
         return quizDefService.getQuizRuns(quizId, query, quizAttemptStatus, pageRequest);
-    }
-    private static validateQuizRunsParamsAndConstructPageRequest(int limit, int page, String orderBy, Boolean ascending) {
-        QuizValidator.isTrue(limit > 0, '[limit] must be > 0')
-        QuizValidator.isTrue(limit <= 500, '[limit] must be <= 500')
-        QuizValidator.isTrue(page >= 0, '[page] must be >= 0')
-        QuizValidator.isTrue(page < 10000, '[page] must be < 10000')
-        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return pageRequest
     }
 
     @RequestMapping(value = "/{quizId}/runs/{attemptId}", method = RequestMethod.DELETE, produces = "application/json")

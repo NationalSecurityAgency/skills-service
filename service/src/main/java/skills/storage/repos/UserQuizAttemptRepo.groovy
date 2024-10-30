@@ -22,6 +22,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
+import skills.controller.result.model.MyQuizAttempt
 import skills.controller.result.model.QuizRun
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.UserQuizAttempt.QuizAttemptStatus
@@ -152,9 +153,29 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                                @Nullable@Param('quizAttemptStatus') String quizAttemptStatus,
                                PageRequest pageRequest)
 
+    @Query(value = '''
+        select attempts.id as attemptId,
+               attempts.status as status,
+               attempts.started as started,
+               attempts.completed as completed,
+               quizDef.name as quizName,
+               quizDef.quizId as quizId,
+               quizDef.type as quizType
+        from UserQuizAttempt attempts, QuizDef quizDef
+        where attempts.userId=:userId and 
+            attempts.quizDefinitionRefId = quizDef.id and
+            attempts.status != 'INPROGRESS' and
+            lower(quizDef.name) LIKE lower(CONCAT('%', :quizNameQuery, '%'))
+     ''')
     @Nullable
-    @Query('''select quizAttempt from UserQuizAttempt quizAttempt where quizAttempt.quizDefinitionRefId = ?1 and quizAttempt.status = ?2''')
-    List<UserQuizAttempt> findByQuizRefIdByStatus(Integer quizRefId, QuizAttemptStatus status, PageRequest pageRequest)
+    Page<MyQuizAttempt> findUserQuizAttempts(
+            @Param('userId') String userId,
+            @Param('quizNameQuery') String quizNameQuery,
+            PageRequest pageRequest)
+
+    @Nullable
+    @Query('''select quizAttempt from UserQuizAttempt quizAttempt where quizAttempt.quizDefinitionRefId = ?1 and quizAttempt.status in ?2''')
+    List<UserQuizAttempt> findByQuizRefIdByStatus(Integer quizRefId, List<QuizAttemptStatus> status, PageRequest pageRequest)
 
     List<UserQuizAttempt> findByUserIdAndQuizDefinitionRefIdAndStatus(String userId, Integer quizRefId, QuizAttemptStatus status)
 
@@ -213,4 +234,17 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                 group by DATE_TRUNC ('day', attempt.started)
                 order by dateVal''', nativeQuery = true)
     List<DateCount> getUsageOverTime(String quizId)
+
+    static interface AttemptCounts {
+        Integer getNumAttempts()
+        Integer getNumQuizAttempts()
+    }
+    @Query('''select 
+            count(*) as numAttempts,
+            sum(case when quizDef.type = 'Quiz' then 1 else 0 end) as numQuizAttempts 
+        from UserQuizAttempt attempt, QuizDef quizDef 
+        where attempt.userId = ?1
+            and attempt.quizDefinitionRefId = quizDef.id''')
+    AttemptCounts getAttemptCountsForUser(String userId)
+
 }

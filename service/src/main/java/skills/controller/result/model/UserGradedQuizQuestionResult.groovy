@@ -19,6 +19,7 @@ import skills.services.quiz.QuizQuestionType
 
 class UserGradedQuizQuestionResult {
     Integer id
+    Integer questionNum
     String question
     QuizQuestionType questionType
 

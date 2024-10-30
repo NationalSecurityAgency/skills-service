@@ -57,7 +57,7 @@ describe('Client Display Survey Tests', () => {
             cy.completedCheck(env)
             if (isDashboard) {
                 cy.get('[data-cy="surveyCompletion"] [data-cy="closeSurveyBtn"]').click()
-                cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
+                cy.get('[data-cy="myQuizAndSurveysTitle"]')
             } else {
                 cy.get('[data-cy="surveyCompletion"] [data-cy="closeSurveyBtn"]').click()
                 cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
@@ -139,7 +139,7 @@ describe('Client Display Survey Tests', () => {
         cy.visit('/progress-and-rankings/quizzes/quiz1')
 
         cy.get('[data-cy="cancelQuizAttempt"]').click()
-        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
+        cy.get('[data-cy="myQuizAndSurveysTitle"]')
     });
 
     const environments =  ['dashboard', 'client-display']

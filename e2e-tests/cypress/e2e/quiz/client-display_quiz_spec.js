@@ -22,9 +22,12 @@ dayjs.extend(advancedFormatPlugin);
 
 describe('Client Display Quiz on a Skill Tests', () => {
 
+    let defaultUser
+    let defaultUserDisplay
     beforeEach(() => {
-
-    });
+        defaultUser = Cypress.env('proxyUser')
+        defaultUserDisplay = Cypress.env('oauthMode') ? 'foo' : Cypress.env('proxyUser')
+    })
 
     it('display quiz tag and alert ', () => {
         cy.createQuizDef(1, { name: 'Trivia Knowledge' });
@@ -55,37 +58,45 @@ describe('Client Display Quiz on a Skill Tests', () => {
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="takeQuizBtn"]').should('be.enabled')
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="takeQuizBtn"]').contains('Take Quiz')
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="quizAlert"]').contains('Pass the 1-question Trivia Knowledge Quiz and earn 150 points')
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="quizRequirementCard"]').contains('Pass Trivia Knowledge quiz to earn the skill')
 
         cy.get('[data-cy="skillDescription-skill2"] [data-cy="takeQuizBtn"]').should('not.exist')
         cy.get('[data-cy="skillDescription-skill2"] [data-cy="quizAlert"]').should('not.exist')
+        cy.get('[data-cy="skillDescription-skill2"] [data-cy="quizRequirementCard"]').should('not.exist')
 
         cy.get('[data-cy="skillDescription-skill3"] [data-cy="takeQuizBtn"]').contains('Take Quiz')
         cy.get('[data-cy="skillDescription-skill3"] [data-cy="quizAlert"]').contains('Pass the 2-question Trivia Knowledge 1 Quiz and earn 150 points')
+        cy.get('[data-cy="skillDescription-skill3"] [data-cy="quizRequirementCard"]').contains('Pass Trivia Knowledge 1 quiz to earn the skill')
 
         cy.get('[data-cy="skillDescription-skill4"] [data-cy="takeQuizBtn"]').contains('Take Quiz')
         cy.get('[data-cy="skillDescription-skill4"] [data-cy="quizAlert"]').contains('Pass the Trivia Knowledge 2 Quiz and earn 150 points')
+        cy.get('[data-cy="skillDescription-skill4"] [data-cy="quizRequirementCard"]').contains('Pass Trivia Knowledge 2 quiz to earn the skill')
 
         cy.cdClickSkill(0);
         cy.get('[data-cy="selfReportQuizTag"]')
         cy.get('[data-cy="takeQuizBtn"]').should('be.enabled')
         cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
         cy.get('[data-cy="quizAlert"]').contains('Pass the 1-question Trivia Knowledge Quiz and earn 150 points')
+        cy.get('[data-cy="quizRequirementCard"]').contains('Pass Trivia Knowledge quiz to earn the skill')
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(1);
         cy.get('[data-cy="selfReportQuizTag"]').should('not.exist')
         cy.get('[data-cy="takeQuizBtn"]').should('not.exist')
         cy.get('[data-cy="quizAlert"]').should('not.exist')
+        cy.get('[data-cy="quizRequirementCard"]').should('not.exist')
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(2);
         cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
         cy.get('[data-cy="quizAlert"]').contains('Pass the 2-question Trivia Knowledge 1 Quiz and earn 150 points')
+        cy.get('[data-cy="quizRequirementCard"]').contains('Pass Trivia Knowledge 1 quiz to earn the skill')
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(3);
         cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
         cy.get('[data-cy="quizAlert"]').contains('Pass the Trivia Knowledge 2 Quiz and earn 150 points')
+        cy.get('[data-cy="quizRequirementCard"]').contains('Pass Trivia Knowledge 2 quiz to earn the skill')
     });
 
     it('display survey tag and alert ', () => {
@@ -117,38 +128,200 @@ describe('Client Display Quiz on a Skill Tests', () => {
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="takeQuizBtn"]').should('be.enabled')
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="takeQuizBtn"]').contains('Complete Survey')
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="quizAlert"]').contains('Complete the 1-question Trivia Knowledge Survey and earn 150 points')
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="quizRequirementCard"]').contains('Complete Trivia Knowledge survey to earn the skill')
 
         cy.get('[data-cy="skillDescription-skill2"] [data-cy="takeQuizBtn"]').should('not.exist')
         cy.get('[data-cy="skillDescription-skill2"] [data-cy="quizAlert"]').should('not.exist')
+        cy.get('[data-cy="skillDescription-skill2"] [data-cy="quizRequirementCard"]').should('not.exist')
 
         cy.get('[data-cy="skillDescription-skill3"] [data-cy="takeQuizBtn"]').contains('Complete Survey')
         cy.get('[data-cy="skillDescription-skill3"] [data-cy="quizAlert"]').contains('Complete the 2-question Trivia Knowledge 1 Survey and earn 150 points')
+        cy.get('[data-cy="skillDescription-skill3"] [data-cy="quizRequirementCard"]').contains('Complete Trivia Knowledge 1 survey to earn the skill')
 
         cy.get('[data-cy="skillDescription-skill4"] [data-cy="takeQuizBtn"]').contains('Complete Survey')
         cy.get('[data-cy="skillDescription-skill4"] [data-cy="quizAlert"]').contains('Complete the Trivia Knowledge 2 Survey and earn 150 points')
+        cy.get('[data-cy="skillDescription-skill4"] [data-cy="quizRequirementCard"]').contains('Complete Trivia Knowledge 2 survey to earn the skill')
 
         cy.cdClickSkill(0);
         cy.get('[data-cy="selfReportSurveyTag"]')
         cy.get('[data-cy="takeQuizBtn"]').should('be.enabled')
         cy.get('[data-cy="takeQuizBtn"]').contains('Complete Survey')
         cy.get('[data-cy="quizAlert"]').contains('Complete the 1-question Trivia Knowledge Survey and earn 150 points')
+        cy.get('[data-cy="quizRequirementCard"]').contains('Complete Trivia Knowledge survey to earn the skill')
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(1);
         cy.get('[data-cy="selfReportQuizTag"]').should('not.exist')
         cy.get('[data-cy="takeQuizBtn"]').should('not.exist')
         cy.get('[data-cy="quizAlert"]').should('not.exist')
+        cy.get('[data-cy="quizRequirementCard"]').should('not.exist')
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(2);
         cy.get('[data-cy="takeQuizBtn"]').contains('Complete Survey')
         cy.get('[data-cy="quizAlert"]').contains('Complete the 2-question Trivia Knowledge 1 Survey and earn 150 points')
+        cy.get('[data-cy="quizRequirementCard"]').contains('Complete Trivia Knowledge 1 survey to earn the skill')
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(3);
         cy.get('[data-cy="takeQuizBtn"]').contains('Complete Survey')
         cy.get('[data-cy="quizAlert"]').contains('Complete the Trivia Knowledge 2 Survey and earn 150 points')
+        cy.get('[data-cy="quizRequirementCard"]').contains('Complete Trivia Knowledge 2 survey to earn the skill')
     });
+
+    it('display quiz results on completed skill', () => {
+        cy.createQuizDef(1, { name: 'Trivia Knowledge' });
+        cy.createQuizQuestionDef(1, 1)
+        cy.createQuizMultipleChoiceQuestionDef(1, 2);
+        cy.createTextInputQuestionDef(1, 3)
+        cy.runQuizForUser(1, defaultUser, [{selectedIndex: [0]}, {selectedIndex: [0, 2]}, {selectedIndex: [0]}], true, 'My Answer')
+        cy.gradeQuizAttempt(1, true)
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1,
+            {
+                selfReportingType: 'Quiz',
+                quizId: 'quiz1',
+                pointIncrement: '150',
+                numPerformToCompletion: 1,
+        });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="quizCompletedMsg"]').contains('Congratulations! You have passed Trivia Knowledge Quiz')
+        cy.get('[data-cy="quizRequirementCard"]').contains('You passed Trivia Knowledge quiz. Well done!')
+
+        cy.get('[data-cy="questionDisplayCard-1"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-2"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-3"]').should('not.exist')
+        cy.get('[data-cy="viewQuizAttemptInfo"]').should('be.enabled').click()
+
+        // q1
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-0_displayText"]').contains('Question 1 - First Answer')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-1_displayText"]').contains('Question 1 - Second Answer')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-2_displayText"]').contains('Question 1 - Third Answer')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-1"] [data-cy="notSelected"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-2"] [data-cy="notSelected"]')
+
+        // q2
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('This is a question # 2')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="wrongAnswer"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-0_displayText"]').contains('First Answer')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-1_displayText"]').contains('Second Answer')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-2_displayText"]').contains('Third Answer')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-3_displayText"]').contains('Fourth Answer')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answerDisplay-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answerDisplay-1"] [data-cy="notSelected"]')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answerDisplay-2"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answerDisplay-3"] [data-cy="notSelected"]')
+
+        // q2
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]').contains('This is a question # 3')
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="wrongAnswer"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="TextInputAnswer"]').contains('My Answer')
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(defaultUserDisplay)
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').contains('Good answer')
+
+        // collapse
+        cy.get('[data-cy="viewQuizAttemptInfo"]').contains('Hide Quiz Results')
+        cy.get('[data-cy="viewQuizAttemptInfo"]').should('be.enabled').click()
+        cy.get('[data-cy="questionDisplayCard-1"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-2"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-3"]').should('not.exist')
+        cy.get('[data-cy="viewQuizAttemptInfo"]').contains('View Quiz Results')
+    })
+
+    it('display survey results on completed skill', () => {
+        const quizNum = 1
+        cy.createSurveyDef(quizNum);
+        cy.createSurveyMultipleChoiceQuestionDef(quizNum, 1, { questionType: 'SingleChoice' });
+        cy.createSurveyMultipleChoiceQuestionDef(quizNum, 2);
+        cy.createTextInputQuestionDef(quizNum, 3)
+        cy.createRatingQuestionDef(quizNum, 4)
+        cy.runQuizForUser(1, defaultUser, [
+            {selectedIndex: [0]},
+            {selectedIndex: [0, 2]},
+            {selectedIndex: [0]},
+            {selectedIndex: [0]},
+        ], true, 'My Answer')
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1,
+            {
+                selfReportingType: 'Quiz',
+                quizId: 'quiz1',
+                pointIncrement: '150',
+                numPerformToCompletion: 1,
+            });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="quizCompletedMsg"]').contains('Congratulations! You have completed This is survey 1 Survey')
+        cy.get('[data-cy="quizRequirementCard"]').contains('You completed This is survey 1 survey. Well done!')
+
+        cy.get('[data-cy="questionDisplayCard-1"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-2"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-3"]').should('not.exist')
+        cy.get('[data-cy="viewQuizAttemptInfo"]').should('be.enabled').click()
+
+        // q1
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-0_displayText"]').contains('Question 1 - First Answer')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-1_displayText"]').contains('Question 1 - Second Answer')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-2_displayText"]').contains('Question 1 - Third Answer')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-1"] [data-cy="notSelected"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-2"] [data-cy="notSelected"]')
+
+        // q2
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('This is a question # 2')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="wrongAnswer"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-0_displayText"]').contains('First Answer')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-1_displayText"]').contains('Second Answer')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-2_displayText"]').contains('Third Answer')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answerDisplay-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answerDisplay-1"] [data-cy="notSelected"]')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answerDisplay-2"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]')
+
+        // q3
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]').contains('This is a question # 3')
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="wrongAnswer"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="TextInputAnswer"]').contains('My Answer')
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="manuallyGradedInfo"]').should('not.exist')
+
+        // q4
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('This is a question # 4')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-pc-name="rating"] [data-pc-section="item"]')
+            .should('have.length', 5).as('ratingItems');
+
+        cy.get('@ratingItems')
+            .eq(0)
+            .should( 'have.attr', 'data-p-active', 'true')
+        cy.get('@ratingItems')
+            .eq(1)
+            .should( 'have.attr', 'data-p-active', 'false')
+        cy.get('@ratingItems')
+            .eq(2)
+            .should( 'have.attr', 'data-p-active', 'false')
+        cy.get('@ratingItems')
+            .eq(3)
+            .should( 'have.attr', 'data-p-active', 'false')
+        cy.get('@ratingItems')
+            .eq(4)
+            .should( 'have.attr', 'data-p-active', 'false')
+
+        // collapse
+        cy.get('[data-cy="viewQuizAttemptInfo"]').contains('Hide Survey Results')
+        cy.get('[data-cy="viewQuizAttemptInfo"]').should('be.enabled').click()
+        cy.get('[data-cy="questionDisplayCard-1"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-2"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-3"]').should('not.exist')
+        cy.get('[data-cy="viewQuizAttemptInfo"]').contains('View Survey Results')
+    })
 });
 
 

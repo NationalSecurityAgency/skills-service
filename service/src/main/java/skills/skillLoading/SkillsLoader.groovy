@@ -258,6 +258,11 @@ class SkillsLoader {
         myProgressSummary.numAchievedSkillsLastMonth = achievedSkillsCount.monthCount ?: 0
         myProgressSummary.numAchievedSkillsLastWeek = achievedSkillsCount.weekCount ?: 0
         myProgressSummary.mostRecentAchievedSkill = achievedSkillsCount.lastAchieved
+
+        UserQuizAttemptRepo.AttemptCounts attemptCounts = userQuizAttemptRepo.getAttemptCountsForUser(userId)
+        myProgressSummary.numQuizAttempts = attemptCounts.numQuizAttempts ?: 0
+        myProgressSummary.numSurveyAttempts = attemptCounts.numAttempts ? attemptCounts.numAttempts - myProgressSummary.numQuizAttempts : 0
+
         return myProgressSummary
     }
 
@@ -688,16 +693,26 @@ class SkillsLoader {
         SkillApproval skillApproval = skillApprovals?.size() > 0 ? skillApprovals.first() : null
 
         Boolean quizNeedsGrading = false
-        Date quizNeedsGradingAttemptDate
-        if (!achievedOn && quizNameAndId) {
+        Boolean quizOrSurveyPassed = false
+        Date quizNeedsGradingAttemptDate = null
+        Integer quizAttemptId = null
+        if (quizNameAndId) {
             PageRequest onePlease = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "updated"))
-            List<UserQuizAttempt> gradingAttempts = userQuizAttemptRepo.findByQuizRefIdByStatus(quizNameAndId.getQuizRefId(), UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING, onePlease)
+            List<UserQuizAttempt> gradingAttempts = userQuizAttemptRepo.findByQuizRefIdByStatus(quizNameAndId.getQuizRefId(),
+                    [UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING, UserQuizAttempt.QuizAttemptStatus.PASSED], onePlease)
             if (gradingAttempts) {
-                quizNeedsGrading = true
-                quizNeedsGradingAttemptDate = gradingAttempts.first().getUpdated()
+                UserQuizAttempt lastAttempt = gradingAttempts.first()
+                if ( lastAttempt.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING) {
+                    quizNeedsGrading = true
+                    quizNeedsGradingAttemptDate = gradingAttempts.first().getUpdated()
+                    quizAttemptId = lastAttempt.id
+                }
+                if ( lastAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED) {
+                    quizOrSurveyPassed = true
+                    quizAttemptId = lastAttempt.id
+                }
             }
         }
-
 
         SelfReportingInfo selfReportingInfo = new SelfReportingInfo(
                 approvalId: skillApproval?.getId(),
@@ -711,7 +726,9 @@ class SkillsLoader {
                 quizName: quizNameAndId?.quizName,
                 numQuizQuestions: quizNameAndId?.numQuestions ?: 0,
                 quizNeedsGrading: quizNeedsGrading,
-                quizNeedsGradingAttemptDate: quizNeedsGradingAttemptDate
+                quizNeedsGradingAttemptDate: quizNeedsGradingAttemptDate,
+                quizOrSurveyPassed: quizOrSurveyPassed,
+                quizAttemptId: quizAttemptId
         )
 
         return selfReportingInfo

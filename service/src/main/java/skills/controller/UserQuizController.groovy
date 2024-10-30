@@ -15,21 +15,20 @@
  */
 package skills.controller
 
-
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.web.bind.annotation.*
 import skills.auth.UserInfoService
 import skills.auth.aop.AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied
 import skills.controller.result.model.RequestResult
+import skills.controller.result.model.TableResult
+import skills.controller.result.model.UserGradedQuizQuestionsResult
 import skills.quizLoading.QuizRunService
-import skills.quizLoading.model.QuizAttemptStartResult
-import skills.quizLoading.model.QuizGradedResult
-import skills.quizLoading.model.QuizInfo
-import skills.quizLoading.model.QuizReportAnswerReq
-import skills.quizLoading.model.CompleteQuizAttemptReq
-import skills.quizLoading.model.StartQuizAttemptReq
+import skills.quizLoading.model.*
+import skills.services.quiz.QuizDefService
+import skills.utils.TablePageUtil
 
 @CrossOrigin(allowCredentials = "true", originPatterns = ["*"])
 @RestController
@@ -42,6 +41,9 @@ class UserQuizController {
 
     @Autowired
     QuizRunService quizRunService
+
+    @Autowired
+    QuizDefService quizDefService
 
     @Autowired
     UserInfoService userInfoService
@@ -95,5 +97,23 @@ class UserQuizController {
                                          @RequestBody(required = false) CompleteQuizAttemptReq completeQuizAttemptReq) {
         String userId = userInfoService.getUserName(completeQuizAttemptReq?.userId, true, completeQuizAttemptReq?.idType);
         return quizRunService.failQuizAttempt(userId, quizId, quizAttemptId);
+    }
+
+    @RequestMapping(value = "/quizAttempts", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    TableResult getQuizAttempts(
+                            @RequestParam String quizNameQuery,
+                            @RequestParam int limit,
+                            @RequestParam int page,
+                            @RequestParam String orderBy,
+                            @RequestParam Boolean ascending) {
+        PageRequest pageRequest = TablePageUtil.validateAndConstructQuizPageRequest(limit, page, orderBy, ascending)
+        return quizRunService.getCurrentUserQuizRuns(quizNameQuery, pageRequest);
+    }
+
+    @RequestMapping(value = "/quizAttempts/{attemptId}", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    UserGradedQuizQuestionsResult getSingleQuizAttempt(@PathVariable Integer attemptId) {
+        return quizDefService.getCurrentUserAttemptGradedResult(attemptId);
     }
 }

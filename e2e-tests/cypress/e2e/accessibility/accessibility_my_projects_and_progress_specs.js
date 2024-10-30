@@ -275,8 +275,7 @@ describe('Accessibility My Projects and Progress And Ranking Home Tests', () => 
             cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
                 .contains('Progress And Rankings')
                 .should('be.visible');
-            cy.get('[data-cy=numSkillsAvailable]')
-                .contains(new RegExp(/^Total: 4$/));
+            cy.get('[data-cy=numSkillsAvailable]').should('have.text', 4);
             cy.get('[data-cy=project-link-proj1]')
                 .should('be.visible');
 

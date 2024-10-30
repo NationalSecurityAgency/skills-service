@@ -1,5 +1,5 @@
-/**
- * Copyright 2020 SkillTree
+/*
+ * Copyright 2024 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
-
-import skills.storage.model.UserQuizAttempt
-
-interface QuizRun {
-    Integer getAttemptId()
-    String getUserId()
-    String getUserIdForDisplay()
-    Date getStarted()
-    Date getCompleted()
-    UserQuizAttempt.QuizAttemptStatus getStatus()
-    String getUserTag()
-    String getFirstName()
-    String getLastName()
-    String getQuizType()
-}
+export default {
+    Approval: 'Approval',
+    HonorSystem: 'HonorSystem',
+    Quiz: 'Quiz',
+    Survey: 'Survey',
+    Video: 'Video',
+    isQuiz: (type) => type === 'Quiz',
+    isSurvey: (type) => type === 'Survey',
+    isQuizOrSurvey: (type) => type === 'Quiz' || type === 'Survey',
+};

@@ -51,8 +51,8 @@ const loadQuizInfo = () => {
       });
 }
 
-const navToProgressAndRanking = () => {
-  router.push({ name: 'MyProgressPage' });
+const navToQuizAttemptsPage = () => {
+  router.push({ name: 'MyQuizAttemptsPage' });
 }
 </script>
 
@@ -69,8 +69,8 @@ const navToProgressAndRanking = () => {
       :projectId="projectId"
       :multipleTakes="quizInfo.multipleTakes"
       class="mb-5"
-      @testWasTaken="navToProgressAndRanking"
-      @cancelled="navToProgressAndRanking"/>
+      @testWasTaken="navToQuizAttemptsPage"
+      @cancelled="navToQuizAttemptsPage"/>
     </div>
   </div>
 </template>
