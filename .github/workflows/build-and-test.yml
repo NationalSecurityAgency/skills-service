@@ -344,7 +344,6 @@ jobs:
 
 
   service-against-postgresql:
-    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
     strategy:
       # when one test fails, DO NOT cancel the other containers
