@@ -229,7 +229,7 @@ defineExpose({
       </template>
     </Message>
     <Message :closable="false"
-             v-if="firstReport && isApprovalRequired && selfReportAvailable && !selfReportDisabled && !isRejected"
+             v-if="(firstReport || !isCompleted) && isApprovalRequired && selfReportAvailable && !selfReportDisabled && !isRejected"
              class="mb-2">
       <template #container>
         <div class="p-3">
