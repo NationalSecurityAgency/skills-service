@@ -209,10 +209,25 @@ jobs:
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: mochawesome-artifacts
+          path: e2e-tests/mochawesome-artifacts
           pattern: mochawesome*
           merge-multiple: true
-      - run: ls -R mochawesome-artifacts
+      - run: |
+          cd e2e-tests
+          ls -R mochawesome-artifacts
+          npm install
+          npx mochawesome-merge "mochawesome-artifacts/*.json" > mochawesome.json
+          npx marge cypress/results/mochawesome.json
+          cd ../
+
+      - name: upload result artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mochawesome-report
+          path: |
+            ./e2e-tests/mochawesome-report
+        
 
   ui-tests-against-postgres-cypress-dashboard:
     if: github.event_name == 'schedule-never'
