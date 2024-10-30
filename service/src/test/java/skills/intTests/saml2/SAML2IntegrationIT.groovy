@@ -21,6 +21,7 @@ import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.By
+import org.openqa.selenium.support.ui.WebDriverWait
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -38,7 +39,9 @@ import spock.lang.Shared
 import spock.lang.Specification
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.openqa.selenium.Cookie
+import org.openqa.selenium.support.ui.ExpectedConditions
 import spock.lang.Unroll
+import java.time.Duration
 
 @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
@@ -51,16 +54,23 @@ class SAML2IntegrationIT extends Specification{
     TestRestTemplate restTemplate
 
     @Shared
-    KeycloakContainer keycloak = new KeycloakContainer().withRealmImportFile("keycloak/realm-export.json");
+    KeycloakContainer keycloak = new KeycloakContainer().withRealmImportFile("keycloak/realm-export.json")
 
     @Autowired
     CreateAccountController userController
 
     @Autowired
-    UserAuthService userAuthService;
+    UserAuthService userAuthService
 
     @Shared
     boolean keycloakUriUpdated = false
+
+    def setupSpec() {
+        // Start Keycloak and set up system properties
+        keycloak.start()
+        setSystemProperties()
+        WebDriverManager.chromedriver().setup()
+    }
 
     def setup() {
         if (!keycloakUriUpdated) {
@@ -73,82 +83,68 @@ class SAML2IntegrationIT extends Specification{
         }
     }
 
-    def setupSpec() {
-
-        keycloak.start()
-
-        // Set the SAML IDP metadata for the Keycloak instance
-        System.setProperty("skills.authorization.authMode","SAML2");
-        System.setProperty("spring.security.saml2.metadata-location",keycloak.authServerUrl + "/realms/master/protocol/saml/descriptor");
-        System.setProperty("spring.security.saml2.registrationId","keycloak");
-        System.setProperty("saml2.rp.signing.key-location","keycloak/private_key.pem");
-        System.setProperty("saml2.rp.signing.cert-location","keycloak/certificate.pem")
-
-        WebDriverManager.chromedriver().setup()
-
+    def cleanupSpec() {
+        keycloak.stop()
+        clearSystemProperties()
     }
 
-    def updateKeycloakRedirectUri() {
+    private void setSystemProperties() {
+        System.setProperty("skills.authorization.authMode", "SAML2")
+        System.setProperty("spring.security.saml2.metadata-location", keycloak.authServerUrl + "/realms/master/protocol/saml/descriptor")
+        System.setProperty("spring.security.saml2.registrationId", "keycloak")
+        System.setProperty("saml2.rp.signing.key-location", "keycloak/private_key.pem")
+        System.setProperty("saml2.rp.signing.cert-location", "keycloak/certificate.pem")
+    }
+
+    private void clearSystemProperties() {
+        System.clearProperty("skills.authorization.authMode")
+        System.clearProperty("spring.security.saml2.metadata-location")
+        System.clearProperty("spring.security.saml2.registrationId")
+        System.clearProperty("saml2.rp.signing.key-location")
+        System.clearProperty("saml2.rp.signing.cert-location")
+    }
+
+    private void updateKeycloakRedirectUri() {
         def keycloakInstance = Keycloak.getInstance(
-                keycloak.authServerUrl, // Keycloak base URL
-                "master", // Admin realm
-                "admin", // Admin username
-                "admin", // Admin password
-                "admin-cli" // Admin client
+                keycloak.authServerUrl,
+                "master",
+                "admin",
+                "admin",
+                "admin-cli"
         )
 
-        // Get the client representation for the SAML client
+        // Fetch the SAML client in Keycloak
         def clientResourceList = keycloakInstance.realm("master").clients().findByClientId("saml-test")
         if (clientResourceList.isEmpty()) {
             throw new IllegalStateException("Client not found in realm 'master'")
         }
-        def clientResource = clientResourceList.get(0)
-        def clientRepresentation = keycloakInstance.realm("master").clients().get(clientResource.getId()).toRepresentation()
+        def clientRepresentation = keycloakInstance.realm("master")
+                .clients().get(clientResourceList.get(0).getId()).toRepresentation()
 
-        // Set the dynamic redirect URI based on the dynamically assigned port
-
-
+        // Set dynamic redirect URIs
         clientRepresentation.redirectUris = ["http://localhost:${port}/login/saml2/sso/keycloak".toString()]
-        clientRepresentation.clientId = "http://localhost:${port}/saml2/service-provider-metadata/keycloak".toString();
+        clientRepresentation.clientId = "http://localhost:${port}/saml2/service-provider-metadata/keycloak".toString()
 
-        // Update the client configuration in Keycloak
-        keycloakInstance.realm("master").clients().get(clientResource.getId()).update(clientRepresentation)
-
-    }
-
-    def cleanupSpec() {
-        keycloak.stop()
-        System.clearProperty("skills.authorization.authMode");
-        System.clearProperty("spring.security.saml2.metadata-location");
-        System.clearProperty("spring.security.saml2.registrationId");
-        System.clearProperty("saml2.rp.signing.key-location");
-        System.clearProperty("saml2.rp.signing.cert-location");
+        // Update Keycloak client configuration
+        keycloakInstance.realm("master").clients().get(clientResourceList.get(0).getId()).update(clientRepresentation)
     }
 
     def "grantFirstRoot should grant root privileges when no root user exists and user is authenticated"() {
         given: "No root user exists and a valid authenticated request"
         if (!userAuthService.rootExists()) {
-            String loginUrl = "http://localhost:${port}/saml2/authenticate/keycloak" // SAML2 login endpoint
-
-            // Perform SAML2 login using Selenium WebDriver and retrieve session cookies
+            String loginUrl = "http://localhost:${port}/saml2/authenticate/keycloak"
             String sessionCookie = getSessionCookieFromWebDriver(loginUrl, "test", "test")
 
             HttpHeaders headers = new HttpHeaders()
-
-
-
             headers.set("Cookie", sessionCookie)
-
             HttpEntity<Void> entity = new HttpEntity<>(headers)
 
-            // Use RestTemplate to call the grantFirstRoot endpoint
-            String grantRootUrl = "http://localhost:${port}/app/userInfo/grantFirstRoot"
+            String grantRootUrl = "http://localhost:${port}/grantFirstRoot"
             ResponseEntity<Void> response = restTemplate.exchange(grantRootUrl, HttpMethod.POST, entity, Void.class)
 
             then: "The request should succeed with a 200 status, and root privileges should be granted"
             response.statusCode == HttpStatus.OK
         } else {
-            // Assert that root user already exists
             then: "No action should be taken since root user already exists"
             assert true
         }
@@ -164,7 +160,7 @@ class SAML2IntegrationIT extends Specification{
         then: "The user is redirected to the SAML2 login page"
         initialResponse.statusCode == HttpStatus.FOUND
         String loginUrl = initialResponse.headers.getLocation().toString()
-        loginUrl.contains("/saml2/authenticate/keycloak")
+        assert loginUrl.contains("/saml2/authenticate/keycloak")
 
         when: "Automated login is performed using Selenium WebDriver"
         String sessionCookie = getSessionCookieFromWebDriver(loginUrl, "test", "test")
@@ -172,8 +168,8 @@ class SAML2IntegrationIT extends Specification{
         and: "The user accesses the protected resource with the SAML assertion"
         HttpHeaders headers = new HttpHeaders()
         headers.set("Cookie", sessionCookie)
-
         HttpEntity<?> entity = new HttpEntity<>(headers)
+
         ResponseEntity<String> protectedResponse = restTemplate.exchange(protectedUrl, HttpMethod.GET, entity, String.class)
 
         then: "The user is successfully authenticated and can access the protected resource"
@@ -192,7 +188,6 @@ class SAML2IntegrationIT extends Specification{
         result == true
     }
 
-
     def "userExists should return false when user does not exist"() {
         given: "A user does not exist in the system"
         def username = "unknownUser"
@@ -209,28 +204,24 @@ class SAML2IntegrationIT extends Specification{
         ChromeOptions options = new ChromeOptions()
         options.addArguments("--headless")
         WebDriver driver = new ChromeDriver(options)
-         try {
-            // Navigate to the login URL
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10))
+
+        try {
             driver.get(loginUrl)
 
             // Simulate entering username and password and submit the form
-            driver.findElement(By.name("username")).sendKeys(username)
+            wait.until(ExpectedConditions.elementToBeClickable(By.name("username"))).sendKeys(username)
             driver.findElement(By.name("password")).sendKeys(password)
-            driver.findElement(By.name("login")).click() // Change button locator to your login button
+            driver.findElement(By.name("login")).click()
 
-            Thread.sleep(5000)
+            // Wait for the session cookies to be set
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("user_settings_menu")))
 
-            // Retrieve session cookies set by Spring Boot application
+            // Retrieve session cookies
             Set<Cookie> cookies = driver.manage().getCookies()
-
-            // Create the Cookie header in "name=value" format
-            def cookieHeader = cookies.collect { "${it.name}=${it.value}" }.join("; ")
-
-            return cookieHeader
+            return cookies.collect { "${it.name}=${it.value}" }.join("; ")
         } finally {
-            // Close the WebDriver session
             driver.quit()
         }
     }
-
 }
