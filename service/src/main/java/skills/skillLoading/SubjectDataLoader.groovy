@@ -367,16 +367,16 @@ class SubjectDataLoader {
             )
         }
 
-        HashMap<String, SkillDefAndUserPoints> skillList = new HashMap<String, SkillDefAndUserPoints>()
-
-        res.forEach {
-          def id = it.skillDef.skillId + '-' + it.skillDef.projectId
-          if(!skillList.containsKey(id) || it.approval.updated > skillList[id].approval.updated) {
-              skillList[id] = it
-          }
-        }
-
-        res = skillList.values().toList()
+//        HashMap<String, SkillDefAndUserPoints> skillList = new HashMap<String, SkillDefAndUserPoints>()
+//
+//        res.forEach {
+//          def id = it.skillDef.skillId + '-' + it.skillDef.projectId
+//          if(!skillList.containsKey(id) || it.approval.updated > skillList[id].approval.updated) {
+//              skillList[id] = it
+//          }
+//        }
+//
+//        res = skillList.values().toList()
 
         return res?.findAll {it.skillDef.type != SkillDef.ContainerType.SkillsGroup || it.skillDef.totalPoints > 0 }.sort { it.skillDef.displayOrder }
     }
