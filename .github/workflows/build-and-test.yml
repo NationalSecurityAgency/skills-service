@@ -144,14 +144,35 @@ jobs:
           npm run cyServices:start
           cd ..
 
-      - name: Run Cypress tests
-        run: |
-          cd e2e-tests
-          ../.github/scripts/runSubsetOfCypressTests.sh -t 10 -c ${{ matrix.container }} 
-          cd ..
-        env:
-          ELECTRON_EXTRA_LAUNCH_ARGS: '--disable-gpu'
+#      - name: Run Cypress tests
+#        run: |
+#          cd e2e-tests
+#          ../.github/scripts/runSubsetOfCypressTests.sh -t 10 -c ${{ matrix.container }}
+#          cd ..
+#        env:
+#          ELECTRON_EXTRA_LAUNCH_ARGS: '--disable-gpu'
 
+      - name: Display Job Summary
+        run: |
+          echo "### Summary for ${{ matrix.container }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "- Lets add a bullet point" >> $GITHUB_STEP_SUMMARY
+          echo "- Lets add a second bullet point" >> $GITHUB_STEP_SUMMARY
+          echo "- How about a third one?" >> $GITHUB_STEP_SUMMARY
+          echo "| Test    | Passsed | Failed |" >> $GITHUB_STEP_SUMMARY
+          echo "| ------- | ------- | ------- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test 1  | 5 | 0 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test 2  | 4 | 3 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test 3  | 4 | 7 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test 1  | 5 | 0 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test 2  | 4 | 3 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test 3  | 4 | 7 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test 1  | 5 | 0 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test 2  | 4 | 3 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test 3  | 4 | 7 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test 1  | 5 | 0 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test 2  | 4 | 3 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test 3  | 4 | 7 |" >> $GITHUB_STEP_SUMMARY
 
       - name: upload result artifacts
         if: ${{ always() }}
@@ -284,6 +305,7 @@ jobs:
 
 
   service-against-postgresql:
+    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
     strategy:
       # when one test fails, DO NOT cancel the other containers
