@@ -1552,3 +1552,15 @@ Cypress.Commands.add("setDarkModeIfNeeded", (darkMode) => {
         cy.configureDarkMode()
     }
 })
+
+Cypress.Commands.add('approveAllRequests', () => {
+    cy.request('/admin/projects/proj1/approvals?limit=10&ascending=true&page=1&orderBy=userId')
+        .then((response) => {
+            response.body.data.forEach((item) => {
+                cy.wait(200);
+                cy.request('POST', '/admin/projects/proj1/approvals/approve', {
+                    skillApprovalIds: [item.id],
+                });
+            });
+        });
+});
