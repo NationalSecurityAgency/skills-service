@@ -539,8 +539,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     left join SkillAttributesDef attributes on sdChild.id = attributes.skillRefId
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
     left join ProjDef pd on sdChild.copiedFromProjectId = pd.projectId
-    left join SkillApproval approval on approval.skillRefId = (
-        select approval.skillRefId from SkillApproval approval where 
+    left join SkillApproval approval on approval.id = (
+        select approval.id from SkillApproval approval where 
         (sdChild.id = approval.skillRefId OR sdChild.copiedFrom = approval.skillRefId)
         and approval.userId=?1
         order by approval.updated desc limit 1
