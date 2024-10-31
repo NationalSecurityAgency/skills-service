@@ -76,6 +76,8 @@ drop table IF EXISTS attachments CASCADE;
 
 drop table IF EXISTS skill_approval_conf CASCADE;
 
+drop table IF EXISTS user_quiz_answer_graded CASCADE;
+
 drop table IF EXISTS quiz_answer_definition CASCADE;
 
 drop table IF EXISTS quiz_definition CASCADE;
