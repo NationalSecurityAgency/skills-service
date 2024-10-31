@@ -46,6 +46,7 @@
         <caffeine.version>3.1.1</caffeine.version>
 
         <pretty-time.version>5.0.3.Final</pretty-time.version>
+        <surefire.version>3.5.1</surefire.version>
     </properties>
 
     <parent>
