@@ -29,10 +29,13 @@ import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
 import { useAdminGroupState } from '@/stores/UseAdminGroupState.js';
+import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js';
+import Avatar from 'primevue/avatar';
 
 const announcer = useSkillsAnnouncer()
 const responsive = useResponsiveBreakpoints()
 const adminGroupState = useAdminGroupState()
+const communityLabels = useCommunityLabels()
 
 const loading = ref(false);
 const adminGroups = ref([]);
@@ -227,11 +230,19 @@ defineExpose({
           <template #body="slotProps">
             <div v-if="slotProps.field === 'name'" class="flex w-full flex-wrap flex-column sm:flex-row gap-2">
               <div class="flex align-items-start justify-content-start w-min-10rem">
-                <router-link :data-cy="`managesAdminGroupLink_${slotProps.data.adminGroupId}`"
-                             :to="{ name:'AdminGroupMembers', params: { adminGroupId: slotProps.data.adminGroupId }}"
-                             :aria-label="`Manage Admin Group ${slotProps.data.name}`">
-                  <highlighted-value :value="slotProps.data.name" :filter="filters.global.value" />
-                </router-link>
+                <div>
+                  <router-link :data-cy="`managesAdminGroupLink_${slotProps.data.adminGroupId}`"
+                               :to="{ name:'AdminGroupMembers', params: { adminGroupId: slotProps.data.adminGroupId }}"
+                               :aria-label="`Manage Admin Group ${slotProps.data.name}`">
+                    <highlighted-value :value="slotProps.data.name" :filter="filters.global.value" />
+                  </router-link>
+                <div v-if="slotProps.data.userCommunity" class="my-2" data-cy="userCommunity">
+                  <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
+                  <span class="text-color-secondary font-italic ml-1">{{ communityLabels.beforeCommunityLabel.value }}</span> <span
+                      class="font-bold text-primary">{{ slotProps.data.userCommunity }}</span> <span
+                      class="text-color-secondary font-italic">{{ communityLabels.afterCommunityLabel.value }}</span>
+                </div>
+                </div>
               </div>
               <div class="flex flex-1 flex-wrap align-items-start justify-content-end gap-2">
                 <router-link :data-cy="`managesAdminGroupBtn_${slotProps.data.adminGroupId}`"

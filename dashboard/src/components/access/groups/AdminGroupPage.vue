@@ -99,9 +99,9 @@ function updateAdminGroupDef(adminGroup) {
       <template #subTitle v-if="adminGroupState.adminGroup">
         <div v-if="adminGroupState.adminGroup.userCommunity" class="mb-3" data-cy="userCommunity">
           <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
-          <span class="text-secondary font-italic ml-1">{{ appConfig.userCommunityBeforeLabel }}</span> <span
-            class="font-weight-bold text-primary">{{ adminGroupState.adminGroup.userCommunity }}</span> <span
-            class="text-secondary font-italic">{{ appConfig.userCommunityAfterLabel }}</span>
+          <span class="text-color-secondary font-italic ml-1">{{ appConfig.userCommunityBeforeLabel }}</span> <span
+            class="font-bold text-primary">{{ adminGroupState.adminGroup.userCommunity }}</span> <span
+            class="text-color-secondary font-italic">{{ appConfig.userCommunityAfterLabel }}</span>
         </div>
       </template>
       <template #subSubTitle v-if="adminGroupState.adminGroup">
