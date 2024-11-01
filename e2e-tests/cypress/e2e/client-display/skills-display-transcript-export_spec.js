@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 const { rmdirSync } = require('fs');
+const moment = require("moment-timezone");
 
 describe('Transcript export tests', () => {
 
@@ -670,4 +671,90 @@ describe('Transcript export tests', () => {
     })
   })
 
+  it('approval column not shown if no approvals exist', () => {
+    const projName = 'Project Without Column'
+    cy.request('POST', '/app/userInfo', {
+      'first': 'Joe',
+      'last': 'Doe',
+      'nickname': 'Joe Doe'
+    })
+    cy.createProject(1, { name: projName })
+    createSubjectAndSkills(1, 4)
+    cy.createSubject(1, 4)
+
+    const user = Cypress.env('proxyUser')
+    const today = moment.utc().format('YYYY-MM-DD')
+    cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: user, date: 'now' })
+    cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: user, date: 'now' })
+
+    cy.cdVisit('/')
+    cy.get('[data-cy="downloadTranscriptBtn"]').click()
+
+    cy.readTranscript(projName).then((doc) => {
+      expect(clean(doc.text)).to.include('Skills: 2 / 4 ')
+      expect(clean(doc.text)).to.include('Achieved On')
+      expect(clean(doc.text)).to.not.include('Approver')
+      expect(clean(doc.text)).to.include(today)
+    })
+  })
+
+  it('approval column shown if skill has been approved', () => {
+    const projName = 'Project With Column'
+    cy.request('POST', '/app/userInfo', {
+      'first': 'Joe',
+      'last': 'Doe',
+      'nickname': 'Joe Doe'
+    })
+    cy.createProject(1, { name: projName })
+    cy.createSubject(1, 1)
+    for (let i = 1; i <= 4; i++) {
+      cy.createSkill(1, 1, i, { numPerformToCompletion: 1, selfReportingType: 'Approval' })
+    }
+
+    const defaultUser = Cypress.env('oauthMode') ? 'foo-hydra': 'skills@skills.org'
+    const user = Cypress.env('proxyUser')
+    const today = moment.utc().format('YYYY-MM-DD')
+    cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: user, date: 'now' })
+    cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: user, date: 'now' })
+    cy.approveAllRequests();
+
+    cy.cdVisit('/')
+    cy.get('[data-cy="downloadTranscriptBtn"]').click()
+
+    cy.readTranscript(projName).then((doc) => {
+      expect(clean(doc.text)).to.include('Skills: 2 / 4 ')
+      expect(clean(doc.text)).to.include('Achieved On')
+      expect(clean(doc.text)).to.include('Approver')
+      expect(clean(doc.text)).to.include(today)
+      expect(clean(doc.text)).to.include(defaultUser)
+    })
+  })
+
+  it('approval column not shown if skill has not yet been approved', () => {
+    const projName = 'Project Without Column'
+    cy.request('POST', '/app/userInfo', {
+      'first': 'Joe',
+      'last': 'Doe',
+      'nickname': 'Joe Doe'
+    })
+    cy.createProject(1, { name: projName })
+    cy.createSubject(1, 1)
+    for (let i = 1; i <= 4; i++) {
+      cy.createSkill(1, 1, i, { numPerformToCompletion: 1, selfReportingType: 'Approval' })
+    }
+
+    const user = Cypress.env('proxyUser')
+    const today = moment.utc().format('YYYY-MM-DD')
+    cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: user, date: 'now' })
+    cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: user, date: 'now' })
+
+    cy.cdVisit('/')
+    cy.get('[data-cy="downloadTranscriptBtn"]').click()
+
+    cy.readTranscript(projName).then((doc) => {
+      expect(clean(doc.text)).to.include('Skills: 0 / 4 ')
+      expect(clean(doc.text)).to.include('Achieved On')
+      expect(clean(doc.text)).to.not.include('Approver')
+    })
+  })
 })

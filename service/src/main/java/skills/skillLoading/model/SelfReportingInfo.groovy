@@ -32,9 +32,12 @@ class SelfReportingInfo {
     String quizId
     String quizName
     Integer numQuizQuestions
+
     Boolean quizNeedsGrading = false
     Date quizNeedsGradingAttemptDate
     Boolean quizOrSurveyPassed = false
     Integer quizAttemptId = null
 
+    String approvedBy
+    boolean approved
 }
