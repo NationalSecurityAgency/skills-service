@@ -102,9 +102,7 @@ const reportSkill = (approvalRequestedMsg) => {
 
   requestApprovalLoading.value = true
 
-  if(skillInternal.value.points === 0) {
-    firstReport.value = true;
-  }
+  firstReport.value = skillInternal.value.points === 0;
   // selfReport.value.msgHidden = true
   // selfReport.value.res = null
   skillsDisplayService.reportSkill(skillInternal.value.skillId, approvalRequestedMsg)
@@ -175,7 +173,7 @@ defineExpose({
 <template>
   <div>
     <quiz-footer :skill="skillInternal"/>
-    <Message v-if="isHonorSystem && selfReportAvailable && (firstReport && !isCompleted)" class="mb-2 alert alert-info">
+    <Message v-if="isHonorSystem && selfReportAvailable && !isCompleted" class="mb-2 alert alert-info">
       <template #container>
         <div class="flex gap-2 p-3 align-content-center">
           <div>
