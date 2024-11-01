@@ -175,7 +175,7 @@ defineExpose({
 <template>
   <div>
     <quiz-footer :skill="skillInternal"/>
-    <Message v-if="isHonorSystem && selfReportAvailable && (firstReport || !isCompleted)" class="mb-2 alert alert-info">
+    <Message v-if="isHonorSystem && selfReportAvailable && (firstReport && !isCompleted)" class="mb-2 alert alert-info">
       <template #container>
         <div class="flex gap-2 p-3 align-content-center">
           <div>
