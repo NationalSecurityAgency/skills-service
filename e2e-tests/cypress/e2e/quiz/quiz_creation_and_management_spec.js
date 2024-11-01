@@ -704,5 +704,29 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
 
     });
+
+    it('copying a quiz validates appropriately', function () {
+        cy.createQuizDef(1, { name: 'Quiz 1' });
+        cy.createSurveyDef(2, { name: 'Survey 1' });
+
+        cy.visit('/administrator/quizzes/')
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Survey 1' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'Copy of Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+        ], 5);
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
+        cy.get('[data-cy="saveDialogBtn"]').should('not.be.enabled')
+        cy.get('[data-cy="quizNameError"]').should('exist');
+        cy.get('[data-cy="quizNameError"]').contains('The value for the Quiz/Survey Name is already taken');
+    });
 });
 
