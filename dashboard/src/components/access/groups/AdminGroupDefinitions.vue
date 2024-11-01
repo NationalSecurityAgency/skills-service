@@ -164,8 +164,16 @@ defineExpose({
     <NoContent2 v-if="!loading && !hasData"
                 title="No Admin Group Definitions"
                 class="py-8 px-4"
-                message="Create an Admin Group that can be assigned to SkillTree quizzes and projects."
-                data-cy="noAdminGroupsYet"/>
+                data-cy="noAdminGroupsYet">
+      <div>
+        <p>
+          Create an Admin Group that can be assigned to SkillTree quizzes and projects.
+        </p>
+        <p>
+          When a group is assigned to a project or a quiz, group's members automatically gain administrative privileges of that project, streamlining management.
+        </p>
+      </div>
+    </NoContent2>
     <div v-if="!loading && hasData">
       <SkillsDataTable
         tableStoredStateId="adminGroupDefinitionsTable"

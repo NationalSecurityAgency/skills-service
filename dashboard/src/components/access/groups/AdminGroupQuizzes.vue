@@ -170,8 +170,16 @@ const removeQuizFromAdminGroup = () => {
           </SkillsDataTable>
         </div>
 
-        <no-content2 v-else title="No Quizzes or Surveys Added Yet..." icon="fas fa-spell-check" class="py-5"
-                     message="Please use the drop-down above to start adding quizzes and surveys to this admin group!"></no-content2>
+        <no-content2 v-else title="No Quizzes or Surveys Added Yet..." icon="fas fa-spell-check" class="py-5">
+          <div>
+            <p>
+              Please use the drop-down above to start adding quizzes and surveys to this admin group!
+            </p>
+            <p>
+              When a quiz or survey is assigned to a group, group's members automatically gain administrative privileges of that project, streamlining management.
+            </p>
+          </div>
+        </no-content2>
       </loading-container>
     </template>
   </Card>
