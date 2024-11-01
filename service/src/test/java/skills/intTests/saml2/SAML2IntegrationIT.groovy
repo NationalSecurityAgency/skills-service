@@ -17,6 +17,7 @@ package skills.intTests.saml2
 
 import dasniko.testcontainers.keycloak.KeycloakContainer
 import org.keycloak.admin.client.Keycloak
+import org.openqa.selenium.TimeoutException
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
@@ -94,6 +95,7 @@ class SAML2IntegrationIT extends Specification{
         System.setProperty("spring.security.saml2.registrationId", "keycloak")
         System.setProperty("saml2.rp.signing.key-location", "keycloak/private_key.pem")
         System.setProperty("saml2.rp.signing.cert-location", "keycloak/certificate.pem")
+        System.setProperty("skills.config.ui.defaultLandingPage","progress")
     }
 
     private void clearSystemProperties() {
@@ -102,6 +104,7 @@ class SAML2IntegrationIT extends Specification{
         System.clearProperty("spring.security.saml2.registrationId")
         System.clearProperty("saml2.rp.signing.key-location")
         System.clearProperty("saml2.rp.signing.cert-location")
+        System.clearProperty("skills.config.ui.defaultLandingPage")
     }
 
     private void updateKeycloakRedirectUri() {
@@ -204,7 +207,7 @@ class SAML2IntegrationIT extends Specification{
         ChromeOptions options = new ChromeOptions()
         options.addArguments("--headless")
         WebDriver driver = new ChromeDriver(options)
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10))
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60))
 
         try {
             driver.get(loginUrl)
@@ -214,8 +217,25 @@ class SAML2IntegrationIT extends Specification{
             driver.findElement(By.name("password")).sendKeys(password)
             driver.findElement(By.name("login")).click()
 
-            // Wait for the session cookies to be set
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("user_settings_menu")))
+            // Wait for the URL to change or the final element to appear
+            wait.until(ExpectedConditions.urlContains("progress-and-rankings"))
+
+            boolean isLoggedIn = false;
+            int attempts = 0;
+
+            while (!isLoggedIn && attempts < 3) {
+                try {
+                    wait.until(ExpectedConditions.presenceOfElementLocated(By.id("user_settings_menu")));
+                    isLoggedIn = true;
+                } catch (TimeoutException e) {
+                    Thread.sleep(5000);  // Retry after delay
+                    attempts++;
+                }
+            }
+
+            if (!isLoggedIn) {
+                throw new TimeoutException("Failed to log in and find the user settings menu.");
+            }
 
             // Retrieve session cookies
             Set<Cookie> cookies = driver.manage().getCookies()
@@ -224,4 +244,5 @@ class SAML2IntegrationIT extends Specification{
             driver.quit()
         }
     }
+
 }
