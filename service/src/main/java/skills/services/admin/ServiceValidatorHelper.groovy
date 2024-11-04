@@ -20,8 +20,10 @@ import org.springframework.stereotype.Component
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillQuizException
+import skills.storage.model.AdminGroupDef
 import skills.storage.model.ProjDef
 import skills.storage.model.QuizDef
+import skills.storage.repos.AdminGroupDefRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.QuizDefRepo
 
@@ -33,6 +35,9 @@ class ServiceValidatorHelper {
 
     @Autowired
     QuizDefRepo quizDefRepo
+
+    @Autowired
+    AdminGroupDefRepo adminGroupDefRepo
 
     void validateProjectIdDoesNotExist(String projectId) {
         ProjDef idExist = projDefRepo.findByProjectIdIgnoreCase(projectId)
@@ -59,6 +64,20 @@ class ServiceValidatorHelper {
         QuizDef nameExist = quizDefRepo.findByNameIgnoreCase(quizName)
         if (nameExist) {
             throw new SkillQuizException("Quiz with name [${quizName}] already exists! Sorry!", quizId, ErrorCode.ConstraintViolation)
+        }
+    }
+
+    void validateAdminGroupIdDoesNotExist(String adminGroupId) {
+        AdminGroupDef idExist = adminGroupDefRepo.findByAdminGroupIdIgnoreCase(adminGroupId)
+        if (idExist) {
+            throw new SkillException("Admin Group with id [${adminGroupId}] already exists! Sorry!",  ErrorCode.ConstraintViolation)
+        }
+    }
+
+    void validateAdminGroupNameDoesNotExist(String adminGroupName, String adminGroupId) {
+        AdminGroupDef nameExist = adminGroupDefRepo.findByNameIgnoreCase(adminGroupName)
+        if (nameExist) {
+            throw new SkillException("Admin Group with name [${adminGroupName}] already exists! Sorry!", ErrorCode.ConstraintViolation)
         }
     }
 

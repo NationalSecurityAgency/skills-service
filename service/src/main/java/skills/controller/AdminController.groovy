@@ -1697,7 +1697,7 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/validateEnablingCommunity", method = RequestMethod.GET, produces = "application/json")
-    EnableProjValidationRes validateProjectForEnablingCommunity(@PathVariable("projectId") String projectId) {
+    EnableUserCommunityValidationRes validateProjectForEnablingCommunity(@PathVariable("projectId") String projectId) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         return projAdminService.validateProjectForEnablingCommunity(projectId)
     }

@@ -37,6 +37,7 @@ class UserRole implements Serializable {
 
     String projectId
     String quizId
+    String adminGroupId
 
     @Enumerated(EnumType.STRING)
     RoleName roleName

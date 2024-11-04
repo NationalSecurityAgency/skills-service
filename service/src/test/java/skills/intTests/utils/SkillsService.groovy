@@ -1975,20 +1975,72 @@ class SkillsService {
         String url = "/projects/${projectId}/skills/${skillId}/expiration"
         return wsHelper.adminDelete(url)
     }
+    def getAdminGroupDefs() {
+        wsHelper.appGet("/admin-group-definitions")
+    }
+    def createAdminGroupDef(Map props) {
+        return wsHelper.appPost(getAdminGroupDefUrl(props.adminGroupId), props)
+    }
+    def updateAdminGroupDef(Map props) {
+        return wsHelper.adminPost(getAdminGroupDefUrl(props.adminGroupId), props)
+    }
+    def getAdminGroupDef(String adminGroupId) {
+        wsHelper.adminGet(getAdminGroupDefUrl(adminGroupId))
+    }
+    def removeAdminGroupDef(String adminGroupId) {
+        wsHelper.adminDelete(getAdminGroupDefUrl(adminGroupId))
+    }
+    def getAdminGroupMembers(String adminGroupId) {
+        wsHelper.adminGet("${getAdminGroupDefUrl(adminGroupId)}/members")
+    }
+    def addAdminGroupOwner(String adminGroupId, String userId) {
+        return wsHelper.adminPut("${getAdminGroupDefUrl(adminGroupId)}/users/${userId}/roles/${RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}")
+    }
+    def addAdminGroupMember(String adminGroupId, String userId) {
+        return wsHelper.adminPut("${getAdminGroupDefUrl(adminGroupId)}/users/${userId}/roles/${RoleName.ROLE_ADMIN_GROUP_MEMBER.toString()}")
+    }
+    def deleteAdminGroupOwner(String adminGroupId, String userId) {
+        return wsHelper.adminDelete("${getAdminGroupDefUrl(adminGroupId)}/users/${userId}/roles/${RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}")
+    }
+    def deleteAdminGroupMember(String adminGroupId, String userId) {
+        return wsHelper.adminDelete("${getAdminGroupDefUrl(adminGroupId)}/users/${userId}/roles/${RoleName.ROLE_ADMIN_GROUP_MEMBER.toString()}")
+    }
+    def getAdminGroupQuizzesAndSurveys(String adminGroupId) {
+        return wsHelper.adminGet("${getAdminGroupDefUrl(adminGroupId)}/quizzes")
+    }
+    def addQuizToAdminGroup(String adminGroupId, String quizId) {
+        return wsHelper.adminPut("${getAdminGroupDefUrl(adminGroupId)}/quizzes/${quizId}")
+    }
+    def deleteQuizFromAdminGroup(String adminGroupId, String quizId) {
+        return wsHelper.adminDelete("${getAdminGroupDefUrl(adminGroupId)}/quizzes/${quizId}")
+    }
+    def getAdminGroupProjects(String adminGroupId) {
+        return wsHelper.adminGet("${getAdminGroupDefUrl(adminGroupId)}/projects")
+    }
+    def addProjectToAdminGroup(String adminGroupId, String projectId) {
+        return wsHelper.adminPut("${getAdminGroupDefUrl(adminGroupId)}/projects/${projectId}")
+    }
+    def deleteProjectFromAdminGroup(String adminGroupId, String projectId) {
+        return wsHelper.adminDelete("${getAdminGroupDefUrl(adminGroupId)}/projects/${projectId}")
+    }
 
-    private String getQuizDefUrl(String quizId) {
+    static private String getAdminGroupDefUrl(String adminGroupId) {
+        return "/admin-group-definitions/${adminGroupId}".toString()
+    }
+
+    private static String getQuizDefUrl(String quizId) {
         return "/quiz-definitions/${quizId}".toString()
     }
 
-    private String getProjectUrl(String project) {
+    private static String getProjectUrl(String project) {
         return "/projects/${project}".toString()
     }
 
-    private String getSubjectUrl(String project, String subject) {
+    private static String getSubjectUrl(String project, String subject) {
         return "${getProjectUrl(project)}/subjects/${subject}".toString()
     }
 
-    private String getSkillUrl(String project, String subject, String skill) {
+    private static String getSkillUrl(String project, String subject, String skill) {
         if (subject) {
             return "${getSubjectUrl(project, subject)}/skills/${skill}".toString()
         } else {
@@ -1996,52 +2048,52 @@ class SkillsService {
         }
     }
 
-    private String getSyncSkillPointsUrl(String project, String subject, String groupId) {
+    private static String getSyncSkillPointsUrl(String project, String subject, String groupId) {
         return "${getSubjectUrl(project, subject)}/groups/${groupId}/skills".toString()
     }
 
-    private String getSkillEventUrl(String project, String skill) {
+    private static String getSkillEventUrl(String project, String skill) {
         // /projects/{projectId}/skills/{skillEventId}
         return "${getProjectUrl(project)}/skills/${skill}".toString()
     }
 
-    private String getBadgeUrl(String project, String badge) {
+    private static String getBadgeUrl(String project, String badge) {
         return "${getProjectUrl(project)}/badges/${badge}".toString()
     }
 
-    private String getGlobalBadgeUrl(String badge) {
+    private static String getGlobalBadgeUrl(String badge) {
         return "/badges/${badge}".toString()
     }
 
-    private String getAddSkillToSkillsGroupUrl(String project, String subjectId, String groupId, String skillId) {
+    private static String getAddSkillToSkillsGroupUrl(String project, String subjectId, String groupId, String skillId) {
         return "${getProjectUrl(project)}/subjects/${subjectId}/groups/${groupId}/skills/${skillId}".toString()
     }
 
-    private String getAddSkillToBadgeUrl(String project, String badge, String skillId) {
+    private static String getAddSkillToBadgeUrl(String project, String badge, String skillId) {
         return "${getProjectUrl(project)}/badge/${badge}/skills/${skillId}".toString()
     }
 
-    private String getAddSkillsToBadgeUrl(String project, String badge) {
+    private static String getAddSkillsToBadgeUrl(String project, String badge) {
         return "${getProjectUrl(project)}/badge/${badge}/skills/add".toString()
     }
 
-    private String getAddSkillToGlobalBadgeUrl(String badge, String project, String skillId) {
+    private static String getAddSkillToGlobalBadgeUrl(String badge, String project, String skillId) {
         return "/badges/${badge}/projects/${project}/skills/${skillId}".toString()
     }
 
-    private String getAddProjectLevelToGlobalBadgeUrl(String badge, String project, String level) {
+    private static String getAddProjectLevelToGlobalBadgeUrl(String badge, String project, String level) {
         return "/badges/${badge}/projects/${project}/level/${level}".toString()
     }
 
-    private String getchangeProjectLevelOnGlobalBadgeUrl(String badge, String project, String currentLevel, String newLevel) {
+    private static String getchangeProjectLevelOnGlobalBadgeUrl(String badge, String project, String currentLevel, String newLevel) {
         return "/badges/${badge}/projects/${project}/level/${currentLevel}/${newLevel}"
     }
 
-    private String getSaveIconUrl(String project){
+    private static String getSaveIconUrl(String project){
         return "/icons/upload/${project}"
     }
 
-    private String getLevelsUrl(String project, String subject){
+    private static String getLevelsUrl(String project, String subject){
         if(subject){
             return "${getSubjectUrl(project, subject)}/levels".toString()
         }else {
@@ -2050,7 +2102,7 @@ class SkillsService {
     }
 
 
-    private String getUserLevelForProjectUrl(String project, String userId){
+    private static String getUserLevelForProjectUrl(String project, String userId){
         if (userId) {
             return "${getProjectUrl(project)}/level?userId=${userId}".toString()
         } else {
@@ -2058,35 +2110,35 @@ class SkillsService {
         }
     }
 
-    private String getDeleteLevelUrl(String project, String subject){
+    private static String getDeleteLevelUrl(String project, String subject){
         return "${getLevelsUrl(project, subject)}/last".toString()
     }
 
-    private String getDeleteLevelUrl(String project){
+    private static String getDeleteLevelUrl(String project){
         return "${getLevelsUrl(project ,'')}/last".toString()
     }
 
-    private String getAddLevelUrl(String project, String subject){
+    private static String getAddLevelUrl(String project, String subject){
         return "${getLevelsUrl(project, subject)}/next".toString()
     }
 
-    private String getEditLevelUrl(String project, String subject, String level){
+    private static String getEditLevelUrl(String project, String subject, String level){
         return "${getLevelsUrl(project, subject)}/edit/${level}".toString()
     }
 
-    private String getSettingsUrl(String project){
+    private static String getSettingsUrl(String project){
         return "${getProjectUrl(project)}/settings"
     }
 
-    private String getSettingUrl(String project, String setting){
+    private static String getSettingUrl(String project, String setting){
         return "${getProjectUrl(project)}/settings/${setting}"
     }
 
-    private String getUserSettingsUrl(){
+    private static String getUserSettingsUrl(){
         return "/userInfo/settings"
     }
 
-    private String getAddProjectAdminUrl(String project, String userId) {
+    private static String getAddProjectAdminUrl(String project, String userId) {
         return "/projects/${project}/users/${userId}/roles/ROLE_PROJECT_ADMIN"
     }
 

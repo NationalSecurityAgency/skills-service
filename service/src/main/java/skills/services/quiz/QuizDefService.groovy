@@ -200,7 +200,7 @@ class QuizDefService {
         copyQuestions(originalQuizId, newQuizId)
         quizSettingsService.copySettings(originalQuizId, newQuizId)
         attachmentService.updateAttachmentsFoundInMarkdown(quizDefRequest.description, null, newQuizId, null)
-        accessSettingsStorageService.addQuizDefUserRole(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
+        accessSettingsStorageService.addQuizDefUserRoleForUser(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
 
         QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)
         return convert(updatedDef)
@@ -289,7 +289,7 @@ class QuizDefService {
 
             attachmentService.updateAttachmentsFoundInMarkdown(quizDefRequest.description, null, newQuizId, null)
 
-            accessSettingsStorageService.addQuizDefUserRole(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
+            accessSettingsStorageService.addQuizDefUserRoleForUser(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
         }
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
@@ -890,7 +890,7 @@ class QuizDefService {
     }
 
 
-    private QuizDef findQuizDef(String quizId) {
+    QuizDef findQuizDef(String quizId) {
         QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizId)
         if (!updatedDef) {
             throw new SkillQuizException("Failed to find quiz id.", quizId, ErrorCode.BadParam)

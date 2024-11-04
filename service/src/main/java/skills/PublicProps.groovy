@@ -42,6 +42,7 @@ class PublicProps {
         minPasswordLength,
         maxPasswordLength,
         minNameLength,
+        maxAdminGroupNameLength,
         maxBadgeNameLength,
         maxProjectNameLength,
         maxQuizNameLength,

@@ -24,7 +24,9 @@ enum RoleName {
     ROLE_PROJECT_APPROVER('Approver'),
     ROLE_DASHBOARD_ADMIN_ACCESS('Admin Access'),
     ROLE_QUIZ_ADMIN('Admin'),
-    ROLE_QUIZ_READ_ONLY('Read Only');
+    ROLE_QUIZ_READ_ONLY('Read Only'),
+    ROLE_ADMIN_GROUP_OWNER('Admin Group Owner'),
+    ROLE_ADMIN_GROUP_MEMBER('Admin Group Member');
 
     String displayName;
 
