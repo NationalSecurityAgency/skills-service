@@ -72,7 +72,7 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupDefsAfter.adminGroupId == [adminGroup2.adminGroupId]
     }
 
-    def "add owner to admin group"() {
+    def "owner can add owner to admin group"() {
         def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
         createService(otherUserId)
         def adminGroup = createAdminGroup(1)
@@ -121,6 +121,22 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
         when:
 
+        memberSkillsService.addAdminGroupMember(adminGroup.adminGroupId, "someOtherUserId")
+
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("code=403 FORBIDDEN")
+    }
+
+    def "member cannot add owner to admin group"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService memberSkillsService = createService(otherUserId)
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+        skillsService.addAdminGroupOwner(adminGroup.adminGroupId, otherUserId)
+
+        when:
         memberSkillsService.addAdminGroupMember(adminGroup.adminGroupId, "someOtherUserId")
 
         then:
@@ -448,4 +464,50 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         !adminGroupDefsAfterRemove
     }
 
+    def "change role between owner and member"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        createService(otherUserId)
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        def proj2 = createProject(2)
+        def subj2 = createSubject(2, 1)
+        def skill2 = createSkill(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj2, subj2, [skill2])
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        when:
+        skillsService.addAdminGroupOwner(adminGroup.adminGroupId, otherUserId)
+        def adminGroupRes1 = skillsService.getAdminGroupDef(adminGroup.adminGroupId)
+        def adminGroupMembers1 = skillsService.getAdminGroupMembers(adminGroup.adminGroupId)
+
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
+        def adminGroupRes2 = skillsService.getAdminGroupDef(adminGroup.adminGroupId)
+        def adminGroupMembers2 = skillsService.getAdminGroupMembers(adminGroup.adminGroupId)
+
+        then:
+        adminGroupRes1.adminGroupId == adminGroup.adminGroupId
+        adminGroupRes1.numberOfOwners == 2
+        adminGroupRes1.numberOfMembers == 0
+        adminGroupMembers1.size() == 2
+        adminGroupMembers1.find {it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}
+        adminGroupMembers1.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}
+        !adminGroupMembers1.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_MEMBER.toString()}
+
+        adminGroupRes2.adminGroupId == adminGroup.adminGroupId
+        adminGroupRes2.numberOfOwners == 1
+        adminGroupRes2.numberOfMembers == 1
+        adminGroupMembers2.size() == 2
+        adminGroupMembers2.find {it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}
+        adminGroupMembers2.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_MEMBER.toString()}
+        !adminGroupMembers2.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}
+    }
 }

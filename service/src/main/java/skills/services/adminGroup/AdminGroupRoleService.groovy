@@ -100,15 +100,18 @@ class AdminGroupRoleService {
         if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
             throw new SkillException("Cannot add roles to yourself. userId=[${userId}], adminGroupName=[${adminGroupDef.name}]", ErrorCode.AccessDenied)
         }
+        Boolean existingMemberOrOwner = userRoleRepo.isUserGroupAdminMemberOrOwner(userId, adminGroupDef.adminGroupId)
         accessSettingsStorageService.addAdminGroupDefUserRoleForUser(userId, adminGroupDef.adminGroupId, roleName)
 
-        List<String> quizIds = userRoleRepo.findQuizIdsByAdminGroupId(adminGroupDef.adminGroupId)
-        quizIds.each { quizId ->
-            quizRoleService.addQuizRole(userId, quizId, RoleName.ROLE_QUIZ_ADMIN, adminGroupDef.adminGroupId)
-        }
-        List<String> projectIds = userRoleRepo.findProjectIdsByAdminGroupId(adminGroupDef.adminGroupId)
-        projectIds.each { projectId ->
-            accessSettingsStorageService.addUserRole(userId, projectId, RoleName.ROLE_PROJECT_ADMIN,true, adminGroupDef.adminGroupId)
+        if (!existingMemberOrOwner) {
+            List<String> quizIds = userRoleRepo.findQuizIdsByAdminGroupId(adminGroupDef.adminGroupId)
+            quizIds.each { quizId ->
+                quizRoleService.addQuizRole(userId, quizId, RoleName.ROLE_QUIZ_ADMIN, adminGroupDef.adminGroupId)
+            }
+            List<String> projectIds = userRoleRepo.findProjectIdsByAdminGroupId(adminGroupDef.adminGroupId)
+            projectIds.each { projectId ->
+                accessSettingsStorageService.addUserRole(userId, projectId, RoleName.ROLE_PROJECT_ADMIN, true, adminGroupDef.adminGroupId)
+            }
         }
 
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)

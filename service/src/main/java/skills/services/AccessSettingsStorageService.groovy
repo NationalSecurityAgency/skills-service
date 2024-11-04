@@ -315,7 +315,7 @@ class AccessSettingsStorageService {
             UserRole userRole = new UserRole(userRefId: user.id, userId: userIdLower, roleName: roleName, projectId: projectId, adminGroupId: adminGroupId)
             // check that the new user role does not already exist
             UserRole existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndProjectIdAndAdminGroupId(userId, roleName, projectId, adminGroupId)
-            assert !existingUserRole, "CREATE FAILED -> user-role with project id [$projectId], userIdLower [$userIdLower] and roleName [$roleName], adming group id [${adminGroupId}] already exists"
+            assert !existingUserRole, "CREATE FAILED -> user-role with project id [$projectId], userIdLower [$userIdLower] and roleName [$roleName], admin group id [${adminGroupId}] already exists"
 
             String userIdForDisplay = loadUserInfo(userId)?.userIdForDisplay
             if (projectId && !userCommunityService.isUserCommunityMember(userIdLower) && userCommunityService.isUserCommunityOnlyProject(projectId)) {
