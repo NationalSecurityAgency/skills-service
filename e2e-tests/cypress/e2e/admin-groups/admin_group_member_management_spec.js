@@ -166,10 +166,17 @@ describe('Admin Group Member Management Tests', () => {
         cy.get('[data-cy="roleDropDown_root@skills.org"]').click()
         cy.get('[data-pc-section="panel"] [data-pc-section="itemlabel"]').contains('Owner').click();
         cy.wait('@addOwner')
-        cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Owner' }],
-            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Owner' }],
-        ], 5, true, null, false);
+        if (Cypress.env('oauthMode')) {
+            cy.validateTable(tableSelector, [
+                [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Owner' }],
+                [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Owner' }],
+            ], 5, true, null, false);
+        } else {
+            cy.validateTable(tableSelector, [
+                [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Owner' }],
+                [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Owner' }],
+            ], 5, true, null, false);
+        }
     });
 
 
@@ -205,10 +212,17 @@ describe('Admin Group Member Management Tests', () => {
 
         const expectedUserName = Cypress.env('oauthMode') ? 'foo bar' : 'skills@';
         cy.get(`${tableSelector} thead th`).contains('Role').click();
-        cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Owner' }],
-            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Owner' }],
-        ], 5, true, null, false);
+        if (Cypress.env('oauthMode')) {
+            cy.validateTable(tableSelector, [
+                [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Owner' }],
+                [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Owner' }],
+            ], 5, true, null, false);
+        } else {
+            cy.validateTable(tableSelector, [
+                [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Owner' }],
+                [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Owner' }],
+            ], 5, true, null, false);
+        }
 
         cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`).click();
         cy.get('[data-cy="roleDropDown_root@skills.org"]').click()
