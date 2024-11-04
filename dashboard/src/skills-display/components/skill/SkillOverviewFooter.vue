@@ -92,6 +92,7 @@ const removeRejection = () => {
   })
 }
 const firstReport = ref(skillInternal?.value?.points === 0);
+const isRetention = ref(false);
 const errNotification = ref({
   enable: false,
   msg: ''
@@ -103,6 +104,7 @@ const reportSkill = (approvalRequestedMsg) => {
   requestApprovalLoading.value = true
 
   firstReport.value = skillInternal.value.points === 0;
+  isRetention.value = skillInternal.value.points === skillInternal.value.totalPoints
   // selfReport.value.msgHidden = true
   // selfReport.value.res = null
   skillsDisplayService.reportSkill(skillInternal.value.skillId, approvalRequestedMsg)
@@ -208,7 +210,7 @@ defineExpose({
           </div>
           <div class="flex-1 font-italic pt-1" data-cy="honorSystemAlert">
             This skill's achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skillInternal.expirationDate) }}</span>, but your <span class="font-size-1">
-            <Tag severity="info">{{ numFormat.pretty(skillInternal.pointIncrement) }}</Tag></span> points can be retained by performing another <span class="font-size-1">Honor System</span> request.
+            <Tag severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> points can be retained by performing another <span class="font-size-1">Honor System</span> request.
           </div>
           <div class="col-auto">
             <SkillsButton
@@ -354,14 +356,14 @@ defineExpose({
           <Message
             icon="fas fa-birthday-cake"
             @close="selfReport.res = null"
-            v-if="isPointsEarned && (!isMotivationalSkill || firstReport)"
+            v-if="isPointsEarned && (!isMotivationalSkill || !isRetention)"
             severity="success">
             Congrats! You just earned
             <Tag>{{ selfReport.res.pointsEarned }}</Tag>
             points<span
             v-if="isCompleted"> and <b>completed</b> the {{ attributes.skillDisplayName.toLowerCase() }}</span>!
           </Message>
-          <Message v-if="isPointsEarned && isMotivationalSkill && !firstReport" severity="success" icon="fas fa-birthday-cake">
+          <Message v-if="isPointsEarned && isMotivationalSkill && !firstReport && isRetention" severity="success" icon="fas fa-birthday-cake">
             Congratulations! You just retained your <Tag>{{ skillInternal.totalPoints }}</Tag> points!
           </Message>
           <Message
