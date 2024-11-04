@@ -240,7 +240,7 @@ const skillId = computed(() => {
         </span>
       </div>
 
-      <div v-if="skill.selfReporting.quizNeedsGrading" class="text-orange-500" data-cy="requiresGrading">
+      <div v-if="skill.selfReporting && skill.selfReporting.quizNeedsGrading" class="text-orange-500" data-cy="requiresGrading">
         <i class="fas fa-user-clock" aria-hidden="true"/> Awaiting Grading
       </div>
     </div>
