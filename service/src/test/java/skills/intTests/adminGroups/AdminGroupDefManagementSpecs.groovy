@@ -134,10 +134,10 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         SkillsService memberSkillsService = createService(otherUserId)
         def adminGroup = createAdminGroup(1)
         skillsService.createAdminGroupDef(adminGroup)
-        skillsService.addAdminGroupOwner(adminGroup.adminGroupId, otherUserId)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
 
         when:
-        memberSkillsService.addAdminGroupMember(adminGroup.adminGroupId, "someOtherUserId")
+        memberSkillsService.addAdminGroupOwner(adminGroup.adminGroupId, "someOtherUserId")
 
         then:
 

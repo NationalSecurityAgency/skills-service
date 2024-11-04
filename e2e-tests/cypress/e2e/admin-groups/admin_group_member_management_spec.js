@@ -125,6 +125,101 @@ describe('Admin Group Member Management Tests', () => {
         cy.contains('No results found')
     });
 
+    it('add group member then update them to group owner', function () {
+        cy.intercept('PUT', '/admin/admin-group-definitions/adminGroup1/users/root@skills.org/roles/ROLE_ADMIN_GROUP_OWNER')
+            .as('addOwner');
+
+        cy.createAdminGroupDef(1, { name: 'My Awesome Admin Group' });
+        cy.createProject();
+        cy.addProjectToAdminGroupDef()
+        cy.createQuizDef()
+        cy.addQuizToAdminGroupDef()
+
+        cy.visit('/administrator/adminGroups/adminGroup1');
+        cy.wait('@loadUserRoles');
+
+        cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '1');
+        cy.get('[data-cy="existingUserInput"]').type('root');
+        cy.wait('@suggest');
+        cy.wait(500);
+        cy.get('[data-pc-section="item"]').contains('root@skills.org').click();
+        cy.get('[data-cy="userRoleSelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Group Member"]').click();
+        cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
+        cy.get('[data-cy="addUserBtn"]').click()
+        cy.get('[data-cy="userCell_root@skills.org"]')
+        cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '2');
+
+        cy.get('[data-cy="existingUserInput"]').type('root');
+        cy.wait('@suggest');
+        cy.wait(500);
+        cy.contains('No results found')
+
+        const expectedUserName = Cypress.env('oauthMode') ? 'foo bar' : 'skills@';
+        cy.get(`${tableSelector} thead th`).contains('Role').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Member' }],
+            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Owner' }],
+        ], 5, true, null, false);
+
+        cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`).click();
+        cy.get('[data-cy="roleDropDown_root@skills.org"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="itemlabel"]').contains('Owner').click();
+        cy.wait('@addOwner')
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Owner' }],
+            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Owner' }],
+        ], 5, true, null, false);
+    });
+
+
+    it('add group owner then update them to group member', function () {
+        cy.intercept('PUT', '/admin/admin-group-definitions/adminGroup1/users/root@skills.org/roles/ROLE_ADMIN_GROUP_MEMBER')
+            .as('addMember');
+
+        cy.createAdminGroupDef(1, { name: 'My Awesome Admin Group' });
+        cy.createProject();
+        cy.addProjectToAdminGroupDef()
+        cy.createQuizDef()
+        cy.addQuizToAdminGroupDef()
+
+        cy.visit('/administrator/adminGroups/adminGroup1');
+        cy.wait('@loadUserRoles');
+
+        cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '1');
+        cy.get('[data-cy="existingUserInput"]').type('root');
+        cy.wait('@suggest');
+        cy.wait(500);
+        cy.get('[data-pc-section="item"]').contains('root@skills.org').click();
+        cy.get('[data-cy="userRoleSelector"]').click()
+        cy.get('[data-pc-section="panel"] [aria-label="Group Owner"]').click();
+        cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
+        cy.get('[data-cy="addUserBtn"]').click()
+        cy.get('[data-cy="userCell_root@skills.org"]')
+        cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '2');
+
+        cy.get('[data-cy="existingUserInput"]').type('root');
+        cy.wait('@suggest');
+        cy.wait(500);
+        cy.contains('No results found')
+
+        const expectedUserName = Cypress.env('oauthMode') ? 'foo bar' : 'skills@';
+        cy.get(`${tableSelector} thead th`).contains('Role').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Owner' }],
+            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Owner' }],
+        ], 5, true, null, false);
+
+        cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`).click();
+        cy.get('[data-cy="roleDropDown_root@skills.org"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="itemlabel"]').contains('Member').click();
+        cy.wait('@addMember')
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Member' }],
+            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Owner' }],
+        ], 5, true, null, false);
+    });
+
     it('delete group member', function () {
         cy.fixture('vars.json')
             .then((vars) => {
