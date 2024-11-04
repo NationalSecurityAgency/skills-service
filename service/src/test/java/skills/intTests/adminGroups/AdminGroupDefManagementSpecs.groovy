@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsService
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserRoleRepo
 
@@ -91,7 +92,7 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupMembers.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}
     }
 
-    def "add member to admin group"() {
+    def "owner can add member to admin group"() {
         def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
         createService(otherUserId)
         def adminGroup = createAdminGroup(1)
@@ -112,7 +113,23 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupMembers.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_MEMBER.toString()}
     }
 
-    def "add project to admin group"() {
+    def "member cannot add member to admin group"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService memberSkillsService = createService(otherUserId)
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
+        when:
+
+        memberSkillsService.addAdminGroupMember(adminGroup.adminGroupId, "someOtherUserId")
+
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("code=403 FORBIDDEN")
+    }
+
+    def "owner can add project to admin group"() {
         def adminGroup = createAdminGroup(1)
         skillsService.createAdminGroupDef(adminGroup)
 
@@ -142,6 +159,32 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupProjects.availableProjects.size() == 1 && adminGroupProjects.availableProjects.find { it.projectId == proj2.projectId }
     }
 
+    def "member cannot add project to admin group"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService memberSkillsService = createService(otherUserId)
+
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        def proj2 = createProject(2)
+        def subj2 = createSubject(2, 1)
+        def skill2 = createSkill(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj2, subj2, [skill2])
+
+        when:
+        memberSkillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("code=403 FORBIDDEN")
+    }
+
     def "cannot add same project to same admin group more than once"() {
         def adminGroup = createAdminGroup(1)
         skillsService.createAdminGroupDef(adminGroup)
@@ -165,7 +208,7 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         SkillsClientException e = thrown(SkillsClientException)
     }
 
-    def "add quiz to admin group"() {
+    def "owner can add quiz to admin group"() {
         def adminGroup = createAdminGroup(1)
         skillsService.createAdminGroupDef(adminGroup)
 
@@ -191,6 +234,27 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupQuizzesAndSurveys.availableQuizzes.size() == 1 && adminGroupQuizzesAndSurveys.availableQuizzes.find { it.quizId == quiz2.quizId }
     }
 
+    def "member cannot add quiz to admin group"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService memberSkillsService = createService(otherUserId)
+
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+
+        def quiz2 = QuizDefFactory.createQuiz(2, "Fancy Description")
+        skillsService.createQuizDef(quiz2)
+
+        when:
+        memberSkillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("code=403 FORBIDDEN")
+    }
+
     def "cannot add same quiz to same admin group more than once"() {
         def adminGroup = createAdminGroup(1)
         skillsService.createAdminGroupDef(adminGroup)
@@ -204,12 +268,12 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         when:
         skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
         skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
-        then:
 
+        then:
         SkillsClientException e = thrown(SkillsClientException)
     }
 
-    def "remove project from admin group"() {
+    def "owner can remove project from admin group"() {
         def adminGroup = createAdminGroup(1)
         skillsService.createAdminGroupDef(adminGroup)
 
@@ -248,7 +312,33 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
                 && adminGroupProjectsAfterRemove.availableProjects.find { it.projectId == proj2.projectId }
     }
 
-    def "remove quiz from admin group"() {
+    def "member cannot remove project from admin group"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService memberSkillsService = createService(otherUserId)
+
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        def proj2 = createProject(2)
+        def subj2 = createSubject(2, 1)
+        def skill2 = createSkill(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj2, subj2, [skill2])
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        when:
+        memberSkillsService.deleteProjectFromAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("code=403 FORBIDDEN")
+    }
+
+    def "owner can remove quiz from admin group"() {
         def adminGroup = createAdminGroup(1)
         skillsService.createAdminGroupDef(adminGroup)
 
@@ -281,6 +371,28 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupQuizzesAndSurveysAfterRemove.availableQuizzes.size() == 2
                 && adminGroupQuizzesAndSurveysAfterRemove.availableQuizzes.find { it.quizId == quiz.quizId }
                 && adminGroupQuizzesAndSurveysAfterRemove.availableQuizzes.find { it.quizId == quiz2.quizId }
+    }
+
+    def "member cannot remove quiz from admin group"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService memberSkillsService = createService(otherUserId)
+
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+
+        def quiz2 = QuizDefFactory.createQuiz(2, "Fancy Description")
+        skillsService.createQuizDef(quiz2)
+        skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
+
+        when:
+        memberSkillsService.deleteQuizFromAdminGroup(adminGroup.adminGroupId, quiz.quizId)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("code=403 FORBIDDEN")
     }
 
     def "removing an admin group removes all other members/owners from quiz/project admin roles except current user, who remains as a 'local' admin"() {
