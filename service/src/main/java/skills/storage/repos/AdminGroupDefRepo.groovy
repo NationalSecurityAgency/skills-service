@@ -42,6 +42,11 @@ interface AdminGroupDefRepo extends CrudRepository<AdminGroupDef, Long> {
     Boolean existsByAdminGroupIdIgnoreCase(String adminGroupId)
     Boolean existsByNameIgnoreCase(String adminGroupName)
 
+    @Nullable
+    @Query('''select 'true' from AdminGroupDef agd JOIN UserRole ur on agd.adminGroupId = ur.adminGroupId where ur.projectId = ?1 AND agd.protectedCommunityEnabled = false''')
+    Boolean doesAdminGroupContainNonUserCommunityProject(String adminGroupId)
+
+
     @Query(value="""
                 SELECT 
                     agd.admin_group_id AS adminGroupId,

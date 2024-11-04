@@ -20,6 +20,7 @@ import groovy.transform.ToString
 import jakarta.persistence.*
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import skills.storage.converters.BooleanConverter
 
 @Entity
 @Table(name = 'admin_group_definition')
@@ -36,6 +37,7 @@ class AdminGroupDef implements Serializable {
 
     String name
 
+    @Convert(converter = BooleanConverter)
     Boolean protectedCommunityEnabled
 
     @Column(name="created", updatable = false, insertable = false)

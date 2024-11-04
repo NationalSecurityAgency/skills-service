@@ -279,7 +279,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         validateForbidden { nonUserCommunityUser.removeAdminGroupDef(adminGroup.adminGroupId) }
     }
 
-    def "can access group admin endpoints with UC protection enabled if the user does not belong to the user community"() {
+    def "can access group admin endpoints with UC protection enabled if the user does belong to the user community"() {
 
         when:
         String userCommunityUserId =  skillsService.userName
@@ -443,6 +443,33 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         e.message.contains("Once admin group [enableProtectedUserCommunity=true] it cannot be flipped to false.  adminGroupId [${adminGroup.adminGroupId}]")
     }
 
+    def "cannot enable UC protection on project if non-UC group is assigned to it already"() {
+
+        String userCommunityUserId =  skillsService.userName
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        def adminGroup = createAdminGroup(1)
+        adminGroup.enableProtectedUserCommunity = false
+        skillsService.createAdminGroupDef(adminGroup)
+
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        when:
+
+        proj.enableProtectedUserCommunity = true
+        skillsService.updateProject(proj)
+
+        then:
+
+        true
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("This project is part of one or more Admin Groups that has not enabled user community protection")
+    }
 
     String extractInviteFromEmail(String emailBody) {
         def regex = /join-project\/([^\/]+)\/([^?]+)/

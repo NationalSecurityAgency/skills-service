@@ -163,6 +163,11 @@ class UserCommunityService {
                 res.isAllowed = false
                 res.unmetRequirements.add("This project is part of one or more Global Badges")
             }
+
+            if(adminGroupDefRepo.doesAdminGroupContainNonUserCommunityProject(projDef.projectId)) {
+                res.isAllowed = false
+                res.unmetRequirements.add("This project is part of one or more Admin Groups that has not enabled user community protection")
+            }
         }
         return res;
     }
