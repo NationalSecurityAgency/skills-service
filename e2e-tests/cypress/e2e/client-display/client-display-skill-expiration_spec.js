@@ -359,7 +359,7 @@ describe('Client Display Expiration Tests', () => {
 
     });
 
-    it('expiring honor system skills have a different message', () => {
+    it('expiring approval skills have a different message', () => {
         let expirationDate = moment.utc().add(30, 'day');
         if (expirationDate.hour() >= 1) {
             expirationDate = expirationDate.add(1, 'day')
