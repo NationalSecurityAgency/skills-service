@@ -280,7 +280,7 @@ defineExpose({
             </div>
             <div class="flex-1" data-cy="requestApprovalAlert">
               This skill's achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skillInternal.expirationDate) }}</span>, but your <span class="font-size-1">
-              <Tag severity="info">{{ numFormat.pretty(skillInternal.pointIncrement) }}</Tag></span> points can be retained by submitting another <span class="font-size-1">approval</span> request.
+              <Tag severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> points can be retained by submitting another <span class="font-size-1">approval</span> request.
             </div>
             <div class="">
               <SkillsButton
