@@ -18,8 +18,12 @@ package skills.intTests.quiz
 import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsService
+import skills.services.quiz.QuizQuestionType
 import skills.storage.model.QuizDefParent
 import skills.storage.model.SkillDef
+
+import java.time.Instant
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -323,6 +327,282 @@ class QuizApi_LoadSkillInfoSpecs extends DefaultIntSpec {
         skillRes.selfReporting.quizOrSurveyPassed == true
         skillRes.selfReporting.quizAttemptId == quizAttempt.id
     }
-}
 
+    def "return quiz grading information for a single skill - multiple users one failed - one passed - one needs grading"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDefs([
+                QuizDefFactory.createTextInputQuestion(1, 1),
+        ])
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skills = createSkills(3, 1, 1, 100, 1)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz.quizId
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(3)
+        SkillsService userWithFailedAttempt = createService(users[0])
+        SkillsService userWithPassedAttempt = createService(users[1])
+        SkillsService userWithNeedsGradingAttempt = createService(users[2])
+
+        def quizInfo = userWithFailedAttempt.getQuizInfo(quiz.quizId)
+        def quizAttempt = userWithFailedAttempt.startQuizAttempt(quiz.quizId).body
+        userWithFailedAttempt.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        userWithFailedAttempt.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        skillsService.gradeAnswer(userWithFailedAttempt.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, false, "Good answer")
+
+        def quizInfo1 = userWithPassedAttempt.getQuizInfo(quiz.quizId)
+        def quizAttempt1 = userWithPassedAttempt.startQuizAttempt(quiz.quizId).body
+        userWithPassedAttempt.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizInfo1.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        userWithPassedAttempt.completeQuizAttempt(quiz.quizId, quizAttempt1.id).body
+        skillsService.gradeAnswer(userWithPassedAttempt.userName, quiz.quizId, quizAttempt1.id, quizInfo1.questions[0].answerOptions[0].id, true, "Good answer")
+
+        def quizInfo2 = userWithNeedsGradingAttempt.getQuizInfo(quiz.quizId)
+        def quizAttempt2 = userWithNeedsGradingAttempt.startQuizAttempt(quiz.quizId).body
+        userWithNeedsGradingAttempt.reportQuizAnswer(quiz.quizId, quizAttempt2.id, quizInfo2.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        userWithNeedsGradingAttempt.completeQuizAttempt(quiz.quizId, quizAttempt2.id).body
+
+        when:
+        def failedRes = skillsService.getSingleSkillSummary(userWithFailedAttempt.userName, proj.projectId, skills[0].skillId)
+        def passedRes = skillsService.getSingleSkillSummary(userWithPassedAttempt.userName, proj.projectId, skills[0].skillId)
+        def needsGradingRes = skillsService.getSingleSkillSummary(userWithNeedsGradingAttempt.userName, proj.projectId, skills[0].skillId)
+        then:
+        failedRes.selfReporting.quizNeedsGrading == false
+        failedRes.selfReporting.quizNeedsGradingAttemptDate == null
+        failedRes.selfReporting.quizOrSurveyPassed == false
+        failedRes.selfReporting.quizAttemptId == null
+
+        passedRes.selfReporting.quizNeedsGrading == false
+        passedRes.selfReporting.quizNeedsGradingAttemptDate == null
+        passedRes.selfReporting.quizOrSurveyPassed == true
+        passedRes.selfReporting.quizAttemptId == quizAttempt1.id
+
+        needsGradingRes.selfReporting.quizNeedsGrading == true
+        needsGradingRes.selfReporting.quizNeedsGradingAttemptDate != null
+        needsGradingRes.selfReporting.quizOrSurveyPassed == false
+        needsGradingRes.selfReporting.quizAttemptId == quizAttempt2.id
+    }
+
+    def "return latest attempt info in a subject summary when quizzes are associated"() {
+        def now = new Date()
+        def fiveMinutesAgo = now - 5 * 60 * 1000
+        def fiveMinutesFromNow = now + 5 * 60 * 1000
+
+        def createQuiz = { Integer quizNum, List<QuizQuestionType> questionTypes = [QuizQuestionType.TextInput] ->
+            def quiz = QuizDefFactory.createQuiz(quizNum, "Fancy Description")
+            skillsService.createQuizDef(quiz)
+            def questions = []
+            questionTypes.eachWithIndex { it, index ->
+                if (it == QuizQuestionType.TextInput) {
+                    questions << QuizDefFactory.createTextInputQuestion(quizNum, index)
+                } else if (it == QuizQuestionType.SingleChoice) {
+                    questions << QuizDefFactory.createChoiceQuestion(quizNum, index, 5, it)
+                }
+            }
+            skillsService.createQuizQuestionDefs(questions)
+            return quiz
+        }
+
+        def quiz1 = createQuiz(1)
+        def quiz2 = createQuiz(2, [QuizQuestionType.TextInput,QuizQuestionType.SingleChoice])
+        def quiz3 = createQuiz(3, [QuizQuestionType.TextInput,QuizQuestionType.SingleChoice, QuizQuestionType.SingleChoice])
+        def quiz4 = createQuiz(4, [QuizQuestionType.SingleChoice, QuizQuestionType.SingleChoice, QuizQuestionType.SingleChoice, QuizQuestionType.SingleChoice])
+        def quiz5 = createQuiz(5)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skills = createSkills(8, 1, 1, 100, 1)
+        skills.each { it.selfReportingType = SkillDef.SelfReportingType.Quiz }
+        skills[0].quizId = quiz1.quizId
+        skills[1].quizId = quiz2.quizId
+        skills[2].quizId = quiz3.quizId
+        skills[3].quizId = quiz4.quizId
+        skills[4].quizId = quiz5.quizId
+        skills[5].quizId = quiz1.quizId
+        skills[6].quizId = quiz2.quizId
+        skills[7].quizId = quiz3.quizId
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(3)
+        SkillsService user1 = createService(users[0])
+        SkillsService user2 = createService(users[1])
+        SkillsService user3 = createService(users[2])
+
+        def runQuiz = { SkillsService user, def quiz, boolean grade, boolean pass ->
+            def quizInfo = user.getQuizInfo(quiz.quizId)
+            def quizAttempt = user.startQuizAttempt(quiz.quizId).body
+            quizInfo.questions.eachWithIndex { it, index ->
+                int answerIndex = 0
+                if (it.questionType == QuizQuestionType.SingleChoice.toString()) {
+                    answerIndex = pass ? 0 : 1
+                }
+                user.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[index].answerOptions[answerIndex].id, [isSelected: true, answerText: 'This is user provided answer'])
+            }
+
+            user.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+            if (grade) {
+                skillsService.gradeAnswer(user.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, pass, "Good answer")
+            }
+
+            return [quizInfo, quizAttempt]
+        }
+
+        def (quizInfo1, quizAttempt1) = runQuiz(user1, quiz1, true, true)
+        def (quizInfo2, quizAttempt2) = runQuiz(user1, quiz2, true, false)
+        def (quizInfo3, quizAttempt3) = runQuiz(user1, quiz3, false, true)
+        def (quizInfo4, quizAttempt4) = runQuiz(user1, quiz4, false, true)
+        def (quizInfo5, quizAttempt5) = runQuiz(user1, quiz5, false, true)
+
+        runQuiz(user2, quiz2, true, false)
+        runQuiz(user2, quiz2, true, false)
+        def (quizInfo6, quizAttempt6) = runQuiz(user2, quiz2, false, true)
+
+        runQuiz(user2, quiz3, true, false)
+        runQuiz(user2, quiz3, true, false)
+        def (quizInfo7, quizAttempt7) = runQuiz(user2, quiz3, true, true)
+
+        runQuiz(user2, quiz5, true, false)
+        runQuiz(user2, quiz5, true, false)
+        def (quizInfo8, quizAttempt8) = runQuiz(user2, quiz5, true, false)
+
+        when:
+        def user1Res = skillsService.getSkillSummary(user1.userName, proj.projectId, subj.subjectId)
+        def user2Res = skillsService.getSkillSummary(user2.userName, proj.projectId, subj.subjectId)
+        def user3Res = skillsService.getSkillSummary(user3.userName, proj.projectId, subj.subjectId)
+        println( JsonOutput.prettyPrint(JsonOutput.toJson(user2Res)))
+        then:
+        user1Res.skills[0].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        user1Res.skills[0].selfReporting.quizId == quiz1.quizId
+        user1Res.skills[0].selfReporting.quizName == quiz1.name
+        user1Res.skills[0].selfReporting.numQuizQuestions == 1
+        user1Res.skills[0].selfReporting.quizNeedsGrading == false
+        user1Res.skills[0].selfReporting.quizOrSurveyPassed == true
+        user1Res.skills[0].selfReporting.quizAttemptId == quizAttempt1.id
+        Date completed = Date.from(Instant.parse(user1Res.skills[0].selfReporting.quizNeedsGradingAttemptDate))
+        completed >= fiveMinutesAgo && completed <= fiveMinutesFromNow
+
+        user1Res.skills[1].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        user1Res.skills[1].selfReporting.quizId == quiz2.quizId
+        user1Res.skills[1].selfReporting.quizName == quiz2.name
+        user1Res.skills[1].selfReporting.numQuizQuestions == 2
+        user1Res.skills[1].selfReporting.quizNeedsGrading == false
+        user1Res.skills[1].selfReporting.quizOrSurveyPassed == false
+        user1Res.skills[1].selfReporting.quizAttemptId == quizAttempt2.id
+
+        user1Res.skills[2].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        user1Res.skills[2].selfReporting.quizId == quiz3.quizId
+        user1Res.skills[2].selfReporting.quizName == quiz3.name
+        user1Res.skills[2].selfReporting.numQuizQuestions == 3
+        user1Res.skills[2].selfReporting.quizNeedsGrading == true
+        user1Res.skills[2].selfReporting.quizOrSurveyPassed == false
+        user1Res.skills[2].selfReporting.quizAttemptId == quizAttempt3.id
+
+        user1Res.skills[3].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        user1Res.skills[3].selfReporting.quizId == quiz4.quizId
+        user1Res.skills[3].selfReporting.quizName == quiz4.name
+        user1Res.skills[3].selfReporting.numQuizQuestions == 4
+        user1Res.skills[3].selfReporting.quizNeedsGrading == false
+        user1Res.skills[3].selfReporting.quizOrSurveyPassed == false
+        user1Res.skills[3].selfReporting.quizAttemptId == null // only loaded for quizzes with InputText questions
+
+        user1Res.skills[4].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        user1Res.skills[4].selfReporting.quizId == quiz5.quizId
+        user1Res.skills[4].selfReporting.quizName == quiz5.name
+        user1Res.skills[4].selfReporting.numQuizQuestions == 1
+        user1Res.skills[4].selfReporting.quizNeedsGrading == true
+        user1Res.skills[4].selfReporting.quizOrSurveyPassed == false
+        user1Res.skills[4].selfReporting.quizAttemptId == quizAttempt5.id
+
+        user1Res.skills[5].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        user1Res.skills[5].selfReporting.quizId == quiz1.quizId
+        user1Res.skills[5].selfReporting.quizName == quiz1.name
+        user1Res.skills[5].selfReporting.numQuizQuestions == 1
+        user1Res.skills[5].selfReporting.quizNeedsGrading == false
+        user1Res.skills[5].selfReporting.quizOrSurveyPassed == true
+        user1Res.skills[5].selfReporting.quizAttemptId == quizAttempt1.id
+        user1Res.skills[5].selfReporting.quizNeedsGradingAttemptDate != null
+
+        user1Res.skills[6].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        user1Res.skills[6].selfReporting.quizId == quiz2.quizId
+        user1Res.skills[6].selfReporting.quizName == quiz2.name
+        user1Res.skills[6].selfReporting.numQuizQuestions == 2
+        user1Res.skills[6].selfReporting.quizNeedsGrading == false
+        user1Res.skills[6].selfReporting.quizOrSurveyPassed == false
+        user1Res.skills[6].selfReporting.quizAttemptId == quizAttempt2.id
+
+        user1Res.skills[7].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        user1Res.skills[7].selfReporting.quizId == quiz3.quizId
+        user1Res.skills[7].selfReporting.quizName == quiz3.name
+        user1Res.skills[7].selfReporting.numQuizQuestions == 3
+        user1Res.skills[7].selfReporting.quizNeedsGrading == true
+        user1Res.skills[7].selfReporting.quizOrSurveyPassed == false
+        user1Res.skills[7].selfReporting.quizAttemptId == quizAttempt3.id
+
+        // user 2
+        user2Res.skills[0].selfReporting.quizNeedsGrading == false
+        user2Res.skills[0].selfReporting.quizOrSurveyPassed == false
+        user2Res.skills[0].selfReporting.quizAttemptId == null
+
+        user2Res.skills[1].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        user2Res.skills[1].selfReporting.quizId == quiz2.quizId
+        user2Res.skills[1].selfReporting.quizName == quiz2.name
+        user2Res.skills[1].selfReporting.numQuizQuestions == 2
+        user2Res.skills[1].selfReporting.quizNeedsGrading == true
+        user2Res.skills[1].selfReporting.quizOrSurveyPassed == false
+        user2Res.skills[1].selfReporting.quizAttemptId == quizAttempt6.id
+
+        user2Res.skills[2].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        user2Res.skills[2].selfReporting.quizId == quiz3.quizId
+        user2Res.skills[2].selfReporting.quizName == quiz3.name
+        user2Res.skills[2].selfReporting.numQuizQuestions == 3
+        user2Res.skills[2].selfReporting.quizNeedsGrading == false
+        user2Res.skills[2].selfReporting.quizOrSurveyPassed == true
+        user2Res.skills[2].selfReporting.quizAttemptId == quizAttempt7.id
+
+        user2Res.skills[3].selfReporting.quizNeedsGrading == false
+        user2Res.skills[3].selfReporting.quizOrSurveyPassed == false
+        user2Res.skills[3].selfReporting.quizAttemptId == null
+
+        user2Res.skills[4].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        user2Res.skills[4].selfReporting.quizId == quiz5.quizId
+        user2Res.skills[4].selfReporting.quizName == quiz5.name
+        user2Res.skills[4].selfReporting.numQuizQuestions == 1
+        user2Res.skills[4].selfReporting.quizNeedsGrading == false
+        user2Res.skills[4].selfReporting.quizOrSurveyPassed == false
+        user2Res.skills[4].selfReporting.quizAttemptId == quizAttempt8.id
+
+        user2Res.skills[5].selfReporting.quizNeedsGrading == false
+        user2Res.skills[5].selfReporting.quizOrSurveyPassed == false
+        user2Res.skills[5].selfReporting.quizAttemptId == null
+
+        user2Res.skills[6].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        user2Res.skills[6].selfReporting.quizId == quiz2.quizId
+        user2Res.skills[6].selfReporting.quizName == quiz2.name
+        user2Res.skills[6].selfReporting.numQuizQuestions == 2
+        user2Res.skills[6].selfReporting.quizNeedsGrading == true
+        user2Res.skills[6].selfReporting.quizOrSurveyPassed == false
+        user2Res.skills[6].selfReporting.quizAttemptId == quizAttempt6.id
+
+        user2Res.skills[7].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        user2Res.skills[7].selfReporting.quizId == quiz3.quizId
+        user2Res.skills[7].selfReporting.quizName == quiz3.name
+        user2Res.skills[7].selfReporting.numQuizQuestions == 3
+        user2Res.skills[7].selfReporting.quizNeedsGrading == false
+        user2Res.skills[7].selfReporting.quizOrSurveyPassed == true
+        user2Res.skills[7].selfReporting.quizAttemptId == quizAttempt7.id
+
+        // user 3
+        user3Res.skills.each {
+            it.selfReporting.quizNeedsGrading == false
+            it.selfReporting.quizOrSurveyPassed == false
+            it.selfReporting.quizAttemptId == null
+        }
+    }
+}
 
