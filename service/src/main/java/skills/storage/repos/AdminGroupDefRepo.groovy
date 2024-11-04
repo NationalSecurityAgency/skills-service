@@ -36,6 +36,16 @@ interface AdminGroupDefRepo extends CrudRepository<AdminGroupDef, Long> {
     @Nullable
     AdminGroupDef findByNameIgnoreCase(String adminGroupName)
 
+//    @javax.annotation.Nullable
+    @Query(value = """
+                SELECT agd
+            FROM AdminGroupDef agd
+            JOIN UserRole ur ON agd.adminGroupId = ur.adminGroupId
+            WHERE agd.adminGroupId = ?1
+            """)
+    List<AdminGroupDef> findAllByProjectId(String projectId)
+
+
     @Query(value = "select count(agd.id) from AdminGroupDef agd, UserRole u where agd.adminGroupId = u.adminGroupId and u.userId=?1")
     Integer getAdminGroupCountByUserId(String userId)
 
@@ -68,6 +78,29 @@ interface AdminGroupDefRepo extends CrudRepository<AdminGroupDef, Long> {
             """, nativeQuery = true)
     @Nullable
     List<AdminGroupDefSummaryRes> getAdminGroupDefSummariesByUser(String userId)
+
+
+    @Query(value="""
+                SELECT 
+                    agd.admin_group_id AS adminGroupId,
+                    agd.name AS name,
+                    agd.created,
+                    agd.protected_community_enabled as protectedCommunityEnabled,
+                    COALESCE(numberOfOwners, 0) as numberOfOwners,
+                    COALESCE(numberOfMembers, 0) as numberOfMembers,
+                    COALESCE(numberOfProjects, 0) as numberOfProjects,
+                    COALESCE(numberOfQuizzesAndSurveys, 0) as numberOfQuizzesAndSurveys
+                    
+                FROM admin_group_definition agd
+                JOIN user_roles ur on (ur.admin_group_id = agd.admin_group_id)
+                LEFT JOIN (SELECT admin_group_id, COUNT(distinct user_id) AS numberOfOwners FROM user_roles WHERE role_name = 'ROLE_ADMIN_GROUP_OWNER' group by admin_group_id ) adminGroupOwners ON adminGroupOwners.admin_group_id = agd.admin_group_id
+                LEFT JOIN (SELECT admin_group_id, COUNT(distinct user_id) AS numberOfMembers FROM user_roles WHERE role_name = 'ROLE_ADMIN_GROUP_MEMBER' group by admin_group_id ) adminGroupMembers ON adminGroupMembers.admin_group_id = agd.admin_group_id
+                LEFT JOIN (SELECT admin_group_id, COUNT(distinct project_id) AS numberOfProjects FROM user_roles WHERE role_name = 'ROLE_PROJECT_ADMIN' group by admin_group_id ) projectAdminRoles ON projectAdminRoles.admin_group_id = agd.admin_group_id
+                LEFT JOIN (SELECT admin_group_id, COUNT(distinct quiz_id) AS numberOfQuizzesAndSurveys FROM user_roles WHERE role_name = 'ROLE_QUIZ_ADMIN' group by admin_group_id ) quizAdminRoles ON quizAdminRoles.admin_group_id = agd.admin_group_id
+                WHERE ur.project_id = ?1
+            """, nativeQuery = true)
+    @Nullable
+    List<AdminGroupDefSummaryRes> getAdminGroupDefSummariesByProjectId(String projectId)
 
     static interface AdminGroupDefSummaryRes {
         String getAdminGroupId();

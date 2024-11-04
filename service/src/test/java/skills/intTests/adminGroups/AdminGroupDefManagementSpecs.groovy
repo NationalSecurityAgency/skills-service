@@ -18,6 +18,7 @@ package skills.intTests.adminGroups
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsClientException
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserRoleRepo
 
@@ -141,6 +142,29 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupProjects.availableProjects.size() == 1 && adminGroupProjects.availableProjects.find { it.projectId == proj2.projectId }
     }
 
+    def "cannot add same project to same admin group more than once"() {
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        def proj2 = createProject(2)
+        def subj2 = createSubject(2, 1)
+        def skill2 = createSkill(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj2, subj2, [skill2])
+
+        when:
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+    }
+
     def "add quiz to admin group"() {
         def adminGroup = createAdminGroup(1)
         skillsService.createAdminGroupDef(adminGroup)
@@ -165,6 +189,24 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupQuizzesAndSurveys.adminGroupId == adminGroup.adminGroupId
         adminGroupQuizzesAndSurveys.assignedQuizzes.size() == 1 && adminGroupQuizzesAndSurveys.assignedQuizzes.find { it.quizId == quiz.quizId }
         adminGroupQuizzesAndSurveys.availableQuizzes.size() == 1 && adminGroupQuizzesAndSurveys.availableQuizzes.find { it.quizId == quiz2.quizId }
+    }
+
+    def "cannot add same quiz to same admin group more than once"() {
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+
+        def quiz2 = QuizDefFactory.createQuiz(2, "Fancy Description")
+        skillsService.createQuizDef(quiz2)
+
+        when:
+        skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
+        skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
     }
 
     def "remove project from admin group"() {
