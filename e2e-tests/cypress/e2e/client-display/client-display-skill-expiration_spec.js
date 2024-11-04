@@ -382,5 +382,7 @@ describe('Client Display Expiration Tests', () => {
         cy.approveAllRequests();
 
         cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill4');
+
+        cy.get('[data-cy="requestApprovalAlert"]').contains('This skill\'s achievement expires in a day, but your 50 points can be retained by submitting another approval request.');
     });
 });
