@@ -47,10 +47,7 @@ import skills.storage.model.*
 import skills.storage.repos.*
 import skills.utils.InputSanitizer
 
-import java.time.Duration
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.ZoneOffset
 
 @Service
@@ -107,6 +104,9 @@ class QuizRunService {
 
     @Autowired
     SkillAttributeService skillAttributeService
+
+    @Autowired
+    QuizNotificationService quizNotificationService
 
     @Value('#{"${skills.config.ui.minimumSubjectPoints}"}')
     int minimumSubjectPoints
@@ -716,6 +716,10 @@ class QuizRunService {
         userQuizAttempt.completed = new Date()
         userQuizAttempt.numQuestionsToPass = minNumQuestionsToPass
         quizAttemptRepo.save(userQuizAttempt)
+
+        if(userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING) {
+            quizNotificationService.sendNotifications(quizDef, userId)
+        }
 
         gradedResult.associatedSkillResults = reportAnyAssociatedSkills(userQuizAttempt, quizDef)
         gradedResult.started = userQuizAttempt.started
