@@ -74,6 +74,8 @@ const shouldLoadTable = computed(() => {
   return roleCount.value > 1;
 })
 
+const numberOfConfiguredApprovers = ref(0);
+
 const loadData = () => {
   const pageParams = {
     limit: pageSize.value,
@@ -86,6 +88,7 @@ const loadData = () => {
   AccessService.getUserRoles(route.params.projectId, roles, pageParams).then((users) => {
     totalRows.value = users.totalCount;
     SelfReportService.getApproverConf(route.params.projectId).then((approverConf) => {
+      numberOfConfiguredApprovers.value = approverConf.length;
       const basicTableInfo = users.data.map((u) => {
         const allConf = approverConf.filter((c) => c.approverUserId === u.userId);
         return {
@@ -137,7 +140,7 @@ const updateTable = (basicTableInfo) => {
   });
   res = res.map((item) => ({
     ...item,
-    lastOneWithoutConf: numConfigured >= (res.length - 1) && !item.hasConf,
+    lastOneWithoutConf: numberOfConfiguredApprovers.value > 0 ? (numConfigured >= (numberOfConfiguredApprovers.value - 1) && !item.hasConf) : false,
     hasAnyFallbackConf,
   }));
   data.value = res;
