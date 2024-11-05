@@ -679,6 +679,10 @@ class SkillsLoader {
                 quizId: skillDefAndUserPoints?.quizId,
                 quizName: skillDefAndUserPoints?.quizName,
                 numQuizQuestions: skillDefAndUserPoints?.quizNumQuestions ?: 0,
+                quizNeedsGrading: skillDefAndUserPoints?.lastQuizAttemptStatus && skillDefAndUserPoints?.lastQuizAttemptStatus == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING,
+                quizNeedsGradingAttemptDate: skillDefAndUserPoints?.lastQuizAttemptDate,
+                quizAttemptId: skillDefAndUserPoints?.lastQuizAttemptId,
+                quizOrSurveyPassed: skillDefAndUserPoints?.lastQuizAttemptStatus && skillDefAndUserPoints?.lastQuizAttemptStatus == UserQuizAttempt.QuizAttemptStatus.PASSED,
                 approvedBy: isFinished ? skillApproval?.approverUserId : '',
                 approved: !skillApproval?.rejectedOn && skillApproval?.approverUserId,
         )
@@ -701,7 +705,9 @@ class SkillsLoader {
         Integer quizAttemptId = null
         if (quizNameAndId) {
             PageRequest onePlease = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "updated"))
-            List<UserQuizAttempt> gradingAttempts = userQuizAttemptRepo.findByQuizRefIdByStatus(quizNameAndId.getQuizRefId(),
+            List<UserQuizAttempt> gradingAttempts = userQuizAttemptRepo.findByQuizRefIdAndUserIdAndStatus(
+                    quizNameAndId.getQuizRefId(),
+                    userId,
                     [UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING, UserQuizAttempt.QuizAttemptStatus.PASSED], onePlease)
             if (gradingAttempts) {
                 UserQuizAttempt lastAttempt = gradingAttempts.first()

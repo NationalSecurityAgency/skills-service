@@ -24,6 +24,7 @@ import skills.storage.model.QuizToSkillDef
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefSkinny
 import skills.storage.model.SubjectAwareSkillDef
+import skills.storage.model.UserQuizAttempt
 
 interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
 
@@ -34,12 +35,20 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
         Integer getQuizRefId()
         QuizDefParent.QuizType getQuizType()
         Integer getNumQuestions()
+        Integer getNumTextInputQuestions()
     }
 
     static interface ProjectIdAndSkillId {
         Integer getSkillRefId()
         String getProjectId()
         String getSkillId()
+    }
+
+    static interface QuizAttemptInfo {
+        Integer getAttemptId()
+        UserQuizAttempt.QuizAttemptStatus getStatus()
+        Date getUpdated()
+        Integer getQuizDefRefId()
     }
 
     @Nullable
@@ -85,8 +94,10 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     @Query(value = '''select q.quiz_id as quizId,
                max(q.name) as quizName,
                max(q.type) as quizType,
+               max(q.id) as quizRefId,
                qToS.skill_ref_id as skillRefId,
-               count(question.id) as numQuestions
+               count(question.id) as numQuestions,
+               count(case when question.type = 'TextInput' then question.id end) as numTextInputQuestions
         from quiz_to_skill_definition qToS, quiz_definition q
              left join quiz_question_definition question on (q.quiz_id = question.quiz_id)
         where qToS.skill_ref_id in ?1

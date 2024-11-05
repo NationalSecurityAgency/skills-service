@@ -239,6 +239,10 @@ const skillId = computed(() => {
           <i class="fas fa-heart-broken skills-theme-primary-color" aria-hidden="true"></i> Request Rejected
         </span>
       </div>
+
+      <div v-if="skill.selfReporting && skill.selfReporting.quizNeedsGrading" class="text-orange-500" data-cy="requiresGrading">
+        <i class="fas fa-user-clock" aria-hidden="true"/> Awaiting Grading
+      </div>
     </div>
   </div>
 </template>

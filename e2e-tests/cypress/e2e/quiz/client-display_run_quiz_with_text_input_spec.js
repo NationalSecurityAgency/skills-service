@@ -358,6 +358,51 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
     });
 
+    it('display pending grading status on subject page', () => {
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.createQuizDef(2);
+        cy.createQuizQuestionDef(2, 1)
+
+        cy.createQuizDef(3);
+        cy.createQuizQuestionDef(3, 1)
+
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, {
+            selfReportingType: 'Quiz',
+            quizId: 'quiz1',
+            pointIncrement: '150',
+            numPerformToCompletion: 1
+        });
+        cy.createSkill(1, 1, 2, {
+            selfReportingType: 'Quiz',
+            quizId: 'quiz2',
+            pointIncrement: '150',
+            numPerformToCompletion: 1
+        });
+        cy.createSkill(1, 1, 3, {
+            selfReportingType: 'Quiz',
+            quizId: 'quiz3',
+            pointIncrement: '150',
+            numPerformToCompletion: 1
+        });
+
+        cy.runQuizForTheCurrentUser(1, [{selectedIndex: [0]}], 'My Answer')
+        cy.runQuizForTheCurrentUser(2, [{selectedIndex: [1]}])
+        cy.runQuizForTheCurrentUser(3, [{selectedIndex: [0]}])
+
+        cy.cdVisit('/subjects/subj1');
+        cy.get('[data-cy="skillProgress_index-0"]')
+        cy.get('[data-cy="skillProgress_index-1"]')
+        cy.get('[data-cy="skillProgress_index-2"]')
+
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="requiresGrading"]')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="requiresGrading"]').should('not.exist')
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="requiresGrading"]').should('not.exist')
+    })
+
 });
 
 

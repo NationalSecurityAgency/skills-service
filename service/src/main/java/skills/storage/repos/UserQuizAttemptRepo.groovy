@@ -177,6 +177,22 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
     @Query('''select quizAttempt from UserQuizAttempt quizAttempt where quizAttempt.quizDefinitionRefId = ?1 and quizAttempt.status in ?2''')
     List<UserQuizAttempt> findByQuizRefIdByStatus(Integer quizRefId, List<QuizAttemptStatus> status, PageRequest pageRequest)
 
+    @Nullable
+    @Query('''select quizAttempt from UserQuizAttempt quizAttempt where quizAttempt.quizDefinitionRefId = ?1 and quizAttempt.userId = ?2 and quizAttempt.status in ?3''')
+    List<UserQuizAttempt> findByQuizRefIdAndUserIdAndStatus(Long quizRefId, String userId, List<QuizAttemptStatus> status, PageRequest pageRequest)
+
+    @Nullable
+    @Query(value = '''SELECT attemptId, status, quizDefRefId, updated
+            FROM (
+                     SELECT attetmpt.id as attemptId, attetmpt.status as status, attetmpt.quiz_definition_ref_id as quizDefRefId, attetmpt.updated as updated,
+                            ROW_NUMBER() OVER (PARTITION BY attetmpt.quiz_definition_ref_id ORDER BY attetmpt.updated DESC) AS rowNumber
+                     FROM user_quiz_attempt attetmpt
+                     WHERE attetmpt.quiz_definition_ref_id = any(:quizRefIds) AND attetmpt.user_id = :userId
+                 ) sub
+            WHERE rowNumber = 1''', nativeQuery = true)
+    List<QuizToSkillDefRepo.QuizAttemptInfo> getLatestQuizAttemptsForUserByQuizIds(@Param("quizRefIds") Integer [] quizRefIds, @Param("userId") String userId)
+
+
     List<UserQuizAttempt> findByUserIdAndQuizDefinitionRefIdAndStatus(String userId, Integer quizRefId, QuizAttemptStatus status)
 
     List<UserQuizAttempt> findByUserIdAndQuizDefinitionRefId(String userId, Integer quizRefId)
