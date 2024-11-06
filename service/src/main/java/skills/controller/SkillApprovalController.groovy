@@ -171,6 +171,12 @@ class SkillApprovalController {
         return skillApprovalService.getProjectApproverConf(projectId);
     }
 
+    @RequestMapping(value = "/projects/{projectId}/approverConf/count", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    int countProjectApproverConf(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return skillApprovalService.countApprovalsForProject(projectId);
+    }
+
     @RequestMapping(value = "/projects/{projectId}/approverConf/{aproverConfId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     ApproverConfResult deleteConfig(@PathVariable("projectId") String projectId,
                                          @PathVariable("aproverConfId") Integer aproverConfId) {

@@ -70,11 +70,18 @@ const countUserRoles = () => {
   })
 }
 
+const countUserConfigs = () => {
+  return SelfReportService.countApproverConfig(route.params.projectId)
+}
+
 const shouldLoadTable = computed(() => {
   return roleCount.value > 1;
 })
 
 const numberOfConfiguredApprovers = ref(0);
+const maxConfigReached = computed(() => {
+  return (totalRows.value - 1) === numberOfConfiguredApprovers.value;
+})
 
 const loadData = () => {
   const pageParams = {
@@ -88,7 +95,6 @@ const loadData = () => {
   AccessService.getUserRoles(route.params.projectId, roles, pageParams).then((users) => {
     totalRows.value = users.totalCount;
     SelfReportService.getApproverConf(route.params.projectId).then((approverConf) => {
-      numberOfConfiguredApprovers.value = approverConf.length;
       const basicTableInfo = users.data.map((u) => {
         const allConf = approverConf.filter((c) => c.approverUserId === u.userId);
         return {
@@ -108,11 +114,17 @@ const loadData = () => {
 const updateTable = (basicTableInfo) => {
   let hasAnyFallbackConf = false;
   let numConfigured = 0;
+  countUserConfigs().then((count) => {
+    numberOfConfiguredApprovers.value = count;
+  }).finally(() => {
   let res = basicTableInfo.map((row) => {
-    const { allConf } = row;
+    const {allConf} = row;
     let tagConf = allConf.filter((c) => c.userTagKey);
     if (tagConf && tagConf.length > 0) {
-      tagConf = tagConf.map((t) => ({ ...t, userTagKeyLabel: t.userTagKey.toLowerCase() === userTagConfKey.value?.toLowerCase() ? userTagConfLabel : t.userTagKey }));
+      tagConf = tagConf.map((t) => ({
+        ...t,
+        userTagKeyLabel: t.userTagKey.toLowerCase() === userTagConfKey.value?.toLowerCase() ? userTagConfLabel : t.userTagKey
+      }));
     }
     const userConf = allConf.filter((c) => c.userId);
     const skillConf = allConf.filter((c) => c.skillId);
@@ -138,14 +150,16 @@ const updateTable = (basicTableInfo) => {
       _showDetails: !!row._showDetails,
     };
   });
+
   res = res.map((item) => ({
     ...item,
-    lastOneWithoutConf: numberOfConfiguredApprovers.value > 0 ? (numConfigured >= (numberOfConfiguredApprovers.value - 1) && !item.hasConf) : false,
+    lastOneWithoutConf: maxConfigReached.value && !item.hasConf,
     hasAnyFallbackConf,
   }));
-  data.value = res;
-};
 
+  data.value = res;
+  })
+};
 
 const updatedConf = (newConf) => {
   const itemToUpdate = data.value.find((i) => i.userId === newConf.approverUserId);
@@ -157,7 +171,7 @@ const removeConf = (removedConf) => {
   const itemToUpdate = data.value.find((i) => i.userId === removedConf.approverUserId);
   itemToUpdate.allConf = itemToUpdate.allConf.filter((i) => i.id !== removedConf.id);
   updateTable(data.value);
-};
+}
 
 const handleFallback = (checked, rowItem) => {
   const itemToUpdate = data.value.find((i) => i.userId === rowItem.userId);

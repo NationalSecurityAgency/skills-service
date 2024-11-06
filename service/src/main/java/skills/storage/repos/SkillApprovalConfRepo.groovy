@@ -48,6 +48,9 @@ interface SkillApprovalConfRepo extends CrudRepository<SkillApprovalConf, Intege
     SkillApprovalConf findByProjectIdAndApproverUserIdAndRestAttributesAreNull(String projectId, String approverId)
 
 
+    @Query('''select count(distinct(sac.approverUserId)) from SkillApprovalConf sac where sac.projectId = ?1 and (sac.skillRefId is not null or sac.userId is not null or sac.userTagKey is not null)''')
+    Integer countConfForProject(String projectId)
+
     @Query('''select count(sac.id) > 0 from SkillApprovalConf sac where sac.projectId = ?1''')
     Boolean confExistForProject(String projectId)
 

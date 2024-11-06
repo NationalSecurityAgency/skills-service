@@ -83,4 +83,7 @@ export default {
   removeApproverConfig(projectId, approverConfigID) {
     return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/approverConf/${approverConfigID}`).then((response) => response.data);
   },
+  countApproverConfig(projectId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/approverConf/count`).then((response) => response.data);
+  }
 };
