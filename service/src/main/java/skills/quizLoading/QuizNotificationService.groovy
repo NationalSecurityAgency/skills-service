@@ -19,17 +19,16 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.UIConfigProperties
-import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserRoleRes
 import skills.notify.EmailNotifier
 import skills.notify.Notifier
 import skills.services.AccessSettingsStorageService
 import skills.services.FeatureService
-import skills.services.settings.SettingsService
 import skills.storage.model.Notification
 import skills.storage.model.QuizDef
 import skills.storage.model.QuizSetting
 import skills.storage.model.UserAttrs
+import skills.storage.model.UserQuizAttempt
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.QuizSettingsRepo
 import skills.storage.repos.UserAttrsRepo
@@ -56,7 +55,7 @@ class QuizNotificationService {
     @Autowired
     UIConfigProperties uiConfigProperties
 
-    void sendNotifications(QuizDef quizDef, String userId) {
+    void sendGradingRequestNotifications(QuizDef quizDef, String userId) {
         String publicUrl = featureService.getPublicUrl()
         if(!publicUrl) {
             return
@@ -92,4 +91,29 @@ class QuizNotificationService {
         //default to true if setting doesn't exist
         return disableGradingSetting ? !Boolean.valueOf(disableGradingSetting.value) : true
     }
+
+
+    void sendGradedRequestNotification(QuizDef quizDef, UserQuizAttempt userQuizAttempt) {
+        String publicUrl = featureService.getPublicUrl()
+        if (!publicUrl) {
+            return
+        }
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userQuizAttempt.userId)
+        Boolean passed = userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED
+        Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                userIds: [userAttrs.userId],
+                type: Notification.Type.QuizGradedResponse.toString(),
+                keyValParams: [
+                        quizName                 : quizDef.name,
+                        passed                   : passed,
+                        quizUrl                  : "${publicUrl}progress-and-rankings/my-quiz-attempts/${userQuizAttempt.id}",
+                        publicUrl                : publicUrl,
+                        replyTo                  : userAttrs?.email,
+                        communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
+                ],
+        )
+        notifier.sendNotification(request)
+    }
+
 }

@@ -573,6 +573,8 @@ class QuizRunService {
 
             userQuizAttempt.status = isQuizPassed ? UserQuizAttempt.QuizAttemptStatus.PASSED : UserQuizAttempt.QuizAttemptStatus.FAILED
             quizAttemptRepo.save(userQuizAttempt)
+
+            quizNotificationService.sendGradedRequestNotification(quizDef, userQuizAttempt)
         }
 
         UserQuizAnswerGraded userQuizAnswerGraded = new UserQuizAnswerGraded(
@@ -718,7 +720,7 @@ class QuizRunService {
         quizAttemptRepo.save(userQuizAttempt)
 
         if(userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING) {
-            quizNotificationService.sendNotifications(quizDef, userId)
+            quizNotificationService.sendGradingRequestNotifications(quizDef, userId)
         }
 
         gradedResult.associatedSkillResults = reportAnyAssociatedSkills(userQuizAttempt, quizDef)
