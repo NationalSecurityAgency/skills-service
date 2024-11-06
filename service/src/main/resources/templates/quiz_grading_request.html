@@ -35,16 +35,12 @@ limitations under the License.
             cursor: pointer;
             background-color: #ecffec;
         }
-
-        .label {
-            color: #525252;
-        }
     </style>
 </head>
 <body class="overall-container">
 <div th:remove="tag" th:utext="${htmlHeader}" th:if= "${htmlHeader != null}">[[${htmlHeader}]]</div>
 <h1>SkillTree Quiz Grading Request!</h1>
-<p>User [[${userRequesting}]] has completed the [${quizName}] quiz which requires manual grading. As a quiz administrator, please review the submitted answers and evaluate them as passed or failed."</p>
+<p>User <b>[[${userRequesting}]]</b> has completed the <b>[[${quizName}]]</b> quiz which requires manual grading. As a quiz administrator, please review the submitted answers and evaluate them as passed or failed.</p>
 
 <p style="font-weight: bold">
     <a th:href="@{${gradingUrl}}" class="button">Review Answers</a>

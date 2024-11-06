@@ -52,6 +52,7 @@ class QuizGradingRequestedNotificationBuilder implements NotificationEmailBuilde
         Context templateContext = new Context()
         templateContext.setVariable("userRequesting", parsed.userRequesting)
         templateContext.setVariable("quizId", parsed.quizId)
+        templateContext.setVariable("quizName", parsed.quizName)
         templateContext.setVariable("gradingUrl", parsed.gradingUrl)
         templateContext.setVariable("publicUrl", parsed.publicUrl)
         templateContext.setVariable("htmlHeader", formatting.htmlHeader)
@@ -61,8 +62,8 @@ class QuizGradingRequestedNotificationBuilder implements NotificationEmailBuilde
     }
 
     private static String buildPlainText(Object parsed, Formatting formatting) {
-        String pt = ">SkillTree Quiz Grading Request!\n\n" +
-                "User [[${parsed.userRequesting}]] has completed the [${parsed.quizName}] quiz which requires manual grading. As a quiz administrator, please review the submitted answers and evaluate them as passed or failed.\n\n" +
+        String pt = "SkillTree Quiz Grading Request!\n\n" +
+                "User [${parsed.userRequesting}] has completed the [${parsed.quizName}] quiz which requires manual grading. As a quiz administrator, please review the submitted answers and evaluate them as passed or failed.\n\n" +
                 "Grading URL: ${parsed.gradingUrl}" +
                 "\n\n" +
                 "\nAlways yours," +

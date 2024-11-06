@@ -88,8 +88,8 @@ class QuizNotificationService {
     }
     private Boolean isUserSubscribed(QuizDef quizDef, String userId) {
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
-        QuizSetting shouldNotifySetting = quizSettingsRepo.findBySettingAndQuizRefIdAndUserRefId(QuizSettings.UserPreference_ShouldNotifyGradingRequest.setting, quizDef.id, userAttrs.id)
+        QuizSetting disableGradingSetting = quizSettingsRepo.findBySettingAndQuizRefIdAndUserRefId(QuizUserPreferences.DisableGradingRequestNotification.preference, quizDef.id, userAttrs.id)
         //default to true if setting doesn't exist
-        return shouldNotifySetting ? Boolean.valueOf(shouldNotifySetting.value) : true
+        return disableGradingSetting ? !Boolean.valueOf(disableGradingSetting.value) : true
     }
 }
