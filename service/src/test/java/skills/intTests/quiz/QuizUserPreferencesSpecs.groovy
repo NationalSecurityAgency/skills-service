@@ -43,10 +43,10 @@ class QuizUserPreferencesSpecs extends DefaultIntSpec {
         def user2Preferences = services[1].getCurrentUserQuizPreferences(quiz1.quizId)
         def user3Preferences = services[2].getCurrentUserQuizPreferences(quiz1.quizId)
         then:
-        user1Preferences.setting == [QuizUserPreferences.DisableGradingRequestNotification.preference]
+        user1Preferences.preference == [QuizUserPreferences.DisableGradingRequestNotification.preference]
         user1Preferences.value == ["true"]
 
-        user2Preferences.setting == [QuizUserPreferences.DisableGradingRequestNotification.preference]
+        user2Preferences.preference == [QuizUserPreferences.DisableGradingRequestNotification.preference]
         user2Preferences.value == ["false"]
 
         !user3Preferences
