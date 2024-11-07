@@ -22,6 +22,52 @@ describe('Grade Quizzes', () => {
         defaultUser = Cypress.env('oauthMode') ? 'foo': Cypress.env('proxyUser')
     })
 
+    it('quiz without Input Text questions', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+
+        cy.visit('/administrator/quizzes/quiz1/grading');
+        cy.get('[data-cy="noContent"]').contains('No Manual Grading Required')
+        cy.get( '[data-cy="quizRunsToGradeTable"]').should('not.exist')
+    });
+
+    it('ability to subscribe and unsubscribe from grading notifications', () => {
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.visit('/administrator/quizzes/quiz1/grading');
+        cy.get( '[data-cy="quizRunsToGradeTable"]').should('exist')
+        cy.get('[data-cy="noContent"]').should('not.exist')
+
+        cy.get('[data-cy="subscribeSwitch"] input').should('be.checked')
+
+        // emails are enabled by default
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}], true, 'My Answer')
+        cy.getEmails().then((emails) => {
+            expect(emails[0].text).to.contain('User [user1] has completed the [This is quiz 1] quiz which requires manual grading');
+        });
+        cy.resetEmail()
+
+        // disable notifications
+        cy.get('[data-cy="subscribeSwitch"]').click()
+        cy.get('[data-cy="subscribeSwitch"] input').should('not.be.checked')
+        cy.runQuizForUser(1, 2, [{selectedIndex: [0]}], true, 'My Answer')
+
+        cy.wait(2000)
+        cy.visit('/administrator/quizzes/quiz1/grading');
+        cy.get( '[data-cy="quizRunsToGradeTable"]').should('exist')
+        cy.get('[data-cy="noContent"]').should('not.exist')
+
+        cy.get('[data-cy="subscribeSwitch"] input').should('not.be.checked')
+
+        cy.get('[data-cy="subscribeSwitch"]').click()
+        cy.get('[data-cy="subscribeSwitch"] input').should('be.checked')
+        cy.runQuizForUser(1, 3, [{selectedIndex: [0]}], true, 'My Answer')
+        cy.getEmails().then((emails) => {
+            expect(emails[0].text).to.contain('User [user3] has completed the [This is quiz 1] quiz which requires manual grading');
+        });
+    });
+
     it('mark quiz with 1 question as correct', () => {
         cy.createQuizDef(1);
         cy.createTextInputQuestionDef(1, 1)

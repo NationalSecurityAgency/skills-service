@@ -57,12 +57,6 @@ onMounted(() => {
   }
 });
 
-const unsubscribeHelpMsg = computed(() => {
-  if (emailSubscribed.value) {
-    return 'Change to Unsubscribed to unsubscribe from all Skill Approval request emails';
-  }
-  return 'Change to Subscribed to receive Skill Approval request emails';
-});
 const pageChanged = (pagingInfo) => {
   currentPage.value = pagingInfo.page + 1;
   pageSize.value = pagingInfo.rows;

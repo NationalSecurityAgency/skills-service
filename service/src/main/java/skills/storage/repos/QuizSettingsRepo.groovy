@@ -15,11 +15,9 @@
  */
 package skills.storage.repos
 
-import org.springframework.data.jpa.repository.Modifying
-import org.springframework.data.jpa.repository.Query
+
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
-import skills.storage.model.QuizDef
 import skills.storage.model.QuizSetting
 
 interface QuizSettingsRepo extends CrudRepository<QuizSetting, Long> {
@@ -32,5 +30,11 @@ interface QuizSettingsRepo extends CrudRepository<QuizSetting, Long> {
 
     @Nullable
     List<QuizSetting> findAllByQuizRefId(Integer quizRefId)
+
+    @Nullable
+    List<QuizSetting> findAllByQuizRefIdAndUserRefId(Integer quizRefId,  Integer userRefId)
+
+    @Nullable
+    QuizSetting findBySettingAndQuizRefIdAndUserRefId(String setting, Integer quizRefId, Integer userRefId)
 
 }

@@ -29,7 +29,8 @@ import jakarta.persistence.*
 class Notification {
 
     static enum Type {
-        SkillApprovalRequested, SkillApprovalResponse, ProjectExpiration, ContactUsers, ContactOwner, InviteOnly, InviteOnlyReminder, PasswordReset, VerifyEmail
+        SkillApprovalRequested, SkillApprovalResponse, ProjectExpiration, ContactUsers, ContactOwner, InviteOnly, InviteOnlyReminder, PasswordReset, VerifyEmail,
+        QuizGradingRequested, QuizGradedResponse
     }
 
     static class KeyValParam {

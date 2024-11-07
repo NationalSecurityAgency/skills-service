@@ -15,22 +15,13 @@
  */
 package skills.quizLoading
 
-enum QuizSettings {
-    MaxNumAttempts('quizNumberOfAttempts'),
-    MinNumQuestionsToPass('quizPassingReq'),
-    QuizUserRole('quizUserRole'),
-    RandomizeQuestions('quizRandomizeQuestions'),
-    RandomizeAnswers('quizRandomizeAnswers'),
-    QuizLength('quizLength'),
-    QuizTimeLimit('quizTimeLimit'),
-    MultipleTakes('quizMultipleTakes'),
-    AlwaysShowCorrectAnswers('quizAlwaysShowCorrectAnswers'),
-    UserPreference_ShouldNotifyGradingRequest('userPreference.shouldNotifyGradingRequest');
+enum QuizUserPreferences {
+    DisableGradingRequestNotification('DisableGradingRequestNotification');
 
-    String setting;
+    String preference;
 
-    private QuizSettings(String setting) {
-        this.setting = setting;
+    private QuizUserPreferences(String preference) {
+        this.preference = preference;
     }
 
 }

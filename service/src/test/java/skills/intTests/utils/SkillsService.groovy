@@ -28,6 +28,7 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.services.settings.Settings
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
+import skills.settings.EmailSettingsService
 import skills.storage.model.auth.RoleName
 
 @Slf4j
@@ -1364,6 +1365,27 @@ class SkillsService {
         ])
     }
 
+    def saveEmailHeaderAndFooterSettings(String htmlHeader, String htmlFooter, String plaintextHeader, String plaintextFooter) {
+        Map settingRequest = [
+                settingGroup : EmailSettingsService.settingsGroup,
+                setting : EmailSettingsService.htmlHeader,
+                value : htmlHeader
+        ]
+        addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+
+        settingRequest.setting = EmailSettingsService.plaintextHeader
+        settingRequest.value = plaintextHeader
+        addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+
+        settingRequest.setting = EmailSettingsService.htmlFooter
+        settingRequest.value = htmlFooter
+        addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+
+        settingRequest.setting = EmailSettingsService.plaintextFooter
+        settingRequest.value = plaintextFooter
+        addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+    }
+
     def addOrUpdateUserSetting(String setting, String value) {
         Map params = [
                 settingGroup: "user.prefs",
@@ -1838,6 +1860,15 @@ class SkillsService {
 
     def getQuizSettings(String quizId) {
         String url = "${getQuizDefUrl(quizId)}/settings"
+        return wsHelper.adminGet(url)
+    }
+
+    def saveQuizUserPreference(String quizId, String preferenceKey, Object value) {
+        String url = "${getQuizDefUrl(quizId)}/preferences/${preferenceKey}"
+        return wsHelper.adminPost(url, [value: value])
+    }
+    def getCurrentUserQuizPreferences(String quizId) {
+        String url = "${getQuizDefUrl(quizId)}/preferences"
         return wsHelper.adminGet(url)
     }
 

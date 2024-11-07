@@ -24,28 +24,20 @@ import org.springframework.web.bind.annotation.*
 import skills.controller.exceptions.QuizValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.QuizDefRequest
+import skills.controller.request.model.QuizPreference
 import skills.controller.request.model.QuizQuestionDefRequest
 import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.*
 import skills.quizLoading.QuizRunService
-import skills.quizLoading.model.QuizAnswerGradingResult
-import skills.quizLoading.model.QuizAttemptStartResult
-import skills.quizLoading.model.QuizGradeAnswerReq
-import skills.quizLoading.model.QuizGradedResult
-import skills.quizLoading.model.QuizReportAnswerReq
-import skills.quizLoading.model.StartQuizAttemptReq
+import skills.quizLoading.model.*
 import skills.services.quiz.QuizDefService
 import skills.services.quiz.QuizRoleService
 import skills.services.quiz.QuizSettingsService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionsHistoryService
-import skills.storage.model.LabeledCount
-import skills.storage.model.SkillDef
-import skills.storage.model.SkillDefSkinny
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.auth.RoleName
-import skills.storage.repos.UserQuizAttemptRepo
 import skills.utils.TablePageUtil
 
 import java.nio.charset.StandardCharsets
@@ -274,6 +266,23 @@ class QuizController {
     List<QuizSettingsRes> getQuizSettings(@PathVariable("quizId") String quizId) {
         QuizValidator.isNotNull(quizId, "QuizId")
         return quizSettingsService.getSettings(quizId)
+    }
+
+    @RequestMapping(value = "/{quizId}/preferences/{preferenceKey}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult saveQuizAdminPreference(@PathVariable("quizId") String quizId, @PathVariable("preferenceKey") String preferenceKey, @RequestBody QuizPreference quizPreference) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id")
+        QuizValidator.isNotBlank(preferenceKey, "Quiz Preference")
+        QuizValidator.isNotBlank(quizPreference?.value, "Quiz Preference Value")
+
+        quizSettingsService.saveUserPreference(quizId, preferenceKey, quizPreference)
+
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/{quizId}/preferences", method = [RequestMethod.GET], produces = MediaType.APPLICATION_JSON_VALUE)
+    List<QuizPreferenceRes> getQuizAdminPreferences(@PathVariable("quizId") String quizId) {
+        QuizValidator.isNotNull(quizId, "QuizId")
+        return quizSettingsService.getCurrentUserQuizPreferences(quizId)
     }
 
     @RequestMapping(value = "/{quizId}/users/{userKey}/roles/{roleName}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)

@@ -152,5 +152,15 @@ export default {
     return axios
       .get(`/admin/quiz-definitions/${quizId}/usageOverTime`)
       .then((response) => response.data)
+  },
+  saveMyPreference(quizId, preferenceKey, value) {
+    return axios
+        .post(`/admin/quiz-definitions/${quizId}/preferences/${preferenceKey}`, {value})
+        .then((response) => response.data)
+  },
+  getMyPreferences(quizId) {
+    return axios
+        .get(`/admin/quiz-definitions/${quizId}/preferences`)
+        .then((response) => response.data)
   }
 }
