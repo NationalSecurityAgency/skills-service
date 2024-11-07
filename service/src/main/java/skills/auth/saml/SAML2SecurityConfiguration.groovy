@@ -50,6 +50,7 @@ import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.security.spec.PKCS8EncodedKeySpec
 
+
 @Slf4j
 @Conditional(SecurityMode.SAML2Auth)
 @Component
@@ -93,9 +94,8 @@ class SAML2SecurityConfiguration{
 
          OpenSaml4AuthenticationProvider authenticationProvider = new OpenSaml4AuthenticationProvider();
          authenticationProvider.setResponseAuthenticationConverter(responseToken -> {
-             Saml2Authentication authentication = OpenSaml4AuthenticationProvider
-                     .createDefaultResponseAuthenticationConverter()
-                     .convert(responseToken);
+             Saml2Authentication authentication = OpenSaml4AuthenticationProvider.createDefaultResponseAuthenticationConverter()
+                                                                                 .convert(responseToken);
              Saml2AuthenticatedPrincipal principal = (Saml2AuthenticatedPrincipal) authentication.getPrincipal();
             // Assertion assertion = responseToken.getResponse().getAssertions().get(0);
              UserInfo userInfo = saml2Utils.convertToUserInfo(authentication,true);

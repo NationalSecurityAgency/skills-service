@@ -217,9 +217,6 @@ class SAML2IntegrationIT extends Specification{
             driver.findElement(By.name("password")).sendKeys(password)
             driver.findElement(By.name("login")).click()
 
-            // Wait for the URL to change or the final element to appear
-            wait.until(ExpectedConditions.urlContains("progress-and-rankings"))
-
             boolean isLoggedIn = false;
             int attempts = 0;
 
