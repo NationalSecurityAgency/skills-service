@@ -184,7 +184,7 @@ describe('Approver Config Tests', () => {
 
             cy.get('[data-pc-section="pagebutton"]').contains('1').click();
 
-            const defaultUser = Cypress.env('oauthMode') ? 'foo-hydra': vars.defaultUser
+            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
 
             const tableSelector = '[data-cy="skillApprovalConfTable"]'
             cy.validateTable(tableSelector, [
@@ -249,7 +249,7 @@ describe('Approver Config Tests', () => {
 
             cy.get('[data-pc-section="pagebutton"]').contains('1').click();
 
-            const defaultUser = Cypress.env('oauthMode') ? 'foo-hydra': vars.defaultUser
+            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
 
             const tableSelector = '[data-cy="skillApprovalConfTable"]'
             cy.validateTable(tableSelector, [
@@ -315,7 +315,7 @@ describe('Approver Config Tests', () => {
 
             cy.visit('/administrator/projects/proj1/self-report/configure');
 
-            const defaultUser = Cypress.env('oauthMode') ? 'foo-hydra': vars.defaultUser
+            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
 
             const tableSelector = '[data-cy="skillApprovalConfTable"]'
             cy.validateTable(tableSelector, [
@@ -381,7 +381,7 @@ describe('Approver Config Tests', () => {
 
             cy.get('[data-pc-section="pagebutton"]').contains('1').click();
 
-            const defaultUser = Cypress.env('oauthMode') ? 'foo-hydra': vars.defaultUser
+            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
 
             const tableSelector = '[data-cy="skillApprovalConfTable"]'
             cy.validateTable(tableSelector, [
