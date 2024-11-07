@@ -628,6 +628,7 @@ class AccessSettingsStorageService {
                 userId: inputRole.userId,
                 projectId: inputRole.projectId,
                 roleName: inputRole.roleName,
+                adminGroupId: inputRole.adminGroupId,
         )
         return res
     }
@@ -637,6 +638,7 @@ class AccessSettingsStorageService {
                 userId: input.role.userId,
                 userIdForDisplay: input.attrs.userIdForDisplay,
                 projectId: input.role.projectId,
+                adminGroupId: input.role.adminGroupId,
                 roleName: input.role.roleName,
                 firstName: input.attrs.firstName,
                 lastName: input.attrs.lastName,

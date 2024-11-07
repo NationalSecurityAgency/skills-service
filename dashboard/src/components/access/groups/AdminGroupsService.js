@@ -69,4 +69,9 @@ export default {
         .get(`/admin/admin-group-definitions/${encodeURIComponent(projectId)}/validateEnablingCommunity`)
         .then((response) => response.data)
   },
+  getAdminGroupsForProject(projectId) {
+    return axios
+        .get(`/admin/projects/${encodeURIComponent(projectId)}/adminGroups`)
+        .then((response) => response.data)
+  }
 }

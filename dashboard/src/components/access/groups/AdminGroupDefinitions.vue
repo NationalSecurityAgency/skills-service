@@ -144,7 +144,7 @@ function deleteAdminGroup() {
       })
       .finally(() => {
         options.value.busy = false;
-        announcer.polite(`$Admin Group ${adminGroupDef.name} was removed.`);
+        announcer.polite(`Admin Group ${adminGroupDef.name} was removed.`);
       });
 }
 const showUpdateModal = (adminGroupDef, isEdit = true) => {

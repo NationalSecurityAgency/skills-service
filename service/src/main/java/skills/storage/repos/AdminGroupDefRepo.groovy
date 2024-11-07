@@ -36,12 +36,11 @@ interface AdminGroupDefRepo extends CrudRepository<AdminGroupDef, Long> {
     @Nullable
     AdminGroupDef findByNameIgnoreCase(String adminGroupName)
 
-//    @javax.annotation.Nullable
     @Query(value = """
-                SELECT agd
+                SELECT distinct agd
             FROM AdminGroupDef agd
             JOIN UserRole ur ON agd.adminGroupId = ur.adminGroupId
-            WHERE agd.adminGroupId = ?1
+            WHERE ur.projectId = ?1
             """)
     List<AdminGroupDef> findAllByProjectId(String projectId)
 
@@ -81,7 +80,7 @@ interface AdminGroupDefRepo extends CrudRepository<AdminGroupDef, Long> {
 
 
     @Query(value="""
-                SELECT 
+                SELECT DISTINCT
                     agd.admin_group_id AS adminGroupId,
                     agd.name AS name,
                     agd.created,

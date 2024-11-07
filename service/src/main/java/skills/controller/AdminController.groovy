@@ -43,6 +43,7 @@ import skills.services.admin.*
 import skills.services.admin.moveSkills.SkillsMoveService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.admin.skillReuse.SkillReuseService
+import skills.services.adminGroup.AdminGroupService
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
@@ -193,8 +194,12 @@ class AdminController {
 
     @Autowired
     SkillMetricsExportResult skillMetricsExportResult
+
     @Autowired
     SubjectSkillsExportResult subjectSkillsExportResult
+
+    @Autowired
+    AdminGroupService adminGroupService
 
     @Value('#{"${skills.config.ui.maxSkillsInBulkImport}"}')
     int maxBulkImport
@@ -1807,6 +1812,13 @@ class AdminController {
                                            @RequestParam Boolean ascending) {
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return userAchievementExpirationService.findAllExpiredAchievements(projectId, userIdParam, skillName, pageRequest);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/adminGroups", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    List<AdminGroupDefResult> getAdminGroupsForProject(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return adminGroupService.getAdminGroupsForProject(projectId)
     }
 }
 

@@ -52,7 +52,7 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
         Date getCreated();
     }
     @Query(value="""
-                SELECT 
+                SELECT DISTINCT
                     qd.quiz_id AS quizId,
                     qd.name AS name,
                     qd.type as quizType,

@@ -25,4 +25,7 @@ class AdminGroupDefResult {
     Integer numberOfQuizzesAndSurveys
     Date created
     String userCommunity
+
+    // optional
+    List<UserRoleRes> allMembers
 }

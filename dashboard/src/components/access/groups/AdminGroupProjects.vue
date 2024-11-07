@@ -46,17 +46,17 @@ const removeProjectInfo = ref({
 
 const adminGroupId = computed(() => route.params.adminGroupId)
 
-const projectsAvailable = computed(() => {
+const areProjectsAvailable = computed(() => {
   return availableProjects.value && availableProjects.value.length > 0;
 })
-const projectsAssigned = computed(() => {
+const areProjectsAssigned = computed(() => {
   return assignedProjects.value && assignedProjects.value.length > 0;
 })
 const emptyMessage = computed(() => {
-  if (projectsAvailable.value) {
+  if (areProjectsAvailable.value) {
     return 'No results. Please refine your search string.'
   } else {
-    if (projectsAssigned.value) {
+    if (areProjectsAssigned.value) {
       return 'All of your available projects have already been assigned to this admin group.'
     }
     return 'You currently do not administer any projects.'

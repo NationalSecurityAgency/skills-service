@@ -42,17 +42,17 @@ const removeQuizInfo = ref({
 
 const adminGroupId = computed(() => route.params.adminGroupId)
 
-const quizzesAvailable = computed(() => {
+const areQuizzesAvailable = computed(() => {
   return availableQuizzes.value && availableQuizzes.value.length > 0;
 })
-const quizzesAssigned = computed(() => {
+const areQuizzesAssigned = computed(() => {
   return assignedQuizzes.value && assignedQuizzes.value.length > 0;
 })
 const emptyMessage = computed(() => {
-  if (quizzesAvailable.value) {
+  if (areQuizzesAvailable.value) {
     return 'No results. Please refine your search string.'
   } else {
-    if (quizzesAssigned.value) {
+    if (areQuizzesAssigned.value) {
       return 'All of your available quizzes and surveys have already been assigned to this admin group.'
     }
     return 'You currently do not administer any quizzes or surveys.'

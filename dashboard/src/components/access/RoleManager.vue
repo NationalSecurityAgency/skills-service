@@ -16,6 +16,7 @@ limitations under the License.
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import AccessService from '@/components/access/AccessService.js'
+import AdminGroupsService from '@/components/access/groups/AdminGroupsService.js';
 import ExistingUserInput from '@/components/utils/ExistingUserInput.vue'
 import UserRolesUtil from '@/components/utils/UserRolesUtil'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
@@ -95,21 +96,12 @@ onMounted(() => {
 const sortInfo = ref({ sortOrder: 1, sortBy: 'userId' })
 const possiblePageSizes = [ 5, 10, 15, 20]
 const pageSize = ref(5)
-let table = ref({
-  options: {
-    busy: true,
-    pagination: {
-      hideUnnecessary: true,
-      server: false,
-      currentPage: 1,
-      totalRows: 1,
-    },
-    tableDescription: `${props.roleDescription} table`,
-  },
-});
+const isLoading = ref(true)
 
-const data = ref([]);
-const userIds = computed(() => data.value.map((d) => d.userId));
+const expandedRows = ref([])
+const assignedLocalAdmins = ref([])
+const assignedAdminGroups = ref([])
+const allAdminGroups = ref([])
 const selectedUser = ref(null);
 const isSaving = ref(false);
 const errNotification = ref({
@@ -121,11 +113,55 @@ const userRole = ref({
   options: props.roles.map((role) => ({ value: role, text: getRoleDisplay(role) })),
 });
 
-let addUsrBtnDisabled = computed(() => {
+const data = computed(() => {
+  const groupRows = adminGroupsSupported.value ? assignedAdminGroups.value.map((g) => {
+    return {
+      ...g,
+      userId: g.adminGroupId,
+      userIdForDisplay: g.name,
+      roleName: ROLE_PROJECT_ADMIN,
+    }
+  }) : [];
+  return assignedLocalAdmins.value.concat(groupRows);
+})
+
+const adminGroupsSupported = computed(() => {
+  return !props.adminGroupId && !!props.projectId;
+})
+const availableAdminGroups = computed(() => {
+  const assignedAdminGroupIds = assignedAdminGroups.value.map((ag) => ag.adminGroupId);
+  return allAdminGroups.value.filter((ag) => !assignedAdminGroupIds.includes(ag.adminGroupId));
+})
+const areAdminGroupsAvailable = computed(() => {
+  return availableAdminGroups.value && availableAdminGroups.value.length > 0;
+})
+const areAdminGroupsAssigned = computed(() => {
+  return assignedAdminGroups.value && assignedAdminGroups.value.length > 0;
+})
+const emptyAdminGroupsMessage = computed(() => {
+  if (areAdminGroupsAvailable.value) {
+    return 'No results. Please refine your search string.'
+  } else {
+    if (areAdminGroupsAssigned.value) {
+      return 'All of your available admin groups have already been assigned.'
+    }
+    return 'You currently do not administer any admin groups.'
+  }
+})
+
+const assignedUserIds = computed(() => {
+  const assignedUserIds = new Set(assignedLocalAdmins.value.map((u) => u.userId));
+  assignedAdminGroups.value.forEach((ag) => {
+    ag.allMembers.forEach((u) => assignedUserIds.add(u.userId));
+  })
+  return Array.from(assignedUserIds);
+})
+
+const addUsrBtnDisabled = computed(() => {
   return !(selectedUser.value && (userRole.value.selected || props.roles.length === 1));
 });
 
-let isOnlyOneRole = computed(() => {
+const isOnlyOneRole = computed(() => {
   return props.roles.length === 1;
 });
 
@@ -155,18 +191,27 @@ function getRoleDisplay(roleName) {
 }
 
 const loadData = () => {
-  table.value.options.busy = true;
+  isLoading.value = true;
   const pageParams = {
     limit: 200,
     page: 1,
     ascending: sortInfo.value.sortOrder === 1,
     orderBy: sortInfo.value.sortBy
   };
-  AccessService.getUserRoles(props.projectId, props.roles, pageParams, props.adminGroupId).then((result) => {
-    table.value.options.busy = false;
-    data.value = result.data;
-    table.value.options.pagination.totalRows = result.totalCount;
+  const getUserRoles = AccessService.getUserRoles(props.projectId, props.roles, pageParams, props.adminGroupId).then((result) => {
+    assignedLocalAdmins.value = adminGroupsSupported.value ? result.data.filter((u) => !u.adminGroupId) : result.data;
   });
+  const getAdminGroupsForProject = props.projectId ? AdminGroupsService.getAdminGroupsForProject(props.projectId).then((result) => {
+    assignedAdminGroups.value = result;
+  }) : Promise.resolve();
+
+  const getOwnedAdminGroups = adminGroupsSupported.value ? AdminGroupsService.getAdminGroupDefs().then((result) => {
+    allAdminGroups.value = result;
+  }) : Promise.resolve();
+
+  Promise.all([getUserRoles, getAdminGroupsForProject, getOwnedAdminGroups]).then(() => {
+    isLoading.value = false;
+  })
 }
 
 function addUserRole() {
@@ -195,7 +240,7 @@ function addUserRole() {
 
 function doAddUserRole() {
   isSaving.value = true;
-  table.value.options.busy = true;
+  isLoading.value = true;
   const pkiAuthenticated = appConfig.isPkiAuthenticated;
 
   const role = isOnlyOneRole.value ? props.roles[0] : userRole.value.selected;
@@ -207,7 +252,7 @@ function doAddUserRole() {
     handleError(e);
   }).finally(() => {
     isSaving.value = false;
-    table.value.options.busy = false;
+    isLoading.value = false;
     selectedUser.value = null;
     userRole.value.selected = null;
   });
@@ -221,7 +266,7 @@ function handleError(e) {
     upgradeInProgressErrorChecker.navToUpgradeInProgressPage()
   } else {
     const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
-    errorState.navToErrorPage('Failed to add User Role', errorMessage)
+    errorState.navToErrorPage('Failed to add User Role or Admin Group', errorMessage)
   }
 }
 
@@ -230,7 +275,7 @@ function getUserDisplay(item) {
 }
 
 function notCurrentUser(userId) {
-  const currentUser = userInfo.userInfo.value.userId;
+  const currentUser = userInfo?.userInfo?.value?.userId;
   return currentUser && userId !== currentUser;
 }
 
@@ -248,19 +293,18 @@ function deleteUserRoleConfirm(row) {
 }
 
 function deleteUserRole(row) {
-  table.value.options.busy = true;
+  isLoading.value = true;
   AccessService.deleteUserRole(row.projectId, row.userId, row.roleName, props.adminGroupId).then(() => {
     announcer.polite(`${getRoleDisplay(row.roleName)} role was removed from ${getUserDisplay(row)}`);
-    data.value = data.value.filter((item) => item.userId !== row.userId);
+    assignedLocalAdmins.value = assignedLocalAdmins.value.filter((item) => item.userId !== row.userId);
     emit('role-deleted', { userId: row.userId, role: row.roleName });
-    table.value.options.busy = false;
-    table.value.options.pagination.totalRows = data.value.length;
+    isLoading.value = false;
     document.getElementById('existingUserInput').firstElementChild.focus()
   });
 }
 
 function editItem(item) {
-  data.value = data.value.map((user) => {
+  assignedLocalAdmins.value = assignedLocalAdmins.value.map((user) => {
     if (user.userId === item.userId) {
       return ({ ...user, existingRoleName: user.roleName, isEdited: true });
     }
@@ -270,10 +314,10 @@ function editItem(item) {
 
 function updateUserRole(selectedRole) {
   const newRole = selectedRole.value;
-  const userRoleToUpdate = data.value.find((user) => user.isEdited);
+  const userRoleToUpdate = assignedLocalAdmins.value.find((user) => user.isEdited);
   if (userRoleToUpdate && newRole !== userRoleToUpdate.existingRoleName) {
     // mark record as loading
-    data.value = data.value.map((user) => {
+    assignedLocalAdmins.value = assignedLocalAdmins.value.map((user) => {
       if (user.isEdited) {
         return ({
           ...user,
@@ -286,7 +330,7 @@ function updateUserRole(selectedRole) {
     const pkiAuthenticated = appConfig.isPkiAuthenticated;
     AccessService.saveUserRole(props.projectId, userRoleToUpdate, newRole, pkiAuthenticated, props.adminGroupId)
         .then(() => {
-          data.value = data.value.map((user) => {
+          assignedLocalAdmins.value = assignedLocalAdmins.value.map((user) => {
             if (user.isEdited) {
               const copy = ({
                 ...user,
@@ -306,6 +350,22 @@ function updateUserRole(selectedRole) {
   }
 }
 
+const addProjectToAdminGroup = (adminGroup) => {
+  isLoading.value = true;
+  AdminGroupsService.addProjectToAdminGroup(adminGroup.adminGroupId, props.projectId).then(() => {
+    announcer.polite(`Admin Group ${adminGroup.name} was added to project to project successfully`);
+    loadData();
+  }).catch((e) => {
+    handleError(e);
+  }).finally(() => {
+    isLoading.value = false;
+  })
+}
+
+const showExpansion = (row) => {
+  return (!row.adminGroupId) ? 'no-expansion' : ''
+}
+
 defineExpose({
   loadData,
 });
@@ -321,7 +381,7 @@ defineExpose({
       <div>
         <div class="p-3">
           <div>
-            <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="userIds"
+            <existing-user-input :suggest="true" :validate="true" :user-type="userType" :excluded-suggestions="assignedUserIds"
                                  v-model="selectedUser" data-cy="existingUserInput" />
           </div>
           <div class="mt-3 mb-3 flex gap-2 flex-column sm:flex-row">
@@ -336,30 +396,75 @@ defineExpose({
               </SkillsButton>
             </div>
           </div>
+          <div class="text-center my-4 font-semibold">
+            OR
+          </div>
+          <div>
+            <Dropdown
+                class="w-full"
+                aria-label="Select Admin Group to add to a Project"
+                data-cy="adminGroupSelector"
+                showClear
+                filter
+                placeholder="Please select Admin Group"
+                optionLabel="name"
+                @update:modelValue="addProjectToAdminGroup"
+                :emptyMessage=emptyAdminGroupsMessage
+                :options="availableAdminGroups">
+              <template #value="slotProps">
+                <div v-if="slotProps.value" class="p-1" :data-cy="`adminGroupSelected-${slotProps.value.projectId}`">
+                  <span class="ml-1">{{ slotProps.value.name }}</span>
+                </div>
+                <span v-else> Search available admin groups...</span>
+              </template>
+              <template #option="slotProps">
+                <div :data-cy="`availableAdminGroupSelection-${slotProps.option.projectId}`">
+                  <span class="h6 ml-2">{{ slotProps.option.name }}</span>
+                </div>
+              </template>
+            </Dropdown>
+          </div>
 
           <Message v-if="errNotification.enable" severity="error" data-cy="error-msg">
             <strong>Error!</strong> Request could not be completed! {{ errNotification.msg }}
           </Message>
         </div>
         <SkillsDataTable
-            :loading="table.options.busy"
-          :value="data"
-          :rowsPerPageOptions="possiblePageSizes"
-          data-cy="roleManagerTable"
-          tableStoredStateId="roleManagerTableSort"
-          aria-label="User Roles"
-          striped-rows
-          paginator
-          :pt:paginator:paginatorWrapper:aria-label='`${title} Paginator`'
-          v-model:sort-field="sortInfo.sortBy"
-          v-model:sort-order="sortInfo.sortOrder"
-          :rows="pageSize">
+            :loading="isLoading"
+            :value="data"
+            :rowsPerPageOptions="possiblePageSizes"
+            data-cy="roleManagerTable"
+            tableStoredStateId="roleManagerTableSort"
+            aria-label="User Roles"
+            striped-rows
+            paginator
+            :pt:paginator:paginatorWrapper:aria-label='`${title} Paginator`'
+            :row-class="showExpansion"
+            v-model:expandedRows="expandedRows"
+            v-model:sort-field="sortInfo.sortBy"
+            v-model:sort-order="sortInfo.sortOrder"
+            :rows="pageSize">
+          <Column v-if="!props.adminGroupId" expander style="width: 5rem" :showFilterMenu="false" :class="{'flex': responsive.md.value }">
+            <template #header>
+              <span class="sr-only">Rows expand and collapse control - Not sortable</span>
+            </template>
+            <template #filter>
+              <span class="sr-only">Rows expand and collapse control - No filtering</span>
+            </template>
+          </Column>
           <Column :header="roleDescription" field="userId" sortable :class="{'flex': responsive.md.value }">
             <template #header>
               <span class="mr-2"><i class="fas fa-user skills-color-users" :class="colors.getTextClass(0)"
                                     aria-hidden="true"></i> </span>
             </template>
             <template #body="slotProps">
+              <div v-if="slotProps.data.adminGroupId && !props.adminGroupId">
+                <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="uppercase">Admin Group</span>
+                <Tag class="uppercase ml-2" data-cy="numMembersInGroup">
+                  {{ slotProps.data.numberOfMembers + slotProps.data.numberOfOwners }}
+                  member{{ slotProps.data.numberOfMembers + slotProps.data.numberOfOwners !== 1 ? 's' : '' }}
+                </Tag>
+              </div>
               <div :data-cy="`userCell_${slotProps.data.userId}`">
                 {{ getUserDisplay(slotProps.data) }}
               </div>
@@ -387,7 +492,7 @@ defineExpose({
               <span class="sr-only">Controls - Not sortable</span>
             </template>
             <template #body="slotProps">
-              <div>
+              <div v-if="!slotProps.data.adminGroupId || props.adminGroupId">
                 <div class="float-right mr-1 flex gap-2" :data-cy="`controlsCell_${slotProps.data.userId}`">
                   <!--            <i v-if="!notCurrentUser(slotProps.data.userId)"-->
                   <!--               data-cy="cannotRemoveWarning"-->
@@ -414,6 +519,14 @@ defineExpose({
               </div>
             </template>
           </Column>
+          <template #expansion="slotProps">
+<!--            <AdminGroupMembersList :admin-group-id="slotProps.data.adminGroupId" :group-member-user-roles="slotProps.data.allMembers" />-->
+            <ul>
+              <li v-for="groupMember in slotProps.data.allMembers" class="m-2">
+                {{ getUserDisplay(groupMember) }}
+              </li>
+            </ul>
+          </template>
           <template #paginatorstart>
             <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ data.length }}</span>
           </template>
@@ -426,6 +539,9 @@ defineExpose({
   </Card>
 </template>
 
-<style scoped>
+<style>
+.no-expansion .p-row-toggler {
+  visibility: hidden !important;
+}
 
 </style>
