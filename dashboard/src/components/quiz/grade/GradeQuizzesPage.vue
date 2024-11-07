@@ -19,7 +19,7 @@ import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import QuizService from "@/components/quiz/QuizService.js";
 import {useRoute} from "vue-router";
-import {computed, onMounted, ref} from "vue";
+import {computed, nextTick, onMounted, ref} from "vue";
 import QuestionType from "@/skills-display/components/quiz/QuestionType.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
@@ -30,12 +30,17 @@ import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import GradeQuizAttempt from "@/components/quiz/grade/GradeQuizAttempt.vue";
+import {useAppInfoState} from "@/stores/UseAppInfoState.js";
+import SelfReportService from "@/components/skills/selfReport/SelfReportService.js";
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
 const route = useRoute()
 const numberFormat = useNumberFormat()
 const responsive = useResponsiveBreakpoints()
 const colors = useColors()
 const userInfo = useUserInfo()
+const appInfo = useAppInfoState()
+const announcer = useSkillsAnnouncer()
 
 const hasGradableQuestionsDefined = ref(false)
 const runningQuizDefinitionCheck = ref(true)
@@ -108,6 +113,7 @@ onMounted(() => {
   checkIfQuizHasInputTextQuestions().then((hasGradableQuestions) => {
     if (hasGradableQuestions) {
       loadQuizRuns()
+      loadEmailSubscriptionPreference()
     } else {
       loadingQuizRuns.value = false
       loadingQuizRunsFirstTime.value = false
@@ -119,6 +125,27 @@ const onGraded = (quizAttempt, gradedInfo) => {
   quizAttempt.isGraded = gradedInfo.doneGradingAttempt
 }
 const isLoading = computed(() => runningQuizDefinitionCheck.value || loadingQuizRunsFirstTime.value)
+
+const isEmailEnabled = computed(() => appInfo.emailEnabled)
+const emailSubscribed = ref(true);
+const disableNotificationPreferenceKey = 'DisableGradingRequestNotification'
+const loadingNotificationPreference = ref(true)
+const toggleSubscription = (subscribeValue) => {
+  QuizService.saveMyPreference(route.params.quizId, disableNotificationPreferenceKey, !subscribeValue).then(() => {
+    const msg = `You have ${subscribeValue ? 'subscribed' : 'unsubscribed'} to quiz grading request emails`
+    announcer.polite(msg)
+  });
+};
+const loadEmailSubscriptionPreference = () => {
+  return QuizService.getMyPreferences(route.params.quizId).then((res) => {
+    const existingPreference = res.find((item) => item.preference === disableNotificationPreferenceKey)
+    if (existingPreference) {
+      emailSubscribed.value = !(existingPreference.value === 'true' || existingPreference.value === true)
+    }
+  }).finally(() => {
+    loadingNotificationPreference.value = false
+  })
+}
 </script>
 
 <template>
@@ -126,10 +153,10 @@ const isLoading = computed(() => runningQuizDefinitionCheck.value || loadingQuiz
     <SubPageHeader title="Grading"/>
     <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
-
         <skills-spinner v-if="isLoading" :is-loading="isLoading" class="py-8"/>
         <div v-else>
           <SkillsDataTable
+              v-if="hasGradableQuestionsDefined"
               tableStoredStateId="quizRunsToGradeTable"
               aria-label="Quiz Runs to Grade"
               :value="quizRunsThatNeedGrading"
@@ -148,6 +175,18 @@ const isLoading = computed(() => runningQuizDefinitionCheck.value || loadingQuiz
               dataKey="attemptId"
               v-model:sort-field="sortInfo.sortBy"
               v-model:sort-order="sortInfo.sortOrder">
+            <template #header>
+              <skills-spinner v-if="isEmailEnabled && loadingNotificationPreference" :is-loading="true" size-in-rem="1"/>
+              <div v-if="isEmailEnabled && !loadingNotificationPreference" data-cy="unsubscribeContainer" class="flex flex-row-reverse align-items-center">
+                  <InputSwitch id="emailSubscribeSwitch"
+                               v-model="emailSubscribed"
+                               @update:modelValue="toggleSubscription"
+                               aria-label="Enable to receive Quiz Grading request emails"
+                               class="ml-2"
+                               data-cy="subscribeSwitch"/>
+                  <label for="emailSubscribeSwitch">Email Subscription</label>
+              </div>
+            </template>
 
             <Column header="User" field="userIdForDisplay" :sortable="true" :class="{'flex': responsive.md.value }">
               <template #header>

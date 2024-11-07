@@ -279,6 +279,12 @@ class QuizController {
         return RequestResult.success()
     }
 
+    @RequestMapping(value = "/{quizId}/preferences", method = [RequestMethod.GET], produces = MediaType.APPLICATION_JSON_VALUE)
+    List<QuizPreferenceRes> getQuizAdminPreferences(@PathVariable("quizId") String quizId) {
+        QuizValidator.isNotNull(quizId, "QuizId")
+        return quizSettingsService.getCurrentUserQuizPreferences(quizId)
+    }
+
     @RequestMapping(value = "/{quizId}/users/{userKey}/roles/{roleName}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult addQuizRole(@PathVariable("quizId") String quizId,
                           @PathVariable("userKey") String userKey,

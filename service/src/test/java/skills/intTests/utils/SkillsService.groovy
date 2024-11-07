@@ -1867,7 +1867,10 @@ class SkillsService {
         String url = "${getQuizDefUrl(quizId)}/preferences/${preferenceKey}"
         return wsHelper.adminPost(url, [value: value])
     }
-
+    def getCurrentUserQuizPreferences(String quizId) {
+        String url = "${getQuizDefUrl(quizId)}/preferences"
+        return wsHelper.adminGet(url)
+    }
 
     def getQuizInfo(String quizId, String userId = null) {
         String url = "/quizzes/${quizId}"

@@ -28,6 +28,7 @@ import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.request.model.QuizPreference
 import skills.controller.request.model.QuizSettingsRequest
+import skills.controller.result.model.QuizPreferenceRes
 import skills.controller.result.model.QuizSettingsRes
 import skills.controller.result.model.SettingsResult
 import skills.quizLoading.QuizSettings
@@ -113,26 +114,41 @@ class QuizSettingsService {
         if (!availablePreferenceKeys.contains(preferenceKey)) {
             throw new SkillQuizException("Provided preferenceKey [${preferenceKey}] is not a valid setting. Available settings: ${availablePreferenceKeys}", quizId, ErrorCode.BadParam)
         }
-        UserInfo currentUser = userInfoService.getCurrentUser()
-        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(currentUser.username)
-
-        QuizSetting existing = quizSettingsRepo.findBySettingAndQuizRefIdAndUserRefId(preferenceKey, quizRefId, userAttrs.id)
+        UserAttrs currentUserAttrs = getCurrentUserAttrs()
+        QuizSetting existing = quizSettingsRepo.findBySettingAndQuizRefIdAndUserRefId(preferenceKey, quizRefId, currentUserAttrs.id)
         if (existing) {
             existing.value = quizPreference.value
             quizSettingsRepo.save(existing)
         } else {
-            quizSettingsRepo.save(new QuizSetting(setting: preferenceKey, value: quizPreference.value, quizRefId: quizRefId, userRefId: userAttrs.id))
+            quizSettingsRepo.save(new QuizSetting(setting: preferenceKey, value: quizPreference.value, quizRefId: quizRefId, userRefId: currentUserAttrs.id))
         }
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: DashboardAction.Create, item: DashboardItem.Settings,
                 itemId: quizId, quizId: quizId,
                 actionAttributes: [
-                        userId: userAttrs.userIdForDisplay,
+                        userId: currentUserAttrs.userIdForDisplay,
                         setting: preferenceKey,
                         value  : quizPreference.value,
                 ]
         ))
+    }
+
+    @Transactional(readOnly = true)
+    List<QuizPreferenceRes> getCurrentUserQuizPreferences(String quizId) {
+        Integer quizRefId = getQuizDefRefId(quizId)
+        UserAttrs currentUserAttrs = getCurrentUserAttrs()
+        List<QuizSetting> quizSettings = quizSettingsRepo.findAllByQuizRefIdAndUserRefId(quizRefId, currentUserAttrs.id)
+        List<QuizPreferenceRes> res = quizSettings.collect {
+            new QuizPreferenceRes(preference: it.setting, value: it.value)
+        } ?: []
+        return res.sort({ it.preference })
+    }
+
+    private UserAttrs getCurrentUserAttrs() {
+        UserInfo currentUser = userInfoService.getCurrentUser()
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(currentUser.username)
+        return userAttrs
     }
 
 
