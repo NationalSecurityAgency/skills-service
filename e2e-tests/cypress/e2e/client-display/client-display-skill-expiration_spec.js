@@ -40,6 +40,12 @@ describe('Client Display Expiration Tests', () => {
             pointIncrementInterval: 0,
             numPerformToCompletion: 1,
         });
+        cy.createSkill(1, 1, 4, {
+            selfReportingType: 'Approval',
+            pointIncrement: 50,
+            pointIncrementInterval: 0,
+            numPerformToCompletion: 1,
+        });
     });
 
     it('expiration date shows when it should', () => {
@@ -305,5 +311,78 @@ describe('Client Display Expiration Tests', () => {
         cy.get('[data-cy="nextSkill"]').click();
         cy.get(`[data-cy="hasExpired"]`).should('not.exist');
 
+    });
+
+    it('expiring honor system skills have a different message', () => {
+        let expirationDate = moment.utc().add(30, 'day');
+        if (expirationDate.hour() >= 1) {
+            expirationDate = expirationDate.add(1, 'day')
+        }
+        cy.configureExpiration(1, 0, 1, 'DAILY');
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
+            .should('not.exist');
+        cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`)
+            .should('not.exist');
+        cy.cdClickSkill(0);
+
+        cy.get('[data-cy="claimPointsBtn"]')
+            .click();
+
+        cy.get('[data-cy="selfReportAlert"]')
+            .contains('You just earned 50 points!');
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
+            .contains('50');
+        cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
+            .contains('50');
+        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
+            .contains('50');
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
+            .contains('50 / 100 Points');
+
+        cy.get(`[data-cy="expirationDate"]`).should('not.exist');
+
+        cy.get('[data-cy="claimPointsBtn"]').click();
+
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
+            .contains('100 / 100 Points');
+
+        cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="honorSystemAlert"]').contains('This skill\'s achievement expires in a day');
+
+        cy.get('[data-cy="claimPointsBtn"]').click();
+        cy.get(`[data-cy="expirationDate"]`).should('not.exist');
+        cy.get('[data-cy="selfReportAlert"]').contains('Congratulations! You just retained your 100 points!');
+
+    });
+
+    it('expiring approval skills have a different message', () => {
+        let expirationDate = moment.utc().add(30, 'day');
+        if (expirationDate.hour() >= 1) {
+            expirationDate = expirationDate.add(1, 'day')
+        }
+        cy.configureExpiration(4, 1, 1, 'DAILY');
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
+            .should('not.exist');
+        cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`)
+            .should('not.exist');
+        cy.cdClickSkill(3);
+
+        cy.get('[data-cy="requestApprovalBtn"]')
+            .click();
+        cy.get('[data-cy="selfReportSubmitBtn"]').click();
+
+        cy.get('[data-cy="selfReportAlert"]').contains('Submitted successfully! This skill requires approval from a project administrator');
+        cy.approveAllRequests();
+
+        cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill4');
+
+        cy.get('[data-cy="requestApprovalAlert"]').contains('This skill\'s achievement expires in a day, but your 50 points can be retained by submitting another approval request.');
     });
 });

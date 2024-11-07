@@ -91,7 +91,8 @@ const removeRejection = () => {
     removeRejectionLoading.value = false
   })
 }
-
+const firstReport = ref(skillInternal?.value?.points === 0);
+const isRetention = ref(false);
 const errNotification = ref({
   enable: false,
   msg: ''
@@ -102,6 +103,8 @@ const reportSkill = (approvalRequestedMsg) => {
 
   requestApprovalLoading.value = true
 
+  firstReport.value = skillInternal.value.points === 0;
+  isRetention.value = skillInternal.value.points === skillInternal.value.totalPoints
   // selfReport.value.msgHidden = true
   // selfReport.value.res = null
   skillsDisplayService.reportSkill(skillInternal.value.skillId, approvalRequestedMsg)
@@ -172,16 +175,15 @@ defineExpose({
 <template>
   <div>
     <quiz-footer :skill="skillInternal"/>
-    <Message v-if="isHonorSystem && selfReportAvailable" class="mb-2 alert alert-info">
+    <Message v-if="isHonorSystem && selfReportAvailable && !isCompleted" class="mb-2 alert alert-info">
       <template #container>
         <div class="flex gap-2 p-3 align-content-center">
           <div>
             <i class="fas fa-user-shield text-2xl" aria-hidden="true"></i>
           </div>
           <div class="flex-1 font-italic pt-1" data-cy="honorSystemAlert">
-            This skill can be submitted under the <span class="font-size-1">Honor System</span>, claim <span
-            class="font-size-1"><Tag severity="info">{{ numFormat.pretty(skillInternal.pointIncrement)
-            }}</Tag></span> points once you've completed the skill.
+            This skill can be submitted under the <span class="font-size-1">Honor System</span>, claim <span class="font-size-1">
+            <Tag severity="info">{{ numFormat.pretty(skillInternal.pointIncrement) }}</Tag></span> points once you've completed the skill.
           </div>
           <div class="col-auto">
             <SkillsButton
@@ -200,8 +202,34 @@ defineExpose({
         </div>
       </template>
     </Message>
+    <Message v-else-if="isHonorSystem && selfReportAvailable && !firstReport && isMotivationalSkill && skillInternal.expirationDate">
+      <template #container>
+        <div class="flex gap-2 p-3 align-content-center">
+          <div>
+            <i class="fas fa-user-shield text-2xl" aria-hidden="true"></i>
+          </div>
+          <div class="flex-1 font-italic pt-1" data-cy="honorSystemAlert">
+            This skill's achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skillInternal.expirationDate) }}</span>, but your <span class="font-size-1">
+            <Tag severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> points can be retained by performing another <span class="font-size-1">Honor System</span> request.
+          </div>
+          <div class="col-auto">
+            <SkillsButton
+                label="Claim Points"
+                icon="fas fa-check-double"
+                class="skills-theme-btn"
+                :disabled="selfReportDisabled"
+                severity="info"
+                outlined
+                size="small"
+                :loading="requestApprovalLoading"
+                @click="reportSkill(null)"
+                data-cy="claimPointsBtn" />
+          </div>
+        </div>
+      </template>
+    </Message>
     <Message :closable="false"
-             v-if="isApprovalRequired && selfReportAvailable && !selfReportDisabled && !isRejected"
+             v-if="(firstReport || !isCompleted) && isApprovalRequired && selfReportAvailable && !selfReportDisabled && !isRejected"
              class="mb-2">
       <template #container>
         <div class="p-3">
@@ -243,6 +271,46 @@ defineExpose({
         </div>
       </template>
     </Message>
+    <Message v-else-if="(!firstReport || isCompleted) && isApprovalRequired && selfReportAvailable && !selfReportDisabled && !isRejected && isMotivationalSkill">
+      <template #container>
+        <div class="p-3">
+          <div class="flex gap-2 sm:align-items-center flex-column sm:flex-row">
+            <div>
+              <i class="fas fa-traffic-light text-2xl" aria-hidden="true"></i>
+            </div>
+            <div class="flex-1" data-cy="requestApprovalAlert">
+              This skill's achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skillInternal.expirationDate) }}</span>, but your <span class="font-size-1">
+              <Tag severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> points can be retained by submitting another <span class="font-size-1">approval</span> request.
+            </div>
+            <div class="">
+              <SkillsButton
+                  label="Begin Request"
+                  icon="far fa-arrow-alt-circle-right"
+                  v-if="!showApprovalJustification"
+                  id="beginRequestBtn"
+                  class="skills-theme-btn"
+                  :disabled="selfReportDisabled"
+                  severity="info"
+                  outlined
+                  size="small"
+                  @click="displayApprovalJustificationInput"
+                  data-cy="requestApprovalBtn" />
+            </div>
+          </div>
+          <BlockUI :blocked="requestApprovalLoading">
+            <justification-input v-if="showApprovalJustification"
+                                 ref="justificationInput"
+                                 class="mt-3"
+                                 @report-skill="reportSkill"
+                                 @cancel="showApprovalJustification = false; focusOnId('beginRequestBtn')"
+                                 :skill="skillInternal"
+                                 :is-approval-required="isApprovalRequired"
+                                 :is-honor-system="isHonorSystem"
+                                 :is-justitification-required="isJustificationRequired" />
+          </BlockUI>
+        </div>
+      </template>
+    </Message>
     <Message :closable="false"
              icon="far fa-clock"
              severity="warn"
@@ -262,9 +330,7 @@ defineExpose({
                 <b>{{ timeUtils.formatDate(skillInternal.selfReporting.requestedOn, 'MM/DD/YYYY') }}</b> was rejected
                 <span
                   class="text-info">{{ timeUtils.relativeTime(skillInternal.selfReporting.rejectedOn) }}</span>.
-                <span
-                  v-if="skillInternal.selfReporting.rejectionMsg">The reason is: <b>"{{ skillInternal.selfReporting.rejectionMsg
-                  }}"</b></span>
+                <span v-if="skillInternal.selfReporting.rejectionMsg">The reason is: <b>"{{ skillInternal.selfReporting.rejectionMsg}}"</b></span>
               </div>
               <div class="">
                 <SkillsButton
@@ -290,19 +356,15 @@ defineExpose({
           <Message
             icon="fas fa-birthday-cake"
             @close="selfReport.res = null"
-            v-if="isPointsEarned && !isMotivationalSkill"
+            v-if="isPointsEarned && (!isMotivationalSkill || !isRetention)"
             severity="success">
             Congrats! You just earned
             <Tag>{{ selfReport.res.pointsEarned }}</Tag>
             points<span
             v-if="isCompleted"> and <b>completed</b> the {{ attributes.skillDisplayName.toLowerCase() }}</span>!
           </Message>
-          <Message v-if="isPointsEarned && isMotivationalSkill"
-                   severity="success"
-                   icon="fas fa-birthday-cake"
-          >
-            Congratulations! You just
-            retained your <Tag>{{ skillInternal.totalPoints }}</Tag> points!
+          <Message v-if="isPointsEarned && isMotivationalSkill && !firstReport && isRetention" severity="success" icon="fas fa-birthday-cake">
+            Congratulations! You just retained your <Tag>{{ skillInternal.totalPoints }}</Tag> points!
           </Message>
           <Message
             v-if="selfReport.res && !isPointsEarned && (isAlreadyPerformed() || !isApprovalRequired)"
