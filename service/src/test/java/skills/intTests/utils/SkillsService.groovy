@@ -600,6 +600,10 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/approverConf")
     }
 
+    def countApproverConf(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/approverConf/count")
+    }
+
     def deleteApproverConf(String projectId, Integer approverRefId) {
         return wsHelper.adminDelete("/projects/${projectId}/approverConf/${approverRefId}")
     }
