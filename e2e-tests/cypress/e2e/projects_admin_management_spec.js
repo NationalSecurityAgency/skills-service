@@ -180,10 +180,10 @@ describe('Projects Admin Management Tests', () => {
                 .find('td')
                 .as('row2');
             cy.get('@row1')
-                .eq(0)
+                .eq(1)
                 .contains('root@skills.org');
             cy.get('@row2')
-                .eq(0)
+                .eq(1)
                 .contains('skills@skills.org');
         } else {
             // the default user in oauth mode is different and results in a different sorting order
@@ -196,10 +196,10 @@ describe('Projects Admin Management Tests', () => {
                 .find('td')
                 .as('row2');
             cy.get('@row1')
-                .eq(0)
+                .eq(1)
                 .contains('foo bar');
             cy.get('@row2')
-                .eq(0)
+                .eq(1)
                 .contains('root@skills.org');
         }
     });
@@ -315,8 +315,8 @@ describe('Projects Admin Management Tests', () => {
         const expectedUserName = Cypress.env('oauthMode') ? 'foo bar' : 'skills@';
         cy.get(`${tableSelector} thead th`).contains('Role').click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Administrator' }],
-            [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Approver' }],
+            [{ colIndex: 1,  value: expectedUserName }, { colIndex: 2,  value: 'Administrator' }],
+            [{ colIndex: 1,  value: 'root@' }, { colIndex: 2,  value: 'Approver' }],
         ], 5, true, null, false);
 
         // reload and retest
@@ -326,8 +326,8 @@ describe('Projects Admin Management Tests', () => {
         // verify that table loaded
         cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`)
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Administrator' }],
-            [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Approver' }],
+            [{ colIndex: 1,  value: expectedUserName }, { colIndex: 2,  value: 'Administrator' }],
+            [{ colIndex: 1,  value: 'root@' }, { colIndex: 2,  value: 'Approver' }],
         ], 5, true, null, false);
 
         cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`).click();
@@ -340,8 +340,8 @@ describe('Projects Admin Management Tests', () => {
             return a[0].value?.localeCompare(b[0].value)
         }
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Administrator' }],
-            [{ colIndex: 0,  value: expectedUserName }, { colIndex: 1,  value: 'Administrator' }],
+            [{ colIndex: 1,  value: 'root@' }, { colIndex: 2,  value: 'Administrator' }],
+            [{ colIndex: 1,  value: expectedUserName }, { colIndex: 2,  value: 'Administrator' }],
         ].sort(compare), 5, true, null, false);
     });
 
