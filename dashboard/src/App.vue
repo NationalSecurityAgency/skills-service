@@ -229,4 +229,10 @@ body .st-dark-theme a:visited {
 body a:hover, body a:focus {
   text-decoration: underline !important;
 }
+
+@media (forced-colors: active) {
+  :focus {
+    outline: 2px solid transparent;
+  }
+}
 </style>
