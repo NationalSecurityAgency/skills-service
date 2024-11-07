@@ -28,6 +28,7 @@ import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveB
 import { userErrorState } from '@/stores/UserErrorState.js'
 import { useDialogMessages } from '@/components/utils/modal/UseDialogMessages.js'
 import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
+import supervisorService from '@/components/utils/SupervisorService.js';
 
 const dialogMessages = useDialogMessages()
 // role constants
@@ -396,33 +397,35 @@ defineExpose({
               </SkillsButton>
             </div>
           </div>
-          <div class="text-center my-4 font-semibold">
-            OR
-          </div>
-          <div>
-            <Dropdown
-                class="w-full"
-                aria-label="Select Admin Group to add to a Project"
-                data-cy="adminGroupSelector"
-                showClear
-                filter
-                placeholder="Please select Admin Group"
-                optionLabel="name"
-                @update:modelValue="addProjectToAdminGroup"
-                :emptyMessage=emptyAdminGroupsMessage
-                :options="availableAdminGroups">
-              <template #value="slotProps">
-                <div v-if="slotProps.value" class="p-1" :data-cy="`adminGroupSelected-${slotProps.value.projectId}`">
-                  <span class="ml-1">{{ slotProps.value.name }}</span>
-                </div>
-                <span v-else> Search available admin groups...</span>
-              </template>
-              <template #option="slotProps">
-                <div :data-cy="`availableAdminGroupSelection-${slotProps.option.projectId}`">
-                  <span class="h6 ml-2">{{ slotProps.option.name }}</span>
-                </div>
-              </template>
-            </Dropdown>
+          <div v-if="adminGroupsSupported">
+            <div class="text-center my-4 font-semibold">
+              OR
+            </div>
+            <div>
+              <Dropdown
+                  class="w-full"
+                  aria-label="Select Admin Group to add to a Project"
+                  data-cy="adminGroupSelector"
+                  showClear
+                  filter
+                  placeholder="Please select Admin Group"
+                  optionLabel="name"
+                  @update:modelValue="addProjectToAdminGroup"
+                  :emptyMessage=emptyAdminGroupsMessage
+                  :options="availableAdminGroups">
+                <template #value="slotProps">
+                  <div v-if="slotProps.value" class="p-1" :data-cy="`adminGroupSelected-${slotProps.value.projectId}`">
+                    <span class="ml-1">{{ slotProps.value.name }}</span>
+                  </div>
+                  <span v-else> Search available admin groups...</span>
+                </template>
+                <template #option="slotProps">
+                  <div :data-cy="`availableAdminGroupSelection-${slotProps.option.projectId}`">
+                    <span class="h6 ml-2">{{ slotProps.option.name }}</span>
+                  </div>
+                </template>
+              </Dropdown>
+            </div>
           </div>
 
           <Message v-if="errNotification.enable" severity="error" data-cy="error-msg">
@@ -444,7 +447,7 @@ defineExpose({
             v-model:sort-field="sortInfo.sortBy"
             v-model:sort-order="sortInfo.sortOrder"
             :rows="pageSize">
-          <Column v-if="!props.adminGroupId" expander style="width: 5rem" :showFilterMenu="false" :class="{'flex': responsive.md.value }">
+          <Column v-if="adminGroupsSupported" expander style="width: 5rem" :showFilterMenu="false" :class="{'flex': responsive.md.value }">
             <template #header>
               <span class="sr-only">Rows expand and collapse control - Not sortable</span>
             </template>
