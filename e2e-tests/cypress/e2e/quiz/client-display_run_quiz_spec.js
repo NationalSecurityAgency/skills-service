@@ -494,11 +494,20 @@ describe('Client Display Quiz Tests', () => {
 
     it('run quiz with subset of questions', () => {
         cy.createQuizDef(1);
-        cy.createQuizQuestionDef(1, 1);
-        cy.createQuizQuestionDef(1, 2);
-        cy.createQuizQuestionDef(1, 3);
-        cy.createQuizQuestionDef(1, 4);
-        cy.createQuizQuestionDef(1, 5);
+        const overrideProps = {
+            answers: [{
+                answer: 'Answer 1',
+                isCorrect: true,
+            }, {
+                answer: 'Answer 2',
+                isCorrect: false,
+            }]
+        }
+        cy.createQuizQuestionDef(1, 1, overrideProps);
+        cy.createQuizQuestionDef(1, 2, overrideProps);
+        cy.createQuizQuestionDef(1, 3, overrideProps);
+        cy.createQuizQuestionDef(1, 4, overrideProps);
+        cy.createQuizQuestionDef(1, 5, overrideProps);
 
         cy.setNumQuestionsForQuiz(1, 2);
 
@@ -524,7 +533,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_3"]').should('not.exist');
 
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
 
         cy.get('[data-cy="completeQuizBtn"]').click()
 
@@ -545,11 +554,6 @@ describe('Client Display Quiz Tests', () => {
                 selected: false,
                 wrongSelection: false,
                 missedSelection: false
-            }, {
-                num: 2,
-                selected: false,
-                wrongSelection: false,
-                missedSelection: false
             }]
         });
         cy.validateQuestionAnswer({
@@ -557,16 +561,11 @@ describe('Client Display Quiz Tests', () => {
             correct: true,
             answers: [{
                 num: 1,
-                selected: false,
-                wrongSelection: false,
-                missedSelection: false
-            }, {
-                num: 2,
                 selected: true,
                 wrongSelection: false,
                 missedSelection: false
             }, {
-                num: 3,
+                num: 2,
                 selected: false,
                 wrongSelection: false,
                 missedSelection: false
@@ -685,6 +684,8 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
         cy.get('[data-cy="takeQuizBtn"]').click();
         cy.get('[data-cy="completionSummaryTitle"]').contains("You've run out of time!")
+        cy.get('[data-cy="percentCorrectInfoCard"]').contains('5 seconds')
+        cy.get('[data-cy="outOfTimeMsg"]')
     });
 
     it('can refresh in the middle of a timed quiz', () => {

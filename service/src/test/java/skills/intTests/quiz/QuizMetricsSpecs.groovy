@@ -259,12 +259,12 @@ class QuizMetricsSpecs extends DefaultIntSpec {
 
     void runSimpleQuiz(String userId, def quizInfo, boolean pass, boolean inProgress = false, long sleepInMs = 0) {
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quizInfo.quizId, userId).body
-        skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, userId)
+        skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, userId)
 
-        skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, userId)
-        skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[2].id, userId)
+        skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, userId)
+        skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id, userId)
         if (!pass) {
-            skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[3].id, userId)
+            skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[3].id, userId)
         }
         if (sleepInMs > 0) {
             Thread.sleep(sleepInMs)
@@ -279,7 +279,7 @@ class QuizMetricsSpecs extends DefaultIntSpec {
 
         answerOptions.eachWithIndex{ List<Integer> answers, int questionNum ->
             answers.each {
-                skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizInfo.questions[questionNum].answerOptions[it].id, userId)
+                skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizAttempt.questions[questionNum].answerOptions[it].id, userId)
             }
         }
 

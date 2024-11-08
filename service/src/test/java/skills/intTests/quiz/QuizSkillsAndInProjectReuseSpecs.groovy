@@ -389,11 +389,10 @@ class QuizSkillsAndInProjectReuseSpecs extends DefaultIntSpec {
         skillsService.reuseSkillInAnotherSubject(proj.projectId, skills[2].skillId, subj2.subjectId)
         String userId = getRandomUsers(1).first()
         SkillsService otherUserService = createService(userId)
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         when:
         def quizAttempt =  otherUserService.startQuizAttempt(quiz.quizId).body
-        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
         def gradedQuizAttempt = otherUserService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
@@ -439,11 +438,10 @@ class QuizSkillsAndInProjectReuseSpecs extends DefaultIntSpec {
 
         String userId = getRandomUsers(1).first()
         SkillsService otherUserService = createService(userId)
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         when:
         def quizAttempt =  otherUserService.startQuizAttempt(quiz.quizId).body
-        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
         def gradedQuizAttempt = otherUserService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 

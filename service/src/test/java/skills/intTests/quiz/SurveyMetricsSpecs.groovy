@@ -366,19 +366,19 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         answerRequestsSorted.each {
             reportSurvey(it.userId, surveyInfo1, it.answerOptions, it.textAnswer, 3)
         }
-        reportSurvey(users[8], surveyInfo1, [[0], [0, 2]], "answer9", 3, true) // doesn't count
+        def survey1Attempt = reportSurvey(users[8], surveyInfo1, [[0], [0, 2]], "answer9", 3, true) // doesn't count
 
 
         def surveyInfo2 = createSimpleSurvey(2)
-        reportSurvey(users[0], surveyInfo2, [[0], [0]], "Cool Answer", 3)
+        def survey2Attempt = reportSurvey(users[0], surveyInfo2, [[0], [0]], "Cool Answer", 3)
 
         when:
-        def answers1 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, surveyInfo1.questions[2].answerOptions[0].id)
-        def answers1_pg1 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, surveyInfo1.questions[2].answerOptions[0].id, 3, 1)
-        def answers1_pg2 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, surveyInfo1.questions[2].answerOptions[0].id, 3, 2)
-        def answers1_pg3 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, surveyInfo1.questions[2].answerOptions[0].id, 3, 3)
+        def answers1 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, survey1Attempt.questions[2].answerOptions[0].id)
+        def answers1_pg1 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, survey1Attempt.questions[2].answerOptions[0].id, 3, 1)
+        def answers1_pg2 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, survey1Attempt.questions[2].answerOptions[0].id, 3, 2)
+        def answers1_pg3 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, survey1Attempt.questions[2].answerOptions[0].id, 3, 3)
 
-        def answers2 = skillsService.getUserQuizAnswers(surveyInfo2.quizId, surveyInfo2.questions[2].answerOptions[0].id)
+        def answers2 = skillsService.getUserQuizAnswers(surveyInfo2.quizId, survey2Attempt.questions[2].answerOptions[0].id)
 
         then:
         answers1.count == 8
@@ -420,24 +420,24 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         List<String> users = getRandomUsers(9, true, [DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME, usersWithSlash].flatten())
 
         def surveyInfo1 = createSimpleSurvey(1)
-        Integer attemptId0 = reportSurvey(users[0], surveyInfo1, [[0], [0, 2]], "Cool Answer", 3)
-        Integer attemptId1 = reportSurvey(users[1], surveyInfo1, [[1], [1, 2]], "Cool Answer", 3)
-        Integer attemptId2 = reportSurvey(users[2], surveyInfo1, [[0], [0]], "Cool Answer", 2)
-        Integer attemptId3 = reportSurvey(users[3], surveyInfo1, [[1], [0, 2]], "Cool Answer", 2)
-        Integer attemptId4 = reportSurvey(users[4], surveyInfo1, [[0], [0, 1, 2]], "Cool Answer", 3)
-        Integer attemptId5 = reportSurvey(users[5], surveyInfo1, [[1], [3]], "Cool Answer", 3)
-        Integer attemptId6 = reportSurvey(users[6], surveyInfo1, [[0], [0, 1, 2, 3]], "Cool Answer", 4)
-        Integer attemptId7 = reportSurvey(users[7], surveyInfo1, [[0], [0, 1, 2, 3]], "Cool Answer", 4)
-        Integer attemptId8 = reportSurvey(users[8], surveyInfo1, [[0], [0, 1, 2, 3]], "Cool Answer", 4, true) // doesn't count
+        def attempt0 = reportSurvey(users[0], surveyInfo1, [[0], [0, 2]], "Cool Answer", 3)
+        def attempt1 = reportSurvey(users[1], surveyInfo1, [[1], [1, 2]], "Cool Answer", 3)
+        def attempt2 = reportSurvey(users[2], surveyInfo1, [[0], [0]], "Cool Answer", 2)
+        def attempt3 = reportSurvey(users[3], surveyInfo1, [[1], [0, 2]], "Cool Answer", 2)
+        def attempt4 = reportSurvey(users[4], surveyInfo1, [[0], [0, 1, 2]], "Cool Answer", 3)
+        def attempt5 = reportSurvey(users[5], surveyInfo1, [[1], [3]], "Cool Answer", 3)
+        def attempt6 = reportSurvey(users[6], surveyInfo1, [[0], [0, 1, 2, 3]], "Cool Answer", 4)
+        def attempt7 = reportSurvey(users[7], surveyInfo1, [[0], [0, 1, 2, 3]], "Cool Answer", 4)
+        def attempt8 = reportSurvey(users[8], surveyInfo1, [[0], [0, 1, 2, 3]], "Cool Answer", 4, true) // doesn't count
 
         def surveyInfo2 = createSimpleSurvey(2)
         reportSurvey(users[0], surveyInfo2, [[0], [0]], "Cool Answer", 2)
 
         when:
-        def s1_answ1 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, surveyInfo1.questions[1].answerOptions[0].id)
-        def s1_answ2 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, surveyInfo1.questions[1].answerOptions[1].id)
-        def s1_answ3 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, surveyInfo1.questions[1].answerOptions[2].id)
-        def s1_answ4 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, surveyInfo1.questions[1].answerOptions[3].id)
+        def s1_answ1 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, attempt8.questions[1].answerOptions[0].id)
+        def s1_answ2 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, attempt8.questions[1].answerOptions[1].id)
+        def s1_answ3 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, attempt8.questions[1].answerOptions[2].id)
+        def s1_answ4 = skillsService.getUserQuizAnswers(surveyInfo1.quizId, attempt8.questions[1].answerOptions[3].id)
 
         then:
         s1_answ1.count == 6
@@ -445,7 +445,7 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
 
         s1_answ1.data.userId.sort() == [users[0], users[2], users[3], users[4], users[6], users[7]].sort()
         s1_answ1.data.answerTxt == [null, null, null, null, null, null]
-        s1_answ1.data.userQuizAttemptId.sort() == [attemptId0, attemptId2, attemptId3, attemptId4, attemptId6, attemptId7].sort()
+        s1_answ1.data.userQuizAttemptId.sort() == [attempt0.id, attempt2.id, attempt3.id, attempt4.id, attempt6.id, attempt7.id].sort()
 
         s1_answ2.count == 4
         s1_answ2.totalCount == 4
@@ -479,23 +479,23 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         return quizInfo
     }
 
-    Integer reportSurvey(String userId, def quizInfo, List<List<Integer>> answerOptions, String textAnswer, Integer rating, boolean inProgress = false) {
+    Object reportSurvey(String userId, def quizInfo, List<List<Integer>> answerOptions, String textAnswer, Integer rating, boolean inProgress = false) {
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quizInfo.quizId, userId).body
 
         answerOptions.eachWithIndex{ List<Integer> answers, int questionNum ->
             answers.each {
-                skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizInfo.questions[questionNum].answerOptions[it].id, userId)
+                skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizAttempt.questions[questionNum].answerOptions[it].id, userId)
             }
         }
 
-        skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, userId, [isSelected:true, answerText: textAnswer])
-        skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizInfo.questions[3].answerOptions[rating - 1].id, userId)
+        skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, userId, [isSelected:true, answerText: textAnswer])
+        skillsService.reportQuizAnswerForUserId(quizInfo.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[rating - 1].id, userId)
 
         if (!inProgress) {
             skillsService.completeQuizAttemptForUserId(quizInfo.quizId, quizAttempt.id, userId).body
         }
 
-        return quizAttempt.id
+        return quizAttempt
     }
 
 }

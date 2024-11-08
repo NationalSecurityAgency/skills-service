@@ -274,11 +274,11 @@ const isProjectExpiring = computed(() => {
           </SkillsButton>
         </div>
         <div data-cy="projectCreated" class="mt-3">
-          <i class="fas fa-clock text-success mr-1" aria-hidden="true" />
+          <i class="fas fa-clock text-primary mr-1" aria-hidden="true" />
           <ProjectDates :created="project.created" :load-last-reported-date="true" />
         </div>
         <div v-if="projConfig.userProjRole">
-          <i class="fas fa-user-shield text-success header-status-icon" aria-hidden="true" /> <span
+          <i class="fas fa-user-shield text-primary header-status-icon" aria-hidden="true" /> <span
           class="text-secondary font-italic small">Role:</span> <span class="small text-primary"
                                                                       data-cy="userRole">{{ UserRolesUtil.userRoleFormatter(projConfig.userProjRole)
           }}</span>

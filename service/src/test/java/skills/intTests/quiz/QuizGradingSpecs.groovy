@@ -22,6 +22,7 @@ import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
+import skills.services.quiz.QuizQuestionType
 import skills.storage.model.SkillDef
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.UserQuizQuestionAttempt
@@ -39,18 +40,16 @@ class QuizGradingSpecs extends DefaultIntSpec {
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
         skillsService.createQuizQuestionDefs([questions])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
 
         // quiz without text input
         def quiz1 = QuizDefFactory.createQuiz(2, "Fancy Description")
         skillsService.createQuizDef(quiz1)
         skillsService.createQuizQuestionDefs([QuizDefFactory.createChoiceQuestion(2, 1)])
 
-        def quizInfo1 = skillsService.getQuizInfo(quiz1.quizId)
         def quizAttempt1 = skillsService.startQuizAttempt(quiz1.quizId).body
-        skillsService.reportQuizAnswer(quiz1.quizId, quizAttempt1.id, quizInfo1.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz1.quizId, quizAttempt1.id, quizAttempt1.questions[0].answerOptions[1].id)
 
         // quiz with multiple questions to grade
         def quiz2 = QuizDefFactory.createQuiz(3, "Fancy Description")
@@ -64,11 +63,10 @@ class QuizGradingSpecs extends DefaultIntSpec {
                 [setting: QuizSettings.AlwaysShowCorrectAnswers.setting, value: '1'],
         ])
 
-        def quizInfo2 = skillsService.getQuizInfo(quiz2.quizId)
         def quizAttempt2 = skillsService.startQuizAttempt(quiz2.quizId).body
-        skillsService.reportQuizAnswer(quiz2.quizId, quizAttempt2.id, quizInfo2.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
-        skillsService.reportQuizAnswer(quiz2.quizId, quizAttempt2.id, quizInfo2.questions[1].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz2.quizId, quizAttempt2.id, quizInfo2.questions[2].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz2.quizId, quizAttempt2.id, quizAttempt2.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz2.quizId, quizAttempt2.id, quizAttempt2.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz2.quizId, quizAttempt2.id, quizAttempt2.questions[2].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
 
         when:
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
@@ -105,14 +103,14 @@ class QuizGradingSpecs extends DefaultIntSpec {
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
         def quizInfo_t1 = skillsService.getQuizInfo(quiz.quizId)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def quizInfo_t2 = skillsService.getQuizInfo(quiz.quizId)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         def quizInfo_t3 = skillsService.getQuizInfo(quiz.quizId)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer")
         def quizInfo_t4 = skillsService.getQuizInfo(quiz.quizId)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, true, "Good answer")
         def quizInfo_t5 = skillsService.getQuizInfo(quiz.quizId)
 
         then:
@@ -145,9 +143,8 @@ class QuizGradingSpecs extends DefaultIntSpec {
                 [setting: QuizSettings.MultipleTakes.setting, value: true],
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
@@ -166,15 +163,14 @@ class QuizGradingSpecs extends DefaultIntSpec {
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
         skillsService.createQuizQuestionDefs([questions])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, false, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
         quizAttemptResBefore.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
@@ -197,15 +193,14 @@ class QuizGradingSpecs extends DefaultIntSpec {
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
         skillsService.createQuizQuestionDefs([questions])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer")
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
         quizAttemptResBefore.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
@@ -234,18 +229,17 @@ class QuizGradingSpecs extends DefaultIntSpec {
                 [setting: QuizSettings.MinNumQuestionsToPass.setting, value: '2'],
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected: true, answerText: '3rd question ansewr'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, [isSelected: true, answerText: '3rd question ansewr'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, true, "Good answer")
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, false, "Good answer 3")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, false, "Good answer 3")
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
         quizAttemptResBefore.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
@@ -284,18 +278,17 @@ class QuizGradingSpecs extends DefaultIntSpec {
                 [setting: QuizSettings.AlwaysShowCorrectAnswers.setting, value: '1'],
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, false, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         assert quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.FAILED.toString()
 
         when:
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, false, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.httpStatus == HttpStatus.BAD_REQUEST
@@ -312,20 +305,19 @@ class QuizGradingSpecs extends DefaultIntSpec {
                 [setting: QuizSettings.AlwaysShowCorrectAnswers.setting, value: '1'],
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
         SkillsService anotherUser = createService("anotherUser")
         def quizAttempt1 = anotherUser.startQuizAttempt(quiz.quizId).body
-        anotherUser.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        anotherUser.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt1 = anotherUser.completeQuizAttempt(quiz.quizId, quizAttempt1.id).body
         assert gradedQuizAttempt1.needsGrading == true
 
         when:
-        skillsService.gradeAnswer(anotherUser.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, false, "Good answer")
+        skillsService.gradeAnswer(anotherUser.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.httpStatus == HttpStatus.BAD_REQUEST
@@ -342,9 +334,8 @@ class QuizGradingSpecs extends DefaultIntSpec {
                 [setting: QuizSettings.AlwaysShowCorrectAnswers.setting, value: '1'],
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
@@ -354,7 +345,7 @@ class QuizGradingSpecs extends DefaultIntSpec {
         def quizAttempt2 = skillsService.startQuizAttempt(quiz2.quizId).body
 
         when:
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt2.id, quizInfo.questions[0].answerOptions[0].id, false, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt2.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.httpStatus == HttpStatus.BAD_REQUEST
@@ -371,27 +362,25 @@ class QuizGradingSpecs extends DefaultIntSpec {
                 [setting: QuizSettings.AlwaysShowCorrectAnswers.setting, value: '1'],
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
         def quiz2 = QuizDefFactory.createQuiz(2, "Fancy Description")
         skillsService.createQuizDef(quiz2)
         skillsService.createQuizQuestionDefs([ QuizDefFactory.createTextInputQuestion(2, 1)])
-        def quizInfo2 = skillsService.getQuizInfo(quiz2.quizId)
         def quizAttempt2 = skillsService.startQuizAttempt(quiz2.quizId).body
-        skillsService.reportQuizAnswer(quiz2.quizId, quizAttempt2.id, quizInfo2.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz2.quizId, quizAttempt2.id, quizAttempt2.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt2 = skillsService.completeQuizAttempt(quiz2.quizId, quizAttempt2.id).body
         assert gradedQuizAttempt2.needsGrading == true
 
         when:
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo2.questions[0].answerOptions[0].id, false, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt2.questions[0].answerOptions[0].id, false, "Good answer")
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.httpStatus == HttpStatus.BAD_REQUEST
-        e.message.contains("Could not find answer attempt for quizAttemptId=[${quizAttempt.id}] and answerDefId=[${quizInfo2.questions[0].answerOptions[0].id}]")
+        e.message.contains("Could not find answer attempt for quizAttemptId=[${quizAttempt.id}] and answerDefId=[${quizAttempt2.questions[0].answerOptions[0].id}]")
     }
 
     def "cannot grade the same question twice"() {
@@ -402,16 +391,15 @@ class QuizGradingSpecs extends DefaultIntSpec {
                 QuizDefFactory.createTextInputQuestion(1, 2),
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, false, "hi")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "hi")
         when:
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, false, "hi")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "hi")
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.httpStatus == HttpStatus.BAD_REQUEST
@@ -426,10 +414,9 @@ class QuizGradingSpecs extends DefaultIntSpec {
                 QuizDefFactory.createTextInputQuestion(1, 2)
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
@@ -437,9 +424,9 @@ class QuizGradingSpecs extends DefaultIntSpec {
         def feedback501 = feedback500 + 'a'
 
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, false, feedback500)
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, feedback500)
         when:
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, false, feedback501)
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, false, feedback501)
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.httpStatus == HttpStatus.BAD_REQUEST
@@ -454,15 +441,14 @@ class QuizGradingSpecs extends DefaultIntSpec {
                 QuizDefFactory.createTextInputQuestion(1, 2)
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
         when:
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, false,  "ab jabberwocky kd")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, false,  "ab jabberwocky kd")
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.httpStatus == HttpStatus.BAD_REQUEST
@@ -477,15 +463,14 @@ class QuizGradingSpecs extends DefaultIntSpec {
                 QuizDefFactory.createTextInputQuestion(1, 2),
         ])
 
-        def quizInfo = skillsService.getQuizInfo(survey.quizId)
         def quizAttempt = skillsService.startQuizAttempt(survey.quizId).body
-        skillsService.reportQuizAnswer(survey.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
-        skillsService.reportQuizAnswer(survey.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(survey.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(survey.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(survey.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == false
 
         when:
-        skillsService.gradeAnswer(skillsService.userName, survey.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, false, "hi")
+        skillsService.gradeAnswer(skillsService.userName, survey.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "hi")
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.httpStatus == HttpStatus.BAD_REQUEST
@@ -507,19 +492,18 @@ class QuizGradingSpecs extends DefaultIntSpec {
         skillWithQuiz.quizId = quiz.quizId
         skillsService.createProjectAndSubjectAndSkills(proj, subj, [skillWithQuiz])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         def skillResBefore = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer")
         def skillResBefore1 = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, true, "Good answer")
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
         then:
@@ -553,16 +537,15 @@ class QuizGradingSpecs extends DefaultIntSpec {
         def skills = createProject(1)
         def proj2Skills = createProject(2)
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
         when:
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, true, "Good answer")
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, true, "Good answer")
         def skill1Res = skillsService.getSingleSkillSummary(skillsService.userName, skills[0].projectId, skills[0].skillId)
         def skill2Res = skillsService.getSingleSkillSummary(skillsService.userName, skills[1].projectId, skills[1].skillId)
         def proj2Skill1Res = skillsService.getSingleSkillSummary(skillsService.userName, proj2Skills[0].projectId, proj2Skills[0].skillId)
@@ -589,19 +572,18 @@ class QuizGradingSpecs extends DefaultIntSpec {
         skillWithQuiz.quizId = quiz.quizId
         skillsService.createProjectAndSubjectAndSkills(proj, subj, [skillWithQuiz])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         def skillResBefore = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer")
         def skillResBefore1 = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, false, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, false, "Good answer")
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
         then:
@@ -611,4 +593,43 @@ class QuizGradingSpecs extends DefaultIntSpec {
         skillResBefore1.points == 0
         skillRes.points ==  0
     }
+
+    def "when quizLength is set and non InputText questions are chosen there is no need to grade"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        List questions = (1..20).collect {
+            return it == 1 ? QuizDefFactory.createTextInputQuestion(1, it)
+                    : QuizDefFactory.createChoiceQuestion(1, it)
+        }
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.QuizLength.setting, value: 1],
+        ])
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.MultipleTakes.setting, value: true],
+        ])
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        int breakoutCounter = 0
+        while(quizAttempt.questions[0].questionType == QuizQuestionType.TextInput.toString()) {
+            skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+            def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+            assert gradedQuizAttempt.needsGrading == true
+            skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
+            quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+
+            breakoutCounter++
+            if (breakoutCounter > 100) {
+                throw new IllegalStateException("looped too many times")
+            }
+        }
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+
+        when:
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        then:
+        gradedQuizAttempt.needsGrading == false
+    }
+
 }

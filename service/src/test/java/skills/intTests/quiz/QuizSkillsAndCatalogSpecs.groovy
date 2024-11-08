@@ -637,7 +637,6 @@ class QuizSkillsAndCatalogSpecs extends DefaultIntSpec {
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
         String userId = getRandomUsers(1).first()
         SkillsService otherUserService = createService(userId)
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         when:
         def userOverallProgress_t0 = skillsService.getSkillSummary(otherUserService.userName, proj2.projectId)
         def userOverallProgressProj2_t0 = skillsService.getSkillSummary(otherUserService.userName, proj2.projectId)
@@ -646,8 +645,8 @@ class QuizSkillsAndCatalogSpecs extends DefaultIntSpec {
         def p2_skillRes_t0 = skillsService.getSingleSkillSummary(otherUserService.userName, proj2.projectId, skills[0].skillId)
 
         def quizAttempt =  otherUserService.startQuizAttempt(quiz.quizId).body
-        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
         def gradedQuizAttempt = otherUserService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
@@ -685,10 +684,9 @@ class QuizSkillsAndCatalogSpecs extends DefaultIntSpec {
         String userId = getRandomUsers(1).first()
         SkillsService otherUserService = createService(userId)
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  otherUserService.startQuizAttempt(quiz.quizId).body
-        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
+        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        otherUserService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
         def gradedQuizAttempt = otherUserService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
         def proj = createProject(1)

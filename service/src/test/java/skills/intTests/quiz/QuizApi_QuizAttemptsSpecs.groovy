@@ -48,16 +48,15 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         when:
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
         def quizAttempt1 =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizInfo.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt.questions[1].answerOptions[0].id)
         def gradedQuizAttempt1 = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt1.id).body
 
         then:
@@ -67,10 +66,10 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
 
         gradedQuizAttempt1.passed == true
         gradedQuizAttempt1.numQuestionsGotWrong == 0
-        gradedQuizAttempt1.gradedQuestions.questionId == quizInfo.questions.id
+        gradedQuizAttempt1.gradedQuestions.questionId == quizAttempt.questions.id
         gradedQuizAttempt1.gradedQuestions.isCorrect == [true, true]
-        gradedQuizAttempt1.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
-        gradedQuizAttempt1.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[0].id]
+        gradedQuizAttempt1.gradedQuestions[0].selectedAnswerIds == [quizAttempt.questions[0].answerOptions[0].id]
+        gradedQuizAttempt1.gradedQuestions[1].selectedAnswerIds == [quizAttempt.questions[1].answerOptions[0].id]
     }
 
     def "previous quiz attempts do not affect follow-on attempts"() {
@@ -79,23 +78,22 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions)
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
         when:
         def quizAttempt1_t0 =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1_t0.id, quizInfo.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1_t0.id, quizAttempt.questions[0].answerOptions[1].id)
         def quizAttempt1_t1 =  skillsService.startQuizAttempt(quiz.quizId).body
         then:
         quizAttempt1_t0.id != quizAttempt.id
         !quizAttempt1_t0.selectedAnswerIds
-        quizAttempt1_t1.selectedAnswerIds == [quizInfo.questions[0].answerOptions[1].id]
+        quizAttempt1_t1.selectedAnswerIds == [quizAttempt.questions[0].answerOptions[1].id]
         quizAttempt1_t0.id == quizAttempt1_t1.id
         // make sure old runs answer were not removed
-        userQuizAnswerAttemptRepo.findAll().findAll({ it.userQuizAttemptRefId == quizAttempt.id }).collect { it.quizAnswerDefinitionRefId } == [quizInfo.questions[0].answerOptions[0].id, quizInfo.questions[1].answerOptions[1].id]
+        userQuizAnswerAttemptRepo.findAll().findAll({ it.userQuizAttemptRefId == quizAttempt.id }).collect { it.quizAnswerDefinitionRefId } == [quizAttempt.questions[0].answerOptions[0].id, quizAttempt.questions[1].answerOptions[1].id]
     }
 
     def "only 1 attempt is allowed"() {
@@ -108,10 +106,8 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
                 [setting: QuizSettings.MaxNumAttempts.setting, value: '1'],
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
-
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.passed == false
         when:
@@ -134,17 +130,15 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
                 [setting: QuizSettings.MaxNumAttempts.setting, value: '1'],
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
-
         when:
         // user 1
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
         SkillsService user2Service = createService(getRandomUsers(1)[0])
         def u2QuizAttempt =  user2Service.startQuizAttempt(quiz.quizId).body
-        user2Service.reportQuizAnswer(quiz.quizId, u2QuizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+        user2Service.reportQuizAnswer(quiz.quizId, u2QuizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
         def u2GradedQuizAttempt = user2Service.completeQuizAttempt(quiz.quizId, u2QuizAttempt.id).body
 
         then:
@@ -162,17 +156,15 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
                 [setting: QuizSettings.MaxNumAttempts.setting, value: '2'],
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
-
         // attempt 1
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.passed == false
 
         // attempt 2
         def quizAttempt2 =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt2.id, quizInfo.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt2.id, quizAttempt.questions[0].answerOptions[1].id)
         def gradedQuizAttempt2 = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt2.id).body
         assert gradedQuizAttempt2.passed == false
         when:
@@ -195,18 +187,16 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
                 [setting: QuizSettings.MaxNumAttempts.setting, value: '-1'],
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
-
         when:
         List passedResults = (1..5).collect {
             def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-            skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+            skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
             def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
             return gradedQuizAttempt.passed
         }
 
         def finalAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, finalAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, finalAttempt.id, finalAttempt.questions[0].answerOptions[0].id)
         def gradedFinalAttempt = skillsService.completeQuizAttempt(quiz.quizId, finalAttempt.id).body
 
         then:
@@ -219,18 +209,17 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
         skillsService.createQuizQuestionDefs(questions)
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
 
         when:
         List passedResults = (1..5).collect {
             def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-            skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+            skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
             def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
             return gradedQuizAttempt.passed
         }
 
         def finalAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, finalAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, finalAttempt.id, finalAttempt.questions[0].answerOptions[0].id)
         def gradedFinalAttempt = skillsService.completeQuizAttempt(quiz.quizId, finalAttempt.id).body
 
         then:
@@ -244,10 +233,8 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         def questions = [QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 2)]
         skillsService.createQuizQuestionDefs(questions)
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
-
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
         skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         when:
         skillsService.startQuizAttempt(quiz.quizId)
@@ -264,10 +251,8 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
         skillsService.createQuizQuestionDefs(questions)
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
-
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.passed == true
         when:
@@ -290,21 +275,21 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
 
         // attempt 1
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
         def quizInfo_t1 = skillsService.getQuizInfo(quiz.quizId)
 
         // attempt 2
         def quizAttempt2 =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt2.id, quizInfo.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt2.id, quizAttempt.questions[0].answerOptions[1].id)
         def gradedQuizAttempt2 = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt2.id).body
 
         def quizInfo_t2 = skillsService.getQuizInfo(quiz.quizId)
 
         // attempt 2
         def quizAttempt3 =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt3.id, quizInfo.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt3.id, quizAttempt.questions[0].answerOptions[0].id)
 
         def quizInfo_t3 = skillsService.getQuizInfo(quiz.quizId)
         def gradedQuizAttempt3 = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt3.id).body
@@ -336,7 +321,7 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         quizInfo_t2.userNumPreviousQuizAttempts == 2
         quizInfo_t2.userQuizPassed == false
         quizInfo_t2.userLastQuizAttemptDate
-        quizInfo.maxAttemptsAllowed == -1
+        quizInfo_t2.maxAttemptsAllowed == -1
 
         quizInfo_t3.isAttemptAlreadyInProgress == true
         quizInfo_t3.userNumPreviousQuizAttempts == 2

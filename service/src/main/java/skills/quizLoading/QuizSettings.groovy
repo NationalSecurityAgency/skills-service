@@ -24,8 +24,7 @@ enum QuizSettings {
     QuizLength('quizLength'),
     QuizTimeLimit('quizTimeLimit'),
     MultipleTakes('quizMultipleTakes'),
-    AlwaysShowCorrectAnswers('quizAlwaysShowCorrectAnswers'),
-    UserPreference_ShouldNotifyGradingRequest('userPreference.shouldNotifyGradingRequest');
+    AlwaysShowCorrectAnswers('quizAlwaysShowCorrectAnswers');
 
     String setting;
 

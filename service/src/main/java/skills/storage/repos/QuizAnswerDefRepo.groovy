@@ -27,7 +27,14 @@ interface QuizAnswerDefRepo extends JpaRepository<QuizAnswerDef, Long> {
     List<QuizAnswerDef> findAllByQuizIdIgnoreCase(String quizId)
 
     @Nullable
+    List<QuizAnswerDef> findAllByQuestionRefIdIn(List<Integer> questionRefIds)
+
+    @Nullable
     List<QuizAnswerDef> findAllByQuestionRefId(Integer questionRefId)
+
+    @Query('''select count(*) > 0 from QuizAnswerDef as aDef, QuizQuestionDef as qDef, UserQuizQuestionAttempt qAttempt 
+            where aDef.questionRefId = qDef.id and qDef.id=qAttempt.quizQuestionDefinitionRefId and qAttempt.userQuizAttemptRefId = ?1 and aDef.id = ?2''')
+    boolean doesAnswerBelongToQuizAttempt(Integer quizAttemptId, Integer answerDefId)
 
     static interface AnswerDefPartialInfo {
         String getIsCorrectAnswer()

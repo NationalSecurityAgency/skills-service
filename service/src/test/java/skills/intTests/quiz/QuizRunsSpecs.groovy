@@ -277,8 +277,8 @@ class QuizRunsSpecs extends DefaultIntSpec {
 
     void runQuiz(String userId, def quiz, def quizInfo, boolean pass) {
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, userId).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, userId)
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[pass ? 0 : 1].id, userId)
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, userId)
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[pass ? 0 : 1].id, userId)
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, userId).body
     }
 

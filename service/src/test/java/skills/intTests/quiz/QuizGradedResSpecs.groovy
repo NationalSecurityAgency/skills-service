@@ -515,7 +515,6 @@ class QuizGradedResSpecs extends DefaultIntSpec {
                 QuizDefFactory.createTextInputQuestion(1, 2),
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
         when:
         def quizAttemptRes_t1 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
@@ -525,9 +524,9 @@ class QuizGradedResSpecs extends DefaultIntSpec {
         def quizAttemptRes_t3 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         def quizAttemptRes_t4 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer")
         def quizAttemptRes_t5 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, true, "Another answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, true, "Another answer")
         def quizAttemptRes_t6 = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
         quizAttemptRes_t1.status == UserQuizAttempt.QuizAttemptStatus.INPROGRESS.toString()

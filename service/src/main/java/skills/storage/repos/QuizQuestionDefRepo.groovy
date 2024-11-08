@@ -27,6 +27,10 @@ interface QuizQuestionDefRepo extends JpaRepository<QuizQuestionDef, Long> {
     List<QuizQuestionDef> findAllByQuizIdIgnoreCase(String quizId)
 
     @Nullable
+    @Query('''select qDef from QuizQuestionDef as qDef, UserQuizQuestionAttempt qAttempt where qAttempt.quizQuestionDefinitionRefId=qDef.id and qAttempt.userQuizAttemptRefId = ?1''')
+    List<QuizQuestionDef> findQuestionDefsForSpecificQuizAttempt(Integer quizAttemptId)
+
+    @Nullable
     @Query('''select max(displayOrder) from QuizQuestionDef where quizId = ?1''')
     Integer getMaxQuestionDisplayOrderByQuizId(String quizId)
 

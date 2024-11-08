@@ -1274,9 +1274,8 @@ class MyProgressSpec extends DefaultIntSpec {
             return quiz.quizId
         }
         def runQuiz = { String quizId ->
-            def quizInfo = skillsService.getQuizInfo(quizId)
             def quizAttempt =  skillsService.startQuizAttempt(quizId).body
-            skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+            skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
             skillsService.completeQuizAttempt(quizId, quizAttempt.id)
         }
 

@@ -48,14 +48,14 @@ class QuizSkillAchievementsBaseIntSpec extends DefaultIntSpec{
 
     protected Integer passQuiz(SkillsService userService, def quizInfo) {
         def quizAttempt =  userService.startQuizAttempt(quizInfo.quizId).body
-        userService.reportQuizAnswer(quizInfo.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
+        userService.reportQuizAnswer(quizInfo.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
         def gradedQuizAttempt = userService.completeQuizAttempt(quizInfo.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.passed == true
         return quizAttempt.id
     }
     protected Integer failQuiz(SkillsService userService, def quizInfo) {
         def quizAttempt =  userService.startQuizAttempt(quizInfo.quizId).body
-        userService.reportQuizAnswer(quizInfo.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
+        userService.reportQuizAnswer(quizInfo.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
         def gradedQuizAttempt = userService.completeQuizAttempt(quizInfo.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.passed == false
         return quizAttempt.id
