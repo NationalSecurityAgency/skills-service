@@ -73,5 +73,10 @@ export default {
     return axios
         .get(`/admin/projects/${encodeURIComponent(projectId)}/adminGroups`)
         .then((response) => response.data)
-  }
+  },
+  getAdminGroupsForQuiz(quizId) {
+    return axios
+        .get(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/adminGroups`)
+        .then((response) => response.data)
+  },
 }

@@ -126,6 +126,17 @@ class AdminGroupService {
         return res
     }
 
+    @Transactional(readOnly = true)
+    List<AdminGroupDefResult> getAdminGroupsForQuiz(String quizId) {
+        List<AdminGroupDefResult> res = []
+        List<AdminGroupDefRepo.AdminGroupDefSummaryRes> fromDb = adminGroupDefRepo.getAdminGroupDefSummariesByQuizId(quizId)
+        if (fromDb) {
+            fromDb = fromDb.sort { a, b -> b.created <=> a.created }
+            res.addAll(fromDb.collect { convert(it, true) })
+        }
+        return res
+    }
+
     @Transactional()
     AdminGroupDefResult saveAdminGroupDef(Boolean isEdit, AdminGroupDefRequest adminGroupDefRequest, String userIdParam = null) {
         adminGroupDefRequest.adminGroupId = InputSanitizer.sanitize(adminGroupDefRequest.adminGroupId)

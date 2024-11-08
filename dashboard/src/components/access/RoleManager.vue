@@ -28,7 +28,7 @@ import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveB
 import { userErrorState } from '@/stores/UserErrorState.js'
 import { useDialogMessages } from '@/components/utils/modal/UseDialogMessages.js'
 import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
-import supervisorService from '@/components/utils/SupervisorService.js';
+import QuizService from '@/components/quiz/QuizService.js';
 
 const dialogMessages = useDialogMessages()
 // role constants
@@ -83,6 +83,10 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  quizId: {
+    type: String,
+    default: null,
+  },
   adminGroupId: {
     type: String,
     default: null,
@@ -127,7 +131,7 @@ const data = computed(() => {
 })
 
 const adminGroupsSupported = computed(() => {
-  return !props.adminGroupId && !!props.projectId;
+  return !props.adminGroupId && (!!props.projectId || !!props.quizId);
 })
 const availableAdminGroups = computed(() => {
   const assignedAdminGroupIds = assignedAdminGroups.value.map((ag) => ag.adminGroupId);
@@ -199,10 +203,18 @@ const loadData = () => {
     ascending: sortInfo.value.sortOrder === 1,
     orderBy: sortInfo.value.sortBy
   };
-  const getUserRoles = AccessService.getUserRoles(props.projectId, props.roles, pageParams, props.adminGroupId).then((result) => {
-    assignedLocalAdmins.value = adminGroupsSupported.value ? result.data.filter((u) => !u.adminGroupId) : result.data;
-  });
+  const getUserRoles = props.quizId ?
+      QuizService.getQuizUserRoles(props.quizId).then((result) => {
+        assignedLocalAdmins.value = adminGroupsSupported.value ? result.filter((u) => !u.adminGroupId) : result;
+      }) :
+      AccessService.getUserRoles(props.projectId, props.roles, pageParams, props.adminGroupId).then((result) => {
+        assignedLocalAdmins.value = adminGroupsSupported.value ? result.data.filter((u) => !u.adminGroupId) : result.data
+      });
   const getAdminGroupsForProject = props.projectId ? AdminGroupsService.getAdminGroupsForProject(props.projectId).then((result) => {
+    assignedAdminGroups.value = result;
+  }) : Promise.resolve();
+
+  const getAdminGroupsForQuiz = props.quizId ? AdminGroupsService.getAdminGroupsForQuiz(props.quizId).then((result) => {
     assignedAdminGroups.value = result;
   }) : Promise.resolve();
 
@@ -210,7 +222,7 @@ const loadData = () => {
     allAdminGroups.value = result;
   }) : Promise.resolve();
 
-  Promise.all([getUserRoles, getAdminGroupsForProject, getOwnedAdminGroups]).then(() => {
+  Promise.all([getUserRoles, getAdminGroupsForProject, getAdminGroupsForQuiz, getOwnedAdminGroups]).then(() => {
     isLoading.value = false;
   })
 }
@@ -243,20 +255,33 @@ function doAddUserRole() {
   isSaving.value = true;
   isLoading.value = true;
   const pkiAuthenticated = appConfig.isPkiAuthenticated;
-
   const role = isOnlyOneRole.value ? props.roles[0] : userRole.value.selected;
-  AccessService.saveUserRole(props.projectId, selectedUser.value, role, pkiAuthenticated, props.adminGroupId).then(() => {
-    announcer.polite(`${getRoleDisplay(role)} role was added for ${getUserDisplay({ ...selectedUser.value, firstName: selectedUser.value.first, lastName: selectedUser.value.last })}`);
-    emit('role-added', { userId: selectedUser.value.userId, role });
-    loadData();
+  if (props.quizId) {
+    addQuizUserRole(role);
+  } else {
+    AccessService.saveUserRole(props.projectId, selectedUser.value, role, pkiAuthenticated, props.adminGroupId).then(() => {
+      completeAddRole(role)
+    }).catch((e) => {
+      handleError(e);
+    });
+  }
+}
+const addQuizUserRole = (role) => {
+  const userIdParam = appConfig.pkiAuthenticated ? selectedUser.value.dn : selectedUser.value.userId
+  QuizService.addQuizAdmin(props.quizId, userIdParam).then(() => {
+    completeAddRole(role)
   }).catch((e) => {
     handleError(e);
-  }).finally(() => {
-    isSaving.value = false;
-    isLoading.value = false;
-    selectedUser.value = null;
-    userRole.value.selected = null;
   });
+}
+const completeAddRole = (role) => {
+  announcer.polite(`${getRoleDisplay(role)} role was added for ${getUserDisplay({ ...selectedUser.value, firstName: selectedUser.value.first, lastName: selectedUser.value.last })}`);
+  emit('role-added', { userId: selectedUser.value.userId, role });
+  loadData();
+  isSaving.value = false;
+  isLoading.value = false;
+  selectedUser.value = null;
+  userRole.value.selected = null;
 }
 
 function handleError(e) {
@@ -295,13 +320,26 @@ function deleteUserRoleConfirm(row) {
 
 function deleteUserRole(row) {
   isLoading.value = true;
-  AccessService.deleteUserRole(row.projectId, row.userId, row.roleName, props.adminGroupId).then(() => {
-    announcer.polite(`${getRoleDisplay(row.roleName)} role was removed from ${getUserDisplay(row)}`);
-    assignedLocalAdmins.value = assignedLocalAdmins.value.filter((item) => item.userId !== row.userId);
-    emit('role-deleted', { userId: row.userId, role: row.roleName });
-    isLoading.value = false;
-    document.getElementById('existingUserInput').firstElementChild.focus()
-  });
+  if (props.quizId) {
+    deleteQuizAdminUserRole(row)
+  } else {
+    AccessService.deleteUserRole(row.projectId, row.userId, row.roleName, props.adminGroupId).then(() => {
+      completeDelete(row)
+    });
+  }
+}
+const deleteQuizAdminUserRole = (row) => {
+  QuizService.deleteQuizAdmin(props.quizId, appConfig.isPkiAuthenticated ? row.dn : row.userId)
+      .then(() => {
+        completeDelete(row)
+      })
+}
+const completeDelete = (row) => {
+  announcer.polite(`${getRoleDisplay(row.roleName)} role was removed from ${getUserDisplay(row)}`);
+  assignedLocalAdmins.value = assignedLocalAdmins.value.filter((item) => item.userId !== row.userId);
+  emit('role-deleted', { userId: row.userId, role: row.roleName });
+  isLoading.value = false;
+  document.getElementById('existingUserInput').firstElementChild.focus()
 }
 
 function editItem(item) {
@@ -351,16 +389,27 @@ function updateUserRole(selectedRole) {
   }
 }
 
-const addProjectToAdminGroup = (adminGroup) => {
+const addProjectOrQuizToAdminGroup = (adminGroup) => {
   isLoading.value = true;
-  AdminGroupsService.addProjectToAdminGroup(adminGroup.adminGroupId, props.projectId).then(() => {
-    announcer.polite(`Admin Group ${adminGroup.name} was added to project to project successfully`);
-    loadData();
-  }).catch((e) => {
-    handleError(e);
-  }).finally(() => {
-    isLoading.value = false;
-  })
+  if (props.projectId) {
+    AdminGroupsService.addProjectToAdminGroup(adminGroup.adminGroupId, props.projectId).then(() => {
+      announcer.polite(`Admin Group ${adminGroup.name} was added to project successfully`);
+      loadData();
+    }).catch((e) => {
+      handleError(e);
+    }).finally(() => {
+      isLoading.value = false;
+    })
+  } else {
+    AdminGroupsService.addQuizToAdminGroup(adminGroup.adminGroupId, props.quizId).then(() => {
+      announcer.polite(`Admin Group ${adminGroup.name} was added to quiz successfully`);
+      loadData();
+    }).catch((e) => {
+      handleError(e);
+    }).finally(() => {
+      isLoading.value = false;
+    })
+  }
 }
 
 const showExpansion = (row) => {
@@ -410,7 +459,7 @@ defineExpose({
                   filter
                   placeholder="Please select Admin Group"
                   optionLabel="name"
-                  @update:modelValue="addProjectToAdminGroup"
+                  @update:modelValue="addProjectOrQuizToAdminGroup"
                   :emptyMessage=emptyAdminGroupsMessage
                   :options="availableAdminGroups">
                 <template #value="slotProps">
@@ -473,7 +522,7 @@ defineExpose({
               </div>
             </template>
           </Column>
-          <Column header="Role" field="roleName" sortable :class="{'flex': responsive.md.value }">
+          <Column header="Role" v-if="!props.quizId" field="roleName" sortable :class="{'flex': responsive.md.value }">
             <template #header>
               <span class="mr-2"><i class="fas fa-id-card text-danger" :class="colors.getTextClass(1)"
                                     aria-hidden="true"></i> </span>
@@ -523,7 +572,6 @@ defineExpose({
             </template>
           </Column>
           <template #expansion="slotProps">
-<!--            <AdminGroupMembersList :admin-group-id="slotProps.data.adminGroupId" :group-member-user-roles="slotProps.data.allMembers" />-->
             <ul>
               <li v-for="groupMember in slotProps.data.allMembers" class="m-2">
                 {{ getUserDisplay(groupMember) }}

@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.controller.exceptions.QuizValidator
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizPreference
@@ -30,6 +31,7 @@ import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.*
 import skills.quizLoading.QuizRunService
 import skills.quizLoading.model.*
+import skills.services.adminGroup.AdminGroupService
 import skills.services.quiz.QuizDefService
 import skills.services.quiz.QuizRoleService
 import skills.services.quiz.QuizSettingsService
@@ -65,6 +67,9 @@ class QuizController {
 
     @Autowired
     UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    AdminGroupService adminGroupService
 
     @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -367,5 +372,12 @@ class QuizController {
     @CompileStatic
     Map getDashboardActionAttributes(@PathVariable("quizId") String quizId, @PathVariable("actionId") Long actionId) {
         return userActionsHistoryService.getActionAttributes(actionId, null, quizId)
+    }
+
+    @RequestMapping(value = "/{quizId}/adminGroups", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    List<AdminGroupDefResult> getAdminGroupsForQuiz(@PathVariable("quizId") String quizId) {
+        SkillsValidator.isNotBlank(quizId, "Quiz Id")
+        return adminGroupService.getAdminGroupsForQuiz(quizId)
     }
 }
