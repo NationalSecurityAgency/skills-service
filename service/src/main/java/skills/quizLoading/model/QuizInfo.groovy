@@ -21,8 +21,6 @@ class QuizInfo {
     String description
     String quizType
 
-    List<QuizQuestionInfo> questions
-
     Integer minNumQuestionsToPass
 
     Boolean isAttemptAlreadyInProgress

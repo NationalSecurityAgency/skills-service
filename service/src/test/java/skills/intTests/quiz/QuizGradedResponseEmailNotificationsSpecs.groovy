@@ -43,13 +43,13 @@ class QuizGradedResponseEmailNotificationsSpecs extends DefaultIntSpec {
 
         def quizInfo = testTaker.getQuizInfo(quiz.quizId)
         def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
-        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
 
         def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         greenMail.purgeEmailFromAllMailboxes()
 
-        def gradedRes = skillsService.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, true, "Good answer")
+        def gradedRes = skillsService.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer")
 
         when:
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
@@ -88,13 +88,13 @@ class QuizGradedResponseEmailNotificationsSpecs extends DefaultIntSpec {
 
         def quizInfo = testTaker.getQuizInfo(quiz.quizId)
         def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
-        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
 
         def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         greenMail.purgeEmailFromAllMailboxes()
 
-        def gradedRes = skillsService.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, false, "Good answer")
+        def gradedRes = skillsService.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
 
         when:
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
@@ -141,13 +141,13 @@ class QuizGradedResponseEmailNotificationsSpecs extends DefaultIntSpec {
 
         def quizInfo = testTaker.getQuizInfo(quiz.quizId)
         def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
-        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
 
         def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         greenMail.purgeEmailFromAllMailboxes()
 
-        skillsService.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, false, "Good answer")
+        skillsService.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
 
         when:
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }

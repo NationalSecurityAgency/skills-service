@@ -41,9 +41,8 @@ class QuizApi_CurrentUserQuizzesSpecs extends DefaultIntSpec {
 
     private static Integer runQuizOrSurvey(SkillsService service, Integer num, int answerNumToReport = 0, boolean complete = true) {
         String quizId = QuizDefFactory.getDefaultQuizId(num)
-        def quizInfo = service.getQuizInfo(quizId)
         def quizAttempt =  service.startQuizAttempt(quizId).body
-        service.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[answerNumToReport].id)
+        service.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[answerNumToReport].id)
         if (complete) {
             service.completeQuizAttempt(quizId, quizAttempt.id)
         }
@@ -283,14 +282,13 @@ class QuizApi_CurrentUserQuizzesSpecs extends DefaultIntSpec {
         skillsService.createQuizQuestionDefs(questions)
 
         String quizId = quiz.quizId
-        def quizInfo = skillsService.getQuizInfo(quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quizId).body
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[2].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected: true, answerText: "answer"])
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, [isSelected: true, answerText: "answer"])
         skillsService.completeQuizAttempt(quizId, quizAttempt.id)
-        skillsService.gradeAnswer(skillsService.userName, quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, true, "Good answer")
 
         def now = new Date()
         def fiveMinutesAgo = now - 5 * 60 * 1000
@@ -357,14 +355,13 @@ class QuizApi_CurrentUserQuizzesSpecs extends DefaultIntSpec {
         ])
 
         String quizId = quiz.quizId
-        def quizInfo = skillsService.getQuizInfo(quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quizId).body
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[2].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected: true, answerText: "answer"])
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, [isSelected: true, answerText: "answer"])
         skillsService.completeQuizAttempt(quizId, quizAttempt.id)
-        skillsService.gradeAnswer(skillsService.userName, quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, false, "Bad answer")
+        skillsService.gradeAnswer(skillsService.userName, quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, false, "Bad answer")
 
         def now = new Date()
         def fiveMinutesAgo = now - 5 * 60 * 1000
@@ -428,14 +425,13 @@ class QuizApi_CurrentUserQuizzesSpecs extends DefaultIntSpec {
         skillsService.createQuizQuestionDefs(questions)
 
         String quizId = quiz.quizId
-        def quizInfo = skillsService.getQuizInfo(quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quizId).body
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[2].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected: true, answerText: "answer"])
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, [isSelected: true, answerText: "answer"])
         skillsService.completeQuizAttempt(quizId, quizAttempt.id)
-        skillsService.gradeAnswer(skillsService.userName, quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, false, "Bad answer")
+        skillsService.gradeAnswer(skillsService.userName, quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, false, "Bad answer")
 
         def now = new Date()
         def fiveMinutesAgo = now - 5 * 60 * 1000
@@ -485,11 +481,10 @@ class QuizApi_CurrentUserQuizzesSpecs extends DefaultIntSpec {
         skillsService.createQuizQuestionDefs(questions)
 
         String quizId = quiz.quizId
-        def quizInfo = skillsService.getQuizInfo(quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quizId).body
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[1].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[2].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
         skillsService.completeQuizAttempt(quizId, quizAttempt.id)
 
         def now = new Date()
@@ -524,12 +519,11 @@ class QuizApi_CurrentUserQuizzesSpecs extends DefaultIntSpec {
         skillsService.createQuizQuestionDefs(questions)
 
         String quizId = quiz.quizId
-        def quizInfo = skillsService.getQuizInfo(quizId)
         def quizAttempt =  skillsService.startQuizAttempt(quizId).body
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[2].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[0].id, [isSelected: true, answerText: "answer"])
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[2].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, [isSelected: true, answerText: "answer"])
         skillsService.completeQuizAttempt(quizId, quizAttempt.id)
 
         def now = new Date()

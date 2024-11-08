@@ -244,20 +244,19 @@ class QuizApi_LoadSkillInfoSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
 
         String user = skillsService.userName
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
 
         when:
         def skillRes = skillsService.getSingleSkillSummary(user, proj.projectId, skills[0].skillId)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def skillRes_t1 = skillsService.getSingleSkillSummary(user, proj.projectId, skills[0].skillId)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         def skillRes_t2 = skillsService.getSingleSkillSummary(user, proj.projectId, skills[0].skillId)
         skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         def skillRes_t3 = skillsService.getSingleSkillSummary(user, proj.projectId, skills[0].skillId)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer")
         def skillRes_t4 = skillsService.getSingleSkillSummary(user, proj.projectId, skills[0].skillId)
-        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, true, "Good answer")
         def skillRes_t5 = skillsService.getSingleSkillSummary(user, proj.projectId, skills[0].skillId)
         then:
         skillRes.selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
@@ -311,9 +310,8 @@ class QuizApi_LoadSkillInfoSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
 
         String user = skillsService.userName
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         when:
         def skillRes = skillsService.getSingleSkillSummary(user, proj.projectId, skills[0].skillId)
@@ -349,21 +347,18 @@ class QuizApi_LoadSkillInfoSpecs extends DefaultIntSpec {
         SkillsService userWithPassedAttempt = createService(users[1])
         SkillsService userWithNeedsGradingAttempt = createService(users[2])
 
-        def quizInfo = userWithFailedAttempt.getQuizInfo(quiz.quizId)
         def quizAttempt = userWithFailedAttempt.startQuizAttempt(quiz.quizId).body
-        userWithFailedAttempt.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        userWithFailedAttempt.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         userWithFailedAttempt.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
-        skillsService.gradeAnswer(userWithFailedAttempt.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, false, "Good answer")
+        skillsService.gradeAnswer(userWithFailedAttempt.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
 
-        def quizInfo1 = userWithPassedAttempt.getQuizInfo(quiz.quizId)
         def quizAttempt1 = userWithPassedAttempt.startQuizAttempt(quiz.quizId).body
-        userWithPassedAttempt.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizInfo1.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        userWithPassedAttempt.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt1.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         userWithPassedAttempt.completeQuizAttempt(quiz.quizId, quizAttempt1.id).body
-        skillsService.gradeAnswer(userWithPassedAttempt.userName, quiz.quizId, quizAttempt1.id, quizInfo1.questions[0].answerOptions[0].id, true, "Good answer")
+        skillsService.gradeAnswer(userWithPassedAttempt.userName, quiz.quizId, quizAttempt1.id, quizAttempt1.questions[0].answerOptions[0].id, true, "Good answer")
 
-        def quizInfo2 = userWithNeedsGradingAttempt.getQuizInfo(quiz.quizId)
         def quizAttempt2 = userWithNeedsGradingAttempt.startQuizAttempt(quiz.quizId).body
-        userWithNeedsGradingAttempt.reportQuizAnswer(quiz.quizId, quizAttempt2.id, quizInfo2.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        userWithNeedsGradingAttempt.reportQuizAnswer(quiz.quizId, quizAttempt2.id, quizAttempt2.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
         userWithNeedsGradingAttempt.completeQuizAttempt(quiz.quizId, quizAttempt2.id).body
 
         when:
@@ -437,17 +432,17 @@ class QuizApi_LoadSkillInfoSpecs extends DefaultIntSpec {
         def runQuiz = { SkillsService user, def quiz, boolean grade, boolean pass ->
             def quizInfo = user.getQuizInfo(quiz.quizId)
             def quizAttempt = user.startQuizAttempt(quiz.quizId).body
-            quizInfo.questions.eachWithIndex { it, index ->
+            quizAttempt.questions.eachWithIndex { it, index ->
                 int answerIndex = 0
                 if (it.questionType == QuizQuestionType.SingleChoice.toString()) {
                     answerIndex = pass ? 0 : 1
                 }
-                user.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[index].answerOptions[answerIndex].id, [isSelected: true, answerText: 'This is user provided answer'])
+                user.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[index].answerOptions[answerIndex].id, [isSelected: true, answerText: 'This is user provided answer'])
             }
 
             user.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
             if (grade) {
-                skillsService.gradeAnswer(user.userName, quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, pass, "Good answer")
+                skillsService.gradeAnswer(user.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, pass, "Good answer")
             }
 
             return [quizInfo, quizAttempt]

@@ -46,7 +46,7 @@ class QuizGradingEmailNotificationsSpecs extends DefaultIntSpec {
 
         def quizInfo = testTaker.getQuizInfo(quiz.quizId)
         def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
-        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
 
         when:
         def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
@@ -98,7 +98,7 @@ class QuizGradingEmailNotificationsSpecs extends DefaultIntSpec {
 
         def quizInfo = testTaker.getQuizInfo(quiz.quizId)
         def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
-        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
 
         when:
         def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
@@ -153,9 +153,8 @@ class QuizGradingEmailNotificationsSpecs extends DefaultIntSpec {
         SkillsService testTaker = createService(users[0])
         UserAttrs testTakerUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(testTaker.userName)
 
-        def quizInfo = testTaker.getQuizInfo(quiz.quizId)
         def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
-        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
 
         when:
         def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
@@ -211,7 +210,7 @@ class QuizGradingEmailNotificationsSpecs extends DefaultIntSpec {
 
         def quizInfo = testTaker.getQuizInfo(quiz.quizId)
         def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
-        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
 
         when:
         def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body

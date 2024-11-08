@@ -36,7 +36,6 @@ class QuizApi_AuthSpecs extends DefaultIntSpec {
 
         SkillsService otherUser = super.createService("otherUser")
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId, skillsService.userName)
         when:
         def quizAttempt =  otherUser.startQuizAttempt(quiz.quizId, skillsService.userName).body
         then:
@@ -53,10 +52,9 @@ class QuizApi_AuthSpecs extends DefaultIntSpec {
 
         SkillsService otherUser = super.createService("otherUser")
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId, skillsService.userName)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId, skillsService.userName).body
         when:
-        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected:true, userId: skillsService.userName])
+        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected:true, userId: skillsService.userName])
         then:
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("Access Denied")
@@ -71,10 +69,9 @@ class QuizApi_AuthSpecs extends DefaultIntSpec {
 
         SkillsService otherUser = super.createService("otherUser")
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId, skillsService.userName)
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId, skillsService.userName).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected:true, userId: skillsService.userName])
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id, [isSelected:true, userId: skillsService.userName])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected:true, userId: skillsService.userName])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id, [isSelected:true, userId: skillsService.userName])
 
         when:
         otherUser.completeQuizAttempt(quiz.quizId, quizAttempt.id, skillsService.userName).body
@@ -109,10 +106,9 @@ class QuizApi_AuthSpecs extends DefaultIntSpec {
         skillsService.addQuizUserRole(quiz.quizId, otherUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
 
         when:
-        def quizInfo = otherUser.getQuizInfo(quiz.quizId, skillsService.userName)
         def quizAttempt =  otherUser.startQuizAttempt(quiz.quizId, skillsService.userName).body
-        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected:true, userId: skillsService.userName])
-        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id, [isSelected:true, userId: skillsService.userName])
+        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected:true, userId: skillsService.userName])
+        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id, [isSelected:true, userId: skillsService.userName])
         def gradedQuizAttempt = otherUser.completeQuizAttempt(quiz.quizId, quizAttempt.id, skillsService.userName).body
         then:
         gradedQuizAttempt.passed == false
@@ -133,10 +129,9 @@ class QuizApi_AuthSpecs extends DefaultIntSpec {
         otherUser.createProjectAndSubjectAndSkills(proj, subj, skills)
 
         when:
-        def quizInfo = otherUser.getQuizInfo(quiz.quizId, skillsService.userName)
         def quizAttempt =  otherUser.startQuizAttempt(quiz.quizId, skillsService.userName).body
-        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected:true, userId: skillsService.userName])
-        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id, [isSelected:true, userId: skillsService.userName])
+        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected:true, userId: skillsService.userName])
+        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id, [isSelected:true, userId: skillsService.userName])
         def gradedQuizAttempt = otherUser.completeQuizAttempt(quiz.quizId, quizAttempt.id, skillsService.userName).body
         then:
         gradedQuizAttempt.passed == false
@@ -161,10 +156,9 @@ class QuizApi_AuthSpecs extends DefaultIntSpec {
         otherUser.addUserRole(approverUser.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
 
         when:
-        def quizInfo = approverUser.getQuizInfo(quiz.quizId, skillsService.userName)
         def quizAttempt =  approverUser.startQuizAttempt(quiz.quizId, skillsService.userName).body
-        approverUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, [isSelected:true, userId: skillsService.userName])
-        approverUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id, [isSelected:true, userId: skillsService.userName])
+        approverUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected:true, userId: skillsService.userName])
+        approverUser.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id, [isSelected:true, userId: skillsService.userName])
         def gradedQuizAttempt = approverUser.completeQuizAttempt(quiz.quizId, quizAttempt.id, skillsService.userName).body
         then:
         gradedQuizAttempt.passed == false

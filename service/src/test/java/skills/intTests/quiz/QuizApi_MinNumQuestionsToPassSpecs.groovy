@@ -52,18 +52,17 @@ class QuizApi_MinNumQuestionsToPassSpecs extends DefaultIntSpec {
                 [setting: QuizSettings.MinNumQuestionsToPass.setting, value: '2'],
         ])
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
         when:
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[1].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizInfo.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[1].id)
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
 
         def quizAttempt1 =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizInfo.questions[0].answerOptions[0].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizInfo.questions[1].answerOptions[1].id)
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizInfo.questions[2].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt.questions[2].answerOptions[0].id)
         def gradedQuizAttempt1 = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt1.id).body
 
         then:
@@ -73,11 +72,11 @@ class QuizApi_MinNumQuestionsToPassSpecs extends DefaultIntSpec {
 
         gradedQuizAttempt1.passed == true
         gradedQuizAttempt1.numQuestionsGotWrong == 1
-        gradedQuizAttempt1.gradedQuestions.questionId == quizInfo.questions.id
+        gradedQuizAttempt1.gradedQuestions.questionId == quizAttempt.questions.id
         gradedQuizAttempt1.gradedQuestions.isCorrect == [true, false, true]
-        gradedQuizAttempt1.gradedQuestions[0].selectedAnswerIds == [quizInfo.questions[0].answerOptions[0].id]
-        gradedQuizAttempt1.gradedQuestions[1].selectedAnswerIds == [quizInfo.questions[1].answerOptions[1].id]
-        gradedQuizAttempt1.gradedQuestions[2].selectedAnswerIds == [quizInfo.questions[2].answerOptions[0].id]
+        gradedQuizAttempt1.gradedQuestions[0].selectedAnswerIds == [quizAttempt.questions[0].answerOptions[0].id]
+        gradedQuizAttempt1.gradedQuestions[1].selectedAnswerIds == [quizAttempt.questions[1].answerOptions[1].id]
+        gradedQuizAttempt1.gradedQuestions[2].selectedAnswerIds == [quizAttempt.questions[2].answerOptions[0].id]
     }
 
 }
