@@ -192,12 +192,10 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
         skillsService.createQuizQuestionDefs(questions)
         userActionsHistoryRepo.deleteAll()
 
-        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
-
         String userId = createService(getRandomUsers(1, true)).userName
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, userId).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, userId)
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[1].answerOptions[0].id, userId)
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, userId)
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, userId)
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, userId).body
 
         def quizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')

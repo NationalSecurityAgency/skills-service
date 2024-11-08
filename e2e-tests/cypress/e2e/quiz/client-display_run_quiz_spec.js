@@ -685,6 +685,8 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
         cy.get('[data-cy="takeQuizBtn"]').click();
         cy.get('[data-cy="completionSummaryTitle"]').contains("You've run out of time!")
+        cy.get('[data-cy="percentCorrectInfoCard"]').contains('5 seconds')
+        cy.get('[data-cy="outOfTimeMsg"]')
     });
 
     it('can refresh in the middle of a timed quiz', () => {

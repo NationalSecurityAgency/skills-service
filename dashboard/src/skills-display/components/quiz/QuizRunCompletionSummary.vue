@@ -54,7 +54,7 @@ const runAgain = () => {
             <span v-else>Thank you for completing the Quiz!</span>
           </Message>
         </slot>
-        <Message severity="danger" v-if="quizResult.outOfTime">You've run out of time!</Message>
+        <Message severity="error" v-if="quizResult.outOfTime" data-cy="outOfTimeMsg">You've run out of time!</Message>
       </div>
       <div class="mb-1 mt-4 text-3xl">
         <span class="font-bold text-success mb-2 skills-page-title-text-color">{{ quizInfo.name }}</span>
@@ -93,7 +93,7 @@ const runAgain = () => {
           </div>
           <div v-else>
               <div class="text-2xl">
-                <i class="fas fa-clock"></i> {{quizInfo.quizTimeLimit * 1000 | formatDuration}}
+                <i class="fas fa-clock"></i> {{ timeUtils.formatDuration(quizInfo.quizTimeLimit * 1000) }}
               </div>
               <div class="text-color-secondary mt-2">
                 You must complete the quiz within the time limit.

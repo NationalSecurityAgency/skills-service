@@ -2075,7 +2075,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
 
         List<String> users = getRandomUsers(1, true)
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0]).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, users[0])
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, users[0]).body
 
         def initialQuizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
@@ -2115,7 +2115,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
 
         List<String> users = getRandomUsers(1, true)
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0]).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, users[0])
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, users[0]).body
 
         def initialQuizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
@@ -2124,7 +2124,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
 
         when:
         def quizAttempt2 =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0]).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt2.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt2.id, quizAttempt.questions[0].answerOptions[0].id, users[0])
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt2.id, users[0]).body
 
         then:
@@ -2154,7 +2154,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
 
         List<String> users = getRandomUsers(1, true)
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0]).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, users[0])
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, users[0]).body
 
         when:
@@ -2162,7 +2162,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         initialQuizRuns.totalCount == 1
         initialQuizRuns.data[0].status == "PASSED"
         def quizAttempt2 =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0]).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt2.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt2.id, quizAttempt.questions[0].answerOptions[0].id, users[0])
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt2.id, users[0]).body
 
         then:
@@ -2195,7 +2195,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
 
         List<String> users = getRandomUsers(1, true)
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0]).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, users[0])
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, users[0]).body
 
         when:
@@ -2203,7 +2203,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         initialQuizRuns.totalCount == 1
         initialQuizRuns.data[0].status == "PASSED"
         def quizAttempt2 =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0]).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt2.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt2.id, quizAttempt.questions[0].answerOptions[0].id, users[0])
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt2.id, users[0]).body
 
         then:
@@ -2233,7 +2233,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
 
         List<String> users = getRandomUsers(1, true)
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0], "skill1", proj.projectId).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, users[0])
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, users[0]).body
 
         when:
@@ -2241,7 +2241,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         initialQuizRuns.totalCount == 1
         initialQuizRuns.data[0].status == "PASSED"
         def quizAttempt2 =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0], "skill1", proj.projectId).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt2.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt2.id, quizAttempt.questions[0].answerOptions[0].id, users[0])
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt2.id, users[0]).body
 
         then:
@@ -2271,13 +2271,13 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
 
         List<String> users = getRandomUsers(1, true)
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0], "skill1", proj.projectId).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, users[0])
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, users[0]).body
 
         when:
         def initialQuizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
         def quizAttempt2 =  skillsService.startQuizAttemptForUserId(quiz.quizId, users[0], "skill1", proj.projectId).body
-        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt2.id, quizInfo.questions[0].answerOptions[0].id, users[0])
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt2.id, quizAttempt.questions[0].answerOptions[0].id, users[0])
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt2.id, users[0]).body
         def newQuizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '')
 

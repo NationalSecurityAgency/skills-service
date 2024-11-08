@@ -159,7 +159,7 @@ const beginDateTimer = () => {
       if (currentDate.value >= dayjs(quizInfo.value.deadline).utc().valueOf()) {
         destroyDateTimer();
         QuizRunService.failQuizAttempt(props.quizId, quizAttemptId.value).then((gradedRes) => {
-          const numTotal = quizInfo.value.questions.length;
+          const numTotal = quizInfo.value.quizLength;
           const numCorrect = 0;
           const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
           quizResult.value = {
@@ -209,9 +209,9 @@ const failQuizAttempt = () => {
       passed: false,
       started: null,
     },
-    missedBy: quizInfo.value.questions.length,
+    missedBy: quizInfo.value.quizLength,
     numCorrect: 0,
-    numTotal: quizInfo.value.questions.length,
+    numTotal: quizInfo.value.quizLength,
     percentCorrect: 0,
     outOfTime: true,
   };
@@ -302,7 +302,7 @@ const submitTestRun = handleSubmit((values) => {
 const reportTestRunToBackend = () => {
   return QuizRunService.completeQuizAttempt(props.quizId, quizAttemptId.value)
       .then((gradedRes) => {
-        const numTotal = quizInfo.value.questions.length;
+        const numTotal = quizInfo.value.quizLength;
         const numCorrect = numTotal - gradedRes.numQuestionsGotWrong;
         const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
         quizResult.value = {
