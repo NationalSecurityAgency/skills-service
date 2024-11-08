@@ -777,8 +777,8 @@ class QuizDefService {
         List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = userQuizAnswerAttemptRepo.getSelectedAnswerIdsAndText(userQuizAttempt.id)
         List<UserQuizAnswerGradedRepo.GradedInfo> manuallyGradedAnswers = userQuizAnswerGradedRepo.getGradedAnswersForQuizAttemptId(userQuizAttempt.id)
 
-        List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)
-        List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
+        List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findQuestionDefsForSpecificQuizAttempt(userQuizAttempt.id)
+        List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuestionRefIdIn(dbQuestionDefs.collect({it.id}))
         List<UserQuizQuestionAttempt> questionAttempts = userQuizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(userQuizAttempt.id)
         Map<Integer, List<QuizAnswerDef>> byQuestionId = dbAnswersDef.groupBy {it.questionRefId }
         Map<Integer, List<UserQuizAnswerGradedRepo.GradedInfo>> manuallyGradedAnswersByAnswerAttemptId = manuallyGradedAnswers.groupBy {it.answerAttemptId }

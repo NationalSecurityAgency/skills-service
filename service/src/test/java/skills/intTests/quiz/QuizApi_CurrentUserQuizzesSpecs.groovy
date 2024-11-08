@@ -547,5 +547,75 @@ class QuizApi_CurrentUserQuizzesSpecs extends DefaultIntSpec {
 
         !res.questions
     }
+
+    def "quiz with sub set of questions in an attempt - passed"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questions = [
+                QuizDefFactory.createChoiceQuestion(1, 1, 2),
+                QuizDefFactory.createChoiceQuestion(1, 2, 2),
+                QuizDefFactory.createChoiceQuestion(1, 3, 2),
+                QuizDefFactory.createChoiceQuestion(1, 4, 2)
+        ]
+        questions.each {
+            it.answers[0].isCorrect = true
+            it.answers[1].isCorrect = false
+        }
+        skillsService.createQuizQuestionDefs(questions)
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.QuizLength.setting, value: 2],
+        ])
+
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
+        skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id)
+
+        when:
+        def res = skillsService.getCurrentUserSingleQuizAttempt(quizAttempt.id)
+        then:
+        res.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        res.numQuestions == 2
+        res.numQuestionsToPass == 2
+        res.numQuestionsPassed == 2
+        res.allQuestionsReturned == true
+        res.questions.size() == 2
+    }
+
+    def "quiz with sub set of questions in an attempt - failed"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questions = [
+                QuizDefFactory.createChoiceQuestion(1, 1, 2),
+                QuizDefFactory.createChoiceQuestion(1, 2, 2),
+                QuizDefFactory.createChoiceQuestion(1, 3, 2),
+                QuizDefFactory.createChoiceQuestion(1, 4, 2)
+        ]
+        questions.each {
+            it.answers[0].isCorrect = true
+            it.answers[1].isCorrect = false
+        }
+        skillsService.createQuizQuestionDefs(questions)
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.QuizLength.setting, value: 2],
+        ])
+
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id)
+
+        when:
+        def res = skillsService.getCurrentUserSingleQuizAttempt(quizAttempt.id)
+        then:
+        res.status == UserQuizAttempt.QuizAttemptStatus.FAILED.toString()
+        res.numQuestions == 2
+        res.numQuestionsToPass == 2
+        res.numQuestionsPassed == 1
+        res.allQuestionsReturned == false
+        !res.questions
+    }
+
 }
+
 
