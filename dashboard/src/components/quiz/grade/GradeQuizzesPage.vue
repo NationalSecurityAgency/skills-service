@@ -101,9 +101,11 @@ const expandedRows = ref([]);
 const toggleRow = (row) => {
   if(expandedRows.value[row]) {
     delete expandedRows.value[row];
+    announcer.polite(`Collapsed grading component`)
   }
   else {
     expandedRows.value[row] = true;
+    announcer.polite(`Expanded quiz grading component`)
   }
 
   expandedRows.value = { ...expandedRows.value };
@@ -205,7 +207,7 @@ const loadEmailSubscriptionPreference = () => {
                                   class="ml-2"
                                   outlined
                                   :data-cy="`gradeBtn_${slotProps.data.userId}`"
-                                  :aria-label="`Grade Quiz for ${slotProps.data.userIdForDisplay}`"
+                                  :aria-label="`Grade Quiz run for ${slotProps.data.userIdForDisplay} user`"
                                   size="small"/>
                     <div v-else><Tag severity="success" :data-cy="`attemptGradedFor_${slotProps.data.userId}`"><i class="fas fa-check mr-1" aria-hidden="true" /> Graded</Tag></div>
                   </div>

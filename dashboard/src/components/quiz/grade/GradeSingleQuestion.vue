@@ -22,6 +22,7 @@ import {useRoute} from "vue-router";
 import { useForm } from 'vee-validate'
 import {object, string} from "yup";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
 const props = defineProps({
   question: Object,
@@ -37,6 +38,7 @@ const props = defineProps({
 const emit = defineEmits(['on-graded'])
 const route = useRoute()
 const appConfig = useAppConfig()
+const announcer = useSkillsAnnouncer()
 
 const validationSchema = object({
   'feedbackTxt': string()
@@ -64,6 +66,11 @@ const grade = (isCorrect, feedback) => {
   return QuizService.gradeQuizAnswerAttempt(route.params.quizId, props.userId, props.quizAttemptId, props.question.answers[0].id, gradingInfo)
       .then((result) => {
         emit('on-graded', result);
+        if (isCorrect) {
+          announcer.polite(`Question number ${props.question.questionNumber} has been graded as correct`)
+        } else {
+          announcer.polite(`Question number ${props.question.questionNumber} has been graded as incorrect`)
+        }
         return result
       }).finally(() => {
         isGraded.value = true
@@ -112,6 +119,7 @@ const grade = (isCorrect, feedback) => {
           @click="submitWrong"
           :loading="isSubmitting"
           :disabled="!meta.valid || isSubmitting"
+          :aria-label="`Mark question number ${question.questionNumber} as wrong`"
           data-cy="markWrongBtn"
       />
       <SkillsButton
@@ -121,6 +129,7 @@ const grade = (isCorrect, feedback) => {
           size="small"
           :disabled="!meta.valid || isSubmitting"
           :loading="isSubmitting"
+          :aria-label="`Mark question number ${question.questionNumber} as correct`"
           data-cy="markCorrectBtn"
       />
     </div>

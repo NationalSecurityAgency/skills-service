@@ -332,6 +332,7 @@ const reportTestRunToBackend = () => {
           });
           quizInfo.value = updatedQuizInfo;
         }
+        announcer.polite('Quiz Completed')
       });
 }
 const tryAgain = () => {
