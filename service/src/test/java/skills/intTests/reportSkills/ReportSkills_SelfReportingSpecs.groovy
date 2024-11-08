@@ -515,6 +515,59 @@ Always yours, <br/> -SkillTree Bot
         userEventPostApproval.count == 1
     }
 
+    def "when configured headers and footer is included in the approved/denied email "() {
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.saveEmailHeaderAndFooterSettings(
+                '<p>Header attention {{ community.descriptor }} Members</p>',
+                '<p>Footer attention {{ community.descriptor }} Members</p>',
+                'Plain Text Header Attention {{ community.descriptor }} Members',
+                'Plain Text Footer Attention {{ community.descriptor }} Members')
+
+        String user = "skills@skills.org"
+
+        def proj = SkillsFactory.createProject()
+        proj.description = 'this is an important project'
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        UserAttrs userRequestingPtsAttrs = userAttrsRepo.findByUserIdIgnoreCase(user)
+
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
+        skillsService.approve(proj.projectId, ids)
+
+        def metricDate = date.toLocalDate().atStartOfDay().toDate()
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(proj.projectId, skills[0].skillId)
+        def userEventPostApproval = userEventsRepo.findByUserIdAndSkillRefIdAndEventTimeAndEventType(user, skillDef.id, metricDate, EventType.DAILY)
+        assert userEventPostApproval
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
+        int approvalEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Approved') }
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, approvalEmailIdx)
+
+        then:
+        emailRes.fromEmail == [projectAdminUserAttrs.email]
+        emailRes.subj == "SkillTree Points Approved"
+        emailRes.recipients == [userRequestingPtsAttrs.email]
+
+        emailRes.plainText.startsWith("Plain Text Header Attention All Dragons Members")
+        emailRes.plainText.endsWith("Plain Text Footer Attention All Dragons Members")
+
+        emailRes.html.contains("<body class=\"overall-container\">\r\n<p>Header attention All Dragons Members</p>\r\n<h1>SkillTree Points <span>Approved!</span></h1>")
+        emailRes.html.contains("<p>Footer attention All Dragons Members</p>\r\n</body>")
+    }
+
     def "email is sent from the approver - report via approval"() {
         List<String> users = getRandomUsers(2, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
         String user = users[0]

@@ -26,6 +26,7 @@ import skills.intTests.utils.SkillsService
 import skills.services.ProjectErrorService
 import skills.storage.model.ProjectError
 import skills.storage.model.SkillDef
+import skills.storage.model.UserAttrs
 import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.utils.WaitFor
@@ -155,6 +156,47 @@ class SelfReportApprovalRequestEmailNotificationSpecs extends DefaultIntSpec {
         then:
         projectErrorService.countOfErrorsForProject(proj.projectId) == 1
         projectErrorService.getAllErrorsForProject(proj.projectId, PageRequest.of(0, 10)).data[0].errorType == ProjectError.ErrorType.NoEmailableApprovers.toString()
+    }
+
+    def "when configured headers and footer is included in the emails"() {
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.saveEmailHeaderAndFooterSettings(
+                '<p>Header attention {{ community.descriptor }} Members</p>',
+                '<p>Footer attention {{ community.descriptor }} Members</p>',
+                'Plain Text Header Attention {{ community.descriptor }} Members',
+                'Plain Text Footer Attention {{ community.descriptor }} Members')
+
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1, 1)
+        skill.pointIncrement = 200
+        skill.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+
+        String user = getRandomUsers(1)[0]
+        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, new Date(), "Please approve this")
+
+        when:
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
+
+        println emailRes.plainText
+        println emailRes.html
+
+        UserAttrs quizAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        then:
+        greenMail.getReceivedMessages().length == 1
+        emailRes.subj == "SkillTree Points Requested"
+        emailRes.recipients == [quizAdminUserAttrs.email]
+
+        emailRes.plainText.startsWith("Plain Text Header Attention All Dragons Members")
+        emailRes.plainText.endsWith("Plain Text Footer Attention All Dragons Members")
+
+        emailRes.html.contains("<body class=\"overall-container\">\r\n<p>Header attention All Dragons Members</p>\r\n<h1>SkillTree Points Requested!</h1>")
+        emailRes.html.contains("<p>Footer attention All Dragons Members</p>\r\n</body>")
     }
 
 }

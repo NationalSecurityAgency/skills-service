@@ -96,6 +96,43 @@ class PasswordResetSpec extends DefaultIntSpec {
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "when configured headers and footer is included in the password reset email"() {
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.saveEmailHeaderAndFooterSettings(
+                '<p>Header attention {{ community.descriptor }} Members</p>',
+                '<p>Footer attention {{ community.descriptor }} Members</p>',
+                'Plain Text Header Attention {{ community.descriptor }} Members',
+                'Plain Text Footer Attention {{ community.descriptor }} Members')
+
+        SkillsService aUser = createService("randomuser@skills.org", "somepassword",)
+
+        when:
+        //post request with an unauthenticated client to ensure that the url is publicly available
+        HttpHeaders headers = new HttpHeaders()
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA)
+        MultiValueMap body = new LinkedMultiValueMap<>()
+        body.add("userId", "randomuser@skills.org")
+        HttpEntity entity = new HttpEntity(body, headers)
+
+        String url = "http://localhost:${localPort}/resetPassword"
+
+        template.postForEntity(url, entity, String.class)
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+        def emailRes = EmailUtils.getEmail(greenMail)
+
+        then:
+        emailRes.subj == "SkillTree Password Reset"
+        emailRes.recipients == [aUser.userName]
+
+        emailRes.plainText.startsWith("Plain Text Header Attention All Dragons Members")
+        emailRes.plainText.endsWith("Plain Text Footer Attention All Dragons Members")
+
+        emailRes.html.contains("<body>\r\n<p>Header attention All Dragons Members</p>\r\n<p>Hi Skills Test,</p>")
+        emailRes.html.contains("<p>Footer attention All Dragons Members</p>\r\n</body>")
+    }
+
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "reset password with token from email"() {
         SkillsService aUser = createService("randomuser@skills.org", "somepassword")
         //post request with an unauthenticated client to ensure that the url is publicly available
