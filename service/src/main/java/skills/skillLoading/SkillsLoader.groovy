@@ -683,7 +683,7 @@ class SkillsLoader {
                 quizNeedsGradingAttemptDate: skillDefAndUserPoints?.lastQuizAttemptDate,
                 quizAttemptId: skillDefAndUserPoints?.lastQuizAttemptId,
                 quizOrSurveyPassed: skillDefAndUserPoints?.lastQuizAttemptStatus && skillDefAndUserPoints?.lastQuizAttemptStatus == UserQuizAttempt.QuizAttemptStatus.PASSED,
-                approvedBy: isFinished ? skillApproval?.approverUserId : '',
+                approvedBy: isFinished ? skillDefAndUserPoints.approverUserIdForDisplay : '',
                 approved: !skillApproval?.rejectedOn && skillApproval?.approverUserId,
         )
 
