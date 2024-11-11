@@ -35,7 +35,7 @@ const quizId = computed(() => {
                   :quiz-id="quizId"
                   title=""
                   role-description="Quiz Admin"
-                  data-cy="existingUserInput"
+                  data-cy="roleManager"
                   :roles="['ROLE_QUIZ_ADMIN']">
     </role-manager>
   </div>

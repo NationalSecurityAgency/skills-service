@@ -217,7 +217,7 @@ describe('Accessibility Quiz Tests', () => {
             cy.createSurveyDef(1);
 
             cy.visit('/administrator/quizzes/quiz1/access')
-            cy.get('[data-cy="quizUserRoleTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+            cy.get('[data-cy="roleManagerTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
 
             cy.customLighthouse();
             cy.injectAxe();
