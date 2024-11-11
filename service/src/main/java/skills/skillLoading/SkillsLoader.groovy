@@ -679,7 +679,7 @@ class SkillsLoader {
                 quizId: skillDefAndUserPoints?.quizId,
                 quizName: skillDefAndUserPoints?.quizName,
                 numQuizQuestions: skillDefAndUserPoints?.quizNumQuestions ?: 0,
-                approvedBy: isFinished ? skillApproval?.approverUserId : '',
+                approvedBy: isFinished ? skillDefAndUserPoints.approverUserIdForDisplay : '',
                 approved: !skillApproval?.rejectedOn && skillApproval?.approverUserId,
         )
 

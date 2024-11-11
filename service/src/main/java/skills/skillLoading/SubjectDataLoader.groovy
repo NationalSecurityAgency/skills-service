@@ -95,6 +95,7 @@ class SubjectDataLoader {
         SkillAttributesDef attributes
         Date expiredOn
         Date achievedOn
+        String approverUserIdForDisplay
     }
 
     static class SkillsData {
@@ -140,7 +141,8 @@ class SubjectDataLoader {
                 ) : null
             }
             new SkillsAndPoints(skillDef: skillDefAndUserPoints.skillDef, points: points, todaysPoints: todayPoints, dependencyInfo: dependencyInfo,
-                    copiedFromProjectName: skillDefAndUserPoints.copiedFromProjectName, approval: skillDefAndUserPoints.approval, attributes: skillDefAndUserPoints.attributes)
+                    copiedFromProjectName: skillDefAndUserPoints.copiedFromProjectName, approval: skillDefAndUserPoints.approval, attributes: skillDefAndUserPoints.attributes,
+                    approverUserIdForDisplay: skillDefAndUserPoints.approverUserIdForDisplay)
         }
 
         updateLastViewedSkill(skillsAndPoints, userId, projectId)
@@ -351,6 +353,7 @@ class SubjectDataLoader {
         String copiedFromProjectName
         SkillApproval approval
         SkillAttributesDef attributes
+        String approverUserIdForDisplay
     }
 
     @Profile
@@ -362,8 +365,9 @@ class SubjectDataLoader {
             SkillAttributesDef attributes = (it.length > 1 ? it[1] : null) as SkillAttributesDef
             UserPoints userPoints = (it.length > 2 ? it[2] : null) as UserPoints
             SkillApproval skillApproval = (projectId ? (it.length > 4 ? it[4] : null) : (it.length > 3 ? it[3] : null)) as SkillApproval
+
             return new SkillDefAndUserPoints(
-                    skillDef: it[0] as SkillDef, points: userPoints, copiedFromProjectName: it.length > 3 ? (String)it[3] : null, approval: skillApproval, attributes: attributes
+                    skillDef: it[0] as SkillDef, points: userPoints, copiedFromProjectName: it.length > 3 ? (String)it[3] : null, approval: skillApproval, attributes: attributes, approverUserIdForDisplay: it.length > 5 ? it[5] : null
             )
         }
 
