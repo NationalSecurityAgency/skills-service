@@ -1205,7 +1205,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         summaries.skills[0].selfReporting.approvedBy == ''
         summaries.skills[0].selfReporting.approved == false
         approvedSummaries.skills[0].selfReporting.approved == true
-        approvedSummaries.skills[0].selfReporting.approvedBy == 'skills@skills.org'
+        approvedSummaries.skills[0].selfReporting.approvedBy == 'skills@skills.org for display'
     }
 
     void "approver information not included on rejections"() {
