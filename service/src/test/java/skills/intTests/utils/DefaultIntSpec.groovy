@@ -18,7 +18,6 @@ package skills.intTests.utils
 import com.icegreen.greenmail.util.GreenMail
 import com.icegreen.greenmail.util.ServerSetupTest
 import groovy.util.logging.Slf4j
-import jakarta.annotation.PostConstruct
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,9 +30,7 @@ import org.springframework.transaction.support.TransactionTemplate
 import skills.SpringBootApp
 import skills.services.LevelDefinitionStorageService
 import skills.services.LockingService
-import skills.storage.model.UserAttrs
 import skills.storage.repos.*
-import skills.utils.RetryUtil
 import spock.lang.Specification
 
 @Slf4j
@@ -118,12 +115,11 @@ class DefaultIntSpec extends Specification {
     @Autowired
     AdminGroupDefRepo adminGroupDefRepo
 
-    private UserUtil userUtil
+    @Autowired
+    DataResetHelper dataResetHelper
 
-    @PostConstruct
-    def init(){
-        userUtil = new UserUtil(certificateRegistry: certificateRegistry)
-    }
+    @Autowired
+    SkillsServiceFactory skillsServiceFactory
 
     def setup() {
         // allows for over-ridding the setup method
@@ -135,31 +131,9 @@ class DefaultIntSpec extends Specification {
                 "START: [${specificationContext.currentIteration.name}]\n" +
                 "-------------------------------------------------------------"
         log.info(msg)
-        /**
-         * deleting projects and users will wipe the entire db clean due to cascading
-         */
-        projDefRepo.deleteAll()
-        quizDefRepo.deleteAll()
-        adminGroupDefRepo.deleteAll()
-        userAttrsRepo.deleteAll()
-        // global badges don't have references to a project so must delete those manually
-        skillDefRepo.deleteAll()
-        // notificationsRepo no longer has a fk to users so must delete explicitly
-        RetryUtil.withRetry(3, {
-            notificationsRepo.deleteAll()
-        })
 
-        settingRepo.findAll().each {
-            if (!it.settingGroup?.startsWith("public_")) {
-                settingRepo.delete(it)
-            }
-        }
+        dataResetHelper.resetData()
 
-        deleteAllAttachments()
-
-        userActionsHistoryRepo.deleteAll()
-
-        waitForAsyncTasksCompletion.clearScheduledTaskTable()
         skillsService = createService()
     }
 
@@ -207,35 +181,13 @@ class DefaultIntSpec extends Specification {
             String firstName = "Skills",
             String lastName = "Test",
             String url = "http://localhost:${localPort}".toString()){
-
-        boolean pkiEnabled = mockUserInfoService != null
-        if (pkiEnabled) {
-            url = url.replace("http://", "https://")
-        }
-
-        SkillsService.UseParams userParams = new SkillsService.UseParams(
-                username: username,
-                password: password,
-                firstName: firstName,
-                lastName: lastName
-        )
-        SkillsService res = new SkillsService(userParams, url, pkiEnabled != null ? certificateRegistry : null)
-        res.waitForAsyncTasksCompletion = waitForAsyncTasksCompletion
-        return res
+        return skillsServiceFactory.createService(username, password, firstName, lastName, url)
     }
 
     SkillsService createService(
             SkillsService.UseParams userParams,
             String url = "http://localhost:${localPort}".toString()){
-
-        boolean pkiEnabled = mockUserInfoService != null
-        if (pkiEnabled) {
-            url = url.replace("http://", "https://")
-        }
-
-        SkillsService res = new SkillsService(userParams, url, pkiEnabled != null ? certificateRegistry : null)
-        res.waitForAsyncTasksCompletion = waitForAsyncTasksCompletion
-        return res
+       return skillsServiceFactory.createService(userParams, url)
     }
 
     SkillsService createSupervisor(){
@@ -258,44 +210,10 @@ class DefaultIntSpec extends Specification {
      * @return
      */
     List<String>  getRandomUsers(int numUsers, boolean createEmail = true, List<String> exclude=[DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME]) {
-        //create email addresses for the users automatically?
-        List<String> userIds =  userUtil.getUsers(numUsers+exclude.size())
-        exclude.each { userToExclude ->
-            String idToRemove = userIds.find { it.equalsIgnoreCase(userToExclude) }
-            userIds.remove(idToRemove)
-        }
-
-        while (userIds.size() > numUsers) {
-            userIds.pop()
-        }
-        if (createEmail) {
-            userIds?.each {
-                if (!(userAttrsRepo.findByUserIdIgnoreCase(it))) {
-                    try {
-                        UserAttrs userAttrs = new UserAttrs()
-                        userAttrs.userId = it.toLowerCase()
-                        userAttrs.userIdForDisplay = it
-                        userAttrs.email = it.contains('@') ? it : EmailUtils.generateEmaillAddressFor(it)
-                        userAttrs.firstName = "${it.toUpperCase()}_first"
-                        userAttrs.lastName = "${it.toUpperCase()}_last"
-                        userAttrs.userTagsLastUpdated = new Date()
-                        userAttrsRepo.save(userAttrs)
-                    } catch (Exception e) {
-                        throw new RuntimeException("error initializing UserAttrs for [${it}]", e)
-                    }
-                }
-            }
-
-        }
-
-        return userIds
+        return skillsServiceFactory.getRandomUsers(numUsers, createEmail, exclude)
     }
 
-    int deleteAllAttachments() {
-        return transactionHelper.doInTransaction {
-            entityManager.createQuery("DELETE from Attachment").executeUpdate()
-        }
-    }
+
 
     protected <T> T runInTransaction(Closure<T> inTransactionLogic) {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)

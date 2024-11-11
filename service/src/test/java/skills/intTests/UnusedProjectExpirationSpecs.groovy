@@ -24,6 +24,7 @@ import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.services.ProjectErrorService
 import skills.services.ProjectExpirationService
 import skills.services.UserEventService
@@ -220,6 +221,50 @@ class UnusedProjectExpirationSpecs extends DefaultIntSpec{
         emails.find { p1.matcher(it.html).find() }
         emails.find { p2.matcher(it.html).find() }
         emails.find { p3.matcher(it.html).find() }
+    }
+
+    def "when configured headers and footer is included in the notification email"() {
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.saveEmailHeaderAndFooterSettings(
+                '<p>Header attention {{ community.descriptor }} Members</p>',
+                '<p>Footer attention {{ community.descriptor }} Members</p>',
+                'Plain Text Header Attention {{ community.descriptor }} Members',
+                'Plain Text Footer Attention {{ community.descriptor }} Members')
+
+        def proj1 = SkillsFactory.createProject(1)
+
+        skillsService.createProject(proj1)
+        Date flagForExpiration = new Date()
+        expirationService.flagOldProjects(flagForExpiration)
+
+        String otherUser = getRandomUsers(1, false, ['skills@skills.org', DEFAULT_ROOT_USER_ID]).first()
+
+        createService(otherUser)
+        skillsService.addProjectAdmin(proj1.projectId, otherUser)
+
+        WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
+        greenMail.purgeEmailFromAllMailboxes()
+
+        UserAttrs projectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        UserAttrs otherProjectAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(otherUser)
+        UserAttrs rootUserUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(DEFAULT_ROOT_USER_ID.toLowerCase())
+
+        when:
+        expirationService.notifyGracePeriodProjectAdmins(flagForExpiration.minus(1))
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() > 2 }
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+
+        then:
+        emails.size() == 3
+        emails.collect {it.recipients[0] }.sort() == [rootUserUserAttrs.email, projectAdminUserAttrs.email, otherProjectAdminUserAttrs.email].sort()
+        emails.findAll { it.subj == "SkillTree Project is expiring!" }.size() == 3
+        emails.each { EmailUtils.EmailRes emailRes ->
+            assert emailRes.plainText.startsWith("Plain Text Header Attention All Dragons Members")
+            assert emailRes.plainText.endsWith("Plain Text Footer Attention All Dragons Members")
+
+            assert emailRes.html.contains("<body class=\"overall-container\">\r\n<p>Header attention All Dragons Members</p>\r\n<h1>Your SkillTree Project Isn't Being Used!</h1>")
+            assert emailRes.html.contains("<p>Footer attention All Dragons Members</p>\r\n</body>")
+        }
     }
 
     def "only one run per day" () {

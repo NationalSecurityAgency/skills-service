@@ -30,7 +30,7 @@ class DelegatingUserInfo extends UserInfo {
         return null
     }
     String getLastName() {
-        return v
+        return null
     }
     String getNickname() {
         return null

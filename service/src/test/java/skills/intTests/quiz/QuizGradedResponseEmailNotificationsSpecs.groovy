@@ -120,7 +120,6 @@ class QuizGradedResponseEmailNotificationsSpecs extends DefaultIntSpec {
 
     def "headers and footer is included in the email when quiz graded notification is sent to the quiz taker"() {
         SkillsService rootSkillsService = createRootSkillService()
-        String headerAndFooterValue = 'Attention {{ community.descriptor }} Members'
         rootSkillsService.saveEmailHeaderAndFooterSettings(
                 '<p>Header attention {{ community.descriptor }} Members</p>',
                 '<p>Footer attention {{ community.descriptor }} Members</p>',
@@ -152,9 +151,6 @@ class QuizGradedResponseEmailNotificationsSpecs extends DefaultIntSpec {
         when:
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
-
-        println emailRes.plainText
-        println emailRes.html
 
         then:
         gradedQuizAttempt.needsGrading
