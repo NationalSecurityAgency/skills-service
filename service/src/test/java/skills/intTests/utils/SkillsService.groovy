@@ -2054,6 +2054,12 @@ class SkillsService {
     def deleteProjectFromAdminGroup(String adminGroupId, String projectId) {
         return wsHelper.adminDelete("${getAdminGroupDefUrl(adminGroupId)}/projects/${projectId}")
     }
+    def getAdminGroupsForProject(String projectId) {
+        return wsHelper.adminGet("${getProjectUrl(projectId)}/adminGroups".toString())
+    }
+    def getAdminGroupsForQuiz(String quizId) {
+        return wsHelper.adminGet("${getQuizDefUrl(quizId)}/adminGroups".toString())
+    }
 
     static private String getAdminGroupDefUrl(String adminGroupId) {
         return "/admin-group-definitions/${adminGroupId}".toString()
