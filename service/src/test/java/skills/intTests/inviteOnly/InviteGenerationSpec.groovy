@@ -183,6 +183,41 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         result.successful[0] == userEmail
     }
 
+    def "when configured headers and footer is included in the invite user email"() {
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.saveEmailHeaderAndFooterSettings(
+                '<p>Header attention {{ community.descriptor }} Members</p>',
+                '<p>Footer attention {{ community.descriptor }} Members</p>',
+                'Plain Text Header Attention {{ community.descriptor }} Members',
+                'Plain Text Footer Attention {{ community.descriptor }} Members')
+
+        def proj = SkillsFactory.createProject(99)
+        skillsService.createProject(proj)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        String userId = getRandomUsers(1, true).first()
+        String userEmail = EmailUtils.generateEmaillAddressFor(userId)
+        SkillsService otherUser = createService(userId)
+
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: [userEmail]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        when:
+        def emailRes = EmailUtils.getEmail(greenMail)
+        then:
+        greenMail.getReceivedMessages().length == 1
+        emailRes.recipients == [userEmail]
+        emailRes.subj == "SkillTree Project Invitation"
+        emailRes.html.contains("<p>You have been invited to join the ${proj.name} project. Please use the link below to accept the invitation. The link will be valid for 5 minutes.</p>")
+        emailRes.plainText.contains("You have been invited to join the ${proj.name} project. Please use the link below to accept the invitation. The link will be valid for 5 minutes.")
+
+        emailRes.plainText.startsWith("Plain Text Header Attention All Dragons Members")
+        emailRes.plainText.endsWith("Plain Text Footer Attention All Dragons Members")
+
+        emailRes.html.contains("<body>\r\n<p>Header attention All Dragons Members</p>\r\n<p>You have been invited to join the")
+        emailRes.html.contains("<p>Footer attention All Dragons Members</p>\r\n</body>")
+    }
+
     def "invalid invite cannot be used"() {
         def proj = SkillsFactory.createProject(99)
         def subj = SkillsFactory.createSubject(99)

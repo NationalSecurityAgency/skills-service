@@ -127,7 +127,7 @@ class PasswordManagementService {
         String name = "${attrs.firstName} ${attrs.lastName}"
         String publicUrl = featureService.getPublicUrl()
         if (!publicUrl) {
-            throw new SkillException("No public URL is configured for the system, unable to send ${type} email")
+            throw new SkillException("No public URL is configured for the system, unable to send [${tokenType}] email")
         }
 
         Notifier.NotificationRequest request = new Notifier.NotificationRequest(

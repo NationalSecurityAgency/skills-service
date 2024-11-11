@@ -301,6 +301,12 @@ class WSHelper {
         return responseEntity
     }
 
+    def rawPost(String endpoint, def params, HttpStatus expectedStatus = HttpStatus.OK, boolean throwExceptionOnFailure = true) {
+        String url = "${skillsService}/${endpoint}"
+        ResponseEntity<String> responseEntity = restTemplateWrapper.postForEntity(url, params, String)
+        return getResultFromEntity(url, responseEntity, expectedStatus, throwExceptionOnFailure)
+    }
+
     private def put(String endpoint, String type, def params, HttpStatus expectedStatus = HttpStatus.OK, boolean throwExceptionOnFailure = true) {
         String url = "${skillsService}/${type}${endpoint}"
         log.info("PUT: {}, params={}", url, params)

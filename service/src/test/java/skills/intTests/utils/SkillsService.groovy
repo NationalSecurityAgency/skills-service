@@ -80,6 +80,10 @@ class SkillsService {
         wsHelper.adminPost("/projects/${projectId}/resetClientSecret".toString(), null)
     }
 
+    void verifyEmail(String email, String verificationCode) {
+        wsHelper.rawPost('verifyEmail', [email: email, token: verificationCode])
+    }
+
     String getUserName() {
         wsHelper.username
     }

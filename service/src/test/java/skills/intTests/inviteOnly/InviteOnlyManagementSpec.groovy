@@ -18,6 +18,7 @@ package skills.intTests.inviteOnly
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.utils.WaitFor
 import spock.lang.IgnoreRest
 
@@ -148,6 +149,59 @@ class InviteOnlyManagementSpec extends InviteOnlyBaseSpec {
         email.subj == "SkillTree Project Invitation Reminder"
         email.html.contains("This is a friendly reminder that you have been invited to join the ${proj.name} project. Please use the link below to accept the invitation. Your invitation will expire approximately")
     }
+
+    def "when configured headers and footer is included in the pending invite email"() {
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.saveEmailHeaderAndFooterSettings(
+                '<p>Header attention {{ community.descriptor }} Members</p>',
+                '<p>Footer attention {{ community.descriptor }} Members</p>',
+                'Plain Text Header Attention {{ community.descriptor }} Members',
+                'Plain Text Footer Attention {{ community.descriptor }} Members')
+
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        subj.description = "subj descrip"
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+        def badge = SkillsFactory.createBadge(99, 1)
+        badge.description = "badge descrip"
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT1M", recipients: ["someemail@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT10M", recipients: ["someemail2@email.foo"]])
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT15M", recipients: ["someemail3@email.foo"]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 2 }
+        greenMail.reset()
+
+        String remindEmail = "someemail@email.foo"
+        when:
+        skillsService.remindUserOfPendingInvite(proj.projectId, remindEmail)
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email = EmailUtils.getEmail(greenMail, 0)
+
+        then:
+        greenMail.getReceivedMessages().length == 1
+        email.recipients == [remindEmail]
+        email.subj == "SkillTree Project Invitation Reminder"
+        email.html.contains("This is a friendly reminder that you have been invited to join the ${proj.name} project. Please use the link below to accept the invitation. Your invitation will expire approximately")
+        email.plainText.contains("This is a friendly reminder that you have been invited to join the ${proj.name} project. Please use the link below to accept the invitation. Your invitation will expire approximately")
+
+        email.plainText.startsWith("Plain Text Header Attention All Dragons Members")
+        email.plainText.endsWith("Plain Text Footer Attention All Dragons Members")
+
+        email.html.contains("<body>\r\n<p>Header attention All Dragons Members</p>\r\n<p>This is a friendly reminder that you have been invited")
+        email.html.contains("<p>Footer attention All Dragons Members</p>\r\n</body>")
+    }
+
 
     def "cannot remind user of pending invite if invite ie expired"() {
         def proj = SkillsFactory.createProject(99)
