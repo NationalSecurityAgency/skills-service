@@ -170,4 +170,57 @@ describe('Quiz User Role Management Tests', () => {
             });
     })
 
+    it('user does not have any admin groups to assign to quiz', function () {
+        cy.intercept('POST', '*suggestDashboardUsers*').as('suggest');
+
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+
+        cy.visit('/administrator/quizzes/quiz1/access');
+
+
+        cy.get('[data-cy="adminGroupSelector"]').click()
+        cy.get('li.p-dropdown-empty-message').contains('You currently do not administer any admin groups.').should('be.visible')
+    });
+
+    it('add admin group to quiz', function () {
+        cy.intercept('POST', '*suggestDashboardUsers*').as('suggest');
+        cy.intercept('POST', ' /admin/admin-group-definitions/adminGroup1/quizzes/quiz1')
+            .as('addAdminGroupToQuiz');
+        cy.intercept('GET', '/app/admin-group-definitions')
+            .as('loadCurrentUsersAdminGroups');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/adminGroups')
+            .as('loadAdminGroupsForQuiz');
+
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createAdminGroupDef(1, { name: 'My Awesome Admin Group' });
+        cy.intercept('GET', '/app/userInfo')
+            .as('loadUserInfo');
+
+        cy.visit('/administrator/quizzes/quiz1/access');
+        cy.wait('@loadAdminGroupsForQuiz');
+        cy.wait('@loadCurrentUsersAdminGroups');
+
+
+        const expectedUserName = Cypress.env('oauthMode') ? 'foo bar' : 'skills@';
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: expectedUserName }],
+        ], 5, true, null, false);
+
+        cy.get('[data-cy="adminGroupSelector"]').click()
+        cy.get('[data-cy="availableAdminGroupSelection-adminGroup1"]').click()
+
+        cy.wait('@addAdminGroupToQuiz');
+        cy.wait('@loadAdminGroupsForQuiz');
+        cy.wait('@loadCurrentUsersAdminGroups');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'My Awesome Admin Group' }],
+        ], 5, true, null, false);
+
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="userGroupMembers"]').find('li').should('have.length', 1);
+        cy.get(`[data-cy^="userGroupMember_${expectedUserName}"]`)
+    });
+
 });
