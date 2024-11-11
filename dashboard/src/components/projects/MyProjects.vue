@@ -241,7 +241,7 @@ const hasData = computed(() => {
 
 <template>
   <div>
-    <SubPageHeader title="Projects" action="Project">
+    <SubPageHeader title="Projects" action="Project" :title-level="1">
       <SkillsButton
         v-if="isRootUser"
         label="Pin"

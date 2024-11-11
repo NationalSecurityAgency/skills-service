@@ -37,6 +37,7 @@ function openNewTestModal() {
                    title="Quizzes And Surveys"
                    action="Quiz/Survey"
                    aria-label="Create New Quiz or Survey"
+                   :title-level="1"
                    @add-action="openNewTestModal">
     </SubPageHeader>
     <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">

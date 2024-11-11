@@ -78,6 +78,7 @@ const navToSkill = (event) => {
       @complete="search"
       @item-select="navToSkill"
       data-cy="searchSkillsAcrossSubjects"
+      aria-label="Search for a skill across subjects..."
       placeholder="Search for a skill across subjects..."
     >
       <template #option="slotProps">

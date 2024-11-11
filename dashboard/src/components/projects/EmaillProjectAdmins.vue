@@ -102,7 +102,7 @@ const emailUsers = () => {
 
 <template>
   <div id="contact-users-panel">
-    <sub-page-header title="Contact Project Administrators" />
+    <sub-page-header title="Contact Project Administrators" :title-level="1" />
 
     <Card>
       <template #content>

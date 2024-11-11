@@ -183,7 +183,6 @@ const skillCreatedOrUpdated = (skill) => {
           outlined
           class="bg-primary-reverse ml-1"
           aria-label="new skills group"
-          aria-describedby="newGroupSrText"
           data-cy="newGroupButton"
           :track-for-focus="true"
           :aria-disabled="addSkillDisabled"
@@ -197,7 +196,6 @@ const skillCreatedOrUpdated = (skill) => {
           variant="outline-primary"
           size="small"
           aria-label="new skill"
-          aria-describedby="newSkillSrText"
           data-cy="newSkillButton"
           outlined
           class="bg-primary-reverse ml-1"

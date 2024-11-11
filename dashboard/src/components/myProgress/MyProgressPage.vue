@@ -45,7 +45,6 @@ onMounted(() => {
               <SkillsButton
                 label="Projects Catalog"
                 outlined
-                size="small"
                 icon="fas fa-tasks"
                 data-cy="manageMyProjsBtn"
                 variant="outline-primary" />

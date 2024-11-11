@@ -95,13 +95,13 @@ const activePointsColor = computed(() => {
 
         <div class="flex mt-2">
           <div class="flex-1 text-left">
-            <label class="skill-label" style="min-width: 5rem;">Overall</label>
+            <div class="skill-label" style="min-width: 5rem;">Overall</div>
           </div>
           <div class="">
-            <label class="skill-label text-right" data-cy="pointsProgress">
+            <div class="skill-label text-right" data-cy="pointsProgress">
               <span :class="activePointsColor" class="font-medium sd-theme-primary-color">{{ numFormat.pretty(subject.points) }}</span> /
               {{ numFormat.pretty(subject.totalPoints) }}
-            </label>
+            </div>
           </div>
         </div>
         <div>
@@ -115,8 +115,8 @@ const activePointsColor = computed(() => {
         <div class=" mt-4">
           <div class="flex">
             <div v-if="!progress.allLevelsComplete" class="flex-1 text-left">
-              <label class="skill-label" style="min-width: 10rem;">Next {{ attributes.levelDisplayName
-                }}</label>
+              <div class="skill-label" style="min-width: 10rem;">Next {{ attributes.levelDisplayName
+                }}</div>
             </div>
             <div v-if="!progress.allLevelsComplete" data-cy="levelProgress">
                 <span :class="activePointsColor" class="font-medium sd-theme-primary-color">{{ numFormat.pretty(subject.levelPoints) }}</span> /
@@ -124,8 +124,8 @@ const activePointsColor = computed(() => {
             </div>
           </div>
           <div v-if="progress.allLevelsComplete" data-cy="allLevelsComplete">
-            <label class="skill-label text-center uppercase"><i class="fas fa-check text-green-800" /> All
-              {{ attributes.levelDisplayName.toLowerCase() }}s complete</label>
+            <div class="skill-label text-center uppercase"><i class="fas fa-check text-green-800" /> All
+              {{ attributes.levelDisplayName.toLowerCase() }}s complete</div>
           </div>
           <div class="">
             <vertical-progress-bar

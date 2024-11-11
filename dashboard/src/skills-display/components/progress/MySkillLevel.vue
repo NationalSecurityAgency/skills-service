@@ -30,7 +30,7 @@ const totalLevels = computed(() => props.userProgress.totalLevels)
 
 <template>
   <div class="progress-circle-wrapper" data-cy="overallLevel">
-    <label class="text-2xl font-medium" data-cy="overallLevelTitle">My {{ attributes.levelDisplayName }}</label>
+    <div class="text-2xl font-medium" data-cy="overallLevelTitle">My {{ attributes.levelDisplayName }}</div>
     <div class="mt-4">
      <TrophySvgIcon :level="level" data-cy="trophyIcon" />
     </div>

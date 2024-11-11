@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserInfo } from '@/components/utils/UseUserInfo.js'
 import { FilterMatchMode } from 'primevue/api'
@@ -197,11 +197,12 @@ const tableFilters = ref({
   quizId: { value: null, matchMode: FilterMatchMode.EQUALS }
 })
 
+const pageAwareTitleLevel = computed(() => route.params.projectId ? 2 : 1)
 </script>
 
 <template>
   <div>
-    <SubPageHeader title="Admin Activity History">
+    <SubPageHeader title="Admin Activity History" :title-level="pageAwareTitleLevel">
       <template #underTitle v-if="!isAllEvents">
           <StartRecordingUserActionsDateWarning />
       </template>

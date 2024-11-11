@@ -65,11 +65,11 @@ const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
 
         <div :class="{'mx-5': showBackButton}" class="text-center flex-1">
           <SkillsDisplayBreadcrumb v-if="!disableBreadcrumb"></SkillsDisplayBreadcrumb>
-          <div data-cy="title"
+          <h1 data-cy="title"
                :class="{ 'mt-2': disableBreadcrumb}"
-               class="skills-title uppercase text-3xl">
+               class="skills-title uppercase text-2xl font-normal m-0">
             <slot />
-          </div>
+          </h1>
         </div>
 
         <div v-if="renderDivWhereBrandResides" class="md:w-8rem">
