@@ -61,6 +61,7 @@ const navToSkill = (selectedItem) => {
                         :is-loading="loading"
                         :show-dropdown="false"
                         placeholder="Search and Navigate directly to a skill"
+                        aria-label="Search and Navigate directly to a skill"
                         placeholder-icon="fas fa-search"
                         select-label="Click to navigate"
                         :internal-search="false"

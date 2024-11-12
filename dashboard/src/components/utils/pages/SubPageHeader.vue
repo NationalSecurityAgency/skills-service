@@ -19,7 +19,19 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useRoute } from "vue-router";
 
 const emit = defineEmits(['add-action'])
-const props = defineProps(['title', 'action', 'disabled', 'disabledMsg', 'ariaLabel', 'isLoading', 'marginBottom']);
+const props = defineProps({
+  'title':  String,
+  'action': String,
+  'disabled': Boolean,
+  'disabledMsg' : String,
+  'ariaLabel': String,
+  'isLoading': Boolean,
+  'marginBottom': String,
+  titleLevel: {
+    type: Number,
+    default: 2
+  },
+});
 const route = useRoute()
 
 const config = useProjConfig();
@@ -59,9 +71,10 @@ function addClicked() {
 </script>
 
 <template>
-  <div class="flex flex-wrap pb-2" data-cy="subPageHeader" :class="`mb-${marginBottom}`" role="heading" aria-level="1">
+  <div class="flex flex-wrap pb-2" data-cy="subPageHeader" :class="`mb-${marginBottom}`" role="heading" :aria-level="titleLevel">
     <div class="flex-1 text-left">
-      <div class="text-2xl uppercase font-normal">{{ title }}</div>
+      <h1 v-if="titleLevel === 1" class="text-2xl uppercase font-normal my-0">{{ title }}</h1>
+      <h2 v-if="titleLevel === 2" class="text-2xl uppercase font-normal my-0">{{ title }}</h2>
     </div>
     <div class="flex pt-0 text-right" data-cy="subPageHeaderControls">
       <div v-if="!isLoading">

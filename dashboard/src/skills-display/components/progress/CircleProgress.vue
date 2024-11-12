@@ -142,7 +142,7 @@ const chartOptions = computed(() => {
 
 <template>
   <div class="progress-circle-wrapper">
-    <label class="text-2xl font-medium">{{ title }}</label>
+    <div class="text-2xl font-medium">{{ title }}</div>
     <div>
       <apexchart type="radialBar" height="250" :options="chartOptions" :series="series"></apexchart>
     </div>

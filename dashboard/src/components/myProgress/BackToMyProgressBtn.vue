@@ -22,7 +22,6 @@ limitations under the License.
     <SkillsButton
         label="Back to My Progress"
         icon="fas fa-arrow-alt-circle-left"
-        size="small"
         outlined
         data-cy="backToProgressAndRankingBtn"
         variant="outline-primary"/>

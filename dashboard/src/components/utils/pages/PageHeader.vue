@@ -40,7 +40,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="pageHeader" data-cy="pageHeader" class="border-1 border-round-md surface-border font-medium surface-0 mt-2 px-3 py-3">
+  <div ref="pageHeader" data-cy="pageHeader" class="border-1 border-round-md surface-border font-medium surface-0 mt-2 px-3 py-3" role="heading" aria-level="1">
     <skills-spinner v-if="loading" :is-loading="loading" />
     <div v-if="!loading">
       <slot name="banner"></slot>
@@ -49,7 +49,7 @@ onUnmounted(() => {
         <div class="mt-2 text-center lg:text-left w-full lg:w-auto">
           <div class="text-2xl flex">
             <Avatar v-if="options.icon" class="mr-2" :icon="options.icon" />
-            <div class="text-2xl" data-cy="title" style="overflow-wrap: anywhere;">{{ options.title }}</div>
+            <h1 class="text-2xl my-0 font-normal" data-cy="title" style="overflow-wrap: anywhere;">{{ options.title }}</h1>
             <slot name="right-of-header"></slot>
           </div>
           <div v-if="options.subTitle" data-cy="subTitle" class="mt-1 mb-2">

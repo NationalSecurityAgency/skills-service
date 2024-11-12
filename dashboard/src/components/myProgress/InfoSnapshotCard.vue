@@ -139,8 +139,7 @@ const projectsNotContributedToYet = computed(() => myProjects.value.length - myP
       <div class="flex gap-2 align-items-center flex-column sm:flex-row">
         <div v-if="projectsNotContributedToYet > 0"
              data-cy="info-snap-footer"
-             class="w-min-12rem"
-             :title="`You still have ${projectsNotContributedToYet} project${ projectsNotContributedToYet > 1 ? 's' : ''} to explore.`">
+             class="w-min-12rem">
           You still have
           <Tag severity="info">{{ projectsNotContributedToYet
             }}

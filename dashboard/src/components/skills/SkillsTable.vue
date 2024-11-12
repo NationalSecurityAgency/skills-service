@@ -524,7 +524,6 @@ const exportSkills = () => {
             <div class="flex-1 align-items-center flex">
               <label for="sortEnabledSwitch" class="lg:ml-3 mr-1">Reorder:</label>
               <InputSwitch
-                  id="sortEnabledSwitch"
                   inputId="sortEnabledSwitch"
                   data-cy="enableDisplayOrderSort"
                   @update:modelValue="onReorderSwitchChanged"

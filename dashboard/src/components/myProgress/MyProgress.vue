@@ -17,7 +17,7 @@ limitations under the License.
 </script>
 
 <template>
-  <div class="mt-2">
+  <div class="mt-3">
     <router-view id="mainContent2" tabindex="-1" aria-label="Main content area, click tab to navigate" />
   </div>
 </template>

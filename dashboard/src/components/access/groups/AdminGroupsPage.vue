@@ -37,6 +37,7 @@ function openNewGroupModal() {
                    title="Admin Groups"
                    action="Admin Group"
                    aria-label="Create a new Group of Administrators"
+                   :title-level="1"
                    @add-action="openNewGroupModal">
     </SubPageHeader>
     <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">

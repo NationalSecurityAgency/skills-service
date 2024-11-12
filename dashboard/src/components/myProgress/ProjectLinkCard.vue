@@ -155,7 +155,7 @@ const remove = () => {
           </div>
           <div class="flex-1 pt-0 pr-3 text-center sm:text-right">
             <div class="uppercase text-2xl text-primary skills-break-word" data-cy="project-card-project-name"
-                 :aria-label="`Project ${proj.projectName}`" :title="proj.projectName ">{{ proj.projectName }}
+                 :aria-label="`Project ${proj.projectName}`">{{ proj.projectName }}
             </div>
             <div class="text-2xl text-color-secondary mt-2" data-cy="project-card-project-level">
               {{ proj.levelDisplayName }} {{ proj.level }}

@@ -195,7 +195,7 @@ const handleFocus = () => {
 
 <template>
   <div>
-    <sub-page-header ref="subPageHeader" title="Global Badges" action="Badge" @add-action="newBadge" aria-label="new global badge"/>
+    <sub-page-header ref="subPageHeader" title="Global Badges" action="Badge" @add-action="newBadge" aria-label="new global badge" :title-level="1"/>
 <!--      <transition name="projectContainer" enter-active-class="animated fadeIn">-->
       <div>
         <div v-if="(!badges || badges.length === 0) && isLoading">

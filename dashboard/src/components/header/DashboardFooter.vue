@@ -55,8 +55,8 @@ const supportLinksProps = computed(() => {
         </div>
         <div v-if="supportLinksProps && supportLinksProps.length > 0">
               <span v-for="(supportLink, index) in supportLinksProps" :key="supportLink.label">
-                <a :href="supportLink.link" class="" :data-cy="`supportLink-${supportLink.label}`"
-                   target="_blank"><u><i :class="supportLink.icon" class="mr-1" />{{ supportLink.label }}</u></a>
+                <a :href="supportLink.link" class="underline" :data-cy="`supportLink-${supportLink.label}`"
+                   target="_blank"><i :class="supportLink.icon" class="mr-1" aria-hidden="true"/>{{ supportLink.label}}</a>
                 <span v-if="index < supportLinksProps.length - 1" class="mx-1">|</span>
               </span>
         </div>

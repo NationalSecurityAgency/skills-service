@@ -155,9 +155,6 @@ const isSkillComplete = computed(() => props.skill && props.skill.meta && props.
         :to="toRoute"
         tabindex="-1"
         :aria-label="`Navigate to ${skill.skill}`">
-        <!--        <vertical-progress-bar-->
-        <!--          class="border-1 border-transparent hover:border-orange-700 border-round"-->
-        <!--          data-cy="skillProgressBar" />-->
         <div class="relative">
           <skill-progress-bar data-cy="skillProgressBar"
                               :is-locked="isSkillLocked"
