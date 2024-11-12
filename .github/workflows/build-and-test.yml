@@ -186,6 +186,7 @@ jobs:
 
   combine-cypress-mochawesome-results:
     runs-on: ubuntu-latest
+    if: ${{ !cancelled() }}
     needs: [ui-tests-against-postgres]
     steps:
       - uses: actions/checkout@v4
@@ -284,17 +285,6 @@ jobs:
         with:
           name: service jar
           path: ./service/target/
-
-#      - name: Prep Services for Cypress tests when running in a cypress docker container
-#        run: |
-#          cd e2e-tests
-#          ls
-#          sed -i 's/"dbHost": "localhost"/"dbHost": "postgres"/' package.json
-#          cat package.json
-#          npm install
-#          npm run backend:dropAllDBTables
-#          npm run cyServices:start
-#          cd ..
 
       - name: Prep Services for Cypress tests
         run: |
@@ -415,6 +405,7 @@ jobs:
 
   combine-surefire-reports:
     runs-on: ubuntu-latest
+    if: ${{ !cancelled() }}
     needs: [service-against-postgresql]
     steps:
       - uses: actions/checkout@v4
