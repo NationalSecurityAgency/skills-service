@@ -86,7 +86,6 @@ jobs:
       postgres:
         # Docker Hub image
         image: postgres
-        # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: skillsPassword
           POSTGRES_DB: skills
