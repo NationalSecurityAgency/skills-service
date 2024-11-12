@@ -76,7 +76,7 @@ const chartOptions = {
         name: {
           offsetY: -10,
           show: true,
-          color:  themeHelper.isDarkTheme ? 'white' : '#888',
+          color:  themeHelper.isDarkTheme ? 'white' : '#098da8',
           fontSize: '16px'
         },
         value: {
@@ -84,7 +84,7 @@ const chartOptions = {
             return `${val} %`
           },
           offsetY: 0,
-          color:  themeHelper.isDarkTheme ? 'white' : '#888',
+          color:  themeHelper.isDarkTheme ? 'white' : '#067085',
           fontSize: '22px',
           show: true
         }

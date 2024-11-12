@@ -15,7 +15,7 @@
  */
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import AccessService from '@/components/access/AccessService'
+import AccessService from '@/components/access/AccessService.js'
 
 export const useAccessState = defineStore('accessState', () => {
   const isSupervisorState = ref(false)

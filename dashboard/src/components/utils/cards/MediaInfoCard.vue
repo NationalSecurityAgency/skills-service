@@ -37,7 +37,7 @@ const styleObject = {
     <template #content>
       <div class="flex flex-column sm:flex-row text-center sm:text-left">
         <div style="min-width: 5rem;" class="text-center">
-          <i class="fa-3x" :class="iconClass" :style="styleObject"/>
+          <i class="fa-3x" :class="iconClass" :style="styleObject" aria-hidden="true"/>
         </div>
         <div>
           <div class="text-2xl mb-2 uppercase" data-cy="mediaInfoCardTitle" style="overflow-wrap: break-word; text-wrap: wrap;">{{ title }}</div>

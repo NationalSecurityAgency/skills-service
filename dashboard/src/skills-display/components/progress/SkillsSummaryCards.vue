@@ -75,7 +75,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
       <media-info-card
         :title="`${numFormat.pretty(skill.todaysPoints)} Today`"
         class="h-full sm:w-min-13rem"
-        icon-class="fa fa-clock"
+        icon-class="far fa-clock"
         :icon-color="themeState.infoCards().iconColors[1]"
         data-cy="pointsAchievedTodayCard">
         {{ attributes.pointDisplayName }}s Achieved <Tag>Today</Tag>

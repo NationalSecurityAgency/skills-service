@@ -17,6 +17,7 @@ limitations under the License.
 import MyProgressInfoCardUtil from '@/components/myProgress/MyProgressInfoCardUtil.vue'
 import {useMyProgressState} from '@/stores/UseMyProgressState.js'
 import {computed} from 'vue'
+import ProgressCardIcon from "@/components/myProgress/ProgressCardIcon.vue";
 
 const myProgressState = useMyProgressState()
 const myProgress = computed(() => myProgressState.myProgress)
@@ -41,9 +42,7 @@ const totalRuns = computed(() => myProgress.value.numQuizAttempts + myProgress.v
     <template #right-content>
       <div class="flex justify-content-center sm:justify-content-end">
         <div class="flex justify-content-center">
-          <div class="border-circle w-7rem h-7rem m-2 bg-bluegray-600 font-bold flex align-items-center justify-content-center">
-            <i class="text-green-500 text-7xl fas fa-spell-check"></i>
-          </div>
+          <progress-card-icon icon="fas fa-spell-check" />
         </div>
       </div>
     </template>
