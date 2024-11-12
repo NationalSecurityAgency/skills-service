@@ -48,6 +48,7 @@ const isCompleted = computed(() => skillInternal.value.points === skillInternal.
 const selfReportDisabled = computed(() => (isCompleted.value && !isMotivationalSkill.value) || isPendingApproval())
 const isHonorSystem = computed(() => skillInternal.value.selfReporting && skillInternal.value.selfReporting.type === 'HonorSystem')
 const isApprovalRequired = computed(() => skillInternal.value.selfReporting && skillInternal.value.selfReporting.type === 'Approval')
+const isVideo = computed(() => skillInternal.value.selfReporting.type === 'Video')
 const isJustificationRequired = computed(() => skillInternal.value.selfReporting && skillInternal.value.selfReporting.justificationRequired)
 const isRejected = computed(() => skillInternal.value.selfReporting && skillInternal.value.selfReporting.rejectedOn !== null && skillInternal.value.selfReporting.rejectedOn !== undefined)
 const isMotivationalSkill = computed(() => skillInternal.value && skillInternal.value.isMotivationalSkill)
@@ -175,7 +176,7 @@ defineExpose({
 <template>
   <div>
     <quiz-footer :skill="skillInternal"/>
-    <Message v-if="isHonorSystem && selfReportAvailable && !isCompleted" class="mb-2 alert alert-info">
+    <Message v-if="isHonorSystem && selfReportAvailable" class="mb-2 alert alert-info">
       <template #container>
         <div class="flex gap-2 p-3 align-content-center">
           <div>

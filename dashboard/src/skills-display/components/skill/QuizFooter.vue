@@ -92,11 +92,15 @@ const viewResultsBtnLabel = computed(() => {
               <div>
                 <i class="fas fa-user-check text-2xl" aria-hidden="true"></i>
               </div>
-              <div class="flex-1" data-cy="quizAlert">{{ completionWord }} the<span
+              <div class="flex-1" data-cy="quizAlert" v-if="!isCompleted">{{ completionWord }} the<span
                   v-if="hasQuestions">&nbsp;{{ selfReporting.numQuizQuestions }}-question</span>&nbsp;<b>{{
                   selfReporting.quizName
                 }}</b>&nbsp;{{ typeWord }} and earn <span class="font-size-1"><Tag
                   severity="info">{{ numFormat.pretty(skill.totalPoints) }}</Tag></span> points!
+              </div>
+              <div class="flex-1" data-cy="quizAlert" v-else-if="isCompleted && isMotivationalSkill">
+                This skill's achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skill.expirationDate) }}</span>, but your <span class="font-size-1">
+                <Tag severity="info">{{ numFormat.pretty(skill.totalPoints) }}</Tag></span> points can be retained by completing the {{ typeWord }} again.
               </div>
               <SkillsButton
                   :label="isQuizSkill ? 'Take Quiz' : 'Complete Survey'"
