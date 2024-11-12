@@ -267,6 +267,11 @@ function doAddUserRole() {
       completeAddRole(role)
     }).catch((e) => {
       handleError(e);
+    }).finally(() => {
+      isSaving.value = false;
+      isLoading.value = false;
+      selectedUser.value = null;
+      userRole.value.selected = null;
     });
   }
 }
@@ -276,16 +281,17 @@ const addQuizUserRole = (role) => {
     completeAddRole(role)
   }).catch((e) => {
     handleError(e);
+  }).finally(() => {
+    isSaving.value = false;
+    isLoading.value = false;
+    selectedUser.value = null;
+    userRole.value.selected = null;
   });
 }
 const completeAddRole = (role) => {
   announcer.polite(`${getRoleDisplay(role)} role was added for ${getUserDisplay({ ...selectedUser.value, firstName: selectedUser.value.first, lastName: selectedUser.value.last })}`);
   emit('role-added', { userId: selectedUser.value.userId, role });
   loadData();
-  isSaving.value = false;
-  isLoading.value = false;
-  selectedUser.value = null;
-  userRole.value.selected = null;
 }
 
 function handleError(e) {
