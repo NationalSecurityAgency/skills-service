@@ -306,7 +306,7 @@ describe('Admin Group Member Management Tests', () => {
         cy.wait('@loadUserRoles');
 
         cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').click()
-        cy.get('.p-confirm-dialog-reject').click()
+        cy.get('[data-cy="closeDialogBtn"]').click()
         cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('have.focus')
 
         cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').click()
