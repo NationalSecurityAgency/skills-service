@@ -88,10 +88,12 @@ describe('Admin Group Member Management Tests', () => {
 
           cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').click()
 
-          cy.get('.p-confirm-dialog').should('be.visible').should('include.text', 'Are you absolutely sure you want to remove Firstname LastName (user1) as a Group Member?');
-          cy.contains('YES, Delete It').click();
+          cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove user1 from having admin privileges.')
+          cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
+          cy.get('[data-cy="saveDialogBtn"]').click()
 
-            cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '2');
+
+          cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '2');
           cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.be.enabled')
           cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('not.exist')
           cy.get('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
@@ -268,8 +270,9 @@ describe('Admin Group Member Management Tests', () => {
 
                 cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').click()
 
-                cy.get('.p-confirm-dialog').should('be.visible').should('include.text', 'Are you absolutely sure you want to remove Firstname LastName (user1) as a Group Member?');
-                cy.contains('YES, Delete It').click();
+                cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove user1 from having admin privileges.')
+                cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
+                cy.get('[data-cy="saveDialogBtn"]').click()
 
                 cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '2');
                 cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.be.enabled')
@@ -303,7 +306,7 @@ describe('Admin Group Member Management Tests', () => {
         cy.wait('@loadUserRoles');
 
         cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').click()
-        cy.get('.p-confirm-dialog-reject').click()
+        cy.get('[data-cy="closeDialogBtn"]').click()
         cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('have.focus')
 
         cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').click()

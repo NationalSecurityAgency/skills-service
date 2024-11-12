@@ -510,4 +510,153 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupMembers2.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_MEMBER.toString()}
         !adminGroupMembers2.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}
     }
+
+    def "remove admin group with project, members are removed from project for this group but remain if also assigned to the same project in other groups"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        createService(otherUserId)
+        def adminGroup1 = createAdminGroup(1)
+        def adminGroup2 = createAdminGroup(2)
+        def adminGroup3 = createAdminGroup(3)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        when:
+
+        skillsService.createAdminGroupDef(adminGroup1)
+        skillsService.addAdminGroupMember(adminGroup1.adminGroupId, otherUserId)
+        skillsService.addQuizToAdminGroup(adminGroup1.adminGroupId, quiz.quizId)
+        skillsService.addProjectToAdminGroup(adminGroup1.adminGroupId, proj.projectId)
+
+        skillsService.createAdminGroupDef(adminGroup2)
+        skillsService.addAdminGroupMember(adminGroup2.adminGroupId, otherUserId)
+        skillsService.addQuizToAdminGroup(adminGroup2.adminGroupId, quiz.quizId)
+        skillsService.addProjectToAdminGroup(adminGroup2.adminGroupId, proj.projectId)
+
+        skillsService.createAdminGroupDef(adminGroup3)
+        skillsService.addAdminGroupMember(adminGroup3.adminGroupId, otherUserId)
+        skillsService.addQuizToAdminGroup(adminGroup3.adminGroupId, quiz.quizId)
+        skillsService.addProjectToAdminGroup(adminGroup3.adminGroupId, proj.projectId)
+
+        def projectAdminsBeforeRemove = userRoleRepository.findAllByProjectIdIgnoreCase(proj.projectId)
+        def quizAdminsBeforeRemove = userRoleRepository.findAllByQuizIdIgnoreCase(quiz.quizId)
+        def adminGroupRolesBeforeRemove = userRoleRepository.findAllByAdminGroupIdIgnoreCase(adminGroup1.adminGroupId)
+        def adminGroupDefsBeforeRemove = skillsService.getAdminGroupDefs()
+
+        skillsService.removeAdminGroupDef(adminGroup1.adminGroupId)
+
+        def projectAdminsAfterRemove = userRoleRepository.findAllByProjectIdIgnoreCase(proj.projectId)
+        def quizAdminsAfterRemove = userRoleRepository.findAllByQuizIdIgnoreCase(quiz.quizId)
+        def adminGroupRolesAfterRemove = userRoleRepository.findAllByAdminGroupIdIgnoreCase(adminGroup1.adminGroupId)
+        def adminGroupDefsAfterRemove = skillsService.getAdminGroupDefs()
+
+        then:
+        adminGroupDefsBeforeRemove && adminGroupDefsBeforeRemove.size() == 3 &&
+                adminGroupDefsBeforeRemove.find { it.adminGroupId == adminGroup1.adminGroupId } &&
+                adminGroupDefsBeforeRemove.find { it.adminGroupId == adminGroup2.adminGroupId } &&
+                adminGroupDefsBeforeRemove.find { it.adminGroupId == adminGroup3.adminGroupId }
+        projectAdminsBeforeRemove.size() == 6
+        projectAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == adminGroup1.adminGroupId }
+        projectAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == adminGroup1.adminGroupId }
+        projectAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
+        projectAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
+        projectAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == adminGroup3.adminGroupId }
+        projectAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == adminGroup3.adminGroupId }
+        quizAdminsBeforeRemove.size() == 6
+        quizAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup1.adminGroupId }
+        quizAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup1.adminGroupId }
+        quizAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
+        quizAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
+        quizAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup3.adminGroupId }
+        quizAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup3.adminGroupId }
+        adminGroupRolesBeforeRemove.size() == 6
+        adminGroupRolesBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER && it.adminGroupId == adminGroup1.adminGroupId }
+        adminGroupRolesBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_MEMBER && it.adminGroupId == adminGroup1.adminGroupId }
+
+
+        projectAdminsAfterRemove.size() == 4
+        projectAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == adminGroup2.adminGroupId  }
+        projectAdminsAfterRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == adminGroup2.adminGroupId  }
+        projectAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == adminGroup3.adminGroupId  }
+        projectAdminsAfterRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == adminGroup3.adminGroupId  }
+        quizAdminsAfterRemove.size() == 4
+        quizAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
+        quizAdminsAfterRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
+        adminGroupRolesAfterRemove.size() == 0
+        quizAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
+        quizAdminsAfterRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
+        quizAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup3.adminGroupId }
+        quizAdminsAfterRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup3.adminGroupId }
+
+        adminGroupDefsAfterRemove && adminGroupDefsAfterRemove.size() == 2 && adminGroupDefsAfterRemove.find { it.adminGroupId == adminGroup2.adminGroupId } && adminGroupDefsAfterRemove.find { it.adminGroupId == adminGroup2.adminGroupId}
+    }
+
+    def "get admin groups for project returns proper results"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService memberSkillsService = createService(otherUserId)
+
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+        def adminGroup2 = createAdminGroup(2)
+        skillsService.createAdminGroupDef(adminGroup2)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+        skillsService.addProjectToAdminGroup(adminGroup2.adminGroupId, proj.projectId)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
+
+        when:
+        def adminGroupsForProjectsAsOwner = skillsService.getAdminGroupsForProject(proj.projectId)
+        def adminGroupsForProjectsAsMember = memberSkillsService.getAdminGroupsForProject(proj.projectId)
+
+        then:
+
+        adminGroupsForProjectsAsOwner.size() == 2
+        adminGroupsForProjectsAsOwner.find { it.adminGroupId == adminGroup.adminGroupId }
+        adminGroupsForProjectsAsOwner.find { it.adminGroupId == adminGroup2.adminGroupId }
+
+        adminGroupsForProjectsAsMember.size() == 2
+        adminGroupsForProjectsAsMember.find { it.adminGroupId == adminGroup.adminGroupId }
+        adminGroupsForProjectsAsMember.find { it.adminGroupId == adminGroup2.adminGroupId }
+    }
+
+
+    def "get admin groups for quiz returns proper results"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService memberSkillsService = createService(otherUserId)
+
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+        def adminGroup2 = createAdminGroup(2)
+        skillsService.createAdminGroupDef(adminGroup2)
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+
+        skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
+        skillsService.addQuizToAdminGroup(adminGroup2.adminGroupId, quiz.quizId)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
+
+        when:
+        def adminGroupsForProjectsAsOwner = skillsService.getAdminGroupsForQuiz(quiz.quizId)
+        def adminGroupsForProjectsAsMember = memberSkillsService.getAdminGroupsForQuiz(quiz.quizId)
+
+        then:
+
+        adminGroupsForProjectsAsOwner.size() == 2
+        adminGroupsForProjectsAsOwner.find { it.adminGroupId == adminGroup.adminGroupId }
+        adminGroupsForProjectsAsOwner.find { it.adminGroupId == adminGroup2.adminGroupId }
+
+        adminGroupsForProjectsAsMember.size() == 2
+        adminGroupsForProjectsAsMember.find { it.adminGroupId == adminGroup.adminGroupId }
+        adminGroupsForProjectsAsMember.find { it.adminGroupId == adminGroup2.adminGroupId }
+    }
 }

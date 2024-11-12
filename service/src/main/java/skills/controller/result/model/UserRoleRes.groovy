@@ -27,6 +27,7 @@ class UserRoleRes {
     String lastName
 
     String projectId
+    String adminGroupId
 
     RoleName roleName
 

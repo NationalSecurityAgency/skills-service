@@ -115,6 +115,28 @@ class AdminGroupService {
         return convert(adminGroupDefRepo.getAdminGroupDefSummary(adminGroupId))
     }
 
+    @Transactional(readOnly = true)
+    List<AdminGroupDefResult> getAdminGroupsForProject(String projectId) {
+        List<AdminGroupDefResult> res = []
+        List<AdminGroupDefRepo.AdminGroupDefSummaryRes> fromDb = adminGroupDefRepo.getAdminGroupDefSummariesByProjectId(projectId)
+        if (fromDb) {
+            fromDb = fromDb.sort { a, b -> b.created <=> a.created }
+            res.addAll(fromDb.collect { convert(it, true) })
+        }
+        return res
+    }
+
+    @Transactional(readOnly = true)
+    List<AdminGroupDefResult> getAdminGroupsForQuiz(String quizId) {
+        List<AdminGroupDefResult> res = []
+        List<AdminGroupDefRepo.AdminGroupDefSummaryRes> fromDb = adminGroupDefRepo.getAdminGroupDefSummariesByQuizId(quizId)
+        if (fromDb) {
+            fromDb = fromDb.sort { a, b -> b.created <=> a.created }
+            res.addAll(fromDb.collect { convert(it, true) })
+        }
+        return res
+    }
+
     @Transactional()
     AdminGroupDefResult saveAdminGroupDef(Boolean isEdit, AdminGroupDefRequest adminGroupDefRequest, String userIdParam = null) {
         adminGroupDefRequest.adminGroupId = InputSanitizer.sanitize(adminGroupDefRequest.adminGroupId)
@@ -266,9 +288,12 @@ class AdminGroupService {
         }
     }
 
-    private AdminGroupDefResult convert(AdminGroupDefRepo.AdminGroupDefSummaryRes adminGroupDefSummaryResult) {
+    private AdminGroupDefResult convert(AdminGroupDefRepo.AdminGroupDefSummaryRes adminGroupDefSummaryResult, Boolean includedMemberRoles = false) {
         AdminGroupDefResult result = Props.copy(adminGroupDefSummaryResult, new AdminGroupDefResult())
         result.userCommunity = userCommunityService.getCommunityNameBasedProjConfStatus(adminGroupDefSummaryResult.getProtectedCommunityEnabled())
+        if (includedMemberRoles) {
+            result.allMembers = adminGroupRoleService.getAdminGroupMemberUserRoles(adminGroupDefSummaryResult.adminGroupId)
+        }
         return result
     }
 }

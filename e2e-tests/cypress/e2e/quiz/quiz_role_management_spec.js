@@ -20,7 +20,7 @@ dayjs.extend(utcPlugin);
 
 describe('Quiz User Role Management Tests', () => {
 
-    const tableSelector = '[data-cy="quizUserRoleTable"]';
+    const tableSelector = '[data-cy="roleManagerTable"]';
 
     it('add quiz admin', function () {
         cy.intercept('POST', '*suggestDashboardUsers*').as('suggest');
@@ -34,9 +34,9 @@ describe('Quiz User Role Management Tests', () => {
         cy.wait('@suggest');
         cy.wait(500);
         cy.get('[data-pc-section="item"]').contains('root@skills.org').click();
-        cy.get('[data-cy="quizAdmin_root@skills.org"]').should('not.exist')
+        cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
         cy.get('[data-cy="addUserBtn"]').click()
-        cy.get('[data-cy="quizAdmin_root@skills.org"]')
+        cy.get('[data-cy="userCell_root@skills.org"]')
 
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
@@ -72,19 +72,19 @@ describe('Quiz User Role Management Tests', () => {
           cy.request('POST', `/admin/quiz-definitions/quiz1/users/user2/roles/ROLE_QUIZ_ADMIN`);
           cy.visit('/administrator/quizzes/quiz1/access');
 
-          cy.get(`[data-cy="quizAdmin_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.exist')
-          cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').should('be.enabled')
-          cy.get('[data-cy="quizAdmin_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
+          cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('be.disabled')
+          cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('be.enabled')
+          cy.get('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
 
-          cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').click()
+          cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').click()
 
           cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove user1 from having admin privileges.')
           cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
           cy.get('[data-cy="saveDialogBtn"]').click()
 
-          cy.get(`[data-cy="quizAdmin_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.exist')
-          cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').should('not.exist')
-          cy.get('[data-cy="quizAdmin_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
+          cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('be.disabled')
+          cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('not.exist')
+          cy.get('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
 
           cy.get('[data-cy="existingUserInput"] [data-pc-section="input"]').should('have.focus')
         });
@@ -111,13 +111,13 @@ describe('Quiz User Role Management Tests', () => {
         cy.request('POST', `/admin/quiz-definitions/quiz1/users/user1/roles/ROLE_QUIZ_ADMIN`);
         cy.request('POST', `/admin/quiz-definitions/quiz1/users/user2/roles/ROLE_QUIZ_ADMIN`);
 
-        cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').click()
+        cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').click()
         cy.get('[data-cy="closeDialogBtn"]').click()
-        cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').should('have.focus')
+        cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('have.focus')
 
-        cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').click()
+        cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').click()
         cy.get('.p-dialog-header [aria-label="Close"]').click()
-        cy.get('[data-cy="quizAdmin_user1"] [data-cy="removeUserBtn"]').should('have.focus')
+        cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('have.focus')
     })
 
     it('paging users', function () {
@@ -159,15 +159,68 @@ describe('Quiz User Role Management Tests', () => {
                     .click();
 
                 cy.validateTable(tableSelector, [
-                    [{ colIndex: 0, value: '0user' }],
-                    [{ colIndex: 0, value: '1user' }],
-                    [{ colIndex: 0, value: '2user' }],
-                    [{ colIndex: 0, value: '3user' }],
-                    [{ colIndex: 0, value: '4user' }],
-                    [{ colIndex: 0, value: '5user' }],
-                    [{ colIndex: 0, value: defaultUserForDisplay }],
+                    [{ colIndex: 1, value: defaultUserForDisplay }],
+                    [{ colIndex: 1, value: '5user' }],
+                    [{ colIndex: 1, value: '4user' }],
+                    [{ colIndex: 1, value: '3user' }],
+                    [{ colIndex: 1, value: '2user' }],
+                    [{ colIndex: 1, value: '1user' }],
+                    [{ colIndex: 1, value: '0user' }],
                 ], 5);
             });
     })
+
+    it('user does not have any admin groups to assign to quiz', function () {
+        cy.intercept('POST', '*suggestDashboardUsers*').as('suggest');
+
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+
+        cy.visit('/administrator/quizzes/quiz1/access');
+
+
+        cy.get('[data-cy="adminGroupSelector"]').click()
+        cy.get('li.p-dropdown-empty-message').contains('You currently do not administer any admin groups.').should('be.visible')
+    });
+
+    it('add admin group to quiz', function () {
+        cy.intercept('POST', '*suggestDashboardUsers*').as('suggest');
+        cy.intercept('POST', ' /admin/admin-group-definitions/adminGroup1/quizzes/quiz1')
+            .as('addAdminGroupToQuiz');
+        cy.intercept('GET', '/app/admin-group-definitions')
+            .as('loadCurrentUsersAdminGroups');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/adminGroups')
+            .as('loadAdminGroupsForQuiz');
+
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createAdminGroupDef(1, { name: 'My Awesome Admin Group' });
+        cy.intercept('GET', '/app/userInfo')
+            .as('loadUserInfo');
+
+        cy.visit('/administrator/quizzes/quiz1/access');
+        cy.wait('@loadAdminGroupsForQuiz');
+        cy.wait('@loadCurrentUsersAdminGroups');
+
+
+        const expectedUserName = Cypress.env('oauthMode') ? 'foo' : 'skills@';
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: expectedUserName }],
+        ], 5, true, null, false);
+
+        cy.get('[data-cy="adminGroupSelector"]').click()
+        cy.get('[data-cy="availableAdminGroupSelection-adminGroup1"]').click()
+
+        cy.wait('@addAdminGroupToQuiz');
+        cy.wait('@loadAdminGroupsForQuiz');
+        cy.wait('@loadCurrentUsersAdminGroups');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'My Awesome Admin Group' }],
+        ], 5, true, null, false);
+
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get('[data-cy="userGroupMembers"]').find('li').should('have.length', 1);
+        cy.get(`[data-cy^="userGroupMember_${expectedUserName}"]`)
+    });
 
 });

@@ -43,15 +43,15 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     UserRole findByUserIdAndRoleNameAndAdminGroupId(String userId, RoleName roleName, String adminGroupId)
 
     @Nullable
-    @Query('''SELECT 'true' from UserRole ur where ur.userId = ?1 and ur.roleName = 'ROLE_QUIZ_ADMIN' and ur.quizId = ?2 and ur.adminGroupId is not null''')
+    @Query('''SELECT DISTINCT 'true' from UserRole ur where ur.userId = ?1 and ur.roleName = 'ROLE_QUIZ_ADMIN' and ur.quizId = ?2 and ur.adminGroupId is not null''')
     Boolean isUserQuizGroupAdmin(String userId, String quizId)
 
     @Nullable
-    @Query('''SELECT 'true' from UserRole ur where ur.userId = ?1 and ur.roleName = 'ROLE_PROJECT_ADMIN' and ur.projectId = ?2 and ur.adminGroupId is not null''')
+    @Query('''SELECT DISTINCT 'true' from UserRole ur where ur.userId = ?1 and ur.roleName = 'ROLE_PROJECT_ADMIN' and ur.projectId = ?2 and ur.adminGroupId is not null''')
     Boolean isUserProjectGroupAdmin(String userId, String projectId)
 
     @Nullable
-    @Query(value = '''SELECT 'true' FROM user_roles ur WHERE ur.user_id = ?1 and ur.role_name in ('ROLE_ADMIN_GROUP_MEMBER','ROLE_ADMIN_GROUP_OWNER') and ur.admin_group_id = ?2 ''', nativeQuery = true)
+    @Query(value = '''SELECT DISTINCT 'true' FROM user_roles ur WHERE ur.user_id = ?1 and ur.role_name in ('ROLE_ADMIN_GROUP_MEMBER','ROLE_ADMIN_GROUP_OWNER') and ur.admin_group_id = ?2 ''', nativeQuery = true)
     Boolean isUserGroupAdminMemberOrOwner(String userId, String adminGroupId)
 
     void deleteByQuizIdAndAdminGroupIdAndRoleName(String quizId, String adminGroupId, RoleName roleName)

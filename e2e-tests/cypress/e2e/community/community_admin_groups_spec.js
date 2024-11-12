@@ -163,7 +163,7 @@ describe('Community Admin Group Tests', () => {
         cy.get('[data-pc-section="item"]').contains(allDragonsUser)
     })
 
-    it('cannot assign non-UC user as group owner to UC protected admin group', function () {
+    it('cannot assign non-UC user as group member to UC protected admin group', function () {
         cy.visit('/administrator/adminGroups/adminGroup1');
         cy.wait('@loadUserRoles');
 

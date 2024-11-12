@@ -50,7 +50,6 @@ class AdminGroupController {
         return adminGroupService.getAdminGroupDef(adminGroupId)
     }
 
-
     @RequestMapping(value = "/{adminGroupId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     AdminGroupDefResult updateAdminGroup(@PathVariable("adminGroupId") String adminGroupId, @RequestBody AdminGroupDefRequest adminGroupDefRequest) {

@@ -237,8 +237,9 @@ describe('Settings Tests', () => {
         cy.get(`${rootUsrTableSelector} [data-cy="removeUserBtn"]`)
             .eq(1)
             .click();
-        cy.contains('YES, Delete It')
-            .click();
+        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove skills@skills.org')
+        cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.wait('@deleteRootUser');
         cy.validateTable(rootUsrTableSelector, [
             [{
@@ -510,8 +511,9 @@ describe('Settings Tests', () => {
         cy.get(`${supervisorTableSelector} [data-cy="removeUserBtn"]`)
             .eq(1)
             .click();
-        cy.contains('YES, Delete It')
-            .click();
+        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove skills@skills.org')
+        cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
+        cy.get('[data-cy="saveDialogBtn"]').click()
         cy.validateTable(supervisorTableSelector, [
             [{
                 colIndex: 0,
