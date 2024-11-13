@@ -36,6 +36,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
         QuizDefParent.QuizType getQuizType()
         Integer getNumQuestions()
         Integer getNumTextInputQuestions()
+        Integer getConfiguredNumQuestionsQuizLength()
     }
 
     static interface ProjectIdAndSkillId {
@@ -57,8 +58,10 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
                    max(q.name) as quizName,
                    max(q.type) as quizType,
                    max(qToS.skill_ref_id) as skillRefId,
+                   max(qSettings.value) as configuredNumQuestionsQuizLength,
                    count(question.id) as numQuestions
             from quiz_to_skill_definition qToS, quiz_definition q
+                 left join quiz_settings qSettings on (q.id = qSettings.quiz_ref_id and qSettings.setting = 'quizLength')
                  left join quiz_question_definition question on (q.quiz_id = question.quiz_id)
             where qToS.skill_ref_id = ?1
               and q.id = qToS.quiz_ref_id
@@ -96,9 +99,11 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
                max(q.type) as quizType,
                max(q.id) as quizRefId,
                qToS.skill_ref_id as skillRefId,
+               max(qSettings.value) as configuredNumQuestionsQuizLength,
                count(question.id) as numQuestions,
                count(case when question.type = 'TextInput' then question.id end) as numTextInputQuestions
         from quiz_to_skill_definition qToS, quiz_definition q
+             left join quiz_settings qSettings on (q.id = qSettings.quiz_ref_id and qSettings.setting = 'quizLength')
              left join quiz_question_definition question on (q.quiz_id = question.quiz_id)
         where qToS.skill_ref_id in ?1
           and q.id = qToS.quiz_ref_id
