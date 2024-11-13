@@ -16,6 +16,7 @@
 package skills.services.quiz
 
 import groovy.util.logging.Slf4j
+import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.auth.UserNameService
@@ -31,9 +32,8 @@ import skills.storage.model.QuizDef
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.QuizDefRepo
-
-import jakarta.transaction.Transactional
 import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.UserRoleRepo
 
 @Service
 @Slf4j
@@ -58,6 +58,9 @@ class QuizRoleService {
     @Autowired
     UserAttrsRepo userAttrsRepo
 
+    @Autowired
+    UserRoleRepo userRoleRepo
+
     @Transactional
     void addQuizRole(String userIdParam, String quizId, RoleName roleName, String adminGroupId = null) {
         QuizDef quizDef = findQuizDef(quizId)
@@ -66,6 +69,9 @@ class QuizRoleService {
         String currentUser = userInfoService.getCurrentUserId()
         if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
             throw new SkillQuizException("Cannot add roles to myself. userId=[${userId}]", quizId, ErrorCode.AccessDenied)
+        }
+        if (userRoleRepo.isUserQuizGroupAdmin(userId, quizId)) {
+            throw new SkillQuizException("User is already part of an Admin Group and cannot be added as a local admin. userId=[${userId}]", quizId, ErrorCode.AccessDenied)
         }
         accessSettingsStorageService.addQuizDefUserRoleForUser(userId, quizDef.quizId, roleName, adminGroupId)
 

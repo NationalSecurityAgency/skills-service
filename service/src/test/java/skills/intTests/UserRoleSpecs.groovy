@@ -16,11 +16,14 @@
 package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import spock.lang.IgnoreIf
+
+import static skills.intTests.utils.AdminGroupDefFactory.createAdminGroup
 
 class UserRoleSpecs extends DefaultIntSpec {
 
@@ -125,5 +128,45 @@ class UserRoleSpecs extends DefaultIntSpec {
         res.get(0).lastName == expectedAttrs.lastName
         res.get(0).projectId == "TestProject1"
         res.get(0).roleName == projAdminRole
+    }
+
+    def "cannot add user that belongs to admin group as local admin for this project"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService otherUser = createService(otherUserId)
+        createService(otherUserId)
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        when:
+        skillsService.addUserRole(otherUserId, proj.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("User is already part of an Admin Group and cannot be added as a local admin")
+    }
+
+    def "cannot add user that belongs to admin group as local approver for this project"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService otherUser = createService(otherUserId)
+        createService(otherUserId)
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        when:
+        skillsService.addUserRole(otherUserId, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("User is already part of an Admin Group and cannot be added as a local admin")
     }
 }

@@ -159,9 +159,11 @@ const emptyAdminGroupsMessage = computed(() => {
 })
 
 const assignedUserIds = computed(() => {
-  const assignedUserIds = new Set(assignedLocalAdmins.value.map((u) => u.userId));
+  const assignedUserIds = new Set(assignedLocalAdmins.value.map((u) => appConfig.isPkiAuthenticated ? u.userIdForDisplay : u.userId));
   assignedAdminGroups.value.forEach((ag) => {
-    ag.allMembers.forEach((u) => assignedUserIds.add(u.userId));
+    ag.allMembers.forEach((u) => {
+      appConfig.isPkiAuthenticated ? assignedUserIds.add(u.userIdForDisplay) : assignedUserIds.add(u.userId);
+    })
   })
   return Array.from(assignedUserIds);
 })
