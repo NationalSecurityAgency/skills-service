@@ -17,6 +17,7 @@ limitations under the License.
 import { computed } from 'vue'
 import MyProgressInfoCardUtil from '@/components/myProgress/MyProgressInfoCardUtil.vue'
 import { useMyProgressState } from '@/stores/UseMyProgressState.js'
+import ProgressCardIcon from "@/components/myProgress/ProgressCardIcon.vue";
 
 const myProgressState = useMyProgressState()
 const myProgress = computed(() => myProgressState.myProgress)
@@ -58,9 +59,7 @@ const myProgress = computed(() => myProgressState.myProgress)
     <template #right-content>
       <div class="flex justify-content-center sm:justify-content-end">
         <div class="flex justify-content-center">
-          <div class="border-circle w-7rem h-7rem m-2 bg-bluegray-600 font-bold flex align-items-center justify-content-center">
-            <i class="text-green-500 text-7xl fas fa-trophy"></i>
-          </div>
+          <progress-card-icon icon="fas fa-trophy" />
         </div>
       </div>
     </template>

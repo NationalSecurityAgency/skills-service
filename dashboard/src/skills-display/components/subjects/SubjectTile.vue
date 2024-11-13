@@ -87,7 +87,7 @@ const activePointsColor = computed(() => {
     </template>
     <template #footer>
       <div  class="px-3 pb-3">
-        <i :class="subject.iconClass" class="text-7xl text-400 sd-theme-subject-tile-icon" aria-hidden="true"/>
+        <i :class="subject.iconClass" class="text-7xl text-500 sd-theme-subject-tile-icon" aria-hidden="true"/>
         <div class="text-xl pt-1 font-medium" data-cy="levelTitle">{{ attributes.levelDisplayName }} {{ subject.skillsLevel }}</div>
         <div class="flex justify-content-center mt-2 subject-progress-stars-icons">
           <LevelsProgress :level="subject.skillsLevel" :totalLevels="subject.totalLevels" data-cy="subjectStars"/>

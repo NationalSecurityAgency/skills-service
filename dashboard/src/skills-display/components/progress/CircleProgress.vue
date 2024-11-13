@@ -17,6 +17,7 @@ limitations under the License.
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { computed, watch, ref } from 'vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
+import {useThemesHelper} from "@/components/header/UseThemesHelper.js";
 
 const props = defineProps({
   diameter: {
@@ -59,6 +60,7 @@ const props = defineProps({
 
 const numFormat = useNumberFormat()
 const themeState = useSkillsDisplayThemeState()
+const themeHelper = useThemesHelper()
 
 // If totalPossiblePoints is -1 it means this is charting Level progress and the user has completed this level
 const isCompleted = props.totalPossiblePoints === -1
@@ -75,7 +77,7 @@ const is100Percent = percentComplete.value === 100
 
 const series = computed(() => [percentComplete.value])
 
-const defaultColor = '#0ea5e9'
+const defaultColor = themeHelper.isDarkTheme ? 'white' : '#067085'
 const completedColor = '#22C55E'
 const dataLabelNameColor = computed(() => {
   if (themeState.circleProgressInteriorTextColor) {
