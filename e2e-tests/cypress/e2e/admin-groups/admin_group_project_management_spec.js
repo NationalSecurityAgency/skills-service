@@ -66,6 +66,12 @@ describe('Admin Group Project Management Tests', () => {
     });
 
     it('admin groups project page, remove project from group', function () {
+        const userIdForDisplay = 'user id for display'
+        cy.intercept('GET', '/app/userInfo', (req) => {
+            req.continue((res) => {
+                res.body.userIdForDisplay = userIdForDisplay
+            })
+        }).as('getUserInfo1');
         cy.fixture('vars.json')
             .then((vars) => {
                 const oauthMode = Cypress.env('oauthMode');
@@ -87,7 +93,7 @@ describe('Admin Group Project Management Tests', () => {
                     [{colIndex: 0, value: 'This is project 2'}],
                 ], 5);
                 cy.get('[data-cy="removeProject_proj2"]').click()
-                cy.get('[data-cy="removalSafetyCheckMsg"]').contains(`This will remove the This is project 2 project from this admin group. All members of this admin group other than ${defaultUser} will lose admin access to this project.`)
+                cy.get('[data-cy="removalSafetyCheckMsg"]').contains(`This will remove the This is project 2 project from this admin group. All members of this admin group other than ${userIdForDisplay} will lose admin access to this project.`)
                 cy.get('[data-cy="currentValidationText"]').type('Delete Me')
                 cy.get('[data-cy="saveDialogBtn"]').click()
 
@@ -97,7 +103,7 @@ describe('Admin Group Project Management Tests', () => {
                 ], 5);
 
                 cy.get('[data-cy="removeProject_proj1"]').click()
-                cy.get('[data-cy="removalSafetyCheckMsg"]').contains(`This will remove the This is project 1 project from this admin group. All members of this admin group other than ${defaultUser} will lose admin access to this project.`)
+                cy.get('[data-cy="removalSafetyCheckMsg"]').contains(`This will remove the This is project 1 project from this admin group. All members of this admin group other than ${userIdForDisplay} will lose admin access to this project.`)
                 cy.get('[data-cy="closeDialogBtn"]').click()
                 cy.get('[data-cy="removeProject_proj1"]').should('have.focus')
             });
