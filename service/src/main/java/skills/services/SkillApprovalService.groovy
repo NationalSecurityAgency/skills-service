@@ -456,6 +456,10 @@ class SkillApprovalService {
         }
     }
 
+    int countApprovalsForProject(String projectId) {
+        return skillApprovalConfRepo.countConfForProject(projectId)
+    }
+
     List<ApproverConfResult> getProjectApproverConf(String projectId) {
         List<SkillApprovalConfRepo.ApproverConfResult> approverConfResults = skillApprovalConfRepo.findAllByProjectId(projectId)
         List<ApproverConfResult> res = approverConfResults.collect {

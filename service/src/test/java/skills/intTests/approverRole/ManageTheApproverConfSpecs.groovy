@@ -995,4 +995,49 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         conf_t1.collect { it.approverUserId } == [user2Service.userName, user2Service.userName]
     }
 
+    def "counting configs works as expected"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(4, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user3Service = createService(users[2])
+        skillsService.addUserRole(user3Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[3], new Date(), "Please approve this!")
+
+        SkillsService rootUser = createRootSkillService()
+        String userTagKey = "key1"
+        rootUser.saveUserTag(users[0], userTagKey, ["abcd"])
+        rootUser.saveUserTag(users[1], userTagKey, ["efgh"])
+
+        // should be DN in case of pki
+        String userIdConConf = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[2]).dn : users[2]
+        when:
+        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, userIdConConf)
+        def oneApproval = skillsService.countApproverConf(proj.projectId)
+        skillsService.configureApproverForSkillId(proj.projectId, user2Service.userName, skills[0].skillId)
+        def twoApprovals = skillsService.countApproverConf(proj.projectId)
+        skillsService.configureApproverForUserTag(proj.projectId, user3Service.userName, userTagKey, 'abcd')
+        def threeApprovals = skillsService.countApproverConf(proj.projectId)
+
+        skillsService.configureApproverForUser(proj.projectId, user3Service.userName, userIdConConf)
+        skillsService.configureApproverForSkillId(proj.projectId, user1Service.userName, skills[0].skillId)
+        skillsService.configureApproverForUserTag(proj.projectId, user2Service.userName, userTagKey, 'abcd')
+        def unchangedApprovals = skillsService.countApproverConf(proj.projectId)
+
+        then:
+        oneApproval == 1
+        twoApprovals == 2
+        threeApprovals == 3
+        unchangedApprovals == 3
+    }
 }

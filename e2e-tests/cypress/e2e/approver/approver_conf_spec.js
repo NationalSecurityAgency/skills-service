@@ -233,4 +233,278 @@ describe('Approver Config Tests', () => {
             ], 5);
         });
     });
+
+    it('page with a single user does not disable edit button', function () {
+        cy.fixture('vars.json').then((vars) => {
+            cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user3/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user4/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user5/roles/ROLE_PROJECT_APPROVER`);
+
+            cy.visit('/administrator/projects/proj1/self-report/configure');
+
+            cy.get('[data-pc-section="pagebutton"]').contains('2').click();
+            cy.get('[data-cy="approvalConfNotAvailable"]').should('not.exist');
+
+            cy.get('[data-pc-section="pagebutton"]').contains('1').click();
+
+            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
+
+            const tableSelector = '[data-cy="skillApprovalConfTable"]'
+            cy.validateTable(tableSelector, [
+                [{
+                    colIndex: 0,
+                    value: 'user5'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user4'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user3'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user2'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user1'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: defaultUser
+                }, {
+                    colIndex: 1,
+                    value: 'Admin'
+                }],
+            ], 5);
+
+            cy.get('[data-cy="editApprovalBtn"]').should('be.enabled');
+        });
+    });
+
+    it('last remaining user has edit button disabled', function () {
+        cy.fixture('vars.json').then((vars) => {
+            cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user3/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user4/roles/ROLE_PROJECT_APPROVER`);
+
+            cy.configureApproverForSkillId(1, 'user1', 1)
+            cy.configureApproverForSkillId(1, 'user2', 1)
+            cy.configureApproverForSkillId(1, 'user3', 1)
+            cy.configureApproverForSkillId(1, 'user4', 1)
+
+            cy.visit('/administrator/projects/proj1/self-report/configure');
+
+            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
+
+            const tableSelector = '[data-cy="skillApprovalConfTable"]'
+            cy.validateTable(tableSelector, [
+                [{
+                    colIndex: 0,
+                    value: 'user4'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user3'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user2'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user1'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: defaultUser
+                }, {
+                    colIndex: 1,
+                    value: 'Admin'
+                }],
+            ], 5);
+
+            cy.get('[data-cy="editApprovalBtn"]').eq(4).should('not.be.enabled');
+        });
+    });
+
+    it('page with a single user disables edit button appropriately', function () {
+        cy.fixture('vars.json').then((vars) => {
+            cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user3/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user4/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user5/roles/ROLE_PROJECT_APPROVER`);
+
+            cy.configureApproverForSkillId(1, 'user1', 1)
+            cy.configureApproverForSkillId(1, 'user2', 1)
+            cy.configureApproverForSkillId(1, 'user3', 1)
+            cy.configureApproverForSkillId(1, 'user4', 1)
+            cy.configureApproverForSkillId(1, 'user5', 1)
+
+            cy.visit('/administrator/projects/proj1/self-report/configure');
+
+            cy.get('[data-pc-section="pagebutton"]').contains('2').click();
+            cy.get('[data-cy="approvalConfNotAvailable"]').should('not.exist');
+
+            cy.get('[data-pc-section="pagebutton"]').contains('1').click();
+
+            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
+
+            const tableSelector = '[data-cy="skillApprovalConfTable"]'
+            cy.validateTable(tableSelector, [
+                [{
+                    colIndex: 0,
+                    value: 'user5'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user4'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user3'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user2'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user1'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: defaultUser
+                }, {
+                    colIndex: 1,
+                    value: 'Admin'
+                }],
+            ], 5);
+
+            cy.get('[data-cy="editApprovalBtn"]').should('not.be.enabled');
+        });
+    });
+
+    it('item on first page is disabled when item on second page has config', function () {
+        cy.fixture('vars.json').then((vars) => {
+            cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user3/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user4/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user5/roles/ROLE_PROJECT_APPROVER`);
+
+            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
+
+            cy.configureApproverForSkillId(1, 'user5', 1)
+            cy.configureApproverForSkillId(1, 'user2', 1)
+            cy.configureApproverForSkillId(1, 'user3', 1)
+            cy.configureApproverForSkillId(1, 'user4', 1)
+            cy.configureApproverForSkillId(1, Cypress.env('proxyUser'), 1)
+
+            cy.visit('/administrator/projects/proj1/self-report/configure');
+
+            cy.get('[data-pc-section="pagebutton"]').contains('2').click();
+            cy.get('[data-cy="approvalConfNotAvailable"]').should('not.exist');
+
+            cy.get('[data-pc-section="pagebutton"]').contains('1').click();
+
+            const tableSelector = '[data-cy="skillApprovalConfTable"]'
+            cy.validateTable(tableSelector, [
+                [{
+                    colIndex: 0,
+                    value: 'user5'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user4'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user3'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user2'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user1'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: defaultUser
+                }, {
+                    colIndex: 1,
+                    value: 'Admin'
+                }],
+            ], 5);
+
+            cy.get('[data-pc-section="pagebutton"]').contains('1').click();
+
+            cy.get('[data-cy="editApprovalBtn"]').eq(4).should('not.be.enabled');
+        });
+    });
 });
