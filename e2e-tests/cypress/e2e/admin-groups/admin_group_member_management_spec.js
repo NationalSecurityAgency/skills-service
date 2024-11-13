@@ -102,7 +102,7 @@ describe('Admin Group Member Management Tests', () => {
         });
     })
 
-    it.only('add group member', function () {
+    it('add group member', function () {
 
         cy.createAdminGroupDef(1, { name: 'My Awesome Admin Group' });
 
