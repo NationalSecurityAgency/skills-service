@@ -463,7 +463,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@loadAdminGroupsForProject');
         cy.wait('@loadCurrentUsersAdminGroups');
 
-        const expectedUserName = Cypress.env('oauthMode') ? 'foo bar' : 'skills@';
+        const expectedUserName = Cypress.env('oauthMode') ? 'foo' : 'skills@';
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: expectedUserName }, { colIndex: 2,  value: 'Administrator' }],
         ], 5, true, null, false);
@@ -535,7 +535,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@loadAdminGroupsForProject');
         cy.wait('@loadCurrentUsersAdminGroups');
 
-        const expectedUserName = Cypress.env('oauthMode') ? 'foo bar' : 'skills@';
+        const expectedUserName = Cypress.env('oauthMode') ? 'foo' : 'skills@';
         cy.get(`${tableSelector} thead th`).contains('Role').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: expectedUserName }, { colIndex: 2,  value: 'Administrator' }],
