@@ -48,6 +48,7 @@ import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
+import skills.storage.repos.UserRoleRepo
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
@@ -101,6 +102,9 @@ class AccessSettingsController {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    UserRoleRepo userRoleRepo
 
     @Value('#{securityConfig.authMode}}')
     skills.auth.AuthMode authMode = skills.auth.AuthMode.DEFAULT_AUTH_MODE
@@ -199,6 +203,9 @@ class AccessSettingsController {
         String currentUser = userInfoService.getCurrentUserId()
         if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
             throw new SkillException("Cannot add roles to myself. userId=[${userId}]", projectId, null, ErrorCode.AccessDenied)
+        }
+        if (userRoleRepo.isUserProjectGroupAdmin(userId, projectId)) {
+            throw new SkillException("User is already part of an Admin Group and cannot be added as a local admin. userId=[${userId}]", projectId, null, ErrorCode.AccessDenied)
         }
         accessSettingsStorageService.addUserRole(userId, projectId, roleName)
 

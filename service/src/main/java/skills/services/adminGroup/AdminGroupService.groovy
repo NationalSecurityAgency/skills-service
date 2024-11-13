@@ -255,11 +255,6 @@ class AdminGroupService {
         return userCommunityService.validateAdminGroupForCommunity(adminGroupId)
     }
 
-    @Transactional(readOnly = true)
-    boolean isUserCommunityRestrictedProject(String adminGroupId) {
-        return userCommunityService.isUserCommunityOnlyAdminGroup(adminGroupId)
-    }
-
     private AdminGroupDef findAdminGroupDef(String adminGroupId) {
         AdminGroupDef adminGroupDef = adminGroupDefRepo.findByAdminGroupIdIgnoreCase(adminGroupId)
         if (!adminGroupDef) {
