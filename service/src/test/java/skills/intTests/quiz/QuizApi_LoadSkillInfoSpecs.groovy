@@ -19,6 +19,7 @@ import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsService
+import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.QuizDefParent
 import skills.storage.model.SkillDef
@@ -63,6 +64,81 @@ class QuizApi_LoadSkillInfoSpecs extends DefaultIntSpec {
         skillRes.selfReporting.quizName == quiz.name
         skillRes.selfReporting.numQuizQuestions == 5
     }
+
+    def "return quiz information with the skills - MinNumQuestionsToPass is set"() {
+        def createQuiz = { int quizNum ->
+            def quiz = QuizDefFactory.createQuiz(quizNum, "Fancy Description")
+            skillsService.createQuizDef(quiz)
+            def questions = QuizDefFactory.createChoiceQuestions(quizNum, 5, 2)
+            skillsService.createQuizQuestionDefs(questions)
+
+            return quiz
+        }
+
+        def quiz1 = createQuiz(1)
+        skillsService.saveQuizSettings(quiz1.quizId, [
+                [setting: QuizSettings.QuizLength.setting, value: '1'],
+        ])
+
+        def quiz2 = createQuiz(2)
+        skillsService.saveQuizSettings(quiz2.quizId, [
+                [setting: QuizSettings.QuizLength.setting, value: '3'],
+        ])
+
+        def quiz3 = createQuiz(3)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skills = createSkills(3, 1, 1, 100, 1)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz1.quizId
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[1].quizId = quiz2.quizId
+        skills[2].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[2].quizId = quiz3.quizId
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(1)
+
+        when:
+        def skillsRes = skillsService.getSkillSummary(users[0], proj.projectId, subj.subjectId)
+        def skillRes = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills[0].skillId)
+        def skill2Res = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills[1].skillId)
+        def skill3Res = skillsService.getSingleSkillSummary(users[0], proj.projectId, skills[2].skillId)
+        then:
+        skillsRes.skills[0].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        skillsRes.skills[0].selfReporting.quizId == quiz1.quizId
+        skillsRes.skills[0].selfReporting.quizName == quiz1.name
+        skillsRes.skills[0].selfReporting.numQuizQuestions == 1
+
+        skillsRes.skills[1].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        skillsRes.skills[1].selfReporting.quizId == quiz2.quizId
+        skillsRes.skills[1].selfReporting.quizName == quiz2.name
+        skillsRes.skills[1].selfReporting.numQuizQuestions == 3
+
+        skillsRes.skills[2].selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        skillsRes.skills[2].selfReporting.quizId == quiz3.quizId
+        skillsRes.skills[2].selfReporting.quizName == quiz3.name
+        skillsRes.skills[2].selfReporting.numQuizQuestions == 5
+
+        skillRes.selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        skillRes.selfReporting.quizId == quiz1.quizId
+        skillRes.selfReporting.quizName == quiz1.name
+        skillRes.selfReporting.numQuizQuestions == 1
+
+        skill2Res.selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        skill2Res.selfReporting.quizId == quiz2.quizId
+        skill2Res.selfReporting.quizName == quiz2.name
+        skill2Res.selfReporting.numQuizQuestions == 3
+
+        skill3Res.selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        skill3Res.selfReporting.quizId == quiz3.quizId
+        skill3Res.selfReporting.quizName == quiz3.name
+        skill3Res.selfReporting.numQuizQuestions == 5
+    }
+
 
     def "return quiz information with the skills - same quiz is associated to multiple skills"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")

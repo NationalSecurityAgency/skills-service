@@ -271,7 +271,7 @@ class SubjectDataLoader {
                         it.quizId = quizNameAndId.quizId
                         it.quizName = quizNameAndId.quizName
                         it.quizType = quizNameAndId.quizType
-                        it.quizNumQuestions = quizNameAndId.numQuestions
+                        it.quizNumQuestions = quizNameAndId.configuredNumQuestionsQuizLength ?: quizNameAndId.numQuestions
 
                         List<QuizToSkillDefRepo.QuizAttemptInfo> attempts = latestAttemptsByQuizRefId[quizNameAndId.quizRefId]
                         if (attempts) {

@@ -733,7 +733,7 @@ class SkillsLoader {
                 rejectionMsg: skillApproval?.rejectionMsg,
                 quizId: quizNameAndId?.quizId,
                 quizName: quizNameAndId?.quizName,
-                numQuizQuestions: quizNameAndId?.numQuestions ?: 0,
+                numQuizQuestions: quizNameAndId.configuredNumQuestionsQuizLength ?: (quizNameAndId?.numQuestions ?: 0),
                 quizNeedsGrading: quizNeedsGrading,
                 quizNeedsGradingAttemptDate: quizNeedsGradingAttemptDate,
                 quizOrSurveyPassed: quizOrSurveyPassed,
