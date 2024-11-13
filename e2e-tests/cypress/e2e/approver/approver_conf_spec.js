@@ -441,7 +441,7 @@ describe('Approver Config Tests', () => {
             cy.request('POST', `/admin/projects/proj1/users/user4/roles/ROLE_PROJECT_APPROVER`);
             cy.request('POST', `/admin/projects/proj1/users/user5/roles/ROLE_PROJECT_APPROVER`);
 
-            const defaultUser = Cypress.env('oauthMode') ? 'foo-hydra': vars.defaultUser
+            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
 
             cy.configureApproverForSkillId(1, 'user5', 1)
             cy.configureApproverForSkillId(1, 'user2', 1)
