@@ -23,7 +23,15 @@ import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
+import skills.storage.model.SkillDef
+import skills.storage.model.UserAchievement
+import skills.storage.model.UserPerformedSkill
+import skills.storage.model.UserPoints
 import skills.storage.repos.*
+
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSkill
+import static skills.intTests.utils.SkillsFactory.createSubject
 
 class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
 
@@ -342,4 +350,237 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         quizInfo_t5.maxAttemptsAllowed == 3
     }
 
+    def "assign quiz with multiple passed attempts to a skill"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.MultipleTakes.setting, value: true],
+        ])
+
+        def runQuiz = {
+            def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+            skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+            return skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id)
+        }
+        assert runQuiz().body.passed == true
+        assert runQuiz().body.passed == true
+        assert runQuiz().body.passed == true
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+        skillWithQuiz.quizId = quiz.quizId
+
+        when:
+        skillsService.createSkill(skillWithQuiz)
+        List<UserPoints> allPoints = userPointsRepo.findAll().collect { it }
+        List<UserAchievement> achievements = userAchievedRepo.findAll().collect { it }
+        List<UserPerformedSkill> performedSkills = userPerformedSkillRepo.findAll().collect { it }
+        then:
+        def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
+        skillRes.points == 200
+
+        allPoints.size() == 3
+        allPoints.find { it.skillId == skillWithQuiz.skillId }.points == 200
+        allPoints.find { it.skillId == subj.subjectId }.points == 200
+        allPoints.find { it.skillId == null }.points == 200
+
+        achievements.size() == 11
+        achievements.findAll { it.skillId == skillWithQuiz.skillId }.level == [null]
+        achievements.findAll { it.skillId == subj.subjectId }.level.sort() == [1, 2, 3, 4, 5]
+        achievements.findAll { it.skillId == null }.level.sort() == [1, 2, 3, 4, 5]
+
+        performedSkills.size() == 1
+        performedSkills[0].skillId == skillWithQuiz.skillId
+    }
+
+    def "assign quiz with multiple failed attempts followed by 1 passed attempt to a skill"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.MultipleTakes.setting, value: true],
+        ])
+
+        def runQuiz = { boolean toPass = true ->
+            def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+            skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[(toPass ? 0 : 1)].id)
+            return skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id)
+        }
+        assert runQuiz(false).body.passed == false
+        assert runQuiz(false).body.passed == false
+        assert runQuiz(true).body.passed == true
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+        skillWithQuiz.quizId = quiz.quizId
+
+        when:
+        skillsService.createSkill(skillWithQuiz)
+        List<UserPoints> allPoints = userPointsRepo.findAll().collect { it }
+        List<UserAchievement> achievements = userAchievedRepo.findAll().collect { it }
+        List<UserPerformedSkill> performedSkills = userPerformedSkillRepo.findAll().collect { it }
+        then:
+        def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
+        skillRes.points == 200
+
+        allPoints.size() == 3
+        allPoints.find { it.skillId == skillWithQuiz.skillId }.points == 200
+        allPoints.find { it.skillId == subj.subjectId }.points == 200
+        allPoints.find { it.skillId == null }.points == 200
+
+        achievements.size() == 11
+        achievements.findAll { it.skillId == skillWithQuiz.skillId }.level == [null]
+        achievements.findAll { it.skillId == subj.subjectId }.level.sort() == [1, 2, 3, 4, 5]
+        achievements.findAll { it.skillId == null }.level.sort() == [1, 2, 3, 4, 5]
+
+        performedSkills.size() == 1
+        performedSkills[0].skillId == skillWithQuiz.skillId
+    }
+
+    def "assign quiz with multiple passed attempts followed by 1 failed attempt to a skill"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.MultipleTakes.setting, value: true],
+        ])
+
+        def runQuiz = { boolean toPass = true ->
+            def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+            skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[(toPass ? 0 : 1)].id)
+            return skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id)
+        }
+        assert runQuiz(true).body.passed == true
+        assert runQuiz(true).body.passed == true
+        assert runQuiz(false).body.passed == false
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+        skillWithQuiz.quizId = quiz.quizId
+
+        when:
+        skillsService.createSkill(skillWithQuiz)
+        List<UserPoints> allPoints = userPointsRepo.findAll().collect { it }
+        List<UserAchievement> achievements = userAchievedRepo.findAll().collect { it }
+        List<UserPerformedSkill> performedSkills = userPerformedSkillRepo.findAll().collect { it }
+        then:
+        def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
+        skillRes.points == 0
+
+        allPoints.size() == 0
+        achievements.size() == 0
+        performedSkills.size() == 0
+    }
+
+    def "assign quiz with multiple failed attempts to a skill"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.MultipleTakes.setting, value: true],
+        ])
+
+        def runQuiz = { boolean toPass = true ->
+            def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+            skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[(toPass ? 0 : 1)].id)
+            return skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id)
+        }
+        assert runQuiz(false).body.passed == false
+        assert runQuiz(false).body.passed == false
+        assert runQuiz(false).body.passed == false
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+        skillWithQuiz.quizId = quiz.quizId
+
+        when:
+        skillsService.createSkill(skillWithQuiz)
+        List<UserPoints> allPoints = userPointsRepo.findAll().collect { it }
+        List<UserAchievement> achievements = userAchievedRepo.findAll().collect { it }
+        List<UserPerformedSkill> performedSkills = userPerformedSkillRepo.findAll().collect { it }
+        then:
+        def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
+        skillRes.points == 0
+
+        allPoints.size() == 0
+        achievements.size() == 0
+        performedSkills.size() == 0
+    }
+
+    def "assign survey with multiple completed attempts to a skill"() {
+        def quiz = QuizDefFactory.createQuizSurvey(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = [QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 2)]
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.MultipleTakes.setting, value: true],
+        ])
+
+        def runQuiz = {
+            def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+            skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+            return skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id)
+        }
+        assert runQuiz().body.passed == true
+        assert runQuiz().body.passed == true
+        assert runQuiz().body.passed == true
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+        skillWithQuiz.quizId = quiz.quizId
+
+        when:
+        skillsService.createSkill(skillWithQuiz)
+        List<UserPoints> allPoints = userPointsRepo.findAll().collect { it }
+        List<UserAchievement> achievements = userAchievedRepo.findAll().collect { it }
+        List<UserPerformedSkill> performedSkills = userPerformedSkillRepo.findAll().collect { it }
+        then:
+        def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
+        skillRes.points == 200
+
+        allPoints.size() == 3
+        allPoints.find { it.skillId == skillWithQuiz.skillId }.points == 200
+        allPoints.find { it.skillId == subj.subjectId }.points == 200
+        allPoints.find { it.skillId == null }.points == 200
+
+        achievements.size() == 11
+        achievements.findAll { it.skillId == skillWithQuiz.skillId }.level == [null]
+        achievements.findAll { it.skillId == subj.subjectId }.level.sort() == [1, 2, 3, 4, 5]
+        achievements.findAll { it.skillId == null }.level.sort() == [1, 2, 3, 4, 5]
+
+        performedSkills.size() == 1
+        performedSkills[0].skillId == skillWithQuiz.skillId
+    }
+
 }
+

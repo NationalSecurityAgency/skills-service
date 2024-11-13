@@ -50,6 +50,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                  quiz_to_skill_definition q_to_s,
                  skill_definition skill
             where q_attempt.status = 'PASSED'
+              and q_attempt.id = (select inner_attempt.id from user_quiz_attempt inner_attempt where inner_attempt.quiz_definition_ref_id = :quizRefId and q_attempt.user_id = inner_attempt.user_id order by inner_attempt.updated desc limit 1)
               and q_attempt.quiz_definition_ref_id = :quizRefId
               and skill.id = :skillRefId
               and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
