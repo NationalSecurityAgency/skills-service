@@ -447,7 +447,7 @@ describe('Approver Config Tests', () => {
             cy.configureApproverForSkillId(1, 'user2', 1)
             cy.configureApproverForSkillId(1, 'user3', 1)
             cy.configureApproverForSkillId(1, 'user4', 1)
-            cy.configureApproverForSkillId(1, defaultUser, 1)
+            cy.configureApproverForSkillId(1, Cypress.env('proxyUser'), 1)
 
             cy.visit('/administrator/projects/proj1/self-report/configure');
 
