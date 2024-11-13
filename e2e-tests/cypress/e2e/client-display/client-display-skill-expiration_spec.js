@@ -24,6 +24,12 @@ describe('Client Display Expiration Tests', () => {
         Cypress.env('disabledUILoginProp', true);
         cy.createProject(1);
         cy.createSubject(1, 1);
+
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createSurveyDef(2);
+        cy.createSurveyMultipleChoiceQuestionDef(2, 1);
+
         cy.createSkill(1, 1, 1, {
             selfReportingType: 'HonorSystem',
             pointIncrement: 50,
@@ -45,6 +51,28 @@ describe('Client Display Expiration Tests', () => {
             pointIncrement: 50,
             pointIncrementInterval: 0,
             numPerformToCompletion: 1,
+        });
+        cy.createSkill(1, 1, 5, {
+            selfReportingType: 'Quiz',
+            quizId: 'quiz1',
+            pointIncrement: '150',
+            numPerformToCompletion: 1
+        });
+        cy.createSkill(1, 1, 6, {
+            selfReportingType: 'Quiz',
+            quizId: 'quiz2',
+            pointIncrement: '150',
+            numPerformToCompletion: 1
+        });
+        cy.createSkill(1, 1, 7, { numPerformToCompletion: 1, description: 'blah blah' })
+
+        const vidAttr = { file: 'create-subject.webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 7, vidAttr)
+
+        cy.createSkill(1, 1, 7, {
+            numPerformToCompletion: 1,
+            description: 'blah blah',
+            selfReportingType: 'Video'
         });
     });
 
@@ -314,10 +342,6 @@ describe('Client Display Expiration Tests', () => {
     });
 
     it('expiring honor system skills have a different message', () => {
-        let expirationDate = moment.utc().add(30, 'day');
-        if (expirationDate.hour() >= 1) {
-            expirationDate = expirationDate.add(1, 'day')
-        }
         cy.configureExpiration(1, 0, 1, 'DAILY');
         cy.cdVisit('/');
         cy.cdClickSubj(0);
@@ -360,10 +384,6 @@ describe('Client Display Expiration Tests', () => {
     });
 
     it('expiring approval skills have a different message', () => {
-        let expirationDate = moment.utc().add(30, 'day');
-        if (expirationDate.hour() >= 1) {
-            expirationDate = expirationDate.add(1, 'day')
-        }
         cy.configureExpiration(4, 1, 1, 'DAILY');
         cy.cdVisit('/');
         cy.cdClickSubj(0);
@@ -384,5 +404,91 @@ describe('Client Display Expiration Tests', () => {
         cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill4');
 
         cy.get('[data-cy="requestApprovalAlert"]').contains('This skill\'s achievement expires in a day, but your 50 points can be retained by submitting another approval request.');
+    });
+
+    it('expiring quiz skills have a different message', () => {
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
+            .should('not.exist');
+        cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`)
+            .should('not.exist');
+        cy.cdClickSkill(4);
+
+        cy.runQuizForTheCurrentUser(1, [{selectedIndex: [0]}]);
+
+        cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill5');
+        cy.get('[data-cy="quizAlert"]').should('not.exist');
+
+        cy.configureExpiration(5, 0, 1, 'DAILY');
+
+        cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill5');
+
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('150 / 150 Points');
+
+        cy.get('[data-cy="quizAlert"]').contains('This skill\'s achievement expires in a day, but your 150 points can be retained by completing the Quiz again.');
+
+    });
+
+    it('expiring survey skills have a different message', () => {
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
+            .should('not.exist');
+        cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`)
+            .should('not.exist');
+
+        cy.cdClickSkill(5);
+
+        cy.get('[data-cy="quizAlert"]').contains('Complete the 1-question This is survey 2 Survey and earn 150 points!');
+
+        cy.runQuizForTheCurrentUser(2, [{selectedIndex: [0]}]);
+
+        cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill6');
+
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('150 / 150 Points');
+        cy.get('[data-cy="quizAlert"]').should('not.exist');
+
+        cy.configureExpiration(6, 0, 1, 'DAILY');
+
+        cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill6');
+
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('150 / 150 Points');
+        cy.get('[data-cy="quizAlert"]').contains('This skill\'s achievement expires in a day, but your 150 points can be retained by completing the Survey again.');
+
+    });
+
+    it('expiring video skills have a different message', () => {
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+
+        cy.get(`[data-cy="skillProgress_index-0"] [data-cy="expirationDate"]`)
+            .should('not.exist');
+        cy.get(`[data-cy="skillProgress_index-1"] [data-cy="expirationDate"]`)
+            .should('not.exist');
+
+        cy.cdClickSkill(6);
+
+        cy.get('[data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video.');
+
+        cy.get('[data-cy="skillVideo-skill7"] [data-cy="videoPlayer"] [title="Play Video"]').click()
+        cy.wait(8000)
+        cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 100 points')
+
+        cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill7');
+
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points');
+        cy.get('[data-cy="watchVideoMsg"]').should('not.exist');
+        cy.get('[data-cy="videoAlert"]').should('not.exist');
+
+        cy.configureExpiration(7, 0, 1, 'DAILY');
+
+        cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill7');
+
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points');
+        cy.get('[data-cy="videoAlert"]').contains('This skill\'s achievement expires in a day, but your 100 points can be retained by watching the video again.');
+
     });
 });

@@ -24,6 +24,8 @@ import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkil
 import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
+import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
+import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 
 const VideoPlayer = defineAsyncComponent(() =>
     import('@/common-components/video/VideoPlayer.vue')
@@ -38,6 +40,9 @@ const props = defineProps({
   },
   isLocked: Boolean,
 })
+
+const numFormat = useNumberFormat()
+const timeUtils = useTimeUtils()
 
 const emit = defineEmits(['points-earned'])
 const router = useRouter()
@@ -63,6 +68,7 @@ const transcript = ref({
 const showPercent = ref(true);
 const isFirstTime = ref(true);
 const transcriptReadCert = ref(false);
+const isMotivationalSkill = computed(() => props.skill && props.skill.isMotivationalSkill)
 
 const isAlreadyAchieved = computed(() => {
   return props.skill.points > 0;
@@ -189,6 +195,19 @@ const loadTranscript = () => {
     </SkillsOverlay>
     <div v-if="!videoCollapsed && !isLocked">
       <video-player :options="videoConf" @watched-progress="updateVideoProgress" />
+      <Message v-if="isSelfReportTypeVideo && isMotivationalSkill && skill.expirationDate">
+        <template #container>
+          <div class="flex gap-2 p-3 align-content-center">
+            <div>
+              <i class="fas fa-user-shield text-2xl" aria-hidden="true"></i>
+            </div>
+            <div class="flex-1 font-italic pt-1" data-cy="videoAlert">
+              This skill's achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skill.expirationDate) }}</span>, but your <span class="font-size-1">
+            <Tag severity="info">{{ numFormat.pretty(skill.totalPoints) }}</Tag></span> points can be retained by watching the video again.
+            </div>
+          </div>
+        </template>
+      </Message>
       <Message v-if="isSelfReportTypeVideo && (!isAlreadyAchieved || justAchieved)"
            class="mt-2"
            :severity="justAchieved ? 'success' : 'info'"
