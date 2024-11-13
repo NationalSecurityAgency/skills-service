@@ -1273,10 +1273,12 @@ class MyProgressSpec extends DefaultIntSpec {
             ])
             return quiz.quizId
         }
-        def runQuiz = { String quizId ->
+        def runQuiz = { String quizId, boolean completeQuiz = true ->
             def quizAttempt =  skillsService.startQuizAttempt(quizId).body
             skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
-            skillsService.completeQuizAttempt(quizId, quizAttempt.id)
+            if (completeQuiz) {
+                skillsService.completeQuizAttempt(quizId, quizAttempt.id)
+            }
         }
 
         def quiz1Id = declareQuiz(1)
@@ -1308,6 +1310,14 @@ class MyProgressSpec extends DefaultIntSpec {
         runQuiz(survey3Id)
         def summary_t7 = skillsService.getMyProgressSummary()
 
+        // not completed attempts
+        runQuiz(quiz1Id, false)
+        runQuiz(quiz2Id, false)
+        runQuiz(survey1Id, false)
+        runQuiz(survey2Id, false)
+        runQuiz(survey3Id, false)
+        def summary_t8 = skillsService.getMyProgressSummary()
+
         then:
         summary_t1.numQuizAttempts == 0
         summary_t1.numSurveyAttempts == 0
@@ -1329,6 +1339,9 @@ class MyProgressSpec extends DefaultIntSpec {
 
         summary_t7.numQuizAttempts == 6
         summary_t7.numSurveyAttempts == 5
+
+        summary_t8.numQuizAttempts == 6
+        summary_t8.numSurveyAttempts == 5
     }
 
 }

@@ -260,6 +260,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
             sum(case when quizDef.type = 'Quiz' then 1 else 0 end) as numQuizAttempts 
         from UserQuizAttempt attempt, QuizDef quizDef 
         where attempt.userId = ?1
+            and attempt.status in ('PASSED', 'FAILED')
             and attempt.quizDefinitionRefId = quizDef.id''')
     AttemptCounts getAttemptCountsForUser(String userId)
 
