@@ -92,6 +92,34 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupMembers.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}
     }
 
+    def "owner can remove owner to admin group"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        createService(otherUserId)
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+        skillsService.addAdminGroupOwner(adminGroup.adminGroupId, otherUserId)
+
+        when:
+        def adminGroupResBefore = skillsService.getAdminGroupDef(adminGroup.adminGroupId)
+        def adminGroupMembersBefore = skillsService.getAdminGroupMembers(adminGroup.adminGroupId)
+        skillsService.deleteAdminGroupOwner(adminGroup.adminGroupId, otherUserId)
+        def adminGroupResAfter = skillsService.getAdminGroupDef(adminGroup.adminGroupId)
+        def adminGroupMembersAfter = skillsService.getAdminGroupMembers(adminGroup.adminGroupId)
+
+        then:
+
+        adminGroupResBefore.adminGroupId == adminGroup.adminGroupId
+        adminGroupResBefore.numberOfOwners == 2
+        adminGroupMembersBefore.size() == 2
+        adminGroupMembersBefore.find {it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}
+        adminGroupMembersBefore.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}
+
+        adminGroupResAfter.adminGroupId == adminGroup.adminGroupId
+        adminGroupResAfter.numberOfOwners == 1
+        adminGroupMembersAfter.size() == 1
+        !adminGroupMembersAfter.find { it.userId == otherUserId}
+    }
+
     def "owner can add member to admin group"() {
         def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
         createService(otherUserId)
@@ -113,6 +141,36 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupMembers.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_MEMBER.toString()}
     }
 
+    def "owner can remove member to admin group"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        createService(otherUserId)
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
+
+        when:
+        def adminGroupResBefore = skillsService.getAdminGroupDef(adminGroup.adminGroupId)
+        def adminGroupMembersBefore = skillsService.getAdminGroupMembers(adminGroup.adminGroupId)
+        skillsService.deleteAdminGroupMember(adminGroup.adminGroupId, otherUserId)
+        def adminGroupResAfter = skillsService.getAdminGroupDef(adminGroup.adminGroupId)
+        def adminGroupMembersAfter = skillsService.getAdminGroupMembers(adminGroup.adminGroupId)
+
+        then:
+
+        adminGroupResBefore.adminGroupId == adminGroup.adminGroupId
+        adminGroupResBefore.numberOfOwners == 1
+        adminGroupResBefore.numberOfMembers == 1
+        adminGroupMembersBefore.size() == 2
+        adminGroupMembersBefore.find {it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}
+        adminGroupMembersBefore.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_MEMBER.toString()}
+
+        adminGroupResAfter.adminGroupId == adminGroup.adminGroupId
+        adminGroupResAfter.numberOfOwners == 1
+        adminGroupResAfter.numberOfMembers == 0
+        adminGroupMembersAfter.size() == 1
+        !adminGroupMembersAfter.find { it.userId == otherUserId}
+    }
+
     def "member cannot add member to admin group"() {
         def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
         SkillsService memberSkillsService = createService(otherUserId)
@@ -129,6 +187,22 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         e.message.contains("code=403 FORBIDDEN")
     }
 
+    def "member cannot remove member from admin group"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService memberSkillsService = createService(otherUserId)
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
+        when:
+
+        memberSkillsService.deleteAdminGroupMember(adminGroup.adminGroupId, "someOtherUserId")
+
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("code=403 FORBIDDEN")
+    }
+
     def "member cannot add owner to admin group"() {
         def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
         SkillsService memberSkillsService = createService(otherUserId)
@@ -138,6 +212,22 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
 
         when:
         memberSkillsService.addAdminGroupOwner(adminGroup.adminGroupId, "someOtherUserId")
+
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("code=403 FORBIDDEN")
+    }
+
+    def "member cannot remove owner from admin group"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService memberSkillsService = createService(otherUserId)
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
+
+        when:
+        memberSkillsService.deleteAdminGroupOwner(adminGroup.adminGroupId, "someOtherUserId")
 
         then:
 
@@ -627,7 +717,6 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupsForProjectsAsMember.find { it.adminGroupId == adminGroup.adminGroupId }
         adminGroupsForProjectsAsMember.find { it.adminGroupId == adminGroup2.adminGroupId }
     }
-
 
     def "get admin groups for quiz returns proper results"() {
         def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
