@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
+import skills.auth.UserNameService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.ProjectResult
@@ -64,6 +65,9 @@ class AdminGroupRoleService {
     ProjAdminService projAdminService
 
     @Autowired
+    UserNameService userNameService
+
+    @Autowired
     AdminGroupDefRepo adminGroupDefRepo
 
     @Autowired
@@ -91,7 +95,7 @@ class AdminGroupRoleService {
     void addAdminGroupRole(String userIdParam, String adminGroupId, RoleName roleName) {
         AdminGroupDef adminGroupDef = findAdminGroupDef(adminGroupId)
         ensureValidRole(roleName, adminGroupDef.adminGroupId)
-        String userId = userIdParam?.toLowerCase()
+        String userId = userNameService.normalizeUserId(userIdParam)
         String currentUser = userInfoService.getCurrentUserId()
         if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
             throw new SkillException("Cannot add roles to yourself. userId=[${userId}], adminGroupName=[${adminGroupDef.name}]", ErrorCode.AccessDenied)
@@ -102,7 +106,7 @@ class AdminGroupRoleService {
         if (!existingMemberOrOwner) {
             List<String> quizIds = userRoleRepo.findQuizIdsByAdminGroupId(adminGroupDef.adminGroupId)
             quizIds.each { quizId ->
-                quizRoleService.addQuizRole(userId, quizId, RoleName.ROLE_QUIZ_ADMIN, adminGroupDef.adminGroupId)
+                quizRoleService.addQuizRole(userIdParam, quizId, RoleName.ROLE_QUIZ_ADMIN, adminGroupDef.adminGroupId)
             }
             List<String> projectIds = userRoleRepo.findProjectIdsByAdminGroupId(adminGroupDef.adminGroupId)
             projectIds.each { projectId ->
