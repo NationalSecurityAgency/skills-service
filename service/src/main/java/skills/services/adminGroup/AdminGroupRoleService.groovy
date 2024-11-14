@@ -131,7 +131,7 @@ class AdminGroupRoleService {
     void deleteAdminGroupRole(String userIdParam, String adminGroupId, RoleName roleName) {
         AdminGroupDef adminGroupDef = findAdminGroupDef(adminGroupId)
         ensureValidRole(roleName, adminGroupDef.adminGroupId)
-        String userId = userNameService.normalizeUserId(userIdParam)
+        String userId = userIdParam?.toLowerCase()
         String currentUser = userInfoService.getCurrentUserId()
         if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
             throw new SkillException("Cannot remove roles from yourself. userId=[${userId}], adminGroupName=[${adminGroupDef.name}]", ErrorCode.AccessDenied)
