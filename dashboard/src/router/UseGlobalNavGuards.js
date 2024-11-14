@@ -56,18 +56,16 @@ export const useGlobalNavGuards = () => {
 
   const beforeEachNavGuard = (to, from, next) => {
     const { skillsClientDisplayPath } = to.query
-    const requestAccountPath = '/request-root-account'
+    const requestRootAccountPath = '/request-root-account'
     const skillsLoginPath = '/skills-login'
     if (
       !isPki() &&
       !isLoggedIn() &&
-      to.path?.toLowerCase() !== requestAccountPath &&
+      to.path?.toLowerCase() !== requestRootAccountPath &&
       appConfig.needToBootstrap
     ) {
-      next({ path: requestAccountPath })
-    } else if (
-      !isPki() &&
-      to.path?.toLowerCase() === requestAccountPath &&
+      next({ path: requestRootAccountPath })
+    } else if (to.path?.toLowerCase() === requestRootAccountPath &&
       !appConfig.needToBootstrap
     ) {
       next({ name: getLandingPage() })
