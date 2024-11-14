@@ -190,7 +190,7 @@ const removeQuizFromAdminGroup = () => {
       @do-remove="removeQuizFromAdminGroup"
       :item-name="removeQuizInfo.quiz.name"
       removalTextPrefix="This will remove the "
-      :item-type="`quiz from this admin group.  All members of this admin group other than ${userInfo.userInfo.value.userId} will lose admin access to this quiz`"
+      :item-type="`quiz from this admin group.  All members of this admin group other than ${userInfo.userInfo.value.userIdForDisplay} will lose admin access to this quiz`"
       :enable-return-focus="true">
   </RemovalValidation>
 </template>

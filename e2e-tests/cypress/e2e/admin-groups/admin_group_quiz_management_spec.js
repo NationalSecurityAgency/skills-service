@@ -66,6 +66,12 @@ describe('Admin Group Quiz Management Tests', () => {
     });
 
     it('admin groups quiz page, remove quiz from group', function () {
+        const userIdForDisplay = 'user id for display'
+        cy.intercept('GET', '/app/userInfo', (req) => {
+            req.continue((res) => {
+                res.body.userIdForDisplay = userIdForDisplay
+            })
+        }).as('getUserInfo1');
         cy.fixture('vars.json')
             .then((vars) => {
                 const oauthMode = Cypress.env('oauthMode');
@@ -87,7 +93,7 @@ describe('Admin Group Quiz Management Tests', () => {
                     [{colIndex: 0, value: 'This is quiz 1'}]
                 ], 5);
                 cy.get('[data-cy="removeQuiz_quiz2"]').click()
-                cy.get('[data-cy="removalSafetyCheckMsg"]').contains(`This will remove the This is quiz 2 quiz from this admin group. All members of this admin group other than ${defaultUser} will lose admin access to this quiz.`)
+                cy.get('[data-cy="removalSafetyCheckMsg"]').contains(`This will remove the This is quiz 2 quiz from this admin group. All members of this admin group other than ${userIdForDisplay} will lose admin access to this quiz.`)
                 cy.get('[data-cy="currentValidationText"]').type('Delete Me')
                 cy.get('[data-cy="saveDialogBtn"]').click()
 
@@ -97,7 +103,7 @@ describe('Admin Group Quiz Management Tests', () => {
                 ], 5);
 
                 cy.get('[data-cy="removeQuiz_quiz1"]').click()
-                cy.get('[data-cy="removalSafetyCheckMsg"]').contains(`This will remove the This is quiz 1 quiz from this admin group. All members of this admin group other than ${defaultUser} will lose admin access to this quiz.`)
+                cy.get('[data-cy="removalSafetyCheckMsg"]').contains(`This will remove the This is quiz 1 quiz from this admin group. All members of this admin group other than ${userIdForDisplay} will lose admin access to this quiz.`)
                 cy.get('[data-cy="closeDialogBtn"]').click()
                 cy.get('[data-cy="removeQuiz_quiz1"]').should('have.focus')
             });

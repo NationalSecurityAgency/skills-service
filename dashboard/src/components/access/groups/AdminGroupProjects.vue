@@ -217,7 +217,7 @@ const clearErrorMessage = () => {
       @do-remove="removeProjectFromAdminGroup"
       :item-name="removeProjectInfo.project.name"
       removalTextPrefix="This will remove the "
-      :item-type="`project from this admin group.  All members of this admin group other than ${userInfo.userInfo.value.userId} will lose admin access to this project`"
+      :item-type="`project from this admin group.  All members of this admin group other than ${userInfo.userInfo.value.userIdForDisplay} will lose admin access to this project`"
       :enable-return-focus="true">
   </RemovalValidation>
 </template>
