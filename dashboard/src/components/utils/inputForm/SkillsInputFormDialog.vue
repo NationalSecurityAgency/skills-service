@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { reactive, computed, ref, provide, toRaw, watch, nextTick } from 'vue'
+import { reactive, computed, ref, provide, toRaw, watch, nextTick, onUnmounted } from 'vue'
 import { useForm } from 'vee-validate'
 import { useInputFormResiliency } from '@/components/utils/inputForm/UseInputFormResiliency.js'
 import deepEqual from 'deep-equal';
@@ -22,6 +22,10 @@ import FormReloadWarning from '@/components/utils/inputForm/FormReloadWarning.vu
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+
+onUnmounted(() => {
+  inputFormResiliency.stop(false);
+})
 
 const dialogMessages = useDialogMessages()
 const isLoadingAsyncData = ref(true)
