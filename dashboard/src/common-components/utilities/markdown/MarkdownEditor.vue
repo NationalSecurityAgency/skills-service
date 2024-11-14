@@ -382,6 +382,11 @@ const editorStyle = computed(() => {
 }
 .editor-theme-dark .toastui-editor-popup-body li:hover {
   background-color: #41444a !important;
+  color: #dadde6 !important;
+}
+.editor-theme-dark .toastui-editor-popup-body input,
+.editor-theme-dark .toastui-editor-popup-add-image .toastui-editor-file-name.has-file {
+  color: #dadde6 !important;
 }
 .editor-theme-dark .toastui-editor-contents p,
 .editor-theme-dark .toastui-editor-contents hr,
