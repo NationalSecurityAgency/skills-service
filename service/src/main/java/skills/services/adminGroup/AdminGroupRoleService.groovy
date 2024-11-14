@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
-import skills.auth.UserNameService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.ProjectResult
@@ -65,9 +64,6 @@ class AdminGroupRoleService {
     ProjAdminService projAdminService
 
     @Autowired
-    UserNameService userNameService
-
-    @Autowired
     AdminGroupDefRepo adminGroupDefRepo
 
     @Autowired
@@ -95,7 +91,7 @@ class AdminGroupRoleService {
     void addAdminGroupRole(String userIdParam, String adminGroupId, RoleName roleName) {
         AdminGroupDef adminGroupDef = findAdminGroupDef(adminGroupId)
         ensureValidRole(roleName, adminGroupDef.adminGroupId)
-        String userId = userNameService.normalizeUserId(userIdParam)
+        String userId = userIdParam?.toLowerCase()
         String currentUser = userInfoService.getCurrentUserId()
         if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
             throw new SkillException("Cannot add roles to yourself. userId=[${userId}], adminGroupName=[${adminGroupDef.name}]", ErrorCode.AccessDenied)
