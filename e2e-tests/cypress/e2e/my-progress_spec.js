@@ -764,6 +764,41 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy="manageMyProjsBtnInNoContent"]').should('exist');
     });
 
+    it('remove project from My Progress view updates info card correctly', function () {
+        cy.createProject(3);
+        cy.enableProdMode(3);
+        cy.addToMyProjects(3);
+
+        cy.viewport(1200, 1000);
+
+        cy.visit('/progress-and-rankings');
+        cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 3', 'This is project 2', 'This is project 1']);
+
+        cy.get('[data-cy="numProjectsContributed"]').contains('1');
+        cy.get('[data-cy="numProjectsAvailable"]').contains('3');
+        cy.get('.apexcharts-datalabels-group > .apexcharts-datalabel-value').contains('33 %');
+
+        cy.get('[data-cy="remove-proj3Btn"]').click()
+        cy.get('[data-pc-name="acceptbutton"]').click()
+
+        cy.get('[data-cy="numProjectsContributed"]').contains('1');
+        cy.get('[data-cy="numProjectsAvailable"]').contains('2');
+        cy.get('.apexcharts-datalabels-group > .apexcharts-datalabel-value').contains('50 %');
+
+        cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1']);
+        cy.get('[data-cy="project-link-card-proj3"]').should('not.exist');
+
+        cy.get('[data-cy="remove-proj1Btn"]').click()
+        cy.get('[data-pc-name="acceptbutton"]').click()
+
+        cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2']);
+        cy.get('[data-cy="project-link-card-proj1"]').should('not.exist');
+
+        cy.get('[data-cy="numProjectsContributed"]').contains('0');
+        cy.get('[data-cy="numProjectsAvailable"]').contains('1');
+        cy.get('.apexcharts-datalabels-group > .apexcharts-datalabel-value').contains('0 %');
+    });
+
     if (!Cypress.env('oauthMode')) {
         it('Progress view is refreshed on login', function() {
             const user2 = 'user2@skills.org'

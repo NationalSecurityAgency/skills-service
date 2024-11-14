@@ -93,6 +93,7 @@ const removeProject = (projectId) => {
   ProjectService.removeFromMyProjects(projectId).finally(() => {
     sortOrderLoading.value = false
     myProgressState.myProjects = updatedProjects
+    myProgressState.loadMyProgressSummary(true)
   })
 }
 </script>

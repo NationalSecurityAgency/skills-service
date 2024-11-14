@@ -27,8 +27,8 @@ export const useMyProgressState = defineStore('myProgressState', () => {
     myProjects.value = incomingProgress.projectSummaries
   }
 
-  const loadMyProgressSummary = () => {
-    isLoadingMyProgressSummary.value = true
+  const loadMyProgressSummary = (loadInPlace = false) => {
+    isLoadingMyProgressSummary.value = !loadInPlace
     return MyProgressService.loadMyProgressSummary()
       .then((response) => {
         setMyProgress(response)
