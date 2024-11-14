@@ -106,7 +106,7 @@ class AdminGroupRoleService {
         if (!existingMemberOrOwner) {
             List<String> quizIds = userRoleRepo.findQuizIdsByAdminGroupId(adminGroupDef.adminGroupId)
             quizIds.each { quizId ->
-                quizRoleService.addQuizRole(userId, quizId, RoleName.ROLE_QUIZ_ADMIN, adminGroupDef.adminGroupId)
+                quizRoleService.addQuizRole(userIdParam, quizId, RoleName.ROLE_QUIZ_ADMIN, adminGroupDef.adminGroupId)
             }
             List<String> projectIds = userRoleRepo.findProjectIdsByAdminGroupId(adminGroupDef.adminGroupId)
             projectIds.each { projectId ->
