@@ -237,11 +237,11 @@ jobs:
           apt-get install -y postgresql postgresql-client postgresql-contrib
           psql --version
           echo "Postgres status:"
-          service postgresql status
+          systemctl postgresql status
           echo "Postgres starting:"
-          service postgresql start
+          systemctl postgresql start
           echo "Postgres status:"
-          service postgresql status
+          systemctl postgresql status
 
   ui-tests-against-postgres-cypress-dashboard:
     if: github.event_name == 'schedule-never'
