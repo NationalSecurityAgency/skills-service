@@ -185,7 +185,8 @@ jobs:
 
   combine-cypress-mochawesome-results:
     runs-on: ubuntu-latest
-    if: ${{ !cancelled() }}
+#    if: ${{ !cancelled() }}
+    if: github.event_name == 'schedule-never'
     needs: [ui-tests-against-postgres]
     steps:
       - uses: actions/checkout@v4
@@ -237,8 +238,8 @@ jobs:
           apt-get install -y postgresql postgresql-contrib
           systemctl list-dependencies postgresql
           echo "Postgres starting:"
-          systemctl postgresql start
           su - postgres
+          postgresql
           psql
 #          echo "Postgres status:"
 #          systemctl postgresql status
