@@ -31,7 +31,6 @@ on:
 
 jobs:
   build-skills-service-for-ui-tests:
-    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
 
     steps:
@@ -232,7 +231,7 @@ jobs:
 
 
     steps:
-      - name: Install libs
+      - name: Run Postgres
         run: |
           apt update
           apt install -y postgresql postgresql-contrib
@@ -240,6 +239,9 @@ jobs:
           service postgresql start
           echo "Postgres status:" 
           service postgresql status
+          su - postgresql
+          psql -c "CREATE DATABASE skills;"
+          psql -c "ALTER USER postgres WITH PASSWORD 'skillsPassword';"
 
   ui-tests-against-postgres-cypress-dashboard:
     if: github.event_name == 'schedule-never'
@@ -283,12 +285,17 @@ jobs:
 #          sudo psql --version
 #          sudo apt-get install fonts-noto-color-emoji
 
-      - name: Install libs
+      - name: Run Postgres
         run: |
-          apt-get update
-          apt-get install -y postgresql-client
-          psql --version
-          apt-get install fonts-noto-color-emoji
+          apt update
+          apt install -y postgresql postgresql-contrib
+          echo "Postgres starting:"
+          service postgresql start
+          echo "Postgres status:" 
+          service postgresql status
+          su - postgresql
+          psql -c "CREATE DATABASE skills;"
+          psql -c "ALTER USER postgres WITH PASSWORD 'skillsPassword';"
 
       - uses: actions/checkout@v4
 
