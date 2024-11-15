@@ -236,7 +236,6 @@ jobs:
         run: |
           apt-get update
           apt-get install -y postgresql postgresql-contrib
-          systemctl list-dependencies postgresql
           echo "Postgres starting:"
           su - postgres
           postgres -D /usr/local/pgsql/data
