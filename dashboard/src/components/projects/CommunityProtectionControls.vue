@@ -113,8 +113,7 @@ const userCommunityRestrictedDescriptor = computed(() => {
                style="text-decoration: underline">{{ appConfig.userCommunityDocsLabel }}</a>
             <i class="fas fa-external-link-alt ml-1" aria-hidden="true" style="font-size: 0.9rem;" />
           </div>
-        </div
-        >
+        </div>
         <div v-if="!pending">
           <Message v-if="enableProtectedUserCommunity && !(errors && errors.length > 0)"
                    :closable="false"
