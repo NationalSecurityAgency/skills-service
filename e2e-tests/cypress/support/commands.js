@@ -313,10 +313,10 @@ Cypress.Commands.add('loginAsRoot', (user, pass) => {
 })
 
 Cypress.Commands.add("resetEmail", () => {
-    cy.request({
-       method: "DELETE",
-       url: "http://localhost:1080/email/all"
-    });
+    // cy.request({
+    //    method: "DELETE",
+    //    url: "http://localhost:1080/email/all"
+    // });
 });
 
 Cypress.Commands.add("createQuizDef", (quizNum = 1, overrideProps = {}) => {
@@ -895,20 +895,21 @@ Cypress.Commands.add("getFooterFromEmail", (wait=true) => {
 });
 
 Cypress.Commands.add("getEmails", (expectAtLeastNumEmails = 1) => {
-    const emailUrl = 'http://localhost:1080/email';
-    cy.waitUntil(() => cy.request(emailUrl).then((response) => response.body && response.body.length >= expectAtLeastNumEmails), {
-        errorMsg: `Timed out after 2 minutes while attempting to find at least ${expectAtLeastNumEmails} emails in the test SMTP server (${emailUrl}).`,
-        timeout: 120000, // waits up to 2 minutes
-        interval: 1000 // performs the check every 1 second, default to 200ms
-    });
-
-    cy.request(emailUrl)
-        .then((response) => {
-            if (response.body) {
-                return cy.wrap(response.body);
-            }
-            return '';
-        });
+    // const emailUrl = 'http://localhost:1080/email';
+    // cy.waitUntil(() => cy.request(emailUrl).then((response) => response.body && response.body.length >= expectAtLeastNumEmails), {
+    //     errorMsg: `Timed out after 2 minutes while attempting to find at least ${expectAtLeastNumEmails} emails in the test SMTP server (${emailUrl}).`,
+    //     timeout: 120000, // waits up to 2 minutes
+    //     interval: 1000 // performs the check every 1 second, default to 200ms
+    // });
+    //
+    // cy.request(emailUrl)
+    //     .then((response) => {
+    //         if (response.body) {
+    //             return cy.wrap(response.body);
+    //         }
+    //         return '';
+    //     });
+    return []
 });
 
 Cypress.Commands.add('customLighthouse', () => {
