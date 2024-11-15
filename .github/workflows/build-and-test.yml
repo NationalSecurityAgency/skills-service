@@ -234,14 +234,12 @@ jobs:
     steps:
       - name: Install libs
         run: |
-          apt-get update
-          apt-get install -y postgresql postgresql-contrib
+          apt update
+          apt install -y postgresql postgresql-contrib
           echo "Postgres starting:"
-          su - postgres
-          postgres -D /usr/local/pgsql/data
-          psql
-#          echo "Postgres status:"
-#          systemctl postgresql status
+          service postgresql start
+          echo "Postgres status:" 
+          service postgresql status
 
   ui-tests-against-postgres-cypress-dashboard:
     if: github.event_name == 'schedule-never'
