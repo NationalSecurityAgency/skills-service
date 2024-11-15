@@ -239,7 +239,7 @@ jobs:
           systemctl list-dependencies postgresql
           echo "Postgres starting:"
           su - postgres
-          postgresql
+          postgres -D /usr/local/pgsql/data
           psql
 #          echo "Postgres status:"
 #          systemctl postgresql status
