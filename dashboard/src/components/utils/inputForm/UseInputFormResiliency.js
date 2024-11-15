@@ -87,12 +87,15 @@ export const useInputFormResiliency = () => {
     indexedDb.clear(operationsContainer.componentName)
   }
 
-  const stop = () => {
+  const stop = (clearData = true) => {
     if (watcherContainer.unwatch){
       watcherContainer.unwatch()
     }
-    indexedDb.clear(operationsContainer.componentName)
+    if (clearData) {
+      indexedDb.clear(operationsContainer.componentName)
+    }
   }
+
 
   return {
     init,

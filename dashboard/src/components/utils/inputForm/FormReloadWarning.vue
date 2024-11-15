@@ -35,12 +35,13 @@ const handleDiscard = () => {
     :closable="false" :visible="visible">
     <template #container>
       <div class="flex w-full p-message-wrapper">
-        <div class="p-message-text">
+        <div class="p-message-text" data-cy="contentRestoredMessage">
           <i class="fas fa-trash-restore pr-2 text-xl" aria-hidden="true"></i>
           Form's values have been restored from backup.
         </div>
         <div class="flex-1 text-right">
           <SkillsButton
+            data-cy="discardContentButton"
             label="Discard Restored"
             icon="fas fa-trash"
             severity="warning"
