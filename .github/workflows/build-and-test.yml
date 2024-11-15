@@ -239,9 +239,10 @@ jobs:
           service postgresql start
           echo "Postgres status:" 
           service postgresql status
-          su - postgresql
+          su - postgres
           psql -c "CREATE DATABASE skills;"
           psql -c "ALTER USER postgres WITH PASSWORD 'skillsPassword';"
+          exit
 
   ui-tests-against-postgres-cypress-dashboard:
     if: github.event_name == 'schedule-never'
