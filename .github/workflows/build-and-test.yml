@@ -235,10 +235,10 @@ jobs:
         run: |
           apt-get update
           apt-get install -y postgresql postgresql-contrib
+          echo "Postgres starting:"
+          systemctl postgresql start
           su - postgres
           psql
-#          echo "Postgres starting:"
-#          systemctl postgresql start
 #          echo "Postgres status:"
 #          systemctl postgresql status
 
