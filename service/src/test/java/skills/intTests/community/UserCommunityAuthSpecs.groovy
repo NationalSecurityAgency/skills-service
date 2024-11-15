@@ -471,6 +471,38 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         e.message.contains("This project is part of one or more Admin Groups that has not enabled user community protection")
     }
 
+    def "cannot enable UC protection on project if non-UC group is assigned to it already, multiple members in group"() {
+
+        String userCommunityUserId =  skillsService.userName
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def otherUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService otherUserCommunityUser = createService(otherUserCommunityUserId)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        def adminGroup = createAdminGroup(1)
+        adminGroup.enableProtectedUserCommunity = false
+        skillsService.createAdminGroupDef(adminGroup)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserCommunityUserId)
+
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        when:
+
+        proj.enableProtectedUserCommunity = true
+        skillsService.updateProject(proj)
+
+        then:
+
+        true
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("This project is part of one or more Admin Groups that has not enabled user community protection")
+    }
+
     String extractInviteFromEmail(String emailBody) {
         def regex = /join-project\/([^\/]+)\/([^?]+)/
         def matcher = emailBody =~ regex
