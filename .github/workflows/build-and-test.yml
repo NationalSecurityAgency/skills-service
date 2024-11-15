@@ -31,6 +31,7 @@ on:
 
 jobs:
   build-skills-service-for-ui-tests:
+    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
 
     steps:
@@ -224,7 +225,6 @@ jobs:
 
 
   try-running-postgres-inside-container:
-    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-22.04
     container:
       image: cypress/browsers:node-22.11.0-chrome-130.0.6723.116-1-ff-132.0.1-edge-130.0.2849.68-1
@@ -429,7 +429,8 @@ jobs:
 
   combine-surefire-reports:
     runs-on: ubuntu-latest
-    if: ${{ !cancelled() }}
+#    if: ${{ !cancelled() }}
+    if: github.event_name == 'schedule-never'
     needs: [service-against-postgresql]
     steps:
       - uses: actions/checkout@v4

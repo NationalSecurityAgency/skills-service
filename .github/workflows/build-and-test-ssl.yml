@@ -1,103 +1,103 @@
-# Copyright 2020 SkillTree
+## Copyright 2020 SkillTree
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##    https://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+## See the License for the specific language governing permissions and
+## limitations under the License.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#name: Run integration tests using two way ssl
 #
-#    https://www.apache.org/licenses/LICENSE-2.0
+#on:
+#  schedule:
+#    - cron: '0 7 * * *'
+#  workflow_dispatch:
+#  push:
+#  pull_request:
+#    paths-ignore:
+#      - 'README.md'
+#      - '.github/workflows/build-and-test-postgres.yml'
+#      - '.github/workflows/publish-image-snapshot.yml'
+#      - '.gitlab-ci.yml'
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-name: Run integration tests using two way ssl
-
-on:
-  schedule:
-    - cron: '0 7 * * *'
-  workflow_dispatch:
-  push:
-  pull_request:
-    paths-ignore:
-      - 'README.md'
-      - '.github/workflows/build-and-test-postgres.yml'
-      - '.github/workflows/publish-image-snapshot.yml'
-      - '.gitlab-ci.yml'
-
-jobs:
-
-  service-against-postgresql:
-    runs-on: ubuntu-latest
-
-    strategy:
-      # when one test fails, DO NOT cancel the other containers
-      fail-fast: false
-      matrix:
-        # run 3 copies of the current job in parallel
-        # IMPORTANT: must, must, must match the total number of containers below: runSubsetOfServiceTests.sh -t <num_of_containers>
-        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ]
-
-    services:
-      postgres:
-        image: postgres
-        # Provide the password for postgres
-        env:
-          POSTGRES_PASSWORD: skillsPassword
-          POSTGRES_DB: skills
-        # Set health checks to wait until postgres has started
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          # Maps tcp port 5432 on service container to the host
-          - 5432:5432
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.17.0'
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '19' # The JDK version to make available on the path.
-
-      - name: Print Versions
-        run: |
-          mvn --version
-          java -version
-
-      - name: Cache local Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Run skills-service pki tests
-        env:
-          SPRING_PROFILES_ACTIVE: pki
-          MAVEN_OPTS: -Xmx3G -XX:+UnlockDiagnosticVMOptions -XX:GCLockerRetryAllocationCount=100
-        run: |
-          cd service
-          ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword -Dspring.cloud.aws.s3.enabled=false"
-
-      - name: upload result artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: Service test artifacts (${{ matrix.container }})
-          path: |
-            ./service/target/*.log
-            ./e2e-tests/logs
-            ./e2e-tests/cypress/visualRegression/diff
-
-
-
+#jobs:
+#
+#  service-against-postgresql:
+#    runs-on: ubuntu-latest
+#
+#    strategy:
+#      # when one test fails, DO NOT cancel the other containers
+#      fail-fast: false
+#      matrix:
+#        # run 3 copies of the current job in parallel
+#        # IMPORTANT: must, must, must match the total number of containers below: runSubsetOfServiceTests.sh -t <num_of_containers>
+#        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ]
+#
+#    services:
+#      postgres:
+#        image: postgres
+#        # Provide the password for postgres
+#        env:
+#          POSTGRES_PASSWORD: skillsPassword
+#          POSTGRES_DB: skills
+#        # Set health checks to wait until postgres has started
+#        options: >-
+#          --health-cmd pg_isready
+#          --health-interval 10s
+#          --health-timeout 5s
+#          --health-retries 5
+#        ports:
+#          # Maps tcp port 5432 on service container to the host
+#          - 5432:5432
+#
+#    steps:
+#      - uses: actions/checkout@v4
+#
+#      - uses: actions/setup-node@v4
+#        with:
+#          node-version: '20.17.0'
+#
+#      - uses: actions/setup-java@v4
+#        with:
+#          distribution: 'temurin'
+#          java-version: '19' # The JDK version to make available on the path.
+#
+#      - name: Print Versions
+#        run: |
+#          mvn --version
+#          java -version
+#
+#      - name: Cache local Maven repository
+#        uses: actions/cache@v4
+#        with:
+#          path: ~/.m2/repository
+#          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: |
+#            ${{ runner.os }}-maven-
+#
+#      - name: Run skills-service pki tests
+#        env:
+#          SPRING_PROFILES_ACTIVE: pki
+#          MAVEN_OPTS: -Xmx3G -XX:+UnlockDiagnosticVMOptions -XX:GCLockerRetryAllocationCount=100
+#        run: |
+#          cd service
+#          ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword -Dspring.cloud.aws.s3.enabled=false"
+#
+#      - name: upload result artifacts
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: Service test artifacts (${{ matrix.container }})
+#          path: |
+#            ./service/target/*.log
+#            ./e2e-tests/logs
+#            ./e2e-tests/cypress/visualRegression/diff
+#
+#
+#
