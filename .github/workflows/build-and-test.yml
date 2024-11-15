@@ -222,7 +222,7 @@ jobs:
         
 
   ui-tests-against-postgres-cypress-dashboard:
-    if: github.event_name == 'schedule-never'
+#    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-22.04
 #    container:
 #      image: cypress/browsers:node-20.6.1-chrome-116.0.5845.187-1-ff-117.0-edge-116.0.1938.76-1
@@ -235,7 +235,7 @@ jobs:
       fail-fast: false
       matrix:
         # run in parallel
-        containers: [1]
+        containers: [1,2,3,4,5,6,7,8,9,10]
 
     services:
       postgres:
@@ -300,7 +300,7 @@ jobs:
           group: 'skills-service tests'
           tag: "${{ github.workflow }}"
           browser: chrome
-          spec: cypress/e2e/quiz/grade_quiz_spec.js
+#          spec: cypress/e2e/quiz/grade_quiz_spec.js
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
