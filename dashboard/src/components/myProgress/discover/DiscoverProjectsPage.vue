@@ -194,6 +194,7 @@ const contactProject = (name, id) => {
 
             <SkillsDataTable
                 class="border-1 surface-border border-round border-surface"
+                style="max-width: 100%"
                 :value="projects"
                 stripedRows
                 paginator
