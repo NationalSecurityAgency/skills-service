@@ -226,4 +226,25 @@ describe('Community Admin Group Tests', () => {
         cy.get('[data-cy="restrictCommunity"]').should('not.exist')
     })
 
+    it('cannot enable UC protection for project that belongs to a non-UC admin group', function () {
+        cy.request('PUT', `/admin/admin-group-definitions/adminGroup2/users/${allDragonsUser}/roles/ROLE_ADMIN_GROUP_OWNER`);
+        cy.addProjectToAdminGroupDef(2, 2)
+
+        cy.visit('/administrator/')
+        cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="projectCard_proj2"] [data-cy="editProjBtn"]').click()
+        cy.get('[data-cy="markdownEditorInput"]')
+
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="communityProtectionErrors"]').should('not.exist')
+
+        cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="communityProtectionErrors"]').contains('Unable to restrict access to Divine Dragon users only')
+        cy.get('[data-cy="communityProtectionErrors"]').contains('Has existing allDragons@email.org user that is not authorized')
+        cy.get('[data-cy="communityProtectionErrors"]').contains('This project is part of one or more Admin Groups that has not enabled user community protection')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="communityRestrictionWarning"]').should('not.exist')
+    })
+
+
 });
