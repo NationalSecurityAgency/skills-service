@@ -236,9 +236,12 @@ jobs:
           apt-get update
           apt-get install -y postgresql postgresql-client postgresql-contrib
           psql --version
+          echo "Postgres status:"
           service postgresql status
-          apt-get install fonts-noto-color-emoji
-          systemctl start postgresql.service
+          echo "Postgres starting:"
+          service postgresql start
+          echo "Postgres status:"
+          service postgresql status
 
   ui-tests-against-postgres-cypress-dashboard:
     if: github.event_name == 'schedule-never'
