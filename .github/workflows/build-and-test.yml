@@ -222,8 +222,26 @@ jobs:
             ./e2e-tests/mochawesome-report
         
 
+
+  try-running-postgres-inside-container:
+    if: github.event_name == 'schedule-never'
+    runs-on: ubuntu-22.04
+    container:
+      image: cypress/browsers:node-22.11.0-chrome-130.0.6723.116-1-ff-132.0.1-edge-130.0.2849.68-1
+
+
+    steps:
+      - name: Install libs
+        run: |
+          apt-get update
+          apt-get install -y postgresql postgresql-client postgresql-contrib
+          psql --version
+          service postgresql status
+          apt-get install fonts-noto-color-emoji
+          systemctl start postgresql.service
+
   ui-tests-against-postgres-cypress-dashboard:
-#    if: github.event_name == 'schedule-never'
+    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-22.04
     container:
       image: cypress/browsers:node-22.11.0-chrome-130.0.6723.116-1-ff-132.0.1-edge-130.0.2849.68-1
