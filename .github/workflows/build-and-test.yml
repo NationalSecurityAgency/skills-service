@@ -235,6 +235,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y postgresql postgresql-contrib
+          systemctl list-dependencies postgresql
           echo "Postgres starting:"
           systemctl postgresql start
           su - postgres
@@ -433,7 +434,7 @@ jobs:
     runs-on: ubuntu-latest
 #    if: ${{ !cancelled() }}
     if: github.event_name == 'schedule-never'
-    needs: [service-against-postgresql]
+#    needs: [service-against-postgresql]
     steps:
       - uses: actions/checkout@v4
 
