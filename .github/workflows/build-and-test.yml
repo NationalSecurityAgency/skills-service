@@ -235,9 +235,6 @@ jobs:
         run: |
           apt-get update
           apt-get install -y postgresql postgresql-client postgresql-contrib
-          psql --version
-          echo "Postgres status:"
-          systemctl postgresql status
           echo "Postgres starting:"
           systemctl postgresql start
           echo "Postgres status:"
