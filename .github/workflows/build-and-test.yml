@@ -73,13 +73,13 @@ jobs:
 
   ui-tests-against-postgres:
 #    if: github.event_name != 'schedule'
-    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
     needs: [build-skills-service-for-ui-tests]
     strategy:
       fail-fast: false
       matrix:
         #IMPORTANT: must, must, must match the total number of containers below: runSubsetOfCypressTests.sh.sh -t <num_of_containers>
+#        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 ]
         container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
     services:
@@ -184,8 +184,7 @@ jobs:
 
   combine-cypress-mochawesome-results:
     runs-on: ubuntu-latest
-#    if: ${{ !cancelled() }}
-    if: github.event_name == 'schedule-never'
+    if: ${{ !cancelled() }}
     needs: [ui-tests-against-postgres]
     steps:
       - uses: actions/checkout@v4
@@ -223,29 +222,11 @@ jobs:
             ./e2e-tests/mochawesome-report
         
 
-
-  try-running-postgres-inside-container:
-    runs-on: ubuntu-22.04
-    container:
-      image: cypress/browsers:node-22.11.0-chrome-130.0.6723.116-1-ff-132.0.1-edge-130.0.2849.68-1
-
-
-    steps:
-      - name: Run Postgres
-        run: |
-          apt update
-          apt install -y postgresql postgresql-contrib
-          echo "Postgres starting:"
-          service postgresql start
-          echo "Postgres status:" 
-          service postgresql status
-          su - postgres bash -c "psql -c \"CREATE DATABASE skills;\""
-          su - postgres bash -c "psql -c \"ALTER USER postgres WITH PASSWORD 'skillsPassword';\""
-
   ui-tests-against-postgres-cypress-dashboard:
+    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-22.04
-    container:
-      image: cypress/browsers:node-22.11.0-chrome-130.0.6723.116-1-ff-132.0.1-edge-130.0.2849.68-1
+#    container:
+#      image: cypress/browsers:node-20.6.1-chrome-116.0.5845.187-1-ff-117.0-edge-116.0.1938.76-1
     needs: [build-skills-service-for-ui-tests]
     strategy:
       # when one test fails, DO NOT cancel the other
@@ -255,7 +236,7 @@ jobs:
       fail-fast: false
       matrix:
         # run in parallel
-        containers: [1,2,3,4,5,6,7,8,9,10]
+        containers: [1]
 
     services:
       postgres:
@@ -276,27 +257,12 @@ jobs:
           - 5432:5432
 
     steps:
-#      - name: Install libs
-#        run: |
-#          sudo apt-get update
-#          sudo apt-get install -y postgresql-client
-#          sudo psql --version
-#          sudo apt-get install fonts-noto-color-emoji
-
-      - name: Run Postgres
+      - name: Install libs
         run: |
-          apt update
-          apt install -y postgresql postgresql-contrib
-          echo "Postgres starting:"
-          service postgresql start
-          echo "Postgres status:" 
-          service postgresql status
-          su - postgres bash -c "psql -c \"CREATE DATABASE skills;\""
-          su - postgres bash -c "psql -c \"ALTER USER postgres WITH PASSWORD 'skillsPassword';\""
-#          su - postgres
-#          psql -c "CREATE DATABASE skills;"
-#          psql -c "ALTER USER postgres WITH PASSWORD 'skillsPassword';"
-#          exit
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          sudo psql --version
+          sudo apt-get install fonts-noto-color-emoji
 
       - uses: actions/checkout@v4
 
@@ -335,7 +301,7 @@ jobs:
           group: 'skills-service tests'
           tag: "${{ github.workflow }}"
           browser: chrome
-#          spec: cypress/e2e/quiz/grade_quiz_spec.js
+          spec: cypress/e2e/quiz/grade_quiz_spec.js
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -358,7 +324,6 @@ jobs:
 
 
   service-against-postgresql:
-    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
     strategy:
       # when one test fails, DO NOT cancel the other containers
@@ -438,9 +403,8 @@ jobs:
 
   combine-surefire-reports:
     runs-on: ubuntu-latest
-#    if: ${{ !cancelled() }}
-    if: github.event_name == 'schedule-never'
-#    needs: [service-against-postgresql]
+    if: ${{ !cancelled() }}
+    needs: [service-against-postgresql]
     steps:
       - uses: actions/checkout@v4
 
