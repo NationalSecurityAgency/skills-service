@@ -1933,10 +1933,18 @@ class SkillsService {
         return wsHelper.apiPost(url, quizAttemptReq)
     }
 
-    def startQuizAttempt(String quizId, String userId = null) {
+    def startQuizAttempt(String quizId, String userId = null, Map additionalParams = null) {
         assert quizId
         String url = "/quizzes/${quizId}/attempt"
-        return wsHelper.apiPost(url, userId ? [userId : userId] : null)
+        def combinedParams = [:]
+        if (userId) {
+            combinedParams.userId = userId
+        }
+        if (additionalParams) {
+            combinedParams.putAll(additionalParams)
+        }
+
+        return wsHelper.apiPost(url, combinedParams)
     }
     def reportQuizAnswer(String quizId, Integer attemptId, Integer answerId, Map params = [isSelected:true]) {
         String url = "/quizzes/${quizId}/attempt/${attemptId}/answers/${answerId}"
