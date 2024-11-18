@@ -32,7 +32,7 @@
         <guava.version>29.0-jre</guava.version>
 
         <!-- !!!!!IMPORTANT!!!!!: when changing the springboot.version property, make sure you also change it in the spring-boot-starter-parent definition -->
-        <springboot.version>3.2.10</springboot.version>
+        <springboot.version>3.2.11</springboot.version>
         <springcloud.version>3.1.1</springcloud.version>
 
         <greenmail.version>2.0.0</greenmail.version>
@@ -53,7 +53,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <!-- !!!!!IMPORTANT!!!!!: when changing this version make sure to also update springboot.version property -->
-        <version>3.2.10</version>
+        <version>3.2.11</version>
         <relativePath/>
     </parent>
 
