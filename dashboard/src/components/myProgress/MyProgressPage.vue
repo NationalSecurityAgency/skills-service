@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useMyProgressState } from '@/stores/UseMyProgressState.js'
 import ProgressAndRankingSplash from '@/components/myProgress/ProgressAndRankingSplash.vue'
 import InfoSnapshotCard from '@/components/myProgress/InfoSnapshotCard.vue'
@@ -26,17 +26,19 @@ import MyProgressTitle from '@/components/myProgress/MyProgressTitle.vue'
 import MuQuizzesCard from "@/components/myProgress/MuQuizzesCard.vue";
 
 const myProgressState = useMyProgressState()
-
+const loading = ref(true)
 onMounted(() => {
-  myProgressState.loadMyProgressSummary()
+  myProgressState.loadMyProgressSummary().then(() => {
+    loading.value = false
+  })
 })
 
 </script>
 
 <template>
   <div>
-    <skills-spinner :is-loading="myProgressState.isLoadingMyProgressSummary" class="mt-8" />
-    <div v-if="!myProgressState.isLoadingMyProgressSummary">
+    <skills-spinner :is-loading="myProgressState.isLoadingMyProgressSummary || loading" class="mt-8" />
+    <div v-if="!myProgressState.isLoadingMyProgressSummary && !loading">
       <progress-and-ranking-splash v-if="!myProgressState.hasProjects" />
       <div v-if="myProgressState.hasProjects">
         <my-progress-title title="My Progress">
