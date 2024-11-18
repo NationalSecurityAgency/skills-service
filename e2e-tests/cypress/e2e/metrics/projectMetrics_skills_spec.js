@@ -541,7 +541,7 @@ describe('Metrics Tests - Skills', () => {
 
         cy.get('[data-cy=skillsBTableTotalRows]').should('contain', 2);
         cy.get('[data-cy=skillsNavigator-skillNameFilter]')
-            .type('not so{enter}');
+            .type('not so{enter}', { delay: 100, waitForAnimations: true });
         cy.get('[data-cy=skillsBTableTotalRows]').should('contain', 1);
     });
 
