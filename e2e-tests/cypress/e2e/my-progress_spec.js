@@ -776,14 +776,14 @@ describe('My Progress Tests', () => {
 
         cy.get('[data-cy="numProjectsContributed"]').contains('1');
         cy.get('[data-cy="numProjectsAvailable"]').contains('3');
-        cy.get('.apexcharts-datalabels-group > .apexcharts-datalabel-value').contains('33 %');
+        cy.get('.apexcharts-datalabels-group > .apexcharts-datalabel-value').contains('33');
 
         cy.get('[data-cy="remove-proj3Btn"]').click()
         cy.get('[data-pc-name="acceptbutton"]').click()
 
         cy.get('[data-cy="numProjectsContributed"]').contains('1');
         cy.get('[data-cy="numProjectsAvailable"]').contains('2');
-        cy.get('.apexcharts-datalabels-group > .apexcharts-datalabel-value').contains('50 %');
+        cy.get('.apexcharts-datalabels-group > .apexcharts-datalabel-value').contains('50');
 
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1']);
         cy.get('[data-cy="project-link-card-proj3"]').should('not.exist');
@@ -796,7 +796,7 @@ describe('My Progress Tests', () => {
 
         cy.get('[data-cy="numProjectsContributed"]').contains('0');
         cy.get('[data-cy="numProjectsAvailable"]').contains('1');
-        cy.get('.apexcharts-datalabels-group > .apexcharts-datalabel-value').contains('0 %');
+        cy.get('.apexcharts-datalabels-group > .apexcharts-datalabel-value').contains('0');
     });
 
     if (!Cypress.env('oauthMode')) {

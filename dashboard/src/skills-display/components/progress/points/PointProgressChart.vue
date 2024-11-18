@@ -271,7 +271,8 @@ const zoomed = (chartContext, { xaxis, yaxis }) => {
             </chart-overlay-msg>
           </div>
           <div v-if="hasData" data-cy="pointHistoryChartWithData">
-            <apexchart ref="ptChart" id="points-chart"
+            <apexchart v-if="chartOptions?.chart?.type"
+                       ref="ptChart" id="points-chart"
                        :options="chartOptions"
                        @animationEnd="animationEnded = true"
                        @zoomed="zoomed"

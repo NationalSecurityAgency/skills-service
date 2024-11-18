@@ -775,27 +775,18 @@ describe('Settings Tests', () => {
             .as('loadUserInfo');
         cy.intercept('GET', '/public/config')
             .as('loadConfig');
-        cy.visit('/administrator/');
-        // cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.visit('/settings/system');
         cy.wait('@loadUserInfo');
-        cy.wait('@getProjects')
-
-        cy.get('[data-cy="settings-button"] button')
-            .click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings').click();
-        cy.get('[data-cy="nav-System"]')
-            .click();
-
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=resetTokenExpiration]')
             .should('have.value', '2H');
 
         cy.get('[data-cy=resetTokenExpiration]')
             .type('{selectall}2H25M22S');
-        cy.get('[data-cy=customHeader')
-            .type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
-        cy.get('[data-cy=customFooter')
-            .type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
+        cy.get('[data-cy=customHeader]')
+            .type('<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
+        cy.get('[data-cy=customFooter]')
+            .type('<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
         cy.get('[data-cy=saveSystemSettings]')
             .click();
         cy.wait('@loadConfig');
@@ -807,9 +798,9 @@ describe('Settings Tests', () => {
         cy.wait('@loadSystemSettings');
         cy.get('[data-cy=resetTokenExpiration]')
             .should('have.value', '2H25M22S');
-        cy.get('[data-cy=customHeader')
+        cy.get('[data-cy=customHeader]')
             .should('have.value', '<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
-        cy.get('[data-cy=customFooter')
+        cy.get('[data-cy=customFooter]')
             .should('have.value', '<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
 
         //confirm that header/footer persist after logging out
@@ -1091,24 +1082,13 @@ describe('Settings Tests', () => {
             .as('loadUserInfo');
         cy.intercept('GET', '/public/config')
             .as('loadConfig');
-        cy.visit('/administrator/');
-        // cy.get('[data-cy="inception-button"]').contains('Level');
-        // cy.get('[data-cy="inception-button"]').contains('Level');
-        cy.wait('@loadUserInfo');
-        cy.wait('@getProjects')
-
-        cy.get('[data-cy="settings-button"] button')
-            .click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings')
-            .click();
-        cy.get('[data-cy="nav-System"]')
-            .click();
-
+        cy.visit('/settings/system');
+        cy.wait('@loadUserInfo')
         cy.wait('@loadSystemSettings');
-        cy.get('[data-cy=customHeader')
-            .type('{selectall}<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
-        cy.get('[data-cy=customFooter')
-            .type('{selectall}<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
+        cy.get('[data-cy=customHeader]')
+            .type('<div id="customHeaderDiv" style="font-size:3em;color:red">HEADER</div>');
+        cy.get('[data-cy=customFooter]')
+            .type('<div id="customFooterDiv" style="font-size:3em;color:red">FOOTER</div>');
         cy.get('[data-cy=saveSystemSettings]')
             .click();
         cy.wait('@loadConfig');
@@ -1165,30 +1145,19 @@ describe('Settings Tests', () => {
     });
 
     it('custom header/footer dynamic variable replacement', () => {
-
         cy.intercept('GET', '/root/getSystemSettings')
             .as('loadSystemSettings');
         cy.intercept('GET', '/app/userInfo')
             .as('loadUserInfo');
         cy.intercept('GET', '/public/config')
             .as('loadConfig');
-        cy.visit('/administrator/');
-        // cy.get('[data-cy="inception-button"]').contains('Level');
-        // cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.visit('/settings/system');
         cy.wait('@loadUserInfo');
-        cy.wait('@getProjects')
-
-        cy.get('[data-cy="settings-button"] button')
-            .click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings')
-            .click();
-        cy.get('[data-cy="nav-System"]')
-            .click();
-
         cy.wait('@loadSystemSettings');
-        cy.get('[data-cy=customHeader')
+        cy.contains('supports ISO 8601 time duration format')
+        cy.get('[data-cy=customHeader]')
             .type('<div id="customHeaderDiv"><span id="chVersion">{{release.version}}</span> <span id="chBuildDate">{{build.date}}</span></div>', { parseSpecialCharSequences: false });
-        cy.get('[data-cy=customFooter')
+        cy.get('[data-cy=customFooter]')
             .type('<div id="customFooterDiv"><span id="cfVersion">{{release.version}}</span> <span id="cfBuildDate">{{build.date}}</span></div>', { parseSpecialCharSequences: false });
         cy.get('[data-cy=saveSystemSettings]')
             .click();

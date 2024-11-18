@@ -36,7 +36,7 @@ const chartAxisColor = () => {
 const series = ref([]);
 const chartOptions = {
   chart: {
-    height: 250,
+    height: 350,
     type: 'area',
     toolbar: {
       show: true,
@@ -131,7 +131,7 @@ const loadData = () => {
     </template>
     <template #content>
       <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">
-        <apexchart type="area" height="350" :options="chartOptions" :series="series" class="mt-4"></apexchart>
+        <apexchart v-if="chartOptions?.chart?.height" type="area" :height="chartOptions.chart.height" :options="chartOptions" :series="series" class="mt-4"></apexchart>
       </metrics-overlay>
     </template>
   </Card>
