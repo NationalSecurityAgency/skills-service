@@ -726,14 +726,13 @@ describe('Global Badges Tests', () => {
             version: 0,
         });
 
-        cy.visit('/administrator/');
+        cy.visit('/administrator/globalBadges/');
         cy.get('[data-cy="inception-button"]').contains('Level');
-
-        cy.clickNav('Global Badges');
         cy.wait('@getGlobalBadges');
 
         cy.get('[data-cy="btn_Global Badges"]').click();
 
+        cy.wait(1000)
         cy.get('[data-cy="name"]')
             .type('A Badge', { delay: 100 })
         cy.wait('@nameExists');

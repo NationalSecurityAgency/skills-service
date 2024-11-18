@@ -34,7 +34,7 @@ const chartAxisColor = () => {
 }
 
 const series = ref([]);
-const chartOptions = {
+const chartOptions = ref ({
   chart: {
     height: 350,
     type: 'area',
@@ -95,7 +95,7 @@ const chartOptions = {
   tooltip: {
     theme: themeHelper.isDarkTheme ? 'dark' : 'light',
   },
-};
+});
 const loading = ref(true);
 const hasData = ref(false);
 

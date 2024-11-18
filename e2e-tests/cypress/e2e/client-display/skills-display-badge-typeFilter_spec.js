@@ -94,14 +94,12 @@ describe('Skills Display Badge Type Filter', () => {
 
     cy.loginAsProxyUser();
 
-    cy.cdVisit('/');
-    cy.cdClickBadges();
-
+    cy.cdVisit('/badges');
     cy.get('[data-cy="badgeDetailsLink_badge1"]')
     cy.get('[data-cy="badgeDetailsLink_badge2"]')
     cy.get('[data-cy="badgeDetailsLink_globalBadge1"]')
 
-
+    cy.wait(1000)
     cy.get('[data-cy="badgeSearchInput"]').type('1')
 
     cy.get('[data-cy="badgeDetailsLink_badge1"]')
@@ -131,11 +129,11 @@ describe('Skills Display Badge Type Filter', () => {
     cy.assignSkillToBadge(1, 1, 2);
     cy.createBadge(1, 1, { enabled: true });
 
-    cy.cdVisit('/');
-    cy.cdClickBadges();
+    cy.cdVisit('/badges');
 
     cy.get('[data-cy="badgeDetailsLink_badge1"]')
 
+    cy.wait(1000)
     cy.get('[data-cy="badgeSearchInput"]').type('bla')
     cy.get('[data-cy="badgeDetailsLink_badge1"]').should('not.exist')
 
