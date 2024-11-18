@@ -73,6 +73,7 @@ jobs:
 
   ui-tests-against-postgres:
 #    if: github.event_name != 'schedule'
+    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
     needs: [build-skills-service-for-ui-tests]
     strategy:
@@ -184,7 +185,8 @@ jobs:
 
   combine-cypress-mochawesome-results:
     runs-on: ubuntu-latest
-    if: ${{ !cancelled() }}
+#    if: ${{ !cancelled() }}
+    if: github.event_name == 'schedule-never'
     needs: [ui-tests-against-postgres]
     steps:
       - uses: actions/checkout@v4
@@ -223,7 +225,7 @@ jobs:
         
 
   ui-tests-against-postgres-cypress-dashboard:
-    if: github.event_name == 'schedule-never'
+#    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-22.04
 #    container:
 #      image: cypress/browsers:node-20.6.1-chrome-116.0.5845.187-1-ff-117.0-edge-116.0.1938.76-1
@@ -236,7 +238,7 @@ jobs:
       fail-fast: false
       matrix:
         # run in parallel
-        containers: [1]
+        containers: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 
     services:
       postgres:
