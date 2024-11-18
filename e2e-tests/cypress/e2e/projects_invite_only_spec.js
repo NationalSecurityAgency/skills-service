@@ -622,7 +622,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(0).should('contain.text', 'abc@abc.org');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(2).should('contain.text', 'expired');
-        cy.get('[data-cy="deleteInvite"]').eq(0).click();
+        cy.get('[data-cy="controls_abc@abc.org"] [data-cy="deleteInvite"]').click();
         cy.contains('Removal Safety Check').should('be.visible');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me');
         cy.get('[data-cy="saveDialogBtn"]').click();
@@ -697,7 +697,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get(`[data-cy="projectInviteStatusTable"] [data-pc-section="headertitle"]`).contains('Recipient').click()
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(0).should('contain.text', 'abc@abc.org');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(2).should('not.contain.text', 'expired');
-        cy.get('[data-cy="deleteInvite"]').eq(0).click();
+        cy.get('[data-cy="controls_abc@abc.org"] [data-cy="deleteInvite"]').click();
         cy.contains('Removal Safety Check').should('be.visible');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me');
         cy.get('[data-cy="saveDialogBtn"]').click();

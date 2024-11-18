@@ -823,15 +823,11 @@ describe('Settings Tests', () => {
         cy.intercept('GET', '/root/getSystemSettings')
             .as('loadSystemSettings');
 
-        cy.visit('/administrator/');
+        cy.visit('/settings/email');
         cy.wait('@loadUserInfo');
-        cy.wait('@getProjects')
-
-        cy.get('[data-cy="settings-button"] button').click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings').click();
-        cy.get('[data-cy="nav-Email"]').click();
         cy.wait('@loadEmailSettings');
 
+        cy.wait(1000)
         cy.get('[data-cy=host]')
             .type('{selectall}localhost');
         cy.get('[data-cy=port]')

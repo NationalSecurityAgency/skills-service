@@ -247,7 +247,7 @@ defineExpose({
             <i class="fas fa-tools mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
           </template>
           <template #body="slotProps">
-            <div>
+            <div :data-cy="`controls_${slotProps.data.recipientEmail}`">
               <ButtonGroup>
                 <SkillsButton
                   icon="fas fa-hourglass-half"
