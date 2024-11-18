@@ -37,7 +37,7 @@ const chartAxisColor = () => {
 
 const inProgressSeries = ref([]);
 const achievedSeries = ref([]);
-const chartOptions = {
+const chartOptions = ref({
   chart: {
     height: 250,
     width: 250,
@@ -107,7 +107,7 @@ const chartOptions = {
   legend: {
     show: false,
   },
-};
+})
 const loading = ref(true);
 
 onMounted(() => {
@@ -118,11 +118,11 @@ const loadData = () => {
   loading.value = true;
   MetricsService.loadChart(route.params.projectId, 'skillAchievementsByTagBuilder', { skillId: route.params.skillId, userTagKey: props.tag.key })
       .then((dataFromServer) => {
-        chartOptions.labels = Object.keys(dataFromServer);
+        chartOptions.value.labels = Object.keys(dataFromServer);
         const inProgressData = [];
         const achievedData = [];
 
-        chartOptions.labels.forEach((label) => {
+        chartOptions.value.labels.forEach((label) => {
           inProgressData.push({ x: label, y: dataFromServer[label].numberInProgress });
           achievedData.push({ x: label, y: dataFromServer[label].numberAchieved });
         });

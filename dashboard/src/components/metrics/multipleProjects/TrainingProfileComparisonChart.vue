@@ -58,7 +58,7 @@ const chartRef = ref();
 const loading = ref(true);
 const hasData = ref(false);
 const seriesInternal = ref([]);
-const options = {
+const options = ref({
   chart: {
     type: 'bar',
     height: 350,
@@ -102,7 +102,7 @@ const options = {
   tooltip: {
     theme: themeHelper.isDarkTheme ? 'dark' : 'light',
   }
-};
+})
 
 onMounted(() => {
   seriesInternal.value = [{

@@ -101,6 +101,7 @@ describe('Root Pin and Unpin Tests', () => {
 
                 cy.get('[data-cy=pinProjectsClearSearch]')
                     .click();
+                cy.wait(1000)
                 cy.get('[data-cy=pinProjects]')
                     .contains('Search Project Catalog');
 
@@ -122,7 +123,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.get(headerSelector)
                     .contains('Name')
                     .click();
-
+                cy.wait(1000)
                 cy.get(rowSelector)
                     .should('have.length', 5)
                     .as('cyRows');
@@ -279,6 +280,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.get('[data-cy=pinProjectsLoadAllButton]')
                     .click();
                 cy.get('[data-pc-section="headertitle"]').contains('Name').click()
+                cy.wait(1000)
                 cy.get('[data-cy=skillsBTableTotalRows]')
                     .contains('5');
                 cy.get(rowSelector)
@@ -489,6 +491,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.get(headerSelector)
                     .contains('Name')
                     .click();
+                cy.wait(1000)
 
                 for (let i = 0; i < 5; i += 1) {
                     cy.get('@cyRows')
@@ -664,6 +667,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.get(headerSelector)
                     .contains('Name')
                     .click();
+                cy.wait(1000)
 
                 const tableSelector = '[data-cy="pinProjectsSearchResults"]';
                 cy.validateTable(tableSelector, [
@@ -693,7 +697,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.get(headerSelector)
                     .contains('Name')
                     .click();
-
+                cy.wait(1000)
                 cy.validateTable(tableSelector, [
                     [{
                         colIndex: 0,
@@ -910,6 +914,7 @@ describe('Root Pin and Unpin Tests', () => {
               cy.get(headerSelector)
                 .contains('Name')
                 .click();
+                cy.wait(1000)
                 cy.get(rowSelector)
                     .should('have.length', 2)
                     .as('cyRows');
@@ -1008,6 +1013,7 @@ describe('Root Pin and Unpin Tests', () => {
 
                 cy.get('[data-cy=pinProjectsClearSearch]')
                     .click();
+                cy.wait(1000)
                 cy.get('[data-cy=pinProjects]')
                     .contains('Search Project Catalog');
 
@@ -1026,7 +1032,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.get(headerSelector)
                     .contains('Name')
                     .click();
-
+                cy.wait(1000)
                 // pin 1 project
                 const rowSelector = '[data-cy=pinProjectsSearchResults] tbody tr';
                 cy.get(rowSelector)

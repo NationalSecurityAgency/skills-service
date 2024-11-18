@@ -111,6 +111,7 @@ describe('Contact Project Admins Specs', () => {
 
         cy.intercept('/root/users/countAllProjectAdmins')
             .as('countAdmins');
+        cy.intercept('api/projects/Inception/skillsClientVersion').as('reportSkillsClientVersion')
         cy.fixture('vars.json')
             .then((vars) => {
                 cy.login(vars.rootUser, vars.defaultPass);
@@ -122,15 +123,16 @@ describe('Contact Project Admins Specs', () => {
                     .click();
                 cy.wait('@isRoot');
                 cy.wait('@countAdmins');
+                cy.wait('@reportSkillsClientVersion');
                 cy.get('[data-cy=projectAdminCount]')
                     .should('have.text', '4');
                 cy.get('[data-cy=emailUsers-submitBtn]')
                     .should('be.disabled');
 
                 cy.get('[data-cy=emailUsers_subject]')
-                    .type('foooo');
+                    .type('foooo', {delay: 100, waitForAnimations: true});
                 cy.get('[data-cy="markdownEditorInput"]')
-                    .type('thisbody');
+                    .type('thisbody', {delay: 100, waitForAnimations: true});
                 cy.get('[data-cy=emailUsers-submitBtn]')
                     .should('be.enabled');
                 cy.get('[data-cy=emailUsers-submitBtn]')

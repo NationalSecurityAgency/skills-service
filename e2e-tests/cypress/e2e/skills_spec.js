@@ -1223,9 +1223,24 @@ describe('Skills Tests', () => {
     cy.request('POST', `/api/projects/proj1/skills/skill1`, { userId: 'someuser3', timestamp: new Date().getTime() })
     cy.request('POST', `/api/projects/proj1/skills/skill1`, { userId: 'someuser4', timestamp: new Date().getTime() })
 
+    cy.intercept('/admin/projects/proj1/metrics/numUserAchievedOverTimeChartBuilder?skillId=skill1').as('numUserAchievedOverTimeChartBuilder')
+    cy.intercept('/admin/projects/proj1/metrics/binnedUsagePostAchievementMetricsBuilder?skillId=skill1').as('binnedUsagePostAchievementMetricsBuilder')
+    cy.intercept('/admin/projects/proj1/metrics/usagePostAchievementMetricsBuilder?skillId=skill1').as('usagePostAchievementMetricsBuilder')
+    cy.intercept('/admin/projects/proj1/metrics/skillAchievementsByTagBuilder?skillId=skill1&userTagKey=adminOrganization').as('skillAchievementsByTagBuilder')
+    cy.intercept('/admin/projects/proj1/metrics/skillAchievementsByTagBuilder?skillId=skill1&userTagKey=dutyOrganization').as('skillAchievementsByTagBuilder2')
+    cy.intercept('/admin/projects/proj1/metrics/skillEventsOverTimeChartBuilder**').as('skillEventsOverTimeChartBuilder')
+    cy.intercept('/admin/projects/proj1/metrics/usagePostAchievementUsersBuilder**').as('usagePostAchievementUsersBuilder')
     const numTries = 5
     for (let i = 1; i <= numTries; i += 1) {
       cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/metrics')
+      cy.wait('@binnedUsagePostAchievementMetricsBuilder')
+      cy.wait('@numUserAchievedOverTimeChartBuilder')
+      cy.wait('@usagePostAchievementMetricsBuilder')
+      cy.wait('@skillAchievementsByTagBuilder')
+      cy.wait('@skillAchievementsByTagBuilder2')
+      cy.wait('@skillEventsOverTimeChartBuilder')
+      cy.wait('@usagePostAchievementUsersBuilder')
+      cy.wait(2000)
       cy.contains('# Users')
       cy.contains('stopped after achieving')
     }

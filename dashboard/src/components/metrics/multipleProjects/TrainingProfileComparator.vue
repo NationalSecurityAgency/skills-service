@@ -64,7 +64,7 @@ onMounted(() => {
 })
 
 const genDataForCharts = (filter) => {
-
+  loading.value = true;
   numSkillsChart.value.labels = projects.value.selected.map((proj) => proj.name);
   numSkillsChart.value.series = projects.value.selected.map((proj) => proj.numSkills);
 
@@ -129,7 +129,7 @@ const filter = (event) => {
         </AutoComplete>
       </div>
       <div v-if="!loading && enoughProjectsSelected">
-        <div class="flex gap-4 mt-4">
+        <div class="flex flex-column xl:flex-row gap-4 mt-4">
           <div class="flex flex-1">
             <training-profile-comparison-chart :series="numSkillsChart.series" :labels="numSkillsChart.labels"
                                                title="Number of Skills" title-icon="fas fa-graduation-cap" data-cy="numOfSkillsChart"/>
@@ -142,7 +142,7 @@ const filter = (event) => {
                                                data-cy="totalAvailablePointsChart"/>
           </div>
         </div>
-        <div class="flex gap-4 mt-4">
+        <div class="flex flex-column xl:flex-row gap-4 mt-4">
           <div class="flex flex-1">
             <training-profile-comparison-chart :series="numSubjectsChart.series" :labels="numSubjectsChart.labels"
                                                title="Number of Subjects" title-icon="fas fa-cubes" data-cy="numOfSubjChart"/>

@@ -72,15 +72,14 @@ jobs:
           path: ./service/target/*.jar
 
   ui-tests-against-postgres:
-#    if: github.event_name != 'schedule'
+#    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
     needs: [build-skills-service-for-ui-tests]
     strategy:
       fail-fast: false
       matrix:
         #IMPORTANT: must, must, must match the total number of containers below: runSubsetOfCypressTests.sh.sh -t <num_of_containers>
-#        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 ]
-        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 
     services:
       postgres:
@@ -145,7 +144,7 @@ jobs:
       - name: Run Cypress tests
         run: |
           cd e2e-tests
-          ../.github/scripts/runSubsetOfCypressTests.sh -t 10 -c ${{ matrix.container }}
+          ../.github/scripts/runSubsetOfCypressTests.sh -t 15 -c ${{ matrix.container }}
           cd ..
         env:
           ELECTRON_EXTRA_LAUNCH_ARGS: '--disable-gpu'
@@ -185,6 +184,7 @@ jobs:
   combine-cypress-mochawesome-results:
     runs-on: ubuntu-latest
     if: ${{ !cancelled() }}
+#    if: github.event_name == 'schedule-never'
     needs: [ui-tests-against-postgres]
     steps:
       - uses: actions/checkout@v4

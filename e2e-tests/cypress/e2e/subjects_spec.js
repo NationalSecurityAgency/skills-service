@@ -781,7 +781,10 @@ describe('Subjects Tests', () => {
 
         cy.clickNav('Settings');
         cy.wait('@loadSettings');
+        cy.contains('Root Help Url:')
+        cy.wait(1000)
         cy.get('[data-cy="helpUrlHostTextInput"]').type('https://someCoolWebsite.com/');
+        cy.get('[data-cy="helpUrlHostTextInput"]').should('have.value', 'https://someCoolWebsite.com/');
         cy.get('[data-cy="saveSettingsBtn"]').click();
         cy.wait('@saveSettings');
         cy.wait('@loadSettings');

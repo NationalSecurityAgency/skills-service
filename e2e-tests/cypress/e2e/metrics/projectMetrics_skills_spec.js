@@ -533,15 +533,13 @@ describe('Metrics Tests - Skills', () => {
         cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
             .as('skillUsageNavigatorChartBuilder');
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Skills]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/skills');
         cy.wait('@skillUsageNavigatorChartBuilder');
 
         cy.get('[data-cy=skillsBTableTotalRows]').should('contain', 2);
+        cy.wait(1000)
         cy.get('[data-cy=skillsNavigator-skillNameFilter]')
-            .type('not so{enter}');
+            .type('not so{enter}', { delay: 100, waitForAnimations: true });
         cy.get('[data-cy=skillsBTableTotalRows]').should('contain', 1);
     });
 

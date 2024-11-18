@@ -57,7 +57,7 @@ const chartAxisColor = () => {
   return themeHelper.isDarkTheme ? 'white' : undefined
 }
 
-const chartOptions = {
+const chartOptions = ref({
   chart: {
     type: 'area',
     toolbar: {
@@ -107,7 +107,7 @@ const chartOptions = {
   stroke: {
     colors: lineColor()
   }
-}
+})
 
 onMounted(() => {
   loadPointsHistory()
@@ -124,16 +124,16 @@ const loadPointsHistory = () => {
         data: seriesData,
         name: 'Points'
       }]
-      chartOptions.xaxis.max = PointProgressHelper.calculateXAxisMaxTimestamp(pointHistoryRes)
-      if (chartOptions.xaxis.max) {
+      chartOptions.value.xaxis.max = PointProgressHelper.calculateXAxisMaxTimestamp(pointHistoryRes)
+      if (chartOptions.value.xaxis.max) {
         chartWasZoomed.value = true
       }
       let lastDay = -1
       let firstDay = -1
       if (seriesData && seriesData.length > 0) {
         lastDay = seriesData[seriesData.length - 1].x
-        if (chartOptions.xaxis.max) {
-          lastDay = chartOptions.xaxis.max
+        if (chartOptions.value.xaxis.max) {
+          lastDay = chartOptions.value.xaxis.max
         }
         firstDay = seriesData[0].x
       }
@@ -163,7 +163,7 @@ const loadPointsHistory = () => {
             }
           }
         })
-        chartOptions.annotations = {
+        chartOptions.value.annotations = {
           points: annotationPoints
         }
       }
@@ -271,7 +271,8 @@ const zoomed = (chartContext, { xaxis, yaxis }) => {
             </chart-overlay-msg>
           </div>
           <div v-if="hasData" data-cy="pointHistoryChartWithData">
-            <apexchart ref="ptChart" id="points-chart"
+            <apexchart v-if="chartOptions?.chart?.type"
+                       ref="ptChart" id="points-chart"
                        :options="chartOptions"
                        @animationEnd="animationEnded = true"
                        @zoomed="zoomed"
