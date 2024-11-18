@@ -243,5 +243,22 @@ describe('Verify Email Tests', () => {
           });
       });
     });
+
+    it('invalid username is not redirected to confirm email page', () => {
+
+      cy.intercept('POST', '/performLogin').as('postPerformLogin');
+
+      cy.visit('/administrator/');
+
+      cy.get('#username')
+          .type('root@skills.org');
+      cy.get('#inputPassword')
+          .type('password1');
+      cy.get('[data-cy=login]')
+          .click();
+      cy.wait('@postPerformLogin');
+
+      cy.get('[data-cy="loginFailed"]').contains('Invalid Username or Password');
+    });
   }
 });

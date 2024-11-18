@@ -115,7 +115,7 @@ const oAuth2Login = (registrationId) => {
           <Card v-if="!appConfig.oAuthOnly" class="mt-3">
             <template #content>
               <form @submit="onSubmit">
-                <Message v-if="loginFailed" severity="error">Invalid Username or Password</Message>
+                <Message v-if="loginFailed" data-cy="loginFailed" severity="error">Invalid Username or Password</Message>
                 <div class="field text-left">
                   <label for="username" class="">Email Address</label>
                   <InputGroup>

@@ -53,7 +53,7 @@ class EmailVerificationController {
     @GetMapping('userEmailIsVerified/{email}')
     boolean userEmailIsVerified(@PathVariable('email') String email) {
         UserAttrs userAttrs = userAttrsService.findByUserId(email)
-        return Boolean.valueOf(userAttrs?.emailVerified)
+        return userAttrs == null ? true : Boolean.valueOf(userAttrs.emailVerified)
     }
 
     // used to send a secondary email after the initial account creation email verification was sent
