@@ -486,7 +486,7 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="addSkillToGroupBtn-group11"]')
             .click();
         cy.get('[data-cy="skillName"]')
-            .type('new skill');
+            .type('new skill', { delay: 100, waitForAnimations: true });
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
 
