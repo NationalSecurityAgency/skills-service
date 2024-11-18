@@ -23,7 +23,7 @@
     "@toast-ui/editor": "3.2.2",
     "@vue-a11y/announcer": "3.1.5",
     "@vueuse/core": "10.9.0",
-    "apexcharts": "3.53.0",
+    "apexcharts": "3.54.1",
     "axios": "1.7.4",
     "dayjs": "1.11.11",
     "deep-equal": "2.2.3",
@@ -47,7 +47,7 @@
     "vis-network": "9.1.9",
     "vue": "3.4.27",
     "vue-router": "4.3.2",
-    "vue3-apexcharts": "1.6.0",
+    "vue3-apexcharts": "1.7.0",
     "yup": "1.4.0"
   },
   "devDependencies": {
