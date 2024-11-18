@@ -29,7 +29,7 @@ const loading = ref(true);
 const hasData = ref(false);
 const series = ref([]);
 
-const chartOptions = {
+const chartOptions = ref({
   chart: {
     height: 350,
     width: 250,
@@ -113,7 +113,7 @@ const chartOptions = {
   legend: {
     show: false,
   },
-};
+});
 
 onMounted(()=> {        
   loading.value = true;
@@ -121,7 +121,7 @@ onMounted(()=> {
       .then((res) => {
         const seriesData = res.map((item) => ({ x: item.value, y: item.count }));
         const height = seriesData.length > 0 ? 150 + (seriesData.length * 50) : 350;
-        chartOptions.chart.height = height;
+        chartOptions.value.chart.height = height;
         series.value = [{ data: seriesData, name: '# of Runs' }];
         hasData.value = seriesData.length > 0;
       })
@@ -137,7 +137,7 @@ onMounted(()=> {
       <template #content>
         <div style="max-height: 400px; min-height: 275px; overflow-y: auto; overflow-x: clip;" class="pt-2 pr-2">
           <MetricsOverlay :loading="loading" :has-data="hasData" no-data-msg="No data yet...">
-          <apexchart v-if="!loading" type="bar" :height="chartOptions.chart.height" :options="chartOptions" :series="series"></apexchart>
+            <apexchart v-if="!loading" type="bar" :height="chartOptions?.value?.chart?.height" :options="chartOptions" :series="series"></apexchart>
           </MetricsOverlay>
         </div>
       </template>
