@@ -23,7 +23,7 @@
     "@toast-ui/editor": "3.2.2",
     "@vue-a11y/announcer": "3.1.5",
     "@vueuse/core": "10.9.0",
-    "apexcharts": "3.54.1",
+    "apexcharts": "4.0.0",
     "axios": "1.7.4",
     "dayjs": "1.11.11",
     "deep-equal": "2.2.3",
