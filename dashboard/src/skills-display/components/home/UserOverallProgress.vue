@@ -63,7 +63,7 @@ const levelStats = computed(() => {
 <template>
   <Card>
     <template #content>
-      <div class="flex flex-column md:flex-row gap-5 align-items-stretch text-center">
+      <div class="flex flex-column lg:flex-row gap-5 align-items-stretch text-center">
         <div class="flex-1">
           <div>
             <circle-progress
