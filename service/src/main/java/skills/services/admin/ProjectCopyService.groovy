@@ -125,6 +125,34 @@ class ProjectCopyService {
     @Autowired
     AttachmentService attachmentService
 
+    @Autowired
+    UserRoleRepo userRoleRepo
+
+    @Transactional
+    @Profile
+    void copySubjectToAnotherProject(String projectId, String subjectId, String otherProjectId) {
+        lockingService.lockProject(otherProjectId)
+
+        ProjDef fromProject = loadProject(projectId)
+        ProjDef otherProject = loadProject(otherProjectId)
+        SkillDefWithExtra subject = skillDefWithExtraRepo.findByProjectIdAndSkillId(projectId, subjectId)
+        if (!subject) {
+            throw new SkillException("Subject with id [${subjectId}] does not exist", subjectId, null, ErrorCode.BadParam)
+        }
+        if (subject.type != SkillDef.ContainerType.Subject) {
+            throw new SkillException("Subject with id [${subjectId}] is not a subject", subjectId, null, ErrorCode.BadParam)
+        }
+        UserInfo userInfo = userInfoService.currentUser
+        Boolean isAdminForOtherProject = userRoleRepo.isUserProjectAdmin(userInfo.username, otherProject.projectId)
+        if (!isAdminForOtherProject) {
+            throw new SkillException("User [${userInfo.username}] is not an admin for destination project [${otherProjectId}]", projectId, null, ErrorCode.BadParam)
+        }
+
+        List<SkillInfo> allCollectedSkills = []
+        Map newIcons = subject.iconClass ? customIconFacade.copyIcons(fromProject.projectId, otherProject.projectId, [subject.iconClass]) : [:]
+        saveSingleSubjectAndItsSkills(fromProject, otherProject, subject, allCollectedSkills, newIcons)
+    }
+
     @Transactional
     @Profile
     void copyProject(String originalProjectId, ProjectRequest projectRequest) {
@@ -367,17 +395,21 @@ class ProjectCopyService {
         fromSubjects?.findAll { it.enabled }
                 .sort { it.displayOrder }
                 .each { SkillDefWithExtra fromSubj ->
-                    SubjectRequest toSubj = new SubjectRequest()
-                    Props.copy(fromSubj, toSubj)
-                    toSubj.subjectId = fromSubj.skillId
-                    toSubj.description = handleAttachmentsInDescription(toSubj.description, toProj.projectId)
-                    if(newIcons[fromSubj.iconClass]) {
-                        toSubj.iconClass = newIcons[fromSubj.iconClass]
-                    }
-                    subjAdminService.saveSubject(projectRequest.projectId, fromSubj.skillId, toSubj)
-                    log.info("PROJ COPY: [{}]=[{}] subj[{}] - created new subject")
-                    createSkills(fromProject.projectId, toProj.projectId, toSubj.subjectId, allCollectedSkills)
+                    saveSingleSubjectAndItsSkills(fromProject, toProj, fromSubj, allCollectedSkills, newIcons)
                 }
+    }
+
+    private void saveSingleSubjectAndItsSkills(ProjDef fromProject, ProjDef toProj, SkillDefWithExtra fromSubj, List<SkillInfo> allCollectedSkills, Map<String, String> newIcons) {
+        SubjectRequest toSubj = new SubjectRequest()
+        Props.copy(fromSubj, toSubj)
+        toSubj.subjectId = fromSubj.skillId
+        toSubj.description = handleAttachmentsInDescription(toSubj.description, toProj.projectId)
+        if(newIcons[fromSubj.iconClass]) {
+            toSubj.iconClass = newIcons[fromSubj.iconClass]
+        }
+        subjAdminService.saveSubject(toProj.projectId, fromSubj.skillId, toSubj)
+        log.info("PROJ COPY: [{}]=[{}] subj[{}] - created new subject")
+        createSkills(fromProject.projectId, toProj.projectId, toSubj.subjectId, allCollectedSkills)
     }
 
     @Profile

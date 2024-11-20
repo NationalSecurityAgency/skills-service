@@ -42,6 +42,11 @@ class IconService {
     }
 
     @Transactional(readOnly = true)
+    CustomIcon getIconByProjectIdAndFilename(String projectId, String filename){
+        return iconRepo.findByProjectIdAndFilename(projectId, filename)
+    }
+
+    @Transactional(readOnly = true)
     Collection<CustomIcon> getGlobalIcons(){
         return iconRepo.findAllByProjectIdIsNull()
     }
