@@ -116,7 +116,7 @@
                 <executions>
                     <execution>
                         <id>exec-npm-install</id>
-                        <phase>install</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
