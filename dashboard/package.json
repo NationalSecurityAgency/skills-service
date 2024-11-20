@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.4",
-    "@skilltree/skills-client-js": "3.5.0",
+    "@skilltree/skills-client-js": "3.6.0",
     "@toast-ui/editor": "3.2.2",
     "@vue-a11y/announcer": "3.1.5",
     "@vueuse/core": "10.9.0",
