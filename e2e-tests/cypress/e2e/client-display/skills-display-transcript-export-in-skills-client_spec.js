@@ -66,7 +66,7 @@ describe('Transcript export in skills-client tests', () => {
     cy.reportSkill(1, 1, user, 'now')
 
     cy.ignoreSkillsClientError()
-    cy.intercept('/api/projects/proj1/pointHistory').as('getProjPointsHistory')
+    cy.intercept('/api/projects/proj1/pointHistory*').as('getProjPointsHistory')
     cy.visit('/test-skills-client/proj1')
     cy.wait('@getProjPointsHistory')
     cy.wrapIframe().find('[data-cy="downloadTranscriptBtn"]').click()
