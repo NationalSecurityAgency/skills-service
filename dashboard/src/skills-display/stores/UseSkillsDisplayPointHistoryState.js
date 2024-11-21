@@ -17,20 +17,28 @@ import { ref } from 'vue'
 import axios from 'axios'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { defineStore } from 'pinia'
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
 export const useSkillsDisplayPointHistoryState = defineStore('skillsDisplayPointHistoryState', () => {
 
   const servicePath = '/api/projects'
   const attributes = useSkillsDisplayAttributesState()
+  const appConfig = useAppConfig()
 
   const pointHistoryMap = ref(new Map())
 
   const getUserIdAndVersionParams = () => {
-    // const params = this.getUserIdParams();
-    // params.version = this.version;
-    //
-    // return params;
-    return {}
+    let config = {}
+    if (attributes.userId) {
+      config.userId = attributes.userId
+    }
+    if (appConfig.isPkiAuthenticated) {
+      config.idType = 'ID'
+    }
+    if (attributes.version) {
+      config.version = attributes.version
+    }
+    return config
   }
   const getMapId = (subjectId) => {
     return subjectId || '__skills__overall_points__'
