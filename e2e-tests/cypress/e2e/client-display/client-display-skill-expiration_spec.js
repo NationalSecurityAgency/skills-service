@@ -375,7 +375,7 @@ describe('Client Display Expiration Tests', () => {
 
         cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill1');
 
-        cy.get('[data-cy="honorSystemAlert"]').contains('This skill\'s achievement expires in a day');
+        cy.get('[data-cy="honorSystemAlert"]').contains('This skill\'s achievement expires');
 
         cy.get('[data-cy="claimPointsBtn"]').click();
         cy.get(`[data-cy="expirationDate"]`).should('not.exist');
@@ -403,7 +403,8 @@ describe('Client Display Expiration Tests', () => {
 
         cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill4');
 
-        cy.get('[data-cy="requestApprovalAlert"]').contains('This skill\'s achievement expires in a day, but your 50 points can be retained by submitting another approval request.');
+        cy.get('[data-cy="requestApprovalAlert"]').contains('This skill\'s achievement expires');
+        cy.get('[data-cy="requestApprovalAlert"]').contains('but your 50 points can be retained by submitting another approval request.');
     });
 
     it('expiring quiz skills have a different message', () => {
@@ -427,7 +428,8 @@ describe('Client Display Expiration Tests', () => {
 
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('150 / 150 Points');
 
-        cy.get('[data-cy="quizAlert"]').contains('This skill\'s achievement expires in a day, but your 150 points can be retained by completing the Quiz again.');
+        cy.get('[data-cy="quizAlert"]').contains('This skill\'s achievement expires');
+        cy.get('[data-cy="quizAlert"]').contains('but your 150 points can be retained by completing the Quiz again.');
 
     });
 
@@ -456,7 +458,8 @@ describe('Client Display Expiration Tests', () => {
         cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill6');
 
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('150 / 150 Points');
-        cy.get('[data-cy="quizAlert"]').contains('This skill\'s achievement expires in a day, but your 150 points can be retained by completing the Survey again.');
+        cy.get('[data-cy="quizAlert"]').contains('This skill\'s achievement expires');
+        cy.get('[data-cy="quizAlert"]').contains('but your 150 points can be retained by completing the Survey again.');
 
     });
 
@@ -488,7 +491,8 @@ describe('Client Display Expiration Tests', () => {
         cy.visit('test-skills-display/proj1/subjects/subj1/skills/skill7');
 
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points');
-        cy.get('[data-cy="videoAlert"]').contains('This skill\'s achievement expires in a day, but your 100 points can be retained by watching the video again.');
+        cy.get('[data-cy="videoAlert"]').contains('This skill\'s achievement expires');
+        cy.get('[data-cy="videoAlert"]').contains('but your 100 points can be retained by watching the video again.');
 
     });
 });

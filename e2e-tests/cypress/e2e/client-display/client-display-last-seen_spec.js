@@ -50,8 +50,8 @@ describe('Client Display Skills Last Viewed', () => {
             return true
         })
 
-        cy.intercept('/api/projects/proj1/subjects/subj1/pointHistory').as('getSubjectPointsHistory')
-        cy.intercept('/api/projects/proj1/pointHistory').as('getProjPointsHistory')
+        cy.intercept('/api/projects/proj1/subjects/subj1/pointHistory*').as('getSubjectPointsHistory')
+        cy.intercept('/api/projects/proj1/pointHistory*').as('getProjPointsHistory')
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
