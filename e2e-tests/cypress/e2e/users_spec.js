@@ -537,6 +537,59 @@ describe('Users Tests', () => {
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumbItemValue]').eq(4).contains('Rank')
     })
 
+    it('User Display point history returns data for the selected user', () => {
+        cy.createSubject(1, 2)
+        cy.createSkill(1, 2, 2,  { pointIncrement: '777', numPerformToCompletion: '2', pointIncrementInterval: 0 })
+        const userId = 'usera@skills.org'
+        cy.reportSkill(1, 1, userId, 'yesterday')
+        cy.reportSkill(1, 1, userId, 'now')
+        cy.doReportSkill({ project: 1, skill: 2, subjNum: 2, userId, date: 'now' })
+
+        cy.intercept(`/api/projects/proj1/pointHistory?userId=**`, (req) => {
+            req.continue((res) => {
+                expect(res.body.achievements).to.have.length(1)
+                expect(res.body.achievements[0].points).to.equal(3777)
+                expect(res.body.achievements[0].name).to.equal('Level 1')
+
+                expect(res.body.pointsHistory).to.have.length(2)
+                expect(res.body.pointsHistory[0].points).to.equal(1500)
+                expect(res.body.pointsHistory[1].points).to.equal(3777)
+            })
+        }).as('pointHistory')
+
+        cy.intercept(`/api/projects/proj1/subjects/subj1/pointHistory?userId=**`, (req) => {
+            req.continue((res) => {
+                expect(res.body.achievements).to.have.length(1)
+                expect(res.body.achievements[0].points).to.equal(1500)
+                expect(res.body.achievements[0].name).to.equal('Level 1')
+
+                expect(res.body.pointsHistory).to.have.length(2)
+                expect(res.body.pointsHistory[0].points).to.equal(1500)
+                expect(res.body.pointsHistory[1].points).to.equal(3000)
+            })
+        }).as('subj1PointHistory')
+
+        cy.intercept(`/api/projects/proj1/subjects/subj2/pointHistory?userId=**`, (req) => {
+            req.continue((res) => {
+                expect(res.body.achievements).to.have.length(0)
+                expect(res.body.pointsHistory).to.have.length(0)
+            })
+        }).as('subj2PointHistory')
+
+        cy.visit('/administrator/projects/proj1/users');
+        cy.get('[data-p-index="0"] [data-cy="usersTable_viewDetailsLink"]').click()
+        cy.wait('@pointHistory')
+        cy.get('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click()
+        cy.wait('@subj1PointHistory')
+        cy.get('[data-cy="skillProgressTitle-skill1"]')
+
+        cy.go('back');  // browser back button
+        cy.wait('@pointHistory')
+        cy.get('[data-cy="subjectTile-subj2"] [data-cy="subjectTileBtn"]').click()
+        cy.wait('@subj2PointHistory')
+        cy.get('[data-cy="skillProgressTitle-skill2Subj2"]')
+    })
+
     it('view users from badge and skill', () => {
         cy.intercept('users')
             .as('getUsers');
