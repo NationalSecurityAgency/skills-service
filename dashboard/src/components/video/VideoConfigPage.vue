@@ -78,6 +78,9 @@ const showSavedMsg = ref(false);
 const overallErrMsg = ref(null);
 const showFileUpload = ref(true);
 const savedAtLeastOnce = ref(false);
+const configuredResolution = ref(null);
+const configuredWidth = ref(null);
+const configuredHeight = ref(null);
 const computedVideoConf = computed(() => {
   const captionsUrl = videoConf.value.captions && videoConf.value.captions.trim().length > 0
       ? `/api/projects/${route.params.projectId}/skills/${route.params.skillId}/videoCaptions`
@@ -86,6 +89,8 @@ const computedVideoConf = computed(() => {
     url: videoConf.value.url,
     videoType: videoConf.value.videoType,
     captionsUrl,
+    width: configuredWidth.value,
+    height: configuredHeight.value,
   };
 });
 const lengthyOperationLoadingBarTimeout = computed(() => {
@@ -131,7 +136,7 @@ onMounted(() => {
 
 const setupPreview = () => {
   if (preview.value) {
-    refreshingPreview.value = true;
+    // refreshingPreview.value = true;
   } else {
     preview.value = true;
     announcer.polite('Opened video preview card below. Navigate down to it.');
@@ -193,6 +198,10 @@ const saveSettings = () => {
   }
   if (videoConf.value.transcript) {
     data.append('transcript', videoConf.value.transcript);
+  }
+  if (configuredWidth.value && configuredHeight.value) {
+    data.append('width', configuredWidth.value)
+    data.append('height', configuredHeight.value)
   }
 
   const endpoint = `/admin/projects/${route.params.projectId}/skills/${route.params.skillId}/video`;
@@ -261,6 +270,9 @@ const updateVideoSettings = (settingRes) => {
   videoConf.value.transcript = settingRes.transcript;
   videoConf.value.isInternallyHosted = settingRes.isInternallyHosted;
   videoConf.value.hostedFileName = settingRes.internallyHostedFileName;
+  configuredWidth.value = settingRes.width
+  configuredHeight.value = settingRes.height
+  configuredResolution.value = settingRes.width + " x " + settingRes.height;
   if (videoConf.value.url) {
     showFileUpload.value = videoConf.value.isInternallyHosted;
     savedAtLeastOnce.value = true;
@@ -268,6 +280,9 @@ const updateVideoSettings = (settingRes) => {
     showFileUpload.value = true;
   }
   setFieldValues();
+  if (videoConf.value.url && savedAtLeastOnce.value) {
+    setupPreview();
+  }
 }
 const setFieldValues = () => {
   resetForm({
@@ -369,6 +384,13 @@ const schema = yup.object().shape({
 })
 
 const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ validationSchema: schema, })
+
+const videoResized = (resolution, width, height) => {
+  configuredResolution.value = resolution;
+  configuredWidth.value = width;
+  configuredHeight.value = height;
+
+}
 </script>
 
 <template>
@@ -564,6 +586,8 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
                            :options="computedVideoConf"
                            @player-destroyed="turnOffRefresh"
                            @watched-progress="updatedWatchProgress"
+                           @on-resize="videoResized"
+                           :loadFromServer="true"
               />
 
               <div v-if="watchedProgress" class="p-3 pt-4">
@@ -591,6 +615,10 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
                 <div class="grid">
                   <div class="col-6 lg:col-3 xl:col-2">Current Position:</div>
                   <div class="col"><span class="text-primary">{{ watchedProgress.currentPosition.toFixed(2) }}</span> <span class="font-italic">Seconds</span></div>
+                </div>
+                <div class="grid">
+                  <div class="col-6 lg:col-3 xl:col-2">Video Size:</div>
+                  <div class="col"><span class="text-primary">{{ configuredResolution }}</span></div>
                 </div>
                 <div class="grid">
                   <div class="col-6 lg:col-3 xl:col-2">Watched Segments:</div>

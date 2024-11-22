@@ -22,4 +22,7 @@ class VideoSummary {
 
     Boolean hasCaptions
     Boolean hasTranscript
+
+    Double height
+    Double width
 }
