@@ -17,7 +17,6 @@ limitations under the License.
 import { onBeforeUnmount, onMounted, onUnmounted, ref, computed } from 'vue'
 import videojs from 'video.js';
 import WatchedSegmentsUtil from '@/common-components/video/WatchedSegmentsUtil';
-import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 
 const props = defineProps({
   options: Object,
@@ -43,6 +42,7 @@ const playerHeight = ref(null);
 const resolution = ref(null);
 const isResizing = ref(false);
 const resizeTimer = ref(null);
+const isFirstLoad = ref(true);
 
 const resizeObserver = new ResizeObserver((mutations) => {
   if(resizeTimer.value) {
@@ -52,12 +52,17 @@ const resizeObserver = new ResizeObserver((mutations) => {
   isResizing.value = true;
   resizeTimer.value = setTimeout(() => {
     isResizing.value = false;
+    if(isFirstLoad.value) {
+      isFirstLoad.value = false;
+    }
   }, 250);
   const currentWidth = mutations[0].contentBoxSize[0].inlineSize;
   const currentHeight = mutations[0].contentBoxSize[0].blockSize;
   resolution.value = `${mutations[0].devicePixelContentBoxSize[0].inlineSize} x ${mutations[0].devicePixelContentBoxSize[0].blockSize}`;
   if(!props.loadFromServer) {
-    localStorage.setItem('playerSize', JSON.stringify({width: currentWidth, height: currentHeight}));
+    if( currentHeight > 0 && currentWidth > 0 ) {
+      localStorage.setItem(`${vidPlayerId}-playerSize`, JSON.stringify({width: currentWidth, height: currentHeight}));
+    }
   }
   emit('on-resize', resolution.value, currentWidth, currentHeight);
 })
@@ -67,11 +72,11 @@ onMounted(() => {
     playerWidth.value = props.options.width + 22;
     playerHeight.value = props.options.height + 22;
   }
-  const existingSize = localStorage.getItem('playerSize');
+  const existingSize = localStorage.getItem(`${vidPlayerId}-playerSize`);
   if (existingSize && !props.loadFromServer) {
     const sizeObject = JSON.parse(existingSize);
-    playerWidth.value = sizeObject.width;
-    playerHeight.value = sizeObject.height;
+    playerWidth.value = sizeObject.width + 22;
+    playerHeight.value = sizeObject.height + 22;
   }
   resizeObserver.observe(document.getElementById('videoPlayerContainer'));
   const player = videojs(vidPlayerId, {
@@ -109,7 +114,7 @@ const updateProgress = (currentTime) => {
 
 <template>
     <div data-cy="videoPlayer" id="videoPlayerContainer" :style="playerWidth ? `width: ${playerWidth}px;` : ''">
-        <div class="absolute z-5 top-0 left-0 right-0 bottom-0 bg-gray-500 opacity-50 text-center flex align-items-center justify-content-center" v-if="isResizing">
+        <div class="absolute z-5 top-0 left-0 right-0 bottom-0 bg-gray-500 opacity-50 text-center flex align-items-center justify-content-center" v-if="isResizing && !isFirstLoad">
           <div class="absolute z-6 top-0 text-center bg-white mt-4" style="width: 100px;">
             {{ resolution }}
           </div>
