@@ -82,6 +82,8 @@ const videoConf = computed(() => {
     url: props.skill.videoSummary.videoUrl,
     videoType: props.skill.videoSummary.videoType ? props.skill.videoSummary.videoType : null,
     captionsUrl,
+    width: props.skill.videoSummary.width,
+    height: props.skill.videoSummary.height,
   };
 });
 const isSelfReportTypeVideo = computed(() => {

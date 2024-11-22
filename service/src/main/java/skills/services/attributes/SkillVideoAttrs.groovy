@@ -26,4 +26,6 @@ class SkillVideoAttrs {
     Boolean isInternallyHosted
     String internallyHostedFileName
     String internallyHostedAttachmentUuid
+    Double width
+    Double height
 }
