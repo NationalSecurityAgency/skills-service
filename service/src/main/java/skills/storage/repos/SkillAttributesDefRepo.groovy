@@ -26,6 +26,9 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
     List<SkillAttributesDef> findAllByType(SkillAttributesDef.SkillAttributesType type)
 
     @Nullable
+    List<SkillAttributesDef> findAllBySkillRefId(Integer skillRefId)
+
+    @Nullable
     SkillAttributesDef findBySkillRefIdAndType(Integer skillRefId, SkillAttributesDef.SkillAttributesType type)
 
     int deleteBySkillRefIdAndType(Integer skillRefId, SkillAttributesDef.SkillAttributesType type)
