@@ -68,7 +68,8 @@ class AdminVideoService {
 
     @Transactional
     SkillVideoAttrs saveVideo(String projectId, String skillId, Boolean isAlreadyHosted,
-                              MultipartFile file, String videoUrl, String captions, String transcript) {
+                              MultipartFile file, String videoUrl, String captions, String transcript,
+                              Double width, Double height) {
 
         SkillVideoAttrs existingVideoAttributes = skillAttributeService.getVideoAttrs(projectId, skillId)
         final boolean isEdit = existingVideoAttributes?.videoUrl
@@ -81,6 +82,8 @@ class AdminVideoService {
             videoAttrs.isInternallyHosted = existingVideoAttributes.isInternallyHosted
             videoAttrs.internallyHostedFileName = existingVideoAttributes.internallyHostedFileName
             videoAttrs.internallyHostedAttachmentUuid = existingVideoAttributes.internallyHostedAttachmentUuid
+            videoAttrs.width = existingVideoAttributes.width
+            videoAttrs.height = existingVideoAttributes.height
         } else  {
             if (StringUtils.isBlank(videoUrl) && !file) {
                 throw new SkillException("Either videoUrl or file must be supplied", projectId, skillId)
@@ -99,6 +102,7 @@ class AdminVideoService {
                 videoAttrs.isInternallyHosted = false
                 videoAttrs.videoUrl = videoUrl
             }
+
         }
 
         if (StringUtils.isNotBlank(captions)){
@@ -106,6 +110,10 @@ class AdminVideoService {
         }
         if (StringUtils.isNotBlank(transcript)){
             videoAttrs.transcript = InputSanitizer.sanitize(transcript)?.trim()
+        }
+        if(width && height) {
+            videoAttrs.width = width
+            videoAttrs.height = height
         }
         boolean isReadOnly = skillDefRepo.isImportedFromCatalog(projectId, skillId)
         SkillsValidator.isTrue(!isReadOnly, "Cannot set video attributes of read-only skill", projectId, skillId)
