@@ -582,6 +582,7 @@ const videoResized = (resolution, width, height) => {
               <div class="border-1 surface-border border-round-top surface-100 p-3">Video Preview</div>
             </template>
             <template #content>
+              <Message>You can set the default size of the video by dragging the handle at the bottom right of the video.</Message>
               <VideoPlayer v-if="!refreshingPreview"
                            :options="computedVideoConf"
                            @player-destroyed="turnOffRefresh"
