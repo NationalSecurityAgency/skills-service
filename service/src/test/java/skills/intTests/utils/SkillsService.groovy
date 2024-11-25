@@ -2009,6 +2009,8 @@ class SkillsService {
         if (videoAttrs.isAlreadyHosted != null) { body.put("isAlreadyHosted", videoAttrs.isAlreadyHosted)}
         if (videoAttrs.captions) { body.put("captions", videoAttrs.captions)}
         if (videoAttrs.transcript) { body.put("transcript", videoAttrs.transcript)}
+        if (videoAttrs.height) { body.put("height", videoAttrs.height)}
+        if (videoAttrs.width) { body.put("width", videoAttrs.width)}
 
         String url = "/projects/${projectId}/skills/${skillId}/video"
         return wsHelper.adminUpload(url, body, true)
