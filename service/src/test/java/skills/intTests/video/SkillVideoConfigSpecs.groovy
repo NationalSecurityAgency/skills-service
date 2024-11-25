@@ -386,12 +386,16 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
                 videoUrl: "http://some1.url",
                 transcript: "transcript1",
                 captions: "captions1",
+                height: 300,
+                width: 600
         ])
 
         skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[1].skillId, [
                 videoUrl: "http://some2.url",
                 transcript: "transcript2",
                 captions: "captions2",
+                height: 300,
+                width: 600
         ])
 
         when:
@@ -414,6 +418,8 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         skill1AttributesAfter.transcript == "transcript1"
 
         !skill2AttributesAfter.videoUrl
+        !skill2AttributesAfter.height
+        !skill2AttributesAfter.width
     }
 
     def "delete video attributes unsets self-report=video" () {
@@ -671,5 +677,83 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         then:
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("[Transcript] must not exceed [20000]")
+    }
+
+    def "save and get video size" () {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(1, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                videoUrl: "http://some.url",
+                transcript: "transcript",
+                captions: "captions",
+                height: 300,
+                width: 600
+        ])
+
+        when:
+        def attributes = skillsService.getSkillVideoAttributes(p1.projectId, p1Skills[0].skillId)
+        then:
+        attributes.height == 300
+        attributes.width == 600
+    }
+
+    def "update video dimensions while keeping uploaded video unchanged" () {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        Resource video1 = new ClassPathResource("/testVideos/create-project.webm")
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                file: video1,
+                transcript: "transcript",
+                captions: "captions",
+                width: 600,
+                height: 300
+        ])
+        def user = getRandomUsers(1).first()
+
+        when:
+        def skill1 = skillsService.getSkillVideoAttributes(p1.projectId, p1Skills[0].skillId)
+        SkillsService.FileAndHeaders skill1Download = skillsService.downloadAttachment(skill1.videoUrl)
+
+        assert attachmentRepo.count() == 1
+
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                isAlreadyHosted: true,
+                transcript: "transcript new",
+                captions: "captions new",
+                width: 900,
+                height: 600,
+        ])
+        def skill1After = skillsService.getSkillVideoAttributes(p1.projectId, p1Skills[0].skillId)
+        SkillsService.FileAndHeaders skill1DownloadAfter = skillsService.downloadAttachment(skill1After.videoUrl)
+
+        then:
+        attachmentRepo.count() == 1
+        skill1.videoUrl.startsWith('/api/download/')
+        skill1.videoType == "video/webm"
+        skill1.captions == "captions"
+        skill1.transcript == "transcript"
+        skill1.width == 600
+        skill1.height == 300
+
+        skill1Download.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/webm"
+        skill1Download.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-project.webm"'
+        skill1Download.file.bytes == Files.readAllBytes(video1.getFile().toPath())
+
+        skill1After.videoUrl.startsWith('/api/download/')
+        skill1After.videoType == "video/webm"
+        skill1After.captions == "captions new"
+        skill1After.transcript == "transcript new"
+        skill1After.width == 900
+        skill1After.height == 600
+
+        skill1DownloadAfter.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "video/webm"
+        skill1DownloadAfter.headers.get(HttpHeaders.CONTENT_DISPOSITION)[0] == 'attachment; filename="create-project.webm"'
+        skill1DownloadAfter.file.bytes == Files.readAllBytes(video1.getFile().toPath())
     }
 }
