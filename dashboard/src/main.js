@@ -60,6 +60,7 @@ import Textarea from 'primevue/textarea'
 import Listbox from 'primevue/listbox'
 import ProgressBar from 'primevue/progressbar'
 import Chip from 'primevue/chip'
+import FloatLabel from "primevue/floatlabel";
 
 import ConfirmationService from 'primevue/confirmationservice'
 import BadgeDirective from 'primevue/badgedirective'
@@ -139,6 +140,7 @@ app.component('Textarea', Textarea)
 app.component('Listbox', Listbox)
 app.component('ProgressBar', ProgressBar)
 app.component('Chip', Chip)
+app.component('FloatLabel', FloatLabel)
 
 app.component('SkillsButton', SkillsButton)
 app.component('SkillsTextInput', SkillsTextInput)

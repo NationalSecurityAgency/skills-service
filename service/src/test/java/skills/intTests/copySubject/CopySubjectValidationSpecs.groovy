@@ -18,6 +18,7 @@ package skills.intTests.copySubject
 import groovy.json.JsonOutput
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
+import org.springframework.http.HttpStatus
 import skills.intTests.copyProject.CopyIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
@@ -172,7 +173,7 @@ class CopySubjectValidationSpecs extends CopyIntSpec {
         skillsService.copySubjectDefIntoAnotherProject(p1.projectId + "a", p1subj1.subjectId, p2.projectId)
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("You do not have permission to view/manage this Project OR this Project does not exist")
+        ex.httpStatus == HttpStatus.FORBIDDEN
     }
 
     def "validate dest proj exist"() {

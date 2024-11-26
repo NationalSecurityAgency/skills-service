@@ -22,6 +22,10 @@ export default class UserRolesUtil {
     return role && role === 'ROLE_PROJECT_APPROVER';
   }
 
+  static isProjectAdminRole(role) {
+    return role && role === 'ROLE_PROJECT_ADMIN';
+  }
+
   static isQuizAdminRole(role) {
     return role && role === 'ROLE_QUIZ_ADMIN';
   }

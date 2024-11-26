@@ -99,5 +99,10 @@ export default {
         data
       )
       .then((res) => res.data)
-  }
+  },
+  copySubjectToAnotherProject(projectId, subjectId, otherProjectId) {
+    return axios.post(
+        `/admin/projects/${encodeURIComponent(projectId)}/copy/subject/${encodeURIComponent(subjectId)}/copy/projects/${encodeURIComponent(otherProjectId)}`
+    )
+  },
 }

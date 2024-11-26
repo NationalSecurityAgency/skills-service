@@ -25,6 +25,7 @@ import Navigation from '@/components/utils/Navigation.vue'
 import EditSubject from '@/components/subjects/EditSubject.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert.vue'
+import CopySubjectDialog from "@/components/subjects/CopySubjectDialog.vue";
 
 const appConfig = useAppConfig()
 const route = useRoute()
@@ -34,7 +35,8 @@ const projConfig = useProjConfig()
 const subjectState = useSubjectsState()
 const focusState = useFocusState()
 
-let showEditSubject = ref(false)
+const showEditSubject = ref(false)
+const showCopySubjectModal = ref(false)
 
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
@@ -123,6 +125,10 @@ const displayEditSubject = () => {
   showEditSubject.value = true
 }
 
+const displayCopySubjectModal = () => {
+  showCopySubjectModal.value = true
+}
+
 const subjectEdited = (updatedSubject) => {
   // store.dispatch('subject/setSubject', resp);
   if (updatedSubject.subjectId !== subjectState.subject.subjectId) {
@@ -155,6 +161,20 @@ const subjectEdited = (updatedSubject) => {
           severity="info"
           data-cy="btn_edit-subject"
           :aria-label="`edit Subject ${subjectState.subject.name}`" />
+        <SkillsButton
+            id="copySubjectButton"
+            v-if="!isReadOnlyProj"
+            @click="displayCopySubjectModal"
+            ref="copySubjectButton"
+            label="Copy"
+            icon="fas fa-copy"
+            outlined
+            class="btn btn-outline-primary"
+            size="small"
+            :track-for-focus="true"
+            severity="info"
+            data-cy="btn_edit-subject"
+            :aria-label="`Copy Subject ${subjectState.subject.name} to another project`" />
       </template>
       <template #footer>
         <!--        <import-finalize-alert />-->
@@ -173,6 +193,8 @@ const subjectEdited = (updatedSubject) => {
     <edit-subject v-if="showEditSubject" v-model="showEditSubject"
                   :subject="subjectState.subject" @subject-saved="subjectEdited"
                   :is-edit="true" />
+
+    <copy-subject-dialog v-if="showCopySubjectModal" v-model="showCopySubjectModal" />
   </div>
 </template>
 
