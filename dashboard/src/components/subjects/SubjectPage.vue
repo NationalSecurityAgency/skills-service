@@ -173,7 +173,7 @@ const subjectEdited = (updatedSubject) => {
             size="small"
             :track-for-focus="true"
             severity="info"
-            data-cy="btn_edit-subject"
+            data-cy="btn_copy-subject"
             :aria-label="`Copy Subject ${subjectState.subject.name} to another project`" />
       </template>
       <template #footer>
