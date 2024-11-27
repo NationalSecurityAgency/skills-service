@@ -278,7 +278,7 @@ function doAddUserRole() {
   }
 }
 const addQuizUserRole = (role) => {
-  const userIdParam = appConfig.pkiAuthenticated ? selectedUser.value.dn : selectedUser.value.userId
+  const userIdParam = appConfig.isPkiAuthenticated ? selectedUser.value.dn : selectedUser.value.userId
   QuizService.addQuizAdmin(props.quizId, userIdParam).then(() => {
     completeAddRole(role)
   }).catch((e) => {
