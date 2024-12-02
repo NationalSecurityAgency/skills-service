@@ -123,6 +123,30 @@ describe('Copy Subject from one project to another Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
     });
 
+    it('other project has imported and still disabled skills with the same id', () => {
+        cy.createProject(3);
+        cy.createSubject(3, 1);
+        cy.createSkill(3, 1, 1);
+        cy.exportSkillToCatalog(3, 1, 1)
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.importSkillFromCatalog(2, 1, 3, 1)
+        cy.createSubject(2, 1, {subjectId: 'otherId', name: 'Other Name'});
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="manageSkillLink_skill1"]')
+        cy.get('[data-cy="manageSkillLink_skill2"]')
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '2');
+        cy.get('[data-cy="btn_copy-subject"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="selectAProjectDropdown"]').click();
+        cy.get('[data-cy="projectSelector-projectName"]').contains('This is project 2').click();
+        cy.get('[data-cy="validationFailedMsg"]').contains('The following skill IDs already exist in the selected project: skill1.')
+        cy.get('[data-cy="validationFailedMsg"]').contains('The following skill names already exist in the selected project: Very Great Skill 1.')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+    });
+
     it('only show first 10 name ids in the error', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
@@ -173,4 +197,42 @@ describe('Copy Subject from one project to another Tests', () => {
         cy.get('[data-cy="closeDialogBtn"]').contains('Close')
     })
 
+    it('clear validation errors on changing project', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1, {name: 'Other Name'});
+
+        cy.createProject(3);
+        cy.createProject(4);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="manageSkillLink_skill1"]')
+        cy.get('[data-cy="manageSkillLink_skill2"]')
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '2');
+        cy.get('[data-cy="btn_copy-subject"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="selectAProjectDropdown"]').click();
+        cy.get('[data-cy="projectSelector-projectName"]').contains('This is project 2').click();
+        cy.get('[data-cy="validationFailedMsg"]').contains('Subject ID already exists in the selected project')
+
+        cy.get('[data-cy="selectAProjectDropdown"]').click();
+        cy.get('[data-cy="projectSelector-projectName"]').contains('This is project 3').click();
+        cy.get('[data-cy="validationPassedMsg"]').should('be.visible');
+        cy.get('[data-cy="validationFailedMsg"]').should('not.exist')
+    });
+
+    it('project itself should be filtered from the list', () => {
+        cy.createProject(2);
+        cy.createProject(3);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="manageSkillLink_skill1"]')
+        cy.get('[data-cy="manageSkillLink_skill2"]')
+        cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '2');
+        cy.get('[data-cy="btn_copy-subject"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="selectAProjectDropdown"]').click();
+        cy.get('[data-cy="projectSelector-projectName"]').contains('This is project 2')
+        cy.get('[data-cy="projectSelector-projectName"]').contains('This is project 3')
+        cy.get('[data-cy="projectSelector-projectName"]').should('not.contain', 'This is project 1')
+    });
 });
