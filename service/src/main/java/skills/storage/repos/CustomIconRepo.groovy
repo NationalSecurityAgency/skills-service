@@ -32,6 +32,7 @@ interface CustomIconRepo extends CrudRepository<CustomIcon, Integer> {
     @Transactional(readOnly = true)
     List<CustomIcon> findAllByProjectIdIsNull()
 
+    @Nullable
     CustomIcon findByProjectIdAndFilename(String projectId, String filename)
 
     void delete(CustomIcon toDelete)

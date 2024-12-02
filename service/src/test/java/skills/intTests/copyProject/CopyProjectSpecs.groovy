@@ -37,13 +37,7 @@ import skills.utils.GroovyToJavaByteUtils
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class CopyProjectSpecs extends DefaultIntSpec {
-
-    @Autowired
-    LevelDefRepo levelDefRepo
-
-    @Autowired
-    AttachmentRepo attachmentRepo
+class CopyProjectSpecs extends CopyIntSpec {
 
     def "copy project with majority of features utilized"() {
         def p1 = createProject(1)
@@ -915,14 +909,6 @@ class CopyProjectSpecs extends DefaultIntSpec {
         file.bytes == contents.getBytes()
     }
 
-    private def attachFileAndReturnHref(String projectId, String contents = 'Test is a test') {
-        String filename = 'test-pdf.pdf'
-        Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
-        def result = skillsService.uploadAttachment(resource, projectId, null, null)
-        String attachmentHref = result.href
-        return attachmentHref
-    }
-
     def "copied percent-based levels do not have from/to points set in DB"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
@@ -1032,7 +1018,6 @@ class CopyProjectSpecs extends DefaultIntSpec {
         file
         file.bytes == contents.getBytes()
     }
-
 
     static class Edge {
         String from

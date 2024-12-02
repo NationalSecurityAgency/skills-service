@@ -74,11 +74,15 @@ class CustomIconFacade {
     }
 
     @Transactional
-    def copyIcons(String fromProjectId, String toProjectId) {
+    Map copyIcons(String fromProjectId, String toProjectId, List<String> copyOnlyTheseCssClass = null) {
         def fromIcons = iconService.getIconsForProject(fromProjectId)
         ProjDef project = projDefAccessor.getProjDef(toProjectId)
-        def iconsToUpdate = new HashMap<String, String>()
+        Map iconsToUpdate = new HashMap<String, String>()
         Collection<CustomIcon> newIcons = new ArrayList<CustomIcon>()
+
+        if (copyOnlyTheseCssClass){
+            fromIcons = fromIcons.findAll { copyOnlyTheseCssClass.contains(IconCssNameUtil.getCssClass(fromProjectId, it.filename)) }
+        }
 
         fromIcons.each{
             CustomIcon newIcon = new CustomIcon(
@@ -99,7 +103,6 @@ class CustomIconFacade {
         iconService.saveAllIcons(newIcons)
 
         return iconsToUpdate
-
     }
 
     /**
