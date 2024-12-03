@@ -70,5 +70,16 @@ export default {
   },
   getUserTags(userId) {
     return axios.get(`/app/userInfo/userTags/${userId}`).then((response) => response.data)
+  },
+  archiveUsers(projectId, userIds) {
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/users/archive`, { userIds})
+        .then((res) => res.data)
+  },
+  getArchivedUsers(projectId, params) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/users/archive`, { params } ).then((response) => response.data)
+  },
+  restoreArchivedUser(projectId, userId) {
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/users/${userId}/restore`)
+        .then((res) => res.data)
   }
 }

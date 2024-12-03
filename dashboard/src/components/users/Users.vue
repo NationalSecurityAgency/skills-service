@@ -15,17 +15,33 @@ limitations under the License.
 */
 <script setup>
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
-import UsersTable from './UsersTable.vue';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute()
+const isProjectLevel = computed(() => {
+  return !(route.params.skillId || route.params.badgeId || route.params.subjectId || (route.params.tagKey && route.params.tagFilter))
+})
+const isUserArchiveRoute = computed(() => {
+  return route.name === 'UserArchivePage';
+});
 </script>
 
 <template>
-  <div class="usersTable">
-    <sub-page-header title="Users"/>
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
-      <template #content>
-        <UsersTable />
-      </template>
-    </Card>
+  <div>
+    <sub-page-header title="Users">
+      <div v-if="isProjectLevel">
+        <router-link :to="{ name: 'UserArchivePage' }" v-if="!isUserArchiveRoute" tabindex="-1">
+          <SkillsButton size="small" icon="fas fa-archive" label="User Archive" data-cy="userArchiveBtn" />
+        </router-link>
+        <router-link :to="{ name: 'ProjectUsers' }" v-if="isUserArchiveRoute" tabindex="-1">
+          <SkillsButton id="backToProjectUsersBtn" size="small" icon="fas fa-arrow-alt-circle-left" label="Back" />
+        </router-link>
+      </div>
+    </sub-page-header>
+    <div style="width: 99%;">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 

@@ -92,6 +92,8 @@ import RedirectPage from "@/components/utils/RedirectPage.vue";
 import UpgradeInProgressPage from '@/components/utils/errors/UpgradeInProgressPage.vue'
 import SkillsClientPath from '@/router/SkillsClientPath.js'
 import log from 'loglevel'
+import UserArchivePage from '@/components/users/UserArchivePage.vue';
+import UsersTablePage from '@/components/users/UsersTablePage.vue';
 
 const routes = [
   {
@@ -394,16 +396,31 @@ const routes = [
         },
       },
     }, {
-      name: 'ProjectUsers',
       path: 'users',
       component: Users,
-      meta: {
-        requiresAuth: true,
-        reportSkillId: 'VisitProjectUsers',
-        announcer: {
-          message: 'Project Users',
+      meta: { requiresAuth: true },
+      children: [{
+        component: UsersTablePage,
+        name: 'ProjectUsers',
+        path: '',
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitProjectUsers',
+          announcer: {
+            message: 'Project Users',
+          },
         },
-      },
+      }, {
+        component: UserArchivePage,
+        name: 'UserArchivePage',
+        path: 'user-archive',
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'User Archive Page',
+          },
+        },
+      }],
     }, {
       path: '/administrator/projects/:projectId/self-report',
       component: SelfReportPageNav,
@@ -609,16 +626,21 @@ const routes = [
         },
       },
     }, {
-      name: 'SkillUsers',
       path: 'users',
       component: Users,
-      meta: {
-        requiresAuth: true,
-        reportSkillId: 'VisitSkillUsers',
-        announcer: {
-          message: 'Skill Users',
+      meta: { requiresAuth: true },
+      children: [{
+        component: UsersTablePage,
+        name: 'SkillUsers',
+        path: '',
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitSkillUsers',
+          announcer: {
+            message: 'Skill Users',
+          },
         },
-      },
+      }],
     }, {
       name: 'ConfigureVideo',
       path: 'config-video',
@@ -693,16 +715,21 @@ const routes = [
         },
       },
     }, {
-      name: 'SubjectUsers',
       path: 'users',
       component: Users,
-      meta: {
-        requiresAuth: true,
-        reportSkillId: 'VisitSubjectUsers',
-        announcer: {
-          message: 'Subject Users',
+      meta: { requiresAuth: true },
+      children: [{
+        component: UsersTablePage,
+        name: 'SubjectUsers',
+        path: '',
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitSubjectUsers',
+          announcer: {
+            message: 'Subject Users',
+          },
         },
-      },
+      }],
     }, {
       name: 'SubjectMetrics',
       path: 'metrics',
@@ -732,16 +759,21 @@ const routes = [
         },
       },
     }, {
-      name: 'BadgeUsers',
       path: 'users',
       component: Users,
-      meta: {
-        requiresAuth: true,
-        reportSkillId: 'VisitBadgeUsers',
-        announcer: {
-          message: 'Badge Users',
+      meta: { requiresAuth: true },
+      children: [{
+        component: UsersTablePage,
+        name: 'BadgeUsers',
+        path: '',
+        meta: {
+          requiresAuth: true,
+          reportSkillId: 'VisitBadgeUsers',
+          announcer: {
+            message: 'Badge Users',
+          },
         },
-      },
+      }],
     }],
   }, {
     path: '/join-project/:pid/:inviteToken',
