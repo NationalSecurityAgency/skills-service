@@ -110,7 +110,7 @@ const displayGroupDescription = ref(false);
               </SkillsButton>
             </div>
           </div>
-          <div v-if="attributes.groupInfoOnSkillPage && skill.groupName" class="mt-3 p-1 mb-3">
+          <div v-if="attributes.groupInfoOnSkillPage && skill.groupName" class="mt-3 p-1 mb-3" data-cy="groupInformationSection">
             <div class="flex">
               <div class="mr-2 mt-1 text-xl">
                 <i class="fas fa-layer-group" aria-hidden="true"></i>
@@ -121,11 +121,11 @@ const displayGroupDescription = ref(false);
               <div v-if="!attributes.groupDescriptionsOn">
                 <div class="flex flex-row align-content-center">
                   <span class="text-muted pr-1 align-content-center">Group Description:</span>
-                  <InputSwitch v-model="displayGroupDescription" />
+                  <InputSwitch v-model="displayGroupDescription" data-cy="toggleGroupDescription" />
                 </div>
               </div>
             </div>
-            <div class="mt-2 ml-4" v-if="displayGroupDescription || attributes.groupDescriptionsOn">
+            <div class="mt-2 ml-4" v-if="displayGroupDescription || attributes.groupDescriptionsOn" data-cy="groupDescriptionSection">
               {{ skill.groupDescription }}
             </div>
           </div>
