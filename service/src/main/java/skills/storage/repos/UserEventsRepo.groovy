@@ -385,16 +385,19 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.event_type AS event_type,
                    uue.count AS count,
                    uue.week_number AS week_number
-            FROM user_events uue INNER JOIN (
+            FROM user_events uue 
+                INNER JOIN (
                     select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
                     from skill_definition sd 
                     where sd.type = 'Skill' 
                     and sd.project_id = :projectId
                     and sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
+                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = :projectId
             WHERE
                 uue.event_time >= :start AND
-                uue.event_type = :#{#type.name()}
+                uue.event_type = :#{#type.name()} AND
+                au.id is null
         ) all_events
         group by all_events.event_time 
         order by all_events.event_time desc
@@ -417,7 +420,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     Stream<EventCount> getDistinctUserCountForProject(@Param("projectId") String projectId, @Param("start") Date start)
 
     @Query(value="""
-        select min(ue.projectId) as projectId, ue.weekNumber as weekNumber, count(distinct ue.userId) as count from UserEvent ue
+        select min(ue.projectId) as projectId, ue.weekNumber as weekNumber, count(distinct ue.userId) as count 
+        from UserEvent ue
+            LEFT JOIN ArchivedUser au ON au.userId = ue.userId and au.projectId = :projectId
         where ue.eventTime >= :start AND
         ue.skillRefId in (
             select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
@@ -426,6 +431,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             AND sd.type = 'Skill'
             AND sd.enabled = 'true'
         )   
+        AND au is null
         group by ue.weekNumber
         order by ue.weekNumber desc
     """)
