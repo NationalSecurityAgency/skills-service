@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2021 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.services.userActions
+package skills.controller.request.model
 
-enum DashboardAction {
-    Create,
-    Edit,
-    Delete,
-    ImportFromCatalog,
-    ExportToCatalog,
-    FinalizeCatalogImport,
-    RemoveFromCatalog,
-    ReuseInProject,
-    StopInProjectReuse,
-    Move,
-    AssignSkill,
-    RemoveSkillAssignment,
-    AssignLevel,
-    RemoveLevelAssignment,
-    Configure,
-    RemoveConfiguration,
-    Extend,
-    Remind,
-    CancelExpiration,
-    ArchiveUser,
-    RestoreArchivedUser,
+import groovy.transform.Canonical
+import groovy.transform.ToString
+
+@Canonical
+@ToString(includePackage = false)
+class ArchiveUsersRequest {
+    List<String> userIds
 }

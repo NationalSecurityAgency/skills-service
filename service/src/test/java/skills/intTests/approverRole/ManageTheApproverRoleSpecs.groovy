@@ -154,7 +154,6 @@ class ManageTheApproverRoleSpecs extends DefaultIntSpec {
         e.message.contains("Access Denied")
     }
 
-
     def "approver can not mutate project's data"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -202,6 +201,11 @@ class ManageTheApproverRoleSpecs extends DefaultIntSpec {
             user1Service.deleteLearningPathPrerequisite(proj.projectId, skills[1].skillId, skills[0].skillId)
         }
         skillsService.deleteLearningPathPrerequisite(proj.projectId, skills[1].skillId, skills[0].skillId)
+
+        hasPermissionException {
+            user1Service.archiveUsers([users[0]], proj.projectId)
+        }
+        skillsService.archiveUsers([users[0]], proj.projectId)
     }
 
     def "approver can approve self reporting requests"() {
