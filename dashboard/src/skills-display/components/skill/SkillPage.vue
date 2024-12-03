@@ -24,6 +24,7 @@ import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollS
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import Prerequisites from '@/skills-display/components/skill/prerequisites/Prerequisites.vue'
+import SkillsInputSwitch from "@/components/utils/inputForm/SkillsInputSwitch.vue";
 
 const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
@@ -69,6 +70,7 @@ const nextButtonClicked = () => {
 
 const isLoading = computed(() => loadingSkill.value || skillState.loadingSkillSummary)
 
+const displayGroupDescription = ref(false);
 </script>
 
 <template>
@@ -105,6 +107,25 @@ const isLoading = computed(() => loadingSkill.value || skillState.loadingSkillSu
                 Next
                 <i class="fas fa-arrow-alt-circle-right ml-1" aria-hidden="true"></i>
               </SkillsButton>
+            </div>
+          </div>
+          <div v-if="attributes.groupInfoOnSkillPage && skill.groupName" class="mt-3 p-1 mb-3">
+            <div class="flex">
+              <div class="mr-2 mt-1 text-xl">
+                <i class="fas fa-layer-group" aria-hidden="true"></i>
+              </div>
+              <div class="flex flex-1">
+                <span class="text-2xl sd-theme-primary-color font-medium flex">{{ skill.groupName }}</span>
+              </div>
+              <div v-if="!attributes.groupDescriptionsOn">
+                <div class="flex flex-row align-content-center">
+                  <span class="text-muted pr-1 align-content-center">Group Description:</span>
+                  <InputSwitch v-model="displayGroupDescription" />
+                </div>
+              </div>
+            </div>
+            <div class="mt-2 ml-4" v-if="displayGroupDescription || attributes.groupDescriptionsOn">
+              {{ skill.groupDescription }}
             </div>
           </div>
           <div class="card-body text-center text-sm-left">
