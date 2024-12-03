@@ -13,28 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.services.userActions
+package skills.controller.result.model
 
-enum DashboardAction {
-    Create,
-    Edit,
-    Delete,
-    ImportFromCatalog,
-    ExportToCatalog,
-    FinalizeCatalogImport,
-    RemoveFromCatalog,
-    ReuseInProject,
-    StopInProjectReuse,
-    Move,
-    AssignSkill,
-    RemoveSkillAssignment,
-    AssignLevel,
-    RemoveLevelAssignment,
-    Configure,
-    RemoveConfiguration,
-    Extend,
-    Remind,
-    CancelExpiration,
-    ArchiveUser,
-    RestoreArchivedUser,
+import groovy.transform.EqualsAndHashCode
+import skills.storage.model.auth.RoleName
+
+@EqualsAndHashCode
+class ArchivedUserRes {
+
+    String userId
+    String userIdForDisplay
+    String firstName
+    String lastName
+
+    String projectId
+    String adminGroupId
+
+    RoleName roleName
+
+    String email
+
+    String dn
 }

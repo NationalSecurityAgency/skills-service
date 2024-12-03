@@ -32,6 +32,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import { useProjConfig } from '@/stores/UseProjConfig.js';
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
@@ -41,6 +42,7 @@ const appConfig = useAppConfig()
 const userInfo = useUserInfo()
 const exportUtil = useExportUtil()
 const numberFormat = useNumberFormat()
+const projConfig = useProjConfig()
 
 let filters = ref({
   user: '',
@@ -57,6 +59,7 @@ const totalRows = ref(1)
 const pageSize = ref(5)
 const possiblePageSizes = [5, 10, 15, 20]
 const sortInfo = ref({ sortOrder: -1, sortBy: 'lastUpdated' })
+const selectedRows = ref([])
 
 const showUserTagColumn = computed(() => {
  return !!(appConfig.usersTableAdditionalUserTagKey && appConfig.usersTableAdditionalUserTagLabel);
@@ -184,6 +187,13 @@ const exportUsers = () => {
     isExporting.value = false
   })
 }
+
+const archiveUsers = () => {
+  const userIds = selectedRows.value.map((row) => row.userId)
+  UsersService.archiveUsers(route.params.projectId, userIds).then(() => {
+    loadData()
+  })
+}
 </script>
 
 <template>
@@ -234,7 +244,9 @@ const exportUsers = () => {
         :rowsPerPageOptions="possiblePageSizes"
         v-model:sort-field="sortInfo.sortBy"
         v-model:sort-order="sortInfo.sortOrder"
+        v-model:selection="selectedRows"
         @sort="sortField"
+        data-key="userId"
       >
         <template #loading>
           <div>
@@ -245,6 +257,15 @@ const exportUsers = () => {
         <template v-if="isProjectLevel" #header>
           <div class="flex justify-content-end flex-wrap">
             <SkillsButton
+                v-if="!projConfig.isReadOnlyProj"
+                class="mr-2"
+                :disabled="selectedRows <= 0"
+                size="small"
+                icon="fas fa-archive"
+                label="Archive"
+                @click="archiveUsers"
+                data-cy="archiveUsersTableBtn" />
+            <SkillsButton
                 :disabled="totalRows <= 0"
                 size="small"
                 icon="fas fa-download"
@@ -253,6 +274,11 @@ const exportUsers = () => {
                 data-cy="exportUsersTableBtn" />
           </div>
         </template>
+        <Column v-if="isProjectLevel && !projConfig.isReadOnlyProj" selectionMode="multiple" :class="{'flex': responsive.md.value }">
+          <template #header>
+            <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-check-double" aria-hidden="true"></i> Select Rows:</span>
+          </template>
+        </Column>
         <Column field="userId" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="fas fa-user skills-color-users mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>

@@ -1842,5 +1842,35 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         return adminGroupService.getAdminGroupsForProject(projectId)
     }
+
+    @RequestMapping(value = "/projects/{projectId}/users/archive", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult archiveUsers(@PathVariable("projectId") String projectId,
+                               @RequestBody ArchiveUsersRequest archiveUsersRequest) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+
+        projAdminService.archiveUsers(projectId, archiveUsersRequest)
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/users/archive", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    TableResult getArchivedUsers(@PathVariable(name = "projectId") String projectId,
+                                 @RequestParam int page,
+                                 @RequestParam int limit,
+                                 @RequestParam String orderBy,
+                                 @RequestParam Boolean ascending) {
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        return projAdminService.findAllArchivedUsers(projectId, pageRequest);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/users/{userKey}/restore", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult restoreArchivedUser(@PathVariable("projectId") String projectId,
+                                      @PathVariable("userKey") String userKey) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(userKey, "userKey")
+
+        projAdminService.restoreArchiveUser(projectId, userKey)
+        return new RequestResult(success: true)
+    }
 }
 

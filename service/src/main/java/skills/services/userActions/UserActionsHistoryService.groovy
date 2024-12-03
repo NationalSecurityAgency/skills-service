@@ -86,6 +86,25 @@ class UserActionsHistoryService {
     }
 
     @Transactional
+    void saveUserActions(List<UserActionInfo> userActionInfos) {
+        List<UserActionsHistory> userActionsHistoryList = userActionInfos.findAll {
+            it.projectId != InceptionProjectService.inceptionProjectId }.collect { UserActionInfo userActionInfo ->
+                String actionAttributesAsStr = userActionInfo.actionAttributes ? mapper.writeValueAsString(userActionInfo.actionAttributes) : null
+                return new UserActionsHistory(
+                        action: userActionInfo.action,
+                        item: userActionInfo.item,
+                        itemId: userActionInfo.itemId,
+                        itemRefId: userActionInfo.itemRefId,
+                        userId: userInfoService.currentUserId,
+                        projectId: userActionInfo.projectId,
+                        quizId: userActionInfo.quizId,
+                        actionAttributes: actionAttributesAsStr,
+                )
+        }
+        userActionsHistoryRepo.saveAll(userActionsHistoryList)
+    }
+
+    @Transactional
     TableResult getUsersActions(PageRequest pageRequest,
                                 String projectId,
                                 String quizId,
