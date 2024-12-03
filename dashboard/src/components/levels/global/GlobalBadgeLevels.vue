@@ -192,7 +192,7 @@ const selectLevel = (level) => {
 
     <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
-        <loading-container v-model="isLoading">
+        <loading-container :is-loading="isLoading">
           <div class="mb-4 m-3 px-3 py-4">
             <div class="flex gap-2">
               <div class="flex-1">
