@@ -170,6 +170,11 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         def res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()))
         def resOver30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()+14))
 
+        skillsService.archiveUsers([users[2]], proj.projectId)
+
+        def res30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()))
+        def resOver30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()+14))
+
         then:
 
         res30days.size() == 5
@@ -179,6 +184,14 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         resOver30days.size() == 7
         resOver30days.collect {it.count} == [0, 0, 1, 2, 3, 4, 5]
         resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+
+        res30daysAfterArchive.size() == 5
+        res30daysAfterArchive.collect {it.count} == [1, 2, 2, 3, 4]
+        res30daysAfterArchive.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+
+        resOver30daysAfterArchive.size() == 7
+        resOver30daysAfterArchive.collect {it.count} == [0, 0, 1, 2, 2, 3, 4]
+        resOver30daysAfterArchive.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
     }
 
     def "number of users growing over few days - include skills imported from catalog"() {
@@ -237,6 +250,11 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         def res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()))
         def resOver30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()+14))
 
+        skillsService.archiveUsers([users[2]], proj.projectId)
+
+        def res30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()))
+        def resOver30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()+14))
+
         then:
 
         res30days.size() == 5
@@ -246,6 +264,14 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         resOver30days.size() == 7
         resOver30days.collect {it.count} == [0, 0, 1, 2, 3, 4, 5]
         resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+
+        res30daysAfterArchive.size() == 5
+        res30daysAfterArchive.collect {it.count} == [1, 2, 2, 3, 4]
+        res30daysAfterArchive.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+
+        resOver30daysAfterArchive.size() == 7
+        resOver30daysAfterArchive.collect {it.count} == [0, 0, 1, 2, 2, 3, 4]
+        resOver30daysAfterArchive.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
     }
 
     def "number of users growing over few days - specific skill"() {
@@ -275,6 +301,8 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
             days.eachWithIndex { Date date, int index ->
                 users.subList(0, index).each { String user ->
                     skills.subList(0, index).each { skill ->
+
+                        println("\n\narchive skill [${skill.skillId}] for users [${user}]\n\n")
                         skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
                     }
                 }
@@ -291,6 +319,14 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         def resOver30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()+14, skills[1].skillId))
         def skill3res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger(), skills[2].skillId))
 
+
+        println("\n\narchive user ${users[2]}\n\n")
+        skillsService.archiveUsers([users[2]], proj.projectId)
+
+        def res30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger(), skills[1].skillId))
+        def resOver30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()+14, skills[1].skillId))
+        def skill3res30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger(), skills[2].skillId))
+
         then:
         res30days.size() == 5
         res30days.collect {it.count} == [0, 2, 3, 4, 5]
@@ -303,6 +339,18 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         skill3res30days.size() == 5
         skill3res30days.collect {it.count} == [0, 0, 3, 4, 5]
         skill3res30days.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+
+        res30daysAfterArchive.size() == 5
+        res30daysAfterArchive.collect {it.count} ==[0, 2, 3, 4, 5]
+        res30daysAfterArchive.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+
+        resOver30daysAfterArchive.size() == 7
+        resOver30daysAfterArchive.collect {it.count} == [0, 0, 0, 2, 3, 4, 5]
+        resOver30daysAfterArchive.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+
+        skill3res30daysAfterArchive.size() == 5
+        skill3res30daysAfterArchive.collect {it.count} == [0, 0, 3, 4, 5]
+        skill3res30daysAfterArchive.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
     }
 
     def "number of users growing over few days - specific skill, include metrics for skills imported from catalog"() {

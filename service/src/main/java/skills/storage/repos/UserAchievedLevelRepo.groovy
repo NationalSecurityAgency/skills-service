@@ -65,16 +65,38 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     List<UserAchievement> findAllByUserIdAndSkillId(String userId, @Nullable String skillId)
 
+    @Query(value='''
+    SELECT COUNT(distinct ua.userId)
+    FROM UserAchievement ua
+        LEFT JOIN ArchivedUser au ON au.userId = ua.userId and au.projectId = ?1
+    WHERE ua.projectId =?1 AND
+          ua.skillId = ?2 AND
+          ua.level = ?3 AND
+          au is null
+    ''')
     Integer countByProjectIdAndSkillIdAndLevel(String projectId, @Nullable String skillId, int level)
 
     @Query(value='''
     SELECT COUNT(distinct ua.userId)
     FROM UserAchievement ua
-    INNER JOIN UserTag AS ut ON ua.userId = ut.userId
+        LEFT JOIN ArchivedUser au ON au.userId = ua.userId and au.projectId = ?1
+    WHERE ua.projectId =?1 AND
+          ua.skillId is null AND
+          ua.level = ?2 AND
+          au is null
+    ''')
+    Integer countByProjectIdAndLevelForSubject(String projectId, int level)
+
+    @Query(value='''
+    SELECT COUNT(distinct ua.userId)
+    FROM UserAchievement ua
+        INNER JOIN UserTag AS ut ON ua.userId = ut.userId
+        LEFT JOIN ArchivedUser au ON au.userId = ua.userId and au.projectId = ?1
     WHERE ua.projectId =?1 AND
           ua.level = ?2 AND
           ut.key = ?3 AND
-          ut.value = ?4
+          ut.value = ?4 AND
+          au is null
     ''')
     Integer countByProjectIdAndSkillIdAndLevelAndUserTag(String projectId, int level, String userTagKey, String userTagValue)
 
