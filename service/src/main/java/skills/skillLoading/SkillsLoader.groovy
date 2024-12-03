@@ -344,6 +344,7 @@ class SkillsLoader {
                 projectId: projDef.projectId,
                 projectName: InputSanitizer.unsanitizeName(projDef.name),
                 skillsLevel: skillLevel,
+                lastLevelAchieved: levelInfo?.achievedOn,
                 totalLevels: levelInfo?.totalNumLevels ?: 0,
                 points: points,
                 totalPoints: totalPoints,
@@ -988,6 +989,7 @@ class SkillsLoader {
                 points: points,
 
                 skillsLevel: levelInfo.level,
+                lastLevelAchieved: levelInfo?.achievedOn,
                 totalLevels: levelInfo.totalNumLevels,
 
                 levelPoints: levelInfo.currentPoints,
@@ -1392,6 +1394,7 @@ class SkillsLoader {
             }
         }
 
+        res.achievedOn = lastAchievedLevel?.achievedOn
         return res
     }
 

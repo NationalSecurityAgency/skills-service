@@ -801,8 +801,9 @@ Cypress.Commands.add("doReportSkill", ({project = 1, skill = 1, subjNum = 1, use
         if (date === 'yesterday') {
             m = moment.utc().subtract(1, 'day')
         }
-        if (date === '2 days ago') {
-            m = moment.utc().subtract(2, 'day')
+        if (date.endsWith(' days ago')) {
+            const daysAgo = parseInt(date)
+            m = moment.utc().subtract(daysAgo, 'day')
         }
         timestamp = m.clone().format('x')
     }

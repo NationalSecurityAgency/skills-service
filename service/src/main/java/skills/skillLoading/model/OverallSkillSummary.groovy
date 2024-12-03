@@ -23,6 +23,7 @@ class OverallSkillSummary {
     String projectName
 
     int skillsLevel
+    Date lastLevelAchieved
     int totalLevels
 
     int points

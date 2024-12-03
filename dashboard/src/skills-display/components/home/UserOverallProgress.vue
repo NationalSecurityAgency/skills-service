@@ -24,6 +24,7 @@ import SkillLevel from '@/skills-display/components/progress/MySkillLevel.vue'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
+import AchievementCelebration from "@/skills-display/components/progress/celebration/AchievementCelebration.vue";
 
 const props = defineProps({
   isSubject: {
@@ -61,7 +62,9 @@ const levelStats = computed(() => {
 </script>
 
 <template>
-  <Card>
+  <div>
+    <achievement-celebration :user-progress="userProgress"/>
+    <Card>
     <template #content>
       <div class="flex flex-column lg:flex-row gap-5 align-items-stretch text-center">
         <div class="flex-1">
@@ -135,6 +138,7 @@ const levelStats = computed(() => {
       </div>
     </template>
   </Card>
+  </div>
 </template>
 
 <style scoped>
