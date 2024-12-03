@@ -52,15 +52,15 @@ describe('Self Report Skills Management Tests', () => {
     const tableSelector = '[data-cy="skillsReportApprovalTable"]';
     cy.validateTable(tableSelector, [
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user0'
       }],
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user1'
       }],
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user2'
       }],
     ]);
@@ -79,11 +79,11 @@ describe('Self Report Skills Management Tests', () => {
       .click();
     cy.validateTable(tableSelector, [
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user0'
       }],
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user2'
       }],
     ]);
@@ -117,15 +117,15 @@ describe('Self Report Skills Management Tests', () => {
     const tableSelector = '[data-cy="skillsReportApprovalTable"]';
     cy.validateTable(tableSelector, [
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user0'
       }],
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user1'
       }],
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user2'
       }],
     ]);
@@ -153,11 +153,11 @@ describe('Self Report Skills Management Tests', () => {
 
     cy.validateTable(tableSelector, [
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user0'
       }],
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user2'
       }],
     ]);
@@ -287,38 +287,38 @@ describe('Self Report Skills Management Tests', () => {
     cy.visit('/administrator/projects/proj1/users');
     cy.validateTable('[data-cy="usersTable"]', [
       [{
-        colIndex: 0,
+        colIndex: 1,
         value: 'user0'
       }, {
-        colIndex: 2,
+        colIndex: 3,
         value: '100'
       }],
       [{
-        colIndex: 0,
+        colIndex: 1,
         value: 'user1'
       }, {
-        colIndex: 2,
+        colIndex: 3,
         value: '100'
       }],
       [{
-        colIndex: 0,
+        colIndex: 1,
         value: 'user2'
       }, {
-        colIndex: 2,
+        colIndex: 3,
         value: '100'
       }],
       [{
-        colIndex: 0,
+        colIndex: 1,
         value: 'user3'
       }, {
-        colIndex: 2,
+        colIndex: 3,
         value: '100'
       }],
       [{
-        colIndex: 0,
+        colIndex: 1,
         value: 'user4'
       }, {
-        colIndex: 2,
+        colIndex: 3,
         value: '100'
       }],
     ]);
@@ -365,11 +365,11 @@ describe('Self Report Skills Management Tests', () => {
 
     cy.validateTable(tableSelector, [
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user5'
       }],
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user6'
       }],
     ]);
@@ -485,21 +485,21 @@ describe('Self Report Skills Management Tests', () => {
     const tableSelector = '[data-cy="skillsReportApprovalTable"]';
     const expected = [
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user3Good@skills.org'
       }, {
         colIndex: 1,
         value: '180'
       }],
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user2Good@skills.org'
       }, {
         colIndex: 1,
         value: '220'
       }],
       [{
-        colIndex: 2,
+        colIndex: 3,
         value: 'user1Good@skills.org'
       }, {
         colIndex: 1,
