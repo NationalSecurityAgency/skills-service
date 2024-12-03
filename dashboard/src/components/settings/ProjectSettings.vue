@@ -143,6 +143,13 @@ let settings = ref({
     dirty: false,
     projectId: route.params.projectId,
   },
+  groupInfoOnSkillPage: {
+    value: false,
+    setting: 'group-info-on-skill-page',
+    lastLoadedValue: false,
+    dirty: false,
+    projectId: route.params.projectId,
+  },
   disableAchievementsCelebration: {
     value: false,
     setting: 'skills-display-achievement-celebration-disabled',
@@ -241,6 +248,10 @@ const disableAchievementCelebrationLabel = computed(() => {
   return formatToggleLabel(settings.value.disableAchievementsCelebration.value);
 });
 
+const groupInfoOnSkillPageLabel = computed(() => {
+  return formatToggleLabel(settings.value.groupInfoOnSkillPage.value);
+})
+
 const rankOptOutLabel = computed(() => {
   return formatToggleLabel(settings.value.rankAndLeaderboardOptOut.value);
 });
@@ -298,6 +309,10 @@ const rankAndLeaderboardOptOutChanged = ((value) => {
 const groupDescriptionsChanged = ((value) => {
   settings.value.groupDescriptions.dirty = `${value}` !== `${settings.value.groupDescriptions.lastLoadedValue}`;
 });
+
+const groupInfoOnSkillPageChanged = ((value) => {
+  settings.value.groupInfoOnSkillPage.dirty = `${value}` !== `${settings.value.groupInfoOnSkillPage.lastLoadedValue}`;
+})
 
 const disableAchievementsCelebrationChanged = ((value) => {
   settings.value.disableAchievementsCelebration.dirty = `${value}` !== `${settings.value.disableAchievementsCelebration.lastLoadedValue}`;
@@ -633,6 +648,21 @@ const saveSettings = ((dirtyChanges) => {
                            aria-labelledby="groupDescriptionsLabel"
                            data-cy="groupDescriptionsSwitch" />
               <span class="ml-1">{{ groupDescriptionsLabel }}</span>
+            </div>
+          </div>
+
+          <div class="field flex flex-column lg:flex-row lg:gap-3">
+            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="groupInfoOnSkillPage" for="groupInfoOnSkillPageSwitch">
+              <span id="groupInfoOnSkillPageLabel">Show Group Info On Skill Pages:</span>
+            </label>
+            <div class="flex align-items-center">
+              <InputSwitch v-model="settings.groupInfoOnSkillPage.value"
+                           inputId="groupInfoOnSkillPageSwitch"
+                           name="check-button"
+                           v-on:update:modelValue="groupInfoOnSkillPageChanged"
+                           aria-labelledby="groupInfoOnSkillPageLabel"
+                           data-cy="groupInfoOnSkillPageSwitch" />
+              <span class="ml-1">{{ groupInfoOnSkillPageLabel }}</span>
             </div>
           </div>
 

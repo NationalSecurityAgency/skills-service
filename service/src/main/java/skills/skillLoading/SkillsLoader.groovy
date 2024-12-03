@@ -543,6 +543,7 @@ class SkillsLoader {
         SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [ContainerType.Skill, ContainerType.SkillsGroup])
 
         def badges = skillDefRepo.findAllBadgesForSkill([skillId], crossProjectId ?: projectId);
+        def groupInfo = skillDefRepo.findGroupInformationForSkill(skillId, crossProjectId ?: projectId)
 
         String nextSkillId = null;
         String prevSkillId = null;
@@ -674,7 +675,9 @@ class SkillsLoader {
                 isMotivationalSkill: isMotivationalSkill,
                 daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
                 mostRecentlyPerformedOn: mostRecentlyPerformedOn,
-                lastExpirationDate: lastExpirationDate
+                lastExpirationDate: lastExpirationDate,
+                groupName: groupInfo?.name,
+                groupDescription: groupInfo?.description
         )
     }
 

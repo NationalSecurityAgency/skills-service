@@ -337,6 +337,12 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
               c.id = r.child.id and c.skillId in ?1 and c.type='Skill' and c.projectId=?2 order by c.skillId, s.skillId''')
     List<SimpleBadgeRes> findAllBadgesForSkill(List<String> skillId, String projectId)
 
+    @Nullable
+    @Query(value='''select s
+        from SkillDefWithExtra s, SkillRelDef r, SkillDef c
+        where s.type = "SkillsGroup" and r.parent.id = s.id and r.child.id = c.id and c.skillId = ?1 and c.projectId = ?2''')
+    SkillDefWithExtra findGroupInformationForSkill(String skillId, String projectId)
+
     @Query(value='''select sum(c.totalPoints) 
         from SkillRelDef r, SkillDef c 
         where r.parent.id=?1 and c.id = r.child.id and r.type=?2''')
