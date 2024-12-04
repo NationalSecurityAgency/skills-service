@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-describe('Achievement Encouragement Messages Tests', () => {
+describe('Achievement Celebration Messages Tests', () => {
 
-    it('show level-specific project encouragements', () => {
+    it('show level-specific project celebration', () => {
         cy.createProject(1)
         cy.createSubject(1)
         cy.createSkill(1, 1, 1)
@@ -26,41 +26,41 @@ describe('Achievement Encouragement Messages Tests', () => {
 
         cy.cdVisit('/')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 0 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').should('not.exist')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').should('not.exist')
 
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
 
         cy.cdVisit('/')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 1 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('You just crushed Level 1 and hit Level 2')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('You just crushed Level 1 and hit Level 2')
 
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
         cy.cdVisit('/', true)
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 2 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('You achieved Level 2, a significant milestone!')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('You achieved Level 2, a significant milestone!')
 
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.cdVisit('/', true)
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 3 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Reaching Level 3 is an impressive achievement!')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Reaching Level 3 is an impressive achievement!')
 
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
         cy.cdVisit('/', true)
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 4 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Achieving Level 4 is a testament to your perseverance and determination!')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Achieving Level 4 is a testament to your perseverance and determination!')
 
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 5, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 5, Cypress.env('proxyUser'), 'now');
         cy.cdVisit('/', true)
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 5 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Congratulation on Level 5')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Congratulation on Level 5')
     })
 
-    it('show level-specific subject encouragements', () => {
+    it('show level-specific subject celebration', () => {
         cy.createProject(1)
         cy.createSubject(1)
         cy.createSkill(1, 1, 1)
@@ -71,43 +71,43 @@ describe('Achievement Encouragement Messages Tests', () => {
 
         cy.cdVisit('/subjects/subj1')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 0 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').should('not.exist')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').should('not.exist')
 
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
 
         cy.cdVisit('/subjects/subj1')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 1 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Subject Level 1')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('You took the first step in mastering Subject 1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Subject Level 1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('You took the first step in mastering Subject 1')
 
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
         cy.cdVisit('/subjects/subj1', true)
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 2 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Subject Level 2')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('You have reached Level 2 in Subject 1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Subject Level 2')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('You have reached Level 2 in Subject 1')
 
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.cdVisit('/subjects/subj1', true)
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 3 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Subject Level 3')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('You\'ve reached Level 3 in Subject 1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Subject Level 3')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('You\'ve reached Level 3 in Subject 1')
 
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
         cy.cdVisit('/subjects/subj1', true)
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 4 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Subject Level 4')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Reaching Level 4 is an impressive achievement')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Subject Level 4')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Reaching Level 4 is an impressive achievement')
 
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 5, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 5, Cypress.env('proxyUser'), 'now');
         cy.cdVisit('/subjects/subj1', true)
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 5 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Subject Level 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Congratulations on reaching Level 5 in Subject 1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Subject Level 5')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Congratulations on reaching Level 5 in Subject 1')
     })
 
     it('only show project achievement kudos if achieved date is within 7 days', () => {
@@ -123,13 +123,13 @@ describe('Achievement Encouragement Messages Tests', () => {
 
         cy.cdVisit('/')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 1 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').should('not.exist')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').should('not.exist')
 
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), '9 days ago');
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), '6 days ago');
         cy.cdVisit('/', true)
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 2 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('You achieved Level 2, a significant milestone!')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('You achieved Level 2, a significant milestone!')
     })
 
     it('only show subject achievement kudos if achieved date is within 7 days', () => {
@@ -145,14 +145,14 @@ describe('Achievement Encouragement Messages Tests', () => {
 
         cy.cdVisit('/subjects/subj1')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 1 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').should('not.exist')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').should('not.exist')
 
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), '9 days ago');
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), '6 days ago');
         cy.cdVisit('/subjects/subj1', true)
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 2 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Subject Level 2')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('You have reached Level 2 in Subject 1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Subject Level 2')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('You have reached Level 2 in Subject 1')
     })
 
     it('closing project achievement kudos will not show that particular achievement kudos again', () => {
@@ -176,21 +176,21 @@ describe('Achievement Encouragement Messages Tests', () => {
 
         cy.visit('/progress-and-rankings/projects/proj1')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 1 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('You just crushed Level 1 and hit Level 2')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('You just crushed Level 1 and hit Level 2')
         cy.get('[data-cy="closeCelebrationMsgBtn"]').click()
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').should('not.exist')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').should('not.exist')
 
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').eq(0).click()
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Subject Level 1')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('You took the first step in mastering Subject 1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Subject Level 1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('You took the first step in mastering Subject 1')
 
         cy.visit('/progress-and-rankings/projects/proj1')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 1 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').should('not.exist')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').should('not.exist')
 
         cy.visit('/progress-and-rankings/projects/proj2')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 3 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Reaching Level 3 is an impressive achievement!')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Reaching Level 3 is an impressive achievement!')
     })
 
     it('closing subject achievement kudos will not show that particular achievement kudos again', () => {
@@ -214,22 +214,22 @@ describe('Achievement Encouragement Messages Tests', () => {
 
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 1 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Subject Level 1')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('You took the first step in mastering Subject 1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Subject Level 1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('You took the first step in mastering Subject 1')
         cy.get('[data-cy="closeCelebrationMsgBtn"]').click()
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').should('not.exist')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').should('not.exist')
 
         cy.get('[data-cy="breadcrumbItemValue"]').contains('proj1').click()
         cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTile-subj2"] [data-cy="subjectTileBtn"]').click()
         cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 3 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Subject Level 3')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('You\'ve reached Level 3 in Subject 2')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Subject Level 3')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('You\'ve reached Level 3 in Subject 2')
 
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 1 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').should('not.exist')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').should('not.exist')
     })
 
     it('honor skill will achieve a level and show celebration msg', () => {
@@ -243,16 +243,18 @@ describe('Achievement Encouragement Messages Tests', () => {
 
         cy.cdVisit('/subjects/subj1')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 0 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').should('not.exist')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').should('not.exist')
         cy.get('[data-cy=toggleSkillDetails]').click();
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="claimPointsBtn"]').click();
 
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 1 out of 5')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('Subject Level 1')
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementCelebrationMsg"]').contains('You took the first step in mastering Subject 1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('Subject Level 1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').contains('You took the first step in mastering Subject 1')
     })
 
 })
+
+
 
 
 

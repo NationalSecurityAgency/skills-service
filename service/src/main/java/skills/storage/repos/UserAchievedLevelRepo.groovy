@@ -175,6 +175,30 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         skillDef.type=?3''')
     int countAchievedForUser(String userId, String projectId, SkillDef.ContainerType containerType)
 
+    static interface AchievementInfo {
+        String getName()
+        String getId()
+        Date getAchievedOn()
+        String getIconClass()
+        SkillDef.ContainerType getType()
+    }
+
+    @Query('''select skillDef.name as name, 
+        skillDef.skillId as id, 
+        ua.achievedOn as achievedOn,
+        skillDef.iconClass as iconClass,
+        skillDef.type as type
+      from SkillDef skillDef, UserAchievement ua 
+      where 
+        ua.level is null and 
+        ua.userId=?1 and
+        ua.achievedOn > ?4 and 
+        skillDef.skillId = ua.skillId and 
+        skillDef.projectId = ua.projectId and 
+        skillDef.projectId=?2 and 
+        skillDef.type in ?3''')
+    List<AchievementInfo> getUserAchievementsAfterDate(String userId, String projectId, List<SkillDef.ContainerType> containerTypes, Date mustBeAfterThisDate)
+
     @Query('''select count(ua)
       from SkillDef skillDef, UserAchievement ua 
       where 
