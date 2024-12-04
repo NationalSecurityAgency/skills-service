@@ -810,9 +810,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param("userTagKey") String userTagKey
     )
 
-    @Query('''select count(distinct ua.userId) from UserAchievement ua
-              where ua.projectId = :projectId and
-              ua.skillId = :skillId
+    @Query('''
+        select count(distinct ua.userId) 
+        from UserAchievement ua
+            LEFT JOIN ArchivedUser au ON au.userId = ua.userId and au.projectId = :projectId      
+        where ua.projectId = :projectId and
+              ua.skillId = :skillId and
+              au is null
     ''')
     Long countDistinctUsersAchievingSkill(@Param("projectId") String projectId, @Param("skillId") String skillId)
 
