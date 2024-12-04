@@ -123,15 +123,17 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.count AS count,
                    uue.week_number AS week_number
             FROM user_events uue 
-            INNER JOIN (
-                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
-                from skill_definition sd 
-                where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId) and 
-                sd.enabled = 'true'
-            ) def ON uue.skill_ref_id = def.id
+                INNER JOIN (
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    from skill_definition sd 
+                    where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId) and 
+                    sd.enabled = 'true'
+                ) def ON uue.skill_ref_id = def.id
+                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = def.project_id
             WHERE
                 uue.event_time >= :start AND
-                uue.event_type = :#{#type.name()}
+                uue.event_type = :#{#type.name()} AND
+                au.id is null
         ) event_join
         GROUP BY event_join.event_time
         ORDER BY event_join.event_time DESC
@@ -149,14 +151,16 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.count AS count,
                    uue.week_number AS week_number
             FROM user_events uue 
-            INNER JOIN (
-                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
-                from skill_definition sd 
-                where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId) and 
-                sd.enabled = 'true'
-            ) def ON uue.skill_ref_id = def.id
+                INNER JOIN (
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    from skill_definition sd 
+                    where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId) and 
+                    sd.enabled = 'true'
+                ) def ON uue.skill_ref_id = def.id
+                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = def.project_id
             WHERE
-                uue.event_time >= :start
+                uue.event_time >= :start AND
+                au.id is null
         ) event_join
         GROUP BY event_join.week_number
         ORDER BY event_join.week_number DESC
@@ -225,15 +229,17 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.count AS count,
                    uue.week_number AS week_number
             FROM user_events uue 
-            INNER JOIN (
-                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
-                from skill_definition sd 
-                where sd.type = 'Skill' and 
-                sd.enabled = 'true' and
-                sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :skillRefId)
-            ) def ON uue.skill_ref_id = def.id
+                INNER JOIN (
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    from skill_definition sd 
+                    where sd.type = 'Skill' and 
+                    sd.enabled = 'true' and
+                    sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :skillRefId)
+                ) def ON uue.skill_ref_id = def.id
+                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = def.project_id
             WHERE
-                uue.event_time >= :start
+                uue.event_time >= :start AND
+                au.id is null
         ) all_events
         group by all_events.week_number 
         order by all_events.week_number desc
@@ -250,16 +256,18 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.count AS count,
                    uue.week_number AS week_number
             FROM user_events uue 
-            INNER JOIN (
-                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
-                from skill_definition sd 
-                where sd.type = 'Skill' and 
-                sd.enabled = 'true' and
-                sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :skillRefId)
-            ) def ON uue.skill_ref_id = def.id
+                INNER JOIN (
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    from skill_definition sd 
+                    where sd.type = 'Skill' and 
+                    sd.enabled = 'true' and
+                    sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :skillRefId)
+                ) def ON uue.skill_ref_id = def.id
+                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = def.project_id
             WHERE
                 uue.event_time > :start AND
-                uue.event_type = :#{#type.name()}
+                uue.event_type = :#{#type.name()} AND
+                au.id is null
         ) all_events
         group by all_events.event_time 
         order by all_events.event_time desc
