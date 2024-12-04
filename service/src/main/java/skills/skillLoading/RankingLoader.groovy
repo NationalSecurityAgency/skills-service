@@ -300,7 +300,7 @@ class RankingLoader {
             } else if (subjectId) {
                 numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, subjectId, levelMeta.level)
             } else {
-                numUsers = achievedLevelRepository.countByProjectIdAndLevelForSubject(projectId, levelMeta.level)
+                numUsers = achievedLevelRepository.countByProjectIdAndLevel(projectId, levelMeta.level)
             }
             new UsersPerLevel(level: levelMeta.level, numUsers: numUsers ?: 0)
         }

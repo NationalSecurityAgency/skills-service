@@ -303,7 +303,7 @@ class LevelDefinitionStorageService {
             existingDefinitions = existingDefinitions.sort({ it.level })
             removed = existingDefinitions.last()
 
-            int usersAtLevel = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, skillId, removed.level)
+            int usersAtLevel = skillId ? achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, skillId, removed.level) : achievedLevelRepository.countByProjectIdAndLevel(projectId, removed.level)
             if(usersAtLevel > 0){
                 SkillException ske = new SkillException("Unable to delete level ${removed.level}, $usersAtLevel ${usersAtLevel > 1 ? 'users have' : 'user has'} achieved this level")
                 ske.errorCode = ErrorCode.ConstraintViolation

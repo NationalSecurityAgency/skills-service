@@ -85,7 +85,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
           ua.level = ?2 AND
           au is null
     ''')
-    Integer countByProjectIdAndLevelForSubject(String projectId, int level)
+    Integer countByProjectIdAndLevel(String projectId, int level)
 
     @Query(value='''
     SELECT COUNT(distinct ua.userId)
