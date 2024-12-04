@@ -59,20 +59,35 @@ class NoUsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
         assert !skillsService.addSkill(skill, users[3], new Date() - 6).body.skillApplied
         assert !skillsService.addSkill(skill, users[3], new Date() - 5).body.skillApplied
 
-        // user 5 and 6 - did not achieve
+        // user 5 - did not achieve
         assert skillsService.addSkill(skill, users[5], new Date()).body.skillApplied
-        assert skillsService.addSkill(skill, users[6], new Date()).body.skillApplied
+
+        // user 6 - achieved but did not use after
+        assert skillsService.addSkill(skill, users[6], new Date() - 2).body.skillApplied
+        assert skillsService.addSkill(skill, users[6], new Date() - 1).body.skillApplied
 
         when:
         def props = ["skillId": skill.skillId, "page": 1, "pageSize": 5, "sortBy": "date", "sortDesc": true]
         def result = builder.build(proj.projectId, builder.id, props)
 
+        skillsService.archiveUsers([users[2]], proj.projectId)
+
+        def resultAfterArchive = builder.build(proj.projectId, builder.id, props)
+
         then:
         result
-        result.totalCount == 1
+        result.totalCount == 2
         result.users[0].userId == users[2]
         result.users[0].count == 2
         result.users[0].date.toString() == date.format('YYYY-MM-dd 00:00:00.0')
+        result.users[1].userId == users[6]
+        result.users[1].count == 2
+        result.users[1].date.toString() == date.format('YYYY-MM-dd 00:00:00.0')
+
+        resultAfterArchive.totalCount == 1
+        resultAfterArchive.users[0].userId == users[6]
+        resultAfterArchive.users[0].count == 2
+        resultAfterArchive.users[0].date.toString() == date.format('YYYY-MM-dd 00:00:00.0')
     }
 
     def "pages appropriately"() {
