@@ -37,7 +37,7 @@ class NoUsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
         skillsService.createSubject(SkillsFactory.createSubject())
         skillsService.createSkill(skill)
 
-        def users = getRandomUsers(7)
+        def users = getRandomUsers(7).sort()
         def date = new Date() - 1
 
         // user 1 - achieved and used after
