@@ -2093,7 +2093,6 @@ class SkillsService {
         return wsHelper.adminGet("${getQuizDefUrl(quizId)}/adminGroups".toString())
     }
     def archiveUsers(List<String> userIds, String projectId) {
-        userIds = userIds.collect { getUserId(it) }
         return wsHelper.adminPost("/projects/${projectId}/users/archive", [userIds: userIds])
     }
 
