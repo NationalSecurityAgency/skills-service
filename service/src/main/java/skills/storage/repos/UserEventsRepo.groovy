@@ -482,33 +482,39 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Nullable
     @Query(value='''
-        SELECT COUNT(ue.user_id) OVER() 
-        FROM user_events ue, (
-            SELECT user_id, achieved_on FROM user_achievement 
-            WHERE skill_ref_id = :skillRefId
-        ) AS achievements 
-        WHERE 
-            ue.skill_ref_id = :skillRefId 
-            AND ue.user_id = achievements.user_id 
-            AND ue.event_time > achievements.achieved_on 
-        GROUP BY ue.user_id HAVING SUM(ue.count) >= :minEventCountThreshold LIMIT 1;
+        SELECT COUNT(ue.user_id) OVER ()
+        FROM user_events ue
+            JOIN (SELECT user_id, achieved_on
+                   FROM user_achievement
+                   WHERE skill_ref_id = :skillRefId)
+            AS achievements ON ue.user_id = achievements.user_id
+            LEFT JOIN archived_users au ON au.user_id = ue.user_id and au.project_id = ue.project_id
+        WHERE ue.skill_ref_id = :skillRefId
+            AND ue.event_time > achievements.achieved_on
+            AND au.id is null 
+        GROUP BY ue.user_id
+        HAVING SUM(ue.count) >= :minEventCountThreshold
+        LIMIT 1;
     ''', nativeQuery = true)
     public Long countOfUsersUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, @Param("minEventCountThreshold") Integer minEventCountThreshold)
 
     @Nullable
     @Query(value='''
-        SELECT ue.user_id as userId, ua.first_name as firstName, ua.last_name as lastName, ua.user_id_for_display as userIdForDisplay, SUM(ue.count) as count, MAX(ue.event_time) as date
-        FROM user_events ue, user_attrs ua, (
-            SELECT user_id, achieved_on, COUNT(id) AS counts FROM user_achievement 
+        SELECT ue.user_id AS userId, ua.first_name AS firstName, ua.last_name AS lastName, ua.user_id_for_display AS userIdForDisplay, SUM(ue.count) AS count, MAX(ue.event_time) AS date
+        FROM user_events ue
+        JOIN user_attrs ua ON ue.user_id = ua.user_id
+        JOIN (
+            SELECT user_id, achieved_on, COUNT(id) AS counts
+            FROM user_achievement 
             WHERE skill_ref_id = :skillRefId
             GROUP BY user_id, user_achievement.achieved_on
-        ) AS achievements 
+        ) AS achievements ON ue.user_id = achievements.user_id
+        LEFT JOIN archived_users au ON au.user_id = ue.user_id and au.project_id = ue.project_id
         WHERE 
             ue.skill_ref_id = :skillRefId 
-            AND ue.user_id = achievements.user_id
-            AND ue.user_id = ua.user_id 
             AND ue.event_time > achievements.achieved_on 
             AND ue.count >= :minEventCountThreshold
+            AND au.id is null 
         GROUP BY ue.user_id, ua.user_id_for_display, ua.first_name, ua.last_name
     ''', nativeQuery = true)
     public List<UserMetrics> getUsersUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, @Param("minEventCountThreshold") Integer minEventCountThreshold, Pageable pageable)
