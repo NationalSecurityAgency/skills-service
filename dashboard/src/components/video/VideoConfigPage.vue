@@ -384,12 +384,15 @@ const schema = yup.object().shape({
 })
 
 const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ validationSchema: schema, })
+const hasBeenResized = ref(false);
 
 const videoResized = (resolution, width, height) => {
+  if(width !== configuredWidth.value && height !== configuredHeight.value) {
+    hasBeenResized.value = true;
+  }
   configuredResolution.value = resolution;
   configuredWidth.value = width;
   configuredHeight.value = height;
-
 }
 </script>
 
@@ -632,6 +635,21 @@ const videoResized = (resolution, width, height) => {
                       <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/><span class="text-primary">{{ segment.stop.toFixed(2) }}</span> <span class="font-italic">Seconds</span>
                     </div>
                   </div>
+                </div>
+
+                <div v-if="!isReadOnly && hasBeenResized">
+                  <SkillsButton
+                      severity="success"
+                      class="mt-2"
+                      :class="{'w-full': responsive.md.value }"
+                      outlined
+                      :disabled="!hasVideoUrl || !meta.valid"
+                      data-cy="updateVideoSettings"
+                      aria-label="Save video settings"
+                      @click="submitSaveSettingsForm"
+                      icon="fas fa-save"
+                      label="Save Changes" />
+                  <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success" data-cy="savedMsg"><i class="fas fa-check" /> Saved</span>
                 </div>
               </div>
 
