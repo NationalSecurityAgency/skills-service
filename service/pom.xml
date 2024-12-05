@@ -688,6 +688,11 @@
     <profiles>
         <profile>
             <id>skipLicensePlugin</id>
+            <activation>
+                <property>
+                    <name>skipLicensePlugin</name>
+                </property>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
