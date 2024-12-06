@@ -118,39 +118,44 @@
                 <version>4.6</version>
 
                 <configuration>
-                    <header>${basedir}/../license-add/LICENSE-HEADER.txt</header>
-                    <validHeaders>
-                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2020.txt</validHeader>
-                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2021.txt</validHeader>
-                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2022.txt</validHeader>
-                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2023.txt</validHeader>
-                    </validHeaders>
-                    <headerDefinitions>
-                        <headerDefinition>vue-header-style.xml</headerDefinition>
-                    </headerDefinitions>
                     <mapping>
                         <vue>VUE_STYLE</vue>
                         <scss>JAVADOC_STYLE</scss>
                     </mapping>
-                    <excludes>
-                        <exclude>**/*.xml</exclude>
-                        <exclude>**/*.jks</exclude>
-                        <exclude>**/*.ftl</exclude>
-                        <exclude>**/*.mp4</exclude>
-                        <exclude>**/*.webm</exclude>
-                        <exclude>**/*.woff2</exclude>
-                        <exclude>src/test/resources/certs/*.*</exclude>
-                        <exclude>src/main/resources/public/**</exclude>
-                        <exclude>src/main/resources/templates/**</exclude>
-                        <exclude>**/license/*.properties</exclude>
-                        <exclude>**/src/main/resources/client-version</exclude>
-                        <exclude>dist/**</exclude>
-                        <exclude>node_modules/**</exclude>
-                        <exclude>.eslintrc.cjs</exclude>
-                        <exclude>**/theme-overrides.scss</exclude>
-                        <exclude>**/theme.css</exclude>
-                        <exclude>**/theme-append.css</exclude>
-                    </excludes>
+                    <licenseSets>
+                        <licenseSet>
+                            <header>${basedir}/../license-add/LICENSE-HEADER.txt</header>
+                            <validHeaders>
+                                <validHeader>${basedir}/../license-add/LICENSE-HEADER_2020.txt</validHeader>
+                                <validHeader>${basedir}/../license-add/LICENSE-HEADER_2021.txt</validHeader>
+                                <validHeader>${basedir}/../license-add/LICENSE-HEADER_2022.txt</validHeader>
+                                <validHeader>${basedir}/../license-add/LICENSE-HEADER_2023.txt</validHeader>
+                            </validHeaders>
+                            <headerDefinitions>
+                                <headerDefinition>vue-header-style.xml</headerDefinition>
+                            </headerDefinitions>
+                            <excludes>
+                                <exclude>**/*.xml</exclude>
+                                <exclude>**/*.jks</exclude>
+                                <exclude>**/*.ftl</exclude>
+                                <exclude>**/*.mp4</exclude>
+                                <exclude>**/*.webm</exclude>
+                                <exclude>**/*.woff2</exclude>
+                                <exclude>src/test/resources/certs/*.*</exclude>
+                                <exclude>src/main/resources/public/**</exclude>
+                                <exclude>src/main/resources/templates/**</exclude>
+                                <exclude>**/license/*.properties</exclude>
+                                <exclude>**/src/main/resources/client-version</exclude>
+                                <exclude>dist/**</exclude>
+                                <exclude>node_modules/**</exclude>
+                                <exclude>.eslintrc.cjs</exclude>
+                                <exclude>**/theme-overrides.scss</exclude>
+                                <exclude>**/theme.css</exclude>
+                                <exclude>**/theme-append.css</exclude>
+                                <exclude>stats.html</exclude>
+                            </excludes>
+                        </licenseSet>
+                    </licenseSets>
                 </configuration>
                 <executions>
                     <execution>
