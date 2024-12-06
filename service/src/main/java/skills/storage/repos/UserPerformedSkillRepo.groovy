@@ -296,6 +296,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
 
     @Query('''select CAST(ups.performedOn as date) as day, count(ups.id) as count
         from UserPerformedSkill ups
+        LEFT JOIN ArchivedUser au ON au.userId = ups.userId and au.projectId = :projectId
         where
         ups.skillRefId in (
             select case when copiedFrom is not null then copiedFrom else id end as id 
@@ -305,7 +306,8 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
             projectId = :projectId and
             enabled = 'true'
         ) and
-        ups.performedOn > :from
+        ups.performedOn > :from and 
+        au.id is null
         group by CAST(ups.performedOn as date)
     ''')
     List<DayCountItem> countsByDay(@Param('projectId') String projectId, @Param('skillId') String skillId, @Param("from") Date from)
