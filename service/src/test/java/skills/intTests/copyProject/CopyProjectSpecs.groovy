@@ -810,19 +810,14 @@ class CopyProjectSpecs extends CopyIntSpec {
         List<Attachment> attachments = attachmentRepo.findAll()
         then:
         origProjSkill1.description == "Here is a [Link](${attachment1Href})"
-        origProjSkill2.description == "Here is a [Link](${attachment1Href})"
-        origProjSkill3.description == "Here is a [Link](${attachment1Href})"
-        origProjSkill4.description == "Here is a [Link](${attachment2Href})"
+        origProjSkill2.description == "Here is a [Link](/api/download/${attachments.find { it.projectId == p1.projectId && it.skillId == p1Skills[1].skillId }.uuid})"
+        origProjSkill3.description == "Here is a [Link](/api/download/${attachments.find { it.projectId == p1.projectId && it.skillId == p1Subj2Skills[0].skillId }.uuid})"
+        origProjSkill4.description == "Here is a [Link](/api/download/${attachments.find { it.projectId == p1.projectId && it.skillId == p1Subj2Skills[1].skillId }.uuid})"
 
-        attachments.size() == 4
-        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
-        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
-        originalAttachment1.projectId == p1.projectId
-        originalAttachment2.projectId == p1.projectId
-
-        List<Attachment> newAttachments = attachments.findAll {
-            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
-        }
+        attachments.size() == 8
+        attachments.findAll { it.projectId == p1.projectId }.size() == 4
+        List<Attachment> newAttachments = attachments.findAll { it.projectId == projToCopy.projectId }
+        newAttachments.size() == 4
 
         List<String> copiedDescriptions = newAttachments.collect( {"Here is a [Link](/api/download/${it.uuid})".toString() })
         copiedDescriptions.contains(copyProjSkill1.description)
