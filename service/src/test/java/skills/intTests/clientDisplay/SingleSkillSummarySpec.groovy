@@ -62,7 +62,6 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         summary.todaysPoints == 0
         summary.description.description == "This skill [skill2] belongs to project [TestProject1]"
         !summary.groupName
-        !summary.groupDescription
     }
 
     def "load single skill summary with some users points"() {
@@ -1359,7 +1358,27 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         summary.todaysPoints == 0
         summary.description.description == "This skill [skill2] belongs to project [TestProject1]"
         summary.groupName == skillsGroup.name
-        summary.groupDescription == skillsGroup.description
+        summary.groupSkillId == skillsGroup.skillId
     }
 
+    def "load description for group"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        String description = skillsService.getSkillDescription(proj.projectId, subj.subjectId, skillsGroup.skillId).description
+
+        then:
+        description == "This skill [skill5] belongs to project [TestProject1]"
+    }
 }

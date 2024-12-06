@@ -55,5 +55,5 @@ class SkillSummary extends SkillSummaryParent {
     Date lastExpirationDate
 
     String groupName
-    String groupDescription
+    String groupSkillId
 }

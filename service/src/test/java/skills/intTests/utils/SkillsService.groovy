@@ -1766,6 +1766,11 @@ class SkillsService {
         return resp
     }
 
+    def getSkillDescription(String projectId, String subjectId, String skillId) {
+        def resp = wsHelper.apiGet("/projects/${projectId}/subjects/${subjectId}/skills/${skillId}/description")
+        return resp
+    }
+
     def getPendingProjectInvites(String projectId, int limit, int page, String orderBy, Boolean ascending) {
         def resp = wsHelper.adminGet("/projects/${projectId}/invites/status?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}")
         return resp

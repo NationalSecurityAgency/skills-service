@@ -65,6 +65,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @CrossOrigin(allowCredentials = "true", originPatterns = {"*"})
 @RestController
@@ -254,6 +255,13 @@ class UserSkillsController {
                                         @RequestParam(name = "idType", required = false) String idType) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
         return skillsLoader.loadSkillSummary(projectId, userId, null, skillId, subjectId);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}/description", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, String> getSkillDescription(@PathVariable("projectId") String projectId,
+                                                   @PathVariable("skillId") String skillId) {
+        return skillsLoader.loadGroupDescription(projectId, skillId);
     }
 
     /**

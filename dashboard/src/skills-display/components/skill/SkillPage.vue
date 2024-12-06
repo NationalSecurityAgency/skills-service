@@ -35,6 +35,9 @@ const route = useRoute()
 const skillState = useSkillsDisplaySubjectState()
 const skill = computed(() => skillState.skillSummary)
 const loadingSkill = ref(true)
+const displayGroupDescription = ref(false);
+const groupDescription = ref(null);
+const loadingDescription = ref(true);
 
 onMounted(() => {
   loadSkillSummary()
@@ -42,6 +45,10 @@ onMounted(() => {
 watch( () => route.params.skillId, () => {
   loadSkillSummary()
 });
+watch(() => skill.value.groupSkillId, () => {
+  groupDescription.value = null;
+  displayGroupDescription.value = false;
+})
 const loadSkillSummary = () => {
   const skillId = skillsDisplayInfo.isDependency() ? route.params.dependentSkillId : route.params.skillId
   skillState.loadSkillSummary(skillId, route.params.crossProjectId, route.params.subjectId)
@@ -70,8 +77,15 @@ const nextButtonClicked = () => {
 }
 
 const isLoading = computed(() => loadingSkill.value || skillState.loadingSkillSummary)
-
-const displayGroupDescription = ref(false);
+const descriptionToggled = () => {
+  if(!groupDescription.value && skill.value.groupSkillId) {
+    loadingDescription.value = true;
+    skillsDisplayService.getDescriptionForSkill(route.params.subjectId, skill.value.groupSkillId).then((res) => {
+      groupDescription.value = res.description;
+      loadingDescription.value = false;
+    })
+  }
+}
 </script>
 
 <template>
@@ -110,7 +124,7 @@ const displayGroupDescription = ref(false);
               </SkillsButton>
             </div>
           </div>
-          <div v-if="attributes.groupInfoOnSkillPage && skill.groupName" class="mt-3 p-1 mb-3" data-cy="groupInformationSection">
+          <div v-if="!attributes.groupInfoOnSkillPage && skill.groupName" class="mt-3 p-1 mb-3" data-cy="groupInformationSection">
             <div class="flex">
               <div class="mr-2 mt-1 text-xl">
                 <i class="fas fa-layer-group" aria-hidden="true"></i>
@@ -121,12 +135,13 @@ const displayGroupDescription = ref(false);
               <div v-if="!attributes.groupDescriptionsOn">
                 <div class="flex flex-row align-content-center">
                   <span class="text-muted pr-1 align-content-center">Group Description:</span>
-                  <InputSwitch v-model="displayGroupDescription" data-cy="toggleGroupDescription" />
+                  <InputSwitch v-model="displayGroupDescription" data-cy="toggleGroupDescription" @change="descriptionToggled" />
                 </div>
               </div>
             </div>
             <div class="mt-2 ml-4" v-if="displayGroupDescription || attributes.groupDescriptionsOn" data-cy="groupDescriptionSection">
-              {{ skill.groupDescription }}
+              <skills-spinner :is-loading="loadingDescription" :size-in-rem="1"/>
+              {{ groupDescription }}
             </div>
           </div>
           <skill-achievement-msg :skill="skill" />

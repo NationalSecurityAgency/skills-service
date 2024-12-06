@@ -653,7 +653,7 @@ const saveSettings = ((dirtyChanges) => {
 
           <div class="field flex flex-column lg:flex-row lg:gap-3">
             <label class="text-secondary w-min-11rem lg:max-w-11rem" id="groupInfoOnSkillPage" for="groupInfoOnSkillPageSwitch">
-              <span id="groupInfoOnSkillPageLabel">Show Group Info On Skill Pages:</span>
+              <span id="groupInfoOnSkillPageLabel">Hide Group Info On Skill Pages:</span>
             </label>
             <div class="flex align-items-center">
               <InputSwitch v-model="settings.groupInfoOnSkillPage.value"
