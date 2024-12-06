@@ -655,25 +655,34 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <version>${mycila.maven.license.plugin.version}</version>
                 <configuration>
-                    <header>${basedir}/../license-add/LICENSE-HEADER.txt</header>
-                    <validHeaders>
-                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2020.txt</validHeader>
-                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2021.txt</validHeader>
-                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2022.txt</validHeader>
-                        <validHeader>${basedir}/../license-add/LICENSE-HEADER_2023.txt</validHeader>
-                    </validHeaders>
-                    <excludes>
-                        <exclude>**/*.xml</exclude>
-                        <exclude>**/*.jks</exclude>
-                        <exclude>**/*.ftl</exclude>
-                        <exclude>**/*.mp4</exclude>
-                        <exclude>**/*.webm</exclude>
-                        <exclude>src/test/resources/certs/*.*</exclude>
-                        <exclude>src/main/resources/public/**</exclude>
-                        <exclude>src/main/resources/templates/**</exclude>
-                        <exclude>**/license/*.properties</exclude>
-                        <exclude>**/src/main/resources/client-version</exclude>
-                    </excludes>
+                    <mapping>
+                        <java>JAVADOC_STYLE</java>
+                        <groovy>JAVADOC_STYLE</groovy>
+                    </mapping>
+                    <licenseSets>
+                        <licenseSet>
+                            <header>${basedir}/../license-add/LICENSE-HEADER.txt</header>
+
+                            <validHeaders>
+                                <validHeader>${basedir}/../license-add/LICENSE-HEADER_2020.txt</validHeader>
+                                <validHeader>${basedir}/../license-add/LICENSE-HEADER_2021.txt</validHeader>
+                                <validHeader>${basedir}/../license-add/LICENSE-HEADER_2022.txt</validHeader>
+                                <validHeader>${basedir}/../license-add/LICENSE-HEADER_2023.txt</validHeader>
+                            </validHeaders>
+                            <excludes>
+                                <exclude>**/*.xml</exclude>
+                                <exclude>**/*.jks</exclude>
+                                <exclude>**/*.ftl</exclude>
+                                <exclude>**/*.mp4</exclude>
+                                <exclude>**/*.webm</exclude>
+                                <exclude>src/test/resources/certs/*.*</exclude>
+                                <exclude>src/main/resources/public/**</exclude>
+                                <exclude>src/main/resources/templates/**</exclude>
+                                <exclude>**/license/*.properties</exclude>
+                                <exclude>**/src/main/resources/client-version</exclude>
+                            </excludes>
+                        </licenseSet>
+                    </licenseSets>
                 </configuration>
                 <executions>
                     <execution>
