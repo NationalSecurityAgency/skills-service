@@ -16,13 +16,19 @@
 package skills.intTests.catalog
 
 import groovy.json.JsonOutput
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.storage.model.Attachment
 import skills.storage.model.SkillDef
+import skills.storage.repos.AttachmentRepo
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
+
+    @Autowired
+    AttachmentRepo attachmentRepo
 
     def "import skill from catalog"() {
         def project1 = createProject(1)
@@ -107,6 +113,88 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         projectsPostImport2.find({ it.projectId == project2.projectId }).numSkillsDisabled == 2
         projectsPostFinalize.find({ it.projectId == project1.projectId }).numSkillsDisabled == 0
         projectsPostFinalize.find({ it.projectId == project2.projectId }).numSkillsDisabled == 0
+    }
+
+    def "delete imported skill with attachments, attachments should be preserved"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        skill.description = "description"
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [])
+
+        String fileContent = 'Text in a file'
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test-pdf.pdf', 'Text in a file', project1.projectId)
+        String attachmentHref = uploadedAttachmentRes.href
+        skill.description = "Here is a [Link](${attachmentHref})".toString()
+        skillsService.createSkill(skill)
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, [])
+
+        when:
+        String fileContent_t1 = skillsService.downloadAttachmentAsText(attachmentHref)
+        List<Attachment> attachments_t1 = attachmentRepo.findAll().toList()
+        def skillRes_t1 = skillsService.getSkill(skill)
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        String fileContent_t2 = skillsService.downloadAttachmentAsText(attachmentHref)
+        List<Attachment> attachments_t2 = attachmentRepo.findAll().toList()
+        def skillRes_t2 = skillsService.getSkill(skill)
+
+        skillsService.deleteSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: skill.skillId])
+        String fileContent_t3 = skillsService.downloadAttachmentAsText(attachmentHref)
+        List<Attachment> attachments_t3 = attachmentRepo.findAll().toList()
+        def skillRes_t3 = skillsService.getSkill(skill)
+
+        then:
+        fileContent_t1 == fileContent
+        attachments_t1.projectId == [project1.projectId]
+        attachments_t1.skillId == [skill.skillId]
+        skillRes_t1.description == skill.description
+
+        fileContent_t2 == fileContent
+        attachments_t2.projectId == [project1.projectId]
+        attachments_t2.skillId == [skill.skillId]
+        skillRes_t2.description == skill.description
+
+        fileContent_t3 == fileContent
+        attachments_t3.projectId == [project1.projectId]
+        attachments_t3.skillId == [skill.skillId]
+        skillRes_t3.description == skill.description
+    }
+
+    def "able to deploy skill with a missing attachment"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        skill.description = "description"
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [])
+
+        String fileContent = 'Text in a file'
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test-pdf.pdf', 'Text in a file', project1.projectId)
+        String attachmentHref = uploadedAttachmentRes.href
+        skill.description = "Here is a [Link](${attachmentHref})".toString()
+        skillsService.createSkill(skill)
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, [])
+
+        attachmentRepo.deleteAll()
+
+        when:
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+        List<Attachment> attachmentsRes = attachmentRepo.findAll().toList()
+        def p1SkillRes = skillsService.getSkill(skill)
+        def p2SkillRes = skillsService.getSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: skill.skillId])
+
+        then:
+        attachmentsRes == []
+        p1SkillRes.description == skill.description
+        p2SkillRes.description == skill.description
     }
 
     def "import skill from catalog - multiple subjects - multiple projects - multiple skills"() {

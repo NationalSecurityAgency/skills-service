@@ -30,6 +30,7 @@ import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.settings.EmailSettingsService
 import skills.storage.model.auth.RoleName
+import skills.utils.GroovyToJavaByteUtils
 
 @Slf4j
 class SkillsService {
@@ -942,6 +943,10 @@ class SkillsService {
         body.put("customIcon", icon)
         wsHelper.supervisorUpload("/icons/upload", body)
     }
+    def uploadAttachment(String fileName, String fileContents, String projectId=null, String skillId=null, String quizId=null){
+        Resource resource = GroovyToJavaByteUtils.toByteArrayResource(fileContents, fileName)
+        return uploadAttachment(resource, projectId, skillId, quizId)
+    }
     def uploadAttachment(Resource attachment, String projectId=null, String skillId=null, String quizId=null){
         Map body = [:]
         body.put("file", attachment)
@@ -963,6 +968,12 @@ class SkillsService {
     static class FileAndHeaders {
         File file
         HttpHeaders headers
+    }
+
+    String downloadAttachmentAsText(String downloadUrl, Map params=null) {
+        FileAndHeaders fileAndHeaders = downloadAttachment(downloadUrl, params)
+        File file = fileAndHeaders.file
+        return file.text
     }
 
     FileAndHeaders downloadAttachment(String downloadUrl, Map params=null) {
