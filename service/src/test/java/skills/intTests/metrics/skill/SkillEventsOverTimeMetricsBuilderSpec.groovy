@@ -111,6 +111,13 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
             return skillsService.getMetricsData(proj.projectId, metricsId, props)
         }
 
+        skillsService.archiveUsers([users[2]], proj.projectId)
+
+        List resAfterArchive = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj.projectId, metricsId, props)
+        }
+
         then:
         res[0].countsByDay.collect { it.num } == [3, 1]
         res[0].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
@@ -135,6 +142,30 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         res[7].countsByDay.collect { it.num } == []
         res[8].countsByDay.collect { it.num } == []
         res[9].countsByDay.collect { it.num } == []
+
+        resAfterArchive[0].countsByDay.collect { it.num } == [2, 1]
+        resAfterArchive[0].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
+        resAfterArchive[0].allEvents
+
+        resAfterArchive[1].countsByDay.collect { it.num } == [2, 1]
+        resAfterArchive[1].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
+        resAfterArchive[1].allEvents
+
+        resAfterArchive[2].countsByDay.collect { it.num } == [2, 1]
+        resAfterArchive[2].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
+        resAfterArchive[2].allEvents
+
+        resAfterArchive[3].countsByDay.collect { it.num } == [3]
+        resAfterArchive[3].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfCurrentWeek.toDate()]
+        resAfterArchive[3].allEvents
+
+        resAfterArchive[4].countsByDay.collect { it.num } == []
+
+        resAfterArchive[5].countsByDay.collect { it.num } == []
+        resAfterArchive[6].countsByDay.collect { it.num } == []
+        resAfterArchive[7].countsByDay.collect { it.num } == []
+        resAfterArchive[8].countsByDay.collect { it.num } == []
+        resAfterArchive[9].countsByDay.collect { it.num } == []
     }
 
     def "number events over time - catalog skills"() {
@@ -201,6 +232,13 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
             return skillsService.getMetricsData(proj2.projectId, metricsId, props)
         }
 
+        skillsService.archiveUsers([users[2]], proj.projectId)
+
+        List resAfterArchive = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj.projectId, metricsId, props)
+        }
+
         then:
         res[0].countsByDay.collect { it.num } == [3, 1]
         res[0].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
@@ -225,6 +263,30 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         res[7].countsByDay.collect { it.num } == []
         res[8].countsByDay.collect { it.num } == []
         res[9].countsByDay.collect { it.num } == []
+
+        resAfterArchive[0].countsByDay.collect { it.num } == [2, 1]
+        resAfterArchive[0].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
+        resAfterArchive[0].allEvents
+
+        resAfterArchive[1].countsByDay.collect { it.num } == [2, 1]
+        resAfterArchive[1].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
+        resAfterArchive[1].allEvents
+
+        resAfterArchive[2].countsByDay.collect { it.num } == [2, 1]
+        resAfterArchive[2].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfTwoWeeksAgo.toDate(), testDates.startOfCurrentWeek.toDate()]
+        resAfterArchive[2].allEvents
+
+        resAfterArchive[3].countsByDay.collect { it.num } == [3]
+        resAfterArchive[3].countsByDay.collect { new Date(it.timestamp) } == [testDates.startOfCurrentWeek.toDate()]
+        resAfterArchive[3].allEvents
+
+        resAfterArchive[4].countsByDay.collect { it.num } == []
+
+        resAfterArchive[5].countsByDay.collect { it.num } == []
+        resAfterArchive[6].countsByDay.collect { it.num } == []
+        resAfterArchive[7].countsByDay.collect { it.num } == []
+        resAfterArchive[8].countsByDay.collect { it.num } == []
+        resAfterArchive[9].countsByDay.collect { it.num } == []
     }
 
     def "number events over time - daily metrics"() {
@@ -263,6 +325,13 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
             return skillsService.getMetricsData(proj.projectId, metricsId, props)
         }
 
+        skillsService.archiveUsers([users[1]], proj.projectId)
+
+        List resAfterArchive = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj.projectId, metricsId, props)
+        }
+
         then:
         res[0].countsByDay.collect { it.num } == [1, 2]
         res[0].countsByDay.collect { new Date(it.timestamp) } == [StartDateUtil.computeStartDate(days[1], EventType.DAILY), StartDateUtil.computeStartDate(days[2], EventType.DAILY)]
@@ -274,6 +343,15 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
 
         res[2].countsByDay == []
 
+        resAfterArchive[0].countsByDay.collect { it.num } == [1, 1]
+        resAfterArchive[0].countsByDay.collect { new Date(it.timestamp) } == [StartDateUtil.computeStartDate(days[1], EventType.DAILY), StartDateUtil.computeStartDate(days[2], EventType.DAILY)]
+        resAfterArchive[0].allEvents
+
+        resAfterArchive[1].countsByDay.collect { it.num } == [0, 1]
+        resAfterArchive[1].countsByDay.collect { new Date(it.timestamp) } == [StartDateUtil.computeStartDate(days[1], EventType.DAILY), StartDateUtil.computeStartDate(days[2], EventType.DAILY)]
+        resAfterArchive[1].allEvents
+
+        resAfterArchive[2].countsByDay == []
     }
 
     def "number events over time - daily metrics/ - catalog skills"() {
@@ -343,6 +421,13 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
             return skillsService.getMetricsData(proj2.projectId, metricsId, props)
         }
 
+        skillsService.archiveUsers([users[1]], proj.projectId)
+
+        List resAfterArchive = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj.projectId, metricsId, props)
+        }
+
         then:
         res[0].countsByDay.collect { it.num } == [1, 2]
         res[0].countsByDay.collect { new Date(it.timestamp) } == [StartDateUtil.computeStartDate(days[1], EventType.DAILY), StartDateUtil.computeStartDate(days[2], EventType.DAILY)]
@@ -353,6 +438,16 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         res[1].allEvents
 
         res[2].countsByDay == []
+
+        resAfterArchive[0].countsByDay.collect { it.num } == [1, 1]
+        resAfterArchive[0].countsByDay.collect { new Date(it.timestamp) } == [StartDateUtil.computeStartDate(days[1], EventType.DAILY), StartDateUtil.computeStartDate(days[2], EventType.DAILY)]
+        resAfterArchive[0].allEvents
+
+        resAfterArchive[1].countsByDay.collect { it.num } == [0, 1]
+        resAfterArchive[1].countsByDay.collect { new Date(it.timestamp) } == [StartDateUtil.computeStartDate(days[1], EventType.DAILY), StartDateUtil.computeStartDate(days[2], EventType.DAILY)]
+        resAfterArchive[1].allEvents
+
+        resAfterArchive[2].countsByDay == []
     }
 
     def "number of applied events and total events over time for project"() {
@@ -388,9 +483,19 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
             return skillsService.getMetricsData(proj.projectId, metricsId, props)
         }
 
+        skillsService.archiveUsers([users[1]], proj.projectId)
+
+        List resAfterArchive = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj.projectId, metricsId, props)
+        }
+
         then:
         res[0].countsByDay.collect { it.num }.sum() == 20
         res[0].allEvents.collect { it.num }.sum() == 60
+
+        resAfterArchive[0].countsByDay.collect { it.num }.sum() == 18
+        resAfterArchive[0].allEvents.collect { it.num }.sum() == 54
     }
 
     def "number of applied events and total events over time for project - catalog skill"() {
@@ -450,9 +555,19 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
             return skillsService.getMetricsData(proj2.projectId, metricsId, props)
         }
 
+        skillsService.archiveUsers([users[1]], proj.projectId)
+
+        List resAfterArchive = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj.projectId, metricsId, props)
+        }
+
         then:
         res[0].countsByDay.collect { it.num }.sum() == 20
         res[0].allEvents.collect { it.num }.sum() == 60
+
+        resAfterArchive[0].countsByDay.collect { it.num }.sum() == 18
+        resAfterArchive[0].allEvents.collect { it.num }.sum() == 54
     }
 
     def "zero fill to current day for applied skill events dataset"() {
