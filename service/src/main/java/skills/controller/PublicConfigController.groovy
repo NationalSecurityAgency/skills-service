@@ -134,6 +134,7 @@ class PublicConfigController {
         res["levelDisplayName"] = 'Level'
         res["pointDisplayName"] = 'Point'
         res["groupDescriptionsOn"] = false
+        res["groupInfoOnSkillPage"] = false
         res["displayProjectDescription"] = true
         if (Boolean.valueOf(uiConfigProperties.dbUpgradeInProgress)) {
             res["dbUpgradeInProgress"] = uiConfigProperties.dbUpgradeInProgress
@@ -147,7 +148,8 @@ class PublicConfigController {
                     'level.displayName',
                     'point.displayName',
                     Settings.GROUP_DESCRIPTIONS.settingName,
-                    Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName
+                    Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName,
+                    Settings.GROUP_INFO_ON_SKILL_PAGE.settingName
             ])?.collectEntries {
                 [it.setting, it.value]
             }
@@ -179,6 +181,10 @@ class PublicConfigController {
             Boolean groupDescriptionsOn = Boolean.valueOf(projectSettings?[Settings.GROUP_DESCRIPTIONS.settingName])
             if (groupDescriptionsOn) {
                 res["groupDescriptionsOn"] = groupDescriptionsOn
+            }
+            Boolean groupInfoOnSkillPage = Boolean.valueOf(projectSettings?[Settings.GROUP_INFO_ON_SKILL_PAGE.settingName])
+            if (groupInfoOnSkillPage) {
+                res["groupInfoOnSkillPage"] = groupInfoOnSkillPage
             }
             Boolean showDescription = Boolean.valueOf(projectSettings?[Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName])
             if (showDescription) {
