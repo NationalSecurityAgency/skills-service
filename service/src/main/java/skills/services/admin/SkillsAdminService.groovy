@@ -335,7 +335,9 @@ class SkillsAdminService {
             } else {
                 assignToParent(skillRequest, savedSkill, subject)
             }
-            attachmentService.updateAttachmentsFoundInMarkdown(skillRequest.description, savedSkill.projectId, null, savedSkill.skillId)
+            if (!isSkillCatalogImport) {
+                attachmentService.updateAttachmentsFoundInMarkdown(skillRequest.description, savedSkill.projectId, null, savedSkill.skillId)
+            }
         }
 
         if (isSkillsGroupChild) {
