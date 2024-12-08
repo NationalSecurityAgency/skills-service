@@ -67,7 +67,7 @@ class PublicConfigController {
     @Value('${skills.config.ui.enablePageVisitReporting:#{false}}')
     Boolean enablePageVisitReporting
 
-    @Value('${spring.security.saml2.registrationId}')
+    @Value('${spring.security.saml2.registrationId:#{null}}')
     String regId
 
     @Autowired

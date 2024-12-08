@@ -59,7 +59,7 @@ class SAML2SecurityConfiguration{
     @Value('${spring.security.saml2.metadata-location}')
     String assertingPartyMetadataLocation;
 
-    @Value('${spring.security.saml2.registrationId}')
+    @Value('${spring.security.saml2.registrationId:#{null}}')
     String registrationId;
 
     // Custom properties using for configuring signing credentials
