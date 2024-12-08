@@ -39,8 +39,7 @@ import spock.lang.Specification
 import org.openqa.selenium.Cookie
 import java.time.Duration
 
-@IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
-@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.DEFINED_PORT, classes = SpringBootApp,
+@IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.DEFINED_PORT, classes = SpringBootApp,
         properties = [
                 'server.port=10100',
                 'skills.authorization.authMode=SAML2',

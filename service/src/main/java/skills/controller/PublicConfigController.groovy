@@ -67,6 +67,9 @@ class PublicConfigController {
     @Value('${skills.config.ui.enablePageVisitReporting:#{false}}')
     Boolean enablePageVisitReporting
 
+    @Value('${spring.security.saml2.registrationId}')
+    String regId
+
     @Autowired
     SettingsService settingsService
 
@@ -83,10 +86,8 @@ class PublicConfigController {
     UserCommunityService userCommunityService
 
     @Autowired
-    private ClientRegistrationRepository clientRegistrationRepository;
+    private ClientRegistrationRepository clientRegistrationRepository
 
-    @Autowired
-    private Environment environment;
 
     @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
@@ -113,8 +114,7 @@ class PublicConfigController {
         }
 
         if(authMode.name() == 'SAML2'){
-            String regId = environment.getProperty("spring.security.saml2.registrationId");
-            res['saml2RegistrationId'] = regId;
+            res['saml2RegistrationId'] = regId
         }
         return res
     }
