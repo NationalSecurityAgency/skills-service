@@ -15,7 +15,6 @@
  */
 import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
 import Login from '@/components/access/Login.vue'
-import SSOLogout from '@/components/access/SSOLogout.vue'
 import MyProgress from '@/components/myProgress/MyProgress.vue'
 import createAdminRoutes from './AdminRoutes.js'
 import createProgressAndRankingRoutes from './ProgressAndRankingRoutes.js'
@@ -114,17 +113,6 @@ const routes = [
       requiresAuth: false,
       announcer: {
         message: 'Login'
-      }
-    }
-  },
-  {
-    path: '/local/logout',
-    name: 'SSOLogout',
-    component: SSOLogout,
-    meta: {
-      requiresAuth: false,
-      announcer: {
-        message: 'Logout'
       }
     }
   },

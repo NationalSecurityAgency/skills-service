@@ -172,11 +172,7 @@ export const useAuthState = defineStore('authState', () => {
         clearAuthData()
         appInfoState.setShowUa(false)
         return axios.post('/logout').then(() => {
-            if(appConfig.isSAML2Authenticated){
-                router.replace('/local/logout')
-            }else {
-                router.replace('/skills-login')
-            }
+            router.replace('/skills-login')
         })
     }
     const setLogoutTimer = (expirationDate) => {

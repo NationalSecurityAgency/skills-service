@@ -61,7 +61,6 @@ export const useGlobalNavGuards = () => {
     const { skillsClientDisplayPath } = to.query
     const requestAccountPath = '/request-root-account'
     const skillsLoginPath = '/skills-login'
-    const saml2LoginPath = '/sso-login'
 
     if (
         !isPki() && !isSaml2() &&
@@ -77,7 +76,7 @@ export const useGlobalNavGuards = () => {
     ) {
       next({ name: getLandingPage() })
     }  else if (
-      ((isPki() || isSaml2() || isLoggedIn()) &&
+      ((isPki()  || isLoggedIn()) &&
       (to.path === skillsLoginPath || to.path === `${skillsLoginPath}/`))
     ) {
       next(route.query.redirect || { name: getLandingPage() })

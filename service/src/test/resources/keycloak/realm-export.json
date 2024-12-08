@@ -134,7 +134,7 @@
       }
     ],
     "client": {
-      "saml-test": [],
+      "http://localhost:10100/saml2/service-provider-metadata/keycloak": [],
       "security-admin-console": [],
       "admin-cli": [],
       "account-console": [],
@@ -704,8 +704,8 @@
     },
     {
       "id": "52622245-c5fc-47ed-8be3-f0a3eb034021",
-      "clientId": "saml-test",
-      "name": "saml-client",
+      "clientId": "http://localhost:10100/saml2/service-provider-metadata/keycloak",
+      "name": "http://localhost:10100/saml2/service-provider-metadata/keycloak",
       "description": "",
       "rootUrl": "",
       "adminUrl": "",
@@ -715,10 +715,10 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "http://localhost:9090/login/saml2/sso/keycloak"
+        "http://localhost:10100/login/saml2/sso/keycloak"
       ],
       "webOrigins": [
-        "http://localhost:9090"
+        "http://localhost:10100"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -731,7 +731,7 @@
       "frontchannelLogout": true,
       "protocol": "saml",
       "attributes": {
-        "saml.signing.certificate": "MIIDdzCCAl+gAwIBAgIUFVeN/zK2XcQ+t4LHwOuaR4ZigRowDQYJKoZIhvcNAQELBQAwSzELMAkGA1UEBhMCSU4xCzAJBgNVBAgMAlROMQwwCgYDVQQHDANIWUQxEzARBgNVBAoMClNFUlZJQ0VOT1cxDDAKBgNVBAsMA1NTTzAeFw0yNDEwMTgxMDM5MzJaFw0yNDExMTcxMDM5MzJaMEsxCzAJBgNVBAYTAklOMQswCQYDVQQIDAJUTjEMMAoGA1UEBwwDSFlEMRMwEQYDVQQKDApTRVJWSUNFTk9XMQwwCgYDVQQLDANTU08wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCpoJtxnGlKsUzIDhstnEvzR4nt1ZTSlFD6j7iTtJM++vawD+r7TZIrVgxfpAUyjRRSQihwXeYz9dnpLmhoKiLWpZrxaQEw2if6rY+Fzu91NrfM9Fsgyrn8vvFjiUup5f5ARkpniMMNYucCZuYkqmoZZZarVc8PMtQlk5AFWnDM2HwjkhSbqqBBmCmB3z+8RNAujOYrBoigb7jtejNi9kkIq31QucYnj9HdHHWyUbCdRCU/vEFie6Q3qx4QzoWIajsZGwrOS+C3VWOSUQB1n8AR1FYTQpgxLQxI4xlOL/mSa1qppolN92VHRSvqn0Xcehnvrcr35uu0PmLHkd3r3X4tAgMBAAGjUzBRMB0GA1UdDgQWBBQiaa9HUTpFvZK5HHL6wP23WRLMQTAfBgNVHSMEGDAWgBQiaa9HUTpFvZK5HHL6wP23WRLMQTAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQAbhfVXNV8o34XNHIxoDamItP+0ncaQleKmCsmfVQe8kDnp4qANJ6hqvVdPXqQmdxLqF8TSHi6ObR+YGxD8swesTGng5zEcwdu3ZzIRAx/ywTNVrG7UfDZ4j1fJ+HH0+MzLaAf1wLyry/wPo4eM7Obl+8t4SzHFocZ3RVujlBay2U6MYxSlQI4lZf6LNTcF7JWal69G7swVOW8eODGz9Ilj9zQ/VtALBkYenwQTjEXzAJc1k5AbTMuIcSJ5PjY79vYHjseBkcfltHFrX15Dqvj3Y1riHy70k970PdQJ19+f9GK4NDdFPoMm5+bxYym1mzjcpZMypHC64PvPVmgnTXt5",
+        "saml.signing.certificate": "MIIDBTCCAe0CBgGTO7G2JjANBgkqhkiG9w0BAQsFADBGMUQwQgYDVQQDDDtodHRwOi8vbG9jYWxob3N0Oiovc2FtbDIvc2VydmljZS1wcm92aWRlci1tZXRhZGF0YS9rZXljbG9hazAeFw0yNDExMTcxOTUzNDJaFw0zNDExMTcxOTU1MjJaMEYxRDBCBgNVBAMMO2h0dHA6Ly9sb2NhbGhvc3Q6Ki9zYW1sMi9zZXJ2aWNlLXByb3ZpZGVyLW1ldGFkYXRhL2tleWNsb2FrMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1a7tK1so3b46tlSSkMlm0tRzoHTJ4nbQpF/YxObqgqO3X/KJR9gbZEk4aQO8j03KFB3Q5604HDN/N6mb16pKYVPBr4T0JGJoZNGzXHP5bq+acJe1e0h1SIQfPrrC5TosblkDaWN+12RzDi84STOq+ZJCYJpMyxuACmCrkMF/e0ULfiUjhCM+JnzAXbKu5ki8d1jMlj6790bgk97hBTqD5g5+Xq6xfZKNjE3eCObZBWj/LO9yjKwVJ7qIwcqaLsOAw2V2IEUGLhbcAFFTWdhy5yIXCZq1exkIaSsEvLchrKrEX0rtFpD0mbnUoCNb8+RHT3kRKxHbkCLFYlB8/F2ViQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCxrqcYRDUPitru88n4Qaguhts8ZhJx91SRILg58yxGed3rIUx7KqtIo6zSY+PGqRW3dHx2IQw2nRbN6uiji0tDfJnP2nN/mlEHx4dEaBu18xNHtIvtAGA72PVQr3m7Zot8QJblwXbTjPiJBClVP3/dV2VS6T/X62HnG4ER4we/W7C+iQUsNM0QcvxYQMoiDJ24spDD1BG0e/Lzjst/kgNOEQ9OeYGT9vPC+pbE/3bAx+cBNawfG/OFPSPj/kGyhL5xwPTrulbyfwY4G2/A+g6xpuKWgdvgDqLcTtQg6rfI/a58oeFeVrqXmv2OiHiBKGnmbmWC7uCWa5rAwuIPe+aQ",
         "realm_client": "false",
         "saml.artifact.binding.identifier": "GIJQ71/SC2XIT6O85VbAyOopowc=",
         "saml.signature.algorithm": "RSA_SHA256",
@@ -739,7 +739,6 @@
         "saml_force_name_id_format": "false",
         "saml.client.signature": "true",
         "saml.authnstatement": "true",
-        "saml_name_id_format": "username",
         "saml.allow.ecp.flow": "false",
         "saml.server.signature": "true",
         "saml_signature_canonicalization_method": "http://www.w3.org/2001/10/xml-exc-c14n#"

@@ -21,9 +21,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.*
 import org.springframework.core.io.Resource
 import org.springframework.core.io.ResourceLoader
-import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.ProviderManager
-import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -35,15 +33,12 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.saml2.provider.service.authentication.OpenSaml4AuthenticationProvider;
 import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
-import org.opensaml.saml.saml2.core.Assertion;
 import org.springframework.stereotype.Component
 import skills.auth.PortalWebSecurityHelper
 import skills.auth.SecurityMode
 import skills.auth.UserInfo
 import skills.auth.form.LocalUserDetailsService
-
 import java.security.KeyFactory
 import java.security.PrivateKey
 import java.security.cert.CertificateFactory
@@ -108,29 +103,44 @@ class SAML2SecurityConfiguration{
                  .authenticationManager(new ProviderManager(authenticationProvider))
                  .relyingPartyRegistrationRepository(relyingPartyRegistrationRepository())
          );
-         http.logout((logout) -> logout.logoutSuccessUrl("/local/logout"));
+         http.logout((logout) -> logout.logoutSuccessUrl("/skills-login"));
          return http.build();
     }
    @Bean
     RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
-        RelyingPartyRegistration registration = null;
+       RelyingPartyRegistration.Builder builder = RelyingPartyRegistrations
+               .fromMetadataLocation(assertingPartyMetadataLocation)
+               .registrationId(registrationId);
 
-        if(privateKeyLocation!=null && certificateLocation!=null){
-            PrivateKey privateKey = loadPrivateKey(privateKeyLocation);
-            X509Certificate certificate = loadCertificate(certificateLocation);
+       // Check if AuthnRequests need signing
+       boolean wantAuthnRequestsSigned = builder.build()
+               .getAssertingPartyDetails()
+               .getWantAuthnRequestsSigned();
 
-            // Create the signing credential
-            Saml2X509Credential signingCredential = new Saml2X509Credential(privateKey, certificate, Saml2X509Credential.Saml2X509CredentialType.SIGNING);
-            registration = RelyingPartyRegistrations.fromMetadataLocation(assertingPartyMetadataLocation)
-                    .registrationId(registrationId)
-                    .signingX509Credentials(c -> c.add(signingCredential))
-                    .build()
-        }else{
-            registration = RelyingPartyRegistrations.fromMetadataLocation(assertingPartyMetadataLocation)
-                    .registrationId(registrationId)
-                    .build()
-        }
-        return new InMemoryRelyingPartyRegistrationRepository(registration);
+       if (wantAuthnRequestsSigned) {
+           if (privateKeyLocation == null || privateKeyLocation.isEmpty()) {
+               throw new IllegalArgumentException("Missing required property: 'saml2.rp.signing.key-location'");
+           }
+           if (certificateLocation == null || certificateLocation.isEmpty()) {
+               throw new IllegalArgumentException("Missing required property: 'saml2.rp.signing.cert-location'");
+           }
+
+           // Load the private key and certificate
+           PrivateKey privateKey = loadPrivateKey(privateKeyLocation);
+           X509Certificate certificate = loadCertificate(certificateLocation);
+
+           // Add signing credential
+           Saml2X509Credential signingCredential = new Saml2X509Credential(
+                   privateKey,
+                   certificate,
+                   Saml2X509Credential.Saml2X509CredentialType.SIGNING
+           );
+
+           builder.signingX509Credentials(c -> c.add(signingCredential));
+       }
+
+       RelyingPartyRegistration registration = builder.build();
+       return new InMemoryRelyingPartyRegistrationRepository(registration);
     }
 
     @Bean
@@ -150,14 +160,18 @@ class SAML2SecurityConfiguration{
         }
         try (InputStream inputStream = resource.getInputStream()) {
             String key = new String(inputStream.readAllBytes())
+                    .replace("-----BEGIN RSA PRIVATE KEY-----", "")
+                    .replace("-----END RSA PRIVATE KEY-----", "")
                     .replace("-----BEGIN PRIVATE KEY-----", "")
                     .replace("-----END PRIVATE KEY-----", "")
                     .replaceAll("\\s", "");
+
             byte[] keyBytes = Base64.getDecoder().decode(key);
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             return keyFactory.generatePrivate(keySpec);
         }
+
     }
 
     private X509Certificate loadCertificate(String location) throws Exception {
