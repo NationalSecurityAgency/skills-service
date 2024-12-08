@@ -22,7 +22,7 @@
 
         <flywaydb.version>6.5.5</flywaydb.version>
 
-        <commons.lang.version>3.11</commons.lang.version>
+        <commons.lang.version>3.14.0</commons.lang.version>
         <commons.collections.version>4.4</commons.collections.version>
         <commons.io.version>2.16.1</commons.io.version>
 
@@ -56,7 +56,18 @@
         <version>3.2.12</version>
         <relativePath/>
     </parent>
-
+    <repositories>
+        <repository>
+            <id>jboss-community</id>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
     <distributionManagement>
         <repository>
             <id>nexus-releases</id>

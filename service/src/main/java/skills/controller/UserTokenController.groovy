@@ -48,7 +48,7 @@ import skills.services.inception.InceptionProjectService
 
 import java.security.Principal
 
-@Conditional(SecurityMode.FormAuth)
+@Conditional(SecurityMode.FormOrSAML2Auth)
 @RestController
 @skills.profile.EnableCallStackProf
 @Slf4j

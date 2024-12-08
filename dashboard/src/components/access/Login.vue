@@ -102,6 +102,10 @@ onBeforeMount(() => {
 const oAuth2Login = (registrationId) => {
   authState.oAuth2Login(registrationId)
 }
+const saml2Login = (registrationId) => {
+  authState.saml2Login(registrationId)
+}
+
 </script>
 
 <template>
@@ -112,7 +116,7 @@ const oAuth2Login = (registrationId) => {
       </div>
       <div class="grid ">
         <div class="col-12 sm:col-8 sm:col-offset-2 md:col-6 md:col-offset-3 lg:col-4 lg:col-offset-4">
-          <Card v-if="!appConfig.oAuthOnly" class="mt-3">
+          <Card v-if="!appConfig.oAuthOnly && !appConfig.saml2RegistrationId" class="mt-3">
             <template #content>
               <form @submit="onSubmit">
                 <Message v-if="loginFailed" data-cy="loginFailed" severity="error">Invalid Username or Password</Message>
@@ -201,6 +205,21 @@ const oAuth2Login = (registrationId) => {
                   :icon="oAuthProvider.iconClass"
                   :label="`Login via ${ oAuthProvider.clientName }`"
                   @click="oAuth2Login(oAuthProvider.registrationId)" />
+              </div>
+            </template>
+          </Card>
+
+          <Card v-if="appConfig.saml2RegistrationId" class="mt-3">
+            <template #content>
+              <div
+                   :key="appConfig.saml2RegistrationId"
+                   class="col-12 mb-3">
+                <Button
+                    class="w-full text-center"
+                    outlined
+                    icon="far fa-arrow-alt-circle-right"
+                    label="`Login with SAML2`"
+                    @click="saml2Login(appConfig.saml2RegistrationId)" />
               </div>
             </template>
           </Card>

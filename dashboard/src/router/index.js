@@ -879,7 +879,7 @@ const routes = [
         message: 'Page Not Found',
       },
     },
-  },
+  }, 
   {
     path: '/user-agreement',
     component: UserAgreement,
