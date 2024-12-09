@@ -75,10 +75,17 @@ class UsagePostAchievementMetricsBuilderSpec extends DefaultIntSpec {
         def props = ["skillId": skill.skillId]
         def result = builder.build(proj.projectId, builder.id, props)
 
+        skillsService.archiveUsers([users[2]], proj.projectId)
+        def resultAfterArchive = builder.build(proj.projectId, builder.id, props)
+
         then:
         result
         result.totalUsersAchieved == 3
         result.usersPostAchievement == 2
+
+        resultAfterArchive
+        resultAfterArchive.totalUsersAchieved == 2
+        resultAfterArchive.usersPostAchievement == 2
     }
 
     def "skill usage post achievement crossing event compaction boundaries"() {
@@ -126,12 +133,19 @@ class UsagePostAchievementMetricsBuilderSpec extends DefaultIntSpec {
         def props = ["skillId": skill.skillId]
         def result = builder.build(proj.projectId, builder.id, props)
 
+        skillsService.archiveUsers([users[2]], proj.projectId)
+        def resultAfterArchive = builder.build(proj.projectId, builder.id, props)
+
         then:
         result
         result.totalUsersAchieved == 3
         //because the post achievement events were compacted into a weekly event whose start of week date
         //falls before the achievement
         result.usersPostAchievement == 0
+
+        resultAfterArchive
+        resultAfterArchive.totalUsersAchieved == 2
+        resultAfterArchive.usersPostAchievement == 0
     }
 
 
