@@ -15,13 +15,12 @@
  */
 package skills.intTests.metrics.skill
 
-import groovy.json.JsonOutput
+
 import groovy.json.JsonSlurper
 import groovy.time.TimeCategory
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.WaitForAsyncTasksCompletion
 import skills.metrics.builders.MetricsParams
 
 class SkillStatsMetricsBuilderSpec extends DefaultIntSpec {
@@ -81,6 +80,13 @@ class SkillStatsMetricsBuilderSpec extends DefaultIntSpec {
             return skillsService.getMetricsData(proj.projectId, metricsId, props)
         }
 
+        skillsService.archiveUsers([users[2]], proj.projectId)
+
+        List resAfterArchive = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj.projectId, metricsId, props)
+        }
+
         then:
         res[0].numUsersAchieved == 4
         new Date(res[0].lastAchieved) == days[4]
@@ -121,6 +127,46 @@ class SkillStatsMetricsBuilderSpec extends DefaultIntSpec {
         res[9].numUsersAchieved == 0
         !res[9].lastAchieved
         res[9].numUsersInProgress == 0
+
+        resAfterArchive[0].numUsersAchieved == 4
+        new Date(resAfterArchive[0].lastAchieved) == days[4]
+        resAfterArchive[0].numUsersInProgress == 0
+
+        resAfterArchive[1].numUsersAchieved == 4
+        new Date(resAfterArchive[1].lastAchieved) == days[4]
+        resAfterArchive[1].numUsersInProgress == 0
+
+        resAfterArchive[2].numUsersAchieved == 4
+        new Date(resAfterArchive[2].lastAchieved) == days[4]
+        resAfterArchive[2].numUsersInProgress == 0
+
+        resAfterArchive[3].numUsersAchieved == 4
+        new Date(resAfterArchive[3].lastAchieved) == days[4]
+        resAfterArchive[3].numUsersInProgress == 0
+
+        resAfterArchive[4].numUsersAchieved == 0
+        !resAfterArchive[4].lastAchieved
+        resAfterArchive[4].numUsersInProgress == 4
+
+        resAfterArchive[5].numUsersAchieved == 0
+        !resAfterArchive[5].lastAchieved
+        resAfterArchive[5].numUsersInProgress == 0
+
+        resAfterArchive[6].numUsersAchieved == 0
+        !resAfterArchive[6].lastAchieved
+        resAfterArchive[6].numUsersInProgress == 0
+
+        resAfterArchive[7].numUsersAchieved == 0
+        !resAfterArchive[7].lastAchieved
+        resAfterArchive[7].numUsersInProgress == 0
+
+        resAfterArchive[8].numUsersAchieved == 0
+        !resAfterArchive[8].lastAchieved
+        resAfterArchive[8].numUsersInProgress == 0
+
+        resAfterArchive[9].numUsersAchieved == 0
+        !resAfterArchive[9].lastAchieved
+        resAfterArchive[9].numUsersInProgress == 0
     }
 
     def "number achievements over time - catalog skills"() {
@@ -169,6 +215,13 @@ class SkillStatsMetricsBuilderSpec extends DefaultIntSpec {
             return skillsService.getMetricsData(proj2.projectId, metricsId, props)
         }
 
+        skillsService.archiveUsers([users[2]], proj2.projectId)
+
+        List resAfterArchive = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj2.projectId, metricsId, props)
+        }
+
         then:
         res[0].numUsersAchieved == 4
         new Date(res[0].lastAchieved) == days[4]
@@ -209,5 +262,45 @@ class SkillStatsMetricsBuilderSpec extends DefaultIntSpec {
         res[9].numUsersAchieved == 0
         !res[9].lastAchieved
         res[9].numUsersInProgress == 0
+
+        resAfterArchive[0].numUsersAchieved == 4
+        new Date(resAfterArchive[0].lastAchieved) == days[4]
+        resAfterArchive[0].numUsersInProgress == 0
+
+        resAfterArchive[1].numUsersAchieved == 4
+        new Date(resAfterArchive[1].lastAchieved) == days[4]
+        resAfterArchive[1].numUsersInProgress == 0
+
+        resAfterArchive[2].numUsersAchieved == 4
+        new Date(resAfterArchive[2].lastAchieved) == days[4]
+        resAfterArchive[2].numUsersInProgress == 0
+
+        resAfterArchive[3].numUsersAchieved == 4
+        new Date(resAfterArchive[3].lastAchieved) == days[4]
+        resAfterArchive[3].numUsersInProgress == 0
+
+        resAfterArchive[4].numUsersAchieved == 0
+        !resAfterArchive[4].lastAchieved
+        resAfterArchive[4].numUsersInProgress == 4
+
+        resAfterArchive[5].numUsersAchieved == 0
+        !resAfterArchive[5].lastAchieved
+        resAfterArchive[5].numUsersInProgress == 0
+
+        resAfterArchive[6].numUsersAchieved == 0
+        !resAfterArchive[6].lastAchieved
+        resAfterArchive[6].numUsersInProgress == 0
+
+        resAfterArchive[7].numUsersAchieved == 0
+        !resAfterArchive[7].lastAchieved
+        resAfterArchive[7].numUsersInProgress == 0
+
+        resAfterArchive[8].numUsersAchieved == 0
+        !resAfterArchive[8].lastAchieved
+        resAfterArchive[8].numUsersInProgress == 0
+
+        resAfterArchive[9].numUsersAchieved == 0
+        !resAfterArchive[9].lastAchieved
+        resAfterArchive[9].numUsersInProgress == 0
     }
 }
