@@ -49,9 +49,10 @@ const doCopy = () => {
 const loadingOtherProjects = ref(true)
 const thisProjectId = route.params.projectId
 const otherProjects = ref([])
+const isAllowedRole = (userRole) => UserRolesUtil.isProjectAdminRole(userRole) || UserRolesUtil.isSuperRole(userRole)
 const loadOtherProjects = () => {
   ProjectService.getProjects().then((projRes) => {
-    otherProjects.value = projRes.filter((p) => p.projectId?.toLowerCase() !== thisProjectId?.toLowerCase() && UserRolesUtil.isProjectAdminRole(p.userRole))
+    otherProjects.value = projRes.filter((p) => p.projectId?.toLowerCase() !== thisProjectId?.toLowerCase() && isAllowedRole(p.userRole))
   }).finally(() => {
     loadingOtherProjects.value = false
   })
