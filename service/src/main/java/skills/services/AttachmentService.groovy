@@ -25,6 +25,7 @@ import skills.auth.UserInfoService
 import skills.controller.result.model.UploadAttachmentResult
 import skills.storage.model.Attachment
 import skills.storage.repos.AttachmentRepo
+import skills.storage.repos.SkillDefWithExtraRepo
 
 import java.util.regex.Pattern
 
@@ -39,6 +40,9 @@ class AttachmentService {
 
     @Autowired
     UserInfoService userInfoService
+
+    @Autowired
+    SkillDefWithExtraRepo skillDefWithExtraRepo
 
     @Transactional
     UploadAttachmentResult saveAttachment(MultipartFile file,
@@ -98,6 +102,32 @@ class AttachmentService {
     @Transactional
     Integer deleteGlobalBadgeAttachments(String globalBadgeId) {
         return attachmentRepo.deleteBySkillIdAndProjectIdIsNull(globalBadgeId)
+    }
+
+    @Transactional
+    String updateAttachmentsInIncomingDescription(String description, String projectId, String skillId) {
+        String res = description
+        if (description && projectId && skillId) {
+            List<String> uuidsToHandle = UUID_PATTERN.matcher(description).findAll().collect { it[1] as String }
+            uuidsToHandle.each { String uuid ->
+                Attachment attachment = attachmentRepo.findByUuid(uuid)
+                if (attachment) {
+                    // check to see if this attachment already exist in another skill which can happen when
+                    // user copying a skill
+                    boolean otherExist = skillDefWithExtraRepo.otherSkillsExistInProjectWithAttachmentUUID(projectId, skillId, attachment.uuid)
+                    if (otherExist) {
+                        // skill id will be updated later in the stack
+                        // cannot set it here as skill was not saved yet
+                        Attachment newAttachment = copyAttachmentWithNewUuid(attachment, projectId)
+                        res = res.replace("(/api/download/${uuid})", "(/api/download/${newAttachment.uuid})")
+                    }
+                } else {
+                    log.warn("updateAttachmentsInIncomingDescription: failed to find attachment with uuid: [${uuid}]. method params are projectId: [${projectId}], skillId: [${skillId}]")
+                }
+            }
+        }
+
+        return res
     }
 
     @Transactional
