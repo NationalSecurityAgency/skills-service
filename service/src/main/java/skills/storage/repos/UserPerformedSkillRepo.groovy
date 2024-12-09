@@ -127,9 +127,6 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
               u.performedOn < ?5''')
     Long countByUserIdAndProjectIdAndSkillIdAndPerformedOnGreaterThanAndPerformedOnLessThan(String userId, String projectId, String skillId, Date startDate, Date endDate)
 
-    @Query("SELECT DISTINCT(p.userId) from UserPerformedSkill p where lower(p.userId) LIKE %?1% order by p.userId asc" )
-    List<String> findDistinctUserIds(String userIdQuery, Pageable pageable)
-
     Boolean existsByUserId(String userId)
 
     @Query('''select true from UserPerformedSkill up 
@@ -163,16 +160,6 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
               and u.userId = ?1
               and u.skillRefId = s.id''')
     List<PerformedSkillQRes> findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(String userId, String projectId, String skillId, Pageable pageable)
-
-    @Query('''select u from UserPerformedSkill u
-              where 
-              u.skillRefId in (
-                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
-                where s.projectId = ?2 and
-                s.enabled = 'true'
-              ) and
-              u.userId = ?1''')
-    List<UserPerformedSkill> findByUserIdAndProjectId(String userId, String projectId, Pageable pageable)
 
     @Query('''SELECT COUNT(DISTINCT p.skillId) from UserPerformedSkill p where p.userId = ?2 
             and p.skillRefId in (
@@ -280,22 +267,6 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
 
     @Query('''select CAST(ups.performedOn as date) as day, count(ups.id) as count
         from UserPerformedSkill ups
-        where
-        ups.skillRefId in (
-            select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id
-            from SkillDef s
-            where
-            s.type = 'Skill' and
-            s.projectId = :projectId and
-            s.skillId = :skillId and
-            s.enabled = 'true'
-        )
-        group by CAST(ups.performedOn as date)
-    ''')
-    List<DayCountItem> countsByDay(@Param('projectId') String projectId, @Param('skillId') String skillId)
-
-    @Query('''select CAST(ups.performedOn as date) as day, count(ups.id) as count
-        from UserPerformedSkill ups
         LEFT JOIN ArchivedUser au ON au.userId = ups.userId and au.projectId = :projectId
         where
         ups.skillRefId in (
@@ -320,9 +291,6 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
 
     @Nullable
     List<UserPerformedSkill> findAllBySkillRefId(Integer skillRefId)
-
-    @Nullable
-    List<UserPerformedSkill> findAllBySkillRefIdAndPerformedOnBefore(Integer skillRefId, Date expirationDate)
 
     @Nullable
     // returns oldest UPS for skill/user
