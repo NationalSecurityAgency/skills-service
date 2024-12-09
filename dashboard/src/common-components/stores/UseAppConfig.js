@@ -150,7 +150,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const limitAdminAccess = computed(() => config.value.limitAdminAccess)
   const maxGraderFeedbackMessageLength = computed(() => config.value.maxGraderFeedbackMessageLength)
   const maxTakeQuizInputTextAnswerLength = computed(() => config.value.maxTakeQuizInputTextAnswerLength)
-  const disableEncouragementsConfetti = computed(() => config.value.disableEncouragementsConfetti)
+  const disableEncouragementsConfetti = computed(() => isTrue(config.value.disableEncouragementsConfetti))
   return {
     loadConfigState,
     refreshConfig,
