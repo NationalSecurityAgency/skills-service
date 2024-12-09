@@ -141,6 +141,16 @@ export const useSkillsDisplayService = () => {
     }).then((result) => result.data)
   }
 
+  const getDescriptionForSkill = (skillId) => {
+    let url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skills/${encodeURIComponent(skillId)}/description`
+    const response = axios.get(url, {
+      params: {
+        ...getUserIdAndVersionParams(),
+      }
+    }).then((result) => result.data)
+    return response
+  }
+
   const getDescriptions = (parentId, type = 'subject') => {
     let url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/subjects/${encodeURIComponent(parentId)}/descriptions`
     if (type === 'badge' || type === 'global-badge') {
@@ -256,6 +266,7 @@ export const useSkillsDisplayService = () => {
     getSkillSummary,
     searchSkills,
     getDescriptions,
+    getDescriptionForSkill,
     reportSkill,
     removeApprovalRejection,
     getBadgeSummaries,
