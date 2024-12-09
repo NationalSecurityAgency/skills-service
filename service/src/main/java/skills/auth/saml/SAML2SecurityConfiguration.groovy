@@ -62,8 +62,6 @@ class SAML2SecurityConfiguration{
     @Value('${spring.security.saml2.registrationId:#{null}}')
     String registrationId;
 
-    // Custom properties using for configuring signing credentials
-
     @Value('${saml2.rp.signing.key-location:#{null}}')
     private String privateKeyLocation;
 
