@@ -285,59 +285,6 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     """, nativeQuery = true)
     Stream<DayCountItem> getDistinctUserCountForSubject(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") EventType type)
 
-
-    @Query(value="""
-        select min(all_events.project_id) as projectId, all_events.event_time as day, sum(all_events.count) as count from
-         (
-            SELECT uue.user_id AS user_id,
-                   def.project_id AS project_id,
-                   uue.skill_ref_id AS skill_ref_id,
-                   uue.event_time AS event_time,
-                   uue.event_type AS event_type,
-                   uue.count AS count,
-                   uue.week_number AS week_number
-            FROM user_events uue 
-            INNER JOIN (
-                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
-                from skill_definition sd 
-                where sd.type = 'Skill' 
-                and sd.project_id = :projectId
-                and sd.enabled = 'true'
-            ) def ON uue.skill_ref_id = def.id
-            WHERE
-                uue.event_time >= :start AND
-                uue.event_type = :#{#type.name()}
-        ) all_events
-        group by all_events.event_time 
-        order by all_events.event_time desc
-    """, nativeQuery = true)
-    Stream<DayCountItem> getEventCountForProject(@Param("projectId") String projectId, @Param("start") Date start, @Param("type") EventType type)
-
-    @Query(value="""select min(all_events.project_id) as projectId, all_events.week_number as weekNumber, sum(all_events.count) as count from
-         (
-            SELECT uue.user_id AS user_id,
-                   def.project_id AS project_id,
-                   uue.skill_ref_id AS skill_ref_id,
-                   uue.event_time AS event_time,
-                   uue.event_type AS event_type,
-                   uue.count AS count,
-                   uue.week_number AS week_number
-            FROM user_events uue 
-            INNER JOIN (
-                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
-                from skill_definition sd 
-                where sd.type = 'Skill' 
-                and sd.project_id = :projectId
-                and sd.enabled = 'true'
-            ) def ON uue.skill_ref_id = def.id
-            WHERE
-                uue.event_time >= :start
-        ) all_events
-        group by all_events.week_number 
-        order by all_events.week_number desc
-    """, nativeQuery = true)
-    Stream<WeekCountItem> getEventCountForProjectGroupedByWeek(@Param("projectId") String projectId, @Param("start") Date start)
-
     @Query(value="""
         SELECT min(uee.project_id) as projectId, uee.event_time as day, sum(uee.count) as count FROM
         (
@@ -363,7 +310,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
         ) uee
         GROUP BY uee.project_id, uee.event_time
         ORDER BY uee.event_time DESC
-    """, nativeQuery = true) // TOD
+    """, nativeQuery = true)
     Stream<DayCountItem> getEventCountForUser(@Param("userId") String userId, @Param("start") Date start, @Param("type") EventType type, @Param("projectIds") List<String> projectIds)
 
     @Query(value="""
@@ -423,21 +370,6 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     Stream<DayCountItem> getDistinctUserCountForProject(@Param("projectId") String projectId, @Param("start") Date start, @Param("type") EventType type)
 
     @Query(value="""
-        select new skills.storage.model.EventCount(ue.eventTime, count(distinct ue.userId), ue.eventType) from UserEvent ue
-        where ue.eventTime > :start AND
-        ue.skillRefId in (
-            SELECT case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
-            FROM SkillDef sd 
-            WHERE sd.projectId = :projectId 
-            AND sd.type = 'Skill'
-            and sd.enabled = 'true'
-        )   
-        group by ue.eventTime, ue.eventType
-        order by ue.eventTime desc
-    """)
-    Stream<EventCount> getDistinctUserCountForProject(@Param("projectId") String projectId, @Param("start") Date start)
-
-    @Query(value="""
         select min(ue.projectId) as projectId, ue.weekNumber as weekNumber, count(distinct ue.userId) as count 
         from UserEvent ue
             LEFT JOIN ArchivedUser au ON au.userId = ue.userId and au.projectId = :projectId
@@ -458,9 +390,6 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     @Nullable
     Stream<UserEvent> findAllBySkillRefIdAndEventType(Integer skillRefId, EventType type)
 
-    @Nullable
-    UserEvent findTopByProjectIdOrderByEventTimeDesc(String projectId)
-
     @QueryHints(value = [
         @QueryHint(name = "org.hibernate.cacheable", value = "false"),
         @QueryHint(name = "org.hibernate.readOnly", value = "true")
@@ -473,19 +402,6 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     void deleteAllByUserIdAndProjectId(String projectId, String userId)
 
     void deleteAllByUserIdAndSkillRefIdIn(String userId, List<Integer> skillRefIds)
-
-
-    @Modifying
-    @Query(value='''
-        update UserEvent ue
-        set ue.count = ue.count-1 
-        where ue.skillRefId = :skillRefId
-        and ue.userId = :userId
-        and ue.eventTime = :eventTime
-        and ue.eventType = :eventType
-        and ue.count > 0
-    ''')
-    void decrementEventCount(@Param("eventTime") Date eventDate, @Param("userId") String userId, @Param("skillRefId") Integer skillRefId, @Param("eventType") EventType type)
 
     @Nullable
     UserEvent findByUserIdAndSkillRefIdAndEventTimeAndEventType(String userId, Integer skillRefId, Date eventTime, EventType type)
