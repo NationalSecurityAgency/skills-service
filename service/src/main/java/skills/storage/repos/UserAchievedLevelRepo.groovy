@@ -915,7 +915,9 @@ where ua.projectId = :projectId and ua.skillId = :skillId
 select count(distinct ua) as userCount, ut.value as tagValue
 from UserAchievement ua
 join UserTag ut on ut.userId = ua.userId
-where ua.projectId = :projectId and ua.skillId = :skillId and ut.key = :userTagKey group by ut.value
+LEFT JOIN ArchivedUser au ON au.userId = ua.userId and au.projectId = :projectId
+where ua.projectId = :projectId and ua.skillId = :skillId and ut.key = :userTagKey
+and au.id is null group by ut.value
 ''')
     List<UserTagCount> countNumAchievedByUserTag(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param("userTagKey") String userTagKey)
 
