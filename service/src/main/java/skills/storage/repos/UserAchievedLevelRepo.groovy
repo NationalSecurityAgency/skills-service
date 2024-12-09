@@ -712,9 +712,11 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     @Query('''select ua.achievedOn as achievedOn, ua.userId as userId, ua.level as level, ua.skillId as skillId,
             sd.name as name, sd.type as type, uAttrs.userIdForDisplay as userIdForDisplay, uAttrs.firstName as firstName, uAttrs.lastName as lastName, ut.value as userTag
-            from UserAttrs uAttrs, UserAchievement ua 
+            from UserAttrs uAttrs
+            JOIN  UserAchievement ua ON uAttrs.userId = ua.userId 
                 left join SkillDef sd on ua.skillRefId = sd.id 
             LEFT JOIN (SELECT ut.userId userId, max(ut.value) AS value FROM UserTag ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.userId) ut ON ut.userId=ua.userId
+            LEFT JOIN ArchivedUser au ON au.userId = ua.userId and au.projectId = :projectId
             where 
                 ua.userId = uAttrs.userId and
                 ua.projectId = :projectId and
@@ -725,7 +727,8 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 (lower(sd.name) like lower(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
                 (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
-                (ua.skillId is not null OR (:includeOverallType = 'true'))
+                (ua.skillId is not null OR (:includeOverallType = 'true')) and
+                au.id is null
                 ''')
     Stream<AchievementItem> findAllForAchievementNavigator(
             @Param("projectId") String projectId,
@@ -740,11 +743,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
             @Param("pageable") Pageable pageable)
 
-    @Query('''select count(uAttrs) 
-            from UserAttrs uAttrs, 
-                UserAchievement ua left join SkillDef sd on ua.skillRefId = sd.id 
+    @Query('''
+            SELECT COUNT(uAttrs)
+            FROM  UserAttrs uAttrs
+            JOIN  UserAchievement ua ON uAttrs.userId = ua.userId
+            LEFT JOIN SkillDef sd ON ua.skillRefId = sd.id
+            LEFT JOIN ArchivedUser au ON au.userId = ua.userId and au.projectId = :projectId
             where 
-                ua.userId = uAttrs.userId and
                 ua.projectId = :projectId and
                 ua.achievedOn >= :fromDate and
                 ua.achievedOn <= :toDate and 
@@ -753,7 +758,8 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                 (lower(sd.name) like lower(CONCAT('%', :skillNameFilter, '%')) OR (:skillNameFilter = 'ALL')) and
                 (ua.level >= :level OR (:level = -1)) and
                 (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
-                (ua.skillId is not null OR (:includeOverallType = 'true'))
+                (ua.skillId is not null OR (:includeOverallType = 'true')) and
+                 au.id is null
                 ''')
     Integer countForAchievementNavigator(
             @Param("projectId") String projectId,
