@@ -143,6 +143,13 @@ let settings = ref({
     dirty: false,
     projectId: route.params.projectId,
   },
+  disableAchievementsCelebration: {
+    value: false,
+    setting: 'skills-display-achievement-celebration-disabled',
+    lastLoadedValue: false,
+    dirty: false,
+    projectId: route.params.projectId,
+  },
   projectDisplayName: {
     value: 'Project',
     setting: 'project.displayName',
@@ -230,6 +237,10 @@ const groupDescriptionsLabel = computed(() => {
   return formatToggleLabel(settings.value.groupDescriptions.value);
 });
 
+const disableAchievementCelebrationLabel = computed(() => {
+  return formatToggleLabel(settings.value.disableAchievementsCelebration.value);
+});
+
 const rankOptOutLabel = computed(() => {
   return formatToggleLabel(settings.value.rankAndLeaderboardOptOut.value);
 });
@@ -287,6 +298,10 @@ const rankAndLeaderboardOptOutChanged = ((value) => {
 const groupDescriptionsChanged = ((value) => {
   settings.value.groupDescriptions.dirty = `${value}` !== `${settings.value.groupDescriptions.lastLoadedValue}`;
 });
+
+const disableAchievementsCelebrationChanged = ((value) => {
+  settings.value.disableAchievementsCelebration.dirty = `${value}` !== `${settings.value.disableAchievementsCelebration.lastLoadedValue}`;
+})
 
 const inviteOnlyProjectChanged = ((value) => {
   settings.value.inviteOnlyProject.dirty = `${value}` !== `${settings.value.inviteOnlyProject.lastLoadedValue}`;
@@ -618,6 +633,21 @@ const saveSettings = ((dirtyChanges) => {
                            aria-labelledby="groupDescriptionsLabel"
                            data-cy="groupDescriptionsSwitch" />
               <span class="ml-1">{{ groupDescriptionsLabel }}</span>
+            </div>
+          </div>
+
+          <div class="field flex flex-column lg:flex-row lg:gap-3">
+            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="disableAchievementsCelebration" for="disableAchievementsCelebrationSwitch">
+              <span id="disableAchievementsCelebrationLabel">Disable Achievement Celebration:</span>
+            </label>
+            <div class="flex align-items-center">
+              <InputSwitch v-model="settings.disableAchievementsCelebration.value"
+                           inputId="disableAchievementsCelebrationSwitch"
+                           name="check-button"
+                           v-on:update:modelValue="disableAchievementsCelebrationChanged"
+                           aria-labelledby="disableAchievementsCelebrationLabel"
+                           data-cy="disableAchievementsCelebrationSwitch" />
+              <span class="ml-1">{{ disableAchievementCelebrationLabel }}</span>
             </div>
           </div>
 

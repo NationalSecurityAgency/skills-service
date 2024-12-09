@@ -115,7 +115,7 @@ class PublicConfigController {
     @ResponseBody
     Map<String,Object> getClientDisplayConfig(@RequestParam(required = false) String projectId){
         String docsHost = uiConfigProperties.ui.docsHost
-        Map<String,String> res = new HashMap<>()
+        Map<String,Object> res = new HashMap<>()
         configureUserCommunityProps(res)
         res["docsHost"] = docsHost
         res["maxSelfReportMessageLength"] = uiConfigProperties.ui.maxSelfReportMessageLength
@@ -147,7 +147,8 @@ class PublicConfigController {
                     'level.displayName',
                     'point.displayName',
                     Settings.GROUP_DESCRIPTIONS.settingName,
-                    Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName
+                    Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName,
+                    Settings.DISABLE_SKILLS_DISPLAY_ACHIEVEMENTS_CELEBRATIONS.settingName
             ])?.collectEntries {
                 [it.setting, it.value]
             }
@@ -186,6 +187,9 @@ class PublicConfigController {
             } else {
                 res["displayProjectDescription"] = false
             }
+
+            Boolean disableAchievementsCelebrations = Boolean.valueOf(projectSettings?[Settings.DISABLE_SKILLS_DISPLAY_ACHIEVEMENTS_CELEBRATIONS.settingName])
+            res["disableAchievementsCelebrations"] = disableAchievementsCelebrations
 
             String name = projAdminService.lookupProjectName(projectId)
             res["projectName"] = name

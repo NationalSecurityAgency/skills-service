@@ -16,35 +16,17 @@ limitations under the License.
 <script setup>
 
 import AchievementMsg from "@/skills-display/components/progress/celebration/AchievementMsg.vue";
-import {computed, onMounted} from "vue";
-import {useConfettiEffects} from "@/skills-display/components/progress/celebration/UseConfettiEffects.js";
+import {computed} from "vue";
 import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
-import {useStorage} from "@vueuse/core";
-import {useSkillsDisplayThemeState} from "@/skills-display/stores/UseSkillsDisplayThemeState.js";
-import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
 const props = defineProps({
   skill: Object,
 })
-const themeState = useSkillsDisplayThemeState()
-const confettiEffects = useConfettiEffects()
-const appConfig = useAppConfig()
 const timeUtils = useTimeUtils()
 
 const showCelebration = computed(() => props.skill.achievedOn && timeUtils.isWithinNDays(props.skill.achievedOn, 7))
 const storageKey = computed(() => `celebration-proj-${props.skill.projectId}-skill-${props.skill.skillId}`)
-const confettiAlreadyShown = useStorage(`${storageKey.value}-confetti-shown`, false)
-const disableEncouragementsConfetti = computed(() => themeState.theme.disableEncouragementsConfetti || appConfig.disableEncouragementsConfetti)
 
-const showConfetti = () => {
-  confettiEffects.simpleConfetti()
-}
-onMounted(() => {
-  if (showCelebration.value && !confettiAlreadyShown.value && !disableEncouragementsConfetti.value) {
-    showConfetti()
-    confettiAlreadyShown.value = true
-  }
-})
 
 const getPtsTag = () => {
   return `<span class="p-tag p-component">${props.skill.points}</span>`
@@ -60,17 +42,10 @@ const getRandomMessage = () => {
 </script>
 
 <template>
-  <achievement-msg v-if="showCelebration" :storage-key="storageKey" data-cy="skillAchievementCelebrationMsg">
-    <template #icon>
-      <SkillsButton
-          @click="showConfetti"
-          text
-          aria-label="Show Celebration Confetti"
-      >
-        <i class="text-4xl fas fa-graduation-cap" aria-hidden="true"></i>
-      </SkillsButton>
-    </template>
-
+  <achievement-msg
+      :is-enabled="showCelebration"
+      icon="fas fa-graduation-cap"
+      :storage-key="storageKey" data-cy="skillAchievementCelebrationMsg">
     <template #content>
       <div class="text-left">
         <span v-html="getRandomMessage()"/>

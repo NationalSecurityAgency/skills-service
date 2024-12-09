@@ -16,12 +16,8 @@ limitations under the License.
 <script setup>
 import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
-import {computed, onMounted} from "vue";
-import {useConfettiEffects} from "@/skills-display/components/progress/celebration/UseConfettiEffects.js";
-import {useStorage} from "@vueuse/core";
+import {computed} from "vue";
 import AchievementMsgContent from "@/skills-display/components/progress/celebration/AchievementMsgContent.vue";
-import {useSkillsDisplayThemeState} from "@/skills-display/stores/UseSkillsDisplayThemeState.js";
-import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import AchievementMsg from "@/skills-display/components/progress/celebration/AchievementMsg.vue";
 
 const props = defineProps({
@@ -30,32 +26,12 @@ const props = defineProps({
 const isSubject = props.userProgress.subjectId
 const timeUtils = useTimeUtils()
 const attributes = useSkillsDisplayAttributesState()
-const themeState = useSkillsDisplayThemeState()
-const confettiEffects = useConfettiEffects()
-const appConfig = useAppConfig()
 
 const level = computed(() => props.userProgress.skillsLevel)
 const dateAchieved = computed(() => props.userProgress.lastLevelAchieved)
 const showLevelCelebration = computed(() => dateAchieved.value && timeUtils.isWithinNDays(dateAchieved.value, 7))
 const projectId = computed(() => attributes.projectId)
 const storageStartKey = isSubject ? `celebration-proj-${projectId.value}-subject-${props.userProgress.subjectId}-achievement-level${level.value}`: `celebration-proj-${projectId.value}-achievement-level${level.value}`
-const confettiAlreadyShown = useStorage(`${storageStartKey}-level${level.value}-confetti-shown`, false)
-const disableEncouragementsConfetti = computed(() => themeState.theme.disableEncouragementsConfetti || appConfig.disableEncouragementsConfetti)
-
-onMounted(() => {
-  if (showLevelCelebration.value && !confettiAlreadyShown.value && !disableEncouragementsConfetti.value) {
-    showConfetti()
-    confettiAlreadyShown.value = true
-  }
-})
-
-const showConfetti = () => {
-  if (isSubject) {
-    confettiEffects.stars()
-  } else {
-    confettiEffects.stars2()
-  }
-}
 
 const currentIcon = computed(() => {
   if (level.value === 1) {
@@ -78,17 +54,11 @@ const currentIcon = computed(() => {
 
 <template>
   <div>
-    <achievement-msg v-if="showLevelCelebration" :storage-key="storageStartKey" data-cy="levelAchievementCelebrationMsg">
-      <template #icon>
-        <SkillsButton
-            @click="showConfetti"
-            text
-            aria-label="Show Celebration Confetti"
-        >
-          <i class="text-4xl" :class="currentIcon" aria-hidden="true"></i>
-        </SkillsButton>
-      </template>
-
+    <achievement-msg :is-enabled="showLevelCelebration"
+                     :storage-key="storageStartKey"
+                     :icon="currentIcon"
+                     :confetti-effect-type="isSubject ? 'stars' : 'stars2'"
+                     data-cy="levelAchievementCelebrationMsg">
       <template #content>
         <div v-if="!isSubject">
           <achievement-msg-content v-if="level === 1" title="Level Up!">

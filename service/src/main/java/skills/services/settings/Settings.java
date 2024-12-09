@@ -28,6 +28,7 @@ public enum Settings {
     INVITE_ONLY_PROJECT("invite_only"),
     GROUP_DESCRIPTIONS("group-descriptions"),
     SHOW_PROJECT_DESCRIPTION_EVERYWHERE("show_project_description_everywhere"),
+    DISABLE_SKILLS_DISPLAY_ACHIEVEMENTS_CELEBRATIONS("skills-display-achievement-celebration-disabled"),
     USER_PROJECT_ROLE("user_project_role"),
     USER_COMMUNITY_ONLY_PROJECT("user_community"),
     PROJECT_COMMUNITY_VALUE("project_community_value");

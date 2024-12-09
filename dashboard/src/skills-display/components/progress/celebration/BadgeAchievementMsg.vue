@@ -17,53 +17,28 @@ limitations under the License.
 
 import AchievementMsgContent from "@/skills-display/components/progress/celebration/AchievementMsgContent.vue";
 import AchievementMsg from "@/skills-display/components/progress/celebration/AchievementMsg.vue";
-import {useConfettiEffects} from "@/skills-display/components/progress/celebration/UseConfettiEffects.js";
-import {computed, onMounted} from "vue";
+import {computed} from "vue";
 import {useSkillsDisplayInfo} from "@/skills-display/UseSkillsDisplayInfo.js";
-import {useStorage} from "@vueuse/core";
-import {useSkillsDisplayThemeState} from "@/skills-display/stores/UseSkillsDisplayThemeState.js";
-import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
 const props = defineProps({
   userProgress: Object,
 })
-const themeState = useSkillsDisplayThemeState()
-const confettiEffects = useConfettiEffects()
-const appConfig = useAppConfig()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 
 const recentlyAchievedBadges = computed(() => props.userProgress.badges?.recentlyAwardedBadges || [])
 const showCelebration = computed(() => recentlyAchievedBadges.value?.length > 0)
 const storageKey = computed(() => `celebration-proj-${props.userProgress.projectId}-badges-${recentlyAchievedBadges.value.map(b => b.badgeId).sort().join('-')}`)
 
-const confettiAlreadyShown = useStorage(`${storageKey.value}-confetti-shown`, false)
-const disableEncouragementsConfetti = computed(() => themeState.theme.disableEncouragementsConfetti || appConfig.disableEncouragementsConfetti)
-
-const showConfetti = () => {
-  confettiEffects.stars2()
-}
-onMounted(() => {
-  if (showCelebration.value && !confettiAlreadyShown.value && !disableEncouragementsConfetti.value) {
-    showConfetti()
-    confettiAlreadyShown.value = true
-  }
-})
-
 const moreThan1Badge = computed(() => recentlyAchievedBadges.value?.length > 1 )
 </script>
 
 <template>
-  <achievement-msg v-if="showCelebration" :storage-key="storageKey" data-cy="badgeAchievementCelebrationMsg">
-    <template #icon>
-      <SkillsButton
-          @click="showConfetti"
-          text
-          aria-label="Show Celebration Confetti"
-      >
-        <i class="text-4xl fa fa-award " aria-hidden="true"></i>
-      </SkillsButton>
-    </template>
-
+  <achievement-msg
+      :is-enabled="showCelebration"
+      confetti-effect-type="stars2"
+      :storage-key="storageKey"
+      icon="fa fa-award"
+      data-cy="badgeAchievementCelebrationMsg">
     <template #content>
       <achievement-msg-content v-if="!moreThan1Badge" title="Badge Achieved!">
         Bravo!
