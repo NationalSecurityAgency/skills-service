@@ -141,8 +141,8 @@ export const useSkillsDisplayService = () => {
     }).then((result) => result.data)
   }
 
-  const getDescriptionForSkill = (subjectId, skillId) => {
-    let url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/subjects/${encodeURIComponent(subjectId)}/skills/${encodeURIComponent(skillId)}/description`
+  const getDescriptionForSkill = (skillId) => {
+    let url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skills/${encodeURIComponent(skillId)}/description`
     const response = axios.get(url, {
       params: {
         ...getUserIdAndVersionParams(),

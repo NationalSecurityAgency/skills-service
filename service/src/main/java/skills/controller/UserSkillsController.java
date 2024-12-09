@@ -257,7 +257,7 @@ class UserSkillsController {
         return skillsLoader.loadSkillSummary(projectId, userId, null, skillId, subjectId);
     }
 
-    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}/description", method = RequestMethod.GET)
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/description", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, String> getSkillDescription(@PathVariable("projectId") String projectId,
                                                    @PathVariable("skillId") String skillId) {
