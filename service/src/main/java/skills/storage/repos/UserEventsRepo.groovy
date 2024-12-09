@@ -492,7 +492,10 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Nullable
     @Query(value = '''
-        SELECT max(event_time) FROM user_events where project_id = ?1
+        SELECT max(event_time) FROM user_events ue
+        LEFT JOIN archived_users au ON au.user_id = ue.user_id and au.project_id = ue.project_id
+        WHERE ue.project_id = ?1
+          AND au.id is null
     ''', nativeQuery = true)
     Date getLatestEventDateForProject(String projectId)
 }
