@@ -179,14 +179,12 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         String getName()
         String getId()
         Date getAchievedOn()
-        String getIconClass()
         SkillDef.ContainerType getType()
     }
 
     @Query('''select skillDef.name as name, 
         skillDef.skillId as id, 
         ua.achievedOn as achievedOn,
-        skillDef.iconClass as iconClass,
         skillDef.type as type
       from SkillDef skillDef, UserAchievement ua 
       where 
@@ -198,6 +196,24 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         skillDef.projectId=?2 and 
         skillDef.type in ?3''')
     List<AchievementInfo> getUserAchievementsAfterDate(String userId, String projectId, List<SkillDef.ContainerType> containerTypes, Date mustBeAfterThisDate)
+
+    @Query('''select badgeDef.name as name, 
+        badgeDef.skillId as id, 
+        ua.achievedOn as achievedOn,
+        badgeDef.type as type
+      from SkillDef badgeDef, SkillDef skillDef, SkillRelDef rel, UserAchievement ua
+      where 
+        ua.level is null and 
+        ua.userId=?1 and
+        ua.achievedOn > ?3 and 
+        badgeDef = rel.parent and
+        skillDef = rel.child and 
+        rel.type = 'BadgeRequirement' and
+        ua.projectId is null and
+        ua.skillRefId = badgeDef.id and 
+        skillDef.projectId=?2 and 
+        badgeDef.type = 'GlobalBadge' ''')
+    List<AchievementInfo> getUserGlobalBadgeAchievementsAfterDate(String userId, String projectId, Date mustBeAfterThisDate)
 
     @Query('''select count(ua)
       from SkillDef skillDef, UserAchievement ua 

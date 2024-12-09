@@ -15,10 +15,12 @@
  */
 package skills.intTests.clientDisplay
 
+import groovy.time.TimeCategory
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.SkillDef
+import skills.storage.model.UserAchievement
 
 class ClientDisplayBadgesSpec extends DefaultIntSpec {
 
@@ -899,5 +901,194 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         summary.hasExpired == true
         summary.achievementPosition == 1
         summary.achievedWithinExpiration == false
+    }
+
+    def "no recently achieved badges because no badges are achieved"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        String badge1 = "badge1"
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
+
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        List<String> users = getRandomUsers(1)
+        when:
+        def user1Summary = skillsService.getSkillSummary(users[0], proj1.projectId)
+        then:
+        user1Summary.badges.numTotalBadges == 1
+        user1Summary.badges.numBadgesCompleted == 0
+        !user1Summary.badges.recentlyAwardedBadges
+    }
+
+    def "recently achieved badges are within 7 days"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1, 100)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        String badge1 = "badge1"
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
+
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        def users = getRandomUsers(3)
+        Date sevenDaysAgoPlus1Hour = null
+        Date sevenDaysAgoMinus1Hour = null
+        use(TimeCategory) {
+            sevenDaysAgoPlus1Hour = new Date() - 7 + 1.hour
+            sevenDaysAgoMinus1Hour = new Date() - 7 - 1.hour
+        }
+
+        skillsService.addSkill(proj1_skills[0], users[0], sevenDaysAgoPlus1Hour)
+        skillsService.addSkill(proj1_skills[0], users[1], sevenDaysAgoMinus1Hour)
+
+        when:
+        def user1Summary = skillsService.getSkillSummary(users[0], proj1.projectId)
+        def user2Summary = skillsService.getSkillSummary(users[1], proj1.projectId)
+        then:
+        user1Summary.badges.numTotalBadges == 1
+        user1Summary.badges.numBadgesCompleted == 1
+        user1Summary.badges.recentlyAwardedBadges.badgeId == [badge.badgeId]
+        def achievedBadge = user1Summary.badges.recentlyAwardedBadges[0]
+        achievedBadge.badgeName == badge.name
+        reformatStrDate(achievedBadge.achievedOn) == formatDate(sevenDaysAgoPlus1Hour)
+        !achievedBadge.isGlobalBadge
+
+        user2Summary.badges.numTotalBadges == 1
+        user2Summary.badges.numBadgesCompleted == 1
+        !user2Summary.badges.recentlyAwardedBadges
+    }
+
+    def "multiple recently achieved badges are within 7 days"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1, 100)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        def createBadge = { int badgeNum, int skillNum ->
+            def theBadge = SkillsFactory.createBadge(1, badgeNum)
+            skillsService.addBadge(theBadge)
+            skillsService.assignSkillToBadge(proj1.projectId, theBadge.badgeId, proj1_skills[skillNum].skillId.toString())
+            theBadge.enabled  = 'true'
+            skillsService.updateBadge(theBadge, theBadge.badgeId)
+
+            return theBadge
+        }
+        def badge1 = createBadge(1, 0)
+        def badge2 = createBadge(2, 1)
+        def badge3 = createBadge(3, 2)
+
+
+        def users = getRandomUsers(3)
+        Date sevenDaysAgoPlus1Hour = null
+        Date sevenDaysAgoMinus1Hour = null
+        Date sixDaysAgo = null
+        use(TimeCategory) {
+            sevenDaysAgoPlus1Hour = new Date() - 7 + 1.hour
+            sevenDaysAgoMinus1Hour = new Date() - 7 - 1.hour
+            sixDaysAgo = new Date() - 6
+        }
+
+        skillsService.addSkill(proj1_skills[0], users[0], sevenDaysAgoPlus1Hour)
+        skillsService.addSkill(proj1_skills[1], users[0], sevenDaysAgoMinus1Hour)
+        skillsService.addSkill(proj1_skills[2], users[0], sixDaysAgo)
+
+        when:
+        def user1Summary = skillsService.getSkillSummary(users[0], proj1.projectId)
+        then:
+        user1Summary.badges.numTotalBadges == 3
+        user1Summary.badges.numBadgesCompleted == 3
+        user1Summary.badges.recentlyAwardedBadges.badgeId.sort() == [badge1.badgeId, badge3.badgeId]
+        def earnedBadge1 = user1Summary.badges.recentlyAwardedBadges.find { it.badgeId == badge1.badgeId }
+        earnedBadge1.badgeName == badge1.name
+        reformatStrDate(earnedBadge1.achievedOn) == formatDate(sevenDaysAgoPlus1Hour)
+        !earnedBadge1.isGlobalBadge
+
+        def earnedBadge3 = user1Summary.badges.recentlyAwardedBadges.find { it.badgeId == badge3.badgeId }
+        earnedBadge3.badgeName == badge3.name
+        reformatStrDate(earnedBadge3.achievedOn) == formatDate(sixDaysAgo)
+        !earnedBadge3.isGlobalBadge
+    }
+
+    def "multiple recently achieved global badges are within 7 days"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1, 100)
+
+        supervisorSkillsService.createProject(proj1)
+        supervisorSkillsService.createSubject(proj1_subj)
+        supervisorSkillsService.createSkills(proj1_skills)
+
+        def createBadge = { int badgeNum, int skillNum ->
+            def theBadge = SkillsFactory.createBadge(1, badgeNum)
+            supervisorSkillsService.createGlobalBadge(theBadge)
+            supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: theBadge.badgeId, skillId: proj1_skills.get(skillNum).skillId])
+            theBadge.enabled  = 'true'
+            supervisorSkillsService.updateGlobalBadge(theBadge, theBadge.badgeId)
+
+            return theBadge
+        }
+        def badge1 = createBadge(1, 0)
+        def badge2 = createBadge(2, 1)
+        def badge3 = createBadge(3, 2)
+
+
+        def users = getRandomUsers(3)
+        Date sevenDaysAgoMinus1Hour = null
+        use(TimeCategory) {
+            sevenDaysAgoMinus1Hour = new Date() - 7 - 1.hour
+        }
+
+        supervisorSkillsService.addSkill(proj1_skills[0], users[0])
+        supervisorSkillsService.addSkill(proj1_skills[1], users[0])
+        supervisorSkillsService.addSkill(proj1_skills[2], users[0])
+
+        // global badges are achieved on the current date no matter when the last event is
+        // so have to manually update DB to simulate an older achievement
+        List<UserAchievement> badge2Achievement = userAchievedRepo.findAllByUserIdAndProjectIdAndSkillId(users[0], null, badge2.badgeId)
+        assert badge2Achievement.size() == 1
+        badge2Achievement.get(0).achievedOn = sevenDaysAgoMinus1Hour
+        userAchievedRepo.saveAll(badge2Achievement)
+        when:
+        def user1Summary = supervisorSkillsService.getSkillSummary(users[0], proj1.projectId)
+        then:
+        user1Summary.badges.numTotalBadges == 3
+        user1Summary.badges.numBadgesCompleted == 3
+        user1Summary.badges.recentlyAwardedBadges.badgeId.sort() == [badge1.badgeId, badge3.badgeId]
+        def earnedBadge1 = user1Summary.badges.recentlyAwardedBadges.find { it.badgeId == badge1.badgeId }
+        earnedBadge1.achievedOn
+        earnedBadge1.badgeName == badge1.name
+        earnedBadge1.isGlobalBadge
+
+        def earnedBadge3 = user1Summary.badges.recentlyAwardedBadges.find { it.badgeId == badge3.badgeId }
+        earnedBadge3.badgeName == badge3.name
+        earnedBadge3.achievedOn
+        earnedBadge3.isGlobalBadge
+    }
+
+    String datePattern = "yyyy-MM-dd'T'HH:mm:ss"
+    private String reformatStrDate(String str) {
+        return formatDate(Date.parse(datePattern, str))
+    }
+    private String formatDate(Date date) {
+        return date.format(datePattern)
     }
 }

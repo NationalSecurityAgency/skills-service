@@ -366,7 +366,6 @@ class SkillsLoader {
                     badgeName: it.name,
                     badgeId: it.id,
                     achievedOn: it.achievedOn,
-                    iconClass: it.iconClass,
                     isGlobalBadge: it.type == ContainerType.GlobalBadge
             )
         }
@@ -383,11 +382,19 @@ class SkillsLoader {
     }
 
     private List<UserAchievedLevelRepo.AchievementInfo> getRecentlyAchievedBadges(String userId, String projectId) {
-        Calendar calendar = Calendar.getInstance()
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
         calendar.add(Calendar.DAY_OF_YEAR, -7)
         Date afterThisDate = calendar.time
-        List<UserAchievedLevelRepo.AchievementInfo> recentlyAchievedBadges = achievedLevelRepository.getUserAchievementsAfterDate(userId, projectId, [ContainerType.Badge, ContainerType.GlobalBadge], afterThisDate)
-        return recentlyAchievedBadges
+        List<UserAchievedLevelRepo.AchievementInfo> res = []
+        List<UserAchievedLevelRepo.AchievementInfo> recentlyAchievedBadges = achievedLevelRepository.getUserAchievementsAfterDate(userId, projectId, [ContainerType.Badge], afterThisDate)
+        if (recentlyAchievedBadges) {
+            res.addAll(recentlyAchievedBadges)
+        }
+        List<UserAchievedLevelRepo.AchievementInfo> recentlyAchievedGlobalBadges = achievedLevelRepository.getUserGlobalBadgeAchievementsAfterDate(userId, projectId, afterThisDate)
+        if (recentlyAchievedGlobalBadges) {
+            res.addAll(recentlyAchievedGlobalBadges)
+        }
+        return res
     }
 
     @Profile
