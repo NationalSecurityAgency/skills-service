@@ -86,14 +86,25 @@ class NumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
                 pageSize: 5,
                 sortDesc: true
         ]
+
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        skillsService.archiveUsers([users[2]], proj.projectId)
+        def resultAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
         then:
         res.totalNumItems == 3
         res.items.size() == 3
         res.items.find { it.value == "blah"}.count == 3
         res.items.find { it.value == "blah1"}.count == 2
         res.items.find { it.value == "blah2"}.count == 1
+
+        resultAfterArchive.totalNumItems == 3
+        resultAfterArchive.items.size() == 3
+        resultAfterArchive.items.find { it.value == "blah"}.count == 2
+        resultAfterArchive.items.find { it.value == "blah1"}.count == 2
+        resultAfterArchive.items.find { it.value == "blah2"}.count == 1
     }
 
     def "count users for each tag value - paging"() {
