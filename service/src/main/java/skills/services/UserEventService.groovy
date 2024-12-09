@@ -164,35 +164,6 @@ class UserEventService {
     }
 
     /**
-     * Returns the total number of user events for a given project id occurring since the
-     * specified start date. Event counts are returned grouped by day with missing days zero filled.
-     *
-     * If start results in a date older than the compactDailyEventsOlderThan, then results will be
-     * compacted into weekly results with each DayCountItem.start being the start of week date for that
-     * weekly rollup (Sunday).
-     *
-     * @param projectId
-     * @param start
-     * @return
-     */
-    @Transactional(readOnly = true)
-    List<DayCountItem> getUserEventCountsForProject(String projectId, Date start) {
-        EventType eventType = determineAppropriateEventType(start)
-
-        List<DayCountItem> results
-        if (EventType.DAILY == eventType) {
-            Stream<DayCountItem> stream = userEventsRepo.getEventCountForProject(projectId, start, eventType)
-            results = convertResults(stream, eventType, start, [projectId])
-        } else {
-            start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
-            Stream<WeekCountItem> stream = userEventsRepo.getEventCountForProjectGroupedByWeek(projectId, start)
-            results = convertResults(stream, start)
-        }
-
-        return results
-    }
-
-    /**
      * Returns the total number of user events for a given user id occurring since the
      * specified start date. Event counts are returned grouped by day with missing days zero filled.
      *
