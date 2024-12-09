@@ -84,8 +84,14 @@ class UserAdminMetricsSpec extends DefaultIntSpec {
 
         when:
         def lastSkillEvent = skillsService.getLastSkillEventForProject(proj1.projectId)
+
+        skillsService.archiveUsers([users[2]], proj1.projectId)
+        def lastSkillEventAfterArchive = skillsService.getLastSkillEventForProject(proj1.projectId)
+
         then:
         Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSS", lastSkillEvent.lastReportedSkillDate) == dates[2].clearTime()
+
+        Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSS", lastSkillEventAfterArchive.lastReportedSkillDate) == dates[1].clearTime()
     }
 
     def "get latest event date is null for a project without any events"() {
