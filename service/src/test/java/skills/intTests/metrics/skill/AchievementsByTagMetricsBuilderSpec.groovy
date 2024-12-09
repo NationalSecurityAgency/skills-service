@@ -70,11 +70,20 @@ class AchievementsByTagMetricsBuilderSpec  extends DefaultIntSpec {
         def props = ["skillId": skill.skillId, "userTagKey": "someTag"]
         def result = builder.build(proj.projectId, builder.id, props)
 
+        skillsService.archiveUsers([users[2], users[5]], proj.projectId)
+        def resultAfterArchive = builder.build(proj.projectId, builder.id, props)
+
         then:
         result['ABCDE'].numberAchieved == 0
         result['ABCDE'].numberInProgress == 3
         result['DEFGH'].numberAchieved == 1
         result['DEFGH'].numberInProgress == 3
+
+        resultAfterArchive['ABCDE'].numberAchieved == 0
+        resultAfterArchive['ABCDE'].numberInProgress == 2
+        resultAfterArchive['DEFGH'].numberAchieved == 0
+        resultAfterArchive['DEFGH'].numberInProgress == 3
+
     }
 
     def "limits to top 20 results"() {
