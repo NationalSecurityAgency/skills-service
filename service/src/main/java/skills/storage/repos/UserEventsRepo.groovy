@@ -479,14 +479,17 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                 WHEN SUM(ue.count) >= 20 AND SUM(ue.count) < 50 THEN '>=20 <50' 
                 WHEN SUM(ue.count) >= 50 THEN '>=50' 
             END AS countBucket 
-            FROM user_events ue, user_achievement achievements 
+            FROM user_events ue
+            JOIN user_achievement achievements ON ue.user_id = achievements.user_id
+            LEFT JOIN archived_users au ON au.user_id = ue.user_id and au.project_id = ue.project_id
             WHERE 
                 achievements.skill_ref_id = :skillRefId
                 AND ue.skill_ref_id = :skillRefId 
-                AND ue.user_id = achievements.user_id
                 AND ue.event_time > achievements.achieved_on 
+                AND au.id is null
             GROUP BY ue.user_id
-        )  AS counts GROUP BY counts.countBucket;
+        )  AS counts
+    GROUP BY counts.countBucket;
     ''', nativeQuery = true)
     List<LabeledCount> binnedUserCountsForSkillUsagePostAchievement(@Param("skillRefId") Integer skillRefId)
 

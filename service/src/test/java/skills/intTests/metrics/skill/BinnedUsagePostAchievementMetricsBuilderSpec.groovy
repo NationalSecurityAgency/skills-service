@@ -70,6 +70,9 @@ class BinnedUsagePostAchievementMetricsBuilderSpec extends DefaultIntSpec {
         def props = ["skillId": skill.skillId]
         def result = builder.build(proj.projectId, builder.id, props)
 
+        skillsService.archiveUsers([users[i2]], proj.projectId)
+        def resultAfterArchive = builder.build(proj.projectId, builder.id, props)
+
         then:
         result[0].label == "<5"
         result[0].count == 2
@@ -79,6 +82,15 @@ class BinnedUsagePostAchievementMetricsBuilderSpec extends DefaultIntSpec {
         result[2].count == 4
         result[3].label == ">=50"
         result[3].count == 1
+
+        resultAfterArchive[0].label == "<5"
+        resultAfterArchive[0].count == 2
+        resultAfterArchive[1].label == ">=5 <20"
+        resultAfterArchive[1].count == 3
+        resultAfterArchive[2].label == ">=20 <50"
+        resultAfterArchive[2].count == 3
+        resultAfterArchive[3].label == ">=50"
+        resultAfterArchive[3].count == 1
     }
 
     def "produces empty result when no achievement exists"() {
