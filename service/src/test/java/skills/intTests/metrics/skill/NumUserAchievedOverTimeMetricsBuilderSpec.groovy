@@ -77,6 +77,14 @@ class NumUserAchievedOverTimeMetricsBuilderSpec extends DefaultIntSpec {
             props[MetricsParams.P_SKILL_ID] = it.skillId
             return skillsService.getMetricsData(proj.projectId, metricsId, props)
         }
+
+        skillsService.archiveUsers([users[2]], proj.projectId)
+
+        List resAfterArchive = skills.collect {
+            props[MetricsParams.P_SKILL_ID] = it.skillId
+            return skillsService.getMetricsData(proj.projectId, metricsId, props)
+        }
+
         then:
         res[0].achievementCounts.collect { it.num } == [1, 2, 3, 4, 5]
         res[0].achievementCounts.collect { new Date(it.timestamp) } == [days[1], days[2], days[3], days[4], days[5]]
@@ -98,5 +106,26 @@ class NumUserAchievedOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         res[7].achievementCounts.collect { it.num } == []
         res[8].achievementCounts.collect { it.num } == []
         res[9].achievementCounts.collect { it.num } == []
+
+        resAfterArchive[0].achievementCounts.collect { it.num } == [1, 2, 3, 4]
+        resAfterArchive[0].achievementCounts.collect { new Date(it.timestamp) } == [days[1], days[2], days[4], days[5]]
+
+        resAfterArchive[1].achievementCounts.collect { it.num } == [2, 3, 4]
+        resAfterArchive[1].achievementCounts.collect { new Date(it.timestamp) } == [days[2], days[4], days[5]]
+
+        resAfterArchive[2].achievementCounts.collect { it.num } == [2, 3, 4]
+        resAfterArchive[2].achievementCounts.collect { new Date(it.timestamp) } == [days[3], days[4], days[5]]
+
+        resAfterArchive[3].achievementCounts.collect { it.num } == [3, 4]
+        resAfterArchive[3].achievementCounts.collect { new Date(it.timestamp) } == [days[4], days[5]]
+
+        res[4].achievementCounts.collect { it.num } == [5]
+        res[4].achievementCounts.collect { new Date(it.timestamp) } == [days[5]]
+
+        resAfterArchive[5].achievementCounts.collect { it.num } == []
+        resAfterArchive[6].achievementCounts.collect { it.num } == []
+        resAfterArchive[7].achievementCounts.collect { it.num } == []
+        resAfterArchive[8].achievementCounts.collect { it.num } == []
+        resAfterArchive[9].achievementCounts.collect { it.num } == []
     }
 }

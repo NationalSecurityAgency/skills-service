@@ -844,9 +844,11 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     @Query('''select ua.achievedOn as day, count(ua.id) as count
             from UserAchievement as ua 
+            LEFT JOIN ArchivedUser au ON au.userId = ua.userId and au.projectId = :projectId
             where 
                 ua.skillId = :skillId and
-                ua.projectId = :projectId
+                ua.projectId = :projectId and
+                au.id is null
             group by ua.achievedOn     
            ''')
     List<DayCountItem> countNumUsersOverTimeByProjectIdAndSkillId(
