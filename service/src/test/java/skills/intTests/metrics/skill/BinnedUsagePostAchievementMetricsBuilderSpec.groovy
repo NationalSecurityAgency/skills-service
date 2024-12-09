@@ -70,7 +70,7 @@ class BinnedUsagePostAchievementMetricsBuilderSpec extends DefaultIntSpec {
         def props = ["skillId": skill.skillId]
         def result = builder.build(proj.projectId, builder.id, props)
 
-        skillsService.archiveUsers([users[i2]], proj.projectId)
+        skillsService.archiveUsers([users[2]], proj.projectId)
         def resultAfterArchive = builder.build(proj.projectId, builder.id, props)
 
         then:
