@@ -24,6 +24,7 @@ import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollS
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import Prerequisites from '@/skills-display/components/skill/prerequisites/Prerequisites.vue'
+import SkillAchievementMsg from "@/skills-display/components/progress/celebration/SkillAchievementMsg.vue";
 
 const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
@@ -107,6 +108,7 @@ const isLoading = computed(() => loadingSkill.value || skillState.loadingSkillSu
               </SkillsButton>
             </div>
           </div>
+          <skill-achievement-msg :skill="skill" />
           <div class="card-body text-center text-sm-left">
             <skill-progress :skill="skill" />
           </div>
