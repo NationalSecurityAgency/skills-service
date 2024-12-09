@@ -1766,8 +1766,8 @@ class SkillsService {
         return resp
     }
 
-    def getSkillDescription(String projectId, String subjectId, String skillId) {
-        def resp = wsHelper.apiGet("/projects/${projectId}/subjects/${subjectId}/skills/${skillId}/description")
+    def getSkillDescription(String projectId, String skillId) {
+        def resp = wsHelper.apiGet("/projects/${projectId}/skills/${skillId}/description")
         return resp
     }
 

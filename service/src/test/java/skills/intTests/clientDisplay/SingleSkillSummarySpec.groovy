@@ -1376,7 +1376,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         }
 
         when:
-        String description = skillsService.getSkillDescription(proj.projectId, subj.subjectId, skillsGroup.skillId).description
+        String description = skillsService.getSkillDescription(proj.projectId, skillsGroup.skillId).description
 
         then:
         description == "This skill [skill5] belongs to project [TestProject1]"

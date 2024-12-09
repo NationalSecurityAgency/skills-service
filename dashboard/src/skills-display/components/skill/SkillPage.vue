@@ -58,6 +58,10 @@ const loadSkillSummary = () => {
         skillsDisplayService.updateSkillHistory(skill.value.projectId, skillId)
       }
       scrollIntoViewState.setLastViewedSkillId(skillId)
+
+      if(!groupDescription.value && skill.value.groupSkillId && attributes.groupDescriptionsOn) {
+        descriptionToggled();
+      }
     })
 }
 
@@ -80,7 +84,7 @@ const isLoading = computed(() => loadingSkill.value || skillState.loadingSkillSu
 const descriptionToggled = () => {
   if(!groupDescription.value && skill.value.groupSkillId) {
     loadingDescription.value = true;
-    skillsDisplayService.getDescriptionForSkill(route.params.subjectId, skill.value.groupSkillId).then((res) => {
+    skillsDisplayService.getDescriptionForSkill(skill.value.groupSkillId).then((res) => {
       groupDescription.value = res.description;
       loadingDescription.value = false;
     })
