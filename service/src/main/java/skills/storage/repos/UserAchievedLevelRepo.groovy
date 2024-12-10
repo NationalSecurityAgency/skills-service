@@ -890,17 +890,24 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
                       skill.skill_id not like '%STREUSESKILLST%'
                 ) sd
             left join (
-                select skill_id, count(distinct user_id) as usersAchieved, max(achieved_on) as lastAchieved from user_achievement where project_id = :projectId group by skill_id
+                select ua.skill_id, count(distinct ua.user_id) as usersAchieved, max(ua.achieved_on) as lastAchieved 
+                from user_achievement ua
+                LEFT JOIN archived_users au ON au.user_id = ua.user_id and au.project_id = :projectId 
+                where ua.project_id = :projectId 
+                AND au.id is null 
+                group by ua.skill_id
             ) achievements
                 on achievements.skill_id = sd.skillId
             left join (
                 select skill.skill_id, count(distinct ups.user_id) as userInProgress, max(ups.performed_on) as lastPerformed
                 from skill_definition skill,
                      user_performed_skill ups
+                LEFT JOIN archived_users au ON au.user_id = ups.user_id and au.project_id = :projectId 
                 where skill.project_id = :projectId
                   and skill.type = 'Skill'
                   and skill.enabled = 'true'
                   and ups.skill_ref_id = case when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref else skill.id end
+                  and au.id is null
                 group by skill.skill_id
             ) performedSkills
                 on sd.skillId = performedSkills.skill_id order by sd.skillId
