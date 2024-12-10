@@ -1609,5 +1609,42 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         copyProj.data.itemId.sort() == [p2.projectId, p2subj1.subjectId, p2Skills[0].skillId].sort()
     }
+
+    def "track archive/restore user actions"() {
+        SkillsService rootService = createRootSkillService()
+        String displayName = getDisplayName()
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        def user = getRandomUsers(1)[0]
+        Date skillDate = new Date()
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, skillDate)
+        userActionsHistoryRepo.deleteAll()
+
+        when:
+        skillsService.archiveUsers([user], proj.projectId)
+        Thread.sleep(100)
+        skillsService.restoreArchivedUser(user, proj.projectId)
+        def res = rootService.getUserActionsForEverything()
+
+        then:
+        res.count == 2
+        res.data[0].action == DashboardAction.RestoreArchivedUser.toString()
+        res.data[0].item == DashboardItem.Project.toString()
+        res.data[0].itemId == user
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == proj.projectId
+        !res.data[0].quizId
+
+        res.data[1].action == DashboardAction.ArchiveUser.toString()
+        res.data[1].item == DashboardItem.Project.toString()
+        res.data[1].itemId == user
+        res.data[1].userId == skillsService.userName
+        res.data[1].userIdForDisplay == displayName
+        res.data[1].projectId == proj.projectId
+        !res.data[1].quizId
+    }
 }
 
