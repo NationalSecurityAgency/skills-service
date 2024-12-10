@@ -149,6 +149,7 @@ const loadData = () => {
     data.value = res.data
     totalRows.value = res.count
     totalPoints.value = res.totalPoints
+    selectedRows.value = []
     isLoading.value = false
   })
 }

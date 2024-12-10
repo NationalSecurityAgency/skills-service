@@ -137,7 +137,7 @@ const restoreUser = (user) => {
                   {{ userInfo.getUserDisplay(slotProps.data, true) }}
                 </div>
                 <div class="flex flex-grow-1 align-items-start justify-content-end">
-                  <SkillsButton data-cy="restoreUserBtn"
+                  <SkillsButton :data-cy="`restoreUser-${slotProps.data.userId}`"
                                 :id="`restoreUser-${slotProps.data.userId}`"
                                 @click="restoreUser(slotProps.data)"
                                 icon="fas fa-undo"
@@ -145,7 +145,7 @@ const restoreUser = (user) => {
                                 outlined
                                 label="Restore"
                                 :track-for-focus="true"
-                                :aria-label="`remove access role from user ${slotProps.data.userId}`" />
+                                :aria-label="`restore ${slotProps.data.userId} from the user archive`" />
                 </div>
               </div>
             </template>

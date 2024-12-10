@@ -35,7 +35,7 @@ const isUserArchiveRoute = computed(() => {
           <SkillsButton size="small" icon="fas fa-archive" label="User Archive" data-cy="userArchiveBtn" />
         </router-link>
         <router-link :to="{ name: 'ProjectUsers' }" v-if="isUserArchiveRoute" tabindex="-1">
-          <SkillsButton id="backToProjectUsersBtn" size="small" icon="fas fa-arrow-alt-circle-left" label="Back" />
+          <SkillsButton data-cy="backToProjectUsersBtn" id="backToProjectUsersBtn" size="small" icon="fas fa-arrow-alt-circle-left" label="Back" />
         </router-link>
       </div>
     </sub-page-header>

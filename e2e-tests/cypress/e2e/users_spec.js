@@ -120,6 +120,93 @@ describe('Users Tests', () => {
         cy.readFile(exportedFileName).should('exist');
     });
 
+    it('archive and restore users', () => {
+
+        cy.intercept('/admin/projects/proj1/users?query=*').as('getUsers');
+        cy.intercept('GET', '/admin/projects/proj1/users/archive?*').as('getArchivedUsers');
+        cy.intercept('POST', '/admin/projects/proj1/users/archive').as('archivedUsers');
+        cy.intercept('POST', '/admin/projects/proj1/users/*/restore').as('restoreUser');
+
+        for (let i = 0; i < 6; i += 1) {
+            for (let j = 0; j <= i+2; j += 1) {
+                cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: `user${i}@skills.org`, timestamp: m.clone().add(j, 'day').format('x')})
+            }
+        }
+
+        cy.visit('/administrator/projects/proj1/users');
+        cy.wait('@getUsers')
+
+        // default sort order is 'Points Last Earned' desc
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(4, 'day')) }],
+            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(2, 'day')) }],
+        ], 5);
+
+        cy.get('[data-pc-extend="paginator"] [aria-label="Page 1"]').click()
+
+        cy.get('[data-cy="archiveUsersTableBtn"]').should('be.disabled');
+
+        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="3"] [data-pc-name="rowcheckbox"]').click()
+
+        cy.get('[data-cy="archiveUsersTableBtn"]').should('be.enabled');
+        cy.get('[data-cy="archiveUsersTableBtn"]').click()
+
+        cy.wait('@archivedUsers');
+        cy.get('[data-cy="archiveUsersTableBtn"]').should('be.disabled');
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(2, 'day')) }],
+        ], 5);
+
+        // navigate to archived users
+        cy.get('[data-cy="userArchiveBtn"]').should('be.enabled');
+        cy.get('[data-cy="userArchiveBtn"]').click()
+        cy.wait('@getArchivedUsers')
+
+        const archivedUsersTableSelector = '[data-cy="userArchiveTable"]';
+        cy.validateTable(archivedUsersTableSelector, [
+            [{ colIndex: 0,  value: 'user4@skills.org' }],
+            [{ colIndex: 0,  value: 'user2@skills.org' }],
+        ], 5);
+
+        cy.get('[data-cy="restoreUser-user4@skills.org"]').should('be.enabled');
+        cy.get('[data-cy="restoreUser-user4@skills.org"]').click()
+        cy.wait('@restoreUser')
+
+        cy.validateTable(archivedUsersTableSelector, [
+            [{ colIndex: 0,  value: 'user2@skills.org' }],
+        ], 5);
+
+
+        cy.get('[data-cy="restoreUser-user2@skills.org"]').should('be.enabled');
+        cy.get('[data-cy="restoreUser-user2@skills.org"]').click()
+        cy.wait('@restoreUser')
+
+        cy.get('[data-cy="noContent"]').contains('No Archived Users')
+
+        // navigate back to project users
+        cy.get('[data-cy="backToProjectUsersBtn"]').should('be.enabled');
+        cy.get('[data-cy="backToProjectUsersBtn"]').click()
+
+        cy.wait('@getUsers')
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(4, 'day')) }],
+            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(2, 'day')) }],
+        ], 5);
+    });
+
     it('different page sizes', () => {
         for (let i = 0; i < 12; i += 1) {
             const charToAdd = String.fromCharCode(97 + i);
