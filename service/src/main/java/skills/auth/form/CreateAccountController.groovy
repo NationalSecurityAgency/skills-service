@@ -135,11 +135,11 @@ class CreateAccountController {
     @RequestMapping(value = "/grantFirstRoot", method = [RequestMethod.POST, RequestMethod.PUT])
     void grantFirstRoot(HttpServletRequest request) {
         SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
-        SkillsValidator.isNotNull(request.getUserPrincipal(), 'Granting the first root user is only available in PKI mode, but it looks like the request was not made by an authenticated account!')
+        SkillsValidator.isNotNull(request.getUserPrincipal(), 'Granting the first root user is only available in SAML & PKI modes, but it looks like the request was not made by an authenticated account!')
         userAuthService.grantRoot(request.getUserPrincipal().name)
     }
 
-    @Conditional(SecurityMode.FormAuth)
+    @Conditional(SecurityMode.FormOrSAML2Auth)
     @GetMapping('userExists/{user}')
     boolean userExists(@PathVariable('user') String user) {
         return userAuthService.userExists(user)
