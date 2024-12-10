@@ -38,6 +38,7 @@ skillsDisplayAttributes.internalBackButton = false
 themeState.theme.landingPageTitle = 'User\'s Skills Preview'
 themeState.theme.disableSkillTreeBrand = true
 themeState.theme.disableBreadcrumb = true
+themeState.theme.disableEncouragementsConfetti = true
 skillsDisplayAttributes.loadConfigStateIfNeeded()
 
 const checkingAccess = ref(true)

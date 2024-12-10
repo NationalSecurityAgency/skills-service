@@ -159,6 +159,8 @@ describe('Client Display Accessibility tests', () => {
             cy.cdVisit('/', true);
             cy.injectAxe();
             cy.contains('Overall Points');
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallLevel"] [data-cy="overallLevelDesc"]').should('have.text', 'Level 2 out of 5')
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelAchievementCelebrationMsg"]').should('be.visible')
             cy.cdClickSubj(0, 'Subject 1', true);
 
             cy.wait('@getSubjectSummary');

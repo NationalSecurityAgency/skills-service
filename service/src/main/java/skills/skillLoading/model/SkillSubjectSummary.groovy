@@ -22,6 +22,7 @@ class SkillSubjectSummary {
     String description
 
     int skillsLevel
+    Date lastLevelAchieved
     int totalLevels
 
     int points

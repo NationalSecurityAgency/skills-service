@@ -23,6 +23,7 @@ class OverallSkillSummary {
     String projectName
 
     int skillsLevel
+    Date lastLevelAchieved
     int totalLevels
 
     int points
@@ -45,10 +46,19 @@ class OverallSkillSummary {
 
     BadgeStats badges
 
+    static class SingleBadgeInfo {
+        String badgeName
+        String badgeId
+        Date achievedOn
+        String iconClass
+        Boolean isGlobalBadge
+    }
+
     static class BadgeStats {
         int numTotalBadges = 0
         int numBadgesCompleted = 0
         boolean enabled = false
+        List<SingleBadgeInfo> recentlyAwardedBadges
     }
 
     String projectDescription

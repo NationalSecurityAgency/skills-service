@@ -178,6 +178,7 @@ skills:
       videoUploadWarningMessage:
       videoUploadLoadingBarLengthyCalculationTimeoutRatio: 75000
       activityHistoryStartDate:
+      disableEncouragementsConfetti: false
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

@@ -206,6 +206,7 @@ class LevelDefinitionStorageService {
     @ToString
     static class LevelInfo implements Serializable {
         int level
+        Date achievedOn
         int totalNumLevels
         int currentPoints
         int nextLevelPoints

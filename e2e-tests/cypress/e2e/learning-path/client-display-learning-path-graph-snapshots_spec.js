@@ -369,17 +369,8 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
 
     it('deps are added to fully achieved skill', () => {
         cy.createSkill(1, 1, 1);
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: moment.utc()
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: moment.utc()
-                .subtract(2, 'day')
-                .format('x')
-        });
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), '8 days ago');
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), '10 days ago');
         cy.createSkill(1, 1, 2);
         cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj1/skill2`);
 
@@ -413,17 +404,8 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
             .should('not.exist');
 
         // now let's achieve the dependent skill
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: moment.utc()
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: Cypress.env('proxyUser'),
-            timestamp: moment.utc()
-                .subtract(2, 'day')
-                .format('x')
-        });
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), '8 days ago');
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), '10 days ago');
         cy.cdBack('Subject 1');
         cy.cdClickSkill(0);
         cy.contains('Very Great Skill 1');

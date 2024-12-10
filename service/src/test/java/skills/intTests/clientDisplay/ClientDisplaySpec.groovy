@@ -15,6 +15,7 @@
  */
 package skills.intTests.clientDisplay
 
+import groovy.time.TimeCategory
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -323,8 +324,8 @@ class ClientDisplaySpec extends DefaultIntSpec {
         skillsService.addSkill(skills[1], users[0])
         skillsService.addSkill(skillsSubj2[0], users[0])
 
-        3.times {  Integer index -> skillsService.addSkill(skills[index], users[1])}
-        2.times {  Integer index -> skillsService.addSkill(skillsSubj2[index], users[1])}
+        3.times { Integer index -> skillsService.addSkill(skills[index], users[1]) }
+        2.times { Integer index -> skillsService.addSkill(skillsSubj2[index], users[1]) }
 
         when:
         def user1Summary = skillsService.getSkillSummary(users[0], proj.projectId)
@@ -383,6 +384,102 @@ class ClientDisplaySpec extends DefaultIntSpec {
         user2Subj2SummaryWithoutSkills.totalSkills == 2
         user3Subj2SummaryWithoutSkills.skillsAchieved == 0
         user3Subj2SummaryWithoutSkills.totalSkills == 2
+    }
+
+    def "project summary returns latest level achievement date"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(5, 1, 1, 100)
+
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def skillsSubj2 = SkillsFactory.createSkills(5, 1, 2, 100)
+
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(skillsSubj2)
+
+        def users = getRandomUsers(3)
+        Date oneDayAgo = null
+        Date twoDaysAgo = null
+        Date threeDaysAgo = null
+        Date fourDaysAgo = null
+        Date fiveDaysAgo = null
+        use(TimeCategory) {
+            oneDayAgo = 1.day.ago
+            twoDaysAgo = 2.days.ago
+            threeDaysAgo = 3.days.ago
+            fourDaysAgo = 4.days.ago
+            fiveDaysAgo = 5.days.ago
+
+            skillsService.addSkill(skills[0], users[0], threeDaysAgo)
+            skillsService.addSkill(skills[1], users[0], twoDaysAgo)
+            skillsService.addSkill(skillsSubj2[0], users[0], oneDayAgo)
+
+            3.times { Integer index -> skillsService.addSkill(skills[index], users[1], fourDaysAgo) }
+            2.times { Integer index -> skillsService.addSkill(skillsSubj2[index], users[1], fiveDaysAgo) }
+        }
+
+        when:
+        def user1Summary = skillsService.getSkillSummary(users[0], proj.projectId)
+        def user2Summary = skillsService.getSkillSummary(users[1], proj.projectId)
+        def user3Summary = skillsService.getSkillSummary(users[2], proj.projectId)
+
+        def user1Subj1Summary = skillsService.getSkillSummary(users[0], proj.projectId, subj.subjectId)
+        def user2Subj1Summary = skillsService.getSkillSummary(users[1], proj.projectId, subj.subjectId)
+        def user3Subj1Summary = skillsService.getSkillSummary(users[2], proj.projectId, subj.subjectId)
+
+        def user1Subj2Summary = skillsService.getSkillSummary(users[0], proj.projectId, subj2.subjectId)
+        def user2Subj2Summary = skillsService.getSkillSummary(users[1], proj.projectId, subj2.subjectId)
+        def user3Subj2Summary = skillsService.getSkillSummary(users[2], proj.projectId, subj2.subjectId)
+
+        then:
+        user1Summary.skillsLevel == 2
+        parseDate(user1Summary.lastLevelAchieved) == oneDayAgo
+        user1Summary.subjects.find { it.subjectId == subj.subjectId }.skillsLevel == 2
+        parseDate(user1Summary.subjects.find { it.subjectId == subj.subjectId }.lastLevelAchieved) == twoDaysAgo
+
+        user1Summary.subjects.find { it.subjectId == subj2.subjectId }.skillsLevel == 1
+        parseDate(user1Summary.subjects.find { it.subjectId == subj2.subjectId }.lastLevelAchieved) == oneDayAgo
+
+        user1Subj1Summary.skillsLevel == 2
+        parseDate(user1Subj1Summary.lastLevelAchieved) == twoDaysAgo
+
+        user1Subj2Summary.skillsLevel == 1
+        parseDate(user1Subj2Summary.lastLevelAchieved) == oneDayAgo
+
+        // user2
+        user2Summary.skillsLevel == 3
+        parseDate(user2Summary.lastLevelAchieved) == fourDaysAgo
+        user2Summary.subjects.find { it.subjectId == subj.subjectId }.skillsLevel == 3
+        parseDate(user2Summary.subjects.find { it.subjectId == subj.subjectId }.lastLevelAchieved) == fourDaysAgo
+
+        user2Summary.subjects.find { it.subjectId == subj2.subjectId }.skillsLevel == 2
+        parseDate(user2Summary.subjects.find { it.subjectId == subj2.subjectId }.lastLevelAchieved) == fiveDaysAgo
+
+        user2Subj1Summary.skillsLevel == 3
+        parseDate(user2Subj1Summary.lastLevelAchieved) == fourDaysAgo
+
+        user2Subj2Summary.skillsLevel == 2
+        parseDate(user2Subj2Summary.lastLevelAchieved) == fiveDaysAgo
+
+        // user3
+        user3Summary.skillsLevel == 0
+        user3Summary.lastLevelAchieved == null
+        user3Summary.subjects.find { it.subjectId == subj.subjectId }.skillsLevel == 0
+        user3Summary.subjects.find { it.subjectId == subj.subjectId }.lastLevelAchieved == null
+
+        user3Summary.subjects.find { it.subjectId == subj2.subjectId }.skillsLevel == 0
+        user3Summary.subjects.find { it.subjectId == subj2.subjectId }.lastLevelAchieved == null
+
+        user3Subj1Summary.skillsLevel == 0
+        user3Subj1Summary.lastLevelAchieved == null
+
+        user3Subj2Summary.skillsLevel == 0
+        user3Subj2Summary.lastLevelAchieved == null
+    }
+
+    private Date parseDate(String str) {
+        Date.parse("yyyy-MM-dd'T'HH:mm:ss", str)
     }
 
 }

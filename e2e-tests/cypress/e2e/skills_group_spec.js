@@ -450,14 +450,13 @@ describe('Skills Group Tests', () => {
         const groupId = 'group1'
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
-
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
         cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
         cy.get('[data-pc-section="closebutton"]').click()
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('200');
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('from 4 skills');
 
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
         cy.acceptRemovalSafetyCheck();
 

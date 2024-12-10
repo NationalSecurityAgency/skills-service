@@ -1199,10 +1199,10 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.assignSkillToBadge(1, 1, 4);
         cy.assignSkillToBadge(1, 1, 5);
 
-        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), '8 days ago');
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), '9 days ago');
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), '8 days ago');
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), '9 days ago');
 
         cy.cdVisit('/subjects/subj1');
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')

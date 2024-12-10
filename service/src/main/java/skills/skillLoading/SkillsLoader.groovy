@@ -41,7 +41,6 @@ import skills.services.GlobalBadgesService
 import skills.services.LevelDefinitionStorageService
 import skills.services.admin.SkillTagService
 import skills.services.admin.SkillsGroupAdminService
-import skills.services.admin.UserAchievementExpirationService
 import skills.services.admin.UserCommunityService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.attributes.BonusAwardAttrs
@@ -325,13 +324,7 @@ class SkillsLoader {
             skillLevel = 0
         }
 
-        //these probably need to exclude badges where enabled = FALSE
-        int numBadgesAchieved = achievedLevelRepository.countAchievedForUser(userId, projDef.projectId, ContainerType.Badge)
-        int numTotalBadges = skillDefRepo.countByProjectIdAndTypeWhereEnabled(projDef.projectId, ContainerType.Badge)
-
-        // add in global badge counts
-        numBadgesAchieved += achievedLevelRepository.countAchievedGlobalBadgeForUserIntersectingProjectId(userId, projDef.projectId)
-        numTotalBadges += skillDefRepo.countGlobalBadgesIntersectingWithProjectIdWhereEnabled(projDef.projectId)
+        OverallSkillSummary.BadgeStats badgeStats = getBadgeStats(projDef, userId)
 
         SettingsResult showDescSetting = settingsService.getProjectSetting(projDef.projectId, Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName)
         String projectDescription
@@ -344,6 +337,7 @@ class SkillsLoader {
                 projectId: projDef.projectId,
                 projectName: InputSanitizer.unsanitizeName(projDef.name),
                 skillsLevel: skillLevel,
+                lastLevelAchieved: levelInfo?.achievedOn,
                 totalLevels: levelInfo?.totalNumLevels ?: 0,
                 points: points,
                 totalPoints: totalPoints,
@@ -353,10 +347,53 @@ class SkillsLoader {
                 totalSkills: totalSkills,
                 skillsAchieved: skillsAchieved,
                 subjects: subjects,
-                badges: new OverallSkillSummary.BadgeStats(numTotalBadges: numTotalBadges, numBadgesCompleted: numBadgesAchieved, enabled: numTotalBadges > 0),
+                badges: badgeStats,
                 projectDescription: projectDescription
         )
 
+        return res
+    }
+
+    @Profile
+    private OverallSkillSummary.BadgeStats getBadgeStats(ProjDef projDef, String userId) {
+        //these probably need to exclude badges where enabled = FALSE
+        int numBadgesAchieved = achievedLevelRepository.countAchievedForUser(userId, projDef.projectId, ContainerType.Badge)
+        int numTotalBadges = skillDefRepo.countByProjectIdAndTypeWhereEnabled(projDef.projectId, ContainerType.Badge)
+
+        List<UserAchievedLevelRepo.AchievementInfo> recentlyAchievedBadges = getRecentlyAchievedBadges(userId, projDef.projectId)
+        List<OverallSkillSummary.SingleBadgeInfo> recentlyAwardedBadges = recentlyAchievedBadges?.collect {
+            new OverallSkillSummary.SingleBadgeInfo(
+                    badgeName: it.name,
+                    badgeId: it.id,
+                    achievedOn: it.achievedOn,
+                    isGlobalBadge: it.type == ContainerType.GlobalBadge
+            )
+        }
+        // add in global badge counts
+        numBadgesAchieved += achievedLevelRepository.countAchievedGlobalBadgeForUserIntersectingProjectId(userId, projDef.projectId)
+        numTotalBadges += skillDefRepo.countGlobalBadgesIntersectingWithProjectIdWhereEnabled(projDef.projectId)
+
+        return new OverallSkillSummary.BadgeStats(
+                numTotalBadges: numTotalBadges,
+                numBadgesCompleted: numBadgesAchieved,
+                enabled: numTotalBadges > 0,
+                recentlyAwardedBadges: recentlyAwardedBadges
+        )
+    }
+
+    private List<UserAchievedLevelRepo.AchievementInfo> getRecentlyAchievedBadges(String userId, String projectId) {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        calendar.add(Calendar.DAY_OF_YEAR, -7)
+        Date afterThisDate = calendar.time
+        List<UserAchievedLevelRepo.AchievementInfo> res = []
+        List<UserAchievedLevelRepo.AchievementInfo> recentlyAchievedBadges = achievedLevelRepository.getUserAchievementsAfterDate(userId, projectId, [ContainerType.Badge], afterThisDate)
+        if (recentlyAchievedBadges) {
+            res.addAll(recentlyAchievedBadges)
+        }
+        List<UserAchievedLevelRepo.AchievementInfo> recentlyAchievedGlobalBadges = achievedLevelRepository.getUserGlobalBadgeAchievementsAfterDate(userId, projectId, afterThisDate)
+        if (recentlyAchievedGlobalBadges) {
+            res.addAll(recentlyAchievedGlobalBadges)
+        }
         return res
     }
 
@@ -988,6 +1025,7 @@ class SkillsLoader {
                 points: points,
 
                 skillsLevel: levelInfo.level,
+                lastLevelAchieved: levelInfo?.achievedOn,
                 totalLevels: levelInfo.totalNumLevels,
 
                 levelPoints: levelInfo.currentPoints,
@@ -1392,6 +1430,7 @@ class SkillsLoader {
             }
         }
 
+        res.achievedOn = lastAchievedLevel?.achievedOn
         return res
     }
 
