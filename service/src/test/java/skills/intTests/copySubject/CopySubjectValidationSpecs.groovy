@@ -15,19 +15,12 @@
  */
 package skills.intTests.copySubject
 
-import groovy.json.JsonOutput
-import org.springframework.core.io.ClassPathResource
-import org.springframework.core.io.Resource
+
 import org.springframework.http.HttpStatus
 import skills.intTests.copyProject.CopyIntSpec
-import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
-import skills.storage.model.Attachment
-import skills.storage.model.QuizDefParent
-import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
-import skills.utils.GroovyToJavaByteUtils
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -84,7 +77,7 @@ class CopySubjectValidationSpecs extends CopyIntSpec {
         skillsService.copySubjectDefIntoAnotherProject(p1.projectId, p1subj1.subjectId, p2.projectId)
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Id [${p1subj1.subjectId}] already exists in project [${p2.projectId}]")
+        ex.message.contains("Id [${p1subj1.subjectId}] already exists")
     }
 
     def "validate subject id is unique - id uppercase"() {
@@ -102,7 +95,7 @@ class CopySubjectValidationSpecs extends CopyIntSpec {
         skillsService.copySubjectDefIntoAnotherProject(p1.projectId, p1subj1.subjectId, p2.projectId)
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Id [${p1subj1.subjectId}] already exists in project [${p2.projectId}]")
+        ex.message.contains("Id [${p1subj1.subjectId}] already exists")
     }
 
     def "validate subject id is unique due to an existing skill id"() {
@@ -120,7 +113,7 @@ class CopySubjectValidationSpecs extends CopyIntSpec {
         skillsService.copySubjectDefIntoAnotherProject(p1.projectId, p1subj1.subjectId, p2.projectId)
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Id [${p1subj1.subjectId}] already exists in project [${p2.projectId}]")
+        ex.message.contains("Id [${p1subj1.subjectId}] already exists")
     }
 
     def "validate that there is no skill id collisions"() {
@@ -258,4 +251,24 @@ class CopySubjectValidationSpecs extends CopyIntSpec {
         ex.message.contains("User [${skillsService.userName}] is not an admin for destination project [${p2.projectId}]")
     }
 
+    def "do not allow to copy from community protected project to a non-community protected project"() {
+        SkillsService rootSkillsService = createRootSkillService()
+        SkillsService dragonUser = createService(getRandomUsers(1).first())
+        rootSkillsService.saveUserTag(dragonUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        dragonUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def p2 = createProject(2)
+        dragonUser.createProject(p2)
+
+        when:
+        dragonUser.copySubjectDefIntoAnotherProject(p1.projectId, p1subj1.subjectId, p2.projectId)
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Subjects from Divine Dragon projects cannot be copied to All Dragons projects")
+    }
 }

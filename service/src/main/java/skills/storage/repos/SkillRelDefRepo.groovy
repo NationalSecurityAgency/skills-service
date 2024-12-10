@@ -63,7 +63,6 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     @Nullable
     SkillRelDef findByChildAndParentAndType(SkillDef child, SkillDef parent, SkillRelDef.RelationshipType type)
 
-    List<SkillRelDef> findAllByParentAndType(SkillDef parent, SkillRelDef.RelationshipType type)
 
     @Query('''SELECT child 
             from SkillRelDef srd, SkillDef child 

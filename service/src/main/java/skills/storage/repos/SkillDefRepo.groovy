@@ -861,4 +861,21 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     @Transactional
     @Query('''update SkillDef set selfReportingType=null where projectId=?1 and skillId=?2 and selfReportingType=?3''')
     int unsetSelfReportTypeByProjectIdSkillIdAndSelfReportType(String projectId, String skillId, SelfReportingType selfReportingType)
+
+
+    static interface SkillIdAndName {
+        String getSkillId()
+        String getSkillName()
+        ContainerType getType()
+    }
+
+    @Nullable
+    @Query('''select sd.skillId as skillId, sd.name as skillName, sd.type as type
+            from SkillDef sd, SkillRelDef rel
+            where
+                sd.id = rel.child.id
+                and rel.parent.id = ?1
+                and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')''')
+    List<SkillIdAndName> findSkillsIdAndNameUnderASubject(Integer subjectRefId)
+
 }
