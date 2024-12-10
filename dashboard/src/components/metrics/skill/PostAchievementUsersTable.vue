@@ -32,10 +32,6 @@ const userInfo = useUserInfo()
 const numberFormat = useNumberFormat()
 const responsive = useResponsiveBreakpoints()
 
-onMounted(() => {
-  loadData();
-})
-
 const postAchievementUsers = ref([]);
 const chartToLoad = ref('usagePostAchievementUsersBuilder');
 const modeSelectorOptions = ref([
