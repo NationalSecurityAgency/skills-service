@@ -115,6 +115,12 @@ export const useAuthState = defineStore('authState', () => {
         const newLocation = `/oauth2/authorization/${encodeURIComponent(oAuthId)}${redirect ? `?skillsRedirectUri=${redirect}` : ''}`
         window.location = newLocation
     }
+    
+    const saml2Login = (registrationid) => {
+        const newLocation = `/saml2/authenticate/${registrationid}`
+        window.location = newLocation
+    }
+    
     const restoreSessionIfAvailable = () => {
         setRestoringSession(true)
         return new Promise((resolve, reject) => {
@@ -217,6 +223,7 @@ export const useAuthState = defineStore('authState', () => {
         return (
           (token.value !== null ||
             appConfig.isPkiAuthenticated ||
+            appConfig.isSAML2Authenticated ||
             localAuth.value ||
             oAuthAuth.value) &&
           userInfoState.value !== null
@@ -234,6 +241,7 @@ export const useAuthState = defineStore('authState', () => {
         signup,
         login,
         oAuth2Login,
+        saml2Login,
         restoreSessionIfAvailable,
         setRestoringSession,
         logout,
