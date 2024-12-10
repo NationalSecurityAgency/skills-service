@@ -105,4 +105,9 @@ export default {
         `/admin/projects/${encodeURIComponent(projectId)}/copy/subject/${encodeURIComponent(subjectId)}/copy/projects/${encodeURIComponent(otherProjectId)}`
     )
   },
+  validateCopySubjectToAnotherProject(projectId, subjectId, otherProjectId) {
+    return axios.get(
+        `/admin/projects/${encodeURIComponent(projectId)}/copy/subject/${encodeURIComponent(subjectId)}/copy/projects/${encodeURIComponent(otherProjectId)}/validateCopy`
+    ).then((res) => res.data)
+  },
 }

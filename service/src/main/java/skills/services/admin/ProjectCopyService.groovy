@@ -31,6 +31,7 @@ import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.*
+import skills.controller.result.model.CopyValidationRes
 import skills.controller.result.model.LevelDefinitionRes
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SkillDefPartialRes
@@ -128,6 +129,45 @@ class ProjectCopyService {
     @Autowired
     UserRoleRepo userRoleRepo
 
+    @Autowired
+    UserCommunityService userCommunityService
+
+    @Transactional
+    @Profile
+    CopyValidationRes validateCopySubjectToAnotherProject(String projectId, String subjectId, String otherProjectId) {
+        SkillDefWithExtra subject
+        try {
+            subject = loadSubject(projectId, subjectId, otherProjectId)
+            ProjDef fromProject = loadProject(projectId)
+            ProjDef otherProject = loadProject(otherProjectId)
+            validateProjectsCommunityStatus(fromProject, otherProject)
+        } catch (SkillException skillException) {
+            return new CopyValidationRes(isAllowed: false, validationErrors: [skillException.getMessage()?.toString()])
+        }
+
+        List<SkillDef> destItems = skillDefRepo.findAllByProjectIdAndTypeIn(otherProjectId, [SkillDef.ContainerType.Subject, SkillDef.ContainerType.Skill, SkillDef.ContainerType.Badge, SkillDef.ContainerType.SkillsGroup])
+        List<SkillDefRepo.SkillIdAndName> itemsToCopy = skillDefRepo.findSkillsIdAndNameUnderASubject(subject.id)
+
+        List<String> validationErrors = []
+
+        List<String> destSkillIds = destItems.collect { it.getSkillId() }
+        List<String> origSkillIds = itemsToCopy.collect { it.getSkillId() }
+        List<String> idsAlreadyInProject = destSkillIds.intersect(origSkillIds, { a, b -> a.toLowerCase() <=> b.toLowerCase() })
+        if (idsAlreadyInProject){
+            validationErrors.add("The following IDs already exist in the destination project: ${idsAlreadyInProject.sort().subList(0, Math.min(idsAlreadyInProject.size(), 10)).join(", ")}.".toString())
+        }
+
+        List<String> destSkillNames = destItems.collect { it.getName() }
+        List<String> origSkillNames = itemsToCopy.collect { it.getSkillName() }
+        List<String> namesAlreadyInProject = destSkillNames.intersect(origSkillNames, { a, b -> a.toLowerCase() <=> b.toLowerCase() })
+        if (namesAlreadyInProject){
+            validationErrors.add("The following names already exist in the destination project: ${namesAlreadyInProject.sort().subList(0, Math.min(namesAlreadyInProject.size(), 10)).join(", ")}.".toString())
+        }
+
+        CopyValidationRes res = new CopyValidationRes(isAllowed: validationErrors?.isEmpty(), validationErrors: validationErrors)
+        return res
+    }
+
     @Transactional
     @Profile
     void copySubjectToAnotherProject(String projectId, String subjectId, String otherProjectId) {
@@ -136,6 +176,7 @@ class ProjectCopyService {
         copiedAttachmentUuidsThreadLocal.set([:])
         try {
             ProjDef fromProject = loadProject(projectId)
+            validateProjectsCommunityStatus(fromProject, otherProject)
             validateUserIsAndAdminOfDestProj(otherProject, projectId)
             SkillDefWithExtra subject = loadSubject(fromProject.projectId, subjectId, otherProject.projectId)
 
@@ -144,6 +185,14 @@ class ProjectCopyService {
             saveSingleSubjectAndItsSkills(fromProject, otherProject, subject, allCollectedSkills, newIcons, true)
         } finally {
             copiedAttachmentUuidsThreadLocal.set([:])
+        }
+    }
+
+    private void validateProjectsCommunityStatus(ProjDef fromProject, ProjDef otherProject) {
+        if (userCommunityService.isUserCommunityOnlyProject(fromProject.projectId) && !userCommunityService.isUserCommunityOnlyProject(otherProject.projectId)) {
+            String fromCommunity = userCommunityService.getProjectUserCommunity(fromProject.projectId)
+            String toCommunity = userCommunityService.getProjectUserCommunity(otherProject.projectId)
+            throw new SkillException("Subjects from ${fromCommunity} projects cannot be copied to ${toCommunity} projects.", fromProject.projectId, null, ErrorCode.AccessDenied)
         }
     }
 
@@ -158,16 +207,16 @@ class ProjectCopyService {
     private SkillDefWithExtra loadSubject(String fromProjectId, String subjectId, String toProjId) {
         SkillDefWithExtra subject = skillDefWithExtraRepo.findByProjectIdAndSkillId(fromProjectId, subjectId)
         if (!subject) {
-            throw new SkillException("Subject with id [${subjectId}] does not exist", subjectId, null, ErrorCode.BadParam)
+            throw new SkillException("Subject with id [${subjectId}] does not exist.", subjectId, null, ErrorCode.BadParam)
         }
         if (subject.type != SkillDef.ContainerType.Subject) {
-            throw new SkillException("Provided id [${subjectId}] is not for a subject", subjectId, null, ErrorCode.BadParam)
+            throw new SkillException("Provided id [${subjectId}] is not for a subject.", subjectId, null, ErrorCode.BadParam)
         }
         if (skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(toProjId, subjectId)) {
-            throw new SkillException("Id [${subjectId}] already exists in project [${toProjId}]", subjectId, null, ErrorCode.BadParam)
+            throw new SkillException("Id [${subjectId}] already exists.", subjectId, null, ErrorCode.BadParam)
         }
         if (skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(toProjId, subject.name, SkillDef.ContainerType.Subject)) {
-            throw new SkillException("Subject with name [${subject.name}] already exists in project [${toProjId}]", subjectId, null, ErrorCode.BadParam)
+            throw new SkillException("Subject with name [${subject.name}] already exists.", subjectId, null, ErrorCode.BadParam)
         }
 
         return subject

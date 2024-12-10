@@ -70,46 +70,15 @@ const onProjectChanged = (changedProj) => {
   validationErrors.value = []
   if (changedProj != null) {
     validatingOtherProj.value = true
-    SubjectsService.getSubjectDetails(route.params.projectId, route.params.subjectId).then((currentSubject) => {
-      SubjectsService.getSubjects(changedProj.projectId).then((subjRes) => {
-        const hasSameSubjectId = subjRes.find((subj) => subj.subjectId?.toLowerCase() === currentSubject.subjectId?.toLowerCase())
-        if (hasSameSubjectId) {
-          validationErrors.value.push('<b>Subject ID</b> already exists in the selected project')
-        }
-        const hasSameName = subjRes.find((subj) => subj.name?.toLowerCase() === currentSubject.name?.toLowerCase())
-        if (hasSameName) {
-          validationErrors.value.push('<b>Subject Name</b> already exists in the selected project')
-        }
 
-        if (!hasSameSubjectId && !hasSameName) {
-          SkillsService.getProjectSkills(route.params.projectId).then((thisProjectSkillIds) => {
-            const thisProjSkillIds = thisProjectSkillIds.map((skill) => skill.skillId)
-            const thisProjSkillNames = thisProjectSkillIds.map((skill) => skill.name)
-            SkillsService.getProjectSkills(changedProj.projectId).then((otherProjSkills) => {
-              const otherProjSkillIds = otherProjSkills.map((skill) => skill.skillId)
-              const alreadyExistSkillIds = thisProjSkillIds.filter((skillId) => otherProjSkillIds.find((otherSkillId) => otherSkillId?.toLowerCase() === skillId?.toLowerCase()))
-              if (alreadyExistSkillIds.length > 0) {
-                const alreadyExistSkillIdsString = alreadyExistSkillIds.sort((a, b) => a - b).slice(0, 10).join(", ")
-                validationErrors.value.push(`The following skill IDs already exist in the selected project: ${alreadyExistSkillIdsString}.`)
-              }
-
-              const otherProjSkillNames = otherProjSkills.map((skill) => skill.name)
-              const alreadyExistSkillNames = thisProjSkillNames.filter((skillName) => otherProjSkillNames.find((otherSkillName) => otherSkillName?.toLowerCase() === skillName?.toLowerCase()))
-              if (alreadyExistSkillNames.length > 0) {
-                const alreadyExistSkillNamesString = alreadyExistSkillNames.sort((a, b) => a - b).slice(0, 10).join(", ")
-                validationErrors.value.push(`The following skill names already exist in the selected project: ${alreadyExistSkillNamesString}.`)
-              }
-
-            }).finally(() => {
-              validatingOtherProj.value = false
-            })
-          })
-
-        } else {
+    return SubjectsService.validateCopySubjectToAnotherProject(route.params.projectId, route.params.subjectId, selectedProject.value.projectId)
+        .then((res) => {
+          if (!res.isAllowed) {
+            validationErrors.value.push(...res.validationErrors)
+          }
+        }).finally(() => {
           validatingOtherProj.value = false
-        }
-      })
-    })
+        })
   }
 }
 const hasProjects = computed(() => otherProjects.value?.length > 0)

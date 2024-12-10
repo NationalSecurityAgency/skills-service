@@ -226,6 +226,16 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/copy/subject/{subjectId}/copy/projects/{otherProjectId}/validateCopy", method = [RequestMethod.GET], produces = "application/json")
+    @ResponseBody
+    CopyValidationRes validateCopySubjectToAnotherProject(
+            @PathVariable("projectId") String projectId,
+            @PathVariable("subjectId") String subjectId,
+            @PathVariable("otherProjectId") String otherProjectId) {
+        return projectCopyService.validateCopySubjectToAnotherProject(projectId, subjectId, otherProjectId)
+    }
+
+
     @RequestMapping(value = "/projects/{projectId}/copy/subject/{subjectId}/copy/projects/{otherProjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     RequestResult copySubjectToAnotherProject(

@@ -141,6 +141,10 @@ class SkillsService {
     def copySubjectDefIntoAnotherProject(String fromProjId, String fromSubjectId, String toSubjId) {
         wsHelper.adminPost("/projects/${fromProjId}/copy/subject/${fromSubjectId}/copy/projects/${toSubjId}".toString(), [])
     }
+    @Profile
+    def validateCopySubjectDefIntoAnotherProject(String fromProjId, String fromSubjectId, String toSubjId) {
+        return wsHelper.adminGet("/projects/${fromProjId}/copy/subject/${fromSubjectId}/copy/projects/${toSubjId}/validateCopy".toString(), [:])
+    }
 
     static String PROD_MODE = Settings.PRODUCTION_MODE.settingName
 
