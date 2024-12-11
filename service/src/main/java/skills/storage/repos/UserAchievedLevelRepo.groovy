@@ -803,11 +803,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     @Query('''select ua.skillId as skillId, ua.level as level, count(ua.id) as numberUsers, ut.value as userTag 
             from UserAchievement as ua 
             join UserTag ut on ut.userId = ua.userId
+            LEFT JOIN ArchivedUser au ON au.userId = ua.userId and au.projectId = :projectId   
             where 
                 ua.skillId = :subjectId and
                 ua.projectId = :projectId and
                 ut.key = :userTagKey and
-                ua.level is not null
+                ua.level is not null and
+                au.id is null
             group by ua.skillId, ua.level, ut.value
            ''')
     List<LevelAndTagCount> countNumUsersPerSubjectTagAndLevel(
