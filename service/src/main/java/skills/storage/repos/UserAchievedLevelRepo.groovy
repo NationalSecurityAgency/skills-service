@@ -786,14 +786,12 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         Long getNumberUsers()
     }
 
-    @Query('''select ua.skillId as skillId, ua.level as level, count(ua.id) as numberUsers 
-            from UserAchievement as ua, SkillDef as sd 
-            where 
-                ua.skillId = sd.skillId and
-                ua.projectId = :projectId and
-                sd.projectId = :projectId and
-                sd.type = :containerType
-            group by ua.skillId, ua.level    
+    @Query('''SELECT ua.skillId AS skillId, ua.level AS level, COUNT(ua.id) AS numberUsers
+            FROM UserAchievement AS ua
+            INNER JOIN SkillDef AS sd ON ua.skillId = sd.skillId AND ua.projectId = sd.projectId
+            LEFT JOIN ArchivedUser au ON au.userId = ua.userId and au.projectId = :projectId 
+            WHERE ua.projectId = :projectId AND sd.type = :containerType AND au.id IS NULL
+            GROUP BY ua.skillId, ua.level   
            ''')
     List<SkillAndLevelUserCount> countNumUsersPerContainerTypeAndLevel(
             @Param("projectId") String projectId,
