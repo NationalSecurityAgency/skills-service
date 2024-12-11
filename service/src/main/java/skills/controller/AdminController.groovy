@@ -246,6 +246,17 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/copy/projects/{otherProjectId}/subjects/{otherSubjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    RequestResult copySkillsToAnotherProjectSubject(
+            @PathVariable("projectId") String projectId,
+            @PathVariable("otherProjectId") String otherProjectId,
+            @PathVariable("otherSubjectId") String otherSubjectId,
+            @RequestBody List<String> skillIds) {
+        projectCopyService.copySkillsToAnotherProject(projectId, skillIds, otherProjectId, otherSubjectId)
+        return new RequestResult(success: true)
+    }
+
 
 
     @RequestMapping(value = "/projects/{id}/invite", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")

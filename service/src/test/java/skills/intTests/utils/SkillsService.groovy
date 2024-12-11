@@ -138,6 +138,11 @@ class SkillsService {
     }
 
     @Profile
+    def copySkillDefsIntoAnotherProjectSubject(String fromProjId, List<String> skillIds, String toProjectId, String toSubjId) {
+        wsHelper.adminPost("/projects/${fromProjId}/copy/projects/${toProjectId}/subjects/${toSubjId}".toString(), skillIds)
+    }
+
+    @Profile
     def copySubjectDefIntoAnotherProject(String fromProjId, String fromSubjectId, String toSubjId) {
         wsHelper.adminPost("/projects/${fromProjId}/copy/subject/${fromSubjectId}/copy/projects/${toSubjId}".toString(), [])
     }
