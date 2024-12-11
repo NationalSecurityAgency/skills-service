@@ -1445,4 +1445,68 @@ class AdminEditSpecs extends DefaultIntSpec {
         updated.body.success == true
         updatedSkill.pointIncrement == 500
     }
+
+    def "archiving a user filter that user from user tables"() {
+        def project = createProject()
+        def subject = createSubject()
+        def skill1 = createSkill(1, 1, 1, 0, 5)
+        skill1.pointIncrement = 50
+        def skill2 = createSkill(1, 1, 2, 0, 5)
+        def badge = createBadge()
+
+        skillsService.createProject(project)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+        skillsService.addBadge([projectId: project.projectId, badgeId: badgeId, name: 'Badge 1'])
+        skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badgeId, skillId: skill1.skillId])
+        skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badgeId, skillId: skill2.skillId])
+
+        def users = getRandomUsers(2)
+        def user1 = users[0]
+        def user2 = users[1]
+
+        skillsService.addSkill(skill1, user1, new Date().minus(5))
+        skillsService.addSkill(skill1, user1, new Date().minus(1))
+        skillsService.addSkill(skill1, user2, new Date())
+        skillsService.addSkill(skill2, user2, new Date())
+
+        def projectUsers = skillsService.getProjectUsers(project.projectId)
+        assert projectUsers.data.find { it.userId == user1 && it.totalPoints == 100 }
+        assert projectUsers.data.find { it.userId == user2 && it.totalPoints == 60 }
+        def subjectUsers = skillsService.getSubjectUsers(project.projectId, subject.subjectId)
+        assert subjectUsers.data.find { it.userId == user1 && it.totalPoints == 100 }
+        assert subjectUsers.data.find { it.userId == user2 && it.totalPoints == 60 }
+        def skill1Users = skillsService.getSkillUsers(project.projectId, skill1.skillId)
+        assert skill1Users.data.find { it.userId == user1 && it.totalPoints == 100 }
+        assert skill1Users.data.find { it.userId == user2 && it.totalPoints == 50 }
+        def skill2Users = skillsService.getSkillUsers(project.projectId, skill2.skillId)
+        assert !skill2Users.data.find { it.userId == user1 }
+        assert skill2Users.data.find { it.userId == user2 && it.totalPoints == 10 }
+        def badgeUsers = skillsService.getBadgeUsers(project.projectId, badgeId)
+        assert badgeUsers.data.find { it.userId == user1 && it.totalPoints == 100 }
+        assert badgeUsers.data.find { it.userId == user2 && it.totalPoints == 60 }
+
+        when:
+
+        skillsService.archiveUsers([user1], project.projectId)
+
+        def projectUsersAfterArchive = skillsService.getProjectUsers(project.projectId)
+        def subjectUsersAfterArchive = skillsService.getSubjectUsers(project.projectId, subject.subjectId)
+        def skill1UsersAfterArchive = skillsService.getSkillUsers(project.projectId, skill1.skillId)
+        def skill2UsersAfterArchive = skillsService.getSkillUsers(project.projectId, skill2.skillId)
+        def badgeUsersAfterArchive = skillsService.getBadgeUsers(project.projectId, badgeId)
+
+        then:
+        !projectUsersAfterArchive.data.find { it.userId == user1 }
+        projectUsersAfterArchive.data.find { it.userId == user2 && it.totalPoints == 60 }
+        !subjectUsersAfterArchive.data.find { it.userId == user1 }
+        subjectUsersAfterArchive.data.find { it.userId == user2 && it.totalPoints == 60 }
+        !skill1UsersAfterArchive.data.find { it.userId == user1 }
+        skill1UsersAfterArchive.data.find { it.userId == user2 && it.totalPoints == 50 }
+        !skill2UsersAfterArchive.data.find { it.userId == user1 }
+        skill2UsersAfterArchive.data.find { it.userId == user2 && it.totalPoints == 10 }
+        !badgeUsersAfterArchive.data.find { it.userId == user1 }
+        badgeUsersAfterArchive.data.find { it.userId == user2 && it.totalPoints == 60 }
+    }
 }
