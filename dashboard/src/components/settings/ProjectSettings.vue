@@ -143,6 +143,13 @@ let settings = ref({
     dirty: false,
     projectId: route.params.projectId,
   },
+  projectProtection: {
+    value: false,
+    setting: 'project-protection',
+    lastLoadedValue: false,
+    dirty: false,
+    projectId: route.params.projectId,
+  },
   groupInfoOnSkillPage: {
     value: false,
     setting: 'group-info-on-skill-page',
@@ -248,6 +255,10 @@ const disableAchievementCelebrationLabel = computed(() => {
   return formatToggleLabel(settings.value.disableAchievementsCelebration.value);
 });
 
+const projectProtectionLabel = computed(() => {
+  return formatToggleLabel(settings.value.projectProtection.value);
+});
+
 const groupInfoOnSkillPageLabel = computed(() => {
   return formatToggleLabel(settings.value.groupInfoOnSkillPage.value);
 })
@@ -308,6 +319,10 @@ const rankAndLeaderboardOptOutChanged = ((value) => {
 
 const groupDescriptionsChanged = ((value) => {
   settings.value.groupDescriptions.dirty = `${value}` !== `${settings.value.groupDescriptions.lastLoadedValue}`;
+});
+
+const projectProtectionChanged = ((value) => {
+  settings.value.projectProtection.dirty = `${value}` !== `${settings.value.projectProtection.lastLoadedValue}`;
 });
 
 const groupInfoOnSkillPageChanged = ((value) => {
@@ -678,6 +693,21 @@ const saveSettings = ((dirtyChanges) => {
                            aria-labelledby="disableAchievementsCelebrationLabel"
                            data-cy="disableAchievementsCelebrationSwitch" />
               <span class="ml-1">{{ disableAchievementCelebrationLabel }}</span>
+            </div>
+          </div>
+
+          <div class="field flex flex-column lg:flex-row lg:gap-3">
+            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="projectProtection" for="projectProtectionSwitch">
+              <span id="projectProtectionLabel">Project Deletion Protection:</span>
+            </label>
+            <div class="flex align-items-center">
+              <InputSwitch v-model="settings.projectProtection.value"
+                           inputId="projectProtectionSwitch"
+                           name="check-button"
+                           v-on:update:modelValue="projectProtectionChanged"
+                           aria-labelledby="projectProtectionLabel"
+                           data-cy="projectProtectionSwitch" />
+              <span class="ml-1">{{ projectProtectionLabel }}</span>
             </div>
           </div>
 

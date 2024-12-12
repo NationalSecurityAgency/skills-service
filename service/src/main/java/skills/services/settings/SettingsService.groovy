@@ -327,6 +327,12 @@ class SettingsService {
         return convertToResList(settings)
     }
 
+    @Transactional()
+    List<SettingsResult> getProjectSettingForAllProjectsInList(String setting, List<String> projectIds){
+        List<Setting> settings = settingsDataAccessor.getProjectSettingForAllProjectsInList(setting, projectIds)
+        return convertToResList(settings)
+    }
+
     @Transactional(readOnly = true)
     SettingsResult getUserProjectSetting(String userId, String projectId, String setting, String settingGroup){
         Setting settingDB = settingsDataAccessor.getUserProjectSetting(getUserRefId(userId), projectId, setting, settingGroup)

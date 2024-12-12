@@ -80,6 +80,10 @@ class SettingsDataAccessor {
         settingRepo.findAllByTypeAndSetting(Setting.SettingType.Project, setting)
     }
 
+    List<Setting> getProjectSettingForAllProjectsInList(String setting, List<String> projectIds) {
+        settingRepo.findSettingsInProjectList(setting, projectIds)
+    }
+
     Setting getUserSetting(Integer userRefId, String setting, String settingGroup){
         settingRepo.findByTypeAndUserRefIdAndProjectIdIgnoreCaseAndSettingGroupAndSetting(Setting.SettingType.User, userRefId, null, settingGroup, setting)
     }

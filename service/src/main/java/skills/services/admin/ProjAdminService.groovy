@@ -377,6 +377,7 @@ class ProjAdminService {
     private  List<ProjectResult> loadProjectsForRoot(Map<String, Integer> projectIdSortOrder, String userId, Boolean isNotCommunityMember) {
         List<SettingsResult> pinnedProjectSettings = settingsService.getUserProjectSettingsForGroup(userId, rootUserPinnedProjectGroup)
         List<String> pinnedProjects = pinnedProjectSettings.collect { it.projectId }
+        List<SettingsResult> projectSettings = settingsService.getProjectSettingForAllProjectsInList("project-protection", pinnedProjects)
 
         List<ProjSummaryResult> projects = projDefRepo.getAllSummariesByProjectIdIn(pinnedProjects)
         if (isNotCommunityMember) {
@@ -387,6 +388,8 @@ class ProjAdminService {
         List<ProjectResult> finalRes = projects?.unique({ it.projectId })?.collect({
             ProjectResult res = convert(it, projectIdSortOrder, pinnedProjectIds)
             res.userRole = RoleName.ROLE_SUPER_DUPER_USER
+            SettingsResult isProtected = projectSettings.find{ setting -> setting.projectId == it.projectId}
+            res.isDeleteProtected = isProtected?.value == "true"
             if (isNotCommunityMember) {
                 res.userCommunity = null
             }
@@ -456,8 +459,12 @@ class ProjAdminService {
             if (isNotCommunityMember) {
                 projects = projects.findAll { !it.protectedCommunityEnabled}
             }
+            List<String> projectIds = projects.collect{ it.projectId }
+            List<SettingsResult> projectSettings = settingsService.getProjectSettingForAllProjectsInList("project-protection", projectIds)
             finalRes = projects?.unique({ it.projectId })?.collect({
                 ProjectResult res = convert(it, projectIdSortOrder)
+                SettingsResult isProtected = projectSettings.find{ setting -> setting.projectId == it.projectId }
+                res.isDeleteProtected = isProtected?.value == "true"
                 return res
             })
         }
