@@ -222,8 +222,9 @@ class UserSkillsController {
     public List<SkillDescription> getSubjectSkillsDescriptions(@PathVariable("projectId") String projectId,
                                                                @PathVariable("subjectId") String subjectId,
                                                                @RequestParam(name = "userId", required = false) String userIdParam,
-                                                               @RequestParam(name = "version", required = false) Integer version) {
-        String userId = userInfoService.getUserName(userIdParam, true);
+                                                               @RequestParam(name = "version", required = false) Integer version,
+                                                               @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
         return skillsLoader.loadSubjectDescriptions(projectId, subjectId, userId, getProvidedVersionOrReturnDefault(version));
     }
 
