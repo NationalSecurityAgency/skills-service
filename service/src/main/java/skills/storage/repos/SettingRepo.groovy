@@ -44,6 +44,13 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     @Nullable
     Setting findAllByTypeAndSettingGroupAndSettingAndProjectId(Setting.SettingType type, String settingGroup, String setting, String projectId)
 
+    @Nullable
+    @Query('''select s from Setting s 
+            where 
+                s.setting=?1 and 
+                s.projectId in ?2 and 
+                s.type='Project' ''')
+    List<Setting> findSettingsInProjectList(String setting, List<String> projectIds)
 
     @Nullable
     @Query('''select s.value from Setting s, User u 

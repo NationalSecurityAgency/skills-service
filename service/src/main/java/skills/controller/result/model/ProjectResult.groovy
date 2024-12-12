@@ -44,4 +44,5 @@ class ProjectResult extends SimpleProjectResult{
     String userRole
 
     String userCommunity
+    boolean isDeleteProtected
 }

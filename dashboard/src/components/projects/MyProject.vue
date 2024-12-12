@@ -30,6 +30,9 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import ProjectExpirationWarning from '@/components/projects/ProjectExpirationWarning.vue'
 import { useAdminProjectsState } from '@/stores/UseAdminProjectsState.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import EnhancedRemovalValidation from "@/components/utils/modal/EnhancedRemovalValidation.vue";
+import projectService from "@/components/projects/ProjectService";
+import AccessService from "@/components/access/AccessService.js";
 
 const dialogMessages = useDialogMessages()
 const props = defineProps(['project', 'disableSortControl'])
@@ -149,6 +152,29 @@ const focusSortControl = () => {
   sortControl.value.focus();
 };
 
+const hasContent = computed(() => {
+  return projectInternal.value.numSubjects > 0 || projectInternal.value.numSkills || projectInternal.value.numBadges
+})
+
+const hasUsers = computed(() => {
+  return userCount.value > 0 || adminCount.value > 1;
+})
+
+const adminCount = ref(0);
+const userCount = ref(0);
+const showDeleteModal = () => {
+  const roles = ['ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER'];
+  const countAdmins = AccessService.countUserRolesForProject(projectInternal.value.projectId, roles);
+  const countUsers = projectService.countProjectUsers(projectInternal.value.projectId)
+  const promiseCounts = [countAdmins, countUsers]
+
+  Promise.all(promiseCounts).then((result) => {
+    adminCount.value = result[0];
+    userCount.value = result[1];
+    showDeleteValidation.value = true
+  })
+};
+
 defineExpose({
   focusSortControl
 });
@@ -194,7 +220,7 @@ defineExpose({
                 :project="projectInternal"
                 @edit-project="createOrUpdateProject(project, true)"
                 @copy-project="copyProject"
-                @delete-project="showDeleteValidation = true"
+                @delete-project="showDeleteModal"
                 @unpin-project="unpin"
                 :read-only-project="isReadOnlyProj"/>
           </div>
@@ -254,15 +280,41 @@ defineExpose({
                   @project-saved="projectCopied"
                   :enable-return-focus="true" />
 
-    <removal-validation
+    <enhanced-removal-validation
       v-if="showDeleteValidation"
       v-model="showDeleteValidation"
       :item-name="projectInternal.name"
       item-type="project"
       @do-remove="doDeleteProject">
-        Deletion <b>cannot</b> be undone and permanently removes all skill subject definitions, skill
-        definitions and users' performed skills for this Project.
-    </removal-validation>
+        <template #initialMessage>
+          <Message severity="warn" :closable="false">
+            Deletion <b>cannot</b> be undone and permanently removes all skill subject definitions, skill
+            definitions and users' performed skills for this Project.
+
+            <div class="mt-4" v-if="hasContent">
+              This will delete:
+              <ul>
+                <li v-if="projectInternal.numSubjects > 0">{{ projectInternal.numSubjects }} Subject(s)</li>
+                <li v-if="projectInternal.numSkills > 0">{{ projectInternal.numSkills }} Skill(s)</li>
+                <li v-if="projectInternal.numBadges > 0">{{ projectInternal.numBadges }} Badge(s)</li>
+              </ul>
+            </div>
+          </Message>
+        </template>
+        <template #userMessage>
+          <Message severity="warn" :closable="false">
+            Deleting this project will also delete it for all administrators and users associated with it.
+
+            <div class="mt-4" v-if="hasUsers">
+              This will remove the project for:
+              <ul>
+                <li v-if="adminCount > 0">{{ adminCount }} Administrator(s)</li>
+                <li v-if="userCount > 0">{{ userCount }} Users(s)</li>
+              </ul>
+            </div>
+          </Message>
+        </template>
+    </enhanced-removal-validation>
   </div>
 </template>
 

@@ -68,6 +68,9 @@ export default {
       .get(`/admin/projects/${encodeURIComponent(projectId)}`)
       .then((response) => response.data)
   },
+  countProjectUsers(projectId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/users/count`).then((response) => response.data)
+  },
   getLatestSkillEventForProject(projectId) {
     return axios
       .get(`/admin/projects/${encodeURIComponent(projectId)}/lastSkillEvent`)
