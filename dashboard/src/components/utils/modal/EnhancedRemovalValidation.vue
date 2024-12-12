@@ -116,7 +116,7 @@ const clearSettings = () => {
       header="Removal Safety Check"
       cancel-button-severity="secondary"
       :show-ok-button="false"
-      :show-cancel-button="false"
+      :show-cancel-button="true"
       @on-ok="removeAction"
       @on-cancel="publishHidden"
       :enable-return-focus="true"
@@ -131,13 +131,12 @@ const clearSettings = () => {
                 {{ removalTextPrefix }} <span class="font-bold text-primary">{{ itemName }}</span><span v-if="itemType">&nbsp;{{ itemType }}</span>.
               </div>
               <slot name="initialMessage"></slot>
-              <div class="flex flex-1">
-                <Checkbox inputId="stepOneCheck" :binary="true" name="Confirm" v-model="confirmStepOne" />
+              <div class="flex">
+                <Checkbox inputId="stepOneCheck" :binary="true" name="Confirm" v-model="confirmStepOne" data-cy="confirmCheckbox" />
                 <label for="stepOneCheck" class="ml-2">I understand that this is permanent and cannot be undone</label>
               </div>
-              <div class="flex flex-1 relative mt-2">
-                <SkillsButton label="Cancel" />
-                <SkillsButton label="Next" class="right-0 absolute" icon="fas fa-arrow-circle-right" @click="nextCallback" :disabled="!confirmStepOne"/>
+              <div class="flex mt-2 w-full justify-content-end">
+                <SkillsButton label="Next" icon="fas fa-arrow-circle-right float-right" @click="nextCallback" :disabled="!confirmStepOne" data-cy="firstNextButton"/>
               </div>
             </div>
           </template>
@@ -151,13 +150,14 @@ const clearSettings = () => {
                     inputId="stepTwoCheck"
                     :binary="true"
                     name="Confirm"
+                    data-cy="confirmCheckbox"
                     v-model="confirmStepTwo"
                 />
                 <label for="stepTwoCheck" class="ml-2">I understand that this project will be deleted for ALL users.</label>
               </div>
               <div class="flex mt-2 relative">
                 <SkillsButton label="Back" icon="fas fa-arrow-circle-left" @click="prevCallback" />
-                <SkillsButton label="Next" icon="fas fa-arrow-circle-right" class="absolute right-0" @click="nextCallback" :disabled="!confirmStepTwo" />
+                <SkillsButton label="Next" icon="fas fa-arrow-circle-right" class="absolute right-0" @click="nextCallback" :disabled="!confirmStepTwo" data-cy="secondNextButton" />
               </div>
             </div>
           </template>
@@ -178,7 +178,7 @@ const clearSettings = () => {
             </div>
             <div class="flex flex-1 mt-2 relative">
               <SkillsButton label="Back" icon="fas fa-arrow-circle-left" @click="prevCallback" />
-              <SkillsButton label="Delete" class="absolute right-0" @click="removeAction" :disabled="removeDisabled" />
+              <SkillsButton label="Delete" class="absolute right-0" @click="removeAction" :disabled="removeDisabled" data-cy="deleteProjectButton" />
             </div>
           </template>
         </StepperPanel>
