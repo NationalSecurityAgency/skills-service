@@ -60,7 +60,6 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     @Query('''select count(distinct(u.userId)) as userCount, ut.value as tagValue 
               from UserPerformedSkill u
               join UserTag ut on ut.userId = u.userId
-              LEFT JOIN ArchivedUser au ON au.userId = u.userId and au.projectId = ?1
               where 
               u.skillRefId in (
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
@@ -68,7 +67,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                 s.skillId = ?2 and
                 s.enabled = 'true'
               ) and ut.key = ?3
-              and au.id is null
+              and not exists (select 1 from ArchivedUser au where au.userId = u.userId and au.projectId = ?1)
               group by ut.value order by userCount desc''')
     @Nullable
     List<UserTagCount> findAllByProjectIdAndSkillIdAndUserTag(String projectId, String skillId, String userTagKey, Pageable pageable)
@@ -176,7 +175,6 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
 
     @Query('''SELECT COUNT(DISTINCT p.userId) 
                 from UserPerformedSkill p
-                LEFT JOIN ArchivedUser au ON au.userId = p.userId and au.projectId = ?1 
                 where p.skillRefId in (
                     select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id
                     from SkillDef s
@@ -184,7 +182,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                     s.projectId=?1 and 
                     s.skillId = ?2 and
                     s.enabled = 'true'
-                ) AND au.id is null''')
+                ) AND not exists (select 1 from ArchivedUser au where au.userId = p.userId and au.projectId = ?1)''')
     Integer countDistinctUserIdByProjectIdAndSkillId(String projectId, String skillId)
 
     @Query(''' select DISTINCT(sdParent)
@@ -272,7 +270,6 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
 
     @Query('''select CAST(ups.performedOn as date) as day, count(ups.id) as count
         from UserPerformedSkill ups
-        LEFT JOIN ArchivedUser au ON au.userId = ups.userId and au.projectId = :projectId
         where
         ups.skillRefId in (
             select case when copiedFrom is not null then copiedFrom else id end as id 
@@ -283,7 +280,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
             enabled = 'true'
         ) and
         ups.performedOn > :from and 
-        au.id is null
+        not exists (select 1 from ArchivedUser au where au.userId = ups.userId and au.projectId = :projectId)
         group by CAST(ups.performedOn as date)
     ''')
     List<DayCountItem> countsByDay(@Param('projectId') String projectId, @Param('skillId') String skillId, @Param("from") Date from)

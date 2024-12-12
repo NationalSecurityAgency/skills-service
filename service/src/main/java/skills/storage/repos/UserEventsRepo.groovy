@@ -80,10 +80,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                     where sd.type = 'Skill' and sd.id = :skillRefId and 
                     sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
-                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = def.project_id
             WHERE
                 uue.event_time >= :start AND
-                au.id is null
+                not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
         ) all_events
         GROUP BY all_events.week_number
         ORDER BY all_events.week_number DESC
@@ -107,11 +106,10 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                     where sd.type = 'Skill' and sd.id = :skillRefId and 
                     sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
-                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = def.project_id
             WHERE
                     uue.event_time >= :start AND 
                     uue.event_type = :#{#type.name()} AND
-                    au.id is null
+                    not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
         ) all_events
         GROUP BY all_events.event_time
         ORDER BY all_events.event_time DESC
@@ -135,11 +133,10 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                     where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId) and 
                     sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
-                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = def.project_id
             WHERE
                 uue.event_time >= :start AND
                 uue.event_type = :#{#type.name()} AND
-                au.id is null
+                not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
         ) event_join
         GROUP BY event_join.event_time
         ORDER BY event_join.event_time DESC
@@ -163,10 +160,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                     where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId) and 
                     sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
-                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = def.project_id
             WHERE
                 uue.event_time >= :start AND
-                au.id is null
+                not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
         ) event_join
         GROUP BY event_join.week_number
         ORDER BY event_join.week_number DESC
@@ -190,11 +186,10 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                     sd.enabled = 'true' and
                     sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :subjectRawId)
                 ) def ON uue.skill_ref_id = def.id
-                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = def.project_id
             WHERE
                 uue.event_time >= :start AND
                 uue.event_type = :#{#type.name()} AND
-                au.id is null
+                not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
         ) all_events
         group by all_events.event_time 
         order by all_events.event_time desc
@@ -219,10 +214,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                     sd.enabled = 'true' and
                     sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :subjectRawId)
                 ) def ON uue.skill_ref_id = def.id
-                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = def.project_id
             WHERE
                 uue.event_time >= :start AND
-                au.id is null
+                not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
         ) all_events
         group by all_events.week_number 
         order by all_events.week_number desc
@@ -246,10 +240,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                     sd.enabled = 'true' and
                     sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :skillRefId)
                 ) def ON uue.skill_ref_id = def.id
-                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = def.project_id
             WHERE
                 uue.event_time >= :start AND
-                au.id is null
+                not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
         ) all_events
         group by all_events.week_number 
         order by all_events.week_number desc
@@ -273,11 +266,10 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                     sd.enabled = 'true' and
                     sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :skillRefId)
                 ) def ON uue.skill_ref_id = def.id
-                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = def.project_id
             WHERE
                 uue.event_time > :start AND
                 uue.event_type = :#{#type.name()} AND
-                au.id is null
+                not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
         ) all_events
         group by all_events.event_time 
         order by all_events.event_time desc
@@ -358,11 +350,10 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                     and sd.project_id = :projectId
                     and sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
-                LEFT JOIN archived_users au ON au.user_id = uue.user_id and au.project_id = :projectId
             WHERE
                 uue.event_time >= :start AND
                 uue.event_type = :#{#type.name()} AND
-                au.id is null
+                not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = :projectId)
         ) all_events
         group by all_events.event_time 
         order by all_events.event_time desc
@@ -372,7 +363,6 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     @Query(value="""
         select min(ue.projectId) as projectId, ue.weekNumber as weekNumber, count(distinct ue.userId) as count 
         from UserEvent ue
-            LEFT JOIN ArchivedUser au ON au.userId = ue.userId and au.projectId = :projectId
         where ue.eventTime >= :start AND
         ue.skillRefId in (
             select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
@@ -381,7 +371,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             AND sd.type = 'Skill'
             AND sd.enabled = 'true'
         )   
-        AND au is null
+        AND not exists (select 1 from ArchivedUser au where au.userId = ue.userId and au.projectId = :projectId)
         group by ue.weekNumber
         order by ue.weekNumber desc
     """)
@@ -414,10 +404,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    FROM user_achievement
                    WHERE skill_ref_id = :skillRefId)
             AS achievements ON ue.user_id = achievements.user_id
-            LEFT JOIN archived_users au ON au.user_id = ue.user_id and au.project_id = ue.project_id
         WHERE ue.skill_ref_id = :skillRefId
             AND ue.event_time > achievements.achieved_on
-            AND au.id is null 
+            AND not exists (select 1 from archived_users au where au.user_id = ue.user_id and au.project_id = ue.project_id) 
         GROUP BY ue.user_id
         HAVING SUM(ue.count) >= :minEventCountThreshold
         LIMIT 1;
@@ -435,12 +424,11 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             WHERE skill_ref_id = :skillRefId
             GROUP BY user_id, user_achievement.achieved_on
         ) AS achievements ON ue.user_id = achievements.user_id
-        LEFT JOIN archived_users au ON au.user_id = ue.user_id and au.project_id = ue.project_id
         WHERE 
             ue.skill_ref_id = :skillRefId 
             AND ue.event_time > achievements.achieved_on 
             AND ue.count >= :minEventCountThreshold
-            AND au.id is null 
+            AND not exists (select 1 from archived_users au where au.user_id = ue.user_id and au.project_id = ue.project_id) 
         GROUP BY ue.user_id, ua.user_id_for_display, ua.first_name, ua.last_name
     ''', nativeQuery = true)
     List<UserMetrics> getUsersUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, @Param("minEventCountThreshold") Integer minEventCountThreshold, Pageable pageable)
@@ -457,13 +445,12 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
               FROM user_achievement
               WHERE skill_ref_id = :skillRefId
               GROUP BY user_id, user_achievement.achieved_on) AS achievements ON ue.user_id = achievements.user_id
-        LEFT JOIN archived_users au ON au.user_id = ue.user_id and au.project_id = ue.project_id
         WHERE ue.skill_ref_id = :skillRefId
           AND (SELECT MAX(ue2.event_time)
                FROM user_events ue2
                WHERE ue2.skill_ref_id = :skillRefId
                  AND ue2.user_id = achievements.user_id) < achievements.achieved_on
-          AND au.id is null
+          AND not exists (select 1 from archived_users au where au.user_id = ue.user_id and au.project_id = ue.project_id)
         GROUP BY ue.user_id, ua.user_id_for_display
     ''', nativeQuery = true)
     List<UserMetrics> getUsersNotUsingSkillAfterAchievement(@Param("skillRefId") Integer skillRefId, Pageable pageable)
@@ -481,12 +468,11 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             END AS countBucket 
             FROM user_events ue
             JOIN user_achievement achievements ON ue.user_id = achievements.user_id
-            LEFT JOIN archived_users au ON au.user_id = ue.user_id and au.project_id = ue.project_id
             WHERE 
                 achievements.skill_ref_id = :skillRefId
                 AND ue.skill_ref_id = :skillRefId 
                 AND ue.event_time > achievements.achieved_on 
-                AND au.id is null
+                AND not exists (select 1 from archived_users au where au.user_id = ue.user_id and au.project_id = ue.project_id)
             GROUP BY ue.user_id
         )  AS counts
     GROUP BY counts.countBucket;
@@ -496,9 +482,8 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     @Nullable
     @Query(value = '''
         SELECT max(event_time) FROM user_events ue
-        LEFT JOIN archived_users au ON au.user_id = ue.user_id and au.project_id = ue.project_id
         WHERE ue.project_id = ?1
-          AND au.id is null
+          AND not exists (select 1 from archived_users au where au.user_id = ue.user_id and au.project_id = ue.project_id)
     ''', nativeQuery = true)
     Date getLatestEventDateForProject(String projectId)
 }
