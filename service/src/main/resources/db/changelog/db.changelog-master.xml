@@ -2796,7 +2796,7 @@
         </createTable>
 
         <createIndex indexName="index_archived_users_project_id"
-                     tableName="archived_users" unique="true">
+                     tableName="archived_users">
             <column name="project_id" type="varchar(255)"/>
         </createIndex>
         <createIndex indexName="index_archived_users_project_id_user_id"
