@@ -2716,7 +2716,6 @@
 
     </changeSet>
 
-
     <changeSet id="48" author="skills team">
         <createTable tableName="admin_group_definition">
             <column name="id" type="int" autoIncrement="true">
@@ -2775,6 +2774,51 @@
             <column name="admin_group_id" type="varchar(255)"/>
         </createIndex>
 
+    </changeSet>
+
+    <changeSet id="49" author="skills team">
+        <createTable tableName="archived_users">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="index_archived_users_project_id"
+                     tableName="archived_users">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_archived_users_project_id_user_id"
+                     tableName="archived_users" unique="true">
+            <column name="user_id" type="varchar(255)"/>
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="archived_users"
+                                 constraintName="fk_archived_users_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="archived_users"
+                                 constraintName="fk_archived_users_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
     </changeSet>
 
 </databaseChangeLog>

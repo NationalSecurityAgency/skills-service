@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -37,10 +38,10 @@ import skills.services.*
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
+import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
-import skills.services.userActions.DashboardAction
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
@@ -133,6 +134,9 @@ class ProjAdminService {
 
     @Autowired
     UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    ArchivedUsersRepo archivedUserRepo
 
     @Transactional()
     void saveProject(String originalProjectId, ProjectRequest projectRequest, String userIdParam = null) {
@@ -678,4 +682,52 @@ class ProjAdminService {
     boolean isUserCommunityRestrictedProject(String projectId) {
         return userCommunityService.isUserCommunityOnlyProject(projectId)
     }
+
+    @Transactional
+    void archiveUsers(String projectId, ArchiveUsersRequest archiveUsersRequest) {
+        archivedUserRepo.saveAll(archiveUsersRequest.userIds.collect { new ArchivedUser(projectId: projectId, userId: it) })
+        userActionsHistoryService.saveUserActions(archiveUsersRequest.userIds.collect { userId ->
+            return new UserActionInfo(
+                action: DashboardAction.ArchiveUser,
+                item: DashboardItem.Project,
+                itemId: userId,
+                projectId: projectId,
+        )})
+    }
+
+    @Transactional
+    void restoreArchiveUser(String projectId, String userId) {
+        ArchivedUser archivedUser = archivedUserRepo.findByProjectIdAndUserId(projectId, userId)
+        assert archivedUser, "RESTORE FAILED -> no archived user found for projectId [$projectId], userId [$userId] and roleName [$roleName]"
+
+        archivedUserRepo.delete(archivedUser)
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.RestoreArchivedUser,
+                    item: DashboardItem.Project,
+                    itemId: userId,
+                    projectId: projectId,
+        ))
+    }
+
+
+    TableResult findAllArchivedUsers(String projectId, PageRequest pageRequest) {
+        Page<ArchivedUsersRepo.ArchivedUserWithAttrs> results = archivedUserRepo.findAllByProjectId(projectId, pageRequest)
+        def totalArchivedUsers = results.getTotalElements()
+        def data = results.getContent().collect { convert(it) };
+        return new TableResult(data: data, count: data.size(), totalCount: totalArchivedUsers)
+    }
+
+    private static ArchivedUserRes convert(ArchivedUsersRepo.ArchivedUserWithAttrs input) {
+        ArchivedUserRes res = new ArchivedUserRes(
+                userId: input.archivedUser.userId,
+                userIdForDisplay: input.attrs.userIdForDisplay,
+                projectId: input.archivedUser.projectId,
+                firstName: input.attrs.firstName,
+                lastName: input.attrs.lastName,
+                email: input.attrs.email,
+                dn: input.attrs.dn,
+        )
+        return res
+    }
+
 }

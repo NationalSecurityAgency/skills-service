@@ -174,6 +174,30 @@ describe('Accessibility Tests', () => {
             cy.customA11y()
         });
 
+        it(`project - users archive${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator/projects/proj1/users');
+            cy.get('[data-cy="pageHeader"]').contains('ID: proj1');
+            cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '6');
+
+            cy.get('[data-p-index="3"] [data-pc-name="rowcheckbox"]').click()
+            cy.get('[data-cy="archiveUsersTableBtn"]').should('be.enabled');
+            cy.get('[data-cy="archiveUsersTableBtn"]').click()
+            cy.get('[data-cy="userArchiveBtn"]').should('be.enabled');
+            cy.get('[data-cy="userArchiveBtn"]').click()
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y()
+
+            cy.get('[data-cy="restoreUser-u4"]').should('be.enabled');
+            cy.get('[data-cy="restoreUser-u4"]').click()
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y()
+        });
+
         it(`project - access page${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
             cy.visit('/administrator/projects/proj1/access');

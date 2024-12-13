@@ -287,38 +287,38 @@ describe('Self Report Skills Management Tests', () => {
     cy.visit('/administrator/projects/proj1/users');
     cy.validateTable('[data-cy="usersTable"]', [
       [{
-        colIndex: 0,
+        colIndex: 1,
         value: 'user0'
       }, {
-        colIndex: 2,
+        colIndex: 3,
         value: '100'
       }],
       [{
-        colIndex: 0,
+        colIndex: 1,
         value: 'user1'
       }, {
-        colIndex: 2,
+        colIndex: 3,
         value: '100'
       }],
       [{
-        colIndex: 0,
+        colIndex: 1,
         value: 'user2'
       }, {
-        colIndex: 2,
+        colIndex: 3,
         value: '100'
       }],
       [{
-        colIndex: 0,
+        colIndex: 1,
         value: 'user3'
       }, {
-        colIndex: 2,
+        colIndex: 3,
         value: '100'
       }],
       [{
-        colIndex: 0,
+        colIndex: 1,
         value: 'user4'
       }, {
-        colIndex: 2,
+        colIndex: 3,
         value: '100'
       }],
     ]);

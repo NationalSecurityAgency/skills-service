@@ -92,6 +92,9 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
+        skillsService.archiveUsers([users[2]], proj.projectId)
+        def resAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
         then:
         res.skills.size() == 10
         def skill1 = res.skills.find { it.skillId == 'skill1' }
@@ -130,6 +133,44 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         skill6.numUsersInProgress == 0
         !skill6.lastReportedTimestamp
         !skill6.lastAchievedTimestamp
+
+        resAfterArchive.skills.size() == 10
+        def skill1AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill1' }
+        skill1AfterArchive.subjectId == subj.subjectId
+        skill1AfterArchive.numUserAchieved == 1
+        skill1AfterArchive.numUsersInProgress == 3
+        new Date(skill1AfterArchive.lastReportedTimestamp) == days[5]
+        new Date(skill1AfterArchive.lastAchievedTimestamp) == days[5]
+
+        def skill2AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill2' }
+        skill2AfterArchive.numUserAchieved == 0
+        skill2AfterArchive.numUsersInProgress == 4
+        new Date(skill2AfterArchive.lastReportedTimestamp) == days[5]
+        !skill2AfterArchive.lastAchievedTimestamp
+
+        def skill3AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill3' }
+        skill3AfterArchive.numUserAchieved == 0
+        skill3AfterArchive.numUsersInProgress == 4
+        new Date(skill3AfterArchive.lastReportedTimestamp) == days[5]
+        !skill3AfterArchive.lastAchievedTimestamp
+
+        def skill4AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill4' }
+        skill4AfterArchive.numUserAchieved == 0
+        skill4AfterArchive.numUsersInProgress == 4
+        new Date(skill4AfterArchive.lastReportedTimestamp) == days[5]
+        !skill4AfterArchive.lastAchievedTimestamp
+
+        def skill5AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill5' }
+        skill5AfterArchive.numUserAchieved == 0
+        skill5AfterArchive.numUsersInProgress == 4
+        new Date(skill5AfterArchive.lastReportedTimestamp) == days[5]
+        !skill5AfterArchive.lastAchievedTimestamp
+
+        def skill6AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill6' }
+        skill6AfterArchive.numUserAchieved == 0
+        skill6AfterArchive.numUsersInProgress == 0
+        !skill6AfterArchive.lastReportedTimestamp
+        !skill6AfterArchive.lastAchievedTimestamp
     }
 
     def "skills with usage, achievements and tags"() {
@@ -205,6 +246,10 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
+        skillsService.archiveUsers([users[2]], proj.projectId)
+
+        def resAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
         then:
         res.skills.size() == 10
         def skill1 = res.skills.find { it.skillId == 'skill1' }
@@ -243,6 +288,45 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         skill6.numUsersInProgress == 0
         !skill6.lastReportedTimestamp
         !skill6.lastAchievedTimestamp
+
+
+        resAfterArchive.skills.size() == 10
+        def skill1AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill1' }
+        skill1AfterArchive.subjectId == subj.subjectId
+        skill1AfterArchive.numUserAchieved == 1
+        skill1AfterArchive.numUsersInProgress == 3
+        new Date(skill1AfterArchive.lastReportedTimestamp) == days[5]
+        new Date(skill1AfterArchive.lastAchievedTimestamp) == days[5]
+
+        def skill2AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill2' }
+        skill2AfterArchive.numUserAchieved == 0
+        skill2AfterArchive.numUsersInProgress == 4
+        new Date(skill2AfterArchive.lastReportedTimestamp) == days[5]
+        !skill2AfterArchive.lastAchievedTimestamp
+
+        def skill3AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill3' }
+        skill3AfterArchive.numUserAchieved == 0
+        skill3AfterArchive.numUsersInProgress == 4
+        new Date(skill3AfterArchive.lastReportedTimestamp) == days[5]
+        !skill3AfterArchive.lastAchievedTimestamp
+
+        def skill4AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill4' }
+        skill4AfterArchive.numUserAchieved == 0
+        skill4AfterArchive.numUsersInProgress == 4
+        new Date(skill4AfterArchive.lastReportedTimestamp) == days[5]
+        !skill4AfterArchive.lastAchievedTimestamp
+
+        def skill5AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill5' }
+        skill5AfterArchive.numUserAchieved == 0
+        skill5AfterArchive.numUsersInProgress == 4
+        new Date(skill5AfterArchive.lastReportedTimestamp) == days[5]
+        !skill5AfterArchive.lastAchievedTimestamp
+
+        def skill6AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill6' }
+        skill6AfterArchive.numUserAchieved == 0
+        skill6AfterArchive.numUsersInProgress == 0
+        !skill6AfterArchive.lastReportedTimestamp
+        !skill6AfterArchive.lastAchievedTimestamp
     }
 
     def "last reported is later than last achieved"() {
@@ -344,6 +428,10 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
+        skillsService.archiveUsers([users[0]], proj.projectId)
+
+        def resAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
         then:
         res.skills.size() == 10
         def skill1 = res.skills.find { it.skillId == 'skill1' }
@@ -382,6 +470,44 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         skill6.numUsersInProgress == 0
         !skill6.lastReportedTimestamp
         !skill6.lastAchievedTimestamp
+
+        resAfterArchive.skills.size() == 10
+        def skill1AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill1' }
+        skill1AfterArchive.subjectId == subj.subjectId
+        skill1AfterArchive.numUserAchieved == 0
+        skill1AfterArchive.numUsersInProgress == 4
+        new Date(skill1AfterArchive.lastReportedTimestamp) == days[5]
+        !skill1AfterArchive.lastAchievedTimestamp
+
+        def skill2AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill2' }
+        skill2AfterArchive.numUserAchieved == 0
+        skill2AfterArchive.numUsersInProgress == 4
+        new Date(skill2AfterArchive.lastReportedTimestamp) == days[5]
+        !skill2AfterArchive.lastAchievedTimestamp
+
+        def skill3AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill3' }
+        skill3AfterArchive.numUserAchieved == 0
+        skill3AfterArchive.numUsersInProgress == 4
+        new Date(skill3AfterArchive.lastReportedTimestamp) == days[5]
+        !skill3AfterArchive.lastAchievedTimestamp
+
+        def skill4AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill4' }
+        skill4AfterArchive.numUserAchieved == 0
+        skill4AfterArchive.numUsersInProgress == 4
+        new Date(skill4AfterArchive.lastReportedTimestamp) == days[5]
+        !skill4AfterArchive.lastAchievedTimestamp
+
+        def skill5AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill5' }
+        skill5AfterArchive.numUserAchieved == 0
+        skill5AfterArchive.numUsersInProgress == 4
+        new Date(skill5AfterArchive.lastReportedTimestamp) == days[5]
+        !skill5AfterArchive.lastAchievedTimestamp
+
+        def skill6AfterArchive = resAfterArchive.skills.find { it.skillId == 'p2skill_0' }
+        skill6AfterArchive.numUserAchieved == 0
+        skill6AfterArchive.numUsersInProgress == 0
+        !skill6AfterArchive.lastReportedTimestamp
+        !skill6AfterArchive.lastAchievedTimestamp
     }
 
     def "skills with usage and achievements - only catalog skills"() {
@@ -431,6 +557,9 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
+        skillsService.archiveUsers([users[2]], proj.projectId)
+        def resAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
         then:
         res.skills.size() == 10
         def skill1 = res.skills.find { it.skillId == 'skill1' }
@@ -469,6 +598,44 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         skill6.numUsersInProgress == 0
         !skill6.lastReportedTimestamp
         !skill6.lastAchievedTimestamp
+
+        resAfterArchive.skills.size() == 10
+        def skill1AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill1' }
+        skill1AfterArchive.subjectId == subj.subjectId
+        skill1AfterArchive.numUserAchieved == 1
+        skill1AfterArchive.numUsersInProgress == 3
+        new Date(skill1AfterArchive.lastReportedTimestamp) == days[5]
+        new Date(skill1AfterArchive.lastAchievedTimestamp) == days[5]
+
+        def skill2AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill2' }
+        skill2AfterArchive.numUserAchieved == 0
+        skill2AfterArchive.numUsersInProgress == 4
+        new Date(skill2AfterArchive.lastReportedTimestamp) == days[5]
+        !skill2AfterArchive.lastAchievedTimestamp
+
+        def skill3AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill3' }
+        skill3AfterArchive.numUserAchieved == 0
+        skill3AfterArchive.numUsersInProgress == 4
+        new Date(skill3AfterArchive.lastReportedTimestamp) == days[5]
+        !skill3AfterArchive.lastAchievedTimestamp
+
+        def skill4AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill4' }
+        skill4AfterArchive.numUserAchieved == 0
+        skill4AfterArchive.numUsersInProgress == 4
+        new Date(skill4AfterArchive.lastReportedTimestamp) == days[5]
+        !skill4AfterArchive.lastAchievedTimestamp
+
+        def skill5AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill5' }
+        skill5AfterArchive.numUserAchieved == 0
+        skill5AfterArchive.numUsersInProgress == 4
+        new Date(skill5AfterArchive.lastReportedTimestamp) == days[5]
+        !skill5AfterArchive.lastAchievedTimestamp
+
+        def skill6AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill6' }
+        skill6AfterArchive.numUserAchieved == 0
+        skill6AfterArchive.numUsersInProgress == 0
+        !skill6AfterArchive.lastReportedTimestamp
+        !skill6AfterArchive.lastAchievedTimestamp
     }
 
     def "metrics endpoint returns proper counts for imported skills"() {
@@ -502,6 +669,10 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         Map props = [:]
         when:
         def res = skillsService.getMetricsData(p2.projectId, "skillUsageNavigatorChartBuilder", props)
+
+        skillsService.archiveUsers([users[2]], p2.projectId)
+        def resAfterArchive = skillsService.getMetricsData(p2.projectId, metricsId, props)
+
         then:
         res.skills[0].skillName == p1Skills[0].name
         res.skills[0].skillId == p1Skills[0].skillId
@@ -510,6 +681,14 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         res.skills[0].numUserAchieved == 2
         res.skills[0].lastReportedTimestamp == dates[4].time
         res.skills[0].lastAchievedTimestamp == dates[3].time
+
+        resAfterArchive.skills[0].skillName == p1Skills[0].name
+        resAfterArchive.skills[0].skillId == p1Skills[0].skillId
+        resAfterArchive.skills[0].isReusedSkill == false
+        resAfterArchive.skills[0].numUsersInProgress == 1
+        resAfterArchive.skills[0].numUserAchieved == 1
+        resAfterArchive.skills[0].lastReportedTimestamp == dates[4].time
+        resAfterArchive.skills[0].lastAchievedTimestamp == dates[1].time
     }
 
     def "metrics endpoint returns proper counts for imported group skills"() {
@@ -546,6 +725,10 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         Map props = [:]
         when:
         def res = skillsService.getMetricsData(p2.projectId, "skillUsageNavigatorChartBuilder", props)
+
+        skillsService.archiveUsers([users[2]], p2.projectId)
+        def resAfterArchive = skillsService.getMetricsData(p2.projectId, metricsId, props)
+
         then:
         res.skills[0].skillName == p1Skills[0].name
         res.skills[0].skillId == p1Skills[0].skillId
@@ -554,5 +737,13 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         res.skills[0].numUserAchieved == 2
         res.skills[0].lastReportedTimestamp == dates[4].time
         res.skills[0].lastAchievedTimestamp == dates[3].time
+
+        resAfterArchive.skills[0].skillName == p1Skills[0].name
+        resAfterArchive.skills[0].skillId == p1Skills[0].skillId
+        resAfterArchive.skills[0].isReusedSkill == false
+        resAfterArchive.skills[0].numUsersInProgress == 1
+        resAfterArchive.skills[0].numUserAchieved == 1
+        resAfterArchive.skills[0].lastReportedTimestamp == dates[4].time
+        resAfterArchive.skills[0].lastAchievedTimestamp == dates[1].time
     }
 }

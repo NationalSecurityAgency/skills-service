@@ -297,8 +297,10 @@ class RankingLoader {
             Integer numUsers
             if (tagKey && tagFilter) {
                 numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevelAndUserTag(projectId, levelMeta.level, tagKey, tagFilter)
-            } else {
+            } else if (subjectId) {
                 numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, subjectId, levelMeta.level)
+            } else {
+                numUsers = achievedLevelRepository.countByProjectIdAndLevel(projectId, levelMeta.level)
             }
             new UsersPerLevel(level: levelMeta.level, numUsers: numUsers ?: 0)
         }

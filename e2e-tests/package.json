@@ -30,7 +30,7 @@
     "cy:run:oauth": "TZ=UTC  cypress run --browser chrome --env oauthMode=true --config video=true",
     "cy:run:accessibility": "TZ=UTC  cypress run --browser chrome --env enableLighthouse=true,enableAvgLighthouseScore=true --browser chrome --headless --spec \"cypress/e2e/accessibility/*.js\" --config video=true",
     "cy:run:dev": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173  --env visualRegressionType=base",
-    "cy:run:dev:specificTest": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173 --spec \"cypress/e2e/client-display/client-display-theme-components_spec.js\" --env visualRegressionType=base",
+    "cy:run:dev:specificTest": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173 --spec \"cypress/e2e/users_spec.js\" --env visualRegressionType=base",
     "cy:run:dev:updateSnapshotForSpecificTests": "TZ=UTC cypress run --browser chrome --env visualRegressionType=base --config baseUrl=http://localhost:5173 --spec \"cypress/e2e/metrics/skillMetrics_spec.js\"",
     "cy:run:dev:metrics": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173 --spec \"cypress/e2e/metrics/projectMetrics_projects_spec.js,cypress/e2e/metrics/projectMetrics_subjects_spec.js,cypress/e2e/metrics/skillMetrics_spec.js,cypress/e2e/metrics/subjectMetrics_spec.js\"",
     "cy:run:dev:updateAdminSnapshots": "TZ=UTC cypress run --browser chrome --config baseUrl=http://localhost:5173  --env visualRegressionType=base --spec \"cypress/e2e/markdown_spec.js\"",

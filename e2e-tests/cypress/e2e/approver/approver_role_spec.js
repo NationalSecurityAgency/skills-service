@@ -384,6 +384,8 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="nav-Issues"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="nav-Access"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="nav-Settings"]').should(`${chainerPrepend}exist`)
+
+            cy.get('[data-cy="archiveUsersTableBtn"]').should(`${chainerPrepend}exist`)
         }
         runCheck(2)
         runCheck(1, 'View','not.')

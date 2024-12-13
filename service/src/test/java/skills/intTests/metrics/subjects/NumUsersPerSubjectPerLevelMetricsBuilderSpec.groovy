@@ -152,6 +152,11 @@ class NumUsersPerSubjectPerLevelMetricsBuilderSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, [:])
         def proj2Res = skillsService.getMetricsData(proj2.projectId, metricsId, [:])
+
+        skillsService.archiveUsers([users[0], users[5]], proj.projectId)
+        def resAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, [:])
+        def proj2ResAfterArchive = skillsService.getMetricsData(proj2.projectId, metricsId, [:])
+
         then:
         res.size() == 1
         def subj1Res = res.find( { it.subject == 'Test Subject #1'})
@@ -181,6 +186,35 @@ class NumUsersPerSubjectPerLevelMetricsBuilderSpec extends DefaultIntSpec {
         subj2Res.numUsersPerLevels[3].numberUsers == 0
         subj2Res.numUsersPerLevels[4].level == 5
         subj2Res.numUsersPerLevels[4].numberUsers == 0
+
+        resAfterArchive.size() == 1
+        def subj1ResAfterArchive= resAfterArchive.find( { it.subject == 'Test Subject #1'})
+        subj1ResAfterArchive
+        subj1ResAfterArchive.numUsersPerLevels.size() == 5
+        subj1ResAfterArchive.numUsersPerLevels[0].level == 1
+        subj1ResAfterArchive.numUsersPerLevels[0].numberUsers == 1
+        subj1ResAfterArchive.numUsersPerLevels[1].level == 2
+        subj1ResAfterArchive.numUsersPerLevels[1].numberUsers == 1
+        subj1ResAfterArchive.numUsersPerLevels[2].level == 3
+        subj1ResAfterArchive.numUsersPerLevels[2].numberUsers == 3
+        subj1ResAfterArchive.numUsersPerLevels[3].level == 4
+        subj1ResAfterArchive.numUsersPerLevels[3].numberUsers == 0
+        subj1ResAfterArchive.numUsersPerLevels[4].level == 5
+        subj1ResAfterArchive.numUsersPerLevels[4].numberUsers == 0
+
+        def subj2ResAfterArchive = proj2ResAfterArchive.find( { it.subject == 'Test Subject #1'})
+        subj2ResAfterArchive
+        subj2ResAfterArchive.numUsersPerLevels.size() == 5
+        subj2ResAfterArchive.numUsersPerLevels[0].level == 1
+        subj2ResAfterArchive.numUsersPerLevels[0].numberUsers == 1
+        subj2ResAfterArchive.numUsersPerLevels[1].level == 2
+        subj2ResAfterArchive.numUsersPerLevels[1].numberUsers == 0
+        subj2ResAfterArchive.numUsersPerLevels[2].level == 3
+        subj2ResAfterArchive.numUsersPerLevels[2].numberUsers == 0
+        subj2ResAfterArchive.numUsersPerLevels[3].level == 4
+        subj2ResAfterArchive.numUsersPerLevels[3].numberUsers == 0
+        subj2ResAfterArchive.numUsersPerLevels[4].level == 5
+        subj2ResAfterArchive.numUsersPerLevels[4].numberUsers == 0
     }
 
     def "num users per level - more than just default levels"() {
@@ -215,9 +249,10 @@ class NumUsersPerSubjectPerLevelMetricsBuilderSpec extends DefaultIntSpec {
 
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, [:])
-        res.each {
-            println JsonOutput.toJson(it)
-        }
+
+        skillsService.archiveUsers([users[0], users[5]], proj.projectId)
+        def resAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, [:])
+
         then:
         res.size() == 2
         def subj1Res = res.find( { it.subject == 'Test Subject #1'})
@@ -251,6 +286,40 @@ class NumUsersPerSubjectPerLevelMetricsBuilderSpec extends DefaultIntSpec {
         subj2Res.numUsersPerLevels[3].numberUsers == 0
         subj2Res.numUsersPerLevels[4].level == 5
         subj2Res.numUsersPerLevels[4].numberUsers == 0
+
+
+        resAfterArchive.size() == 2
+        def subj1ResAfterArchive = resAfterArchive.find( { it.subject == 'Test Subject #1'})
+        subj1ResAfterArchive
+        subj1ResAfterArchive.numUsersPerLevels.size() == 7
+        subj1ResAfterArchive.numUsersPerLevels[0].level == 1
+        subj1ResAfterArchive.numUsersPerLevels[0].numberUsers == 1
+        subj1ResAfterArchive.numUsersPerLevels[1].level == 2
+        subj1ResAfterArchive.numUsersPerLevels[1].numberUsers == 1
+        subj1ResAfterArchive.numUsersPerLevels[2].level == 3
+        subj1ResAfterArchive.numUsersPerLevels[2].numberUsers == 3
+        subj1ResAfterArchive.numUsersPerLevels[3].level == 4
+        subj1ResAfterArchive.numUsersPerLevels[3].numberUsers == 0
+        subj1ResAfterArchive.numUsersPerLevels[4].level == 5
+        subj1ResAfterArchive.numUsersPerLevels[4].numberUsers == 0
+        subj1ResAfterArchive.numUsersPerLevels[5].level == 6
+        subj1ResAfterArchive.numUsersPerLevels[5].numberUsers == 1
+        subj1ResAfterArchive.numUsersPerLevels[6].level == 7
+        subj1ResAfterArchive.numUsersPerLevels[6].numberUsers == 2
+
+        def subj2ResAfterArchive = resAfterArchive.find( { it.subject == 'Test Subject #2'})
+        subj2ResAfterArchive
+        subj2ResAfterArchive.numUsersPerLevels.size() == 5
+        subj2ResAfterArchive.numUsersPerLevels[0].level == 1
+        subj2ResAfterArchive.numUsersPerLevels[0].numberUsers == 1
+        subj2ResAfterArchive.numUsersPerLevels[1].level == 2
+        subj2ResAfterArchive.numUsersPerLevels[1].numberUsers == 0
+        subj2ResAfterArchive.numUsersPerLevels[2].level == 3
+        subj2ResAfterArchive.numUsersPerLevels[2].numberUsers == 0
+        subj2ResAfterArchive.numUsersPerLevels[3].level == 4
+        subj2ResAfterArchive.numUsersPerLevels[3].numberUsers == 0
+        subj2ResAfterArchive.numUsersPerLevels[4].level == 5
+        subj2ResAfterArchive.numUsersPerLevels[4].numberUsers == 0
     }
 
     private void achieveLevelForUsers(List<String> users, List<Map> skills, int numUsers, int level, String type = "Overall") {

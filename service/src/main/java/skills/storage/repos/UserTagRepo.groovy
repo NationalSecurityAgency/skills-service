@@ -54,7 +54,8 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
             )
             and up.skillRefId is not null 
             and ut.key = ?2 
-            and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))   
+            and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))
+            and not exists (select 1 from ArchivedUser au where au.userId = up.userId and au.projectId = ?1)   
         group by ut.value''')
     List<UserTagCount> findDistinctUserIdByProjectIdAndUserTag(String projectId, String tagKey, String tagFilter, Pageable pageable)
 
@@ -69,7 +70,8 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
             )  
             and up.skillRefId is not null 
             and ut.key = ?2 
-            and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))   ''')
+            and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))
+            and not exists (select 1 from ArchivedUser au where au.userId = up.userId and au.projectId = ?1)''')
     Integer countDistinctUserTag(String projectId, String tagKey, String tagFilter)
 
 }

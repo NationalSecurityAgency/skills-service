@@ -294,6 +294,11 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 3
         def resPage3 = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
+        skillsService.archiveUsers([users[2]], proj.projectId)
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 15
+        def resultAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
         then:
         res.totalNumItems == 14
         def items = res.items
@@ -313,6 +318,21 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
                                         users[3],
                                         users[3],
                                         users[3],]
+
+        resultAfterArchive.totalNumItems == 9
+        def itemsAfterArchive = resultAfterArchive.items
+        itemsAfterArchive.collect { it.userId } == [users[0],
+                                        users[0],
+                                        users[0],
+                                        users[1],
+                                        users[1],
+
+                                        users[1],
+
+                                        users[3],
+                                        users[3],
+                                        users[3],]
+
 
         resPage1.items.collect { it.userId } == [
                 users[0],

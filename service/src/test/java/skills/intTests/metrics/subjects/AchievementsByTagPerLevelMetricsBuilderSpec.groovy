@@ -15,7 +15,6 @@
  */
 package skills.intTests.metrics.skill
 
-
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
@@ -72,6 +71,9 @@ class AchievementsByTagPerLevelMetricsBuilderSpec extends DefaultIntSpec {
         def props = ["subjectId": subj.subjectId, "userTagKey": "someTag"]
         def result = builder.build(proj.projectId, builder.id, props)
 
+        skillsService.archiveUsers([users[2]], proj.projectId)
+        def resAfterArchive = builder.build(proj.projectId, builder.id, props)
+
         then:
         result.totalLevels == 5
         result.data[0].value == [1: 1, 2: 1, 3: 1, 4: 0, 5: 1]
@@ -80,6 +82,14 @@ class AchievementsByTagPerLevelMetricsBuilderSpec extends DefaultIntSpec {
         result.data[1].value == [1: 2, 2: 0, 3: 0, 4: 1]
         result.data[1].tag == 'ABCDE'
         result.data[1].totalUsers == 3
+
+        resAfterArchive.totalLevels == 5
+        resAfterArchive.data[0].value == [1: 1, 2: 1, 3: 1, 4: 0, 5: 1]
+        resAfterArchive.data[0].tag == 'DEFGH'
+        resAfterArchive.data[0].totalUsers == 4
+        resAfterArchive.data[1].value == [1: 1, 2: 0, 3: 0, 4: 1]
+        resAfterArchive.data[1].tag == 'ABCDE'
+        resAfterArchive.data[1].totalUsers == 2
     }
 
     def "limits to top 20 results"() {
@@ -185,6 +195,10 @@ class AchievementsByTagPerLevelMetricsBuilderSpec extends DefaultIntSpec {
         def props2 = ["subjectId": subj2.subjectId, "userTagKey": "someTag"]
         def subj2result = builder.build(proj.projectId, builder.id, props2)
 
+        skillsService.archiveUsers([users[0], users[5]], proj.projectId)
+        def subj1resultAfterArchive = builder.build(proj.projectId, builder.id, props)
+        def subj2resultAfterArchive = builder.build(proj.projectId, builder.id, props2)
+
         then:
         subj1result.totalLevels == 3
         subj1result.data[0].value == [1: 2, 2: 1]
@@ -200,5 +214,20 @@ class AchievementsByTagPerLevelMetricsBuilderSpec extends DefaultIntSpec {
         subj2result.data[1].value == [1: 1]
         subj2result.data[1].tag == 'ABCDE'
         subj2result.data[1].totalUsers == 1
+
+        subj1resultAfterArchive.totalLevels == 1
+        subj1resultAfterArchive.data[0].value == [1: 2]
+        subj1resultAfterArchive.data[0].tag == 'DEFGH'
+        subj1resultAfterArchive.data[0].totalUsers == 2
+        subj1resultAfterArchive.data[1].value == [1: 1]
+        subj1resultAfterArchive.data[1].tag == 'ABCDE'
+        subj1resultAfterArchive.data[1].totalUsers == 1
+        subj2resultAfterArchive.totalLevels == 1
+        subj2resultAfterArchive.data[0].value == [1: 2]
+        subj2resultAfterArchive.data[0].tag == 'DEFGH'
+        subj2resultAfterArchive.data[0].totalUsers == 2
+        subj2resultAfterArchive.data[1].value == [1: 1]
+        subj2resultAfterArchive.data[1].tag == 'ABCDE'
+        subj2resultAfterArchive.data[1].totalUsers == 1
     }
 }
