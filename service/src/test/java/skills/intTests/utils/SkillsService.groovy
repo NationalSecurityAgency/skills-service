@@ -358,6 +358,10 @@ class SkillsService {
         wsHelper.adminGet(getProjectUrl(projectId) + "/subjects")
     }
 
+    def getSubjectsAndSkillGroups(String projectId) {
+        wsHelper.adminGet(getProjectUrl(projectId) + "/subjectsAndSkillsGroups")
+    }
+
     def subjectNameExists(Map props){
         wsHelper.adminPost("/projects/${props.projectId}/subjectNameExists", [name:props.subjectName])?.body
     }

@@ -229,6 +229,7 @@ class SubjAdminService {
     @Transactional(readOnly = true)
     List<SubjectOrSkillGroupResult> getSubjectsAndSkillGroups(String projectId) {
         List<SkillDef> subjectsAndGroups = skillDefRepo.findAllByProjectIdAndTypeIn(projectId, [SkillDef.ContainerType.Subject, SkillDef.ContainerType.SkillsGroup])
+
         return subjectsAndGroups?.collect({
             new SubjectOrSkillGroupResult(
                     skillId: it.skillId,

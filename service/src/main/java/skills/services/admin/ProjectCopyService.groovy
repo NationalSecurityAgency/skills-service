@@ -156,7 +156,7 @@ class ProjectCopyService {
             ProjDef otherProject = loadProject(otherProjectId)
             validateProjectsCommunityStatus(fromProject, otherProject)
             loadSubject(otherProject.projectId, otherSubjectId)
-            validateSkillGroupExist(otherProject.projectId, otherGroupId)
+            loadSkillGroup(otherProject.projectId, otherGroupId)
             itemsToCopy = getSkillsToCopy(projectId, skillIds)
         } catch (SkillException skillException) {
             return new CopyValidationRes(isAllowed: false, validationErrors: [skillException.getMessage()?.toString()])
@@ -177,11 +177,19 @@ class ProjectCopyService {
             validateProjectsCommunityStatus(fromProject, otherProject)
             validateUserIsAndAdminOfDestProj(otherProject, projectId)
 
+            if (otherGroupId) {
+                SkillDef skillGroup = loadSkillGroup(otherProject.projectId, otherGroupId)
+                if (!otherSubjectId) {
+                    List<SkillDef> subjectParent = skillRelDefRepo.findParentByChildIdAndTypes(skillGroup.id, [SkillRelDef.RelationshipType.RuleSetDefinition])
+                    if (subjectParent) {
+                        otherSubjectId = subjectParent.first().skillId
+                    }
+                }
+            }
+
             SkillDefWithExtra destinationSubject = loadSubject(otherProject.projectId, otherSubjectId)
 
             List<SkillDefWithExtra> skillDefs = getSkillsToCopy(projectId, skillIds)
-
-            validateSkillGroupExist(otherProject.projectId, otherGroupId)
 
             List<SkillInfo> allCollectedSkills = []
             List<SkillDefWithExtra> skillDefsSorted = skillDefs.sort { skillIds.indexOf(it.skillId) }
@@ -205,13 +213,17 @@ class ProjectCopyService {
     }
 
     @Profile
-    private void validateSkillGroupExist(String projectId, String groupId) {
+    private SkillDef loadSkillGroup(String projectId, String groupId) {
         if (groupId) {
             SkillDef skillGroup = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup)
             if (!skillGroup) {
                 throw new SkillException("Group with id [${groupId}] does not exist.", projectId, null, ErrorCode.BadParam)
             }
+
+            return skillGroup
         }
+
+        return null
     }
 
     @Profile

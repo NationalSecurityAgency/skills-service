@@ -108,13 +108,13 @@ const onProjectChanged = (changedProj) => {
     }
 
     if (isSelectedSkillsCopy.value) {
-
-
+      loadingOtherSubjectsAndGroups.value = true
       return SubjectsService.getSubjectsAndSkillGroups(selectedProject.value.projectId)
           .then((subjectsAndGroups) => {
             otherSubjectsAndGroups.value = subjectsAndGroups;
           }).finally(() => {
             showSubjectAndGroupSelector.value = true
+            loadingOtherSubjectsAndGroups.value = false
           })
     }
   }
@@ -122,6 +122,7 @@ const onProjectChanged = (changedProj) => {
 
 const showSubjectAndGroupSelector = ref(false)
 const otherSubjectsAndGroups = ref([])
+const loadingOtherSubjectsAndGroups = ref(false)
 const selectedSubjectOrGroup = ref(null)
 const onSubjectOrGroupChanged = ((changedSubjOrGroup) => {
   if (changedSubjOrGroup) {
@@ -136,7 +137,6 @@ const onSubjectOrGroupChanged = ((changedSubjOrGroup) => {
         })
   }
 })
-
 
 const hasProjects = computed(() => otherProjects.value?.length > 0)
 const showOkButton = computed(() => !copied.value && (hasProjects.value || loadingOtherProjects.value))
@@ -187,7 +187,8 @@ const showOkButton = computed(() => !copied.value && (hasProjects.value || loadi
           </Dropdown>
 
       </div>
-      <div v-if="isSelectedSkillsCopy && wasProjectSelected" class="flex flex-column gap-2 mt-5">
+      <skills-spinner  :is-loading="loadingOtherSubjectsAndGroups" class="mt-4"/>
+      <div v-if="isSelectedSkillsCopy && wasProjectSelected && !loadingOtherSubjectsAndGroups" class="flex flex-column gap-2 mt-5">
         <label for="selectASubjectOrGroupDropdown">Destination Subject or Skills Group:</label>
         <Dropdown id="selectASubjectOrGroupDropdown"
                   :options="otherSubjectsAndGroups"
@@ -222,7 +223,12 @@ const showOkButton = computed(() => !copied.value && (hasProjects.value || loadi
         </ul>
 
       </Message>
-      <Message v-if="canCopy" :closable="false" severity="success" data-cy="validationPassedMsg">Validation Passed! This subject is eligible to be copied to <b>{{ selectedProject.name }}</b> project</Message>
+      <Message v-if="canCopy && isSubjectCopy" :closable="false" severity="success" data-cy="validationPassedMsg">
+        Validation Passed! This subject is eligible to be copied to <b>{{ selectedProject.name }}</b> project
+      </Message>
+      <Message v-if="canCopy && isSelectedSkillsCopy" :closable="false" severity="success" data-cy="validationPassedMsg">
+        Validation Passed! <Tag>{{ selectedSkills.length}}</Tag> skill(s) are eligible to be copied to <b>{{ selectedProject.name }}</b> project
+      </Message>
     </BlockUI>
     <Message v-if="copied" severity="success" :closable="false">Subject copied to <b>{{ selectedProject.name }}</b></Message>
   </SkillsDialog>
