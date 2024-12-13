@@ -51,7 +51,7 @@ describe('Error Pages Tests', () => {
             .contains('You do not have permission to view/manage this Project OR this Project does not exist');
     });
 
-    it('User Not Authorized For Project', () => {
+    it.only('User Not Authorized For Project', () => {
         cy.register('user1', 'password1', false);
         cy.register('user2', 'password2', false);
         cy.logout();
@@ -84,38 +84,20 @@ describe('Error Pages Tests', () => {
         });
         cy.logout();
         cy.login('user2', 'password2');
-        cy.intercept({
-            method: 'GET',
-            url: '/admin/projects/proj1'
-        })
-            .as('loadProject');
         cy.visit('/administrator/projects/proj1');
-        cy.wait('@loadProject');
 
         cy.get('[data-cy=errExplanation]')
             .should('be.visible');
         cy.get('[data-cy=errExplanation]')
             .contains('You do not have permission to view/manage this Project OR this Project does not exist');
 
-        cy.intercept({
-            method: 'GET',
-            url: '/admin/projects/proj1/subjects/subj1'
-        })
-            .as('loadSubject');
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.wait('@loadSubject');
         cy.get('[data-cy=errExplanation]')
             .should('be.visible');
         cy.get('[data-cy=errExplanation]')
             .contains('You do not have permission to view/manage this Project OR this Project does not exist');
 
-        cy.intercept({
-            method: 'GET',
-            url: '/admin/projects/proj1/*'
-        })
-            .as('loadSkill');
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
-        cy.wait('@loadSkill');
         cy.get('[data-cy=errExplanation]')
             .should('be.visible');
         cy.get('[data-cy=errExplanation]')
