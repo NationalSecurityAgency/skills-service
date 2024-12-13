@@ -1193,6 +1193,195 @@ describe('Client Display Skills Groups Tests', () => {
             .contains('1 / 2 Skills');
     });
 
+    it('group info is shown on skill page if not toggled off', () => {
+        let groupDescription = "This is where cool description"
+        cy.createSkillsGroup(1, 1, 1, {
+            numSkillsRequired: 1,
+            description: groupDescription
+        });
+        cy.addSkillToGroup(1, 1, 1, 1, {
+            pointIncrement: 100,
+            numPerformToCompletion: 2
+        });
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: 150,
+            numPerformToCompletion: 2
+        });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1', true);
+
+        cy.get('[data-cy="groupInformationSection"]').should('exist');
+        cy.get('[data-cy="toggleGroupDescription"]').click();
+        cy.get('[data-cy="groupDescriptionSection"]').should('exist');
+        cy.get('[data-cy="groupDescriptionSection"]').contains(groupDescription);
+    });
+
+    it('group info is not shown on skill page if setting is toggled', () => {
+        let groupDescription = "This is where cool description"
+        cy.createSkillsGroup(1, 1, 1, {
+            numSkillsRequired: 1,
+            description: groupDescription
+        });
+
+        cy.addSkillToGroup(1, 1, 1, 1, {
+            pointIncrement: 100,
+            numPerformToCompletion: 2
+        });
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: 150,
+            numPerformToCompletion: 2
+        });
+
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            {
+                value: 'false',
+                setting: 'group-info-on-skill-page',
+                projectId: 'proj1',
+            },
+        ]);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1', true);
+
+        cy.get('[data-cy="groupInformationSection"]').should('exist');
+        cy.get('[data-cy="groupDescriptionSection"]').should('not.exist');
+
+        cy.get('[data-cy="toggleGroupDescription"]').click();
+        cy.get('[data-cy="groupDescriptionSection"]').should('exist');
+        cy.get('[data-cy="groupDescriptionSection"]').contains(groupDescription);
+
+        cy.get('[data-cy="toggleGroupDescription"]').click();
+        cy.get('[data-cy="groupDescriptionSection"]').should('not.exist');
+    });
+
+    it('group info is shown on skill page if always show descriptions is toggled', () => {
+        let groupDescription = "This is where cool description"
+        cy.createSkillsGroup(1, 1, 1, {
+            numSkillsRequired: 1,
+            description: groupDescription
+        });
+
+        cy.addSkillToGroup(1, 1, 1, 1, {
+            pointIncrement: 100,
+            numPerformToCompletion: 2
+        });
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: 150,
+            numPerformToCompletion: 2
+        });
+
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            {
+                value: 'false',
+                setting: 'group-info-on-skill-page',
+                projectId: 'proj1',
+            },
+            {
+                value: 'true',
+                setting: 'group-descriptions',
+                projectId: 'proj1',
+            },
+        ]);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1', true);
+
+        cy.get('[data-cy="groupInformationSection"]').should('exist');
+
+        cy.get('[data-cy="toggleGroupDescription"]').should('not.exist');
+        cy.get('[data-cy="groupDescriptionSection"]').should('exist');
+        cy.get('[data-cy="groupDescriptionSection"]').contains(groupDescription);
+
+    });
+
+    it('group info is not shown on skill page if always show descriptions is toggled but group info on skill page is not', () => {
+        let groupDescription = "This is where cool description"
+        cy.createSkillsGroup(1, 1, 1, {
+            numSkillsRequired: 1,
+            description: groupDescription
+        });
+
+        cy.addSkillToGroup(1, 1, 1, 1, {
+            pointIncrement: 100,
+            numPerformToCompletion: 2
+        });
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: 150,
+            numPerformToCompletion: 2
+        });
+
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            {
+                value: 'true',
+                setting: 'group-info-on-skill-page',
+                projectId: 'proj1',
+            },
+            {
+                value: 'true',
+                setting: 'group-descriptions',
+                projectId: 'proj1',
+            },
+        ]);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1', true);
+
+        cy.get('[data-cy="groupInformationSection"]').should('not.exist');
+        cy.get('[data-cy="toggleGroupDescription"]').should('not.exist');
+        cy.get('[data-cy="groupDescriptionSection"]').should('not.exist');
+
+    });
+
+    it('test full setting process', () => {
+        let groupDescription = "This is where cool description"
+        cy.createSkillsGroup(1, 1, 1, {
+            numSkillsRequired: 1,
+            description: groupDescription
+        });
+
+        cy.addSkillToGroup(1, 1, 1, 1, {
+            pointIncrement: 100,
+            numPerformToCompletion: 2
+        });
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: 150,
+            numPerformToCompletion: 2
+        });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1', true);
+
+        cy.get('[data-cy="groupInformationSection"]').should('exist');
+        cy.get('[data-cy="toggleGroupDescription"]').should('exist');
+        cy.get('[data-cy="toggleGroupDescription"]').click();
+        cy.get('[data-cy="groupDescriptionSection"]').should('exist');
+        cy.get('[data-cy="groupDescriptionSection"]').contains(groupDescription);
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.get('[data-cy="groupInfoOnSkillPageSwitch"]').click();
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveSettingsBtn"]').click();
+
+        cy.cdVisit('/subjects/subj1/skills/skill1', true);
+
+        cy.get('[data-cy="groupInformationSection"]').should('not.exist');
+        cy.get('[data-cy="toggleGroupDescription"]').should('not.exist');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.get('[data-cy="groupDescriptionsSwitch"]').click();
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveSettingsBtn"]').click();
+
+        cy.cdVisit('/subjects/subj1/skills/skill1', true);
+        cy.get('[data-cy="groupInformationSection"]').should('not.exist');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.get('[data-cy="groupInfoOnSkillPageSwitch"]').click();
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveSettingsBtn"]').click();
+
+        cy.cdVisit('/subjects/subj1/skills/skill1', true);
+        cy.get('[data-cy="groupInformationSection"]').should('exist');
+        cy.get('[data-cy="groupDescriptionSection"]').should('exist');
+        cy.get('[data-cy="groupDescriptionSection"]').contains(groupDescription);
+
+    });
 });
 
 

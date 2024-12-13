@@ -544,6 +544,11 @@ class SkillsLoader {
 
         def badges = skillDefRepo.findAllBadgesForSkill([skillId], crossProjectId ?: projectId);
 
+        String groupName = null
+        if(skillDef.groupId) {
+            groupName = skillDefRepo.getSkillNameByProjectIdAndSkillId(projectId, skillDef.groupId)?.skillName
+        }
+
         String nextSkillId = null;
         String prevSkillId = null;
         int totalSkills = 0;
@@ -674,7 +679,9 @@ class SkillsLoader {
                 isMotivationalSkill: isMotivationalSkill,
                 daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
                 mostRecentlyPerformedOn: mostRecentlyPerformedOn,
-                lastExpirationDate: lastExpirationDate
+                lastExpirationDate: lastExpirationDate,
+                groupName: groupName,
+                groupSkillId: skillDef.groupId
         )
     }
 
@@ -793,6 +800,10 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
+    Map<String, String> loadGroupDescription(String projectId, String groupId) {
+        return loadDescription(projectId, groupId)
+    }
+    @Transactional(readOnly = true)
     List<SkillDescription> loadSubjectDescriptions(String projectId, String subjectId, String userId, Integer version = -1) {
         return loadDescriptions(projectId, subjectId, userId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
     }
@@ -803,6 +814,15 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     List<SkillDescription> loadGlobalBadgeDescriptions(String badgeId, String userId,Integer version = -1) {
         return loadDescriptions(null, badgeId, userId, SkillRelDef.RelationshipType.BadgeRequirement, version)
+    }
+
+    private Map<String, String> loadDescription(String projectId, String skillId) {
+        List<SkillDefWithExtraRepo.SkillIdAndDesc> description = skillDefWithExtraRepo.findDescriptionBySkillIdIn(projectId, [skillId])
+        if(description.size() > 0) {
+            return ['description': description[0]?.description?.toString()];
+        } else {
+            return null
+        }
     }
 
     private List<SkillDescription> loadDescriptions(String projectId, String subjectId,  String userId, SkillRelDef.RelationshipType relationshipType, int version) {

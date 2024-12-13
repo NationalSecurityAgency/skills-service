@@ -78,6 +78,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
 
   const maxSelfReportMessageLength = computed(() => config.value.maxSelfReportMessageLength)
   const groupDescriptionsOn = computed(() => config.value.groupDescriptionsOn)
+  const groupInfoOnSkillPage = computed(() => config.value.groupInfoOnSkillPage)
   const disableAchievementsCelebrations = computed(() => config.value.disableAchievementsCelebrations)
 
   const afterPropsAreSet = () => {
@@ -106,6 +107,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     isInIframe,
     maxSelfReportMessageLength,
     groupDescriptionsOn,
+    groupInfoOnSkillPage,
     projectDisplayName,
     subjectDisplayName,
     groupDisplayName,

@@ -17,6 +17,7 @@ package skills.skillLoading.model
 
 import skills.storage.model.SimpleBadgeRes
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefWithExtra
 
 class SkillSummary extends SkillSummaryParent {
 
@@ -52,4 +53,7 @@ class SkillSummary extends SkillSummaryParent {
     Date mostRecentlyPerformedOn
     Date expirationDate
     Date lastExpirationDate
+
+    String groupName
+    String groupSkillId
 }

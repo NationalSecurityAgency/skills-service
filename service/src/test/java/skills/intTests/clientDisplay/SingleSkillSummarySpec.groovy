@@ -61,6 +61,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         summary.points == 0
         summary.todaysPoints == 0
         summary.description.description == "This skill [skill2] belongs to project [TestProject1]"
+        !summary.groupName
     }
 
     def "load single skill summary with some users points"() {
@@ -1327,4 +1328,57 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         skillDefRepo.findById(skillRefId).get().skillId
     }
 
+    def "load single skill summary with group information"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        def summary = skillsService.getSingleSkillSummaryWithSubject("user1", proj.projectId, subj.subjectId, skills.get(1).skillId)
+
+        then:
+        !summary.crossProject
+        summary.projectId == proj.projectId
+        summary.projectName == proj.name
+        summary.skillId == skills.get(1).skillId
+        summary.skill == skills.get(1).name
+        summary.pointIncrement == skills.get(1).pointIncrement
+        summary.maxOccurrencesWithinIncrementInterval == skills.get(1).numMaxOccurrencesIncrementInterval
+        summary.totalPoints == skills.get(1).pointIncrement * skills.get(1).numPerformToCompletion
+        summary.points == 0
+        summary.todaysPoints == 0
+        summary.description.description == "This skill [skill2] belongs to project [TestProject1]"
+        summary.groupName == skillsGroup.name
+        summary.groupSkillId == skillsGroup.skillId
+    }
+
+    def "load description for group"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        String description = skillsService.getSkillDescription(proj.projectId, skillsGroup.skillId).description
+
+        then:
+        description == "This skill [skill5] belongs to project [TestProject1]"
+    }
 }

@@ -25,6 +25,8 @@ import {useSkillsDisplaySubjectState} from '@/skills-display/stores/UseSkillsDis
 import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import Prerequisites from '@/skills-display/components/skill/prerequisites/Prerequisites.vue'
 import SkillAchievementMsg from "@/skills-display/components/progress/celebration/SkillAchievementMsg.vue";
+import SkillsInputSwitch from "@/components/utils/inputForm/SkillsInputSwitch.vue";
+import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 
 const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
@@ -34,6 +36,9 @@ const route = useRoute()
 const skillState = useSkillsDisplaySubjectState()
 const skill = computed(() => skillState.skillSummary)
 const loadingSkill = ref(true)
+const displayGroupDescription = ref(false);
+const groupDescription = ref(null);
+const loadingDescription = ref(true);
 
 onMounted(() => {
   loadSkillSummary()
@@ -41,6 +46,10 @@ onMounted(() => {
 watch( () => route.params.skillId, () => {
   loadSkillSummary()
 });
+watch(() => skill.value.groupSkillId, () => {
+  groupDescription.value = null;
+  displayGroupDescription.value = false;
+})
 const loadSkillSummary = () => {
   const skillId = skillsDisplayInfo.isDependency() ? route.params.dependentSkillId : route.params.skillId
   skillState.loadSkillSummary(skillId, route.params.crossProjectId, route.params.subjectId)
@@ -50,6 +59,10 @@ const loadSkillSummary = () => {
         skillsDisplayService.updateSkillHistory(skill.value.projectId, skillId)
       }
       scrollIntoViewState.setLastViewedSkillId(skillId)
+
+      if(!groupDescription.value && skill.value.groupSkillId && attributes.groupDescriptionsOn) {
+        descriptionToggled();
+      }
     })
 }
 
@@ -69,7 +82,15 @@ const nextButtonClicked = () => {
 }
 
 const isLoading = computed(() => loadingSkill.value || skillState.loadingSkillSummary)
-
+const descriptionToggled = () => {
+  if(!groupDescription.value && skill.value.groupSkillId) {
+    loadingDescription.value = true;
+    skillsDisplayService.getDescriptionForSkill(skill.value.groupSkillId).then((res) => {
+      groupDescription.value = res.description;
+      loadingDescription.value = false;
+    })
+  }
+}
 </script>
 
 <template>
@@ -106,6 +127,28 @@ const isLoading = computed(() => loadingSkill.value || skillState.loadingSkillSu
                 Next
                 <i class="fas fa-arrow-alt-circle-right ml-1" aria-hidden="true"></i>
               </SkillsButton>
+            </div>
+          </div>
+          <div v-if="!attributes.groupInfoOnSkillPage && skill.groupName" class="mt-3 p-1 mb-3" data-cy="groupInformationSection">
+            <div class="flex">
+              <div class="mr-2 mt-1 text-xl">
+                <i class="fas fa-layer-group" aria-hidden="true"></i>
+              </div>
+              <div class="flex flex-1">
+                <span class="text-2xl sd-theme-primary-color font-medium flex">{{ skill.groupName }}</span>
+              </div>
+              <div v-if="!attributes.groupDescriptionsOn">
+                <div class="flex flex-row align-content-center">
+                  <label for="groupDescriptionToggleSwitch">
+                    <span class="text-muted pr-1 align-content-center">Group Description:</span>
+                  </label>
+                  <InputSwitch v-model="displayGroupDescription" data-cy="toggleGroupDescription" @change="descriptionToggled" inputId="groupDescriptionToggleSwitch" />
+                </div>
+              </div>
+            </div>
+            <div class="mt-2 ml-4" v-if="displayGroupDescription || attributes.groupDescriptionsOn" data-cy="groupDescriptionSection">
+              <skills-spinner :is-loading="loadingDescription" :size-in-rem="1"/>
+              <markdown-text v-if="groupDescription" :text="groupDescription" />
             </div>
           </div>
           <skill-achievement-msg :skill="skill" />

@@ -27,6 +27,7 @@ public enum Settings {
     USER_VIEWED_USER_AGREEMENT("viewed_user_agreement"),
     INVITE_ONLY_PROJECT("invite_only"),
     GROUP_DESCRIPTIONS("group-descriptions"),
+    GROUP_INFO_ON_SKILL_PAGE("group-info-on-skill-page"),
     SHOW_PROJECT_DESCRIPTION_EVERYWHERE("show_project_description_everywhere"),
     DISABLE_SKILLS_DISPLAY_ACHIEVEMENTS_CELEBRATIONS("skills-display-achievement-celebration-disabled"),
     USER_PROJECT_ROLE("user_project_role"),
