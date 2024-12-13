@@ -194,7 +194,7 @@ const subjectEdited = (updatedSubject) => {
                   :subject="subjectState.subject" @subject-saved="subjectEdited"
                   :is-edit="true" />
 
-    <copy-subject-dialog v-if="showCopySubjectModal" v-model="showCopySubjectModal" />
+    <copy-subject-dialog v-if="showCopySubjectModal" v-model="showCopySubjectModal" copy-type="EntireSubject" />
   </div>
 </template>
 

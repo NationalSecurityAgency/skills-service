@@ -25,25 +25,36 @@ import SubjectsService from "@/components/subjects/SubjectsService.js";
 import SkillsService from "@/components/skills/SkillsService.js";
 import {useFocusState} from "@/stores/UseFocusState.js";
 
+const props = defineProps({
+  copyType: {
+    type: String,
+    validator: (value) => ['EntireSubject', 'SelectSkills'].includes(value)
+  },
+  selectedSkills: {
+    type: Array,
+    default: [],
+  },
+})
 const model = defineModel()
 const route = useRoute()
 const focusState = useFocusState()
+
+const isSubjectCopy = computed(() => props.copyType === 'EntireSubject')
+const isSelectedSkillsCopy = computed(() => props.copyType === 'SelectSkills')
+const modalTitle = computed(() => isSubjectCopy.value ? 'Copy Subject To Another Project' : 'Copy Selected Skills To Another Project')
 
 const close = () => {
   model.value = false
   focusState.focusOnLastElement()
 }
 
-const canCopy = computed(() => selectedProject.value != null && !loadingOtherProjects.value && !validatingOtherProj.value && validationErrors.value.length === 0)
+const areAllValuesSelected = computed(() => isSubjectCopy.value ? selectedProject.value != null : (selectedProject.value && selectedSubjectOrGroup.value))
+const canCopy = computed(() => areAllValuesSelected.value && !loadingOtherProjects.value && !validatingOtherProj.value && validationErrors.value.length === 0)
 const copying = ref(false)
 const copied = ref(false)
 const doCopy = () => {
   copying.value = true
-  const copyProps = {
-    copyType: 'EntireSubject',
-    fromSubjectId: route.params.subjectId,
-  }
-  return SubjectsService.copySubjectToAnotherProject(route.params.projectId, selectedProject.value.projectId, copyProps)
+  return SubjectsService.copySubjectToAnotherProject(route.params.projectId, selectedProject.value.projectId, endpointsProps.value)
       .then(() => {
         copying.value = false
         copied.value = true
@@ -67,19 +78,55 @@ onMounted(() => {
 })
 
 const selectedProject = ref(null)
+const wasProjectSelected = computed(() => selectedProject.value != null)
 const validatingOtherProj = ref(false)
 const validationErrors = ref([])
 const hasValidationErrors = computed(() => validationErrors.value.length > 0)
+
+const endpointsProps = computed(() => {
+  return {
+    copyType: props.copyType,
+    fromSubjectId: isSubjectCopy.value ? route.params.subjectId : null,
+    skillIds: isSelectedSkillsCopy.value ? props.selectedSkills.map((sk) => sk.skillId) : null,
+    toSubjectId: isSelectedSkillsCopy.value ? selectedSubjectOrGroup.value?.skillId : null
+  }
+})
+
 const onProjectChanged = (changedProj) => {
   validationErrors.value = []
   if (changedProj != null) {
-    validatingOtherProj.value = true
-
-    const validationProps = {
-      copyType: 'EntireSubject',
-      fromSubjectId: route.params.subjectId,
+    if (isSubjectCopy.value) {
+      validatingOtherProj.value = true
+      return SubjectsService.validateCopyItemsToAnotherProject(route.params.projectId, selectedProject.value.projectId, endpointsProps.value)
+          .then((res) => {
+            if (!res.isAllowed) {
+              validationErrors.value.push(...res.validationErrors)
+            }
+          }).finally(() => {
+            validatingOtherProj.value = false
+          })
     }
-    return SubjectsService.validateCopyItemsToAnotherProject(route.params.projectId, selectedProject.value.projectId, validationProps)
+
+    if (isSelectedSkillsCopy.value) {
+
+
+      return SubjectsService.getSubjectsAndSkillGroups(selectedProject.value.projectId)
+          .then((subjectsAndGroups) => {
+            otherSubjectsAndGroups.value = subjectsAndGroups;
+          }).finally(() => {
+            showSubjectAndGroupSelector.value = true
+          })
+    }
+  }
+}
+
+const showSubjectAndGroupSelector = ref(false)
+const otherSubjectsAndGroups = ref([])
+const selectedSubjectOrGroup = ref(null)
+const onSubjectOrGroupChanged = ((changedSubjOrGroup) => {
+  if (changedSubjOrGroup) {
+    validatingOtherProj.value = true
+    return SubjectsService.validateCopyItemsToAnotherProject(route.params.projectId, selectedProject.value.projectId, endpointsProps.value)
         .then((res) => {
           if (!res.isAllowed) {
             validationErrors.value.push(...res.validationErrors)
@@ -88,7 +135,9 @@ const onProjectChanged = (changedProj) => {
           validatingOtherProj.value = false
         })
   }
-}
+})
+
+
 const hasProjects = computed(() => otherProjects.value?.length > 0)
 const showOkButton = computed(() => !copied.value && (hasProjects.value || loadingOtherProjects.value))
 </script>
@@ -97,7 +146,7 @@ const showOkButton = computed(() => !copied.value && (hasProjects.value || loadi
   <SkillsDialog
       :maximizable="false"
       v-model="model"
-      header="Copy Subject To Another Project"
+      :header="modalTitle"
       cancel-button-severity="secondary"
       ok-button-severity="danger"
       ok-button-icon="fas fa-copy"
@@ -113,8 +162,8 @@ const showOkButton = computed(() => !copied.value && (hasProjects.value || loadi
       :submitting="copying">
     <Message v-if="!hasProjects" severity="warn" :closable="false" data-cy="noOtherProjectsMsg">You are not currently an administrator on any other projects.</Message>
     <BlockUI v-if="hasProjects && !copied" :blocked="copying" class="py-4">
-      <div>
-        <FloatLabel>
+      <div class="flex flex-column gap-2">
+        <label for="selectAProjectDropdown">Destination Project:</label>
           <Dropdown id="selectAProjectDropdown"
                     :options="otherProjects"
                     placeholder="Search for a project..."
@@ -136,8 +185,31 @@ const showOkButton = computed(() => !copied.value && (hasProjects.value || loadi
               </div>
             </template>
           </Dropdown>
-          <label for="selectAProjectDropdown">Project To Copy Subject To</label>
-        </FloatLabel>
+
+      </div>
+      <div v-if="isSelectedSkillsCopy && wasProjectSelected" class="flex flex-column gap-2 mt-5">
+        <label for="selectASubjectOrGroupDropdown">Destination Subject or Skills Group:</label>
+        <Dropdown id="selectASubjectOrGroupDropdown"
+                  :options="otherSubjectsAndGroups"
+                  placeholder="Search for a subject or group"
+                  v-model="selectedSubjectOrGroup"
+                  @update:model-value="onSubjectOrGroupChanged"
+                  :disabled="!showSubjectAndGroupSelector || validatingOtherProj"
+                  label="name"
+                  class="w-full"
+                  data-cy="selectASubjectOrGroupDropdown"
+                  filter
+                  :filterFields="['name']">
+          <template #value="slotProps" v-if="selectedSubjectOrGroup">
+            <div>{{ slotProps.value?.name }}</div>
+          </template>
+          <template #option="slotProps">
+            <div>
+              <div class="h6 project-name" data-cy="projectSelector-projectName">{{ slotProps.option.name }}</div>
+              <div class="text-secondary project-id">ID: {{ slotProps.option.skillId }}</div>
+            </div>
+          </template>
+        </Dropdown>
       </div>
       <div v-if="validatingOtherProj">
         <skills-spinner  :is-loading="validatingOtherProj" class="mt-4"/>

@@ -110,4 +110,9 @@ export default {
         `/admin/projects/${encodeURIComponent(projectId)}/copy/projects/${encodeURIComponent(otherProjectId)}/validateCopy`, props
     ).then((res) => res.data)
   },
+  getSubjectsAndSkillGroups(projectId) {
+    return axios.get(
+        `/admin/projects/${encodeURIComponent(projectId)}/subjectsAndSkillsGroups`
+    ).then((res) => res.data)
+  },
 }

@@ -432,6 +432,13 @@ class AdminController {
         return subjAdminService.getSubjects(projectId)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/subjectsAndSkillsGroups", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    List<SubjectOrSkillGroupResult> getSubjectsAndSkillGroups(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return subjAdminService.getSubjectsAndSkillGroups(projectId)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SubjectResult getSubject(@PathVariable("projectId") String projectId, @PathVariable("subjectId") String subjectId) {

@@ -165,7 +165,7 @@ class SkillsService {
     @Profile
     def validateCopySubjectDefIntoAnotherProject(String fromProjId, String fromSubjectId, String toProjectId) {
         def request = [copyType: CopyToAnotherProjectRequestType.EntireSubject, fromSubjectId: fromSubjectId]
-        wsHelper.adminPost("/projects/${fromProjId}/copy/projects/${toProjectId}/validateCopy".toString(), request)
+        wsHelper.adminPost("/projects/${fromProjId}/copy/projects/${toProjectId}/validateCopy".toString(), request).body
     }
 
     static String PROD_MODE = Settings.PRODUCTION_MODE.settingName

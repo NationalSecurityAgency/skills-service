@@ -75,6 +75,9 @@
 .w-min-20rem {
     min-width: 20rem
 }
+.w-1_5rem {
+    width: 1.5rem
+}
 
 .skills-break-word {
     overflow-wrap: break-word !important;
