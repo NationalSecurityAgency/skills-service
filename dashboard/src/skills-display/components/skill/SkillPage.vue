@@ -26,6 +26,7 @@ import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkills
 import Prerequisites from '@/skills-display/components/skill/prerequisites/Prerequisites.vue'
 import SkillAchievementMsg from "@/skills-display/components/progress/celebration/SkillAchievementMsg.vue";
 import SkillsInputSwitch from "@/components/utils/inputForm/SkillsInputSwitch.vue";
+import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 
 const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
@@ -138,14 +139,16 @@ const descriptionToggled = () => {
               </div>
               <div v-if="!attributes.groupDescriptionsOn">
                 <div class="flex flex-row align-content-center">
-                  <span class="text-muted pr-1 align-content-center">Group Description:</span>
-                  <InputSwitch v-model="displayGroupDescription" data-cy="toggleGroupDescription" @change="descriptionToggled" />
+                  <label for="groupDescriptionToggleSwitch">
+                    <span class="text-muted pr-1 align-content-center">Group Description:</span>
+                  </label>
+                  <InputSwitch v-model="displayGroupDescription" data-cy="toggleGroupDescription" @change="descriptionToggled" inputId="groupDescriptionToggleSwitch" />
                 </div>
               </div>
             </div>
             <div class="mt-2 ml-4" v-if="displayGroupDescription || attributes.groupDescriptionsOn" data-cy="groupDescriptionSection">
               <skills-spinner :is-loading="loadingDescription" :size-in-rem="1"/>
-              {{ groupDescription }}
+              <markdown-text v-if="groupDescription" :text="groupDescription" />
             </div>
           </div>
           <skill-achievement-msg :skill="skill" />
