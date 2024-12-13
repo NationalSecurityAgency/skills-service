@@ -51,7 +51,7 @@ describe('Error Pages Tests', () => {
             .contains('You do not have permission to view/manage this Project OR this Project does not exist');
     });
 
-    it.only('User Not Authorized For Project', () => {
+    it('User Not Authorized For Project', () => {
         cy.register('user1', 'password1', false);
         cy.register('user2', 'password2', false);
         cy.logout();
