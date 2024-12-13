@@ -15,8 +15,7 @@
  */
 package skills.intTests.copySkillsToAnotherProject
 
-import groovy.json.JsonOutput
-import org.springframework.core.io.ClassPathResource
+
 import org.springframework.core.io.Resource
 import skills.intTests.copyProject.CopyIntSpec
 import skills.intTests.utils.QuizDefFactory
@@ -28,7 +27,7 @@ import skills.utils.GroovyToJavaByteUtils
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class CopySkillsToAnotherProjSpecs extends CopyIntSpec {
+class CopySkillsToAnotherProjGroupSpecs extends CopyIntSpec {
 
     def "copy 1 skill" () {
         def p1 = createProject(1)
@@ -37,13 +36,14 @@ class CopySkillsToAnotherProjSpecs extends CopyIntSpec {
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Subj1Skills)
 
         def p2 = createProject(2)
-        def p2subj1 = createSubject(2, 1)
-        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
+        def p2subj1 = createSubject(2, 2)
+        def destGroup = createSkillsGroup(2, 2, 4)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [destGroup])
 
         when:
-        skillsService.copySkillDefsIntoAnotherProjectSubject(p1.projectId, p1Subj1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId)
+        skillsService.copySkillDefsIntoAnotherProjectSkillGroup(p1.projectId, p1Subj1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId, destGroup.skillId)
 
-        def copiedSkills = skillsService.getSkillsForSubject(p2.projectId, p2subj1.subjectId)
+        def copiedSkills = skillsService.getSkillsForGroup(p2.projectId, destGroup.skillId)
         then:
         copiedSkills.size() == 1
         copiedSkills[0].projectId == p2.projectId
@@ -90,14 +90,14 @@ class CopySkillsToAnotherProjSpecs extends CopyIntSpec {
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Subj1Skills)
 
         def p2 = createProject(2)
-        def p2subj1 = createSubject(2, 1)
-        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
+        def p2subj1 = createSubject(2, 2)
+        def destGroup = createSkillsGroup(2, 2, 4)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [destGroup])
 
         when:
-        skillsService.copySkillDefsIntoAnotherProjectSubject(p1.projectId, p1Subj1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId)
+        skillsService.copySkillDefsIntoAnotherProjectSkillGroup(p1.projectId, p1Subj1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId, destGroup.skillId)
 
-        def copiedSubj1Skills = skillsService.getSkillsForSubject(p2.projectId, p1subj1.subjectId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(copiedSubj1Skills))
+        def copiedSubj1Skills = skillsService.getSkillsForGroup(p2.projectId, destGroup.skillId)
         then:
 
         copiedSubj1Skills.size() == 3
@@ -153,16 +153,17 @@ class CopySkillsToAnotherProjSpecs extends CopyIntSpec {
         skillsService.assignSkillToSkillsGroup(group2.skillId, skill2)
 
         def p2 = createProject(2)
-        def p2subj1 = createSubject(2, 1)
-        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
+        def p2subj1 = createSubject(2, 2)
+        def destGroup = createSkillsGroup(2, 2, 6)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [destGroup])
 
         when:
-        skillsService.copySkillDefsIntoAnotherProjectSubject(p1.projectId, [skill1.skillId, skill2.skillId], p2.projectId, p2subj1.subjectId)
+        skillsService.copySkillDefsIntoAnotherProjectSkillGroup(p1.projectId, [skill1.skillId, skill2.skillId], p2.projectId, p2subj1.subjectId, destGroup.skillId)
 
         def original1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: skill1.skillId])
         def original2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: skill2.skillId])
 
-        def copiedSkills = skillsService.getSkillsForSubject(p2.projectId, p2subj1.subjectId, true)
+        def copiedSkills = skillsService.getSkillsForGroup(p2.projectId, destGroup.skillId)
 
         then:
         copiedSkills.size() == 2
@@ -177,6 +178,139 @@ class CopySkillsToAnotherProjSpecs extends CopyIntSpec {
         skill2Res.name == original2.name
         skill2Res.type == original2.type
         skill2Res.totalPoints == original2.totalPoints
+    }
+
+    def "copy skills from a subject to another project's empty group"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Subj1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Subj1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 2)
+        def group1 = createSkillsGroup(2, 2, 4)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [group1])
+
+        when:
+        skillsService.copySkillDefsIntoAnotherProjectSkillGroup(p1.projectId, p1Subj1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId, group1.skillId)
+
+        def original1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Subj1Skills[0].skillId])
+        def original2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Subj1Skills[1].skillId])
+        def original3 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Subj1Skills[2].skillId])
+
+        def destGroupSkills = skillsService.getSkillsForGroup(p2.projectId, group1.skillId)
+
+        then:
+        destGroupSkills.size() == 3
+        def skill1Res = destGroupSkills.find { it.skillId == original1.skillId }
+        skill1Res.skillId == original1.skillId
+        skill1Res.name == original1.name
+        skill1Res.type == original1.type
+        skill1Res.totalPoints == original1.totalPoints
+
+        def skill2Res = destGroupSkills.find { it.skillId == original2.skillId }
+        skill2Res.skillId == original2.skillId
+        skill2Res.name == original2.name
+        skill2Res.type == original2.type
+        skill2Res.totalPoints == original2.totalPoints
+
+        def skill3Res = destGroupSkills.find { it.skillId == original3.skillId }
+        skill3Res.skillId == original3.skillId
+        skill3Res.name == original3.name
+        skill3Res.type == original3.type
+        skill3Res.totalPoints == original3.totalPoints
+    }
+
+    def "copy skills from a subject to another project's group with skill"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Subj1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Subj1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 2)
+        def group1 = createSkillsGroup(2, 2, 4)
+        def group2 = createSkillsGroup(2, 2, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [group1, group2])
+        def p2Subj1Skills = createSkills(3, 2, 2, 100)
+        skillsService.assignSkillToSkillsGroup(group1.skillId, p2Subj1Skills[0])
+        skillsService.assignSkillToSkillsGroup(group1.skillId, p2Subj1Skills[1])
+        skillsService.assignSkillToSkillsGroup(group2.skillId, p2Subj1Skills[2])
+
+        when:
+        skillsService.copySkillDefsIntoAnotherProjectSkillGroup(p1.projectId, p1Subj1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId, group1.skillId)
+
+        def original1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Subj1Skills[0].skillId])
+        def original2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Subj1Skills[1].skillId])
+        def original3 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Subj1Skills[2].skillId])
+
+        def destGroupSkills = skillsService.getSkillsForGroup(p2.projectId, group1.skillId)
+
+        then:
+        destGroupSkills.size() == 5
+        destGroupSkills.skillId.sort() == [original1.skillId, original2.skillId, original3.skillId, p2Subj1Skills[0].skillId, p2Subj1Skills[1].skillId].sort()
+        def skill1Res = destGroupSkills.find { it.skillId == original1.skillId }
+        skill1Res.skillId == original1.skillId
+        skill1Res.name == original1.name
+        skill1Res.type == original1.type
+        skill1Res.totalPoints == original1.totalPoints
+
+        def skill2Res = destGroupSkills.find { it.skillId == original2.skillId }
+        skill2Res.skillId == original2.skillId
+        skill2Res.name == original2.name
+        skill2Res.type == original2.type
+        skill2Res.totalPoints == original2.totalPoints
+
+        def skill3Res = destGroupSkills.find { it.skillId == original3.skillId }
+        skill3Res.skillId == original3.skillId
+        skill3Res.name == original3.name
+        skill3Res.type == original3.type
+        skill3Res.totalPoints == original3.totalPoints
+    }
+
+    def "copy skills from a group to another project's empty group"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def origGroup = createSkillsGroup(1, 1, 10)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [origGroup])
+        def p1Subj1Skills = createSkills(3, 1, 1, 100)
+        skillsService.assignSkillToSkillsGroup(origGroup.skillId, p1Subj1Skills[0])
+        skillsService.assignSkillToSkillsGroup(origGroup.skillId, p1Subj1Skills[1])
+        skillsService.assignSkillToSkillsGroup(origGroup.skillId, p1Subj1Skills[2])
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 2)
+        def destGroup = createSkillsGroup(2, 2, 4)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [destGroup])
+
+        when:
+        skillsService.copySkillDefsIntoAnotherProjectSkillGroup(p1.projectId, p1Subj1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId, destGroup.skillId)
+
+        def original1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Subj1Skills[0].skillId])
+        def original2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Subj1Skills[1].skillId])
+        def original3 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Subj1Skills[2].skillId])
+
+        def destGroupSkills = skillsService.getSkillsForGroup(p2.projectId, destGroup.skillId)
+
+        then:
+        destGroupSkills.size() == 3
+        def skill1Res = destGroupSkills.find { it.skillId == original1.skillId }
+        skill1Res.skillId == original1.skillId
+        skill1Res.name == original1.name
+        skill1Res.type == original1.type
+        skill1Res.totalPoints == original1.totalPoints
+
+        def skill2Res = destGroupSkills.find { it.skillId == original2.skillId }
+        skill2Res.skillId == original2.skillId
+        skill2Res.name == original2.name
+        skill2Res.type == original2.type
+        skill2Res.totalPoints == original2.totalPoints
+
+        def skill3Res = destGroupSkills.find { it.skillId == original3.skillId }
+        skill3Res.skillId == original3.skillId
+        skill3Res.name == original3.name
+        skill3Res.type == original3.type
+        skill3Res.totalPoints == original3.totalPoints
     }
 
     def "copy skills with attachments in skill's description - attachments should be copied"() {
@@ -197,11 +331,12 @@ class CopySkillsToAnotherProjSpecs extends CopyIntSpec {
         skillsService.createSkills(p1Skills)
 
         def p2 = createProject(2)
-        def p2subj1 = createSubject(2, 1)
-        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
+        def p2subj1 = createSubject(2, 2)
+        def destGroup = createSkillsGroup(2, 2, 4)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [destGroup])
 
         when:
-        skillsService.copySkillDefsIntoAnotherProjectSubject(p1.projectId, p1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId)
+        skillsService.copySkillDefsIntoAnotherProjectSkillGroup(p1.projectId, p1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId, destGroup.skillId)
 
         def origProjSkill = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
         def copyProjSkill = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
@@ -251,14 +386,14 @@ class CopySkillsToAnotherProjSpecs extends CopyIntSpec {
         skillsService.createSkills(p1Subj2Skills)
 
         def p2 = createProject(2)
-        def p2subj1 = createSubject(2, 1)
-        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
-        def p2subj2 = createSubject(2, 2)
-        skillsService.createSubject(p2subj2)
+        def p2subj1 = createSubject(2, 2)
+        def destGroup = createSkillsGroup(2, 2, 4)
+        def destGroup1 = createSkillsGroup(2, 2, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [destGroup, destGroup1])
 
         when:
-        skillsService.copySkillDefsIntoAnotherProjectSubject(p1.projectId, p1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId)
-        skillsService.copySkillDefsIntoAnotherProjectSubject(p1.projectId, p1Subj2Skills.collect { it.skillId as String }, p2.projectId, p2subj2.subjectId)
+        skillsService.copySkillDefsIntoAnotherProjectSkillGroup(p1.projectId, p1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId, destGroup.skillId)
+        skillsService.copySkillDefsIntoAnotherProjectSkillGroup(p1.projectId, p1Subj2Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId, destGroup1.skillId)
 
         def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
         def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])

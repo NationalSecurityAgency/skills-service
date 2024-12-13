@@ -226,37 +226,24 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/copy/subject/{subjectId}/copy/projects/{otherProjectId}/validateCopy", method = [RequestMethod.GET], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/copy/projects/{otherProjectId}/validateCopy", method = [RequestMethod.POST], produces = "application/json")
     @ResponseBody
-    CopyValidationRes validateCopySubjectToAnotherProject(
-            @PathVariable("projectId") String projectId,
-            @PathVariable("subjectId") String subjectId,
-            @PathVariable("otherProjectId") String otherProjectId) {
-        return projectCopyService.validateCopySubjectToAnotherProject(projectId, subjectId, otherProjectId)
-    }
-
-
-    @RequestMapping(value = "/projects/{projectId}/copy/subject/{subjectId}/copy/projects/{otherProjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
-    @ResponseBody
-    RequestResult copySubjectToAnotherProject(
-            @PathVariable("projectId") String projectId,
-            @PathVariable("subjectId") String subjectId,
-            @PathVariable("otherProjectId") String otherProjectId) {
-        projectCopyService.copySubjectToAnotherProject(projectId, subjectId, otherProjectId)
-        return new RequestResult(success: true)
-    }
-
-    @RequestMapping(value = "/projects/{projectId}/copy/projects/{otherProjectId}/subjects/{otherSubjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
-    @ResponseBody
-    RequestResult copySkillsToAnotherProjectSubject(
+    CopyValidationRes validateCopyItemsToAnotherProject(
             @PathVariable("projectId") String projectId,
             @PathVariable("otherProjectId") String otherProjectId,
-            @PathVariable("otherSubjectId") String otherSubjectId,
-            @RequestBody List<String> skillIds) {
-        projectCopyService.copySkillsToAnotherProject(projectId, skillIds, otherProjectId, otherSubjectId)
-        return new RequestResult(success: true)
+            @RequestBody CopyToAnotherProjectRequest copyToAnotherProjectRequest) {
+        return projectCopyService.validateCopyItemsToAnotherProject(projectId, otherProjectId, copyToAnotherProjectRequest)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/copy/projects/{otherProjectId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    RequestResult copyItemsToAnotherProject(
+            @PathVariable("projectId") String projectId,
+            @PathVariable("otherProjectId") String otherProjectId,
+            @RequestBody CopyToAnotherProjectRequest copyToAnotherProjectRequest) {
+        projectCopyService.copyItemsToAnotherProject(projectId, otherProjectId, copyToAnotherProjectRequest)
+        return new RequestResult(success: true)
+    }
 
 
     @RequestMapping(value = "/projects/{id}/invite", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")

@@ -100,14 +100,14 @@ export default {
       )
       .then((res) => res.data)
   },
-  copySubjectToAnotherProject(projectId, subjectId, otherProjectId) {
+  copySubjectToAnotherProject(projectId, otherProjectId, props) {
     return axios.post(
-        `/admin/projects/${encodeURIComponent(projectId)}/copy/subject/${encodeURIComponent(subjectId)}/copy/projects/${encodeURIComponent(otherProjectId)}`
+        `/admin/projects/${encodeURIComponent(projectId)}/copy/projects/${encodeURIComponent(otherProjectId)}`, props
     )
   },
-  validateCopySubjectToAnotherProject(projectId, subjectId, otherProjectId) {
-    return axios.get(
-        `/admin/projects/${encodeURIComponent(projectId)}/copy/subject/${encodeURIComponent(subjectId)}/copy/projects/${encodeURIComponent(otherProjectId)}/validateCopy`
+  validateCopyItemsToAnotherProject(projectId, otherProjectId, props) {
+    return axios.post(
+        `/admin/projects/${encodeURIComponent(projectId)}/copy/projects/${encodeURIComponent(otherProjectId)}/validateCopy`, props
     ).then((res) => res.data)
   },
 }

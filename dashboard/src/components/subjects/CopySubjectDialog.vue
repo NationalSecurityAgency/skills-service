@@ -39,7 +39,11 @@ const copying = ref(false)
 const copied = ref(false)
 const doCopy = () => {
   copying.value = true
-  return SubjectsService.copySubjectToAnotherProject(route.params.projectId, route.params.subjectId, selectedProject.value.projectId)
+  const copyProps = {
+    copyType: 'EntireSubject',
+    fromSubjectId: route.params.subjectId,
+  }
+  return SubjectsService.copySubjectToAnotherProject(route.params.projectId, selectedProject.value.projectId, copyProps)
       .then(() => {
         copying.value = false
         copied.value = true
@@ -71,7 +75,11 @@ const onProjectChanged = (changedProj) => {
   if (changedProj != null) {
     validatingOtherProj.value = true
 
-    return SubjectsService.validateCopySubjectToAnotherProject(route.params.projectId, route.params.subjectId, selectedProject.value.projectId)
+    const validationProps = {
+      copyType: 'EntireSubject',
+      fromSubjectId: route.params.subjectId,
+    }
+    return SubjectsService.validateCopyItemsToAnotherProject(route.params.projectId, selectedProject.value.projectId, validationProps)
         .then((res) => {
           if (!res.isAllowed) {
             validationErrors.value.push(...res.validationErrors)
