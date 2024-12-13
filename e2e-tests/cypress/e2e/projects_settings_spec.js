@@ -523,4 +523,41 @@ describe('Project Settings Tests', () => {
         cy.wait('@loadP3Cd');
         cy.get('[data-cy="projectDescription"]').should('not.exist');
     });
+
+    it('project-level settings: toggle project deletion protection', () => {
+        cy.createProject(1, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vitae tellus.'});
+        cy.createProject(2, { description: '' });
+        cy.createProject(3, { description: 'Lorem ipsum dolor sit amet' });
+
+        cy.visit('/administrator');
+        cy.get('#deleteProjBtnproj1').should('exist');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.get('[data-cy="projectProtectionSwitch"]').click()
+        cy.get('[data-cy="saveSettingsBtn"').click();
+
+        cy.visit('/administrator');
+        cy.get('#deleteProjBtnproj1').should('not.exist');
+        cy.get('#deleteProjBtnproj2').should('exist');
+        cy.get('#deleteProjBtnproj3').should('exist');
+
+        cy.visit('/administrator/projects/proj3/settings');
+        cy.get('[data-cy="projectProtectionSwitch"]').click()
+        cy.get('[data-cy="saveSettingsBtn"').click();
+
+        cy.visit('/administrator');
+        cy.get('#deleteProjBtnproj1').should('not.exist');
+        cy.get('#deleteProjBtnproj2').should('exist');
+        cy.get('#deleteProjBtnproj3').should('not.exist');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.get('[data-cy="projectProtectionSwitch"]').click()
+        cy.get('[data-cy="saveSettingsBtn"').click();
+
+        cy.visit('/administrator');
+        cy.get('#deleteProjBtnproj1').should('exist');
+        cy.get('#deleteProjBtnproj2').should('exist');
+        cy.get('#deleteProjBtnproj3').should('not.exist');
+    });
 });
+
