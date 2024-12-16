@@ -833,7 +833,8 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             from UserAchievement as ua 
             where 
                 ua.skillId = :skillId and
-                ua.projectId = :projectId
+                ua.projectId = :projectId and
+                not exists (select 1 from ArchivedUser au where au.userId = ua.userId and au.projectId = :projectId)
             group by ua.achievedOn, ua.level     
            ''')
     List<SkillLevelDayUserCount> countNumUsersOverTimeAndLevelByProjectIdAndSkillId(

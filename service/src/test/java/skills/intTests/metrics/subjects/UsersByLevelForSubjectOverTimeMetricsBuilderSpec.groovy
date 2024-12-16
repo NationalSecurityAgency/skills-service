@@ -102,6 +102,8 @@ class UsersByLevelForSubjectOverTimeMetricsBuilderSpec extends DefaultIntSpec {
 
         when:
         def res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+        skillsService.archiveUsers([users[2]], proj.projectId)
+        def resAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
         then:
         res
@@ -113,6 +115,16 @@ class UsersByLevelForSubjectOverTimeMetricsBuilderSpec extends DefaultIntSpec {
 
         res[2].counts.collect { it.count } == [0, 5]
         res[2].counts.collect { new Date(it.value) } == [days[4], days[5]]
+
+        resAfterArchive
+        resAfterArchive[0].counts.collect { it.count } == [0, 1, 2, 3, 4]
+        resAfterArchive[0].counts.collect { new Date(it.value) } == [days[0], days[1], days[2], days[4], days[5]]
+
+        resAfterArchive[1].counts.collect { it.count } == [0, 2, 3, 4]
+        resAfterArchive[1].counts.collect { new Date(it.value) } == [days[2], days[3], days[4], days[5]]
+
+        resAfterArchive[2].counts.collect { it.count } == [0, 4]
+        resAfterArchive[2].counts.collect { new Date(it.value) } == [days[4], days[5]]
     }
 
 
