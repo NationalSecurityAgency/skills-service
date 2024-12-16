@@ -49,7 +49,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import SkillNameRouterLink from '@/components/skills/SkillNameRouterLink.vue';
 import { useFocusState } from '@/stores/UseFocusState.js'
 import skillsService from '@/components/skills/SkillsService.js';
-import CopySubjectDialog from "@/components/subjects/CopySubjectDialog.vue";
+import CopySubjectOrSkillsDialog from "@/components/subjects/CopySubjectOrSkillsDialog.vue";
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -901,11 +901,12 @@ const exportSkills = () => {
       :skills="selectedSkills"
       @on-added="removeSelectedRows"
     />
-    <copy-subject-dialog
+    <copy-subject-or-skills-dialog
         v-if="showCopySkillsModal"
         v-model="showCopySkillsModal"
         copy-type="SelectSkills"
         :selected-skills="selectedSkills"
+        @after-copied="removeSelectedRows"
     />
     <add-skill-tag-dialog
       id="addTagSkillsModal"

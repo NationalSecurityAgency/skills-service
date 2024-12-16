@@ -100,7 +100,7 @@ export default {
       )
       .then((res) => res.data)
   },
-  copySubjectToAnotherProject(projectId, otherProjectId, props) {
+  copySubjectOrSkillsToAnotherProject(projectId, otherProjectId, props) {
     return axios.post(
         `/admin/projects/${encodeURIComponent(projectId)}/copy/projects/${encodeURIComponent(otherProjectId)}`, props
     )

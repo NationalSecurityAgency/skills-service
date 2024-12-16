@@ -35,6 +35,7 @@ const props = defineProps({
     default: [],
   },
 })
+const emits = defineEmits(['after-copied'])
 const model = defineModel()
 const route = useRoute()
 const focusState = useFocusState()
@@ -54,10 +55,14 @@ const copying = ref(false)
 const copied = ref(false)
 const doCopy = () => {
   copying.value = true
-  return SubjectsService.copySubjectToAnotherProject(route.params.projectId, selectedProject.value.projectId, endpointsProps.value)
+  return SubjectsService.copySubjectOrSkillsToAnotherProject(route.params.projectId, selectedProject.value.projectId, endpointsProps.value)
       .then(() => {
         copying.value = false
         copied.value = true
+        if (isSelectedSkillsCopy.value) {
+          focusState.setElementId('newSkillBtn')
+        }
+        emits('after-copied')
       })
 }
 
@@ -206,7 +211,7 @@ const showOkButton = computed(() => !copied.value && (hasProjects.value || loadi
           </template>
           <template #option="slotProps">
             <div>
-              <div class="h6 project-name" data-cy="projectSelector-projectName">{{ slotProps.option.name }}</div>
+              <div class="h6 project-name" data-cy="subjOrGroupSelector-name">{{ slotProps.option.name }}</div>
               <div class="text-secondary project-id">ID: {{ slotProps.option.skillId }}</div>
             </div>
           </template>

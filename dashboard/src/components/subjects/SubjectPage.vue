@@ -25,7 +25,7 @@ import Navigation from '@/components/utils/Navigation.vue'
 import EditSubject from '@/components/subjects/EditSubject.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert.vue'
-import CopySubjectDialog from "@/components/subjects/CopySubjectDialog.vue";
+import CopySubjectOrSkillsDialog from "@/components/subjects/CopySubjectOrSkillsDialog.vue";
 
 const appConfig = useAppConfig()
 const route = useRoute()
@@ -194,7 +194,10 @@ const subjectEdited = (updatedSubject) => {
                   :subject="subjectState.subject" @subject-saved="subjectEdited"
                   :is-edit="true" />
 
-    <copy-subject-dialog v-if="showCopySubjectModal" v-model="showCopySubjectModal" copy-type="EntireSubject" />
+    <copy-subject-or-skills-dialog
+        v-if="showCopySubjectModal"
+        v-model="showCopySubjectModal"
+        copy-type="EntireSubject" />
   </div>
 </template>
 
