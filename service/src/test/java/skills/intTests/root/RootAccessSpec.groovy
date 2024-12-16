@@ -1016,39 +1016,5 @@ class RootAccessSpec extends DefaultIntSpec {
         user3SubjectSummary.skills[0].children.find { it.skillId = childSkillId2 }.points == 100
         user3SubjectSummary.skills[0].children.find { it.skillId = childSkillId2 }.totalPoints == 100
     }
-
-    def 'get projects for pinned projects as root returns project protection'() {
-        def proj = SkillsFactory.createProject(1)
-        def proj2 = SkillsFactory.createProject(2)
-        rootSkillsService.createProject(proj)
-        rootSkillsService.createProject(proj2)
-        rootSkillsService.pinProject(proj.projectId)
-        rootSkillsService.pinProject(proj2.projectId)
-
-        rootSkillsService.changeSetting(proj2.projectId, "project-protection", [projectId: proj2.projectId, setting: "project-protection", value: "true"])
-        when:
-        def projects = rootSkillsService.getProjects()
-
-        then:
-        projects.size() == 2
-        !projects[0].isDeleteProtected
-        projects[1].isDeleteProtected
-    }
-
-    def 'get projects for pinned projects as non-root returns project protection'() {
-        def proj = SkillsFactory.createProject(1)
-        def proj2 = SkillsFactory.createProject(2)
-        nonRootSkillsService.createProject(proj)
-        nonRootSkillsService.createProject(proj2)
-
-        nonRootSkillsService.changeSetting(proj2.projectId, "project-protection", [projectId: proj2.projectId, setting: "project-protection", value: "true"])
-        when:
-        def projects = nonRootSkillsService.getProjects()
-
-        then:
-        projects.size() == 2
-        !projects[0].isDeleteProtected
-        projects[1].isDeleteProtected
-    }
 }
 

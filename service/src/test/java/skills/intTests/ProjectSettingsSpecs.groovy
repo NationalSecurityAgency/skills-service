@@ -149,5 +149,43 @@ class ProjectSettingsSpecs extends DefaultIntSpec {
         p2SettingsAllDragons.find { it.setting == "project_community_value"}?.value == 'All Dragons'
     }
 
+    def 'projects are returned with and without project protection'() {
+        def proj = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        skillsService.createProject(proj)
+        skillsService.createProject(proj2)
 
+        skillsService.changeSetting(proj2.projectId, "project-protection", [projectId: proj2.projectId, setting: "project-protection", value: "true"])
+        when:
+        def projects = skillsService.getProjects()
+
+        then:
+        projects.size() == 2
+        !projects[0].isDeleteProtected
+        projects[1].isDeleteProtected
+    }
+
+    def 'count total users for project'() {
+        def proj = createProject(1)
+        def subject = SkillsFactory.createSubject()
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 0, 5)
+        skill1.pointIncrement = 50
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill1)
+
+        List<String> users = getRandomUsers(30)
+
+        users.each {user ->
+            skillsService.addSkill(skill1, user, new Date().minus(5))
+            skillsService.addSkill(skill1, user, new Date().minus(1))
+        }
+
+        when:
+        def count = skillsService.getProjectUsersCount(proj.projectId)
+
+        then:
+        count == users.size()
+    }
 }
