@@ -222,6 +222,27 @@ class CopySkillsValidationEndpointSpecs extends CopyIntSpec {
         ].sort()
     }
 
+    def "group dest - destination subject id is optional"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Subj1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Subj1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 2)
+        def p2Subj1Skills = createSkills(3, 2, 2, 100)
+        def destGroup = createSkillsGroup(2, 2, 4)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, p2Subj1Skills + [destGroup])
+
+        when:
+        def res = skillsService.validateCopySkillDefsIntoAnotherProject(p1.projectId,
+                p1Subj1Skills.collect { it.skillId as String },
+                p2.projectId, null, destGroup.skillId)
+        then:
+        res.isAllowed == true
+        !res.validationErrors
+    }
+
     def "validate that there is no skill id and name collisions - only return up to 10 names/ids in the error"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)

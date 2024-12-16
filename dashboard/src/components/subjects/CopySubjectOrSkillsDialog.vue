@@ -22,7 +22,6 @@ import {useRoute} from "vue-router";
 import Dropdown from "primevue/dropdown";
 import UserRolesUtil from "@/components/utils/UserRolesUtil.js";
 import SubjectsService from "@/components/subjects/SubjectsService.js";
-import SkillsService from "@/components/skills/SkillsService.js";
 import {useFocusState} from "@/stores/UseFocusState.js";
 
 const props = defineProps({
@@ -60,7 +59,9 @@ const doCopy = () => {
         copying.value = false
         copied.value = true
         if (isSelectedSkillsCopy.value) {
-          focusState.setElementId('newSkillBtn')
+          const groupId = props.selectedSkills[0].groupId
+          const focusOn = groupId ? `group-${groupId}_newSkillBtn` : 'newSkillBtn'
+          focusState.setElementId(focusOn)
         }
         emits('after-copied')
       })
@@ -89,17 +90,20 @@ const validationErrors = ref([])
 const hasValidationErrors = computed(() => validationErrors.value.length > 0)
 
 const endpointsProps = computed(() => {
+  const isDestAGroup = () =>  isSelectedSkillsCopy.value && selectedSubjectOrGroup.value?.type === 'SkillsGroup'
   return {
     copyType: props.copyType,
     fromSubjectId: isSubjectCopy.value ? route.params.subjectId : null,
     skillIds: isSelectedSkillsCopy.value ? props.selectedSkills.map((sk) => sk.skillId) : null,
-    toSubjectId: isSelectedSkillsCopy.value ? selectedSubjectOrGroup.value?.skillId : null
+    toSubjectId: isSelectedSkillsCopy.value && !isDestAGroup() ? selectedSubjectOrGroup.value?.skillId : null,
+    toGroupId: isSelectedSkillsCopy.value && isDestAGroup() ? selectedSubjectOrGroup.value?.skillId : null,
   }
 })
 
 const onProjectChanged = (changedProj) => {
-  validationErrors.value = []
   if (changedProj != null) {
+    console.log(`onProjectChanged ${JSON.stringify(changedProj)}`)
+    validationErrors.value = []
     if (isSubjectCopy.value) {
       validatingOtherProj.value = true
       return SubjectsService.validateCopyItemsToAnotherProject(route.params.projectId, selectedProject.value.projectId, endpointsProps.value)
@@ -114,6 +118,9 @@ const onProjectChanged = (changedProj) => {
 
     if (isSelectedSkillsCopy.value) {
       loadingOtherSubjectsAndGroups.value = true
+      otherSubjectsAndGroups.value = []
+      selectedSubjectOrGroup.value = null
+      showSubjectAndGroupSelector.value = false
       return SubjectsService.getSubjectsAndSkillGroups(selectedProject.value.projectId)
           .then((subjectsAndGroups) => {
             otherSubjectsAndGroups.value = subjectsAndGroups;
@@ -235,7 +242,10 @@ const showOkButton = computed(() => !copied.value && (hasProjects.value || loadi
         Validation Passed! <Tag>{{ selectedSkills.length}}</Tag> skill(s) are eligible to be copied to <b>{{ selectedProject.name }}</b> project
       </Message>
     </BlockUI>
-    <Message v-if="copied" severity="success" :closable="false">Subject copied to <b>{{ selectedProject.name }}</b></Message>
+    <Message v-if="copied" severity="success" :closable="false" data-cy="copySuccessMsg">
+      <div v-if="isSubjectCopy">Subject was copied to <b>{{ selectedProject.name }}</b></div>
+      <div v-if="isSelectedSkillsCopy">Selected skill(s) were copied to <b>{{ selectedProject.name }}</b></div>
+    </Message>
   </SkillsDialog>
 </template>
 

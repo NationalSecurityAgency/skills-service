@@ -155,7 +155,13 @@ class ProjectCopyService {
             ProjDef fromProject = loadProject(projectId)
             ProjDef otherProject = loadProject(otherProjectId)
             validateProjectsCommunityStatus(fromProject, otherProject)
-            loadSubject(otherProject.projectId, otherSubjectId)
+            if (otherSubjectId) {
+                loadSubject(otherProject.projectId, otherSubjectId)
+            } else {
+                if (!otherGroupId) {
+                    throw new SkillException("otherGroupId is required when otherSubjectId is not provided", projectId, null, ErrorCode.BadParam)
+                }
+            }
             loadSkillGroup(otherProject.projectId, otherGroupId)
             itemsToCopy = getSkillsToCopy(projectId, skillIds)
         } catch (SkillException skillException) {
