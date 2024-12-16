@@ -709,6 +709,10 @@ class ProjAdminService {
         ))
     }
 
+    @Transactional(readOnly = true)
+    boolean isUserArchived(String projectId, String userId) {
+        return archivedUserRepo.existsByProjectIdAndUserId(projectId, userId)
+    }
 
     TableResult findAllArchivedUsers(String projectId, PageRequest pageRequest) {
         Page<ArchivedUsersRepo.ArchivedUserWithAttrs> results = archivedUserRepo.findAllByProjectId(projectId, pageRequest)

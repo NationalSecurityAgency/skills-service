@@ -1872,5 +1872,15 @@ class AdminController {
         projAdminService.restoreArchiveUser(projectId, userKey)
         return new RequestResult(success: true)
     }
+
+
+    @RequestMapping(value = "/projects/{projectId}/users/{userKey}/isArchived", method = RequestMethod.GET, produces = "application/json")
+    RequestResult isUserArchived(@PathVariable("projectId") String projectId,
+                                 @PathVariable("userKey") String userKey) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(userKey, "userKey")
+
+        return new RequestResult(success: projAdminService.isUserArchived(projectId, userKey))
+    }
 }
 

@@ -27,6 +27,7 @@ const projectUserState = useProjectUserState()
 const appConfig = useAppConfig()
 
 const isLoading = ref(true)
+const isUserArchived = ref(false)
 const userTitle = ref( '')
 const userIdForDisplay = ref( '')
 const tags = ref( '')
@@ -71,6 +72,9 @@ const loadUserInfo = () => {
       tags.value = processUserTags(response);
     });
   }
+  UsersService.isUserArchived(route.params.projectId, route.params.userId).then((result) => {
+    isUserArchived.value = result
+  })
 
   const userDetails = UsersService.getUserInfo(route.params.projectId, route.params.userId)
     .then((result) => {
@@ -116,6 +120,9 @@ const processUserTags = (userTags) =>{
 <template>
 <div>
   <page-header :loading="isLoading" :options="headerOptions">
+    <template #right-of-header>
+      <Tag class="ml-2" severity="danger" v-if="isUserArchived"><i class="fas fa-archive mr-1" aria-hidden="true"/>Archived</Tag>
+    </template>
     <template #subSubTitle v-if="tags">
         <span v-for="(tag, index) in tags" :key="index" data-cy="userTagHeader">
           <span class="text-muted">{{tag.label}}: </span>
