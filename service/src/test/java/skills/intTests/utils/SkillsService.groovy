@@ -278,6 +278,10 @@ class SkillsService {
         wsHelper.adminGet(getProjectUrl(projectId))
     }
 
+    def getProjectUsersCount(String projectId) {
+        wsHelper.adminGet("${getProjectUrl(projectId)}/users/count")
+    }
+
     def deleteProjectIfExist(String projectId) {
         def res = wsHelper.appPost("/projectExist", [projectId: projectId])
         Boolean exists = res.body
