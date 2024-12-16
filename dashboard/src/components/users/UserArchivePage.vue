@@ -16,16 +16,16 @@ limitations under the License.
 <script setup>
 
 import { useRoute } from 'vue-router';
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js';
 import { useUserInfo } from '@/components/utils/UseUserInfo.js';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import { useFocusState } from '@/stores/UseFocusState.js';
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import UsersService from '@/components/users/UsersService.js'
-import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
-import ExistingUserInput from '@/components/utils/ExistingUserInput.vue';
 import NoContent2 from '@/components/utils/NoContent2.vue';
+import SkillsDisplayPathAppendValues from '@/router/SkillsDisplayPathAppendValues.js';
+import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
 
 const announcer = useSkillsAnnouncer()
 const route = useRoute()
@@ -74,7 +74,7 @@ const loadData = () => {
   return UsersService.getArchivedUsers(route.params.projectId, params)
       .then((res) => {
         archivedUsers.value = res.data
-        options.value.pagination.totalRows = archivedUsers.value.length
+        options.value.pagination.totalRows = res.totalCount
         options.value.busy = false
       })
       .finally(() => {
@@ -95,6 +95,27 @@ const restoreUser = (user) => {
             })
       })
 }
+const calculateClientDisplayRoute = (props) => {
+  return {
+    name: `SkillsDisplay${SkillsDisplayPathAppendValues.SkillsDisplayPreview}`,
+    params: {
+      projectId: route.params.projectId,
+      userId: props.userId,
+      dn: props.dn
+    }
+  }
+}
+
+const pageChanged = (pagingInfo) => {
+  options.value.pagination.pageSize = pagingInfo.rows
+  options.value.pagination.currentPage = pagingInfo.page + 1
+  loadData()
+}
+const sortField = (column) => {
+  // set to the first page
+  options.value.pagination.currentPage = 1
+  loadData()
+}
 
 </script>
 
@@ -113,16 +134,20 @@ const restoreUser = (user) => {
             :loading="options.busy"
             show-gridlines
             striped-rows
+            lazy
             paginator
             id="userArchiveTable"
             data-cy="userArchiveTable"
+            :total-records="options.pagination.totalRows"
             :rows="options.pagination.pageSize"
             :rowsPerPageOptions="options.pagination.possiblePageSizes"
+            @page="pageChanged"
+            @sort="sortField"
             v-model:sort-field="sortInfo.sortBy"
             v-model:sort-order="sortInfo.sortOrder">
 
           <template #paginatorstart>
-            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ archivedUsers.length }}</span>
+            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ options.pagination.totalRows }}</span>
           </template>
 
           <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
