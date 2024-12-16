@@ -1446,7 +1446,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         updatedSkill.pointIncrement == 500
     }
 
-    def "archiving a user filter that user from user tables"() {
+    def "archiving a user filters that user from user tables"() {
         def project = createProject()
         def subject = createSubject()
         def skill1 = createSkill(1, 1, 1, 0, 5)
@@ -1465,6 +1465,10 @@ class AdminEditSpecs extends DefaultIntSpec {
         def users = getRandomUsers(2)
         def user1 = users[0]
         def user2 = users[1]
+
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(user1, 'someTag', ["ABC"])
+        rootUser.saveUserTag(user2, 'someTag', ["ABC"])
 
         skillsService.addSkill(skill1, user1, new Date().minus(5))
         skillsService.addSkill(skill1, user1, new Date().minus(1))
@@ -1486,6 +1490,9 @@ class AdminEditSpecs extends DefaultIntSpec {
         def badgeUsers = skillsService.getBadgeUsers(project.projectId, badgeId)
         assert badgeUsers.data.find { it.userId == user1 && it.totalPoints == 100 }
         assert badgeUsers.data.find { it.userId == user2 && it.totalPoints == 60 }
+        def userTagUsers = skillsService.getUserTagUsers(project.projectId, 'someTag', 'ABC')
+        assert userTagUsers.data.find { it.userId == user1 && it.totalPoints == 100 }
+        assert userTagUsers.data.find { it.userId == user2 && it.totalPoints == 60 }
 
         when:
 
@@ -1496,6 +1503,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         def skill1UsersAfterArchive = skillsService.getSkillUsers(project.projectId, skill1.skillId)
         def skill2UsersAfterArchive = skillsService.getSkillUsers(project.projectId, skill2.skillId)
         def badgeUsersAfterArchive = skillsService.getBadgeUsers(project.projectId, badgeId)
+        def userTagUsersAfterArchive = skillsService.getUserTagUsers(project.projectId, 'someTag', 'ABC')
 
         then:
         !projectUsersAfterArchive.data.find { it.userId == user1 }
@@ -1508,5 +1516,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         skill2UsersAfterArchive.data.find { it.userId == user2 && it.totalPoints == 10 }
         !badgeUsersAfterArchive.data.find { it.userId == user1 }
         badgeUsersAfterArchive.data.find { it.userId == user2 && it.totalPoints == 60 }
+        !userTagUsersAfterArchive.data.find { it.userId == user1 }
+        userTagUsersAfterArchive.data.find { it.userId == user2 && it.totalPoints == 60 }
     }
 }

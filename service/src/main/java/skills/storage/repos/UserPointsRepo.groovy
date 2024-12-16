@@ -623,7 +623,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
           AND up.project_id = ?1
           AND up.skill_id IS NULL
           AND ut.key = ?2
-          AND ut.value = ?3''', nativeQuery = true)
+          AND ut.value = ?3
+          AND not exists (select 1 from archived_users au where au.user_id = up.user_id and au.project_id = ?1)''', nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndUserTag(String projectId, String userTagKey, String userTagValue)
 
     @Query(value = '''SELECT COUNT(*)
@@ -636,7 +637,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                       usr.project_id = ?1 and 
                       usr.skill_id is null and 
                       (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', ?4, '%')) OR
-                       lower(usattr.user_id_for_display) like lower(CONCAT('%', ?4, '%')))) 
+                       lower(usattr.user_id_for_display) like lower(CONCAT('%', ?4, '%')))
+                      AND not exists (select 1 from archived_users au where au.user_id = usr.user_id and au.project_id = ?1)
+                ) 
                 AS temp''',
             nativeQuery = true)
     Long countDistinctUserIdByProjectIdAndUserTagAndUserIdLike(String projectId, String userTagKey, String userTagValue, String userId)
@@ -831,6 +834,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                  lower(ua.user_id_for_display) like lower(CONCAT('%', ?5, '%'))
                 ) and 
                 up.skill_id is null 
+                AND not exists (select 1 from archived_users au where au.user_id = up.user_id and au.project_id = ?1)
             GROUP BY up.user_id''', nativeQuery = true)
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndUserTagAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String userTagKey, String userTagValue, String userId, Pageable pageable)
 
