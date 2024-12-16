@@ -159,7 +159,13 @@ const sortField = (column) => {
               <div v-if="slotProps.field === 'userIdForDisplay'" class="flex flex-row flex-wrap"
                    :data-cy="`archivedUser_${slotProps.data.userId}`">
                 <div class="flex align-items-start justify-content-start">
-                  {{ userInfo.getUserDisplay(slotProps.data, true) }}
+                  <router-link
+                      :to="calculateClientDisplayRoute(slotProps.data)"
+                      aria-label="View user details"
+                      data-cy="usersTable_viewDetailsLink"
+                  >
+                    {{ userInfo.getUserDisplay(slotProps.data, true) }}
+                  </router-link>
                 </div>
                 <div class="flex flex-grow-1 align-items-start justify-content-end">
                   <SkillsButton :data-cy="`restoreUser-${slotProps.data.userId}`"
