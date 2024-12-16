@@ -93,9 +93,10 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
           ua.level = ?2 AND
           ut.key = ?3 AND
           ut.value = ?4 AND
+          ua.skillId is null AND
           not exists (select 1 from ArchivedUser au where au.userId = ua.userId and au.projectId = ?1)
     ''')
-    Integer countByProjectIdAndSkillIdAndLevelAndUserTag(String projectId, int level, String userTagKey, String userTagValue)
+    Integer countByProjectIdAndLevelAndUserTag(String projectId, int level, String userTagKey, String userTagValue)
 
     void deleteAllByProjectIdAndUserId(String projectId, String userId)
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
