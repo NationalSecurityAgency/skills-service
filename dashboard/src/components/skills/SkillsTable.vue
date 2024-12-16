@@ -49,6 +49,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import SkillNameRouterLink from '@/components/skills/SkillNameRouterLink.vue';
 import { useFocusState } from '@/stores/UseFocusState.js'
 import skillsService from '@/components/skills/SkillsService.js';
+import CopySubjectOrSkillsDialog from "@/components/subjects/CopySubjectOrSkillsDialog.vue";
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -289,7 +290,8 @@ const skillsActionsMenu = ref(false)
 const toggleActionsMenu = (event) => {
   skillsActionsMenu.value.toggle(event)
 }
-const actionsMenu = ref([
+const addWidthToIcon = (menuItems) => menuItems.map((item) => ({...item, icon: `${item.icon} w-1_5rem`}))
+const actionsMenu = ref(addWidthToIcon([
   {
     label: 'Export To Catalog',
     icon: 'far fa-arrow-alt-circle-up',
@@ -319,8 +321,15 @@ const actionsMenu = ref([
     }
   },
   {
+    label: 'Copy to another Project',
+    icon: 'fas fa-copy',
+    command: () => {
+      showCopySkillsModal.value = true
+    }
+  },
+  {
     label: 'Skill Tags',
-    items: [
+    items: addWidthToIcon([
       {
         label: 'Add Tag',
         icon: 'fas fa-tag',
@@ -335,13 +344,14 @@ const actionsMenu = ref([
           showRemoveSkillsTag.value = true
         }
       }
-    ]
+    ])
   }
-])
+]))
 const expandedRows = ref([])
 
 const showMoveSkillsInfoModal = ref(false)
 const showSkillsReuseModal = ref(false)
+const showCopySkillsModal = ref(false)
 const showExportToCatalogDialog = ref(false)
 const showAddSkillsToBadgeDialog = ref(false)
 const showAddSkillsTag = ref(false)
@@ -890,6 +900,13 @@ const exportSkills = () => {
       v-model="showAddSkillsToBadgeDialog"
       :skills="selectedSkills"
       @on-added="removeSelectedRows"
+    />
+    <copy-subject-or-skills-dialog
+        v-if="showCopySkillsModal"
+        v-model="showCopySkillsModal"
+        copy-type="SelectSkills"
+        :selected-skills="selectedSkills"
+        @after-copied="removeSelectedRows"
     />
     <add-skill-tag-dialog
       id="addTagSkillsModal"

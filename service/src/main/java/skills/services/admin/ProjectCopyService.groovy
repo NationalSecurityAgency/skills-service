@@ -20,7 +20,6 @@ import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
@@ -38,8 +37,6 @@ import skills.controller.result.model.SkillDefPartialRes
 import skills.icons.CustomIconFacade
 import skills.services.*
 import skills.services.admin.skillReuse.SkillReuseService
-import skills.services.attributes.SkillAttributeService
-import skills.services.attributes.SkillVideoAttrs
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.*
@@ -134,43 +131,50 @@ class ProjectCopyService {
 
     @Transactional
     @Profile
-    CopyValidationRes validateCopySubjectToAnotherProject(String projectId, String subjectId, String otherProjectId) {
-        SkillDefWithExtra subject
-        try {
-            subject = loadSubject(projectId, subjectId, otherProjectId)
-            ProjDef fromProject = loadProject(projectId)
-            ProjDef otherProject = loadProject(otherProjectId)
-            validateProjectsCommunityStatus(fromProject, otherProject)
-        } catch (SkillException skillException) {
-            return new CopyValidationRes(isAllowed: false, validationErrors: [skillException.getMessage()?.toString()])
+    void copyItemsToAnotherProject(String fromProjectId, String toProjectId, CopyToAnotherProjectRequest copyRequest) {
+        if (copyRequest.copyType == CopyToAnotherProjectRequestType.SelectSkills) {
+            copySkillsToAnotherProject(fromProjectId, copyRequest.skillIds, toProjectId, copyRequest.toSubjectId, copyRequest.toGroupId)
+        } else {
+            copySubjectToAnotherProject(fromProjectId, copyRequest.fromSubjectId, toProjectId)
         }
-
-        List<SkillDef> destItems = skillDefRepo.findAllByProjectIdAndTypeIn(otherProjectId, [SkillDef.ContainerType.Subject, SkillDef.ContainerType.Skill, SkillDef.ContainerType.Badge, SkillDef.ContainerType.SkillsGroup])
-        List<SkillDefRepo.SkillIdAndName> itemsToCopy = skillDefRepo.findSkillsIdAndNameUnderASubject(subject.id)
-
-        List<String> validationErrors = []
-
-        List<String> destSkillIds = destItems.collect { it.getSkillId() }
-        List<String> origSkillIds = itemsToCopy.collect { it.getSkillId() }
-        List<String> idsAlreadyInProject = destSkillIds.intersect(origSkillIds, { a, b -> a.toLowerCase() <=> b.toLowerCase() })
-        if (idsAlreadyInProject){
-            validationErrors.add("The following IDs already exist in the destination project: ${idsAlreadyInProject.sort().subList(0, Math.min(idsAlreadyInProject.size(), 10)).join(", ")}.".toString())
-        }
-
-        List<String> destSkillNames = destItems.collect { it.getName() }
-        List<String> origSkillNames = itemsToCopy.collect { it.getSkillName() }
-        List<String> namesAlreadyInProject = destSkillNames.intersect(origSkillNames, { a, b -> a.toLowerCase() <=> b.toLowerCase() })
-        if (namesAlreadyInProject){
-            validationErrors.add("The following names already exist in the destination project: ${namesAlreadyInProject.sort().subList(0, Math.min(namesAlreadyInProject.size(), 10)).join(", ")}.".toString())
-        }
-
-        CopyValidationRes res = new CopyValidationRes(isAllowed: validationErrors?.isEmpty(), validationErrors: validationErrors)
-        return res
     }
 
     @Transactional
     @Profile
-    void copySubjectToAnotherProject(String projectId, String subjectId, String otherProjectId) {
+    CopyValidationRes validateCopyItemsToAnotherProject(String fromProjectId, String toProjectId, CopyToAnotherProjectRequest copyRequest) {
+        if (copyRequest.copyType == CopyToAnotherProjectRequestType.SelectSkills) {
+            return validateCopySkillsToAnotherProject(fromProjectId, copyRequest.skillIds, toProjectId, copyRequest.toSubjectId, copyRequest.toGroupId)
+        }
+        return validateCopySubjectToAnotherProject(fromProjectId, copyRequest.fromSubjectId, toProjectId)
+    }
+
+    @Profile
+    private CopyValidationRes validateCopySkillsToAnotherProject(String projectId, List<String> skillIds, String otherProjectId, String otherSubjectId, String otherGroupId = null ) {
+        List<SkillDefWithExtra> itemsToCopy
+        try {
+            ProjDef fromProject = loadProject(projectId)
+            ProjDef otherProject = loadProject(otherProjectId)
+            validateProjectsCommunityStatus(fromProject, otherProject)
+            if (otherSubjectId) {
+                loadSubject(otherProject.projectId, otherSubjectId)
+            } else {
+                if (!otherGroupId) {
+                    throw new SkillException("otherGroupId is required when otherSubjectId is not provided", projectId, null, ErrorCode.BadParam)
+                }
+            }
+            loadSkillGroup(otherProject.projectId, otherGroupId)
+            itemsToCopy = getSkillsToCopy(projectId, skillIds)
+        } catch (SkillException skillException) {
+            return new CopyValidationRes(isAllowed: false, validationErrors: [skillException.getMessage()?.toString()])
+        }
+
+        List<String> validationErrors = checkForSkillIdAndNameCollisions(itemsToCopy.collect { new SkillIdAndName(skillId: it.skillId, skillName: it.name) }, otherProjectId)
+        CopyValidationRes res = new CopyValidationRes(isAllowed: validationErrors?.isEmpty(), validationErrors: validationErrors)
+        return res
+    }
+
+    @Profile
+    private void copySkillsToAnotherProject(String projectId, List<String> skillIds, String otherProjectId, String otherSubjectId, String otherGroupId = null ) {
         ProjDef otherProject = loadProject(otherProjectId)
         lockingService.lockProject(otherProject.projectId)
         copiedAttachmentUuidsThreadLocal.set([:])
@@ -178,7 +182,114 @@ class ProjectCopyService {
             ProjDef fromProject = loadProject(projectId)
             validateProjectsCommunityStatus(fromProject, otherProject)
             validateUserIsAndAdminOfDestProj(otherProject, projectId)
-            SkillDefWithExtra subject = loadSubject(fromProject.projectId, subjectId, otherProject.projectId)
+
+            if (otherGroupId) {
+                SkillDef skillGroup = loadSkillGroup(otherProject.projectId, otherGroupId)
+                if (!otherSubjectId) {
+                    List<SkillDef> subjectParent = skillRelDefRepo.findParentByChildIdAndTypes(skillGroup.id, [SkillRelDef.RelationshipType.RuleSetDefinition])
+                    if (subjectParent) {
+                        otherSubjectId = subjectParent.first().skillId
+                    }
+                }
+            }
+
+            SkillDefWithExtra destinationSubject = loadSubject(otherProject.projectId, otherSubjectId)
+
+            List<SkillDefWithExtra> skillDefs = getSkillsToCopy(projectId, skillIds)
+
+            List<SkillInfo> allCollectedSkills = []
+            List<SkillDefWithExtra> skillDefsSorted = skillDefs.sort { skillIds.indexOf(it.skillId) }
+            createSkills(skillDefsSorted, fromProject.projectId, otherProject.projectId, destinationSubject.skillId, allCollectedSkills, otherGroupId, true)
+        } finally {
+            copiedAttachmentUuidsThreadLocal.set([:])
+        }
+    }
+
+    @Profile
+    private List<SkillDefWithExtra> getSkillsToCopy(String projectId, List<String> skillIds) {
+        List<SkillDefWithExtra> skillDefs = skillDefWithExtraRepo.findAllByProjectIdAndSkillIdIn(projectId, skillIds)
+        if (skillDefs.size() != skillIds.size()) {
+            throw new SkillException("Not all provided skill were loaded, missing skill ids are: ${skillIds - skillDefs.collect { it.skillId }}", projectId, null, ErrorCode.BadParam)
+        }
+        List<SkillDefWithExtra> importedSkills = skillDefs.findAll { it.copiedFromProjectId != null }
+        if (importedSkills) {
+            throw new SkillException("Can't copy imported skills, following skills were imported: ${importedSkills.collect { it.skillId }.sort()}", projectId, null, ErrorCode.BadParam)
+        }
+        return skillDefs
+    }
+
+    @Profile
+    private SkillDef loadSkillGroup(String projectId, String groupId) {
+        if (groupId) {
+            SkillDef skillGroup = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+            if (!skillGroup) {
+                throw new SkillException("Group with id [${groupId}] does not exist.", projectId, null, ErrorCode.BadParam)
+            }
+
+            return skillGroup
+        }
+
+        return null
+    }
+
+    @Profile
+    private CopyValidationRes validateCopySubjectToAnotherProject(String projectId, String subjectId, String otherProjectId) {
+        SkillDefWithExtra subject
+        try {
+            subject = loadSubject(projectId, subjectId)
+            validateSubjectDoesNotExist(otherProjectId, subject.skillId, subject.name)
+            ProjDef fromProject = loadProject(projectId)
+            ProjDef otherProject = loadProject(otherProjectId)
+            validateProjectsCommunityStatus(fromProject, otherProject)
+        } catch (SkillException skillException) {
+            return new CopyValidationRes(isAllowed: false, validationErrors: [skillException.getMessage()?.toString()])
+        }
+
+
+        List<SkillDefRepo.SkillIdAndName> itemsToCopy = skillDefRepo.findSkillsIdAndNameUnderASubject(subject.id)
+
+        List<String> validationErrors = checkForSkillIdAndNameCollisions(itemsToCopy.collect { new SkillIdAndName(skillId: it.skillId, skillName: it.skillName) }, otherProjectId)
+        CopyValidationRes res = new CopyValidationRes(isAllowed: validationErrors?.isEmpty(), validationErrors: validationErrors)
+        return res
+    }
+
+    private static class SkillIdAndName {
+        String skillId
+        String skillName
+    }
+
+    @Profile
+    private List<String> checkForSkillIdAndNameCollisions(List<SkillIdAndName> itemsToCopy, String otherProjectId) {
+        List<SkillDef> destItems = skillDefRepo.findAllByProjectIdAndTypeIn(otherProjectId, [SkillDef.ContainerType.Subject, SkillDef.ContainerType.Skill, SkillDef.ContainerType.Badge, SkillDef.ContainerType.SkillsGroup])
+        List<String> validationErrors = []
+
+        List<String> destSkillIds = destItems.collect { it.getSkillId() }
+        List<String> origSkillIds = itemsToCopy.collect { it.getSkillId() }
+        List<String> idsAlreadyInProject = destSkillIds.intersect(origSkillIds, { a, b -> a.toLowerCase() <=> b.toLowerCase() })
+        if (idsAlreadyInProject) {
+            validationErrors.add("The following IDs already exist in the destination project: ${idsAlreadyInProject.sort().subList(0, Math.min(idsAlreadyInProject.size(), 10)).join(", ")}.".toString())
+        }
+
+        List<String> destSkillNames = destItems.collect { it.getName() }
+        List<String> origSkillNames = itemsToCopy.collect { it.getSkillName() }
+        List<String> namesAlreadyInProject = destSkillNames.intersect(origSkillNames, { a, b -> a.toLowerCase() <=> b.toLowerCase() })
+        if (namesAlreadyInProject) {
+            validationErrors.add("The following names already exist in the destination project: ${namesAlreadyInProject.sort().subList(0, Math.min(namesAlreadyInProject.size(), 10)).join(", ")}.".toString())
+        }
+        return validationErrors
+    }
+
+    @Profile
+    private void copySubjectToAnotherProject(String projectId, String subjectId, String otherProjectId) {
+        ProjDef otherProject = loadProject(otherProjectId)
+        lockingService.lockProject(otherProject.projectId)
+        copiedAttachmentUuidsThreadLocal.set([:])
+        try {
+            ProjDef fromProject = loadProject(projectId)
+            validateProjectsCommunityStatus(fromProject, otherProject)
+            validateUserIsAndAdminOfDestProj(otherProject, projectId)
+            SkillDefWithExtra subject = loadSubject(fromProject.projectId, subjectId)
+            validateSubjectDoesNotExist(otherProjectId, subject.skillId, subject.name)
 
             List<SkillInfo> allCollectedSkills = []
             Map newIcons = subject.iconClass ? customIconFacade.copyIcons(fromProject.projectId, otherProject.projectId, [subject.iconClass]) : [:]
@@ -204,22 +315,24 @@ class ProjectCopyService {
         }
     }
 
-    private SkillDefWithExtra loadSubject(String fromProjectId, String subjectId, String toProjId) {
-        SkillDefWithExtra subject = skillDefWithExtraRepo.findByProjectIdAndSkillId(fromProjectId, subjectId)
+    private SkillDefWithExtra loadSubject(String projectId, String subjectId) {
+        SkillDefWithExtra subject = skillDefWithExtraRepo.findByProjectIdAndSkillId(projectId, subjectId)
         if (!subject) {
-            throw new SkillException("Subject with id [${subjectId}] does not exist.", subjectId, null, ErrorCode.BadParam)
+            throw new SkillException("Subject with id [${subjectId}] does not exist.", projectId, null, ErrorCode.BadParam)
         }
         if (subject.type != SkillDef.ContainerType.Subject) {
-            throw new SkillException("Provided id [${subjectId}] is not for a subject.", subjectId, null, ErrorCode.BadParam)
+            throw new SkillException("Provided id [${subjectId}] is not for a subject.", projectId, null, ErrorCode.BadParam)
         }
+        return subject
+    }
+
+    private void validateSubjectDoesNotExist(String toProjId, String subjectId, String subjectName) {
         if (skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(toProjId, subjectId)) {
             throw new SkillException("Id [${subjectId}] already exists.", subjectId, null, ErrorCode.BadParam)
         }
-        if (skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(toProjId, subject.name, SkillDef.ContainerType.Subject)) {
-            throw new SkillException("Subject with name [${subject.name}] already exists.", subjectId, null, ErrorCode.BadParam)
+        if (skillDefRepo.existsByProjectIdAndNameAndTypeAllIgnoreCase(toProjId, subjectName, SkillDef.ContainerType.Subject)) {
+            throw new SkillException("Subject with name [${subjectName}] already exists.", subjectId, null, ErrorCode.BadParam)
         }
-
-        return subject
     }
 
     @Transactional
@@ -486,10 +599,17 @@ class ProjectCopyService {
         String parentId = groupId ?: subjectId
         List<SkillDefWithExtra> skillDefs = skillRelDefRepo.getChildrenWithExtraAttrs(originalProjectId, parentId,
                 [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        List<SkillDefWithExtra> skillDefsSorted = skillDefs?.sort { it.displayOrder }
+        createSkills(skillDefsSorted, originalProjectId, desProjectId, subjectId, allCollectedSkills, groupId, validateNameAndIdCollisions)
+    }
 
-        allCollectedSkills.addAll(skillDefs.collect { new SkillInfo(skillDef: it, subjectId: subjectId, groupId: groupId) })
-        skillDefs?.findAll { it.enabled == "true" && (!it.copiedFrom) }
-                ?.sort { it.displayOrder }
+    @Profile
+    private void createSkills(List<SkillDefWithExtra> skillsToCopy, String originalProjectId,
+                              String desProjectId, String subjectId,
+                              List<SkillInfo> allCollectedSkills, String groupId = null,
+                              boolean validateNameAndIdCollisions = false) {
+        allCollectedSkills.addAll(skillsToCopy.collect { new SkillInfo(skillDef: it, subjectId: subjectId, groupId: groupId) })
+        skillsToCopy?.findAll { it.enabled == "true" && (!it.copiedFrom) }
                 ?.each { SkillDefWithExtra fromSkill ->
                     if (validateNameAndIdCollisions) {
                         if (skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(desProjectId, fromSkill.skillId)) {
@@ -539,6 +659,7 @@ class ProjectCopyService {
                     }
                 }
     }
+
 
     private final ThreadLocal<Map<String,String>> copiedAttachmentUuidsThreadLocal = new ThreadLocal<>();
     @Profile

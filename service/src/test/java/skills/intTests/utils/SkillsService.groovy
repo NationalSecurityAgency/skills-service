@@ -25,6 +25,8 @@ import org.springframework.util.StreamUtils
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import skills.controller.request.model.ActionPatchRequest
+import skills.controller.request.model.CopyToAnotherProjectRequest
+import skills.controller.request.model.CopyToAnotherProjectRequestType
 import skills.services.settings.Settings
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
@@ -138,12 +140,32 @@ class SkillsService {
     }
 
     @Profile
-    def copySubjectDefIntoAnotherProject(String fromProjId, String fromSubjectId, String toSubjId) {
-        wsHelper.adminPost("/projects/${fromProjId}/copy/subject/${fromSubjectId}/copy/projects/${toSubjId}".toString(), [])
+    def copySkillDefsIntoAnotherProjectSubject(String fromProjId, List<String> skillIds, String toProjectId, String toSubjId) {
+        def request = [copyType: CopyToAnotherProjectRequestType.SelectSkills, skillIds: skillIds, toSubjectId: toSubjId]
+        wsHelper.adminPost("/projects/${fromProjId}/copy/projects/${toProjectId}".toString(), request)
+    }
+
+    @Profile
+    def copySkillDefsIntoAnotherProjectSkillGroup(String fromProjId, List<String> skillIds, String toProjectId, String toSubjId, String otherGroupId) {
+        def request = [copyType: CopyToAnotherProjectRequestType.SelectSkills, skillIds: skillIds, toSubjectId: toSubjId, toGroupId: otherGroupId]
+        wsHelper.adminPost("/projects/${fromProjId}/copy/projects/${toProjectId}".toString(), request)
+    }
+
+    @Profile
+    def validateCopySkillDefsIntoAnotherProject(String fromProjId, List<String> skillIds, String toProjectId, String toSubjId, String otherGroupId = null) {
+        def request = [copyType: CopyToAnotherProjectRequestType.SelectSkills, skillIds: skillIds, toSubjectId: toSubjId, toGroupId: otherGroupId]
+        wsHelper.adminPost("/projects/${fromProjId}/copy/projects/${toProjectId}/validateCopy".toString(), request)?.body
+    }
+
+    @Profile
+    def copySubjectDefIntoAnotherProject(String fromProjId, String fromSubjectId, String toProjectId) {
+        def request = [copyType: CopyToAnotherProjectRequestType.EntireSubject, fromSubjectId: fromSubjectId]
+        wsHelper.adminPost("/projects/${fromProjId}/copy/projects/${toProjectId}".toString(), request)
     }
     @Profile
-    def validateCopySubjectDefIntoAnotherProject(String fromProjId, String fromSubjectId, String toSubjId) {
-        return wsHelper.adminGet("/projects/${fromProjId}/copy/subject/${fromSubjectId}/copy/projects/${toSubjId}/validateCopy".toString(), [:])
+    def validateCopySubjectDefIntoAnotherProject(String fromProjId, String fromSubjectId, String toProjectId) {
+        def request = [copyType: CopyToAnotherProjectRequestType.EntireSubject, fromSubjectId: fromSubjectId]
+        wsHelper.adminPost("/projects/${fromProjId}/copy/projects/${toProjectId}/validateCopy".toString(), request).body
     }
 
     static String PROD_MODE = Settings.PRODUCTION_MODE.settingName
@@ -334,6 +356,10 @@ class SkillsService {
 
     def getSubjects(String projectId) {
         wsHelper.adminGet(getProjectUrl(projectId) + "/subjects")
+    }
+
+    def getSubjectsAndSkillGroups(String projectId) {
+        wsHelper.adminGet(getProjectUrl(projectId) + "/subjectsAndSkillsGroups")
     }
 
     def subjectNameExists(Map props){

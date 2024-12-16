@@ -35,6 +35,7 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
 
     List<SkillDefWithExtra> findAllByProjectIdAndType(@Nullable String id, ContainerType type)
 
+
     List<SkillDefWithExtra> findAllByProjectIdAndTypeAndEnabled(@Nullable String id, ContainerType type, String enabled)
 
     @Nullable
@@ -45,6 +46,9 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
 
     @Nullable
     SkillDefWithExtra findByProjectIdAndSkillId(String id, String skillId)
+
+    @Nullable
+    List<SkillDefWithExtra> findAllByProjectIdAndSkillIdIn(String projectId, List<String> skillId)
 
     static interface SkillDescDBRes {
         String getSkillId()
