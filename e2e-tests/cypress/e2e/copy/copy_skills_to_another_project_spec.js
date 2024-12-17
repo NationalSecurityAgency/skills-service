@@ -322,6 +322,49 @@ describe('Copy skills from one project to another Tests', () => {
         cy.get('[data-cy="validationFailedMsg"]').should('not.exist')
     });
 
+    it('validation errors are cleared and re-checked when the subject is changed', () => {
+        cy.createSkill(2, 1, 1);
+        cy.createSubject(2, 2)
+        cy.createProject(3)
+        cy.createSubject(3, 1)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.initiateSkillsCopyModal([0,1])
+        // 1. select project
+        cy.get('[data-cy="selectAProjectDropdown"]').click();
+        cy.get('[data-cy="projectSelector-projectName"]').contains('This is project 2').click();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="validationPassedMsg"]').should('not.exist');
+        // 2. select subject
+        cy.get('[data-cy="selectASubjectOrGroupDropdown"]').click();
+        cy.get('[data-cy="subjOrGroupSelector-name"]').contains('Subject 1').click();
+        cy.get('[data-cy="validationFailedMsg"]').contains('The following IDs already exist in the destination project: skill1.')
+        cy.get('[data-cy="validationFailedMsg"]').contains('The following names already exist in the destination project: Very Great Skill 1.')
+        // validate that error is not duplicated
+        cy.get('[data-cy="validationFailedMsg"]').invoke('text').then((text) => {
+            const occurrences = text.split('Very Great Skill 1').length - 1;
+            cy.wrap(occurrences).should('eq', 1);
+        });
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="closeDialogBtn"]').contains('Cancel')
+        cy.get('[data-cy="selectASubjectOrGroupDropdown"]').should('contain.text', 'Subject 1')
+
+        // select subject a different subject
+        cy.get('[data-cy="selectASubjectOrGroupDropdown"]').click();
+        cy.get('[data-cy="subjOrGroupSelector-name"]').contains('Subject 2').click();
+        cy.get('[data-cy="validationFailedMsg"]').contains('The following IDs already exist in the destination project: skill1.')
+        cy.get('[data-cy="validationFailedMsg"]').contains('The following names already exist in the destination project: Very Great Skill 1.').should('have.length', 1)
+        // validate that error is not duplicated
+        cy.get('[data-cy="validationFailedMsg"]').invoke('text').then((text) => {
+            const occurrences = text.split('Very Great Skill 1').length - 1;
+            cy.wrap(occurrences).should('eq', 1);
+        });
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="closeDialogBtn"]').contains('Cancel')
+        cy.get('[data-cy="selectASubjectOrGroupDropdown"]').should('contain.text', 'Subject 2')
+    });
+
     it('cancelling dialog should return focus to the actions button', () => {
         cy.createSkill(1, 1, 3);
         cy.createSkill(1, 1, 4);
