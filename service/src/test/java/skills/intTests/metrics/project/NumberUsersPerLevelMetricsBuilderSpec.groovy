@@ -19,6 +19,7 @@ package skills.intTests.metrics.project
 import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.metrics.builders.MetricsParams
 import spock.lang.IgnoreRest
 
@@ -369,6 +370,93 @@ class NumberUsersPerLevelMetricsBuilderSpec extends DefaultIntSpec {
         resSubj2AfterArchive[4].count == 2
         resSubj2AfterArchive[5].value == "Level 6"
         resSubj2AfterArchive[5].count == 1
+    }
+
+    def "number of users achieved per level for user tag"() {
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(10)
+        skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        def subj = SkillsFactory.createSubject()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> users = new ArrayList<>(getRandomUsers(16))
+        List<String> usersCopy = new ArrayList<>(users)
+
+        SkillsService rootUser = createRootSkillService()
+        users.each { userId ->
+            rootUser.saveUserTag(userId, "tag1", ["value1"])
+        }
+
+        achieveLevelForUsers(usersCopy, skills, 4, 1)
+        achieveLevelForUsers(usersCopy, skills, 2, 2)
+        achieveLevelForUsers(usersCopy, skills, 4, 3)
+        achieveLevelForUsers(usersCopy, skills, 5, 4)
+        achieveLevelForUsers(usersCopy,skills, 1, 5)
+
+        Map projectProps = [:]
+        Map tagProps = [(MetricsParams.P_TAG_KEY): "tag1", (MetricsParams.P_TAG_FILTER): "value1"]
+
+        when:
+        def res = skillsService.getMetricsData(proj.projectId, metricsId, projectProps)
+        def res1 = skillsService.getMetricsData(proj.projectId, metricsId, tagProps)
+
+        skillsService.archiveUsers([users[2]], proj.projectId)
+
+        def resAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, projectProps)
+        def res1AfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, tagProps)
+
+        then:
+        res.size() == 5
+        res[0].value == "Level 1"
+        res[0].count == 4
+        res[1].value == "Level 2"
+        res[1].count == 2
+        res[2].value == "Level 3"
+        res[2].count == 4
+        res[3].value == "Level 4"
+        res[3].count == 5
+        res[4].value == "Level 5"
+        res[4].count == 1
+
+        res1.size() == 5
+        res1[0].value == "Level 1"
+        res1[0].count == 4
+        res1[1].value == "Level 2"
+        res1[1].count == 2
+        res1[2].value == "Level 3"
+        res1[2].count == 4
+        res1[3].value == "Level 4"
+        res1[3].count == 5
+        res1[4].value == "Level 5"
+        res1[4].count == 1
+
+        resAfterArchive.size() == 5
+        resAfterArchive[0].value == "Level 1"
+        resAfterArchive[0].count == 3
+        resAfterArchive[1].value == "Level 2"
+        resAfterArchive[1].count == 2
+        resAfterArchive[2].value == "Level 3"
+        resAfterArchive[2].count == 4
+        resAfterArchive[3].value == "Level 4"
+        resAfterArchive[3].count == 5
+        resAfterArchive[4].value == "Level 5"
+        resAfterArchive[4].count == 1
+
+        res1AfterArchive.size() == 5
+        res1AfterArchive[0].value == "Level 1"
+        res1AfterArchive[0].count == 3
+        res1AfterArchive[1].value == "Level 2"
+        res1AfterArchive[1].count == 2
+        res1AfterArchive[2].value == "Level 3"
+        res1AfterArchive[2].count == 4
+        res1AfterArchive[3].value == "Level 4"
+        res1AfterArchive[3].count == 5
+        res1AfterArchive[4].value == "Level 5"
+        res1AfterArchive[4].count == 1
     }
 
     private void achieveLevelForUsers(List<String> users, List<Map> skills, int numUsers, int level, String type = "Overall") {

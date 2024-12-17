@@ -38,4 +38,6 @@ interface ArchivedUsersRepo extends CrudRepository<ArchivedUser, Long> {
 
     @Nullable
     ArchivedUser findByProjectIdAndUserId(String projectId, String userId)
+
+    Boolean existsByProjectIdAndUserId(String projectId, String userId)
 }

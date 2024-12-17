@@ -296,7 +296,7 @@ class RankingLoader {
         }).collect { skills.controller.result.model.LevelDefinitionRes levelMeta ->
             Integer numUsers
             if (tagKey && tagFilter) {
-                numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevelAndUserTag(projectId, levelMeta.level, tagKey, tagFilter)
+                numUsers = achievedLevelRepository.countByProjectIdAndLevelAndUserTag(projectId, levelMeta.level, tagKey, tagFilter)
             } else if (subjectId) {
                 numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, subjectId, levelMeta.level)
             } else {
@@ -319,7 +319,7 @@ class RankingLoader {
         if (includeZeroLevel) {
             Integer numUsers
             if (tagKey && tagFilter) {
-                numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevelAndUserTag(projectId, 0, tagKey, tagFilter)
+                numUsers = achievedLevelRepository.countByProjectIdAndLevelAndUserTag(projectId, 0, tagKey, tagFilter)
             } else {
                 numUsers = achievedLevelRepository.countByProjectIdAndSkillIdAndLevel(projectId, subjectId, 0)
             }
