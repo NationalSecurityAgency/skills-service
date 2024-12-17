@@ -31,6 +31,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import SkillsSettingTextInput from '@/components/settings/SkillsSettingTextInput.vue'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import SettingsItem from "@/components/settings/SettingsItem.vue";
 
 const dialogMessages = useDialogMessages()
 const announcer = useSkillsAnnouncer();
@@ -474,10 +475,7 @@ const saveSettings = ((dirtyChanges) => {
     <Card>
       <template #content>
         <loading-container :is-loading="isLoading">
-          <div class="field flex flex-column lg:flex-row lg:gap-3" data-cy="projectVisibility">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="projectVisibilityLabel" for="projectVisibilityDropdown">
-              Project Discoverability:
-            </label>
+          <settings-item label="Project Discoverability" input-id="projectVisibilityDropdown">
             <Dropdown v-model="settings.projectVisibility.value"
                       inputId="projectVisibilityDropdown"
                       :options="projectVisibilityOptions"
@@ -486,12 +484,9 @@ const saveSettings = ((dirtyChanges) => {
                       optionLabel="text" optionValue="value"
                       class="w-full"
                       data-cy="projectVisibilitySelector" required />
-          </div>
+          </settings-item>
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="hideProjectDescriptionLabel" for="hideProjectDescription">
-              Project Description:
-            </label>
+          <settings-item label="Project Description" input-id="hideProjectDescription">
             <Dropdown v-model="settings.hideProjectDescription.value"
                       inputId="hideProjectDescription"
                       :options="[{value: true, label: 'Show Project Description everywhere'}, {value: false, label: 'Only show Description in Project Catalog'}]"
@@ -500,43 +495,36 @@ const saveSettings = ((dirtyChanges) => {
                       aria-labelledby="hideProjectDescriptionLabel"
                       class="w-full"
                       data-cy="showProjectDescriptionSelector" />
-          </div>
+          </settings-item>
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="pointsForLevelsLabel" for="levelPointsEnabled">
-              Use Points For Levels:
-            </label>
-            <div class="flex align-items-center">
-              <InputSwitch v-model="settings.levelPointsEnabled.value"
-                           inputId="levelPointsEnabled"
-                           v-on:update:modelValue="levelPointsEnabledChanged"
-                           name="check-button"
-                           aria-labelledby="pointsForLevelsLabel"
-                           data-cy="usePointsForLevelsSwitch" />
-              <span class="ml-1">{{ usePointsForLevelsLabel }}</span>
-            </div>
-          </div>
+          <settings-item label="Use Points For Levels" input-id="levelPointsEnabled">
+            <InputSwitch v-model="settings.levelPointsEnabled.value"
+                         inputId="levelPointsEnabled"
+                         v-on:update:modelValue="levelPointsEnabledChanged"
+                         name="check-button"
+                         aria-labelledby="pointsForLevelsLabel"
+                         data-cy="usePointsForLevelsSwitch" />
+            <span class="ml-1">{{ usePointsForLevelsLabel }}</span>
+          </settings-item>
 
           <SkillsSettingTextInput name="helpUrlHost"
-                                  label="Root Help Url:"
+                                  label="Root Help Url"
+                                  :label-width-in-rem="16"
                                   @input="updateSettingsField"
                                   placeholder="http://www.STarticle.com" />
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="selfReportLabel" for="selfReportingControl">
-              Self Report Default:
-            </label>
-            <div class="">
+          <settings-item label="Self Report Default" input-id="selfReportingControl">
+            <div class="flex flex-column flex-1">
               <div class="flex align-items-center">
-              <InputSwitch v-model="selfReport.enabled"
-                               name="check-button"
-                               inputId="selfReportingControl"
-                               v-on:update:modelValue="selfReportingControl"
-                               aria-labelledby="selfReportLabel"
-                               data-cy="selfReportSwitch" />
+                <InputSwitch v-model="selfReport.enabled"
+                             name="check-button"
+                             inputId="selfReportingControl"
+                             v-on:update:modelValue="selfReportingControl"
+                             aria-labelledby="selfReportLabel"
+                             data-cy="selfReportSwitch"/>
                 <span class="ml-1">{{ selfReportingEnabledLabel }}</span>
               </div>
-              <Card class="mt-2" Card :pt="{  content: { class: 'py-0' } }" data-cy="selfReportTypeSelector">
+              <Card v-if="selfReport.enabled" class="mt-2" Card :pt="{  content: { class: 'py-0' } }" data-cy="selfReportTypeSelector">
                 <template #content>
                   <div class="flex flex-column">
                     <div>
@@ -545,141 +533,116 @@ const saveSettings = ((dirtyChanges) => {
                                    value="Approval"
                                    v-model="selfReport.selected"
                                    @change="selfReportingTypeChanged('Approval')"
-                                   :disabled="!selfReport.enabled" />
+                                   :disabled="!selfReport.enabled"/>
                       <label for="approval">Approval Queue (reviewed by project admins first)</label>
                     </div>
-                    <div class="ml-4">
+                    <div class="ml-4 mt-1">
                       <Checkbox data-cy="justificationRequiredCheckbox"
                                 inputId="justificationRequiredCheckbox"
                                 id="justification-required-checkbox" :binary="true"
                                 class="d-inline mr-2"
                                 v-model="settings.selfReportJustificationRequired.value"
                                 :disabled="!approvalSelected || !selfReport.enabled"
-                                @update:modelValue="justificationRequiredChanged" />
+                                @update:modelValue="justificationRequiredChanged"/>
                       <label for="justificationRequiredCheckbox" class="m-0 font-italic"
                              :class="{ 'text-secondary': !approvalSelected || !selfReport.enabled}">
                         Justification Required
                       </label>
                     </div>
                   </div>
-                      <div class="flex mt-2">
-                        <RadioButton class="mr-2"
-                                     inputId="honorSystem"
-                                     @change="selfReportingTypeChanged('HonorSystem')"
-                                     value="HonorSystem"
-                                     v-model="selfReport.selected"
-                                     :disabled="!selfReport.enabled" />
-                        <label for="honorSystem">Honor System (applied right away)</label>
-                      </div>
+                  <div class="flex mt-2">
+                    <RadioButton class="mr-2"
+                                 inputId="honorSystem"
+                                 @change="selfReportingTypeChanged('HonorSystem')"
+                                 value="HonorSystem"
+                                 v-model="selfReport.selected"
+                                 :disabled="!selfReport.enabled"/>
+                    <label for="honorSystem">Honor System (applied right away)</label>
+                  </div>
                 </template>
               </Card>
             </div>
-          </div>
+          </settings-item>
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="rankAndLeaderboardOptOutLabel" for="rankAndLeaderboardOptOut">
-              Rank Opt-Out for ALL Admins:
-            </label>
-            <div class="flex align-items-center">
-              <InputSwitch v-model="settings.rankAndLeaderboardOptOut.value"
-                           inputId="rankAndLeaderboardOptOut"
-                           name="check-button"
-                           v-on:update:modelValue="rankAndLeaderboardOptOutChanged"
-                           aria-labelledby="rankAndLeaderboardOptOutLabel"
-                           data-cy="rankAndLeaderboardOptOutSwitch" />
-              <span class="ml-1">{{ rankOptOutLabel }}</span>
-            </div>
-          </div>
+          <settings-item label="Rank Opt-Out for ALL Admins" input-id="rankAndLeaderboardOptOut">
+            <InputSwitch v-model="settings.rankAndLeaderboardOptOut.value"
+                         inputId="rankAndLeaderboardOptOut"
+                         name="check-button"
+                         v-on:update:modelValue="rankAndLeaderboardOptOutChanged"
+                         aria-labelledby="rankAndLeaderboardOptOutLabel"
+                         data-cy="rankAndLeaderboardOptOutSwitch" />
+            <span class="ml-1">{{ rankOptOutLabel }}</span>
+          </settings-item>
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="customLabelsLabel" for="showCustomLabelsConfigToggle">
-              Custom Labels:
-            </label>
-            <div class="">
+          <settings-item label="Custom Labels" input-id="showCustomLabelsConfigToggle">
+            <div class="flex flex-column flex-1">
               <div class="flex align-items-center">
                 <InputSwitch v-model="showCustomLabelsConfigToggle"
                              inputId="showCustomLabelsConfigToggle"
-                               name="check-button"
-                               aria-labelledby="customLabelsLabel"
-                               data-cy="customLabelsSwitch"/>
+                             name="check-button"
+                             aria-labelledby="customLabelsLabel"
+                             data-cy="customLabelsSwitch"/>
                 <span class="ml-1">{{ showCustomLabelsConfigLabel }}</span>
               </div>
-
-                <Card class="mt-3" v-if="shouldShowCustomLabelsConfig">
-                  <template #content>
-                    <SkillsSettingTextInput name="projectDisplayName"
-                                            label="Project Display Text"
-                                            @input="updateSettingsField"
-                                            help-message='The word "Project" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
-                    <SkillsSettingTextInput name="subjectDisplayName"
-                                            label="Subject Display Text"
-                                            @input="updateSettingsField"
-                                            help-message='The word "Subject" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
-                    <SkillsSettingTextInput name="groupDisplayName"
-                                            label="Group Display Text"
-                                            @input="updateSettingsField"
-                                            help-message='The word "Group" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
-                    <SkillsSettingTextInput name="skillDisplayName"
-                                            label="Skill Display Text"
-                                            @input="updateSettingsField"
-                                            help-message='The word "Skill" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
-                    <SkillsSettingTextInput name="levelDisplayName"
-                                            label="Level Display Text"
-                                            @input="updateSettingsField"
-                                            help-message='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
-                    <SkillsSettingTextInput name="pointDisplayName"
-                                            label="Point Display Text"
-                                            @input="updateSettingsField"
-                                            help-message='The word "Point" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
-                  </template>
-                </Card>
+              <Card class="mt-3" v-if="shouldShowCustomLabelsConfig">
+                <template #content>
+                  <SkillsSettingTextInput name="projectDisplayName"
+                                          label="Project Display Text"
+                                          @input="updateSettingsField"
+                                          help-message='The word "Project" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  <SkillsSettingTextInput name="subjectDisplayName"
+                                          label="Subject Display Text"
+                                          @input="updateSettingsField"
+                                          help-message='The word "Subject" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  <SkillsSettingTextInput name="groupDisplayName"
+                                          label="Group Display Text"
+                                          @input="updateSettingsField"
+                                          help-message='The word "Group" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  <SkillsSettingTextInput name="skillDisplayName"
+                                          label="Skill Display Text"
+                                          @input="updateSettingsField"
+                                          help-message='The word "Skill" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  <SkillsSettingTextInput name="levelDisplayName"
+                                          label="Level Display Text"
+                                          @input="updateSettingsField"
+                                          help-message='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  <SkillsSettingTextInput name="pointDisplayName"
+                                          label="Point Display Text"
+                                          @input="updateSettingsField"
+                                          help-message='The word "Point" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                </template>
+              </Card>
             </div>
-          </div>
+          </settings-item>
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="groupDescriptions" for="groupDescriptionsSwitch">
-              <span id="groupDescriptionsLabel">Always Show Group Descriptions:</span>
-            </label>
-            <div class="flex align-items-center">
-              <InputSwitch v-model="settings.groupDescriptions.value"
-                           inputId="groupDescriptionsSwitch"
-                           name="check-button"
-                           v-on:update:modelValue="groupDescriptionsChanged"
-                           aria-labelledby="groupDescriptionsLabel"
-                           data-cy="groupDescriptionsSwitch" />
-              <span class="ml-1">{{ groupDescriptionsLabel }}</span>
-            </div>
-          </div>
+          <settings-item label="Always Show Group Descriptions" input-id="groupDescriptionsSwitch">
+            <InputSwitch v-model="settings.groupDescriptions.value"
+                         inputId="groupDescriptionsSwitch"
+                         name="check-button"
+                         v-on:update:modelValue="groupDescriptionsChanged"
+                         aria-labelledby="groupDescriptionsLabel"
+                         data-cy="groupDescriptionsSwitch" />
+            <span class="ml-1">{{ groupDescriptionsLabel }}</span>
+          </settings-item>
+          <settings-item label="Hide Group Info On Skill Pages" input-id="groupInfoOnSkillPageSwitch">
+            <InputSwitch v-model="settings.groupInfoOnSkillPage.value"
+                         inputId="groupInfoOnSkillPageSwitch"
+                         name="check-button"
+                         v-on:update:modelValue="groupInfoOnSkillPageChanged"
+                         aria-labelledby="groupInfoOnSkillPageLabel"
+                         data-cy="groupInfoOnSkillPageSwitch" />
+            <span class="ml-1">{{ groupInfoOnSkillPageLabel }}</span>
+          </settings-item>
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="groupInfoOnSkillPage" for="groupInfoOnSkillPageSwitch">
-              <span id="groupInfoOnSkillPageLabel">Hide Group Info On Skill Pages:</span>
-            </label>
-            <div class="flex align-items-center">
-              <InputSwitch v-model="settings.groupInfoOnSkillPage.value"
-                           inputId="groupInfoOnSkillPageSwitch"
-                           name="check-button"
-                           v-on:update:modelValue="groupInfoOnSkillPageChanged"
-                           aria-labelledby="groupInfoOnSkillPageLabel"
-                           data-cy="groupInfoOnSkillPageSwitch" />
-              <span class="ml-1">{{ groupInfoOnSkillPageLabel }}</span>
-            </div>
-          </div>
-
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="disableAchievementsCelebration" for="disableAchievementsCelebrationSwitch">
-              <span id="disableAchievementsCelebrationLabel">Disable Achievement Celebration:</span>
-            </label>
-            <div class="flex align-items-center">
-              <InputSwitch v-model="settings.disableAchievementsCelebration.value"
-                           inputId="disableAchievementsCelebrationSwitch"
-                           name="check-button"
-                           v-on:update:modelValue="disableAchievementsCelebrationChanged"
-                           aria-labelledby="disableAchievementsCelebrationLabel"
-                           data-cy="disableAchievementsCelebrationSwitch" />
-              <span class="ml-1">{{ disableAchievementCelebrationLabel }}</span>
-            </div>
-          </div>
+          <settings-item label="Hide Achievement Celebration" input-id="disableAchievementsCelebrationSwitch">
+            <InputSwitch v-model="settings.disableAchievementsCelebration.value"
+                         inputId="disableAchievementsCelebrationSwitch"
+                         name="check-button"
+                         v-on:update:modelValue="disableAchievementsCelebrationChanged"
+                         aria-labelledby="disableAchievementsCelebrationLabel"
+                         data-cy="disableAchievementsCelebrationSwitch" />
+            <span class="ml-1">{{ disableAchievementCelebrationLabel }}</span>
+          </settings-item>
 
           <hr/>
 
