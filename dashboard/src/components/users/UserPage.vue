@@ -121,7 +121,7 @@ const processUserTags = (userTags) =>{
 <div>
   <page-header :loading="isLoading" :options="headerOptions">
     <template #right-of-header>
-      <Tag class="ml-2" severity="danger" v-if="isUserArchived"><i class="fas fa-archive mr-1" aria-hidden="true"/>Archived</Tag>
+      <Tag class="ml-2" data-cy="archivedUserTag" severity="danger" v-if="isUserArchived"><i class="fas fa-archive mr-1" aria-hidden="true"/>Archived</Tag>
     </template>
     <template #subSubTitle v-if="tags">
         <span v-for="(tag, index) in tags" :key="index" data-cy="userTagHeader">

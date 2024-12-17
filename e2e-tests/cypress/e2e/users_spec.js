@@ -205,6 +205,30 @@ describe('Users Tests', () => {
             [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(3, 'day')) }],
             [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(2, 'day')) }],
         ], 5);
+
+        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+
+        cy.get('[data-cy="archiveUsersTableBtn"]').should('be.enabled');
+        cy.get('[data-cy="archiveUsersTableBtn"]').click()
+
+        cy.wait('@archivedUsers');
+        cy.get('[data-cy="archiveUsersTableBtn"]').should('be.disabled');
+
+        // navigate to back archived users
+        cy.get('[data-cy="userArchiveBtn"]').should('be.enabled');
+        cy.get('[data-cy="userArchiveBtn"]').click()
+        cy.wait('@getArchivedUsers')
+
+        cy.validateTable(archivedUsersTableSelector, [
+            [{ colIndex: 0,  value: 'user0@skills.org' }],
+        ], 5);
+
+
+        cy.get(`${archivedUsersTableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
+        cy.get('[data-cy="subPageHeader"]').contains("User's Display");
+        cy.contains("ID: user0@skills.org");
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]')
+        cy.get('[data-cy="archivedUserTag"]').should('be.visible');
     });
 
     it('different page sizes', () => {
