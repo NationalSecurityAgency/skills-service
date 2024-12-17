@@ -171,9 +171,16 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="projectCard_proj1"] [data-cy="deleteProjBtn"]')
             .click();
         cy.contains('Removal Safety Check');
+
+        cy.get('#stepOneCheck').check();
+        cy.get('[data-cy="firstNextButton"]').click();
+
+        cy.get('#stepTwoCheck').check();
+        cy.get('[data-cy="secondNextButton"]').click();
+
         cy.get('[data-cy=currentValidationText]')
-            .type('Delete Me');
-        cy.get('[data-cy="saveDialogBtn"]')
+            .type('Delete This Project');
+        cy.get('[data-cy="deleteProjectButton"]')
             .should('be.enabled')
             .click();
 
@@ -187,7 +194,7 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="projectCard_proj2"] [data-cy="deleteProjBtn"]')
             .click();
         cy.contains('Removal Safety Check');
-        cy.get('[data-cy="closeDialogBtn"]')
+        cy.get('[data-cy="removalSafetyCheckMsg"] [data-cy="closeButton"]')
             .click();
         cy.get('[data-cy="projectCard_proj2"]')
             .should('exist');

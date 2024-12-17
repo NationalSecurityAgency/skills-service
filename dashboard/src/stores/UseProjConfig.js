@@ -84,6 +84,10 @@ export const useProjConfig = defineStore('projConfig', () => {
     return projConfig.value && projConfig.value.user_project_role;
   });
 
+  const isProjectProtected = computed(() => {
+    return projConfig.value && projConfig.value['project-deletion-protection'] === 'true';
+  })
+
   return {
     projConfig,
     loadingProjConfig,
@@ -92,6 +96,7 @@ export const useProjConfig = defineStore('projConfig', () => {
     getProjectCommunityValue,
     isProjConfigInviteOnly,
     isProjConfigDiscoverable,
+    isProjectProtected,
     projConfigRootHelpUrl,
     isReadOnlyProj,
     userProjRole

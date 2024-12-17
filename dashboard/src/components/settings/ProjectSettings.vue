@@ -143,6 +143,13 @@ let settings = ref({
     dirty: false,
     projectId: route.params.projectId,
   },
+  projectDeletionProtection: {
+    value: false,
+    setting: 'project-deletion-protection',
+    lastLoadedValue: false,
+    dirty: false,
+    projectId: route.params.projectId,
+  },
   groupInfoOnSkillPage: {
     value: false,
     setting: 'group-info-on-skill-page',
@@ -248,6 +255,10 @@ const disableAchievementCelebrationLabel = computed(() => {
   return formatToggleLabel(settings.value.disableAchievementsCelebration.value);
 });
 
+const projectDeletionProtectionLabel = computed(() => {
+  return formatToggleLabel(settings.value.projectDeletionProtection.value);
+});
+
 const groupInfoOnSkillPageLabel = computed(() => {
   return formatToggleLabel(settings.value.groupInfoOnSkillPage.value);
 })
@@ -308,6 +319,10 @@ const rankAndLeaderboardOptOutChanged = ((value) => {
 
 const groupDescriptionsChanged = ((value) => {
   settings.value.groupDescriptions.dirty = `${value}` !== `${settings.value.groupDescriptions.lastLoadedValue}`;
+});
+
+const projectDeletionProtectionChanged = ((value) => {
+  settings.value.projectDeletionProtection.dirty = `${value}` !== `${settings.value.projectDeletionProtection.lastLoadedValue}`;
 });
 
 const groupInfoOnSkillPageChanged = ((value) => {
@@ -678,6 +693,21 @@ const saveSettings = ((dirtyChanges) => {
                            aria-labelledby="disableAchievementsCelebrationLabel"
                            data-cy="disableAchievementsCelebrationSwitch" />
               <span class="ml-1">{{ disableAchievementCelebrationLabel }}</span>
+            </div>
+          </div>
+
+          <div class="field flex flex-column lg:flex-row lg:gap-3">
+            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="projectDeletionProtection" for="projectDeletionProtectionSwitch">
+              <span id="projectDeletionProtectionLabel">Project Deletion Protection:</span>
+            </label>
+            <div class="flex align-items-center">
+              <InputSwitch v-model="settings.projectDeletionProtection.value"
+                           inputId="projectDeletionProtectionSwitch"
+                           name="check-button"
+                           v-on:update:modelValue="projectDeletionProtectionChanged"
+                           aria-labelledby="projectDeletionProtectionLabel"
+                           data-cy="projectDeletionProtectionSwitch" />
+              <span class="ml-1">{{ projectDeletionProtectionLabel }}</span>
             </div>
           </div>
 
