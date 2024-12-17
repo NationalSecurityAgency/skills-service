@@ -144,9 +144,9 @@ let settings = ref({
     dirty: false,
     projectId: route.params.projectId,
   },
-  projectProtection: {
+  projectDeletionProtection: {
     value: false,
-    setting: 'project-protection',
+    setting: 'project-deletion-protection',
     lastLoadedValue: false,
     dirty: false,
     projectId: route.params.projectId,
@@ -256,8 +256,8 @@ const disableAchievementCelebrationLabel = computed(() => {
   return formatToggleLabel(settings.value.disableAchievementsCelebration.value);
 });
 
-const projectProtectionLabel = computed(() => {
-  return formatToggleLabel(settings.value.projectProtection.value);
+const projectDeletionProtectionLabel = computed(() => {
+  return formatToggleLabel(settings.value.projectDeletionProtection.value);
 });
 
 const groupInfoOnSkillPageLabel = computed(() => {
@@ -322,8 +322,8 @@ const groupDescriptionsChanged = ((value) => {
   settings.value.groupDescriptions.dirty = `${value}` !== `${settings.value.groupDescriptions.lastLoadedValue}`;
 });
 
-const projectProtectionChanged = ((value) => {
-  settings.value.projectProtection.dirty = `${value}` !== `${settings.value.projectProtection.lastLoadedValue}`;
+const projectDeletionProtectionChanged = ((value) => {
+  settings.value.projectDeletionProtection.dirty = `${value}` !== `${settings.value.projectDeletionProtection.lastLoadedValue}`;
 });
 
 const groupInfoOnSkillPageChanged = ((value) => {
@@ -660,17 +660,17 @@ const saveSettings = ((dirtyChanges) => {
           </settings-item>
 
           <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="projectProtection" for="projectProtectionSwitch">
-              <span id="projectProtectionLabel">Project Deletion Protection:</span>
+            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="projectDeletionProtection" for="projectDeletionProtectionSwitch">
+              <span id="projectDeletionProtectionLabel">Project Deletion Protection:</span>
             </label>
             <div class="flex align-items-center">
-              <InputSwitch v-model="settings.projectProtection.value"
-                           inputId="projectProtectionSwitch"
+              <InputSwitch v-model="settings.projectDeletionProtection.value"
+                           inputId="projectDeletionProtectionSwitch"
                            name="check-button"
-                           v-on:update:modelValue="projectProtectionChanged"
-                           aria-labelledby="projectProtectionLabel"
-                           data-cy="projectProtectionSwitch" />
-              <span class="ml-1">{{ projectProtectionLabel }}</span>
+                           v-on:update:modelValue="projectDeletionProtectionChanged"
+                           aria-labelledby="projectDeletionProtectionLabel"
+                           data-cy="projectDeletionProtectionSwitch" />
+              <span class="ml-1">{{ projectDeletionProtectionLabel }}</span>
             </div>
           </div>
 

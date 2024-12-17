@@ -33,7 +33,7 @@ public enum Settings {
     USER_PROJECT_ROLE("user_project_role"),
     USER_COMMUNITY_ONLY_PROJECT("user_community"),
     PROJECT_COMMUNITY_VALUE("project_community_value"),
-    PROJECT_PROTECTION("project-protection");
+    PROJECT_PROTECTION("project-deletion-protection");
 
 
     private String settingName;

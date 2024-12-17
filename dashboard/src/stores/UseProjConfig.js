@@ -85,7 +85,7 @@ export const useProjConfig = defineStore('projConfig', () => {
   });
 
   const isProjectProtected = computed(() => {
-    return projConfig.value && projConfig.value['project-protection'] === 'true';
+    return projConfig.value && projConfig.value['project-deletion-protection'] === 'true';
   })
 
   return {

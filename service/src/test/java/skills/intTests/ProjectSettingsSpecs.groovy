@@ -155,7 +155,7 @@ class ProjectSettingsSpecs extends DefaultIntSpec {
         skillsService.createProject(proj)
         skillsService.createProject(proj2)
 
-        skillsService.changeSetting(proj2.projectId, "project-protection", [projectId: proj2.projectId, setting: "project-protection", value: "true"])
+        skillsService.changeSetting(proj2.projectId, "project-deletion-protection", [projectId: proj2.projectId, setting: "project-protection", value: "true"])
         when:
         def projects = skillsService.getProjects()
 

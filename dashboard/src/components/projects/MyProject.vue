@@ -24,13 +24,12 @@ import ProjectCardFooter from '@/components/projects/ProjectCardFooter.vue'
 import ProjectCardControls from '@/components/projects/ProjectCardControls.vue'
 import UserRolesUtil from '@/components/utils/UserRolesUtil'
 import EditProject from '@/components/projects/EditProject.vue'
-import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import ProjectExpirationWarning from '@/components/projects/ProjectExpirationWarning.vue'
 import { useAdminProjectsState } from '@/stores/UseAdminProjectsState.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
-import EnhancedRemovalValidation from "@/components/utils/modal/EnhancedRemovalValidation.vue";
+import ProjectRemovalValidation from "@/components/utils/modal/ProjectRemovalValidation.vue";
 import projectService from "@/components/projects/ProjectService";
 import AccessService from "@/components/access/AccessService.js";
 
@@ -49,6 +48,7 @@ const showCopyProjectModal = ref(false);
 const showDeleteValidation = ref(false);
 let overSortControl = ref(false);
 const sortControl = ref();
+const loading = ref(false);
 
 let copyProjectInfo = ref({
   newProject: {},
@@ -168,10 +168,12 @@ const showDeleteModal = () => {
   const countUsers = projectService.countProjectUsers(projectInternal.value.projectId)
   const promiseCounts = [countAdmins, countUsers]
 
+  loading.value = true
+  showDeleteValidation.value = true
   Promise.all(promiseCounts).then((result) => {
     adminCount.value = result[0];
     userCount.value = result[1];
-    showDeleteValidation.value = true
+    loading.value = false
   })
 };
 
@@ -280,11 +282,12 @@ defineExpose({
                   @project-saved="projectCopied"
                   :enable-return-focus="true" />
 
-    <enhanced-removal-validation
+    <project-removal-validation
       v-if="showDeleteValidation"
       v-model="showDeleteValidation"
       :item-name="projectInternal.name"
       item-type="project"
+      :loading="loading"
       @do-remove="doDeleteProject">
         <template #initialMessage>
           <Message severity="warn" :closable="false">
@@ -314,7 +317,7 @@ defineExpose({
             </div>
           </Message>
         </template>
-    </enhanced-removal-validation>
+    </project-removal-validation>
   </div>
 </template>
 
