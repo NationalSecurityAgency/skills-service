@@ -194,7 +194,7 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="projectCard_proj2"] [data-cy="deleteProjBtn"]')
             .click();
         cy.contains('Removal Safety Check');
-        cy.get('[data-cy="closeDialogBtn"]')
+        cy.get('[data-cy="closeButton"]')
             .click();
         cy.get('[data-cy="projectCard_proj2"]')
             .should('exist');
