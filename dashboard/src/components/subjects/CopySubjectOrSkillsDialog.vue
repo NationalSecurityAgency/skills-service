@@ -102,7 +102,6 @@ const endpointsProps = computed(() => {
 
 const onProjectChanged = (changedProj) => {
   if (changedProj != null) {
-    console.log(`onProjectChanged ${JSON.stringify(changedProj)}`)
     validationErrors.value = []
     if (isSubjectCopy.value) {
       validatingOtherProj.value = true
@@ -139,6 +138,7 @@ const selectedSubjectOrGroup = ref(null)
 const onSubjectOrGroupChanged = ((changedSubjOrGroup) => {
   if (changedSubjOrGroup) {
     validatingOtherProj.value = true
+    validationErrors.value = []
     return SubjectsService.validateCopyItemsToAnotherProject(route.params.projectId, selectedProject.value.projectId, endpointsProps.value)
         .then((res) => {
           if (!res.isAllowed) {
