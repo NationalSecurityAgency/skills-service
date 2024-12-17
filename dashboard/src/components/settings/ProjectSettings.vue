@@ -615,18 +615,18 @@ const saveSettings = ((dirtyChanges) => {
             </div>
           </settings-item>
 
-          <settings-item label="Always Show Group Descriptions" input-id="groupDescriptionsSwitch">
+          <settings-item label="Always Show Group Descriptions" input-id="groupDescriptionsSwitchInput">
             <InputSwitch v-model="settings.groupDescriptions.value"
-                         inputId="groupDescriptionsSwitch"
+                         inputId="groupDescriptionsSwitchInput"
                          name="check-button"
                          v-on:update:modelValue="groupDescriptionsChanged"
                          aria-labelledby="groupDescriptionsLabel"
                          data-cy="groupDescriptionsSwitch" />
             <span class="ml-1">{{ groupDescriptionsLabel }}</span>
           </settings-item>
-          <settings-item label="Hide Group Info On Skill Pages" input-id="groupInfoOnSkillPageSwitch">
+          <settings-item label="Hide Group Info On Skill Pages" input-id="groupInfoOnSkillPageSwitchInput">
             <InputSwitch v-model="settings.groupInfoOnSkillPage.value"
-                         inputId="groupInfoOnSkillPageSwitch"
+                         inputId="groupInfoOnSkillPageSwitchInput"
                          name="check-button"
                          v-on:update:modelValue="groupInfoOnSkillPageChanged"
                          aria-labelledby="groupInfoOnSkillPageLabel"
@@ -634,9 +634,9 @@ const saveSettings = ((dirtyChanges) => {
             <span class="ml-1">{{ groupInfoOnSkillPageLabel }}</span>
           </settings-item>
 
-          <settings-item label="Hide Achievement Celebration" input-id="disableAchievementsCelebrationSwitch">
+          <settings-item label="Hide Achievement Celebration" input-id="disableAchievementsCelebrationSwitchInput">
             <InputSwitch v-model="settings.disableAchievementsCelebration.value"
-                         inputId="disableAchievementsCelebrationSwitch"
+                         inputId="disableAchievementsCelebrationSwitchInput"
                          name="check-button"
                          v-on:update:modelValue="disableAchievementsCelebrationChanged"
                          aria-labelledby="disableAchievementsCelebrationLabel"
