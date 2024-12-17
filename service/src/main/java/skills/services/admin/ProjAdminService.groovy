@@ -246,7 +246,7 @@ class ProjAdminService {
         }
 
         SettingsResult isDeleteProtected = settingsService.getProjectSetting(projectId, "project-deletion-protection")
-        if (isDeleteProtected.value == "true") {
+        if (isDeleteProtected?.value == "true") {
             throw new SkillException("Project [${projectId}] cannot be deleted as it has deletion protection enabled")
         }
 
