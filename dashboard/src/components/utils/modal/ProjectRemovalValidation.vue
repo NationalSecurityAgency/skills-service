@@ -96,6 +96,7 @@ const removeAction = () => {
 
 const close = () => {
   model.value = false
+  handleFocus()
 }
 
 const confirmStepOne = ref(false);
@@ -105,6 +106,10 @@ const clearSettings = () => {
   confirmStepOne.value = false;
   confirmStepTwo.value = false;
   currentValidationText.value = '';
+}
+
+const handleFocus = () => {
+  focusState.focusOnLastElement()
 }
 </script>
 
