@@ -101,6 +101,33 @@ describe('Skill Achievement Celebration Tests', () => {
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillAchievementCelebrationMsg"]').should('not.exist')
     })
 
+    it('achieved honor skill shows celebration messaged after the claim button is clicked', () => {
+        cy.createProject(1)
+        cy.createSubject(1)
+        cy.createSkill(1, 1, 1, {numPerformToCompletion: 2, pointIncrement: 100,  selfReportingType: 'HonorSystem', pointIncrementInterval: 0})
+
+        cy.cdVisit('/subjects/subj1/skills/skill1')
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+
+        cy.get('[data-cy="claimPointsBtn"]').click()
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 200 Points')
+        cy.get('[data-cy="skillCompletedCheck-skill1"]').should('not.exist')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementDate"]').should('not.exist')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillAchievementCelebrationMsg"]').should('not.exist')
+
+        cy.get('[data-cy="claimPointsBtn"]').click()
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
+        cy.get('[data-cy="skillCompletedCheck-skill1"]').should('be.visible')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="achievementDate"]').should('be.visible')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillAchievementCelebrationMsg"]').should('be.visible')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillAchievementCelebrationMsg"]').then(($element) => {
+            const text = $element.text().trim();
+            if (/(\d+)\s+points/.test(text)) {
+                cy.wrap($element).should('contain.text', '200 points');
+            }
+        });
+    })
+
 })
 
 
