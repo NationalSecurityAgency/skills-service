@@ -207,7 +207,7 @@ describe('Quiz Question CRUD Tests', () => {
 
         cy.get('[data-cy="answersError"]').should('not.be.visible')
         cy.get('[data-cy="saveDialogBtn"]').click()
-        cy.get('[data-cy="answersError"]').contains('Multiple Choice Question must have at least 2 correct answers')
+        cy.get('[data-cy="answersError"]').contains('Multiple Answers Question must have at least 2 correct answers')
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answersError"]').should('not.be.visible')
     });

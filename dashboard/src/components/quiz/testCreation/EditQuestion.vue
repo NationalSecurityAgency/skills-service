@@ -85,22 +85,26 @@ function questionTypeChanged(inputItem) {
 }
 
 const questionTypes = [{
-  label: 'Multiple Choice',
+  label: 'Multiple Answers',
+  description: 'Two or more correct answers',
   prop: 'extra',
   id: QuestionType.MultipleChoice,
   icon: 'fas fa-tasks',
 }, {
-  label: 'Single Choice',
+  label: 'Multiple Choice',
+  description: 'A single correct answer',
   id: QuestionType.SingleChoice,
   icon: 'far fa-check-square',
 }, {
   label: 'Input Text',
+  description: 'A free-form text answer',
   id: QuestionType.TextInput,
   icon: 'far fa-keyboard',
 }]
 if (QuizType.isSurvey(props.questionDef.quizType)) {
   questionTypes.push({
     label: 'Rating',
+    description: 'A star-based rating',
     id: QuestionType.Rating,
     icon: 'fa fa-star',
   })
@@ -109,7 +113,7 @@ if (QuizType.isSurvey(props.questionDef.quizType)) {
 const questionType = ref({
   options: questionTypes,
   selectedType: {
-    label: 'Multiple Choice',
+    label: 'Multiple Answers',
     id: QuestionType.MultipleChoice,
     icon: 'fas fa-tasks',
   },
@@ -125,6 +129,12 @@ const isQuestionTypeTextInput = computed(() => {
 })
 const isQuestionTypeRatingInput = computed(() => {
   return questionType.value.selectedType && questionType.value.selectedType.id === QuestionType.Rating;
+})
+const isQuestionTypeMultipleChoice = computed(() => {
+  return questionType.value.selectedType && questionType.value.selectedType.id === QuestionType.MultipleChoice;
+})
+const isQuestionTypeSingleChoice = computed(() => {
+  return questionType.value.selectedType && questionType.value.selectedType.id === QuestionType.SingleChoice;
 })
 const quizType = computed(() => {
   return props.questionDef.quizType;
@@ -208,8 +218,8 @@ const schema = object({
       .test('atLeastTwoAnswersFilledIn', 'Must have at least 2 answers', (value) => atLeastTwoAnswersFilledIn(value))
       .test('correctAnswersMustHaveText', 'Answers labeled as correct must have text', (value) => correctAnswersMustHaveText(value))
       .test('maxNumAnswers', `Exceeded maximum number of [${appConfig.maxAnswersPerQuizQuestion}] answers`, (value) => maxNumAnswers(value))
-      .test('singleChoiceQuestionsMustHave1Answer', 'Single Choice Question must have 1 correct answer', (value) => singleChoiceQuestionsMustHave1Answer(value))
-      .test('multipleChoiceQuestionsMustHaveAtLeast2Answer', 'Multiple Choice Question must have at least 2 correct answers', (value) => multipleChoiceQuestionsMustHaveAtLeast2Answer(value))
+      .test('singleChoiceQuestionsMustHave1Answer', 'Multiple Choice Question must have 1 correct answer', (value) => singleChoiceQuestionsMustHave1Answer(value))
+      .test('multipleChoiceQuestionsMustHaveAtLeast2Answer', 'Multiple Answers Question must have at least 2 correct answers', (value) => multipleChoiceQuestionsMustHaveAtLeast2Answer(value))
   ,
 })
 const initialQuestionData = {
@@ -311,7 +321,7 @@ const onSavedQuestion = (savedQuestion) => {
           <template #option="slotProps">
             <div class="p-1" :data-cy="`selectionItem_${slotProps.option.id}`">
               <i :class="slotProps.option.icon" style="min-width: 1.2rem" class="border rounded p-1 mr-2" aria-hidden="true"></i>
-              <span class="">{{ slotProps.option.label }}</span>
+              <span class="">{{ slotProps.option.label }}</span><span class="hidden sm:inline">: {{ slotProps.option.description }}</span>
             </div>
           </template>
         </SkillsDropDown>
@@ -340,8 +350,13 @@ const onSavedQuestion = (savedQuestion) => {
       </div>
 
       <div v-if="!isQuestionTypeTextInput && !isQuestionTypeRatingInput" class="pl-3">
-        <div class="mb-1" v-if="isQuizType">
-          <span class="text-secondary">Check one or more correct answer(s) on the left:</span>
+        <div class="mb-2" v-if="isQuizType">
+          <span
+              v-if="isQuestionTypeMultipleChoice"
+              class="text-secondary">Check two or more correct answers on the left:</span>
+          <span
+              v-if="isQuestionTypeSingleChoice"
+              class="text-secondary">Check one correct answer on the left:</span>
         </div>
         <ConfigureAnswers
             ref="answersRef"
