@@ -533,7 +533,7 @@ describe('Project Settings Tests', () => {
         cy.get('#deleteProjBtnproj1').should('exist');
 
         cy.visit('/administrator/projects/proj1/settings');
-        cy.get('[data-cy="projectProtectionSwitch"]').click()
+        cy.get('[data-cy="projectDeletionProtectionSwitch"]').click()
         cy.get('[data-cy="saveSettingsBtn"').click();
 
         cy.visit('/administrator');
@@ -542,7 +542,7 @@ describe('Project Settings Tests', () => {
         cy.get('#deleteProjBtnproj3').should('exist');
 
         cy.visit('/administrator/projects/proj3/settings');
-        cy.get('[data-cy="projectProtectionSwitch"]').click()
+        cy.get('[data-cy="projectDeletionProtectionSwitch"]').click()
         cy.get('[data-cy="saveSettingsBtn"').click();
 
         cy.visit('/administrator');
@@ -551,7 +551,7 @@ describe('Project Settings Tests', () => {
         cy.get('#deleteProjBtnproj3').should('not.exist');
 
         cy.visit('/administrator/projects/proj1/settings');
-        cy.get('[data-cy="projectProtectionSwitch"]').click()
+        cy.get('[data-cy="projectDeletionProtectionSwitch"]').click()
         cy.get('[data-cy="saveSettingsBtn"').click();
 
         cy.visit('/administrator');
