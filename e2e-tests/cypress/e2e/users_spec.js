@@ -231,6 +231,81 @@ describe('Users Tests', () => {
         cy.get('[data-cy="archivedUserTag"]').should('be.visible');
     });
 
+
+    it('different page sizes archive users table', () => {
+
+        cy.intercept('/admin/projects/proj1/users?query=*').as('getUsers');
+        cy.intercept('GET', '/admin/projects/proj1/users/archive?*').as('getArchivedUsers');
+        cy.intercept('POST', '/admin/projects/proj1/users/archive').as('archivedUsers');
+
+        for (let i = 0; i < 12; i += 1) {
+            const charToAdd = String.fromCharCode(97 + i);
+            cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                userId: `user${charToAdd}@skills.org`,
+                timestamp: m.clone().add(i, 'day').format('x')
+            });
+        }
+
+        cy.visit('/administrator/projects/proj1/');
+        cy.clickNav('Users');
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '12')
+        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('15').click();
+
+        cy.get(`${tableSelector} [data-pc-name="headercheckbox"] [data-pc-section="input"]`).click();
+        cy.get('[data-cy="archiveUsersTableBtn"]').should('be.enabled');
+        cy.get('[data-cy="archiveUsersTableBtn"]').click()
+
+        cy.wait('@archivedUsers');
+        cy.get('[data-cy="archiveUsersTableBtn"]').should('be.disabled');
+
+        // navigate to back archived users
+        cy.get('[data-cy="userArchiveBtn"]').should('be.enabled');
+        cy.get('[data-cy="userArchiveBtn"]').click()
+        cy.wait('@getArchivedUsers')
+
+        const archivedUsersTableSelector = '[data-cy="userArchiveTable"]';
+
+        cy.get(`${archivedUsersTableSelector}`).contains('User').click();
+        cy.validateTable(archivedUsersTableSelector, [
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
+            [{ colIndex: 0,  value: 'userb@skills.org' }],
+            [{ colIndex: 0,  value: 'userc@skills.org' }],
+            [{ colIndex: 0,  value: 'userd@skills.org' }],
+            [{ colIndex: 0,  value: 'usere@skills.org' }],
+        ], 5, true, 12);
+
+        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('10').click();
+        cy.validateTable(archivedUsersTableSelector, [
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
+            [{ colIndex: 0,  value: 'userb@skills.org' }],
+            [{ colIndex: 0,  value: 'userc@skills.org' }],
+            [{ colIndex: 0,  value: 'userd@skills.org' }],
+            [{ colIndex: 0,  value: 'usere@skills.org' }],
+            [{ colIndex: 0,  value: 'userf@skills.org' }],
+            [{ colIndex: 0,  value: 'userg@skills.org' }],
+            [{ colIndex: 0,  value: 'userh@skills.org' }],
+            [{ colIndex: 0,  value: 'useri@skills.org' }],
+            [{ colIndex: 0,  value: 'userj@skills.org' }],
+        ], 10, true, 12);
+
+        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('20').click();
+        cy.validateTable(archivedUsersTableSelector, [
+            [{ colIndex: 0,  value: 'usera@skills.org' }],
+            [{ colIndex: 0,  value: 'userb@skills.org' }],
+            [{ colIndex: 0,  value: 'userc@skills.org' }],
+            [{ colIndex: 0,  value: 'userd@skills.org' }],
+            [{ colIndex: 0,  value: 'usere@skills.org' }],
+            [{ colIndex: 0,  value: 'userf@skills.org' }],
+            [{ colIndex: 0,  value: 'userg@skills.org' }],
+            [{ colIndex: 0,  value: 'userh@skills.org' }],
+            [{ colIndex: 0,  value: 'useri@skills.org' }],
+            [{ colIndex: 0,  value: 'userj@skills.org' }],
+            [{ colIndex: 0,  value: 'userk@skills.org' }],
+            [{ colIndex: 0,  value: 'userl@skills.org' }],
+        ], 20, true, 12);
+    });
+
+
     it('different page sizes', () => {
         for (let i = 0; i < 12; i += 1) {
             const charToAdd = String.fromCharCode(97 + i);
