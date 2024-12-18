@@ -290,7 +290,9 @@ class SkillsAdminService {
                 }
             }
 
-            description = attachmentService.updateAttachmentsInIncomingDescription(description, skillRequest.projectId, skillRequest.skillId)
+            if (!isSkillCatalogImport) {
+                description = attachmentService.updateAttachmentsInIncomingDescription(description, skillRequest.projectId, skillRequest.skillId)
+            }
 
             skillDefinition = new SkillDefWithExtra(
                     skillId: skillRequest.skillId,
@@ -339,9 +341,9 @@ class SkillsAdminService {
             } else {
                 assignToParent(skillRequest, savedSkill, subject)
             }
-            if (!isSkillCatalogImport) {
-                attachmentService.updateAttachmentsFoundInMarkdown(description, savedSkill.projectId, null, savedSkill.skillId)
-            }
+        }
+        if (!isSkillCatalogImport) {
+            attachmentService.updateAttachmentsFoundInMarkdown(description, savedSkill.projectId, null, savedSkill.skillId)
         }
 
         if (isSkillsGroupChild) {

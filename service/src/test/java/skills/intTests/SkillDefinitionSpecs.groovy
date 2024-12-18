@@ -19,6 +19,7 @@ package skills.intTests
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.storage.model.Attachment
 import skills.storage.repos.AttachmentRepo
 
@@ -150,6 +151,171 @@ class SkillDefinitionSpecs extends DefaultIntSpec {
         skillRes_t3.description.contains(skill1Attachments[1].uuid)
         fileContent_t3 == fileContent1
         file2Content_t3 == fileContent2
+    }
+
+    def "when skill is edited projectId and skillId is properly set in the attachment in the description "() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        String descriptionWithoutAttachments = "description"
+        skill.description = descriptionWithoutAttachments
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+
+        String fileContent1 = 'Text in a file1'
+        String fileContent2 = 'Text in a file2'
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        String attachmentHref = uploadedAttachmentRes.href
+        String attachment2Href = uploadedAttachment2Res.href
+
+
+
+        when:
+        String fileContent_t1 = skillsService.downloadAttachmentAsText(attachmentHref)
+        String file2Content_t1 = skillsService.downloadAttachmentAsText(attachment2Href)
+        List<Attachment> attachments_t1 = attachmentRepo.findAll().toList()
+        def skillRes_t1 = skillsService.getSkill([skillId: skill.skillId, projectId: project1.projectId, subjectId: p1subj1.subjectId])
+
+        String descriptionWithAttachments =("[File1.pdf](${attachmentHref})\n" +
+                "\n" +
+                "## some more\n" +
+                "\n" +
+                "[File2.pdf](${attachment2Href})").toString()
+        skill.description = descriptionWithAttachments
+
+        skillsService.updateSkill(skill, skill.skillId)
+
+        String fileContent_t2 = skillsService.downloadAttachmentAsText(attachmentHref)
+        String file2Content_t2 = skillsService.downloadAttachmentAsText(attachment2Href)
+        List<Attachment> attachments_t2 = attachmentRepo.findAll().toList()
+        def skillRes_t2 = skillsService.getSkill([skillId: skill.skillId, projectId: project1.projectId, subjectId: p1subj1.subjectId])
+
+        then:
+        fileContent_t1 == fileContent1
+        file2Content_t1 == fileContent2
+        attachments_t1.projectId == [null, null]
+        attachments_t1.skillId == [null, null]
+        skillRes_t1.description == descriptionWithoutAttachments
+
+        fileContent_t2 == fileContent1
+        file2Content_t2 == fileContent2
+        attachments_t2.projectId == [project1.projectId, project1.projectId]
+        attachments_t2.skillId.sort() == [skill.skillId, skill.skillId].sort()
+        skillRes_t2.description == descriptionWithAttachments
+        List<Attachment> skill1Attachments = attachments_t2.findAll { it.skillId == skill.skillId}
+        skillRes_t2.description.contains(skill1Attachments[0].uuid)
+        skillRes_t2.description.contains(skill1Attachments[1].uuid)
+    }
+
+    def "when skill is reused attachments are not copied but are also reused and are linked to the original skill"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+
+        String fileContent1 = 'Text in a file1'
+        String fileContent2 = 'Text in a file2'
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        String attachmentHref = uploadedAttachmentRes.href
+        String attachment2Href = uploadedAttachment2Res.href
+
+        String descriptionWithAttachments =("[File1.pdf](${attachmentHref})\n" +
+                "\n" +
+                "## some more\n" +
+                "\n" +
+                "[File2.pdf](${attachment2Href})").toString()
+        skill.description = descriptionWithAttachments
+
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+        skillsService.createSubject(p1subj2)
+
+        when:
+        skillsService.reuseSkills(project1.projectId, [skill.skillId], p1subj2.subjectId)
+
+        List<Attachment> attachments = attachmentRepo.findAll().toList()
+        def skill1Res = skillsService.getSkill([skillId: skill.skillId, projectId: project1.projectId, subjectId: p1subj1.subjectId])
+        def skill2Res = skillsService.getSkill([skillId: SkillReuseIdUtil.addTag(skill.skillId, 0), projectId: project1.projectId, subjectId: p1subj2.subjectId])
+
+        String fileContent3= 'Text in a file3'
+        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, null)
+        String attachment3Href = uploadedAttachment3Res.href
+        String description2WithAttachment = "Just one: [File3.pdf](${attachment3Href})".toString()
+        skill.description = description2WithAttachment
+        skillsService.updateSkill(skill, skill.skillId)
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        List<Attachment> attachments_t2 = attachmentRepo.findAll().toList()
+        def skill1Res_t2 = skillsService.getSkill([skillId: skill.skillId, projectId: project1.projectId, subjectId: p1subj1.subjectId])
+        def skill2Res_t2 = skillsService.getSkill([skillId: SkillReuseIdUtil.addTag(skill.skillId, 0), projectId: project1.projectId, subjectId: p1subj2.subjectId])
+
+        then:
+        attachments.projectId == [project1.projectId, project1.projectId]
+        attachments.skillId.sort() == [skill.skillId, skill.skillId].sort()
+        skill1Res.description == descriptionWithAttachments
+        skill2Res.description == descriptionWithAttachments
+
+        attachments_t2.projectId == [project1.projectId, project1.projectId, project1.projectId]
+        attachments_t2.skillId.sort() == [skill.skillId, skill.skillId, skill.skillId].sort()
+        skill1Res_t2.description == description2WithAttachment
+        skill2Res_t2.description == description2WithAttachment
+    }
+
+    def "when skill is imported attachments are not copied but are reused and are linked to the original skill"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+
+        String fileContent1 = 'Text in a file1'
+        String fileContent2 = 'Text in a file2'
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        String attachmentHref = uploadedAttachmentRes.href
+        String attachment2Href = uploadedAttachment2Res.href
+
+        String descriptionWithAttachments =("[File1.pdf](${attachmentHref})\n" +
+                "\n" +
+                "## some more\n" +
+                "\n" +
+                "[File2.pdf](${attachment2Href})").toString()
+        skill.description = descriptionWithAttachments
+
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, [])
+
+        when:
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
+
+        List<Attachment> attachments = attachmentRepo.findAll().toList()
+        def skill1Res = skillsService.getSkill([skillId: skill.skillId, projectId: project1.projectId, subjectId: p1subj1.subjectId])
+        def skill2Res = skillsService.getSkill([skillId: skill.skillId, projectId: project2.projectId, subjectId: p2subj1.subjectId])
+
+        String fileContent3= 'Text in a file3'
+        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, null)
+        String attachment3Href = uploadedAttachment3Res.href
+        String description2WithAttachment = "Just one: [File3.pdf](${attachment3Href})".toString()
+        skill.description = description2WithAttachment
+        skillsService.updateSkill(skill, skill.skillId)
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        List<Attachment> attachments_t2 = attachmentRepo.findAll().toList()
+        def skill1Res_t2 = skillsService.getSkill([skillId: skill.skillId, projectId: project1.projectId, subjectId: p1subj1.subjectId])
+        def skill2Res_t2 = skillsService.getSkill([skillId: skill.skillId, projectId: project2.projectId, subjectId: p2subj1.subjectId])
+
+        then:
+        attachments.projectId == [project1.projectId, project1.projectId]
+        attachments.skillId.sort() == [skill.skillId, skill.skillId].sort()
+        skill1Res.description == descriptionWithAttachments
+        skill2Res.description == descriptionWithAttachments
+
+        attachments_t2.projectId == [project1.projectId, project1.projectId, project1.projectId]
+        attachments_t2.skillId.sort() == [skill.skillId, skill.skillId, skill.skillId].sort()
+        skill1Res_t2.description == description2WithAttachment
+        skill2Res_t2.description == description2WithAttachment
     }
 
 }
