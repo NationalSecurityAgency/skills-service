@@ -16,13 +16,16 @@
 package skills.intTests.quiz
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
+import skills.storage.model.Attachment
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
+import skills.storage.repos.AttachmentRepo
 
 import static skills.intTests.utils.SkillsFactory.createProject
 import static skills.intTests.utils.SkillsFactory.createSkill
@@ -30,6 +33,10 @@ import static skills.intTests.utils.SkillsFactory.createSubject
 
 @Slf4j
 class QuizDefCopySpecs extends DefaultIntSpec {
+
+    @Autowired
+    AttachmentRepo attachmentRepo
+
     def "copy a quiz"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)
@@ -678,6 +685,153 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         questionOneAttributes["Answer4:text"] == "Answer #4"
         questionOneAttributes["Answer4:isCorrectAnswer"] == "false"
 
+    }
+
+    def "copy quiz - attachments in quiz description are duplicated"() {
+        String fileContent1 = 'Text in a file1'
+        String fileContent2 = 'Text in a file2'
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null)
+        String attachmentHref = uploadedAttachmentRes.href
+        String attachment2Href = uploadedAttachment2Res.href
+
+        String descriptionWithAttachments =("[File1.pdf](${attachmentHref})\n" +
+                "\n" +
+                "## some more\n" +
+                "\n" +
+                "[File2.pdf](${attachment2Href})").toString()
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        quiz.description = descriptionWithAttachments
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice))
+
+        when:
+        List<Attachment> attachments_t1 = attachmentRepo.findAll().toList()
+        def result = skillsService.copyQuiz(quiz.quizId, [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: descriptionWithAttachments, type: quiz.type])
+        def copiedQuiz = result.body
+
+        def originalQuiz = skillsService.getQuizDef(quiz.quizId)
+        def copiedQuizRes = skillsService.getQuizDef(copiedQuiz.quizId)
+        List<Attachment> attachments_t2 = attachmentRepo.findAll().toList()
+        List<Attachment> newAttachments = attachments_t2.findAll {
+            !attachments_t1.find { Attachment inner -> inner.uuid == it.uuid}
+        }
+        then:
+        originalQuiz.description == descriptionWithAttachments
+        copiedQuizRes.description != descriptionWithAttachments
+
+        attachments_t1.quizId == [quiz.quizId, quiz.quizId]
+        attachments_t1.skillId == [null, null]
+        attachments_t1.projectId == [null, null]
+        attachments_t1.filename.sort() == ['test1-pdf.pdf', 'test2-pdf.pdf'].sort()
+
+        attachments_t2.quizId.sort() == [quiz.quizId, quiz.quizId, copiedQuizRes.quizId, copiedQuizRes.quizId].sort()
+        attachments_t2.filename.sort() == ['test1-pdf.pdf', 'test2-pdf.pdf', 'test1-pdf.pdf', 'test2-pdf.pdf'].sort()
+
+        newAttachments.quizId == [copiedQuizRes.quizId, copiedQuizRes.quizId]
+        copiedQuizRes.description.contains(newAttachments[0].uuid)
+        copiedQuizRes.description.contains(newAttachments[1].uuid)
+    }
+
+    def "copy quiz - attachments in question description are duplicated"() {
+        String fileContent1 = 'Text in a file1'
+        String fileContent2 = 'Text in a file2'
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null)
+        String attachmentHref = uploadedAttachmentRes.href
+        String attachment2Href = uploadedAttachment2Res.href
+
+        String descriptionWithAttachments =("[File1.pdf](${attachmentHref})\n" +
+                "\n" +
+                "## some more\n" +
+                "\n" +
+                "[File2.pdf](${attachment2Href})").toString()
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice)
+        question.question = descriptionWithAttachments
+        skillsService.createQuizQuestionDef(question)
+
+        when:
+        List<Attachment> attachments_t1 = attachmentRepo.findAll().toList()
+        def result = skillsService.copyQuiz(quiz.quizId, [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: '', type: quiz.type])
+        def copiedQuiz = result.body
+
+        def originalQuestions = skillsService.getQuizQuestionDefs(quiz.quizId).questions
+        def copiedQuestions = skillsService.getQuizQuestionDefs(copiedQuiz.quizId).questions
+        List<Attachment> attachments_t2 = attachmentRepo.findAll().toList()
+        List<Attachment> newAttachments = attachments_t2.findAll {
+            !attachments_t1.find { Attachment inner -> inner.uuid == it.uuid}
+        }
+        then:
+        originalQuestions[0].question == descriptionWithAttachments
+        copiedQuestions[0].question != descriptionWithAttachments
+
+        attachments_t1.quizId == [quiz.quizId, quiz.quizId]
+        attachments_t1.skillId == [null, null]
+        attachments_t1.projectId == [null, null]
+        attachments_t1.filename.sort() == ['test1-pdf.pdf', 'test2-pdf.pdf'].sort()
+
+        attachments_t2.quizId.sort() == [quiz.quizId, quiz.quizId, copiedQuiz.quizId, copiedQuiz.quizId].sort()
+        attachments_t2.filename.sort() == ['test1-pdf.pdf', 'test2-pdf.pdf', 'test1-pdf.pdf', 'test2-pdf.pdf'].sort()
+
+        newAttachments.quizId == [copiedQuiz.quizId, copiedQuiz.quizId]
+        copiedQuestions[0].question.contains(newAttachments[0].uuid)
+        copiedQuestions[0].question.contains(newAttachments[1].uuid)
+    }
+
+    def "a single question is copied via UI - attachments in question description are duplicated"() {
+        String fileContent1 = 'Text in a file1'
+        String fileContent2 = 'Text in a file2'
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null)
+        String attachmentHref = uploadedAttachmentRes.href
+        String attachment2Href = uploadedAttachment2Res.href
+
+        String descriptionWithAttachments =("[File1.pdf](${attachmentHref})\n" +
+                "\n" +
+                "## some more\n" +
+                "\n" +
+                "[File2.pdf](${attachment2Href})").toString()
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice)
+        question.question = descriptionWithAttachments
+        skillsService.createQuizQuestionDef(question)
+
+        when:
+        List<Attachment> attachments_t1 = attachmentRepo.findAll().toList()
+        def questions_t1 = skillsService.getQuizQuestionDefs(quiz.quizId).questions
+
+        skillsService.createQuizQuestionDef(question)
+
+        def questions_t2 = skillsService.getQuizQuestionDefs(quiz.quizId).questions
+        List<Attachment> attachments_t2 = attachmentRepo.findAll().toList()
+        List<Attachment> newAttachments = attachments_t2.findAll {
+            !attachments_t1.find { Attachment inner -> inner.uuid == it.uuid}
+        }
+        then:
+        questions_t1.size() == 1
+        questions_t1[0].question == descriptionWithAttachments
+
+        questions_t2.size() == 2
+        questions_t2[0].question == descriptionWithAttachments
+        questions_t2[1].question != descriptionWithAttachments
+
+        attachments_t1.quizId == [quiz.quizId, quiz.quizId]
+        attachments_t1.skillId == [null, null]
+        attachments_t1.projectId == [null, null]
+        attachments_t1.filename.sort() == ['test1-pdf.pdf', 'test2-pdf.pdf'].sort()
+
+        attachments_t2.quizId.sort() == [quiz.quizId, quiz.quizId, quiz.quizId, quiz.quizId].sort()
+        attachments_t2.filename.sort() == ['test1-pdf.pdf', 'test2-pdf.pdf', 'test1-pdf.pdf', 'test2-pdf.pdf'].sort()
+
+        newAttachments.quizId == [quiz.quizId, quiz.quizId]
+        questions_t2[1].question.contains(newAttachments[0].uuid)
+        questions_t2[1].question.contains(newAttachments[1].uuid)
     }
 
     void runQuiz(String userId, def quiz, def quizInfo, boolean pass) {

@@ -77,7 +77,7 @@ class AttachmentService {
     }
 
     @Transactional
-    Attachment copyAttachmentWithNewUuid(Attachment attachment, String newProjectId = null) {
+    Attachment copyAttachmentWithNewUuid(Attachment attachment, String newProjectId = null, String newQuizId = null) {
         String uuid = UUID.randomUUID().toString()
         Attachment res = new Attachment(
                 filename: attachment.filename,
@@ -86,7 +86,7 @@ class AttachmentService {
                 size: attachment.size,
                 userId: attachment.userId,
                 projectId: newProjectId ?: attachment.projectId,
-                quizId: newProjectId ? null : attachment.quizId, // then now a quiz for sure
+                quizId: newProjectId ? null : (newQuizId ?: attachment.quizId), // then now a quiz for sure
                 skillId: newProjectId ? null : attachment.skillId, // if a new project then skillId may not exist
                 content: attachment.content
         )
@@ -129,6 +129,30 @@ class AttachmentService {
 
         return res
     }
+
+    @Transactional
+    String updateQuizAttachmentsInIncomingDescription(String description, String newQuizId, Closure<Boolean> shouldCopyUuid = { String uuid -> return true }) {
+        String res = description
+        if (description) {
+            List<String> uuidsToHandle = UUID_PATTERN.matcher(description).findAll().collect { it[1] as String }
+            uuidsToHandle.each { String uuid ->
+                Attachment attachment = attachmentRepo.findByUuid(uuid)
+                if (attachment) {
+                    if (shouldCopyUuid.call(attachment.uuid)) {
+                        // skill id will be updated later in the stack
+                        // cannot set it here as skill was not saved yet
+                        Attachment newAttachment = copyAttachmentWithNewUuid(attachment, null, newQuizId)
+                        res = res.replace("(/api/download/${uuid})", "(/api/download/${newAttachment.uuid})")
+                    }
+                } else {
+                    log.warn("updateAttachmentsInIncomingDescription: failed to find attachment with uuid: [${uuid}]. method params are quizId: [${newQuizId}]")
+                }
+            }
+        }
+
+        return res
+    }
+
 
     @Transactional
     void updateAttachmentsFoundInMarkdown(String description, String projectId, String quizId, String skillId) {
