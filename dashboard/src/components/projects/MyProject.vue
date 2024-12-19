@@ -312,7 +312,7 @@ defineExpose({
               This will remove the project for:
               <ul>
                 <li v-if="adminCount > 0">{{ adminCount }} Administrator(s)</li>
-                <li v-if="userCount > 0">{{ userCount }} Users(s)</li>
+                <li v-if="userCount > 0">{{ userCount }} User(s)</li>
               </ul>
             </div>
           </Message>

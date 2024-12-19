@@ -148,7 +148,7 @@ const handleFocus = () => {
         </StepperPanel>
         <StepperPanel>
           <template #content="{ nextCallback }">
-            <div>
+            <div data-cy="userRemovalMsg">
               <slot name="userMessage"></slot>
               <div class="flex flex-1 mt-2">
                 <Checkbox
