@@ -221,4 +221,55 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="newProjectButton"]').should('be.disabled')
     })
 
+    it('delete project with users, skills, admins', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.createSubject(1, 2);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.createSkill(1, 1, 4);
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.createBadge(1, 1, { enabled: true });
+
+        cy.reportSkill(1, 1, 'userA', 'now');
+        cy.reportSkill(1, 1, 'userB', 'now');
+        cy.reportSkill(1, 1, 'userC', 'now');
+
+        cy.assignUserAsAdmin('proj1', 'root@skills.org')
+
+        cy.visit('/administrator');
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="deleteProjBtn"]')
+            .click();
+        cy.contains('Removal Safety Check');
+
+        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('2 Subject(s)')
+        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('4 Skill(s)')
+        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('1 Badge(s)')
+
+        cy.get('[data-cy="firstNextButton"]').should('be.disabled')
+        cy.get('#stepOneCheck').check();
+        cy.get('[data-cy="firstNextButton"]').should('be.enabled')
+        cy.get('[data-cy="firstNextButton"]').click();
+
+        cy.get('[data-cy="userRemovalMsg"]').contains('3 User(s)')
+        cy.get('[data-cy="userRemovalMsg"]').contains('2 Administrator(s)')
+
+        cy.get('[data-cy="secondNextButton"]').should('be.disabled')
+        cy.get('#stepTwoCheck').check();
+        cy.get('[data-cy="secondNextButton"]').should('be.enabled')
+        cy.get('[data-cy="secondNextButton"]').click();
+
+        cy.get('[data-cy="deleteProjectButton"]').should('be.disabled');
+
+        cy.get('[data-cy=currentValidationText]')
+            .type('Delete This Project');
+        cy.get('[data-cy="deleteProjectButton"]')
+            .should('be.enabled')
+            .click();
+
+        cy.get('[data-cy="projectCard_proj1"]')
+            .should('not.exist');
+    });
 });
