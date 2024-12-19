@@ -1074,6 +1074,13 @@ class AdminController {
         return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest, minimumPoints)
     }
 
+    @GetMapping(value = "/projects/{projectId}/users/count")
+    @ResponseBody
+    Long countProjectUsers(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return adminUsersService.countTotalProjUsers(projectId)
+    }
+
     @GetMapping(value = "/projects/{projectId}/users/export/excel")//, produces = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", name = "exportUsers")
     @CompileStatic
     ModelAndView exportProjectUsers(@PathVariable("projectId") String projectId,

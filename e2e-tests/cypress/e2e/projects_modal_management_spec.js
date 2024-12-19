@@ -49,7 +49,7 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=deleteProjBtn]')
             .eq(0)
             .click();
-        cy.get('[data-cy=closeDialogBtn]')
+        cy.get('[data-cy="removalSafetyCheckMsg"] [data-cy=closeButton]')
             .click();
         cy.wait(200);
         cy.get('[data-cy=deleteProjBtn]')

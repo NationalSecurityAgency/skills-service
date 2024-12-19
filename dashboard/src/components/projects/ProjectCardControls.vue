@@ -21,11 +21,10 @@ import { useAdminProjectsState } from '@/stores/UseAdminProjectsState.js'
 const accessState = useAccessState()
 const projectsState = useAdminProjectsState()
 
-defineProps(['project', 'readOnlyProject'])
+const props = defineProps(['project', 'readOnlyProject'])
 const emit = defineEmits(['edit-project', 'unpin-project', 'copy-project', 'delete-project'])
 
 const isRootUser = computed(() => accessState.isRoot)
-
 </script>
 
 <template>
@@ -92,6 +91,7 @@ const isRootUser = computed(() => accessState.isRoot)
 
       <SkillsButton
         :id="`deleteProjBtn${project.projectId}`"
+        v-if="!project.isDeleteProtected"
         outlined
         severity="info"
         ref="deleteBtn"

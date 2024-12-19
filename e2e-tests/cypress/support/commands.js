@@ -1583,3 +1583,7 @@ Cypress.Commands.add('approveAllRequests', () => {
             });
         });
 });
+
+Cypress.Commands.add('assignUserAsAdmin', (projId, userId) => {
+    cy.request('PUT', `/admin/projects/${projId}/users/${userId}/roles/ROLE_PROJECT_ADMIN`)
+})
