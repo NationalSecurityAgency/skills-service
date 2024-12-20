@@ -133,13 +133,11 @@ const skillId = computed(() => {
       <div class="py-1 md:flex">
         <div class="sd-theme-primary-color font-medium flex">
           <div class="mr-1">
-            <i v-if="skill.isSkillsGroupType && !isExpanded" style="cursor: pointer;" class="fas fa-chevron-right mr-2" @click="emit('toggle-row')"></i>
-            <i v-if="skill.isSkillsGroupType && isExpanded" style="cursor: pointer;" class="fas fa-chevron-down mr-2" @click="emit('toggle-row')"></i>
             <i  v-if="skill.isSkillsGroupType" class="fas fa-layer-group"></i>
             <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType" class="fas fa-graduation-cap text-color-secondary"></i>
             <i v-if="skill.copiedFromProjectId" class="fas fa-book text-secondary"></i>
           </div>
-          <div class="">
+          <div>
             <div v-if="skillDisplayInfo.isGlobalBadgePage.value">
               <span class="font-italic text-color-secondary">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}
             </div>
@@ -154,6 +152,15 @@ const skillId = computed(() => {
             <div v-else class="inline-block" data-cy="skillProgressTitle">
               <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
             </div>
+            <Button :icon="!isExpanded ? 'far fa-plus-square' : 'far fa-minus-square'"
+                    v-if="skill.isSkillsGroupType"
+                    outlined
+                    class="ml-2 p-1"
+                    style="width: 24px"
+                    size="small"
+                    :data-cy="`toggleGroup-${skillId}`"
+                    @click="emit('toggle-row')">
+            </Button>
           </div>
         </div>
         <div v-if="skill.copiedFromProjectId" class="ml-2"
