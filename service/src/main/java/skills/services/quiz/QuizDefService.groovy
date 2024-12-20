@@ -208,7 +208,7 @@ class QuizDefService {
     QuizDefWithDescription copyQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest, String userId) {
         QuizDefWithDescription quizDefWithDescription = retrieveAndValidateQuizDef(originalQuizId, newQuizId, quizDefRequest)
 
-        String description = attachmentService.updateQuizAttachmentsInIncomingDescription(quizDefRequest.description, null)
+        String description = attachmentService.copyAttachmentsForIncomingDescription(quizDefRequest.description, null, null, null)
         quizDefWithDescription = new QuizDefWithDescription(quizId: newQuizId, name: quizDefRequest.name,
                 description: description, type: QuizDefParent.QuizType.valueOf(quizDefRequest.type))
         log.debug("Created quiz [{}]", quizDefWithDescription)
@@ -216,7 +216,7 @@ class QuizDefService {
         DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null, null, quizDefWithDescription.quizId) {
             quizDefWithDescription = quizDefWithDescRepo.save(quizDefWithDescription)
         }
-        attachmentService.updateAttachmentsFoundInMarkdown(quizDefWithDescription.description, null, quizDefWithDescription.quizId, null)
+        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(quizDefWithDescription.description, null, quizDefWithDescription.quizId, null)
         return quizDefWithDescription
     }
 
@@ -226,7 +226,7 @@ class QuizDefService {
         originalQuestions.questions.forEach(question -> {
             List<QuizAnswerDefResult> answers = question.answers
             QuizQuestionDefRequest newQuestion = new QuizQuestionDefRequest()
-            String updateQuestion = attachmentService.updateQuizAttachmentsInIncomingDescription(question.question, newQuizId)
+            String updateQuestion = attachmentService.copyAttachmentsForIncomingDescription(question.question, null, null, newQuizId)
             newQuestion.question = updateQuestion
             newQuestion.questionType = question.questionType
             List<QuizAnswerDefRequest> newAnswers = answers.collect( it -> {
@@ -289,10 +289,10 @@ class QuizDefService {
 
             log.debug("Saved [{}]", quizDefWithDescription)
 
-            attachmentService.updateAttachmentsFoundInMarkdown(quizDefRequest.description, null, newQuizId, null)
-
             accessSettingsStorageService.addQuizDefUserRoleForUser(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
         }
+        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(quizDefRequest.description, null, quizDefWithDescription.quizId, null)
+
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
                 item: DashboardItem.Quiz,
@@ -379,7 +379,7 @@ class QuizDefService {
         Closure<Boolean> shouldCopyUuid = { String uuid ->
             quizDefRepo.otherQuestionsExistInQuizWithAttachmentUUID(quizDef.quizId, existingQuestionId ?: -1, uuid)
         }
-        questionDefRequest.question = attachmentService.updateQuizAttachmentsInIncomingDescription(questionDefRequest.question, quizDef.quizId, shouldCopyUuid)
+        questionDefRequest.question = attachmentService.copyAttachmentsForIncomingDescription(questionDefRequest.question, null, null, quizDef.quizId, shouldCopyUuid)
         if (isEdit) {
             savedQuestion = updateQuizQuestionDef(quizId, existingQuestionId, questionDefRequest)
             savedAnswers = updateQuizQuestionAnswerDefs(savedQuestion, questionDefRequest)
@@ -390,7 +390,7 @@ class QuizDefService {
 
         addSavedQuestionUserAction(quizDef.quizId, savedQuestion, savedAnswers, isEdit)
 
-        attachmentService.updateAttachmentsFoundInMarkdown(savedQuestion.question, null, quizDef.quizId, null)
+        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(savedQuestion.question, null, quizDef.quizId, null)
 
         return convert(savedQuestion, savedAnswers)
     }

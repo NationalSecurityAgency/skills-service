@@ -109,6 +109,9 @@ class SelfReportingService {
     @Autowired
     UIConfigProperties uiConfigProperties
 
+    @Autowired
+    AttachmentService attachmentService
+
     SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
         if (StringUtils.isNotBlank(requestMsg)) {
@@ -117,6 +120,8 @@ class SelfReportingService {
                 String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[selfReportApprovalMsg], requestMsg=[${requestMsg}], userId=${userId}, performedOn=[${performedOn}]]"
                 throw new SkillException(msg, skillDefinition.projectId, skillDefinition.skillId, ErrorCode.BadParam)
             }
+
+            requestMsg = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(requestMsg, skillDefinition.projectId, null, skillDefinition.skillId)
         }
         validateSufficientPoints(skillDefinition, userId)
 

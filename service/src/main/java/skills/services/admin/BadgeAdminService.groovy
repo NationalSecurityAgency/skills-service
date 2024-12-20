@@ -185,10 +185,8 @@ class BadgeAdminService {
             savedSkill = skillDefWithExtraRepo.saveAndFlush(skillDefinition)
         }
 
-        if (!isEdit) {
-            attachmentService.updateAttachmentsFoundInMarkdown(badgeRequest?.description, projectId, null, badgeRequest.badgeId)
-        }
-      
+        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(savedSkill?.description, savedSkill.projectId, null, savedSkill.skillId)
+
         if(savedSkill && badgeRequest.awardAttrs && type == SkillDef.ContainerType.Badge) {
             skillAttributeService.saveBadgeBonusAwardAttrs(projectId, badgeRequest.badgeId, badgeRequest.awardAttrs)
         }

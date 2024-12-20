@@ -105,20 +105,19 @@ class AttachmentService {
     }
 
     @Transactional
-    String updateAttachmentsInIncomingDescription(String description, String projectId, String skillId) {
+    String copyAttachmentsForIncomingDescription(String description, String projectId, String skillId, String quizId, Closure<Boolean> shouldCopyUuid = { String uuid -> return true }) {
         String res = description
-        if (description && projectId && skillId) {
-            List<String> uuidsToHandle = UUID_PATTERN.matcher(description).findAll().collect { it[1] as String }
-            uuidsToHandle.each { String uuid ->
+        if (description) {
+            List<String> uuidsToHandle = findAttachmentUuids(description)
+            uuidsToHandle?.each { String uuid ->
                 Attachment attachment = attachmentRepo.findByUuid(uuid)
                 if (attachment) {
-                    // check to see if this attachment already exist in another skill which can happen when
-                    // user copying a skill
-                    boolean otherExist = skillDefWithExtraRepo.otherSkillsExistInProjectWithAttachmentUUID(projectId, skillId, attachment.uuid)
+                    // check to see if this attachment already exist  which can happen when an item is being copied
+                    boolean otherExist = shouldCopyUuid.call(uuid)
                     if (otherExist) {
                         // skill id will be updated later in the stack
                         // cannot set it here as skill was not saved yet
-                        Attachment newAttachment = copyAttachmentWithNewUuid(attachment, projectId)
+                        Attachment newAttachment = copyAttachmentWithNewUuid(attachment, projectId, quizId)
                         res = res.replace("(/api/download/${uuid})", "(/api/download/${newAttachment.uuid})")
                     }
                 } else {
@@ -131,33 +130,10 @@ class AttachmentService {
     }
 
     @Transactional
-    String updateQuizAttachmentsInIncomingDescription(String description, String newQuizId, Closure<Boolean> shouldCopyUuid = { String uuid -> return true }) {
-        String res = description
+    void updateAttachmentsAttrsBasedOnUuidsInMarkdown(String description, String projectId, String quizId, String skillId) {
         if (description) {
-            List<String> uuidsToHandle = UUID_PATTERN.matcher(description).findAll().collect { it[1] as String }
-            uuidsToHandle.each { String uuid ->
-                Attachment attachment = attachmentRepo.findByUuid(uuid)
-                if (attachment) {
-                    if (shouldCopyUuid.call(attachment.uuid)) {
-                        // skill id will be updated later in the stack
-                        // cannot set it here as skill was not saved yet
-                        Attachment newAttachment = copyAttachmentWithNewUuid(attachment, null, newQuizId)
-                        res = res.replace("(/api/download/${uuid})", "(/api/download/${newAttachment.uuid})")
-                    }
-                } else {
-                    log.warn("updateAttachmentsInIncomingDescription: failed to find attachment with uuid: [${uuid}]. method params are quizId: [${newQuizId}]")
-                }
-            }
-        }
-
-        return res
-    }
-
-
-    @Transactional
-    void updateAttachmentsFoundInMarkdown(String description, String projectId, String quizId, String skillId) {
-        if (description) {
-            UUID_PATTERN.matcher(description).findAll().collect { it[1] }.each { uuid ->
+            List<String> uuids = findAttachmentUuids(description)
+            uuids?.each { uuid ->
                 Attachment attachment = attachmentRepo.findByUuid(uuid)
                 if (!attachment) {
                     throw new IllegalStateException("Failed to find attachment with uuid: [${uuid}]. method params are projectId: [${projectId}], quizId: [${quizId}], skillId: [${skillId}]")

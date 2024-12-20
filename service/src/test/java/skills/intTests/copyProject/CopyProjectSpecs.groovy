@@ -830,6 +830,45 @@ class CopyProjectSpecs extends CopyIntSpec {
         }
     }
 
+    def "copy a project that has attachments in project's description - attachments should be copied"() {
+        String contents = 'Test is a test'
+        String attachmentHref = attachFileAndReturnHref(null, contents)
+        
+        String desc = "Here is a [Link](${attachmentHref})".toString()
+        def p1 = createProject(1)
+        p1.description = desc
+        skillsService.createProject(p1)
+
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createSubject(p1subj1)
+
+        when:
+        def projToCopy = createProject(2)
+        projToCopy.description = desc
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def orig = skillsService.getProjectDescription(p1.projectId)
+        def copied = skillsService.getProjectDescription(projToCopy.projectId)
+
+        List<Attachment> attachments = attachmentRepo.findAll().toList()
+        then:
+        orig.description == desc
+
+        attachments.size() == 2
+        Attachment originalAttachment = attachments.find {  attachmentHref.contains(it.uuid)}
+        Attachment newAttachment = attachments.find { !attachmentHref.contains(it.uuid)}
+
+        originalAttachment.projectId == p1.projectId
+
+        newAttachment.projectId == projToCopy.projectId
+        copied.description == "Here is a [Link](/api/download/${newAttachment.uuid})".toString()
+
+        SkillsService.FileAndHeaders fileAndHeaders = skillsService.downloadAttachment("/api/download/${newAttachment.uuid}")
+        File file = fileAndHeaders.file
+        file
+        file.bytes == contents.getBytes()
+    }
+    
     def "copy a project that has attachments in subject's description - attachments should be copied"() {
         def p1 = createProject(1)
         skillsService.createProject(p1)

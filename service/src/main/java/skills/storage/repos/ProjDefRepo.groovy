@@ -490,4 +490,11 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Query('''SELECT pd.totalPoints FROM ProjDef pd WHERE pd.projectId = ?1''')
     Integer getTotalPointsByProjectId(String projectId)
 
+    @Query(value = '''select count(id) > 0
+            from project_definition
+            where
+                convert_from(lo_get(CAST(description as oid)), 'UTF8') like CONCAT('%(/api/download/', ?2, ')%')
+              and LOWER(project_id) <> LOWER(?1)''', nativeQuery = true)
+    Boolean otherProjectExistWithAttachmentUUID(String notThisProject, String attachmentUUID)
+
 }
