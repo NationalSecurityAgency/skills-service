@@ -121,7 +121,7 @@ class SelfReportingService {
                 throw new SkillException(msg, skillDefinition.projectId, skillDefinition.skillId, ErrorCode.BadParam)
             }
 
-            requestMsg = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(requestMsg, skillDefinition.projectId, null, skillDefinition.skillId)
+            attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(requestMsg, skillDefinition.projectId, null, skillDefinition.skillId)
         }
         validateSufficientPoints(skillDefinition, userId)
 
