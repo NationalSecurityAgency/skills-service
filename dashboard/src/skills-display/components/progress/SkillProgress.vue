@@ -120,6 +120,10 @@ const pointsEarned = (pts) => {
 }
 
 const isSkillComplete = computed(() => props.skill && props.skill.meta && props.skill.meta.complete)
+const expanded = ref(false);
+const toggleRow = () => {
+  expanded.value = !expanded.value;
+}
 </script>
 
 <template>
@@ -142,11 +146,12 @@ const isSkillComplete = computed(() => props.skill && props.skill.meta && props.
       }}</strong> {{ attributes.projectDisplayName.toLowerCase() }}! Happy playing!!
     </Message>
 
-
     <skill-progress-name-row
       :skill="skill"
       :badge-is-locked="badgeIsLocked"
       :to-route="toRoute"
+      :is-expanded="expanded"
+      @toggle-row="toggleRow"
       :child-skill-highlight-string="childSkillHighlightString"
       :type="type" />
     <div class="mt-1">
@@ -226,7 +231,7 @@ const isSkillComplete = computed(() => props.skill && props.skill.meta && props.
       </div>
     </div>
 
-    <div v-if="skill.isSkillsGroupType && childSkillsInternal" class="ml-4 mt-3">
+    <div v-if="skill.isSkillsGroupType && childSkillsInternal && expanded" class="ml-4 mt-3">
       <div v-for="(childSkill, index) in childSkillsInternal"
            :key="`group-${skill.skillId}_skill-${childSkill.skillId}`"
            :id="`skillRow-${childSkill.skillId}`"
