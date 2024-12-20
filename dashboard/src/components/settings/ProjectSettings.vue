@@ -659,11 +659,7 @@ const saveSettings = ((dirtyChanges) => {
             <span class="ml-1">{{ disableAchievementCelebrationLabel }}</span>
           </settings-item>
 
-          <div class="field flex flex-column lg:flex-row lg:gap-3">
-            <label class="text-secondary w-min-11rem lg:max-w-11rem" id="projectDeletionProtection" for="projectDeletionProtectionSwitch">
-              <span id="projectDeletionProtectionLabel">Project Deletion Protection:</span>
-            </label>
-            <div class="flex align-items-center">
+          <settings-item label="Project Deletion Protection" input-id="projectDeletionProtectionSwitch">
               <InputSwitch v-model="settings.projectDeletionProtection.value"
                            inputId="projectDeletionProtectionSwitch"
                            name="check-button"
@@ -671,8 +667,7 @@ const saveSettings = ((dirtyChanges) => {
                            aria-labelledby="projectDeletionProtectionLabel"
                            data-cy="projectDeletionProtectionSwitch" />
               <span class="ml-1">{{ projectDeletionProtectionLabel }}</span>
-            </div>
-          </div>
+          </settings-item>
 
           <hr/>
 
