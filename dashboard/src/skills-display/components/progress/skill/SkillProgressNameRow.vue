@@ -152,7 +152,7 @@ const skillId = computed(() => {
             <div v-else class="inline-block" data-cy="skillProgressTitle">
               <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
             </div>
-            <SkillsButton :icon="!isExpanded ? 'far fa-plus-square' : 'far fa-minus-square'"
+            <SkillsButton :icon="!isExpanded ? 'fas fa-plus' : 'fas fa-minus'"
                     v-if="skill.isSkillsGroupType"
                     outlined
                     text
