@@ -152,15 +152,14 @@ const skillId = computed(() => {
             <div v-else class="inline-block" data-cy="skillProgressTitle">
               <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
             </div>
-            <Button :icon="!isExpanded ? 'far fa-plus-square' : 'far fa-minus-square'"
+            <SkillsButton :icon="!isExpanded ? 'far fa-plus-square' : 'far fa-minus-square'"
                     v-if="skill.isSkillsGroupType"
                     outlined
-                    class="ml-2 p-1"
-                    style="width: 24px"
-                    size="small"
+                    text
+                    class="p-1"
                     :data-cy="`toggleGroup-${skillId}`"
                     @click="emit('toggle-row')">
-            </Button>
+            </SkillsButton>
           </div>
         </div>
         <div v-if="skill.copiedFromProjectId" class="ml-2"
