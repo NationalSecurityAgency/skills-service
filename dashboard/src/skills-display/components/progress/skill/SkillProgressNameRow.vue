@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import dayjs from 'dayjs'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
@@ -36,8 +36,13 @@ const props = defineProps({
   childSkillHighlightString: {
     type: String,
     default: ''
+  },
+  isExpanded: {
+    type: Boolean,
+    default: true
   }
 })
+const emit = defineEmits(['toggle-row']);
 const numFormat = useNumberFormat()
 const timeUtils = useTimeUtils()
 const appConfig = useAppConfig()
@@ -128,9 +133,10 @@ const skillId = computed(() => {
       <div class="py-1 md:flex">
         <div class="sd-theme-primary-color font-medium flex">
           <div class="mr-1">
+            <i v-if="skill.isSkillsGroupType && !isExpanded" style="cursor: pointer;" class="fas fa-chevron-right mr-2" @click="emit('toggle-row')"></i>
+            <i v-if="skill.isSkillsGroupType && isExpanded" style="cursor: pointer;" class="fas fa-chevron-down mr-2" @click="emit('toggle-row')"></i>
             <i  v-if="skill.isSkillsGroupType" class="fas fa-layer-group"></i>
-            <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType"
-               class="fas fa-graduation-cap text-color-secondary"></i>
+            <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType" class="fas fa-graduation-cap text-color-secondary"></i>
             <i v-if="skill.copiedFromProjectId" class="fas fa-book text-secondary"></i>
           </div>
           <div class="">
