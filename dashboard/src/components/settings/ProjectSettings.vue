@@ -659,9 +659,9 @@ const saveSettings = ((dirtyChanges) => {
             <span class="ml-1">{{ disableAchievementCelebrationLabel }}</span>
           </settings-item>
 
-          <settings-item label="Project Deletion Protection" input-id="projectDeletionProtectionSwitch">
+          <settings-item label="Project Deletion Protection" input-id="projectDeletionProtectionSwitchInput">
               <InputSwitch v-model="settings.projectDeletionProtection.value"
-                           inputId="projectDeletionProtectionSwitch"
+                           inputId="projectDeletionProtectionSwitchInput"
                            name="check-button"
                            v-on:update:modelValue="projectDeletionProtectionChanged"
                            aria-labelledby="projectDeletionProtectionLabel"
