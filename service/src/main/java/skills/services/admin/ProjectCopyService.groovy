@@ -699,6 +699,10 @@ class ProjectCopyService {
 
     @Profile
     private ProjDef saveToProject(ProjectRequest projectRequest) {
+        Closure<Boolean> alreadyExistLookup = { String uuid ->
+            return projDefRepo.otherProjectExistWithAttachmentUUID(projectRequest.projectId, uuid)
+        }
+        projectRequest.description = attachmentService.copyAttachmentsForIncomingDescription(projectRequest.description, null, null, null, alreadyExistLookup)
         projAdminService.saveProject(null, projectRequest)
         ProjDef toProj = projDefRepo.findByProjectId(projectRequest.projectId)
         return toProj

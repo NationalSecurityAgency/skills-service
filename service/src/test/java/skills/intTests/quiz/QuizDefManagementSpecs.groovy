@@ -517,7 +517,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         updatedQuestion.answers.displayOrder == [1, 2, 3, 4]
     }
 
-    def "update question definition - all questions replaced"() {
+    def "update question definition - all answers replaced"() {
         def quiz = QuizDefFactory.createQuiz(1)
         def newQuiz = skillsService.createQuizDef(quiz)
         def q1 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice)).body

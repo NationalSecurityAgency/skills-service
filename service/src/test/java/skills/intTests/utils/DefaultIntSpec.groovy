@@ -121,6 +121,9 @@ class DefaultIntSpec extends Specification {
     @Autowired
     SkillsServiceFactory skillsServiceFactory
 
+    @Autowired
+    AttachmentRepo attachmentRepo
+
     def setup() {
         // allows for over-ridding the setup method
         doSetup()

@@ -35,7 +35,6 @@ import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillCounts
 import skills.storage.model.SkillDef
-import skills.storage.model.SkillDefParent
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.accessors.ProjDefAccessor
@@ -154,9 +153,9 @@ class SubjAdminService {
             }
             levelDefService.createDefault(projectId, null, skillDef)
 
-            attachmentService.updateAttachmentsFoundInMarkdown(subjectRequest?.description, projectId, null, subjectRequest.subjectId)
             log.debug("Created [{}]", res)
         }
+        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(res.description, res.projectId, null, res.skillId)
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: existing ? DashboardAction.Edit : DashboardAction.Create,

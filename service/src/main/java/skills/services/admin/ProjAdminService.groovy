@@ -190,10 +190,10 @@ class ProjAdminService {
             accessSettingsStorageService.addUserRole(userId, projectRequest.projectId, RoleName.ROLE_PROJECT_ADMIN)
             log.debug("Added user role [{}] to [{}]", RoleName.ROLE_PROJECT_ADMIN, userId)
 
-            attachmentService.updateAttachmentsFoundInMarkdown(projectRequest.description, projectRequest.projectId, null, null)
-
             savedProjDef = projDef
         }
+        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(projectRequest.description, projectDefinition.projectId, null, null)
+
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
                 item: DashboardItem.Project,

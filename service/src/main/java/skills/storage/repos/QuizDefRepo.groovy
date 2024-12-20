@@ -81,4 +81,11 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
                 WHERE qd.quiz_id = ?1
             """, nativeQuery = true)
     QuizDefSummaryRes getQuizDefSummary(String quizId)
+
+    @Query(value = '''select count(id) > 0
+            from quiz_question_definition
+            where question like CONCAT('%(/api/download/', ?3, ')%')
+              and id <> ?2
+              and LOWER(quiz_id) = LOWER(?1) ''', nativeQuery = true)
+    Boolean otherQuestionsExistInQuizWithAttachmentUUID(String quizId, Integer notQuestionRefId, String attachmentUUID)
 }
