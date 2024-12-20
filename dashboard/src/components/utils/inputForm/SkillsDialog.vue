@@ -56,6 +56,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  showCancelButton: {
+    type: Boolean,
+    default: true,
+  },
   enableReturnFocus: {
     type: Boolean,
     default: false
@@ -140,6 +144,7 @@ defineExpose({
 
       <div :class="`text-right ${footerClass}`">
         <SkillsButton
+            v-if="showCancelButton"
             :label="cancelButtonLabel"
             :icon="cancelButtonIcon"
             :severity="cancelButtonSeverity"

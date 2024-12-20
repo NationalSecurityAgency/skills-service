@@ -24,12 +24,14 @@ import ProjectCardFooter from '@/components/projects/ProjectCardFooter.vue'
 import ProjectCardControls from '@/components/projects/ProjectCardControls.vue'
 import UserRolesUtil from '@/components/utils/UserRolesUtil'
 import EditProject from '@/components/projects/EditProject.vue'
-import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import ProjectExpirationWarning from '@/components/projects/ProjectExpirationWarning.vue'
 import { useAdminProjectsState } from '@/stores/UseAdminProjectsState.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import ProjectRemovalValidation from "@/components/utils/modal/ProjectRemovalValidation.vue";
+import projectService from "@/components/projects/ProjectService";
+import AccessService from "@/components/access/AccessService.js";
 
 const dialogMessages = useDialogMessages()
 const props = defineProps(['project', 'disableSortControl'])
@@ -149,6 +151,10 @@ const focusSortControl = () => {
   sortControl.value.focus();
 };
 
+const showDeleteModal = () => {
+  showDeleteValidation.value = true
+};
+
 defineExpose({
   focusSortControl
 });
@@ -194,7 +200,7 @@ defineExpose({
                 :project="projectInternal"
                 @edit-project="createOrUpdateProject(project, true)"
                 @copy-project="copyProject"
-                @delete-project="showDeleteValidation = true"
+                @delete-project="showDeleteModal"
                 @unpin-project="unpin"
                 :read-only-project="isReadOnlyProj"/>
           </div>
@@ -254,15 +260,14 @@ defineExpose({
                   @project-saved="projectCopied"
                   :enable-return-focus="true" />
 
-    <removal-validation
+    <project-removal-validation
       v-if="showDeleteValidation"
       v-model="showDeleteValidation"
+      :project="projectInternal"
       :item-name="projectInternal.name"
       item-type="project"
       @do-remove="doDeleteProject">
-        Deletion <b>cannot</b> be undone and permanently removes all skill subject definitions, skill
-        definitions and users' performed skills for this Project.
-    </removal-validation>
+    </project-removal-validation>
   </div>
 </template>
 

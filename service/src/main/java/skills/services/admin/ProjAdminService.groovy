@@ -245,6 +245,11 @@ class ProjAdminService {
             throw new SkillException("Project with id [${projectId}] cannot be deleted as it is currently referenced by one or more global badges")
         }
 
+        SettingsResult isDeleteProtected = settingsService.getProjectSetting(projectId, "project-deletion-protection")
+        if (isDeleteProtected?.value == "true") {
+            throw new SkillException("Project [${projectId}] cannot be deleted as it has deletion protection enabled")
+        }
+
         List<SkillDef> childSkills = skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Skill)
         childSkills.each {
             skillsAdminService.removeCatalogImportedSkills(it)
@@ -377,6 +382,7 @@ class ProjAdminService {
     private  List<ProjectResult> loadProjectsForRoot(Map<String, Integer> projectIdSortOrder, String userId, Boolean isNotCommunityMember) {
         List<SettingsResult> pinnedProjectSettings = settingsService.getUserProjectSettingsForGroup(userId, rootUserPinnedProjectGroup)
         List<String> pinnedProjects = pinnedProjectSettings.collect { it.projectId }
+        List<SettingsResult> projectSettings = settingsService.getProjectSettingForAllProjectsInList("project-deletion-protection", pinnedProjects)
 
         List<ProjSummaryResult> projects = projDefRepo.getAllSummariesByProjectIdIn(pinnedProjects)
         if (isNotCommunityMember) {
@@ -387,6 +393,8 @@ class ProjAdminService {
         List<ProjectResult> finalRes = projects?.unique({ it.projectId })?.collect({
             ProjectResult res = convert(it, projectIdSortOrder, pinnedProjectIds)
             res.userRole = RoleName.ROLE_SUPER_DUPER_USER
+            SettingsResult isProtected = projectSettings.find{ setting -> setting.projectId == it.projectId}
+            res.isDeleteProtected = isProtected?.value == "true"
             if (isNotCommunityMember) {
                 res.userCommunity = null
             }
@@ -456,8 +464,12 @@ class ProjAdminService {
             if (isNotCommunityMember) {
                 projects = projects.findAll { !it.protectedCommunityEnabled}
             }
+            List<String> projectIds = projects.collect{ it.projectId }
+            List<SettingsResult> projectSettings = settingsService.getProjectSettingForAllProjectsInList("project-deletion-protection", projectIds)
             finalRes = projects?.unique({ it.projectId })?.collect({
                 ProjectResult res = convert(it, projectIdSortOrder)
+                SettingsResult isProtected = projectSettings.find{ setting -> setting.projectId == it.projectId }
+                res.isDeleteProtected = isProtected?.value == "true"
                 return res
             })
         }

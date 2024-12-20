@@ -1822,9 +1822,15 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="projectCard_proj1"] [data-cy="deleteProjBtn"]')
             .click();
         cy.contains('Removal Safety Check');
+        cy.get('#stepOneCheck').check();
+        cy.get('[data-cy="firstNextButton"]').click();
+
+        cy.get('#stepTwoCheck').check();
+        cy.get('[data-cy="secondNextButton"]').click();
+
         cy.get('[data-cy=currentValidationText]')
-            .type('Delete Me');
-        cy.get('[data-cy=saveDialogBtn]')
+            .type('Delete This Project');
+        cy.get('[data-cy=deleteProjectButton]')
             .should('be.enabled')
             .click();
         cy.contains('Cannot delete this project as it belongs to one or more global badges');
@@ -1834,11 +1840,14 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="projectCard_proj2"] [data-cy="deleteProjBtn"]')
             .click();
         cy.contains('Removal Safety Check');
+        cy.get('#stepOneCheck').check();
+        cy.get('[data-cy="firstNextButton"]').click();
+
+        cy.get('#stepTwoCheck').check();
+        cy.get('[data-cy="secondNextButton"]').click();
+
         cy.get('[data-cy=currentValidationText]')
-            .type('Delete Me');
-        cy.get('[data-cy=saveDialogBtn]')
-            .should('be.enabled')
-            .click();
+            .type('Delete This Project');
         cy.contains('Cannot delete this project as it belongs to one or more global badges')
             .should('not.exist');
     });
