@@ -14,15 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useFocusState } from '@/stores/UseFocusState.js'
-import { useSlotsUtil } from '@/components/utils/UseSlotsUtil.js';
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue';
 import InputText from 'primevue/inputtext';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import Stepper from 'primevue/stepper'
 import StepperPanel from 'primevue/stepperpanel'
+import AccessService from "@/components/access/AccessService.js";
+import projectService from "@/components/projects/ProjectService.js";
 
 const focusState = useFocusState()
 
@@ -56,18 +57,36 @@ const props = defineProps({
     type: String,
     required: false,
   },
-  loading: {
-    type: Boolean,
-    default: false
-  },
   removalTextPrefix: {
     type: String,
     required: false,
     default: 'This will delete the',
   },
+  project: {
+    type: Object,
+    required: true,
+  }
 });
 
 const model = defineModel()
+
+const adminCount = ref(0);
+const userCount = ref(0);
+const loading = ref(false);
+
+onMounted(() => {
+  const roles = ['ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER'];
+  const countAdmins = AccessService.countUserRolesForProject(props.project.projectId, roles);
+  const countUsers = projectService.countProjectUsers(props.project.projectId)
+  const promiseCounts = [countAdmins, countUsers]
+
+  loading.value = true
+  Promise.all(promiseCounts).then((result) => {
+    adminCount.value = result[0];
+    userCount.value = result[1];
+    loading.value = false
+  })
+})
 
 let currentValidationText = ref('');
 
@@ -111,6 +130,14 @@ const clearSettings = () => {
 const handleFocus = () => {
   focusState.focusOnLastElement()
 }
+
+const hasContent = computed(() => {
+  return props.project.numSubjects > 0 || props.project.numSkills || props.project.numBadges
+})
+
+const hasUsers = computed(() => {
+  return userCount.value > 0 || adminCount.value > 1;
+})
 </script>
 
 <template>
@@ -134,7 +161,19 @@ const handleFocus = () => {
               <div v-if="!removalNotAvailable">
                 {{ removalTextPrefix }} <span class="font-bold text-primary">{{ itemName }}</span><span v-if="itemType">&nbsp;{{ itemType }}</span>.
               </div>
-              <slot name="initialMessage"></slot>
+              <Message severity="warn" :closable="false">
+                Deletion <b>cannot</b> be undone and permanently removes all skill subject definitions, skill
+                definitions and users' performed skills for this Project.
+
+                <div class="mt-4" v-if="hasContent">
+                  This will delete:
+                  <ul>
+                    <li v-if="project.numSubjects > 0">{{ project.numSubjects }} Subject(s)</li>
+                    <li v-if="project.numSkills > 0">{{ project.numSkills }} Skill(s)</li>
+                    <li v-if="project.numBadges > 0">{{ project.numBadges }} Badge(s)</li>
+                  </ul>
+                </div>
+              </Message>
               <div class="flex">
                 <Checkbox inputId="stepOneCheck" :binary="true" name="Confirm" v-model="confirmStepOne" data-cy="confirmCheckbox" />
                 <label for="stepOneCheck" class="ml-2">I understand that this is permanent and cannot be undone</label>
@@ -149,7 +188,17 @@ const handleFocus = () => {
         <StepperPanel>
           <template #content="{ nextCallback }">
             <div data-cy="userRemovalMsg">
-              <slot name="userMessage"></slot>
+              <Message severity="warn" :closable="false">
+                Deleting this project will also delete it for all administrators and users associated with it.
+
+                <div class="mt-4" v-if="hasUsers">
+                  This will remove the project for:
+                  <ul>
+                    <li v-if="adminCount > 0">{{ adminCount }} Administrator(s)</li>
+                    <li v-if="userCount > 0">{{ userCount }} User(s)</li>
+                  </ul>
+                </div>
+              </Message>
               <div class="flex flex-1 mt-2">
                 <Checkbox
                     inputId="stepTwoCheck"

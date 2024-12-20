@@ -48,7 +48,6 @@ const showCopyProjectModal = ref(false);
 const showDeleteValidation = ref(false);
 let overSortControl = ref(false);
 const sortControl = ref();
-const loading = ref(false);
 
 let copyProjectInfo = ref({
   newProject: {},
@@ -152,29 +151,8 @@ const focusSortControl = () => {
   sortControl.value.focus();
 };
 
-const hasContent = computed(() => {
-  return projectInternal.value.numSubjects > 0 || projectInternal.value.numSkills || projectInternal.value.numBadges
-})
-
-const hasUsers = computed(() => {
-  return userCount.value > 0 || adminCount.value > 1;
-})
-
-const adminCount = ref(0);
-const userCount = ref(0);
 const showDeleteModal = () => {
-  const roles = ['ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER'];
-  const countAdmins = AccessService.countUserRolesForProject(projectInternal.value.projectId, roles);
-  const countUsers = projectService.countProjectUsers(projectInternal.value.projectId)
-  const promiseCounts = [countAdmins, countUsers]
-
-  loading.value = true
   showDeleteValidation.value = true
-  Promise.all(promiseCounts).then((result) => {
-    adminCount.value = result[0];
-    userCount.value = result[1];
-    loading.value = false
-  })
 };
 
 defineExpose({
@@ -285,38 +263,10 @@ defineExpose({
     <project-removal-validation
       v-if="showDeleteValidation"
       v-model="showDeleteValidation"
+      :project="projectInternal"
       :item-name="projectInternal.name"
       item-type="project"
-      :loading="loading"
       @do-remove="doDeleteProject">
-        <template #initialMessage>
-          <Message severity="warn" :closable="false">
-            Deletion <b>cannot</b> be undone and permanently removes all skill subject definitions, skill
-            definitions and users' performed skills for this Project.
-
-            <div class="mt-4" v-if="hasContent">
-              This will delete:
-              <ul>
-                <li v-if="projectInternal.numSubjects > 0">{{ projectInternal.numSubjects }} Subject(s)</li>
-                <li v-if="projectInternal.numSkills > 0">{{ projectInternal.numSkills }} Skill(s)</li>
-                <li v-if="projectInternal.numBadges > 0">{{ projectInternal.numBadges }} Badge(s)</li>
-              </ul>
-            </div>
-          </Message>
-        </template>
-        <template #userMessage>
-          <Message severity="warn" :closable="false">
-            Deleting this project will also delete it for all administrators and users associated with it.
-
-            <div class="mt-4" v-if="hasUsers">
-              This will remove the project for:
-              <ul>
-                <li v-if="adminCount > 0">{{ adminCount }} Administrator(s)</li>
-                <li v-if="userCount > 0">{{ userCount }} User(s)</li>
-              </ul>
-            </div>
-          </Message>
-        </template>
     </project-removal-validation>
   </div>
 </template>
