@@ -188,4 +188,21 @@ class ProjectSettingsSpecs extends DefaultIntSpec {
         then:
         count == users.size()
     }
+
+    def 'project can not be deleted when delete protection is enabled'() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+
+        skillsService.changeSetting(proj.projectId, "project-deletion-protection", [projectId: proj.projectId, setting: "project-deletion-protection", value: "true"])
+        def projects = skillsService.getProjects()
+        assert projects.size() == 1
+        assert projects[0].isDeleteProtected
+
+        when:
+        skillsService.deleteProject(proj.projectId)
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("Project [TestProject1] cannot be deleted as it has deletion protection enabled")
+    }
 }
