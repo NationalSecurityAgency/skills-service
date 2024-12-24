@@ -280,8 +280,9 @@ const onGroupsToggle = () => {
 
           <div class="" data-cy="skillDetailsToggle">
             <div class="flex flex-row align-content-center">
-              <span class="text-muted pr-1 align-content-center">Expand Groups:</span>
+              <span class="text-muted pr-1 align-content-center" v-if="!route.params.badgeId">Expand Groups:</span>
               <InputSwitch v-model="expandGroups"
+                           v-if="!route.params.badgeId"
                            @change="onGroupsToggle"
                            aria-label="Expand Groups"
                            data-cy="expandGroupsSwitch" />
