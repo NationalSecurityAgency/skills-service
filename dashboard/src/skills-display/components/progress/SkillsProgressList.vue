@@ -221,6 +221,10 @@ const isLastViewedScrollSupported = computed(() => {
 })
 // this.lastViewedButtonDisabled = resultSkills.findIndex((i) => i.isLastViewed || (i.children && i.children.findIndex((c) => c.isLastViewed) >= 0)) < 0
 
+const expandGroups = ref(true);
+const onGroupsToggle = () => {
+
+}
 </script>
 
 <template>
@@ -276,7 +280,12 @@ const isLastViewedScrollSupported = computed(() => {
 
           <div class="" data-cy="skillDetailsToggle">
             <div class="flex flex-row align-content-center">
-              <span class="text-muted pr-1 align-content-center">{{ attributes.skillDisplayName }} Details:</span>
+              <span class="text-muted pr-1 align-content-center">Expand Groups:</span>
+              <InputSwitch v-model="expandGroups"
+                           @change="onGroupsToggle"
+                           aria-label="Expand Groups"
+                           data-cy="expandGroupsSwitch" />
+              <span class="text-muted pr-1 ml-3 align-content-center">{{ attributes.skillDisplayName }} Details:</span>
               <InputSwitch v-model="showDescriptionsInternal"
                            @change="onDetailsToggle"
                            :aria-label="`Show ${attributes.skillDisplayName} Details`"
@@ -327,6 +336,7 @@ const isLastViewedScrollSupported = computed(() => {
               :ref="`skillProgress${skill.skillId}`"
               :skill="skill"
               :type="type"
+              :expand-groups="expandGroups"
               :enable-drill-down="true"
               :show-description="showDescriptionsInternal"
               :data-cy="`skillProgress_index-${index}`"
