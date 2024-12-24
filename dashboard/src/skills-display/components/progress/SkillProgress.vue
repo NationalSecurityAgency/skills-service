@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import SkillProgressNameRow from '@/skills-display/components/progress/skill/SkillProgressNameRow.vue'
 import { useRoute } from 'vue-router'
-import { computed, ref } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillsSummaryCards from '@/skills-display/components/progress/SkillsSummaryCards.vue'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
@@ -62,6 +62,11 @@ const props = defineProps({
     required: false
   },
   videoCollapsedByDefault: {
+    type: Boolean,
+    default: false,
+    required: false
+  },
+  expandGroups: {
     type: Boolean,
     default: false,
     required: false
@@ -120,10 +125,19 @@ const pointsEarned = (pts) => {
 }
 
 const isSkillComplete = computed(() => props.skill && props.skill.meta && props.skill.meta.complete)
-const expanded = ref(false);
+const expanded = ref(null);
 const toggleRow = () => {
   expanded.value = !expanded.value;
 }
+watch(() => props.expandGroups, (newValue) => {
+  expanded.value = newValue
+})
+
+onMounted(() => {
+  if(props.expandGroups) {
+    expanded.value = props.expandGroups
+  }
+})
 </script>
 
 <template>
