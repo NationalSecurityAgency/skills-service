@@ -155,6 +155,7 @@ const skillId = computed(() => {
             <SkillsButton :icon="!isExpanded ? 'fas fa-plus' : 'fas fa-minus'"
                     v-if="skill.isSkillsGroupType"
                     outlined
+                    :aria-label="!isExpanded ? 'Expand Group' : 'Collapse Group'"
                     text
                     class="p-1"
                     :data-cy="`toggleGroup-${skillId}`"
