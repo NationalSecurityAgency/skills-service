@@ -63,6 +63,9 @@ spring:
       location: ${java.io.tmpdir}
       max-file-size: ${skills.config.maxAttachmentSize}
       max-request-size: ${skills.config.maxAttachmentSize}
+#  http:
+#    client:
+#      factory: simple
 management:
   server:
     port: 8808

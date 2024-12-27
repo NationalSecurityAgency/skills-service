@@ -88,8 +88,11 @@ class RestTemplateWrapper extends RestTemplate {
             HttpHeaders headers = response.getHeaders();
 
             List<String> returnedCookies = headers.getOrEmpty(HttpHeaders.SET_COOKIE)
-            if (returnedCookies && cookies == null) {
-                cookies = returnedCookies
+            if (returnedCookies /*&& cookies == null*/) {
+                if (cookies == null) {
+                    cookies = []
+                }
+                cookies.addAll(returnedCookies)
                 log.info("Setting cookies to {}", returnedCookies)
             }
             if (returnedCookies && !xsrfToken) {
