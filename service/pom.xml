@@ -185,8 +185,14 @@
         </dependency>
 
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-access</artifactId>
+            <groupId>ch.qos.logback.access</groupId>
+            <artifactId>logback-access-common</artifactId>
+            <version>${logback-access.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback.access</groupId>
+            <artifactId>logback-access-tomcat</artifactId>
+            <version>${logback-access.version}</version>
         </dependency>
 
         <dependency>
@@ -653,10 +659,12 @@
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache License, version 2.0</licenseMerge>
                                 <licenseMerge>The Apache Software License, Version 2.0|Apache License 2.0</licenseMerge>
                                 <licenseMerge>The Apache Software License, Version 2.0|The Apache Software License, version 2.0</licenseMerge>
+                                <licenseMerge>The Apache Software License, Version 2.0|Apache License Version 2.0</licenseMerge>
                                 <licenseMerge>The MIT License|The MIT License (MIT)</licenseMerge>
                                 <licenseMerge>The MIT License|MIT License</licenseMerge>
                                 <licenseMerge>The MIT License|MIT license</licenseMerge>
                                 <licenseMerge>The MIT License|MIT-0</licenseMerge>
+                                <licenseMerge>The MIT License|MIT</licenseMerge>
                                 <licenseMerge>The GNU General Public License (GPL) Version 2 with the Classpath Exception|GPL2 w/ CPE</licenseMerge>
                                 <licenseMerge>Eclipse Public License - Version 1.0|Eclipse Public License - v 1.0|EPL 1.0</licenseMerge>
                                 <licenseMerge>Eclipse Public License - Version 2.0|Eclipse Public License - v 2.0</licenseMerge>
