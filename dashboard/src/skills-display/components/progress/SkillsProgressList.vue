@@ -15,6 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import {useStorage} from "@vueuse/core";
 import SkillProgress from '@/skills-display/components/progress/SkillProgress.vue'
 import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
@@ -27,10 +28,6 @@ import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkil
 import { useRoute } from 'vue-router'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
-// subject: {
-//   type: Object,
-//     required: true
-// },
 const props = defineProps({
   showDescriptions: {
     type: Boolean,
@@ -211,7 +208,6 @@ const skillsToShow = computed(() => {
     })
     resultSkills = filteredRes
   }
-  // this.skillsInternal = resultSkills
   return resultSkills
 })
 
@@ -219,12 +215,8 @@ const showDescriptionsInternal = ref(false)
 const isLastViewedScrollSupported = computed(() => {
   return !parentFrame.parentFrame || parentFrame.isLastViewedScrollSupported
 })
-// this.lastViewedButtonDisabled = resultSkills.findIndex((i) => i.isLastViewed || (i.children && i.children.findIndex((c) => c.isLastViewed) >= 0)) < 0
 
-const expandGroups = ref(true);
-const onGroupsToggle = () => {
-
-}
+const expandGroups = useStorage(`client-groups-expanded`, true)
 </script>
 
 <template>
@@ -284,7 +276,6 @@ const onGroupsToggle = () => {
                 <span class="text-muted pr-1 align-content-center" v-if="!route.params.badgeId">Expand Groups:</span>
                 <InputSwitch v-model="expandGroups"
                              v-if="!route.params.badgeId"
-                             @change="onGroupsToggle"
                              aria-label="Expand Groups"
                              data-cy="expandGroupsSwitch" />
               </div>
