@@ -279,18 +279,22 @@ const onGroupsToggle = () => {
 
 
           <div class="" data-cy="skillDetailsToggle">
-            <div class="flex flex-row align-content-center">
-              <span class="text-muted pr-1 align-content-center" v-if="!route.params.badgeId">Expand Groups:</span>
-              <InputSwitch v-model="expandGroups"
-                           v-if="!route.params.badgeId"
-                           @change="onGroupsToggle"
-                           aria-label="Expand Groups"
-                           data-cy="expandGroupsSwitch" />
-              <span class="text-muted pr-1 ml-3 align-content-center">{{ attributes.skillDisplayName }} Details:</span>
-              <InputSwitch v-model="showDescriptionsInternal"
-                           @change="onDetailsToggle"
-                           :aria-label="`Show ${attributes.skillDisplayName} Details`"
-                           data-cy="toggleSkillDetails" />
+            <div class="flex flex-row flex-wrap align-content-center">
+              <div class="flex mr-3">
+                <span class="text-muted pr-1 align-content-center" v-if="!route.params.badgeId">Expand Groups:</span>
+                <InputSwitch v-model="expandGroups"
+                             v-if="!route.params.badgeId"
+                             @change="onGroupsToggle"
+                             aria-label="Expand Groups"
+                             data-cy="expandGroupsSwitch" />
+              </div>
+              <div class="flex">
+                <span class="text-muted pr-1 align-content-center">{{ attributes.skillDisplayName }} Details:</span>
+                <InputSwitch v-model="showDescriptionsInternal"
+                             @change="onDetailsToggle"
+                             :aria-label="`Show ${attributes.skillDisplayName} Details`"
+                             data-cy="toggleSkillDetails" />
+              </div>
             </div>
           </div>
 
