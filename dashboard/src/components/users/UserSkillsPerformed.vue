@@ -330,6 +330,7 @@ const selectedSkills = ref([]);
               </div>
               <div class="flex">
                 <SkillsButton label="Delete Selected"
+                              v-if="!projConfig.isReadOnlyProj"
                               icon="fa fa-trash"
                               size="small"
                               outlined
@@ -338,6 +339,7 @@ const selectedSkills = ref([]);
                               aria-label="Remove selected performed skills from user"
                               data-cy="performedSkills-deleteSelected"/>
                 <SkillsButton label="Delete All"
+                              v-if="!projConfig.isReadOnlyProj"
                               icon="fa fa-trash"
                               size="small"
                               outlined
@@ -372,7 +374,7 @@ const selectedSkills = ref([]);
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :class="{'flex': responsive.md.value }">
+          <Column selectionMode="multiple" :class="{'flex': responsive.md.value }" v-if="!projConfig.isReadOnlyProj">
             <template #header>
               <span class="mr-1 lg:mr-0 md:hidden">
                 <i class="fas fa-check-double" aria-hidden="true"></i> Select Skills:
