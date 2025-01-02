@@ -49,7 +49,7 @@ const monthlyDayCategories = ref([
   { name: 'Other', key: SET_DAY_OF_MONTH },
 ])
 const yearlyYears = ref(1);
-const yearlyMonth = ref(1);
+const yearlyMonth = ref(0);
 const yearlyDayOfMonth = ref(1);
 const monthlyMonths = ref(1);
 const monthlyDay = ref(1);
@@ -176,8 +176,8 @@ const schema = yup.object().shape({
         is: YEARLY,
         then: (sch)  => sch
             .required()
-            .min(1)
-            .max(12)
+            .min(0)
+            .max(11)
             .label('Month'),
       }),
   'yearlyDayOfMonth': yup.number()
