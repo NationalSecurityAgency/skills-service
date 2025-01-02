@@ -19,9 +19,7 @@ import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vu
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
-import DateCell from "@/components/utils/table/DateCell.vue";
-import SlimDateCell from "@/components/utils/table/SlimDateCell.vue";
-import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
+import { useTimeUtils } from "@/common-components/utilities/UseTimeUtils.js";
 
 const props = defineProps({
   quizType: String,
@@ -114,7 +112,9 @@ const manuallyGradedInfo = computed(() => {
             <Rating class="flex-initial py-3 px-4" v-model="surveyScore" :stars="numberOfStars" readonly :cancel="false"/>
           </div>
           <div v-if="isTextInputType" class="border-1 border-300 border-round p-3 w-full" data-cy="TextInputAnswer">
-            <pre>{{ answerText }}</pre>
+            <MarkdownText
+                :text="answerText"
+                :instance-id="`${question.id}_answer`"/>
           </div>
           <div v-if="manuallyGradedInfo" class="mt-3 w-full border-1 p-3 border-round surface-border" data-cy="manuallyGradedInfo">
             <div class="text-xl mb-3 font-semibold">Manually Graded</div>
