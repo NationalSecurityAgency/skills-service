@@ -582,7 +582,6 @@ const videoResized = (width, height) => {
               <div class="border-1 surface-border border-round-top surface-100 p-3">Video Preview</div>
             </template>
             <template #content>
-              <Message>You can set the default size of the video by dragging the handle at the bottom right of the video.</Message>
               <VideoPlayer v-if="!refreshingPreview"
                            :options="computedVideoConf"
                            @player-destroyed="turnOffRefresh"
@@ -619,7 +618,10 @@ const videoResized = (width, height) => {
                 </div>
                 <div class="grid">
                   <div class="col-6 lg:col-3 xl:col-2">Default Video Size:</div>
-                  <div class="col"><span class="text-primary" data-cy="defaultVideoSize">{{ configuredResolution }}</span></div>
+                  <div class="col">
+                    <span class="text-primary" data-cy="defaultVideoSize">{{ configuredResolution }}</span>
+                    <div>** Change the size by dragging the handle at the bottom right of the video and click Save Changes button.</div>
+                  </div>
                 </div>
                 <div class="grid">
                   <div class="col-6 lg:col-3 xl:col-2">Watched Segments:</div>
@@ -646,7 +648,7 @@ const videoResized = (width, height) => {
                       @click="submitSaveSettingsForm"
                       icon="fas fa-save"
                       label="Save Changes" />
-                  <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success" data-cy="savedMsg"><i class="fas fa-check" /> Saved</span>
+                  <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-color-success" data-cy="savedMsg"><i class="fas fa-check" /> Saved</span>
                 </div>
               </div>
 

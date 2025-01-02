@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { onBeforeUnmount, onMounted, onUnmounted, ref, computed } from 'vue'
+import {computed, onBeforeUnmount, onMounted, onUnmounted, ref} from 'vue'
 import videojs from 'video.js';
 import WatchedSegmentsUtil from '@/common-components/video/WatchedSegmentsUtil';
 import {useStorage} from "@vueuse/core";
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
 const props = defineProps({
   options: Object,
@@ -26,6 +27,7 @@ const props = defineProps({
     default:  false,
   }
 })
+const announcer = useSkillsAnnouncer()
 const vidPlayerId = props.options.videoId ? `vidPlayer${props.options.videoId}` : 'vidPlayer1'
 const emit = defineEmits(['player-destroyed', 'watched-progress', 'on-resize'])
 const watchProgress = ref({
@@ -52,7 +54,7 @@ const isFirstLoad = ref(true);
 
 const videoPlayerSizeInStorage = useStorage(`${vidPlayerId}-playerSize`, {})
 
-
+const isPlaying = ref(false)
 onMounted(() => {
   if(props.options.width && props.options.height) {
     playerWidth.value = props.options.width + 22;
@@ -73,6 +75,12 @@ onMounted(() => {
     player.on('timeupdate', () => {
       updateProgress(player.currentTime());
     });
+    player.on('play', () => {
+      isPlaying.value = true
+    });
+    player.on('pause', () => {
+      isPlaying.value = false
+    });
     playerContainer.player = player
   });
 
@@ -91,10 +99,36 @@ const updateProgress = (currentTime) => {
   emit('watched-progress', watchProgress.value)
 }
 
+const getResizableElement = () => {
+  const resizableDiv = `#${vidPlayerId}Container`
+  return document.querySelector(resizableDiv)
+}
+
+const getResizableElementRect = () => {
+  const element = getResizableElement();
+  return element.getBoundingClientRect()
+}
+
+const resizePlayerSmaller = () => resizePlayer(-50)
+const resizePlayerBigger = () => resizePlayer(50)
+
+const resizePlayer = (resizeWidth) => {
+  const element = getResizableElement();
+  const clientRect = element.getBoundingClientRect()
+  element.style.width = (clientRect.width + resizeWidth) + 'px'
+  updateResizableInfo()
+  announcer.polite(`Resized the video player by ${resizeWidth} pixels`)
+}
+
+const updateResizableInfo = () => {
+  const clientRect = getResizableElementRect()
+  const width = Math.trunc(clientRect.width)
+  const height = Math.trunc(clientRect.height)
+  videoPlayerSizeInStorage.value = { width, height }
+  emit('on-resize', width, height);
+}
 const createResizeSupport = () => {
   function makeResizableDiv() {
-    const resizableDiv = `#${vidPlayerId}Container`
-    const element = document.querySelector(resizableDiv);
     const handle = document.querySelectorAll( `#${vidPlayerId}ResizeHandle`)[0]
 
     handle.addEventListener('mousedown', function (e) {
@@ -104,12 +138,10 @@ const createResizeSupport = () => {
     })
 
     function resize(e) {
+      const element = getResizableElement();
       const clientRect = element.getBoundingClientRect()
-      const width = Math.trunc(clientRect.width)
-      const height = Math.trunc(clientRect.height)
-      videoPlayerSizeInStorage.value = { width, height }
       element.style.width = e.pageX - clientRect.left + 'px'
-      emit('on-resize', width, height);
+      updateResizableInfo()
     }
 
     function stopResize() {
@@ -124,14 +156,15 @@ const createResizeSupport = () => {
 </script>
 
 <template>
-  <div :id="`${vidPlayerId}Container`" data-cy="videoPlayer"  :style="playerWidth ? `width: ${playerWidth}px;` : ''" class="videoPlayerContainer">
-    <div class="bg-white block" style="width: 3rem; height: 3rem">
-      <i class="fas fa-expand-alt fa-rotate-90 handle bg-white border-top-1"
+  <div :id="`${vidPlayerId}Container`" data-cy="videoPlayer"  :style="playerWidth ? `width: ${playerWidth}px;` : ''" class="videoPlayerContainer border-1 p-0 border-round-xs">
+      <i v-if="!isPlaying"
+         class="fas fa-expand-alt fa-rotate-90 handle border-1 border-500 p-1 bg-primary-reverse border-round"
          :id="`${vidPlayerId}ResizeHandle`"
          data-cy="videoResizeHandle"
-         aria-label="Resize video dimensions control"
+         aria-label="Resize video dimensions control. Press right or left to resize the video player."
+         @keyup.right="resizePlayerBigger"
+         @keyup.left="resizePlayerSmaller"
          tabindex="0"></i>
-    </div>
     <div class="absolute z-5 top-0 left-0 right-0 bottom-0 bg-gray-500 opacity-50 text-center flex align-items-center justify-content-center " v-if="isResizing && !isFirstLoad">
       <div class="absolute z-6 top-0 text-center bg-white mt-4" style="width: 100px;">
         {{ resolution }}
@@ -152,7 +185,6 @@ const createResizeSupport = () => {
 .videoPlayerContainer {
   //resize: horizontal;
   overflow: hidden;
-  border: 1px solid gray;
   max-width: 100%;
   min-width: 222px;
   position: relative;
@@ -160,7 +192,7 @@ const createResizeSupport = () => {
 
 .handle{
   font-size: 1.1rem;
-  right: 0px;
+  right: 3px;
   bottom: 0px;
   position: absolute;
   z-index: 500;
