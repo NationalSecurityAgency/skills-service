@@ -17,6 +17,7 @@ limitations under the License.
 import { onBeforeUnmount, onMounted, onUnmounted, ref, computed } from 'vue'
 import videojs from 'video.js';
 import WatchedSegmentsUtil from '@/common-components/video/WatchedSegmentsUtil';
+import {useStorage} from "@vueuse/core";
 
 const props = defineProps({
   options: Object,
@@ -39,46 +40,24 @@ const watchProgress = ref({
 const playerContainer = { player: null }
 const playerWidth = ref(null);
 const playerHeight = ref(null);
-const resolution = ref('');
+const resolution = computed(() => {
+  if (!videoPlayerSizeInStorage.value) {
+    return ''
+  }
+  return `${videoPlayerSizeInStorage.value.width} x ${videoPlayerSizeInStorage.value.height}`
+})
 const isResizing = ref(false);
 const resizeTimer = ref(null);
 const isFirstLoad = ref(true);
 
-const resizeObserver = new ResizeObserver((mutations) => {
-  if(resizeTimer.value) {
-    clearTimeout(resizeTimer.value);
-    resizeTimer.value = null;
-  }
-  isResizing.value = true;
-  resizeTimer.value = setTimeout(() => {
-    isResizing.value = false;
-    if(isFirstLoad.value) {
-      isFirstLoad.value = false;
-    }
-  }, 250);
-  const currentWidth = mutations[0].contentBoxSize[0].inlineSize;
-  const currentHeight = mutations[0].contentBoxSize[0].blockSize;
-  resolution.value = `${mutations[0].devicePixelContentBoxSize[0].inlineSize} x ${mutations[0].devicePixelContentBoxSize[0].blockSize}`;
-  if(!props.loadFromServer) {
-    if( currentHeight > 0 && currentWidth > 0 ) {
-      localStorage.setItem(`${vidPlayerId}-playerSize`, JSON.stringify({width: currentWidth, height: currentHeight}));
-    }
-  }
-  emit('on-resize', resolution.value, currentWidth, currentHeight);
-})
+const videoPlayerSizeInStorage = useStorage(`${vidPlayerId}-playerSize`, {})
+
 
 onMounted(() => {
   if(props.options.width && props.options.height) {
     playerWidth.value = props.options.width + 22;
     playerHeight.value = props.options.height + 22;
   }
-  const existingSize = localStorage.getItem(`${vidPlayerId}-playerSize`);
-  if (existingSize && !props.loadFromServer) {
-    const sizeObject = JSON.parse(existingSize);
-    playerWidth.value = sizeObject.width + 22;
-    playerHeight.value = sizeObject.height + 22;
-  }
-  resizeObserver.observe(document.getElementById('videoPlayerContainer'));
   const player = videojs(vidPlayerId, {
     playbackRates: [0.5, 1, 1.5, 2],
     enableSmoothSeeking: true,
@@ -96,6 +75,8 @@ onMounted(() => {
     });
     playerContainer.player = player
   });
+
+  createResizeSupport()
 })
 onBeforeUnmount(() => {
   if (playerContainer.player) {
@@ -110,34 +91,81 @@ const updateProgress = (currentTime) => {
   emit('watched-progress', watchProgress.value)
 }
 
+const createResizeSupport = () => {
+  function makeResizableDiv() {
+    const resizableDiv = `#${vidPlayerId}Container`
+    const element = document.querySelector(resizableDiv);
+    const handle = document.querySelectorAll( `#${vidPlayerId}ResizeHandle`)[0]
+
+    handle.addEventListener('mousedown', function (e) {
+      e.preventDefault()
+      window.addEventListener('mousemove', resize)
+      window.addEventListener('mouseup', stopResize)
+    })
+
+    function resize(e) {
+      const clientRect = element.getBoundingClientRect()
+      const width = Math.trunc(clientRect.width)
+      const height = Math.trunc(clientRect.height)
+      videoPlayerSizeInStorage.value = { width, height }
+      element.style.width = e.pageX - clientRect.left + 'px'
+      emit('on-resize', width, height);
+    }
+
+    function stopResize() {
+      window.removeEventListener('mousemove', resize)
+    }
+  }
+
+  makeResizableDiv()
+}
+
+
 </script>
 
 <template>
-    <div data-cy="videoPlayer" id="videoPlayerContainer" :style="playerWidth ? `width: ${playerWidth}px;` : ''">
-        <div class="absolute z-5 top-0 left-0 right-0 bottom-0 bg-gray-500 opacity-50 text-center flex align-items-center justify-content-center" v-if="isResizing && !isFirstLoad">
-          <div class="absolute z-6 top-0 text-center bg-white mt-4" style="width: 100px;">
-            {{ resolution }}
-          </div>
-        </div>
-        <video :id="vidPlayerId"
-               class="video-js vjs-fluid"
-               data-setup='{}'
-               responsive
-               controls>
-          <source :src="options.url" :type="options.videoType">
-          <track v-if="props.options.captionsUrl" :src="props.options.captionsUrl" kind="captions" srclang="en" label="English">
-        </video>
+  <div :id="`${vidPlayerId}Container`" data-cy="videoPlayer"  :style="playerWidth ? `width: ${playerWidth}px;` : ''" class="videoPlayerContainer">
+    <div class="bg-white block" style="width: 3rem; height: 3rem">
+      <i class="fas fa-expand-alt fa-rotate-90 handle bg-white border-top-1"
+         :id="`${vidPlayerId}ResizeHandle`"
+         data-cy="videoResizeHandle"
+         aria-label="Resize video dimensions control"
+         tabindex="0"></i>
     </div>
+    <div class="absolute z-5 top-0 left-0 right-0 bottom-0 bg-gray-500 opacity-50 text-center flex align-items-center justify-content-center " v-if="isResizing && !isFirstLoad">
+      <div class="absolute z-6 top-0 text-center bg-white mt-4" style="width: 100px;">
+        {{ resolution }}
+      </div>
+    </div>
+    <video :id="vidPlayerId"
+           class="video-js vjs-fluid"
+           data-setup='{}'
+           responsive
+           controls>
+      <source :src="options.url" :type="options.videoType">
+      <track v-if="props.options.captionsUrl" :src="props.options.captionsUrl" kind="captions" srclang="en" label="English">
+    </video>
+  </div>
 </template>
 
 <style scoped>
-#videoPlayerContainer {
-  resize: horizontal;
-  overflow: auto;
-  padding: 10px;
+.videoPlayerContainer {
+  //resize: horizontal;
+  overflow: hidden;
   border: 1px solid gray;
   max-width: 100%;
   min-width: 222px;
   position: relative;
 }
+
+.handle{
+  font-size: 1.1rem;
+  right: 0px;
+  bottom: 0px;
+  position: absolute;
+  z-index: 500;
+}
+
+
+
 </style>

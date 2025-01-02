@@ -78,8 +78,8 @@ const showSavedMsg = ref(false);
 const overallErrMsg = ref(null);
 const showFileUpload = ref(true);
 const savedAtLeastOnce = ref(false);
-const configuredResolution = ref(null);
 const configuredWidth = ref(null);
+const configuredResolution = computed(() => configuredWidth.value && configuredHeight.value ? configuredWidth.value + " x " + configuredHeight.value : 'Not Configured')
 const configuredHeight = ref(null);
 const computedVideoConf = computed(() => {
   const captionsUrl = videoConf.value.captions && videoConf.value.captions.trim().length > 0
@@ -272,7 +272,6 @@ const updateVideoSettings = (settingRes) => {
   videoConf.value.hostedFileName = settingRes.internallyHostedFileName;
   configuredWidth.value = settingRes.width
   configuredHeight.value = settingRes.height
-  configuredResolution.value = settingRes.width + " x " + settingRes.height;
   if (videoConf.value.url) {
     showFileUpload.value = videoConf.value.isInternallyHosted;
     savedAtLeastOnce.value = true;
@@ -386,11 +385,10 @@ const schema = yup.object().shape({
 const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ validationSchema: schema, })
 const hasBeenResized = ref(false);
 
-const videoResized = (resolution, width, height) => {
+const videoResized = (width, height) => {
   if(width !== configuredWidth.value && height !== configuredHeight.value) {
     hasBeenResized.value = true;
   }
-  configuredResolution.value = resolution;
   configuredWidth.value = width;
   configuredHeight.value = height;
 }
@@ -425,7 +423,6 @@ const videoResized = (resolution, width, height) => {
             </Message>
           </div>
 
-<!--          <div data-cy="videoInputFields" class="flex flex-column md:flex-row flex-wrap gap-2 mb-4">-->
           <div data-cy="videoInputFields" class="mb-4" :class="{'flex flex-column gap-2': responsive.md.value }">
             <div class="flex flex-column md:flex-row gap-2 md:mb-2">
               <div class="flex-1 align-content-end">
@@ -621,8 +618,8 @@ const videoResized = (resolution, width, height) => {
                   <div class="col"><span class="text-primary">{{ watchedProgress.currentPosition.toFixed(2) }}</span> <span class="font-italic">Seconds</span></div>
                 </div>
                 <div class="grid">
-                  <div class="col-6 lg:col-3 xl:col-2">Video Size:</div>
-                  <div class="col"><span class="text-primary">{{ configuredResolution }}</span></div>
+                  <div class="col-6 lg:col-3 xl:col-2">Default Video Size:</div>
+                  <div class="col"><span class="text-primary" data-cy="defaultVideoSize">{{ configuredResolution }}</span></div>
                 </div>
                 <div class="grid">
                   <div class="col-6 lg:col-3 xl:col-2">Watched Segments:</div>

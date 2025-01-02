@@ -236,4 +236,28 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
     });
 
+    it('resize video setting', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        const vid = { file: 'create-subject.webm', captions: 'cool caption', transcript: 'great' }
+        cy.saveVideoAttrs(1, 1, vid)
+        cy.visitVideoConfPage();
+
+        cy.wait(1000)
+        cy.get('[data-cy="defaultVideoSize"]').contains('Not Configured')
+        cy.get('[data-cy="videoResizeHandle"]').should('be.visible')
+            .trigger('mousedown', )
+            .trigger('mousemove', )
+            .trigger('mouseup', { force: true })
+        cy.get('[data-cy="defaultVideoSize"]').contains('707 x 537')
+
+
+        cy.get('[data-cy="videoResizeHandle"]').should('be.visible')
+            .trigger('mousedown', )
+            .trigger('mousemove', )
+            .trigger('mouseup', { force: true })
+        cy.get('[data-cy="defaultVideoSize"]').contains('697 x 530')
+
+    });
 });
