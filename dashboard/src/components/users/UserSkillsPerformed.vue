@@ -374,7 +374,7 @@ const selectedSkills = ref([]);
               </span>
             </div>
           </template>
-          <Column selectionMode="multiple" :class="{'flex': responsive.md.value }">
+          <Column selectionMode="multiple" :class="{'flex': responsive.md.value }" v-if="!projConfig.isReadOnlyProj">
             <template #header>
               <span class="mr-1 lg:mr-0 md:hidden">
                 <i class="fas fa-check-double" aria-hidden="true"></i> Select Skills:
