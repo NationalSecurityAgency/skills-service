@@ -330,6 +330,7 @@ const selectedSkills = ref([]);
               </div>
               <div class="flex">
                 <SkillsButton label="Delete Selected"
+                              v-if="!projConfig.isReadOnlyProj"
                               icon="fa fa-trash"
                               size="small"
                               outlined
@@ -338,6 +339,7 @@ const selectedSkills = ref([]);
                               aria-label="Remove selected performed skills from user"
                               data-cy="performedSkills-deleteSelected"/>
                 <SkillsButton label="Delete All"
+                              v-if="!projConfig.isReadOnlyProj"
                               icon="fa fa-trash"
                               size="small"
                               outlined
