@@ -396,10 +396,16 @@ describe('Approver Role Tests', () => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
             cy.visit(`/administrator/projects/proj${projNum}/users/user2/skillEvents`);
             cy.wait(`@getSettingsProj${projNum}`);
+
             cy.get('[data-cy="deleteEventBtn"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="performedSkills-deleteSelected"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="performedSkills-deleteAll"]').should(`${chainerPrepend}exist`)
+            cy.get('.p-selection-column').should(`${chainerPrepend}exist`)
+
         }
         runCheck(2)
         runCheck(1, 'View','not.')
+
     });
 
     it('/metrics page - approver role has no mutation controls', function () {
