@@ -771,8 +771,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     Long countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(String projectId, List<String> skillIds, String query, int minimumPoints)
 
     @Query(value = '''SELECT 
-                up.user_id as userId, 
-                max(upa.performedOn) as lastUpdated, 
+                up.user_id as userId,
+                max(upa.firstPerformedOn) as firstUpdated, 
+                max(upa.lastPerformedOn) as lastUpdated, 
                 sum(up.points) as totalPoints,
                 max(ua.first_name) as firstName,
                 max(ua.last_name) as lastName,
@@ -783,7 +784,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             FROM user_points up
             LEFT JOIN (
                 SELECT upa.user_id, 
-                max(upa.performed_on) AS performedOn 
+                min(upa.performed_on) AS firstPerformedOn,
+                max(upa.performed_on) AS lastPerformedOn 
                 FROM user_performed_skill upa 
                 WHERE upa.skill_ref_id in (
                     select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition sd where type = 'Skill' and sd.project_id = ?1 and sd.skill_id in (?3)
@@ -805,7 +807,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     @Query(value = '''SELECT 
                 up.user_id as userId, 
-                max(upa.performedOn) as lastUpdated, 
+                min(upa.firstPerformedOn) as firstUpdated,
+                max(upa.lastPerformedOn) as lastUpdated, 
                 sum(up.points) as totalPoints,
                 max(ua.first_name) as firstName,
                 max(ua.last_name) as lastName,
@@ -816,7 +819,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             FROM user_points up
             LEFT JOIN (
                 SELECT upa.user_id, 
-                max(upa.performed_on) AS performedOn 
+                min(upa.performed_on) AS firstPerformedOn,
+                max(upa.performed_on) AS lastPerformedOn 
                 FROM user_performed_skill upa 
                 WHERE upa.skill_ref_id in (
                     select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = ?1 and enabled = 'true'
@@ -856,7 +860,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         )
         SELECT 
             up.user_id as userId, 
-            max(upa.performedOn) as lastUpdated, 
+            min(upa.firstPerformedOn) as firstUpdated,
+            max(upa.lastPerformedOn) as lastUpdated, 
             sum(up.points) as totalPoints,
             max(ua.first_name) as firstName,
             max(ua.last_name) as lastName,
@@ -868,10 +873,24 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         FROM user_points up
         LEFT JOIN (
             SELECT upa.user_id, 
-            max(upa.performed_on) AS performedOn 
+            min(upa.performed_on) AS firstPerformedOn,
+            max(upa.performed_on) AS lastPerformedOn 
             FROM user_performed_skill upa 
             WHERE upa.skill_ref_id in (
-                select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = :projectId and exists (select 1 from subj_skills s_s where s_s.id = id)
+                select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition
+                where type = 'Skill' and project_id = :projectId and exists (select 1 from subj_skills s_s where s_s.id = id)
+            ) and upa.skill_id in (
+                select child.skill_id as id
+                from skill_definition parent,
+                     skill_relationship_definition rel,
+                     skill_definition child
+                where parent.project_id = :projectId
+                  and parent.skill_id = :subjectId
+                  and rel.parent_ref_id = parent.id
+                  and rel.child_ref_id = child.id
+                  and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+                  and child.type = 'Skill'
+                  and child.enabled = 'true'
             )
             GROUP BY upa.user_id
         ) upa ON upa.user_id = up.user_id

@@ -346,6 +346,14 @@ const archiveUsers = () => {
             </div>
           </template>
         </Column>
+        <Column field="firstUpdated" header="Points First Earned" :sortable="true" :class="{'flex': responsive.md.value }">
+          <template #header>
+            <i class="far fa-clock mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
+          </template>
+          <template #body="slotProps">
+            <date-cell :value="slotProps.data.firstUpdated" />
+          </template>
+        </Column>
         <Column field="lastUpdated" header="Points Last Earned" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="far fa-clock mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
