@@ -236,7 +236,7 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
     });
 
-    it.only('resize video setting', () => {
+    it('resize video setting', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
