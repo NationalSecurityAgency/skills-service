@@ -79,7 +79,8 @@ const overallErrMsg = ref(null);
 const showFileUpload = ref(true);
 const savedAtLeastOnce = ref(false);
 const configuredWidth = ref(null);
-const configuredResolution = computed(() => configuredWidth.value && configuredHeight.value ? configuredWidth.value + " x " + configuredHeight.value : 'Not Configured')
+const isConfiguredVideoSize = computed(() => configuredWidth.value && configuredHeight.value)
+const configuredResolution = computed(() => isConfiguredVideoSize.value ? configuredWidth.value + " x " + configuredHeight.value : 'Not Configured')
 const configuredHeight = ref(null);
 const computedVideoConf = computed(() => {
   const captionsUrl = videoConf.value.captions && videoConf.value.captions.trim().length > 0
@@ -210,6 +211,7 @@ const saveSettings = () => {
     updateVideoSettings(response.data);
     showSavedMsg.value = true;
     loading.value.video = false;
+    unsavedVideoSizeChanges.value = false;
     setTimeout(() => {
       showSavedMsg.value = false;
     }, 3500);
@@ -384,10 +386,12 @@ const schema = yup.object().shape({
 
 const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ validationSchema: schema, })
 const hasBeenResized = ref(false);
+const unsavedVideoSizeChanges = ref(false)
 
 const videoResized = (width, height) => {
   if(width !== configuredWidth.value && height !== configuredHeight.value) {
     hasBeenResized.value = true;
+    unsavedVideoSizeChanges.value = true;
   }
   configuredWidth.value = width;
   configuredHeight.value = height;
@@ -582,14 +586,15 @@ const videoResized = (width, height) => {
               <div class="border-1 surface-border border-round-top surface-100 p-3">Video Preview</div>
             </template>
             <template #content>
-              <VideoPlayer v-if="!refreshingPreview"
-                           :options="computedVideoConf"
-                           @player-destroyed="turnOffRefresh"
-                           @watched-progress="updatedWatchProgress"
-                           @on-resize="videoResized"
-                           :loadFromServer="true"
+              <VideoPlayer
+                  v-if="!refreshingPreview"
+                  :video-player-id="`videoConfigFor-${route.params.projectId}-${route.params.skillId}`"
+                  :options="computedVideoConf"
+                  @player-destroyed="turnOffRefresh"
+                  @watched-progress="updatedWatchProgress"
+                  @on-resize="videoResized"
+                  :loadFromServer="true"
               />
-
               <div v-if="watchedProgress" class="p-3 pt-4">
                 <Message v-if="!isDurationAvailable" severity="warn" icon="fas fa-exclamation-triangle" :closable="false" data-cy="noDurationWarning">
                   Browser cannot derive the duration of this video. Percentage will only be updated after the video is fully watched.
@@ -619,8 +624,8 @@ const videoResized = (width, height) => {
                 <div class="grid">
                   <div class="col-6 lg:col-3 xl:col-2">Default Video Size:</div>
                   <div class="col">
-                    <span class="text-primary" data-cy="defaultVideoSize">{{ configuredResolution }}</span>
-                    <div>** Change the size by dragging the handle at the bottom right of the video and click Save Changes button.</div>
+                    <span class="text-primary" data-cy="defaultVideoSize">{{ configuredResolution }}</span> <Tag v-if="unsavedVideoSizeChanges" severity="warning" data-cy="unsavedVideoSizeChanges"><i class="fas fa-exclamation-circle mr-1" aria-hidden="true"></i>Unsaved Changes</Tag>
+                    <div class="text-sm font-italic">** Change the size by dragging the handle at the bottom right of the video and click Save Changes button.</div>
                   </div>
                 </div>
                 <div class="grid">
@@ -636,7 +641,7 @@ const videoResized = (width, height) => {
                   </div>
                 </div>
 
-                <div v-if="!isReadOnly && hasBeenResized">
+                <div v-if="!isReadOnly && hasBeenResized" class="flex align-items-center">
                   <SkillsButton
                       severity="success"
                       class="mt-2"
@@ -648,7 +653,7 @@ const videoResized = (width, height) => {
                       @click="submitSaveSettingsForm"
                       icon="fas fa-save"
                       label="Save Changes" />
-                  <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-color-success" data-cy="savedMsg"><i class="fas fa-check" /> Saved</span>
+                  <InlineMessage v-if="showSavedMsg" aria-hidden="true" class="ml-3 text-color-success" data-cy="savedMsg" severity="success">Saved</InlineMessage>
                 </div>
               </div>
 
