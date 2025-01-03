@@ -169,7 +169,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity(body, HttpStatus.FORBIDDEN)
     }
 
-    @ExceptionHandler(AsyncRequestNotUsableException)
+    @Override
     protected ResponseEntity<Object> handleAsyncRequestNotUsableException(AsyncRequestNotUsableException ex, WebRequest request) {
         if (log.isTraceEnabled()) {
             log.trace("Received AsyncRequestNotUsableException", ex)
