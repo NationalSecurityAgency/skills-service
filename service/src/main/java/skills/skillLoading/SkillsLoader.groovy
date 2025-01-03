@@ -695,7 +695,9 @@ class SkillsLoader {
                     videoUrl: videoSummaryAttributes.url,
                     videoType: videoSummaryAttributes.type,
                     hasCaptions: videoSummaryAttributes.hasCaptions,
-                    hasTranscript: videoSummaryAttributes.hasTranscript
+                    hasTranscript: videoSummaryAttributes.hasTranscript,
+                    height: videoSummaryAttributes.height,
+                    width: videoSummaryAttributes.width
             )
         }
         return res

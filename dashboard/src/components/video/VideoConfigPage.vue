@@ -78,6 +78,10 @@ const showSavedMsg = ref(false);
 const overallErrMsg = ref(null);
 const showFileUpload = ref(true);
 const savedAtLeastOnce = ref(false);
+const configuredWidth = ref(null);
+const isConfiguredVideoSize = computed(() => configuredWidth.value && configuredHeight.value)
+const configuredResolution = computed(() => isConfiguredVideoSize.value ? configuredWidth.value + " x " + configuredHeight.value : 'Not Configured')
+const configuredHeight = ref(null);
 const computedVideoConf = computed(() => {
   const captionsUrl = videoConf.value.captions && videoConf.value.captions.trim().length > 0
       ? `/api/projects/${route.params.projectId}/skills/${route.params.skillId}/videoCaptions`
@@ -86,6 +90,8 @@ const computedVideoConf = computed(() => {
     url: videoConf.value.url,
     videoType: videoConf.value.videoType,
     captionsUrl,
+    width: configuredWidth.value,
+    height: configuredHeight.value,
   };
 });
 const lengthyOperationLoadingBarTimeout = computed(() => {
@@ -131,7 +137,7 @@ onMounted(() => {
 
 const setupPreview = () => {
   if (preview.value) {
-    refreshingPreview.value = true;
+    // refreshingPreview.value = true;
   } else {
     preview.value = true;
     announcer.polite('Opened video preview card below. Navigate down to it.');
@@ -194,6 +200,10 @@ const saveSettings = () => {
   if (videoConf.value.transcript) {
     data.append('transcript', videoConf.value.transcript);
   }
+  if (configuredWidth.value && configuredHeight.value) {
+    data.append('width', configuredWidth.value)
+    data.append('height', configuredHeight.value)
+  }
 
   const endpoint = `/admin/projects/${route.params.projectId}/skills/${route.params.skillId}/video`;
   FileUploadService.upload(endpoint, data, (response) => {
@@ -201,6 +211,7 @@ const saveSettings = () => {
     updateVideoSettings(response.data);
     showSavedMsg.value = true;
     loading.value.video = false;
+    unsavedVideoSizeChanges.value = false;
     setTimeout(() => {
       showSavedMsg.value = false;
     }, 3500);
@@ -261,6 +272,8 @@ const updateVideoSettings = (settingRes) => {
   videoConf.value.transcript = settingRes.transcript;
   videoConf.value.isInternallyHosted = settingRes.isInternallyHosted;
   videoConf.value.hostedFileName = settingRes.internallyHostedFileName;
+  configuredWidth.value = settingRes.width
+  configuredHeight.value = settingRes.height
   if (videoConf.value.url) {
     showFileUpload.value = videoConf.value.isInternallyHosted;
     savedAtLeastOnce.value = true;
@@ -268,6 +281,9 @@ const updateVideoSettings = (settingRes) => {
     showFileUpload.value = true;
   }
   setFieldValues();
+  if (videoConf.value.url && savedAtLeastOnce.value) {
+    setupPreview();
+  }
 }
 const setFieldValues = () => {
   resetForm({
@@ -369,6 +385,17 @@ const schema = yup.object().shape({
 })
 
 const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ validationSchema: schema, })
+const hasBeenResized = ref(false);
+const unsavedVideoSizeChanges = ref(false)
+
+const videoResized = (width, height) => {
+  if(width !== configuredWidth.value && height !== configuredHeight.value) {
+    hasBeenResized.value = true;
+    unsavedVideoSizeChanges.value = true;
+  }
+  configuredWidth.value = width;
+  configuredHeight.value = height;
+}
 </script>
 
 <template>
@@ -400,7 +427,6 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
             </Message>
           </div>
 
-<!--          <div data-cy="videoInputFields" class="flex flex-column md:flex-row flex-wrap gap-2 mb-4">-->
           <div data-cy="videoInputFields" class="mb-4" :class="{'flex flex-column gap-2': responsive.md.value }">
             <div class="flex flex-column md:flex-row gap-2 md:mb-2">
               <div class="flex-1 align-content-end">
@@ -560,12 +586,15 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
               <div class="border-1 surface-border border-round-top surface-100 p-3">Video Preview</div>
             </template>
             <template #content>
-              <VideoPlayer v-if="!refreshingPreview"
-                           :options="computedVideoConf"
-                           @player-destroyed="turnOffRefresh"
-                           @watched-progress="updatedWatchProgress"
+              <VideoPlayer
+                  v-if="!refreshingPreview"
+                  :video-player-id="`videoConfigFor-${route.params.projectId}-${route.params.skillId}`"
+                  :options="computedVideoConf"
+                  @player-destroyed="turnOffRefresh"
+                  @watched-progress="updatedWatchProgress"
+                  @on-resize="videoResized"
+                  :loadFromServer="true"
               />
-
               <div v-if="watchedProgress" class="p-3 pt-4">
                 <Message v-if="!isDurationAvailable" severity="warn" icon="fas fa-exclamation-triangle" :closable="false" data-cy="noDurationWarning">
                   Browser cannot derive the duration of this video. Percentage will only be updated after the video is fully watched.
@@ -593,6 +622,13 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
                   <div class="col"><span class="text-primary">{{ watchedProgress.currentPosition.toFixed(2) }}</span> <span class="font-italic">Seconds</span></div>
                 </div>
                 <div class="grid">
+                  <div class="col-6 lg:col-3 xl:col-2">Default Video Size:</div>
+                  <div class="col">
+                    <span class="text-primary" data-cy="defaultVideoSize">{{ configuredResolution }}</span> <Tag v-if="unsavedVideoSizeChanges" severity="warning" data-cy="unsavedVideoSizeChanges"><i class="fas fa-exclamation-circle mr-1" aria-hidden="true"></i>Unsaved Changes</Tag>
+                    <div class="text-sm font-italic">** Change the size by dragging the handle at the bottom right of the video and click Save Changes button.</div>
+                  </div>
+                </div>
+                <div class="grid">
                   <div class="col-6 lg:col-3 xl:col-2">Watched Segments:</div>
                   <div class="col">
                     <div v-if="watchedProgress.currentStart !== null && watchedProgress.lastKnownStopPosition"> <span class="text-primary">{{ watchedProgress.currentStart.toFixed(2) }}</span>
@@ -603,6 +639,21 @@ const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ va
                       <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/><span class="text-primary">{{ segment.stop.toFixed(2) }}</span> <span class="font-italic">Seconds</span>
                     </div>
                   </div>
+                </div>
+
+                <div v-if="!isReadOnly && hasBeenResized" class="flex align-items-center">
+                  <SkillsButton
+                      severity="success"
+                      class="mt-2"
+                      :class="{'w-full': responsive.md.value }"
+                      outlined
+                      :disabled="!hasVideoUrl || !meta.valid"
+                      data-cy="updateVideoSettings"
+                      aria-label="Save video settings"
+                      @click="submitSaveSettingsForm"
+                      icon="fas fa-save"
+                      label="Save Changes" />
+                  <InlineMessage v-if="showSavedMsg" aria-hidden="true" class="ml-3 text-color-success" data-cy="savedMsg" severity="success">Saved</InlineMessage>
                 </div>
               </div>
 

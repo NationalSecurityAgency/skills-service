@@ -21,6 +21,9 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.skill.UsagePostAchievementUsersBuilder
 
+import java.time.Instant
+import java.time.LocalDateTime
+
 class UsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
 
     @Autowired
@@ -37,31 +40,31 @@ class UsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
         skillsService.createSkill(skill)
 
         def users = getRandomUsers(7)
-        def date = new Date()
-        def dateFiveDaysAgo = new Date() - 5
+        Date date = Date.from(Instant.parse("2024-07-01T12:00:00.000Z"));
+        def dateFiveDaysAgo = date - 5
 
         // user 1 - achieved and used after
-        assert skillsService.addSkill(skill, users[0], new Date() - 4).body.skillApplied
-        assert skillsService.addSkill(skill, users[0], new Date() - 3).body.skillApplied
-        assert !skillsService.addSkill(skill, users[0], new Date()).body.skillApplied
+        assert skillsService.addSkill(skill, users[0], date - 4).body.skillApplied
+        assert skillsService.addSkill(skill, users[0], date - 3).body.skillApplied
+        assert !skillsService.addSkill(skill, users[0], date).body.skillApplied
 
         // user 2 - did not achieve
-        assert skillsService.addSkill(skill, users[1], new Date()).body.skillApplied
+        assert skillsService.addSkill(skill, users[1], date).body.skillApplied
 
         // user 3 - achieved but did not use after
-        assert skillsService.addSkill(skill, users[2], new Date() - 2).body.skillApplied
-        assert skillsService.addSkill(skill, users[2], new Date() - 1).body.skillApplied
+        assert skillsService.addSkill(skill, users[2], date - 2).body.skillApplied
+        assert skillsService.addSkill(skill, users[2], date - 1).body.skillApplied
 
         // user 4 - achieved and used after
-        assert skillsService.addSkill(skill, users[3], new Date() - 9).body.skillApplied
-        assert skillsService.addSkill(skill, users[3], new Date() - 8).body.skillApplied
-        assert !skillsService.addSkill(skill, users[3], new Date() - 7).body.skillApplied
-        assert !skillsService.addSkill(skill, users[3], new Date() - 6).body.skillApplied
-        assert !skillsService.addSkill(skill, users[3], new Date() - 5).body.skillApplied
+        assert skillsService.addSkill(skill, users[3], date - 9).body.skillApplied
+        assert skillsService.addSkill(skill, users[3], date - 8).body.skillApplied
+        assert !skillsService.addSkill(skill, users[3], date - 7).body.skillApplied
+        assert !skillsService.addSkill(skill, users[3], date - 6).body.skillApplied
+        assert !skillsService.addSkill(skill, users[3], date - 5).body.skillApplied
 
         // user 5 and 6 - did not achieve
-        assert skillsService.addSkill(skill, users[5], new Date()).body.skillApplied
-        assert skillsService.addSkill(skill, users[6], new Date()).body.skillApplied
+        assert skillsService.addSkill(skill, users[5], date).body.skillApplied
+        assert skillsService.addSkill(skill, users[6], date).body.skillApplied
 
         when:
         def props = ["skillId": skill.skillId, "page": 1, "pageSize": 5, "sortBy": "date", "sortDesc": true]

@@ -189,7 +189,7 @@ class PkiUserLookup {
             log.debug("X.509 client authentication certificate:${certs[0]}")
             return certs[0]
         }
-        log.error("No client certificate found in request [{}].", request.getRequestURI())
+        log.error("No client certificate found in request [{}].", request?.getRequestURI())
         return null
     }
 

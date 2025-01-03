@@ -73,6 +73,7 @@ const isMotivationalSkill = computed(() => props.skill && props.skill.isMotivati
 const isAlreadyAchieved = computed(() => {
   return props.skill.points > 0;
 });
+const isConfiguredVideoSize = computed(() => props.skill?.videoSummary?.width && props.skill?.videoSummary?.height)
 const videoConf = computed(() => {
   const captionsUrl = props.skill.videoSummary.hasCaptions
       ? `/api/projects/${props.skill.projectId}/skills/${props.skill.skillId}/videoCaptions`
@@ -82,6 +83,8 @@ const videoConf = computed(() => {
     url: props.skill.videoSummary.videoUrl,
     videoType: props.skill.videoSummary.videoType ? props.skill.videoSummary.videoType : null,
     captionsUrl,
+    width: props.skill.videoSummary.width,
+    height: props.skill.videoSummary.height,
   };
 });
 const isSelfReportTypeVideo = computed(() => {
@@ -194,7 +197,14 @@ const loadTranscript = () => {
       </div>
     </SkillsOverlay>
     <div v-if="!videoCollapsed && !isLocked">
-      <video-player :options="videoConf" @watched-progress="updateVideoProgress" />
+      <div class="flex justify-content-center">
+        <div :class="{ 'flex-1' : !isConfiguredVideoSize }">
+          <video-player :video-player-id="`skillVideoFor-${skill.projectId}-${skill.skillId}`"
+                        :options="videoConf"
+                        @watched-progress="updateVideoProgress"
+                        :storeAndRecoverSizeFromStorage="true" />
+        </div>
+      </div>
       <Message v-if="isSelfReportTypeVideo && isMotivationalSkill && skill.expirationDate">
         <template #container>
           <div class="flex gap-2 p-3 align-content-center">
@@ -245,11 +255,11 @@ const loadTranscript = () => {
           </div>
         </template>
       </Message>
-      <div v-if="skill.videoSummary.hasTranscript && (!isSelfReportTypeVideo || (isAlreadyAchieved && !justAchieved))" class="text-right">
+      <div v-if="skill.videoSummary.hasTranscript && (!isSelfReportTypeVideo || (isAlreadyAchieved && !justAchieved))" class="text-center">
         <SkillsSpinner :is-loading="transcript.loading" small />
         <SkillsButton style="text-decoration: underline; padding-right: 0.25rem; padding-left: 0.5rem;"
                       class="skills-theme-primary-color"
-                      label="View Transcript 2"
+                      label="View Transcript"
                       variant="link"
                       size="small"
                       text
