@@ -112,7 +112,7 @@ class SAML2IntegrationIT extends Specification{
         then: "The user is redirected to the SAML2 login page"
         initialResponse.statusCode == HttpStatus.FOUND
         String loginUrl = initialResponse.headers.getLocation().toString()
-        assert loginUrl.contains("/saml2/authenticate/keycloak")
+        assert loginUrl.contains("/saml2/authenticate?registrationId=keycloak")
 
         when: "Automated login is performed using Selenium WebDriver"
         String sessionCookie = getSessionCookieFromWebDriver(loginUrl, "test", "test")
