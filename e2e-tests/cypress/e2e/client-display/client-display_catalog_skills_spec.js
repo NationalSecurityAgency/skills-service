@@ -284,8 +284,10 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
             .should('be.enabled');
 
         cy.cdClickSkill(0);
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('pending approval');
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .should('contain.text', 'Approval Requested')
         cy.get('[data-cy="requestApprovalBtn"]')
             .should('not.exist');
     });
