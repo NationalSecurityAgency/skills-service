@@ -281,6 +281,9 @@ class SkillEventsTransactionalService {
         savePerformedSkill(performedSkill)
 
         res.pointsEarned = skillDefinition.pointIncrement
+        res.totalPointsEarned = ((int)numExistingSkills + 1) * skillDefinition.pointIncrement
+        res.totalPoints = skillDefinition.totalPoints
+        res.numOccurrencesToCompletion = (int)(skillDefinition.totalPoints / skillDefinition.pointIncrement)
 
         List<CompletionItem> achievements = pointsAndAchievementsHandler.updatePointsAndAchievements(userId, skillDefinition, skillDate)
         if (achievements) {
