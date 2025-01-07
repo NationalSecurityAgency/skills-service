@@ -72,7 +72,7 @@ describe('Grade Quizzes', () => {
         cy.createQuizDef(1);
         cy.createTextInputQuestionDef(1, 1)
 
-        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}], true, 'My Answer')
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}], true, '**My Answer**')
 
         cy.visit('/administrator/quizzes/quiz1/grading');
         cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled').click()
@@ -100,7 +100,8 @@ describe('Grade Quizzes', () => {
         cy.get('[data-cy="numQuestionsToPass"]').contains('1 / 1')
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
-        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="TextInputAnswer"]').contains('My Answer')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="TextInputAnswer"]').should('contain.text', 'My Answer')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="TextInputAnswer"]').should('not.contain.text', '**My Answer**')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]').should('not.exist')
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').contains(defaultUser)
