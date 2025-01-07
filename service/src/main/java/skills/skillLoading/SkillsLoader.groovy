@@ -62,7 +62,7 @@ import skills.utils.InputSanitizer
 import java.util.stream.Stream
 
 import static skills.services.LevelDefinitionStorageService.LevelInfo
-import static skills.storage.model.SkillDef.ContainerType
+import static skills.storage.model.SkillDef.*
 
 @Component
 @CompileStatic
@@ -170,6 +170,9 @@ class SkillsLoader {
 
     @Autowired
     TaskConfig taskConfig
+
+    @Autowired
+    ApprovalHistoryLoader approvalHistoryLoader
 
     private static String PROP_HELP_URL_ROOT = CommonSettings.HELP_URL_ROOT
 
@@ -646,6 +649,8 @@ class SkillsLoader {
 
         String unsanitizedName = InputSanitizer.unsanitizeName(skillDef.name)
         boolean isReusedSkill = SkillReuseIdUtil.isTagged(unsanitizedName)
+
+        List<ApprovalEvent> approvalHistory = approvalHistoryLoader.loadApprovalHistory(skillDef, userId, quizNameAndId)
         return new SkillSummary(
                 projectId: skillDef.projectId,
                 projectName: InputSanitizer.unsanitizeName(projDef.name),
@@ -681,7 +686,8 @@ class SkillsLoader {
                 mostRecentlyPerformedOn: mostRecentlyPerformedOn,
                 lastExpirationDate: lastExpirationDate,
                 groupName: groupName,
-                groupSkillId: skillDef.groupId
+                groupSkillId: skillDef.groupId,
+                approvalHistory: approvalHistory,
         )
     }
 

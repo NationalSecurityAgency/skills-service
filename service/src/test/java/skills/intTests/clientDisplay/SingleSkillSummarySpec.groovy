@@ -24,6 +24,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.skillLoading.ApprovalHistoryLoader
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.repos.SkillApprovalRepo
@@ -350,10 +351,43 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         approvals.totalCount == 1
         approvalsHistoryUser1.totalCount == 3
 
+        // latest event is loaded for selfReporting
         summary1.selfReporting.enabled
         !summary1.selfReporting.rejectionMsg
         summary1.selfReporting.requestedOn == dates[0].time
         !summary1.selfReporting.rejectedOn
+
+        // approvalHistory still loads the entire history
+        summary1.approvalHistory
+        summary1.approvalHistory.size() == 7
+        summary1.approvalHistory[0].eventStatus == ApprovalHistoryLoader.REQUESTED
+        summary1.approvalHistory[0].userId == users[0]
+        summary1.approvalHistory[0].eventTime == dates[0].time
+        summary1.approvalHistory[0].description == 'approve 3'
+
+        summary1.approvalHistory[1].eventStatus == ApprovalHistoryLoader.APPROVED
+        summary1.approvalHistory[1].userId == users[0]
+
+        summary1.approvalHistory[2].eventStatus == ApprovalHistoryLoader.REQUESTED
+        summary1.approvalHistory[2].userId == users[0]
+        summary1.approvalHistory[2].eventTime == dates[1].time
+        summary1.approvalHistory[2].description == 'approve 2'
+
+        summary1.approvalHistory[3].eventStatus == ApprovalHistoryLoader.REJECTED
+        summary1.approvalHistory[3].userId == users[0]
+
+        summary1.approvalHistory[4].eventStatus == ApprovalHistoryLoader.REQUESTED
+        summary1.approvalHistory[4].userId == users[0]
+        summary1.approvalHistory[4].eventTime == dates[2].time
+        summary1.approvalHistory[4].description == 'reject 1'
+
+        summary1.approvalHistory[5].eventStatus == ApprovalHistoryLoader.APPROVED
+        summary1.approvalHistory[5].userId == users[0]
+
+        summary1.approvalHistory[6].eventStatus == ApprovalHistoryLoader.REQUESTED
+        summary1.approvalHistory[6].userId == users[0]
+        summary1.approvalHistory[6].eventTime == dates[3].time
+        summary1.approvalHistory[6].description == 'approve 1'
     }
 
     def "when a self-reporting skill has a history of approvals only load the latest approval info - latest approval request was approved"() {
@@ -396,10 +430,46 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         then:
         approvalsHistoryUser1.totalCount == 4
 
+        // latest event is loaded for selfReporting
         summary1.selfReporting.enabled
         !summary1.selfReporting.rejectionMsg
         !summary1.selfReporting.requestedOn
         !summary1.selfReporting.rejectedOn
+
+        // approvalHistory still loads the entire history
+        summary1.approvalHistory
+        summary1.approvalHistory.size() == 8
+        summary1.approvalHistory[0].eventStatus == ApprovalHistoryLoader.APPROVED
+        summary1.approvalHistory[0].userId == users[0]
+
+        summary1.approvalHistory[1].eventStatus == ApprovalHistoryLoader.REQUESTED
+        summary1.approvalHistory[1].userId == users[0]
+        summary1.approvalHistory[1].eventTime == dates[0].time
+        summary1.approvalHistory[1].description == 'approve 3'
+
+        summary1.approvalHistory[2].eventStatus == ApprovalHistoryLoader.APPROVED
+        summary1.approvalHistory[2].userId == users[0]
+
+        summary1.approvalHistory[3].eventStatus == ApprovalHistoryLoader.REQUESTED
+        summary1.approvalHistory[3].userId == users[0]
+        summary1.approvalHistory[3].eventTime == dates[1].time
+        summary1.approvalHistory[3].description == 'approve 2'
+
+        summary1.approvalHistory[4].eventStatus == ApprovalHistoryLoader.REJECTED
+        summary1.approvalHistory[4].userId == users[0]
+
+        summary1.approvalHistory[5].eventStatus == ApprovalHistoryLoader.REQUESTED
+        summary1.approvalHistory[5].userId == users[0]
+        summary1.approvalHistory[5].eventTime == dates[2].time
+        summary1.approvalHistory[5].description == 'reject 1'
+
+        summary1.approvalHistory[6].eventStatus == ApprovalHistoryLoader.APPROVED
+        summary1.approvalHistory[6].userId == users[0]
+
+        summary1.approvalHistory[7].eventStatus == ApprovalHistoryLoader.REQUESTED
+        summary1.approvalHistory[7].userId == users[0]
+        summary1.approvalHistory[7].eventTime == dates[3].time
+        summary1.approvalHistory[7].description == 'approve 1'
     }
 
     def "user can remove approval rejection from their view"() {

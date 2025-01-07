@@ -298,7 +298,10 @@ describe('Client Display Self Report Skills Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
-        cy.get('[data-cy="pendingApprovalStatus"]').contains('pending approval')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .should('contain.text', 'Approval Requested')
 
         // approve and then visit page again
         cy.approveRequest();
@@ -308,8 +311,14 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.get('[data-cy="requestApprovalBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .should('not.exist');
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .should('contain.text', 'Approved')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .should('contain.text', 'Approval Requested')
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
         cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
@@ -355,12 +364,13 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
 
-        cy.get('[data-cy="pendingApprovalStatus"]').should('not.exist')
+        // cy.get('[data-cy="approvalHistoryTimeline"]').should('not.exist')
         cy.get('[data-cy="selfReportAlert"] [data-pc-section="closebutton"]').click()
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('pending approval');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Submitted a few seconds ago');
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .should('contain.text', 'Approval Requested')
+            .should('contain.text', 'a few seconds ago');
         cy.get('[data-cy="selfReportAlert"]').should('not.exist')
 
         // refresh the page and validate that submit button is disabled and approval status is still displayed
@@ -371,10 +381,11 @@ describe('Client Display Self Report Skills Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('ending approval');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Submitted a few seconds ago');
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .should('contain.text', 'Approval Requested')
+            .should('contain.text', 'a few seconds ago');
 
         // approve and then visit page again
         cy.approveRequest();
@@ -384,8 +395,15 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.get('[data-cy="requestApprovalBtn"]')
             .should('be.enabled');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .should('not.exist');
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .should('contain.text', 'Approved')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .should('contain.text', 'Approval Requested')
+
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
         cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')
@@ -408,10 +426,11 @@ describe('Client Display Self Report Skills Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('pending approval');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Submitted 5 days ago');
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .should('contain.text', 'Approval Requested')
+            .should('contain.text', '5 days ago');
     });
 
     it('self report - skill was submitted for approval - on subject page', () => {
@@ -562,10 +581,19 @@ describe('Client Display Self Report Skills Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('0');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('pending approval');
-        cy.get('[data-cy="pendingApprovalStatus"]')
-            .contains('Submitted a few seconds ago');
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .should('contain.text', 'Approval Requested')
+            .should('contain.text', 'a few seconds ago');
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .should('contain.text', 'Rejected')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(2)
+            .should('contain.text', 'Approval Requested')
     });
 
     it('self report - resubmit rejected skill - on subject page', () => {

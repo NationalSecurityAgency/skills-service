@@ -24,6 +24,8 @@ import JustificationInput from '@/skills-display/components/skill/JustificationI
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import QuizFooter from "@/skills-display/components/skill/QuizFooter.vue";
+import ApprovalHistory from '@/skills-display/components/skill/ApprovalHistory.vue';
+import QuizType from '@/skills-display/components/quiz/QuizType.js';
 
 const props = defineProps({
   skill: Object
@@ -48,10 +50,17 @@ const isCompleted = computed(() => skillInternal.value.points === skillInternal.
 const selfReportDisabled = computed(() => (isCompleted.value && !isMotivationalSkill.value) || isPendingApproval())
 const isHonorSystem = computed(() => skillInternal.value.selfReporting && skillInternal.value.selfReporting.type === 'HonorSystem')
 const isApprovalRequired = computed(() => skillInternal.value.selfReporting && skillInternal.value.selfReporting.type === 'Approval')
+const isQuizSkill = computed(() => skillInternal.value.selfReporting && QuizType.isQuiz(skillInternal.value.selfReporting.type))
 const isVideo = computed(() => skillInternal.value.selfReporting.type === 'Video')
 const isJustificationRequired = computed(() => skillInternal.value.selfReporting && skillInternal.value.selfReporting.justificationRequired)
 const isRejected = computed(() => skillInternal.value.selfReporting && skillInternal.value.selfReporting.rejectedOn !== null && skillInternal.value.selfReporting.rejectedOn !== undefined)
 const isMotivationalSkill = computed(() => skillInternal.value && skillInternal.value.isMotivationalSkill)
+const showTimeline = computed(() => {
+  if (skillInternal.value.approvalHistory && skillInternal.value.approvalHistory.length > 0) {
+    return isApprovalRequired.value || (isQuizSkill.value && skillInternal.value.approvalHistory > 1)
+  }
+  return false
+})
 
 const showApprovalJustification = ref(false)
 const requestApprovalLoading = ref(false)
@@ -123,7 +132,16 @@ const reportSkill = (approvalRequestedMsg) => {
         selfReport.value.msgHidden = false
         selfReport.value.res = res
         if (!isAlreadyPerformed() && isApprovalRequired.value) {
-          skillInternal.value.selfReporting.requestedOn = new Date()
+          const requestedOn = new Date()
+          skillInternal.value.selfReporting.requestedOn = requestedOn
+          if (skillInternal.value.approvalHistory) {
+            skillInternal.value.approvalHistory.unshift({
+              id: '-1',
+              eventTime : requestedOn.getTime(),
+              eventStatus: 'Approval Requested',
+              description: approvalRequestedMsg
+            })
+          }
         }
         updateEarnedPoints(res)
         if (res.explanation.includes('Skill Achievement retained')) {
@@ -312,10 +330,11 @@ defineExpose({
         </div>
       </template>
     </Message>
+
     <Message :closable="false"
              icon="far fa-clock"
              severity="warn"
-             v-if="isPendingApproval() && selfReport.msgHidden" class="mb-2 alert alert-info font-italic"
+             v-if="isPendingApproval() && !showTimeline && selfReport.msgHidden" class="mb-2 alert alert-info font-italic"
              data-cy="pendingApprovalStatus">
       This skill is <span class="font-size-1 normal-font">pending approval</span>.
       Submitted {{ timeUtils.relativeTime(skillInternal.selfReporting.requestedOn) }}
@@ -390,6 +409,8 @@ defineExpose({
         </div>
       </div>
     </div>
+
+    <ApprovalHistory v-if="showTimeline" :events="skillInternal.approvalHistory" />
 
     <div class=" pt-2">
         <div class="btn-group" role="group" aria-label="Skills Buttons">
