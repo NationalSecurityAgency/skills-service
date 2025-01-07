@@ -57,7 +57,7 @@ const isRejected = computed(() => skillInternal.value.selfReporting && skillInte
 const isMotivationalSkill = computed(() => skillInternal.value && skillInternal.value.isMotivationalSkill)
 const showTimeline = computed(() => {
   if (skillInternal.value.approvalHistory && skillInternal.value.approvalHistory.length > 0) {
-    return isApprovalRequired.value || (isQuizSkill.value && skillInternal.value.approvalHistory > 1)
+    return isApprovalRequired.value || (isQuizSkill.value && skillInternal.value.approvalHistory.length > 1)
   }
   return false
 })
