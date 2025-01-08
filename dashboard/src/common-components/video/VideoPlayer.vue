@@ -54,10 +54,10 @@ const playerWidth = ref(null);
 const playerHeight = ref(null);
 const isConfiguredVideoSize = computed(() => playerWidth.value && playerHeight.value)
 const resolution = computed(() => {
-  if (!videoPlayerSizeInStorage?.value) {
+  if (!playerWidth?.value || !playerHeight?.value) {
     return ''
   }
-  return `${videoPlayerSizeInStorage.value.width} x ${videoPlayerSizeInStorage.value.height}`
+  return `${playerWidth.value} x ${playerHeight.value}`
 })
 const isResizing = ref(false);
 
@@ -167,6 +167,9 @@ const createResizeSupport = () => {
     function stopResize() {
       window.removeEventListener('mousemove', resize)
       isResizing.value = false
+      if (playerWidth.value && playerHeight.value) {
+        announcer.polite(`Resized the video player to ${playerWidth.value} x ${playerHeight.value}`)
+      }
     }
   }
 
@@ -193,7 +196,7 @@ const createResizeSupport = () => {
     <div v-if="isResizing" class="text-center flex align-items-center justify-content-center ">
       <div class="absolute z-4 top-0 left-0 right-0 bottom-0 bg-gray-600 opacity-50 text-center flex align-items-center justify-content-center " >
       </div>
-      <div class="absolute top-0 z-5 text-center bg-white mt-5 border-1 border-round" style="width: 100px;">
+      <div class="absolute top-0 z-5 text-center bg-primary-reverse mt-5 border-1 border-round" style="width: 100px;">
         {{ resolution }}
       </div>
     </div>
