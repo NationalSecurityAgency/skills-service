@@ -238,7 +238,7 @@ export const useTranscriptPdfExport = () => {
       pdfHelper.addTitle(doc, overallStats, 'Progress Snapshot', 165)
     }
 
-    const addStat = (label, icon, x, num, totalNum = null) => {
+    const addStat = (label, icon, x, num, totalNum = null, endingText = null) => {
       const currentY = doc.y
       return doc.struct('Div', { title: `${label} stat` }, [
         doc.struct('Span', { alt: `${label} stat icon` }, () => {
@@ -247,18 +247,23 @@ export const useTranscriptPdfExport = () => {
         doc.struct('Span', () => {
           doc.text(`${label}: `, x + 20, currentY, { continued: true })
             .fillColor(pdfHelper.arrowColor5).fontSize(13)
-            .text(`${numFormat.pretty(num)} `, { continued: totalNum !== null })
+            .text(`${numFormat.pretty(num)} `, { continued: totalNum !== null || endingText !== null })
           pdfHelper.resetTextStyle(doc)
           if (totalNum !== null) {
-            doc.text(`/ ${numFormat.pretty(totalNum)} `, {})
+            doc.text(`/ ${numFormat.pretty(totalNum)} `, { continued: endingText !== null })
+          }
+          if (endingText !== null) {
+            doc.text(`${endingText}`, {})
           }
         })
       ])
     }
     overallStats.add(addStat(labelsConf.level, base64Images.trophy, 50, info.userLevel, info.totalLevels))
     doc.moveUp()
-    overallStats.add(addStat(`${labelsConf.skill}s`, base64Images.arrowUp, 300, info.userSkillsCompleted, info.totalSkills))
-    overallStats.add(addStat(`${labelsConf.point}s`, base64Images.hat, 50, info.userPoints, info.totalPoints))
+    const skillsPercentage = ((info.userSkillsCompleted / info.totalSkills) * 100).toFixed(1)
+    const pointsPercentage = ((info.userPoints / info.totalPoints) * 100).toFixed(1)
+    overallStats.add(addStat(`${labelsConf.skill}s`, base64Images.arrowUp, 300, info.userSkillsCompleted, info.totalSkills, `(${skillsPercentage}%)`))
+    overallStats.add(addStat(`${labelsConf.point}s`, base64Images.hat, 50, info.userPoints, info.totalPoints, `(${pointsPercentage}%)`))
     if (info.achievedBadges && info.achievedBadges.length > 0) {
       doc.moveUp()
       overallStats.add(addStat(`${labelsConf.badge}s`, base64Images.badge, 300, info.achievedBadges.length))
