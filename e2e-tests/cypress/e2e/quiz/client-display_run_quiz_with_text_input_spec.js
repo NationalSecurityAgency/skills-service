@@ -62,6 +62,7 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="quizRequiresGradingMsg"]')
         cy.get('[data-cy="takeQuizMsg"]').should('not.exist')
         cy.get('[data-cy="takeQuizBtn"]').should('not.exist')
+        cy.get('[data-cy="approvalHistoryTimeline"]').should('not.exist')
     });
 
     it('run quiz with multiple questions where 1 is text input', () => {
@@ -100,6 +101,7 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="quizRequiresGradingMsg"]')
         cy.get('[data-cy="takeQuizMsg"]').should('not.exist')
         cy.get('[data-cy="takeQuizBtn"]').should('not.exist')
+        cy.get('[data-cy="approvalHistoryTimeline"]').should('not.exist')
     });
 
     it('run quiz with multiple questions and multiple Text Input questions', () => {
@@ -142,6 +144,7 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="quizRequiresGradingMsg"]')
         cy.get('[data-cy="takeQuizMsg"]').should('not.exist')
         cy.get('[data-cy="takeQuizBtn"]').should('not.exist')
+        cy.get('[data-cy="approvalHistoryTimeline"]').should('not.exist')
     });
 
     it('show input text needs grading when quizAlwaysShowCorrectAnswers property is enabled', () => {
@@ -203,6 +206,7 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="quizRequiresGradingMsg"]')
         cy.get('[data-cy="takeQuizMsg"]').should('not.exist')
         cy.get('[data-cy="takeQuizBtn"]').should('not.exist')
+        cy.get('[data-cy="approvalHistoryTimeline"]').should('not.exist')
     });
 
     it('cannot start previously taken quiz that needs grading', () => {
@@ -279,6 +283,16 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
+
+        cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .should('contain.text', 'Awaiting Grading')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .should('contain.text', 'Passed')
     });
 
     it('Input Text validation: max num chars', () => {

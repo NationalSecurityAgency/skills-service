@@ -404,6 +404,16 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Used 2 out of 3 attempts')
 
         cy.get('[data-cy="quizRunQuestions"]').should('not.exist')
+
+        cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .should('contain.text', 'Failed')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .should('contain.text', 'Failed')
     });
 
     it('passed quiz cannot be attempted again', () => {
@@ -751,6 +761,20 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+
+        cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .should('contain.text', 'Passed')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .should('contain.text', 'Passed')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(2)
+            .should('contain.text', 'Failed')
     });
 
     it('quiz attached to skill expiring in a day can be retaken', () => {

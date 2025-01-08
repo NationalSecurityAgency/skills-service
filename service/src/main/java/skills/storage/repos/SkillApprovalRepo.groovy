@@ -316,6 +316,29 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             )''')
     List<SkillApproval> findApprovalForSkillsDisplay(String userId, String projectId, Integer skillRefId, Pageable pageable)
 
+    @Nullable
+    @Query('''
+        SELECT
+            s.id as approvalId,
+            s.userId as userId,
+            uAttrs.userIdForDisplay as userIdForDisplay,
+            approverUAttrs.userId as approverUserId,
+            approverUAttrs.userIdForDisplay as approverUserIdForDisplay,
+            s.requestedOn as requestedOn,
+            s.approverActionTakenOn as approverActionTakenOn,
+            s.rejectedOn as rejectedOn,
+            s.requestMsg as requestMsg,
+            s.rejectionMsg as rejectionMsg
+        FROM SkillApproval s
+            JOIN UserAttrs uAttrs on uAttrs.userId = s.userId
+            LEFT OUTER JOIN UserAttrs approverUAttrs on approverUAttrs.userId = s.approverUserId
+        WHERE s.userId = ?1 and 
+            s.projectId = ?2 and 
+            s.skillRefId = ?3
+        ORDER BY s.requestedOn DESC
+            ''')
+    List<SimpleSkillApproval> findApprovalHistoryForSkillsDisplay(String userId, String projectId, Integer skillRefId)
+
     interface SkillApprovalPlusSkillId {
         SkillApproval getSkillApproval()
         String getSkillId()
