@@ -23,6 +23,7 @@ import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
+import skills.skillLoading.ApprovalHistoryLoader
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPerformedSkill
@@ -386,6 +387,15 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
         skillRes.points == 200
 
+        skillRes.approvalHistory
+        skillRes.approvalHistory.size() == 3
+        skillRes.approvalHistory[0].eventStatus == ApprovalHistoryLoader.PASSED
+        skillRes.approvalHistory[0].userId == skillsService.userName
+        skillRes.approvalHistory[1].eventStatus == ApprovalHistoryLoader.PASSED
+        skillRes.approvalHistory[1].userId == skillsService.userName
+        skillRes.approvalHistory[2].eventStatus == ApprovalHistoryLoader.PASSED
+        skillRes.approvalHistory[2].userId == skillsService.userName
+
         allPoints.size() == 3
         allPoints.find { it.skillId == skillWithQuiz.skillId }.points == 200
         allPoints.find { it.skillId == subj.subjectId }.points == 200
@@ -435,6 +445,16 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         then:
         def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
         skillRes.points == 200
+
+        skillRes.approvalHistory
+        skillRes.approvalHistory.size() == 3
+        skillRes.approvalHistory[0].eventStatus == ApprovalHistoryLoader.PASSED
+        skillRes.approvalHistory[0].userId == skillsService.userName
+        skillRes.approvalHistory[1].eventStatus == ApprovalHistoryLoader.FAILED
+        skillRes.approvalHistory[1].userId == skillsService.userName
+        skillRes.approvalHistory[2].eventStatus == ApprovalHistoryLoader.FAILED
+        skillRes.approvalHistory[2].userId == skillsService.userName
+
 
         allPoints.size() == 3
         allPoints.find { it.skillId == skillWithQuiz.skillId }.points == 200
@@ -486,6 +506,15 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
         skillRes.points == 0
 
+        skillRes.approvalHistory
+        skillRes.approvalHistory.size() == 3
+        skillRes.approvalHistory[0].eventStatus == ApprovalHistoryLoader.FAILED
+        skillRes.approvalHistory[0].userId == skillsService.userName
+        skillRes.approvalHistory[1].eventStatus == ApprovalHistoryLoader.PASSED
+        skillRes.approvalHistory[1].userId == skillsService.userName
+        skillRes.approvalHistory[2].eventStatus == ApprovalHistoryLoader.PASSED
+        skillRes.approvalHistory[2].userId == skillsService.userName
+
         allPoints.size() == 0
         achievements.size() == 0
         performedSkills.size() == 0
@@ -527,6 +556,15 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
         skillRes.points == 0
 
+        skillRes.approvalHistory
+        skillRes.approvalHistory.size() == 3
+        skillRes.approvalHistory[0].eventStatus == ApprovalHistoryLoader.FAILED
+        skillRes.approvalHistory[0].userId == skillsService.userName
+        skillRes.approvalHistory[1].eventStatus == ApprovalHistoryLoader.FAILED
+        skillRes.approvalHistory[1].userId == skillsService.userName
+        skillRes.approvalHistory[2].eventStatus == ApprovalHistoryLoader.FAILED
+        skillRes.approvalHistory[2].userId == skillsService.userName
+
         allPoints.size() == 0
         achievements.size() == 0
         performedSkills.size() == 0
@@ -567,6 +605,14 @@ class QuizApi_QuizAttemptsSpecs extends DefaultIntSpec {
         then:
         def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
         skillRes.points == 200
+        skillRes.approvalHistory
+        skillRes.approvalHistory.size() == 3
+        skillRes.approvalHistory[0].eventStatus == ApprovalHistoryLoader.COMPLETED
+        skillRes.approvalHistory[0].userId == skillsService.userName
+        skillRes.approvalHistory[1].eventStatus == ApprovalHistoryLoader.COMPLETED
+        skillRes.approvalHistory[1].userId == skillsService.userName
+        skillRes.approvalHistory[2].eventStatus == ApprovalHistoryLoader.COMPLETED
+        skillRes.approvalHistory[2].userId == skillsService.userName
 
         allPoints.size() == 3
         allPoints.find { it.skillId == skillWithQuiz.skillId }.points == 200
