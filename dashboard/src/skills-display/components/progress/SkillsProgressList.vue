@@ -15,7 +15,6 @@ limitations under the License.
 */
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import {useStorage} from "@vueuse/core";
 import SkillProgress from '@/skills-display/components/progress/SkillProgress.vue'
 import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
@@ -216,7 +215,20 @@ const isLastViewedScrollSupported = computed(() => {
   return !parentFrame.parentFrame || parentFrame.isLastViewedScrollSupported
 })
 
-const expandGroups = useStorage(`client-groups-expanded`, true)
+const expandGroups = ref(null)
+const hasGroups = computed(() => {
+  return !!skillsInternal.value.find(it => it.type === 'SkillsGroup')
+})
+
+const expandAllGroups = (() => {
+  expandGroups.value = true
+})
+const collapseAllGroups = (() => {
+  expandGroups.value = false
+})
+const resetGroupExpansion = (() => {
+  expandGroups.value = null
+})
 </script>
 
 <template>
@@ -272,12 +284,9 @@ const expandGroups = useStorage(`client-groups-expanded`, true)
 
           <div class="" data-cy="skillDetailsToggle">
             <div class="flex flex-row flex-wrap align-content-center">
-              <div class="flex mr-3">
-                <span class="text-muted pr-1 align-content-center" v-if="!route.params.badgeId">Expand Groups:</span>
-                <InputSwitch v-model="expandGroups"
-                             v-if="!route.params.badgeId"
-                             aria-label="Expand Groups"
-                             data-cy="expandGroupsSwitch" />
+              <div class="flex flex-wrap mr-3 gap-2" v-if="!route.params.badgeId && hasGroups">
+                <SkillsButton label="Expand Groups" icon="fas fa-plus" size="small" data-cy="expandGroupsButton" @click="expandAllGroups"></SkillsButton>
+                <SkillsButton label="Collapse Groups" icon="fas fa-minus" size="small" data-cy="collapseGroupsButton" @click="collapseAllGroups"></SkillsButton>
               </div>
               <div class="flex">
                 <span class="text-muted pr-1 align-content-center">{{ attributes.skillDisplayName }} Details:</span>
@@ -333,6 +342,7 @@ const expandGroups = useStorage(`client-groups-expanded`, true)
               :skill="skill"
               :type="type"
               :expand-groups="expandGroups"
+              @reset-group-expansion="resetGroupExpansion"
               :enable-drill-down="true"
               :show-description="showDescriptionsInternal"
               :data-cy="`skillProgress_index-${index}`"

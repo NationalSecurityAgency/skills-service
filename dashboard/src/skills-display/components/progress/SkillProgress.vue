@@ -29,6 +29,8 @@ import CatalogImportStatus from '@/skills-display/components/progress/CatalogImp
 import PartialPointsAlert from '@/skills-display/components/skill/PartialPointsAlert.vue'
 import SkillVideo from '@/skills-display/components/progress/SkillVideo.vue';
 import dayjs from 'dayjs';
+import {useStorage} from "@vueuse/core";
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
 const props = defineProps({
   skill: Object,
@@ -72,8 +74,9 @@ const props = defineProps({
     required: false
   }
 })
-const emit = defineEmits(['add-tag-filter', 'points-earned'])
+const emit = defineEmits(['add-tag-filter', 'points-earned', 'reset-group-expansion'])
 const route = useRoute()
+const announcer = useSkillsAnnouncer()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const attributes = useSkillsDisplayAttributesState()
 
@@ -125,17 +128,16 @@ const pointsEarned = (pts) => {
 }
 
 const isSkillComplete = computed(() => props.skill && props.skill.meta && props.skill.meta.complete)
-const expanded = ref(null);
+const storageKey = computed(() => props.skill.projectId + '-' + props.skill.skillId + '-expanded')
+const expanded = useStorage(storageKey.value, true)
 const toggleRow = () => {
   expanded.value = !expanded.value;
+  announcer.polite(`Group ${props.skill.skill} has been ${expanded.value ? 'expanded' : 'collapsed'}`);
+  emit('reset-group-expansion')
 }
 watch(() => props.expandGroups, (newValue) => {
-  expanded.value = newValue
-})
-
-onMounted(() => {
-  if(props.expandGroups) {
-    expanded.value = props.expandGroups
+  if(newValue !== null && props.skill.type === 'SkillsGroup') {
+    expanded.value = newValue
   }
 })
 </script>

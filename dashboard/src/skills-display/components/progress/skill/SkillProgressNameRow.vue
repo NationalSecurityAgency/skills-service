@@ -156,8 +156,8 @@ const skillId = computed(() => {
                     v-if="skill.isSkillsGroupType"
                     outlined
                     :aria-label="!isExpanded ? 'Expand Group' : 'Collapse Group'"
-                    text
-                    class="p-1"
+                    style="padding: 0.3rem 0.3rem 0.3rem 0.1rem;"
+                    class="ml-2"
                     :data-cy="`toggleGroup-${skillId}`"
                     @click="emit('toggle-row')">
             </SkillsButton>

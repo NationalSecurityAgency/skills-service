@@ -406,15 +406,12 @@ describe('Client Display Tests', () => {
         cy.cdVisit('/', true);
         cy.cdClickSubj(1, 'Subject 2', false);
 
-        cy.get('[data-cy=expandGroupsSwitch] input').should('be.checked')
         checkGroupSkillExistence(true)
 
-        cy.get('[data-cy=expandGroupsSwitch]').click()
-        cy.get('[data-cy=expandGroupsSwitch] input').should('not.be.checked')
+        cy.get('[data-cy=collapseGroupsButton]').click()
         checkGroupSkillExistence(false)
 
-        cy.get('[data-cy=expandGroupsSwitch]').click()
-        cy.get('[data-cy=expandGroupsSwitch] input').should('be.checked')
+        cy.get('[data-cy=expandGroupsButton]').click()
         checkGroupSkillExistence(true)
 
         cy.get('[data-cy="toggleGroup-group1Subj2"]').click()
@@ -451,26 +448,50 @@ describe('Client Display Tests', () => {
 
         cy.cdVisit('/subjects/subj2');
 
-        cy.get('[data-cy=expandGroupsSwitch] input').should('be.checked')
         checkGroupSkillExistence(true)
 
-        cy.get('[data-cy=expandGroupsSwitch]').click()
-        cy.get('[data-cy=expandGroupsSwitch] input').should('not.be.checked')
+        cy.get('[data-cy=collapseGroupsButton]').click()
         checkGroupSkillExistence(false)
 
         cy.cdVisit('/subjects/subj2');
-        cy.get('[data-cy=expandGroupsSwitch] input').should('not.be.checked')
         checkGroupSkillExistence(false)
 
-        cy.cdVisit('/subjects/subj1');
-        cy.get('[data-cy=expandGroupsSwitch] input').should('not.be.checked')
-
-        cy.get('[data-cy=expandGroupsSwitch]').click()
-        cy.get('[data-cy=expandGroupsSwitch] input').should('be.checked')
+        cy.get('[data-cy=expandGroupsButton]').click()
 
         cy.cdVisit('/subjects/subj2');
-        cy.get('[data-cy=expandGroupsSwitch] input').should('be.checked')
         checkGroupSkillExistence(true)
+
+        cy.get('[data-cy="toggleGroup-group1Subj2"]').click()
+        cy.get('#skillProgressTitleLink-skill11Subj2').should('not.exist');
+        cy.get('#skillProgressTitleLink-skill12Subj2').should('not.exist');
+        cy.get('#skillProgressTitleLink-skill13Subj2').should('not.exist');
+        cy.get('#skillProgressTitleLink-skill22Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill23Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill24Subj2').should('exist');
+
+        cy.cdVisit('/subjects/subj2');
+        cy.get('#skillProgressTitleLink-skill11Subj2').should('not.exist');
+        cy.get('#skillProgressTitleLink-skill12Subj2').should('not.exist');
+        cy.get('#skillProgressTitleLink-skill13Subj2').should('not.exist');
+        cy.get('#skillProgressTitleLink-skill22Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill23Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill24Subj2').should('exist');
+
+        cy.get('[data-cy="toggleGroup-group1Subj2"]').click()
+        cy.get('#skillProgressTitleLink-skill11Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill12Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill13Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill22Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill23Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill24Subj2').should('exist');
+
+        cy.cdVisit('/subjects/subj2');
+        cy.get('#skillProgressTitleLink-skill11Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill12Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill13Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill22Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill23Subj2').should('exist');
+        cy.get('#skillProgressTitleLink-skill24Subj2').should('exist');
     });
 
     const checkGroupSkillExistence = (exists) => {
