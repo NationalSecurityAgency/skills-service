@@ -84,7 +84,7 @@ class ApprovalHistoryLoader {
                             approverUserId: skillApproval.approverUserId,
                             approverUserIdForDisplay: skillApproval.approverUserIdForDisplay,
                             eventTime: skillApproval.approverActionTakenOn?.time,
-//                            description: skillApproval.approvalMsg,
+                            description: skillApproval.message,
                     ))
                     approvalHistory.add(new ApprovalEvent(
                             id: "${skillApproval.approvalId}-${index}",

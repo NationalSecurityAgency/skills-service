@@ -88,7 +88,7 @@ class SkillApprovalHistorySpecs extends DefaultIntSpec {
         when:
         def approvals1 = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
         def approvalsHistory1 = skillsService.getApprovalsHistory(proj.projectId, 7, 1, 'requestedOn', false)
-        skillsService.approve(proj.projectId, [approvals1.data[0].id, approvals1.data[2].id])
+        skillsService.approve(proj.projectId, [approvals1.data[0].id, approvals1.data[2].id], 'This is an approval message 1')
         skillsService.rejectSkillApprovals(proj.projectId, [approvals1.data[4].id], 'This is a rejection message')
 
         def approvals2 = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
@@ -123,7 +123,7 @@ class SkillApprovalHistorySpecs extends DefaultIntSpec {
         approvalsHistory2.data[0].requestMsg == "Please approve this 0!"
         approvalsHistory2.data[0].approverActionTakenOn
         !approvalsHistory2.data[0].rejectedOn
-        !approvalsHistory2.data[0].message
+        approvalsHistory2.data[0].message == 'This is an approval message 1'
         approvalsHistory2.data[0].approverUserId == skillsService.userName
         approvalsHistory2.data[0].approverUserIdForDisplay == getUserIdForDisplay(skillsService.userName)
 
@@ -138,7 +138,7 @@ class SkillApprovalHistorySpecs extends DefaultIntSpec {
         approvalsHistory2.data[1].requestMsg == "Please approve this 2!"
         approvalsHistory2.data[1].approverActionTakenOn
         !approvalsHistory2.data[1].rejectedOn
-        !approvalsHistory2.data[1].message
+        approvalsHistory2.data[1].message == 'This is an approval message 1'
         approvalsHistory2.data[1].approverUserId == skillsService.userName
         approvalsHistory2.data[1].approverUserIdForDisplay == getUserIdForDisplay(skillsService.userName)
 

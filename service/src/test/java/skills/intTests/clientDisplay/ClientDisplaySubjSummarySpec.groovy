@@ -791,7 +791,7 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
 
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[0], "approve 3")
         approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
-        skillsService.approve(proj.projectId, approvals.data.collect { it.id })
+        skillsService.approve(proj.projectId, approvals.data.collect { it.id }, 'approval message!')
 
         def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '',  '', '')
         def res1 = skillsService.getSkillSummary(users[0], proj.projectId, subj.subjectId).skills.sort { it.skillId }
@@ -802,7 +802,7 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         res1.size() == 4
         res1.get(0).skillId == skills[0].skillId
         res1.get(0).selfReporting.enabled
-        !res1.get(0).selfReporting.message
+        res1.get(0).selfReporting.message == 'approval message!'
         !res1.get(0).selfReporting.rejectedOn
 
         res1.get(1).skillId == skills[1].skillId

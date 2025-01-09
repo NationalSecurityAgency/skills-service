@@ -628,8 +628,8 @@ class SkillsService {
     }
 
 
-    def approve(String projectId, List<Integer> approvalId) {
-        return wsHelper.adminPost("/projects/${projectId}/approvals/approve", [skillApprovalIds: approvalId])
+    def approve(String projectId, List<Integer> approvalId, String msg = null) {
+        return wsHelper.adminPost("/projects/${projectId}/approvals/approve", [skillApprovalIds: approvalId, approvalMessage: msg])
     }
 
     def configureApproverForUser(String projectId, String approverUserId, String userId) {

@@ -295,7 +295,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         }
     }
 
-    void "approval message is optional"() {
+    void "request message is optional"() {
         String user = "user0"
         String user1 = "user1"
 
@@ -360,6 +360,38 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         !approvalsAfterRejection.get(1).message
     }
 
+    void "approval message is optional"() {
+        String user = "user0"
+        String user1 = "user1"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def res1 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user1, date)
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+
+        List approvals = approvalsEndpointRes.data.sort({ it.userId })
+
+        when:
+        skillsService.approve(proj.projectId, [approvals[0].id], 'Just felt like approving it')
+        skillsService.rejectSkillApprovals(proj.projectId, [approvals[1].id])
+
+        List<SkillApproval> approvalsAfterRejection = skillApprovalRepo.findAll().sort { it.userId}
+        then:
+        approvalsAfterRejection.get(0).message == "Just felt like approving it"
+        !approvalsAfterRejection.get(1).message
+    }
+
     void "ignore ids that do not exist during approval or rejection"() {
         String user = "user0"
         String user1 = "user1"
@@ -412,6 +444,36 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         SkillsClientException e = thrown()
         e.httpStatus == HttpStatus.BAD_REQUEST
         e.message.contains("Custom validation failed: msg=[paragraphs may not contain jabberwocky], type=[skillApprovalRejection], rejectionMsg=[Just jabberwocky felt like it]")
+    }
+
+
+    void "validate approval message if 'paragraphValidationRegex' property is configured"() {
+        String user = "user0"
+        String user1 = "user1"
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+
+        List approvals = approvalsEndpointRes.data.sort({ it.userId })
+
+        skillsService.approve(proj.projectId, [approvals[0].id], 'Just jabberwocky felt like it')
+        then:
+        SkillsClientException e = thrown()
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.message.contains("Custom validation failed: msg=[paragraphs may not contain jabberwocky], type=[skillApprovalApprove], approvalMsg=[Just jabberwocky felt like it]")
     }
 
     void "get self reporting stats - all skills disabled"() {

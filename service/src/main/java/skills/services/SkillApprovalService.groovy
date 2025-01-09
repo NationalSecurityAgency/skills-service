@@ -222,7 +222,7 @@ class SkillApprovalService {
         return tableResult
     }
 
-    void approve(String projectId, List<Integer> approvalRequestIds) {
+    void approve(String projectId, List<Integer> approvalRequestIds, String approvalMsg) {
         List<SkillApproval> toApprove = skillApprovalRepo.findAllById(approvalRequestIds)
         toApprove.each {
             validateProjId(it, projectId)
@@ -238,6 +238,7 @@ class SkillApprovalService {
                     log.debug("Approval for ${it} yielded:\n${res}")
                 }
 
+                it.message = approvalMsg
                 it.approverActionTakenOn = new Date()
                 it.approverUserId = userInfoService.currentUser.username
                 skillApprovalRepo.save(it)
