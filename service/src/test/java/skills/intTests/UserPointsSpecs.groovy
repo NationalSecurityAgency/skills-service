@@ -179,6 +179,31 @@ class UserPointsSpecs extends DefaultIntSpec {
         result2User.firstUpdated == DTF.print(threeDaysAgo.time)
     }
 
+    def 'get skill users returns correct firstUpdated and lastUpdated date for imported skill'() {
+        def subj1_skills = skillsService.getSkillsForSubject(projId, subjects.get(0))
+
+        def project2 = SkillsFactory.createProject(11)
+        def project2_subject = SkillsFactory.createSubject(11, 1)
+        def project2_skill2 = SkillsFactory.createSkill(11, 1, 2, 0, 10, 0, 100)
+        skillsService.createProjectAndSubjectAndSkills(project2, project2_subject, [project2_skill2])
+
+        skillsService.exportSkillToCatalog(projId, subj1_skills[0].skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, project2_subject.subjectId, subj1_skills[0].projectId, subj1_skills[0].skillId)
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
+
+        when:
+        def results = skillsService.getSkillUsers(project2.projectId, subj1_skills[0].skillId)
+
+        then:
+        results
+        results.count == 1
+        results.data.size() == 1
+
+        def result2User = results.data.find { it -> it.userId == sampleUserIds.get(0).toLowerCase() }
+        result2User.lastUpdated == DTF.print(threeDaysAgo.time)
+        result2User.firstUpdated == DTF.print(threeDaysAgo.time)
+    }
+
     def 'get badge users returns correct firstUpdated and lastUpdated date'() {
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(0), yesterday)
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(1), threeDaysAgo)
@@ -199,6 +224,8 @@ class UserPointsSpecs extends DefaultIntSpec {
         result2User.lastUpdated == DTF.print(threeDaysAgo.time)
         result2User.firstUpdated == DTF.print(threeDaysAgo.time)
     }
+
+
 
     def 'get project users when project exists'() {
         when:
