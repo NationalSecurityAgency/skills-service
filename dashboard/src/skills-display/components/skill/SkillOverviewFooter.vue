@@ -349,7 +349,7 @@ defineExpose({
                 <b>{{ timeUtils.formatDate(skillInternal.selfReporting.requestedOn, 'MM/DD/YYYY') }}</b> was rejected
                 <span
                   class="text-info">{{ timeUtils.relativeTime(skillInternal.selfReporting.rejectedOn) }}</span>.
-                <span v-if="skillInternal.selfReporting.message">The reason is: <b>"{{ skillInternal.selfReporting.rejectionMsg}}"</b></span>
+                <span v-if="skillInternal.selfReporting.message">The reason is: <b>"{{ skillInternal.selfReporting.message}}"</b></span>
               </div>
               <div class="">
                 <SkillsButton
