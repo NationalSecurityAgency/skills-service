@@ -26,7 +26,7 @@ class SelfReportingInfo {
     // only applicable to when selfReportingType == SelfReportingType.Approval
     Long requestedOn
     Long rejectedOn
-    String rejectionMsg
+    String message
 
     // only applicable to when selfReportingType == SelfReportingType.Quiz
     String quizId

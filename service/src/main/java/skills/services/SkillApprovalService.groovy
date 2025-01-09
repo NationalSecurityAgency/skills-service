@@ -198,7 +198,7 @@ class SkillApprovalService {
                     approverActionTakenOn: simpleSkillApproval.getApproverActionTakenOn()?.time,
                     rejectedOn: simpleSkillApproval.getRejectedOn()?.time,
                     requestMsg: simpleSkillApproval.getRequestMsg(),
-                    rejectionMsg: simpleSkillApproval.getRejectionMsg(),
+                    message: simpleSkillApproval.getMessage(),
                     points: simpleSkillApproval.getPoints(),
                     approverUserId: simpleSkillApproval.getApproverUserId(),
                     approverUserIdForDisplay: simpleSkillApproval.getApproverUserIdForDisplay(),
@@ -254,7 +254,7 @@ class SkillApprovalService {
             validateProjId(it, projectId)
 
             Date now = new Date()
-            it.rejectionMsg = rejectionMsg
+            it.message = rejectionMsg
             it.rejectedOn = now
             it.approverActionTakenOn = now
             it.approverUserId = userInfoService.currentUser.username

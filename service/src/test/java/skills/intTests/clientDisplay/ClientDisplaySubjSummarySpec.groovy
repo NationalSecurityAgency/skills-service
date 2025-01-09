@@ -573,28 +573,28 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         res1.get(0).selfReporting.type == SkillDef.SelfReportingType.HonorSystem.toString()
         !res1.get(0).selfReporting.requestedOn
         !res1.get(0).selfReporting.rejectedOn
-        !res1.get(0).selfReporting.rejectionMsg
+        !res1.get(0).selfReporting.message
 
         res1.get(1).skillId == proj1_subj1_skills[1].skillId
         res1.get(1).selfReporting.enabled
         res1.get(1).selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
         res1.get(1).selfReporting.requestedOn == date1.time
         !res1.get(1).selfReporting.rejectedOn
-        !res1.get(1).selfReporting.rejectionMsg
+        !res1.get(1).selfReporting.message
 
         res1.get(2).skillId == proj1_subj1_skills[2].skillId
         !res1.get(2).selfReporting.enabled
         !res1.get(2).selfReporting.type
         !res1.get(2).selfReporting.requestedOn
         !res1.get(2).selfReporting.rejectedOn
-        !res1.get(2).selfReporting.rejectionMsg
+        !res1.get(2).selfReporting.message
 
         res1.get(3).skillId == proj1_subj1_skills[3].skillId
         res1.get(3).selfReporting.enabled
         res1.get(3).selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
         res1.get(3).selfReporting.requestedOn == date2.time
         new Date(res1.get(3).selfReporting.rejectedOn).format('yyyy-MM-dd') == new Date().format('yyyy-MM-dd')
-        res1.get(3).selfReporting.rejectionMsg == "rejection message"
+        res1.get(3).selfReporting.message == "rejection message"
 
         res2.size() == 3
         res2.get(0).skillId == proj1_subj2_skills[0].skillId
@@ -602,21 +602,21 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         !res2.get(0).selfReporting.type
         !res2.get(0).selfReporting.requestedOn
         !res2.get(0).selfReporting.rejectedOn
-        !res2.get(0).selfReporting.rejectionMsg
+        !res2.get(0).selfReporting.message
 
         res2.get(1).skillId == proj1_subj2_skills[1].skillId
         res2.get(1).selfReporting.enabled
         res2.get(1).selfReporting.type == SkillDef.SelfReportingType.HonorSystem.toString()
         !res2.get(1).selfReporting.requestedOn
         !res2.get(1).selfReporting.rejectedOn
-        !res2.get(1).selfReporting.rejectionMsg
+        !res2.get(1).selfReporting.message
 
         res2.get(2).skillId == proj1_subj2_skills[2].skillId
         res2.get(2).selfReporting.enabled
         res2.get(2).selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
         !res2.get(2).selfReporting.requestedOn
         !res2.get(2).selfReporting.rejectedOn
-        !res2.get(2).selfReporting.rejectionMsg
+        !res2.get(2).selfReporting.message
     }
 
     def "when a self-reporting skill has a history of approvals only load the latest approval info - latest rejection"() {
@@ -669,28 +669,28 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         res1.size() == 5
         res1.get(0).skillId == skills[0].skillId
         res1.get(0).selfReporting.enabled
-        res1.get(0).selfReporting.rejectionMsg == 'last rejection'
+        res1.get(0).selfReporting.message == 'last rejection'
         res1.get(0).selfReporting.requestedOn == dates[0].time
         res1.get(0).selfReporting.rejectedOn
 
         res1.get(1).skillId == skills[1].skillId
         res1.get(1).selfReporting.enabled
-        !res1.get(1).selfReporting.rejectionMsg
+        !res1.get(1).selfReporting.message
         !res1.get(1).selfReporting.rejectedOn
 
         res1.get(2).skillId == skills[2].skillId
         res1.get(2).selfReporting.enabled
-        !res1.get(2).selfReporting.rejectionMsg
+        !res1.get(2).selfReporting.message
         !res1.get(2).selfReporting.rejectedOn
 
         res1.get(3).skillId == skills[3].skillId
         res1.get(3).selfReporting.enabled
-        !res1.get(3).selfReporting.rejectionMsg
+        !res1.get(3).selfReporting.message
         !res1.get(3).selfReporting.rejectedOn
 
         res1.get(4).skillId == skills[4].skillId
         res1.get(4).selfReporting.enabled
-        !res1.get(4).selfReporting.rejectionMsg
+        !res1.get(4).selfReporting.message
         !res1.get(4).selfReporting.rejectedOn
     }
 
@@ -735,26 +735,26 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         res1.size() == 4
         res1.get(0).skillId == skills[0].skillId
         res1.get(0).selfReporting.enabled
-        !res1.get(0).selfReporting.rejectionMsg
+        !res1.get(0).selfReporting.message
         res1.get(0).selfReporting.requestedOn == dates[0].time
         !res1.get(0).selfReporting.rejectedOn
 
         res1.get(1).skillId == skills[1].skillId
         res1.get(1).selfReporting.enabled
-        !res1.get(1).selfReporting.rejectionMsg
+        !res1.get(1).selfReporting.message
         !res1.get(1).selfReporting.rejectedOn
         !res1.get(1).selfReporting.requestedOn
 
 
         res1.get(2).skillId == skills[2].skillId
         res1.get(2).selfReporting.enabled
-        !res1.get(2).selfReporting.rejectionMsg
+        !res1.get(2).selfReporting.message
         !res1.get(2).selfReporting.rejectedOn
         !res1.get(2).selfReporting.requestedOn
 
         res1.get(3).skillId == skills[3].skillId
         res1.get(3).selfReporting.enabled
-        !res1.get(3).selfReporting.rejectionMsg
+        !res1.get(3).selfReporting.message
         !res1.get(3).selfReporting.rejectedOn
         !res1.get(3).selfReporting.requestedOn
     }
@@ -802,22 +802,22 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         res1.size() == 4
         res1.get(0).skillId == skills[0].skillId
         res1.get(0).selfReporting.enabled
-        !res1.get(0).selfReporting.rejectionMsg
+        !res1.get(0).selfReporting.message
         !res1.get(0).selfReporting.rejectedOn
 
         res1.get(1).skillId == skills[1].skillId
         res1.get(1).selfReporting.enabled
-        !res1.get(1).selfReporting.rejectionMsg
+        !res1.get(1).selfReporting.message
         !res1.get(1).selfReporting.rejectedOn
 
         res1.get(2).skillId == skills[2].skillId
         res1.get(2).selfReporting.enabled
-        !res1.get(2).selfReporting.rejectionMsg
+        !res1.get(2).selfReporting.message
         !res1.get(2).selfReporting.rejectedOn
 
         res1.get(3).skillId == skills[3].skillId
         res1.get(3).selfReporting.enabled
-        !res1.get(3).selfReporting.rejectionMsg
+        !res1.get(3).selfReporting.message
         !res1.get(3).selfReporting.rejectedOn
     }
 
@@ -866,11 +866,11 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
             assert it.selfReporting.requestedOn
             assert it.selfReporting.rejectedOn
         }
-        res1.collect { it.selfReporting.rejectionMsg } == ["reject skill1", "reject skill2", "reject skill3", "reject skill4"]
+        res1.collect { it.selfReporting.message } == ["reject skill1", "reject skill2", "reject skill3", "reject skill4"]
 
         approvalsHistoryUser2.totalCount == 4
         res2.size() == 4
-        res2.collect { it.selfReporting.rejectionMsg } == ["reject skill1", "reject skill2", "reject skill3", "reject skill4"]
+        res2.collect { it.selfReporting.message } == ["reject skill1", "reject skill2", "reject skill3", "reject skill4"]
         res2.each {
             assert it.selfReporting.enabled
         }
@@ -921,7 +921,7 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         res1.size() == 1
         res1.get(0).skillId == skills[0].skillId
         res1.get(0).selfReporting.enabled
-        !res1.get(0).selfReporting.rejectionMsg
+        !res1.get(0).selfReporting.message
         !res1.get(0).selfReporting.rejectedOn
         res1.get(0).selfReporting.requestedOn == dates[2].time
     }

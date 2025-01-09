@@ -123,7 +123,7 @@ class SkillApprovalHistorySpecs extends DefaultIntSpec {
         approvalsHistory2.data[0].requestMsg == "Please approve this 0!"
         approvalsHistory2.data[0].approverActionTakenOn
         !approvalsHistory2.data[0].rejectedOn
-        !approvalsHistory2.data[0].rejectionMsg
+        !approvalsHistory2.data[0].message
         approvalsHistory2.data[0].approverUserId == skillsService.userName
         approvalsHistory2.data[0].approverUserIdForDisplay == getUserIdForDisplay(skillsService.userName)
 
@@ -138,7 +138,7 @@ class SkillApprovalHistorySpecs extends DefaultIntSpec {
         approvalsHistory2.data[1].requestMsg == "Please approve this 2!"
         approvalsHistory2.data[1].approverActionTakenOn
         !approvalsHistory2.data[1].rejectedOn
-        !approvalsHistory2.data[1].rejectionMsg
+        !approvalsHistory2.data[1].message
         approvalsHistory2.data[1].approverUserId == skillsService.userName
         approvalsHistory2.data[1].approverUserIdForDisplay == getUserIdForDisplay(skillsService.userName)
 
@@ -153,7 +153,7 @@ class SkillApprovalHistorySpecs extends DefaultIntSpec {
         approvalsHistory2.data[2].requestMsg == "Please approve this 4!"
         approvalsHistory2.data[2].approverActionTakenOn
         approvalsHistory2.data[2].rejectedOn
-        approvalsHistory2.data[2].rejectionMsg == 'This is a rejection message'
+        approvalsHistory2.data[2].message == 'This is a rejection message'
         approvalsHistory2.data[2].approverUserId == skillsService.userName
         approvalsHistory2.data[2].approverUserIdForDisplay == getUserIdForDisplay(skillsService.userName)
 

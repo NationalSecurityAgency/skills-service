@@ -15,6 +15,7 @@
  */
 package skills.storage.model
 
+import jakarta.persistence.Column
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -50,7 +51,10 @@ class SkillApproval {
     String requestMsg
 
     Date rejectedOn
-    String rejectionMsg
+
+    @Column(name="rejection_msg")
+    String message
+
     Date rejectionAcknowledgedOn
 
     String approverUserId

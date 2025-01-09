@@ -218,7 +218,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         approvalsAfterRejection.size() == 1
         approvalsAfterRejection.get(0).requestMsg == "Please approve this!"
         approvalsAfterRejection.get(0).rejectedOn.format("yyyy-MM-dd") == new Date().format("yyyy-MM-dd")
-        approvalsAfterRejection.get(0).rejectionMsg == "Just felt like it"
+        approvalsAfterRejection.get(0).message == "Just felt like it"
 
         approvalsAfterRejection.get(0).projectId == proj.projectId
         approvalsAfterRejection.get(0).skillRefId == skillDefRepo.findAll().find({it.skillId == skills[0].skillId}).id
@@ -356,8 +356,8 @@ class SkillApprovalSpecs extends DefaultIntSpec {
 
         List<SkillApproval> approvalsAfterRejection = skillApprovalRepo.findAll().sort { it.userId}
         then:
-        approvalsAfterRejection.get(0).rejectionMsg == "Just felt like it"
-        !approvalsAfterRejection.get(1).rejectionMsg
+        approvalsAfterRejection.get(0).message == "Just felt like it"
+        !approvalsAfterRejection.get(1).message
     }
 
     void "ignore ids that do not exist during approval or rejection"() {

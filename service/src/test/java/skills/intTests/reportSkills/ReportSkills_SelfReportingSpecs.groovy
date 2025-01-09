@@ -99,7 +99,7 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
 
         approvals.get(0).requestMsg == "Please approve this!"
         !approvals.get(0).rejectedOn
-        !approvals.get(0).rejectionMsg
+        !approvals.get(0).message
 
         approvals.get(0).projectId == proj.projectId
         approvals.get(0).skillRefId == skillDefRepo.findAll().find({it.skillId == skills[0].skillId}).id
@@ -174,7 +174,7 @@ class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
 
         !approvals.get(0).requestMsg
         !approvals.get(0).rejectedOn
-        !approvals.get(0).rejectionMsg
+        !approvals.get(0).message
 
         approvals.get(0).projectId == proj.projectId
         approvals.get(0).skillRefId == skillDefRepo.findAll().find({it.skillId == skills[0].skillId}).id
