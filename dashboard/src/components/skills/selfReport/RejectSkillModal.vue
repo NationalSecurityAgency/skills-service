@@ -59,7 +59,7 @@ const rejectOrApproveSkills = (values) => {
       emit('do-reject', ids);
     });
   } else {
-    return SelfReportService.approve(route.params.projectId, ids/*, values.approvalRequiredMsg*/).then(() => {
+    return SelfReportService.approve(route.params.projectId, ids, values.approvalRequiredMsg).then(() => {
       emit('do-approve', ids);
     });
   }
