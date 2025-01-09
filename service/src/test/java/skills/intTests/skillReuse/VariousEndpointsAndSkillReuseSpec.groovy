@@ -217,7 +217,7 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         subj1Users.data.totalPoints.sort() == [100, 200, 200].sort()
 
         subj2Users.data.userId.sort() == [users[0], users[1], users[2]].sort()
-        subj2Users.data.lastUpdated.sort() == [null, null, null]
+        subj2Users.data.lastUpdated.sort() == [DTF.print(dates[4].time), DTF.print(dates[1].time), DTF.print(dates[3].time)].sort()
         subj2Users.data.totalPoints.sort() == [100, 200, 200].sort()
 
         projectUsers.data.userId.sort() == [users[0], users[1], users[2]].sort()
@@ -275,7 +275,7 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         subj1Users.data.totalPoints.sort() == [100, 200, 200].sort()
 
         subj2Users.data.userId.sort() == [users[0], users[1], users[2]].sort()
-        subj2Users.data.lastUpdated.sort() == [null, null, null].sort()
+        subj2Users.data.lastUpdated.sort() == [DTF.print(dates[4].time), DTF.print(dates[1].time), DTF.print(dates[3].time)].sort()
         subj2Users.data.totalPoints.sort() == [100, 200, 200].sort()
 
         projectUsers.data.userId.sort() == [users[0], users[1], users[2]].sort()
