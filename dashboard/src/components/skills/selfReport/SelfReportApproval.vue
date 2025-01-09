@@ -48,7 +48,8 @@ const expandedRows = ref({});
 const totalRows = ref(null);
 const emailSubscribed = ref(true);
 const isEmailEnabled = computed(() => appInfo.emailEnabled)
-const showRejectModal = ref(false);
+const showApproveOrRejectModal = ref(false);
+const requestType = ref('Reject');
 
 onMounted(() => {
   loadApprovals();
@@ -88,31 +89,38 @@ const loadApprovals = () => {
       });
 };
 
-const approve = () => {
-  loading.value = true;
-  const idsToApprove = selectedItems.value.map((item) => item.id);
-  SelfReportService.approve(route.params.projectId, idsToApprove)
-      .then(() => {
-        loadApprovals().then(() => {
-          setTimeout(() => announcer.polite(`approved ${idsToApprove.length} skill approval request${idsToApprove.length > 1 ? 's' : ''}`), 0);
-        });
-        emit('approval-action', 'approved');
-        selectedItems.value = [];
-      });
-};
+const showApproveModal = () => {
+  requestType.value = 'Approve';
+  showApproveOrRejectModal.value = true;
+}
 
-const doReject = (rejectedIds) => {
+const doApprove = (idsToApprove) => {
   loading.value = true;
   loadApprovals().then(() => {
-    setTimeout(() => announcer.polite(`rejected ${rejectedIds.length} skill approval request${rejectedIds.length > 1 ? 's' : ''}`), 0);
+    setTimeout(() => announcer.polite(`approved ${idsToApprove.length} skill approval request${idsToApprove.length > 1 ? 's' : ''}`), 0);
+    emit('approval-action', 'approved');
+    selectedItems.value = [];
+  });
+  closeModal();
+};
+
+const doReject = (idsToReject) => {
+  loading.value = true;
+  loadApprovals().then(() => {
+    setTimeout(() => announcer.polite(`rejected ${idsToReject.length} skill approval request${idsToReject.length > 1 ? 's' : ''}`), 0);
     emit('approval-action', 'rejected');
     selectedItems.value = [];
   });
   closeModal();
 };
 
+const showRejectModal = () => {
+  requestType.value = 'Reject';
+  showApproveOrRejectModal.value = true;
+}
+
 const closeModal = () => {
-  showRejectModal.value = false;
+  showApproveOrRejectModal.value = false;
 }
 
 const checkEmailSubscriptionStatus = () => {
@@ -170,8 +178,8 @@ const toggleRow = (row) => {
           <SkillsButton size="small" @click="loadApprovals" aria-label="Sync Records" data-cy="syncApprovalsBtn" class="" icon="fas fa-sync-alt" />
         </div>
         <div class="flex flex-1 justify-content-center sm:justify-content-end">
-          <SkillsButton size="small" @click="showRejectModal=true" data-cy="rejectBtn" class="" :disabled="selectedItems.length === 0" icon="fa fa-times-circle" label="Reject" />
-          <SkillsButton size="small" @click="approve" data-cy="approveBtn" class="ml-2" :disabled="selectedItems.length === 0" icon="fa fa-check" label="Approve" />
+          <SkillsButton size="small" @click="showRejectModal" data-cy="rejectBtn" class="" :disabled="selectedItems.length === 0" icon="fa fa-times-circle" label="Reject" />
+          <SkillsButton size="small" @click="showApproveModal" data-cy="approveBtn" class="ml-2" :disabled="selectedItems.length === 0" icon="fa fa-check" label="Approve" />
         </div>
       </div>
 
@@ -222,7 +230,7 @@ const toggleRow = (row) => {
             </SkillsButton>
           </template>
         </Column>
-        <Column field="userId" sortable :class="{'flex': responsive.md.value }">
+        <Column field="userId" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <span class="mr-1"><i class="fas fa-hand-pointer" :class="colors.getTextClass(2)"/> For User</span>
           </template>
@@ -230,7 +238,7 @@ const toggleRow = (row) => {
             {{ slotProps.data.userIdForDisplay }}
           </template>
         </Column>
-        <Column field="requestedOn" sortable :class="{'flex': responsive.md.value }">
+        <Column field="requestedOn" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <span class="mr-1"><i class="fas fa-clock" :class="colors.getTextClass(3)" /> Requested On</span>
           </template>
@@ -264,7 +272,7 @@ const toggleRow = (row) => {
       </SkillsDataTable>
     </template>
   </Card>
-  <RejectSkillModal v-model="showRejectModal" @do-reject="doReject" @done="closeModal" :selected-items="selectedItems"/>
+  <RejectSkillModal v-model="showApproveOrRejectModal" @do-reject="doReject" @do-approve="doApprove" @done="closeModal" :selected-items="selectedItems" :request-type="requestType"/>
 </template>
 
 <style scoped>
