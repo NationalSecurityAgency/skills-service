@@ -179,6 +179,27 @@ class UserPointsSpecs extends DefaultIntSpec {
         result2User.firstUpdated == DTF.print(threeDaysAgo.time)
     }
 
+    def 'get badge users returns correct firstUpdated and lastUpdated date'() {
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(0), yesterday)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(1), threeDaysAgo)
+
+        when:
+        def results = skillsService.getBadgeUsers(projId, badgeId)
+
+        then:
+        results
+        results.count == 2
+        results.data.size() == 2
+
+        def resultUser = results.data.find { it -> it.userId == sampleUserIds.get(0).toLowerCase() }
+        resultUser.lastUpdated == DTF.print(yesterday.time)
+        resultUser.firstUpdated == DTF.print(threeDaysAgo.time)
+
+        def result2User = results.data.find { it -> it.userId == sampleUserIds.get(1).toLowerCase() }
+        result2User.lastUpdated == DTF.print(threeDaysAgo.time)
+        result2User.firstUpdated == DTF.print(threeDaysAgo.time)
+    }
+
     def 'get project users when project exists'() {
         when:
         def results = skillsService.getProjectUsers(projId)
