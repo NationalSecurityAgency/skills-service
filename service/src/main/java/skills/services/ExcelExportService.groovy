@@ -87,6 +87,9 @@ class ExcelExportService {
         CellStyle dateStyle = workbook.createCellStyle()
         dateStyle.setDataFormat((short) 22) // NOTE: 14 = "mm/dd/yyyy"
 
+        CellStyle percentStyle = workbook.createCellStyle()
+        percentStyle.setDataFormat((short) 9)
+
         Cell cell = null
 
         Integer projectPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
@@ -103,8 +106,10 @@ class ExcelExportService {
                 }
                 row.createCell(columnNumber++).setCellValue(user.userMaxLevel)
                 row.createCell(columnNumber++).setCellValue(user.totalPoints)
-                Double percentage = (user.totalPoints / projectPoints) * 100
-                row.createCell(columnNumber++).setCellValue(percentage)
+                Double percentage = (user.totalPoints / projectPoints)
+                cell = row.createCell(columnNumber++)
+                cell.setCellStyle(percentStyle)
+                cell.setCellValue(percentage)
 
                 cell = row.createCell(columnNumber++)
                 cell.setCellStyle(dateStyle)
