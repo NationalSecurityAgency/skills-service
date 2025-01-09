@@ -878,19 +878,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             FROM user_performed_skill upa 
             WHERE upa.skill_ref_id in (
                 select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition
-                where type = 'Skill' and project_id = :projectId and exists (select 1 from subj_skills s_s where s_s.id = id)
-            ) and upa.skill_id in (
-                select child.skill_id as id
-                from skill_definition parent,
-                     skill_relationship_definition rel,
-                     skill_definition child
-                where parent.project_id = :projectId
-                  and parent.skill_id = :subjectId
-                  and rel.parent_ref_id = parent.id
-                  and rel.child_ref_id = child.id
-                  and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
-                  and child.type = 'Skill'
-                  and child.enabled = 'true'
+                where type = 'Skill' and project_id = :projectId and id in (select s_s.id from subj_skills s_s where s_s.id = id)
             )
             GROUP BY upa.user_id
         ) upa ON upa.user_id = up.user_id
