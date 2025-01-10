@@ -26,6 +26,7 @@ import { useLog } from '@/components/utils/misc/useLog.js'
 import QuizFooter from "@/skills-display/components/skill/QuizFooter.vue";
 import ApprovalHistory from '@/skills-display/components/skill/ApprovalHistory.vue';
 import QuizType from '@/skills-display/components/quiz/QuizType.js';
+import { useSelfReportHelper } from '@/skills-display/UseSelfReportHelper.js';
 
 const props = defineProps({
   skill: Object
@@ -37,6 +38,7 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 const skillsDisplayService = useSkillsDisplayService()
 const attributes = useSkillsDisplayAttributesState()
 const skillState = useSkillsDisplaySubjectState()
+const selfReportHelper = useSelfReportHelper()
 const log = useLog()
 
 const selfReport = ref({
@@ -57,7 +59,14 @@ const isRejected = computed(() => skillInternal.value.selfReporting && skillInte
 const isMotivationalSkill = computed(() => skillInternal.value && skillInternal.value.isMotivationalSkill)
 const showTimeline = computed(() => {
   if (skillInternal.value.approvalHistory && skillInternal.value.approvalHistory.length > 0) {
-    return isApprovalRequired.value || (isQuizSkill.value && skillInternal.value.approvalHistory.length > 1)
+    if (isApprovalRequired.value) {
+      return true;
+    }
+    if (isQuizSkill.value) {
+      return skillInternal.value.approvalHistory.length > 1
+          || (skillInternal.value.approvalHistory.length === 1 &&
+              selfReportHelper.isFailed(skillInternal.value.approvalHistory[0].eventStatus));
+    }
   }
   return false
 })

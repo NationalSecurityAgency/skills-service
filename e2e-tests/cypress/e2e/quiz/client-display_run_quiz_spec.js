@@ -412,6 +412,11 @@ describe('Client Display Quiz Tests', () => {
             .should('contain.text', 'Failed')
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
+            .eq(0)
+            .find('[data-cy="myQuizAttemptsLink"]')
+            .should('exist')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
             .eq(1)
             .should('contain.text', 'Failed')
     });
@@ -769,6 +774,11 @@ describe('Client Display Quiz Tests', () => {
             .should('contain.text', 'Passed')
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
+            .eq(0)
+            .find('[data-cy="myQuizAttemptsLink"]')
+            .should('not.exist')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
             .eq(1)
             .should('contain.text', 'Passed')
         cy.get('[data-cy="approvalHistoryTimeline"]')
@@ -968,6 +978,57 @@ describe('Client Display Quiz Tests', () => {
 
         cy.get('[data-cy="closeQuizAttempt"]').click()
         cy.get('[data-cy="skillDescription-skill1"]')
+    });
+
+    it('show timeline for single failed quiz attempt', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, {
+            selfReportingType: 'Quiz',
+            quizId: 'quiz1',
+            pointIncrement: '150',
+            numPerformToCompletion: 1
+        });
+
+        cy.runQuizForUser(1, Cypress.env('proxyUser'), [{selectedIndex: [1]}]);
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .should('contain.text', 'Failed')
+    });
+
+    it('do not show timeline for single passed quiz attempt', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.setQuizMultipleTakes(1, false);
+
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, {
+            selfReportingType: 'Quiz',
+            quizId: 'quiz1',
+            pointIncrement: '150',
+            numPerformToCompletion: 1
+        });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .should('not.exist')
     });
 });
 

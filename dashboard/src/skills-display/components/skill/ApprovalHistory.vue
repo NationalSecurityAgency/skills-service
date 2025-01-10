@@ -73,6 +73,11 @@ const getApprover = (item) => {
           <i class="fas fa-circle px-2 text-400" style="font-size: .5rem;"></i>
           <small class="text-muted py-2" :title="`${timeUtils.formatDate(slotProps.item.eventTime)}`">{{timeUtils.relativeTime(slotProps.item.eventTime)}}</small>
         </div>
+        <div v-if="selfReportHelper.isFailed(slotProps.item.eventStatus)" class="pb-2">
+          <span class="text-muted text-sm">
+            View <router-link data-cy="myQuizAttemptsLink" :to="{ name:'MyQuizAttemptsPage' }">My Quiz Attempts</router-link> History
+          </span>
+        </div>
         <div>
           <span class="text-muted text-sm">{{ timeUtils.formatDate(slotProps.item.eventTime) }}</span>
         </div>
