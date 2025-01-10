@@ -408,10 +408,12 @@ describe('Client Display Tests', () => {
 
         checkGroupSkillExistence(true)
 
-        cy.get('[data-cy=collapseGroupsButton]').click()
+        cy.get('[data-cy=groupToggle]').click()
+        cy.get('[data-pc-name="menu"] [aria-label="Collapse All"]').contains('Collapse All').click();
         checkGroupSkillExistence(false)
 
-        cy.get('[data-cy=expandGroupsButton]').click()
+        cy.get('[data-cy=groupToggle]').click()
+        cy.get('[data-pc-name="menu"] [aria-label="Expand All"]').contains('Expand All').click();
         checkGroupSkillExistence(true)
 
         cy.get('[data-cy="toggleGroup-group1Subj2"]').click()
@@ -450,13 +452,15 @@ describe('Client Display Tests', () => {
 
         checkGroupSkillExistence(true)
 
-        cy.get('[data-cy=collapseGroupsButton]').click()
+        cy.get('[data-cy=groupToggle]').click()
+        cy.get('[data-pc-name="menu"] [aria-label="Collapse All"]').contains('Collapse All').click();
         checkGroupSkillExistence(false)
 
         cy.cdVisit('/subjects/subj2');
         checkGroupSkillExistence(false)
 
-        cy.get('[data-cy=expandGroupsButton]').click()
+        cy.get('[data-cy=groupToggle]').click()
+        cy.get('[data-pc-name="menu"] [aria-label="Expand All"]').contains('Expand All').click();
 
         cy.cdVisit('/subjects/subj2');
         checkGroupSkillExistence(true)
