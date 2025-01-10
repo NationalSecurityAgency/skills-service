@@ -19,6 +19,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.SkillDef
 
 import static skills.intTests.utils.SkillsFactory.createProject
 
@@ -319,6 +320,67 @@ class DescriptionValidatorCommunitySpecs extends DefaultIntSpec {
         exception.message.contains("May not contain divinedragon word")
 
         communityValid.body.success
+    }
+
+    def "skill approval message custom validation UC protected"(){
+        List<String> users = getRandomUsers(2)
+        Date date = new Date() - 60
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def proj = SkillsFactory.createProject()
+        proj.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProject(proj)
+
+        def subj = SkillsFactory.createSubject()
+        pristineDragonsUser.createSubject(subj)
+
+        def skill = SkillsFactory.createSkill()
+        skill.pointIncrement = 200
+        skill.selfReportingType = SkillDef.SelfReportingType.Approval
+        pristineDragonsUser.createSkill(skill)
+
+        when:
+        pristineDragonsUser.addSkill([projectId: proj.projectId, skillId: skill.skillId], users[0], date, "Please approve this!")
+        def approvalsEndpointRes = pristineDragonsUser.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+
+        List approvals = approvalsEndpointRes.data.sort({ it.userId })
+
+        pristineDragonsUser.approve(proj.projectId, [approvals[0].id], notValidProtectedCommunity)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("May not contain divinedragon word")
+    }
+
+    def "skill approval message custom validation default protected"(){
+        List<String> users = getRandomUsers(2)
+        Date date = new Date() - 60
+
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        def subj = SkillsFactory.createSubject()
+        skillsService.createSubject(subj)
+
+        def skill = SkillsFactory.createSkill()
+        skill.pointIncrement = 200
+        skill.selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createSkill(skill)
+
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], users[0], date, "Please approve this!")
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+
+        List approvals = approvalsEndpointRes.data.sort({ it.userId })
+
+        skillsService.approve(proj.projectId, [approvals[0].id], notValidDefault)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("may not contain jabberwocky")
     }
 
     def "only community member can call description validator for community with useProtectedCommunityValidator"() {

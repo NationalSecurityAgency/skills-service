@@ -219,28 +219,28 @@ describe('Self Report Skills Management Tests', () => {
     cy.get('[data-cy="rejectionInputMsg"]')
       .type('y');
     cy.get('[data-cy="approvalRequiredMsgError"]')
-      .contains('Rejection Message - paragraphs may not contain jabberwocky');
+      .contains('Message - paragraphs may not contain jabberwocky');
     cy.get('[data-cy="saveDialogBtn"]')
       .should('be.disabled');
 
     cy.get('[data-cy="rejectionInputMsg"]')
       .type(' ok');
     cy.get('[data-cy="approvalRequiredMsgError"]')
-      .contains('Rejection Message - paragraphs may not contain jabberwocky');
+      .contains('Message - paragraphs may not contain jabberwocky');
     cy.get('[data-cy="saveDialogBtn"]')
       .should('be.disabled');
 
     cy.get('[data-cy="rejectionInputMsg"]')
       .type('{backspace}{backspace}{backspace}');
     cy.get('[data-cy="approvalRequiredMsgError"]')
-      .contains('Rejection Message - paragraphs may not contain jabberwocky');
+      .contains('Message - paragraphs may not contain jabberwocky');
     cy.get('[data-cy="saveDialogBtn"]')
       .should('be.disabled');
 
     cy.get('[data-cy="rejectionInputMsg"]')
       .type('{backspace}{backspace}');
     cy.get('[data-cy="approvalRequiredMsgError"]')
-      .contains('Rejection Message - paragraphs may not contain jabberwocky')
+      .contains('Message - paragraphs may not contain jabberwocky')
       .should('not.exist');
     cy.get('[data-cy="saveDialogBtn"]')
       .should('be.enabled');
@@ -426,7 +426,7 @@ describe('Self Report Skills Management Tests', () => {
     cy.get('[data-cy=rejectionInputMsg]')
       .fill(new Array(500).join('A'));
     cy.get('[data-cy=approvalRequiredMsgError]')
-      .contains('Rejection Message must be at most 250 characters')
+      .contains('Message must be at most 250 characters')
       .should('be.visible');
     cy.get('[data-cy=saveDialogBtn]')
       .should('be.disabled');

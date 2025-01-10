@@ -170,7 +170,71 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
     });
 
-    it('self report reject messages are validated against custom validators', () => {
+    it('self report approval messages are validated against custom validators', () => {
+        cy.intercept('POST', '/admin/projects/proj1/approvals/approve').as('approve');
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+        cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00');
+        cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00');
+        cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00');
+
+        cy.visit('/administrator/projects/proj1/self-report');
+
+        const tableSelector = '[data-cy="skillsReportApprovalTable"]';
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 2,
+                value: 'user0'
+            }],
+            [{
+                colIndex: 2,
+                value: 'user1'
+            }],
+            [{
+                colIndex: 2,
+                value: 'user2'
+            }],
+        ]);
+
+        cy.get('[data-cy="approveBtn"]').should('be.disabled');
+        cy.get('[data-cy="rejectBtn"]').should('be.disabled');
+        // cy.get('[data-cy="approvalSelect_user1-skill3"]').click({ force: true });
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="approveBtn"]').should('be.enabled');
+        cy.get('[data-cy="rejectBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="approveBtn"]').click();
+        cy.get('[data-cy="approvalTitle"]').contains('This will approve user\'s request(s) to get points');
+        cy.get('[data-cy="approvalInputMsg"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="approvalRequiredMsgError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="approvalInputMsg"]').clear().type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="approvalRequiredMsgError"]').contains('Message - May not contain divinedragon word');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="approvalInputMsg"]').type('{backspace}');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click();
+
+        cy.wait('@approve');
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 2,
+                value: 'user0'
+            }],
+            [{
+                colIndex: 2,
+                value: 'user2'
+            }],
+        ]);
+    });
+
+    it.only('self report reject messages are validated against custom validators', () => {
         cy.intercept('POST', '/admin/projects/proj1/approvals/reject').as('reject');
         cy.createProject(1, {enableProtectedUserCommunity: true})
         cy.createSubject(1, 1);
@@ -213,7 +277,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         cy.get('[data-cy="rejectionInputMsg"]').clear().type('ldkj aljdl aj\n\ndivinedragon');
-        cy.get('[data-cy="approvalRequiredMsgError"]').contains('Rejection Message - May not contain divinedragon word');
+        cy.get('[data-cy="approvalRequiredMsgError"]').contains('Message - May not contain divinedragon word');
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
 
         cy.get('[data-cy="rejectionInputMsg"]').type('{backspace}');
