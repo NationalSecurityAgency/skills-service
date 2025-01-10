@@ -238,31 +238,31 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         summary1.selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
         !summary1.selfReporting.requestedOn
         !summary1.selfReporting.rejectedOn
-        !summary1.selfReporting.rejectionMsg
+        !summary1.selfReporting.message
 
         summary2.selfReporting.enabled
         summary2.selfReporting.type == SkillDef.SelfReportingType.HonorSystem.toString()
         !summary2.selfReporting.requestedOn
         !summary2.selfReporting.rejectedOn
-        !summary2.selfReporting.rejectionMsg
+        !summary2.selfReporting.message
 
         summary3.selfReporting.enabled
         summary3.selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
         summary3.selfReporting.requestedOn == date.time
         !summary3.selfReporting.rejectedOn
-        !summary3.selfReporting.rejectionMsg
+        !summary3.selfReporting.message
 
         summary4.selfReporting.enabled
         summary4.selfReporting.type == SkillDef.SelfReportingType.Approval.toString()
         summary4.selfReporting.requestedOn == date.time
         new Date(summary4.selfReporting.rejectedOn).format('yyyy-MM-dd') == date.format('yyyy-MM-dd')
-        summary4.selfReporting.rejectionMsg == 'Good rejection message'
+        summary4.selfReporting.message == 'Good rejection message'
 
         !summary5.selfReporting.enabled
         !summary5.selfReporting.type
         !summary5.selfReporting.requestedOn
         !summary5.selfReporting.rejectedOn
-        !summary5.selfReporting.rejectionMsg
+        !summary5.selfReporting.message
     }
 
     def "when a self-reporting skill has a history of approvals only load the latest approval info - latest rejection"() {
@@ -306,7 +306,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         approvalsHistoryUser1.totalCount == 4
 
         summary1.selfReporting.enabled
-        summary1.selfReporting.rejectionMsg == 'last rejection'
+        summary1.selfReporting.message == 'last rejection'
         summary1.selfReporting.requestedOn == dates[0].time
         summary1.selfReporting.rejectedOn
     }
@@ -353,7 +353,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
 
         // latest event is loaded for selfReporting
         summary1.selfReporting.enabled
-        !summary1.selfReporting.rejectionMsg
+        !summary1.selfReporting.message
         summary1.selfReporting.requestedOn == dates[0].time
         !summary1.selfReporting.rejectedOn
 
@@ -408,7 +408,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         when:
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[3], "approve 1")
         def approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
-        skillsService.approve(proj.projectId, approvals.data.collect { it.id })
+        skillsService.approve(proj.projectId, approvals.data.collect { it.id }, 'approved 1')
 
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[2], "reject 1")
         approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
@@ -416,11 +416,11 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
 
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[1], "approve 2")
         approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
-        skillsService.approve(proj.projectId, approvals.data.collect { it.id })
+        skillsService.approve(proj.projectId, approvals.data.collect { it.id }, 'approved 2')
 
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], dates[0], "approve 3")
         approvals = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
-        skillsService.approve(proj.projectId, approvals.data.collect { it.id })
+        skillsService.approve(proj.projectId, approvals.data.collect { it.id }, 'last approved')
 
 
         def approvalsHistoryUser1 = skillsService.getApprovalsHistory(proj.projectId, 10, 1, 'requestedOn', false, '', '', '')
@@ -432,7 +432,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
 
         // latest event is loaded for selfReporting
         summary1.selfReporting.enabled
-        !summary1.selfReporting.rejectionMsg
+        !summary1.selfReporting.message
         !summary1.selfReporting.requestedOn
         !summary1.selfReporting.rejectedOn
 
@@ -441,6 +441,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         summary1.approvalHistory.size() == 8
         summary1.approvalHistory[0].eventStatus == ApprovalHistoryLoader.APPROVED
         summary1.approvalHistory[0].userId == users[0]
+        summary1.approvalHistory[0].description == 'last approved'
 
         summary1.approvalHistory[1].eventStatus == ApprovalHistoryLoader.REQUESTED
         summary1.approvalHistory[1].userId == users[0]
@@ -449,6 +450,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
 
         summary1.approvalHistory[2].eventStatus == ApprovalHistoryLoader.APPROVED
         summary1.approvalHistory[2].userId == users[0]
+        summary1.approvalHistory[2].description == 'approved 2'
 
         summary1.approvalHistory[3].eventStatus == ApprovalHistoryLoader.REQUESTED
         summary1.approvalHistory[3].userId == users[0]
@@ -465,6 +467,7 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
 
         summary1.approvalHistory[6].eventStatus == ApprovalHistoryLoader.APPROVED
         summary1.approvalHistory[6].userId == users[0]
+        summary1.approvalHistory[6].description == 'approved 1'
 
         summary1.approvalHistory[7].eventStatus == ApprovalHistoryLoader.REQUESTED
         summary1.approvalHistory[7].userId == users[0]
@@ -662,26 +665,26 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         then:
         approvalsHistoryUser1.totalCount == 4
         summary1.selfReporting.enabled
-        summary1.selfReporting.rejectionMsg == 'sorry but rejected 1'
+        summary1.selfReporting.message == 'sorry but rejected 1'
         summary1.selfReporting.requestedOn == dates[2].time
         summary1.selfReporting.rejectedOn
 
 
         approvalsHistoryUser2.totalCount == 4
         summary2.selfReporting.enabled
-        !summary2.selfReporting.rejectionMsg
+        !summary2.selfReporting.message
         !summary2.selfReporting.requestedOn
         !summary2.selfReporting.rejectedOn
 
         approvalsHistoryUser3.totalCount == 4
         summary3.selfReporting.enabled
-        !summary3.selfReporting.rejectionMsg
+        !summary3.selfReporting.message
         summary3.selfReporting.requestedOn == dates[1].time
         !summary3.selfReporting.rejectedOn
 
         approvalsHistoryUser4.totalCount == 5
         summary4.selfReporting.enabled
-        summary4.selfReporting.rejectionMsg == 'sorry but rejected 2'
+        summary4.selfReporting.message == 'sorry but rejected 2'
         summary4.selfReporting.requestedOn == dates[1].time
         summary4.selfReporting.rejectedOn
 

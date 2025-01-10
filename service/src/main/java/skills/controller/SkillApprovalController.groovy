@@ -95,7 +95,15 @@ class SkillApprovalController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(approveRequest?.skillApprovalIds?.size() > 0, "Must supply [skillApprovalIds]", projectId)
 
-        skillApprovalService.approve(projectId, approveRequest.skillApprovalIds)
+        if (StringUtils.isNoneBlank(approveRequest.approvalMessage)) {
+            CustomValidationResult customValidationResult = customValidator.validateDescription(approveRequest.approvalMessage, projectId)
+            if (!customValidationResult.valid) {
+                String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[skillApprovalApprove], approvalMsg=[${approveRequest.approvalMessage}], skillApprovalIds=${approveRequest.skillApprovalIds}]"
+                throw new SkillException(msg, projectId, null, ErrorCode.BadParam)
+            }
+        }
+
+        skillApprovalService.approve(projectId, approveRequest.skillApprovalIds, approveRequest.approvalMessage)
         return new RequestResult(success: true)
     }
 

@@ -302,6 +302,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
 
     cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
     cy.get('[data-cy="approveBtn"]').click();
+    cy.get('[data-cy="saveDialogBtn"]').click();
 
     cy.wait('@saveEndpoint')
 

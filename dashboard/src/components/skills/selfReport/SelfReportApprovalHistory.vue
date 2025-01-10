@@ -209,7 +209,7 @@ defineExpose( {
             <div v-else><Badge variant="success"><i class="fas fa-thumbs-up"></i> <span class="text-uppercase">Approved</span></Badge></div>
             <div class="text-primary">by</div>
             <div class="font-italic"><span v-if="slotProps.data.approverUserIdHtml" v-html="slotProps.data.approverUserIdHtml"></span><span v-else>{{ slotProps.data.approverUserIdForDisplay }}</span></div>
-            <div v-if="slotProps.data.rejectionMsg"><span class="text-primary text-break">Explanation:</span> <show-more :text="slotProps.data.rejectionMsg"/></div>
+            <div v-if="slotProps.data.message"><span class="text-primary text-break">Explanation:</span> <show-more :text="slotProps.data.message"/></div>
           </template>
         </Column>
         <Column field="requestedOn" sortable :class="{'flex': responsive.md.value }">

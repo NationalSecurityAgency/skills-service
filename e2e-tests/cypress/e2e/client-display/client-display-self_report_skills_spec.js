@@ -25,11 +25,12 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
 
-        Cypress.Commands.add('approveRequest', (requestNum = 0) => {
+        Cypress.Commands.add('approveRequest', (requestNum = 0, approvalMsg = '') => {
             cy.request('/admin/projects/proj1/approvals?limit=10&ascending=true&page=1&orderBy=userId')
                 .then((response) => {
                     cy.request('POST', '/admin/projects/proj1/approvals/approve', {
                         skillApprovalIds: [response.body.data[requestNum].id],
+                        approvalMessage: approvalMsg,
                     });
                 });
         });
@@ -304,7 +305,7 @@ describe('Client Display Self Report Skills Tests', () => {
             .should('contain.text', 'Approval Requested')
 
         // approve and then visit page again
-        cy.approveRequest();
+        cy.approveRequest(0, 'I approve this message!');
         cy.cdVisit('/');
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
@@ -319,6 +320,27 @@ describe('Client Display Self Report Skills Tests', () => {
             .children('.p-timeline-event')
             .eq(1)
             .should('contain.text', 'Approval Requested')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .get('[data-cy="toggleShowMessageBtn"]')
+            .click();
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .get('[data-cy="approvalEventMessage"]')
+            .should('contain.text', 'I approve this message!')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .get('[data-cy="toggleShowMessageBtn"]')
+            .click();
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .get('[data-cy="approvalEventMessage"]')
+            .should('not.exist')
+
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
         cy.get('[data-cy="pointsAchievedTodayCard"] [data-cy="mediaInfoCardTitle"]')

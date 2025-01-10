@@ -75,8 +75,7 @@ const displayApprovalJustificationInput = () => {
 }
 
 const isPendingApproval = () => {
-  const res = skillInternal.value.selfReporting && skillInternal.value.selfReporting.requestedOn !== null && skillInternal.value.selfReporting.requestedOn !== undefined && !isRejected.value
-  return res
+  return skillInternal.value.selfReporting && skillInternal.value.selfReporting.requestedOn !== null && skillInternal.value.selfReporting.requestedOn !== undefined && !isRejected.value
 }
 const selfReportConfigured = () => {
   return skillInternal.value.selfReporting && skillInternal.value.selfReporting && skillInternal.value.selfReporting.enabled
@@ -126,7 +125,7 @@ const reportSkill = (approvalRequestedMsg) => {
       } else {
         if (skillInternal.value.selfReporting) {
           skillInternal.value.selfReporting.rejectedOn = null
-          skillInternal.value.selfReporting.rejectionMsg = null
+          skillInternal.value.selfReporting.message = null
         }
 
         selfReport.value.msgHidden = false
@@ -345,12 +344,12 @@ defineExpose({
           <template #container>
             <div class="flex p-3 align-content-center">
               <div class="flex-1 align-content-center">
-                <i class="fas fa-heart-broken text-xl" aria-hidden=""></i>
+                <i class="fas fa-heart-broken text-xl" aria-hidden="true"></i>
                 Unfortunately your request from
                 <b>{{ timeUtils.formatDate(skillInternal.selfReporting.requestedOn, 'MM/DD/YYYY') }}</b> was rejected
                 <span
                   class="text-info">{{ timeUtils.relativeTime(skillInternal.selfReporting.rejectedOn) }}</span>.
-                <span v-if="skillInternal.selfReporting.rejectionMsg">The reason is: <b>"{{ skillInternal.selfReporting.rejectionMsg}}"</b></span>
+                <span v-if="skillInternal.selfReporting.message">The reason is: <b>"{{ skillInternal.selfReporting.message}}"</b></span>
               </div>
               <div class="">
                 <SkillsButton

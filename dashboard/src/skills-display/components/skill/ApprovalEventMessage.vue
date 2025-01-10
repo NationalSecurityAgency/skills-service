@@ -41,8 +41,8 @@ const toggleShowMessage = () => {
         severity="info"
         size="small"
         @click="toggleShowMessage"
-        data-cy="viewTimeline"/>
-  <markdown-text v-if="isDescriptionShowing" :text="props.message" :instance-id="props.id" />
+        data-cy="toggleShowMessageBtn"/>
+  <markdown-text v-if="isDescriptionShowing" :text="props.message" :instance-id="props.id" data-cy="approvalEventMessage" />
   </div>
 </template>
 

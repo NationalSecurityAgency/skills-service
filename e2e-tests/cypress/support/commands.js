@@ -837,11 +837,12 @@ Cypress.Commands.add("reportSkill", (project = 1, skill = 1, userId = 'user@skil
     cy.doReportSkill({ project, skill, userId, date, failOnError, approvalRequestedMsg } );
 });
 
-Cypress.Commands.add("approveRequest", (projNum = 1, requestNum = 0) => {
+Cypress.Commands.add("approveRequest", (projNum = 1, requestNum = 0, approvalMsg = '') => {
     cy.request(`/admin/projects/proj${projNum}/approvals?limit=10&ascending=true&page=1&orderBy=userId`)
         .then((response) => {
             cy.request('POST', `/admin/projects/proj${projNum}/approvals/approve`, {
                 skillApprovalIds: [response.body.data[requestNum].id],
+                approvalMessage: approvalMsg,
             });
         });
 });

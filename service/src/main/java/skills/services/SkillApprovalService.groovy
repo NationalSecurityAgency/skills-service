@@ -198,7 +198,7 @@ class SkillApprovalService {
                     approverActionTakenOn: simpleSkillApproval.getApproverActionTakenOn()?.time,
                     rejectedOn: simpleSkillApproval.getRejectedOn()?.time,
                     requestMsg: simpleSkillApproval.getRequestMsg(),
-                    rejectionMsg: simpleSkillApproval.getRejectionMsg(),
+                    message: simpleSkillApproval.getMessage(),
                     points: simpleSkillApproval.getPoints(),
                     approverUserId: simpleSkillApproval.getApproverUserId(),
                     approverUserIdForDisplay: simpleSkillApproval.getApproverUserIdForDisplay(),
@@ -222,7 +222,7 @@ class SkillApprovalService {
         return tableResult
     }
 
-    void approve(String projectId, List<Integer> approvalRequestIds) {
+    void approve(String projectId, List<Integer> approvalRequestIds, String approvalMsg) {
         List<SkillApproval> toApprove = skillApprovalRepo.findAllById(approvalRequestIds)
         toApprove.each {
             validateProjId(it, projectId)
@@ -238,6 +238,7 @@ class SkillApprovalService {
                     log.debug("Approval for ${it} yielded:\n${res}")
                 }
 
+                it.message = approvalMsg
                 it.approverActionTakenOn = new Date()
                 it.approverUserId = userInfoService.currentUser.username
                 skillApprovalRepo.save(it)
@@ -254,7 +255,7 @@ class SkillApprovalService {
             validateProjId(it, projectId)
 
             Date now = new Date()
-            it.rejectionMsg = rejectionMsg
+            it.message = rejectionMsg
             it.rejectedOn = now
             it.approverActionTakenOn = now
             it.approverUserId = userInfoService.currentUser.username

@@ -45,7 +45,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         Date getApproverActionTakenOn()
         String getRequestMsg()
         Date getRejectedOn()
-        String getRejectionMsg()
+        String getMessage()
         Integer getPoints()
     }
 
@@ -60,7 +60,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         s.approverActionTakenOn as approverActionTakenOn,
         s.rejectedOn as rejectedOn,
         s.requestMsg as requestMsg,
-        s.rejectionMsg as rejectionMsg,
+        s.message as message,
         sd.pointIncrement as points
         from SkillApproval s, SkillDef sd, UserAttrs uAttrs, SkillDef subjectDef, SkillRelDef srd 
         where 
@@ -86,7 +86,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         s.approverActionTakenOn as approverActionTakenOn,
         s.rejectedOn as rejectedOn,
         s.requestMsg as requestMsg,
-        s.rejectionMsg as rejectionMsg,
+        s.message as message,
         sd.pointIncrement as points
         from SkillApproval s, SkillDef sd, UserAttrs uAttrs, SkillDef subjectDef, SkillRelDef srd
         where 
@@ -163,7 +163,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         s.approverActionTakenOn as approverActionTakenOn,
         s.rejectedOn as rejectedOn,
         s.requestMsg as requestMsg,
-        s.rejectionMsg as rejectionMsg,
+        s.message as message,
         sd.pointIncrement as points
         from SkillApproval s, SkillDef sd, UserAttrs uAttrs, SkillDef subjectDef, SkillRelDef srd
         where 
@@ -241,7 +241,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         s.approverActionTakenOn as approverActionTakenOn,
         s.rejectedOn as rejectedOn,
         s.requestMsg as requestMsg,
-        s.rejectionMsg as rejectionMsg,
+        s.message as message,
         sd.pointIncrement as points
         from SkillApproval s, SkillDef sd, UserAttrs uAttrs, UserAttrs approverUAttrs, SkillDef subjectDef, SkillRelDef srd 
         where 
@@ -328,7 +328,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.approverActionTakenOn as approverActionTakenOn,
             s.rejectedOn as rejectedOn,
             s.requestMsg as requestMsg,
-            s.rejectionMsg as rejectionMsg
+            s.message as message
         FROM SkillApproval s
             JOIN UserAttrs uAttrs on uAttrs.userId = s.userId
             LEFT OUTER JOIN UserAttrs approverUAttrs on approverUAttrs.userId = s.approverUserId

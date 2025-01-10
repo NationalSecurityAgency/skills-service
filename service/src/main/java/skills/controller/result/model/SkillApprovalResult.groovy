@@ -35,6 +35,6 @@ class SkillApprovalResult {
     String requestMsg
 
     Long rejectedOn
-    String rejectionMsg
+    String message
     Integer points
 }

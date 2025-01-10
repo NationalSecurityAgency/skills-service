@@ -19,18 +19,28 @@ import {object, string} from "yup";
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
 import SelfReportService from '@/components/skills/selfReport/SelfReportService';
+import { computed } from 'vue';
 
-const emit = defineEmits(['do-reject']);
+const emit = defineEmits(['do-approve', 'do-reject', 'done']);
 const model = defineModel();
 const appConfig = useAppConfig()
 const route = useRoute();
 
 const props = defineProps({
+  requestType: {
+    type: String,
+    required: true,
+    validator: (value) => ['Approve', 'Reject'].includes(value)
+  },
   selectedItems: {
     type: Array,
     required: true,
   }
 })
+
+const isApprove = computed(() => props.requestType === 'Approve')
+const isReject = computed(() => props.requestType === 'Reject')
+const modalTitle = computed(() => isApprove.value ? 'Approve Skills' : 'Reject Skills')
 
 const initialData = {
   approvalRequiredMsg: ''
@@ -42,11 +52,17 @@ const schema = object({
       .max(appConfig.maxSelfReportRejectionMessageLength)
       .label('Rejection Message')
 })
-const rejectSkills = (values) => {
+const rejectOrApproveSkills = (values) => {
   const ids = props.selectedItems.map((item) => item.id);
-  return SelfReportService.reject(route.params.projectId, ids, values.approvalRequiredMsg).then(() => {
-    emit('do-reject', ids);
-  });
+  if (isReject.value) {
+    return SelfReportService.reject(route.params.projectId, ids, values.approvalRequiredMsg).then(() => {
+      emit('do-reject', ids);
+    });
+  } else {
+    return SelfReportService.approve(route.params.projectId, ids, values.approvalRequiredMsg).then(() => {
+      emit('do-approve', ids);
+    });
+  }
 }
 
 const done = () => {
@@ -61,23 +77,23 @@ const done = () => {
                          :enable-return-focus="true"
                          :initial-values="initialData"
                          :style="{ width: '40rem !important' }"
-                         :ok-button-icon="'fas fa-arrow-alt-circle-right'"
-                         ok-button-label="Reject"
+                         ok-button-icon="fas fa-arrow-alt-circle-right"
+                         :ok-button-label="isApprove ? 'Approve' : 'Reject'"
                          :validation-schema="schema"
-                         :save-data-function="rejectSkills"
+                         :save-data-function="rejectOrApproveSkills"
                          @on-cancel="done"
-                         header="Reject Skills">
-    <div id="rejectionTitleInModal" class="flex gap-2" data-cy="rejectionTitle">
+                         :header="modalTitle">
+    <div id="rejectionApprovalTitleInModal" class="flex gap-2" :data-cy="isReject ? 'rejectionTitle' : 'approvalTitle'">
       <div class="flex text-center">
         <i class="far fa-thumbs-down text-warning" style="font-size: 3rem"/>
       </div>
       <div class="flex flex-1">
-        <p class="h6">This will reject user's request(s) to get points. Users will be notified and you can provide an optional message below.</p>
+        <p class="h6">This will {{ isReject ? 'reject' : 'approve' }} user's request(s) to get points. Users will be notified and you can provide an optional message below.</p>
       </div>
     </div>
-    <SkillsTextarea data-cy="rejectionInputMsg"
-                    aria-describedby="rejectionTitleInModal"
-                    aria-label="Optional Rejection Message"
+    <SkillsTextarea :data-cy="isReject ? 'rejectionInputMsg' : 'approvalInputMsg'"
+                    aria-describedby="rejectionApprovalTitleInModal"
+                    :aria-label="isReject ? 'Optional Rejection Message' : 'Optional Approval Message'"
                     rows="5"
                     name="approvalRequiredMsg">
     </SkillsTextarea>

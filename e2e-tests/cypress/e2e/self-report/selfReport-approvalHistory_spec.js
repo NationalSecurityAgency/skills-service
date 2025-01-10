@@ -58,6 +58,7 @@ describe('Self Report Approval History Tests', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' });
         // cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00')
         // cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00')
         // cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00')
@@ -68,9 +69,35 @@ describe('Self Report Approval History Tests', () => {
         cy.approveAllRequests();
         cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00');
         cy.rejectRequest(0);
+        cy.reportSkill(1, 4, 'user2', '2024-09-16 11:00');
+        cy.approveRequest(1, 0, 'I approve this message!');
 
         cy.visit('/administrator/projects/proj1/self-report');
         cy.validateTable(approvalHistoryTableSelector, [
+            [
+                {
+                    colIndex: 0,
+                    value: 'Very Great Skill 4'
+                }, {
+                colIndex: 0,
+                value: 'user2'
+            },
+                {
+                    colIndex: 1,
+                    value: 'Approved'
+                }, {
+                colIndex: 1,
+                value: 'Explanation: I approve this message!'
+            },
+                {
+                    colIndex: 2,
+                    value: '2024-09-16 11:00'
+                },
+                {
+                    colIndex: 3,
+                    value: 'Today'
+                }
+            ],
             [
                 {
                     colIndex: 0,
@@ -886,8 +913,8 @@ describe('Self Report Approval History Tests', () => {
             .contains(('There are no records to show'));
 
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="approveBtn"]')
-            .click();
+        cy.get('[data-cy="approveBtn"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').click();
         cy.validateTable(approvalHistoryTableSelector, [
             [{
                 colIndex: 0,
@@ -923,9 +950,8 @@ describe('Self Report Approval History Tests', () => {
         cy.wait(1000);
 
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="approveBtn"]')
-            .click();
-
+        cy.get('[data-cy="approveBtn"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').click();
 
         cy.validateTable(approvalHistoryTableSelector, [
             [{

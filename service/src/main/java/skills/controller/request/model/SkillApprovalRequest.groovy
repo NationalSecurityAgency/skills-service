@@ -17,4 +17,5 @@ package skills.controller.request.model
 
 class SkillApprovalRequest {
     List<Integer> skillApprovalIds
+    String approvalMessage
 }

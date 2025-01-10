@@ -26,9 +26,9 @@ export default {
     return axios.get(url, { params })
       .then((response) => response.data);
   },
-  approve(projectId, approvalIds) {
+  approve(projectId, approvalIds, approvalMsg) {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/approvals/approve`;
-    return axios.post(url, { skillApprovalIds: approvalIds })
+    return axios.post(url, { skillApprovalIds: approvalIds, approvalMessage: approvalMsg })
       .then((response) => response.data);
   },
   reject(projectId, approvalIds, rejectMsg) {
