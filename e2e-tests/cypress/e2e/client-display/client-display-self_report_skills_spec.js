@@ -316,34 +316,36 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.get('[data-cy="requestApprovalBtn"]')
             .should('be.enabled');
+
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
             .eq(0)
             .should('contain.text', 'Approved')
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
-            .eq(1)
-            .should('contain.text', 'Approval Requested')
-        cy.get('[data-cy="approvalHistoryTimeline"]')
-            .children('.p-timeline-event')
-            .eq(1)
+            .eq(0)
             .find('[data-cy="toggleShowMessageBtn"]')
             .click();
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
-            .eq(1)
+            .eq(0)
             .get('[data-cy="approvalEventMessage"]')
             .should('contain.text', 'I approve this message!')
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
-            .eq(1)
+            .eq(0)
             .find('[data-cy="toggleShowMessageBtn"]')
             .click();
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
-            .eq(1)
+            .eq(0)
             .get('[data-cy="approvalEventMessage"]')
             .should('not.exist')
+
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .should('contain.text', 'Approval Requested')
 
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
