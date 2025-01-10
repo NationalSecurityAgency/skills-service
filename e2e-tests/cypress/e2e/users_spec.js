@@ -56,22 +56,22 @@ describe('Users Tests', () => {
 
         // default sort order is 'Points Last Earned' desc
         cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(7, 'day')) }],
-            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(6, 'day')) }],
-            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(5, 'day')) }],
-            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(4, 'day')) }],
-            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(3, 'day')) }],
-            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(2, 'day')) }],
+            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(4, 'day')) }],
+            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(2, 'day')) }],
         ], 5);
 
         cy.get(`${tableSelector}`).contains('Points Last Earned').click();
         cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(2, 'day')) }],
-            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(3, 'day')) }],
-            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(4, 'day')) }],
-            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(5, 'day')) }],
-            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(6, 'day')) }],
-            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(2, 'day')) }],
+            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(4, 'day')) }],
+            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(7, 'day')) }],
         ], 5);
 
         cy.get(`${tableSelector}`).contains('User').click();
@@ -138,12 +138,12 @@ describe('Users Tests', () => {
 
         // default sort order is 'Points Last Earned' desc
         cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(7, 'day')) }],
-            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(6, 'day')) }],
-            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(5, 'day')) }],
-            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(4, 'day')) }],
-            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(3, 'day')) }],
-            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(2, 'day')) }],
+            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(4, 'day')) }],
+            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(2, 'day')) }],
         ], 5);
 
         cy.get('[data-pc-extend="paginator"] [aria-label="Page 1"]').click()
@@ -160,10 +160,10 @@ describe('Users Tests', () => {
         cy.get('[data-cy="archiveUsersTableBtn"]').should('be.disabled');
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(7, 'day')) }],
-            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(5, 'day')) }],
-            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(3, 'day')) }],
-            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(2, 'day')) }],
+            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(2, 'day')) }],
         ], 5);
 
         // navigate to archived users
@@ -198,12 +198,12 @@ describe('Users Tests', () => {
 
         cy.wait('@getUsers')
         cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(7, 'day')) }],
-            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(6, 'day')) }],
-            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(5, 'day')) }],
-            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(4, 'day')) }],
-            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(3, 'day')) }],
-            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(2, 'day')) }],
+            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(4, 'day')) }],
+            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(2, 'day')) }],
         ], 5);
 
         cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
@@ -1050,7 +1050,7 @@ describe('Users Tests', () => {
         cy.clickNav('Users');
         cy.wait('@getUsers')
 
-        cy.get(`${tableSelector} th`).should('have.length', 5)
+        cy.get(`${tableSelector} th`).should('have.length', 6)
         cy.get(`${tableSelector}`).should('contain', 'Org');
         cy.validateTable(tableSelector, [
             [{colIndex: 2, value: 'tagA'}],
@@ -1093,7 +1093,7 @@ describe('Users Tests', () => {
         cy.wait('@loadConfig')
         cy.clickNav('Users');
         cy.wait('@getUsers')
-        cy.get(`${tableSelector} th`).should('have.length', 4)
+        cy.get(`${tableSelector} th`).should('have.length', 5)
         cy.get(`${tableSelector}`).should('not.contain', 'Org');
     });
 
@@ -1136,7 +1136,7 @@ describe('Users Tests', () => {
         cy.clickNav('Users');
         cy.wait('@getUsers')
 
-        cy.get(`${tableSelector} th`).should('have.length', 5)
+        cy.get(`${tableSelector} th`).should('have.length', 6)
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
         cy.wait('@getUserTags')
@@ -1174,7 +1174,7 @@ describe('Users Tests', () => {
         cy.clickNav('Users');
         cy.wait('@getUsers')
 
-        cy.get(`${tableSelector} th`).should('have.length', 5)
+        cy.get(`${tableSelector} th`).should('have.length', 6)
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
         cy.contains("Client Display");
@@ -1193,12 +1193,12 @@ describe('Users Tests', () => {
 
         // default sort order is 'Points Last Earned' desc
         cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(7, 'day')) }],
-            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(6, 'day')) }],
-            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(5, 'day')) }],
-            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(4, 'day')) }],
-            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(3, 'day')) }],
-            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(2, 'day')) }],
+            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(4, 'day')) }],
+            [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(2, 'day')) }],
         ], 5);
 
         cy.get('[data-cy=users-progress-input]').type('{selectall}50')
@@ -1206,10 +1206,10 @@ describe('Users Tests', () => {
         // users-progress-input
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(7, 'day')) }],
-            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(6, 'day')) }],
-            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(5, 'day')) }],
-            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(4, 'day')) }],
+            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(4, 'day')) }],
         ], 5);
 
         cy.get('[data-cy=users-progress-input]').type('{selectall}60')
@@ -1217,9 +1217,9 @@ describe('Users Tests', () => {
         // users-progress-input
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(7, 'day')) }],
-            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(6, 'day')) }],
-            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(5, 'day')) }],
+            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 1,  value: 'user3@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(5, 'day')) }],
         ], 5);
 
         cy.get('[data-cy=users-progress-input]').type('{selectall}70')
@@ -1227,8 +1227,8 @@ describe('Users Tests', () => {
         // users-progress-input
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(7, 'day')) }],
-            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(6, 'day')) }],
         ], 5);
 
         cy.get('[data-cy=users-progress-input]').type('{selectall}80')
@@ -1236,7 +1236,7 @@ describe('Users Tests', () => {
         // users-progress-input
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 4,  value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(7, 'day')) }],
         ], 5);
 
         cy.get('[data-cy=users-progress-input]').type('{selectall}90')

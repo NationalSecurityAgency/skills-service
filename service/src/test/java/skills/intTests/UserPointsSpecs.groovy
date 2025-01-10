@@ -40,6 +40,7 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     Date threeDaysAgo = new Date()-3
     Date twoDaysAgo = new Date()-2
+    Date yesterday = new Date() - 1
     DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     String ultimateRoot = 'jh@dojo.com'
@@ -102,18 +103,129 @@ class UserPointsSpecs extends DefaultIntSpec {
         resultsAfter.data.get(0).totalPoints == 20
     }
 
-    def 'get subject users returns correct lastUpdated date'() {
+    def 'get subject users returns correct firstUpdated and lastUpdated date'() {
+        def subj2_skills = skillsService.getSkillsForSubject(projId, subjects.get(1))
+        def subj3_skills = skillsService.getSkillsForSubject(projId, subjects.get(2))
+
+        skillsService.addSkill(['projectId': projId, skillId: subj2_skills[0].skillId], sampleUserIds.get(1), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: subj2_skills[0].skillId], sampleUserIds.get(1), yesterday)
+        skillsService.addSkill(['projectId': projId, skillId: subj3_skills[0].skillId], sampleUserIds.get(1), twoDaysAgo)
+
         when:
         def results1 = skillsService.getSubjectUsers(projId, subjects.get(0))
+        def results2 = skillsService.getSubjectUsers(projId, subjects.get(1))
+        def results3 = skillsService.getSubjectUsers(projId, subjects.get(2))
 
         then:
         results1
         results1.count == 1
         results1.data.size() == 1
+        results2
+        results2.count == 2
+        results2.data.size() == 2
 
         // lastUpdated is null for H2 (see UserPointsRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike)
         results1.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
+        def result2User = results2.data.find { it -> it.userId == sampleUserIds.get(1).toLowerCase() }
+        def result3User = results3.data.find { it -> it.userId == sampleUserIds.get(1).toLowerCase() }
+        result2User
+        result3User
+        result2User.lastUpdated != result3User.lastUpdated
+        result2User.firstUpdated == DTF.print(threeDaysAgo.time)
+        result2User.lastUpdated == DTF.print(yesterday.time)
+        result3User.firstUpdated == DTF.print(twoDaysAgo.time)
+        result3User.lastUpdated == DTF.print(twoDaysAgo.time)
     }
+
+    def 'get project users returns correct firstUpdated and lastUpdated date'() {
+        def subj2_skills = skillsService.getSkillsForSubject(projId, subjects.get(1))
+        def subj3_skills = skillsService.getSkillsForSubject(projId, subjects.get(2))
+
+        skillsService.addSkill(['projectId': projId, skillId: subj2_skills[0].skillId], sampleUserIds.get(1), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: subj2_skills[0].skillId], sampleUserIds.get(1), yesterday)
+        skillsService.addSkill(['projectId': projId, skillId: subj3_skills[0].skillId], sampleUserIds.get(1), twoDaysAgo)
+
+        when:
+        def results = skillsService.getProjectUsers(projId)
+
+        then:
+        results
+        results.count == 2
+        results.data.size() == 2
+
+        def result2User = results.data.find { it -> it.userId == sampleUserIds.get(1).toLowerCase() }
+        result2User.lastUpdated == DTF.print(yesterday.time)
+        result2User.firstUpdated == DTF.print(threeDaysAgo.time)
+    }
+
+    def 'get skill users returns correct firstUpdated and lastUpdated date'() {
+        def subj2_skills = skillsService.getSkillsForSubject(projId, subjects.get(1))
+        def subj3_skills = skillsService.getSkillsForSubject(projId, subjects.get(2))
+
+        skillsService.addSkill(['projectId': projId, skillId: subj2_skills[0].skillId], sampleUserIds.get(1), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: subj2_skills[0].skillId], sampleUserIds.get(1), yesterday)
+        skillsService.addSkill(['projectId': projId, skillId: subj3_skills[0].skillId], sampleUserIds.get(1), twoDaysAgo)
+
+        when:
+        def results = skillsService.getSkillUsers(projId, subj2_skills[0].skillId)
+
+        then:
+        results
+        results.count == 2
+        results.data.size() == 2
+
+        def result2User = results.data.find { it -> it.userId == sampleUserIds.get(1).toLowerCase() }
+        result2User.lastUpdated == DTF.print(yesterday.time)
+        result2User.firstUpdated == DTF.print(threeDaysAgo.time)
+    }
+
+    def 'get skill users returns correct firstUpdated and lastUpdated date for imported skill'() {
+        def subj1_skills = skillsService.getSkillsForSubject(projId, subjects.get(0))
+
+        def project2 = SkillsFactory.createProject(11)
+        def project2_subject = SkillsFactory.createSubject(11, 1)
+        def project2_skill2 = SkillsFactory.createSkill(11, 1, 2, 0, 10, 0, 100)
+        skillsService.createProjectAndSubjectAndSkills(project2, project2_subject, [project2_skill2])
+
+        skillsService.exportSkillToCatalog(projId, subj1_skills[0].skillId)
+        skillsService.importSkillFromCatalog(project2.projectId, project2_subject.subjectId, subj1_skills[0].projectId, subj1_skills[0].skillId)
+        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
+
+        when:
+        def results = skillsService.getSkillUsers(project2.projectId, subj1_skills[0].skillId)
+
+        then:
+        results
+        results.count == 1
+        results.data.size() == 1
+
+        def result2User = results.data.find { it -> it.userId == sampleUserIds.get(0).toLowerCase() }
+        result2User.lastUpdated == DTF.print(threeDaysAgo.time)
+        result2User.firstUpdated == DTF.print(threeDaysAgo.time)
+    }
+
+    def 'get badge users returns correct firstUpdated and lastUpdated date'() {
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(0), yesterday)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(1), threeDaysAgo)
+
+        when:
+        def results = skillsService.getBadgeUsers(projId, badgeId)
+
+        then:
+        results
+        results.count == 2
+        results.data.size() == 2
+
+        def resultUser = results.data.find { it -> it.userId == sampleUserIds.get(0).toLowerCase() }
+        resultUser.lastUpdated == DTF.print(yesterday.time)
+        resultUser.firstUpdated == DTF.print(threeDaysAgo.time)
+
+        def result2User = results.data.find { it -> it.userId == sampleUserIds.get(1).toLowerCase() }
+        result2User.lastUpdated == DTF.print(threeDaysAgo.time)
+        result2User.firstUpdated == DTF.print(threeDaysAgo.time)
+    }
+
+
 
     def 'get project users when project exists'() {
         when:
