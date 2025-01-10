@@ -27,7 +27,6 @@ const props = defineProps({
 const timeUtils = useTimeUtils()
 
 const REQUESTED = 'Approval Requested'
-// const PENDING = 'Pending Approval'
 const APPROVED = 'Approved'
 const REJECTED = 'Rejected'
 const AWAITING_GRADING = "Awaiting Grading"
@@ -58,6 +57,7 @@ const getIconBackground = (item) => {
   }
   return 'bg-gray-500'
 }
+
 </script>
 
 <template>
@@ -77,7 +77,7 @@ const getIconBackground = (item) => {
         <div>
           <span class="text-muted text-sm">{{ timeUtils.formatDate(slotProps.item.eventTime) }}</span>
         </div>
-        <ApprovalEventMessage class="py-2" v-if="slotProps.item.description" :message="slotProps.item.description" :messageId="slotProps.item.id" />
+        <ApprovalEventMessage class="py-2" v-if="slotProps.item.description" :message="slotProps.item.description" :is-approval-request="slotProps.item.eventStatus === REQUESTED" :messageId="slotProps.item.id" />
       </template>
     </Timeline>
   </div>

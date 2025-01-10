@@ -19,12 +19,16 @@ import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vu
 
 const props = defineProps({
   message: String,
-  messageId: String
+  messageId: String,
+  isApprovalRequest: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const isDescriptionShowing = ref(false)
 const showMessageBtnLabel = computed(() => {
-  return `${isDescriptionShowing.value ? 'Hide' : 'Show'} Message`
+  return `${isDescriptionShowing.value ? 'Hide' : 'Show'} ${props.isApprovalRequest ? 'Justification' : 'Message'}`
 })
 const toggleShowMessage = () => {
   isDescriptionShowing.value = !isDescriptionShowing.value
@@ -42,7 +46,7 @@ const toggleShowMessage = () => {
         size="small"
         @click="toggleShowMessage"
         data-cy="toggleShowMessageBtn"/>
-  <markdown-text v-if="isDescriptionShowing" :text="props.message" :instance-id="props.id" data-cy="approvalEventMessage" />
+  <markdown-text v-if="isDescriptionShowing" :text="props.message" :instance-id="props.messageId" data-cy="approvalEventMessage" />
   </div>
 </template>
 
