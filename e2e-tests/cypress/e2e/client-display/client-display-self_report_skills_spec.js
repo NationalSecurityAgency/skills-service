@@ -930,12 +930,14 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
+        const expectedUserName = Cypress.env('oauthMode') ? 'foo' : 'skills@';
+
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
             .eq(0)
             .should('contain.text', 'Approved')
             .should('contain.text', 'a few seconds ago')
-            .should('contain.text', 'by skills@skills.org for display');
+            .should('contain.text', `by ${expectedUserName}`);
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
             .eq(0)
@@ -987,7 +989,7 @@ describe('Client Display Self Report Skills Tests', () => {
             .children('.p-timeline-event')
             .eq(2)
             .should('contain.text', 'Rejected')
-            .should('contain.text', 'by skills@skills.org for display')
+            .should('contain.text', `by ${expectedUserName}`);
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
             .eq(2)
