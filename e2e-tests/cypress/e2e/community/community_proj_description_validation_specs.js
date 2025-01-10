@@ -234,7 +234,7 @@ describe('Community Project Creation Tests', () => {
         ]);
     });
 
-    it.only('self report reject messages are validated against custom validators', () => {
+    it('self report reject messages are validated against custom validators', () => {
         cy.intercept('POST', '/admin/projects/proj1/approvals/reject').as('reject');
         cy.createProject(1, {enableProtectedUserCommunity: true})
         cy.createSubject(1, 1);
