@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import dayjs from 'dayjs'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
@@ -36,8 +36,13 @@ const props = defineProps({
   childSkillHighlightString: {
     type: String,
     default: ''
+  },
+  isExpanded: {
+    type: Boolean,
+    default: true
   }
 })
+const emit = defineEmits(['toggle-row']);
 const numFormat = useNumberFormat()
 const timeUtils = useTimeUtils()
 const appConfig = useAppConfig()
@@ -129,11 +134,10 @@ const skillId = computed(() => {
         <div class="sd-theme-primary-color font-medium flex">
           <div class="mr-1">
             <i  v-if="skill.isSkillsGroupType" class="fas fa-layer-group"></i>
-            <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType"
-               class="fas fa-graduation-cap text-color-secondary"></i>
+            <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType" class="fas fa-graduation-cap text-color-secondary"></i>
             <i v-if="skill.copiedFromProjectId" class="fas fa-book text-secondary"></i>
           </div>
-          <div class="">
+          <div>
             <div v-if="skillDisplayInfo.isGlobalBadgePage.value">
               <span class="font-italic text-color-secondary">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}
             </div>
@@ -148,6 +152,15 @@ const skillId = computed(() => {
             <div v-else class="inline-block" data-cy="skillProgressTitle">
               <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
             </div>
+            <SkillsButton :icon="!isExpanded ? 'fas fa-plus' : 'fas fa-minus'"
+                    v-if="skill.isSkillsGroupType"
+                    outlined
+                    :aria-label="!isExpanded ? 'Expand Group' : 'Collapse Group'"
+                    style="padding: 0.3rem 0.3rem 0.3rem 0.1rem;"
+                    class="ml-2"
+                    :data-cy="`toggleGroup-${skillId}`"
+                    @click="emit('toggle-row')">
+            </SkillsButton>
           </div>
         </div>
         <div v-if="skill.copiedFromProjectId" class="ml-2"

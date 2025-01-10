@@ -27,10 +27,6 @@ import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkil
 import { useRoute } from 'vue-router'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
-// subject: {
-//   type: Object,
-//     required: true
-// },
 const props = defineProps({
   showDescriptions: {
     type: Boolean,
@@ -211,7 +207,6 @@ const skillsToShow = computed(() => {
     })
     resultSkills = filteredRes
   }
-  // this.skillsInternal = resultSkills
   return resultSkills
 })
 
@@ -219,8 +214,21 @@ const showDescriptionsInternal = ref(false)
 const isLastViewedScrollSupported = computed(() => {
   return !parentFrame.parentFrame || parentFrame.isLastViewedScrollSupported
 })
-// this.lastViewedButtonDisabled = resultSkills.findIndex((i) => i.isLastViewed || (i.children && i.children.findIndex((c) => c.isLastViewed) >= 0)) < 0
 
+const expandGroups = ref(null)
+const hasGroups = computed(() => {
+  return !!skillsInternal.value.find(it => it.type === 'SkillsGroup')
+})
+
+const expandAllGroups = (() => {
+  expandGroups.value = true
+})
+const collapseAllGroups = (() => {
+  expandGroups.value = false
+})
+const resetGroupExpansion = (() => {
+  expandGroups.value = null
+})
 </script>
 
 <template>
@@ -275,12 +283,18 @@ const isLastViewedScrollSupported = computed(() => {
 
 
           <div class="" data-cy="skillDetailsToggle">
-            <div class="flex flex-row align-content-center">
-              <span class="text-muted pr-1 align-content-center">{{ attributes.skillDisplayName }} Details:</span>
-              <InputSwitch v-model="showDescriptionsInternal"
-                           @change="onDetailsToggle"
-                           :aria-label="`Show ${attributes.skillDisplayName} Details`"
-                           data-cy="toggleSkillDetails" />
+            <div class="flex flex-row flex-wrap align-content-center">
+              <div class="flex flex-wrap mr-3 gap-2" v-if="!route.params.badgeId && hasGroups">
+                <SkillsButton label="Expand Groups" icon="fas fa-plus" size="small" data-cy="expandGroupsButton" @click="expandAllGroups"></SkillsButton>
+                <SkillsButton label="Collapse Groups" icon="fas fa-minus" size="small" data-cy="collapseGroupsButton" @click="collapseAllGroups"></SkillsButton>
+              </div>
+              <div class="flex">
+                <span class="text-muted pr-1 align-content-center">{{ attributes.skillDisplayName }} Details:</span>
+                <InputSwitch v-model="showDescriptionsInternal"
+                             @change="onDetailsToggle"
+                             :aria-label="`Show ${attributes.skillDisplayName} Details`"
+                             data-cy="toggleSkillDetails" />
+              </div>
             </div>
           </div>
 
@@ -327,6 +341,8 @@ const isLastViewedScrollSupported = computed(() => {
               :ref="`skillProgress${skill.skillId}`"
               :skill="skill"
               :type="type"
+              :expand-groups="expandGroups"
+              @reset-group-expansion="resetGroupExpansion"
               :enable-drill-down="true"
               :show-description="showDescriptionsInternal"
               :data-cy="`skillProgress_index-${index}`"

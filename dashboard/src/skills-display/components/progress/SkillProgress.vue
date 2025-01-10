@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import SkillProgressNameRow from '@/skills-display/components/progress/skill/SkillProgressNameRow.vue'
 import { useRoute } from 'vue-router'
-import { computed, ref } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillsSummaryCards from '@/skills-display/components/progress/SkillsSummaryCards.vue'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
@@ -29,6 +29,8 @@ import CatalogImportStatus from '@/skills-display/components/progress/CatalogImp
 import PartialPointsAlert from '@/skills-display/components/skill/PartialPointsAlert.vue'
 import SkillVideo from '@/skills-display/components/progress/SkillVideo.vue';
 import dayjs from 'dayjs';
+import {useStorage} from "@vueuse/core";
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
 const props = defineProps({
   skill: Object,
@@ -65,10 +67,16 @@ const props = defineProps({
     type: Boolean,
     default: false,
     required: false
+  },
+  expandGroups: {
+    type: Boolean,
+    default: false,
+    required: false
   }
 })
-const emit = defineEmits(['add-tag-filter', 'points-earned'])
+const emit = defineEmits(['add-tag-filter', 'points-earned', 'reset-group-expansion'])
 const route = useRoute()
+const announcer = useSkillsAnnouncer()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const attributes = useSkillsDisplayAttributesState()
 
@@ -120,6 +128,18 @@ const pointsEarned = (pts) => {
 }
 
 const isSkillComplete = computed(() => props.skill && props.skill.meta && props.skill.meta.complete)
+const storageKey = computed(() => props.skill.projectId + '-' + props.skill.skillId + '-expanded')
+const expanded = useStorage(storageKey.value, true)
+const toggleRow = () => {
+  expanded.value = !expanded.value;
+  announcer.polite(`Group ${props.skill.skill} has been ${expanded.value ? 'expanded' : 'collapsed'}`);
+  emit('reset-group-expansion')
+}
+watch(() => props.expandGroups, (newValue) => {
+  if(newValue !== null && props.skill.type === 'SkillsGroup') {
+    expanded.value = newValue
+  }
+})
 </script>
 
 <template>
@@ -142,11 +162,12 @@ const isSkillComplete = computed(() => props.skill && props.skill.meta && props.
       }}</strong> {{ attributes.projectDisplayName.toLowerCase() }}! Happy playing!!
     </Message>
 
-
     <skill-progress-name-row
       :skill="skill"
       :badge-is-locked="badgeIsLocked"
       :to-route="toRoute"
+      :is-expanded="expanded"
+      @toggle-row="toggleRow"
       :child-skill-highlight-string="childSkillHighlightString"
       :type="type" />
     <div class="mt-1">
@@ -226,7 +247,7 @@ const isSkillComplete = computed(() => props.skill && props.skill.meta && props.
       </div>
     </div>
 
-    <div v-if="skill.isSkillsGroupType && childSkillsInternal" class="ml-4 mt-3">
+    <div v-if="skill.isSkillsGroupType && childSkillsInternal && expanded" class="ml-4 mt-3">
       <div v-for="(childSkill, index) in childSkillsInternal"
            :key="`group-${skill.skillId}_skill-${childSkill.skillId}`"
            :id="`skillRow-${childSkill.skillId}`"
