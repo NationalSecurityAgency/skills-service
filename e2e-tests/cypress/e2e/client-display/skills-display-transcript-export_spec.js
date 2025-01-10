@@ -112,8 +112,8 @@ describe('Transcript export tests', () => {
       expect(clean(doc.text)).to.include('SkillTree Transcript')
       expect(clean(doc.text)).to.include(projName)
       expect(clean(doc.text)).to.include('Level: 1 / 5 ')
-      expect(clean(doc.text)).to.include('Points: 100 / 600 ')
-      expect(clean(doc.text)).to.include('Skills: 0 / 3 ')
+      expect(clean(doc.text)).to.include('Points: 100 / 600 (16.7%)')
+      expect(clean(doc.text)).to.include('Skills: 0 / 3 (0.0%)')
       expect(clean(doc.text)).to.not.include('Badges')
 
       // should be a title on the 2nd page
@@ -155,8 +155,8 @@ describe('Transcript export tests', () => {
       expect(clean(doc.text)).to.include('SkillTree Transcript')
       expect(clean(doc.text)).to.include(projName)
       expect(clean(doc.text)).to.include('Level: 1 / 5 ')
-      expect(clean(doc.text)).to.include('Points: 600 / 2,600 ')
-      expect(clean(doc.text)).to.include('Skills: 6 / 26 ')
+      expect(clean(doc.text)).to.include('Points: 600 / 2,600 (23.1%)')
+      expect(clean(doc.text)).to.include('Skills: 6 / 26 (23.1%)')
       expect(clean(doc.text)).to.not.include('Badges')
 
       // should be a title on the 2nd-4th pages
@@ -204,8 +204,8 @@ describe('Transcript export tests', () => {
       expect(clean(doc.text)).to.include('SkillTree Transcript')
       expect(clean(doc.text)).to.include(projName)
       expect(clean(doc.text)).to.include('Level: 1 / 5 ')
-      expect(clean(doc.text)).to.include('Points: 600 / 2,600 ')
-      expect(clean(doc.text)).to.include('Skills: 6 / 26 ')
+      expect(clean(doc.text)).to.include('Points: 600 / 2,600 (23.1%)')
+      expect(clean(doc.text)).to.include('Skills: 6 / 26 (23.1%)')
       expect(clean(doc.text)).to.include('Badges: 1 ')
 
       // should be a title on the 2nd page
@@ -403,8 +403,8 @@ describe('Transcript export tests', () => {
       expect(clean(doc.text)).to.include('SkillTree Transcript')
       expect(clean(doc.text)).to.include(projName)
       expect(clean(doc.text)).to.include('Level: 0 / 5 ')
-      expect(clean(doc.text)).to.include('Points: 600 / 21,000 ')
-      expect(clean(doc.text)).to.include('Skills: 6 / 210 ')
+      expect(clean(doc.text)).to.include('Points: 600 / 21,000 (2.9%)')
+      expect(clean(doc.text)).to.include('Skills: 6 / 210 (2.9%)')
       expect(clean(doc.text)).to.not.include('Badges ')
 
       // should be a title on the 2nd-4th pages
@@ -607,8 +607,8 @@ describe('Transcript export tests', () => {
       expect(clean(doc.text)).to.include(user1)
       expect(clean(doc.text)).to.not.include(user2)
       expect(clean(doc.text)).to.include('Level: 1 / 5 ')
-      expect(clean(doc.text)).to.include('Points: 400 / 2,600 ')
-      expect(clean(doc.text)).to.include('Skills: 4 / 26 ')
+      expect(clean(doc.text)).to.include('Points: 400 / 2,600 (15.4%)')
+      expect(clean(doc.text)).to.include('Skills: 4 / 26 (15.4%)')
       expect(clean(doc.text)).to.not.include('Badges')
     })
 
@@ -624,8 +624,8 @@ describe('Transcript export tests', () => {
       expect(clean(doc.text)).to.include(user2)
       expect(clean(doc.text)).to.not.include(user1)
       expect(clean(doc.text)).to.include('Level: 0 / 5 ')
-      expect(clean(doc.text)).to.include('Points: 200 / 2,600 ')
-      expect(clean(doc.text)).to.include('Skills: 2 / 26 ')
+      expect(clean(doc.text)).to.include('Points: 200 / 2,600 (7.7%)')
+      expect(clean(doc.text)).to.include('Skills: 2 / 26 (7.7%)')
       expect(clean(doc.text)).to.not.include('Badges')
     })
 
@@ -691,7 +691,7 @@ describe('Transcript export tests', () => {
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
 
     cy.readTranscript(projName).then((doc) => {
-      expect(clean(doc.text)).to.include('Skills: 2 / 4 ')
+      expect(clean(doc.text)).to.include('Skills: 2 / 4 (50.0%)')
       expect(clean(doc.text)).to.include('Achieved On')
       expect(clean(doc.text)).to.not.include('Approver')
       expect(clean(doc.text)).to.include(today)
@@ -722,7 +722,7 @@ describe('Transcript export tests', () => {
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
 
     cy.readTranscript(projName).then((doc) => {
-      expect(clean(doc.text)).to.include('Skills: 2 / 4 ')
+      expect(clean(doc.text)).to.include('Skills: 2 / 4 (50.0%)')
       expect(clean(doc.text)).to.include('Achieved On')
       expect(clean(doc.text)).to.include('Approver')
       expect(clean(doc.text)).to.include(today)
@@ -752,7 +752,7 @@ describe('Transcript export tests', () => {
     cy.get('[data-cy="downloadTranscriptBtn"]').click()
 
     cy.readTranscript(projName).then((doc) => {
-      expect(clean(doc.text)).to.include('Skills: 0 / 4 ')
+      expect(clean(doc.text)).to.include('Skills: 0 / 4 (0.0%)')
       expect(clean(doc.text)).to.include('Achieved On')
       expect(clean(doc.text)).to.not.include('Approver')
     })
