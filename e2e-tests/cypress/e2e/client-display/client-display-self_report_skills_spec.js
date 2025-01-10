@@ -934,7 +934,8 @@ describe('Client Display Self Report Skills Tests', () => {
             .children('.p-timeline-event')
             .eq(0)
             .should('contain.text', 'Approved')
-            .should('contain.text', 'a few seconds ago');
+            .should('contain.text', 'a few seconds ago')
+            .should('contain.text', 'by skills@skills.org for display');
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
             .eq(0)
@@ -986,6 +987,7 @@ describe('Client Display Self Report Skills Tests', () => {
             .children('.p-timeline-event')
             .eq(2)
             .should('contain.text', 'Rejected')
+            .should('contain.text', 'by skills@skills.org for display')
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
             .eq(2)

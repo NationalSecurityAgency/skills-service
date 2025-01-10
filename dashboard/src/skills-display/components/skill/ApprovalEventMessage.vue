@@ -16,19 +16,19 @@ limitations under the License.
 <script setup>
 import { computed, ref } from 'vue'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue';
+import { useSelfReportHelper } from '@/skills-display/UseSelfReportHelper.js';
 
 const props = defineProps({
   message: String,
   messageId: String,
-  isApprovalRequest: {
-    type: Boolean,
-    default: false,
-  },
+  eventStatus: String,
 })
+
+const selfReportHelper = useSelfReportHelper()
 
 const isDescriptionShowing = ref(false)
 const showMessageBtnLabel = computed(() => {
-  return `${isDescriptionShowing.value ? 'Hide' : 'Show'} ${props.isApprovalRequest ? 'Justification' : 'Message'}`
+  return `${isDescriptionShowing.value ? 'Hide' : 'Show'} ${selfReportHelper.isApprovalRequest(props.eventStatus) ? 'Justification' : 'Message'}`
 })
 const toggleShowMessage = () => {
   isDescriptionShowing.value = !isDescriptionShowing.value
