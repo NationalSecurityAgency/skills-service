@@ -34,6 +34,7 @@ import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.attributes.ExpirationAttrs
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
+import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.utils.InputSanitizer
 
@@ -67,15 +68,18 @@ class ExcelExportService {
     @Autowired
     SkillsAdminService skillsAdminService
 
+    @Autowired
+    ProjDefRepo projDefRepo
+
     @Transactional(readOnly = true)
     void exportUsersProgress(Workbook workbook, String projectId, String query, PageRequest pageRequest, int minimumPoints) {
         String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getProjectUserCommunity(projectId))
         Sheet sheet = workbook.createSheet()
         List<String> headers
         if (userTagLabel) {
-            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Level", "Current Points", "Points First Earned (UTC)", "Points Last Earned (UTC)"]
+            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"]
         } else {
-            headers = ["User ID", "Last Name", "First Name", "Level", "Current Points", "Points First Earned (UTC)", "Points Last Earned (UTC)"]
+            headers = ["User ID", "Last Name", "First Name", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"]
         }
         Integer columnNumber = 0
         Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
@@ -83,7 +87,12 @@ class ExcelExportService {
         CellStyle dateStyle = workbook.createCellStyle()
         dateStyle.setDataFormat((short) 22) // NOTE: 14 = "mm/dd/yyyy"
 
+        CellStyle percentStyle = workbook.createCellStyle()
+        percentStyle.setDataFormat((short) 9)
+
         Cell cell = null
+
+        Integer projectPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
         Stream<ProjectUser> projectUsers = adminUsersService.streamAllDistinctUsersForProject(projectId, query, pageRequest, minimumPoints)
         try {
             projectUsers.each { ProjectUser user ->
@@ -97,6 +106,10 @@ class ExcelExportService {
                 }
                 row.createCell(columnNumber++).setCellValue(user.userMaxLevel)
                 row.createCell(columnNumber++).setCellValue(user.totalPoints)
+                Double percentage = (user.totalPoints / projectPoints)
+                cell = row.createCell(columnNumber++)
+                cell.setCellStyle(percentStyle)
+                cell.setCellValue(percentage)
 
                 cell = row.createCell(columnNumber++)
                 cell.setCellStyle(dateStyle)
