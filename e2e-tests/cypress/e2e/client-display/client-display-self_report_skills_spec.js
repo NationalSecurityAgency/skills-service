@@ -45,14 +45,18 @@ describe('Client Display Self Report Skills Tests', () => {
                 });
         });
 
-        Cypress.Commands.add('submitForApproval', (skillNum = '1') => {
+        Cypress.Commands.add('submitForApproval', (skillNum = '1', approvalRequestedMsg = '', timestamp = null) => {
             // cy.request('POST', `/api/projects/proj1/skills/${skillId}`)
-            const m = moment.utc();
-            cy.request('POST', `/api/projects/proj1/skills/skill${skillNum}`, {
-                userId: Cypress.env('proxyUser'),
-                timestamp: m.clone()
+            if (!timestamp) {
+                const m = moment.utc();
+                timestamp = m.clone()
                     .subtract(5, 'day')
                     .format('x')
+            }
+            cy.request('POST', `/api/projects/proj1/skills/skill${skillNum}`, {
+                userId: Cypress.env('proxyUser'),
+                approvalRequestedMsg,
+                timestamp
             });
         });
     });
@@ -312,34 +316,36 @@ describe('Client Display Self Report Skills Tests', () => {
 
         cy.get('[data-cy="requestApprovalBtn"]')
             .should('be.enabled');
+
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
             .eq(0)
             .should('contain.text', 'Approved')
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
-            .eq(1)
-            .should('contain.text', 'Approval Requested')
-        cy.get('[data-cy="approvalHistoryTimeline"]')
-            .children('.p-timeline-event')
-            .eq(1)
-            .get('[data-cy="toggleShowMessageBtn"]')
+            .eq(0)
+            .find('[data-cy="toggleShowMessageBtn"]')
             .click();
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
-            .eq(1)
+            .eq(0)
             .get('[data-cy="approvalEventMessage"]')
             .should('contain.text', 'I approve this message!')
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
-            .eq(1)
-            .get('[data-cy="toggleShowMessageBtn"]')
+            .eq(0)
+            .find('[data-cy="toggleShowMessageBtn"]')
             .click();
         cy.get('[data-cy="approvalHistoryTimeline"]')
             .children('.p-timeline-event')
-            .eq(1)
+            .eq(0)
             .get('[data-cy="approvalEventMessage"]')
             .should('not.exist')
+
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .should('contain.text', 'Approval Requested')
 
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
             .contains('50');
@@ -911,5 +917,123 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="overallLevelDesc"]').contains('Level 1 out of 5')
         cy.get('[data-cy="overallStars"]').find('[data-p-active="true"]').should('have.length', 1)
         cy.get('[data-cy="overallStars"]').find('[data-p-active="false"]').should('have.length', 4)
+    });
+
+    it('self report - expand multiple messages', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.submitForApproval(1, 'please approve request 1');
+        cy.rejectRequest();
+        cy.submitForApproval(1, 'please approve request 2', moment.utc().format('x'));
+        cy.approveRequest(0, 'I approve this message!');
+
+        cy.cdVisit('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(0);
+
+        const expectedUserName = Cypress.env('oauthMode') ? 'foo' : 'skills@';
+
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .should('contain.text', 'Approved')
+            .should('contain.text', 'a few seconds ago')
+            .should('contain.text', `by ${expectedUserName}`);
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .find('[data-cy="toggleShowMessageBtn"]')
+            .should('contain.text', 'Show Message');
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .find('[data-cy="toggleShowMessageBtn"]')
+            .click();
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .get('[data-cy="approvalEventMessage"]')
+            .should('contain.text', 'I approve this message!')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(0)
+            .find('[data-cy="toggleShowMessageBtn"]')
+            .should('contain.text', 'Hide Message');
+
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .should('contain.text', 'Approval Requested')
+            .should('contain.text', 'a few seconds ago');
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .find('[data-cy="toggleShowMessageBtn"]')
+            .should('contain.text', 'Show Justification');
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .find('[data-cy="toggleShowMessageBtn"]')
+            .click();
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .get('[data-cy="approvalEventMessage"]')
+            .should('contain.text', 'please approve request 2')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(1)
+            .find('[data-cy="toggleShowMessageBtn"]')
+            .should('contain.text', 'Hide Justification');
+
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(2)
+            .should('contain.text', 'Rejected')
+            .should('contain.text', `by ${expectedUserName}`);
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(2)
+            .find('[data-cy="toggleShowMessageBtn"]')
+            .should('contain.text', 'Show Message');
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(2)
+            .find('[data-cy="toggleShowMessageBtn"]')
+            .click();
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(3)
+            .get('[data-cy="approvalEventMessage"]')
+            .should('contain.text', 'Skill was rejected')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(2)
+            .find('[data-cy="toggleShowMessageBtn"]')
+            .should('contain.text', 'Hide Message');
+
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(3)
+            .should('contain.text', 'Approval Requested')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(3)
+            .find('[data-cy="toggleShowMessageBtn"]')
+            .should('contain.text', 'Show Justification');
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(3)
+            .find('[data-cy="toggleShowMessageBtn"]')
+            .click();
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(3)
+            .get('[data-cy="approvalEventMessage"]')
+            .should('contain.text', 'please approve request 1')
+        cy.get('[data-cy="approvalHistoryTimeline"]')
+            .children('.p-timeline-event')
+            .eq(3)
+            .find('[data-cy="toggleShowMessageBtn"]')
+            .should('contain.text', 'Hide Justification');
     });
 });
