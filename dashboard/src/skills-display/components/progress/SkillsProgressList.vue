@@ -229,6 +229,24 @@ const collapseAllGroups = (() => {
 const resetGroupExpansion = (() => {
   expandGroups.value = null
 })
+
+const items = [
+  {
+    label: 'Collapse All',
+    icon: 'fas fa-minus',
+    command: collapseAllGroups
+  },
+  {
+    label: 'Expand All',
+    icon: 'fas fa-plus',
+    command: expandAllGroups
+  },
+]
+
+const menu = ref()
+const toggle = (event) => {
+  menu.value.toggle(event)
+}
 </script>
 
 <template>
@@ -285,8 +303,22 @@ const resetGroupExpansion = (() => {
           <div class="" data-cy="skillDetailsToggle">
             <div class="flex flex-row flex-wrap align-content-center">
               <div class="flex flex-wrap mr-3 gap-2" v-if="!route.params.badgeId && hasGroups">
-                <SkillsButton label="Expand Groups" icon="fas fa-plus" size="small" data-cy="expandGroupsButton" @click="expandAllGroups"></SkillsButton>
-                <SkillsButton label="Collapse Groups" icon="fas fa-minus" size="small" data-cy="collapseGroupsButton" @click="collapseAllGroups"></SkillsButton>
+                <Button
+                    outlined
+                    raised
+                    size="small"
+                    @click="toggle"
+                    aria-label="Group Controls"
+                    aria-haspopup="true"
+                    data-cy="groupToggle"
+                    aria-controls="group_control_menu">
+                  <i class="fas fa-list mr-1" aria-hidden="true"></i>
+                  <span>Groups</span>
+                  <i class="fas fa-caret-down ml-2"></i>
+                </Button>
+                <div id="group_control_menu">
+                  <Menu ref="menu" :model="items" :popup="true"></Menu>
+                </div>
               </div>
               <div class="flex">
                 <span class="text-muted pr-1 align-content-center">{{ attributes.skillDisplayName }} Details:</span>
