@@ -316,7 +316,9 @@ const toggle = (event) => {
                   <span>Groups</span>
                   <i class="fas fa-caret-down ml-2"></i>
                 </Button>
-                <Menu ref="menu" :model="items" :popup="true"></Menu>
+                <div id="group_control_menu">
+                  <Menu ref="menu" :model="items" :popup="true"></Menu>
+                </div>
               </div>
               <div class="flex">
                 <span class="text-muted pr-1 align-content-center">{{ attributes.skillDisplayName }} Details:</span>
