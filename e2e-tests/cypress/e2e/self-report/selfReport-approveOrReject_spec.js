@@ -250,6 +250,82 @@ describe('Self Report Skills Management Tests', () => {
     cy.wait('@reject');
   });
 
+  it('custom validation for approval message', () => {
+    cy.intercept('POST', '/admin/projects/proj1/approvals/approve', (req) => {
+      expect(req.body.approvalMessage)
+          .to
+          .include('Approval jabberwoc');
+    })
+        .as('approve');
+
+    cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+    cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+    cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+    cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00');
+    cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00');
+    cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00');
+
+    cy.visit('/administrator/projects/proj1/self-report');
+
+    cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+    cy.get('[data-cy="approveBtn"]')
+        .click();
+    cy.get('[data-cy="approvalTitle"]')
+        .contains('This will approve user\'s request(s) to get points');
+
+    cy.get('[data-cy="approvalRequiredMsgError"]')
+        .should('not.be.visible');
+    cy.get('[data-cy="saveDialogBtn"]')
+        .should('be.enabled');
+
+    cy.get('[data-cy="approvalInputMsg"]')
+        .type('Approval jabber');
+    cy.get('[data-cy="approvalRequiredMsgError"]')
+        .should('not.be.visible');
+    cy.get('[data-cy="saveDialogBtn"]')
+        .should('be.enabled');
+
+    cy.get('[data-cy="approvalInputMsg"]')
+        .type('wock');
+    cy.get('[data-cy="approvalRequiredMsgError"]')
+        .should('not.be.visible');
+    cy.get('[data-cy="saveDialogBtn"]')
+        .should('be.enabled');
+
+    cy.get('[data-cy="approvalInputMsg"]')
+        .type('y');
+    cy.get('[data-cy="approvalRequiredMsgError"]')
+        .contains('Message - paragraphs may not contain jabberwocky');
+    cy.get('[data-cy="saveDialogBtn"]')
+        .should('be.disabled');
+
+    cy.get('[data-cy="approvalInputMsg"]')
+        .type(' ok');
+    cy.get('[data-cy="approvalRequiredMsgError"]')
+        .contains('Message - paragraphs may not contain jabberwocky');
+    cy.get('[data-cy="saveDialogBtn"]')
+        .should('be.disabled');
+
+    cy.get('[data-cy="approvalInputMsg"]')
+        .type('{backspace}{backspace}{backspace}');
+    cy.get('[data-cy="approvalRequiredMsgError"]')
+        .contains('Message - paragraphs may not contain jabberwocky');
+    cy.get('[data-cy="saveDialogBtn"]')
+        .should('be.disabled');
+
+    cy.get('[data-cy="approvalInputMsg"]')
+        .type('{backspace}{backspace}');
+    cy.get('[data-cy="approvalRequiredMsgError"]')
+        .contains('Message - paragraphs may not contain jabberwocky')
+        .should('not.exist');
+    cy.get('[data-cy="saveDialogBtn"]')
+        .should('be.enabled');
+
+    cy.get('[data-cy="saveDialogBtn"]')
+        .click();
+    cy.wait('@approve');
+  });
+
   it('approve 1 page worth of records', () => {
     cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
     cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
