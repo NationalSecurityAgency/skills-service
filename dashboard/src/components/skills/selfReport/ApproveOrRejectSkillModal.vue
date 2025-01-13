@@ -48,9 +48,9 @@ const initialData = {
 const schema = object({
   'approvalRequiredMsg': string()
       .trim()
-      .customDescriptionValidator('Rejection Message')
+      .customDescriptionValidator('Message')
       .max(appConfig.maxSelfReportRejectionMessageLength)
-      .label('Rejection Message')
+      .label('Message')
 })
 const rejectOrApproveSkills = (values) => {
   const ids = props.selectedItems.map((item) => item.id);

@@ -446,7 +446,6 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         e.message.contains("Custom validation failed: msg=[paragraphs may not contain jabberwocky], type=[skillApprovalRejection], rejectionMsg=[Just jabberwocky felt like it]")
     }
 
-
     void "validate approval message if 'paragraphValidationRegex' property is configured"() {
         String user = "user0"
         String user1 = "user1"

@@ -21,7 +21,7 @@ import SelfReportService from '@/components/skills/selfReport/SelfReportService'
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
-import RejectSkillModal from "@/components/skills/selfReport/RejectSkillModal.vue";
+import RejectSkillModal from "@/components/skills/selfReport/ApproveOrRejectSkillModal.vue";
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
