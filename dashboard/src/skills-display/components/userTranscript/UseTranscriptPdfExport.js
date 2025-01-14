@@ -260,8 +260,8 @@ export const useTranscriptPdfExport = () => {
     }
     overallStats.add(addStat(labelsConf.level, base64Images.trophy, 50, info.userLevel, info.totalLevels))
     doc.moveUp()
-    const skillsPercentage = ((info.userSkillsCompleted / info.totalSkills) * 100).toFixed(1)
-    const pointsPercentage = ((info.userPoints / info.totalPoints) * 100).toFixed(1)
+    const skillsPercentage = Math.round((info.userSkillsCompleted / info.totalSkills) * 100)
+    const pointsPercentage = Math.round((info.userPoints / info.totalPoints) * 100)
     overallStats.add(addStat(`${labelsConf.skill}s`, base64Images.arrowUp, 300, info.userSkillsCompleted, info.totalSkills, `(${skillsPercentage}%)`))
     overallStats.add(addStat(`${labelsConf.point}s`, base64Images.hat, 50, info.userPoints, info.totalPoints, `(${pointsPercentage}%)`))
     if (info.achievedBadges && info.achievedBadges.length > 0) {
