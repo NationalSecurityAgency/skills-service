@@ -40,6 +40,7 @@ import skills.quizLoading.QuizSettings
 import skills.services.*
 import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.ServiceValidatorHelper
+import skills.services.admin.UserCommunityService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
@@ -130,6 +131,9 @@ class QuizDefService {
 
     @Autowired
     UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    UserCommunityService userCommunityService
 
     @Transactional(readOnly = true)
     List<QuizDefResult> getCurrentUsersTestDefs() {
@@ -261,6 +265,7 @@ class QuizDefService {
         lockingService.lockQuizDefs()
 
         QuizDefWithDescription quizDefWithDescription = retrieveAndValidateQuizDef(originalQuizId, newQuizId, quizDefRequest)
+        validateUserCommunityProps(quizDefRequest, quizDefWithDescription)
         final boolean isEdit = quizDefWithDescription
         if (quizDefWithDescription) {
             QuizDefParent.QuizType incomingType = QuizDefParent.QuizType.valueOf(quizDefRequest.type)
@@ -1052,6 +1057,28 @@ class QuizDefService {
         CustomValidationResult customValidationResult = customValidator.validate(quizDefRequest)
         if (!customValidationResult.valid) {
             throw new SkillQuizException(customValidationResult.msg, quizId, ErrorCode.BadParam)
+        }
+    }
+
+
+    @Profile
+    private void validateUserCommunityProps(QuizDefRequest quizDefRequest, QuizDefWithDescription quizDefWithDescription) {
+        String quizId = quizDefWithDescription?.quizId ?: quizDefRequest.quizId
+        if (quizDefRequest.enableProtectedUserCommunity != null) {
+            if (quizDefRequest.enableProtectedUserCommunity) {
+                String userId = userInfoService.currentUserId
+                if (!userCommunityService.isUserCommunityMember(userId)) {
+                    throw new SkillQuizException("User [${userId}] is not allowed to set [enableProtectedUserCommunity] to true", quizId, ErrorCode.AccessDenied)
+                }
+
+//                EnableUserCommunityValidationRes enableProjValidationRes = userCommunityService.validateProjectForCommunity(projId)
+//                if (!enableProjValidationRes.isAllowed) {
+//                    String reasons = enableProjValidationRes.unmetRequirements.join("\n")
+//                    throw new SkillException("Not Allowed to set [enableProtectedUserCommunity] to true. Reasons are:\n${reasons}", projId, null, ErrorCode.AccessDenied)
+//                }
+            } else if (quizDefWithDescription){
+                QuizValidator.isTrue(!userCommunityService.isUserCommunityOnlyQuiz(quizDefWithDescription.id), "Once quiz [enableProtectedUserCommunity=true] it cannot be flipped to false", quizId)
+            }
         }
     }
 

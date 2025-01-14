@@ -25,6 +25,7 @@ import skills.UIConfigProperties
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.EnableUserCommunityValidationRes
 import skills.controller.result.model.UserRoleRes
+import skills.quizLoading.QuizSettings
 import skills.services.AccessSettingsStorageService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsDataAccessor
@@ -32,14 +33,7 @@ import skills.storage.model.AdminGroupDef
 import skills.storage.model.ProjDef
 import skills.storage.model.UserTag
 import skills.storage.model.auth.UserRole
-import skills.storage.repos.AdminGroupDefRepo
-import skills.storage.repos.ExportedSkillRepo
-import skills.storage.repos.ProjDefRepo
-import skills.storage.repos.SkillRelDefRepo
-import skills.storage.repos.SkillShareDefRepo
-import skills.storage.repos.UserAttrsRepo
-import skills.storage.repos.UserRoleRepo
-import skills.storage.repos.UserTagRepo
+import skills.storage.repos.*
 
 import java.util.regex.Pattern
 
@@ -55,6 +49,9 @@ class UserCommunityService {
 
     @Autowired
     SettingsDataAccessor settingsDataAccessor
+
+    @Autowired
+    QuizSettingsRepo quizSettingsRepo
 
     @Autowired
     UserRoleRepo userRoleRepo
@@ -193,6 +190,17 @@ class UserCommunityService {
     boolean isUserCommunityOnlyProject(String projectId) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         return settingsDataAccessor.getProjectSetting(projectId, Settings.USER_COMMUNITY_ONLY_PROJECT.settingName)?.isEnabled()
+    }
+
+    /**
+     * Checks if the specified quizId is configured as a user community only quiz
+     * @param quizId - not null
+     * @return true if the project exists and has been configured as a user community only project
+     */
+    @Transactional(readOnly = true)
+    boolean isUserCommunityOnlyQuiz(Integer quizRefId) {
+        SkillsValidator.isNotNull(quizRefId, "quizRefId")
+        return quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.UserCommunityOnlyQuiz.setting, quizRefId)?.isEnabled()
     }
 
     @Transactional(readOnly = true)
