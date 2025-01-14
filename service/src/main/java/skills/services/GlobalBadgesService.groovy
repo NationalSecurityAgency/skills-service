@@ -406,7 +406,7 @@ class GlobalBadgesService {
 
     @Transactional(readOnly = true)
     boolean isSkillUsedInGlobalBadge(SkillDef skillDef) {
-        int numProjectSkillsUsedInGlobalBadge = skillRelDefRepo.getSkillUsedInGlobalBadgeCount(skillDef.skillId)
+        int numProjectSkillsUsedInGlobalBadge = skillRelDefRepo.getSkillUsedInGlobalBadgeCount(skillDef.id)
         return numProjectSkillsUsedInGlobalBadge > 0
     }
 

@@ -23,6 +23,8 @@ import skills.intTests.utils.SkillsService
 import skills.storage.model.UserAchievement
 import skills.storage.repos.UserAchievedLevelRepo
 
+import static skills.intTests.utils.SkillsFactory.*
+
 class GlobalBadgeSpecs extends DefaultIntSpec {
 
     @Autowired
@@ -370,4 +372,33 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         !summary.badgeAchieved
     }
 
+
+    def "removing imported skill when original is part of the global badge"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1_skills = (1..3).collect {createSkill(1, 1, it, 0, 5, 0, 250) }
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, p1_skills)
+        p1_skills.each {
+            skillsService.exportSkillToCatalog(project1.projectId, it.skillId)
+        }
+
+        def badge = SkillsFactory.createBadge()
+        badge.enabled = 'true'
+        supervisorService.createGlobalBadge(badge)
+        supervisorService.assignSkillToGlobalBadge(projectId: project1.projectId, badgeId: badge.badgeId, skillId: p1_skills[0].skillId)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, [])
+
+        skillsService.importSkillFromCatalog(project2.projectId, p2subj1.subjectId, project1.projectId, p1_skills[0].skillId)
+        when:
+        skillsService.deleteSkill([projectId: project2.projectId, subjectId: p2subj1.subjectId, skillId: p1_skills[0].skillId])
+
+        def badgeSkills =supervisorService.getGlobalBadgeSkills(badge.badgeId)
+        then:
+        badgeSkills.size() == 1
+        badgeSkills.projectId == [project1.projectId]
+        badgeSkills.skillId == [p1_skills[0].skillId]
+    }
 }
