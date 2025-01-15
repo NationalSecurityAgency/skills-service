@@ -2368,4 +2368,20 @@ describe('Global Badges Tests', () => {
               expect(bgImage).to.contain('data:image/png;base64')
           })
     });
+
+    it('cannot delete a skill assigned to a global badge', function () {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1);
+        cy.enableGlobalBadge(1);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy=deleteSkillButton_skill1]').click()
+        cy.get('[data-cy="skillBelongsToGlobalBadgeWarning"]').should('be.visible')
+        cy.get('[data-cy="deleteSkillWarning"]').should('not.exist')
+        cy.get('[data-cy="closeDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
+    })
 });

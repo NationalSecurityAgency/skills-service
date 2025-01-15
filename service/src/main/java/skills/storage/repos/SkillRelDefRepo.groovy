@@ -108,8 +108,8 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
                 and skill.skillId in (?2) ''')
     List<SkillToSubjIds> findAllSubjectIdsByChildSkillId(String projectId, List<String> skillIds)
 
-    @Query(value = '''select count(srd.id) from SkillRelDef srd where srd.child.skillId=?1 and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')
-    Integer getSkillUsedInGlobalBadgeCount(String skillId)
+    @Query(value = '''select count(srd.id) from SkillRelDef srd where srd.child.id=?1 and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')
+    Integer getSkillUsedInGlobalBadgeCount(Integer skillRefId)
 
     @Query(value = '''select srd.parent.id from SkillRelDef srd where srd.child.id=?1 and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge' ''')
     List<Integer> getGlobalBadgeIdsForSkill(Integer id)
