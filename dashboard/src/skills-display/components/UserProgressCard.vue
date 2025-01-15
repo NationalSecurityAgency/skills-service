@@ -62,7 +62,7 @@ const props = defineProps({
         <i :class="`${icon} fa-stack-2x watermark-icon`" />
 
         <div class="fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg">
-          <div class="text-3xl" style="line-height: 1.2em">{{ userAchieved }}</div>
+          <div class="text-3xl" style="line-height: 1.2em" :data-cy="`${componentName}Position`">{{ userAchieved }}</div>
           <div class="mt-1">out of</div>
           <div>{{ totalAvailable }} {{ unit }}</div>
         </div>
