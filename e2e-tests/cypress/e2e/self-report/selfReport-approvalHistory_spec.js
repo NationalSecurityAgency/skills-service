@@ -979,4 +979,38 @@ describe('Self Report Approval History Tests', () => {
 
     });
 
+    it('approval history - expand multiple justifications', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.reportSkill(1, 1, 'user1', '2020-09-17 11:00', true, 'please approve request 1');
+        cy.rejectRequest();
+        cy.reportSkill(1, 1, 'user1', moment.utc(), true, 'please approve request 2');
+        cy.approveAllRequests();
+
+        cy.intercept('/admin/projects/proj1/approvals/history*')
+            .as('loadHistory');
+
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@loadHistory');
+
+        cy.get('[data-cy="expandDetailsBtn_skill1"]')
+            .should('have.length', 2)
+            .eq(0)
+            .click();
+
+        cy.get('[data-cy="expandDetailsBtn_skill1"]')
+            .should('have.length', 2)
+            .eq(1)
+            .click();
+
+        cy.get('[data-cy="approvalMessage"]')
+            .should('have.length', 2)
+            .eq(0)
+            .should('contain.text', 'please approve request 2')
+
+        cy.get('[data-cy="approvalMessage"]')
+            .should('have.length', 2)
+            .eq(1)
+            .should('contain.text', 'please approve request 1');
+    });
+
 });
