@@ -236,7 +236,7 @@ defineExpose( {
                 <SkillsCardHeader title="Requested points with the following justification:"></SkillsCardHeader>
               </template>
               <template #content>
-                <markdown-text class="d-inline-block" :text="slotProps.data.requestMsg" data-cy="approvalMessage"/>
+                <markdown-text class="d-inline-block" :text="slotProps.data.requestMsg" data-cy="approvalMessage" :instance-id="`${slotProps.data.id}`"/>
               </template>
             </Card>
             <Card v-else class="ml-4">
