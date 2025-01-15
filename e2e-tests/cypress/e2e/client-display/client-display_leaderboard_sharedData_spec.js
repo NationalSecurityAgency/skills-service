@@ -295,10 +295,10 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
         }]);
 
         cy.cdVisit('/?loginAsUser=skills@skills.org');
-        cy.get('[data-cy="myRank"]')
+        cy.get('[data-cy="optedOutMessage"]')
           .contains('Opted-Out');
-        cy.get('[data-cy="myRank"]')
-          .contains('Your position would be 13 if you opt-in');
+        cy.get('[data-cy="optedOutMessage"]')
+          .contains('Your position would be #13 if you opt-in');
         cy.wait(2000)
         cy.matchSnapshotImageForElement('[data-cy="myRank"]', {
             name: 'my-rank-opted-out',

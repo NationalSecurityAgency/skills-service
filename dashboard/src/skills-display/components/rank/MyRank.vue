@@ -30,6 +30,7 @@ const route = useRoute()
 
 const position = computed(() => numberFormat.pretty(progress.userRanking.position))
 const totalUsers = computed(() => numberFormat.pretty(progress.userRanking.numUsers))
+const optedOut = computed(() => progress.userRanking.optedOut)
 onMounted(() => {
   progress.loadUserSkillsRanking(route.params.subjectId)
 })
@@ -52,7 +53,9 @@ const toRankDetailsPage = computed(() => {
       unit="users"
       icon="fa fa-users"
       :route="toRankDetailsPage"
-      :is-summary-only="attributes.isSummaryOnly" />
+      :is-summary-only="attributes.isSummaryOnly"
+      :loading="progress.loadingUserSkillsRanking"
+      :opted-out="optedOut" />
 </template>
 
 <style scoped>
