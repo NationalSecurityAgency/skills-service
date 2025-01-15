@@ -88,7 +88,7 @@ class AppController {
     @RequestMapping(value = "/quiz-definitions", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     List<QuizDefResult> getQuizDefs() {
-        return quizDefService.getCurrentUsersTestDefs()
+        return quizDefService.getCurrentUsersQuizDefs()
     }
 
     @RequestMapping(value = "/admin-group-definitions", method = RequestMethod.GET, produces = "application/json")

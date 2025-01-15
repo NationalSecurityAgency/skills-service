@@ -232,7 +232,7 @@ class AdminGroupService {
 
     @Transactional(readOnly = true)
     AdminGroupQuizResult getAdminGroupQuizzesAndSurveys(String adminGroupId) {
-        List<QuizDefResult> userQuizzes = quizDefService.getCurrentUsersTestDefs()
+        List<QuizDefResult> userQuizzes = quizDefService.getCurrentUsersQuizDefs()
         List<String> assignedQuizIds = userRoleRepository.findQuizIdsByAdminGroupId(adminGroupId)
         return new AdminGroupQuizResult(adminGroupId: adminGroupId,
                 availableQuizzes: userQuizzes.findAll { QuizDefResult it -> (it.quizId !in assignedQuizIds) },
@@ -285,7 +285,7 @@ class AdminGroupService {
 
     private AdminGroupDefResult convert(AdminGroupDefRepo.AdminGroupDefSummaryRes adminGroupDefSummaryResult, Boolean includedMemberRoles = false) {
         AdminGroupDefResult result = Props.copy(adminGroupDefSummaryResult, new AdminGroupDefResult())
-        result.userCommunity = userCommunityService.getCommunityNameBasedProjConfStatus(adminGroupDefSummaryResult.getProtectedCommunityEnabled())
+        result.userCommunity = userCommunityService.getCommunityNameBasedOnConfAndItemStatus(adminGroupDefSummaryResult.getProtectedCommunityEnabled())
         if (includedMemberRoles) {
             result.allMembers = adminGroupRoleService.getAdminGroupMemberUserRoles(adminGroupDefSummaryResult.adminGroupId)
         }

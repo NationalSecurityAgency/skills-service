@@ -26,4 +26,6 @@ class QuizDefResult {
 
     Date created
     int displayOrder
+
+    String userCommunity
 }

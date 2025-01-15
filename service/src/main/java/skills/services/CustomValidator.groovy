@@ -126,7 +126,13 @@ class CustomValidator {
     }
 
     CustomValidationResult validate(QuizDefRequest quizDefRequest) {
-        return validateDescriptionAndName(quizDefRequest.description, quizDefRequest.name)
+        CustomValidationResult validationResult = validateDescription(quizDefRequest.description, null, false, quizDefRequest.quizId)
+        if (!validationResult.valid) {
+            return validationResult
+        }
+
+        validationResult = validateName(quizDefRequest.name)
+        return validationResult
     }
 
     CustomValidationResult validate(AdminGroupDefRequest adminGroupDefRequest) {
@@ -152,19 +158,29 @@ class CustomValidator {
         return validationResult
     }
 
-    CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false) {
+    private boolean shouldUseCommunityValidation(String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId) {
+        if (this.userCommunityParagraphPattern) {
+            if (utilizeUserCommunityParagraphPatternByDefault || projectId) {
+                return projectId ? userCommunityService.isUserCommunityOnlyProject(projectId) : utilizeUserCommunityParagraphPatternByDefault
+            }
+            if (quizId) {
+                return userCommunityService.isUserCommunityOnlyQuiz(quizId)
+            }
+        }
+        return false
+    }
+
+    CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
         Pattern paragraphPatternToUse = this.paragraphPattern
         String paragraphValidationMsgToUse = this.paragraphValidationMsg
-        if ((utilizeUserCommunityParagraphPatternByDefault || projectId) && this.userCommunityParagraphPattern) {
-            boolean shouldUseCommunityValidation = projectId ? userCommunityService.isUserCommunityOnlyProject(projectId) : utilizeUserCommunityParagraphPatternByDefault
-            if (shouldUseCommunityValidation) {
-                paragraphPatternToUse = this.userCommunityParagraphPattern
-                paragraphValidationMsgToUse = this.userCommunityParagraphValidationMsg ?: this.paragraphValidationMsg
 
-                String userId = userInfoService.currentUserId
-                if (!userCommunityService.isUserCommunityMember(userId)) {
-                    throw new SkillException("User [${userId}] is not allowed to validate using user community validation", projectId, null, ErrorCode.AccessDenied)
-                }
+        if (shouldUseCommunityValidation(projectId, utilizeUserCommunityParagraphPatternByDefault, quizId)) {
+            paragraphPatternToUse = this.userCommunityParagraphPattern
+            paragraphValidationMsgToUse = this.userCommunityParagraphValidationMsg ?: this.paragraphValidationMsg
+
+            String userId = userInfoService.currentUserId
+            if (!userCommunityService.isUserCommunityMember(userId)) {
+                throw new SkillException("User [${userId}] is not allowed to validate using user community validation", projectId, null, ErrorCode.AccessDenied)
             }
         }
         if (!paragraphPatternToUse || StringUtils.isBlank(description)) {

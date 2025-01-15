@@ -258,7 +258,7 @@ class SettingsService {
             res.add(new SettingsResult(
                     setting: Settings.PROJECT_COMMUNITY_VALUE.settingName,
                     projectId: projectId,
-                    value: userCommunityService.getCommunityNameBasedProjConfStatus(isUserCommunityProtectedProject),
+                    value: userCommunityService.getCommunityNameBasedOnConfAndItemStatus(isUserCommunityProtectedProject),
                     userId: currentUser.username?.toLowerCase()
             ))
         }

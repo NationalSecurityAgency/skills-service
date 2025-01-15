@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.UIConfigProperties
+import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.EnableUserCommunityValidationRes
 import skills.controller.result.model.UserRoleRes
@@ -31,6 +32,7 @@ import skills.services.settings.Settings
 import skills.services.settings.SettingsDataAccessor
 import skills.storage.model.AdminGroupDef
 import skills.storage.model.ProjDef
+import skills.storage.model.QuizDef
 import skills.storage.model.UserTag
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.*
@@ -64,6 +66,9 @@ class UserCommunityService {
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    QuizDefRepo quizDefRepo
 
     @Autowired
     SkillShareDefRepo skillShareDefRepo
@@ -127,24 +132,14 @@ class UserCommunityService {
         return res
     }
 
-    EnableUserCommunityValidationRes validateProjectForCommunity(String projId, EnableUserCommunityValidationRes enableProjValidationRes = null) {
-        EnableUserCommunityValidationRes res = enableProjValidationRes ? enableProjValidationRes : new EnableUserCommunityValidationRes(isAllowed: true, unmetRequirements: [])
+    EnableUserCommunityValidationRes validateProjectForCommunity(String projId, EnableUserCommunityValidationRes existingValidationRes = null) {
+        EnableUserCommunityValidationRes res = existingValidationRes ? existingValidationRes : new EnableUserCommunityValidationRes(isAllowed: true, unmetRequirements: [])
 
         // only applicable if project already exist; also normalizes project ids case
         ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(projId)
         if (projDef) {
             List<UserRole> allRoles = userRoleRepo.findAllByProjectIdIgnoreCase(projDef.projectId)
-            if (allRoles) {
-                List<UserRole> unique = allRoles.unique { it.userId }
-                unique.each { UserRole userWithRole ->
-                    if (!isUserCommunityMember(userWithRole.userId)) {
-                        String userIdForDisplay = userAttrsRepo.findByUserIdIgnoreCase(userWithRole.userId).userIdForDisplay
-
-                        res.isAllowed = false
-                        res.unmetRequirements.add("Has existing ${userIdForDisplay} user that is not authorized".toString())
-                    }
-                }
-            }
+            checkAllUsersAreUCMembers(allRoles, res)
 
             if (exportedSkillRepo.countSkillsExportedByProject(projDef.projectId) > 0) {
                 res.isAllowed = false
@@ -168,6 +163,39 @@ class UserCommunityService {
         }
         return res;
     }
+
+    EnableUserCommunityValidationRes validateQuizForCommunity(String quizId, EnableUserCommunityValidationRes existingValidationRes = null) {
+        EnableUserCommunityValidationRes res = existingValidationRes ? existingValidationRes : new EnableUserCommunityValidationRes(isAllowed: true, unmetRequirements: [])
+
+        // only applicable if project already exist; also normalizes project ids case
+        QuizDef quizDef = quizDefRepo.findByQuizIdIgnoreCase(quizId)
+        if (quizDef) {
+            List<UserRole> allRoles = userRoleRepo.findAllByQuizIdIgnoreCase(quizDef.quizId)
+            checkAllUsersAreUCMembers(allRoles, res)
+
+
+//            if(adminGroupDefRepo.doesAdminGroupContainNonUserCommunityProject(projDef.projectId)) {
+//                res.isAllowed = false
+//                res.unmetRequirements.add("This project is part of one or more Admin Groups that has not enabled user community protection")
+//            }
+        }
+        return res;
+    }
+
+    private void checkAllUsersAreUCMembers(List<UserRole> roles, EnableUserCommunityValidationRes res) {
+        if (roles) {
+            List<UserRole> unique = roles.unique { it.userId }
+            unique.each { UserRole userWithRole ->
+                if (!isUserCommunityMember(userWithRole.userId)) {
+                    String userIdForDisplay = userAttrsRepo.findByUserIdIgnoreCase(userWithRole.userId).userIdForDisplay
+
+                    res.isAllowed = false
+                    res.unmetRequirements.add("Has existing ${userIdForDisplay} user that is not authorized".toString())
+                }
+            }
+        }
+    }
+
 
     /**
      * Checks if the specified adminGroupId is configured as a user community only admin group
@@ -193,6 +221,17 @@ class UserCommunityService {
     }
 
     /**
+     * Checks if the specified projectId is configured as a user community only project
+     * @param projectId - not null
+     * @return true if the project exists and has been configured as a user community only project
+     */
+    @Transactional(readOnly = true)
+    boolean isUserCommunityOnlyQuiz(String quizId) {
+        QuizValidator.isNotBlank(quizId, "quizId")
+        return quizSettingsRepo.findBySettingAndQuizId(QuizSettings.UserCommunityOnlyQuiz.setting, quizId)?.isEnabled()
+    }
+
+    /**
      * Checks if the specified quizId is configured as a user community only quiz
      * @param quizId - not null
      * @return true if the project exists and has been configured as a user community only project
@@ -205,15 +244,19 @@ class UserCommunityService {
 
     @Transactional(readOnly = true)
     String getProjectUserCommunity(String projectId) {
-       return getCommunityNameBasedProjConfStatus(isUserCommunityOnlyProject(projectId))
+       return getCommunityNameBasedOnConfAndItemStatus(isUserCommunityOnlyProject(projectId))
     }
 
+    @Transactional(readOnly = true)
+    String getQuizUserCommunity(String quizId) {
+        return getCommunityNameBasedOnConfAndItemStatus(isUserCommunityOnlyQuiz(quizId))
+    }
 
-    String getCommunityNameBasedProjConfStatus(Boolean isUserCommunityOnlyProject) {
-        if (!restrictedUserCommunityName || isUserCommunityOnlyProject == null) {
+    String getCommunityNameBasedOnConfAndItemStatus(Boolean isUserCommunityOnlyItem) {
+        if (!restrictedUserCommunityName || isUserCommunityOnlyItem == null) {
             return null
         }
-        return isUserCommunityOnlyProject ? restrictedUserCommunityName : defaultUserCommunityName;
+        return isUserCommunityOnlyItem ? restrictedUserCommunityName : defaultUserCommunityName;
     }
 
     Boolean containsProjectUserCommunityDescriptorVar(String text) {

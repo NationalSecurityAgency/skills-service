@@ -21,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
+import skills.controller.exceptions.SkillQuizException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.QuizDefRequest
@@ -30,6 +32,7 @@ import skills.controller.request.model.QuizQuestionDefRequest
 import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.*
 import skills.quizLoading.QuizRunService
+import skills.quizLoading.QuizSettings
 import skills.quizLoading.model.*
 import skills.services.adminGroup.AdminGroupService
 import skills.services.quiz.QuizDefService
@@ -261,6 +264,9 @@ class QuizController {
         QuizValidator.isNotBlank(quizId, "Quiz Id")
         QuizValidator.isNotNull(values, "Settings")
 
+        if (values?.find {it.setting.equalsIgnoreCase(QuizSettings.UserCommunityOnlyQuiz.setting) }) {
+            throw new SkillQuizException("Not allowed to save [${QuizSettings.UserCommunityOnlyQuiz.setting}] setting using this endpoint", quizId, ErrorCode.BadParam)
+        }
         quizSettingsService.saveSettings(quizId, values)
 
         return RequestResult.success()

@@ -50,6 +50,8 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
         String getQuizType()
 
         Date getCreated();
+
+        String getUserCommunityEnabled()
     }
     @Query(value="""
                 SELECT DISTINCT

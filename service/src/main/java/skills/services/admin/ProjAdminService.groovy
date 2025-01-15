@@ -655,7 +655,7 @@ class ProjAdminService {
                 numSkillsReused: definition.getNumSkillsReused() ?: 0,
                 totalPointsReused: definition.getTotalPointsReused() ?: 0,
                 userRole: definition.getUserRole(),
-                userCommunity: userCommunityService.getCommunityNameBasedProjConfStatus(definition.getProtectedCommunityEnabled())
+                userCommunity: userCommunityService.getCommunityNameBasedOnConfAndItemStatus(definition.getProtectedCommunityEnabled())
         )
         res.numBadges = definition.numBadges
         res.numSkills = definition.numSkills

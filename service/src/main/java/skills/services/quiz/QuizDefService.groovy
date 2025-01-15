@@ -35,6 +35,7 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.QuizAnswerDefRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
+import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.*
 import skills.quizLoading.QuizSettings
 import skills.services.*
@@ -136,15 +137,16 @@ class QuizDefService {
     UserCommunityService userCommunityService
 
     @Transactional(readOnly = true)
-    List<QuizDefResult> getCurrentUsersTestDefs() {
+    List<QuizDefResult> getCurrentUsersQuizDefs() {
         UserInfo userInfo = userInfoService.currentUser
+        boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
         String userId = userInfo.username?.toLowerCase()
         List<QuizDefResult> res = []
 
         List<QuizDefRepo.QuizDefBasicResult> fromDb = quizDefRepo.getQuizDefSummariesByUser(userId)
         if (fromDb) {
             fromDb = fromDb.sort { a, b -> b.created <=> a.created }
-            res.addAll(fromDb.collect { convert(it) })
+            res.addAll(fromDb.collect { convert(it, isCommunityMember) })
         }
         return res
     }
@@ -298,6 +300,10 @@ class QuizDefService {
         }
         attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(quizDefRequest.description, null, quizDefWithDescription.quizId, null)
 
+        if (quizDefRequest.enableProtectedUserCommunity) {
+            quizSettingsService.saveSettings(quizDefWithDescription.quizId, [new QuizSettingsRequest(setting: QuizSettings.UserCommunityOnlyQuiz.setting, value: Boolean.TRUE.toString())], false)
+        }
+
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
                 item: DashboardItem.Quiz,
@@ -306,6 +312,11 @@ class QuizDefService {
                 itemRefId: quizDefWithDescription.id,
                 quizId: quizDefWithDescription.quizId,
         ))
+
+        CustomValidationResult customValidationResult = customValidator.validate(quizDefRequest)
+        if (!customValidationResult.valid) {
+            throw new SkillQuizException(customValidationResult.msg, quizDefWithDescription.quizId, ErrorCode.BadParam)
+        }
 
         QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)
         return convert(updatedDef)
@@ -1053,11 +1064,6 @@ class QuizDefService {
         if (!quizDefRequest?.name) {
             throw new SkillQuizException("Quiz name was not provided.", quizId, ErrorCode.BadParam)
         }
-
-        CustomValidationResult customValidationResult = customValidator.validate(quizDefRequest)
-        if (!customValidationResult.valid) {
-            throw new SkillQuizException(customValidationResult.msg, quizId, ErrorCode.BadParam)
-        }
     }
 
 
@@ -1071,21 +1077,23 @@ class QuizDefService {
                     throw new SkillQuizException("User [${userId}] is not allowed to set [enableProtectedUserCommunity] to true", quizId, ErrorCode.AccessDenied)
                 }
 
-//                EnableUserCommunityValidationRes enableProjValidationRes = userCommunityService.validateProjectForCommunity(projId)
-//                if (!enableProjValidationRes.isAllowed) {
-//                    String reasons = enableProjValidationRes.unmetRequirements.join("\n")
-//                    throw new SkillException("Not Allowed to set [enableProtectedUserCommunity] to true. Reasons are:\n${reasons}", projId, null, ErrorCode.AccessDenied)
-//                }
+                EnableUserCommunityValidationRes enableProjValidationRes = userCommunityService.validateQuizForCommunity(quizId)
+                if (!enableProjValidationRes.isAllowed) {
+                    String reasons = enableProjValidationRes.unmetRequirements.join("\n")
+                    throw new SkillQuizException("Not Allowed to set [enableProtectedUserCommunity] to true. Reasons are:\n${reasons}", quizId, ErrorCode.AccessDenied)
+                }
             } else if (quizDefWithDescription){
                 QuizValidator.isTrue(!userCommunityService.isUserCommunityOnlyQuiz(quizDefWithDescription.id), "Once quiz [enableProtectedUserCommunity=true] it cannot be flipped to false", quizId)
             }
         }
     }
 
-    private QuizDefResult convert(QuizDefRepo.QuizDefBasicResult quizDefSummaryResult) {
+    private QuizDefResult convert(QuizDefRepo.QuizDefBasicResult quizDefSummaryResult, boolean isCommunityMember) {
         QuizDefResult result = Props.copy(quizDefSummaryResult, new QuizDefResult())
         result.type = QuizDefParent.QuizType.valueOf(quizDefSummaryResult.getQuizType())
         result.displayOrder = 0 // todo
+
+        result.userCommunity = isCommunityMember ? userCommunityService.getQuizUserCommunity(quizDefSummaryResult.quizId) : null
         return result
     }
 

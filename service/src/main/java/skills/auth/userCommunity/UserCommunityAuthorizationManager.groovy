@@ -51,10 +51,13 @@ import java.util.regex.Pattern
 class UserCommunityAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 
     private static final Pattern PROJECT_ID = ~/(?i)\/.*\/(?:my)?projects\/([^\/]+).*/
+    private static final Pattern QUIZ_ID = ~/(?i)\/.*\/(?:quizzes|quiz-definitions)\/([^\/]+).*/
     private static final Pattern ATTACHMENT_UUID = ~/(?i)\/api\/download\/(.+)/
     private static final Pattern ADMIN_GROUP_ID = ~/(?i)\/.*\/admin-group-definitions\/([^\/]+).*/
 
     private RequestMatcher projectsRequestMatcher
+    private RequestMatcher quizzesAdminRequestMatcher
+    private RequestMatcher quizzesApiRequestMatcher
     private RequestMatcher attachmentsRequestMatcher
     private RequestMatcher adminGroupRequestMatcher
 
@@ -76,6 +79,8 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     void init() {
         authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
         projectsRequestMatcher = new AntPathRequestMatcher("/**/*projects/**")
+        quizzesAdminRequestMatcher = new AntPathRequestMatcher("/**/quiz-definitions/**")
+        quizzesApiRequestMatcher = new AntPathRequestMatcher("/**/quizzes/**")
         attachmentsRequestMatcher = new AntPathRequestMatcher("/api/download/**")
         adminGroupRequestMatcher = new AntPathRequestMatcher("/**/admin-group-definitions/**")
     }
@@ -91,6 +96,7 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         }
         AuthorizationDecision vote = null // ACCESS_ABSTAIN
         String projectId = null
+        String quizId = null
         String adminGroupId = null
         if (projectsRequestMatcher.matches(request)) {
             projectId = extractProjectId(request)
@@ -98,12 +104,15 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
             projectId = extractProjectIdForAttachment(request)
         } else if (adminGroupRequestMatcher.matches(request)) {
             adminGroupId = extractAdminGroupId(request)
+        } else if (quizzesApiRequestMatcher.matches(request) || quizzesAdminRequestMatcher.matches(request)) {
+            quizId = extractQuizId(request)
         }
-        if (projectId || adminGroupId) {
+        if (projectId || adminGroupId || quizId) {
             log.debug("evaluating request [{}] for user community protection", request.getRequestURI())
             Boolean isUserCommunityOnlyProject = projectId && userCommunityService.isUserCommunityOnlyProject(projectId)
             Boolean isUserCommunityOnlyAdminGroup = adminGroupId && userCommunityService.isUserCommunityOnlyAdminGroup(adminGroupId)
-            if (isUserCommunityOnlyProject || isUserCommunityOnlyAdminGroup) {
+            Boolean isUserCommunityOnlyQuiz = quizId && userCommunityService.isUserCommunityOnlyQuiz(quizId)
+            if (isUserCommunityOnlyProject || isUserCommunityOnlyAdminGroup || isUserCommunityOnlyQuiz) {
                 log.debug("project id [{}] or admin group id [{}] requires user community only access", projectId, adminGroupId)
                 Boolean belongsToUserCommunity = userCommunityService.isUserCommunityMember(getUsername(authentication.get()))
                 if (belongsToUserCommunity) {
@@ -141,6 +150,15 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     private String extractAdminGroupId(HttpServletRequest request) {
         String url = getRequestUrl(request)
         Matcher gid = ADMIN_GROUP_ID.matcher(url)
+        if (gid.matches()) {
+            return gid.group(1)
+        }
+        return StringUtils.EMPTY
+    }
+
+    private String extractQuizId(HttpServletRequest request) {
+        String url = getRequestUrl(request)
+        Matcher gid = QUIZ_ID.matcher(url)
         if (gid.matches()) {
             return gid.group(1)
         }
