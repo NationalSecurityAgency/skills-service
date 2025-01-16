@@ -87,7 +87,7 @@ const checkDescription = useDebounceFn((value, testContext) => {
     if (result.valid) {
       return true
     }
-    let fieldNameToUse = 'Quiz Description'
+    let fieldNameToUse = 'Quiz/Survey Description'
     if (result.msg) {
       return testContext.createError({ message: `${fieldNameToUse ? `${fieldNameToUse} - ` : ''}${result.msg}` })
     }
