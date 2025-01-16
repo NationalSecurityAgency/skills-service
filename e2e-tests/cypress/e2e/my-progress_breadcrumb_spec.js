@@ -939,7 +939,7 @@ describe('My Progress Breadcrumb Tests', () => {
 
     });
 
-    it.only('navigate through and validate breadcrumbs', function () {
+    it('navigate through and validate breadcrumbs', function () {
 
         cy.visit('/');
 

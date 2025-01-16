@@ -229,7 +229,7 @@ describe('Skills Display Global Badges Tests', () => {
       .contains('blah1')
   });
 
-  it.only('completed badge count should not include global badges that do not have dependencies on this project', () => {
+  it('completed badge count should not include global badges that do not have dependencies on this project', () => {
     cy.resetDb();
     cy.fixture('vars.json')
       .then((vars) => {
@@ -239,7 +239,7 @@ describe('Skills Display Global Badges Tests', () => {
       });
     cy.loginAsProxyUser();
     cy.createProject(1);
-    cy.createProject(2);
+    cy.createProject(2);s
     cy.createSubject(1, 1);
     cy.createSubject(2, 1);
     cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
