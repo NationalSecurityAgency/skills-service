@@ -239,7 +239,7 @@ describe('Skills Display Global Badges Tests', () => {
       });
     cy.loginAsProxyUser();
     cy.createProject(1);
-    cy.createProject(2);s
+    cy.createProject(2);
     cy.createSubject(1, 1);
     cy.createSubject(2, 1);
     cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
