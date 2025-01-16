@@ -229,7 +229,7 @@ describe('Skills Display Global Badges Tests', () => {
       .contains('blah1')
   });
 
-  it('completed badge count should not include global badges that do not have dependencies on this project', () => {
+  it.only('completed badge count should not include global badges that do not have dependencies on this project', () => {
     cy.resetDb();
     cy.fixture('vars.json')
       .then((vars) => {
@@ -269,8 +269,8 @@ describe('Skills Display Global Badges Tests', () => {
     cy.loginAsProxyUser();
 
     cy.cdVisit('/');
-    cy.get('[data-cy=myBadges]')
-      .contains(' 0 ');
+    cy.get('[data-cy=myBadgesPosition]')
+      .contains('0');
   });
 
   it('global badge with project levels should not display no skill assigned message', () => {

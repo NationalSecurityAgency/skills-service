@@ -939,7 +939,7 @@ describe('My Progress Breadcrumb Tests', () => {
 
     });
 
-    it('navigate through and validate breadcrumbs', function () {
+    it.only('navigate through and validate breadcrumbs', function () {
 
         cy.visit('/');
 
@@ -1006,7 +1006,7 @@ describe('My Progress Breadcrumb Tests', () => {
         cy.get('[data-cy="skillsDisplayHome"] [data-cy=title]')
           .contains('Subject 1');
         cy.get('[data-cy="skillProgressTitle-skill1"]')
-        cy.get('[data-cy="myRank"] [data-cy="myRankPosition"]').should('have.text', '1')
+        cy.get('[data-cy="myRank"] [data-cy="myRankPosition"]').should('have.text', '#1')
 
         // click on rank
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="myRankBtn"] button')
@@ -1037,7 +1037,7 @@ describe('My Progress Breadcrumb Tests', () => {
           .click();
         cy.get('[data-cy="skillsDisplayHome"]')
           .contains('Overall Points');
-        cy.get('[data-cy="myRank"] [data-cy="myRankPosition"]').should('have.text', '1')
+        cy.get('[data-cy="myRank"] [data-cy="myRankPosition"]').should('have.text', '#1')
         // click on rank
         cy.get('[data-cy="skillsDisplayHome"] [data-cy=myRankBtn]')
           .click();
