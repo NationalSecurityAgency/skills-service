@@ -68,10 +68,10 @@ const props = defineProps({
       <div class="fa-stack skills-icon user-rank-stack text-blue-300 flex flex-wrap align-items-center" v-if="!loading">
         <i :class="`${icon} fa-stack-2x watermark-icon`" />
 
-        <div v-if="optedOut" class="text-danger fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg" data-cy="optedOutMessage">
+        <div v-if="optedOut" class="pt-2 text-danger fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg" data-cy="optedOutMessage">
           <div>Opted-Out</div>
           <div style="font-size: 0.8rem; line-height: 1rem;" class="mb-2">
-            Your position would be <b style="font-size: 0.9rem;" class="badge badge-danger">{{ userAchieved }}</b> if you opt-in!
+            Your position would be {{ userAchieved }} if you opt-in!
           </div>
         </div>
         <div class="fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg" v-else>
