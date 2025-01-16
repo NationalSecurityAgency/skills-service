@@ -162,5 +162,10 @@ export default {
     return axios
         .get(`/admin/quiz-definitions/${quizId}/preferences`)
         .then((response) => response.data)
+  },
+  validateQuizForEnablingCommunity(quizId) {
+    return axios
+        .get(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/validateEnablingCommunity`)
+        .then((response) => response.data)
   }
 }

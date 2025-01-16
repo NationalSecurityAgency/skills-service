@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { ref, computed } from 'vue'
-import { object, string } from 'yup'
+import { boolean, object, string, ValidationError } from 'yup'
 import { useDebounceFn } from '@vueuse/core'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import QuizService from '@/components/quiz/QuizService.js';
@@ -24,6 +24,9 @@ import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEdito
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
+import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js';
+import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js';
+import CommunityProtectionControls from '@/components/projects/CommunityProtectionControls.vue';
 
 const model = defineModel()
 const props = defineProps({
@@ -52,6 +55,9 @@ if(props.isEdit) {
 
 const appConfig = useAppConfig()
 
+const communityLabels = useCommunityLabels()
+const initialValueForEnableProtectedUserCommunity = communityLabels.isRestrictedUserCommunity(props.quiz.userCommunity)
+const enableProtectedUserCommunity = ref(initialValueForEnableProtectedUserCommunity)
 
 const checkQuizNameUnique = useDebounceFn((value) => {
   if (!value || value.length === 0) {
@@ -71,6 +77,42 @@ const checkQuizIdUnique = useDebounceFn((value) => {
       .then((remoteRes) => !remoteRes)
 
 }, appConfig.formFieldDebounceInMs)
+
+const descriptionValidatorService = useDescriptionValidatorService()
+const checkDescription = useDebounceFn((value, testContext) => {
+  if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
+    return true
+  }
+  return descriptionValidatorService.validateDescription(value, false, enableProtectedUserCommunity.value).then((result) => {
+    if (result.valid) {
+      return true
+    }
+    let fieldNameToUse = 'Quiz Description'
+    if (result.msg) {
+      return testContext.createError({ message: `${fieldNameToUse ? `${fieldNameToUse} - ` : ''}${result.msg}` })
+    }
+    return testContext.createError({ message: `${fieldNameToUse || 'Field'} is invalid` })
+  })
+
+}, appConfig.formFieldDebounceInMs)
+
+const checkUserCommunityRequirements =(value, testContext) => {
+  if (!value || !props.isEdit) {
+    return true;
+  }
+  return QuizService.validateQuizForEnablingCommunity(props.quiz.quizId).then((result) => {
+    if (result.isAllowed) {
+      return true;
+    }
+    if (result.unmetRequirements) {
+      const errors = result.unmetRequirements.map((req) => {
+        return testContext.createError({ message: `${req}` })
+      })
+      return new ValidationError(errors)
+    }
+    return true
+  });
+}
 
 const schema = object({
   'quizName': string()
@@ -94,9 +136,12 @@ const schema = object({
       .required()
       .nullValueNotAllowed()
       .label('Type'),
+  'enableProtectedUserCommunity': boolean()
+      .test('communityReqValidation', 'Unmet community requirements', (value, testContext) => checkUserCommunityRequirements(value, testContext))
+      .label('Enable Protected User Community'),
   'description': string()
       .max(appConfig.descriptionMaxLength)
-      .customDescriptionValidator('Quiz/Survey Description', false)
+      .test('descriptionValidation', 'Description is invalid', (value, testContext) => checkDescription(value, testContext))
       .label('Description')
 })
 
@@ -120,6 +165,7 @@ const initialQuizData = ref({
   quizName: props.isCopy ? `Copy of ${props.quiz.name}` : (props.quiz.name || ''),
   type: props.quiz.type || '',
   description: props.quiz.description || '',
+  enableProtectedUserCommunity: false,
 })
 const close = () => { model.value = false }
 
@@ -129,6 +175,9 @@ const saveQuiz = (values) => {
     originalQuizId: props.quiz.quizId,
     name: InputSanitizer.sanitize(values.quizName),
     quizId: InputSanitizer.sanitize(values.quizId),
+  }
+  if (initialValueForEnableProtectedUserCommunity) {
+    quizToSave.enableProtectedUserCommunity = initialValueForEnableProtectedUserCommunity
   }
   if(props.isCopy) {
     return QuizService.copyQuiz(quizToSave).then((newQuizDef) => {
@@ -177,6 +226,13 @@ const onSavedQuiz = (savedQuiz) => {
           id-field-name="quizId"
           :name-to-id-sync-enabled="!isEdit" />
 
+      <community-protection-controls
+          class="mb-3"
+          v-model:enable-protected-user-community="enableProtectedUserCommunity"
+          :quiz="quiz"
+          :is-edit="isEdit"
+          :is-copy="isCopy" />
+
       <div data-cy="quizTypeSection">
         <SkillsDropDown
             label="Type"
@@ -191,6 +247,7 @@ const onSavedQuiz = (savedQuiz) => {
       <markdown-editor
           id="quizDescription"
           :quiz-id="isEdit ? quiz.quizId : null"
+          :allow-attachments="isEdit || !communityLabels.showManageUserCommunity.value"
           data-cy="quizDescription"
           class="mt-5"
           name="description" />
