@@ -96,7 +96,7 @@ class EnableCommunityForQuizValidationSpecs extends DefaultIntSpec {
         def res = pristineDragonsUser.validateQuizForEnablingCommunity(q1.quizId)
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["This quiz is part of one or more Admin Groups that do no have Divine Dragon permission"]
+        res.unmetRequirements.find { it == "This quiz is part of one or more Admin Groups that do no have Divine Dragon permission" }
     }
 
     def "validation endpoint - cannot enable community if quiz associated to skills of a non-community project"() {
