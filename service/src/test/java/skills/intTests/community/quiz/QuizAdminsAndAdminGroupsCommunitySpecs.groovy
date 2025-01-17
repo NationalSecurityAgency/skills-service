@@ -38,7 +38,7 @@ class QuizAdminsAndAdminGroupsCommunitySpecs extends DefaultIntSpec {
         quiz.enableProtectedUserCommunity = true
         pristineDragonsUser.createQuizDef(quiz)
 
-        String allDragonsUserIdForDisplay = userAttrsRepo.findByUserIdIgnoreCase(allDragons.userName).userIdForDisplay
+        String allDragonsUserIdForDisplay = userAttrsRepo.findByUserIdIgnoreCase(allDragons.userName).userIdForDisplay.toLowerCase()
 
         when:
         pristineDragonsUser.addQuizUserRole(quiz.quizId, allDragons.userName, RoleName.ROLE_QUIZ_ADMIN.toString())

@@ -15,6 +15,7 @@
  */
 package skills.intTests.community.quiz
 
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
@@ -48,22 +49,47 @@ class ConfigureCommunityForQuizSpecs extends DefaultIntSpec {
     def "configure community when creating a quiz"() {
         List<String> users = getRandomUsers(2)
 
+        SkillsService allDragonsUser = createService(users[0])
         SkillsService pristineDragonsUser = createService(users[1])
         SkillsService rootUser = createRootSkillService()
         rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
 
         def q1 = QuizDefFactory.createQuiz(1)
         q1.enableProtectedUserCommunity = true
-        pristineDragonsUser.createQuizDef(q1)
 
         def q2 = QuizDefFactory.createQuiz(2)
-        pristineDragonsUser.createQuizDef(q2)
 
         when:
+        def q1CreatedRes = pristineDragonsUser.createQuizDef(q1)
+        def q2CreatedRes = pristineDragonsUser.createQuizDef(q2)
         def quizDefsRes = pristineDragonsUser.getQuizDefs()
+
+        pristineDragonsUser.addQuizUserRole(q2.quizId, allDragonsUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        def quizDefsRes_allDragonsUser = allDragonsUser.getQuizDefs()
+
         then:
         quizDefsRes.quizId == [q2.quizId, q1.quizId]
         quizDefsRes.userCommunity == ['All Dragons', 'Divine Dragon']
+        q1CreatedRes.body.userCommunity == 'Divine Dragon'
+        q2CreatedRes.body.userCommunity == 'All Dragons'
+
+        quizDefsRes_allDragonsUser.quizId == [q2.quizId]
+        quizDefsRes_allDragonsUser.userCommunity == [null]
+    }
+
+    def "community is null for a non-community user"() {
+        def q1 = QuizDefFactory.createQuiz(1)
+        def q2 = QuizDefFactory.createQuiz(2)
+
+        when:
+        def q1CreatedRes = skillsService.createQuizDef(q1)
+        def q2CreatedRes = skillsService.createQuizDef(q2)
+        def quizDefsRes = skillsService.getQuizDefs()
+        then:
+        quizDefsRes.quizId == [q2.quizId, q1.quizId]
+        quizDefsRes.userCommunity == [null, null]
+        q1CreatedRes.body.userCommunity == null
+        q2CreatedRes.body.userCommunity == null
     }
 
     def "only member of the community can enable quiz "() {
@@ -89,15 +115,15 @@ class ConfigureCommunityForQuizSpecs extends DefaultIntSpec {
         rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
 
         def q1 = QuizDefFactory.createQuiz(1)
-        pristineDragonsUser.createQuizDef(q1)
+        def q1CreatedRes_t1 = pristineDragonsUser.createQuizDef(q1)
 
         def q2 = QuizDefFactory.createQuiz(2)
-        pristineDragonsUser.createQuizDef(q2)
+        def q2CreatedRes = pristineDragonsUser.createQuizDef(q2)
 
         when:
         def pristineDragonUserQuizzes_before = pristineDragonsUser.getQuizDefs()
         q1.enableProtectedUserCommunity = true
-        pristineDragonsUser.createQuizDef(q1, q1.quizId)
+        def q1CreatedRes_t2 = pristineDragonsUser.createQuizDef(q1, q1.quizId)
         def pristineDragonUserQuizzes_after = pristineDragonsUser.getQuizDefs()
         then:
         pristineDragonUserQuizzes_before.quizId == [q2.quizId, q1.quizId]
@@ -105,6 +131,10 @@ class ConfigureCommunityForQuizSpecs extends DefaultIntSpec {
 
         pristineDragonUserQuizzes_after.quizId == [q2.quizId, q1.quizId]
         pristineDragonUserQuizzes_after.userCommunity == ['All Dragons', 'Divine Dragon']
+
+        q1CreatedRes_t1.body.userCommunity == 'All Dragons'
+        q1CreatedRes_t2.body.userCommunity == 'Divine Dragon'
+        q2CreatedRes.body.userCommunity == 'All Dragons'
     }
 
     def "once community is enabled it cannot be disabled"() {

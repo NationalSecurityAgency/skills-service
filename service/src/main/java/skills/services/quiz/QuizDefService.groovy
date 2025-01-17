@@ -1106,6 +1106,11 @@ class QuizDefService {
     private QuizDefResult convert(QuizDef updatedDef) {
         QuizDefResult result = Props.copy(updatedDef, new QuizDefResult())
         result.displayOrder = 0 // todo
+
+        UserInfo userInfo = userInfoService.currentUser
+        Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
+        result.userCommunity = isCommunityMember ? userCommunityService.getQuizUserCommunity(updatedDef.quizId) : null
+
         return result
     }
 
