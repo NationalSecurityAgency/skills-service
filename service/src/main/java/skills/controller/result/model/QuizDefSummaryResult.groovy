@@ -21,8 +21,7 @@ class QuizDefSummaryResult {
     String quizId
     String name
     QuizDefParent.QuizType type
-
     Date created
-
     Integer numQuestions
+    String userCommunity
 }

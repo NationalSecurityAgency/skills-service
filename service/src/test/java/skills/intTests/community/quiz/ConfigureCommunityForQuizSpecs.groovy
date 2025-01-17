@@ -63,18 +63,27 @@ class ConfigureCommunityForQuizSpecs extends DefaultIntSpec {
         def q1CreatedRes = pristineDragonsUser.createQuizDef(q1)
         def q2CreatedRes = pristineDragonsUser.createQuizDef(q2)
         def quizDefsRes = pristineDragonsUser.getQuizDefs()
+        def quizSummaryRes1 = pristineDragonsUser.getQuizDefSummary(q1.quizId)
+        def quizSummaryRes2 = pristineDragonsUser.getQuizDefSummary(q2.quizId)
 
         pristineDragonsUser.addQuizUserRole(q2.quizId, allDragonsUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
         def quizDefsRes_allDragonsUser = allDragonsUser.getQuizDefs()
+        def quizSummaryRes_allDragonsUser = allDragonsUser.getQuizDefSummary(q2.quizId)
 
         then:
         quizDefsRes.quizId == [q2.quizId, q1.quizId]
         quizDefsRes.userCommunity == ['All Dragons', 'Divine Dragon']
+        quizSummaryRes1.quizId == q1.quizId
+        quizSummaryRes1.userCommunity == 'Divine Dragon'
+        quizSummaryRes2.quizId == q2.quizId
+        quizSummaryRes2.userCommunity == 'All Dragons'
         q1CreatedRes.body.userCommunity == 'Divine Dragon'
         q2CreatedRes.body.userCommunity == 'All Dragons'
 
         quizDefsRes_allDragonsUser.quizId == [q2.quizId]
         quizDefsRes_allDragonsUser.userCommunity == [null]
+        quizSummaryRes_allDragonsUser.quizId == q2.quizId
+        quizSummaryRes_allDragonsUser.userCommunity == null
     }
 
     def "community is null for a non-community user"() {
@@ -85,11 +94,17 @@ class ConfigureCommunityForQuizSpecs extends DefaultIntSpec {
         def q1CreatedRes = skillsService.createQuizDef(q1)
         def q2CreatedRes = skillsService.createQuizDef(q2)
         def quizDefsRes = skillsService.getQuizDefs()
+        def quizSummaryRes1 = skillsService.getQuizDefSummary(q1.quizId)
+        def quizSummaryRes2 = skillsService.getQuizDefSummary(q2.quizId)
         then:
         quizDefsRes.quizId == [q2.quizId, q1.quizId]
         quizDefsRes.userCommunity == [null, null]
         q1CreatedRes.body.userCommunity == null
         q2CreatedRes.body.userCommunity == null
+        quizSummaryRes1.quizId == q1.quizId
+        quizSummaryRes1.userCommunity == null
+        quizSummaryRes2.quizId == q2.quizId
+        quizSummaryRes2.userCommunity == null
     }
 
     def "only member of the community can enable quiz "() {

@@ -171,12 +171,15 @@ class QuizDefService {
     QuizDefSummaryResult getQuizDefSummary(String quizId) {
         assert quizId
         QuizDefRepo.QuizDefSummaryRes dbRes = quizDefRepo.getQuizDefSummary(quizId)
+        UserInfo userInfo = userInfoService.currentUser
+        Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
         return new QuizDefSummaryResult(
                 quizId: quizId,
                 name: dbRes.getName(),
                 created: dbRes.getCreated(),
                 type: QuizDefParent.QuizType.valueOf(dbRes.getQuizType()),
-                numQuestions: dbRes.getNumQuestions()
+                numQuestions: dbRes.getNumQuestions(),
+                userCommunity: isCommunityMember ? userCommunityService.getQuizUserCommunity(quizId) : null
         )
     }
 
