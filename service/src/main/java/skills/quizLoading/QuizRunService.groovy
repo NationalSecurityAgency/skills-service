@@ -31,6 +31,7 @@ import skills.controller.PublicPropsBasedValidator
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
+import skills.controller.result.model.MyQuizAttempt
 import skills.controller.result.model.QuizRun
 import skills.controller.result.model.QuizSkillResult
 import skills.controller.result.model.TableResult
@@ -38,6 +39,7 @@ import skills.quizLoading.model.*
 import skills.services.CustomValidationResult
 import skills.services.CustomValidator
 import skills.services.LockingService
+import skills.services.admin.UserCommunityService
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.services.events.SkillEventResult
@@ -107,6 +109,9 @@ class QuizRunService {
 
     @Autowired
     QuizNotificationService quizNotificationService
+
+    @Autowired
+    UserCommunityService userCommunityService
 
     @Value('#{"${skills.config.ui.minimumSubjectPoints}"}')
     int minimumSubjectPoints
@@ -757,9 +762,10 @@ class QuizRunService {
     @Transactional
     TableResult getCurrentUserQuizRuns(String quizNameQuery, PageRequest pageRequest) {
         UserInfo currentUser = userInfoService.currentUser
-        Page<QuizRun> quizAttemptsPage = quizAttemptRepo.findUserQuizAttempts(currentUser.username, quizNameQuery ?: "", pageRequest)
+        Boolean isUCMember = userCommunityService.isUserCommunityMember(currentUser.username) ?: false
+        Page<MyQuizAttempt> quizAttemptsPage = quizAttemptRepo.findUserQuizAttempts(currentUser.username, quizNameQuery ?: "", isUCMember, pageRequest)
         long count = quizAttemptsPage.getTotalElements()
-        List<QuizRun> quizAttempts = quizAttemptsPage.getContent()
+        List<MyQuizAttempt> quizAttempts = quizAttemptsPage.getContent()
         return new TableResult(totalCount: count, data: quizAttempts, count: count)
     }
 

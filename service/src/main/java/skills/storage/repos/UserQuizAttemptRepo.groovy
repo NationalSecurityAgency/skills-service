@@ -162,15 +162,18 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                quizDef.quizId as quizId,
                quizDef.type as quizType
         from UserQuizAttempt attempts, QuizDef quizDef
+        left join QuizSetting ucSetting on (ucSetting.quizRefId = quizDef.id and ucSetting.setting = 'user_community')
         where attempts.userId=:userId and 
             attempts.quizDefinitionRefId = quizDef.id and
             attempts.status != 'INPROGRESS' and
-            lower(quizDef.name) LIKE lower(CONCAT('%', :quizNameQuery, '%'))
+            lower(quizDef.name) LIKE lower(CONCAT('%', :quizNameQuery, '%')) and 
+            ((ucSetting.value is null or lower(ucSetting.value) = 'false') or :isUserUCMember = true)
      ''')
     @Nullable
     Page<MyQuizAttempt> findUserQuizAttempts(
             @Param('userId') String userId,
             @Param('quizNameQuery') String quizNameQuery,
+            @Param('isUserUCMember') Boolean isUserUCMember,
             PageRequest pageRequest)
 
     @Nullable

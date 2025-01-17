@@ -15,12 +15,14 @@
  */
 package skills.intTests.community.quiz
 
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
+import skills.storage.model.UserQuizAttempt
 
 @Slf4j
 class UserCommunityQuizAuthSpecs extends DefaultIntSpec {
@@ -51,8 +53,211 @@ class UserCommunityQuizAuthSpecs extends DefaultIntSpec {
         validateForbidden { nonUserCommunityUser.failQuizAttempt(q1.quizId, 1 ) }
     }
 
-//    validateForbidden { nonUserCommunityUser.getCurrentUserQuizAttempts() }
-//    validateForbidden { nonUserCommunityUser.getCurrentUserSingleQuizAttempt(1 ) }
+    def "for non-UC user quiz attempt history only contains non-UC projects"() {
+        // this can happen if a non-uc user takes a quiz and the quiz is elevated to UC at a later time
+        List<String> users = getRandomUsers(3)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService adminUser = createService(users[2])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootUser.saveUserTag(adminUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        adminUser.createQuizDef(q1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
+        adminUser.createQuizQuestionDefs(questions)
+
+        def runQuiz = { SkillsService userService, boolean pass ->
+            def quizAttempt = userService.startQuizAttempt(q1.quizId).body
+            int answerIndex = pass ? 0 : 1
+            userService.reportQuizAnswer(q1.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[answerIndex].id)
+            def gradedQuizAttempt = userService.completeQuizAttempt(q1.quizId, quizAttempt.id).body
+            return gradedQuizAttempt
+        }
+
+        runQuiz(allDragonsUser, false)
+        runQuiz(allDragonsUser, false)
+        runQuiz(allDragonsUser, true)
+
+        runQuiz(pristineDragonsUser, false)
+        runQuiz(pristineDragonsUser, false)
+        runQuiz(pristineDragonsUser, true)
+
+        when:
+        def allDragonsAttempts_t1 = allDragonsUser.getCurrentUserQuizAttempts()
+        def pristineDragonAttempts_t1 = pristineDragonsUser.getCurrentUserQuizAttempts()
+
+        q1.enableProtectedUserCommunity = true
+        adminUser.createQuizDef(q1, q1.quizId)
+        def allDragonsAttempts_t2 = allDragonsUser.getCurrentUserQuizAttempts()
+        def pristineDragonAttempts_t2 = pristineDragonsUser.getCurrentUserQuizAttempts()
+
+        then:
+        allDragonsAttempts_t1.data.size() == 3
+        allDragonsAttempts_t1.data.quizId == [q1.quizId, q1.quizId, q1.quizId]
+        allDragonsAttempts_t1.data.status == [
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        ]
+
+        pristineDragonAttempts_t1.data.size() == 3
+        pristineDragonAttempts_t1.data.quizId == [q1.quizId, q1.quizId, q1.quizId]
+        pristineDragonAttempts_t1.data.status == [
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        ]
+
+        pristineDragonAttempts_t2.data.size() == 3
+        pristineDragonAttempts_t2.data.quizId == [q1.quizId, q1.quizId, q1.quizId]
+        pristineDragonAttempts_t2.data.status == [
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        ]
+
+        allDragonsAttempts_t2.data.size() == 0
+        allDragonsAttempts_t2.data == []
+    }
+
+    def "for non-UC user quiz attempt history only contains non-UC projects - multiple quizzes"() {
+        // this can happen if a non-uc user takes a quiz and the quiz is elevated to UC at a later time
+        List<String> users = getRandomUsers(3)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService adminUser = createService(users[2])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootUser.saveUserTag(adminUser.userName, 'dragons', ['DivineDragon'])
+
+        def createQuiz = { int num ->
+            def theQuiz = QuizDefFactory.createQuiz(num)
+            adminUser.createQuizDef(theQuiz)
+            def questions = QuizDefFactory.createChoiceQuestions(num, 1, 2)
+            adminUser.createQuizQuestionDefs(questions)
+            return theQuiz
+        }
+        def runQuiz = { def quiz, SkillsService userService, boolean pass ->
+            def quizAttempt = userService.startQuizAttempt(quiz.quizId).body
+            int answerIndex = pass ? 0 : 1
+            userService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[answerIndex].id)
+            def gradedQuizAttempt = userService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+            return gradedQuizAttempt
+        }
+
+
+        def q1 = createQuiz(1)
+        def q2 = createQuiz(2)
+
+        runQuiz(q1, allDragonsUser, false)
+        runQuiz(q2, allDragonsUser, false)
+
+        runQuiz(q1, allDragonsUser, false)
+        runQuiz(q2, allDragonsUser, false)
+
+        runQuiz(q1, allDragonsUser, true)
+        runQuiz(q2, allDragonsUser, true)
+
+        runQuiz(q1, pristineDragonsUser, false)
+        runQuiz(q2, pristineDragonsUser, false)
+
+        runQuiz(q1, pristineDragonsUser, false)
+        runQuiz(q2, pristineDragonsUser, false)
+
+        runQuiz(q1, pristineDragonsUser, true)
+        runQuiz(q2, pristineDragonsUser, true)
+
+        when:
+        def allDragonsAttempts_t1 = allDragonsUser.getCurrentUserQuizAttempts()
+        def pristineDragonAttempts_t1 = pristineDragonsUser.getCurrentUserQuizAttempts()
+
+        q1.enableProtectedUserCommunity = true
+        adminUser.createQuizDef(q1, q1.quizId)
+        def allDragonsAttempts_t2 = allDragonsUser.getCurrentUserQuizAttempts()
+        def pristineDragonAttempts_t2 = pristineDragonsUser.getCurrentUserQuizAttempts()
+
+        then:
+        allDragonsAttempts_t1.data.size() == 6
+        allDragonsAttempts_t1.data.quizId == [q1.quizId, q2.quizId, q1.quizId, q2.quizId, q1.quizId, q2.quizId]
+
+        allDragonsAttempts_t1.data.status == [
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        ]
+        pristineDragonAttempts_t1.data.size() == 6
+        pristineDragonAttempts_t1.data.quizId == [q1.quizId, q2.quizId, q1.quizId, q2.quizId, q1.quizId, q2.quizId]
+        pristineDragonAttempts_t1.data.status == [
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        ]
+
+        pristineDragonAttempts_t2.data.size() == 6
+        pristineDragonAttempts_t2.data.quizId == [q1.quizId, q2.quizId, q1.quizId, q2.quizId, q1.quizId, q2.quizId]
+        pristineDragonAttempts_t2.data.status == [
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        ]
+
+        allDragonsAttempts_t2.data.size() == 3
+        allDragonsAttempts_t2.data.quizId == [q2.quizId, q2.quizId, q2.quizId]
+        allDragonsAttempts_t2.data.status == [
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
+                UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        ]
+    }
+
+    def "not allowed to get uc quiz attempts for non-uc user"() {
+        // this can happen if a non-uc user takes a quiz and the quiz is elevated to UC at a later time
+        List<String> users = getRandomUsers(3)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService adminUser = createService(users[2])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootUser.saveUserTag(adminUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        adminUser.createQuizDef(q1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
+        adminUser.createQuizQuestionDefs(questions)
+
+        def runQuiz = { SkillsService userService, boolean pass ->
+            def quizAttempt = userService.startQuizAttempt(q1.quizId).body
+            int answerIndex = pass ? 0 : 1
+            userService.reportQuizAnswer(q1.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[answerIndex].id)
+            def gradedQuizAttempt = userService.completeQuizAttempt(q1.quizId, quizAttempt.id).body
+            return quizAttempt
+        }
+        def allDragonsUserAttempt = runQuiz(allDragonsUser, false)
+        def pristineDragonAttempt = runQuiz(pristineDragonsUser, false)
+        q1.enableProtectedUserCommunity = true
+        adminUser.createQuizDef(q1, q1.quizId)
+        def pristineDragonAttemptInfo = pristineDragonsUser.getCurrentUserSingleQuizAttempt(pristineDragonAttempt.id)
+        when:
+        allDragonsUser.getCurrentUserSingleQuizAttempt(allDragonsUserAttempt.id)
+        then:
+        pristineDragonAttemptInfo.quizName == q1.name
+        SkillsClientException e = thrown(SkillsClientException)
+        e.resBody.contains("User [${allDragonsUser.userName}] does not have access to quiz [${allDragonsUserAttempt.id}]")
+    }
 
 //    def "can access project endpoints with UC protection enabled when the user does belong to the user community"() {
 //        when:

@@ -797,6 +797,9 @@ class QuizDefService {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${currentUser.username}] user", ErrorCode.BadParam)
         }
         QuizDef quizDef = quizDefRepo.findById(userQuizAttempt.quizDefinitionRefId).get()
+        if (userCommunityService.isUserCommunityOnlyQuiz(quizDef.id) && !userCommunityService.isUserCommunityMember(currentUser.username)) {
+            throw new SkillQuizException("User [${currentUser.username}] does not have access to quiz [${quizAttemptId}]", quizDef.quizId, ErrorCode.AccessDenied)
+        }
         return getAttemptGradedResult(quizDef, userQuizAttempt, false)
     }
 
