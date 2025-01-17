@@ -49,6 +49,10 @@ describe('Community Admin Group Tests', () => {
             cy.createProject(1, {enableProtectedUserCommunity: true})
             cy.createProject(2)
 
+            cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+            cy.createQuizDef(2);
+
+
             cy.request('POST', `/admin/projects/proj2/users/${allDragonsUser}/roles/ROLE_PROJECT_ADMIN`);
 
             cy.createAdminGroupDef(1, { name: 'UC Protected Admin Group', enableProtectedUserCommunity: true });
@@ -202,6 +206,21 @@ describe('Community Admin Group Tests', () => {
         cy.get('[data-cy="error-msg"]').contains('Error! Request could not be completed! Project [This is project 1] is not allowed to be assigned [Non-UC Protected Admin Group] Admin Group')
     })
 
+    it('cannot add UC protected quiz to a non-UC admin group', function () {
+        cy.intercept('GET', '/admin/admin-group-definitions/adminGroup2/quizzes')
+            .as('loadGroupQuizzes');
+        cy.visit('/administrator/adminGroups/adminGroup2/group-quizzes');
+        cy.wait('@loadGroupQuizzes');
+        cy.get('[data-cy="pageHeaderStat_Quizzes and Surveys"] [data-cy="statValue"]').should('have.text', '0');
+        cy.get('[data-cy="noContent"]')
+        cy.get('span.p-dropdown-label.p-inputtext').contains('Search available quizzes and surveys...').should('be.visible')
+        cy.get('[data-cy="quizSelector"]').click()
+        cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
+
+        cy.get('[data-cy="pageHeaderStat_Quizzes and Surveys"] [data-cy="statValue"]').should('have.text', '0');
+        cy.get('[data-cy="error-msg"]').contains('Error! Request could not be completed! Admin Group [Non-UC Protected Admin Group] is not allowed to be assigned to [This is quiz 1] Quiz as the group does not have Divine Dragon permission')
+    })
+
     it('cannot enable UC protection for admin group if it contains a non UC member', function () {
         cy.request('PUT', `/admin/admin-group-definitions/adminGroup2/users/${allDragonsUser}/roles/ROLE_ADMIN_GROUP_OWNER`);
 
@@ -242,6 +261,26 @@ describe('Community Admin Group Tests', () => {
         cy.get('[data-cy="communityProtectionErrors"]').contains('Unable to restrict access to Divine Dragon users only')
         cy.get('[data-cy="communityProtectionErrors"]').contains('Has existing allDragons@email.org user that is not authorized')
         cy.get('[data-cy="communityProtectionErrors"]').contains('This project is part of one or more Admin Groups that has not enabled user community protection')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="communityRestrictionWarning"]').should('not.exist')
+    })
+
+    it('cannot enable UC protection for quiz that belongs to a non-UC admin group', function () {
+        cy.request('PUT', `/admin/admin-group-definitions/adminGroup2/users/${allDragonsUser}/roles/ROLE_ADMIN_GROUP_OWNER`);
+        cy.addQuizToAdminGroupDef(2, 2)
+
+        cy.visit('/administrator/quizzes/')
+        // cy.get('[data-cy="noQuizzesYet"]')
+        cy.get('[data-cy="editQuizButton_quiz2"]').click()
+        cy.get('[data-cy="markdownEditorInput"]')
+
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="communityProtectionErrors"]').should('not.exist')
+
+        cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="communityProtectionErrors"]').contains('Unable to restrict access to Divine Dragon users only')
+        cy.get('[data-cy="communityProtectionErrors"]').contains('Has existing allDragons@email.org user that is not authorized')
+        cy.get('[data-cy="communityProtectionErrors"]').contains('This quiz is part of one or more Admin Groups that do no have Divine Dragon permission')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="communityRestrictionWarning"]').should('not.exist')
     })

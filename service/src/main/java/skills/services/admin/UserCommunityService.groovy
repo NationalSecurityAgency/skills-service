@@ -174,11 +174,10 @@ class UserCommunityService {
         QuizDef quizDef = quizDefRepo.findByQuizIdIgnoreCase(quizId)
         if (quizDef) {
             List<UserRole> allRoles = userRoleRepo.findAllByQuizIdIgnoreCase(quizDef.quizId)
+            checkAllUsersAreUCMembers(allRoles, res)
             if(adminGroupDefRepo.doesAdminGroupContainNonUserCommunityQuiz(quizDef.quizId)) {
                 res.isAllowed = false
                 res.unmetRequirements.add("This quiz is part of one or more Admin Groups that do no have ${getCommunityNameBasedOnConfAndItemStatus(true)} permission".toString())
-            } else {
-                checkAllUsersAreUCMembers(allRoles, res)
             }
 
             List<String> nonCommunityProjects = quizToSkillDefRepo.getNonCommunityProjectsThatThisQuizIsLinkedTo(quizDef.id)?.sort()

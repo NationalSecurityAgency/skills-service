@@ -58,6 +58,10 @@ const emptyMessage = computed(() => {
     return 'You currently do not administer any quizzes or surveys.'
   }
 })
+const errNotification = ref({
+  enable: false,
+  msg: '',
+});
 
 onMounted(() => {
   loadData()
@@ -75,13 +79,15 @@ const loadData = () => {
 const addQuizToAdminGroup = (quiz) => {
   isLoading.value = true
   AdminGroupsService.addQuizToAdminGroup(adminGroupId.value, quiz.quizId)
-      .then((res) => {
-        availableQuizzes.value = res.availableQuizzes;
-        assignedQuizzes.value = res.assignedQuizzes;
-        adminGroupState.adminGroup.numberOfQuizzesAndSurveys++;
-      }).finally(() => {
-    isLoading.value = false
-  });
+    .then((res) => {
+      availableQuizzes.value = res.availableQuizzes;
+      assignedQuizzes.value = res.assignedQuizzes;
+      adminGroupState.adminGroup.numberOfQuizzesAndSurveys++;
+    }).catch((e) => {
+      handleError(e);
+    }).finally(() => {
+      isLoading.value = false
+    });
 }
 const removeQuizFromAdminGroupConfirm = (quiz) => {
   removeQuizInfo.value.quiz = quiz
@@ -99,6 +105,21 @@ const removeQuizFromAdminGroup = () => {
       }).finally(() => {
     isLoading.value = false
   });
+}
+const handleError = (e) => {
+  if (e.response.data && e.response.data.errorCode && e.response.data.errorCode === 'AccessDenied') {
+    errNotification.value.msg = e.response.data.explanation;
+    errNotification.value.enable = true;
+  } else if (upgradeInProgressErrorChecker.isUpgrading(e)) {
+    upgradeInProgressErrorChecker.navToUpgradeInProgressPage()
+  } else {
+    const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
+    errorState.navToErrorPage('Failed to add Project to Admin Group', errorMessage)
+  }
+}
+const clearErrorMessage = () => {
+  errNotification.value.msg = '';
+  errNotification.value.enable = false;
 }
 </script>
 
@@ -133,6 +154,9 @@ const removeQuizFromAdminGroup = () => {
             </template>
           </SkillsDropDown>
         </div>
+        <Message v-if="errNotification.enable" @close="clearErrorMessage" severity="error" data-cy="error-msg">
+          <strong>Error!</strong> Request could not be completed! {{ errNotification.msg }}
+        </Message>
         <div v-if="assignedQuizzes && assignedQuizzes.length > 0">
           <SkillsDataTable
               :loading="isLoading"
