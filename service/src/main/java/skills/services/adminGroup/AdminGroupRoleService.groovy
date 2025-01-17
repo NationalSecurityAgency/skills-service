@@ -23,6 +23,7 @@ import skills.auth.UserInfoService
 import skills.auth.UserNameService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillQuizException
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
@@ -156,6 +157,12 @@ class AdminGroupRoleService {
     void addQuizToAdminGroup(String adminGroupId, String quizId) {
         AdminGroupDef adminGroupDef = findAdminGroupDef(adminGroupId)
         QuizDef quizDef = quizDefService.findQuizDef(quizId)
+
+        if (userCommunityService.isUserCommunityOnlyQuiz(quizId) && !userCommunityService.isUserCommunityOnlyAdminGroup(adminGroupId)) {
+            String communityName = userCommunityService.getCommunityNameBasedOnConfAndItemStatus(true)
+            throw new SkillQuizException("Admin Group [${adminGroupDef.name}] is not allowed to be assigned to [${quizDef.name}] Quiz as the group does not have ${communityName} permission".toString(), quizId, ErrorCode.AccessDenied)
+        }
+
         accessSettingsStorageService.findAllAdminGroupMembers(adminGroupDef.adminGroupId).each { UserRoleRes userRoleRes ->
             accessSettingsStorageService.addQuizDefUserRoleForUser(userRoleRes.userId, quizDef.quizId, RoleName.ROLE_QUIZ_ADMIN, adminGroupId)
         }
