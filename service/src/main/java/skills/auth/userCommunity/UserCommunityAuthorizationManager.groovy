@@ -101,7 +101,13 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         if (projectsRequestMatcher.matches(request)) {
             projectId = extractProjectId(request)
         } else if (attachmentsRequestMatcher.matches(request)) {
-            projectId = extractProjectIdForAttachment(request)
+            AttachmentExtractRes extractRes = extractProjectIdForAttachment(request)
+            if (extractRes?.projectId) {
+                projectId = extractRes.projectId
+            }
+            if (extractRes?.quizId) {
+                quizId = extractRes.quizId
+            }
         } else if (adminGroupRequestMatcher.matches(request)) {
             adminGroupId = extractAdminGroupId(request)
         } else if (quizzesApiRequestMatcher.matches(request) || quizzesAdminRequestMatcher.matches(request)) {
@@ -136,15 +142,19 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         return StringUtils.EMPTY
     }
 
-    private String extractProjectIdForAttachment(HttpServletRequest request) {
+    static class AttachmentExtractRes {
+        String projectId
+        String quizId
+    }
+    private AttachmentExtractRes extractProjectIdForAttachment(HttpServletRequest request) {
         String url = getRequestUrl(request)
         Matcher pid = ATTACHMENT_UUID.matcher(url)
         if (pid.matches()) {
             String uuid = pid.group(1)
             Attachment attachment = attachmentService.getAttachment(uuid);
-            return attachment?.projectId
+            return new AttachmentExtractRes(projectId: attachment?.projectId, quizId: attachment?.quizId)
         }
-        return StringUtils.EMPTY
+        return null
     }
 
     private String extractAdminGroupId(HttpServletRequest request) {

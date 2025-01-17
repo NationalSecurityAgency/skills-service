@@ -195,6 +195,7 @@ class QuizDefService {
 
         String userId = userIdParam ?: userInfoService.getCurrentUserId()
         QuizDefWithDescription quizDefWithDescription = copyQuizDef(originalQuizId, newQuizId, quizDefRequest, userId)
+        validateUserCommunityProps(quizDefRequest, quizDefWithDescription)
 
         log.debug("Copied [{}]", quizDefWithDescription)
         userActionsHistoryService.saveUserAction(new UserActionInfo(
