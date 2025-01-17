@@ -157,12 +157,16 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     }
 
     private String extractQuizId(HttpServletRequest request) {
+        String res = StringUtils.EMPTY
         String url = getRequestUrl(request)
         Matcher gid = QUIZ_ID.matcher(url)
         if (gid.matches()) {
-            return gid.group(1)
+            res = gid.group(1)
+            if (res?.equalsIgnoreCase("null") ) {
+                res = StringUtils.EMPTY
+            }
         }
-        return StringUtils.EMPTY
+        return res
     }
 
     private String getRequestUrl(HttpServletRequest request) {

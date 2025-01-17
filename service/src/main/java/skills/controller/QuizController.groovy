@@ -270,7 +270,7 @@ class QuizController {
         QuizValidator.isNotBlank(quizId, "Quiz Id")
         QuizValidator.isNotNull(values, "Settings")
 
-        if (values?.find {it.setting.equalsIgnoreCase(QuizSettings.UserCommunityOnlyQuiz.setting) }) {
+        if (values?.find {it.setting?.equalsIgnoreCase(QuizSettings.UserCommunityOnlyQuiz.setting) }) {
             throw new SkillQuizException("Not allowed to save [${QuizSettings.UserCommunityOnlyQuiz.setting}] setting using this endpoint", quizId, ErrorCode.BadParam)
         }
         quizSettingsService.saveSettings(quizId, values)

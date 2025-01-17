@@ -189,94 +189,42 @@ class EnableCommunityForQuizValidationSpecs extends DefaultIntSpec {
         res.unmetRequirements == ["This quiz is linked to the following project(s) that do not have Divine Dragon permission: ${p1.projectId}, ${p3.projectId}".toString()]
     }
 
-//    def "validation endpoint - cannot enable community because number of requirements are not met"() {
-//        List<String> users = getRandomUsers(3)
-//
-//        SkillsService allDragonsUser = createService(users[0])
-//        SkillsService pristineDragonsUser = createService(users[1])
-//        SkillsService allDragonsUser1 = createService(users[2])
-//        SkillsService rootUser = createRootSkillService()
-//        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
-//
-//        def p1 = createProject(1)
-//        def p1subj1 = createSubject(1, 1)
-//        def p1Skills = createSkills(3, 1, 1, 100, 5)
-//        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
-//        pristineDragonsUser.exportSkillToCatalog(p1.projectId, p1Skills[0].skillId)
-//
-//        pristineDragonsUser.addUserRole(allDragonsUser.userName, p1.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
-//        pristineDragonsUser.addUserRole(allDragonsUser1.userName, p1.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
-//
-//        when:
-//        def res = pristineDragonsUser.validateProjectForEnablingCommunity(p1.projectId)
-//        then:
-//        res.isAllowed == false
-//        res.unmetRequirements.sort() == [
-//                "Has existing ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} user that is not authorized",
-//                "Has existing ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser1.userName).userIdForDisplay} user that is not authorized",
-//                "Has skill(s) that have been exported to the Skills Catalog"
-//        ].sort()
-//    }
-//
-//    def "validation endpoint - projects with a protected community are not allowed to share skills for dependencies"() {
-//        List<String> users = getRandomUsers(2)
-//
-//        SkillsService pristineDragonsUser = createService(users[1])
-//        SkillsService rootUser = createRootSkillService()
-//        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
-//
-//        def p1 = createProject(1)
-//        def p1subj1 = createSubject(1, 1)
-//        def p1Skills = createSkills(3, 1, 1, 100, 5)
-//        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
-//
-//        def p2 = createProject(2)
-//        def p2subj1 = createSubject(2, 1)
-//        def p2Skills = createSkills(3, 2, 1, 100, 5)
-//        pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
-//
-//        pristineDragonsUser.shareSkill(p1.projectId, p1Skills[0].skillId, p2.projectId)
-//
-//        when:
-//        def res = pristineDragonsUser.validateProjectForEnablingCommunity(p1.projectId)
-//        then:
-//        res.isAllowed == false
-//        res.unmetRequirements == ["Has skill(s) that have been shared for cross-project dependencies"]
-//    }
-//
-//    def "validation endpoint - projects with a protected community are not allowed to be part of the global badge"() {
-//        List<String> users = getRandomUsers(2)
-//
-//        SkillsService pristineDragonsUser = createService(users[1])
-//        SkillsService rootUser = createRootSkillService()
-//        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
-//
-//        def p1 = createProject(1)
-//        def p1subj1 = createSubject(1, 1)
-//        def p1Skills = createSkills(3, 1, 1, 100, 5)
-//        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
-//
-//        def p2 = createProject(2)
-//        def p2subj1 = createSubject(2, 1)
-//        def p2Skills = createSkills(3, 2, 1, 100, 5)
-//        pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
-//
-//        def badge1 = SkillsFactory.createBadge(1)
-//        def badge2 = SkillsFactory.createBadge(2)
-//        rootUser.createGlobalBadge(badge1)
-//        rootUser.assignSkillToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId)
-//
-//        rootUser.createGlobalBadge(badge2)
-//        rootUser.assignProjectLevelToGlobalBadge(projectId: p2.projectId, badgeId: badge2.badgeId, level: "1")
-//
-//        when:
-//        def res = pristineDragonsUser.validateProjectForEnablingCommunity(p1.projectId)
-//        def res1 = pristineDragonsUser.validateProjectForEnablingCommunity(p2.projectId)
-//        then:
-//        res.isAllowed == false
-//        res.unmetRequirements == ["This project is part of one or more Global Badges"]
-//
-//        res1.isAllowed == false
-//        res1.unmetRequirements == ["This project is part of one or more Global Badges"]
-//    }
+    def "validation endpoint - cannot enable community because number of requirements are not met"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        pristineDragonsUser.createQuizDef(q1)
+
+        def q2 = QuizDefFactory.createQuiz(2)
+        pristineDragonsUser.createQuizDef(q2)
+
+        pristineDragonsUser.addQuizUserRole(q1.quizId, allDragonsUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+
+        def p1 = createProject(1)
+        def p1Skill = createSkill(1, 1, 1, 1, 1, 480, 200)
+        p1Skill.selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+        p1Skill.quizId = q1.quizId
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, createSubject(1, 1), [p1Skill])
+
+        def p2 = createProject(2)
+        p2.enableProtectedUserCommunity = true
+        def p2Skill = createSkill(2, 1, 1, 1, 1, 480, 200)
+        p2Skill.selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+        p2Skill.quizId = q1.quizId
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p2, createSubject(2, 1), [p2Skill])
+
+        when:
+        assert pristineDragonsUser.validateQuizForEnablingCommunity(q2.quizId).isAllowed == true
+        def res = pristineDragonsUser.validateQuizForEnablingCommunity(q1.quizId)
+        then:
+        res.isAllowed == false
+        res.unmetRequirements.sort() == [
+                "Has existing ${allDragonsUser.userName} for display user that is not authorized".toString(),
+                "This quiz is linked to the following project(s) that do not have Divine Dragon permission: ${p1.projectId}".toString()
+        ].sort()
+    }
 }

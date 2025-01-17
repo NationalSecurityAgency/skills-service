@@ -1098,7 +1098,7 @@ class QuizDefService {
         result.type = QuizDefParent.QuizType.valueOf(quizDefSummaryResult.getQuizType())
         result.displayOrder = 0 // todo
 
-        Boolean isUserCommunityEnableForThisQuiz = quizDefSummaryResult.userCommunityEnabled && quizDefSummaryResult.userCommunityEnabled == Boolean.TRUE.toString()
+        Boolean isUserCommunityEnableForThisQuiz = Boolean.valueOf(quizDefSummaryResult.userCommunityEnabled)
         result.userCommunity = isCommunityMember ? userCommunityService.getCommunityNameBasedOnConfAndItemStatus(isUserCommunityEnableForThisQuiz) : null
         return result
     }

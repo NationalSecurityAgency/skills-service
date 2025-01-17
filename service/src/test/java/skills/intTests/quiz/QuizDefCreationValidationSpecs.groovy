@@ -51,6 +51,18 @@ class QuizDefCreationValidationSpecs extends DefaultIntSpec {
         skillsClientException.message.contains("QuizId was not provided")
     }
 
+    def "quiz id must not be null string"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+
+        when:
+        quiz1.quizId = "null"
+        skillsService.createQuizDef(quiz1)
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("QuizId was not provided")
+    }
+
     def "quiz id must be at least 3 chars"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
 
