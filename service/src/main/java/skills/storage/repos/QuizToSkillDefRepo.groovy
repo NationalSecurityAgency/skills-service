@@ -114,6 +114,14 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
 
     Integer countByQuizRefId(Integer quizRefId)
 
+    @Query('''select distinct(skill.projectId)
+            from QuizToSkillDef qToS, QuizDef  quiz, SkillDef skill
+            where quiz.id = qToS.quizRefId
+                and skill.id = qToS.skillRefId
+                and quiz.id = ?1
+                and not exists (select 1 from Setting s2 where skill.projectId = s2.projectId and s2.setting = 'user_community' and s2.value = 'true')''')
+    List<String> getNonCommunityProjectsThatThisQuizIsLinkedTo(Integer quizRefId)
+
     @Query('''select count(quiz) > 0
             from QuizToSkillDef qToS, QuizDef  quiz, SkillDef  skill
             where quiz.id = qToS.quizRefId

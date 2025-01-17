@@ -71,6 +71,9 @@ class UserCommunityService {
     QuizDefRepo quizDefRepo
 
     @Autowired
+    QuizToSkillDefRepo quizToSkillDefRepo
+
+    @Autowired
     SkillShareDefRepo skillShareDefRepo
 
     @Autowired
@@ -171,13 +174,18 @@ class UserCommunityService {
         QuizDef quizDef = quizDefRepo.findByQuizIdIgnoreCase(quizId)
         if (quizDef) {
             List<UserRole> allRoles = userRoleRepo.findAllByQuizIdIgnoreCase(quizDef.quizId)
-            checkAllUsersAreUCMembers(allRoles, res)
+            if(adminGroupDefRepo.doesAdminGroupContainNonUserCommunityQuiz(quizDef.quizId)) {
+                res.isAllowed = false
+                res.unmetRequirements.add("This quiz is part of one or more Admin Groups that do no have ${getCommunityNameBasedOnConfAndItemStatus(true)} permission".toString())
+            } else {
+                checkAllUsersAreUCMembers(allRoles, res)
+            }
 
-
-//            if(adminGroupDefRepo.doesAdminGroupContainNonUserCommunityProject(projDef.projectId)) {
-//                res.isAllowed = false
-//                res.unmetRequirements.add("This project is part of one or more Admin Groups that has not enabled user community protection")
-//            }
+            List<String> nonCommunityProjects = quizToSkillDefRepo.getNonCommunityProjectsThatThisQuizIsLinkedTo(quizDef.id)?.sort()
+            if (nonCommunityProjects) {
+                res.isAllowed = false
+                res.unmetRequirements.add("This quiz is linked to the following project(s) that do not have ${getCommunityNameBasedOnConfAndItemStatus(true)} permission: ${nonCommunityProjects.join(", ")}".toString())
+            }
         }
         return res;
     }

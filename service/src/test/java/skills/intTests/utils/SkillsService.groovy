@@ -129,9 +129,13 @@ class SkillsService {
     def createProject(Map props, String originalProjectId = null) {
         wsHelper.appPost(getProjectUrl(originalProjectId ?: props.projectId), props)
     }
-
+    @Profile
     def validateProjectForEnablingCommunity(String projectId) {
         wsHelper.adminGet(getProjectUrl(projectId) + "/validateEnablingCommunity")
+    }
+    @Profile
+    def validateQuizForEnablingCommunity(String quizId) {
+        wsHelper.adminGet("/quiz-definitions/${quizId}/validateEnablingCommunity")
     }
 
     @Profile

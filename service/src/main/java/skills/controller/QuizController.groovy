@@ -92,6 +92,12 @@ class QuizController {
         quizDefService.deleteQuiz(quizId)
     }
 
+    @RequestMapping(value = "/{quizId}/validateEnablingCommunity", method = RequestMethod.GET, produces = "application/json")
+    EnableUserCommunityValidationRes validateQuizForEnablingCommunity(@PathVariable("quizId") String quizId) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id")
+        return quizDefService.validateQuizForEnablingCommunity(quizId)
+    }
+
     @RequestMapping(value = "/{quizId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     QuizDefResult getQuizDef(@PathVariable("quizId") String quizId) {

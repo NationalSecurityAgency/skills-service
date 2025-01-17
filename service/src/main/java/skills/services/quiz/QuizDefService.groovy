@@ -322,6 +322,11 @@ class QuizDefService {
         return convert(updatedDef)
     }
 
+    @Transactional(readOnly = true)
+    EnableUserCommunityValidationRes validateQuizForEnablingCommunity(String quizId) {
+        return userCommunityService.validateQuizForCommunity(quizId)
+    }
+
     @Transactional()
     void deleteQuestion(String quizId, Integer quizQuestionDefId) {
         QuizDef quizDef = findQuizDef(quizId)

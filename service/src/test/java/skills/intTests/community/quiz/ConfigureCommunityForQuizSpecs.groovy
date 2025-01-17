@@ -180,7 +180,7 @@ class ConfigureCommunityForQuizSpecs extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.getMessage().contains("Not Allowed to set [enableProtectedUserCommunity] to true")
-        e.message.contains("Has existing ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} user that is not authorized")
+        e.message.contains("This quiz is part of one or more Admin Groups that do no have Divine Dragon permission")
     }
 
     def "run community specific paragraph validation for project's description - project creation with community"() {
