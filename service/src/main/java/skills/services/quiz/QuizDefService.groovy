@@ -139,7 +139,7 @@ class QuizDefService {
     @Transactional(readOnly = true)
     List<QuizDefResult> getCurrentUsersQuizDefs() {
         UserInfo userInfo = userInfoService.currentUser
-        boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
+        Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
         String userId = userInfo.username?.toLowerCase()
         List<QuizDefResult> res = []
 
@@ -1093,7 +1093,7 @@ class QuizDefService {
         }
     }
 
-    private QuizDefResult convert(QuizDefRepo.QuizDefBasicResult quizDefSummaryResult, boolean isCommunityMember) {
+    private QuizDefResult convert(QuizDefRepo.QuizDefBasicResult quizDefSummaryResult, Boolean isCommunityMember) {
         QuizDefResult result = Props.copy(quizDefSummaryResult, new QuizDefResult())
         result.type = QuizDefParent.QuizType.valueOf(quizDefSummaryResult.getQuizType())
         result.displayOrder = 0 // todo
