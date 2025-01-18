@@ -26,6 +26,8 @@ import Navigation from '@/components/utils/Navigation.vue';
 import UserRolesUtil from '@/components/utils/UserRolesUtil.js';
 import EditQuiz from '@/components/quiz/testCreation/EditQuiz.vue';
 import QuizType from "@/skills-display/components/quiz/QuizType.js";
+import Avatar from 'primevue/avatar';
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 
 const announcer = useSkillsAnnouncer()
 const router = useRouter()
@@ -33,6 +35,7 @@ const route = useRoute()
 const quizSummaryState = useQuizSummaryState()
 const quizConfig = useQuizConfig()
 const focusState = useFocusState()
+const appConfig = useAppConfig()
 
 onMounted(() => {
   if (!quizSummaryState.quizSummary || quizSummaryState.quizSummary.quizId !== route.params.quizId) {
@@ -102,6 +105,7 @@ function updateEditQuizInfo(quizSummary) {
   editQuizInfo.value.quizDef.quizId = quizSummary.quizId
   editQuizInfo.value.quizDef.name = quizSummary.name
   editQuizInfo.value.quizDef.type = quizSummary.type
+  editQuizInfo.value.quizDef.userCommunity = quizSummary.userCommunity
 }
 
 function updateQuizDef(quizDef) {
@@ -118,6 +122,7 @@ function updateQuizDef(quizDef) {
   updateEditQuizInfo(quizDef)
   quizSummaryState.quizSummary.name = quizDef.name
   quizSummaryState.quizSummary.quizId = quizDef.quizId
+  quizSummaryState.quizSummary.userCommunity = quizDef.userCommunity
   announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`)
 }
 </script>
@@ -127,6 +132,15 @@ function updateQuizDef(quizDef) {
     <PageHeader :loading="isLoading" :options="headerOptions">
       <template #subSubTitle v-if="quizSummaryState.quizSummary">
         <div>
+          <div>
+            <div v-if="quizSummaryState.quizSummary.userCommunity" class="my-1" data-cy="userCommunity">
+              <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
+              <span
+                class="text-secondary font-italic ml-1">{{ appConfig.userCommunityBeforeLabel }}</span> <span
+                class="font-weight-bold text-primary">{{ quizSummaryState.quizSummary.userCommunity }}</span> <span
+                class="text-secondary font-italic">{{ appConfig.userCommunityAfterLabel }}</span>
+            </div>
+          </div>
           <div v-if="!quizConfig.isReadOnlyQuiz" class="mt-2">
             <SkillsButton
                 id="editQuizButton"
