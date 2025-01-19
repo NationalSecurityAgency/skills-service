@@ -17,3 +17,4 @@ These pages provide in-depth guidance on installation, usage and contribution.
 [![Continuous Integration with OAuth](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-oauth.yml/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-oauth.yml)
 
 [![Continuous Integration with Email Confirmation Enabled](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-email-confirmation.yml/badge.svg)](https://github.com/NationalSecurityAgency/skills-service/actions/workflows/build-and-test-email-confirmation.yml)
+
