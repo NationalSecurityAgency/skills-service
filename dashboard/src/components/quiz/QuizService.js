@@ -127,8 +127,11 @@ export default {
   },
   addQuizAdmin(quizId, userId) {
     const adminRole = 'ROLE_QUIZ_ADMIN'
-    return axios
-      .post(`/admin/quiz-definitions/${quizId}/users/${userId}/roles/${adminRole}`)
+    return axios.post(
+        `/admin/quiz-definitions/${quizId}/users/${userId}/roles/${adminRole}`,
+        null,
+        { handleError: false }
+      )
       .then((response) => response.data)
   },
   deleteQuizAdmin(quizId, userId) {
