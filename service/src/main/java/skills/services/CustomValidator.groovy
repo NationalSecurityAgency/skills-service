@@ -158,17 +158,19 @@ class CustomValidator {
         return validationResult
     }
 
-    private boolean shouldUseCommunityValidation(String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId) {
-        if (this.userCommunityParagraphPattern) {
-            if (utilizeUserCommunityParagraphPatternByDefault || projectId) {
-                return projectId ? userCommunityService.isUserCommunityOnlyProject(projectId) : utilizeUserCommunityParagraphPatternByDefault
-            }
-            if (quizId) {
-                return userCommunityService.isUserCommunityOnlyQuiz(quizId)
-            }
+    private boolean shouldUseCommunityValidation(String projectId = null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId) {
+        if (!this.userCommunityParagraphPattern) {
+            return false
         }
-        return false
+        if (projectId) {
+            return userCommunityService.isUserCommunityOnlyProject(projectId)
+        }
+        if (quizId) {
+            return userCommunityService.isUserCommunityOnlyQuiz(quizId)
+        }
+        return (boolean)utilizeUserCommunityParagraphPatternByDefault
     }
+
 
     CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
         Pattern paragraphPatternToUse = this.paragraphPattern
