@@ -19,11 +19,16 @@ package skills.intTests.community.quiz
 import groovy.util.logging.Slf4j
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
+import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
+import skills.quizLoading.QuizSettings
+import skills.quizLoading.QuizUserPreferences
+import skills.services.quiz.QuizQuestionType
 import skills.storage.model.UserQuizAttempt
+import skills.storage.model.auth.RoleName
 import skills.utils.GroovyToJavaByteUtils
 
 @Slf4j
@@ -42,6 +47,8 @@ class UserCommunityQuizAuthSpecs extends DefaultIntSpec {
         def q1 = QuizDefFactory.createQuiz(1)
         q1.enableProtectedUserCommunity = true
         skillsService.createQuizDef(q1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
 
         def nonUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
         SkillsService nonUserCommunityUser = createService(nonUserCommunityUserId)
@@ -73,6 +80,34 @@ class UserCommunityQuizAuthSpecs extends DefaultIntSpec {
         validateForbidden { nonUserCommunityUser.reportQuizAnswer(q1.quizId, quizAttempt.id, 1) }
         validateForbidden { nonUserCommunityUser.completeQuizAttempt(q1.quizId, quizAttempt.id ) }
         validateForbidden { nonUserCommunityUser.failQuizAttempt(q1.quizId, quizAttempt.id ) }
+    }
+
+    def "user was UC but then became non-UC - cannot access quiz trainee/api endpoints with UC protection enabled"() {
+        when:
+        rootSkillsService.saveUserTag(skillsService.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        skillsService.createQuizDef(q1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def nonUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService nonUserCommunityUser = createService(nonUserCommunityUserId)
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(nonUserCommunityUser.userName, 'dragons', ['DivineDragon'])
+
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
+        nonUserCommunityUser.getQuizInfo(q1.quizId)
+        def quizAttempt =  skillsService.startQuizAttempt(q1.quizId).body
+        transactionTemplate.execute({
+            userTagRepo.deleteByUserId(nonUserCommunityUser.userName)
+        })
+        then:
+        validateForbidden { nonUserCommunityUser.getQuizInfo(q1.quizId) }
+        validateForbidden { nonUserCommunityUser.reportQuizAnswer(q1.quizId, 1, 1) }
+        validateForbidden { nonUserCommunityUser.completeQuizAttempt(q1.quizId, 1 ) }
+        validateForbidden { nonUserCommunityUser.failQuizAttempt(q1.quizId, 1 ) }
     }
 
     def "for non-UC user quiz attempt history only contains non-UC projects"() {
@@ -304,25 +339,166 @@ class UserCommunityQuizAuthSpecs extends DefaultIntSpec {
         e.getMessage().contains("User [${skillsService.userName}] is not allowed to set [enableProtectedUserCommunity] to true")
     }
 
-//    def "non-UC user cannot access quiz admin endpoints with UC protection enabled"() {
-//        SkillsService allDragonsUser = createService(users[0])
-//        SkillsService pristineDragonsUser = createService(users[1])
-//        SkillsService rootUser = createRootSkillService()
-//        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
-//
-//        when:
-//
-//        def q1 = QuizDefFactory.createQuiz(1)
-//        skillsService.createQuizDef(q1)
-//
-//        def nonUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
-//        SkillsService nonUserCommunityUser = createService(nonUserCommunityUserId)
-//
-//        q1.enableProtectedUserCommunity = true
-//
-//        then:
-//        validateForbidden { nonUserCommunityUser.createQuizDef(QuizDefFactory.createQuiz(1)) }
-//    }
+    def "non-UC user cannot access quiz admin endpoints with UC protection enabled"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+
+        when:
+        pristineDragonsUser.createQuizDef(q1)
+
+        then:
+        validateForbidden { allDragonsUser.createQuizDef(q1, q1.quizId) }
+        validateForbidden { allDragonsUser.removeQuizDef(q1.quizId) }
+        validateForbidden { allDragonsUser.validateQuizForEnablingCommunity(q1.quizId) }
+        validateForbidden { allDragonsUser.getQuizDef(q1.quizId) }
+        validateForbidden { allDragonsUser.countSkillsForQuiz(q1.quizId) }
+        validateForbidden { allDragonsUser.getSkillsForQuiz(q1.quizId) }
+        validateForbidden { allDragonsUser.getQuizDefSummary(q1.quizId) }
+        validateForbidden { allDragonsUser.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 1, QuizQuestionType.SingleChoice)) }
+        validateForbidden { allDragonsUser.updateQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 1, QuizQuestionType.SingleChoice)) }
+        validateForbidden { allDragonsUser.deleteQuizQuestionDef(q1.quizId, 1) }
+        validateForbidden { allDragonsUser.changeQuizQuestionDisplayOrder(q1.quizId, 1, 1) }
+        validateForbidden { allDragonsUser.getQuizQuestionDefs(q1.quizId) }
+        validateForbidden { allDragonsUser.getQuizQuestionDef(q1.quizId, 1) }
+        validateForbidden { allDragonsUser.getUserQuizAnswers(q1.quizId, 1) }
+        validateForbidden { allDragonsUser.getQuizMetrics(q1.quizId) }
+        validateForbidden { allDragonsUser.getQuizRuns(q1.quizId) }
+        validateForbidden { allDragonsUser.deleteQuizRun(q1.quizId, 1) }
+        validateForbidden { allDragonsUser.getQuizAttemptResult(q1.quizId, 1) }
+        validateForbidden { allDragonsUser.startQuizAttempt(q1.quizId) }
+        validateForbidden { allDragonsUser.reportQuizAnswer(q1.quizId, 1,1) }
+        validateForbidden { allDragonsUser.gradeAnswer(skillsService.userName, q1.quizId, 1, 1, true) }
+        validateForbidden { allDragonsUser.failQuizAttempt(q1.quizId, 1) }
+        validateForbidden { allDragonsUser.completeQuizAttempt(q1.quizId, 1) }
+        validateForbidden { allDragonsUser.saveQuizSettings(q1.quizId, [[setting: QuizSettings.QuizLength.setting, value: '1']]) }
+        validateForbidden { allDragonsUser.getQuizSettings(q1.quizId) }
+        validateForbidden { allDragonsUser.saveQuizUserPreference(q1.quizId, QuizUserPreferences.DisableGradingRequestNotification.preference, true) }
+        validateForbidden { allDragonsUser.getCurrentUserQuizPreferences(q1.quizId) }
+        validateForbidden { allDragonsUser.addQuizUserRole(q1.quizId, allDragonsUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString()) }
+        validateForbidden { allDragonsUser.getQuizUserRoles(q1.quizId) }
+        validateForbidden { allDragonsUser.deleteQuizUserRole(q1.quizId, allDragonsUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString()) }
+        validateForbidden { allDragonsUser.getQuizUserTagCounts(q1.quizId, "tag") }
+        validateForbidden { allDragonsUser.getQuizUsageOverTime(q1.quizId) }
+        validateForbidden { allDragonsUser.getUserActionsForQuiz(q1.quizId) }
+        validateForbidden { allDragonsUser.getUserActionFilterOptionsForQuiz(q1.quizId) }
+        validateForbidden { allDragonsUser.getQuizUserActionAttributes(q1.quizId, 1) }
+        validateForbidden { allDragonsUser.getAdminGroupsForQuiz(q1.quizId) }
+    }
+
+    def "user was UC but then became non-UC - cannot access quiz admin endpoints with UC protection enabled"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)
+
+        when:
+        rootUser.saveUserTag(allDragonsUser.userName, 'dragons', ['DivineDragon'])
+        allDragonsUser.createQuizDef(q1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        allDragonsUser.createQuizQuestionDefs(questions)
+        def quizAttempt =  allDragonsUser.startQuizAttempt(q1.quizId).body
+        transactionTemplate.execute({
+            userTagRepo.deleteByUserId(allDragonsUser.userName)
+        })
+
+        then:
+        validateForbidden { allDragonsUser.validateQuizForEnablingCommunity(q1.quizId) }
+        validateForbidden { allDragonsUser.getQuizDef(q1.quizId) }
+        validateForbidden { allDragonsUser.countSkillsForQuiz(q1.quizId) }
+        validateForbidden { allDragonsUser.getSkillsForQuiz(q1.quizId) }
+        validateForbidden { allDragonsUser.getQuizDefSummary(q1.quizId) }
+        validateForbidden { allDragonsUser.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 1, QuizQuestionType.SingleChoice)) }
+        validateForbidden { allDragonsUser.updateQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 1, QuizQuestionType.SingleChoice)) }
+        validateForbidden { allDragonsUser.deleteQuizQuestionDef(q1.quizId, 1) }
+        validateForbidden { allDragonsUser.changeQuizQuestionDisplayOrder(q1.quizId, 1, 1) }
+        validateForbidden { allDragonsUser.getQuizQuestionDefs(q1.quizId) }
+        validateForbidden { allDragonsUser.getQuizQuestionDef(q1.quizId, 1) }
+        validateForbidden { allDragonsUser.getUserQuizAnswers(q1.quizId, 1) }
+        validateForbidden { allDragonsUser.getQuizMetrics(q1.quizId) }
+        validateForbidden { allDragonsUser.getQuizRuns(q1.quizId) }
+        validateForbidden { allDragonsUser.deleteQuizRun(q1.quizId, quizAttempt.id) }
+        validateForbidden { allDragonsUser.getQuizAttemptResult(q1.quizId, 1) }
+        validateForbidden { allDragonsUser.startQuizAttempt(q1.quizId) }
+        validateForbidden { allDragonsUser.reportQuizAnswer(q1.quizId, quizAttempt.id,1) }
+        validateForbidden { allDragonsUser.gradeAnswer(skillsService.userName, q1.quizId, 1, 1, true) }
+        validateForbidden { allDragonsUser.failQuizAttempt(q1.quizId, quizAttempt.id) }
+        validateForbidden { allDragonsUser.completeQuizAttempt(q1.quizId, quizAttempt.id) }
+        validateForbidden { allDragonsUser.saveQuizSettings(q1.quizId, [[setting: QuizSettings.QuizLength.setting, value: '1']]) }
+        validateForbidden { allDragonsUser.getQuizSettings(q1.quizId) }
+        validateForbidden { allDragonsUser.saveQuizUserPreference(q1.quizId, QuizUserPreferences.DisableGradingRequestNotification.preference, true) }
+        validateForbidden { allDragonsUser.getCurrentUserQuizPreferences(q1.quizId) }
+        validateForbidden { allDragonsUser.addQuizUserRole(q1.quizId, allDragonsUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString()) }
+        validateForbidden { allDragonsUser.getQuizUserRoles(q1.quizId) }
+        validateForbidden { allDragonsUser.deleteQuizUserRole(q1.quizId, allDragonsUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString()) }
+        validateForbidden { allDragonsUser.getQuizUserTagCounts(q1.quizId, "tag") }
+        validateForbidden { allDragonsUser.getQuizUsageOverTime(q1.quizId) }
+        validateForbidden { allDragonsUser.getUserActionsForQuiz(q1.quizId) }
+        validateForbidden { allDragonsUser.getUserActionFilterOptionsForQuiz(q1.quizId) }
+        validateForbidden { allDragonsUser.getQuizUserActionAttributes(q1.quizId, 1) }
+        validateForbidden { allDragonsUser.getAdminGroupsForQuiz(q1.quizId) }
+        validateForbidden { allDragonsUser.removeQuizDef(q1.quizId) }
+    }
+
+    def "UC user can access quiz admin endpoints with UC protection enabled"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+
+        when:
+        pristineDragonsUser.createQuizDef(q1)
+
+        then:
+        !validateForbidden { pristineDragonsUser.createQuizDef(q1, q1.quizId) }
+        !validateForbidden { pristineDragonsUser.getQuizDef(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.countSkillsForQuiz(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.getSkillsForQuiz(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.getQuizDefSummary(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 1, QuizQuestionType.SingleChoice)) }
+        !validateForbidden { pristineDragonsUser.updateQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 1, QuizQuestionType.SingleChoice)) }
+        !validateForbidden { pristineDragonsUser.deleteQuizQuestionDef(q1.quizId, 1) }
+        !validateForbidden { pristineDragonsUser.changeQuizQuestionDisplayOrder(q1.quizId, 1, 1) }
+        !validateForbidden { pristineDragonsUser.getQuizQuestionDefs(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.getQuizQuestionDef(q1.quizId, 1) }
+        !validateForbidden { pristineDragonsUser.getUserQuizAnswers(q1.quizId, 1) }
+        !validateForbidden { pristineDragonsUser.getQuizMetrics(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.getQuizRuns(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.deleteQuizRun(q1.quizId, 1) }
+        !validateForbidden { pristineDragonsUser.getQuizAttemptResult(q1.quizId, 1) }
+        !validateForbidden { pristineDragonsUser.startQuizAttempt(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.reportQuizAnswer(q1.quizId, 1,1) }
+        !validateForbidden { pristineDragonsUser.gradeAnswer(skillsService.userName, q1.quizId, 1, 1, true) }
+        !validateForbidden { pristineDragonsUser.failQuizAttempt(q1.quizId, 1) }
+        !validateForbidden { pristineDragonsUser.completeQuizAttempt(q1.quizId, 1) }
+        !validateForbidden { pristineDragonsUser.saveQuizSettings(q1.quizId, [[setting: QuizSettings.QuizLength.setting, value: '1']]) }
+        !validateForbidden { pristineDragonsUser.getQuizSettings(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.saveQuizUserPreference(q1.quizId, QuizUserPreferences.DisableGradingRequestNotification.preference, true) }
+        !validateForbidden { pristineDragonsUser.getCurrentUserQuizPreferences(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.getQuizUserRoles(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.getQuizUserTagCounts(q1.quizId, "tag") }
+        !validateForbidden { pristineDragonsUser.getQuizUsageOverTime(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.getUserActionsForQuiz(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.getUserActionFilterOptionsForQuiz(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.getQuizUserActionAttributes(q1.quizId, 1) }
+        !validateForbidden { pristineDragonsUser.validateQuizForEnablingCommunity(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.getAdminGroupsForQuiz(q1.quizId) }
+        !validateForbidden { pristineDragonsUser.removeQuizDef(q1.quizId) }
+    }
 
     def "cannot download attachments associated with a UC protected project if the user does not belong to the user community"() {
         when:
@@ -347,285 +523,10 @@ class UserCommunityQuizAuthSpecs extends DefaultIntSpec {
         println quizAttachment.href
         validateForbidden { allDragonsUser.downloadAttachment(quizAttachment.href) }
     }
-//
-//    def "cannot access group admin endpoints with UC protection enabled if the user does not belong to the user community"() {
-//
-//        when:
-//        String userCommunityUserId =  skillsService.userName
-//        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
-//
-//        def adminGroup = createAdminGroup(1)
-//        adminGroup.enableProtectedUserCommunity = true
-//        skillsService.createAdminGroupDef(adminGroup)
-//
-//        def proj = createProject(1)
-//        proj.enableProtectedUserCommunity = true
-//        def subj = createSubject(1, 1)
-//        def skill = SkillsFactory.createSkill(1, 1)
-//        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
-//
-//        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
-//        skillsService.createQuizDef(quiz)
-//
-//        def nonUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
-//        SkillsService nonUserCommunityUser = createService(nonUserCommunityUserId)
-//
-//        then:
-//
-//        // get admin groups should not receive 403
-//        !validateForbidden { nonUserCommunityUser.getAdminGroupDefs() }
-//        nonUserCommunityUser.getAdminGroupDefs() == []
-//
-//        // all others should
-//        validateForbidden { nonUserCommunityUser.getAdminGroupDef(adminGroup.adminGroupId) }
-//        validateForbidden { nonUserCommunityUser.getAdminGroupMembers(adminGroup.adminGroupId) }
-//        validateForbidden { nonUserCommunityUser.addAdminGroupOwner(adminGroup.adminGroupId, nonUserCommunityUserId) }
-//        validateForbidden { nonUserCommunityUser.addAdminGroupMember(adminGroup.adminGroupId, nonUserCommunityUserId) }
-//        validateForbidden { nonUserCommunityUser.deleteAdminGroupOwner(adminGroup.adminGroupId, nonUserCommunityUserId) }
-//        validateForbidden { nonUserCommunityUser.deleteAdminGroupMember(adminGroup.adminGroupId, nonUserCommunityUserId) }
-//        validateForbidden { nonUserCommunityUser.getAdminGroupQuizzesAndSurveys(adminGroup.adminGroupId) }
-//        validateForbidden { nonUserCommunityUser.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
-//        validateForbidden { nonUserCommunityUser.deleteQuizFromAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
-//        validateForbidden { nonUserCommunityUser.getAdminGroupProjects(adminGroup.adminGroupId) }
-//        validateForbidden { nonUserCommunityUser.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId) }
-//        validateForbidden { nonUserCommunityUser.deleteProjectFromAdminGroup(adminGroup.adminGroupId, proj.projectId) }
-//        validateForbidden { nonUserCommunityUser.updateAdminGroupDef(adminGroup) }
-//        validateForbidden { nonUserCommunityUser.removeAdminGroupDef(adminGroup.adminGroupId) }
-//    }
-//
-//    def "can access group admin endpoints with UC protection enabled if the user does belong to the user community"() {
-//
-//        when:
-//        String userCommunityUserId =  skillsService.userName
-//        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
-//
-//        def adminGroup = createAdminGroup(1)
-//        adminGroup.enableProtectedUserCommunity = true
-//        skillsService.createAdminGroupDef(adminGroup)
-//
-//        def proj = createProject(1)
-//        proj.enableProtectedUserCommunity = true
-//        def subj = createSubject(1, 1)
-//        def skill = SkillsFactory.createSkill(1, 1)
-//        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
-//
-//        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
-//        skillsService.createQuizDef(quiz)
-//
-//        def otherUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
-//        rootSkillsService.saveUserTag(otherUserCommunityUserId, 'dragons', ['DivineDragon'])
-//
-//        then:
-//
-//        // get admin groups should not receive 403
-//        !validateForbidden { skillsService.getAdminGroupDefs() }
-//
-//        // all others should
-//        !validateForbidden { skillsService.getAdminGroupDef(adminGroup.adminGroupId) }
-//        !validateForbidden { skillsService.getAdminGroupMembers(adminGroup.adminGroupId) }
-//        !validateForbidden { skillsService.addAdminGroupOwner(adminGroup.adminGroupId, otherUserCommunityUserId) }
-//        !validateForbidden { skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserCommunityUserId) }
-//        !validateForbidden { skillsService.deleteAdminGroupOwner(adminGroup.adminGroupId, otherUserCommunityUserId) }
-//        !validateForbidden { skillsService.deleteAdminGroupMember(adminGroup.adminGroupId, otherUserCommunityUserId) }
-//        !validateForbidden { skillsService.getAdminGroupQuizzesAndSurveys(adminGroup.adminGroupId) }
-//        !validateForbidden { skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
-//        !validateForbidden { skillsService.deleteQuizFromAdminGroup(adminGroup.adminGroupId, quiz.quizId) }
-//        !validateForbidden { skillsService.getAdminGroupProjects(adminGroup.adminGroupId) }
-//        !validateForbidden { skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId) }
-//        !validateForbidden { skillsService.deleteProjectFromAdminGroup(adminGroup.adminGroupId, proj.projectId) }
-//        !validateForbidden { skillsService.updateAdminGroupDef(adminGroup) }
-//        !validateForbidden { skillsService.removeAdminGroupDef(adminGroup.adminGroupId) }
-//    }
-//
-//    def "cannot add non-UC user as owner to UC protected admin group"() {
-//
-//        String userCommunityUserId =  skillsService.userName
-//        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
-//
-//        def adminGroup = createAdminGroup(1)
-//        adminGroup.enableProtectedUserCommunity = true
-//        skillsService.createAdminGroupDef(adminGroup)
-//
-//        def proj = createProject(1)
-//        proj.enableProtectedUserCommunity = true
-//        def subj = createSubject(1, 1)
-//        def skill = SkillsFactory.createSkill(1, 1)
-//        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
-//
-//        def nonUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
-//        createService(nonUserCommunityUserId)
-//
-//        when:
-//
-//        skillsService.addAdminGroupOwner(adminGroup.adminGroupId, nonUserCommunityUserId)
-//
-//        then:
-//
-//        SkillsClientException e = thrown(SkillsClientException)
-//        e.message.contains("User [${nonUserCommunityUserId} for display] is not allowed to be assigned [Admin Group Owner] user role for admin group [${adminGroup.adminGroupId}]")
-//    }
-//
-//    def "cannot add a non-UC user as member to UC protected admin group"() {
-//
-//        String userCommunityUserId =  skillsService.userName
-//        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
-//
-//        def adminGroup = createAdminGroup(1)
-//        adminGroup.enableProtectedUserCommunity = true
-//        skillsService.createAdminGroupDef(adminGroup)
-//
-//        def proj = createProject(1)
-//        def subj = createSubject(1, 1)
-//        def skill = SkillsFactory.createSkill(1, 1)
-//        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
-//
-//        def nonUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
-//        createService(nonUserCommunityUserId)
-//        when:
-//
-//        skillsService.addAdminGroupMember(adminGroup.adminGroupId, nonUserCommunityUserId)
-//
-//        then:
-//
-//        SkillsClientException e = thrown(SkillsClientException)
-//        e.message.contains("User [${nonUserCommunityUserId} for display] is not allowed to be assigned [Admin Group Member] user role for admin group [${adminGroup.adminGroupId}]")
-//    }
-//
-//    def "cannot add UC protected project to a non-UC admin group"() {
-//
-//        String userCommunityUserId =  skillsService.userName
-//        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
-//
-//        def adminGroup = createAdminGroup(1)
-//        skillsService.createAdminGroupDef(adminGroup)
-//
-//        def proj = createProject(1)
-//        proj.enableProtectedUserCommunity = true
-//        def subj = createSubject(1, 1)
-//        def skill = SkillsFactory.createSkill(1, 1)
-//        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
-//
-//        when:
-//
-//        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
-//
-//        then:
-//
-//        SkillsClientException e = thrown(SkillsClientException)
-//        e.message.contains("Project [${proj.name}] is not allowed to be assigned [${adminGroup.name}] Admin Group")
-//    }
-//
-//    def "cannot enable UC protection for admin group if it contains a non UC member"() {
-//
-//        String userCommunityUserId =  skillsService.userName
-//        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
-//
-//        def adminGroup = createAdminGroup(1)
-//        skillsService.createAdminGroupDef(adminGroup)
-//
-//        def nonUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
-//        createService(nonUserCommunityUserId)
-//        skillsService.addAdminGroupMember(adminGroup.adminGroupId, nonUserCommunityUserId)
-//
-//        when:
-//        adminGroup.enableProtectedUserCommunity = true
-//        skillsService.updateAdminGroupDef(adminGroup)
-//
-//        then:
-//
-//        SkillsClientException e = thrown(SkillsClientException)
-//        e.message.contains("Not Allowed to set [enableProtectedUserCommunity] to true for adminGroupId [${adminGroup.adminGroupId}]")
-//        e.message.contains("Has existing ${nonUserCommunityUserId} for display user that is not authorized")
-//    }
-//
-//    def "cannot disable UC protection for admin group after it has already been enabled"() {
-//
-//        String userCommunityUserId =  skillsService.userName
-//        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
-//
-//        def adminGroup = createAdminGroup(1)
-//        adminGroup.enableProtectedUserCommunity = true
-//        skillsService.createAdminGroupDef(adminGroup)
-//
-//        when:
-//        adminGroup.enableProtectedUserCommunity = false
-//        skillsService.updateAdminGroupDef(adminGroup)
-//
-//        then:
-//
-//        SkillsClientException e = thrown(SkillsClientException)
-//        e.message.contains("Once admin group [enableProtectedUserCommunity=true] it cannot be flipped to false.  adminGroupId [${adminGroup.adminGroupId}]")
-//    }
-//
-//    def "cannot enable UC protection on project if non-UC group is assigned to it already"() {
-//
-//        String userCommunityUserId =  skillsService.userName
-//        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
-//
-//        def proj = createProject(1)
-//        def subj = createSubject(1, 1)
-//        def skill = SkillsFactory.createSkill(1, 1)
-//        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
-//
-//        def adminGroup = createAdminGroup(1)
-//        adminGroup.enableProtectedUserCommunity = false
-//        skillsService.createAdminGroupDef(adminGroup)
-//
-//        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
-//
-//        when:
-//
-//        proj.enableProtectedUserCommunity = true
-//        skillsService.updateProject(proj)
-//
-//        then:
-//
-//        true
-//        SkillsClientException e = thrown(SkillsClientException)
-//        e.message.contains("This project is part of one or more Admin Groups that has not enabled user community protection")
-//    }
-//
-//    def "cannot enable UC protection on project if non-UC group is assigned to it already, multiple members in group"() {
-//
-//        String userCommunityUserId =  skillsService.userName
-//        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
-//
-//        def otherUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
-//        SkillsService otherUserCommunityUser = createService(otherUserCommunityUserId)
-//
-//        def proj = createProject(1)
-//        def subj = createSubject(1, 1)
-//        def skill = SkillsFactory.createSkill(1, 1)
-//        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
-//
-//        def adminGroup = createAdminGroup(1)
-//        adminGroup.enableProtectedUserCommunity = false
-//        skillsService.createAdminGroupDef(adminGroup)
-//        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserCommunityUserId)
-//
-//        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
-//
-//        when:
-//
-//        proj.enableProtectedUserCommunity = true
-//        skillsService.updateProject(proj)
-//
-//        then:
-//
-//        true
-//        SkillsClientException e = thrown(SkillsClientException)
-//        e.message.contains("This project is part of one or more Admin Groups that has not enabled user community protection")
-//    }
-//
-//    String extractInviteFromEmail(String emailBody) {
-//        def regex = /join-project\/([^\/]+)\/([^?]+)/
-//        def matcher = emailBody =~ regex
-//        return matcher[0][2]
-//    }
 
     private static boolean validateForbidden(Closure c) {
         try {
-            c.call()
+            def res = c.call()
             return false
         } catch (SkillsClientException skillsClientException) {
             return skillsClientException.httpStatus == HttpStatus.FORBIDDEN

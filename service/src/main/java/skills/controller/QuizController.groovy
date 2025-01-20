@@ -110,10 +110,10 @@ class QuizController {
         return quizDefService.countNumSkillsQuizAssignedTo(quizId)
     }
 
-    @RequestMapping(value = "/{quizId}/skills/", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{quizId}/skills", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<QuizSkillResult> getSkillsForQuiz(@PathVariable("quizId") String quizId, @RequestParam String userId) {
-        return quizDefService.getSkillsForQuiz(quizId, userId)
+    List<QuizSkillResult> getSkillsForQuiz(@PathVariable("quizId") String quizId) {
+        return quizDefService.getSkillsForQuiz(quizId)
     }
 
     @RequestMapping(value = "/{quizId}/summary", method = RequestMethod.GET, produces = "application/json")
@@ -145,7 +145,7 @@ class QuizController {
 
     @RequestMapping(value = "/{quizId}/questions/{questionId}", method = RequestMethod.PATCH)
     @ResponseBody
-    RequestResult updateSkillDisplayOrder(@PathVariable("quizId") String quizId,
+    RequestResult updateQuestionDisplayOrder(@PathVariable("quizId") String quizId,
                                           @PathVariable("questionId") Integer questionId,
                                           @RequestBody ActionPatchRequest patchRequest) {
         QuizValidator.isNotBlank(quizId, "Quiz Id", quizId)

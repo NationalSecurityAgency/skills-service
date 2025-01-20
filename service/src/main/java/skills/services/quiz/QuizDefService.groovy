@@ -145,6 +145,9 @@ class QuizDefService {
 
         List<QuizDefRepo.QuizDefBasicResult> fromDb = quizDefRepo.getQuizDefSummariesByUser(userId)
         if (fromDb) {
+            if (!isCommunityMember) {
+                fromDb = fromDb.findAll { !Boolean.valueOf(it.userCommunityEnabled) }
+            }
             fromDb = fromDb.sort { a, b -> b.created <=> a.created }
             res.addAll(fromDb.collect { convert(it, isCommunityMember) })
         }
@@ -1039,9 +1042,10 @@ class QuizDefService {
     }
 
     @Transactional()
-    List<QuizSkillResult> getSkillsForQuiz(String quizId, userId) {
+    List<QuizSkillResult> getSkillsForQuiz(String quizId) {
+        UserInfo currentUser = userInfoService.currentUser
         QuizDef quizDef = findQuizDef(quizId)
-        return quizToSkillDefRepo.getSkillsForQuizWithSubjects(quizDef.id, userId);
+        return quizToSkillDefRepo.getSkillsForQuizWithSubjects(quizDef.id, currentUser.username);
     }
 
     @Transactional(readOnly = true)
@@ -1125,6 +1129,10 @@ class QuizDefService {
         QuizDefResult result = Props.copy(updatedDef, new QuizDefResult())
         result.description = InputSanitizer.unsanitizeForMarkdown(result.description)
         result.displayOrder = 0 // todo
+
+        UserInfo userInfo = userInfoService.currentUser
+        Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
+        result.userCommunity = isCommunityMember ? userCommunityService.getQuizUserCommunity(updatedDef.quizId) : null
         return result
     }
 }

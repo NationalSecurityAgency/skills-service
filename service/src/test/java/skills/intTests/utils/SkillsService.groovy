@@ -22,10 +22,7 @@ import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.util.StreamUtils
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestParam
 import skills.controller.request.model.ActionPatchRequest
-import skills.controller.request.model.CopyToAnotherProjectRequest
 import skills.controller.request.model.CopyToAnotherProjectRequestType
 import skills.services.settings.Settings
 import skills.services.userActions.DashboardAction
@@ -1838,6 +1835,9 @@ class SkillsService {
     def countSkillsForQuiz(String quizId) {
         wsHelper.adminGet("${getQuizDefUrl(quizId)}/skills-count")
     }
+    def getSkillsForQuiz(String quizId) {
+        wsHelper.adminGet("${getQuizDefUrl(quizId)}/skills")
+    }
     def getQuizDefSummary(String quizId) {
         wsHelper.adminGet("${getQuizDefUrl(quizId)}/summary")
     }
@@ -1970,12 +1970,12 @@ class SkillsService {
         return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}".toString())
     }
 
-    def getUserTagCounts(String quizId, String userTagKey) {
+    def getQuizUserTagCounts(String quizId, String userTagKey) {
         String url = "${getQuizDefUrl(quizId)}/userTagCounts?userTagKey=${userTagKey}"
         return wsHelper.adminGet(url.toString())
     }
 
-    def getUsageOverTime(String quizId) {
+    def getQuizUsageOverTime(String quizId) {
         String url = "${getQuizDefUrl(quizId)}/usageOverTime"
         return wsHelper.adminGet(url.toString())
     }

@@ -15,6 +15,7 @@
  */
 package skills.intTests.quiz
 
+
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -26,6 +27,7 @@ import skills.services.quiz.QuizDefService
 import skills.storage.model.QuizDefParent
 import skills.storage.model.QuizToSkillDef
 import skills.storage.model.SkillDef
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.QuizToSkillDefRepo
 import spock.lang.IgnoreIf
@@ -374,6 +376,182 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skillsService.countSkillsForQuiz(quiz.body.quizId) == 1
         skillsService.countSkillsForQuiz(survey2.body.quizId) == 3
         skillsService.countSkillsForQuiz(quiz3.body.quizId) == 2
+    }
+
+
+    def "get skills for quiz"() {
+        Closure associateQuizToSkill = { Integer projNum, Integer subjNum, Integer skillNum, String quizId ->
+            def skillWithQuiz = createSkill(projNum, subjNum, skillNum, 1, 1, 480, 200)
+            skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+            skillWithQuiz.quizId = quizId
+            return skillWithQuiz
+        }
+
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+        def survey2 = skillsService.createQuizDef(QuizDefFactory.createQuizSurvey(2))
+        def quiz3 = skillsService.createQuizDef(QuizDefFactory.createQuiz(3))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+
+        def proj2 = createProject(2)
+        def proj2Subj1 = createSubject(2, 1)
+        def proj2Subj2 = createSubject(2, 2)
+
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [
+                associateQuizToSkill.call(1, 1, 1, quiz.body.quizId),
+                associateQuizToSkill.call(1, 1, 2, survey2.body.quizId),
+                associateQuizToSkill.call(1, 1, 3, quiz3.body.quizId),
+        ])
+        skillsService.createProjectAndSubjectAndSkills(proj2, proj2Subj1, [])
+        skillsService.createSubject(proj2Subj2)
+        skillsService.createSkills([
+                associateQuizToSkill.call(2, 1, 1, survey2.body.quizId),
+                associateQuizToSkill.call(2, 1, 2, quiz3.body.quizId),
+                associateQuizToSkill.call(2, 2, 3, survey2.body.quizId),
+                associateQuizToSkill.call(2, 1, 4, survey2.body.quizId),
+        ])
+
+        List<String> otherUsers = getRandomUsers(3)
+        SkillsService onlyProj1Admin = createService(otherUsers[0])
+        skillsService.addUserRole(onlyProj1Admin.userName, proj.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
+
+        SkillsService onlyProj2Admin = createService(otherUsers[1])
+        skillsService.addUserRole(onlyProj2Admin.userName, proj2.projectId, RoleName.ROLE_PROJECT_ADMIN.toString())
+
+        SkillsService onlyQuizAdmin = createService(otherUsers[2])
+        skillsService.addQuizUserRole(quiz.body.quizId, onlyQuizAdmin.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        skillsService.addQuizUserRole(survey2.body.quizId, onlyQuizAdmin.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        skillsService.addQuizUserRole(quiz3.body.quizId, onlyQuizAdmin.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+
+        when:
+        def quizSkills = skillsService.getSkillsForQuiz(quiz.body.quizId)
+        def survey2Skills = skillsService.getSkillsForQuiz(survey2.body.quizId)
+        def quiz3Skills = skillsService.getSkillsForQuiz(quiz3.body.quizId)
+
+        def quizSkillsOnlyProject1Admin = onlyProj1Admin.getSkillsForQuiz(quiz.body.quizId)
+        def survey2SkillsOnlyProject1Admin = onlyProj1Admin.getSkillsForQuiz(survey2.body.quizId)
+        def quiz3SkillsOnlyProject1Admin = onlyProj1Admin.getSkillsForQuiz(quiz3.body.quizId)
+
+        assert validateForbidden {onlyProj2Admin.getSkillsForQuiz(quiz.body.quizId)}
+        def survey2SkillsOnlyProject2Admin = onlyProj2Admin.getSkillsForQuiz(survey2.body.quizId)
+        def quiz3SkillsOnlyProject2Admin = onlyProj2Admin.getSkillsForQuiz(quiz3.body.quizId)
+
+        def quizSkillsOnlyQuizAdmin = onlyQuizAdmin.getSkillsForQuiz(quiz.body.quizId)
+        def survey2SkillsOnlyQuizAdmin = onlyQuizAdmin.getSkillsForQuiz(survey2.body.quizId)
+        def quiz3SkillsOnlyQuizAdmin = onlyQuizAdmin.getSkillsForQuiz(quiz3.body.quizId)
+
+        then:
+        quizSkills.projectId == [proj.projectId]
+        quizSkills.subjectId == [subj.subjectId]
+        quizSkills.subjectName == [subj.name]
+        quizSkills.skillId == ['skill1']
+        quizSkills.skillName == ["Test Skill 1"]
+        quizSkills.subjectPoints == [600]
+        quizSkills.projectPoints == [600]
+        quizSkills.canUserAccess == [true]
+
+        survey2Skills.projectId == [proj.projectId, proj2.projectId, proj2.projectId, proj2.projectId]
+        survey2Skills.subjectId == [subj.subjectId, proj2Subj1.subjectId, proj2Subj2.subjectId, proj2Subj1.subjectId]
+        survey2Skills.subjectName == [subj.name, proj2Subj1.name, proj2Subj2.name, proj2Subj1.name]
+        survey2Skills.skillId == ["skill2", "skill1", "skill3subj2", "skill4"]
+        survey2Skills.skillName == ["Test Skill 2", "Test Skill 1", "Test Skill 3 Subject2", "Test Skill 4"]
+        survey2Skills.subjectPoints == [600, 600, 200, 600]
+        survey2Skills.projectPoints == [600, 800, 800, 800]
+        survey2Skills.canUserAccess == [true, true, true, true]
+
+        quiz3Skills.projectId == [proj.projectId, proj2.projectId]
+        quiz3Skills.subjectId == [subj.subjectId, proj2Subj1.subjectId]
+        quiz3Skills.subjectName == [subj.name, proj2Subj1.name]
+        quiz3Skills.skillId == ["skill3", "skill2"]
+        quiz3Skills.skillName == ["Test Skill 3", "Test Skill 2"]
+        quiz3Skills.subjectPoints == [600, 600]
+        quiz3Skills.projectPoints == [600, 800]
+        quiz3Skills.canUserAccess == [true, true]
+
+        // only proj 1 admin
+        quizSkillsOnlyProject1Admin.projectId == [proj.projectId]
+        quizSkillsOnlyProject1Admin.subjectId == [subj.subjectId]
+        quizSkillsOnlyProject1Admin.subjectName == [subj.name]
+        quizSkillsOnlyProject1Admin.skillId == ['skill1']
+        quizSkillsOnlyProject1Admin.skillName == ["Test Skill 1"]
+        quizSkillsOnlyProject1Admin.subjectPoints == [600]
+        quizSkillsOnlyProject1Admin.projectPoints == [600]
+        quizSkillsOnlyProject1Admin.canUserAccess == [true]
+
+        survey2SkillsOnlyProject1Admin.projectId == [proj.projectId, proj2.projectId, proj2.projectId, proj2.projectId]
+        survey2SkillsOnlyProject1Admin.subjectId == [subj.subjectId, proj2Subj1.subjectId, proj2Subj2.subjectId, proj2Subj1.subjectId]
+        survey2SkillsOnlyProject1Admin.subjectName == [subj.name, proj2Subj1.name, proj2Subj2.name, proj2Subj1.name]
+        survey2SkillsOnlyProject1Admin.skillId == ["skill2", "skill1", "skill3subj2", "skill4"]
+        survey2SkillsOnlyProject1Admin.skillName == ["Test Skill 2", "Test Skill 1", "Test Skill 3 Subject2", "Test Skill 4"]
+        survey2SkillsOnlyProject1Admin.subjectPoints == [600, 600, 200, 600]
+        survey2SkillsOnlyProject1Admin.projectPoints == [600, 800, 800, 800]
+        survey2SkillsOnlyProject1Admin.canUserAccess == [true, false, false, false]
+
+        quiz3SkillsOnlyProject1Admin.projectId == [proj.projectId, proj2.projectId]
+        quiz3SkillsOnlyProject1Admin.subjectId == [subj.subjectId, proj2Subj1.subjectId]
+        quiz3SkillsOnlyProject1Admin.subjectName == [subj.name, proj2Subj1.name]
+        quiz3SkillsOnlyProject1Admin.skillId == ["skill3", "skill2"]
+        quiz3SkillsOnlyProject1Admin.skillName == ["Test Skill 3", "Test Skill 2"]
+        quiz3SkillsOnlyProject1Admin.subjectPoints == [600, 600]
+        quiz3SkillsOnlyProject1Admin.projectPoints == [600, 800]
+        quiz3SkillsOnlyProject1Admin.canUserAccess == [true, false]
+
+        // only proj 2 admin
+        survey2SkillsOnlyProject2Admin.projectId == [proj.projectId, proj2.projectId, proj2.projectId, proj2.projectId]
+        survey2SkillsOnlyProject2Admin.subjectId == [subj.subjectId, proj2Subj1.subjectId, proj2Subj2.subjectId, proj2Subj1.subjectId]
+        survey2SkillsOnlyProject2Admin.subjectName == [subj.name, proj2Subj1.name, proj2Subj2.name, proj2Subj1.name]
+        survey2SkillsOnlyProject2Admin.skillId == ["skill2", "skill1", "skill3subj2", "skill4"]
+        survey2SkillsOnlyProject2Admin.skillName == ["Test Skill 2", "Test Skill 1", "Test Skill 3 Subject2", "Test Skill 4"]
+        survey2SkillsOnlyProject2Admin.subjectPoints == [600, 600, 200, 600]
+        survey2SkillsOnlyProject2Admin.projectPoints == [600, 800, 800, 800]
+        survey2SkillsOnlyProject2Admin.canUserAccess == [false, true, true, true]
+
+        quiz3SkillsOnlyProject2Admin.projectId == [proj.projectId, proj2.projectId]
+        quiz3SkillsOnlyProject2Admin.subjectId == [subj.subjectId, proj2Subj1.subjectId]
+        quiz3SkillsOnlyProject2Admin.subjectName == [subj.name, proj2Subj1.name]
+        quiz3SkillsOnlyProject2Admin.skillId == ["skill3", "skill2"]
+        quiz3SkillsOnlyProject2Admin.skillName == ["Test Skill 3", "Test Skill 2"]
+        quiz3SkillsOnlyProject2Admin.subjectPoints == [600, 600]
+        quiz3SkillsOnlyProject2Admin.projectPoints == [600, 800]
+        quiz3SkillsOnlyProject2Admin.canUserAccess == [false, true]
+
+        // only quiuz admin
+        quizSkillsOnlyQuizAdmin.projectId == [proj.projectId]
+        quizSkillsOnlyQuizAdmin.subjectId == [subj.subjectId]
+        quizSkillsOnlyQuizAdmin.subjectName == [subj.name]
+        quizSkillsOnlyQuizAdmin.skillId == ['skill1']
+        quizSkillsOnlyQuizAdmin.skillName == ["Test Skill 1"]
+        quizSkillsOnlyQuizAdmin.subjectPoints == [600]
+        quizSkillsOnlyQuizAdmin.projectPoints == [600]
+        quizSkillsOnlyQuizAdmin.canUserAccess == [false]
+
+        survey2SkillsOnlyQuizAdmin.projectId == [proj.projectId, proj2.projectId, proj2.projectId, proj2.projectId]
+        survey2SkillsOnlyQuizAdmin.subjectId == [subj.subjectId, proj2Subj1.subjectId, proj2Subj2.subjectId, proj2Subj1.subjectId]
+        survey2SkillsOnlyQuizAdmin.subjectName == [subj.name, proj2Subj1.name, proj2Subj2.name, proj2Subj1.name]
+        survey2SkillsOnlyQuizAdmin.skillId == ["skill2", "skill1", "skill3subj2", "skill4"]
+        survey2SkillsOnlyQuizAdmin.skillName == ["Test Skill 2", "Test Skill 1", "Test Skill 3 Subject2", "Test Skill 4"]
+        survey2SkillsOnlyQuizAdmin.subjectPoints == [600, 600, 200, 600]
+        survey2SkillsOnlyQuizAdmin.projectPoints == [600, 800, 800, 800]
+        survey2SkillsOnlyQuizAdmin.canUserAccess == [false, false, false, false]
+
+        quiz3SkillsOnlyQuizAdmin.projectId == [proj.projectId, proj2.projectId]
+        quiz3SkillsOnlyQuizAdmin.subjectId == [subj.subjectId, proj2Subj1.subjectId]
+        quiz3SkillsOnlyQuizAdmin.subjectName == [subj.name, proj2Subj1.name]
+        quiz3SkillsOnlyQuizAdmin.skillId == ["skill3", "skill2"]
+        quiz3SkillsOnlyQuizAdmin.skillName == ["Test Skill 3", "Test Skill 2"]
+        quiz3SkillsOnlyQuizAdmin.subjectPoints == [600, 600]
+        quiz3SkillsOnlyQuizAdmin.projectPoints == [600, 800]
+        quiz3SkillsOnlyQuizAdmin.canUserAccess == [false, false]
+    }
+
+    private static boolean validateForbidden(Closure c) {
+        try {
+            c.call()
+            return false
+        } catch (SkillsClientException skillsClientException) {
+            return skillsClientException.httpStatus == HttpStatus.FORBIDDEN
+        }
     }
 
     def "skill with quiz assignment is removed"() {

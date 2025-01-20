@@ -124,6 +124,9 @@ class DefaultIntSpec extends Specification {
     @Autowired
     AttachmentRepo attachmentRepo
 
+    @Autowired
+    UserTagRepo userTagRepo
+
     def setup() {
         // allows for over-ridding the setup method
         doSetup()

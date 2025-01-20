@@ -82,7 +82,7 @@ onMounted(() => {
 
 const loadData = () => {
   options.value.busy = true
-  QuizService.getSkillsForQuiz(route.params.quizId, userInfo.userInfo.value.userId)
+  QuizService.getSkillsForQuiz(route.params.quizId)
     .then((result) => {
       if (result) {
         skills.value = result
