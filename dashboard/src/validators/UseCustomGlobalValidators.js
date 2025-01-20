@@ -42,13 +42,13 @@ export const useCustomGlobalValidators = () => {
     return this.test("customNameValidator", null, (value, context) => validateName(value, context));
   }
 
-  function customDescriptionValidator(fieldName = '', enableProjectIdParam = true, useProtectedCommunityValidator = null, fieldNameFunction = null) {
+  function customDescriptionValidator(fieldName = '', enableProjectIdParam = true, useProtectedCommunityValidator = null, fieldNameFunction = null, enableQuizIdParam = true) {
     const appConfig = useAppConfig()
     const validateName = useDebounceFn((value, context) => {
       if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
         return true
       }
-      return descriptionValidatorService.validateDescription(value, enableProjectIdParam, useProtectedCommunityValidator).then((result) => {
+      return descriptionValidatorService.validateDescription(value, enableProjectIdParam, useProtectedCommunityValidator, enableQuizIdParam).then((result) => {
         if (result.valid) {
           return true
         }

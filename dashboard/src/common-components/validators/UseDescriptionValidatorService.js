@@ -15,16 +15,19 @@
  */
 import axios from 'axios';
 import { useProjectInfo } from '@/common-components/stores/UseCurrentProjectInfo.js'
+import { useQuizInfo } from '@/common-components/stores/UseCurrentQuizInfo.js';
 
 export const useDescriptionValidatorService = () => {
 
   const projectInfo = useProjectInfo()
+  const quizInfo = useQuizInfo()
 
-  const validateDescription = (description, enableProjectIdParam = true, useProtectedCommunityValidator = null) => {
+  const validateDescription = (description, enableProjectIdParam = true, useProtectedCommunityValidator = null, enableQuizIdParam = true) => {
     const body = {
       value: description,
       projectId: enableProjectIdParam ? projectInfo.currentProjectId : null,
       useProtectedCommunityValidator,
+      quizId: enableQuizIdParam ? quizInfo.currentQuizId : null
     };
     return axios.post('/api/validation/description', body).then((result) => result.data);
   }

@@ -30,10 +30,12 @@ import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
 import Avatar from 'primevue/avatar';
+import { useQuizSummaryState } from '@/stores/UseQuizSummaryState.js';
 
 const announcer = useSkillsAnnouncer()
 const responsive = useResponsiveBreakpoints()
 const communityLabels = useCommunityLabels()
+const quizSummaryState = useQuizSummaryState()
 
 const loading = ref(false);
 const quizzes = ref([]);
@@ -92,6 +94,7 @@ const hasData = computed(() => {
 });
 
 onMounted(() => {
+  quizSummaryState.quizSummary = null
   loadData()
 })
 
