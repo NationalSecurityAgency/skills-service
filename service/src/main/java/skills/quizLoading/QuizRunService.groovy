@@ -99,6 +99,9 @@ class QuizRunService {
     UserQuizAnswerAttemptRepo quizAttemptAnswerRepo
 
     @Autowired
+    UserQuizQuestionAttemptRepo quizAttemptQuestionRepo
+
+    @Autowired
     UserInfoService userInfoService
 
     @Autowired
@@ -196,12 +199,18 @@ class QuizRunService {
         )
     }
 
-    private List<QuizQuestionInfo> loadQuizQuestionInfo(String quizId, boolean randomizeQuestions = false, boolean randomizeAnswers = false, QuizSetting quizLength = null) {
+    private List<QuizQuestionInfo> loadQuizQuestionInfo(String quizId, boolean randomizeQuestions = false, boolean randomizeAnswers = false, QuizSetting quizLength = null, boolean onlyIncorrect = false, Integer attemptId) {
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)
         List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
         Map<Integer, List<QuizAnswerDef>> byQuizId = dbAnswersDef.groupBy { it.questionRefId }
 
         boolean forceRandomizationOfQuestions = quizLength?.value != null && Integer.valueOf(quizLength.value) < dbQuestionDefs.size()
+
+        if(onlyIncorrect && attemptId) {
+            List<Integer> questionIds = quizAttemptQuestionRepo.getQuestionIdsForAttemptByStatus(attemptId)
+            dbQuestionDefs = dbQuestionDefs?.findAll { question -> questionIds.contains(question.id) }
+        }
+
         if(randomizeQuestions || forceRandomizationOfQuestions) {
             dbQuestionDefs?.shuffle()
         } else {
@@ -246,7 +255,22 @@ class QuizRunService {
         boolean randomizeAnswersSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeAnswers.setting })?.value?.toBoolean()
         Integer quizTimeLimit = quizSettings?.find( { it.setting == QuizSettings.QuizTimeLimit.setting })?.value?.toInteger()
         QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
-        List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId, randomizeQuestionsSetting, randomizeAnswersSetting, quizLength)
+        QuizSetting onlyIncorrect = quizSettings?.find({it.setting == QuizSettings.RetakeIncorrectQuestionsOnly.setting})
+
+        boolean onlyIncorrectQuestions = onlyIncorrect?.value?.toBoolean()
+        Integer attemptId = null
+        if(onlyIncorrectQuestions) {
+            Integer[] ids = [quizDefWithDesc.id]
+            List<QuizToSkillDefRepo.QuizAttemptInfo> attempts = quizAttemptRepo.getLatestQuizAttemptsForUserByQuizIds(ids, userId)
+            if(attempts.size() > 0) {
+                QuizToSkillDefRepo.QuizAttemptInfo attempt = attempts[0]
+                if (attempt && attempt.status == UserQuizAttempt.QuizAttemptStatus.FAILED) {
+                    attemptId = attempt.attemptId
+                }
+            }
+        }
+
+        List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId, randomizeQuestionsSetting, randomizeAnswersSetting, quizLength, onlyIncorrectQuestions, attemptId)
         List<QuizQuestionInfo> questionsForQuiz = []
         Integer quizLengthAsInteger = quizLength ? Integer.valueOf(quizLength.value) : 0
         Integer lengthSetting = quizLengthAsInteger > 0 ? quizLengthAsInteger : questions.size()
@@ -384,7 +408,7 @@ class QuizRunService {
 
     @Profile
     private List<QuizSetting> loadQuizSettings(Integer quizRefId) {
-        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId, [QuizSettings.MaxNumAttempts.setting, QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.RandomizeQuestions.setting, QuizSettings.RandomizeAnswers.setting, QuizSettings.QuizLength.setting, QuizSettings.QuizTimeLimit.setting, QuizSettings.MultipleTakes.setting])
+        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId, [QuizSettings.MaxNumAttempts.setting, QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.RandomizeQuestions.setting, QuizSettings.RandomizeAnswers.setting, QuizSettings.QuizLength.setting, QuizSettings.QuizTimeLimit.setting, QuizSettings.MultipleTakes.setting, QuizSettings.RetakeIncorrectQuestionsOnly.setting])
     }
 
     @Profile

@@ -17,6 +17,7 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import skills.storage.model.UserQuizAnswerAttempt
 import skills.storage.model.UserQuizQuestionAttempt
 
 import javax.annotation.Nullable
@@ -54,4 +55,9 @@ interface UserQuizQuestionAttemptRepo extends JpaRepository<UserQuizQuestionAtte
     @Nullable
     List<UserQuizQuestionAttempt> findAllByUserQuizAttemptRefId(Integer userQuizAttemptRefId)
 
+    @Query(value = '''
+        select questionAttempt.quizQuestionDefinitionRefId from UserQuizQuestionAttempt questionAttempt
+        where questionAttempt.userQuizAttemptRefId = ?1 and questionAttempt.status = 'WRONG'
+    ''')
+    List<Integer> getQuestionIdsForAttemptByStatus(Integer quizAttemptId)
 }
