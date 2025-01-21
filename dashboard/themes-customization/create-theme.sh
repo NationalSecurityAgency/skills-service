@@ -75,6 +75,8 @@ handle_theme() {
   cd $currentDir
   cp $primeVueSass/$themePath/theme.css ../public/themes/${themeName}/theme.css
   echo "Copied theme file: [$primeVueSass/$themePath/theme.css] to [../public/themes/${themeName}/theme.css]"
+  cp $primeVueSass/$themePath/theme.css.map ../public/themes/${themeName}/theme.css.map
+  echo "Copied theme file: [$primeVueSass/$themePath/theme.css.map] to [../public/themes/${themeName}/theme.css.map]"
 }
 
 handle_theme "skills-light-green" "themes/lara/lara-light/green"
