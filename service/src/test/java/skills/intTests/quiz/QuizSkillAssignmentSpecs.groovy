@@ -608,12 +608,10 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
     }
 
     def "can get all skills for a quiz"() {
-        def currentUser = skillsService.getCurrentUser()
         def quizDef = QuizDefFactory.createQuiz(1)
         def quiz = skillsService.createQuizDef(quizDef)
 
-        def skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, currentUser.userId)
-        assert skills.size() == 0
+        def skills_t0 = skillsService.getSkillsForQuiz(quiz.body.quizId)
 
         def proj = createProject(1)
         def subj = createSubject(1, 1)
@@ -625,8 +623,7 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
 
         skillsService.createSkill(skillWithQuiz)
 
-        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, currentUser.userId)
-        assert skills.size() == 1
+        def skills_t1 = skillsService.getSkillsForQuiz(quiz.body.quizId)
 
         def proj2 = createProject(2)
         def subj2 = createSubject(2, 1)
@@ -639,39 +636,38 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skillsService.createSkill(skillWithQuiz2)
 
         when:
-        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, currentUser.userId)
+        def skills_t2 = skillsService.getSkillsForQuiz(quiz.body.quizId)
         then:
-        skills.size() == 2
-        skills[0].skillId == 'skill1'
-        skills[0].skillName == 'Test Skill 1'
-        skills[0].subjectId == 'TestSubject1'
-        skills[0].subjectName == 'Test Subject #1'
-        skills[0].projectId == 'TestProject1'
-        skills[0].canUserAccess == true
+        skills_t0.size() == 0
+        skills_t1.size() == 1
 
-        skills[1].skillId == 'skill1'
-        skills[1].skillName == 'Test Skill 1'
-        skills[1].subjectId == 'TestSubject1'
-        skills[1].subjectName == 'Test Subject #1'
-        skills[1].projectId == 'TestProject2'
-        skills[1].canUserAccess == true
+        skills_t2.size() == 2
+        skills_t2[0].skillId == 'skill1'
+        skills_t2[0].skillName == 'Test Skill 1'
+        skills_t2[0].subjectId == 'TestSubject1'
+        skills_t2[0].subjectName == 'Test Subject #1'
+        skills_t2[0].projectId == 'TestProject1'
+        skills_t2[0].canUserAccess == true
+
+        skills_t2[1].skillId == 'skill1'
+        skills_t2[1].skillName == 'Test Skill 1'
+        skills_t2[1].subjectId == 'TestSubject1'
+        skills_t2[1].subjectName == 'Test Subject #1'
+        skills_t2[1].projectId == 'TestProject2'
+        skills_t2[1].canUserAccess == true
     }
 
-    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "user that is not admin on a project does not get canUserAccess status on skill"() {
         def quizDef = QuizDefFactory.createQuiz(1)
         def quiz = skillsService.createQuizDef(quizDef)
 
-        def skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, "aaa@email.foo")
-        assert skills.size() == 0
+        List<String> userIds = getRandomUsers(3)
+        SkillsService user1 = createService(userIds[0])
 
         def proj = createProject(1)
         def subj = createSubject(1, 1)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
-
-        SkillsService createAcctService = createService()
-        createAcctService.createUser([firstName: "Aaa", lastName: "Aaa", email: "aaa@email.foo", password: "password"])
-        skillsService.addProjectAdmin(proj.projectId, "aaa@email.foo")
+        skillsService.addProjectAdmin(proj.projectId, user1.userName)
 
         def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
         skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
@@ -679,8 +675,7 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
 
         skillsService.createSkill(skillWithQuiz)
 
-        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, 'aaa@email.foo')
-        assert skills.size() == 1
+        def user1Skills_t1 = user1.getSkillsForQuiz(quiz.body.quizId)
 
         def proj2 = createProject(2)
         def subj2 = createSubject(2, 1)
@@ -693,39 +688,37 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skillsService.createSkill(skillWithQuiz2)
 
         when:
-        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, "aaa@email.foo")
+        def user1Skills_t2 = user1.getSkillsForQuiz(quiz.body.quizId)
         then:
-        skills.size() == 2
-        skills[0].skillId == 'skill1'
-        skills[0].skillName == 'Test Skill 1'
-        skills[0].subjectId == 'TestSubject1'
-        skills[0].subjectName == 'Test Subject #1'
-        skills[0].projectId == 'TestProject1'
-        skills[0].canUserAccess == true
+        user1Skills_t1.size() == 1
 
-        skills[1].skillId == 'skill1'
-        skills[1].skillName == 'Test Skill 1'
-        skills[1].subjectId == 'TestSubject1'
-        skills[1].subjectName == 'Test Subject #1'
-        skills[1].projectId == 'TestProject2'
-        skills[1].canUserAccess == false
+        user1Skills_t2.size() == 2
+        user1Skills_t2[0].skillId == 'skill1'
+        user1Skills_t2[0].skillName == 'Test Skill 1'
+        user1Skills_t2[0].subjectId == 'TestSubject1'
+        user1Skills_t2[0].subjectName == 'Test Subject #1'
+        user1Skills_t2[0].projectId == 'TestProject1'
+        user1Skills_t2[0].canUserAccess == true
+
+        user1Skills_t2[1].skillId == 'skill1'
+        user1Skills_t2[1].skillName == 'Test Skill 1'
+        user1Skills_t2[1].subjectId == 'TestSubject1'
+        user1Skills_t2[1].subjectName == 'Test Subject #1'
+        user1Skills_t2[1].projectId == 'TestProject2'
+        user1Skills_t2[1].canUserAccess == false
     }
 
-    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "user that is approver on a project can access skill"() {
         def quizDef = QuizDefFactory.createQuiz(1)
         def quiz = skillsService.createQuizDef(quizDef)
 
-        def skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, "aaa@email.foo")
-        assert skills.size() == 0
+        List<String> userIds = getRandomUsers(3)
+        SkillsService user1 = createService(userIds[0])
 
         def proj = createProject(1)
         def subj = createSubject(1, 1)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
-
-        SkillsService createAcctService = createService()
-        createAcctService.createUser([firstName: "Aaa", lastName: "Aaa", email: "aaa@email.foo", password: "password"])
-        skillsService.addUserRole("aaa@email.foo", proj.projectId, "ROLE_PROJECT_APPROVER")
+        skillsService.addUserRole(user1.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.name())
 
         def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
         skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
@@ -733,8 +726,7 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
 
         skillsService.createSkill(skillWithQuiz)
 
-        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, 'aaa@email.foo')
-        assert skills.size() == 1
+        def user1Skills_t1 = user1.getSkillsForQuiz(quiz.body.quizId)
 
         def proj2 = createProject(2)
         def subj2 = createSubject(2, 1)
@@ -747,22 +739,24 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skillsService.createSkill(skillWithQuiz2)
 
         when:
-        skills = quizDefService.getSkillsForQuiz(quiz.body.quizId, "aaa@email.foo")
+        def user1Skills_t2 = user1.getSkillsForQuiz(quiz.body.quizId)
         then:
-        skills.size() == 2
-        skills[0].skillId == 'skill1'
-        skills[0].skillName == 'Test Skill 1'
-        skills[0].subjectId == 'TestSubject1'
-        skills[0].subjectName == 'Test Subject #1'
-        skills[0].projectId == 'TestProject1'
-        skills[0].canUserAccess == true
+        user1Skills_t1.size() == 1
 
-        skills[1].skillId == 'skill1'
-        skills[1].skillName == 'Test Skill 1'
-        skills[1].subjectId == 'TestSubject1'
-        skills[1].subjectName == 'Test Subject #1'
-        skills[1].projectId == 'TestProject2'
-        skills[1].canUserAccess == false
+        user1Skills_t2.size() == 2
+        user1Skills_t2[0].skillId == 'skill1'
+        user1Skills_t2[0].skillName == 'Test Skill 1'
+        user1Skills_t2[0].subjectId == 'TestSubject1'
+        user1Skills_t2[0].subjectName == 'Test Subject #1'
+        user1Skills_t2[0].projectId == 'TestProject1'
+        user1Skills_t2[0].canUserAccess == true
+
+        user1Skills_t2[1].skillId == 'skill1'
+        user1Skills_t2[1].skillName == 'Test Skill 1'
+        user1Skills_t2[1].subjectId == 'TestSubject1'
+        user1Skills_t2[1].subjectName == 'Test Subject #1'
+        user1Skills_t2[1].projectId == 'TestProject2'
+        user1Skills_t2[1].canUserAccess == false
     }
 }
 
