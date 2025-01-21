@@ -462,7 +462,7 @@ class QuizRunService {
                 propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength,
                         "Answer", quizReportAnswerReq.answerText, quizId)
                 QuizValidator.isNotBlank(quizReportAnswerReq.getAnswerText(), "answerText", quizId)
-                CustomValidationResult customValidationResult = validator.validateDescription(quizReportAnswerReq.getAnswerText())
+                CustomValidationResult customValidationResult = validator.validateDescription(quizReportAnswerReq.getAnswerText(), null, null, quizId)
                 if (!customValidationResult.valid) {
                     throw new SkillQuizException("answerText is invalid: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
                 }
@@ -539,7 +539,7 @@ class QuizRunService {
         validateAttempt(userQuizAttempt, quizDef, quizAttemptId, quizId, userId)
 
         propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxGraderFeedbackMessageLength, "Feedback", gradeAnswerReq.feedback, quizId)
-        CustomValidationResult customValidationResult = validator.validateDescription(gradeAnswerReq.feedback)
+        CustomValidationResult customValidationResult = validator.validateDescription(gradeAnswerReq.feedback, null, null, quizDef.quizId)
         if (!customValidationResult.valid) {
             throw new SkillQuizException("Feedback is invalid: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
         }

@@ -28,7 +28,9 @@ import static skills.intTests.utils.SkillsFactory.createProject
 class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
 
     String notValidDefault = "has jabberwocky"
+    String notValidDefaultErrMsg = "paragraphs may not contain jabberwocky"
     String notValidProtectedCommunity = "has divinedragon"
+    String notValidProtectedCommunityErrMsg = "May not contain divinedragon word"
 
     def "description validator for community without quizId"() {
         List<String> users = getRandomUsers(2)
@@ -44,7 +46,7 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
         then:
         defaultResValid.body.valid
         !defaultResInValid.body.valid
-        defaultResInValid.body.msg == "paragraphs may not contain jabberwocky"
+        defaultResInValid.body.msg == notValidDefaultErrMsg
     }
 
     def "description validator for community with quizId"() {
@@ -70,11 +72,11 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
         then:
         communityValid.body.valid
         !communityInvalidValid.body.valid
-        communityInvalidValid.body.msg == "May not contain divinedragon word"
+        communityInvalidValid.body.msg == notValidProtectedCommunityErrMsg
 
         communityValidP2.body.valid
         !communityInvalidValidP2.body.valid
-        communityInvalidValidP2.body.msg == "paragraphs may not contain jabberwocky"
+        communityInvalidValidP2.body.msg == notValidDefaultErrMsg
     }
 
     def "description validator for community with useProtectedCommunityValidator"() {
@@ -97,11 +99,11 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
         then:
         communityValid.body.valid
         !communityInvalidValid.body.valid
-        communityInvalidValid.body.msg == "May not contain divinedragon word"
+        communityInvalidValid.body.msg == notValidProtectedCommunityErrMsg
 
         defaultResValid.body.valid
         !defaultResInvalid.body.valid
-        defaultResInvalid.body.msg == "paragraphs may not contain jabberwocky"
+        defaultResInvalid.body.msg == notValidDefaultErrMsg
     }
 
     def "description validator for community with quizId overrides useProtectedCommunityValidator"() {
@@ -127,11 +129,11 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
         then:
         communityValid.body.valid
         !communityInvalidValid.body.valid
-        communityInvalidValid.body.msg == "May not contain divinedragon word"
+        communityInvalidValid.body.msg == notValidProtectedCommunityErrMsg
 
         communityValidP2.body.valid
         !communityInvalidValidP2.body.valid
-        communityInvalidValidP2.body.msg == "paragraphs may not contain jabberwocky"
+        communityInvalidValidP2.body.msg == notValidDefaultErrMsg
     }
 
     def "quiz paragraph custom validation on create - UC quiz fails"(){
@@ -155,7 +157,7 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("May not contain divinedragon word")
+        exception.message.contains(notValidProtectedCommunityErrMsg)
     }
 
     def "quiz paragraph custom validation on create - non-UC quiz fails"(){
@@ -177,7 +179,7 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("paragraphs may not contain jabberwocky")
+        exception.message.contains(notValidDefaultErrMsg)
     }
 
     def "quiz paragraph custom validation on edit - UC quiz fails"(){
@@ -206,7 +208,7 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("May not contain divinedragon word")
+        exception.message.contains(notValidProtectedCommunityErrMsg)
     }
 
     def "quiz paragraph custom validation on edit - non-UC quiz fails"(){
@@ -233,7 +235,7 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("paragraphs may not contain jabberwocky")
+        exception.message.contains(notValidDefaultErrMsg)
     }
 
     def "quiz question paragraph custom validation on create - UC quiz fails"(){
@@ -263,7 +265,7 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("May not contain divinedragon word")
+        exception.message.contains(notValidProtectedCommunityErrMsg)
     }
 
     def "quiz question paragraph custom validation on create - non-UC quiz fails"(){
@@ -291,7 +293,7 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("paragraphs may not contain jabberwocky")
+        exception.message.contains(notValidDefaultErrMsg)
     }
 
     def "quiz question paragraph custom validation on edit - UC quiz fails"(){
@@ -324,7 +326,7 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("May not contain divinedragon word")
+        exception.message.contains(notValidProtectedCommunityErrMsg)
     }
 
     def "quiz question paragraph custom validation on edit - non-UC quiz fails"(){
@@ -352,7 +354,137 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
 
         then:
         def exception = thrown(SkillsClientException)
-        exception.message.contains("paragraphs may not contain jabberwocky")
+        exception.message.contains(notValidDefaultErrMsg)
+    }
+
+    def "quiz Input Text answer paragraph custom validation - UC quiz fails"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(q1)
+        def textInputQuestion = QuizDefFactory.createTextInputQuestion(1, 1)
+        pristineDragonsUser.createQuizQuestionDef(textInputQuestion)
+
+        def q2 = QuizDefFactory.createQuiz(2)
+        q2.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(q2)
+        def q2TextInputQuestion = QuizDefFactory.createTextInputQuestion(2, 1)
+        pristineDragonsUser.createQuizQuestionDef(q2TextInputQuestion)
+
+        def quiz1Attempt = pristineDragonsUser.startQuizAttempt(q1.quizId).body
+        def quiz2Attempt = pristineDragonsUser.startQuizAttempt(q2.quizId).body
+
+        pristineDragonsUser.reportQuizAnswer(q2.quizId, quiz2Attempt.id, quiz2Attempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: notValidDefault])
+        when:
+        pristineDragonsUser.reportQuizAnswer(q1.quizId, quiz1Attempt.id, quiz1Attempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: notValidProtectedCommunity])
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains(notValidProtectedCommunityErrMsg)
+    }
+
+    def "quiz Input Text answer paragraph custom validation - non-UC quiz fails"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        pristineDragonsUser.createQuizDef(q1)
+        def textInputQuestion = QuizDefFactory.createTextInputQuestion(1, 1)
+        pristineDragonsUser.createQuizQuestionDef(textInputQuestion)
+
+        def q2 = QuizDefFactory.createQuiz(2)
+        pristineDragonsUser.createQuizDef(q2)
+        def q2TextInputQuestion = QuizDefFactory.createTextInputQuestion(2, 1)
+        pristineDragonsUser.createQuizQuestionDef(q2TextInputQuestion)
+
+        def quiz1Attempt = pristineDragonsUser.startQuizAttempt(q1.quizId).body
+        def quiz2Attempt = pristineDragonsUser.startQuizAttempt(q2.quizId).body
+
+        pristineDragonsUser.reportQuizAnswer(q2.quizId, quiz2Attempt.id, quiz2Attempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: notValidProtectedCommunity])
+        when:
+        pristineDragonsUser.reportQuizAnswer(q1.quizId, quiz1Attempt.id, quiz1Attempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: notValidDefault])
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains(notValidDefaultErrMsg)
+    }
+
+    def "quiz Input Text grading response comment paragraph custom validation - UC quiz fails"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(q1)
+        def textInputQuestion = QuizDefFactory.createTextInputQuestion(1, 1)
+        pristineDragonsUser.createQuizQuestionDef(textInputQuestion)
+
+        def q2 = QuizDefFactory.createQuiz(2)
+        q2.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(q2)
+        def q2TextInputQuestion = QuizDefFactory.createTextInputQuestion(2, 1)
+        pristineDragonsUser.createQuizQuestionDef(q2TextInputQuestion)
+
+        def quiz1Attempt = pristineDragonsUser.startQuizAttempt(q1.quizId).body
+        pristineDragonsUser.reportQuizAnswer(q1.quizId, quiz1Attempt.id, quiz1Attempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: "credit pretty please"])
+        pristineDragonsUser.completeQuizAttempt(q1.quizId, quiz1Attempt.id)
+        def quiz2Attempt = pristineDragonsUser.startQuizAttempt(q2.quizId).body
+        pristineDragonsUser.reportQuizAnswer(q2.quizId, quiz2Attempt.id, quiz2Attempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: "credit please"])
+        pristineDragonsUser.completeQuizAttempt(q2.quizId, quiz2Attempt.id)
+
+        pristineDragonsUser.gradeAnswer(pristineDragonsUser.userName, q1.quizId, quiz1Attempt.id, quiz1Attempt.questions[0].answerOptions[0].id, true, notValidDefault)
+        when:
+        pristineDragonsUser.gradeAnswer(pristineDragonsUser.userName, q2.quizId, quiz2Attempt.id, quiz2Attempt.questions[0].answerOptions[0].id, true, notValidProtectedCommunity)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains(notValidProtectedCommunityErrMsg)
+    }
+
+    def "quiz Input Text grading response comment paragraph custom validation - non-UC quiz fails"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        pristineDragonsUser.createQuizDef(q1)
+        def textInputQuestion = QuizDefFactory.createTextInputQuestion(1, 1)
+        pristineDragonsUser.createQuizQuestionDef(textInputQuestion)
+
+        def q2 = QuizDefFactory.createQuiz(2)
+        pristineDragonsUser.createQuizDef(q2)
+        def q2TextInputQuestion = QuizDefFactory.createTextInputQuestion(2, 1)
+        pristineDragonsUser.createQuizQuestionDef(q2TextInputQuestion)
+
+        def quiz1Attempt = pristineDragonsUser.startQuizAttempt(q1.quizId).body
+        pristineDragonsUser.reportQuizAnswer(q1.quizId, quiz1Attempt.id, quiz1Attempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: "credit pretty please"])
+        pristineDragonsUser.completeQuizAttempt(q1.quizId, quiz1Attempt.id)
+        def quiz2Attempt = pristineDragonsUser.startQuizAttempt(q2.quizId).body
+        pristineDragonsUser.reportQuizAnswer(q2.quizId, quiz2Attempt.id, quiz2Attempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: "credit please"])
+        pristineDragonsUser.completeQuizAttempt(q2.quizId, quiz2Attempt.id)
+
+        pristineDragonsUser.gradeAnswer(pristineDragonsUser.userName, q1.quizId, quiz1Attempt.id, quiz1Attempt.questions[0].answerOptions[0].id, true, notValidProtectedCommunity)
+        when:
+        pristineDragonsUser.gradeAnswer(pristineDragonsUser.userName, q2.quizId, quiz2Attempt.id, quiz2Attempt.questions[0].answerOptions[0].id, true, notValidDefault)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains(notValidDefaultErrMsg)
     }
 
     def "only community member can call description validator for community with quizId that belongs to that community"() {
