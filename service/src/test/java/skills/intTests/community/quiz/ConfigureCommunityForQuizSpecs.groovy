@@ -168,6 +168,27 @@ class ConfigureCommunityForQuizSpecs extends DefaultIntSpec {
         e.getMessage().contains("User [${allDragonsUser.userName}] is not allowed to set [enableProtectedUserCommunity] to true")
     }
 
+    def "only member of the community can enable community when editing a quiz - quiz admin comes from Admin Group"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService allDragonsUser = createService(users[0])
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        allDragonsUser.createQuizDef(quiz)
+
+        def adminGroup = createAdminGroup(1)
+        allDragonsUser.createAdminGroupDef(adminGroup)
+        allDragonsUser.addAdminGroupOwner(adminGroup.adminGroupId, allDragonsUser.userName)
+        allDragonsUser.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
+
+        when:
+        quiz.enableProtectedUserCommunity = true
+        allDragonsUser.createQuizDef(quiz, quiz.quizId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("User [${allDragonsUser.userName}] is not allowed to set [enableProtectedUserCommunity] to true")
+    }
+
     def "once community is enabled it cannot be disabled"() {
         List<String> users = getRandomUsers(2)
 

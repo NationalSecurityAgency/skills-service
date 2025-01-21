@@ -407,4 +407,97 @@ class EnableCommunityForQuizValidationSpecs extends DefaultIntSpec {
         ].sort()
     }
 
+    def "cannot assign community enabled quiz to a skill of a non-community project - new skill"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(q1)
+
+        def q2 = QuizDefFactory.createQuiz(2)
+        pristineDragonsUser.createQuizDef(q2)
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1Skill = createSkill(1, 1, 1, 1, 1, 480, 200)
+        p1Skill.selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+        p1Skill.quizId = q1.quizId
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, createSubject(1, 1), [p1Skill])
+
+        def p2 = createProject(2)
+        def p2Skill = createSkill(2, 1, 1, 1, 1, 480, 200)
+        p2Skill.selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+        p2Skill.quizId = q1.quizId
+
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p2, createSubject(2, 1), [])
+        when:
+        pristineDragonsUser.createSkill(p2Skill)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Cannot assign quiz [${q1.quizId}] to [${p2.projectId}] because project does not have [Divine Dragon] permission".toString())
+    }
+
+    def "cannot assign community enabled quiz to a skill of a non-community project - edit skill"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(q1)
+
+        def q2 = QuizDefFactory.createQuiz(2)
+        pristineDragonsUser.createQuizDef(q2)
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1Skill = createSkill(1, 1, 1, 1, 1, 480, 200)
+        p1Skill.selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+        p1Skill.quizId = q1.quizId
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, createSubject(1, 1), [p1Skill])
+
+        def p2 = createProject(2)
+        def p2Skill = createSkill(2, 1, 1, 1, 1, 480, 200)
+        p2Skill.selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+        p2Skill.quizId = q2.quizId
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p2, createSubject(2, 1), [p2Skill])
+
+        when:
+        p2Skill.quizId = q1.quizId
+        pristineDragonsUser.updateSkill(p2Skill, p2Skill.skillId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Cannot assign quiz [${q1.quizId}] to [${p2.projectId}] because project does not have [Divine Dragon] permission".toString())
+    }
+
+    def "able to assign non-community enabled quiz to a skill of a community project"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        pristineDragonsUser.createQuizDef(q1)
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1Skill = createSkill(1, 1, 1, 1, 1, 480, 200)
+        p1Skill.selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+        p1Skill.quizId = q1.quizId
+
+        when:
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, createSubject(1, 1), [p1Skill])
+        def skillRes = pristineDragonsUser.getSingleSkillSummary(pristineDragonsUser.userName, p1.projectId, p1Skill.skillId)
+        then:
+        skillRes.selfReporting.type == SkillDef.SelfReportingType.Quiz.name()
+        skillRes.selfReporting.quizId == q1.quizId
+    }
+
 }
