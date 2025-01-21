@@ -146,7 +146,7 @@ const isFlex = computed(() => responsive.md.value)
                          v-model:sort-field="sortBy"
                          v-model:sort-order="sortOrder"
                          :rowsPerPageOptions="possiblePageSizes">
-          <Column header="Error" field="typeAndError" sortable  :class="{'flex': isFlex }">
+          <Column header="Error" field="errorType" sortable  :class="{'flex': isFlex }">
             <template #body="slotProps">
               <div class="pl-3">
                 <div class="mb-2">
