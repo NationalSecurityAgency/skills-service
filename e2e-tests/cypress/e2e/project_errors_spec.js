@@ -167,6 +167,73 @@ describe('Project Errors Tests', () => {
             .contains('2');
     });
 
+    it('ability to sort by each column', () => {
+        cy.intercept('GET', '/admin/projects/proj1/errors**').as('getErrors');
+
+        cy.reportSkill(1, 42, 'user@skills.org', '2021-02-24 10:00', false);
+        cy.wait(1000)
+        cy.reportSkill(1, 75, 'user@skills.org', '2021-02-24 10:00', false);
+        cy.reportSkill(1, 75, 'user@skills.org', '2021-02-24 10:00', false);
+        cy.wait(1000)
+        cy.reportSkill(1, 13, 'user@skills.org', '2021-02-24 10:00', false);
+        cy.reportSkill(1, 13, 'user@skills.org', '2021-02-24 10:00', false);
+        cy.reportSkill(1, 13, 'user@skills.org', '2021-02-24 10:00', false);
+        cy.wait(1000)
+
+        cy.visit('/administrator/projects/proj1/issues')
+
+        const tableSelector = '[data-cy="projectErrorsTable"]';
+
+        // last seen is the default
+        cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '3')
+        cy.validateTable(tableSelector, [
+            [{colIndex: 0, value: '[skill13]'}],
+            [{colIndex: 0, value: '[skill75]'}],
+            [{colIndex: 0, value: '[skill42]'}],
+        ]);
+        cy.get(`${tableSelector} th`).contains('Last Seen').click();
+        cy.wait('@getErrors');
+        cy.validateTable(tableSelector, [
+            [{colIndex: 0, value: '[skill42]'}],
+            [{colIndex: 0, value: '[skill75]'}],
+            [{colIndex: 0, value: '[skill13]'}],
+        ]);
+
+        // just make sure it doesn't fail when sorting by error
+        cy.get(`${tableSelector} th`).contains('Error').click();
+        cy.wait('@getErrors');
+
+        cy.get(`${tableSelector} th`).contains('First Seen').click();
+        cy.wait('@getErrors');
+        cy.validateTable(tableSelector, [
+            [{colIndex: 0, value: '[skill42]'}],
+            [{colIndex: 0, value: '[skill75]'}],
+            [{colIndex: 0, value: '[skill13]'}],
+        ]);
+        cy.get(`${tableSelector} th`).contains('First Seen').click();
+        cy.wait('@getErrors');
+        cy.validateTable(tableSelector, [
+            [{colIndex: 0, value: '[skill13]'}],
+            [{colIndex: 0, value: '[skill75]'}],
+            [{colIndex: 0, value: '[skill42]'}],
+        ]);
+
+        cy.get(`${tableSelector} th`).contains('Times Seen').click();
+        cy.wait('@getErrors');
+        cy.validateTable(tableSelector, [
+            [{colIndex: 0, value: '[skill42]'}, {colIndex: 3, value: '1'}],
+            [{colIndex: 0, value: '[skill75]'}, {colIndex: 3, value: '2'}],
+            [{colIndex: 0, value: '[skill13]'}, {colIndex: 3, value: '3'}],
+        ]);
+        cy.get(`${tableSelector} th`).contains('Times Seen').click();
+        cy.wait('@getErrors');
+        cy.validateTable(tableSelector, [
+            [{colIndex: 0, value: '[skill13]'}, {colIndex: 3, value: '3'}],
+            [{colIndex: 0, value: '[skill75]'}, {colIndex: 3, value: '2'}],
+            [{colIndex: 0, value: '[skill42]'}, {colIndex: 3, value: '1'}],
+        ]);
+    });
+
     it('issues count on administrator home page is correct', () => {
         cy.intercept('GET', '/admin/projects')
             .as('getProjects');
