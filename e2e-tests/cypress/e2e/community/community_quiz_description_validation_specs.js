@@ -123,7 +123,7 @@ describe('Community Quiz Description Validation Tests', () => {
         cy.get('[data-cy="completeQuizBtn"]').should('be.enabled');
     });
 
-    it.only('Input Text grader response is validated against custom validators', () => {
+    it('Input Text grader response is validated against custom validators', () => {
         cy.createQuizDef(1, {enableProtectedUserCommunity: true})
         cy.createTextInputQuestionDef(1, 1)
         cy.createTextInputQuestionDef(1, 2)
