@@ -453,11 +453,31 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="associatedQuizError"]').contains('Quiz is not allowed to be assigned to this project. Project does not have Divine Dragon permission')
     });
 
-    it('A UC protected quiz can be assigned assigned to a skill of a UC protected community project', () => {
+    it('A UC protected quiz can be assigned to a skill of a UC protected community project', () => {
         cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/abcSkill').as('saveSkill')
         cy.createProject(1, {enableProtectedUserCommunity: true})
         cy.createSubject(1,1)
         cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="newSkillButton"]').click()
+        cy.get('[data-cy="skillName"]').type('abc')
+        cy.get('[data-cy="selfReportEnableCheckbox"]').click()
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').click({ force: true })
+        cy.get('[data-cy="quizSelector"]').click()
+        cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
+        cy.get('[data-cy="quizSelected-quiz1"]')
+        cy.get('[data-cy="associatedQuizError"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveSkill')
+    });
+
+    it('A non UC quiz can be assigned to a skill of a UC protected community project', () => {
+        cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/abcSkill').as('saveSkill')
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createSubject(1,1)
+        cy.createQuizDef(1, {enableProtectedUserCommunity: false})
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="newSkillButton"]').click()
