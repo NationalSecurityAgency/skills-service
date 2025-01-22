@@ -53,7 +53,6 @@ describe('Community Project Creation Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains(allDragonsUser).click();
         cy.get('[data-cy="addUserBtn"]').click();
-        cy.log(`looking for: [/admin/quiz-definitions/quiz1/users/${allDragonsUser}/roles/ROLE_QUIZ_ADMIN]`)
         cy.wait('@addAdminAttempt').its('response.statusCode').should('eq', 400);
         cy.get('[data-cy=error-msg]')
           .contains(`Error! Request could not be completed! User [${allDragonsUser}] is not allowed to be assigned [Admin] user role`);

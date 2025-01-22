@@ -405,6 +405,37 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="communityRestrictionWarning"]').should('not.exist')
     });
 
+    it.only('Community protection cannot be enabled if quiz is assigned non community skill', () => {
+        cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/abcSkill').as('saveSkill')
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createQuizDef(1, {enableProtectedUserCommunity: false})
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="newSkillButton"]').click()
+        cy.get('[data-cy="skillName"]').type('abc')
+        cy.get('[data-cy="selfReportEnableCheckbox"]').click()
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').click({ force: true })
+        cy.get('[data-cy="quizSelector"]').click()
+        cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
+        cy.get('[data-cy="quizSelected-quiz1"]')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveSkill')
+
+        cy.visit('/administrator/quizzes');
+        cy.get('[data-cy="editQuizButton_quiz1"]').click()
+
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="communityProtectionErrors"]').should('not.exist')
+
+        cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="communityProtectionErrors"]').contains('Unable to restrict access to Divine Dragon users only')
+        cy.get('[data-cy="communityProtectionErrors"]').contains('This quiz is linked to the following project(s) that do not have Divine Dragon permission: proj1')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="communityRestrictionWarning"]').should('not.exist')
+    });
+
     it('attachments are not enabled on project creation when UC protection is available', () => {
         cy.visit('/administrator/quizzes/')
         cy.get('[data-cy="noQuizzesYet"]')
