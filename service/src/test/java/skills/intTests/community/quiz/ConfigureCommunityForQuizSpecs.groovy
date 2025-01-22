@@ -178,7 +178,6 @@ class ConfigureCommunityForQuizSpecs extends DefaultIntSpec {
 
         def adminGroup = createAdminGroup(1)
         allDragonsUser.createAdminGroupDef(adminGroup)
-        allDragonsUser.addAdminGroupOwner(adminGroup.adminGroupId, allDragonsUser.userName)
         allDragonsUser.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
 
         when:
