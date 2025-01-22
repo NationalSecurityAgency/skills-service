@@ -209,6 +209,7 @@ const skillId = computed(() => {
       v-model="showEdit"
       :skill="skillsState.skill"
       :is-edit="true"
+      :project-user-community="projConfig.getProjectCommunityValue()"
       @skill-saved="skillEdited" />
   </div>
 </template>

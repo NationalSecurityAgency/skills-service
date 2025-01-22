@@ -405,7 +405,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="communityRestrictionWarning"]').should('not.exist')
     });
 
-    it('Community protection cannot be enabled if quiz is assigned non community skill', () => {
+    it('Community protection cannot be enabled if quiz is assigned a skill from a non community project', () => {
         cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/abcSkill').as('saveSkill')
         cy.createProject(1)
         cy.createSubject(1,1)
@@ -434,6 +434,43 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="communityProtectionErrors"]').contains('This quiz is linked to the following project(s) that do not have Divine Dragon permission: proj1')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="communityRestrictionWarning"]').should('not.exist')
+    });
+
+    it('A UC protected quiz cannot be assigned assigned to a skill of a non community project', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: false})
+        cy.createSubject(1,1)
+        cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="newSkillButton"]').click()
+        cy.get('[data-cy="skillName"]').type('abc')
+        cy.get('[data-cy="selfReportEnableCheckbox"]').click()
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').click({ force: true })
+        cy.get('[data-cy="quizSelector"]').click()
+        cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
+        cy.get('[data-cy="quizSelected-quiz1"]')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="associatedQuizError"]').contains('Quiz is not allowed to be assigned to this project. Project does not have Divine Dragon permission')
+    });
+
+    it('A UC protected quiz can be assigned assigned to a skill of a UC protected community project', () => {
+        cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/abcSkill').as('saveSkill')
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createSubject(1,1)
+        cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="newSkillButton"]').click()
+        cy.get('[data-cy="skillName"]').type('abc')
+        cy.get('[data-cy="selfReportEnableCheckbox"]').click()
+        cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').click({ force: true })
+        cy.get('[data-cy="quizSelector"]').click()
+        cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
+        cy.get('[data-cy="quizSelected-quiz1"]')
+        cy.get('[data-cy="associatedQuizError"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveSkill')
     });
 
     it('attachments are not enabled on project creation when UC protection is available', () => {

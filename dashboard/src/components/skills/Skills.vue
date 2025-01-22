@@ -236,6 +236,7 @@ const skillCreatedOrUpdated = (skill) => {
       :is-edit="newSkillInfo.isEdit"
       :is-copy="newSkillInfo.isCopy"
       :group-id="newSkillInfo.groupId"
+      :project-user-community="projConfig.getProjectCommunityValue()"
       @skill-saved="skillCreatedOrUpdated"
     />
 
