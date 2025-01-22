@@ -123,4 +123,59 @@ describe('Community Quiz Description Validation Tests', () => {
         cy.get('[data-cy="completeQuizBtn"]').should('be.enabled');
     });
 
+    it.only('Input Text grader response is validated against custom validators', () => {
+        cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createTextInputQuestionDef(1, 2)
+        cy.createTextInputQuestionDef(1, 3)
+
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [0]}], true, 'My Answer')
+
+        cy.visit('/administrator/quizzes/quiz1/grading');
+        cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled').click()
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="answer_1displayText"]').contains('My Answer')
+        cy.get('[data-cy="attemptGradedFor_user1"]').should('not.exist')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="markWrongBtn"]').should('be.enabled')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="markCorrectBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="feedbackTxtMarkdownEditor"]').type('hi jabberwocky')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_3"] [data-cy="descriptionError"]').should('not.be.visible')
+
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="feedbackTxtMarkdownEditor"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="feedbackTxtMarkdownEditor"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="descriptionError"]').contains('Feedback - May not contain divinedragon word')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_3"] [data-cy="descriptionError"]').should('not.be.visible')
+
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="markWrongBtn"]').should('be.disabled')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="markCorrectBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="markWrongBtn"]').should('be.enabled')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="markCorrectBtn"]').should('be.enabled')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_3"] [data-cy="markWrongBtn"]').should('be.enabled')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_3"] [data-cy="markCorrectBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_3"] [data-cy="markWrongBtn"]').should('be.enabled').click()
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_3"] [data-cy="gradedTag"]')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="markWrongBtn"]').should('be.enabled').click()
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="gradedTag"]')
+
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="markWrongBtn"]').should('be.disabled')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="markCorrectBtn"]').should('be.disabled')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="descriptionError"]').contains('Feedback - May not contain divinedragon word')
+
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="feedbackTxtMarkdownEditor"]').type('{moveToEnd}{backspace}')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="markWrongBtn"]').should('be.enabled')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="markCorrectBtn"]').should('be.enabled')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="markWrongBtn"]').should('be.enabled').click()
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="gradedTag"]')
+
+        // all 3 are graded
+        cy.get('[data-cy="attemptGradedFor_user1"]')
+    });
+
 });
