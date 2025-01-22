@@ -405,7 +405,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="communityRestrictionWarning"]').should('not.exist')
     });
 
-    it.only('Community protection cannot be enabled if quiz is assigned non community skill', () => {
+    it('Community protection cannot be enabled if quiz is assigned non community skill', () => {
         cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/abcSkill').as('saveSkill')
         cy.createProject(1)
         cy.createSubject(1,1)
