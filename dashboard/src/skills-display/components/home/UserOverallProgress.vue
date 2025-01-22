@@ -66,7 +66,7 @@ const levelStats = computed(() => {
     <achievement-celebration :user-progress="userProgress"/>
     <Card>
     <template #content>
-      <div class="flex flex-column lg:flex-row gap-5 align-items-stretch text-center">
+      <div class="flex flex-col lg:flex-row gap-8 items-stretch text-center">
         <div class="flex-1">
           <div>
             <circle-progress
@@ -122,8 +122,8 @@ const levelStats = computed(() => {
           </circle-progress>
         </div>
       </div>
-      <div class="mt-6 mx-5 flex justify-content-center">
-        <div class="w-11">
+      <div class="mt-12 mx-8 flex justify-center">
+        <div class="w-11/12">
         <div class="flex mb-1" :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`">
           <div class="flex-1 text-lg font-medium">Achieved Skills</div>
           <div><span class="text-color-warn font-medium sd-theme-primary-color" data-cy="numAchievedSkills">{{skillsAchieved}}</span> / <span data-cy="numTotalSkills">{{totalSkills}}</span></div>
@@ -131,7 +131,7 @@ const levelStats = computed(() => {
         <vertical-progress-bar
           :total-progress="skillsPercentAchieved"
           :barSize="8"
-          beforeTodayBarColor="bg-primary"
+          beforeTodayBarColor="bg-primary text-primary-contrast"
           :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`"
         />
         </div>

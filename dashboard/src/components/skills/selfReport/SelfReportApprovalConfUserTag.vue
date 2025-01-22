@@ -88,7 +88,7 @@ const removeTagConf = (removedIem) => {
     <SkillsCardHeader :title="'Split Workload By ' + tagLabel"></SkillsCardHeader>
   </template>
   <template #content>
-    <div class="flex gap-2 px-3 pt-3 flex-column sm:flex-row">
+    <div class="flex gap-2 px-4 pt-4 flex-col sm:flex-row">
       <div class="flex flex-1">
         <SkillsTextInput
             class="w-full"
@@ -113,7 +113,7 @@ const removeTagConf = (removedIem) => {
       </div>
     </div>
 
-    <SkillsDataTable v-if="hadData" class="mt-3" data-cy="tagKeyConfTable"
+    <SkillsDataTable v-if="hadData" class="mt-4" data-cy="tagKeyConfTable"
                      :rows="pageSize"
                      :rowsPerPageOptions="possiblePageSizes"
                      v-model:sort-field="sortBy"
@@ -154,7 +154,7 @@ const removeTagConf = (removedIem) => {
     </SkillsDataTable>
 
     <no-content2 v-if="!hadData" title="Not Configured Yet..."
-                 class="py-5"
+                 class="py-8"
                  data-cy="noTagKeyConf"
                  icon="fas fa-user-tag">
       You can split the approval workload by routing approval requests for users with the selected <span class="text-info">{{tagLabel}}</span> to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.

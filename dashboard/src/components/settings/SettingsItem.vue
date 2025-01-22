@@ -26,11 +26,11 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="field flex flex-column lg:flex-row lg:gap-3 mb-4" :data-cy="inputId">
+  <div class="field flex flex-col lg:flex-row lg:gap-4 mb-6" :data-cy="inputId">
     <label class="text-secondary" :class="`w-min-${labelWidthInRem}rem lg:max-w-${labelWidthInRem}rem`" :id="`labelFor${inputId}`" :for="inputId">
       <span >{{ label }}:</span>
     </label>
-    <div class="flex align-items-center flex-1">
+    <div class="flex items-center flex-1">
       <slot />
     </div>
   </div>

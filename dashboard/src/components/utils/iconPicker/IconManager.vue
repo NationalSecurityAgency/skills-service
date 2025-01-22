@@ -316,13 +316,13 @@ const closeError = () => {
 </script>
 
 <template xmlns:v-if="http://www.w3.org/1999/xlink">
-    <div class="flex flex-column gap-3" :style="`width: ${modalWidth}`">
+    <div class="flex flex-col gap-4" :style="`width: ${modalWidth}`">
         <InputText type="text" class="w-full" :placeholder="searchPlaceholder" autofocus v-model="filterCriteria"
                @keyup="filter" ref="iconFilterInput" data-cy="icon-search" aria-label="search by icon name" />
 
       <TabMenu :model="iconPacks" @tab-change="onChange" v-model:activeIndex="active">
         <template #item="{ item, props }">
-          <a v-bind="props.action" class="flex align-items-center gap-2">
+          <a v-bind="props.action" class="flex items-center gap-2">
             <i :class="item.headerIcon"></i> {{ item.packName }}
           </a>
         </template>
@@ -337,7 +337,7 @@ const closeError = () => {
         <template #header>
           <div class="w-full">
             <InputText class="w-full" data-cy="fileInput" placeholder="Browse..." type="file" @change="uploadFromInput($event)" v-model="fileInfo" />
-            <p class="text-muted text-right text-primary font-italic">* custom icons must be between {{minDimensionsString}} and {{maxDimensionsString}}</p>
+            <p class="text-muted text-right text-primary italic">* custom icons must be between {{minDimensionsString}} and {{maxDimensionsString}}</p>
           </div>
         </template>
         <template #content>
@@ -345,7 +345,7 @@ const closeError = () => {
           <p>Drag and drop file here to upload.</p>
           <div v-if="iconPacks[2].icons.length > 0 && !loadingIcons">
             <div v-for="(icons, index) of iconPacks[2].icons" v-bind:key="index" class="flex">
-              <div v-for="(file) of icons" :key="file.filename" class="card m-0 px-6 flex flex-wrap border-1 surface-border align-items-center gap-3">
+              <div v-for="(file) of icons" :key="file.filename" class="card m-0 px-12 flex flex-wrap border border-surface items-center gap-4">
                 <div class="icon-item" style="max-width: 100px;">
                   <button class="p-link text-blue-400"
                      :aria-label="`Select icon ${file.filename}`"

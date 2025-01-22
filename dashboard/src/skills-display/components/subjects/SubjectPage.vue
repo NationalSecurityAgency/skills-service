@@ -41,15 +41,15 @@ onMounted(() => {
     <skills-spinner :is-loading="subject.loadingSubjectSummary" />
     <div v-if="!subject.loadingSubjectSummary">
       <skills-title>{{  subject.subjectSummary.subject }}</skills-title>
-      <div class="mt-3">
+      <div class="mt-4">
         <user-overall-progress :is-subject="true"/>
       </div>
 
-      <div class="mt-3 flex flex-column md:flex-row gap-4 ">
-        <div class="flex align-items-center">
+      <div class="mt-4 flex flex-col md:flex-row gap-6 ">
+        <div class="flex items-center">
           <my-rank class="w-full"/>
         </div>
-        <div class="flex-1 align-items-center">
+        <div class="flex-1 items-center">
           <point-progress-chart />
         </div>
       </div>
@@ -76,7 +76,7 @@ onMounted(() => {
 <!--      @points-earned="refreshHeader"-->
 <!--      @scrollTo="scrollToLastViewedSkill"-->
       <skills-progress-list
-        class="mt-3" />
+        class="mt-4" />
 
     </div>
   </div>

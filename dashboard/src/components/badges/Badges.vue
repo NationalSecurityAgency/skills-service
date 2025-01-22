@@ -282,13 +282,13 @@ const toDate = (value) => {
         <div>
           <div v-if="badges && badges.length"
                id="badgeCards"
-               class="grid">
+               class="grid grid-cols-12 gap-4">
             <div v-for="(badge) of badges"
                  :id="badge.badgeId"
                  :key="badge.badgeId"
-                 class="col-12 xl:col-6 xlPlus:col-4 xlPlusPlus:col-3">
+                 class="col-span-12 xl:col-span-6 xlPlus:col-4 xlPlusPlus:col-3">
               <BlockUI :blocked="sortOrder.loading">
-                <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${badge.badgeId}_overlayShown`">
+                <div class="absolute z-50 top-1/2 w-full text-center" v-if="sortOrder.loading" :data-cy="`${badge.badgeId}_overlayShown`">
                   <div v-if="badge.badgeId===sortOrder.loadingBadgeId" data-cy="updatingSortMsg">
                     <div class="text-info text-uppercase mb-1">Updating sort order!</div>
                     <skills-spinner :is-loading="sortOrder.loading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
@@ -308,7 +308,7 @@ const toDate = (value) => {
 
           <no-content2 v-else title="No Badges Yet"
                        message="Badges add another facet to the overall gamification profile and allows you to further reward your users by providing these prestigious symbols. Badges are a collection of skills and when all of the skills are accomplished that badge is earned."
-                       class="mt-4"/>
+                       class="mt-6"/>
         </div>
     </loading-container>
 

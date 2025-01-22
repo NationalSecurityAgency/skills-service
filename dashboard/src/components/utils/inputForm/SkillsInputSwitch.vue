@@ -25,7 +25,7 @@ const { value } = useField(() => props.name)
 </script>
 
 <template>
-  <InputSwitch
+  <ToggleSwitch
     v-model="value" />
 </template>
 

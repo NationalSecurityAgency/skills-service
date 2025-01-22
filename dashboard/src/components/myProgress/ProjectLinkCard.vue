@@ -123,7 +123,7 @@ const remove = () => {
             text
             icon="fas fa-arrows-alt"
             severity="secondary"
-            class="pl-2 pr-3 sort-control border-top-none border-left-none border-right-1 border-bottom-1 surface-border text-color-secondary"
+            class="pl-2 pr-4 sort-control border-t-0 border-l-0 border-r border-b border-surface text-muted-color"
             :aria-label="`Sort Control. Current position for ${proj.projectName} is ${displayOrder}. Press up or down to change the order.`"
             size="large"
             data-cy="sortControlHandle"
@@ -137,7 +137,7 @@ const remove = () => {
             text
             icon="far fa-times-circle"
             severity="secondary"
-            class="pr-3 pt-2"
+            class="pr-4 pt-2"
             :data-cy="`remove-${proj.projectId}Btn`"
             @click="remove"
             :aria-label="`Remove ${proj.projectName} from My Projects`"
@@ -148,16 +148,16 @@ const remove = () => {
     <template #content>
       <div :class="{'pt-4': !showSortControl }">
 
-        <div class="flex flex-column sm:flex-row align-items-center">
-          <div class="pt-3" style="min-width: 200px;">
+        <div class="flex flex-col sm:flex-row items-center">
+          <div class="pt-4" style="min-width: 200px;">
             <apexchart type="radialBar" height="200" width="200" :options="chartOptions"
                        :series="series"></apexchart>
           </div>
-          <div class="flex-1 pt-0 pr-3 text-center sm:text-right">
+          <div class="flex-1 pt-0 pr-4 text-center sm:text-right">
             <div class="uppercase text-2xl text-primary skills-break-word" data-cy="project-card-project-name"
                  :aria-label="`Project ${proj.projectName}`">{{ proj.projectName }}
             </div>
-            <div class="text-2xl text-color-secondary mt-2" data-cy="project-card-project-level">
+            <div class="text-2xl text-muted-color mt-2" data-cy="project-card-project-level">
               {{ proj.levelDisplayName }} {{ proj.level }}
             </div>
             <div data-cy="project-card-project-rank" class="mt-1">
@@ -173,7 +173,7 @@ const remove = () => {
       </div>
     </template>
     <template #footer>
-      <div class="text-right mx-3">
+      <div class="text-right mx-4">
         <div :id="`projectProgressLabel_${proj.projectId}`"
              class="small mb-1"
              :aria-label="`${proj.points} out of ${proj.totalPoints} available points`"
@@ -189,7 +189,7 @@ const remove = () => {
           style="height: 6px" />
       </div>
 
-      <div class="px-3 w-full text-center pt-4 pb-3">
+      <div class="px-4 w-full text-center pt-6 pb-4">
         <router-link tabindex="-1"
                      :to="{ path: `/progress-and-rankings/projects/${proj.projectId}` }"
                      :data-cy="`project-link-${proj.projectId}`">

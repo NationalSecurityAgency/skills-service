@@ -194,12 +194,12 @@ const loadTableData = () => {
 </script>
 
 <template>
-  <Card data-cy="multiProjectUsersInCommon" class="mb-4">
+  <Card data-cy="multiProjectUsersInCommon" class="mb-6">
     <template #header>
       <SkillsCardHeader title="Find users across multiple projects"></SkillsCardHeader>
     </template>
     <template #content>
-      <skills-spinner :is-loading="projects.loading" class="mb-5"/>
+      <skills-spinner :is-loading="projects.loading" class="mb-8"/>
 
       <div v-if="enoughOverallProjects && !projects.loading">
         <div class="flex">
@@ -215,21 +215,21 @@ const loadTableData = () => {
               multiple
               optionLabel="name"
               inputClass="w-full"
-              class="w-full mb-4"
+              class="w-full mb-6"
               @complete="filterProjects"
               data-cy="projectSelector"
               placeholder="Select option">
             <template #empty>
-              <div v-if="projects.selected.length === 5" class="ml-4" data-cy="projectSelectorMaximumReached">
+              <div v-if="projects.selected.length === 5" class="ml-6" data-cy="projectSelectorMaximumReached">
                 Maximum of 5 options selected. First remove a selected option to select another.
               </div>
-              <div v-else class="ml-4">
+              <div v-else class="ml-6">
                 No results found
               </div>
             </template>
           </AutoComplete>
         </div>
-        <div class="flex mb-4">
+        <div class="flex mb-6">
           <no-content2 v-if="!atLeast1Proj" title="No Projects Selected" class="w-full"
                        message="Please select at least 2 projects using search above then click 'Find Users' button below"></no-content2>
 
@@ -256,12 +256,12 @@ const loadTableData = () => {
             </Column>
             <Column field="minLevel" header="Min Level">
               <template #body="slotProps">
-                <div class="flex gap-4">
-                  <Dropdown :options="slotProps.data.availableLevels"
+                <div class="flex gap-6">
+                  <Select :options="slotProps.data.availableLevels"
                             v-if="!slotProps.data.loadingLevels"
                             v-model="slotProps.data.minLevel"
                             data-cy="minLevelSelector">
-                  </Dropdown>
+                  </Select>
                   <SkillsButton variant="outline-info"
                                 aria-label="Sync other levels"
                                 @click="syncOtherLevels(slotProps.data.minLevel)"
@@ -275,7 +275,7 @@ const loadTableData = () => {
             </Column>
           </SkillsDataTable>
         </div>
-        <div class="flex justify-content-center">
+        <div class="flex justify-center">
           <SkillsButton :disabled="!atLeast2Proj"
                         @click="locateUsers"
                         label="Find Users"
@@ -283,7 +283,7 @@ const loadTableData = () => {
                         data-cy="findUsersBtn">
           </SkillsButton>
         </div>
-        <div class="flex mt-4">
+        <div class="flex mt-6">
           <SkillsDataTable v-if="resultsLoaded"
                            :value="results"
                            :busy="resultTableOptions.busy"
@@ -316,14 +316,14 @@ const loadTableData = () => {
             </template>
 
             <template #empty>
-              <span class="flex align-items-center justify-content-center">There are no records to show</span>
+              <span class="flex items-center justify-center">There are no records to show</span>
             </template>
           </SkillsDataTable>
         </div>
       </div>
 
       <no-content2 v-if="!enoughOverallProjects"
-                   class="my-5"
+                   class="my-8"
                    title="Feature is disabled"
                    icon="fas fa-poo"
                    message="At least 2 projects must exist for this feature to work. Please create more projects to enable this feature."/>

@@ -196,8 +196,8 @@ const suggestUsers = (query) => {
 
 <template>
   <div data-cy="existingUserInput" v-bind="fallthroughAttributes.rootAttrs.value">
-    <div class="flex flex-column sm:flex-row gap-2">
-      <Dropdown v-if="hasUserSuggestOptions" data-cy="userSuggestOptionsDropdown" v-model="selectedSuggestOption" :options="userSuggestOptions" class="md:mr-2"/>
+    <div class="flex flex-col sm:flex-row gap-2">
+      <Select v-if="hasUserSuggestOptions" data-cy="userSuggestOptionsDropdown" v-model="selectedSuggestOption" :options="userSuggestOptions" class="md:mr-2"/>
       <AutoComplete v-bind="fallthroughAttributes.inputAttrs.value"
                     v-model="currentSelectedUser"
                     data-cy="existingUserInputDropdown"
@@ -214,7 +214,7 @@ const suggestUsers = (query) => {
                     @clear="onClear"
                     @dropdownClick="onShowDropdown">
         <template #option="slotProps">
-          <div v-if="slotProps.option.isNewUser" class="flex flex-wrap align-options-center align-items-center">
+          <div v-if="slotProps.option.isNewUser" class="flex flex-wrap align-options-center items-center">
             <div class="flex-1 existing-user-id" data-cy="existingUserId">{{ slotProps.option.label }}</div>
             <div aria-live="polite" class="flex font-light text-sm click-indicator ml-2" style="right: 5px; bottom: 0px;">
               Enter to Select (new user)

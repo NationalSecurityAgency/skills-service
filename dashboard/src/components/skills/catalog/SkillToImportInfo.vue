@@ -39,24 +39,24 @@ const selfReport = computed(() => {
   <div :data-cy="`skillToImportInfo-${skill.projectId}_${skill.skillId}`">
     <div class="md:flex my-1">
       <div class="flex-1">
-        <i class="fas fa-laptop skills-color-selfreport" aria-hidden="true" /> <span class="font-italic">Self Report:</span> <span class="text-primary">{{ selfReport }}</span>
+        <i class="fas fa-laptop skills-color-selfreport" aria-hidden="true" /> <span class="italic">Self Report:</span> <span class="text-primary">{{ selfReport }}</span>
       </div>
       <div class="md:flex my-1">
-        <div class="align-items-center">
-          <i class="fas fa-book text-info"></i> <span class="font-italic">Exported:</span>
+        <div class="items-center">
+          <i class="fas fa-book text-info"></i> <span class="italic">Exported:</span>
         </div>
         <date-cell :value="skill.exportedOn" class="ml-2" />
       </div>
     </div>
-    <div class="mb-3">
-        <div class="align-items-start flex">
-          <span class="font-italic mr-2">Project ID: </span><span class="text-primary" data-cy="projId">{{ skill.projectId }}</span>
+    <div class="mb-4">
+        <div class="items-start flex">
+          <span class="italic mr-2">Project ID: </span><span class="text-primary" data-cy="projId">{{ skill.projectId }}</span>
         </div>
-        <div class="align-items-start flex my-1">
-          <span class="font-italic mr-2">Skill ID: </span><span class="text-primary max-wrap" data-cy="skillId">{{ skill.skillId }}</span>
+        <div class="items-start flex my-1">
+          <span class="italic mr-2">Skill ID: </span><span class="text-primary max-wrap" data-cy="skillId">{{ skill.skillId }}</span>
         </div>
         <div>
-          <span class="font-italic">Points: </span><span class="text-primary" data-cy="totalPts">{{ skill.totalPoints}}</span><span> ({{ skill.pointIncrement }} Increment x {{ skill.numPerformToCompletion }} Occurrences)</span>
+          <span class="italic">Points: </span><span class="text-primary" data-cy="totalPts">{{ skill.totalPoints}}</span><span> ({{ skill.pointIncrement }} Increment x {{ skill.numPerformToCompletion }} Occurrences)</span>
         </div>
     </div>
     <Card>

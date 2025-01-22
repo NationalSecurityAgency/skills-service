@@ -187,7 +187,7 @@ function validate(value, ctx) {
       <SkillsCardHeader title="Add a new item to the learning path"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex gap-2 flex-wrap flex-column lg:flex-row lg:align-items-end">
+      <div class="flex gap-2 flex-wrap flex-col lg:flex-row lg:items-end">
         <div class="flex-1 field">
           <label for="learningItemFromInput">From:</label>
           <skills-selector :options="allSkills"
@@ -220,7 +220,7 @@ function validate(value, ctx) {
         </div>
         <div class="field text-center">
           <SkillsButton @click="onAddPath"
-                        class="mt-3"
+                        class="mt-4"
                         icon="fas fa-plus-circle"
                         label="Add"
                         data-cy="addLearningPathItemBtn"

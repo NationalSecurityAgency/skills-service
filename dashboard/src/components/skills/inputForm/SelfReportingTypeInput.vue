@@ -119,7 +119,7 @@ watch(() => selfReportingType.value, () => {
   <div>
     <div class="flex flex-wrap md:flex-no-wrap">
       <!--        @input="onEnabledChanged"-->
-      <div class="w-min-10rem mt-4 w-full md:w-auto">
+      <div class="w-min-10rem mt-6 w-full md:w-auto">
         <SkillsCheckboxInput
           @update:modelValue="onEnabledChanged"
           :binary="true"
@@ -129,9 +129,9 @@ watch(() => selfReportingType.value, () => {
         <label for="selfReport" class="ml-2"> Self Reporting </label>
       </div>
 
-      <div class="card flex flex-1 sm:ml-4 mt-4">
-        <div class="flex flex-column gap-3 w-full" data-cy="selfReportTypeSelector">
-          <div v-for="category in categories" :key="category.key" class="flex align-items-start">
+      <div class="card flex flex-1 sm:ml-6 mt-6">
+        <div class="flex flex-col gap-4 w-full" data-cy="selfReportTypeSelector">
+          <div v-for="category in categories" :key="category.key" class="flex items-start">
             <SkillsRadioButtonInput
               @update:modelValue="onTypeChanged"
               :disabled="!enabled || (category.key === videoKey && isVideoChoiceDisabled)"
@@ -157,13 +157,13 @@ watch(() => selfReportingType.value, () => {
                 <label
                   for="selfReportJustificationRequired"
                   :class="{ 'text-color-secondary' : !enabled || selfReportingType !== 'Approval' }"
-                  class="ml-2 font-italic">Justification Required</label>
+                  class="ml-2 italic">Justification Required</label>
               </div>
               <div v-if="category.key === quizKey" class="pl-2 w-full">
                 <QuizSelector class="mb-0" v-if="category.key === quizKey && enabled && quizSelected"
                               :initiallySelectedQuizId="initialSkillData.quizId" @changed="quizIdSelected" />
               </div>
-              <span v-if="category.key === videoKey && !isVideoConfigured" class="ml-2 font-italic"
+              <span v-if="category.key === videoKey && !isVideoConfigured" class="ml-2 italic"
                     :class="{ 'text-color-secondary' : !enabled || (category.key === videoKey && isVideoChoiceDisabled) }"
                     data-cy="videoSelectionMsg">
                   <span v-if="!isEdit">(Please create skill and configure video settings first)</span>

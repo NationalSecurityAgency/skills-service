@@ -27,7 +27,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useAnnouncer } from '@vue-a11y/announcer'
 import { useDialogMessages } from '@/components/utils/modal/UseDialogMessages.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
-import { FilterMatchMode } from 'primevue/api'
+import { FilterMatchMode } from '@primevue/core/api'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 
 const route = useRoute()
@@ -160,7 +160,7 @@ const tableFilters = ref({
       <div class="">
         <skills-spinner :is-loading="loadingData" />
         <no-content2 v-if="!hasData"
-                     class="py-5"
+                     class="py-8"
                      title="No one one joined yet"
                      message="Once a user has accepted an invitation to join a project configured for Invite Only visibility, that user will show up under the Revoke Access table at which point their access can be revoked and they will no longer have access to the project." />
         <div v-if="!loadingData">

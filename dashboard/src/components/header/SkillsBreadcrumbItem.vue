@@ -42,8 +42,8 @@ const maxWidth = computed(() => props.label ? 'max-width:13rem' : '')
        class="fas fa-angle-right ml-1 mr-1"
        aria-hidden="true"/>
     <div v-if="icon" :class="[icon, 'text-color']" aria-hidden="true" class="mr-2"/>
-    <div v-if="label" class="text-color-secondary mr-1" data-cy="breadcrumbItemLabel">{{ label }}:</div>
-    <div class="font-semibold white-space-nowrap overflow-hidden text-overflow-ellipsis" :style="`${maxWidth}`"
+    <div v-if="label" class="text-muted-color mr-1" data-cy="breadcrumbItemLabel">{{ label }}:</div>
+    <div class="font-semibold whitespace-nowrap overflow-hidden text-ellipsis" :style="`${maxWidth}`"
           :class="valueCss"
           data-cy="breadcrumbItemValue">{{ value }}</div>
   </div>

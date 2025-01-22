@@ -104,9 +104,9 @@ const totalRows = computed(() => items.value.length);
       <SkillsCardHeader title="Skills"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="p-3">
-        <div class="flex gap-3 flex-column xl:flex-row">
-          <div class="field flex-1 xl:border-right-1 xl:px-3 xl:pt-3 gap-2">
+      <div class="p-4">
+        <div class="flex gap-4 flex-col xl:flex-row">
+          <div class="field flex-1 xl:border-r xl:px-4 xl:pt-4 gap-2">
             <label for="skillFilter">Skill Name Filter</label>
             <InputText class="w-full"
                        v-model="filters.name"
@@ -133,7 +133,7 @@ const totalRows = computed(() => items.value.length);
             </div>
           </div>
         </div>
-        <div class="flex flex-1 flex-column gap-2 px-3 pb-3" v-if="tags.length > 0">
+        <div class="flex flex-1 flex-col gap-2 px-4 pb-4" v-if="tags.length > 0">
           <label>Skill Tags</label>
           <div class="flex gap-2" data-cy="skillTag-filters">
             <div v-for="tag in tags" :key="tag.tagId">
@@ -146,7 +146,7 @@ const totalRows = computed(() => items.value.length);
             </div>
           </div>
         </div>
-        <div class="flex xl:pl-3 mb-3 xl:mt-3">
+        <div class="flex xl:pl-4 mb-4 xl:mt-4">
         <SkillsButton variant="outline-info" @click="applyFilters" data-cy="skillsNavigator-filterBtn" icon="fa fa-filter" label="Filter" />
         <SkillsButton variant="outline-info" @click="reset" class="ml-1" data-cy="skillsNavigator-resetBtn" icon="fa fa-times" label="Reset" />
       </div>
@@ -169,7 +169,7 @@ const totalRows = computed(() => items.value.length);
 ￼          </div>
         </template>
         <template #header>
-          <div class="flex justify-content-end flex-wrap">
+          <div class="flex justify-end flex-wrap">
             <SkillsButton :disabled="totalRows <= 0"
                           size="small"
                           icon="fas fa-download"
@@ -181,7 +181,7 @@ const totalRows = computed(() => items.value.length);
         <Column field="skillName" header="Skill" sortable :class="{'flex': isFlex }">
           <template #body="slotProps">
             <div class="flex gap-2 flex-wrap">
-              <div class="flex flex-1 flex-column">
+              <div class="flex flex-1 flex-col">
                 {{ slotProps.data.skillName }}
                 <Badge v-if="slotProps.data.isReusedSkill" variant="success" class="text-uppercase"><i class="fas fa-recycle"></i> Reused</Badge>
                 <div v-if="slotProps.data.skillTags && slotProps.data.skillTags.length > 0">
@@ -236,9 +236,9 @@ const totalRows = computed(() => items.value.length);
         </template>
 
         <template #empty>
-          <div class="flex justify-content-center flex-wrap" data-cy="emptyTable">
-            <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
-            <span class="flex align-items-center justify-content-center">There are no records to show</span>
+          <div class="flex justify-center flex-wrap" data-cy="emptyTable">
+            <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+            <span class="flex items-center justify-center">There are no records to show</span>
           </div>
         </template>
       </SkillsDataTable>

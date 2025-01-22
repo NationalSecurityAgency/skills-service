@@ -64,7 +64,7 @@ onMounted(() => {
 
     <Card>
       <template #content>
-        <SkillsSpinner v-if="loading" :is-loading="true" class="my-8"/>
+        <SkillsSpinner v-if="loading" :is-loading="true" class="my-20"/>
         <div v-else>
           <quiz-single-run :run-info="runInfo" />
         </div>

@@ -173,10 +173,10 @@ const showOkButton = computed(() => !copied.value && (hasProjects.value || loadi
       :loading="loadingOtherProjects"
       :submitting="copying">
     <Message v-if="!hasProjects" severity="warn" :closable="false" data-cy="noOtherProjectsMsg">You are not currently an administrator on any other projects.</Message>
-    <BlockUI v-if="hasProjects && !copied" :blocked="copying" class="py-4">
-      <div class="flex flex-column gap-2">
+    <BlockUI v-if="hasProjects && !copied" :blocked="copying" class="py-6">
+      <div class="flex flex-col gap-2">
         <label for="selectAProjectDropdown">Destination Project:</label>
-          <Dropdown id="selectAProjectDropdown"
+          <Select id="selectAProjectDropdown"
                     :options="otherProjects"
                     placeholder="Search for a project..."
                     v-model="selectedProject"
@@ -196,13 +196,13 @@ const showOkButton = computed(() => !copied.value && (hasProjects.value || loadi
                 <div class="text-secondary project-id">ID: {{ slotProps.option.projectId }}</div>
               </div>
             </template>
-          </Dropdown>
+          </Select>
 
       </div>
-      <skills-spinner  :is-loading="loadingOtherSubjectsAndGroups" class="mt-4"/>
-      <div v-if="isSelectedSkillsCopy && wasProjectSelected && !loadingOtherSubjectsAndGroups" class="flex flex-column gap-2 mt-5">
+      <skills-spinner  :is-loading="loadingOtherSubjectsAndGroups" class="mt-6"/>
+      <div v-if="isSelectedSkillsCopy && wasProjectSelected && !loadingOtherSubjectsAndGroups" class="flex flex-col gap-2 mt-8">
         <label for="selectASubjectOrGroupDropdown">Destination Subject or Skills Group:</label>
-        <Dropdown id="selectASubjectOrGroupDropdown"
+        <Select id="selectASubjectOrGroupDropdown"
                   :options="otherSubjectsAndGroups"
                   placeholder="Search for a subject or group"
                   v-model="selectedSubjectOrGroup"
@@ -222,10 +222,10 @@ const showOkButton = computed(() => !copied.value && (hasProjects.value || loadi
               <div class="text-secondary project-id">ID: {{ slotProps.option.skillId }}</div>
             </div>
           </template>
-        </Dropdown>
+        </Select>
       </div>
       <div v-if="validatingOtherProj">
-        <skills-spinner  :is-loading="validatingOtherProj" class="mt-4"/>
+        <skills-spinner  :is-loading="validatingOtherProj" class="mt-6"/>
         <div class="text-center text-secondary" role="alert">Validating if copy is possible...</div>
       </div>
       <Message v-if="hasValidationErrors" :closable="false" severity="error" data-cy="validationFailedMsg">

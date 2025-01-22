@@ -183,8 +183,8 @@ const removeTagConf = (removedItem) => {
       <SkillsCardHeader title="Split Workload By Skill"></SkillsCardHeader>
     </template>
     <template #content>
-      <div v-if="!(loadingMeta.skills || loadingMeta.subjects)" class="flex gap-1 align-items-center pt-3 px-3 flex-column lg:flex-row">
-        <div class="flex flex-1 flex-column mx-1 mt-1 w-full">
+      <div v-if="!(loadingMeta.skills || loadingMeta.subjects)" class="flex gap-1 items-center pt-4 px-4 flex-col lg:flex-row">
+        <div class="flex flex-1 flex-col mx-1 mt-1 w-full">
           <div class="mb-1">Add a Single Skill</div>
           <skills-selector
               :disabled="selectedSubject !== null || loading"
@@ -196,7 +196,7 @@ const removeTagConf = (removedItem) => {
         <div class="flex mx-1 text-center">
           <span class="text-center">OR</span>
         </div>
-        <div class="flex flex-1 flex-column mx-1 mt-1 align-self-end w-full">
+        <div class="flex flex-1 flex-col mx-1 mt-1 self-end w-full">
           <div class="mb-1">Add <b>ALL</b> Skills under a Subject</div>
           <subject-selector v-if="availableSubjects && availableSubjects.length > 0"
                             :disabled="(selectedSkills && selectedSkills.length > 0) || loading"
@@ -207,7 +207,7 @@ const removeTagConf = (removedItem) => {
                             :onlySingleSelectedValue="true"
                             :warnBeforeRemoving="false"/>
         </div>
-        <div class="mx-1 mt-1 text-center lg:align-self-end">
+        <div class="mx-1 mt-1 text-center lg:self-end">
           <SkillsButton
               aria-label="Add Tag Value"
               @click="addSkillToConf"
@@ -220,9 +220,9 @@ const removeTagConf = (removedItem) => {
         </div>
       </div>
 
-      <skills-spinner v-if="loading" :is-loading="loading" class="mb-5"/>
+      <skills-spinner v-if="loading" :is-loading="loading" class="mb-8"/>
       <div v-if="!loading">
-        <SkillsDataTable v-if="hadData" class="mt-3"
+        <SkillsDataTable v-if="hadData" class="mt-4"
                          :value="data"
                          show-gridlines
                          striped-rows
@@ -267,7 +267,7 @@ const removeTagConf = (removedItem) => {
           </template>
         </SkillsDataTable>
         <no-content2 v-if="!hadData" title="Not Configured Yet..."
-                     class="p-2 py-5"
+                     class="p-2 py-8"
                      data-cy="noSkillConf"
                      icon="fas fa-graduation-cap">
           You can split approval workload by routing approval requests for selected skills approval requests to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.

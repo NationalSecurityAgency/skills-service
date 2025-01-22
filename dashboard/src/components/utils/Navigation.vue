@@ -56,18 +56,18 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="mt-3" data-cy="nav" aria-label="Navigation">
-    <div class="sticky top-0 mb-3 md:hidden" style="z-index: 101">
-      <Dropdown
+  <div class="mt-4" data-cy="nav" aria-label="Navigation">
+    <div class="sticky top-0 mb-4 md:hidden" style="z-index: 101">
+      <Select
         :options="navItems"
         @change="navOnSmallScreen"
         optionLabel="name"
         data-cy="navSmallScreenExpandMenu"
         placeholder="Navigation"
-        class="w-full md:w-14rem">
+        class="w-full md:w-56">
         <template #option="slotProps">
-          <div class="flex align-items-center">
-            <i :class="slotProps.option.iconClass" class="fas text-base mr-2 w-2rem" aria-hidden="true" />
+          <div class="flex items-center">
+            <i :class="slotProps.option.iconClass" class="fas text-base mr-2 w-8" aria-hidden="true" />
             <div>{{ slotProps.option.name }}</div>
           </div>
         </template>
@@ -75,14 +75,14 @@ onUnmounted(() => {
           <i class="fas fa-bars mr-2" aria-hidden="true"></i>
           <span class="uppercase">Navigation</span>
         </template>
-      </Dropdown>
+      </Select>
     </div>
 
     <div class="flex">
       <div id="skillsNavigation" ref="skillsNavigation" class="flex-none hidden md:flex" data-cy="nav-col">
-        <div class="border-1 border-300 border-round-md surface-border font-medium surface-0" style="min-height: calc(100vh - 20rem); !important">
-            <div class="text-900 font-semibold flex">
-              <div v-if="!showCollapsed" class="pt-3 px-3">Navigate</div>
+        <div class="border border-surface-300 dark:border-surface-500 rounded-md border-surface font-medium bg-surface-0 dark:bg-surface-900" style="min-height: calc(100vh - 20rem); !important">
+            <div class="text-surface-900 dark:text-surface-0 font-semibold flex">
+              <div v-if="!showCollapsed" class="pt-4 px-4">Navigate</div>
               <div class="flex-1" :class="{ 'text-right': !showCollapsed, 'text-center': showCollapsed}">
                 <Button size="small" text
                         data-cy="navCollapseOrExpand"
@@ -99,17 +99,16 @@ onUnmounted(() => {
                            :to="{ name: navItem.page }"
                            v-slot="{ navigate, isExactActive }"
                            custom>
-                <li>
+                <li :class="{ 'bg-primary ': isExactActive }">
                   <Button link
-                          :class="{ 'bg-primary': isExactActive }"
                           class="no-underline w-full"
                           @click="(e) => { navigate(e); }"
                           :aria-label="`Navigate to ${navItem.name} page`"
                           :aria-current="isExactActive ? 'page' : false"
                           :data-cy="`nav-${navItem.name}`">
-                    <div class="" :class="{'mr-4': !showCollapsed}">
-                      <i :class="`${navItem.iconClass} ${colors.getTextClass(index)}${isExactActive ? ' bg-primary-reverse border-round border-1 py-1' : ''}`"
-                         class="fas mr-2 w-2rem"
+                    <div class="flex justify-start w-full" :class="{'mr-4': !showCollapsed, 'text-zinc-100': isExactActive }">
+                      <i :class="`${navItem.iconClass} ${colors.getTextClass(index)}${isExactActive ? ' text-primary bg-primary-contrast rounded-border border py-1' : ''}`"
+                         class="fas mr-2 w-8"
                          aria-hidden="true" /> <span v-if="!showCollapsed" class="font-medium">{{ navItem.name }}</span>
                     </div>
                   </Button>
@@ -120,7 +119,7 @@ onUnmounted(() => {
       </div>
 
       <div class="flex-1" ref="content">
-        <div class="md:pl-3" id="mainContent2"
+        <div class="md:pl-4" id="mainContent2"
              tabindex="-1"
              aria-label="Main content area, click tab to navigate">
 <!--          <router-view id="mainContent2" -->

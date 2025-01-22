@@ -115,7 +115,7 @@ const emailUsers = () => {
             <Tag data-cy="projectAdminCount">{{ numFormat.pretty(currentCount) }}</Tag>
             Project Administrators
           </div>
-          <div class="uppercase text-xl my-4">Email Content</div>
+          <div class="uppercase text-xl my-6">Email Content</div>
           <div>
             <SkillsTextInput name="subjectLine" label="Subject Line" data-cy="emailUsers_subject" class="w-full" />
             <markdown-editor data-cy="emailUsers_body"
@@ -126,7 +126,7 @@ const emailUsers = () => {
                              :use-html="true"/>
           </div>
           <div>
-            <SkillsButton class="mr-3" data-cy="previewAdminEmail"
+            <SkillsButton class="mr-4" data-cy="previewAdminEmail"
                           :disabled="isPreviewDisabled || !meta.valid"
                           @click="previewEmail"
                           label="Preview"
@@ -141,14 +141,14 @@ const emailUsers = () => {
             </transition>
           </div>
 <!--          <ValidationObserver ref="observer" v-slot="{invalid}" slim>-->
-<!--            <div class="row pl-3 pr-3 pt-3 pb-1 m-3 mb-1">-->
+<!--            <div class="row pl-4 pr-4 pt-4 pb-1 m-4 mb-1">-->
 <!--              <label for="subject-line-input">Subject Line</label>-->
 <!--              <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Email Subject" class="w-100">-->
 <!--                <b-input class="w-100" v-model="subject" id="subject-line-input" data-cy="emailUsers_subject"/>-->
 <!--                <small role="alert" id="emailSubjectError" class="form-text text-danger">{{ errors[0] }}</small>-->
 <!--              </ValidationProvider>-->
 <!--            </div>-->
-<!--            <div class="row pl-3 pr-3 pb-1 ml-3 mr-3 mb-1 mt-1">-->
+<!--            <div class="row pl-4 pr-4 pb-1 ml-4 mr-4 mb-1 mt-1">-->
 <!--              <ValidationProvider rules="maxDescriptionLength|customDescriptionValidator" :debounce="250" v-slot="{ errors }" name="Email Body" class="w-100">-->
 <!--                <markdown-editor class="w-100" v-model="body" data-cy="emailUsers_body"-->
 <!--                                 label="Email Body"-->
@@ -157,8 +157,8 @@ const emailUsers = () => {
 <!--                <small role="alert" id="emailBodyError" class="form-text text-danger">{{ errors[0] }}</small>-->
 <!--              </ValidationProvider>-->
 <!--            </div>-->
-<!--            <div class="row pl-3 pr-3 pb-3 pt-1 ml-3 mr-3 mb-3 mt-1">-->
-<!--              <b-button class="mr-3" data-cy="previewAdminEmail"-->
+<!--            <div class="row pl-4 pr-4 pb-4 pt-1 ml-4 mr-4 mb-4 mt-1">-->
+<!--              <b-button class="mr-4" data-cy="previewAdminEmail"-->
 <!--                        v-b-tooltip.hover="'this will send a test email to the current user'"-->
 <!--                        :disabled="isEmailDisabled || invalid"-->
 <!--                        @click="previewEmail"-->

@@ -143,7 +143,7 @@ const isExportable = computed(() => {
     header="Export Skill to the Catalog"
     :maximizable="true"
     :close-on-escape="true"
-    class="w-11 xl:w-8"
+    class="w-11/12 xl:w-8/12"
     @update:visible="onUpdateVisible"
     v-model:visible="model"
     :pt="{ maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }"
@@ -192,7 +192,7 @@ const isExportable = computed(() => {
               of this skill.
             </p>
             <p v-if="numAlreadyExported > 0">
-              <span class="font-italic"><i class="fas fa-exclamation-triangle text-warning" /> Note:</span> The are
+              <span class="italic"><i class="fas fa-exclamation-triangle text-warning" /> Note:</span> The are
               already
               <Tag severity="info">{{ numAlreadyExported }}</Tag>
               skill(s) in the Skill Catalog from the provided selection.
@@ -209,11 +209,11 @@ const isExportable = computed(() => {
                       },
                       bary: 'hover:bg-primary-400 bg-primary-300 opacity-100'
                   }"
-                class="mb-3"
+                class="mb-4"
                 style="width: 100%; max-height: 200px">
               <ul>
                 <li v-for="dupSkill in notExportableSkills" :key="dupSkill.skillId"
-                    :data-cy="`dupSkill-${dupSkill.skillId}`" class="line-height-4">
+                    :data-cy="`dupSkill-${dupSkill.skillId}`" class="leading-loose">
                   {{ dupSkill.name }}
                   <Tag severity="warning" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">
                     Name Conflict

@@ -19,7 +19,7 @@ import ProjectService from '@/components/projects/ProjectService.js'
 import Column from 'primevue/column'
 import {useResponsiveBreakpoints} from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
-import {FilterMatchMode} from 'primevue/api'
+import {FilterMatchMode} from '@primevue/core/api'
 import {useSkillsAnnouncer} from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
 import {useAppInfoState} from '@/stores/UseAppInfoState.js'
@@ -140,16 +140,16 @@ const contactProject = (name, id) => {
         <back-to-my-progress-btn/>
       </template>
     </my-progress-title>
-    <Card class="mt-3" :pt="{  content: { class: 'p-0' }, body: { class: 'p-0' } }">
+    <Card class="mt-4" :pt="{  content: { class: 'p-0' }, body: { class: 'p-0' } }">
       <template #content>
-        <skills-spinner :is-loading="isLoading" class="mt-8"/>
+        <skills-spinner :is-loading="isLoading" class="mt-20"/>
         <div v-if="!isLoading">
           <div v-if="!hasProjects">
             <no-projects-in-catalog-msg/>
           </div>
           <div v-if="hasProjects">
 
-            <div class="flex flex-column md:flex-row gap-2 pt-3 px-3">
+            <div class="flex flex-col md:flex-row gap-2 pt-4 px-4">
               <media-info-card :title="countsAll"
                                sub-title="ALL PROJECTS"
                                class="flex-1"
@@ -170,13 +170,13 @@ const contactProject = (name, id) => {
               </media-info-card>
             </div>
 
-            <InputGroup class="mt-2 pt-4 px-3 pb-2">
+            <InputGroup class="mt-2 pt-6 px-4 pb-2">
               <InputGroupAddon>
                 <i class="fas fa-search" aria-hidden="true"/>
               </InputGroupAddon>
               <InputText
                   id="projectFilter"
-                  class="flex flex-grow-1"
+                  class="flex grow"
                   v-model="filters['global'].value"
                   data-cy="searchInput"
                   placeholder="Project Name Search"/>
@@ -193,7 +193,7 @@ const contactProject = (name, id) => {
             </InputGroup>
 
             <SkillsDataTable
-                class="border-1 surface-border border-round border-surface"
+                class="border border-surface rounded-border border-surface"
                 style="max-width: 100%"
                 :value="projects"
                 stripedRows
@@ -224,7 +224,7 @@ const contactProject = (name, id) => {
                   <i class="fas fa-tasks mr-1" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  <div class="flex align-items-center">
+                  <div class="flex items-center">
                     <div class="flex-1">
                       <highlighted-value :value="slotProps.data.name" :filter="filters['global'].value || ''"/>
                     </div>
@@ -254,7 +254,7 @@ const contactProject = (name, id) => {
                       icon="fas fa-plus-circle"
                       @click="addToMyProjects(slotProps.data) "
                       outlined
-                      class="fadein animation-duration-300"
+                      class="animate-fadein animate-duration-300"
                       size="small"
                       :data-cy="`addButton-${slotProps.data.projectId}`"
                       :loading="slotProps.data.loading"
@@ -265,13 +265,13 @@ const contactProject = (name, id) => {
                         label="Preview"
                         icon="fas fa-eye"
                         outlined
-                        class="fadein animation-duration-300 ml-2"
+                        class="animate-fadein animate-duration-300 ml-2"
                         size="small"
                         :data-cy="`viewButton-${slotProps.data.projectId}`"
                         :loading="slotProps.data.loading"
                         :aria-label="`preview project ${slotProps.data.projectId}`"/>
                   </router-link>
-                  <div v-if="slotProps.data.isMyProject" class="flex align-items-center">
+                  <div v-if="slotProps.data.isMyProject" class="flex items-center">
                     <Tag
                         class="animate__bounceIn"
                         severity="success"><i class="fas fa-heart mr-1"/> My Project

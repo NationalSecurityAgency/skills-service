@@ -317,19 +317,19 @@ const onBadgeSaved = () => {
           :name-to-id-sync-enabled="!props.isEdit">
         <template #beforeName>
           <icon-picker
-            class="mb-3"
+            class="mb-4"
             :startIcon="currentIcon"
             @selected-icon="onSelectedIcon"
           />
         </template>
       </SkillsNameAndIdInput>
 
-      <markdown-editor class="mt-5" name="description" />
+      <markdown-editor class="mt-8" name="description" />
 
       <Card v-if="!global" data-cy="bonusAwardCard">
         <template #content>
           <div>
-            <div class="pb-3">
+            <div class="pb-4">
               <Checkbox data-cy="timeLimitCheckbox" id="checkbox-1" inputId="enableAward" class="d-inline" :binary="true" name="timeLimitEnabled" v-model="badgeInternal.timeLimitEnabled" v-on:input="resetTimeLimit"/>
               <label for="enableAward">
                 Enable Bonus Award
@@ -337,7 +337,7 @@ const onBadgeSaved = () => {
             </div>
             <div class="flex gap-2" style="padding-bottom: 10px;" v-if="badgeInternal.timeLimitEnabled">
               <div>
-                <icon-picker :startIcon="awardIcon" class="mr-3" @selected-icon="(e) => onSelectedIcon(e, true)" :disabled="false"></icon-picker>
+                <icon-picker :startIcon="awardIcon" class="mr-4" @selected-icon="(e) => onSelectedIcon(e, true)" :disabled="false"></icon-picker>
               </div>
               <div class="w-full">
                 <label for="awardName">Award Name</label>
@@ -347,7 +347,7 @@ const onBadgeSaved = () => {
                     name="awardAttrs.name"/>
               </div>
             </div>
-            <div class="flex gap-4" v-if="badgeInternal.timeLimitEnabled">
+            <div class="flex gap-6" v-if="badgeInternal.timeLimitEnabled">
               <div class="flex flex-1">
                 <SkillsNumberInput v-model="badgeInternal.expirationDays"
                                    class="w-full"
@@ -382,7 +382,7 @@ const onBadgeSaved = () => {
         </template>
       </Card>
 
-      <help-url-input class="mt-3"
+      <help-url-input class="mt-4"
                       :next-focus-el="previousFocus"
                       name="helpUrl"
                       @keydown-enter="emit('keydown-enter')" />
@@ -393,7 +393,7 @@ const onBadgeSaved = () => {
           Enable Gem Feature
         </label>
 
-        <div v-if="limitTimeframe" class="flex justify-content-center gap-4">
+        <div v-if="limitTimeframe" class="flex justify-center gap-6">
           <div>
             <SkillsCalendarInput selectionMode="range" inline name="gemDates" v-model="gemDates" label="Date Range" />
           </div>

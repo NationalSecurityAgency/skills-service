@@ -17,7 +17,7 @@ limitations under the License.
 import { computed, onMounted, ref } from 'vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
-import { FilterMatchMode } from 'primevue/api'
+import { FilterMatchMode } from '@primevue/core/api'
 import AdminGroupsService from '@/components/access/groups/AdminGroupsService.js';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
@@ -160,10 +160,10 @@ defineExpose({
 
 <template>
   <div style="min-height: 20rem;">
-    <SkillsSpinner :is-loading="loading" class="my-5" />
+    <SkillsSpinner :is-loading="loading" class="my-8" />
     <NoContent2 v-if="!loading && !hasData"
                 title="No Admin Group Definitions"
-                class="py-8 px-4"
+                class="py-20 px-6"
                 data-cy="noAdminGroupsYet">
       <div>
         <p>
@@ -194,7 +194,7 @@ defineExpose({
               <InputGroupAddon>
                 <i class="fas fa-search" aria-hidden="true"/>
               </InputGroupAddon>
-              <InputText class="flex flex-grow-1"
+              <InputText class="flex grow"
                          v-model="filters['global'].value"
                          data-cy="adminGroupNameFilter"
                          placeholder="Admin Group Search"
@@ -217,10 +217,10 @@ defineExpose({
         </template>
 
         <template #empty>
-          <div class="flex justify-content-center flex-wrap">
-            <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
-            <span class="flex align-items-center justify-content-center">No Admin Groups found.  Click
-            <SkillsButton class="flex flex align-items-center justify-content-center px-1"
+          <div class="flex justify-center flex-wrap">
+            <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+            <span class="flex items-center justify-center">No Admin Groups found.  Click
+            <SkillsButton class="flex flex items-center justify-center px-1"
                           label="Reset"
                           link
                           size="small"
@@ -236,8 +236,8 @@ defineExpose({
             <span><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
           </template>
           <template #body="slotProps">
-            <div v-if="slotProps.field === 'name'" class="flex w-full flex-wrap flex-column sm:flex-row gap-2">
-              <div class="flex align-items-start justify-content-start w-min-10rem">
+            <div v-if="slotProps.field === 'name'" class="flex w-full flex-wrap flex-col sm:flex-row gap-2">
+              <div class="flex items-start justify-start w-min-10rem">
                 <div>
                   <router-link :data-cy="`managesAdminGroupLink_${slotProps.data.adminGroupId}`"
                                :to="{ name:'AdminGroupMembers', params: { adminGroupId: slotProps.data.adminGroupId }}"
@@ -252,13 +252,13 @@ defineExpose({
                   </div>
                 </div>
               </div>
-              <div class="flex flex-1 flex-wrap align-items-start justify-content-end gap-2">
+              <div class="flex flex-1 flex-wrap items-start justify-end gap-2">
                 <router-link :data-cy="`managesAdminGroupBtn_${slotProps.data.adminGroupId}`"
                              :to="{ name:'AdminGroupMembers', params: { adminGroupId: slotProps.data.adminGroupId }}"
                              :aria-label="`Manage Admin Group ${slotProps.data.name}`" tabindex="-1">
                   <SkillsButton label="Manage"
                                 icon="fas fa-arrow-circle-right"
-                                  class="flex-shrink-1"
+                                  class="shrink"
                                 outlined
                                 size="small"/>
                 </router-link>

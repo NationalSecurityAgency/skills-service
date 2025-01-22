@@ -110,10 +110,10 @@ const userCommunityRestrictedDescriptor = computed(() => {
         }}</b> users only and <b>cannot</b> be lifted/disabled
       </div>
       <div v-if="!isEditAndCommunityProtected && !isCopyAndCommunityProtected">
-        <div class="flex align-items-center align-content-center">
-          <div class="flex-1 flex align-items-center align-content-center">
+        <div class="flex items-center content-center">
+          <div class="flex-1 flex items-center content-center">
 
-            <InputSwitch
+            <ToggleSwitch
               data-cy="restrictCommunity"
               :aria-label="`Restrict Access to ${userCommunityRestrictedDescriptor} Users Only`"
               class="mr-2"

@@ -37,24 +37,24 @@ function refresh() {
 </script>
 
 <template>
-  <div class="text-color-secondary text-center" data-cy="noContent" role="alert" aria-live="assertive"
+  <div class="text-muted-color text-center" data-cy="noContent" role="alert" aria-live="assertive"
        aria-atomic="true">
-    <div class="flex justify-content-center text-center">
-      <div class="border-circle w-8rem h-8rem m-2 surface-500 font-bold flex align-items-center justify-content-center">
-        <i class="text-0 text-7xl" :class="icon"></i>
+    <div class="flex justify-center text-center">
+      <div class="rounded-full w-32 h-32 m-2 bg-surface-500 dark:bg-surface-300 font-bold flex items-center justify-center">
+        <i class="text-surface-0 dark:text-surface-900 text-7xl" :class="icon"></i>
       </div>
     </div>
     <div v-if="title" class="mt-1">
       <div class="text-3xl no-content text-center">{{ title }}</div>
     </div>
-    <div class="grid justify-content-center mt-1">
-      <div class="col md:col-8 lg:col-7 xl:col-5 no-content sd-theme-primary-color">
+    <div class="grid grid-cols-12 gap-4 justify-center mt-1">
+      <div class="col md:col-span-8 lg:col-span-7 xl:col-span-5 no-content sd-theme-primary-color">
         <slot>
           {{ message }}
         </slot>
       </div>
     </div>
-    <div v-if="showRefreshAction" class="grid justify-content-center mt-3">
+    <div v-if="showRefreshAction" class="grid grid-cols-12 gap-4 justify-center mt-4">
       <div class="col col-md-8 col-lg-7 col-xl-5 no-content">
         Please
         <Button severity="info" @click="refresh" class="uppercase" size="small"

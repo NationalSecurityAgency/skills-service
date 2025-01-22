@@ -133,7 +133,7 @@ const clearErrorMessage = () => {
   <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #content>
       <loading-container :is-loading="isLoading" class="">
-        <div class="w-full px-3 py-4">
+        <div class="w-full px-4 py-6">
           <SkillsDropDown
               name="associatedQuiz"
               data-cy="quizSelector"
@@ -198,7 +198,7 @@ const clearErrorMessage = () => {
           </SkillsDataTable>
         </div>
 
-        <no-content2 v-else title="No Quizzes or Surveys Added Yet..." icon="fas fa-spell-check" class="py-5">
+        <no-content2 v-else title="No Quizzes or Surveys Added Yet..." icon="fas fa-spell-check" class="py-8">
           <div>
             <p>
               Please use the drop-down above to start adding quizzes and surveys to this admin group!

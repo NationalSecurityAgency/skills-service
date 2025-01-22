@@ -299,7 +299,7 @@ const onSavedQuestion = (savedQuestion) => {
           markdownHeight="150px"
           name="question" />
 
-      <div class="mt-3 mb-2">
+      <div class="mt-4 mb-2">
         <span class="font-bold text-primary">Answers</span>
       </div>
       <div class="mb-2">
@@ -327,7 +327,7 @@ const onSavedQuestion = (savedQuestion) => {
         </SkillsDropDown>
       </div>
 
-      <div v-if="isQuestionTypeTextInput" class="flex pl-3">
+      <div v-if="isQuestionTypeTextInput" class="flex pl-4">
         <label for="textInputPlaceholder" hidden>Text Input Answer Placeholder:</label>
         <Textarea
             style="resize: none"
@@ -339,7 +339,7 @@ const onSavedQuestion = (savedQuestion) => {
             rows="3"/>
       </div>
 
-      <div v-if="isQuestionTypeRatingInput" class="flex flex-column">
+      <div v-if="isQuestionTypeRatingInput" class="flex flex-col">
         <SkillsDropDown
             label="Scale"
             name="currentScaleValue"
@@ -349,7 +349,7 @@ const onSavedQuestion = (savedQuestion) => {
             :options="currentScaleOptions" />
       </div>
 
-      <div v-if="!isQuestionTypeTextInput && !isQuestionTypeRatingInput" class="pl-3">
+      <div v-if="!isQuestionTypeTextInput && !isQuestionTypeRatingInput" class="pl-4">
         <div class="mb-2" v-if="isQuizType">
           <span
               v-if="isQuestionTypeMultipleChoice"

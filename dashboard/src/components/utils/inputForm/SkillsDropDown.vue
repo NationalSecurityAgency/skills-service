@@ -55,7 +55,7 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 <template>
   <div class="field" v-bind="fallthroughAttributes.rootAttrs.value">
     <label v-if="label" :for="name"><span v-if="isRequired">*</span> {{ label }}:</label>
-    <Dropdown v-model="value"
+    <Select v-model="value"
               :options="options"
               class="w-full"
               v-bind="fallthroughAttributes.inputAttrs.value"
@@ -72,7 +72,7 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
       <template #option="slotProps">
         <slot name="option" :option="slotProps.option"></slot>
       </template>
-    </Dropdown>
+    </Select>
     <small v-if="errorMessage"
         role="alert"
         class="p-error"

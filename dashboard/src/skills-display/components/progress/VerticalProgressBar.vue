@@ -91,7 +91,7 @@ const ariaLabelFullMsg = computed(() => {
                  :ariaLabel="ariaLabelFullMsg"
                  :style="styleObject"></ProgressBar>
     <div v-if="isLocked" class="absolute left-0 right-0" data-cy="progressBarWithLock">
-      <div class="flex justify-content-center">
+      <div class="flex justify-center">
         <div class="text-center" style="z-index: 1000 !important;">
           <i class="fas fa-lock" aria-hidden="true"/>
         </div>

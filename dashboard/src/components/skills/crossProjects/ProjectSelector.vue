@@ -77,7 +77,7 @@ const search = (query) => {
 
 <template>
   <div id="project-selector" data-cy="projectSelector" class="w-full">
-    <Dropdown :options="projects" placeholder="Search for a project..." v-model="selectedValue" label="name" class="w-full" filter
+    <Select :options="projects" placeholder="Search for a project..." v-model="selectedValue" label="name" class="w-full" filter
               :disabled="disabled" :loading="isLoading" :filterFields="['name']" @update:model-value="inputChanged" :showClear="showClear">
       <template #value="slotProps" v-if="selectedValue">
         <div>{{slotProps.value?.name}}</div>
@@ -88,7 +88,7 @@ const search = (query) => {
           <div class="text-secondary project-id">ID: {{ slotProps.option.projectId }}</div>
         </div>
       </template>
-    </Dropdown>
+    </Select>
   </div>
 </template>
 

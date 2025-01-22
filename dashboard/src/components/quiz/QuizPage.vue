@@ -172,9 +172,9 @@ function updateQuizDef(quizDef) {
               </SkillsButton>
             </router-link>
           </div>
-          <div class="mt-3" v-if="!isLoading">
+          <div class="mt-4" v-if="!isLoading">
             <i class="fas fa-user-shield header-status-icon text-primary" aria-hidden="true"/>
-            <span class="text-secondary font-italic small mx-1">Role:</span>
+            <span class="text-secondary italic small mx-1">Role:</span>
             <span class="small text-primary" data-cy="userRole">{{ userRoleForDisplay }}</span>
           </div>
         </div>

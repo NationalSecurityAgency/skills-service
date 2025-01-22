@@ -103,7 +103,7 @@ const toggle = (event) => {
     <div id="user_settings_menu">
       <Menu ref="menu" :model="items" :popup="true" role="navigation">
         <template #start>
-          <div class="mx-3 mt-2">
+          <div class="mx-4 mt-2">
             <Avatar icon="fas fa-user" class="bg-lime-900 text-white" />
             <span data-cy="settingsButton-loggedInName" class="ml-1">{{ displayName }}</span>
           </div>

@@ -44,7 +44,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <skills-spinner :is-loading="loading" class="mb-5" />
+    <skills-spinner :is-loading="loading" class="mb-8" />
     <div v-if="!loading">
       <exported-skill-deletion-warning :loaded-stats="loadedStats"
                                        :skill-name="skillToRemove.skillName" />

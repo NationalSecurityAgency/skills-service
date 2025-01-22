@@ -118,13 +118,13 @@ const loadData = (shouldHighlight = false) => {
       <SkillsCardHeader :title="titleInternal"></SkillsCardHeader>
     </template>
     <template #content>
-      <skills-spinner :is-loading="isLoading" class="mb-5"/>
+      <skills-spinner :is-loading="isLoading" class="mb-8"/>
       <div v-if="!isLoading">
         <div class="flex gap-2">
           <div class="flex">
             <SkillsTextInput label="Filter" v-model="filters.tag" v-on:keydown.enter="filter" id="userTagTable-tagFilter" name="userTagTable-tagFilter"/>
           </div>
-          <div class="mt-5">
+          <div class="mt-8">
             <SkillsButton size="small" @click="filter" data-cy="userTagTable-filterBtn" title="search by tag">
               <i class="fa fa-search"/><span class="sr-only">filter tags</span>
             </SkillsButton>
@@ -165,9 +165,9 @@ const loadData = (shouldHighlight = false) => {
           </template>
 
           <template #empty>
-            <div class="flex justify-content-center flex-wrap" data-cy="emptyTable">
-              <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
-              <span class="flex align-items-center justify-content-center">There are no records to show</span>
+            <div class="flex justify-center flex-wrap" data-cy="emptyTable">
+              <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+              <span class="flex items-center justify-center">There are no records to show</span>
             </div>
           </template>
         </SkillsDataTable>

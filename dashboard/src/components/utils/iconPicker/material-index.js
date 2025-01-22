@@ -1335,7 +1335,7 @@ const materialIcons = {
       cssClass: 'mi mi-flight-takeoff',
     },
     {
-      name: 'flip',
+      name: 'animate-flip',
       cssClass: 'mi mi-flip',
     },
     {
@@ -3515,7 +3515,7 @@ const materialIcons = {
       cssClass: 'mi mi-verified-user',
     },
     {
-      name: 'vertical-align-bottom',
+      name: 'align-bottom',
       cssClass: 'mi mi-vertical-align-bottom',
     },
     {
@@ -3523,7 +3523,7 @@ const materialIcons = {
       cssClass: 'mi mi-vertical-align-center',
     },
     {
-      name: 'vertical-align-top',
+      name: 'align-top',
       cssClass: 'mi mi-vertical-align-top',
     },
     {

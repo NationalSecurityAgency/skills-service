@@ -215,7 +215,7 @@ const onSavedProject = () => {
         :is-edit="isEdit"
         :is-copy="isCopy" />
       <markdown-editor
-        class="mt-5"
+        class="mt-8"
         :allow-attachments="isEdit || !communityLabels.showManageUserCommunity.value"
         name="description" />
 

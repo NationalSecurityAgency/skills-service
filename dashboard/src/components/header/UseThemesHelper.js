@@ -49,14 +49,7 @@ export const useThemesHelper = defineStore('useThemesHelper', () => {
     });
   }
 
-  const configureDefaultThemeFileInHeadTag = () =>{
-    let file = document.createElement('link')
-    file.id=   'theme-link'
-    file.rel = 'stylesheet'
-    file.href = `/themes/${currentTheme.value.value}/theme.css`
-    document.head.appendChild(file)
-  }
-const isDarkTheme =  computed(() => currentTheme.value.name === 'Dark')
+  const isDarkTheme =  computed(() => currentTheme.value.name === 'Dark')
 
   return {
     currentTheme,
@@ -64,7 +57,6 @@ const isDarkTheme =  computed(() => currentTheme.value.name === 'Dark')
     setDarkMode,
     setLightMode,
     themeOptions,
-    configureDefaultThemeFileInHeadTag,
     loadTheme,
     isDarkTheme
   }

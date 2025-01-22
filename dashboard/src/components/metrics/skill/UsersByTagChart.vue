@@ -148,7 +148,7 @@ const loadData = () => {
       <SkillsCardHeader :title="`Top 20 ${tag.label} User Counts`"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex flex-column xl:flex-row gap-4">
+      <div class="flex flex-col xl:flex-row gap-6">
         <div class="flex flex-1">
           <Card data-cy="usersInProgressByTag" class="w-full">
             <template #header>

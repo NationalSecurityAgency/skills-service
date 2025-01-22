@@ -52,7 +52,6 @@ const accessState = useAccessState()
 const errorHandling = useErrorHandling()
 const userAgreementInterceptor = useUserAgreementInterceptor()
 const route = useRoute()
-const PrimeVue = usePrimeVue()
 
 const customGlobalValidators = useCustomGlobalValidators()
 const globalNavGuards = useGlobalNavGuards()
@@ -65,7 +64,6 @@ const isScrollToTopDisabled = computed(() => {
 const isLoadingApp = computed(() => !isAppLoaded.value || appConfig.isLoadingConfig || authState.restoringSession || (skillsDisplayAttributes.loadingConfig && skillsDisplayInfo.isSkillsDisplayPath()))
 
 const themeHelper = useThemesHelper()
-themeHelper.configureDefaultThemeFileInHeadTag()
 
 const addCustomIconCSSForClientDisplay = () => {
   if (skillsDisplayInfo.isSkillsClientPath()) {
@@ -99,7 +97,8 @@ watch(() => authState.userInfo, async (newUserInfo) => {
 })
 
 watch(() => themeHelper.currentTheme, (newTheme, oldTheme) => {
-  PrimeVue.changeTheme(oldTheme.value, newTheme.value, 'theme-link')
+  // PrimeVue.changeTheme(oldTheme.value, newTheme.value, 'theme-link')
+  document.documentElement.classList.toggle('my-dark-mode');
 })
 
 const iframeInit = useIframeInit()
@@ -165,15 +164,15 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
 </script>
 
 <template>
+<!--  :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }"-->
   <div role="presentation"
-       :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }"
-       class="m-0 surface-ground">
+       class="m-0 bg-surface-50 dark:bg-surface-950">
     <VueAnnouncer class="sr-only" />
 
     <customizable-header v-if="isCustomizableHeader" role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="skilltree-main-container">
-      <div v-if="isLoadingApp" role="main" class="flex align-content-center justify-content-center flex-wrap" style="min-height: 40rem">
-        <div class="flex align-items-center justify-content-center m-2">
+      <div v-if="isLoadingApp" role="main" class="flex content-center justify-center flex-wrap" style="min-height: 40rem">
+        <div class="flex items-center justify-center m-2">
           <skills-spinner :is-loading="true" class="text-center"/>
           <h1 class="text-sm sr-only">Loading...</h1>
         </div>

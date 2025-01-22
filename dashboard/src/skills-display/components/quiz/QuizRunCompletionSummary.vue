@@ -56,7 +56,7 @@ const runAgain = () => {
         </slot>
         <Message severity="error" v-if="quizResult.outOfTime" data-cy="outOfTimeMsg">You've run out of time!</Message>
       </div>
-      <div class="mb-1 mt-4 text-3xl">
+      <div class="mb-1 mt-6 text-3xl">
         <span class="font-bold text-success mb-2 skills-page-title-text-color">{{ quizInfo.name }}</span>
         <div v-if="!needsGrading" class="text-3xl inline-block ml-2">
           <Tag v-if="!quizResult.gradedRes.passed" class="uppercase text-2xl" severity="warning" data-cy="quizFailed"><i class="far fa-times-circle mr-1" aria-hidden="true"></i>Failed</Tag>
@@ -64,8 +64,8 @@ const runAgain = () => {
         </div>
       </div>
       
-      <div v-if="!needsGrading" class="flex flex-wrap flex-column md:flex-row gap-4 pt-2">
-        <Card class="text-center surface-50 skills-card-theme-border flex-1" data-cy="numCorrectInfoCard">
+      <div v-if="!needsGrading" class="flex flex-wrap flex-col md:flex-row gap-6 pt-2">
+        <Card class="text-center bg-surface-50 dark:bg-surface-800 skills-card-theme-border flex-1" data-cy="numCorrectInfoCard">
           <template #content>
             <div class="text-2xl" data-cy="numCorrect" v-if="!quizResult.outOfTime">
               <Tag class="text-xl p-2" severity="success">{{ quizResult.numCorrect }}</Tag> out of <Tag class="text-xl p-2" severity="secondary">{{ quizResult.numTotal }}</Tag>
@@ -73,7 +73,7 @@ const runAgain = () => {
             <div class="text-2xl" data-cy="timedOut" v-else-if="quizResult.outOfTime">
               <i class="fas fa-hourglass-end"></i> Time Expired
             </div>
-            <div class="text-color-secondary mt-2" data-cy="subTitleMsg">
+            <div class="text-muted-color mt-2" data-cy="subTitleMsg">
               <span v-if="!quizResult.gradedRes.passed && quizResult.missedBy > 0 && !quizResult.outOfTime">Missed by <Tag severity="warning">{{ quizResult.missedBy }}</Tag> question{{ quizResult.missedBy > 1 ? 's' : '' }}</span>
               <span v-else-if="!quizResult.gradedRes.passed && quizResult.outOfTime">You've run out of time!</span>
 
@@ -81,13 +81,13 @@ const runAgain = () => {
             </div>
           </template>
         </Card>
-        <Card  class="text-center surface-50 skills-card-theme-border flex-1" data-cy="percentCorrectInfoCard">
+        <Card  class="text-center bg-surface-50 dark:bg-surface-800 skills-card-theme-border flex-1" data-cy="percentCorrectInfoCard">
           <template #content>        
           <div v-if="!quizResult.outOfTime">
             <div class="text-2xl">
               <span data-cy="percentCorrect">{{ quizResult.percentCorrect }}%</span>
             </div>
-            <div class="text-color-secondary mt-2">
+            <div class="text-muted-color mt-2">
               <b data-cy="percentToPass">{{ quizInfo.percentToPass }}%</b> is required to pass
             </div>
           </div>
@@ -95,25 +95,25 @@ const runAgain = () => {
               <div class="text-2xl">
                 <i class="fas fa-clock"></i> {{ timeUtils.formatDuration(quizInfo.quizTimeLimit * 1000) }}
               </div>
-              <div class="text-color-secondary mt-2">
+              <div class="text-muted-color mt-2">
                 You must complete the quiz within the time limit.
               </div>
           </div>
           </template>
         </Card>
         
-        <Card v-if="quizResult.gradedRes.passed" class="text-center surface-50 skills-card-theme-border flex-1" data-cy="quizRuntime">
+        <Card v-if="quizResult.gradedRes.passed" class="text-center bg-surface-50 dark:bg-surface-800 skills-card-theme-border flex-1" data-cy="quizRuntime">
           <template #content>
             <div class="text-2xl" data-cy="title">
               {{ timeUtils.formatDurationDiff(quizResult.gradedRes.started, quizResult.gradedRes.completed) }}
             </div>
-            <div class="text-color-secondary mt-2" data-cy="subTitle">
+            <div class="text-muted-color mt-2" data-cy="subTitle">
               Time to Complete
             </div>
           </template>
         </Card>
 
-        <Card v-if="!quizResult.gradedRes.passed" class="text-center surface-50 skills-card-theme-border flex-1" data-cy="numAttemptsInfoCard">
+        <Card v-if="!quizResult.gradedRes.passed" class="text-center bg-surface-50 dark:bg-surface-800 skills-card-theme-border flex-1" data-cy="numAttemptsInfoCard">
           <template #content>
             <div class="text-2xl" data-cy="title">
               <span v-if="unlimitedAttempts" class=""><i class="fas fa-infinity" aria-hidden="true"></i> Attempts</span>
@@ -122,7 +122,7 @@ const runAgain = () => {
               <Tag v-else severity="success">{{ numAttemptsLeft }}</Tag> More Attempt{{ numAttemptsLeft !== 1 ? 's' : '' }}
             </span>
             </div>
-            <div class="text-color-secondary mt-2" data-cy="subTitle">
+            <div class="text-muted-color mt-2" data-cy="subTitle">
               <span v-if="unlimitedAttempts">Unlimited Attempts - <Tag severity="warning">{{ quizInfo.userNumPreviousQuizAttempts  + 1 }}</Tag> attempt so far</span>
               <span v-if="!unlimitedAttempts">Used <Tag severity="warning">{{ quizInfo.userNumPreviousQuizAttempts  + 1 }}</Tag> out of <Tag severity="success">{{ quizInfo.maxAttemptsAllowed }}</Tag> attempts</span>
             </div>
@@ -139,7 +139,7 @@ const runAgain = () => {
         </div>
       </Message>
 
-      <div v-if="!quizResult.gradedRes.passed && !needsGrading" class="mt-4">
+      <div v-if="!quizResult.gradedRes.passed && !needsGrading" class="mt-6">
         <div class="my-2" v-if="unlimitedAttempts || numAttemptsLeft > 0"><span class="text-primary">No worries!</span> Would you like to try again?</div>
         <SkillsButton icon="fas fa-times-circle"
                       outlined
@@ -160,7 +160,7 @@ const runAgain = () => {
         </SkillsButton>
       </div>
 
-      <div v-if="quizResult.gradedRes.passed || needsGrading" class="mt-4">
+      <div v-if="quizResult.gradedRes.passed || needsGrading" class="mt-6">
         <SkillsButton icon="fas fa-times-circle"
                       outlined
                       severity="success"

@@ -59,8 +59,8 @@ const hasTags = computed(()=> props.skill.tags && props.skill.tags.length > 0)
       <Chip v-for="(tag, index) in skill.tags"
             :data-cy="`skillTag-${index}`"
             v-bind:key="tag.tagId"
-            class="py-0 pl-0 pr-3 mr-2">
-        <span class="bg-primary border-circle w-2rem h-2rem flex align-items-center justify-content-center"><i
+            class="py-0 pl-0 pr-4 mr-2">
+        <span class="bg-primary text-primary-contrast rounded-full w-8 h-8 flex items-center justify-center"><i
           class="fas fa-tag" /></span>
         <span class="ml-2 font-medium">{{ tag.tagValue }}</span>
       <SkillsButton

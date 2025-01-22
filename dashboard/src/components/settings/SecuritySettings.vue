@@ -51,13 +51,13 @@ const handleRootRoleChanged = () => {
                   @role-deleted="handleRootRoleChanged"
                   data-cy="rootrm" :user-type="root.userType" :role-description="root.roleDescription" />
 
-    <limit-dashboard-access class="mt-3" />
+    <limit-dashboard-access class="mt-4" />
 
     <role-manager id="add-supervisor-user"
                   title="Supervisor Users Management"
                   ref="supervisorRoleManager"
                   data-cy="supervisorrm"
-                  class="mt-3"
+                  class="mt-4"
                   :roles="['ROLE_SUPERVISOR']"
                   :user-type="supervisor.userType"
                   :role-description="supervisor.roleDescription"/>

@@ -42,10 +42,10 @@ const getFooterText = () => {
 <template>
   <my-progress-info-card-util title="Earned">
     <template #left-content>
-      <i class="fas fa-calendar-alt mt-1 mb-2 text-bluegray-600" style="font-size: 5rem;" />
+      <i class="fas fa-calendar-alt mt-1 mb-2 text-slate-600" style="font-size: 5rem;" />
     </template>
     <template #right-content>
-      <div class="pt-2 pr-3 text-center sm:text-left w-min-15rem">
+      <div class="pt-2 pr-4 text-center sm:text-left w-min-15rem">
         <div v-if="myProgress.mostRecentAchievedSkill !== null" data-cy="mostRecentAchievedSkill">
           <span>Last Achieved skill</span>
           <Tag severity="success" class="ml-2">{{ timeUtils.timeFromNow(myProgress.mostRecentAchievedSkill) }}</Tag>
@@ -59,12 +59,12 @@ const getFooterText = () => {
           in the last month
         </div>
         <div class="my-2">
-          <span class="font-italic">Total Skills:</span> <Tag severity="success" data-cy="numAchievedSkills">{{ myProgress.numAchievedSkills }}</Tag> / <Tag severity="info" data-cy="numSkillsAvailable">{{ myProgress.totalSkills }}</Tag>
+          <span class="italic">Total Skills:</span> <Tag severity="success" data-cy="numAchievedSkills">{{ myProgress.numAchievedSkills }}</Tag> / <Tag severity="info" data-cy="numSkillsAvailable">{{ myProgress.totalSkills }}</Tag>
         </div>
       </div>
     </template>
     <template #footer>
-      <div class="align-items-center">
+      <div class="items-center">
         <span data-cy="last-earned-footer" class="w-min-10rem">{{ getFooterText() }}</span>
       </div>
     </template>

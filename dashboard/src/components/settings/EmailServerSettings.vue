@@ -125,10 +125,10 @@ function saveEmailSettings() {
     <SkillsTextInput name="protocol" label="Protocol" is-required />
 
     <div>
-      <InputSwitch v-model="tlsEnabled" class="mr-2" data-cy="tlsSwitch" inputId="tlsSwitch" aria-labelledby="tlsSwitchLabel"/> <label for="tlsSwitch" id="tlsSwitchLabel">TLS {{ tlsEnabled ? 'Enabled' : 'Disabled'}}</label>
+      <ToggleSwitch v-model="tlsEnabled" class="mr-2" data-cy="tlsSwitch" inputId="tlsSwitch" aria-labelledby="tlsSwitchLabel"/> <label for="tlsSwitch" id="tlsSwitchLabel">TLS {{ tlsEnabled ? 'Enabled' : 'Disabled'}}</label>
     </div>
     <div class="mt-2">
-      <InputSwitch v-model="authEnabled" class="mr-2" data-cy="authSwitch" inputId="authSwitch" aria-labelledby="authLabel"/> <label for="authSwitch" id="authLabel">Authentication {{ authEnabled ? 'Enabled' : 'Disabled'}}</label>
+      <ToggleSwitch v-model="authEnabled" class="mr-2" data-cy="authSwitch" inputId="authSwitch" aria-labelledby="authLabel"/> <label for="authSwitch" id="authLabel">Authentication {{ authEnabled ? 'Enabled' : 'Disabled'}}</label>
       <Card v-if="authEnabled" class="mt-2">
         <template #header>
           <SkillsCardHeader title="Authentication Info"></SkillsCardHeader>
@@ -146,7 +146,7 @@ function saveEmailSettings() {
       <span v-if="connectionError">{{ connectionError }}</span>
     </Message>
 
-    <div class="flex gap-2 mt-4">
+    <div class="flex gap-2 mt-6">
       <SkillsButton v-on:click="testConnection" :disabled="!meta.valid || isTesting || isSaving"
               data-cy="emailSettingsTest" label="Test" :icon="testButtonClass" aria-roledescription="test email server settings button">
       </SkillsButton>

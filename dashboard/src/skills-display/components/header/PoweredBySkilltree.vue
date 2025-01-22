@@ -33,11 +33,11 @@ const isHovering = ref(false)
 </script>
 
 <template>
-  <div class="fadein animation-duration-500 w-8rem text-left" data-cy="skillTreePoweredBy">
+  <div class="animate-fadein animate-duration-500 w-32 text-left" data-cy="skillTreePoweredBy">
     <a :href="appConfig.docsHost" target="_blank" class=""
        aria-label="Powered by SkillTree">
       <div
-        class="poweredByContainer flex border-1 border-round surface-border py-1 px-2"
+        class="poweredByContainer flex border rounded-border border-surface py-1 px-2"
         @mouseover="isHovering = true"
         @mouseout="isHovering = false">
 

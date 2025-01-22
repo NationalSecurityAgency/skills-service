@@ -63,7 +63,7 @@ const buildBadgeLink = (badge) => {
 <template>
   <Card class="card" data-cy="myBadges">
     <template #header>
-      <div class="flex p-3">
+      <div class="flex p-4">
         <div class="flex-1 text-xl uppercase">
           My Earned Badges
         </div>
@@ -76,12 +76,12 @@ const buildBadgeLink = (badge) => {
       <no-content2 v-if="!badges || badges.length === 0" title="No badges earned yet."
                    message="Take a peak at the catalog below to get started!" />
 
-      <div v-if="badges && badges.length > 0" class="flex-column md:flex-row flex flex-wrap justify-content-center gap-3">
+      <div v-if="badges && badges.length > 0" class="flex-col md:flex-row flex flex-wrap justify-center gap-4">
           <Card class="skills-card-theme-border skills-earned-badge"
                 v-for="(badge, index) in badges" v-bind:key="badge.badgeId"
                 :pt="{ content: { class: 'h-full' }, body: { class: 'h-full' } }" :data-cy="`achievedBadge-${badge.badgeId}`">
             <template #header>
-              <div class="pt-3 px-3 flex">
+              <div class="pt-4 px-4 flex">
                 <div class="flex-1">
                   <i class="fa fa-check-circle position-absolute text-success"
                      v-if="badge.achievementPosition > 3"
@@ -92,7 +92,7 @@ const buildBadgeLink = (badge) => {
               </div>
             </template>
             <template #content>
-              <div class="earned-badge text-center flex flex-column h-full pb-3">
+              <div class="earned-badge text-center flex flex-col h-full pb-4">
                 <div class="flex-1">
                   <i :class="`${badge.iconClass} ${colors.getTextClass(index)}`" style="font-size: 4em;" />
                   <div class="mb-0 font-bold text-xl"
@@ -100,7 +100,7 @@ const buildBadgeLink = (badge) => {
                         :aria-label="badgeAriaLabel(badge)">
                     {{ badge.badge }}
                   </div>
-                  <div v-if="badge.projectName" class="text-center text-color-secondary mb-2"
+                  <div v-if="badge.projectName" class="text-center text-muted-color mb-2"
                        data-cy="badgeProjectName">
                     <small>Project: {{ badge.projectName }}</small>
                   </div>
@@ -112,7 +112,7 @@ const buildBadgeLink = (badge) => {
                   <extra-badge-award v-if="badge.achievedWithinExpiration"
                                      :icon-class="badge.awardAttrs.iconClass"
                                      :name="badge.awardAttrs.name"
-                                      class="mt-3"/>
+                                      class="mt-4"/>
                 </div>
                 <div>
                   <router-link

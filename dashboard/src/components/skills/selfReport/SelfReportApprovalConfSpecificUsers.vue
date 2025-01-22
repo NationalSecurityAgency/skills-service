@@ -111,7 +111,7 @@ const updateSelectedList = () => {
       <SkillsCardHeader title="Split Workload By Specific Users"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex px-3 pt-3 gap-2 flex-column md:flex-row align-items-center">
+      <div class="flex px-4 pt-4 gap-2 flex-col md:flex-row items-center">
         <div class="flex flex-1 px-1">
           <existing-user-input
               class="w-full"
@@ -136,9 +136,9 @@ const updateSelectedList = () => {
         </div>
       </div>
 
-      <skills-spinner v-if="loading" :is-loading="loading" class="mb-5"/>
+      <skills-spinner v-if="loading" :is-loading="loading" class="mb-8"/>
       <div v-if="!loading">
-        <SkillsDataTable v-if="hadData" class="mt-3"
+        <SkillsDataTable v-if="hadData" class="mt-4"
                         :value="data" paginator
                         tableStoredStateId="skillApprovalConfSpecificUsersTable"
                         data-cy="skillApprovalConfSpecificUsersTable"
@@ -182,7 +182,7 @@ const updateSelectedList = () => {
         </SkillsDataTable>
 
         <no-content2 v-if="!hadData" title="Not Configured Yet..."
-                     class="py-5"
+                     class="py-8"
                      data-cy="noUserConf"
                      icon="fas fa-user-plus">
           You can split the approval workload by routing approval requests for specific users to <span class="text-primary font-weight-bold">{{userInfo.userIdForDisplay}}</span>.

@@ -44,7 +44,7 @@ const loadBadges = () => {
 
 <template>
   <div>
-    <skills-spinner :is-loading="loading" class="mt-8" />
+    <skills-spinner :is-loading="loading" class="mt-20" />
 
     <div v-if="!loading">
       <skills-title>My Badges</skills-title>
@@ -53,12 +53,12 @@ const loadBadges = () => {
       <my-badges-details
         data-cy="achievedBadges"
         :badges="achievedBadges"
-        class="mt-3"
+        class="mt-4"
         />
 
       <!--      :badgeRouterLinkGenerator="genLink"-->
       <!--      :noBadgesMessage="noCatalogMsg"-->
-      <badges-catalog class="mt-3"
+      <badges-catalog class="mt-4"
                       :badges="unachievedBadges"
                       data-cy="availableBadges">
       </badges-catalog>

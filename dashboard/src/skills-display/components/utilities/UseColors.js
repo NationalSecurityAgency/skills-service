@@ -23,7 +23,7 @@ export const useColors = () => {
 
 
   const goldText = 'text-yellow-600'
-  const silverText = 'text-bluegray-600'
+  const silverText = 'text-slate-600'
   const bronzeText = 'text-orange-800'
 
   const getRankTextClass = (rank) => {

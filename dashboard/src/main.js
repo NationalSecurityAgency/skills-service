@@ -18,6 +18,9 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
+import Lara from '@primevue/themes/lara';
+import Aura from '@primevue/themes/aura';
+import Nora from '@primevue/themes/nora';
 import ToastService from 'primevue/toastservice'
 import App from './App.vue'
 import constructRouter from './router'
@@ -25,6 +28,7 @@ import VueAnnouncer from '@vue-a11y/announcer'
 import VueApexCharts from 'vue3-apexcharts'
 import log from 'loglevel'
 
+import {ToggleSwitch, Select } from "primevue";
 import Button from 'primevue/button'
 import ButtonGroup from 'primevue/buttongroup'
 import Card from 'primevue/card'
@@ -34,13 +38,10 @@ import Avatar from 'primevue/avatar'
 import InputText from 'primevue/inputtext'
 import Divider from 'primevue/divider'
 import Message from 'primevue/message'
-import InlineMessage from 'primevue/inlinemessage'
 import Menu from 'primevue/menu'
 import ProgressSpinner from 'primevue/progressspinner'
 import Breadcrumb from 'primevue/breadcrumb'
-import Dropdown from 'primevue/dropdown'
 import Dialog from 'primevue/dialog'
-import InputSwitch from 'primevue/inputswitch'
 import BlockUI from 'primevue/blockui'
 import SelectButton from 'primevue/selectbutton'
 import Badge from 'primevue/badge'
@@ -68,6 +69,7 @@ import BadgeDirective from 'primevue/badgedirective'
 
 import FocusTrap from 'primevue/focustrap'
 
+import InlineMessage from '@/components/utils/misc/InlineMessage.vue'
 import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue'
 import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue'
 import SkillsIdInput from '@/components/utils/inputForm/SkillsIdInput.vue'
@@ -82,12 +84,10 @@ import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import SkillsCardHeader from '@/components/utils/cards/SkillsCardHeader.vue'
 import { useSkillsReporterDirective } from '@/components/utils/SkillsReporterDirective.js'
 
-import 'primeflex/primeflex.css'
 import '@fortawesome/fontawesome-free/css/all.css'
 import 'material-icons/css/material-icons.css'
 import 'material-icons/iconfont/material-icons.css'
 import '@toast-ui/editor/dist/toastui-editor.css'
-// import 'primevue/resources/themes/lara-light-green/theme.css'
 import 'video.js/dist/video-js.css'
 
 
@@ -100,7 +100,16 @@ const router = constructRouter()
 
 app.use(router)
 app.use(pinia)
-app.use(PrimeVue)
+app.use(PrimeVue, {
+    theme: {
+        preset: Aura,
+        options: {
+            prefix: 'p',
+            darkModeSelector: '.my-dark-mode',
+            cssLayer: false
+        }
+    }
+})
 app.use(ToastService)
 app.use(VueAnnouncer, { router })
 app.use(VueApexCharts)
@@ -118,9 +127,9 @@ app.component('InlineMessage', InlineMessage)
 app.component('Menu', Menu)
 app.component('ProgressSpinner', ProgressSpinner)
 app.component('Breadcrumb', Breadcrumb)
-app.component('Dropdown', Dropdown)
+app.component('Select', Select)
 app.component('Dialog', Dialog)
-app.component('InputSwitch', InputSwitch)
+app.component('ToggleSwitch', ToggleSwitch)
 app.component('BlockUI', BlockUI)
 app.component('SelectButton', SelectButton)
 app.component('Badge', Badge)

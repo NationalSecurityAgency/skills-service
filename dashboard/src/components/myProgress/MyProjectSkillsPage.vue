@@ -99,7 +99,7 @@ const handleProjInvitation = () => {
         label="Contact Project"
         icon="fas fa-mail-bulk" />
     </div>
-    <skills-display-home :id="projectId" class="my-3" />
+    <skills-display-home :id="projectId" class="my-4" />
 
     <contact-owners-dialog v-if="showContact"
                            v-model="showContact"

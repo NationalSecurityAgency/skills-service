@@ -155,7 +155,7 @@ function enableDarkModeChanged() {
 
   <Card v-if="!isLoading">
     <template #content>
-      <div data-cy="defaultHomePageSetting" v-if="isProgressAndRankingEnabled()" class="pb-4">
+      <div data-cy="defaultHomePageSetting" v-if="isProgressAndRankingEnabled()" class="pb-6">
         <label :for="settings.homePage.value === 'admin' ? 'progress' : 'admin'">
           <i class="fas fa-home mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i> Default Home Page:
         </label>
@@ -168,21 +168,21 @@ function enableDarkModeChanged() {
           <label for="progress" class="ml-2">Progress and Rankings</label>
         </div>
       </div>
-      <div data-cy="rankOptOut" class="pb-2 flex align-content-center align-items-center">
+      <div data-cy="rankOptOut" class="pb-2 flex content-center items-center">
         <label for="rankAndLeaderboardOptOutSwitch">
           <i class="fas fa-users-slash mr-2" :class="colors.getTextClass(2)" aria-hidden="true"></i> <span id="rankAndLeaderboardOptOutLabel">Rank and Leaderboard Opt-Out:</span>
         </label>
-        <InputSwitch v-model="settings.rankAndLeaderboardOptOut.value" data-cy="rankAndLeaderboardOptOutSwitch" class="ml-2"
+        <ToggleSwitch v-model="settings.rankAndLeaderboardOptOut.value" data-cy="rankAndLeaderboardOptOutSwitch" class="ml-2"
                      aria-labelledby="rankAndLeaderboardOptOutLabel"
                      inputId="rankAndLeaderboardOptOutSwitch"
                      @change="rankAndLeaderboardOptOutPrefChanged" />
         <span class="ml-2">{{ settings.rankAndLeaderboardOptOut.value ? 'Yes' : 'No'}}</span>
       </div>
-      <div data-cy="enableDarkMode" class="pt-2 pb-2 flex align-content-center align-items-center">
+      <div data-cy="enableDarkMode" class="pt-2 pb-2 flex content-center items-center">
         <label for="enableDarkModeSwitch">
           <i class="fas fa-moon mr-2" :class="colors.getTextClass(2)" aria-hidden="true"></i> <span id="enableDarkModeLabel">Dark Mode:</span>
         </label>
-        <InputSwitch v-model="settings.enableDarkMode.value" data-cy="enableDarkModeSwitch" class="ml-2"
+        <ToggleSwitch v-model="settings.enableDarkMode.value" data-cy="enableDarkModeSwitch" class="ml-2"
                      aria-labelledby="enableDarkModeLabel"
                      inputId="enableDarkModeSwitch"
                      @change="enableDarkModeChanged" />

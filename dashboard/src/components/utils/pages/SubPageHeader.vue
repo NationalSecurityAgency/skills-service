@@ -88,7 +88,7 @@ function addClicked() {
                         v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action"
                         :data-cy="`btn_${title}`"/>
           <div v-if="disabledInternal" class="mt-1" data-cy="subPageHeaderDisabledMsg">
-            <InlineMessage  icon="fas fa-exclamation-circle" severity="warn">{{ disabledMsg }}</InlineMessage>
+            <InlineMessage severity="warn">{{ disabledMsg }}</InlineMessage>
           </div>
         </slot>
       </div>

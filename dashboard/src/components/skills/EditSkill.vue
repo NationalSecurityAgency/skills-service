@@ -305,7 +305,7 @@ const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
           :name-to-id-sync-enabled="!props.isEdit" />
       </div>
 
-      <div class="lg:max-w-10rem lg:ml-3 w-full">
+      <div class="lg:max-w-40 lg:ml-4 w-full">
         <SkillsNumberInput
           showButtons
           :disabled="isEdit"
@@ -337,15 +337,15 @@ const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
       <total-points-field class="lg:ml-2" />
     </div>
 
-    <time-window-input :disabled="occurrencesToCompletionAndTimeWindowDisabled" class="mb-3"/>
+    <time-window-input :disabled="occurrencesToCompletionAndTimeWindowDisabled" class="mb-4"/>
 
     <self-reporting-type-input @self-reporting-type-changed="selfReportingType = $event" :initial-skill-data="initialSkillData" :is-edit="isEdit" class="mt-1"/>
 
     <markdown-editor
-      class="mt-5"
+      class="mt-8"
       name="description" />
 
-    <help-url-input class="mt-3"
+    <help-url-input class="mt-4"
                     name="helpUrl" />
 
   </SkillsInputFormDialog>

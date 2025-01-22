@@ -38,7 +38,7 @@ skillsDisplayAttributes.loadConfigStateIfNeeded()
 
 <template>
   <div>
-    <skills-display-home id="inception" class="my-3" />
+    <skills-display-home id="inception" class="my-4" />
   </div>
 </template>
 

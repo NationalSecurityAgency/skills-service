@@ -91,8 +91,8 @@ const viewResultsBtnLabel = computed(() => {
     <div v-if="selfReportAvailable && isQuizOrSurveySkill" class="mb-2">
       <Message :closable="false">
         <template #container>
-          <div class="p-3">
-            <div v-if="!isQuizPendingGrading" class="flex gap-2 align-items-center" data-cy="takeQuizMsg">
+          <div class="p-4">
+            <div v-if="!isQuizPendingGrading" class="flex gap-2 items-center" data-cy="takeQuizMsg">
               <div>
                 <i class="fas fa-user-check text-2xl" aria-hidden="true"></i>
               </div>
@@ -118,7 +118,7 @@ const viewResultsBtnLabel = computed(() => {
                   @click="navToQuiz"
                   data-cy="takeQuizBtn"/>
             </div>
-            <div v-if="isQuizPendingGrading" class="flex gap-2 align-items-center" data-cy="quizRequiresGradingMsg">
+            <div v-if="isQuizPendingGrading" class="flex gap-2 items-center" data-cy="quizRequiresGradingMsg">
               <div>
                 <i class="fas fa-user-clock text-2xl" aria-hidden="true"/>
               </div>
@@ -127,7 +127,7 @@ const viewResultsBtnLabel = computed(() => {
                   <Tag>{{ timeUtils.formatDate(selfReporting.quizNeedsGradingAttemptDate) }}</Tag>
                   but it <b>requires grading</b>.
                 </div>
-                <div class="mt-3">It will be assessed by a quiz administrator, so there is nothing to do but wait for
+                <div class="mt-4">It will be assessed by a quiz administrator, so there is nothing to do but wait for
                   the
                   grades to roll in!
                 </div>
@@ -139,7 +139,7 @@ const viewResultsBtnLabel = computed(() => {
     </div>
     <Message v-if="isCompleted && isQuizOrSurveySkill && quizOrSurveyPassed" :closable="false" severity="success" data-cy="quizCompletedMsg">
       <template #container>
-        <div class="flex flex-column md:flex-row gap-2 p-3 align-items-center">
+        <div class="flex flex-col md:flex-row gap-2 p-4 items-center">
           <div>
             <i class="far fa-smile text-2xl" aria-hidden=""></i>
           </div>
@@ -157,9 +157,9 @@ const viewResultsBtnLabel = computed(() => {
                 data-cy="viewQuizAttemptInfo"/>
           </div>
         </div>
-        <div v-if="showQuizResults" class="border-top-1">
+        <div v-if="showQuizResults" class="border-t">
           <skills-spinner v-if="loadingAttempt" :is-loading="true"/>
-          <div v-if="!loadingAttempt" class="pl-6 pr-5 pb-4">
+          <div v-if="!loadingAttempt" class="pl-12 pr-8 pb-6">
             <quiz-single-run  :run-info="lastQuizAttempt"  :show-cards="false" />
           </div>
         </div>

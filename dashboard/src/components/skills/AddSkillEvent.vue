@@ -203,7 +203,7 @@ const addSkill = () => {
       <BlockUI data-cy="addEventDisabledBlockUI" :blocked="addEventDisabled">
         <Card>
           <template #content>
-            <div class="flex flex-column md:flex-row gap-2 flex-wrap align-items-start">
+            <div class="flex flex-col md:flex-row gap-2 flex-wrap items-start">
               <div class="flex flex-1 px-1">
                 <existing-user-input class="w-full"
                                      :project-id="projectId"
@@ -235,7 +235,7 @@ const addSkill = () => {
                 </SkillsButton>
               </div>
             </div>
-            <div class="mt-5" v-for="(user) in reversedUsersAdded" v-bind:key="user.key" data-cy="addedUserEventsInfo">
+            <div class="mt-8" v-for="(user) in reversedUsersAdded" v-bind:key="user.key" data-cy="addedUserEventsInfo">
               <div class="">
             <span :class="[user.success ? 'text-primary' : 'text-red-800']" style="font-weight: bolder">
               <i :class="[user.success ? 'fa fa-check' : 'fa fa-info-circle']" aria-hidden="true"/>

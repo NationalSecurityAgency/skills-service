@@ -200,7 +200,7 @@ const filterSkills = (searchQuery) => {
     <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
       <template #content>
         <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp || loading.badgeInfo">
-          <div class="p-3">
+          <div class="p-4">
             <skills-selector :options="availableSkills"
                              ref="skillsSelector"
                              v-if="!projConf.isReadOnlyProj"
@@ -255,7 +255,7 @@ const filterSkills = (searchQuery) => {
               </template>
             </SkillsDataTable>
           </div>
-          <no-content2 v-else title="No Skills Selected Yet..." icon="fas fa-award" class="py-5"
+          <no-content2 v-else title="No Skills Selected Yet..." icon="fas fa-award" class="py-8"
                        message="Please use drop-down above to start adding skills to this badge!"></no-content2>
         </loading-container>
       </template>

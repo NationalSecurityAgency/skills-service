@@ -148,7 +148,7 @@ defineExpose({
             />
       </template>
       <template #footer>
-        <div class="flex justify-content-end">
+        <div class="flex justify-end">
           <span class="small"><Badge style="font-size: 0.8rem;" variant="primary" data-cy="pointsPercent">{{ subjectInternal.pointsPercentage }}%</Badge> of the total points</span>
         </div>
       </template>

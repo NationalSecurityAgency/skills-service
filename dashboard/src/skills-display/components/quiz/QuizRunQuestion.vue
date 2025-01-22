@@ -161,8 +161,8 @@ const needsGrading = computed(() => QuizStatus.isNeedsGrading(props.q.gradedInfo
     <div v-if="needsGrading">
       <Tag severity="warning" class="uppercase" data-cy="needsGradingTag"><i class="fas fa-user-check mr-1" aria-hidden="true"></i> Needs Grading</Tag>
     </div>
-    <div class="flex gap-0 mb-4">
-      <div class="flex align-items-start pt-2 pr-2">
+    <div class="flex gap-0 mb-6">
+      <div class="flex items-start pt-2 pr-2">
         <Tag class="inline-block"
                  :aria-label="questionNumAriaLabel"
                  :severity="`${q.gradedInfo && !needsGrading ? (q.gradedInfo.isCorrect ? 'success' : 'danger') : 'secondary'}`">
@@ -174,10 +174,10 @@ const needsGrading = computed(() => QuizStatus.isNeedsGrading(props.q.gradedInfo
         </span>
       </div>
       <div class="flex flex-1">
-        <div class="flex flex-column w-full">
+        <div class="flex flex-col w-full">
           <markdown-text :text="q.question" data-cy="questionsText" :instance-id="`${q.id}`" />
           <div v-if="isTextInput">
-            <div v-if="needsGrading" class="border-1 border-round surface-border px-3">
+            <div v-if="needsGrading" class="border rounded-border border-surface px-4">
               <markdown-text
                   :text="answerText"
                   data-cy="textInputAnswer"
@@ -199,10 +199,10 @@ const needsGrading = computed(() => QuizStatus.isNeedsGrading(props.q.gradedInfo
                              :resizable="true" />
           </div>
           <div v-else-if="isRating">
-            <SkillsRating @update:modelValue="ratingChanged" class="flex-initial border-round py-3 px-4" v-model="answerRating" :stars="numberOfStars" :cancel="false" :name="fieldName"/>
+            <SkillsRating @update:modelValue="ratingChanged" class="flex-initial rounded-border py-4 px-6" v-model="answerRating" :stars="numberOfStars" :cancel="false" :name="fieldName"/>
           </div>
           <div v-else>
-            <div v-if="isMultipleChoice" class="text-secondary font-italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>
+            <div v-if="isMultipleChoice" class="text-secondary italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>
             <QuizRunAnswers class="mt-1 pl-1"
                             :name="fieldName"
                             @selected-answer="selectionChanged"

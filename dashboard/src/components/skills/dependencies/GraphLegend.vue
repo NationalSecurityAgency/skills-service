@@ -20,8 +20,8 @@ defineProps(['items']);
 
 <template>
   <div class="graph-legend" data-cy="graphLegend">
-    <span class="font-italic">Legend:</span>
-    <span v-for="item in items" v-bind:key="item.label" class="legend-list-item mb-0 ml-3">
+    <span class="italic">Legend:</span>
+    <span v-for="item in items" v-bind:key="item.label" class="legend-list-item mb-0 ml-4">
       <span class="border rounded p-2">
         <i v-if="item.iconClass" :class="`fas ${item.iconClass}`" v-bind:style="{color: item.color}"></i>
       </span>

@@ -140,7 +140,7 @@ defineExpose( {
       <SkillsCardHeader title="Approval History"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex flex-column md:flex-row gap-2 pt-3 px-3">
+      <div class="flex flex-col md:flex-row gap-2 pt-4 px-4">
         <div class="w-full">
           <label for="skill-filter" class="ml-1">Skill Name</label>
           <InputText type="text" class="w-full mt-2" placeholder="Skill Name" v-model="filters.skill" id="skill-filter"
@@ -157,7 +157,7 @@ defineExpose( {
                      v-on:keydown.enter="loadApprovalsHistory" data-cy="selfReportApprovalHistory-approverUserIdFilter" />
         </div>
       </div>
-      <div class="flex gap-2 mt-4 mb-4 px-3">
+      <div class="flex gap-2 mt-6 mb-6 px-4">
         <SkillsButton size="small" @click="loadApprovalsHistory" data-cy="selfReportApprovalHistory-filterBtn" icon="fa fa-filter" label="Filter" />
         <SkillsButton size="small" @click="reset" class="ml-1" data-cy="selfReportApprovalHistory-resetBtn" label="Reset" icon="fa fa-times" />
       </div>
@@ -191,7 +191,7 @@ defineExpose( {
               <Badge class="ml-2">+ {{ slotProps.data.points }} Points</Badge>
             </div>
             <div class="text-primary">by</div>
-            <div class="font-italic"><span v-if="slotProps.data.userIdHtml" v-html="slotProps.data.userIdHtml"></span><span v-else>{{ slotProps.data.userIdForDisplay }}</span></div>
+            <div class="italic"><span v-if="slotProps.data.userIdHtml" v-html="slotProps.data.userIdHtml"></span><span v-else>{{ slotProps.data.userIdForDisplay }}</span></div>
             <SkillsButton size="small" variant="outline-info"
                       class="mr-2 py-0 px-1"
                       @click="toggleRow(slotProps.data.id)"
@@ -208,7 +208,7 @@ defineExpose( {
             <div v-if="slotProps.data.rejectedOn"><Badge variant="danger"><i class="fas fa-thumbs-down"></i> <span class="text-uppercase">Rejected</span></Badge></div>
             <div v-else><Badge variant="success"><i class="fas fa-thumbs-up"></i> <span class="text-uppercase">Approved</span></Badge></div>
             <div class="text-primary">by</div>
-            <div class="font-italic"><span v-if="slotProps.data.approverUserIdHtml" v-html="slotProps.data.approverUserIdHtml"></span><span v-else>{{ slotProps.data.approverUserIdForDisplay }}</span></div>
+            <div class="italic"><span v-if="slotProps.data.approverUserIdHtml" v-html="slotProps.data.approverUserIdHtml"></span><span v-else>{{ slotProps.data.approverUserIdForDisplay }}</span></div>
             <div v-if="slotProps.data.message"><span class="text-primary text-break">Explanation:</span> <show-more :text="slotProps.data.message"/></div>
           </template>
         </Column>
@@ -231,7 +231,7 @@ defineExpose( {
 
         <template #expansion="slotProps">
           <div>
-            <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" class="ml-4">
+            <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" class="ml-6">
               <template #header>
                 <SkillsCardHeader title="Requested points with the following justification:"></SkillsCardHeader>
               </template>
@@ -239,7 +239,7 @@ defineExpose( {
                 <markdown-text class="d-inline-block" :text="slotProps.data.requestMsg" data-cy="approvalMessage" :instance-id="`${slotProps.data.id}`"/>
               </template>
             </Card>
-            <Card v-else class="ml-4">
+            <Card v-else class="ml-6">
               <template #content>
                 No Justification supplied
               </template>

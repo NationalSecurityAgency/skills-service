@@ -60,7 +60,7 @@ const contactProjAdmins = (projInfo) => {
 </script>
 
 <template>
-  <div :data-cy="`importSkillInfo-${skill.projectId}_${skill.skillId}`" class="ml-5">
+  <div :data-cy="`importSkillInfo-${skill.projectId}_${skill.skillId}`" class="ml-8">
 
     <div v-if="skill.importedProjectCount > 0">
       <SkillsDataTable

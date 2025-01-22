@@ -92,7 +92,7 @@ const close = () => {
     @on-ok="finalize"
     @on-cancel="close"
     :enable-return-focus="true">
-    <skills-spinner :is-loading="loading" class="mb-5" />
+    <skills-spinner :is-loading="loading" class="mb-8" />
     <div v-if="!loading">
       <p>
         There {{ pluralSupport.areOrIs(finalizeInfo.numSkillsToFinalize) }}

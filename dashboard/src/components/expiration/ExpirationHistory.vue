@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { FilterMatchMode } from 'primevue/api'
+import { FilterMatchMode } from '@primevue/core/api'
 import { useUserInfo } from '@/components/utils/UseUserInfo.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
@@ -166,13 +166,13 @@ const calculateClientDisplayRoute = (props) => {
         </template>
 
         <template #empty>
-          <div class="flex justify-content-center flex-wrap h-12rem">
-            <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle fa-3x"
+          <div class="flex justify-center flex-wrap h-48">
+            <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle fa-3x"
                aria-hidden="true"></i>
             <span class="w-full">
-                <span class="flex align-items-center justify-content-center">There are no records to show</span>
-                <span v-if="filtering" class="flex align-items-center justify-content-center">  Click
-                    <SkillsButton class="flex flex align-items-center justify-content-center px-1"
+                <span class="flex items-center justify-center">There are no records to show</span>
+                <span v-if="filtering" class="flex items-center justify-center">  Click
+                    <SkillsButton class="flex flex items-center justify-center px-1"
                                   label="Reset"
                                   link
                                   size="small"

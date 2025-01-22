@@ -23,23 +23,23 @@ const logoWidth = computed(() => responsive.sm.value ? '15rem' : '23rem')
 </script>
 
 <template>
-  <div class="masthead mt-3 border-1 border-round surface-border">
+  <div class="masthead mt-4 border rounded-border border-surface">
     <h1 class="sr-only">SkillTree Progress and Rankings</h1>
     <div class="masthead-content">
       <div class="container-fluid above-background">
-        <div class="text-center mt-7">
+        <div class="text-center mt-16">
           <SkillTreeLogoSvg :logo-width="logoWidth"/>
         </div>
-        <div class="text-center mb-5 font-italic above-background text-lg">A micro-learning <b>gamification</b>
+        <div class="text-center mb-8 italic above-background text-lg">A micro-learning <b>gamification</b>
           training
           platform
         </div>
-        <div class="flex flex-column md:flex-row gap-4 px-4">
+        <div class="flex flex-col md:flex-row gap-6 px-6">
           <Card class="h-100 card-1-border-top">
             <template #content>
               <div class="text-primary uppercase text-xl text-center">Gamification</div>
               <div class="flex gap-2 mt-2">
-                <Avatar icon="fas fa-trophy" class="bg-primary-reverse border-1 card-1-icon w-min-3rem"
+                <Avatar icon="fas fa-trophy" class="text-primary bg-primary-contrast border card-1-icon w-min-3rem"
                         size="large" />
                 <div>
                   Earn <b>points <i class="far fa-arrow-alt-circle-up skills-color-points"
@@ -56,7 +56,7 @@ const logoWidth = computed(() => responsive.sm.value ? '15rem' : '23rem')
             <template #content>
               <div class="text-primary uppercase text-xl text-center">Go At your Own Pace</div>
               <div class="flex gap-2 mt-2">
-                <Avatar icon="fas fa-clock" class="bg-primary-reverse border-1 card-2-icon w-min-3rem"
+                <Avatar icon="fas fa-clock" class="text-primary bg-primary-contrast border card-2-icon w-min-3rem"
                         size="large" />
                 <div>
                   Learn new <b>skills <i class="fas fa-graduation-cap skills-color-skills"
@@ -71,7 +71,7 @@ const logoWidth = computed(() => responsive.sm.value ? '15rem' : '23rem')
             <template #content>
               <div class="text-primary uppercase text-xl text-center">Community</div>
               <div class="flex gap-2 mt-2">
-                <Avatar icon="fas fa-users" class="bg-primary-reverse border-1 card-3-icon w-min-3rem"
+                <Avatar icon="fas fa-users" class="text-primary bg-primary-contrast border card-3-icon w-min-3rem"
                         size="large" />
                 <div>
                   Take the learning journey <b>together <i class="fas fa-users skills-color-users"
@@ -83,8 +83,8 @@ const logoWidth = computed(() => responsive.sm.value ? '15rem' : '23rem')
             </template>
           </Card>
         </div>
-        <div class="text-center mt-5">
-          <div class="mb-3 uppercase text-2xl text-primary">Get Started Now</div>
+        <div class="text-center mt-8">
+          <div class="mb-4 uppercase text-2xl text-primary">Get Started Now</div>
           <div>
             <router-link :to="{ name: 'DiscoverProjectsPage' }" tabindex="-1">
               <SkillsButton
@@ -94,7 +94,7 @@ const logoWidth = computed(() => responsive.sm.value ? '15rem' : '23rem')
                 severity="info"
                 :outlined="false"
                 data-cy="manageMyProjsBtnInNoContent"
-                class="fadein animation-duration-500" />
+                class="animate-fadein animate-duration-500" />
             </router-link>
           </div>
         </div>

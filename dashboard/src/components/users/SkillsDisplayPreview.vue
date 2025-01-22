@@ -72,7 +72,7 @@ const isLoading = computed(() => checkingAccess.value || skillsDisplayAttributes
     <Message v-if="!canAccess" icon="fas fa-user-slash" severity="error" :closable="false">
       Access Revoked! This user's access was previously revoked, their Client Display is disabled until they are granted access.
     </Message>
-    <skills-display-home v-if="canAccess" class="my-3" />
+    <skills-display-home v-if="canAccess" class="my-4" />
   </div>
 </div>
 </template>
