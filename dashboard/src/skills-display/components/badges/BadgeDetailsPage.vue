@@ -57,12 +57,12 @@ const badgeTitle = computed(() => skillsDisplayInfo.isGlobalBadgePage.value ? 'G
 
 <template>
   <div>
-    <skills-spinner :is-loading="isLoading" class="mt-8" />
+    <skills-spinner :is-loading="isLoading" class="mt-20" />
 
     <div v-if="!isLoading">
       <skills-title>{{ badgeTitle }}</skills-title>
 
-      <Card class="mt-3">
+      <Card class="mt-4">
         <template #content>
           <badge-catalog-item :badge="badge"></badge-catalog-item>
           <Message v-if="locked" icon="fas fa-lock" severity="warn" :closable="false">
@@ -81,7 +81,7 @@ const badgeTitle = computed(() => skillsDisplayInfo.isGlobalBadgePage.value ? 'G
         v-if="badge && !(skillsDisplayInfo.isGlobalBadgePage.value && !(summaryAndSkillsState.subjectSummary?.skills?.length > 0))"
         :subject="badge"
         type="badge"
-        class="mt-3"
+        class="mt-4"
         :badge-is-locked="locked"/>
 
       <prerequisites />

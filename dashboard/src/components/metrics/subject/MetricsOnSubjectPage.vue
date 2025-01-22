@@ -43,9 +43,9 @@ onMounted(() => {
   <div>
     <sub-page-header title="Metrics"/>
     <level-breakdown-metric title="Subject Levels"/>
-    <num-users-per-day class="my-3" title="Subject's users per day" role="figure"/>
+    <num-users-per-day class="my-4" title="Subject's users per day" role="figure"/>
     <div v-for="tag of tags" :key="tag.key">
-      <user-tags-by-level-chart :tag="tag" class="mb-3" />
+      <user-tags-by-level-chart :tag="tag" class="mb-4" />
     </div>
   </div>
 </template>

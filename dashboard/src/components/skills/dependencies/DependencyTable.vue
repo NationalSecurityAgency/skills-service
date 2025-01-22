@@ -97,7 +97,7 @@ const isFlex = computed(() => responsive.sm.value)
 </script>
 
 <template>
-  <Card class="mb-3" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+  <Card class="mb-4" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
     <template #header>
       <SkillsCardHeader title="Learning Path Routes"></SkillsCardHeader>
     </template>
@@ -142,7 +142,7 @@ const isFlex = computed(() => responsive.sm.value)
         </SkillsDataTable>
       </div>
       <div v-else>
-        <no-content2 title="No Learning Paths Yet..." icon="fas fa-share-alt" class="my-5"
+        <no-content2 title="No Learning Paths Yet..." icon="fas fa-share-alt" class="my-8"
                      message="Add a path between a Skill/Badge and another Skill/Badge" />
       </div>
     </template>

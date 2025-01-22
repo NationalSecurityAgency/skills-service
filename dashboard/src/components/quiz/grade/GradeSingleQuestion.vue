@@ -79,7 +79,7 @@ const grade = (isCorrect, feedback) => {
 </script>
 
 <template>
-  <div class="mb-3" :data-cy="`question_${question.questionNumber}`">
+  <div class="mb-4" :data-cy="`question_${question.questionNumber}`">
     <div class="">
       <div class="font-bold text-lg">Question #{{ question.questionNumber }}:  <Tag v-if="isGraded" data-cy="gradedTag"><i class="fas fa-check mr-1" aria-hidden="true" /> GRADED</Tag></div>
       <div v-if="!isGraded" class="">
@@ -92,7 +92,7 @@ const grade = (isCorrect, feedback) => {
     <div v-if="!isGraded">
       <div class="">
         <div class="font-semibold">User's Answer:</div>
-        <div class="mt-2 border-1 border-round border-dotted surface-border px-4 py-2">
+        <div class="mt-2 border rounded-border border-dotted border-surface px-6 py-2">
         <MarkdownText
             :data-cy="`answer_${question.questionNumber}displayText`"
             :text="question.answers[0].answer"
@@ -100,7 +100,7 @@ const grade = (isCorrect, feedback) => {
             data-cy="answerText"/>
         </div>
       </div>
-      <markdown-editor class="form-text mt-3"
+      <markdown-editor class="form-text mt-4"
                        :id="`qFeedback-${quizAttemptId}_${question.questionNumber}`"
                        markdownHeight="120px"
                        label="Your Feedback (optional):"
@@ -110,7 +110,7 @@ const grade = (isCorrect, feedback) => {
                        :allow-insert-images="false"
                        :aria-label="`optionally provide feedback for answer of question # ${question.questionNumber}`"
                        :resizable="false" />
-      <div class="flex gap-2 mt-3">
+      <div class="flex gap-2 mt-4">
       <SkillsButton
           size="small"
           label="Wrong"

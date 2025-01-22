@@ -109,7 +109,7 @@ const doRemoveSkill = () => {
         <div v-if="!initialLoad">
           <no-content2
             v-if="!initialLoadHadData"
-            class="py-6"
+            class="py-12"
             message="To export to the Skills Catalog please navigate to the Skills page, then select skills to export and click on the Action button located on the top-right above the skills' table."
             title="No skills exported to Skills Catalog"
             data-cy="noExportedSkills"
@@ -170,7 +170,7 @@ const doRemoveSkill = () => {
                 <date-cell :value="slotProps.data.exportedOn" />
               </template>
             </Column>
-            <Column class="md:w-2rem" :class="{'flex': responsive.md.value }">
+            <Column class="md:w-8" :class="{'flex': responsive.md.value }">
               <template #header>
                 <span class="sr-only">Controls Heading - Not sortable</span>
               </template>

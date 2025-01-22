@@ -121,15 +121,15 @@ const onSubmit = handleSubmit((values) => {
 
 <template>
   <div>
-    <div class="grid justify-content-center text-center">
-      <div class="col md:col-8 lg:col-7 xl:col-4 mt-3" style="min-width: 20rem;">
-        <div class="mt-5">
+    <div class="grid grid-cols-12 gap-4 justify-center text-center">
+      <div class="col md:col-span-8 lg:col-span-7 xl:col-span-4 mt-4" style="min-width: 20rem;">
+        <div class="mt-8">
           <logo1 />
-          <div class="text-3xl mt-4 text-primary">
+          <div class="text-3xl mt-6 text-primary">
             New <span v-if="isRootAccount">Root </span>Account
           </div>
         </div>
-        <Card v-if="!oAuthOnly" class="mt-3 text-left">
+        <Card v-if="!oAuthOnly" class="mt-4 text-left">
           <template #content>
             <form @submit="onSubmit">
               <div class="w-full">
@@ -216,7 +216,7 @@ const onSubmit = handleSubmit((values) => {
                     </template>
                   </SkillsTextInput>
               </div>
-              <div class="flex justify-content-end mt-2">
+              <div class="flex justify-end mt-2">
                 <SkillsButton variant="outline-success"
                               type="submit"
                               label="Create Account"
@@ -240,12 +240,12 @@ const onSubmit = handleSubmit((values) => {
         </Card>
 
         <Card v-if="oAuthProviders && oAuthProviders.length > 0"
-              class="mt-3"
+              class="mt-4"
               data-cy="oAuthProviders">
           <template #content>
             <div v-for="oAuthProvider in oAuthProviders"
                  :key="oAuthProvider.registrationId"
-                 class="col-12 mb-3">
+                 class="col-span-12 mb-4">
               <Button
                   class="w-full text-center"
                   outlined

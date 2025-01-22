@@ -51,7 +51,7 @@ onMounted(() => {
 
 <template>
   <div class="" data-cy="depsProgress">
-    <div class="flex text-sm w-min-14rem align-items-center pb-1">
+    <div class="flex text-sm w-min-14rem items-center pb-1">
       <div class="flex-1">
         <Tag data-cy="numDeps" severity="info">{{ numDependencies }}</Tag>
         Prerequisites

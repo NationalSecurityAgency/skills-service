@@ -78,11 +78,11 @@ watch(() => timer.value, (newValue) => {
 
 <template>
   <loading-container :is-loading="loading">
-    <div class="flex justify-content-center text-center" data-cy="emailConfirmation">
+    <div class="flex justify-center text-center" data-cy="emailConfirmation">
       <div class="" style="min-width: 20rem;">
-        <div class="mt-5">
+        <div class="mt-8">
           <logo1 />
-          <div class="h3 mt-4 text-primary">Email Address Successfully Confirmed!</div>
+          <div class="h3 mt-6 text-primary">Email Address Successfully Confirmed!</div>
         </div>
         <Card>
           <template #content>

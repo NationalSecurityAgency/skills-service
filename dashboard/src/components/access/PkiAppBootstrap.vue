@@ -33,14 +33,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex justify-content-center">
-    <Card class="mt-3 text-center w-11">
+  <div class="flex justify-center">
+    <Card class="mt-4 text-center w-11/12">
     <template #content>
       <logo1 />
-      <div v-if="isLoading" class="justify-content-center mt-4">
+      <div v-if="isLoading" class="justify-center mt-6">
         <skills-spinner :is-loading="true" />
         <div class="mt-2 text-primary text-xl">Getting Things Ready!</div>
-        <div class="text-color-secondary">This may take just a second...</div>
+        <div class="text-muted-color">This may take just a second...</div>
       </div>
       <div v-else>
         <Message icon="far fa-check-square" severity="success" :closable="false">

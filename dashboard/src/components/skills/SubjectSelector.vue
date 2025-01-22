@@ -129,7 +129,7 @@ const searchChanged = (query) => {
 </script>
 
 <template>
-  <Dropdown :options="optionsInternal" :placeholder="placeholder" class="st-skills-selector w-full" v-model="selectedInternal" label="name"
+  <Select :options="optionsInternal" :placeholder="placeholder" class="st-skills-selector w-full" v-model="selectedInternal" label="name"
             data-cy="subjectSelector" :class="props.class" :disabled="disabled" :loading="isLoading" filter
             @filter="searchChanged" @change="added" optionLabel="name" resetFilterOnHide showClear>
     <template #option="slotProps">
@@ -137,15 +137,15 @@ const searchChanged = (query) => {
         <div class="text-xl skills-option-name" data-cy="subjSelector-name">{{ slotProps.option.name }}
         </div>
         <div style="font-size: 0.8rem;">
-          <span class="uppercase mr-1 font-italic"># Skills:</span>
+          <span class="uppercase mr-1 italic"># Skills:</span>
           <span class="font-bold" data-cy="skillsSelector-projectId">{{ slotProps.option.numSkills}}</span>
           <span class="mx-2">|</span>
-          <span class="uppercase mr-1 font-italic" data-cy="skillsSelectionItem-subjectId">Points:</span>
+          <span class="uppercase mr-1 italic" data-cy="skillsSelectionItem-subjectId">Points:</span>
           <span class="font-weight-bold skills-option-subject-name" data-cy="skillsSelector-subjectName">{{ slotProps.option.totalPoints }}</span>
         </div>
       </div>
     </template>
-  </Dropdown>
+  </Select>
 <!--    -->
 <!--  <AutoComplete :suggestions="optionsInternal"-->
 <!--                dropdown-->

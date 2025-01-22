@@ -22,12 +22,12 @@ defineProps(['title', 'subtitle', 'description', 'icon', 'pathName']);
 <template>
   <CardWithVericalSections>
     <template #content>
-      <div class="p-5">
+      <div class="p-8">
         <div class="flex">
-          <div class="flex d-inline-block mt-1 mr-3 border rounded p-2">
+          <div class="flex d-inline-block mt-1 mr-4 border rounded p-2">
             <i class="fa-3x" :class="icon"/>
           </div>
-          <div class="flex flex-1 flex-column">
+          <div class="flex flex-1 flex-col">
             <div class="h4 mb-2 font-semibold">{{ title }}</div>
             <div class="font-light text-sm">
               <slot name="subtitle">
@@ -43,7 +43,7 @@ defineProps(['title', 'subtitle', 'description', 'icon', 'pathName']);
 
     </template>
     <template #footer>
-      <div class="text-center pb-3 px-5">
+      <div class="text-center pb-4 px-8">
         <router-link :to="{ name: pathName }" :data-cy="`metricsNav-${title}`" tabindex="-1">
           <SkillsButton size="small" :label="`${title}`" icon="fas fa-arrow-right" />
         </router-link>

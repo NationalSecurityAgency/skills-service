@@ -114,7 +114,7 @@ const groupChanged = (updatedGroup) => {
     <skills-spinner :is-loading="loading" />
     <div v-if="!loading" :data-cy="`ChildRowSkillGroupDisplay_${skillInfo.skillId}`">
 
-      <Fieldset v-if="skillInfo.description" legend="Group's Description" class="mb-3">
+      <Fieldset v-if="skillInfo.description" legend="Group's Description" class="mb-4">
         <markdown-text
           :text="skillInfo.description"
           :instance-id="skillInfo.skillId"
@@ -125,9 +125,9 @@ const groupChanged = (updatedGroup) => {
         legend="Group's Skills"
         :pt="{ content: { class: 'p-0' }, root: { class: 'm-0' }, toggler: { class: 'm-2'} }"
       >
-        <div class="flex mx-3 my-4" data-cy="requiredSkillsSection">
+        <div class="flex mx-4 my-6" data-cy="requiredSkillsSection">
           <div>
-            <span class="mr-1 font-italic">Required: </span>
+            <span class="mr-1 italic">Required: </span>
             <span v-if="!allSkillsRequired">
               <Tag severity="info" data-cy="requiredSkillsNum">{{ requiredSkillsNum }}</Tag>
               <span class="ml-1">out of <Tag data-cy="numSkillsInGroup">{{ skill.numSkillsInGroup
@@ -148,7 +148,7 @@ const groupChanged = (updatedGroup) => {
               :aria-label="'Edit Number of Required skills for '+ skillInfo.name + ' group'"
               data-cy="editRequired" class="ml-2" />
             <div v-if="lessThanTwoSkills"
-              class="font-italic text-small mt-1 font-light">** Must have at least 2 skills to modify</div>
+              class="italic text-small mt-1 font-light">** Must have at least 2 skills to modify</div>
 
           </div>
           <div class="flex-1 text-right">
@@ -209,7 +209,7 @@ const groupChanged = (updatedGroup) => {
           <no-content2
             v-if="!hasSkills"
             title="Group has no Skills"
-            class="py-8"
+            class="py-20"
             message="Click 'Add Skill' button to add skills to this group" />
         </div>
       </Fieldset>

@@ -58,9 +58,9 @@ const letUserKnowUrlWasCopied = () => {
     cancel-button-severity="success">
     <div class="text-xl text-primary text-center">To share your project, the following URL was copied.</div>
 
-    <div class="flex border-1 border-round surface-border mt-2">
+    <div class="flex border rounded-border border-surface mt-2">
       <div class="flex-1 p-2" data-cy="projShareUrl">{{ shareUrl }}</div>
-      <div class="border-left-1 surface-border">
+      <div class="border-l border-surface">
         <SkillsButton
           text
           severity="info"
@@ -71,14 +71,14 @@ const letUserKnowUrlWasCopied = () => {
       </div>
     </div>
 
-    <div class="flex justify-content-center">
+    <div class="flex justify-center">
       <InlineMessage
         severity="success"
-        class="mt-2" :class="{ 'fadein animation-duration-1000 animation-iteration-infinite': visualEffectUrlWasCopied }">
+        class="mt-2" :class="{ 'fadein animate-duration-1000 animation-iteration-infinite': visualEffectUrlWasCopied }">
         URL was copied!
       </InlineMessage>
     </div>
-    <div class="text-primary mt-2 text-center mb-3">
+    <div class="text-primary mt-2 text-center mb-4">
       Please feel free to paste and share it with new users.
     </div>
   </SkillsDialog>

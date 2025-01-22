@@ -79,7 +79,7 @@ const isSubmitting = useIsSubmitting()
 <template>
   <div :class="{ 'flex flex-wrap md:flex-nowrap' : isInline }">
     <div :class="{ 'md:mr-1 flex-1' : isInline }">
-      <div class="flex gap-3 flex-column sm:flex-row">
+      <div class="flex gap-4 flex-col sm:flex-row">
         <slot name="beforeName"></slot>
         <div class="flex-1">
           <SkillsTextInput

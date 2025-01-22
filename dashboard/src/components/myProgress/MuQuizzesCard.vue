@@ -32,22 +32,22 @@ const totalRuns = computed(() => myProgress.value.numQuizAttempts + myProgress.v
       <div>
         <div class="text-4xl text-color-warn" data-cy="numQuizAndSurveyRuns">{{ totalRuns }}</div>
         <div class="flex">
-          <span class="mr-1 w-5rem">Quizzes:</span> <Tag severity="info" data-cy="numQuizzes">{{ myProgress.numQuizAttempts }}</Tag>
+          <span class="mr-1 w-20">Quizzes:</span> <Tag severity="info" data-cy="numQuizzes">{{ myProgress.numQuizAttempts }}</Tag>
         </div>
         <div class="flex my-1">
-          <span class="mr-1 w-5rem">Surveys:</span> <Tag severity="success" data-cy="numSurveys">{{ myProgress.numSurveyAttempts }}</Tag>
+          <span class="mr-1 w-20">Surveys:</span> <Tag severity="success" data-cy="numSurveys">{{ myProgress.numSurveyAttempts }}</Tag>
         </div>
       </div>
     </template>
     <template #right-content>
-      <div class="flex justify-content-center sm:justify-content-end">
-        <div class="flex justify-content-center">
+      <div class="flex justify-center sm:justify-end">
+        <div class="flex justify-center">
           <progress-card-icon icon="fas fa-spell-check" />
         </div>
       </div>
     </template>
     <template #footer>
-      <div class="flex gap-2 align-items-center flex-column sm:flex-row">
+      <div class="flex gap-2 items-center flex-col sm:flex-row">
         <div data-cy="quizzes-card-footer" class="flex-1 w-min-10rem">
           Explore quiz and survey history!
         </div>

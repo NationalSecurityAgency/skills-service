@@ -58,14 +58,14 @@ const hasBadges = computed(() => {
     <skills-spinner :is-loading="userProgress.loadingUserProgressSummary"/>
     <div v-if="!userProgress.loadingUserProgressSummary">
       <skills-title :back-button="false">{{ skillsDisplayTheme.landingPageTitle }}</skills-title>
-      <project-description v-if="showDescription" :description="description" class="mt-3"/>
-      <user-overall-progress class="mt-3"/>
+      <project-description v-if="showDescription" :description="description" class="mt-4"/>
+      <user-overall-progress class="mt-4"/>
 
-      <div class="mt-3 flex flex-column lg:flex-row gap-3 align-items-stretch">
-        <div class=" align-items-center">
+      <div class="mt-4 flex flex-col lg:flex-row gap-4 items-stretch">
+        <div class=" items-center">
           <my-rank />
         </div>
-        <div class="flex-1 align-items-center">
+        <div class="flex-1 items-center">
           <point-progress-chart />
         </div>
         <div v-if="hasBadges" class="">
@@ -73,7 +73,7 @@ const hasBadges = computed(() => {
         </div>
       </div>
 
-      <subject-tiles class="mt-3"/>
+      <subject-tiles class="mt-4"/>
 
       <transcript-card
         v-if="userProgress.userProgressSummary && userProgress.userProgressSummary.totalSkills > 0"

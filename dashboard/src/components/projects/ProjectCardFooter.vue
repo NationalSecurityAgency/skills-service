@@ -48,7 +48,7 @@ const numIssuesForDisplay = computed(() => {
   <div class="text-right">
     <div class="flex"
          :class="{
-            'flex-column gap-2 justify-content-center align-items-center': projectsState.shouldTileProjectsCards,
+            'flex-col gap-2 justify-center items-center': projectsState.shouldTileProjectsCards,
             '': !projectsState.shouldTileProjectsCards
           }">
       <div class="flex-1 text-left small" data-cy="ProjectCardFooter_issues">

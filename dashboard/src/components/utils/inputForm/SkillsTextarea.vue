@@ -78,7 +78,7 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 <template>
   <div class="field text-left" v-bind="fallthroughAttributes.rootAttrs.value">
     <label :for="name">
-      <span v-if="isRequired" class="mr-1 text-color-secondary" aria-label="Required field">*</span>
+      <span v-if="isRequired" class="mr-1 text-muted-color" aria-label="Required field">*</span>
       <slot name="label">{{ label }}</slot>
     </label>
     <Textarea

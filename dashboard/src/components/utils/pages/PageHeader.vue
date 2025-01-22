@@ -40,7 +40,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="pageHeader" data-cy="pageHeader" class="border-1 border-round-md surface-border font-medium surface-0 mt-2 px-3 py-3" role="heading" aria-level="1">
+  <div ref="pageHeader" data-cy="pageHeader" class="border rounded-md border-surface font-medium bg-surface-0 dark:bg-surface-900 mt-2 px-4 py-4" role="heading" aria-level="1">
     <skills-spinner v-if="loading" :is-loading="loading" />
     <div v-if="!loading">
       <slot name="banner"></slot>
@@ -60,19 +60,19 @@ onUnmounted(() => {
           <slot name="subSubTitle" data-cy="subSubTitle"></slot>
         </div>
         <div class="flex-1">
-          <div class="flex justify-content-center lg:justify-content-end flex-wrap">
-            <div v-for="(stat, index) in options.stats" :key="stat.label" data-cy="pageHeaderStat" class="w-full md:w-6 lg:w-auto mb-1">
-              <Card class="ml-3 mt-2 h-full" :pt="{ body: { class: 'p-3' }, content: { class: 'p-0' } }">
+          <div class="flex justify-center lg:justify-end flex-wrap">
+            <div v-for="(stat, index) in options.stats" :key="stat.label" data-cy="pageHeaderStat" class="w-full md:w-6/12 lg:w-auto mb-1">
+              <Card class="ml-4 mt-2 h-full" :pt="{ body: { class: 'p-3' }, content: { class: 'p-0' } }">
                 <template #content>
                   <div class="flex">
                     <div class="" :data-cy="`pageHeaderStat_${stat.label}`">
-                      <div class="uppercase text-color-secondary">{{ stat.label }}</div>
+                      <div class="uppercase text-muted-color">{{ stat.label }}</div>
                       <div class="font-bold text-xl">
                         <span v-if="stat.preformatted" data-cy="statPreformatted" v-html="stat.preformatted" />
                         <span v-else data-cy="statValue">{{ numberFormat.pretty(stat.count) }}</span>
                       </div>
                     </div>
-                    <div class="ml-3 flex-1 text-right">
+                    <div class="ml-4 flex-1 text-right">
                       <i :class="`${stat.icon} ${colors.getTextClass(index)}`" style="font-size: 2.2rem;" aria-hidden="true"></i>
                     </div>
                   </div>

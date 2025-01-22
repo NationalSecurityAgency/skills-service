@@ -83,7 +83,7 @@ const start = () => {
           <template #messageicon>
             <i class="fas fa-gift" aria-hidden="true"></i>
           </template>
-          <div class="flex align-items-center">
+          <div class="flex items-center">
             <span class="mx-2">
               Good News! You already <span v-if="!isSurveyType">passed this quiz</span><span v-else>completed this survey</span> <span class="font-bold">{{ timeUtils.timeFromNow(quizInfo.userLastQuizAttemptDate) }}</span>!
             </span>
@@ -105,7 +105,7 @@ const start = () => {
         <Card v-if="!isSurveyType && canStartQuiz" class="my-2 text-xl skills-card-theme-border" :pt="{ content: { class: 'p-0' } }" data-cy="quizPassInfo">
           <template #content>
             <i class="fas fa-check-circle text-primary" aria-hidden="true"></i>
-            Must get <Tag severity="success">{{ minNumQuestionsToPass }}</Tag> / <Tag severity="secondary">{{ numQuestions }}</Tag> questions <span class="text-color-secondary font-italic">({{ quizInfo.percentToPass }}%)</span> to <span class="text-primary uppercase">pass</span>. Good Luck!
+            Must get <Tag severity="success">{{ minNumQuestionsToPass }}</Tag> / <Tag severity="secondary">{{ numQuestions }}</Tag> questions <span class="text-muted-color italic">({{ quizInfo.percentToPass }}%)</span> to <span class="text-primary uppercase">pass</span>. Good Luck!
           </template>
         </Card>
 
@@ -115,21 +115,21 @@ const start = () => {
           <span v-else>You need to answer <Tag severity="warning">{{ remainingQuestions }}</Tag> question(s) to pass.</span>
         </Message>
 
-        <div class="flex flex-wrap flex-column md:flex-row gap-4 pt-2">
+        <div class="flex flex-wrap flex-col md:flex-row gap-6 pt-2">
             <Card class="skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2' } }" data-cy="quizInfoCard">
               <template #content>
-                <div class="px-3">
+                <div class="px-4">
                   <i class="fas fa-question-circle text-primary" style="font-size: 1.3rem;" aria-hidden="true"></i>
-                  <span class="text-color-secondary font-italic ml-1">Questions:</span>
+                  <span class="text-muted-color font-italic ml-1">Questions:</span>
                   <span class="uppercase ml-1 font-bold" data-cy="numQuestions">{{ onlyIncorrect ? questionsToTake : numQuestions }}</span>
                 </div>
               </template>
             </Card>
             <Card v-if="!isSurveyType"  class="skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2' } }" data-cy="quizTimeLimitCard">
               <template #content>
-                <div class="px-3">
+                <div class="px-4">
                   <i class="fas fa-business-time text-primary" style="font-size: 1.3rem;"></i>
-                  <span class="text-color-secondary font-italic ml-1">Time Limit:</span>
+                  <span class="text-muted-color italic ml-1">Time Limit:</span>
                   <span v-if="quizInfo.quizTimeLimit > 0" class="uppercase ml-1 font-bold">{{ timeUtils.formatDuration(quizTimeLimit) }}</span>
                   <span v-else class="uppercase ml-1 font-bold">NONE</span>
                 </div>
@@ -137,9 +137,9 @@ const start = () => {
             </Card>
             <Card v-if="!isSurveyType"  class="skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2' } }" data-cy="quizInfoCard">
               <template #content>
-                <div class="px-3">
+                <div class="px-4">
                   <i class="fas fa-redo-alt text-primary" style="font-size: 1.3rem;" aria-hidden="true"></i>
-                  <span class="text-color-secondary font-italic ml-1">Attempts:</span>
+                  <span class="text-muted-color italic ml-1">Attempts:</span>
                   <span class="uppercase ml-1 font-bold" data-cy="numAttempts"><Tag severity="secondary">{{quizInfo.userNumPreviousQuizAttempts}}</Tag> / <Tag severity="secondary">{{ maxAttemptsDisplay }}</Tag></span>
                 </div>
               </template>
@@ -160,11 +160,11 @@ const start = () => {
           <div class="mt-2">It will be assessed by a quiz administrator, so there is nothing to do but wait for the grades to roll in!</div>
         </Message>
 
-        <p v-if="quizInfo.description && !allAttemptsExhausted" class="mt-5" data-cy="quizDescription">
+        <p v-if="quizInfo.description && !allAttemptsExhausted" class="mt-8" data-cy="quizDescription">
           <MarkdownText :text="quizInfo.description" />
         </p>
 
-        <div class="mt-6">
+        <div class="mt-12">
           <SkillsButton v-if="canStartQuiz"
                         @click="cancel"
                         icon="fas fas fa-times-circle"

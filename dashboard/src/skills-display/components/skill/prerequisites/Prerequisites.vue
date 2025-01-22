@@ -330,10 +330,10 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
 <template>
   <Card v-if="!loadingData && dependenciesInternal?.length > 0"
         :pt="{ content: { class: 'p-0' }, body: {class: 'p-0'} }"
-        data-cy="prerequisitesCard" class="mt-3">
+        data-cy="prerequisitesCard" class="mt-4">
     <template #content>
-      <div class="pt-3 px-3">
-        <div class="flex flex-wrap gap-3">
+      <div class="pt-4 px-4">
+        <div class="flex flex-wrap gap-4">
           <div class="flex-1 w-min-16rem">
             <graph-legend />
           </div>

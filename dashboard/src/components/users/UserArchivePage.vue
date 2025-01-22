@@ -158,7 +158,7 @@ const sortField = (column) => {
             <template #body="slotProps">
               <div v-if="slotProps.field === 'userIdForDisplay'" class="flex flex-row flex-wrap"
                    :data-cy="`archivedUser_${slotProps.data.userId}`">
-                <div class="flex align-items-start justify-content-start">
+                <div class="flex items-start justify-start">
                   <router-link
                       :to="calculateClientDisplayRoute(slotProps.data)"
                       aria-label="View user details"
@@ -167,7 +167,7 @@ const sortField = (column) => {
                     {{ userInfo.getUserDisplay(slotProps.data, true) }}
                   </router-link>
                 </div>
-                <div class="flex flex-grow-1 align-items-start justify-content-end">
+                <div class="flex grow items-start justify-end">
                   <SkillsButton :data-cy="`restoreUser-${slotProps.data.userId}`"
                                 :id="`restoreUser-${slotProps.data.userId}`"
                                 @click="restoreUser(slotProps.data)"

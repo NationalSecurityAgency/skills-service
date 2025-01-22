@@ -403,9 +403,9 @@ const videoResized = (width, height) => {
     <SubPageHeader title="Configure Video" />
     <SkillsOverlay :show="loading.video || skillsState.loadingSkill || appConfig.isLoadingConfig">
       <template v-if="videoConf.file" #overlay>
-        <div class="text-center text-success pt-5">
-          <div class="text-2xl mb-3"><i class="fas fa-video" aria-hidden="true"/> Uploading Video</div>
-          <div class="w-9 mx-auto">
+        <div class="text-center text-success pt-8">
+          <div class="text-2xl mb-4"><i class="fas fa-video" aria-hidden="true"/> Uploading Video</div>
+          <div class="w-9/12 mx-auto">
             <lengthy-operation-progress-bar :timeout="lengthyOperationLoadingBarTimeout" />
           </div>
         </div>
@@ -427,9 +427,9 @@ const videoResized = (width, height) => {
             </Message>
           </div>
 
-          <div data-cy="videoInputFields" class="mb-4" :class="{'flex flex-column gap-2': responsive.md.value }">
-            <div class="flex flex-column md:flex-row gap-2 md:mb-2">
-              <div class="flex-1 align-content-end">
+          <div data-cy="videoInputFields" class="mb-6" :class="{'flex flex-col gap-2': responsive.md.value }">
+            <div class="flex flex-col md:flex-row gap-2 md:mb-2">
+              <div class="flex-1 content-end">
                 <label>* Video:</label>
               </div>
               <div class="flex" >
@@ -486,9 +486,9 @@ const videoResized = (width, height) => {
             </div>
           </div>
 
-          <div data-cy="videoCaptionsInputFields" :class="{'flex flex-column gap-2': responsive.md.value }">
-            <div class="flex flex-column md:flex-row gap-2 md:mb-2">
-              <div class="flex-1 align-content-end">
+          <div data-cy="videoCaptionsInputFields" :class="{'flex flex-col gap-2': responsive.md.value }">
+            <div class="flex flex-col md:flex-row gap-2 md:mb-2">
+              <div class="flex-1 content-end">
                 <label for="videoCaptions">Captions:</label>
               </div>
               <div v-if="!videoConf.captions && !isReadOnly" class="flex">
@@ -520,7 +520,7 @@ const videoResized = (width, height) => {
 
           <div data-cy="videoTranscriptInput">
             <div class="flex mb-2">
-              <div class="flex-1 align-content-end">
+              <div class="flex-1 content-end">
                 <label for="videoTranscript">Transcript:</label>
               </div>
             </div>
@@ -541,7 +541,7 @@ const videoResized = (width, height) => {
             {{ overallErrMsg }}
           </Message>
 
-          <div v-if="!isReadOnly" data-cy="updateButtons" class="my-3 flex flex-column md:flex-row gap-2">
+          <div v-if="!isReadOnly" data-cy="updateButtons" class="my-4 flex flex-col md:flex-row gap-2">
             <div class="flex-1">
               <SkillsButton
                   severity="success"
@@ -555,7 +555,7 @@ const videoResized = (width, height) => {
                   label="Save and Preview" />
               <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success" data-cy="savedMsg"><i class="fas fa-check" /> Saved</span>
             </div>
-            <div class="flex flex-column md:flex-row gap-2">
+            <div class="flex flex-col md:flex-row gap-2">
               <SkillsButton
                   severity="secondary"
                   class="md:mr-2"
@@ -581,9 +581,9 @@ const videoResized = (width, height) => {
           </div>
 
           <!-- Video Preview -->
-          <Card v-if="preview" class="mt-3" data-cy="videoPreviewCard" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+          <Card v-if="preview" class="mt-4" data-cy="videoPreviewCard" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
             <template #header>
-              <div class="border-1 surface-border border-round-top surface-100 p-3">Video Preview</div>
+              <div class="border border-surface rounded-t bg-surface-100 dark:bg-surface-700 p-4">Video Preview</div>
             </template>
             <template #content>
               <VideoPlayer
@@ -595,53 +595,53 @@ const videoResized = (width, height) => {
                   @on-resize="videoResized"
                   :loadFromServer="true"
               />
-              <div v-if="watchedProgress" class="p-3 pt-4">
+              <div v-if="watchedProgress" class="p-4 pt-6">
                 <Message v-if="!isDurationAvailable" severity="warn" icon="fas fa-exclamation-triangle" :closable="false" data-cy="noDurationWarning">
                   Browser cannot derive the duration of this video. Percentage will only be updated after the video is fully watched.
                 </Message>
-                <div class="grid">
-                  <div class="col-6 lg:col-3 xl:col-2">Total Duration:</div>
+                <div class="grid grid-cols-12 gap-4">
+                  <div class="col-span-6 lg:col-span-3 xl:col-span-2">Total Duration:</div>
                   <div class="col">
                     <span v-if="watchedProgress.videoDuration === Infinity" class="text-danger" data-cy="videoTotalDuration">N/A</span>
                     <span v-else class="text-primary" data-cy="videoTotalDuration">{{ timeUtils.formatDuration(Math.trunc(watchedProgress.videoDuration * 1000), true) }}</span>
                   </div>
                 </div>
-                <div class="grid">
-                  <div class="col-6 lg:col-3 xl:col-2">Time Watched:</div>
+                <div class="grid grid-cols-12 gap-4">
+                  <div class="col-span-6 lg:col-span-3 xl:col-span-2">Time Watched:</div>
                   <div class="col"><span class="text-primary" data-cy="videoTimeWatched">{{ timeUtils.formatDuration(Math.trunc(watchedProgress.totalWatchTime * 1000), true) }}</span></div>
                 </div>
-                <div class="grid">
-                  <div class="col-6 lg:col-3 xl:col-2">% Watched:</div>
+                <div class="grid grid-cols-12 gap-4">
+                  <div class="col-span-6 lg:col-span-3 xl:col-span-2">% Watched:</div>
                   <div class="col">
                     <span v-if="watchedProgress.videoDuration === Infinity" class="text-danger" data-cy="percentWatched">N/A</span>
                     <span v-else class="text-primary" data-cy="percentWatched">{{ watchedProgress.percentWatched }}%</span>
                   </div>
                 </div>
-                <div class="grid">
-                  <div class="col-6 lg:col-3 xl:col-2">Current Position:</div>
-                  <div class="col"><span class="text-primary">{{ watchedProgress.currentPosition.toFixed(2) }}</span> <span class="font-italic">Seconds</span></div>
+                <div class="grid grid-cols-12 gap-4">
+                  <div class="col-span-6 lg:col-span-3 xl:col-span-2">Current Position:</div>
+                  <div class="col"><span class="text-primary">{{ watchedProgress.currentPosition.toFixed(2) }}</span> <span class="italic">Seconds</span></div>
                 </div>
-                <div class="grid">
-                  <div class="col-6 lg:col-3 xl:col-2">Default Video Size:</div>
+                <div class="grid grid-cols-12 gap-4">
+                  <div class="col-span-6 lg:col-span-3 xl:col-span-2">Default Video Size:</div>
                   <div class="col">
                     <span class="text-primary" data-cy="defaultVideoSize">{{ configuredResolution }}</span> <Tag v-if="unsavedVideoSizeChanges" severity="warning" data-cy="unsavedVideoSizeChanges"><i class="fas fa-exclamation-circle mr-1" aria-hidden="true"></i>Unsaved Changes</Tag>
-                    <div class="text-sm font-italic">** Change the size by dragging the handle at the bottom right of the video and click Save Changes button.</div>
+                    <div class="text-sm italic">** Change the size by dragging the handle at the bottom right of the video and click Save Changes button.</div>
                   </div>
                 </div>
-                <div class="grid">
-                  <div class="col-6 lg:col-3 xl:col-2">Watched Segments:</div>
+                <div class="grid grid-cols-12 gap-4">
+                  <div class="col-span-6 lg:col-span-3 xl:col-span-2">Watched Segments:</div>
                   <div class="col">
                     <div v-if="watchedProgress.currentStart !== null && watchedProgress.lastKnownStopPosition"> <span class="text-primary">{{ watchedProgress.currentStart.toFixed(2) }}</span>
                       <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/>
-                      <span class="text-primary">{{ watchedProgress.lastKnownStopPosition.toFixed(2) }}</span> <span class="font-italic">Seconds</span>
+                      <span class="text-primary">{{ watchedProgress.lastKnownStopPosition.toFixed(2) }}</span> <span class="italic">Seconds</span>
                     </div>
                     <div v-for="segment in watchedProgress.watchSegments" :key="segment.start"><span class="text-primary">{{ segment.start.toFixed(2) }}</span>
-                      <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/><span class="text-primary">{{ segment.stop.toFixed(2) }}</span> <span class="font-italic">Seconds</span>
+                      <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/><span class="text-primary">{{ segment.stop.toFixed(2) }}</span> <span class="italic">Seconds</span>
                     </div>
                   </div>
                 </div>
 
-                <div v-if="!isReadOnly && hasBeenResized" class="flex align-items-center">
+                <div v-if="!isReadOnly && hasBeenResized" class="flex items-center">
                   <SkillsButton
                       severity="success"
                       class="mt-2"
@@ -653,7 +653,7 @@ const videoResized = (width, height) => {
                       @click="submitSaveSettingsForm"
                       icon="fas fa-save"
                       label="Save Changes" />
-                  <InlineMessage v-if="showSavedMsg" aria-hidden="true" class="ml-3 text-color-success" data-cy="savedMsg" severity="success">Saved</InlineMessage>
+                  <InlineMessage v-if="showSavedMsg" aria-hidden="true" class="ml-4" data-cy="savedMsg" severity="success" size="small" icon="fas fa-check">Saved</InlineMessage>
                 </div>
               </div>
 

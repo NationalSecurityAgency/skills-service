@@ -42,11 +42,11 @@ const resend = () => {
 
 <template>
   <div>
-    <div class="flex w-full justify-content-center">
-      <div class="flex flex-column" style="min-width: 20rem;">
-        <div class="mt-5 mb-5 flex flex-column align-items-center" data-cy="confirmEmailTitle">
+    <div class="flex w-full justify-center">
+      <div class="flex flex-col" style="min-width: 20rem;">
+        <div class="mt-8 mb-8 flex flex-col items-center" data-cy="confirmEmailTitle">
           <logo1 />
-          <div class="h3 mt-4 text-primary">Email Verification is Required!</div>
+          <div class="h3 mt-6 text-primary">Email Verification is Required!</div>
         </div>
         <Card data-cy="confirmEmailExplanation">
           <template #content>

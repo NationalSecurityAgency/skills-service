@@ -104,12 +104,12 @@ const removeProject = (projectId) => {
                     v-if="sortOrderLoading"
                     aria-label="Updating sort order"
                     class="loading-indicator" />
-    <div class="grid" id="projectCards">
+    <div class="grid grid-cols-12 gap-4" id="projectCards">
 
       <div v-for="(proj, index) in myProgressState.myProjects"
            :key="proj.projectName"
            :id="proj.projectId"
-           class="col-12 lg:col-6 project-link-container">
+           class="col-span-12 lg:col-span-6 project-link-container">
         <project-link-card
           :ref="`proj${proj.projectId}`"
           :display-order="index"

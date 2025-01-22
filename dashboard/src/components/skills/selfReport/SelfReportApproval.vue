@@ -162,8 +162,8 @@ const toggleRow = (row) => {
     <template #header>
       <SkillsCardHeader title="Self Reported Skills Requiring Approval">
         <template #headerContent>
-          <div v-if="isEmailEnabled" data-cy="unsubscribeContainer" class="flex align-content-center align-items-center">
-            {{ emailSubscribed ? 'Subscribed' : 'Unsubscribed' }} <InputSwitch v-model="emailSubscribed"
+          <div v-if="isEmailEnabled" data-cy="unsubscribeContainer" class="flex content-center items-center">
+            {{ emailSubscribed ? 'Subscribed' : 'Unsubscribed' }} <ToggleSwitch v-model="emailSubscribed"
                                                                                @update:modelValue="toggleUnsubscribe"
                                                                                aria-label="Enable to receive Skill Approval request emails"
                                                                                class="ml-2"
@@ -173,11 +173,11 @@ const toggleRow = (row) => {
       </SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex p-3 gap-2 flex-column sm:flex-row">
-        <div class="flex flex-1 justify-content-center sm:justify-content-start">
+      <div class="flex p-4 gap-2 flex-col sm:flex-row">
+        <div class="flex flex-1 justify-center sm:justify-start">
           <SkillsButton size="small" @click="loadApprovals" aria-label="Sync Records" data-cy="syncApprovalsBtn" class="" icon="fas fa-sync-alt" />
         </div>
-        <div class="flex flex-1 justify-content-center sm:justify-content-end">
+        <div class="flex flex-1 justify-center sm:justify-end">
           <SkillsButton size="small" @click="showRejectModal" data-cy="rejectBtn" class="" :disabled="selectedItems.length === 0" icon="fa fa-times-circle" label="Reject" />
           <SkillsButton size="small" @click="showApproveModal" data-cy="approveBtn" class="ml-2" :disabled="selectedItems.length === 0" icon="fa fa-check" label="Approve" />
         </div>
@@ -249,7 +249,7 @@ const toggleRow = (row) => {
 
         <template #expansion="slotProps">
           <div>
-            <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-4">
+            <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-6">
               <template #content>
                 <markdown-text class="d-inline-block" :text="slotProps.data.requestMsg" data-cy="approvalMessage" :instance-id="`${slotProps.data.id}`"/>
               </template>

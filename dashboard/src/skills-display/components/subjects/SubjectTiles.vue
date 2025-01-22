@@ -36,11 +36,11 @@ const hasData = computed(() => userProgress.userProgressSummary.subjects?.length
           :message="`Please contact this ${attributes.projectDisplayName.toLowerCase()}'s administrator.`" />
       </template>
     </Card>
-    <search-all-project-skills v-if="hasData && !attributes.isSummaryOnly" class="mb-3"/>
-    <div v-if="hasData" class="grid mx-0">
+    <search-all-project-skills v-if="hasData && !attributes.isSummaryOnly" class="mb-4"/>
+    <div v-if="hasData" class="grid grid-cols-12 gap-4 mx-0">
       <div v-for="(subject, index) in userProgress.userProgressSummary.subjects"
            :key="`unique-subject-${index}`"
-           class="col-12 md:col-6 xl:col-4">
+           class="col-span-12 md:col-span-6 xl:col-span-4">
           <subject-tile :subject="subject" :tile-index="index"/>
       </div>
     </div>

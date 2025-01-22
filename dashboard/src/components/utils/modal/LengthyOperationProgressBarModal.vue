@@ -52,7 +52,7 @@ const allDone = () => {
     <div class="text-center" data-cy="lengthyOpModal">
       <div v-if="!isComplete">
         <i class="fas fa-running p-2 mb-1 p-badge p-badge-info" style="font-size: 2.5rem; height: 100%;"/>
-        <div class="h4 text-primary mb-3" data-cy="title">{{ progressMessage }}</div>
+        <div class="h4 text-primary mb-4" data-cy="title">{{ progressMessage }}</div>
         <lengthy-operation-progress-bar :showValue="false" height="15px" :animated="true"/>
         <div class="text-secondary mt-1">This operation takes a little while so buckle up!</div>
       </div>

@@ -28,7 +28,7 @@ const route = useRoute();
                     :aria-label="`${navItem.title} metrics`"
                     :data-cy="`${navItem.title}-metrics-link`"
                     :class="{
-                      'bg-primary' : route.name === navItem.pathName,
+                      'bg-primary text-primary-contrast' : route.name === navItem.pathName,
                       'text-white' : route.name === navItem.pathName
                     }"> <i :class="navItem.icon"/><span class="sr-only">{{navItem.title}}</span></SkillsButton>
     </router-link>

@@ -37,7 +37,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <skills-spinner :is-loading="myProgressState.isLoadingMyProgressSummary || loading" class="mt-8" />
+    <skills-spinner :is-loading="myProgressState.isLoadingMyProgressSummary || loading" class="mt-20" />
     <div v-if="!myProgressState.isLoadingMyProgressSummary && !loading">
       <progress-and-ranking-splash v-if="!myProgressState.hasProjects" />
       <div v-if="myProgressState.hasProjects">
@@ -54,7 +54,7 @@ onMounted(() => {
           </template>
         </my-progress-title>
 
-        <div class="flex flex-column sm:flex-row gap-3 flex-wrap mt-3">
+        <div class="flex flex-col sm:flex-row gap-4 flex-wrap mt-4">
           <div class="flex-1">
             <info-snapshot-card />
           </div>

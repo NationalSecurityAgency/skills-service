@@ -59,13 +59,13 @@ onMounted(() => {
       <template #content>
         <NoContent2 v-if="!hasMetrics && !isLoading"
                     title="No Results Yet..."
-                    class="my-5 py-5"
+                    class="my-8 py-8"
                     :message="`Results will be available once at least 1 ${metrics.quizType} is completed`"
                     data-cy="noMetricsYet"/>
       </template>
     </Card>
     <div v-if="hasMetrics">
-      <div class="flex gap-3 flex-column lg:flex-row flex-wrap mb-3">
+      <div class="flex gap-4 flex-col lg:flex-row flex-wrap mb-4">
         <div class="flex-1">
           <StatsCard class="w-full h-full w-min-14rem" title="Total" icon="fas fa-pen-square skills-color-selfreport" :stat-num="metrics.numTaken" data-cy="metricsCardTotal">
             <span v-if="!isSurvey"><Tag severity="info">{{ metrics.numTaken }}</Tag> attempt{{ metrics.numTaken!=1 ? 's' : '' }} by <Tag severity="success">{{ metrics.numTakenDistinctUsers }}</Tag> user{{ metrics.numTakenDistinctUsers !=1 ? 's' : '' }}</span>
@@ -106,7 +106,7 @@ onMounted(() => {
 
       <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
         <template #content>
-          <div v-for="(q, index) in metrics.questions" :key="q.id" class="mb-5">
+          <div v-for="(q, index) in metrics.questions" :key="q.id" class="mb-8">
             <QuizQuestionMetrics :q="q" :num="index" :is-survey="isSurvey"/>
           </div>
         </template>

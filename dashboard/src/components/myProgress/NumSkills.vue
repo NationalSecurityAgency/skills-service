@@ -70,7 +70,7 @@ const chartOptions = {
     <template #left-content>
       <div>
         <div class="text-4xl text-color-warn" data-cy="numAchievedSkills">{{ myProgress.numAchievedSkills }}</div>
-        <div class="w-5rem">
+        <div class="w-20">
           <Tag severity="info" data-cy="numSkillsAvailable">Total: {{ myProgress.totalSkills }}</Tag>
         </div>
       </div>

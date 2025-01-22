@@ -27,7 +27,7 @@ defineProps({
 </script>
 
 <template>
-  <div v-if="isLoading" class="d-flex justify-content-center text-center">
+  <div v-if="isLoading" class="d-flex justify-center text-center">
     <ProgressSpinner aria-label="Loading" :style="`width: ${sizeInRem}rem; height: ${sizeInRem}rem;`" />
   </div>
 </template>

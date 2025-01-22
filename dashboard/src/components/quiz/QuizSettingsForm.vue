@@ -158,11 +158,11 @@ const updateTimeLimit = () => {
 </script>
 
 <template>
-  <div class="field grid align-items-start" v-if="!isSurvey">
-    <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+  <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
+    <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
       <label for="quizNumQuestions"># of Questions per Quiz Attempt:</label>
     </div>
-    <div class="col-12 md:col-9">
+    <div class="col-span-12 md:col-span-9">
       <SkillsDropDown
           name="quizLength"
           inputId="quizNumQuestions"
@@ -172,11 +172,11 @@ const updateTimeLimit = () => {
           :options="quizLengthOptions" />
     </div>
   </div>
-  <div class="field grid align-items-start" v-if="!isSurvey">
-    <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+  <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
+    <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
       <label for="quizPassingReq">Passing Requirement:</label>
     </div>
-    <div class="col-12 md:col-9">
+    <div class="col-span-12 md:col-span-9">
       <SkillsDropDown
           name="quizPassingReq"
           inputId="quizPassingReq"
@@ -187,11 +187,11 @@ const updateTimeLimit = () => {
     </div>
   </div>
 
-  <div class="field grid align-items-start" v-if="!isSurvey">
-    <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+  <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
+    <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
       <label for="quizNumberOfAttemptsUnlimited">Maximum Number of Attempts:</label>
     </div>
-    <div class="col-12 md:col-9">
+    <div class="col-span-12 md:col-span-9">
       <div class="flex flex-wrap">
         <SkillsInputSwitch
             name="quizNumberOfAttemptsUnlimited"
@@ -199,7 +199,7 @@ const updateTimeLimit = () => {
             aria-label="Maximum Number of Attempts setting, unlimited number of attempts checkbox"
             data-cy="unlimitedAttemptsSwitch"/>
         <span class="mx-2">Unlimited</span>
-        <div v-if="!values.quizNumberOfAttemptsUnlimited" class="flex-1 border-left-1 ml-2 pl-2">
+        <div v-if="!values.quizNumberOfAttemptsUnlimited" class="flex-1 border-l ml-2 pl-2">
           <SkillsNumberInput
               label="Number of Attempts"
               id="numAttemptsInput"
@@ -211,50 +211,50 @@ const updateTimeLimit = () => {
     </div>
   </div>
 
-  <div class="field grid align-items-start" v-if="!isSurvey">
-    <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+  <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
+    <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
       <label for="randomizeQuestions">Randomize Question Order:</label>
     </div>
-    <div class="col-12 md:col-9">
+    <div class="col-span-12 md:col-span-9">
       <SkillsInputSwitch
           name="quizRandomizeQuestions"
           inputId="randomizeQuestions"
           aria-label="Randomize order of the questions"
           data-cy="randomizeQuestionSwitch"/>
-      <span class="mx-2 vertical-align-top">Randomize</span>
+      <span class="mx-2 align-top">Randomize</span>
     </div>
   </div>
 
-  <div class="field grid align-items-start" v-if="!isSurvey">
-    <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+  <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
+    <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
       <label for="randomizeAnswers">
         Randomize Answer Order:
       </label>
     </div>
-    <div class="col-12 md:col-9">
+    <div class="col-span-12 md:col-span-9">
       <SkillsInputSwitch
           name="quizRandomizeAnswers"
           inputId="randomizeAnswers"
           aria-label="Randomize order of the answers"
           data-cy="randomizeAnswerSwitch"/>
-      <span class="mx-2 vertical-align-top">Randomize</span>
+      <span class="mx-2 align-top">Randomize</span>
     </div>
   </div>
 
 
-  <div class="field grid align-items-start" v-if="!isSurvey">
-    <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+  <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
+    <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
       <label for="timeLimitUnlimited">Quiz Time Limit:</label>
     </div>
-    <div class="col-12 md:col-9">
+    <div class="col-span-12 md:col-span-9">
       <div class="flex flex-wrap">
         <SkillsInputSwitch inputId="timeLimitUnlimited"
                            name="quizTimeLimitUnlimited"
                            aria-label="Quiz Time Limit setting, unlimited time checkbox"
                            data-cy="unlimitedTimeSwitch"/>
-        <div class="flex flex-column flex-1">
+        <div class="flex flex-col flex-1">
           <div class="mx-2">Unlimited</div>
-          <div v-if="!values.quizTimeLimitUnlimited" class="flex flex-column sm:flex-row flex-1 gap-2 mt-3">
+          <div v-if="!values.quizTimeLimitUnlimited" class="flex flex-col sm:flex-row flex-1 gap-2 mt-4">
             <SkillsNumberInput
                 class="flex-1"
                 label="Hours"
@@ -275,31 +275,31 @@ const updateTimeLimit = () => {
     </div>
   </div>
 
-  <div class="field grid align-items-start">
-    <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+  <div class="field grid grid-cols-12 gap-4 items-start">
+    <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
       <label for="multipleTakes">Allow Retakes After Completion:</label>
     </div>
-    <div class="col-12 md:col-9">
+    <div class="col-span-12 md:col-span-9">
       <SkillsInputSwitch
           name="quizMultipleTakes"
           inputId="multipleTakes"
           aria-label="Allow retaking the quiz/survey after passing"
           data-cy="multipleTakesSwitch"/>
-      <span class="mx-2 vertical-align-top">Allow</span>
+      <span class="mx-2 align-top">Allow</span>
     </div>
   </div>
 
-  <div class="field grid align-items-start" v-if="!isSurvey">
-    <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+  <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
+    <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
       <label for="alwaysShowCorrectAnswers">Show Correct Answers On Failure:</label>
     </div>
-    <div class="col-12 md:col-9">
+    <div class="col-span-12 md:col-span-9">
       <SkillsInputSwitch
           name="quizAlwaysShowCorrectAnswers"
           inputId="alwaysShowCorrectAnswers"
           aria-label="Allow retaking the quiz after passing"
           data-cy="alwaysShowCorrectAnswersSwitch"/>
-      <span class="mx-2 vertical-align-top">Enabled</span>
+      <span class="mx-2 align-top">Enabled</span>
     </div>
   </div>
 
@@ -324,7 +324,6 @@ const updateTimeLimit = () => {
   <hr/>
 
   <div class="flex flex-row">
-    <div class="">
       <SkillsButton variant="outline-success"
                     label="Save"
                     icon="fas fa-arrow-circle-right"
@@ -347,7 +346,6 @@ const updateTimeLimit = () => {
                      data-cy="settingsSavedAlert">
         Settings Updated!
       </InlineMessage>
-    </div>
   </div>
 </template>
 

@@ -360,7 +360,7 @@ const doneWithThisRun = () => {
 
 <template>
   <div>
-    <SkillsSpinner :is-loading="isLoading" class="mt-3"/>
+    <SkillsSpinner :is-loading="isLoading" class="mt-4"/>
     <div v-if="!isLoading">
       <QuizRunSplashScreen v-if="splashScreen.show" :quiz-info="quizInfo" @cancelQuizAttempt="cancelQuizAttempt" @start="startQuizAttempt" :multipleTakes="multipleTakes">
         <template #aboveTitle>
@@ -371,7 +371,7 @@ const doneWithThisRun = () => {
       <SurveyRunCompletionSummary
           ref="surveyRunCompletionSummary"
           v-if="isSurveyType && quizResult && !splashScreen.show"
-          class="mb-3"
+          class="mb-4"
           :quiz-info="quizInfo"
           :quiz-result="quizResult"
           @close="doneWithThisRun">
@@ -386,7 +386,7 @@ const doneWithThisRun = () => {
           id="quizRunCompletionSummary"
           ref="quizRunCompletionSummary"
           v-if="!isSurveyType && quizResult && !splashScreen.show"
-          class="mb-3"
+          class="mb-4"
           :quiz-info="quizInfo"
           :quiz-result="quizResult"
           @close="doneWithThisRun"
@@ -401,9 +401,9 @@ const doneWithThisRun = () => {
         </template>
       </QuizRunCompletionSummary>
       
-      <Card v-if="!splashScreen.show && !(isSurveyType && quizResult) && showQuestions" class="mb-4" data-cy="quizRunQuestions">
+      <Card v-if="!splashScreen.show && !(isSurveyType && quizResult) && showQuestions" class="mb-6" data-cy="quizRunQuestions">
         <template #content>
-          <div class="flex flex-wrap align-items-center justify-content-center border-bottom-1 py-2 mb-3" data-cy="subPageHeader">
+          <div class="flex flex-wrap items-center justify-center border-b py-2 mb-4" data-cy="subPageHeader">
             <div class="flex">
               <div class="text-2xl text-primary font-bold skills-page-title-text-color" data-cy="quizName">{{ quizInfo.name }}</div>
             </div>
@@ -428,7 +428,7 @@ const doneWithThisRun = () => {
 
           <QuizRunValidationWarnings v-if="!meta.valid && !quizResult?.gradedRes?.needsGrading" :errors-to-show="errorsToShow" />
 
-          <div v-if="!quizResult" class="text-left mt-5 flex flex-wrap">
+          <div v-if="!quizResult" class="text-left mt-8 flex flex-wrap">
             <SkillsOverlay :show="isCompleting" opacity="0.6">
               <SkillsButton severity="success" outlined
                             :label="`Complete ${quizInfo.quizType}`"
@@ -442,7 +442,7 @@ const doneWithThisRun = () => {
             </SkillsOverlay>
           </div>
 
-          <div v-if="quizResult && quizResult.gradedRes && quizResult.gradedRes.passed" class="text-left mt-5">
+          <div v-if="quizResult && quizResult.gradedRes && quizResult.gradedRes.passed" class="text-left mt-8">
             <SkillsButton :severity="quizResult.gradedRes.passed || quizResult.gradedRes.needsGrading ? 'success' : 'danger'" outlined
                           label="Close"
                           icon="fas fa-times-circle"
@@ -450,7 +450,7 @@ const doneWithThisRun = () => {
                           class="text-uppercase font-weight-bold skills-theme-btn">
             </SkillsButton>
           </div>
-          <div v-if="quizResult && quizResult.gradedRes && !quizResult.gradedRes.passed" class="mt-5">
+          <div v-if="quizResult && quizResult.gradedRes && !quizResult.gradedRes.passed" class="mt-8">
             <div class="my-2" v-if="(quizInfo.maxAttemptsAllowed - quizInfo.userNumPreviousQuizAttempts - 1) > 0"><span class="text-info">No worries!</span> Would you like to try again?</div>
             <SkillsButton :severity="quizResult.gradedRes.needsGrading ? 'success' : 'danger'"
                           outlined

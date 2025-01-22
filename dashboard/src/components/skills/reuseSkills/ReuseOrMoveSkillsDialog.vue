@@ -17,7 +17,10 @@ limitations under the License.
 import { computed, onMounted, ref, toRaw } from 'vue'
 import { useRoute } from 'vue-router'
 import Stepper from 'primevue/stepper'
-import StepperPanel from 'primevue/stepperpanel'
+import StepList from 'primevue/steplist';
+import StepPanels from 'primevue/steppanels';
+import StepPanel from 'primevue/steppanel';
+import Step from 'primevue/step';
 import SkillsService from '@/components/skills/SkillsService.js'
 import CatalogService from '@/components/skills/catalog/CatalogService.js'
 import ReuseOrMovePreview from '@/components/skills/reuseSkills/ReuseOrMovePreview.vue'
@@ -133,120 +136,121 @@ const handleFocus = () => {
     :header="`${textCustomization.actionName} Skills in this Project`"
     :maximizable="true"
     :close-on-escape="true"
-    class="w-11 xl:w-8"
+    class="w-11/12 xl:w-8/12"
     v-model:visible="model"
     :pt="{ maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }"
   >
     <div data-cy="reuseOrMoveDialog">
-      <skills-spinner :is-loading="isLoadingData" class="my-8" />
+      <skills-spinner :is-loading="isLoadingData" class="my-20" />
       <div v-if="!isLoadingData" data-cy="reuseModalContent" class="w-100">
         <no-content2
-          class="mt-5 mb-4"
+          class="mt-8 mb-6"
           v-if="state.skillsWereMovedOrReusedAlready"
           title="Please Refresh"
           :show-refresh-action="true"
           message="Skills were moved or reused in another browser tab OR modified by another project administrator." />
         <no-content2
-          class="mt-5 mb-4"
+          class="mt-8 mb-6"
           v-if="!hasDestinations && !state.skillsWereMovedOrReusedAlready"
           title="No Destinations Available"
           :message="`There are no Subjects or Groups that this skill can be ${actionNameInPast} ${actionDirection}. Please create additional subjects and/or groups if you want to ${actionNameLowerCase} skills.`" />
         <no-content2
-            class="mt-5 mb-4"
+            class="mt-8 mb-6"
             v-if="importFinalizePending"
             :title="`Cannot ${textCustomization.actionName}`"
             :message="`Cannot initiate skill ${actionNameLowerCase} while skill finalization is pending.`"/>
 
-        <Stepper v-if="showStepper" :linear="true" class="w-100">
-        <StepperPanel header="Select Destination">
-          <template #content="{ nextCallback }">
-            <div data-cy="reuseSkillsModalStep1">
-              <Listbox
-                v-model="selectedDestination"
-                :options="destinations"
-                :filter="destinations.length > 4"
-                :filter-fields="['subjectName', 'groupName']"
-                listStyle="max-height:250px"
-                @update:modelValue="nextCallback"
-                class="w-full">
-                <template #empty>
-                  There are no <b>Subjects</b> or <b>Groups</b> that this skill can be {{actionNameInPast}} {{actionDirection}}.
-                  Please create additional subjects and/or groups if you want to {{actionNameLowerCase}} skills.
-                </template>
-                <template #option="item">
-                  <div class="flex" :data-cy="`selectDest_subj${item.option.subjectId}${item.option.groupId || ''}`">
-                    <div class="mr-2">
-                      <i v-if="item.option.groupId" class="fas fa-layer-group" aria-hidden="true" />
-                      <i v-else class="fas fa-cubes" aria-hidden="true" />
-                    </div>
+        <Stepper v-if="showStepper"  value="1" :linear="true" class="w-100">
+          <StepList>
+            <Step value="1">Select Destination</Step>
+            <Step value="2">Preview</Step>
+            <Step value="3">Confirmation</Step>
+          </StepList>
+          <StepPanels>
+            <StepPanel value="1" v-slot="{ activateCallback }">
+              <div data-cy="reuseSkillsModalStep1">
+                  <Listbox
+                    v-model="selectedDestination"
+                    :options="destinations"
+                    :filter="destinations.length > 4"
+                    :filter-fields="['subjectName', 'groupName']"
+                    listStyle="max-height:250px"
+                    @update:modelValue="activateCallback('2')"
+                    class="w-full">
+                    <template #empty>
+                      There are no <b>Subjects</b> or <b>Groups</b> that this skill can be {{actionNameInPast}} {{actionDirection}}.
+                      Please create additional subjects and/or groups if you want to {{actionNameLowerCase}} skills.
+                    </template>
+                    <template #option="item">
+                      <div class="flex" :data-cy="`selectDest_subj${item.option.subjectId}${item.option.groupId || ''}`">
+                        <div class="mr-2">
+                          <i v-if="item.option.groupId" class="fas fa-layer-group" aria-hidden="true" />
+                          <i v-else class="fas fa-cubes" aria-hidden="true" />
+                        </div>
 
-                    <div v-if="!item.option.groupId">
-                      <span class="font-italic">Subject:</span>
-                      <span class="ml-1 font-semibold text-primary">{{
-                          item.option.subjectName
-                        }}</span>
-                    </div>
-                    <div v-if="item.option.groupId">
-                      <div>
-                        <span class="font-italic">Group:</span>
-                        <span class="ml-1 font-semibold text-primary">{{
-                            item.option.groupName
-                          }}</span>
+                        <div v-if="!item.option.groupId">
+                          <span class="italic">Subject:</span>
+                          <span class="ml-1 font-semibold text-primary">{{
+                              item.option.subjectName
+                            }}</span>
+                        </div>
+                        <div v-if="item.option.groupId">
+                          <div>
+                            <span class="italic">Group:</span>
+                            <span class="ml-1 font-semibold text-primary">{{
+                                item.option.groupName
+                              }}</span>
+                          </div>
+                          <div>
+                            <span class="italic">In subject:</span> {{ item.option.subjectName }}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <span class="font-italic">In subject:</span> {{ item.option.subjectName }}
-                      </div>
-                    </div>
+                    </template>
+                  </Listbox>
+                  <div class="flex pt-6 justify-end">
+                    <SkillsButton
+                      label="Cancel"
+                      icon="far fa-times-circle"
+                      outlined
+                      class="mr-2"
+                      severity="warning"
+                      data-cy="closeButton"
+                      @click="onCancel" />
+                    <SkillsButton
+                      :label="textCustomization.actionName"
+                      :disabled="true"
+                      data-cy="reuseButton"
+                      icon="fas fa-shipping-fast"
+                      outlined />
                   </div>
-                </template>
-              </Listbox>
-              <div class="flex pt-4 justify-content-end">
-                <SkillsButton
-                  label="Cancel"
-                  icon="far fa-times-circle"
-                  outlined
-                  class="mr-2"
-                  severity="warning"
-                  data-cy="closeButton"
-                  @click="onCancel" />
-                <SkillsButton
-                  :label="textCustomization.actionName"
-                  :disabled="true"
-                  data-cy="reuseButton"
-                  icon="fas fa-shipping-fast"
-                  outlined />
-              </div>
-            </div>
-          </template>
-        </StepperPanel>
-        <StepperPanel header="Preview">
-          <template #content="{ nextCallback }">
-            <reuse-or-move-preview
-              v-if="selectedDestination?.groupId || selectedDestination?.subjectId"
-              data-cy="reuseSkillsModalStep2"
-              :skills="skills"
-              :destination="selectedDestination"
-              @on-cancel="onCancel"
-              @on-changed="onReuseOrMove"
-              :is-reuse-type="isReuseType"
-              :action-direction="actionDirection"
-              :action-name="textCustomization.actionName"
-              :next-step-nav-function="nextCallback"
-            />
-          </template>
-        </StepperPanel>
-        <StepperPanel header="Confirmation">
-          <template #content>
-            <div data-cy="reuseSkillsModalStep3" role="alert">
-              <div class="flex flex-column h-12rem">
+                </div>
+            </StepPanel>
+            <StepPanel value="2" v-slot="{ activateCallback }">
+              <reuse-or-move-preview
+                  v-if="selectedDestination?.groupId || selectedDestination?.subjectId"
+                  data-cy="reuseSkillsModalStep2"
+                  :skills="skills"
+                  :destination="selectedDestination"
+                  @on-cancel="onCancel"
+                  @on-changed="onReuseOrMove"
+                  :is-reuse-type="isReuseType"
+                  :action-direction="actionDirection"
+                  :action-name="textCustomization.actionName"
+                  :next-step-nav-function="() => activateCallback('3')"
+                />
+            </StepPanel>
+            <StepPanel value="3">
+              <div data-cy="reuseSkillsModalStep3" role="alert">
+              <div class="flex flex-col h-48">
                 <div
-                  class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
+                  class="border-2 border-dashed border-surface rounded-border bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium">
                 <span><span class="text-primary">Successfully</span> {{ actionNameInPast }}
                 <Tag severity="info">{{ movedOrReusedSkills.length }}</Tag>
                 skill{{ pluralSupport.plural(movedOrReusedSkills) }}.</span>
                 </div>
               </div>
-              <div class="flex pt-4 justify-content-end">
+              <div class="flex pt-6 justify-end">
                 <SkillsButton
                   label="OK"
                   icon="fas fa-shipping-fast"
@@ -255,9 +259,9 @@ const handleFocus = () => {
                   outlined />
               </div>
             </div>
-          </template>
-        </StepperPanel>
-      </Stepper>
+            </StepPanel>
+          </StepPanels>
+        </Stepper>
       </div>
     </div>
   </Dialog>

@@ -70,7 +70,7 @@ const signOut = () => {
 </script>
 
 <template>
-  <Card class="mt-3">
+  <Card class="mt-4">
     <template #content>
       <skills-spinner :is-loading="loading" v-if="loading" />
 

@@ -185,7 +185,7 @@ const loadData = () => {
       </SkillsCardHeader>
     </template>
     <template #content>
-      <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity." class="mt-4">
+      <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity." class="mt-6">
         <apexchart type="area" height="350" :options="chartOptions" :series="distinctUsersOverTime" data-cy="apexchart"></apexchart>
       </metrics-overlay>
     </template>

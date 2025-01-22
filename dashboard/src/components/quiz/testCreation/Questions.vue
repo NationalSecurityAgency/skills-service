@@ -229,20 +229,20 @@ function handleNewQuestionBtnFocus() {
       <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
         <template #content>
           <div>
-            <SkillsSpinner :is-loading="isLoading" class="py-8"/>
+            <SkillsSpinner :is-loading="isLoading" class="py-20"/>
             <div v-if="!isLoading">
               <NoContent2 v-if="!hasData"
                           title="No Questions Yet..."
-                          class="mt-5 pt-5"
+                          class="mt-8 pt-8"
                           message="Create a question to get started."
                           data-cy="noQuestionsYet"/>
               <div v-if="hasData" id="questionsCard">
                 <div v-for="(q, index) in questions" :key="q.id" :id="q.id">
                   <BlockUI :blocked="sortOrder.loading">
-                    <div class="absolute top-50 z-5 w-full text-center" :data-cy="`${q.id}_overlayShown`">
+                    <div class="absolute top-1/2 z-50 w-full text-center" :data-cy="`${q.id}_overlayShown`">
                       <div v-if="sortOrder.loading && q.id.toString()===sortOrder.loadingQuestionId" data-cy="updatingSortMsg" >
                         <div class="text-primary uppercase mb-1">Updating sort order!</div>
-                        <div class="flex justify-content-center">
+                        <div class="flex justify-center">
                           <SkillsSpinner label="Loading..." extra-class="m-0" :is-loading="true"
                                          style="width: 3rem; height: 3rem;" variant="info"/>
                         </div>
@@ -265,7 +265,7 @@ function handleNewQuestionBtnFocus() {
         </template>
 
         <template #footer v-if="!quizConfig.isReadOnlyQuiz && !quizConfig.loadingQuizConfig">
-          <div class="flex justify-content-end flex-wrap p-3">
+          <div class="flex justify-end flex-wrap p-4">
             <SkillsButton @click="openNewQuestionModal()"
                           icon="fas fa-plus-circle"
                           outlined

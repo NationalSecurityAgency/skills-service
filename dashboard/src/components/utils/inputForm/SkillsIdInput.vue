@@ -71,7 +71,7 @@ defineExpose({
     <InputGroup>
       <InputGroupAddon>
         <div style="width: 3.3rem !important;">
-          <InputSwitch
+          <ToggleSwitch
             v-model="canEdit"
             style="height:1rem !important;"
             size="small"

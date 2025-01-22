@@ -21,7 +21,7 @@ import SubjectLevelsOverTime from "@/components/metrics/projectSubjects/SubjectL
 <template>
   <div>
     <user-counts-by-subject-metric />
-    <subject-levels-over-time class="my-3"/>
+    <subject-levels-over-time class="my-4"/>
   </div>
 </template>
 

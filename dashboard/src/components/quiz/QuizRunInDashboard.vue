@@ -60,7 +60,7 @@ const navToQuizAttemptsPage = () => {
   <div>
     <SkillsSpinner :is-loading="loadingQuizInfo"/>
     <div v-if="!loadingQuizInfo">
-      <SubPageHeader :title="quizInfo.quizType" class="pt-4 pl-3">
+      <SubPageHeader :title="quizInfo.quizType" class="pt-6 pl-4">
       </SubPageHeader>
       <QuizRun v-if="quizId"
       :quiz-id="quizId"
@@ -68,7 +68,7 @@ const navToQuizAttemptsPage = () => {
       :skillId="skillId"
       :projectId="projectId"
       :multipleTakes="quizInfo.multipleTakes"
-      class="mb-5"
+      class="mb-8"
       @testWasTaken="navToQuizAttemptsPage"
       @cancelled="navToQuizAttemptsPage"/>
     </div>

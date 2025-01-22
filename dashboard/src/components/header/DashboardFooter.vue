@@ -45,9 +45,9 @@ const supportLinksProps = computed(() => {
 </script>
 
 <template>
-  <div class="mt-4 py-4 px-3 flex bg-primary-reverse border-top border-top-1 border-200 flex-column sm:flex-row gap-3 sm:gap-0"
+  <div class="mt-6 py-6 px-4 flex text-primary bg-primary-contrast border-top border-t border-surface-200 dark:border-surface-600 flex-col sm:flex-row gap-4 sm:gap-0"
        data-cy="dashboardFooter">
-    <div class="flex-1 flex sm:justify-content-start align-items-end align-content-end text-left">
+    <div class="flex-1 flex sm:justify-start items-end content-end text-left">
       <skill-tree-arrows />
       <div>
         <div>
@@ -62,7 +62,7 @@ const supportLinksProps = computed(() => {
         </div>
       </div>
     </div>
-    <div class="flex align-items-end ml-3 sm:ml-0" data-cy="dashboardVersionContainer">
+    <div class="flex items-end ml-4 sm:ml-0" data-cy="dashboardVersionContainer">
       <div class="mr-2"
             :title="skillTreeVersionTitle"
             data-cy="dashboardVersion">v{{ appConfig.dashboardVersion }}</div>

@@ -85,7 +85,7 @@ const navToSkill = (event) => {
         <div class="py-1 skill-res-row" :data-cy="`searchRes-${slotProps.option.skillId}`">
           <div class="flex">
             <div
-              class="flex-1 flex align-items-center"
+              class="flex-1 flex items-center"
               data-cy="skillName"
               :aria-label="`Selected ${slotProps.option.skillName} skill from ${slotProps.option.subjectName} subject. You have earned ${slotProps.option.userCurrentPoints} points out of ${slotProps.option.totalPoints} for this skill. Click to navigate to the skill. Type to search for a skill across all subjects.`">
               <i class="fas fa-graduation-cap skills-theme-primary-color mr-1 text-xl text-green-800"
@@ -97,19 +97,19 @@ const navToSkill = (event) => {
               data-cy="points"
               :class="{'font-green-300': slotProps.option.userAchieved}" aria-hidden="true">
               <i option v-if="slotProps.option.userAchieved" class="fas fa-check mr-1" aria-hidden="" />
-              <span class="text-orange-600 font-medium">{{ slotProps.option.userCurrentPoints }}</span> / {{ slotProps.option.totalPoints }} <span class="font-italic">Points</span>
+              <span class="text-orange-600 font-medium">{{ slotProps.option.userCurrentPoints }}</span> / {{ slotProps.option.totalPoints }} <span class="italic">Points</span>
             </div>
           </div>
 
           <div data-cy="subjectName" aria-hidden="true" class="mt-1">
-            <span class="font-italic ">Subject:</span> <span
+            <span class="italic ">Subject:</span> <span
             class="text-info skills-theme-primary-color alt-color-handle-hover">{{ slotProps.option.subjectName
             }}</span>
           </div>
         </div>
       </template>
       <template #empty>
-        <div class="p-3">No Results Found</div>
+        <div class="p-4">No Results Found</div>
       </template>
     </AutoComplete>
   </div>

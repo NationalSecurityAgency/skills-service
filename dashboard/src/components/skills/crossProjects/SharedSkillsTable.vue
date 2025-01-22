@@ -68,7 +68,7 @@ const sortTable = (criteria) => {
       </Column>
       <Column field="projectName" header="Project" sortable :class="{'flex': isFlex }">
         <template #body="slotProps">
-          <div class="flex flex-column">
+          <div class="flex flex-col">
             <div>
               <i v-if="slotProps.data.sharedWithAllProjects" class="fas fa-globe text-secondary" />
               {{ getProjectName(slotProps.data) }}

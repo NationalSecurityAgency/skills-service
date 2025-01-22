@@ -104,7 +104,7 @@ const formatLabel = (originalLabel) => {
     <div v-if="attributes && attributes.length > 0">
       <div v-for="(attr, index) in attributes" :key="attr.label">
         <div v-if="attr.isDescription && attr.value">
-          <div class="font-italic">
+          <div class="italic">
             {{ attr.label }}:
           </div>
           <Card body-class="py-1" style="height:150px; overflow-y: scroll;">
@@ -118,8 +118,8 @@ const formatLabel = (originalLabel) => {
             </template>
           </Card>
         </div>
-        <div v-else class="grid">
-          <div class="col-3 font-italic">{{ attr.label }}:</div>
+        <div v-else class="grid grid-cols-12 gap-4">
+          <div class="col-span-3 italic">{{ attr.label }}:</div>
           <div class="col my-auto">
             <span v-if="!attr.value" class="text-secondary">Not Provided</span>
             <span v-else>

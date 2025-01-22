@@ -163,7 +163,7 @@ const loadTranscript = () => {
   <div v-if="skill.videoSummary && skill.videoSummary.videoUrl" :data-cy="`skillVideo-${skill.skillId}`">
     <Message v-if="videoCollapsed" severity="info" :closable="false" data-cy="videoCollapsed">
       <template #container>
-        <div class="flex align-items-center p-3">
+        <div class="flex items-center p-4">
           <div class="flex-1"><i class="fas fa-tv mr-1" style="font-size: 1.2rem;" aria-hidden="true"/> This
             {{ attributes.skillDisplayName }} has a video.
           </div>
@@ -181,15 +181,15 @@ const loadTranscript = () => {
     </Message>
     <SkillsOverlay v-if="!videoCollapsed && isLocked" :show="true" :no-fade="true">
       <template #overlay>
-        <div class="text-center text-primary surface-overlay p-2 border-round mb-8" data-cy="videoIsLockedMsg">
+        <div class="text-center text-primary bg-surface-0 dark:bg-surface-900 p-2 rounded-border mb-20" data-cy="videoIsLockedMsg">
           <i class="fas fa-lock" style="font-size: 1.2rem;"></i>
           <div class="font-weight-bold">Complete this {{ attributes.skillDisplayName.toLowerCase() }}'s prerequisites to unlock the video</div>
         </div>
       </template>
       <div class="flex" style="padding: 0rem 1rem 0rem 1rem !important;">
-        <div style="height: 400px; background-color: black;" class="flex column align-items-center justify-content-center w-full">
-          <div class="text-center mt-6">
-              <span class="border rounded d-inline-block p-3 pl-4">
+        <div style="height: 400px; background-color: black;" class="flex column items-center justify-center w-full">
+          <div class="text-center mt-12">
+              <span class="border rounded d-inline-block p-4 pl-6">
                 <i class="fas fa-play" style="font-size: 3rem;"></i>
               </span>
           </div>
@@ -197,7 +197,7 @@ const loadTranscript = () => {
       </div>
     </SkillsOverlay>
     <div v-if="!videoCollapsed && !isLocked">
-      <div class="flex justify-content-center">
+      <div class="flex justify-center">
         <div :class="{ 'flex-1' : !isConfiguredVideoSize }">
           <video-player :video-player-id="`skillVideoFor-${skill.projectId}-${skill.skillId}`"
                         :options="videoConf"
@@ -207,11 +207,11 @@ const loadTranscript = () => {
       </div>
       <Message v-if="isSelfReportTypeVideo && isMotivationalSkill && skill.expirationDate">
         <template #container>
-          <div class="flex gap-2 p-3 align-content-center">
+          <div class="flex gap-2 p-4 content-center">
             <div>
               <i class="fas fa-user-shield text-2xl" aria-hidden="true"></i>
             </div>
-            <div class="flex-1 font-italic pt-1" data-cy="videoAlert">
+            <div class="flex-1 italic pt-1" data-cy="videoAlert">
               This skill's achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skill.expirationDate) }}</span>, but your <span class="font-size-1">
             <Tag severity="info">{{ numFormat.pretty(skill.totalPoints) }}</Tag></span> points can be retained by watching the video again.
             </div>
@@ -226,7 +226,7 @@ const loadTranscript = () => {
            :closable="false"
            data-cy="watchVideoAlert">
         <template #container>
-          <div class="flex flex-column md:flex-row align-items-center p-3">
+          <div class="flex flex-col md:flex-row items-center p-4">
             <div class="flex-1" data-cy="watchVideoMsg">
               <div v-if="!justAchieved">
                 <i class="fas fa-video font-size-2 mr-1 animate__bounceIn" aria-hidden="true"></i>
@@ -237,7 +237,7 @@ const loadTranscript = () => {
                   class="text-success font-weight-bold">{{ skill.totalPoints }}</span> points<span> and <b>completed</b> the {{ attributes.skillDisplayName.toLowerCase() }}</span>!
               </div>
             </div>
-            <div class="flex align-items-center">
+            <div class="flex items-center">
               <span v-if="skill.videoSummary.hasTranscript">
                 <SkillsSpinner :is-loading="transcript.loading" small/>
                 <SkillsButton style="text-decoration: underline; padding-right: 0.25rem; padding-left: 0.5rem;"
@@ -250,7 +250,7 @@ const loadTranscript = () => {
                               @click="loadTranscript" />
               </span>
               <span aria-hidden="true" class="mr-1" v-if="showPercent && skill.videoSummary.hasTranscript">|</span>
-              <span v-if="showPercent"><span class="font-italic">Watched: </span> <b data-cy="percentWatched">{{ percentWatched }}</b>%</span>
+              <span v-if="showPercent"><span class="italic">Watched: </span> <b data-cy="percentWatched">{{ percentWatched }}</b>%</span>
             </div>
           </div>
         </template>
@@ -274,7 +274,7 @@ const loadTranscript = () => {
           <Panel id="transcriptDisplay" data-cy="videoTranscript">
             <p class="m-0">{{ transcript.transcript }}</p>
           </Panel>
-          <div v-if="isSelfReportTypeVideo && !isAlreadyAchieved && !justAchieved" class="mt-2 flex align-items-center">
+          <div v-if="isSelfReportTypeVideo && !isAlreadyAchieved && !justAchieved" class="mt-2 flex items-center">
             <div class="flex flex-1">
               <Checkbox
                   inputId="readTranscript"

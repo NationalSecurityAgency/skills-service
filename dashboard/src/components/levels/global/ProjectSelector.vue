@@ -85,7 +85,7 @@ const searchChanged = (query) => {
 
 <template>
   <div id="project-selector">
-    <Dropdown :options="projects"
+    <Select :options="projects"
               v-model="selectedInternal"
               :filter="internalSearch"
               @filter="searchChanged"
@@ -97,13 +97,13 @@ const searchChanged = (query) => {
       <template #option="slotProps">
         <div :data-cy="`${slotProps.option.projectId}_option`">
           <div class="h6">{{ slotProps.option.name }}</div>
-          <div class="text-400 text-sm">ID: {{ slotProps.option.projectId }}</div>
+          <div class="text-surface-400 dark:text-surface-400 text-sm">ID: {{ slotProps.option.projectId }}</div>
         </div>
       </template>
       <template #footer v-if="afterListSlotText">
         <div class="h6 ml-1" data-cy="projectSelectorCountMsg">{{ afterListSlotText }}</div>
       </template>
-    </Dropdown>
+    </Select>
   </div>
 </template>
 

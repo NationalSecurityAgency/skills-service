@@ -93,7 +93,7 @@ const getTypeIconColor = (type) => {
           <i class="fas fa-atom mr-1" aria-hidden="true"></i>
         </template>
         <template #body="slotProps">
-          <div class="flex align-items-center gap-1">
+          <div class="flex items-center gap-1">
             <Avatar :icon="`fas ${getTypeIcon(slotProps.data.type)}`"
                     :style="`color: ${getTypeIconColor(slotProps.data.type)}`" />
             <div :aria-label="`Prerequisite's type is ${slotProps.data.type}`" data-cy="prereqType">

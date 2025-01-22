@@ -130,7 +130,7 @@ const onSkillSaved = (skill) => {
       :name-to-id-sync-enabled="!props.isEdit" />
 
     <markdown-editor
-      class="mt-5"
+      class="mt-8"
       name="description" />
 
   </SkillsInputFormDialog>

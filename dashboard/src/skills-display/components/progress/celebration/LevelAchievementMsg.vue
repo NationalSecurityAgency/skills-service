@@ -67,19 +67,19 @@ const currentIcon = computed(() => {
             and hit
             <Tag severity="info">Level 2</Tag>
             {{ timeUtils.timeFromNow(dateAchieved) }}!
-            <span class="font-italic">Keep that momentum going!</span>
+            <span class="italic">Keep that momentum going!</span>
           </achievement-msg-content>
           <achievement-msg-content v-if="level === 2" title="Congratulations!">
             You achieved
             <Tag severity="info">Level 2</Tag>,
             a significant milestone!
-            <span class="font-italic">Keep up the fantastic work!</span>
+            <span class="italic">Keep up the fantastic work!</span>
           </achievement-msg-content>
           <achievement-msg-content v-if="level === 3" title="You are on a roll!">
             Reaching
             <Tag severity="info">Level 3</Tag>
             is an impressive achievement!
-            <span class="font-italic">Keep pushing forward!</span>
+            <span class="italic">Keep pushing forward!</span>
           </achievement-msg-content>
           <achievement-msg-content v-if="level === 4" title="Amazing Job!">
             Achieving <Tag severity="info">Level 4</Tag>
@@ -94,19 +94,19 @@ const currentIcon = computed(() => {
           <achievement-msg-content v-if="level === 1" title="Subject Level 1 Unlocked!">
             You took the first step in mastering
             <Tag severity="info">{{ props.userProgress.subject }}</Tag>!
-            <span class="font-italic">You're off to a fantastic start!!</span>
+            <span class="italic">You're off to a fantastic start!!</span>
           </achievement-msg-content>
           <achievement-msg-content v-if="level === 2" title="Subject Level 2 Unlocked!">
             Exciting News! You have reached
             <Tag severity="info">Level 2</Tag>
             in <Tag severity="info">{{ props.userProgress.subject }}</Tag>!
-            <span class="font-italic">Keep up the great work!</span>
+            <span class="italic">Keep up the great work!</span>
           </achievement-msg-content>
           <achievement-msg-content v-if="level === 3" title="Subject Level 3 Unlocked!">
             Bravo! You've reached
             <Tag severity="info">Level 3</Tag>
             in <Tag severity="info">{{ props.userProgress.subject }}</Tag>!
-            <span class="font-italic">Hard work and dedication are paying off!</span>
+            <span class="italic">Hard work and dedication are paying off!</span>
           </achievement-msg-content>
           <achievement-msg-content v-if="level === 4" title="Subject Level 4 Unlocked!">
             Well Done! Reaching <Tag severity="info">Level 4</Tag>

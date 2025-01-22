@@ -139,20 +139,20 @@ const overlayMessage  = computed(() => {
       <SkillsCardHeader title="Number of users for each level over time"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex gap-2 mb-5 flex-column sm:flex-row">
+      <div class="flex gap-2 mb-8 flex-col sm:flex-row">
         <BlockUI :blocked="loading.subjects" rounded="sm" opacity="0.5" spinner-variant="info" spinner-type="grow" spinner-small class="flex flex-1">
-          <Dropdown :options="subjects.available"
+          <Select :options="subjects.available"
                     v-model="subjects.selected"
                     optionLabel="text"
                     optionValue="value"
                     class="w-full"
                     placeholder="Select a Subject to plot"
                     data-cy="subjectNumUsersPerLevelOverTime-subjectSelector">
-          </Dropdown>
+          </Select>
         </BlockUI>
         <SkillsButton variant="outline-info" class="ml-2" :disabled="!subjects.selected" @click="loadChart" icon="fas fa-paint-roller" label="Generate" />
       </div>
-      <metrics-overlay :loading="loading.charts" :has-data="!isSeriesEmpty" :no-data-msg="overlayMessage" class="mt-4">
+      <metrics-overlay :loading="loading.charts" :has-data="!isSeriesEmpty" :no-data-msg="overlayMessage" class="mt-6">
         <apexchart type="area" height="300" :options="chartOptions" :series="series"></apexchart>
       </metrics-overlay>
     </template>

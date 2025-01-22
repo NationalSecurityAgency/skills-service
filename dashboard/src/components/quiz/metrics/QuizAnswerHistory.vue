@@ -202,9 +202,9 @@ const collapseAll = () => {
       </template>
 
       <template #empty>
-        <div class="flex justify-content-center flex-wrap">
-          <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
-          <span class="flex align-items-center justify-content-center">There are no records to show</span>
+        <div class="flex justify-center flex-wrap">
+          <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+          <span class="flex items-center justify-center">There are no records to show</span>
         </div>
       </template>
       <template #expansion="slotProps">
@@ -222,24 +222,24 @@ const collapseAll = () => {
               :key="col.key"
               :field="col.key"
               :sortable="col.sortable"
-              class="vertical-align-top"
+              class="align-top"
               :class="{'flex': responsive.md.value }">
         <template #header>
           <span :data-cy="col.dataCy" ><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
         </template>
         <template #body="slotProps">
-          <div v-if="slotProps.field === 'userIdForDisplay'" class="flex flex-row flex-wrap align-items-center"  :data-cy="`row${slotProps.index}-colUserId`">
-            <div class="flex flex-grow-1 justify-content-start mb-2">
+          <div v-if="slotProps.field === 'userIdForDisplay'" class="flex flex-row flex-wrap items-center"  :data-cy="`row${slotProps.index}-colUserId`">
+            <div class="flex grow justify-start mb-2">
               {{ userInfo.getUserDisplay(slotProps.data, true) }}
             </div>
-            <div class="flex justify-content-start mb-2">
+            <div class="flex justify-start mb-2">
               <router-link :data-cy="`managesQuizBtn_${slotProps.data.quizId}`"
                            :aria-label="`View quiz attempt for ${slotProps.data.userQuizAttemptId} id`"
                            :to="{ name: 'QuizSingleRunPage', params: { runId: slotProps.data.userQuizAttemptId } }" tabindex="-1">
                   <SkillsButton label="View Run"
                                 icon="fas fa-eye"
                                 data-cy="viewRunBtn"
-                              class="flex-shrink-1"
+                              class="shrink"
                                 outlined
                                 size="small"/>
               </router-link>

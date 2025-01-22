@@ -19,7 +19,7 @@ import { useRoute } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
-import { FilterMatchMode } from 'primevue/api'
+import { FilterMatchMode } from '@primevue/core/api'
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjSkillsDisplayOrder } from '@/components/skills/UseSubjSkillsDisplayOrder.js'
@@ -492,14 +492,14 @@ const exportSkills = () => {
 
 <template>
   <div>
-    <div class="p-3 bg-primary-reverse">
+    <div class="p-4 text-primary bg-primary-contrast">
       <div class="flex gap-1">
         <InputGroup>
           <InputGroupAddon>
             <i class="fas fa-search" aria-hidden="true"/>
           </InputGroupAddon>
           <InputText
-              class="flex flex-grow-1"
+              class="flex grow"
               v-model="filters['global'].value"
               data-cy="skillsTable-skillFilter"
               aria-label="Skill Search"
@@ -516,7 +516,7 @@ const exportSkills = () => {
           </InputGroupAddon>
         </InputGroup>
       </div>
-      <div class="mt-4">
+      <div class="mt-6">
         <div class="mt-2 flex flex-wrap">
           <div class="flex-1 w-full lg:w-auto">
             <MultiSelect
@@ -530,10 +530,10 @@ const exportSkills = () => {
                 placeholder="Optional Fields"
                 data-cy="skillsTable-additionalColumns"/>
           </div>
-          <div v-if="!projConfig.isReadOnlyProj" class="w-full lg:w-auto flex mt-3 lg:mt-0 flex-column sm:flex-row gap-2">
-            <div class="flex-1 align-items-center flex">
-              <label for="sortEnabledSwitch" class="lg:ml-3 mr-1">Reorder:</label>
-              <InputSwitch
+          <div v-if="!projConfig.isReadOnlyProj" class="w-full lg:w-auto flex mt-4 lg:mt-0 flex-col sm:flex-row gap-2">
+            <div class="flex-1 items-center flex">
+              <label for="sortEnabledSwitch" class="lg:ml-4 mr-1">Reorder:</label>
+              <ToggleSwitch
                   inputId="sortEnabledSwitch"
                   data-cy="enableDisplayOrderSort"
                   @update:modelValue="onReorderSwitchChanged"
@@ -543,7 +543,7 @@ const exportSkills = () => {
             <SkillsButton
                 :id="`skillActionsBtn${groupId || ''}`"
                 severity="info"
-                class="ml-3"
+                class="ml-4"
                 @click="toggleActionsMenu"
                 aria-label="Skill's actions button"
                 aria-haspopup="true"
@@ -601,7 +601,7 @@ const exportSkills = () => {
       </template>
 
       <template #header v-if="!isSkillsGroupTable">
-        <div class="flex justify-content-end flex-wrap mt-2">
+        <div class="flex justify-end flex-wrap mt-2">
           <SkillsButton :disabled="totalRows <= 0"
                         size="small"
                         icon="fas fa-download"
@@ -627,7 +627,7 @@ const exportSkills = () => {
         </template>
         <template #body="slotProps">
           <div v-if="slotProps.field == 'name'"
-               class="flex flex-wrap align-items-center flex-column sm:flex-row"
+               class="flex flex-wrap items-center flex-col sm:flex-row"
                :data-cy="`nameCell_${slotProps.data.skillId}`">
             <div v-if="slotProps.data.isGroupType" class="flex-1">
               <div>
@@ -681,7 +681,7 @@ const exportSkills = () => {
                 </Tag>
               </div>
             </div>
-            <div class="flex align-items-start justify-content-end">
+            <div class="flex items-start justify-end">
               <div class="flex flex-nowrap">
                 <ButtonGroup v-if="!projConfig.isReadOnlyProj" class="mt-2 ml-1">
                   <SkillsButton
@@ -731,7 +731,7 @@ const exportSkills = () => {
             </div>
           </div>
           <div v-else-if="slotProps.field === 'displayOrder'" class="w-min-9rem">
-            <div class="flex align-items-center">
+            <div class="flex items-center">
               <div class="flex-1">
                 {{ slotProps.data[col.key] }}
               </div>
@@ -791,11 +791,11 @@ const exportSkills = () => {
           <div v-else-if="slotProps.field === 'totalPoints'">
             <div :data-cy="`totalPointsCell_${slotProps.data.skillId}`">
               <div class="text-lg">{{ numberFormat.pretty(slotProps.data.totalPoints) }}</div>
-              <div v-if="slotProps.data.isSkillType" class="text-color-secondary">
+              <div v-if="slotProps.data.isSkillType" class="text-muted-color">
                 {{ numberFormat.pretty(slotProps.data.pointIncrement) }} pts x {{ slotProps.data.numPerformToCompletion
                 }} repetitions
               </div>
-              <div v-if="slotProps.data.isGroupType" class="text-color-secondary">from
+              <div v-if="slotProps.data.isGroupType" class="text-muted-color">from
                 <Tag>{{ slotProps.data.numSkillsInGroup }}</Tag>
                 skill{{ slotProps.data.numSkillsInGroup !== 1 ? 's' : '' }}
               </div>
@@ -828,7 +828,7 @@ const exportSkills = () => {
           :id="`childRow-${slotProps.data.skillId}`"
           :key="`childRow-${slotProps.data.skillId}`"
           :skill="slotProps.data"
-          class="ml-4"
+          class="ml-6"
         />
         <child-row-skills-display
           v-if="slotProps.data.isSkillType"
@@ -844,11 +844,11 @@ const exportSkills = () => {
       <!--      </template>-->
 
       <template #empty>
-        <div class="flex justify-content-center flex-wrap">
-          <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle"
+        <div class="flex justify-center flex-wrap">
+          <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle"
              aria-hidden="true"></i>
-          <span class="flex align-items-center justify-content-center">No Skills Found.
-            <SkillsButton class="flex flex align-items-center justify-content-center px-1"
+          <span class="flex items-center justify-center">No Skills Found.
+            <SkillsButton class="flex flex items-center justify-center px-1"
                           label="Reset"
                           link
                           size="small"

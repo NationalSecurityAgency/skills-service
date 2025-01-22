@@ -30,8 +30,8 @@ const isRootUser = computed(() => accessState.isRoot)
 <template>
   <div class="flex flex-wrap gap-2"
     :class="{
-      'flex-column justify-content-center align-items-center': projectsState.shouldTileProjectsCards,
-      'justify-content-end': !projectsState.shouldTileProjectsCards
+      'flex-col justify-center items-center': projectsState.shouldTileProjectsCards,
+      'justify-end': !projectsState.shouldTileProjectsCards
     }">
     <div class="flex gap-2">
       <router-link :to="{ name:'Subjects', params: { projectId: project.projectId }}" tabindex="-1">

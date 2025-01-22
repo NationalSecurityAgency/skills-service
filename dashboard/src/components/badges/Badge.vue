@@ -151,9 +151,9 @@ defineExpose({
       <template #footer>
         <i v-if="badge.endDate" class="fas fa-gem absolute" style="font-size: 1rem; top: 2.6rem; left: 1.6rem; color: purple" aria-hidden="true"/>
         <div class="mt-1" style="height: 2.5rem;">
-          <div v-if="!live" data-cy="badgeStatus" class="flex align-items-end">
+          <div v-if="!live" data-cy="badgeStatus" class="flex items-end">
             <div class="flex-1">
-              <span class="text-color-secondary">Status: </span>
+              <span class="text-muted-color">Status: </span>
               <span class="uppercase" :class="{ 'border-right pr-2 mr-2' : !isReadOnlyProj }">Disabled <span
                 class="far fa-stop-circle text-red-500" aria-hidden="true" /></span>
             </div>
@@ -163,9 +163,9 @@ defineExpose({
                           @click.stop="handlePublish"></SkillsButton>
             </div>
           </div>
-          <div v-else data-cy="badgeStatus" class="flex align-items-end h-full">
+          <div v-else data-cy="badgeStatus" class="flex items-end h-full">
             <div class="flex-1">
-              <span class="text-color-secondary" style="height: 4rem;">Status: </span> <span
+              <span class="text-muted-color" style="height: 4rem;">Status: </span> <span
               class="uppercase" style="height: 4rem;">Live <span
               class="far fa-check-circle text-green-500" aria-hidden="true" /></span>
             </div>

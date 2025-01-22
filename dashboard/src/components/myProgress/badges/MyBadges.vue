@@ -59,10 +59,10 @@ const loadBadges = () => {
   <my-badges-details
     data-cy="achievedBadges"
     :badges="achievedBadges"
-    class="mt-3"
+    class="mt-4"
   />
 
-  <badges-catalog class="mt-3"
+  <badges-catalog class="mt-4"
                   :badges="unachievedBadges"
                   data-cy="availableBadges">
   </badges-catalog>

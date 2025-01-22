@@ -250,7 +250,7 @@ const zoomed = (chartContext, { xaxis, yaxis }) => {
     </template>
     <template #content>
       <div class="text-center">
-        <div class="flex align-content-center justify-content-center">
+        <div class="flex content-center justify-center">
           <skills-spinner
             v-if="loading"
             :is-loading="loading"

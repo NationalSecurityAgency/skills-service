@@ -144,9 +144,9 @@ watch(() => props.expandGroups, (newValue) => {
 
 <template>
   <div class="text-left skills-theme-skills-progress" data-cy="skillProgress">
-    <div v-if="skill.crossProject && !skillsDisplayInfo.isGlobalBadgePage.value" class="flex gap-3 flex-wrap">
+    <div v-if="skill.crossProject && !skillsDisplayInfo.isGlobalBadgePage.value" class="flex gap-4 flex-wrap">
       <div class="flex-1">
-        <div class="text-xl"><span class="text-color-secondary font-italic">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}</div>
+        <div class="text-xl"><span class="text-muted-color italic">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}</div>
       </div>
       <div class="">
         <div class="text-xl"><i class="fa fa-vector-square" aria-hidden="true"/> Cross-{{ attributes.projectDisplayName }} {{ attributes.skillDisplayName }}</div>
@@ -179,7 +179,7 @@ watch(() => props.expandGroups, (newValue) => {
         <div class="relative">
           <skill-progress-bar data-cy="skillProgressBar"
                               :is-locked="isSkillLocked"
-                              class="border-1 border-transparent hover:border-orange-700 border-round"
+                              class="border border-transparent hover:border-orange-700 rounded-border"
                               :skill="skill" />
 
         </div>
@@ -201,7 +201,7 @@ watch(() => props.expandGroups, (newValue) => {
          :data-cy="`skillDescription-${skill.skillId}`">
 
       <div v-if="skill.type === 'SkillsGroup'">
-        <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
+        <p class="skills-text-description text-primary mt-4" style="font-size: 0.9rem;">
           <markdown-text
             :instance-id="`skillDescription-${skill.skillId}`"
             v-if="skill.description && skill.description.description"
@@ -217,7 +217,7 @@ watch(() => props.expandGroups, (newValue) => {
           <span v-else>Please see its prerequisites below.</span>
           ***
         </div>
-        <p v-if="skill.subjectName" class="text-secondary mt-3">
+        <p v-if="skill.subjectName" class="text-secondary mt-4">
           {{ attributes.subjectDisplayName }}: {{ skill.subjectName }}
         </p>
 
@@ -226,7 +226,7 @@ watch(() => props.expandGroups, (newValue) => {
           :date="skill.achievedOn" class="mt-2" />
 
         <partial-points-alert v-if="!enableDrillDown" :skill="skill" :is-locked="isSkillLocked" />
-        <skills-summary-cards v-if="!isSkillLocked" :skill="skill" class="mt-3" />
+        <skills-summary-cards v-if="!isSkillLocked" :skill="skill" class="mt-4" />
         <catalog-import-status :skill="skill" />
         <skill-video v-if="skill"
                      :skill="skill"
@@ -234,7 +234,7 @@ watch(() => props.expandGroups, (newValue) => {
                      :video-collapsed-by-default="videoCollapsedByDefault"
                      @points-earned="pointsEarned"
                      class="mt-2" />
-        <p class="skills-text-description text-primary mt-3" style="font-size: 0.9rem;">
+        <p class="skills-text-description text-primary mt-4" style="font-size: 0.9rem;">
           <markdown-text
             :instance-id="`skillDescription-${skill.skillId}`"
             v-if="skill.description && skill.description.description"
@@ -247,7 +247,7 @@ watch(() => props.expandGroups, (newValue) => {
       </div>
     </div>
 
-    <div v-if="skill.isSkillsGroupType && childSkillsInternal && expanded" class="ml-4 mt-3">
+    <div v-if="skill.isSkillsGroupType && childSkillsInternal && expanded" class="ml-6 mt-4">
       <div v-for="(childSkill, index) in childSkillsInternal"
            :key="`group-${skill.skillId}_skill-${childSkill.skillId}`"
            :id="`skillRow-${childSkill.skillId}`"
@@ -256,7 +256,7 @@ watch(() => props.expandGroups, (newValue) => {
         <!--        @points-earned="onChildSkillPointsEarned"-->
         <skill-progress
           :id="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
-          class="mb-3"
+          class="mb-4"
           :skill="childSkill"
           :subjectId="subjectId"
           :badgeId="badgeId"

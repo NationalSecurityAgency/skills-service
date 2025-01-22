@@ -22,7 +22,7 @@ language governing permissions and limitations under the License. */
 <template>
   <div>
     <img src="@/assets/img/skilltree_logo.png" style="height: 7rem" alt="SkillTree logo" />
-    <div class="h6 text-color-secondary">Micro-Learning Gamification Platform</div>
+    <div class="h6 text-muted-color">Micro-Learning Gamification Platform</div>
   </div>
 </template>
 

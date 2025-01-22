@@ -167,7 +167,7 @@ const numberOfStars = computed(() => {
 
 <template>
   <div :data-cy="`metrics-q${qNum}`">
-    <div class="p-4">
+    <div class="p-6">
       <div class="text-3xl">Question #{{ qNum }}
         <Tag class="text-lg" severity="info" data-cy="qType">{{ questionTypeLabel }}</Tag>
       </div>
@@ -184,9 +184,9 @@ const numberOfStars = computed(() => {
       </div>
     </div>
 
-    <div v-if="isRating && averageScore" class="flex align-items-baseline flex-wrap pl-3">
+    <div v-if="isRating && averageScore" class="flex items-baseline flex-wrap pl-4">
       Average Score:
-      <Rating class="flex-initial border-round py-3 px-4" v-model="averageScore" :stars="numberOfStars" readonly
+      <Rating class="flex-initial rounded-border py-4 px-6" v-model="averageScore" :stars="numberOfStars" readonly
               :cancel="false" />
       <span class="text-lg">{{ averageScore }}</span>
     </div>
@@ -229,11 +229,11 @@ const numberOfStars = computed(() => {
         <QuizAnswerHistory :answer-def-id="slotProps.data.id"
                            :is-survey="isSurvey"
                            :data-cy="`row${slotProps.index}-answerHistory`"
-                           class="mb-4" />
+                           class="mb-6" />
       </template>
     </SkillsDataTable>
 
-    <div v-if="!isSurvey && isMultipleChoice" class="surface-100 p-2 text-sm" data-cy="multipleChoiceQuestionWarning">
+    <div v-if="!isSurvey && isMultipleChoice" class="bg-surface-100 dark:bg-surface-700 p-2 text-sm" data-cy="multipleChoiceQuestionWarning">
       *** All of the required choices must be selected for the question to be counted as <span
       class="text-primary uppercase">correct</span> ***
     </div>

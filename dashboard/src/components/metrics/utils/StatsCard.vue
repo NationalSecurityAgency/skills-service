@@ -63,7 +63,7 @@ defineProps({
 
     </template>
     <template #footer>
-      <p class="font-light text-sm mt-3 mb-0" data-cy="statCardDescription">
+      <p class="font-light text-sm mt-4 mb-0" data-cy="statCardDescription">
         <slot />
       </p>
     </template>

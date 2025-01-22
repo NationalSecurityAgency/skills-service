@@ -15,8 +15,7 @@ limitations under the License.
 */
 <script setup>
 
-import OverlayPanel from 'primevue/overlaypanel'
-import PanelMenu from 'primevue/panelmenu'
+import {Popover, PanelMenu} from "primevue";
 import { nextTick, onMounted, ref } from 'vue'
 
 const props = defineProps({
@@ -81,7 +80,7 @@ const focusOnProgressGroup = () => {
 
 <template>
   <div v-if="filtersInternal" class="skills-theme-filter-menu" data-cy="filterMenu">
-    <div class="flex align-content-center">
+    <div class="flex content-center">
       <Button
         icon="fas fa-filter"
         @click="toggle"
@@ -90,25 +89,25 @@ const focusOnProgressGroup = () => {
         data-cy="filterBtn"
         aria-label="Open type filter"
         aria-haspopup="true" />
-      <div v-if="filteredSelection?.label" class="ml-2 align-content-center">
+      <div v-if="filteredSelection?.label" class="ml-2 content-center">
         <Chip :label="filteredSelection.label"
               :icon="filteredSelection.icon"
               @remove="clearSelection"
-              class="white-space-nowrap"
+              class="whitespace-nowrap"
               removable
               data-cy="selectedFilter"/>
       </div>
     </div>
-    <OverlayPanel id="typeSelectorPanel" ref="menu" @show="focusOnProgressGroup" aria-label="Type Selector Menu">
+    <Popover id="typeSelectorPanel" ref="menu" @show="focusOnProgressGroup" aria-label="Type Selector Menu">
       <div>
-        <PanelMenu :model="filtersInternal" class="w-full md:w-20rem" v-model:expandedKeys="expandedKeys">
+        <PanelMenu :model="filtersInternal" class="w-full md:w-80" v-model:expandedKeys="expandedKeys">
           <template #item="{ item, props, root, active }">
-            <div text v-if="root" class="p-3" :id="item.key" :data-cy="`filter_${item.key}`">
+            <div text v-if="root" class="p-4" :id="item.key" :data-cy="`filter_${item.key}`">
               <i v-if="!active" class="far fa-arrow-alt-circle-right"></i>
               <i v-else class="far fa-arrow-alt-circle-down"></i>
               <span class="ml-2" v-html="item.label" />
             </div>
-            <div v-else class="flex align-items-center pl-3 p-2" v-bind="props.action" :data-cy="`filter_${item.key}`">
+            <div v-else class="flex items-center pl-4 p-2" v-bind="props.action" :data-cy="`filter_${item.key}`">
               <Avatar v-if="item.icon" :icon="item.icon" class="" size="small" />
               <div class="flex-1">
                 <span class="ml-2">{{ item.label}}</span>
@@ -118,7 +117,7 @@ const focusOnProgressGroup = () => {
           </template>
         </PanelMenu>
       </div>
-    </OverlayPanel>
+    </Popover>
 
   </div>
 </template>

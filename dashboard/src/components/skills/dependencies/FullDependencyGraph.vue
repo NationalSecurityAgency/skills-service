@@ -264,7 +264,7 @@ const setVisNetworkTabIndex = () => {
     <Card data-cy="fullDepsSkillsGraph" style="margin-bottom: 25px;">
       <template #content>
 <!--      <loading-container :is-loading="isLoading">-->
-        <div v-if="!hasGraphData && !isLoading" class="my-5">
+        <div v-if="!hasGraphData && !isLoading" class="my-8">
           <no-content2 icon="fa fa-project-diagram" title="No Learning Path Yet..."
                        message="Here you can create and manage the project's Learning Path which may consist of skills and badges. You can get started by adding a path above."></no-content2>
         </div>

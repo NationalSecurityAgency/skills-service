@@ -180,12 +180,12 @@ const createResizeSupport = () => {
 </script>
 
 <template>
-  <div class="flex justify-content-center mt-2">
+  <div class="flex justify-center mt-2">
     <div :class="{ 'flex-1' : !isConfiguredVideoSize }">
   <div :id="`${vidPlayerId}Container`" data-cy="videoPlayer"  :style="playerWidth ? `width: ${playerWidth}px;` : ''"
-       class="videoPlayerContainer p-0 border-1 border-round-sm border-200">
+       class="videoPlayerContainer p-0 border rounded border-surface-200 dark:border-surface-600">
       <i v-if="!isPlaying"
-         class="fas fa-expand-alt fa-rotate-90 handle border-1 border-500 p-1 bg-primary-reverse border-round"
+         class="fas fa-expand-alt fa-rotate-90 handle border border-surface-500 dark:border-surface-300 p-1 text-primary bg-primary-contrast rounded-border"
          :id="`${vidPlayerId}ResizeHandle`"
          data-cy="videoResizeHandle"
          role="button"
@@ -193,10 +193,10 @@ const createResizeSupport = () => {
          @keyup.right="resizePlayerBigger"
          @keyup.left="resizePlayerSmaller"
          tabindex="0"></i>
-    <div v-if="isResizing" class="text-center flex align-items-center justify-content-center ">
-      <div class="absolute z-4 top-0 left-0 right-0 bottom-0 bg-gray-600 opacity-50 text-center flex align-items-center justify-content-center " >
+    <div v-if="isResizing" class="text-center flex items-center justify-center ">
+      <div class="absolute z-40 top-0 left-0 right-0 bottom-0 bg-gray-600 opacity-50 text-center flex items-center justify-center " >
       </div>
-      <div class="absolute top-0 z-5 text-center bg-primary-reverse mt-5 border-1 border-round" style="width: 100px;">
+      <div class="absolute top-0 z-50 text-center text-primary bg-primary-contrast mt-8 border rounded-border" style="width: 100px;">
         {{ resolution }}
       </div>
     </div>

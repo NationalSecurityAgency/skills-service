@@ -57,14 +57,14 @@ const myProgress = computed(() => myProgressState.myProgress)
       </div>
     </template>
     <template #right-content>
-      <div class="flex justify-content-center sm:justify-content-end">
-        <div class="flex justify-content-center">
+      <div class="flex justify-center sm:justify-end">
+        <div class="flex justify-center">
           <progress-card-icon icon="fas fa-trophy" />
         </div>
       </div>
     </template>
     <template #footer>
-      <div class="flex gap-2 align-items-center flex-column sm:flex-row">
+      <div class="flex gap-2 items-center flex-col sm:flex-row">
         <div data-cy="badges-num-footer" class="flex-1 w-min-10rem">
           Be proud to earn those badges!!
         </div>

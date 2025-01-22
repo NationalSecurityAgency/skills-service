@@ -110,13 +110,13 @@ const saml2Login = (registrationId) => {
 
 <template>
   <div class="">
-    <div class="text-center mt-8">
-      <div class="mt-5 justify-content-center">
+    <div class="text-center mt-20">
+      <div class="mt-8 justify-center">
         <logo1 />
       </div>
-      <div class="grid ">
-        <div class="col-12 sm:col-8 sm:col-offset-2 md:col-6 md:col-offset-3 lg:col-4 lg:col-offset-4">
-          <Card v-if="!appConfig.oAuthOnly && !appConfig.saml2RegistrationId" class="mt-3">
+      <div class="grid grid-cols-12 gap-4 ">
+        <div class="col-span-12 sm:col-span-8 sm:col-start-3 md:col-span-6 md:col-start-4 lg:col-span-4 lg:col-start-5">
+          <Card v-if="!appConfig.oAuthOnly && !appConfig.saml2RegistrationId" class="mt-4">
             <template #content>
               <form @submit="onSubmit">
                 <Message v-if="loginFailed" data-cy="loginFailed" severity="error">Invalid Username or Password</Message>
@@ -193,12 +193,12 @@ const saml2Login = (registrationId) => {
           </Card>
 
           <Card v-if="oAuthProviders && oAuthProviders.length > 0"
-                class="mt-3"
+                class="mt-4"
                 data-cy="oAuthProviders">
             <template #content>
               <div v-for="oAuthProvider in oAuthProviders"
                    :key="oAuthProvider.registrationId"
-                   class="col-12 mb-3">
+                   class="col-span-12 mb-4">
                 <Button
                   class="w-full text-center"
                   outlined
@@ -209,11 +209,11 @@ const saml2Login = (registrationId) => {
             </template>
           </Card>
 
-          <Card v-if="appConfig.saml2RegistrationId" class="mt-3">
+          <Card v-if="appConfig.saml2RegistrationId" class="mt-4">
             <template #content>
               <div
                    :key="appConfig.saml2RegistrationId"
-                   class="col-12 mb-3">
+                   class="col-span-12 mb-4">
                 <Button
                     class="w-full text-center"
                     outlined

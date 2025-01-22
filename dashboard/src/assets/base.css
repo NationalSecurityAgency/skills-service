@@ -14,3 +14,6 @@
  * limitations under the License.
  */
 /* base css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

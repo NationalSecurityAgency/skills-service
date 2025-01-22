@@ -48,7 +48,7 @@ function loadEmailSettings() {
 
 <template>
   <sub-page-header title="Email Settings"/>
-  <Card class="mb-4">
+  <Card class="mb-6">
     <template #header>
       <SkillsCardHeader title="Email Connection Settings"></SkillsCardHeader>
     </template>

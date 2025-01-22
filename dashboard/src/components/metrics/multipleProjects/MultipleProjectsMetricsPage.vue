@@ -43,7 +43,7 @@ const loadProjects = () => {
 
     <skills-spinner :is-loading="loading" />
     <div v-if="!loading">
-      <training-profile-comparator class="mb-3" :available-projects="projects"/>
+      <training-profile-comparator class="mb-4" :available-projects="projects"/>
       <multiple-proj-users-in-common :available-projects="projects"/>
     </div>
   </div>

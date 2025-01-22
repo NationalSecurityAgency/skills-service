@@ -20,7 +20,7 @@ import AchievementsNavigator from '@/components/metrics/projectAchievements/Achi
 
 <template>
   <div>
-    <div class="flex flex-column gap-3">
+    <div class="flex flex-col gap-4">
       <level-breakdown-metric />
       <achievements-navigator />
     </div>

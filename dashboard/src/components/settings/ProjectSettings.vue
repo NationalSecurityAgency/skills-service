@@ -491,7 +491,7 @@ const saveSettings = ((dirtyChanges) => {
       <template #content>
         <loading-container :is-loading="isLoading">
           <settings-item label="Project Discoverability" input-id="projectVisibilityDropdown">
-            <Dropdown v-model="settings.projectVisibility.value"
+            <Select v-model="settings.projectVisibility.value"
                       inputId="projectVisibilityDropdown"
                       :options="projectVisibilityOptions"
                       @change="projectVisibilityChanged"
@@ -502,7 +502,7 @@ const saveSettings = ((dirtyChanges) => {
           </settings-item>
 
           <settings-item label="Project Description" input-id="hideProjectDescription">
-            <Dropdown v-model="settings.hideProjectDescription.value"
+            <Select v-model="settings.hideProjectDescription.value"
                       inputId="hideProjectDescription"
                       :options="[{value: true, label: 'Show Project Description everywhere'}, {value: false, label: 'Only show Description in Project Catalog'}]"
                       optionLabel="label" optionValue="value"
@@ -513,7 +513,7 @@ const saveSettings = ((dirtyChanges) => {
           </settings-item>
 
           <settings-item label="Use Points For Levels" input-id="levelPointsEnabled">
-            <InputSwitch v-model="settings.levelPointsEnabled.value"
+            <ToggleSwitch v-model="settings.levelPointsEnabled.value"
                          inputId="levelPointsEnabled"
                          v-on:update:modelValue="levelPointsEnabledChanged"
                          name="check-button"
@@ -529,9 +529,9 @@ const saveSettings = ((dirtyChanges) => {
                                   placeholder="http://www.STarticle.com" />
 
           <settings-item label="Self Report Default" input-id="selfReportingControl">
-            <div class="flex flex-column flex-1">
-              <div class="flex align-items-center">
-                <InputSwitch v-model="selfReport.enabled"
+            <div class="flex flex-col flex-1">
+              <div class="flex items-center">
+                <ToggleSwitch v-model="selfReport.enabled"
                              name="check-button"
                              inputId="selfReportingControl"
                              v-on:update:modelValue="selfReportingControl"
@@ -541,7 +541,7 @@ const saveSettings = ((dirtyChanges) => {
               </div>
               <Card v-if="selfReport.enabled" class="mt-2" Card :pt="{  content: { class: 'py-0' } }" data-cy="selfReportTypeSelector">
                 <template #content>
-                  <div class="flex flex-column">
+                  <div class="flex flex-col">
                     <div>
                       <RadioButton class="mr-2"
                                    inputId="approval"
@@ -551,7 +551,7 @@ const saveSettings = ((dirtyChanges) => {
                                    :disabled="!selfReport.enabled"/>
                       <label for="approval">Approval Queue (reviewed by project admins first)</label>
                     </div>
-                    <div class="ml-4 mt-1">
+                    <div class="ml-6 mt-1">
                       <Checkbox data-cy="justificationRequiredCheckbox"
                                 inputId="justificationRequiredCheckbox"
                                 id="justification-required-checkbox" :binary="true"
@@ -559,7 +559,7 @@ const saveSettings = ((dirtyChanges) => {
                                 v-model="settings.selfReportJustificationRequired.value"
                                 :disabled="!approvalSelected || !selfReport.enabled"
                                 @update:modelValue="justificationRequiredChanged"/>
-                      <label for="justificationRequiredCheckbox" class="m-0 font-italic"
+                      <label for="justificationRequiredCheckbox" class="m-0 italic"
                              :class="{ 'text-secondary': !approvalSelected || !selfReport.enabled}">
                         Justification Required
                       </label>
@@ -580,7 +580,7 @@ const saveSettings = ((dirtyChanges) => {
           </settings-item>
 
           <settings-item label="Rank Opt-Out for ALL Admins" input-id="rankAndLeaderboardOptOut">
-            <InputSwitch v-model="settings.rankAndLeaderboardOptOut.value"
+            <ToggleSwitch v-model="settings.rankAndLeaderboardOptOut.value"
                          inputId="rankAndLeaderboardOptOut"
                          name="check-button"
                          v-on:update:modelValue="rankAndLeaderboardOptOutChanged"
@@ -590,16 +590,16 @@ const saveSettings = ((dirtyChanges) => {
           </settings-item>
 
           <settings-item label="Custom Labels" input-id="showCustomLabelsConfigToggle">
-            <div class="flex flex-column flex-1">
-              <div class="flex align-items-center">
-                <InputSwitch v-model="showCustomLabelsConfigToggle"
+            <div class="flex flex-col flex-1">
+              <div class="flex items-center">
+                <ToggleSwitch v-model="showCustomLabelsConfigToggle"
                              inputId="showCustomLabelsConfigToggle"
                              name="check-button"
                              aria-labelledby="customLabelsLabel"
                              data-cy="customLabelsSwitch"/>
                 <span class="ml-1">{{ showCustomLabelsConfigLabel }}</span>
               </div>
-              <Card class="mt-3" v-if="shouldShowCustomLabelsConfig">
+              <Card class="mt-4" v-if="shouldShowCustomLabelsConfig">
                 <template #content>
                   <SkillsSettingTextInput name="projectDisplayName"
                                           label="Project Display Text"
@@ -631,7 +631,7 @@ const saveSettings = ((dirtyChanges) => {
           </settings-item>
 
           <settings-item label="Always Show Group Descriptions" input-id="groupDescriptionsSwitchInput">
-            <InputSwitch v-model="settings.groupDescriptions.value"
+            <ToggleSwitch v-model="settings.groupDescriptions.value"
                          inputId="groupDescriptionsSwitchInput"
                          name="check-button"
                          v-on:update:modelValue="groupDescriptionsChanged"
@@ -640,7 +640,7 @@ const saveSettings = ((dirtyChanges) => {
             <span class="ml-1">{{ groupDescriptionsLabel }}</span>
           </settings-item>
           <settings-item label="Hide Group Info On Skill Pages" input-id="groupInfoOnSkillPageSwitchInput">
-            <InputSwitch v-model="settings.groupInfoOnSkillPage.value"
+            <ToggleSwitch v-model="settings.groupInfoOnSkillPage.value"
                          inputId="groupInfoOnSkillPageSwitchInput"
                          name="check-button"
                          v-on:update:modelValue="groupInfoOnSkillPageChanged"
@@ -650,7 +650,7 @@ const saveSettings = ((dirtyChanges) => {
           </settings-item>
 
           <settings-item label="Hide Achievement Celebration" input-id="disableAchievementsCelebrationSwitchInput">
-            <InputSwitch v-model="settings.disableAchievementsCelebration.value"
+            <ToggleSwitch v-model="settings.disableAchievementsCelebration.value"
                          inputId="disableAchievementsCelebrationSwitchInput"
                          name="check-button"
                          v-on:update:modelValue="disableAchievementsCelebrationChanged"
@@ -660,7 +660,7 @@ const saveSettings = ((dirtyChanges) => {
           </settings-item>
 
           <settings-item label="Project Deletion Protection" input-id="projectDeletionProtectionSwitchInput">
-              <InputSwitch v-model="settings.projectDeletionProtection.value"
+              <ToggleSwitch v-model="settings.projectDeletionProtection.value"
                            inputId="projectDeletionProtectionSwitchInput"
                            name="check-button"
                            v-on:update:modelValue="projectDeletionProtectionChanged"
@@ -674,17 +674,16 @@ const saveSettings = ((dirtyChanges) => {
           <Message v-if="errMsg" severity="error" :closable="false">{{ errMsg }}</Message>
 
           <div class="flex flex-row">
-            <div class="col">
-              <SkillsButton variant="outline-success" @click="save" :disabled="!meta.valid || !isDirty" data-cy="saveSettingsBtn" icon="fas fa-arrow-circle-right" label="Save">
-              </SkillsButton>
+            <SkillsButton variant="outline-success" @click="save" :disabled="!meta.valid || !isDirty"
+                          data-cy="saveSettingsBtn" icon="fas fa-arrow-circle-right" label="Save">
+            </SkillsButton>
 
-              <InlineMessage v-if="isDirty" class="ml-2" data-cy="unsavedChangesAlert" severity="warn" icon="fa fa-exclamation-circle">
-                  Unsaved Changes
-                </InlineMessage>
-              <InlineMessage v-if="!isDirty && showSavedMsg" class="ml-2" data-cy="settingsSavedAlert" severity="success" icon="fa fa-check">
-                  Settings Updated!
-                </InlineMessage>
-            </div>
+            <InlineMessage v-if="isDirty" class="ml-2" data-cy="unsavedChangesAlert" severity="warn">
+              Unsaved Changes
+            </InlineMessage>
+            <InlineMessage v-if="!isDirty && showSavedMsg" class="ml-2" data-cy="settingsSavedAlert" severity="success">
+              Settings Updated!
+            </InlineMessage>
           </div>
         </loading-container>
       </template>

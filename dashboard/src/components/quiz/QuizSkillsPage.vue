@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 
 import { computed, onMounted, ref } from 'vue'
-import { FilterMatchMode } from 'primevue/api'
+import { FilterMatchMode } from '@primevue/core/api'
 import { useRoute } from 'vue-router'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
@@ -138,7 +138,7 @@ const onFilter = (filterEvent) => {
                     <InputGroupAddon>
                       <i class="fas fa-search" aria-hidden="true" />
                     </InputGroupAddon>
-                    <InputText class="flex flex-grow-1"
+                    <InputText class="flex grow"
                                v-model="filters['global'].value"
                                data-cy="quiz-skillNameFilter"
                                placeholder="Skill Filter"
@@ -162,13 +162,13 @@ const onFilter = (filterEvent) => {
               </template>
 
               <template #empty>
-                <div class="flex justify-content-center flex-wrap h-12rem">
-                  <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle fa-3x"
+                <div class="flex justify-center flex-wrap h-48">
+                  <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle fa-3x"
                      aria-hidden="true"></i>
                   <span class="w-full">
-                      <span class="flex align-items-center justify-content-center">There are no records to show</span>
-                      <span v-if="filtering" class="flex align-items-center justify-content-center">  Click
-                        <SkillsButton class="flex flex align-items-center justify-content-center px-1"
+                      <span class="flex items-center justify-center">There are no records to show</span>
+                      <span v-if="filtering" class="flex items-center justify-center">  Click
+                        <SkillsButton class="flex flex items-center justify-center px-1"
                                       label="Reset"
                                       link
                                       size="small"
@@ -219,7 +219,7 @@ const onFilter = (filterEvent) => {
               </Column>
             </SkillsDataTable>
           </div>
-          <NoContent2 v-else title="No Skills Associated Yet..." icon="fas fa-award" class="p-5">
+          <NoContent2 v-else title="No Skills Associated Yet..." icon="fas fa-award" class="p-8">
             There are currently no skills associated with this quiz/survey.
             You can learn more about how to add skills to a quiz/survey in the documentation
             <a aria-label="SkillTree documentation of associating skills to quizzes"

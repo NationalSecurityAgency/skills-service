@@ -42,7 +42,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <SkillsSpinner v-if="loadingAttempt" :is-loading="true" class="my-8"/>
+    <SkillsSpinner v-if="loadingAttempt" :is-loading="true" class="my-20"/>
     <div v-else>
       <my-progress-title :title="`My ${attempt.quizType}`">
         <template #rightContent>
@@ -58,9 +58,9 @@ onMounted(() => {
           </router-link>
         </template>
       </my-progress-title>
-      <Card class="my-4">
+      <Card class="my-6">
         <template #content>
-          <div class="text-2xl mb-3 font-medium" data-cy="quizName">{{ attempt.quizName }}</div>
+          <div class="text-2xl mb-4 font-medium" data-cy="quizName">{{ attempt.quizName }}</div>
           <quiz-single-run :run-info="attempt"  :show-user-card="false" :show-question-card="!QuizStatus.isNeedsGrading(attempt.status)"/>
         </template>
       </Card>

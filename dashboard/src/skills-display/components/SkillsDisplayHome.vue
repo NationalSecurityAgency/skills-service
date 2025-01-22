@@ -23,7 +23,7 @@ const route = useRoute()
 
 <template>
   <div class="sd-theme-home" data-cy="skillsDisplayHome">
-    <skills-spinner :is-loading="displayAttributes.loadingConfig" class="mt-8"/>
+    <skills-spinner :is-loading="displayAttributes.loadingConfig" class="mt-20"/>
     <router-view v-if="!displayAttributes.loadingConfig" :key="route.name"/>
   </div>
 </template>

@@ -84,7 +84,7 @@ watch(
 <template>
   <Message v-if="shouldShowMsg" severity="success">
     <template #container>
-      <div class="px-2 py-3 flex align-items-center gap-3">
+      <div class="px-2 py-4 flex items-center gap-4">
         <div>
           <SkillsButton
               @click="doShowConfetti"

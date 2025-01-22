@@ -66,7 +66,7 @@ const props = defineProps({
   },
   dialogClass: {
     type: String,
-    default: 'w-11 xl:w-10'
+    default: 'w-11/12 xl:w-10/12'
   },
   footerClass: {
     type: String,
