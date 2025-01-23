@@ -181,6 +181,325 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('150')
     });
 
+    it('run quiz from subject page with expanded skills', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1');
+        cy.get('[data-cy="toggleSkillDetails"]').click();
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '3')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+
+        cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
+
+        cy.validateQuestionAnswer({
+            num: 1,
+            correct: true,
+            answers: [{
+                num: 1,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+        cy.validateQuestionAnswer({
+            num: 2,
+            correct: true,
+            answers: [{
+                num: 1,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 3,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+        cy.validateQuestionAnswer({
+            num: 3,
+            correct: true,
+            answers: [{
+                num: 1,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 3,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+
+        cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('150')
+    });
+
+    it('run quiz from a badge page', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.createBadge(1, 1)
+        cy.assignSkillToBadge(1, 1, 1)
+        cy.enableBadge(1, 1)
+
+        cy.visit('/progress-and-rankings/projects/proj1/badges/badge1/skills/skill1');
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '3')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+
+        cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
+
+        cy.validateQuestionAnswer({
+            num: 1,
+            correct: true,
+            answers: [{
+                num: 1,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+        cy.validateQuestionAnswer({
+            num: 2,
+            correct: true,
+            answers: [{
+                num: 1,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 3,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+        cy.validateQuestionAnswer({
+            num: 3,
+            correct: true,
+            answers: [{
+                num: 1,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 3,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+
+        cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('150')
+    });
+
+    it('run quiz from badges page with expanded skills', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.createBadge(1, 1)
+        cy.assignSkillToBadge(1, 1, 1)
+        cy.enableBadge(1, 1)
+
+        cy.visit('/progress-and-rankings/projects/proj1/badges/badge1');
+        cy.get('[data-cy="toggleSkillDetails"]').click();
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '3')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+
+        cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
+
+        cy.validateQuestionAnswer({
+            num: 1,
+            correct: true,
+            answers: [{
+                num: 1,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+        cy.validateQuestionAnswer({
+            num: 2,
+            correct: true,
+            answers: [{
+                num: 1,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 3,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+        cy.validateQuestionAnswer({
+            num: 3,
+            correct: true,
+            answers: [{
+                num: 1,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 2,
+                selected: false,
+                wrongSelection: false,
+                missedSelection: false
+            }, {
+                num: 3,
+                selected: true,
+                wrongSelection: false,
+                missedSelection: false
+            }]
+        });
+
+        cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('150')
+    });
+
     it('wrong answers are accurately depicted on the result screen', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1);
