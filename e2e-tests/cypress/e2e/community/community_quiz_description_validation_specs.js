@@ -37,16 +37,19 @@ describe('Community Quiz Description Validation Tests', () => {
 
     it('quiz description is validated against custom validators', () => {
         cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+        cy.createQuizDef(2, {enableProtectedUserCommunity: false})
 
-        cy.intercept('GET', '/admin/quiz-definitions/quiz1/questions').as('loadQuestions');
-        cy.intercept('GET', '/admin/quiz-definitions/quiz1').as('loadQuizDef');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/questions').as('loadQuiz1Questions');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1').as('loadQuiz1QuizDef');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz2/questions').as('loadQuiz2Questions');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz2').as('loadQuiz2QuizDef');
         cy.intercept('POST', '/api/validation/description*').as('validateDescription');
 
         cy.visit('/administrator/quizzes/quiz1');
-        cy.wait('@loadQuestions');
+        cy.wait('@loadQuiz1Questions');
 
         cy.get('[data-cy="editQuizButton"]').click()
-        cy.wait('@loadQuizDef');
+        cy.wait('@loadQuiz1QuizDef');
 
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
         cy.wait('@validateDescription');
@@ -62,15 +65,33 @@ describe('Community Quiz Description Validation Tests', () => {
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
         cy.wait('@validateDescription');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        // navigate to quiz 2
+        cy.get('[data-cy=breadcrumb-Quizzes]').click();
+        cy.get('[data-cy="managesQuizBtn_quiz2"]').click()
+        cy.wait('@loadQuiz2Questions');
+
+        cy.get('[data-cy="editQuizButton"]').click()
+        cy.wait('@loadQuiz2QuizDef');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.wait('@validateDescription');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
     });
 
     it('question text is validated against custom validators', () => {
         cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+        cy.createQuizDef(2, {enableProtectedUserCommunity: false})
 
-        cy.intercept('GET', '/admin/quiz-definitions/quiz1/questions').as('loadQuestions');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/questions').as('loadQuiz1Questions');
+        cy.intercept('POST', '/admin/quiz-definitions/quiz1/create-question').as('saveQuiz1Question');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz2/questions').as('loadQuiz2Questions');
+        cy.intercept('POST', '/admin/quiz-definitions/quiz2/create-question').as('saveQuiz2Question');
 
         cy.visit('/administrator/quizzes/quiz1');
-        cy.wait('@loadQuestions');
+        cy.wait('@loadQuiz1Questions');
 
         cy.get('[data-cy="btn_Questions"]').click()
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
@@ -80,6 +101,7 @@ describe('Community Quiz Description Validation Tests', () => {
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
 
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
@@ -91,6 +113,119 @@ describe('Community Quiz Description Validation Tests', () => {
 
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveQuiz1Question');
+
+        // navigate using ui to quiz 2
+        cy.get('[data-cy=breadcrumb-Quizzes]').click();
+        cy.get('[data-cy="managesQuizBtn_quiz2"]').click()
+        cy.wait('@loadQuiz2Questions');
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="descriptionError"]').contains('Question - paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveQuiz2Question');
+
+        // navigate directly back to quiz 1
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.wait('@loadQuiz1Questions');
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('2')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('5')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="descriptionError"]').contains('Question - May not contain divinedragon word');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveQuiz1Question');
+
+        // navigate directly back to quiz 2
+        cy.visit('/administrator/quizzes/quiz2');
+        cy.wait('@loadQuiz2Questions');
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('2')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('5')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="descriptionError"]').contains('Question - paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveQuiz2Question');
+
+        // finally, navigate back to quiz 1 again using ui controls
+        cy.get('[data-cy=breadcrumb-Quizzes]').click();
+        cy.get('[data-cy="managesQuizBtn_quiz1"]').click()
+        cy.wait('@loadQuiz1Questions');
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('6')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('8')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="descriptionError"]').contains('Question - May not contain divinedragon word');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveQuiz1Question');
     });
 
     it('Input Text answer is validated against custom validators', () => {
