@@ -207,8 +207,7 @@ describe('Community Admin Group Tests', () => {
     })
 
     it('cannot add UC protected quiz to a non-UC admin group', function () {
-        cy.intercept('GET', '/admin/admin-group-definitions/adminGroup2/quizzes')
-            .as('loadGroupQuizzes');
+        cy.intercept('GET', '/admin/admin-group-definitions/adminGroup2/quizzes').as('loadGroupQuizzes');
         cy.visit('/administrator/adminGroups/adminGroup2/group-quizzes');
         cy.wait('@loadGroupQuizzes');
         cy.get('[data-cy="pageHeaderStat_Quizzes and Surveys"] [data-cy="statValue"]').should('have.text', '0');
@@ -219,6 +218,38 @@ describe('Community Admin Group Tests', () => {
 
         cy.get('[data-cy="pageHeaderStat_Quizzes and Surveys"] [data-cy="statValue"]').should('have.text', '0');
         cy.get('[data-cy="error-msg"]').contains('Error! Request could not be completed! Admin Group [Non-UC Protected Admin Group] is not allowed to be assigned to [This is quiz 1] Quiz as the group does not have Divine Dragon permission')
+    })
+
+    it('when adding quiz to an admin group and an error occurs redirect to the error page', () => {
+        cy.intercept('POST', '/admin/admin-group-definitions/adminGroup1/quizzes/quiz1', { statusCode: 500 }).as('saveEndpoint')
+        cy.intercept('GET', '/admin/admin-group-definitions/adminGroup1/quizzes').as('loadGroupQuizzes');
+        cy.visit('/administrator/adminGroups/adminGroup1/group-quizzes');
+        cy.wait('@loadGroupQuizzes');
+        cy.get('[data-cy="pageHeaderStat_Quizzes and Surveys"] [data-cy="statValue"]').should('have.text', '0');
+        cy.get('[data-cy="noContent"]')
+        cy.get('span.p-dropdown-label.p-inputtext').contains('Search available quizzes and surveys...').should('be.visible')
+        cy.get('[data-cy="quizSelector"]').click()
+        cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
+
+        cy.wait('@saveEndpoint')
+        cy.get('[data-cy="errorPage"]').contains("Failed to add Quiz to Admin Group")
+        cy.url().should('include', '/error')
+    })
+
+    it('when adding project to an admin group and an error occurs redirect to the error page', () => {
+        cy.intercept('POST', '/admin/admin-group-definitions/adminGroup1/projects/proj1', { statusCode: 500 }).as('saveEndpoint')
+        cy.intercept('GET', '/admin/admin-group-definitions/adminGroup1/projects').as('loadGroupProjects');
+        cy.visit('/administrator/adminGroups/adminGroup1/group-projects');
+        cy.wait('@loadGroupProjects');
+        cy.get('[data-cy="pageHeaderStat_Projects"] [data-cy="statValue"]').should('have.text', '0');
+        cy.get('[data-cy="noContent"]')
+        cy.get('span.p-dropdown-label.p-inputtext').contains('Search available projects...').should('be.visible')
+        cy.get('[data-cy="projectSelector"]').click()
+        cy.get('[data-cy="availableProjectSelection-proj1"]').click()
+
+        cy.wait('@saveEndpoint')
+        cy.get('[data-cy="errorPage"]').contains("Failed to add Project to Admin Group")
+        cy.url().should('include', '/error')
     })
 
     it('cannot enable UC protection for admin group if it contains a non UC member', function () {

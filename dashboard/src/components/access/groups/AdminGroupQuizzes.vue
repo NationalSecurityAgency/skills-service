@@ -17,6 +17,10 @@ limitations under the License.
 
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router';
+import { useUserInfo } from '@/components/utils/UseUserInfo.js';
+import { useAdminGroupState } from '@/stores/UseAdminGroupState.js';
+import { userErrorState } from '@/stores/UserErrorState.js';
+import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import AdminGroupsService from '@/components/access/groups/AdminGroupsService.js';
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
@@ -24,12 +28,12 @@ import LoadingContainer from '@/components/utils/LoadingContainer.vue';
 import Column from 'primevue/column';
 import NoContent2 from '@/components/utils/NoContent2.vue';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
-import { useUserInfo } from '@/components/utils/UseUserInfo.js';
-import { useAdminGroupState } from '@/stores/UseAdminGroupState.js';
 
 const route = useRoute()
 const userInfo = useUserInfo();
 const adminGroupState = useAdminGroupState()
+const errorState = userErrorState()
+const upgradeInProgressErrorChecker = useUpgradeInProgressErrorChecker()
 
 const isLoading = ref(true)
 const availableQuizzes = ref([])
@@ -114,7 +118,7 @@ const handleError = (e) => {
     upgradeInProgressErrorChecker.navToUpgradeInProgressPage()
   } else {
     const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
-    errorState.navToErrorPage('Failed to add Project to Admin Group', errorMessage)
+    errorState.navToErrorPage('Failed to add Quiz to Admin Group', errorMessage)
   }
 }
 const clearErrorMessage = () => {
