@@ -170,7 +170,7 @@ class UserCommunityService {
     EnableUserCommunityValidationRes validateQuizForCommunity(String quizId, EnableUserCommunityValidationRes existingValidationRes = null) {
         EnableUserCommunityValidationRes res = existingValidationRes ? existingValidationRes : new EnableUserCommunityValidationRes(isAllowed: true, unmetRequirements: [])
 
-        // only applicable if project already exist; also normalizes project ids case
+        // only applicable if quiz already exists; also normalizes quiz ids case
         QuizDef quizDef = quizDefRepo.findByQuizIdIgnoreCase(quizId)
         if (quizDef) {
             List<UserRole> allRoles = userRoleRepo.findAllByQuizIdIgnoreCase(quizDef.quizId)
@@ -230,7 +230,7 @@ class UserCommunityService {
     /**
      * Checks if the specified projectId is configured as a user community only project
      * @param projectId - not null
-     * @return true if the project exists and has been configured as a user community only project
+     * @return true if the quiz exists and has been configured as a user community only project
      */
     @Transactional(readOnly = true)
     boolean isUserCommunityOnlyQuiz(String quizId) {
@@ -241,7 +241,7 @@ class UserCommunityService {
     /**
      * Checks if the specified quizId is configured as a user community only quiz
      * @param quizId - not null
-     * @return true if the project exists and has been configured as a user community only project
+     * @return true if the quiz exists and has been configured as a user community only project
      */
     @Transactional(readOnly = true)
     boolean isUserCommunityOnlyQuiz(Integer quizRefId) {
