@@ -546,6 +546,17 @@ class AdminEditSpecs extends DefaultIntSpec {
         e.message.contains "Each user is limited to [25] Projects"
     }
 
+    def "project id must not be null string"() {
+        def proj1 = SkillsFactory.createProject(1)
+
+        when:
+        proj1.projectId = "null"
+        skillsService.createProject(proj1)
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Project Id was not provided")
+    }
+
     def "user with root role can have unlimited # of projects"() {
         SkillsService rootUser = createRootSkillService()
         when:

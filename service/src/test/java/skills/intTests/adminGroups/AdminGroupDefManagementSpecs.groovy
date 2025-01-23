@@ -57,6 +57,16 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupRes.userCommunity == 'All Dragons'
     }
 
+    def "group id must not be null string"() {
+        def adminGroup = createAdminGroup(1)
+        when:
+        adminGroup.adminGroupId = "null"
+        skillsService.createAdminGroupDef(adminGroup)
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("adminGroupId was not provided")
+    }
+
     def "remove admin group definition"() {
         def adminGroup1 = createAdminGroup(1)
         def adminGroup2 = createAdminGroup(2)

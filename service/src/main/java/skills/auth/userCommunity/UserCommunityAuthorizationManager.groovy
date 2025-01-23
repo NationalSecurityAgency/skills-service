@@ -134,12 +134,16 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     }
 
     private String extractProjectId(HttpServletRequest request) {
+        String res = StringUtils.EMPTY
         String url = getRequestUrl(request)
         Matcher pid = PROJECT_ID.matcher(url)
         if (pid.matches()) {
-            return pid.group(1)
+            res = pid.group(1)
+            if (res?.equalsIgnoreCase("null") ) {
+                res = StringUtils.EMPTY
+            }
         }
-        return StringUtils.EMPTY
+        return res
     }
 
     static class AttachmentExtractRes {
@@ -158,12 +162,16 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     }
 
     private String extractAdminGroupId(HttpServletRequest request) {
+        String res = StringUtils.EMPTY
         String url = getRequestUrl(request)
         Matcher gid = ADMIN_GROUP_ID.matcher(url)
         if (gid.matches()) {
-            return gid.group(1)
+            res = gid.group(1)
+            if (res?.equalsIgnoreCase("null") ) {
+                res = StringUtils.EMPTY
+            }
         }
-        return StringUtils.EMPTY
+        return res
     }
 
     private String extractQuizId(HttpServletRequest request) {
