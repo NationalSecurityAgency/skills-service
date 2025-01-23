@@ -212,11 +212,39 @@ describe('Community Quiz Description Validation Tests', () => {
     });
 
     it('Input Text answer is validated against custom validators', () => {
+        cy.intercept('GET', '/api/projects/*/pointHistory').as('getPointHistory');
+
         cy.createQuizDef(1, {enableProtectedUserCommunity: true})
         cy.createTextInputQuestionDef(1, 1)
+        cy.createQuizDef(2, {enableProtectedUserCommunity: false})
+        cy.createTextInputQuestionDef(2, 1)
 
-        cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.request('POST', '/admin/projects/proj1/settings', [{
+            setting: 'production.mode.enabled',
+            value: 'true',
+            projectId: 'proj1'
+        }]);
+        cy.request('POST', '/api/myprojects/proj1')
+
+        cy.createProject(2, {enableProtectedUserCommunity: false})
+        cy.createSubject(2,1)
+        cy.createSkill(2, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz2',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.request('POST', '/admin/projects/proj2/settings', [{
+            setting: 'production.mode.enabled',
+            value: 'true',
+            projectId: 'proj2'
+        }]);
+        cy.request('POST', '/api/myprojects/proj2')
+
+        // navigate directly to quiz 1
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '1')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
 
@@ -238,6 +266,92 @@ describe('Community Quiz Description Validation Tests', () => {
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.wait(1000)
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - May not contain divinedragon word');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
+        cy.get('[data-cy="completeQuizBtn"]').should('be.enabled');
+
+        // navigate to quiz2 using ui controls
+        cy.get('[data-cy="skillTreeLogo"]').click()
+        cy.get('[data-cy="project-link-proj2"]').click()
+        cy.wait('@getPointHistory');
+        cy.get('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click()
+        cy.get('#skillProgressTitleLink-skill1').click()
+
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '1')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #2! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="completeQuizBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}jabberwocky')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\n');
+        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky');
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.wait(1000)
+        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
+        cy.get('[data-cy="completeQuizBtn"]').should('be.enabled');
+
+        // navigate to quiz1 using ui controls
+        cy.get('[data-cy="skillTreeLogo"]').click()
+        cy.get('[data-cy="project-link-proj1"]').click()
+        cy.wait('@getPointHistory');
+        cy.get('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click()
+        cy.get('#skillProgressTitleLink-skill1').click()
+
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="completeQuizBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - May not contain divinedragon word');
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.wait(1000)
+        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - May not contain divinedragon word');
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
+        cy.get('[data-cy="completeQuizBtn"]').should('be.enabled');
+
+        // navigate directly back to quiz 2
+        cy.visit('/test-skills-display/proj2/subjects/subj1/skills/skill1');
+        cy.validatePoweredBy()
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="completeQuizBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}jabberwocky')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\n');
+        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky');
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.wait(1000)
+        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky');
 
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
         cy.get('[data-cy="completeQuizBtn"]').should('be.enabled');
