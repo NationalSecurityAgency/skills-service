@@ -16,18 +16,20 @@
 import axios from 'axios';
 import { useProjectInfo } from '@/common-components/stores/UseCurrentProjectInfo.js'
 import { useQuizInfo } from '@/common-components/stores/UseCurrentQuizInfo.js';
+import { useRoute } from 'vue-router';
 
 export const useDescriptionValidatorService = () => {
 
+  const route = useRoute()
   const projectInfo = useProjectInfo()
   const quizInfo = useQuizInfo()
 
   const validateDescription = (description, enableProjectIdParam = true, useProtectedCommunityValidator = null, enableQuizIdParam = true) => {
     const body = {
       value: description,
-      projectId: enableProjectIdParam ? projectInfo.currentProjectId : null,
+      projectId: enableProjectIdParam ? route.params.projectId : null,
       useProtectedCommunityValidator,
-      quizId: enableQuizIdParam ? quizInfo.currentQuizId : null
+      quizId: enableQuizIdParam ? route.params.quizId : null
     };
     return axios.post('/api/validation/description', body).then((result) => result.data);
   }
