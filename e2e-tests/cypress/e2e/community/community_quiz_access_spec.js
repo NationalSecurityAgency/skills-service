@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-describe('Community Project Creation Tests', () => {
+describe('Community Quiz Access Tests', () => {
 
     const allDragonsUser = 'allDragons@email.org'
 
