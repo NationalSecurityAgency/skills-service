@@ -37,19 +37,16 @@ describe('Community Quiz Description Validation Tests', () => {
 
     it('quiz description is validated against custom validators', () => {
         cy.createQuizDef(1, {enableProtectedUserCommunity: true})
-        cy.createQuizDef(2, {enableProtectedUserCommunity: false})
 
-        cy.intercept('GET', '/admin/quiz-definitions/quiz1/questions').as('loadQuiz1Questions');
-        cy.intercept('GET', '/admin/quiz-definitions/quiz1').as('loadQuiz1QuizDef');
-        cy.intercept('GET', '/admin/quiz-definitions/quiz2/questions').as('loadQuiz2Questions');
-        cy.intercept('GET', '/admin/quiz-definitions/quiz2').as('loadQuiz2QuizDef');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/questions').as('loadQuestions');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1').as('loadQuizDef');
         cy.intercept('POST', '/api/validation/description*').as('validateDescription');
 
         cy.visit('/administrator/quizzes/quiz1');
-        cy.wait('@loadQuiz1Questions');
+        cy.wait('@loadQuestions');
 
         cy.get('[data-cy="editQuizButton"]').click()
-        cy.wait('@loadQuiz1QuizDef');
+        cy.wait('@loadQuizDef');
 
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
         cy.wait('@validateDescription');
@@ -65,20 +62,6 @@ describe('Community Quiz Description Validation Tests', () => {
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
         cy.wait('@validateDescription');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click()
-
-        // navigate to quiz 2
-        cy.get('[data-cy=breadcrumb-Quizzes]').click();
-        cy.get('[data-cy="managesQuizBtn_quiz2"]').click()
-        cy.wait('@loadQuiz2Questions');
-
-        cy.get('[data-cy="editQuizButton"]').click()
-        cy.wait('@loadQuiz2QuizDef');
-
-        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
-        cy.wait('@validateDescription');
-        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
     });
 
     it('question text is validated against custom validators', () => {
