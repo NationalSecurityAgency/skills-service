@@ -545,6 +545,8 @@ class SkillsLoader {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
         SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [ContainerType.Skill, ContainerType.SkillsGroup])
 
+        String skillSubjectId = skillRelDefRepo.findSubjectSkillIdByChildId(skillDef.id)
+
         def badges = skillDefRepo.findAllBadgesForSkill([skillId], crossProjectId ?: projectId);
 
         String groupName = null
@@ -655,6 +657,7 @@ class SkillsLoader {
                 projectId: skillDef.projectId,
                 projectName: InputSanitizer.unsanitizeName(projDef.name),
                 skillId: skillDef.skillId,
+                subjectId: skillSubjectId,
                 prevSkillId: prevSkillId,
                 nextSkillId: nextSkillId,
                 orderInGroup: orderInGroup,
@@ -1190,9 +1193,9 @@ class SkillsLoader {
 
         if (loadSkills) {
             SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, null, badgeDefinition, version, [SkillRelDef.RelationshipType.BadgeRequirement])
-            skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints, userId)?.sort({ it.skill?.toLowerCase() })
+            skillsRes = createSkillSummaries(null, groupChildrenMeta.childrenWithPoints, true, userId)?.sort({ it.skill?.toLowerCase() })
             if (skillsRes) {
-                // all the skills are "cross-project" if they don't belong to the project that originated this reqest
+                // all the skills are "cross-project" if they don't belong to the project that originated this request
                 skillsRes.each {
                     if (it.projectId != originatingProject) {
                         it.crossProject = true
