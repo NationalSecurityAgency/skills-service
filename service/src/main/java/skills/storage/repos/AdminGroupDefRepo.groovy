@@ -53,8 +53,11 @@ interface AdminGroupDefRepo extends CrudRepository<AdminGroupDef, Long> {
 
     @Nullable
     @Query('''select DISTINCT 'true' from AdminGroupDef agd JOIN UserRole ur on agd.adminGroupId = ur.adminGroupId where ur.projectId = ?1 AND agd.protectedCommunityEnabled = false''')
-    Boolean doesAdminGroupContainNonUserCommunityProject(String adminGroupId)
+    Boolean doesAdminGroupContainNonUserCommunityProject(String projectId)
 
+    @Nullable
+    @Query('''select DISTINCT 'true' from AdminGroupDef agd JOIN UserRole ur on agd.adminGroupId = ur.adminGroupId where ur.quizId = ?1 AND agd.protectedCommunityEnabled = false''')
+    Boolean doesAdminGroupContainNonUserCommunityQuiz(String quizId)
 
     @Query(value="""
                 SELECT 

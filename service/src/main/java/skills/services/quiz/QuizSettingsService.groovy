@@ -82,7 +82,7 @@ class QuizSettingsService {
     }
 
     @Transactional
-    void saveSettings(String quizId, List<QuizSettingsRequest> settingsRequests) {
+    void saveSettings(String quizId, List<QuizSettingsRequest> settingsRequests, boolean documentUserActions = true) {
         Integer quizRefId = getQuizDefRefId(quizId)
         settingsRequests.each {
             validateProvidedQuizSetting(quizId, it)
@@ -95,14 +95,16 @@ class QuizSettingsService {
                 quizSettingsRepo.save(new QuizSetting(setting: it.setting, value: it.value, quizRefId: quizRefId))
             }
 
-            userActionsHistoryService.saveUserAction(new UserActionInfo(
-                    action: DashboardAction.Create, item: DashboardItem.Settings,
-                    itemId: quizId, quizId: quizId,
-                    actionAttributes: [
-                            setting: it.setting,
-                            value: it.value,
-                    ]
-            ))
+            if (documentUserActions) {
+                userActionsHistoryService.saveUserAction(new UserActionInfo(
+                        action: DashboardAction.Create, item: DashboardItem.Settings,
+                        itemId: quizId, quizId: quizId,
+                        actionAttributes: [
+                                setting: it.setting,
+                                value  : it.value,
+                        ]
+                ))
+            }
         }
     }
 

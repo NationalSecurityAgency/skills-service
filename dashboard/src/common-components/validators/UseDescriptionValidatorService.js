@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 import axios from 'axios';
-import { useProjectInfo } from '@/common-components/stores/UseCurrentProjectInfo.js'
+import { useRoute } from 'vue-router';
 
 export const useDescriptionValidatorService = () => {
 
-  const projectInfo = useProjectInfo()
+  const route = useRoute()
 
-  const validateDescription = (description, enableProjectIdParam = true, useProtectedCommunityValidator = null) => {
+  const validateDescription = (description, enableProjectIdParam = true, useProtectedCommunityValidator = null, enableQuizIdParam = true) => {
     const body = {
       value: description,
-      projectId: enableProjectIdParam ? projectInfo.currentProjectId : null,
+      projectId: enableProjectIdParam ? route.params.projectId : null,
       useProtectedCommunityValidator,
+      quizId: enableQuizIdParam ? route.params.quizId : null
     };
     return axios.post('/api/validation/description', body).then((result) => result.data);
   }

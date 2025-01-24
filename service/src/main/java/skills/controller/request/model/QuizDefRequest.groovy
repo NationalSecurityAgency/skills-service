@@ -25,4 +25,6 @@ class QuizDefRequest {
     String quizId
 
     String type
+
+    Boolean enableProtectedUserCommunity = false
 }

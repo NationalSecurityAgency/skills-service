@@ -35,11 +35,13 @@ import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.QuizAnswerDefRequest
 import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizQuestionDefRequest
+import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.*
 import skills.quizLoading.QuizSettings
 import skills.services.*
 import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.ServiceValidatorHelper
+import skills.services.admin.UserCommunityService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
@@ -131,16 +133,23 @@ class QuizDefService {
     @Autowired
     UserActionsHistoryService userActionsHistoryService
 
+    @Autowired
+    UserCommunityService userCommunityService
+
     @Transactional(readOnly = true)
-    List<QuizDefResult> getCurrentUsersTestDefs() {
+    List<QuizDefResult> getCurrentUsersQuizDefs() {
         UserInfo userInfo = userInfoService.currentUser
+        Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
         String userId = userInfo.username?.toLowerCase()
         List<QuizDefResult> res = []
 
         List<QuizDefRepo.QuizDefBasicResult> fromDb = quizDefRepo.getQuizDefSummariesByUser(userId)
         if (fromDb) {
+            if (!isCommunityMember) {
+                fromDb = fromDb.findAll { !Boolean.valueOf(it.userCommunityEnabled) }
+            }
             fromDb = fromDb.sort { a, b -> b.created <=> a.created }
-            res.addAll(fromDb.collect { convert(it) })
+            res.addAll(fromDb.collect { convert(it, isCommunityMember) })
         }
         return res
     }
@@ -165,12 +174,15 @@ class QuizDefService {
     QuizDefSummaryResult getQuizDefSummary(String quizId) {
         assert quizId
         QuizDefRepo.QuizDefSummaryRes dbRes = quizDefRepo.getQuizDefSummary(quizId)
+        UserInfo userInfo = userInfoService.currentUser
+        Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
         return new QuizDefSummaryResult(
                 quizId: quizId,
                 name: dbRes.getName(),
                 created: dbRes.getCreated(),
                 type: QuizDefParent.QuizType.valueOf(dbRes.getQuizType()),
-                numQuestions: dbRes.getNumQuestions()
+                numQuestions: dbRes.getNumQuestions(),
+                userCommunity: isCommunityMember ? userCommunityService.getQuizUserCommunity(quizId) : null
         )
     }
 
@@ -186,6 +198,7 @@ class QuizDefService {
 
         String userId = userIdParam ?: userInfoService.getCurrentUserId()
         QuizDefWithDescription quizDefWithDescription = copyQuizDef(originalQuizId, newQuizId, quizDefRequest, userId)
+        validateUserCommunityProps(quizDefRequest, quizDefWithDescription)
 
         log.debug("Copied [{}]", quizDefWithDescription)
         userActionsHistoryService.saveUserAction(new UserActionInfo(
@@ -261,6 +274,7 @@ class QuizDefService {
         lockingService.lockQuizDefs()
 
         QuizDefWithDescription quizDefWithDescription = retrieveAndValidateQuizDef(originalQuizId, newQuizId, quizDefRequest)
+        validateUserCommunityProps(quizDefRequest, quizDefWithDescription)
         final boolean isEdit = quizDefWithDescription
         if (quizDefWithDescription) {
             QuizDefParent.QuizType incomingType = QuizDefParent.QuizType.valueOf(quizDefRequest.type)
@@ -293,6 +307,10 @@ class QuizDefService {
         }
         attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(quizDefRequest.description, null, quizDefWithDescription.quizId, null)
 
+        if (quizDefRequest.enableProtectedUserCommunity) {
+            quizSettingsService.saveSettings(quizDefWithDescription.quizId, [new QuizSettingsRequest(setting: QuizSettings.UserCommunityOnlyQuiz.setting, value: Boolean.TRUE.toString())], false)
+        }
+
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
                 item: DashboardItem.Quiz,
@@ -302,8 +320,18 @@ class QuizDefService {
                 quizId: quizDefWithDescription.quizId,
         ))
 
+        CustomValidationResult customValidationResult = customValidator.validate(quizDefRequest)
+        if (!customValidationResult.valid) {
+            throw new SkillQuizException(customValidationResult.msg, quizDefWithDescription.quizId, ErrorCode.BadParam)
+        }
+
         QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)
         return convert(updatedDef)
+    }
+
+    @Transactional(readOnly = true)
+    EnableUserCommunityValidationRes validateQuizForEnablingCommunity(String quizId) {
+        return userCommunityService.validateQuizForCommunity(quizId)
     }
 
     @Transactional()
@@ -776,6 +804,9 @@ class QuizDefService {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${currentUser.username}] user", ErrorCode.BadParam)
         }
         QuizDef quizDef = quizDefRepo.findById(userQuizAttempt.quizDefinitionRefId).get()
+        if (userCommunityService.isUserCommunityOnlyQuiz(quizDef.id) && !userCommunityService.isUserCommunityMember(currentUser.username)) {
+            throw new SkillQuizException("User [${currentUser.username}] does not have access to quiz [${quizAttemptId}]", quizDef.quizId, ErrorCode.AccessDenied)
+        }
         return getAttemptGradedResult(quizDef, userQuizAttempt, false)
     }
 
@@ -915,7 +946,7 @@ class QuizDefService {
         propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Question", questionDefRequest.question, quizDef.quizId)
         int numQuestions = quizQuestionRepo.countByQuizId(quizDef.quizId)
         propsBasedValidator.quizValidationMaxIntValue(PublicProps.UiProp.maxQuestionsPerQuiz, "Number of Questions", numQuestions + 1, quizDef.quizId)
-        CustomValidationResult customValidationResult = customValidator.validateDescription(questionDefRequest.question)
+        CustomValidationResult customValidationResult = customValidator.validateDescription(questionDefRequest.question, null, null, quizDef.quizId)
         if (!customValidationResult.valid) {
             throw new SkillQuizException("Question: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
         }
@@ -1011,9 +1042,10 @@ class QuizDefService {
     }
 
     @Transactional()
-    List<QuizSkillResult> getSkillsForQuiz(String quizId, userId) {
+    List<QuizSkillResult> getSkillsForQuiz(String quizId) {
+        UserInfo currentUser = userInfoService.currentUser
         QuizDef quizDef = findQuizDef(quizId)
-        return quizToSkillDefRepo.getSkillsForQuizWithSubjects(quizDef.id, userId);
+        return quizToSkillDefRepo.getSkillsForQuizWithSubjects(quizDef.id, currentUser.username);
     }
 
     @Transactional(readOnly = true)
@@ -1048,23 +1080,48 @@ class QuizDefService {
         if (!quizDefRequest?.name) {
             throw new SkillQuizException("Quiz name was not provided.", quizId, ErrorCode.BadParam)
         }
+    }
 
-        CustomValidationResult customValidationResult = customValidator.validate(quizDefRequest)
-        if (!customValidationResult.valid) {
-            throw new SkillQuizException(customValidationResult.msg, quizId, ErrorCode.BadParam)
+
+    @Profile
+    private void validateUserCommunityProps(QuizDefRequest quizDefRequest, QuizDefWithDescription quizDefWithDescription) {
+        String quizId = quizDefWithDescription?.quizId ?: quizDefRequest.quizId
+        if (quizDefRequest.enableProtectedUserCommunity != null) {
+            if (quizDefRequest.enableProtectedUserCommunity) {
+                String userId = userInfoService.currentUserId
+                if (!userCommunityService.isUserCommunityMember(userId)) {
+                    throw new SkillQuizException("User [${userId}] is not allowed to set [enableProtectedUserCommunity] to true", quizId, ErrorCode.AccessDenied)
+                }
+
+                EnableUserCommunityValidationRes enableProjValidationRes = userCommunityService.validateQuizForCommunity(quizId)
+                if (!enableProjValidationRes.isAllowed) {
+                    String reasons = enableProjValidationRes.unmetRequirements.join("\n")
+                    throw new SkillQuizException("Not Allowed to set [enableProtectedUserCommunity] to true. Reasons are:\n${reasons}", quizId, ErrorCode.AccessDenied)
+                }
+            } else if (quizDefWithDescription){
+                QuizValidator.isTrue(!userCommunityService.isUserCommunityOnlyQuiz(quizDefWithDescription.id), "Once quiz [enableProtectedUserCommunity=true] it cannot be flipped to false", quizId)
+            }
         }
     }
 
-    private QuizDefResult convert(QuizDefRepo.QuizDefBasicResult quizDefSummaryResult) {
+    private QuizDefResult convert(QuizDefRepo.QuizDefBasicResult quizDefSummaryResult, Boolean isCommunityMember) {
         QuizDefResult result = Props.copy(quizDefSummaryResult, new QuizDefResult())
         result.type = QuizDefParent.QuizType.valueOf(quizDefSummaryResult.getQuizType())
         result.displayOrder = 0 // todo
+
+        Boolean isUserCommunityEnableForThisQuiz = Boolean.valueOf(quizDefSummaryResult.userCommunityEnabled)
+        result.userCommunity = isCommunityMember ? userCommunityService.getCommunityNameBasedOnConfAndItemStatus(isUserCommunityEnableForThisQuiz) : null
         return result
     }
 
     private QuizDefResult convert(QuizDef updatedDef) {
         QuizDefResult result = Props.copy(updatedDef, new QuizDefResult())
         result.displayOrder = 0 // todo
+
+        UserInfo userInfo = userInfoService.currentUser
+        Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
+        result.userCommunity = isCommunityMember ? userCommunityService.getQuizUserCommunity(updatedDef.quizId) : null
+
         return result
     }
 
@@ -1072,6 +1129,10 @@ class QuizDefService {
         QuizDefResult result = Props.copy(updatedDef, new QuizDefResult())
         result.description = InputSanitizer.unsanitizeForMarkdown(result.description)
         result.displayOrder = 0 // todo
+
+        UserInfo userInfo = userInfoService.currentUser
+        Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
+        result.userCommunity = isCommunityMember ? userCommunityService.getQuizUserCommunity(updatedDef.quizId) : null
         return result
     }
 }

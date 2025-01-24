@@ -155,8 +155,8 @@ class AdminGroupController {
     }
 
     @RequestMapping(value = "/{adminGroupId}/validateEnablingCommunity", method = RequestMethod.GET, produces = "application/json")
-    EnableUserCommunityValidationRes validateProjectForEnablingCommunity(@PathVariable("adminGroupId") String projectId) {
-        SkillsValidator.isNotBlank(projectId, "projectId")
-        return adminGroupService.validateAdminGroupForEnablingCommunity(projectId)
+    EnableUserCommunityValidationRes validateAdminGroupForEnablingCommunity(@PathVariable("adminGroupId") String adminGroupId) {
+        SkillsValidator.isNotBlank(adminGroupId, "adminGroupId")
+        return adminGroupService.validateAdminGroupForEnablingCommunity(adminGroupId)
     }
 }

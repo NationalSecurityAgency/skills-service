@@ -21,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
+import skills.controller.exceptions.SkillQuizException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.QuizDefRequest
@@ -30,6 +32,7 @@ import skills.controller.request.model.QuizQuestionDefRequest
 import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.*
 import skills.quizLoading.QuizRunService
+import skills.quizLoading.QuizSettings
 import skills.quizLoading.model.*
 import skills.services.adminGroup.AdminGroupService
 import skills.services.quiz.QuizDefService
@@ -89,6 +92,12 @@ class QuizController {
         quizDefService.deleteQuiz(quizId)
     }
 
+    @RequestMapping(value = "/{quizId}/validateEnablingCommunity", method = RequestMethod.GET, produces = "application/json")
+    EnableUserCommunityValidationRes validateQuizForEnablingCommunity(@PathVariable("quizId") String quizId) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id")
+        return quizDefService.validateQuizForEnablingCommunity(quizId)
+    }
+
     @RequestMapping(value = "/{quizId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     QuizDefResult getQuizDef(@PathVariable("quizId") String quizId) {
@@ -101,10 +110,10 @@ class QuizController {
         return quizDefService.countNumSkillsQuizAssignedTo(quizId)
     }
 
-    @RequestMapping(value = "/{quizId}/skills/", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{quizId}/skills", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<QuizSkillResult> getSkillsForQuiz(@PathVariable("quizId") String quizId, @RequestParam String userId) {
-        return quizDefService.getSkillsForQuiz(quizId, userId)
+    List<QuizSkillResult> getSkillsForQuiz(@PathVariable("quizId") String quizId) {
+        return quizDefService.getSkillsForQuiz(quizId)
     }
 
     @RequestMapping(value = "/{quizId}/summary", method = RequestMethod.GET, produces = "application/json")
@@ -136,7 +145,7 @@ class QuizController {
 
     @RequestMapping(value = "/{quizId}/questions/{questionId}", method = RequestMethod.PATCH)
     @ResponseBody
-    RequestResult updateSkillDisplayOrder(@PathVariable("quizId") String quizId,
+    RequestResult updateQuestionDisplayOrder(@PathVariable("quizId") String quizId,
                                           @PathVariable("questionId") Integer questionId,
                                           @RequestBody ActionPatchRequest patchRequest) {
         QuizValidator.isNotBlank(quizId, "Quiz Id", quizId)
@@ -261,6 +270,9 @@ class QuizController {
         QuizValidator.isNotBlank(quizId, "Quiz Id")
         QuizValidator.isNotNull(values, "Settings")
 
+        if (values?.find {it.setting?.equalsIgnoreCase(QuizSettings.UserCommunityOnlyQuiz.setting) }) {
+            throw new SkillQuizException("Not allowed to save [${QuizSettings.UserCommunityOnlyQuiz.setting}] setting using this endpoint", quizId, ErrorCode.BadParam)
+        }
         quizSettingsService.saveSettings(quizId, values)
 
         return RequestResult.success()

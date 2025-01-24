@@ -40,7 +40,7 @@ class CustomValidationController {
     @ResponseBody
     ValidationResult validateDescription(@RequestBody Map<String,String> body){
         Boolean useProtectedCommunityValidator = body.useProtectedCommunityValidator ? Boolean.valueOf(body.useProtectedCommunityValidator) : false
-        CustomValidationResult vr = customValidator.validateDescription(body.value, body.projectId, useProtectedCommunityValidator)
+        CustomValidationResult vr = customValidator.validateDescription(body.value, body.projectId, useProtectedCommunityValidator, body.quizId)
         ValidationResult validationResult = new ValidationResult(vr.valid, vr.msg)
         return validationResult
     }

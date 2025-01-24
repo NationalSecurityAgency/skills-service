@@ -15,7 +15,7 @@
  */
 package skills.storage.repos
 
-
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.QuizSetting
@@ -24,6 +24,10 @@ interface QuizSettingsRepo extends CrudRepository<QuizSetting, Long> {
 
     @Nullable
     QuizSetting findBySettingAndQuizRefId(String setting, Integer quizRefId)
+
+    @Nullable
+    @Query('''select qS from QuizSetting qS, QuizDef quiz where quiz.id = qS.quizRefId and qS.setting = ?1 and lower(quiz.quizId) = lower(?2)''')
+    QuizSetting findBySettingAndQuizId(String setting, String quizId)
 
     @Nullable
     List<QuizSetting> findAllByQuizRefIdAndSettingIn(Integer quizRefId, List<String> settings)

@@ -84,11 +84,13 @@ const editAdminGroupInfo = ref({
 });
 function updateEditAdminGroupInfo(adminGroupSummary) {
   editAdminGroupInfo.value.adminGroupDef.name = adminGroupSummary.name
+  editAdminGroupInfo.value.adminGroupDef.userCommunity = adminGroupSummary.userCommunity
 }
 function updateAdminGroupDef(adminGroup) {
   focusState.focusOnLastElement()
   updateEditAdminGroupInfo(adminGroup)
   adminGroupState.adminGroup.name = adminGroup.name
+  adminGroupState.adminGroup.userCommunity = adminGroup.userCommunity
   announcer.polite(`Admin Group named ${adminGroup.name} was saved`);
 }
 </script>

@@ -21,6 +21,8 @@ describe('Show warning when upgrade is in progress', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2)
     cy.createProject(2)
+    cy.createQuizDef(1)
+    cy.createAdminGroupDef(1);
 
     cy.intercept('GET', '/public/config', (req) => {
       req.reply((res) => {
@@ -52,6 +54,48 @@ describe('Show warning when upgrade is in progress', () => {
     cy.wrapIframe().find('[data-cy="subjectTileBtn"]')
     cy.wait(2000)
     cy.wrapIframe().find('[data-cy=upgradeInProgressWarning]').should('not.exist')
+  })
+
+  it('when adding project to an admin group and DB upgrade is in progress redirect to the upgrade in progress page', () => {
+    cy.intercept('POST', '/admin/admin-group-definitions/adminGroup1/projects/proj1', {
+      statusCode: 503,
+        body: {
+          errorCode: 'DbUpgradeInProgress',
+        } }
+    ).as('saveEndpoint')
+    cy.intercept('GET', '/admin/admin-group-definitions/adminGroup1/projects').as('loadGroupProjects');
+    cy.visit('/administrator/adminGroups/adminGroup1/group-projects');
+    cy.wait('@loadGroupProjects');
+    cy.get('[data-cy="pageHeaderStat_Projects"] [data-cy="statValue"]').should('have.text', '0');
+    cy.get('[data-cy="noContent"]')
+    cy.get('span.p-dropdown-label.p-inputtext').contains('Search available projects...').should('be.visible')
+    cy.get('[data-cy="projectSelector"]').click()
+    cy.get('[data-cy="availableProjectSelection-proj1"]').click()
+
+    cy.wait('@saveEndpoint')
+    cy.get('[data-cy="upgradeInProgressError"]').contains('A database upgrade is in progress!')
+    cy.url().should('include', '/upgrade-in-progress')
+  })
+
+  it('when adding quiz to an admin group and DB upgrade is in progress redirect to the upgrade in progress page', () => {
+    cy.intercept('POST', '/admin/admin-group-definitions/adminGroup1/quizzes/quiz1', {
+      statusCode: 503,
+      body: {
+        errorCode: 'DbUpgradeInProgress',
+      } }
+    ).as('saveEndpoint')
+    cy.intercept('GET', '/admin/admin-group-definitions/adminGroup1/quizzes').as('loadGroupQuizzes');
+    cy.visit('/administrator/adminGroups/adminGroup1/group-quizzes');
+    cy.wait('@loadGroupQuizzes');
+    cy.get('[data-cy="pageHeaderStat_Quizzes and Surveys"] [data-cy="statValue"]').should('have.text', '0');
+    cy.get('[data-cy="noContent"]')
+    cy.get('span.p-dropdown-label.p-inputtext').contains('Search available quizzes and surveys...').should('be.visible')
+    cy.get('[data-cy="quizSelector"]').click()
+    cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
+
+    cy.wait('@saveEndpoint')
+    cy.get('[data-cy="upgradeInProgressError"]').contains('A database upgrade is in progress!')
+    cy.url().should('include', '/upgrade-in-progress')
   })
 
 })

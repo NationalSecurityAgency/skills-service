@@ -45,4 +45,8 @@ class QuizSetting {
     @LastModifiedDate
     Date updated
 
+    //convenience method for settings that are in an either on or off state as opposed to containing a meaningful value
+    boolean isEnabled(){
+        return Boolean.valueOf(value) || value.toLowerCase() == "enabled" || value.toLowerCase() == "enable" || value.toLowerCase() == "on"
+    }
 }

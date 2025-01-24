@@ -30,6 +30,7 @@ import skills.services.BadgeUtils
 import skills.services.RuleSetDefGraphService
 import skills.services.UserAchievementsAndPointsManagement
 import skills.services.admin.BatchOperationsTransactionalAccessor
+import skills.services.admin.UserCommunityService
 import skills.storage.model.QuizDef
 import skills.storage.model.QuizToSkillDef
 import skills.storage.model.SkillDef
@@ -76,9 +77,17 @@ class QuizToSkillService {
     @Autowired
     UserAchievedLevelRepo userAchievedRepo
 
+    @Autowired
+    UserCommunityService userCommunityService
+
     @Transactional
     void handleQuizToSkillRelationship(SkillDef savedSkill, SkillRequest skillRequest){
         QuizDef quizDef = getQuizDef(skillRequest.quizId)
+
+        if (userCommunityService.isUserCommunityOnlyQuiz(quizDef.quizId) && !userCommunityService.isUserCommunityOnlyProject(savedSkill.projectId)) {
+            String msg = "Cannot assign quiz [${quizDef.quizId}] to [${savedSkill.projectId}] because project does not have [${userCommunityService.getCommunityNameBasedOnConfAndItemStatus(true)}] permission"
+            throw new SkillQuizException(msg, quizDef.quizId, ErrorCode.AccessDenied)
+        }
 
         boolean isSkillCatalogImport = skillRequest instanceof SkillImportRequest
         if (!isSkillCatalogImport) {

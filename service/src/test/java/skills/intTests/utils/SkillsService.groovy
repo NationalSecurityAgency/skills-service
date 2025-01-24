@@ -22,10 +22,7 @@ import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.util.StreamUtils
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestParam
 import skills.controller.request.model.ActionPatchRequest
-import skills.controller.request.model.CopyToAnotherProjectRequest
 import skills.controller.request.model.CopyToAnotherProjectRequestType
 import skills.services.settings.Settings
 import skills.services.userActions.DashboardAction
@@ -129,9 +126,13 @@ class SkillsService {
     def createProject(Map props, String originalProjectId = null) {
         wsHelper.appPost(getProjectUrl(originalProjectId ?: props.projectId), props)
     }
-
+    @Profile
     def validateProjectForEnablingCommunity(String projectId) {
         wsHelper.adminGet(getProjectUrl(projectId) + "/validateEnablingCommunity")
+    }
+    @Profile
+    def validateQuizForEnablingCommunity(String quizId) {
+        wsHelper.adminGet("/quiz-definitions/${quizId}/validateEnablingCommunity")
     }
 
     @Profile
@@ -1351,8 +1352,12 @@ class SkillsService {
         return wsHelper.adminPost("${getProjectUrl(project)}/settings/checkValidity".toString(), settings)
     }
 
-    def checkCustomDescriptionValidation(String description, String projectId = null, Boolean useProtectedCommunityValidator = null){
-        return wsHelper.apiPost("/validation/description", [value: description, projectId: projectId, useProtectedCommunityValidator: useProtectedCommunityValidator])
+    def checkCustomDescriptionValidationWithQuizId(String description, String quizId,  Boolean useProtectedCommunityValidator = null){
+        return checkCustomDescriptionValidation(description, null, useProtectedCommunityValidator, quizId)
+    }
+
+    def checkCustomDescriptionValidation(String description, String projectId = null, Boolean useProtectedCommunityValidator = null, String quizId = null){
+        return wsHelper.apiPost("/validation/description", [value: description, projectId: projectId, useProtectedCommunityValidator: useProtectedCommunityValidator, quizId: quizId])
     }
 
     def checkCustomNameValidation(String description){
@@ -1834,6 +1839,9 @@ class SkillsService {
     def countSkillsForQuiz(String quizId) {
         wsHelper.adminGet("${getQuizDefUrl(quizId)}/skills-count")
     }
+    def getSkillsForQuiz(String quizId) {
+        wsHelper.adminGet("${getQuizDefUrl(quizId)}/skills")
+    }
     def getQuizDefSummary(String quizId) {
         wsHelper.adminGet("${getQuizDefUrl(quizId)}/summary")
     }
@@ -1966,12 +1974,12 @@ class SkillsService {
         return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}".toString())
     }
 
-    def getUserTagCounts(String quizId, String userTagKey) {
+    def getQuizUserTagCounts(String quizId, String userTagKey) {
         String url = "${getQuizDefUrl(quizId)}/userTagCounts?userTagKey=${userTagKey}"
         return wsHelper.adminGet(url.toString())
     }
 
-    def getUsageOverTime(String quizId) {
+    def getQuizUsageOverTime(String quizId) {
         String url = "${getQuizDefUrl(quizId)}/usageOverTime"
         return wsHelper.adminGet(url.toString())
     }

@@ -71,7 +71,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     @Nullable
     @Query('''select child.name as skillName, child.skillId as skillId, child.projectId as projectId, subject.skillId as subjectId,
                      subject.name as subjectName, exists(
-                       select ur.roleName from UserRole ur where ((ur.projectId = child.projectId and
+                       select ur.roleName from UserRole ur where ((ur.projectId = project.projectId and
                        ur.roleName in ('ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER')) OR ur.roleName = 'ROLE_SUPER_DUPER_USER') and ur.userId = ?2
                    ) as canUserAccess, subject.totalPoints as subjectPoints, project.totalPoints as projectPoints
               from QuizToSkillDef quiz, SkillDefWithExtra child
@@ -113,6 +113,14 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     void deleteBySkillRefId(Integer skillRefId)
 
     Integer countByQuizRefId(Integer quizRefId)
+
+    @Query('''select distinct(skill.projectId)
+            from QuizToSkillDef qToS, QuizDef  quiz, SkillDef skill
+            where quiz.id = qToS.quizRefId
+                and skill.id = qToS.skillRefId
+                and quiz.id = ?1
+                and not exists (select 1 from Setting s2 where skill.projectId = s2.projectId and s2.setting = 'user_community' and s2.value = 'true')''')
+    List<String> getNonCommunityProjectsThatThisQuizIsLinkedTo(Integer quizRefId)
 
     @Query('''select count(quiz) > 0
             from QuizToSkillDef qToS, QuizDef  quiz, SkillDef  skill

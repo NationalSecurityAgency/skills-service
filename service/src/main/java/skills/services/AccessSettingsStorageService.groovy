@@ -368,6 +368,11 @@ class AccessSettingsStorageService {
         String userIdLower = userId?.toLowerCase()
         User user = userRepository.findByUserId(userIdLower)
         if (user) {
+            if (!userCommunityService.isUserCommunityMember(userIdLower) && userCommunityService.isUserCommunityOnlyQuiz(quizId)) {
+                String userIdForDisplay = loadUserInfo(userId)?.userIdForDisplay ?: userId
+                throw new SkillQuizException("User [${userIdForDisplay}] is not allowed to be assigned [${roleName?.displayName}] user role", quizId, ErrorCode.AccessDenied)
+            }
+
             UserRole userRole = new UserRole(userRefId: user.id, userId: userIdLower, roleName: roleName, quizId: quizId, adminGroupId: adminGroupId)
             // check that the new user role does not already exist
             UserRole existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndQuizIdAndAdminGroupId(userId, roleName, quizId, adminGroupId)

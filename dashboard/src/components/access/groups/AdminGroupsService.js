@@ -39,7 +39,8 @@ export default {
   },
   addQuizToAdminGroup(adminGroupId, quizId) {
     return axios
-        .post(`/admin/admin-group-definitions/${adminGroupId}/quizzes/${quizId}`)
+        .post(`/admin/admin-group-definitions/${adminGroupId}/quizzes/${quizId}`, null,
+            { handleError: false })
         .then((response) => response.data)
   },
   removeQuizFromAdminGroup(adminGroupId, quizId) {

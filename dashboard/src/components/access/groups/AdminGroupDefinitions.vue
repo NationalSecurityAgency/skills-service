@@ -244,12 +244,12 @@ defineExpose({
                                :aria-label="`Manage Admin Group ${slotProps.data.name}`">
                     <highlighted-value :value="slotProps.data.name" :filter="filters.global.value" />
                   </router-link>
-                <div v-if="slotProps.data.userCommunity" class="my-2" data-cy="userCommunity">
-                  <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
-                  <span class="text-color-secondary font-italic ml-1">{{ communityLabels.beforeCommunityLabel.value }}</span> <span
-                      class="font-bold text-primary">{{ slotProps.data.userCommunity }}</span> <span
-                      class="text-color-secondary font-italic">{{ communityLabels.afterCommunityLabel.value }}</span>
-                </div>
+                  <div v-if="slotProps.data.userCommunity" class="my-2" data-cy="userCommunity">
+                    <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
+                    <span class="text-color-secondary font-italic ml-1">{{ communityLabels.beforeCommunityLabel.value }}</span> <span
+                        class="font-bold text-primary">{{ slotProps.data.userCommunity }}</span> <span
+                        class="text-color-secondary font-italic">{{ communityLabels.afterCommunityLabel.value }}</span>
+                  </div>
                 </div>
               </div>
               <div class="flex flex-1 flex-wrap align-items-start justify-content-end gap-2">

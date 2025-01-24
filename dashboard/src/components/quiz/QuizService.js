@@ -127,8 +127,11 @@ export default {
   },
   addQuizAdmin(quizId, userId) {
     const adminRole = 'ROLE_QUIZ_ADMIN'
-    return axios
-      .post(`/admin/quiz-definitions/${quizId}/users/${userId}/roles/${adminRole}`)
+    return axios.post(
+        `/admin/quiz-definitions/${quizId}/users/${userId}/roles/${adminRole}`,
+        null,
+        { handleError: false }
+      )
       .then((response) => response.data)
   },
   deleteQuizAdmin(quizId, userId) {
@@ -137,10 +140,9 @@ export default {
       .delete(`/admin/quiz-definitions/${quizId}/users/${userId}/roles/${adminRole}`)
       .then((response) => response.data)
   },
-  getSkillsForQuiz(quizId, userId) {
-    const params = { userId }
+  getSkillsForQuiz(quizId) {
     return axios
-      .get(`/admin/quiz-definitions/${quizId}/skills/`, { params })
+      .get(`/admin/quiz-definitions/${quizId}/skills`)
       .then((response) => response.data)
   },
   getUserTagCounts(quizId, userTagKey) {
@@ -161,6 +163,11 @@ export default {
   getMyPreferences(quizId) {
     return axios
         .get(`/admin/quiz-definitions/${quizId}/preferences`)
+        .then((response) => response.data)
+  },
+  validateQuizForEnablingCommunity(quizId) {
+    return axios
+        .get(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/validateEnablingCommunity`)
         .then((response) => response.data)
   }
 }

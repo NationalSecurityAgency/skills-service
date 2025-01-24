@@ -1,5 +1,5 @@
-/**
- * Copyright 2020 SkillTree
+/*
+ * Copyright 2024 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+import { computed, ref } from 'vue'
+import { defineStore } from 'pinia'
 
-import skills.storage.model.QuizDefParent
+export const useQuizInfo = defineStore('useQuizInfo', () => {
+  const currentQuizIdVal = ref('')
+  const setCurrentQuizId = (newProjId) => {
+    currentQuizIdVal.value = newProjId
+  }
+  const currentQuizId = computed(() => currentQuizIdVal.value)
 
-class QuizDefResult {
-
-    String quizId
-    String name
-    QuizDefParent.QuizType type
-    String description
-
-    Date created
-    int displayOrder
-
-    String userCommunity
-}
+  return {
+    currentQuizId,
+    setCurrentQuizId
+  }
+})

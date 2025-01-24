@@ -29,6 +29,7 @@ import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import { useSkillYupValidators } from '@/components/skills/UseSkillYupValidators.js'
 import SettingsService from '@/components/settings/SettingsService.js';
+import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js';
 
 const show = defineModel()
 const route = useRoute()
@@ -39,10 +40,12 @@ const props = defineProps({
   groupId: {
     type: String,
     default: null,
-  }
+  },
+  projectUserCommunity: String,
 })
 const emit = defineEmits(['skill-saved'])
 const appConfig = useAppConfig()
+const communityLabels = useCommunityLabels()
 const skillYupValidators = useSkillYupValidators()
 
 const latestSkillVersion = ref(0)
@@ -125,6 +128,14 @@ if (props.isEdit) {
 if (props.isCopy) {
   modalTitle = 'Copy Skill'
   formId = `copySkillDialog-${props.skill.projectId}-${props.skill.skillId}`
+}
+const isQuizAssignableToSkill = (selectedQuiz, context) => {
+  const quizIsRestricted = communityLabels.isRestrictedUserCommunity(selectedQuiz?.userCommunity);
+  const projectIsRestricted = communityLabels.isRestrictedUserCommunity(props.projectUserCommunity);
+  if (selectedQuiz && quizIsRestricted && !projectIsRestricted) {
+    return context.createError({message: `Quiz is not allowed to be assigned to this project. Project does not have ${selectedQuiz.userCommunity} permission`});
+  }
+  return true;
 }
 
 const schema = object({
@@ -211,6 +222,7 @@ const schema = object({
   'associatedQuiz': object()
       .nullable()
       .test('quizRequired', 'Please select an available Quiz/Survey', (value) => !!(selfReportingType.value !== 'Quiz' || value))
+      .test('quizIsAssignable', (value, context) => isQuizAssignableToSkill(value, context))
       .label('Quiz/Survey'),
 })
 const selfReportingType = ref(props.skill.selfReportingType && props.skill.selfReportingType !== 'Disabled' ? props.skill.selfReportingType : null)

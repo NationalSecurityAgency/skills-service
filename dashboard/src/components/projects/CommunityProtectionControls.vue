@@ -39,9 +39,13 @@ const props = defineProps({
     type: Object,
     default: null
   },
+  quiz: {
+    type: Object,
+    default: null
+  },
 })
-if (!props.project && !props.adminGroup) {
-  throw new Error('Either project or adminGroup must be provided')
+if (!props.project && !props.adminGroup && !props.quiz) {
+  throw new Error('Either project, adminGroup or quiz must be provided')
 }
 const authState = useAuthState()
 const appConfig = useAppConfig()
@@ -56,7 +60,9 @@ const invalid = ref(false)
 const pending = ref(false)
 
 onMounted(() => {
-  initialValueForEnableProtectedUserCommunity.value = communityLabels.isRestrictedUserCommunity(props.project?.userCommunity) || communityLabels.isRestrictedUserCommunity(props.adminGroup?.userCommunity)
+  initialValueForEnableProtectedUserCommunity.value = communityLabels.isRestrictedUserCommunity(props.project?.userCommunity)
+      || communityLabels.isRestrictedUserCommunity(props.adminGroup?.userCommunity)
+      || communityLabels.isRestrictedUserCommunity(props.quiz?.userCommunity)
   enableProtectedUserCommunitySynced.value = initialValueForEnableProtectedUserCommunity.value
 
   // enableProtectedUserCommunity.value = this.isRestrictedUserCommunity(this.project.userCommunity);
