@@ -18,9 +18,6 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
-import Lara from '@primevue/themes/lara';
-import Aura from '@primevue/themes/aura';
-import Nora from '@primevue/themes/nora';
 import ToastService from 'primevue/toastservice'
 import App from './App.vue'
 import constructRouter from './router'
@@ -28,7 +25,7 @@ import VueAnnouncer from '@vue-a11y/announcer'
 import VueApexCharts from 'vue3-apexcharts'
 import log from 'loglevel'
 
-import {ToggleSwitch, Select } from "primevue";
+import {Select, ToggleSwitch} from "primevue";
 import Button from 'primevue/button'
 import ButtonGroup from 'primevue/buttongroup'
 import Card from 'primevue/card'
@@ -89,6 +86,7 @@ import 'material-icons/css/material-icons.css'
 import 'material-icons/iconfont/material-icons.css'
 import '@toast-ui/editor/dist/toastui-editor.css'
 import 'video.js/dist/video-js.css'
+import defineSkillTreePreset from "@/theme/StPrimeVueThemePreset.js";
 
 
 log.setLevel('info')
@@ -102,7 +100,7 @@ app.use(router)
 app.use(pinia)
 app.use(PrimeVue, {
     theme: {
-        preset: Aura,
+        preset: defineSkillTreePreset(),
         options: {
             prefix: 'p',
             darkModeSelector: '.my-dark-mode',
