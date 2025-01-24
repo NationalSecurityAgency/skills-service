@@ -98,7 +98,7 @@ const start = () => {
           </template>
         </Card>
 
-        <Message v-if="onlyIncorrect">
+        <Message v-if="onlyIncorrect" data-cy="onlyIncorrectMessage">
           You only need to retake the questions you did not answer correctly on your last attempt. You need to answer {{ questionsToTake }} question(s).
         </Message>
 

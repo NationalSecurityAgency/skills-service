@@ -355,7 +355,12 @@ Cypress.Commands.add("setQuizMultipleTakes", (quizNum = 1, enabled) => {
         value: `${enabled}`
     }]);
 });
-
+Cypress.Commands.add("setLimitToIncorrectQuestions", (quizNum = 1, enabled) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
+        setting: 'quizRetakeIncorrectQuestions',
+        value: `${enabled}`
+    }]);
+});
 Cypress.Commands.add("setQuizShowCorrectAnswers", (quizNum = 1, enabled) => {
     cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
         setting: 'quizAlwaysShowCorrectAnswers',
