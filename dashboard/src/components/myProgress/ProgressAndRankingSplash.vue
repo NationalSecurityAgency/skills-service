@@ -27,7 +27,7 @@ const logoWidth = computed(() => responsive.sm.value ? '15rem' : '23rem')
     <h1 class="sr-only">SkillTree Progress and Rankings</h1>
     <div class="masthead-content">
       <div class="container-fluid above-background">
-        <div class="text-center mt-16">
+        <div class="flex justify-center mt-16">
           <SkillTreeLogoSvg :logo-width="logoWidth"/>
         </div>
         <div class="text-center mb-8 italic above-background text-lg">A micro-learning <b>gamification</b>

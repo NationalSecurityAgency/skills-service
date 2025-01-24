@@ -48,7 +48,7 @@ const doLoadDate = () => {
 <template>
   <span>
     <span data-cy="projectCreated">
-      <span class="text-muted-color small italic">Created: </span>
+      <span class="text-muted-color small italic mr-1">Created: </span>
       <SlimDateCell :value="created"/>
       <span v-if="loadLastReportedDate"
             class="text-secondary small mx-2 d-none d-md-inline">|</span>

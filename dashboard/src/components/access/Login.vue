@@ -109,8 +109,8 @@ const saml2Login = (registrationId) => {
 </script>
 
 <template>
-  <div class="">
-    <div class="text-center mt-20">
+  <div class="pt-20">
+    <div class="text-center">
       <div class="mt-8 justify-center">
         <logo1 />
       </div>
@@ -120,7 +120,7 @@ const saml2Login = (registrationId) => {
             <template #content>
               <form @submit="onSubmit">
                 <Message v-if="loginFailed" data-cy="loginFailed" severity="error">Invalid Username or Password</Message>
-                <div class="field text-left">
+                <div class="flex flex-col gap-2 text-left">
                   <label for="username" class="">Email Address</label>
                   <InputGroup>
                     <InputGroupAddon>
@@ -142,7 +142,7 @@ const saml2Login = (registrationId) => {
                   <small role="alert" class="p-error" id="username-error">{{ errors.username || '&nbsp;' }}</small>
                 </div>
 
-                <div class="text-left">
+                <div class="flex flex-col gap-1 text-left">
                   <div class="flex mb-2">
                     <label for="inputPassword" class="flex">Password</label>
                     <div class="flex-1 text-right">

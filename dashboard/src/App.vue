@@ -201,30 +201,30 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
 
 <style scoped>
 .overall-container {
-  min-height: calc(100vh - 100px);
+  min-height: calc(100vh - 120px);
 }
 
 </style>
 
 <style>
 body a, a:link, a:visited {
-  text-decoration: none !important;
+  //text-decoration: none !important;
 }
 
 body .st-light-theme a, a:link {
-  color: #2f64bd !important;
+  //color: #2f64bd !important;
 }
 
 body .st-light-theme a:visited {
-  color: #784f9f !important;
+  //color: #784f9f !important;
 }
 
 body .st-dark-theme a, a:link {
-  color: #99befb !important;
+  //color: #99befb !important;
 }
 
 body .st-dark-theme a:visited {
-  color: #d5aafb !important;
+  //color: #d5aafb !important;
 }
 
 body a:hover, body a:focus {

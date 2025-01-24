@@ -21,8 +21,8 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
 language governing permissions and limitations under the License. */
 <template>
   <div>
-    <img src="@/assets/img/skilltree_logo.png" style="height: 7rem" alt="SkillTree logo" />
-    <div class="h6 text-muted-color">Micro-Learning Gamification Platform</div>
+    <img src="@/assets/img/skilltree_logo.png" style="height: 7rem" alt="SkillTree logo" class="mx-auto"/>
+    <div class="text-muted-color">Micro-Learning Gamification Platform</div>
   </div>
 </template>
 
