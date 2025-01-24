@@ -99,7 +99,7 @@ const start = () => {
         </Card>
 
         <Message v-if="onlyIncorrect">
-          You only need to retake the questions you did not answer correctly on your last attempt. You need to take {{ questionsToTake }} question(s).
+          You only need to retake the questions you did not answer correctly on your last attempt. You need to answer {{ questionsToTake }} question(s).
         </Message>
 
         <div class="flex flex-wrap flex-column md:flex-row gap-4 pt-2">
