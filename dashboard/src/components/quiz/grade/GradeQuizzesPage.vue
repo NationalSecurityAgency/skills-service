@@ -178,7 +178,7 @@ const loadEmailSubscriptionPreference = () => {
               v-model:sort-field="sortInfo.sortBy"
               v-model:sort-order="sortInfo.sortOrder">
             <template #header>
-              <skills-spinner v-if="isEmailEnabled && loadingNotificationPreference" :is-loading="true" size-in-rem="1"/>
+              <skills-spinner v-if="isEmailEnabled && loadingNotificationPreference" :is-loading="true" :size-in-rem="1"/>
               <div v-if="isEmailEnabled && !loadingNotificationPreference" data-cy="unsubscribeContainer" class="flex flex-row-reverse align-items-center">
                   <InputSwitch id="emailSubscribeSwitch"
                                v-model="emailSubscribed"
