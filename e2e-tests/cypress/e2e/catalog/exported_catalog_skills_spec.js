@@ -942,11 +942,11 @@ describe('Skills Exported to Catalog Tests', () => {
                 value: '1'
             }],
         ], 5);
-        cy.get(`${tableSelector} [data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="1"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill2"')
             .contains('This skill has not been imported by any other projects yet...');
 
-        cy.get(`${tableSelector} [data-p-index="2"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="2"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]')
             .should('exist');
         cy.validateTable('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]', [
@@ -956,7 +956,7 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill3"] [data-cy="importedSkillsTable"]')
             .should('exist');
         cy.validateTable('[data-cy="importSkillInfo-proj1_skill3"] [data-cy="importedSkillsTable"]', [
@@ -988,7 +988,7 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.get('[data-cy="exportedSkillsTable"] [data-cy="skillsBTableTotalRows"]')
           .should('have.text', '3')
 
-        cy.get(`[data-cy="exportedSkillsTable"] [data-p-index="2"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="exportedSkillsTable"] [data-p-index="2"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]')
           .should('exist')
         cy.validateTable('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]', [

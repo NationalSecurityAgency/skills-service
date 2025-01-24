@@ -237,7 +237,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=skillName]').type('Skill 1')
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
 
-    cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+    cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
     cy.get('[data-cy="childRowDisplay_Skill1Skill"]').contains('100 Points')
 
     cy.get('[data-cy="editSkillButton_Skill1Skill"]').click()
@@ -247,7 +247,7 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
 
-    // cy.get('[data-pc-section="rowtoggler"]').first().click();
+    // cy.get('[data-pc-section="rowtogglebutton"]').first().click();
     cy.get('[ data-cy="childRowDisplay_Skill1Skill"]').contains('1,000 Points')
   })
 
@@ -1066,7 +1066,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="editSkillButton_skill1Skill"]').click()
     cy.get('[data-cy="skillHelpUrl"]').should('have.value', 'https://someCoolWebsite.com/some%20url%20with%20spaces')
     cy.get('[data-cy="closeDialogBtn"]').click()
-    cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+    cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
     cy.get('[data-cy="childRowDisplay_skill1Skill"] [data-cy="skillOverviewHelpUrl"]').contains('https://someCoolWebsite.com/some%20url%20with%20spaces')
   })
 
@@ -1081,11 +1081,11 @@ describe('Skills Tests', () => {
 
     const runHelpUrlValidation = () => {
       cy.visit('/administrator/projects/proj1/subjects/subj1')
-      cy.get('[data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+      cy.get('[data-p-index="1"] [data-pc-section="rowtogglebutton"]').click()
       cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewHelpUrl"]').should('have.attr', 'href', 'https://SomeArticleRepo.com/some/path')
       cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewHelpUrl"]').contains('https://SomeArticleRepo.com/some/path')
 
-      cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+      cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
       cy.get('[data-cy="childRowDisplay_skill2"] [data-cy="skillOverviewHelpUrl"]').should('have.attr', 'href', 'https://www.OverrideHelpUrl.com/other/path')
       cy.get('[data-cy="childRowDisplay_skill2"] [data-cy="skillOverviewHelpUrl"]').contains('https://www.OverrideHelpUrl.com/other/path')
 

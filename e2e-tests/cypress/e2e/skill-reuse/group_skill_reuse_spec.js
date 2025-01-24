@@ -58,7 +58,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="nameCell_group11"] [data-cy="numSkillsInGroup"]')
             .contains('3 skills');
 
-        cy.get(`[data-p-index="1"] [data-pc-section="rowtoggler"]`).first().click()
+        cy.get(`[data-p-index="1"] [data-pc-section="rowtogglebutton"]`).first().click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="importedBadge-skill1STREUSESKILLST0"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="importedBadge-skill2STREUSESKILLST0"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="importedBadge-skill3STREUSESKILLST0"]');
@@ -159,7 +159,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="nameCell_group11Subj2"] [data-cy="numSkillsInGroup"]')
             .contains('3 skills');
 
-        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11Subj2"] [data-cy="importedBadge-skill1STREUSESKILLST0"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11Subj2"] [data-cy="importedBadge-skill2STREUSESKILLST0"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11Subj2"] [data-cy="importedBadge-skill3STREUSESKILLST0"]');

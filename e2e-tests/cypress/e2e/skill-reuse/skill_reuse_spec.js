@@ -35,7 +35,7 @@ describe('Skill Reuse Tests', () => {
         cy.get('[data-cy="nameCell_skill1STREUSESKILLST0"] [data-cy="highlightedValue"]')
             .should('have.text', 'Very Great Skill 1');
 
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]');
 
         // navigate down to a skill page
@@ -68,7 +68,7 @@ describe('Skill Reuse Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: subj2')
         cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]')
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]').contains('Original Skill')
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"] [data-cy="linkToTheOriginalSkill"]')
             .click();

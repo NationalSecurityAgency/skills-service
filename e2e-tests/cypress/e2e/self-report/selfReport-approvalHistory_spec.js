@@ -534,7 +534,7 @@ describe('Self Report Approval History Tests', () => {
         cy.visit('/administrator/projects/proj1/self-report');
         cy.get(`${approvalHistoryTableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '7')
         cy.get(approvalHistoryTableSelector)
-            .get('[data-pc-name="paginator"]')
+            .get('[data-pc-name="pcpaginator"]')
             .contains('2')
             .click();
         cy.get(approvalHistoryTableSelector)

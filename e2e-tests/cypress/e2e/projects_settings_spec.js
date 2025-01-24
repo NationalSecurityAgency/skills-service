@@ -495,8 +495,8 @@ describe('Project Settings Tests', () => {
         cy.loginAsProxyUser();
         cy.visit('/progress-and-rankings/manage-my-projects');
         cy.wait('@loadMyProjects');
-        cy.get('[data-pc-section="rowtoggler"]').should('have.length', 3);
-        cy.get('[data-pc-section="rowtoggler"]').first().click();
+        cy.get('[data-pc-section="rowtogglebutton"]').should('have.length', 3);
+        cy.get('[data-pc-section="rowtogglebutton"]').first().click();
         cy.wait('@loadProj1Description');
         cy.get('[data-cy="projectDescriptionRow_proj1"]').should('exist');
         cy.get('[data-cy="projectDescriptionRow_proj1"]').should('contain.text', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vitae tellus.');

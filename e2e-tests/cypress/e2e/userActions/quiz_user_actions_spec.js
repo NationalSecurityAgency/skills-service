@@ -38,7 +38,7 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="row1-item"]').contains('Question')
         cy.get('[data-cy="row2-item"]').contains('Quiz')
 
-        cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="row0-expandedDetails"').contains('Question:')
         cy.get('[data-cy="row0-expandedDetails"').contains('This is a question # 2')
     });

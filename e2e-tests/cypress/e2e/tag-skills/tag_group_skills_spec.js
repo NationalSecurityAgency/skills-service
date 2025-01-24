@@ -34,7 +34,7 @@ describe('Tag Skills Tests', () => {
 
         // must exist initially
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get(`${groupSelector} [data-cy="manageSkillLink_skill23"]`);
         cy.get(`${groupSelector} [data-cy="manageSkillLink_skill22"]`);
         cy.get(`${groupSelector} [data-cy="manageSkillLink_skill21"]`);
@@ -52,7 +52,7 @@ describe('Tag Skills Tests', () => {
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-newtag1"]`).should('exist')
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-newtag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-newtag1"]`).should('not.exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-newtag1"]`).should('exist')
@@ -63,7 +63,7 @@ describe('Tag Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-tag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('not.exist')
@@ -81,7 +81,7 @@ describe('Tag Skills Tests', () => {
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-tag1"]`).should('exist')
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-tag1"]`).should('not.exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('not.exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-tag1"]`).should('exist')
@@ -92,7 +92,7 @@ describe('Tag Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-tag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('not.exist')
@@ -108,7 +108,7 @@ describe('Tag Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]`).click()
         cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]`).click()
@@ -138,7 +138,7 @@ describe('Tag Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]`).click()
         cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]`).click()
@@ -171,7 +171,7 @@ describe('Tag Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-tag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('exist')
@@ -202,7 +202,7 @@ describe('Tag Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-tag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('exist')

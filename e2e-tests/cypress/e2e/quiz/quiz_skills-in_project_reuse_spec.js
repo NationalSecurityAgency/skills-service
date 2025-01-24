@@ -85,7 +85,7 @@ describe('Quiz-skills in-project reuse Tests', () => {
 
         cy.get('[data-cy="nameCell_group3"] [data-cy="numSkillsInGroup"]').contains('1 skill')
 
-        cy.get(`[data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="1"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group3"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
         cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()

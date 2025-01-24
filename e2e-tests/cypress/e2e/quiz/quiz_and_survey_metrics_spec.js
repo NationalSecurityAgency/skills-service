@@ -169,7 +169,7 @@ describe('Quiz and Survey Metrics', () => {
             cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row3-colAnswerTxt"]`).should('contain', 'Answer 4')
             cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row4-colAnswerTxt"]`).should('contain', 'Answer 5')
             // page2
-            cy.get(`[data-cy="metrics-q${qNum}"] [data-pc-name="paginator"] [aria-label="Page 2"]`).click()
+            cy.get(`[data-cy="metrics-q${qNum}"] [data-pc-name="pcpaginator"] [aria-label="Page 2"]`).click()
             cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-pc-section="bodyrow"]`).should('have.length', 1)
             cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-p-index="0"]`).contains('user6')
             cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row0-colAnswerTxt"]`).should('contain', 'Answer 6')
@@ -181,7 +181,7 @@ describe('Quiz and Survey Metrics', () => {
             cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row0-colAnswerTxt"]`).should('not.exist')
 
             // back to page 1
-            cy.get(`[data-cy="metrics-q${qNum}"] [data-pc-name="paginator"] [aria-label="Page 1"]`).click()
+            cy.get(`[data-cy="metrics-q${qNum}"] [data-pc-name="pcpaginator"] [aria-label="Page 1"]`).click()
             cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-pc-section="bodyrow"]`).should('have.length', 5)
             cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-p-index="0"]`).contains('user1')
             cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-p-index="1"]`).contains('user2')

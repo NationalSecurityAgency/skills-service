@@ -66,22 +66,6 @@ class CachingSpec extends DefaultIntSpec {
         responseEntity.headers.getCacheControl() == "no-store"
     }
 
-    def "theme resources should be cached"() {
-        when:
-        int count = 0
-        getFileNamesFromClasspath("/public/themes/*").each {
-            println it
-            String endpoint = "/themes/${it}/theme.css".toString()
-            ResponseEntity<String> responseEntity = skillsService.wsHelper.rawGet(endpoint, [:])
-            assert responseEntity.statusCode.is2xxSuccessful()
-            assert responseEntity.headers.getCacheControl() == "max-age=${defaultCacheAge}, must-revalidate, private"
-            count++
-        }
-
-        then:
-        count > 0
-    }
-
     def "assets should be cached"() {
         when:
         int count = 0
