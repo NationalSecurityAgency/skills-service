@@ -427,7 +427,7 @@ describe('Import From Catalog Table Tests', () => {
 
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`)
             .should('have.text', '8');
-        cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="skillToImportInfo-proj1_skill1"]')
             .contains('Self Report: N/A');
         cy.get('[data-cy="skillToImportInfo-proj1_skill1"]')
@@ -442,7 +442,7 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="skillToImportInfo-proj1_skill1"] [data-cy="totalPts"]')
             .should('have.text', '80');
 
-        cy.get('[data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="1"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="skillToImportInfo-proj2_skill2"]')
             .contains('Self Report: Requires Approval');
         cy.get('[data-cy="skillToImportInfo-proj2_skill2"] [data-cy="importedSkillInfoDescription"]')
@@ -454,7 +454,7 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="skillToImportInfo-proj2_skill2"] [data-cy="totalPts"]')
             .should('have.text', '105');
 
-        cy.get('[data-p-index="2"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="2"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="skillToImportInfo-proj2_skill3Subj3"]')
             .contains('Self Report: Honor System');
         cy.get('[data-cy="skillToImportInfo-proj2_skill3Subj3"] [data-cy="projId"]')
@@ -464,7 +464,7 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="skillToImportInfo-proj2_skill3Subj3"] [data-cy="totalPts"]')
             .should('have.text', '80');
 
-        cy.get('[data-p-index="3"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="3"] [data-pc-section="rowtogglebutton"]').click()
         // make sure markdown is not shown
         cy.get('[data-cy="skillToImportInfo-proj1_skill4Subj2"] [data-cy="importedSkillInfoDescription"]')
             .should('have.text', 'Title\n');

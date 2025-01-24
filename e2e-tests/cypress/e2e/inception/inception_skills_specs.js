@@ -169,7 +169,7 @@ describe('Inception Skills Tests', () => {
 
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get(`[data-cy="addSkillToGroupBtn-GroupGroup"]`).click();
         cy.get('[data-cy="skillName"]').type('Skill');
 

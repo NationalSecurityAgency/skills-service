@@ -173,7 +173,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1')
 
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
@@ -479,7 +479,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.addSkillToGroup(1, 1, 11, 7);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
@@ -511,7 +511,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1')
 
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()

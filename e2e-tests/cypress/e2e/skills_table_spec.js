@@ -732,20 +732,20 @@ describe('Skills Table Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.get(`${tableSelector} th`).contains('Skill').click()
-    cy.get('[data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+    cy.get('[data-p-index="1"] [data-pc-section="rowtogglebutton"]').click()
     cy.get('[data-cy="childRowDisplay_skill2"]').contains('Minimum Time Window between occurrences')
     cy.get('[data-cy="childRowDisplay_skill2"]').contains('300 Points')
 
     // cy.get('[data-cy="expandDetailsBtn_skill1"]').click()
-    cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+    cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
     cy.get('[data-cy="childRowDisplay_skill1"]').contains('150 Points')
     cy.get('[data-cy="childRowDisplay_skill1"]').contains('Time Window N/A')
 
-    cy.get('[data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+    cy.get('[data-p-index="1"] [data-pc-section="rowtogglebutton"]').click()
     cy.get('[data-cy="childRowDisplay_skill2"]').should('not.exist')
 
     cy.get('[data-cy="childRowDisplay_skill1"]').contains('150 Points')
-    cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+    cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
     cy.get('[data-cy="childRowDisplay_skill1"]').should('not.exist')
   })
 

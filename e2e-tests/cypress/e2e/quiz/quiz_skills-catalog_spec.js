@@ -35,7 +35,7 @@ describe('Quiz Skills Catalog Tests', () => {
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="importFromCatalogBtn"]')
             .click();
-        cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="skillToImportInfo-proj1_skill1"]').contains('Self Report: Quiz/Survey')
     });
 

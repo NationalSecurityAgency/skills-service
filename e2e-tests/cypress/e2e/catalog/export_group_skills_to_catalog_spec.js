@@ -34,7 +34,7 @@ describe('Export Group Skills to the Catalog Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillActionsBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
@@ -62,7 +62,7 @@ describe('Export Group Skills to the Catalog Tests', () => {
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="exportedBadge-skill22"]')
             .should('exist');
         cy.get('[data-cy="exportedBadge-skill21"]')

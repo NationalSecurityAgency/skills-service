@@ -38,7 +38,7 @@ describe('Skills Group Tests', () => {
         Cypress.Commands.add("addSkillToGroupViaUI", (groupId, skillNum, expandGroupNum = 0) => {
             const skillName = `Skill ${skillNum}`;
             if (expandGroupNum !== null) {
-                cy.get(`[data-p-index="${expandGroupNum}"] [data-pc-section="rowtoggler"]`).click()
+                cy.get(`[data-p-index="${expandGroupNum}"] [data-pc-section="rowtogglebutton"]`).click()
             }
             cy.get(`[data-cy="addSkillToGroupBtn-${groupId}"]`).click();
             cy.get('[data-cy="skillName"]').type(skillName);
@@ -100,12 +100,12 @@ describe('Skills Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="noContent"]').contains('No Skills');
         cy.createGroupViaUI('Blah', 'Description for this group!');
-        cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_BlahGroup"] [data-cy="description"]').contains('Description for this group!');
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_BlahGroup"] [data-cy="description"]').contains('Description for this group!');
     })
 
@@ -117,7 +117,7 @@ describe('Skills Group Tests', () => {
 
         cy.viewport(1200, 1800)
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
         cy.wait('@getGroup')
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"] h1').contains('Title1');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="description"] h2').contains('Title2');
@@ -295,7 +295,7 @@ describe('Skills Group Tests', () => {
         // window.localStorage.setItem('tableState', JSON.stringify({'skillsTable': {'sortDesc': false, 'sortBy': 'displayOrder'}}))
         // window.localStorage.setItem('tableState', JSON.stringify({'groupSkills_group1': {'sortDesc': false, 'sortBy': 'displayOrder'}}))
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
 
         const skillsTableSelector = '[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="skillsTable"]'
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="enableDisplayOrderSort"]').click()
@@ -341,7 +341,7 @@ describe('Skills Group Tests', () => {
 
         // refresh and re-validate
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="enableDisplayOrderSort"]').click()
         cy.wait('@getSkill')
         cy.validateTable(skillsTableSelector, [
@@ -402,7 +402,7 @@ describe('Skills Group Tests', () => {
         const groupId = 'group1'
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get('[data-cy="deleteSkillButton_skill1"]').should('be.enabled');
         cy.get('[data-cy="deleteSkillButton_skill2"]').should('be.enabled');
@@ -423,7 +423,7 @@ describe('Skills Group Tests', () => {
 
         // refresh and verify
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get('[data-cy="deleteSkillButton_skill1"]').should('not.exist');
         cy.get('[data-cy="deleteSkillButton_skill2"]').should('not.exist');
@@ -438,7 +438,7 @@ describe('Skills Group Tests', () => {
         const groupId = 'group1'
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).contains('1')
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('2')
@@ -462,7 +462,7 @@ describe('Skills Group Tests', () => {
 
         // refresh and verify
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get('[data-cy="deleteSkillButton_skill1"]').should('not.exist');
         cy.get('[data-cy="deleteSkillButton_skill2"]').should('not.exist');
@@ -484,7 +484,7 @@ describe('Skills Group Tests', () => {
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('200');
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('from 4 skills');
 
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="deleteSkillButton_skill2"]').click();
         cy.acceptRemovalSafetyCheck();
 
@@ -506,7 +506,7 @@ describe('Skills Group Tests', () => {
         cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
         cy.get('[data-pc-section="closebutton"]').click()
 
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="tokenlabel"]').contains('Points')
 
         cy.get('[data-cy="editSkillButton_skill2"]').click();
@@ -530,7 +530,7 @@ describe('Skills Group Tests', () => {
         const groupId = 'group1'
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get('[data-cy="copySkillButton_skill2"]').click();
         cy.get('button').contains('Save').click();
@@ -541,12 +541,12 @@ describe('Skills Group Tests', () => {
         cy.clickNav('Levels')
         cy.clickNav('Skills')
 
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('Copy of Very Great Skill 2')
 
         // refresh and verify
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get('[data-cy="nameCell_copy_of_skill2"]').contains('Copy of Very Great Skill 2')
     });

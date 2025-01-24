@@ -218,7 +218,7 @@ describe('Quiz User Role Management Tests', () => {
             [{ colIndex: 1,  value: 'My Awesome Admin Group' }],
         ], 5, true, null, false);
 
-        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="userGroupMembers"]').find('li').should('have.length', 1);
         cy.get(`[data-cy^="userGroupMember_${expectedUserName}"]`)
     });

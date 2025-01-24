@@ -747,11 +747,11 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.createSkill(1, 1, 3); // 3 - exported
         cy.exportSkillToCatalog(1, 1, 3);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="childRowDisplay_skill3"] [data-cy="exportedToCatalogCard"]')
             .contains('This skill was exported');
 
-        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="childRowDisplay_skill2"]')
             .contains('Description');
         cy.get('[data-cy="childRowDisplay_skill2"] [data-cy="exportedToCatalogCard"]')

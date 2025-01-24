@@ -478,7 +478,7 @@ describe('Projects Admin Management Tests', () => {
             [{ colIndex: 1,  value: 'My Awesome Admin Group' }, { colIndex: 2,  value: 'Administrator' }],
         ], 5, true, null, false);
 
-        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="userGroupMembers"]').find('li').should('have.length', 1);
         cy.get(`[data-cy^="userGroupMember_${expectedUserName}"]`)
     });
@@ -553,7 +553,7 @@ describe('Projects Admin Management Tests', () => {
             [{ colIndex: 1,  value: 'user1' }, { colIndex: 2,  value: 'Approver' }],
         ], 5, true, null, false);
 
-        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="userGroupMembers"]').find('li').should('have.length', 1);
         cy.get(`[data-cy^="userGroupMember_${expectedUserName}"]`)
 
@@ -585,7 +585,7 @@ describe('Projects Admin Management Tests', () => {
             [{ colIndex: 1,  value: 'My Awesome Admin Group' }, { colIndex: 2,  value: 'Administrator' }],
         ], 5, true, null, false);
 
-        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="userGroupMembers"]').find('li').should('have.length', 2);
         cy.get(`[data-cy^="userGroupMember_${expectedUserName}"]`)
         cy.get('[data-cy="userGroupMember_user1"]')

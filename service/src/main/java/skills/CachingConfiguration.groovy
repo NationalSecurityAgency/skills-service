@@ -36,9 +36,7 @@ class CachingConfiguration implements WebMvcConfigurer {
         registry.addResourceHandler("/assets/**")
                 .addResourceLocations("classpath:/public/assets/")
                 .setCacheControl(CacheControl.maxAge(MAX_AGE).cachePrivate().mustRevalidate())
-        registry.addResourceHandler("/themes/**")
-                .addResourceLocations("classpath:/public/themes/")
-                .setCacheControl(CacheControl.maxAge(MAX_AGE).cachePrivate().mustRevalidate())
+
         registry.addResourceHandler("/assets/clientPortal/css/**")
                 .addResourceLocations("classpath:/public/assets/clientPortal/css/")
                 .setCacheControl(CacheControl.maxAge(MAX_AGE).cachePrivate().mustRevalidate())

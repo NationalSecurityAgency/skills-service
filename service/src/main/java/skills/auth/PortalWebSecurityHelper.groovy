@@ -100,7 +100,7 @@ class PortalWebSecurityHelper {
         http.authorizeHttpRequests((authorize) ->
             authorize
                 .requestMatchers("/", "/favicon.ico",
-                    "/icons/**", "/static/**", "/assets/**", "/themes/**",
+                    "/icons/**", "/static/**", "/assets/**",
                     "/skilltree.ico",
                     "/error", "/oauth/**",
                     "/app/oAuthProviders", "/login*", "/login/**",

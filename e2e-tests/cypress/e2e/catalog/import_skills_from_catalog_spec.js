@@ -211,13 +211,13 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="skillsTable"] tbody tr')
             .should('have.length', '4');
 
-        cy.get('[data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="1"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="childRowDisplay_skill3"]')
             .contains('This skill was imported');
         cy.get('[data-cy="childRowDisplay_skill3"]')
             .contains('initially defined in the This is project 2 project');
 
-        cy.get('[data-p-index="2"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="2"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="childRowDisplay_skill2"]')
             .contains('This skill was imported');
         cy.get('[data-cy="childRowDisplay_skill2"]')
