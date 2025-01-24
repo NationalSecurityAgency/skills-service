@@ -18,9 +18,11 @@ package skills.intTests.clientDisplay
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.QuizDefParent
 import skills.storage.model.SkillDef
 
 @Slf4j
@@ -652,6 +654,67 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         List proj2Skills = globalBadge.skills.findAll { it.projectId == proj2.projectId }
         proj2Skills.size() == 1
         proj2Skills.get(0).crossProject
+    }
+
+    def "quiz info is returned for global badge skills"() {
+        String userId = getRandomUsers(1).first()
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 5, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def survey = QuizDefFactory.createQuizSurvey(2)
+        skillsService.createQuizDef(survey)
+        def survey_questions = [
+                QuizDefFactory.createMultipleChoiceSurveyQuestion(2, 1, 3, QuizDefParent.QuizType.Survey),
+                QuizDefFactory.createSingleChoiceSurveyQuestion(2, 2, 4, QuizDefParent.QuizType.Survey),
+                QuizDefFactory.createTextInputQuestion(2, 3),
+        ]
+        skillsService.createQuizQuestionDefs(survey_questions)
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(2, 1, 1, 50)
+        proj1_skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        proj1_skills[0].quizId = quiz.quizId
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj, proj1_skills)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2, 50)
+        proj2_skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        proj2_skills[0].quizId = survey.quizId
+        skillsService.createProjectAndSubjectAndSkills(proj2, proj2_subj, proj2_skills)
+
+        Map badge = [badgeId: "bid1", name: "global badge", description: "gbadge".toString(), iconClass: "fa fa-foo".toString(),]
+        supervisorSkillsService.createGlobalBadge(badge)
+
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: proj1_skills.get(0).skillId])
+        supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj2.projectId, badgeId: badge.badgeId, skillId: proj2_skills.get(0).skillId])
+        badge.enabled = "true"
+        supervisorSkillsService.createGlobalBadge(badge)
+
+        when:
+        def globalBadge = skillsService.getBadgeSummary(userId, proj1.projectId, badge.badgeId, -1, true)
+
+        then:
+        globalBadge.skills.size() == 2
+        List proj1Skills = globalBadge.skills.findAll { it.projectId == proj1.projectId }
+        proj1Skills.size() == 1
+        def proj1Skill = proj1Skills[0]
+        proj1Skill.selfReporting.type == SkillDef.SelfReportingType.Quiz.toString()
+        proj1Skill.selfReporting.quizId == quiz.quizId
+        proj1Skill.selfReporting.quizName == quiz.name
+        proj1Skill.selfReporting.numQuizQuestions == 5
+
+        List proj2Skills = globalBadge.skills.findAll { it.projectId == proj2.projectId }
+        proj2Skills.size() == 1
+        def proj2Skill = proj2Skills[0]
+        proj2Skill.selfReporting.type == "Survey"
+        proj2Skill.selfReporting.quizId == survey.quizId
+        proj2Skill.selfReporting.quizName == survey.name
+        proj2Skill.selfReporting.numQuizQuestions == 3
     }
 
     def "sort skills alphabetically"() {

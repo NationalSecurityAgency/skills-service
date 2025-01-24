@@ -47,8 +47,14 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj)
         skillsService.createSkills(proj1_skills)
 
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> proj1_skills_subj2 = SkillsFactory.createSkills(2, 1, 2)
+        skillsService.createSubject(proj1_subj2)
+        skillsService.createSkills(proj1_skills_subj2)
+
         when:
         def summary = skillsService.getSingleSkillSummary("user1", proj1.projectId, proj1_skills.get(1).skillId)
+        def summary2 = skillsService.getSingleSkillSummary("user1", proj1.projectId, proj1_skills_subj2.get(0).skillId)
 
         then:
         !summary.crossProject
@@ -63,6 +69,9 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         summary.todaysPoints == 0
         summary.description.description == "This skill [skill2] belongs to project [TestProject1]"
         !summary.groupName
+
+        summary.subjectId == proj1_subj.subjectId
+        summary2.subjectId == proj1_subj2.subjectId
     }
 
     def "load single skill summary with some users points"() {
@@ -768,8 +777,15 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj)
         skillsService.createSkills(proj1_skills)
 
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> proj1_skills_subj2 = SkillsFactory.createSkills(2, 1, 2)
+        skillsService.createSubject(proj1_subj2)
+        skillsService.createSkills(proj1_skills_subj2)
+
         when:
-        def summary = skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId,proj1_subj.subjectId, proj1_skills.get(1).skillId)
+        def summary = skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId,proj1_subj.subjectId, (String)proj1_skills.get(1).skillId)
+
+        def summary2 = skillsService.getSingleSkillSummaryWithSubject(skillsService.userName, proj1.projectId, proj1_subj2.subjectId, (String)proj1_skills_subj2[0].skillId)
 
         then:
         !summary.crossProject
@@ -783,6 +799,10 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         summary.points == 0
         summary.todaysPoints == 0
         summary.description.description == "This skill [skill2] belongs to project [TestProject1]"
+        summary.subjectId == proj1_subj.subjectId
+
+        summary2.subjectId == proj1_subj2.subjectId
+
     }
 
     def "loading the first skill sets nextSkillId but not prevSkillId"() {

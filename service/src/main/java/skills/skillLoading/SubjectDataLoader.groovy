@@ -158,7 +158,7 @@ class SubjectDataLoader {
         skillsAndPoints = handleGroupDescriptions(projectId, skillsAndPoints, relationshipTypes)
         skillsAndPoints = handleBadges(projectId, skillsAndPoints)
         skillsAndPoints = handleSkillTags(projectId, skillsAndPoints)
-        skillsAndPoints = handleSkillQuizInfo(projectId, skillsAndPoints, userId)
+        skillsAndPoints = handleSkillQuizInfo(skillsAndPoints, userId)
         skillsAndPoints = handleAchievements(projectId, userId, skillsAndPoints)
         skillsAndPoints = handleSkillExpirations(projectId, userId, skillsAndPoints)
 
@@ -244,46 +244,44 @@ class SubjectDataLoader {
     }
 
     @Profile
-    private List<SkillsAndPoints> handleSkillQuizInfo(String projectId, List<SkillsAndPoints> skillsAndPoints, String userId) {
-        if(projectId) {
-            List<SkillsAndPoints> allSkillAndPoints = (List<SkillsAndPoints>)skillsAndPoints
-                    .collect { SkillsAndPoints skAndPts -> (skAndPts.skillDef.type == SkillDef.ContainerType.SkillsGroup) ? skAndPts.children : skAndPts }
-                    .flatten()
-            List<SkillsAndPoints> quizBasedSkills = allSkillAndPoints.findAll { it.skillDef.selfReportingType == SkillDef.SelfReportingType.Quiz}
-            if (quizBasedSkills) {
-                List<Integer> skillRefIds = quizBasedSkills.collect { it.skillDef.copiedFrom ?: it.skillDef.id }
-                List<QuizToSkillDefRepo.QuizNameAndId> quizInfo = quizToSkillDefRepo.getQuizInfoSkillIdRef(skillRefIds)
+    private List<SkillsAndPoints> handleSkillQuizInfo(List<SkillsAndPoints> skillsAndPoints, String userId) {
+        List<SkillsAndPoints> allSkillAndPoints = (List<SkillsAndPoints>)skillsAndPoints
+                .collect { SkillsAndPoints skAndPts -> (skAndPts.skillDef.type == SkillDef.ContainerType.SkillsGroup) ? skAndPts.children : skAndPts }
+                .flatten()
+        List<SkillsAndPoints> quizBasedSkills = allSkillAndPoints.findAll { it.skillDef.selfReportingType == SkillDef.SelfReportingType.Quiz}
+        if (quizBasedSkills) {
+            List<Integer> skillRefIds = quizBasedSkills.collect { it.skillDef.copiedFrom ?: it.skillDef.id }
+            List<QuizToSkillDefRepo.QuizNameAndId> quizInfo = quizToSkillDefRepo.getQuizInfoSkillIdRef(skillRefIds)
 
-                List<Integer> quizIds = quizInfo.findAll { it.getNumTextInputQuestions() > 0 }?.collect { it.getQuizRefId() }?.unique()?.toList()
-                Map<Integer, List<QuizToSkillDefRepo.QuizAttemptInfo>> latestAttemptsByQuizRefId = [:]
-                if (quizIds) {
-                    Integer[] quizRefIdArray = quizIds.toArray(new Integer[0]);
-                    List<QuizToSkillDefRepo.QuizAttemptInfo> quizAttempts = userQuizAttemptRepo.getLatestQuizAttemptsForUserByQuizIds(quizRefIdArray, userId)
-                    if (quizAttempts) {
-                        latestAttemptsByQuizRefId = quizAttempts.groupBy { it.quizDefRefId }
-                    }
+            List<Integer> quizIds = quizInfo.findAll { it.getNumTextInputQuestions() > 0 }?.collect { it.getQuizRefId() }?.unique()?.toList()
+            Map<Integer, List<QuizToSkillDefRepo.QuizAttemptInfo>> latestAttemptsByQuizRefId = [:]
+            if (quizIds) {
+                Integer[] quizRefIdArray = quizIds.toArray(new Integer[0]);
+                List<QuizToSkillDefRepo.QuizAttemptInfo> quizAttempts = userQuizAttemptRepo.getLatestQuizAttemptsForUserByQuizIds(quizRefIdArray, userId)
+                if (quizAttempts) {
+                    latestAttemptsByQuizRefId = quizAttempts.groupBy { it.quizDefRefId }
                 }
-                Map<Integer, List<QuizToSkillDefRepo.QuizNameAndId>> bySkillRefId = quizInfo.groupBy() { it.getSkillRefId() }
-                quizBasedSkills.each {
-                    List<QuizToSkillDefRepo.QuizNameAndId> found = bySkillRefId[it.skillDef.copiedFrom ?: it.skillDef.id]
-                    if (found) {
-                        QuizToSkillDefRepo.QuizNameAndId quizNameAndId = found.first()
-                        it.quizId = quizNameAndId.quizId
-                        it.quizName = quizNameAndId.quizName
-                        it.quizType = quizNameAndId.quizType
-                        it.quizNumQuestions = quizNameAndId.configuredNumQuestionsQuizLength ?: quizNameAndId.numQuestions
+            }
+            Map<Integer, List<QuizToSkillDefRepo.QuizNameAndId>> bySkillRefId = quizInfo.groupBy() { it.getSkillRefId() }
+            quizBasedSkills.each {
+                List<QuizToSkillDefRepo.QuizNameAndId> found = bySkillRefId[it.skillDef.copiedFrom ?: it.skillDef.id]
+                if (found) {
+                    QuizToSkillDefRepo.QuizNameAndId quizNameAndId = found.first()
+                    it.quizId = quizNameAndId.quizId
+                    it.quizName = quizNameAndId.quizName
+                    it.quizType = quizNameAndId.quizType
+                    it.quizNumQuestions = quizNameAndId.configuredNumQuestionsQuizLength ?: quizNameAndId.numQuestions
 
-                        List<QuizToSkillDefRepo.QuizAttemptInfo> attempts = latestAttemptsByQuizRefId[quizNameAndId.quizRefId]
-                        if (attempts) {
-                            QuizToSkillDefRepo.QuizAttemptInfo lastAttempt = attempts.first()
-                            it.lastQuizAttemptStatus = lastAttempt.status
-                            it.lastQuizAttemptId = lastAttempt.attemptId
-                            it.lastQuizAttemptDate = lastAttempt.updated
-                        }
-
-                    } else {
-                        log.error("Failed to find quiz for skill ref id [{}]. This is likely an issue with the data and a record is missing in the QuizToSkillDef or SkillDef's SelfReportingType.Quiz is not correct.", it.skillDef.id)
+                    List<QuizToSkillDefRepo.QuizAttemptInfo> attempts = latestAttemptsByQuizRefId[quizNameAndId.quizRefId]
+                    if (attempts) {
+                        QuizToSkillDefRepo.QuizAttemptInfo lastAttempt = attempts.first()
+                        it.lastQuizAttemptStatus = lastAttempt.status
+                        it.lastQuizAttemptId = lastAttempt.attemptId
+                        it.lastQuizAttemptDate = lastAttempt.updated
                     }
+
+                } else {
+                    log.error("Failed to find quiz for skill ref id [{}]. This is likely an issue with the data and a record is missing in the QuizToSkillDef or SkillDef's SelfReportingType.Quiz is not correct.", it.skillDef.id)
                 }
             }
         }
