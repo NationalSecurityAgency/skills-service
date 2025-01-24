@@ -322,6 +322,109 @@ describe('Client Display Quiz on a Skill Tests', () => {
         cy.get('[data-cy="questionDisplayCard-3"]').should('not.exist')
         cy.get('[data-cy="viewQuizAttemptInfo"]').contains('View Survey Results')
     })
+
+    it('do not show take quiz button if skills has an unfulfilled skill prerequisite', () => {
+        cy.createQuizDef(1, { name: 'Trivia Knowledge' });
+        cy.createQuizQuestionDef(1, 1);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2, { pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 4, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.addLearningPathItem(1, 1, 3)
+        cy.addLearningPathItem(1, 2, 4)
+
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'))
+
+        cy.cdVisit('/subjects/subj1/skills/skill3');
+        cy.get('[data-cy="skillProgressTitle"]').contains('Great Skill 3')
+        cy.get('[data-cy="takeQuizBtn"]').should('not.exist')
+
+        cy.cdVisit('/subjects/subj1/skills/skill4');
+        cy.get('[data-cy="skillProgressTitle"]').contains('Great Skill 4')
+        cy.get('[data-cy="takeQuizBtn"]').should('exist')
+
+        // from skill under a subject with skills expanded
+        cy.cdVisit('/subjects/subj1');
+        cy.get('[data-cy="toggleSkillDetails"]').click();
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgressTitle"]').contains('Great Skill 3')
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="takeQuizBtn"]').should('not.exist')
+        cy.get('[data-cy="skillProgress_index-3"] [data-cy="skillProgressTitle"]').contains('Great Skill 4')
+        cy.get('[data-cy="skillProgress_index-3"] [data-cy="takeQuizBtn"]').should('exist')
+    });
+
+    it('do not show take quiz button if skills has an unfulfilled badge prerequisite', () => {
+        cy.createQuizDef(1, { name: 'Trivia Knowledge' });
+        cy.createQuizQuestionDef(1, 1);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2, { pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 4, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.createBadge(1, 1)
+        cy.assignSkillToBadge(1, 1, 1)
+        cy.enableBadge(1, 1)
+
+        cy.createBadge(1, 2)
+        cy.assignSkillToBadge(1, 2, 2)
+        cy.enableBadge(1, 2)
+
+        cy.createBadge(1, 3)
+        cy.assignSkillToBadge(1, 3, 3)
+        cy.enableBadge(1, 3)
+
+        cy.createBadge(1, 4)
+        cy.assignSkillToBadge(1, 4, 4)
+        cy.enableBadge(1, 4)
+
+        cy.addLearningPathItem(1, 1, 3, true, true)
+        cy.addLearningPathItem(1, 2, 4, true, true)
+
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'))
+
+        cy.cdVisit('/subjects/subj1/skills/skill3');
+        cy.get('[data-cy="skillProgressTitle"]').contains('Great Skill 3')
+        cy.get('[data-cy="takeQuizBtn"]').should('not.exist')
+
+        cy.cdVisit('/subjects/subj1/skills/skill4');
+        cy.get('[data-cy="skillProgressTitle"]').contains('Great Skill 4')
+        cy.get('[data-cy="takeQuizBtn"]').should('exist')
+
+        // from skill under a subject with skills expanded
+        cy.cdVisit('/subjects/subj1');
+        cy.get('[data-cy="toggleSkillDetails"]').click();
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgressTitle"]').contains('Great Skill 3')
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="takeQuizBtn"]').should('not.exist')
+        cy.get('[data-cy="skillProgress_index-3"] [data-cy="skillProgressTitle"]').contains('Great Skill 4')
+        cy.get('[data-cy="skillProgress_index-3"] [data-cy="takeQuizBtn"]').should('exist')
+
+        // from skill under badge
+        cy.visit('/progress-and-rankings/projects/proj1/badges/badge3/skills/skill3');
+        cy.get('[data-cy="skillProgressTitle"]').contains('Great Skill 3')
+        cy.get('[data-cy="takeQuizBtn"]').should('not.exist')
+
+        cy.visit('/progress-and-rankings/projects/proj1/badges/badge4/skills/skill4');
+        cy.get('[data-cy="skillProgressTitle"]').contains('Great Skill 4')
+        cy.get('[data-cy="takeQuizBtn"]').should('exist')
+
+        // from skill under a badge with skills expanded
+        cy.visit('/progress-and-rankings/projects/proj1/badges/badge3');
+        cy.get('[data-cy="toggleSkillDetails"]').click();
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').contains('Great Skill 3')
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="takeQuizBtn"]').should('not.exist')
+
+        cy.visit('/progress-and-rankings/projects/proj1/badges/badge4');
+        cy.get('[data-cy="toggleSkillDetails"]').click();
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').contains('Great Skill 4')
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="takeQuizBtn"]').should('exist')
+
+    });
 });
 
 

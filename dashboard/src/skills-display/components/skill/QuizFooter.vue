@@ -22,9 +22,8 @@ import {useSkillsDisplayInfo} from "@/skills-display/UseSkillsDisplayInfo.js";
 import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 import QuizRunService from "@/skills-display/components/quiz/QuizRunService.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
-import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 import QuizSingleRun from "@/components/quiz/runsHistory/QuizSingleRun.vue";
-import {viewDepthKey} from "vue-router";
+import {useRoute} from "vue-router";
 
 const props = defineProps({
   skill: Object,
@@ -33,6 +32,7 @@ const props = defineProps({
 const numFormat = useNumberFormat()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const timeUtils = useTimeUtils()
+const route = useRoute()
 
 const selfReporting = computed(() => props.skill.selfReporting)
 const isQuizSkill = computed(() => selfReporting.value && QuizType.isQuiz(selfReporting.value.type))
@@ -47,16 +47,20 @@ const hasQuestions = computed(() => selfReporting.value.numQuizQuestions && self
 const isCompleted = computed(() => props.skill && props.skill.points === props.skill.totalPoints)
 const isMotivationalSkill = computed(() => props.skill && props.skill.isMotivationalSkill)
 const selfReportDisabled = computed(() => isCompleted.value && !isMotivationalSkill.value)
-const isLocked = computed(() => props.skill.dependencyInfo && !props.skill.dependencyInfo.achieved)
+const isLocked = computed(() => {
+  const lockedDueToSkillPrerequisites = props.skill.dependencyInfo && !props.skill.dependencyInfo.achieved
+  const lockedDueToBadgePrerequisites = props.skill.badgeDependencyInfo && props.skill.badgeDependencyInfo.length > 0 && !props.skill.badgeDependencyInfo.find((item) => item.achieved)
+  return lockedDueToSkillPrerequisites || lockedDueToBadgePrerequisites
+})
 const isCrossProject = computed(() => props.skill.crossProject)
 const selfReportAvailable = computed(() => isQuizOrSurveySkill?.value && (!isCompleted.value || isMotivationalSkill.value) && !isLocked.value && !isCrossProject.value)
 const quizOrSurveyPassed = computed(() => selfReporting.value?.quizOrSurveyPassed)
-
+const subjectId = computed(() => props.skill.subjectId || route.params.subjectId)
 
 const navToQuiz = () => {
   skillsDisplayInfo.routerPush('quizPage',
       {
-        skillInternal: props.skill.subjectId,
+        subjectId: subjectId.value,
         skillId: props.skill.skillId,
         quizId: props.skill.selfReporting.quizId,
       }
