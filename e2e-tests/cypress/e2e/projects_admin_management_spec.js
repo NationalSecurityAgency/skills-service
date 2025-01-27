@@ -79,7 +79,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('bar').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Administrator"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
 
         cy.wait('@addAdmin');
@@ -133,7 +133,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('bar').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Administrator"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdmin');
         cy.get('[data-cy="errorPage"]')
@@ -165,7 +165,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('root@skills.org').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Administrator"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdmin');
 
@@ -233,7 +233,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('root').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Administrator"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdmin');
 
@@ -311,7 +311,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('root').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Approver"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Approver"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addApprover');
         const expectedUserName = Cypress.env('oauthMode') ? 'foo bar' : 'skills@';
@@ -334,7 +334,7 @@ describe('Projects Admin Management Tests', () => {
 
         cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`).click();
         cy.get('[data-cy="roleDropDown_root@skills.org"]').click()
-        cy.get('[data-pc-section="panel"] [data-pc-section="itemlabel"]').contains('Administrator').click();
+        cy.get('[data-pc-section="overlay"] [data-pc-section="itemlabel"]').contains('Administrator').click();
         cy.wait('@addAdmin')
         cy.get(`${tableSelector} thead th`).contains('User').click();
 
@@ -377,11 +377,11 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('some');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="list"] [data-pc-section="item"]').should('have.length', 1)
+        cy.get('[data-pc-section="list"] [data-pc-section="option"]').should('have.length', 1)
         cy.get('[data-pc-section="list"]').contains('some display name')
             .click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Approver"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Approver"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
 
 
@@ -391,7 +391,7 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('some');
         cy.wait('@suggest');
         cy.wait(1500);
-        cy.get('[data-pc-section="list"] [data-pc-section="item"]').should('have.length', 0)
+        cy.get('[data-pc-section="list"] [data-pc-section="option"]').should('have.length', 0)
     });
 
     it('Role manager shows loading indicator', () => {
@@ -529,7 +529,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('user1').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Approver"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Approver"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addApprover');
         cy.wait('@loadAdminGroupsForProject');
@@ -569,9 +569,9 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('user1');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="item"]').contains('user1').click();
+        cy.get('[data-pc-section="option"]').contains('user1').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Group Member"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Group Member"]').click();
         cy.get('[data-cy="addUserBtn"]').click()
         cy.wait('@addAdminGroupMember');
 

@@ -30,9 +30,9 @@ describe('Settings Tests', () => {
                 cy.wait('@getProjects')
 
             }
-            cy.get('[data-pc-section="menuitem"]').contains('Settings')
+            cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
                 .should('not.be.disabled');
-            cy.get('[data-pc-section="menuitem"]').contains('Settings')
+            cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
                 .click({force: true});
         });
     });
@@ -181,11 +181,11 @@ describe('Settings Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.get('[data-cy="rootrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy="rootrm"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click();
         cy.get('[data-cy="rootrm"] [data-cy="existingUserInputDropdown"]').type('sk');
 
         cy.wait('@getEligibleForRoot');
-        cy.get('[data-pc-section="item"]')
+        cy.get('[data-pc-section="option"]')
             .contains('skills@skills.org')
             .click({ force: true });
         cy.contains('Add')
@@ -238,7 +238,7 @@ describe('Settings Tests', () => {
             .eq(1)
             .click();
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove skills@skills.org')
-        cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me')
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.wait('@deleteRootUser');
         cy.validateTable(rootUsrTableSelector, [
@@ -290,7 +290,7 @@ describe('Settings Tests', () => {
             .contains('Projects');
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
@@ -331,7 +331,7 @@ describe('Settings Tests', () => {
 
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
@@ -342,10 +342,10 @@ describe('Settings Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.get('[data-cy="rootrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy="rootrm"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click();
 
         cy.wait('@getEligibleForRoot');
-        cy.get('[data-pc-section="item"]')
+        cy.get('[data-pc-section="option"]')
             .contains('skills@skills.org')
             .click();
         cy.contains('Add')
@@ -415,16 +415,16 @@ describe('Settings Tests', () => {
         //     });
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
 
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click();
         cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('root');
 
         cy.wait('@getEligibleForSupervisor');
-        cy.get('[data-pc-section="item"]')
+        cy.get('[data-pc-section="option"]')
             .contains('root@skills.org')
             .click();
         cy.get('[data-cy=supervisorrm]')
@@ -463,11 +463,11 @@ describe('Settings Tests', () => {
 
         cy.visit('/settings/security');
 
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click();
         cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('root');
 
         cy.wait('@getEligibleForSupervisor');
-        cy.get('[data-pc-section="item"]')
+        cy.get('[data-pc-section="option"]')
             .contains('root@skills.org')
             .click();
         cy.get('[data-cy=supervisorrm]')
@@ -475,11 +475,11 @@ describe('Settings Tests', () => {
             .click();
         cy.wait('@addSupervisor');
 
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click();
         cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('{selectall}skills');
 
         cy.wait('@getEligibleForSupervisor');
-        cy.get('[data-pc-section="item"]')
+        cy.get('[data-pc-section="option"]')
             .contains('skills@skills.org')
             .click();
         cy.get('[data-cy=supervisorrm]')
@@ -512,7 +512,7 @@ describe('Settings Tests', () => {
             .eq(1)
             .click();
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove skills@skills.org')
-        cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me')
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.validateTable(supervisorTableSelector, [
             [{
@@ -564,15 +564,15 @@ describe('Settings Tests', () => {
         //     });
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click();
         cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('blah');
 
         cy.wait('@getEligibleForSupervisor');
-        cy.get('[data-pc-section="item"]')
+        cy.get('[data-pc-section="option"]')
             .contains('blah@skills.org')
             .click();
         cy.get('[data-cy=supervisorrm]')
@@ -623,12 +623,12 @@ describe('Settings Tests', () => {
         //     });
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.wait('@checkRoot');
         cy.contains('Security')
             .click();
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click();
+        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click();
         cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('sk/foo');
         cy.wait('@getEligibleForSupervisor');
     });
@@ -646,7 +646,7 @@ describe('Settings Tests', () => {
         //
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
 
         cy.get('[data-cy="nav-Email"]')
             .click();
@@ -745,7 +745,7 @@ describe('Settings Tests', () => {
         //
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
         cy.get('[data-cy="nav-Email"]')
             .click();
         cy.wait('@loadEmailSettings');
@@ -862,7 +862,7 @@ describe('Settings Tests', () => {
         cy.wait('@getProjects')
 
         cy.get('[data-cy="settings-button"] button').click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
         cy.get('[data-cy="nav-System"]')
             .click();
 
@@ -905,7 +905,7 @@ describe('Settings Tests', () => {
         cy.wait('@getProjects')
 
         cy.get('[data-cy="settings-button"] button').click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
 
         cy.get('[data-cy="nav-System"]')
             .click();
@@ -978,7 +978,7 @@ describe('Settings Tests', () => {
 
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.get('[data-cy="nav-System"]')
             .click();
@@ -1034,7 +1034,7 @@ describe('Settings Tests', () => {
 
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.get('[data-cy="nav-Email"]')
             .click();

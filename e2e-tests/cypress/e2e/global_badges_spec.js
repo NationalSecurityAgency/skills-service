@@ -368,15 +368,15 @@ describe('Global Badges Tests', () => {
 
         cy.get('#project-selector')
             .click()
-        cy.get('[data-pc-section="filtercontainer"]').click().type('proj2');
+        cy.get('[data-pc-name="pcfilter"]').click().type('proj2');
         cy.wait('@getAvailableLevels');
         cy.get('[data-cy="proj2_option"]').click();
 
         cy.wait('@getLevels');
         cy.get('#level-selector')
             .click()
-        cy.get('[data-pc-section="filtercontainer"]').click().type('5');
-        cy.get('[data-pc-section="item"]').contains(5).click();
+        cy.get('[data-pc-name="pcfilter"]').click().type('5');
+        cy.get('[data-pc-section="option"]').contains(5).click();
 
         cy.contains('Add')
             .click();
@@ -400,9 +400,9 @@ describe('Global Badges Tests', () => {
 
         cy.get('.p-dialog-content #level-selector')
             .click()
-        cy.get('[data-pc-section="item"]').contains(5).get('[data-p-disabled="true"]'); //should('be.disabled');
+        cy.get('[data-pc-section="option"]').contains(5).get('[data-p-disabled="true"]'); //should('be.disabled');
 
-        cy.get('[data-pc-section="item"]').contains(1).click();
+        cy.get('[data-pc-section="option"]').contains(1).click();
         cy.get('[data-cy=saveDialogBtn]')
             .should('be.enabled');
         cy.get('[data-cy=saveDialogBtn]')
@@ -426,7 +426,7 @@ describe('Global Badges Tests', () => {
             .should('have.focus');
         cy.get('[data-cy=editProjectLevelButton_proj2]')
             .click();
-        cy.get('[data-pc-section="closebutton"]')
+        cy.get('[data-pc-name="pcclosebutton"]')
             .click();
         cy.get('[data-cy=editProjectLevelButton_proj2]')
             .should('have.focus');
@@ -766,15 +766,15 @@ describe('Global Badges Tests', () => {
 
         cy.get('#project-selector')
             .click()
-        cy.get('[data-pc-section="filtercontainer"]').click().type('proj2');
+        cy.get('[data-pc-name="pcfilter"]').click().type('proj2');
         cy.wait('@availableProjects');
         cy.get('[data-cy="proj2_option"]').click();
 
         cy.wait('@proj2Levels');
         cy.get('#level-selector')
             .click()
-        cy.get('[data-pc-section="filtercontainer"]').click().type('5');
-        cy.get('[data-pc-section="item"]').contains(5).click();
+        cy.get('[data-pc-name="pcfilter"]').click().type('5');
+        cy.get('[data-pc-section="option"]').contains(5).click();
 
         cy.contains('Add')
             .click();
@@ -1788,15 +1788,15 @@ describe('Global Badges Tests', () => {
         cy.wait('@getAvailableLevels');
         cy.get('#project-selector')
             .click()
-        cy.get('[data-pc-section="filtercontainer"]').click().type('proj2');
+        cy.get('[data-pc-name="pcfilter"]').click().type('proj2');
         cy.wait('@getAvailableLevels');
         cy.get('[data-cy="proj2_option"]').click();
 
         cy.wait('@getLevels');
         cy.get('#level-selector')
             .click()
-        cy.get('[data-pc-section="filtercontainer"]').click().type('5');
-        cy.get('[data-pc-section="item"]').contains(5).click();
+        cy.get('[data-pc-name="pcfilter"]').click().type('5');
+        cy.get('[data-pc-section="option"]').contains(5).click();
 
         cy.contains('Add')
             .click();
@@ -2187,7 +2187,7 @@ describe('Global Badges Tests', () => {
             .click()
         cy.get('[data-cy="projectSelectorCountMsg"]').should('exist').should('contain.text', 'Showing 10 of 14 results.  Use search to narrow results.');
 
-        cy.get('[data-pc-section="filtercontainer"]').click().type('1');
+        cy.get('[data-pc-name="pcfilter"]').click().type('1');
         cy.wait('@getAvailableLevels');
         //not displayed if results less then availableCount
         cy.get('[data-cy="projectSelectorCountMsg"]').should('not.exist');
@@ -2320,11 +2320,11 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="proj0_option"]').click();
 
         cy.get('#level-selector').click()
-        cy.get('[data-pc-section="item"]').contains(5).click();
+        cy.get('[data-pc-section="option"]').contains(5).click();
 
         cy.get('#project-selector').contains('proj0');
         cy.contains('Add').click();
-        cy.get('#level-selector > .p-dropdown').should('have.class', 'p-disabled');
+        cy.get('#level-selector > [data-pc-name="select"]').should('have.class', 'p-disabled');
 
     });
 
