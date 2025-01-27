@@ -187,7 +187,6 @@ defineExpose({
           :disabled="disabled"
           :loading="isLoading"
           @complete="searchChanged"
-          @item-select="added"
           @option-select="added"
           @clear="added"
           @blur="handleBlur"

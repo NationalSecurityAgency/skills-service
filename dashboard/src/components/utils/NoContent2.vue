@@ -47,8 +47,8 @@ function refresh() {
     <div v-if="title" class="mt-1">
       <div class="text-3xl no-content text-center">{{ title }}</div>
     </div>
-    <div class="grid grid-cols-12 gap-4 justify-center mt-1">
-      <div class="col md:col-span-8 lg:col-span-7 xl:col-span-5 no-content sd-theme-primary-color">
+    <div class="flex justify-center mt-1 sd-theme-primary-color">
+      <div class="max-w-full lg:max-w-2xl">
         <slot>
           {{ message }}
         </slot>

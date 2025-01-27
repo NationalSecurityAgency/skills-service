@@ -142,21 +142,23 @@ const focusOnSkillsSelector = () => {
   })
 }
 const skillAdded = (newItem) => {
-  loading.value.skillOp = true;
-  GlobalBadgeService.assignSkillToBadge(badgeId.value, newItem.projectId, newItem.skillId)
-      .then(() => {
-        badgeSkills.value.push(newItem);
-        availableSkills.value = availableSkills.value.filter((item) => `${item.projectId}${item.skillId}` !== `${newItem.projectId}${newItem.skillId}`);
-        badgeState.loadGlobalBadgeDetailsState( badgeId.value ).then(() => {
-          announcer.polite('skill has been added to global badge')
-          badge.value = badgeState.badge;
-        });
-        loading.value.skillOp = false;
-        emit('skills-changed', newItem);
-      })
-      .finally(() => {
-        focusOnSkillsSelector()
-      })
+  if (newItem) {
+    loading.value.skillOp = true;
+    GlobalBadgeService.assignSkillToBadge(badgeId.value, newItem.projectId, newItem.skillId)
+        .then(() => {
+          badgeSkills.value.push(newItem);
+          availableSkills.value = availableSkills.value.filter((item) => `${item.projectId}${item.skillId}` !== `${newItem.projectId}${newItem.skillId}`);
+          badgeState.loadGlobalBadgeDetailsState(badgeId.value).then(() => {
+            announcer.polite('skill has been added to global badge')
+            badge.value = badgeState.badge;
+          });
+          loading.value.skillOp = false;
+          emit('skills-changed', newItem);
+        })
+        .finally(() => {
+          focusOnSkillsSelector()
+        })
+  }
   searchChanged('');
 };
 
