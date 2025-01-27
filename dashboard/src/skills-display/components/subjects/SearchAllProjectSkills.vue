@@ -77,6 +77,7 @@ const navToSkill = (event) => {
       :delay="500"
       @complete="search"
       @item-select="navToSkill"
+      fluid
       data-cy="searchSkillsAcrossSubjects"
       aria-label="Search for a skill across subjects..."
       placeholder="Search for a skill across subjects..."

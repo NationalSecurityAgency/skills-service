@@ -61,12 +61,12 @@ describe('Client Display Search Skills Tests', () => {
         cy.get('[data-cy="searchRes-skill2Subj2"] [data-cy="subjectName"]').contains('Subject 2')
         cy.get('[data-cy="searchRes-skill2Subj2"] [data-cy="skillName"]').contains('Very Great Skill 2 Subj2')
         cy.get('[data-cy="searchRes-skill2Subj2"] [data-cy="points"]').contains('0 / 44')
-        cy.get('[data-pc-section="panel"] [data-cy="skillName"]').should('have.length', 5)
+        cy.get('[data-pc-section="overlay"] [data-cy="skillName"]').should('have.length', 5)
 
         cy.get('[data-cy="searchSkillsAcrossSubjects"]').type('subj3')
         cy.get('[data-cy="searchRes-skill1Subj3"]')
         cy.get('[data-cy="searchRes-skill2Subj3"]')
-        cy.get('[data-pc-section="panel"] [data-cy="skillName"]').should('have.length', 2)
+        cy.get('[data-pc-section="overlay"] [data-cy="skillName"]').should('have.length', 2)
     });
 
     it('navigate to the skill', () => {
@@ -82,7 +82,7 @@ describe('Client Display Search Skills Tests', () => {
         cy.get('[data-cy="searchSkillsAcrossSubjects"]')
             .click()
         cy.wait(5000)
-        cy.matchSnapshotImageForElement('[data-pc-section="panel"]')
+        cy.matchSnapshotImageForElement('[data-pc-section="overlay"]')
     });
 
     it('search results in configured theme', () => {
@@ -90,6 +90,6 @@ describe('Client Display Search Skills Tests', () => {
         cy.get('[data-cy="searchSkillsAcrossSubjects"]')
             .click()
         cy.wait(5000)
-        cy.matchSnapshotImageForElement('[data-pc-section="panel"]')
+        cy.matchSnapshotImageForElement('[data-pc-section="overlay"]')
     });
 });
