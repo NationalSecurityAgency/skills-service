@@ -68,7 +68,7 @@ const props = defineProps({
 
 const model = defineModel()
 
-let currentValidationText = ref('');
+const currentValidationText = ref('');
 
 const removeDisabled = computed(() => {
   return currentValidationText.value !== props.validationText;
