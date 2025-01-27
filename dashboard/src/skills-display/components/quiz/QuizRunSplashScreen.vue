@@ -51,7 +51,7 @@ const canStartQuiz = computed(() => {
   return (!props.quizInfo.userQuizPassed || props.multipleTakes) && !allAttemptsExhausted.value && numQuestions.value > 0 && props.quizInfo.canStartQuiz;
 })
 const needsGrading = computed(() => props.quizInfo.needsGrading)
-const questionsToTake = computed(() => props.quizInfo.incorrectQuestions)
+const questionsToTake = computed(() => props.quizInfo.numIncorrectQuestions)
 const onlyIncorrect = computed(() => {
   return props.quizInfo.onlyIncorrectQuestions && !props.quizInfo.userQuizPassed && props.quizInfo.userLastQuizAttemptDate
 })

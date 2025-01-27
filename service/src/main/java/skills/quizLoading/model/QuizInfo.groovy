@@ -38,5 +38,5 @@ class QuizInfo {
     Date needsGradingAttemptDate
 
     Boolean onlyIncorrectQuestions
-    Integer incorrectQuestions
+    Integer numIncorrectQuestions
 }
