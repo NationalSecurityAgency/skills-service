@@ -49,7 +49,9 @@ const marginCss = computed(() => {
 </script>
 
 <template>
-  <Message :class="marginCss" :icon="msgIcon"><slot /></Message>
+  <Message
+      :pt="{ text: { class: 'flex-1' } }"
+      :class="marginCss" :icon="msgIcon"><slot /><template #container><slot name="container" /></template></Message>
 </template>
 
 <style scoped>

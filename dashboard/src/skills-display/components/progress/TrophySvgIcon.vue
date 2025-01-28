@@ -55,7 +55,7 @@ defineProps({
 
 .trophy-level {
   position: absolute;
-  top: 1.65rem;
+  top: 1.45rem;
   right: 0;
   left: 0;
   margin: auto;

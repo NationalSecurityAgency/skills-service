@@ -558,7 +558,7 @@ const previewEmail = () => {
               optionValue="value"
               v-model="currentFilterType"
               :options="filterOptions" />
-            <div class="flex flex-1 gap-2 flex-col ml-6">
+            <div class="flex flex-1 gap-3 flex-col ml-6">
               <SkillsDropDown
                   v-if="currentFilterType && currentFilterType !== 'project'"
                   :disabled="(currentFilterType && currentFilterType === 'project') || !emailFeatureConfigured"
@@ -595,8 +595,8 @@ const previewEmail = () => {
                 <label for="skillAchieved" class="ml-2"> {{ skills.achieved ? 'Achieved' : 'Not Achieved' }} </label>
               </div>
             </div>
-            <div>
-              <SkillsButton class="ml-6" @click="addCriteria" data-cy="emailUsers-addBtn" :track-for-focus="true" id="addCriteriaButton"
+            <div class="mt-3">
+              <SkillsButton class="" @click="addCriteria" data-cy="emailUsers-addBtn" :track-for-focus="true" id="addCriteriaButton"
                             :disabled="isAddDisabled || maxTagsReached || !emailFeatureConfigured" label="Add" icon="fas fa-plus-circle" />
               <transition name="fade">
                 <span v-if="alreadyApplied" data-cy="filterExists" class="pt-2 pl-1" role="alert">Filter already exists</span>
