@@ -63,7 +63,7 @@ const handleOnInput = (event) => {
 </script>
 
 <template>
-  <div class="field flex-auto p-fluid" v-bind="fallthroughAttributes.rootAttrs.value">
+  <div class="flex flex-col gap-2" v-bind="fallthroughAttributes.rootAttrs.value">
     <label v-if="label" :for="`input${name}`" class="block"><span v-if="isRequired">*</span> {{ label }} </label>
       <InputNumber
           inputClass="sm:w-[6rem]"
@@ -76,16 +76,19 @@ const handleOnInput = (event) => {
           :data-cy="$attrs['data-cy'] || name"
           :autofocus="autofocus"
           show-buttons
+          fluid
           :id="name"
           :inputId="`input${name}`"
           :class="{ 'p-invalid': errorMessage }"
           :aria-invalid="!!errorMessage"
           :aria-errormessage="`${name}Error`" />
-    <small v-if="errorMessage"
-      role="alert"
-      class="p-error block"
-      :data-cy="`${name}Error`"
-      :id="`${name}Error`">{{ errorMessage || '' }}</small>
+    <Message v-if="errorMessage"
+             severity="error"
+             variant="simple"
+             size="small"
+             :data-cy="`${name}Error`"
+             :id="`${name}Error`">{{ errorMessage || '' }}
+    </Message>
   </div>
 </template>
 

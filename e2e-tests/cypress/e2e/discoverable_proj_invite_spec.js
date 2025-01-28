@@ -145,7 +145,7 @@ describe('Copy Invite URL Tests', () => {
         cy.get('[data-cy="shareProjBtn"]').should('have.focus')
 
         cy.get('[data-cy="shareProjBtn"]').realClick()
-        cy.get('[data-pc-section="closebuttonicon"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]').click()
         cy.get('[data-cy="shareProjBtn"]').should('have.focus')
     });
 

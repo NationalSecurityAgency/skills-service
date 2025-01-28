@@ -71,7 +71,7 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.get('[data-cy="editSkillButton_skill1"]').click()
         cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 4)
         cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.enabled')
-        cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
+        cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
         cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('have.value', 2)
         cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('be.enabled')
         cy.get('[data-cy=timeWindowCheckbox] [data-pc-section="input"]').should('be.checked')
@@ -88,7 +88,7 @@ describe('Configure Self Report Video Type Tests', () => {
             .click({ force: true });
         cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 1)
         cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.disabled')
-        cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
+        cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
         cy.get('[data-cy=timeWindowCheckbox] [data-pc-section="input"]').should('not.be.checked')
         cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('have.value', 1)
         cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('be.disabled')

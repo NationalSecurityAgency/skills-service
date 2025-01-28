@@ -695,7 +695,7 @@ describe('Self Report Approval History Tests', () => {
 
         cy.get(approvalHistoryTableSelector).find('[data-pc-name="pcrowperpagedropdown"]').click();
 
-        cy.get('.p-dropdown-item-label').contains(10).click();
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains(10).click();
 
         cy.validateTable(approvalHistoryTableSelector, [
             [{

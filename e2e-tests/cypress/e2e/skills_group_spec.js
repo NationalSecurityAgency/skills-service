@@ -161,7 +161,7 @@ describe('Skills Group Tests', () => {
 
         cy.get('[data-cy="newGroupButton"]').click();
         cy.get('[data-cy="name"]')
-        cy.get('[data-pc-section="closebuttonicon"]').click();
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]').click();
         cy.get('[data-cy="newGroupButton"]').should('have.focus')
 
         cy.get('[data-cy="newGroupButton"]').click();
@@ -188,7 +188,7 @@ describe('Skills Group Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-pc-section="headercontent"]').contains('Display').click()
+        cy.get('[data-pc-section="columnheadercontent"]').contains('Display').click()
         cy.validateTable(tableSelector, [
             [{ colIndex: 2,  value: 'Awesome Group 1' },  { colIndex: 3, value: '1' }],
             [{ colIndex: 2,  value: 'Awesome Group 2 Subj1' },  { colIndex: 3, value: '2' }],
@@ -228,7 +228,7 @@ describe('Skills Group Tests', () => {
         cy.createSkill(1, 1, 2);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-pc-section="headercontent"]').contains('Display').click()
+        cy.get('[data-pc-section="columnheadercontent"]').contains('Display').click()
         cy.get('[data-cy="enableDisplayOrderSort"]').click()
         cy.get('[data-cy="orderMoveDown_group1"]').click();
         cy.wait('@getSkill')
@@ -301,7 +301,7 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="enableDisplayOrderSort"]').click()
         cy.wait('@getSkill')
 
-        // cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-pc-section="headercontent"]').contains('Display').click()
+        // cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-pc-section="columnheadercontent"]').contains('Display').click()
 
         cy.validateTable(skillsTableSelector, [
             [{ colIndex: 2,  value: 'Very Great Skill 4' }],
@@ -369,7 +369,7 @@ describe('Skills Group Tests', () => {
         cy.addSkillToGroup(1, 1, 3, 6);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-pc-section="headercontent"]').contains('Display').click()
+        cy.get('[data-pc-section="columnheadercontent"]').contains('Display').click()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
