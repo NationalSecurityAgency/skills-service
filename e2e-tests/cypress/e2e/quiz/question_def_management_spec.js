@@ -592,18 +592,20 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
-        cy.get('[data-cy="questionText"]').type('question # 1')
+        cy.get('[data-cy="questionText"]').type('question # 1', {delay: 0})
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
-        cy.get('[data-cy="questionText"]').type('question # 2')
+        cy.get('[data-cy="questionText"]').type('question # 2', {delay: 0})
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('a')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('b')
         cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="saveDialogBtn"]').click()
 
         const q1Card = '[data-cy="questionDisplayCard-1"] [data-cy="sortControlHandle"]';

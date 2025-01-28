@@ -82,9 +82,9 @@ watch(
 </script>
 
 <template>
-  <Message v-if="shouldShowMsg" severity="success">
+  <Message v-if="shouldShowMsg" severity="success" class="my-3">
     <template #container>
-      <div class="px-2 py-4 flex items-center gap-4">
+      <div class="px-2 py-2 flex items-center gap-4">
         <div>
           <SkillsButton
               @click="doShowConfetti"
