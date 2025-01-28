@@ -105,8 +105,8 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="numSelectedSkills"]').should('have.text', '1');
         cy.get('[data-cy="importBtn"]').should('be.enabled').click();
         cy.get('[data-cy="importedBadge-skill1"]');
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Catalog"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Catalog"]').click()
         cy.get('[data-pc-section="closebutton"]').click()
         cy.validateTable('[data-cy="skillsTable"]', [
             [{
@@ -265,7 +265,7 @@ describe('Import skills from Catalog Tests', () => {
             cy.get(`[data-cy="importSkillsFromCatalogTable"]  [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
         }
 
-        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
 
         for (let i= 0; i < 5 ; i++) {
             cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
@@ -913,7 +913,7 @@ describe('Import skills from Catalog Tests', () => {
             cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
         }
 
-        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
 
         for (let i= 0; i < 5 ; i++) {
             cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')

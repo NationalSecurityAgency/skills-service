@@ -14,18 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed } from 'vue'
 import Message from 'primevue/message'
+import {computed, useAttrs} from "vue";
 
 const props = defineProps({
   icon: String,
-  severity: String,
+  marginY: {
+    type: Number,
+    default: 3
+  }
 })
+const attrs = useAttrs()
 
-const msgSeverity = computed(() => props.severity || 'info')
 const msgIcon = computed(() => {
   if (props.icon) {
     return props.icon
+  }
+  if (attrs.variant === 'simple') {
+    return null
   }
   const severityIcons = {
     success: 'fas fa-check-circle',
@@ -33,14 +39,17 @@ const msgIcon = computed(() => {
   };
   return severityIcons[props.severity] || 'fas fa-exclamation-circle';
 })
+
+const marginCss = computed(() => {
+  if (attrs.variant === 'simple') {
+    return ''
+  }
+  return `my-${props.marginY}`
+})
 </script>
 
 <template>
-  <Message
-      class="inline-message"
-      :pt="{ root: { class: 'm-0 border-surface rounded-border border-1' }, icon: { class: 'm-0'}}"
-      :severity="msgSeverity"
-      :icon="msgIcon"><slot /></Message>
+  <Message :class="marginCss" :icon="msgIcon"><slot /></Message>
 </template>
 
 <style scoped>

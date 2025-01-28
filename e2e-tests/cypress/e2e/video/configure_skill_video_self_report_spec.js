@@ -98,8 +98,8 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.wait('@getSubjectSkills').then(() => {
             cy.wait(1000)
             cy.get('[data-cy="skillsTable"] [data-cy="manageSkillLink_skill1"]')
-            cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-            cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+            cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+            cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
             cy.get('[data-cy="skillsTable"] [data-cy="selfReportCell-skill1"]').contains('Video')
         })
     });

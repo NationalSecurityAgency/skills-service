@@ -533,7 +533,7 @@ describe('Badges Tests', () => {
         cy.visit('/administrator/projects/proj1/badges/badge1')
 
         cy.get('[data-cy="skillsSelector"]').click();
-        cy.get('[data-pc-section="item"]').first().click();
+        cy.get('[data-pc-section="option"]').first().click();
 
         cy.wait('@saveEndpoint')
 

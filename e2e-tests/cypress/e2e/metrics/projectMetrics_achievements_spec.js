@@ -1059,7 +1059,7 @@ describe('Metrics Tests - Achievements', () => {
             }],
         ], 5, true, 35);
 
-        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('15').click();
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('15').click();
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,

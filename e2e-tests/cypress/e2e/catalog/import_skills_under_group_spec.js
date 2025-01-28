@@ -112,8 +112,8 @@ describe('Import Skills under a Group Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
         cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
         cy.get('[data-pc-section="closebutton"]').click()
         cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
             [{

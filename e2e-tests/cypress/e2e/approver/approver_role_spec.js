@@ -187,7 +187,7 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="newGroupButton"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="newSkillButton"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="skillActionsBtn"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').should(`${chainerPrepend}exist`)
 
             cy.get('[data-cy="editSkillButton_skill1"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="editSkillButton_skill2"]').should(`${chainerPrepend}exist`)

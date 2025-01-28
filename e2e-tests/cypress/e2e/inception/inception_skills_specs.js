@@ -266,8 +266,8 @@ describe('Inception Skills Tests', () => {
 
         cy.assertInceptionPoints('Skills', 'SkillsTableAdditionalColumns', 0, false)
         // cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Time Window').click();
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Time Window"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Time Window"]').click()
         cy.assertInceptionPoints('Skills', 'SkillsTableAdditionalColumns', 5)
     })
 
@@ -367,7 +367,7 @@ describe('Inception Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable"]  [data-pc-name="headercheckbox"]').click()
+        cy.get('[data-cy="skillsTable"]  [data-pc-name="pcheadercheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click()

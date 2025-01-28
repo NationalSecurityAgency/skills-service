@@ -111,7 +111,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="skillActionsBtn"]')
           .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
@@ -174,7 +174,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1')
 
         cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
-        cy.get('[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
 
@@ -225,7 +225,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="skillActionsBtn"]')
           .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
@@ -331,7 +331,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="skillActionsBtn"]')
           .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
@@ -420,7 +420,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
 
@@ -451,7 +451,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1')
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click()
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
 
@@ -480,7 +480,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
-        cy.get('[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
 
@@ -512,7 +512,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1')
 
         cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
-        cy.get('[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
 

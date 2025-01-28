@@ -162,9 +162,9 @@ describe('Approver Config Users Tests', () => {
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('2 Specific Users')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput [data-pc-name="dropdownbutton"]`).click();
-        cy.get('[data-pc-section="item"]').contains('userB').should('not.exist');
-        cy.get('[data-pc-section="item"]').contains('userA').should('not.exist');
-        cy.get('[data-pc-section="item"]').contains('userc').click();
+        cy.get('[data-pc-section="option"]').contains('userB').should('not.exist');
+        cy.get('[data-pc-section="option"]').contains('userA').should('not.exist');
+        cy.get('[data-pc-section="option"]').contains('userc').click();
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.enabled')
         // cy.get('[data-cy="userIdInputErr"]').should('not.be.visible')

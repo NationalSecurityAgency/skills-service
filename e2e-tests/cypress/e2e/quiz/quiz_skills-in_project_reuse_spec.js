@@ -87,9 +87,10 @@ describe('Quiz-skills in-project reuse Tests', () => {
 
         cy.get(`[data-p-index="1"] [data-pc-section="rowtogglebutton"]`).click()
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group3"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
-        cy.get('[data-pc-section="panel"] [data-pc-section="closeicon"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group3"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
+        //close the selector
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group3"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group3"] [data-cy="selfReportCell-skill1STREUSESKILLST0-quiz"]').contains('Survey-Based Validation')
     });
 

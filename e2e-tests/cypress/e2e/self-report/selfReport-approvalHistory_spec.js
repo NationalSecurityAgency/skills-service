@@ -693,7 +693,7 @@ describe('Self Report Approval History Tests', () => {
 
         cy.visit('/administrator/projects/proj1/self-report');
 
-        cy.get(approvalHistoryTableSelector).find('[data-pc-name="rowperpagedropdown"]').click();
+        cy.get(approvalHistoryTableSelector).find('[data-pc-name="pcrowperpagedropdown"]').click();
 
         cy.get('.p-dropdown-item-label').contains(10).click();
 

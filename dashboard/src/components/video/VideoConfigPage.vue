@@ -31,7 +31,6 @@ import MsgLogService from '@/common-components/utilities/MsgLogService.js';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
 import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar.vue';
-import Message from 'primevue/message';
 import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue';
 import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue';
 import VideoFileInput from '@/components/video/VideoFileInput.vue';
@@ -396,6 +395,8 @@ const videoResized = (width, height) => {
   configuredWidth.value = width;
   configuredHeight.value = height;
 }
+
+const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap-4')
 </script>
 
 <template>
@@ -423,7 +424,7 @@ const videoResized = (width, height) => {
               Users are required to watch this video in order to earn the skill and its points.
             </Message>
             <Message v-else severity="info" icon="fas fa-exclamation-triangle" :closable="false">
-              Optionally set <i>Self Reporting</i> type to <Tag>Video</Tag> in order to award the skill for watching this video. Click the <i>Edit</i> button above to update the <i>Self Reporting</i> type.
+             Optionally set <i>Self Reporting</i> type to <Tag>Video</Tag> in order to award the skill for watching this video. Click the <i>Edit</i> button above to update the <i>Self Reporting</i> type.
             </Message>
           </div>
 
@@ -595,42 +596,42 @@ const videoResized = (width, height) => {
                   @on-resize="videoResized"
                   :loadFromServer="true"
               />
-              <div v-if="watchedProgress" class="p-4 pt-6">
+              <div v-if="watchedProgress" class="p-4 pt-6 flex flex-col gap-2">
                 <Message v-if="!isDurationAvailable" severity="warn" icon="fas fa-exclamation-triangle" :closable="false" data-cy="noDurationWarning">
                   Browser cannot derive the duration of this video. Percentage will only be updated after the video is fully watched.
                 </Message>
-                <div class="grid grid-cols-12 gap-4">
-                  <div class="col-span-6 lg:col-span-3 xl:col-span-2">Total Duration:</div>
-                  <div class="col">
+                <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
+                  <div>Total Duration:</div>
+                  <div>
                     <span v-if="watchedProgress.videoDuration === Infinity" class="text-danger" data-cy="videoTotalDuration">N/A</span>
                     <span v-else class="text-primary" data-cy="videoTotalDuration">{{ timeUtils.formatDuration(Math.trunc(watchedProgress.videoDuration * 1000), true) }}</span>
                   </div>
                 </div>
-                <div class="grid grid-cols-12 gap-4">
-                  <div class="col-span-6 lg:col-span-3 xl:col-span-2">Time Watched:</div>
-                  <div class="col"><span class="text-primary" data-cy="videoTimeWatched">{{ timeUtils.formatDuration(Math.trunc(watchedProgress.totalWatchTime * 1000), true) }}</span></div>
+                <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
+                  <div>Time Watched:</div>
+                  <div><span class="text-primary" data-cy="videoTimeWatched">{{ timeUtils.formatDuration(Math.trunc(watchedProgress.totalWatchTime * 1000), true) }}</span></div>
                 </div>
-                <div class="grid grid-cols-12 gap-4">
-                  <div class="col-span-6 lg:col-span-3 xl:col-span-2">% Watched:</div>
-                  <div class="col">
+                <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
+                  <div>% Watched:</div>
+                  <div>
                     <span v-if="watchedProgress.videoDuration === Infinity" class="text-danger" data-cy="percentWatched">N/A</span>
                     <span v-else class="text-primary" data-cy="percentWatched">{{ watchedProgress.percentWatched }}%</span>
                   </div>
                 </div>
-                <div class="grid grid-cols-12 gap-4">
-                  <div class="col-span-6 lg:col-span-3 xl:col-span-2">Current Position:</div>
-                  <div class="col"><span class="text-primary">{{ watchedProgress.currentPosition.toFixed(2) }}</span> <span class="italic">Seconds</span></div>
+                <div class="grid grid-cols-[10rem_1fr] md:gap-4">
+                  <div>Current Position:</div>
+                  <div><span class="text-primary">{{ watchedProgress.currentPosition.toFixed(2) }}</span> <span class="italic">Seconds</span></div>
                 </div>
-                <div class="grid grid-cols-12 gap-4">
-                  <div class="col-span-6 lg:col-span-3 xl:col-span-2">Default Video Size:</div>
-                  <div class="col">
+                <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
+                  <div>Default Video Size:</div>
+                  <div>
                     <span class="text-primary" data-cy="defaultVideoSize">{{ configuredResolution }}</span> <Tag v-if="unsavedVideoSizeChanges" severity="warning" data-cy="unsavedVideoSizeChanges"><i class="fas fa-exclamation-circle mr-1" aria-hidden="true"></i>Unsaved Changes</Tag>
                     <div class="text-sm italic">** Change the size by dragging the handle at the bottom right of the video and click Save Changes button.</div>
                   </div>
                 </div>
-                <div class="grid grid-cols-12 gap-4">
-                  <div class="col-span-6 lg:col-span-3 xl:col-span-2">Watched Segments:</div>
-                  <div class="col">
+                <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
+                  <div>Watched Segments:</div>
+                  <div>
                     <div v-if="watchedProgress.currentStart !== null && watchedProgress.lastKnownStopPosition"> <span class="text-primary">{{ watchedProgress.currentStart.toFixed(2) }}</span>
                       <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/>
                       <span class="text-primary">{{ watchedProgress.lastKnownStopPosition.toFixed(2) }}</span> <span class="italic">Seconds</span>

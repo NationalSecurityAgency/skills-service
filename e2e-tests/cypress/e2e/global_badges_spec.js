@@ -29,7 +29,7 @@ describe('Global Badges Tests', () => {
         cy.log('completed supervisor user login');
 
         // Cypress.Commands.add('selectSkill', (skillsSelector='[data-cy="skillsSelectionItem-proj1-skill1"]', retry=true) => {
-        //     cy.get('[data-cy="skillsSelector"] [data-pc-section="trigger"]').as('getOptions')
+        //     cy.get('[data-cy="skillsSelector"] [data-pc-section="dropdownicon"]').as('getOptions')
         //         .click();
         //     cy.wait(500);
         //     cy.get(skillsSelector).click();

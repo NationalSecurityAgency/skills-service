@@ -136,7 +136,7 @@ describe('Accessibility Tests', () => {
 
             // looks like AXE and PrimeVue lib disagree where `aria-selected="true"` can be applied
             // TODO: not really an issue but look into this further so this validation can be added back
-            // cy.get('[data-pc-name="headercheckbox"]').click();
+            // cy.get('[data-pc-name="pcheadercheckbox"]').click();
             // cy.get('[data-cy="rejectBtn"]').click();
             // cy.get('[data-cy="rejectionTitle"]').contains('This will reject user\'s request(s) to get points');
             // cy.wait(500); // wait for modal to continue loading, if background doesn't load the contract checks will fail

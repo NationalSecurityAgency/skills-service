@@ -36,7 +36,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-cy="manageSkillLink_skill2"]')
         cy.get('[data-cy="skillsTable"] [data-cy="manageSkillLink_skill3"]')
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"')
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"')
             .click();
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
@@ -128,7 +128,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-cy="manageSkillLink_skill2"]')
         cy.get('[data-cy="skillsTable"] [data-cy="manageSkillLink_skill3"]')
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"')
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"')
           .click();
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
@@ -186,7 +186,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]')
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]')
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillsTable"] [data-pc-name="headercheckbox"]')
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"]')
             .click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
             .click();
@@ -232,9 +232,9 @@ describe('Group Skill Reuse Tests', () => {
             .should('have.text', '400');
 
         const tableSelector = '[data-cy="ChildRowSkillGroupDisplay_group12Subj2"] [data-cy="skillsTable"]';
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group12Subj2"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
-        cy.get('[data-pc-section="panel"] [data-pc-section="closeicon"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group12Subj2"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="closeicon"]').click()
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 5,
@@ -259,7 +259,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]')
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]')
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillsTable"] [data-pc-name="headercheckbox"]')
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"]')
             .click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
             .click();
@@ -301,9 +301,9 @@ describe('Group Skill Reuse Tests', () => {
             .should('have.text', '400');
 
         const tableSelector = '[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="skillsTable"]';
-        cy.get(`[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]`).click()
-        cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
-        cy.get('[data-pc-section="panel"] [data-pc-section="closeicon"]').click()
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]`).click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="closeicon"]').click()
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 5,
@@ -318,9 +318,9 @@ describe('Group Skill Reuse Tests', () => {
         // validate groups points
         cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).first().click()
         cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]`).first().click()
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
-        cy.get('[data-pc-section="panel"] [data-pc-section="closeicon"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="closeicon"]').click()
 
         cy.validateTable('[data-cy="skillsTable"]', [
             [{

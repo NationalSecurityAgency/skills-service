@@ -117,7 +117,7 @@ describe('Survey Metrics With Reused Data Tests', () => {
         cy.get(headerSelector)
             .contains('User')
             .click();
-        cy.get(`${tableSelector} [data-pc-name="rowperpagedropdown"]`).click().get('[data-pc-section="item"]').contains('10').click();
+        cy.get(`${tableSelector} [data-pc-name="pcrowperpagedropdown"]`).click().get('[data-pc-section="option"]').contains('10').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0, value: 'user1' }],
             [{ colIndex: 0, value: 'user10' }],

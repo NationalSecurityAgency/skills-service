@@ -163,6 +163,12 @@ const qNum = computed(() => {
 const numberOfStars = computed(() => {
   return props.q.answers.length
 })
+const removeExpanderClass = (rowData) => {
+  if (!(rowData?.numAnswered && rowData.numAnswered > 0) ){
+    return 'no-expander'
+  }
+  return ''
+}
 </script>
 
 <template>
@@ -197,13 +203,7 @@ const numberOfStars = computed(() => {
       v-model:expandedRows="expandedRows"
       :expander="true"
       expander-label="Expand Answer History"
-      :expander-pt="{
-                rowToggler: ({ instance: { rowData } }) => ({
-                  class: {
-                    hidden: !(rowData?.numAnswered && rowData.numAnswered > 0),
-                  },
-                }),
-              }"
+      :row-class="removeExpanderClass"
       :value="answers">
       <Column v-for="col of tableOptions.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
               :class="{'flex': responsive.md.value }">
@@ -249,4 +249,9 @@ const numberOfStars = computed(() => {
 
 <style scoped>
 
+</style>
+<style>
+.p-datatable .p-datatable-tbody > tr.no-expander > td .p-datatable-row-toggle-button {
+  display: none;
+}
 </style>

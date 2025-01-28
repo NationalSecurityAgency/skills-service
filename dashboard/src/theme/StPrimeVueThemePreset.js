@@ -39,10 +39,26 @@ const button = {
             outlined: {
                 info: {
                     borderColor: '{sky.300}',
-                        color: '{sky.800}'
+                    color: '{sky.800}'
                 },
                 primary: {
                     borderColor: '{green.600}',
+                },
+                success: {
+                    borderColor: '{green.300}',
+                    color: '{green.800}'
+                },
+                danger: {
+                    borderColor: '{red.300}',
+                    color: '{red.800}'
+                },
+                warn: {
+                    borderColor: '{orange.300}',
+                    color: '{orange.800}'
+                },
+                help: {
+                    borderColor: '{purple.300}',
+                    color: '{purple.800}'
                 }
             },
         },

@@ -212,7 +212,7 @@ describe('Metrics Tests - Skills', () => {
         ]);
 
         // test page size
-        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('10').click();
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('10').click();
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 0,

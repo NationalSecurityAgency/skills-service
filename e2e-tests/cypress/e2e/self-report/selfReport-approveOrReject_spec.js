@@ -347,7 +347,7 @@ describe('Self Report Skills Management Tests', () => {
     cy.wait('@loadApprovals');
 
     const tableSelector = '[data-cy="skillsReportApprovalTable"]';
-    cy.get(`${tableSelector} [data-pc-name="headercheckbox"] [data-pc-section="input"]`).click();
+    cy.get(`${tableSelector} [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]`).click();
     cy.get('[data-cy="approveBtn"]')
       .click();
     cy.get('[data-cy="saveDialogBtn"]').click();
@@ -435,7 +435,7 @@ describe('Self Report Skills Management Tests', () => {
     cy.wait('@loadApprovals');
 
     const tableSelector = '[data-cy="skillsReportApprovalTable"]';
-    cy.get(`${tableSelector} [data-pc-name="headercheckbox"] [data-pc-section="input"]`).click();
+    cy.get(`${tableSelector} [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]`).click();
 
     cy.get('[data-cy="rejectBtn"]')
       .click();
@@ -495,7 +495,7 @@ describe('Self Report Skills Management Tests', () => {
     cy.visit('/administrator/projects/proj1/self-report');
     cy.wait('@loadApprovals');
     const tableSelector = '[data-cy="skillsReportApprovalTable"]';
-    cy.get(`${tableSelector} [data-pc-name="headercheckbox"] [data-pc-section="input"]`).click();
+    cy.get(`${tableSelector} [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]`).click();
     cy.get('[data-cy=rejectBtn]')
       .click();
     cy.contains('Reject Skills');
