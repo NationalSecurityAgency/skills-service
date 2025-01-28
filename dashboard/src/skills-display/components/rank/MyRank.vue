@@ -50,7 +50,7 @@ const toRankDetailsPage = computed(() => {
       component-name="myRank"
       :user-achieved="`#${position}`"
       :total-available="totalUsers"
-      unit="users"
+      :unit="totalUsers > 1 ? 'users' : 'user'"
       icon="fa fa-users"
       :route="toRankDetailsPage"
       :is-summary-only="attributes.isSummaryOnly"
