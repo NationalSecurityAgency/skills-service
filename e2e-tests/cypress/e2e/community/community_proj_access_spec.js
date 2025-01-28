@@ -141,7 +141,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcacceptbutton"]').click()
         cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');

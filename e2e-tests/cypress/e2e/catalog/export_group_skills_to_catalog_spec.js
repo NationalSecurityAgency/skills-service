@@ -40,7 +40,7 @@ describe('Export Group Skills to the Catalog Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
             .should('have.text', '0');
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
 
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group20"] [data-cy="skillActionsBtn"]')
             .should('be.enabled');

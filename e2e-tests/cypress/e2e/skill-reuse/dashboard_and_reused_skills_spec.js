@@ -111,7 +111,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.importSkillFromCatalog(2, 1, 1, 2);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1/');
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
@@ -135,7 +135,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.importSkillFromCatalog(2, 1, 1, 2);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1/');
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="finalizeBtn"]')
             .click();
         cy.get('[data-cy="saveDialogBtn"]')

@@ -32,8 +32,8 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 
@@ -59,8 +59,8 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 
@@ -72,7 +72,7 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
         cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 
@@ -98,8 +98,8 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 
@@ -110,7 +110,7 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
         cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
         cy.get('[data-cy="existingTag"]').click();
@@ -132,8 +132,8 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 
@@ -144,8 +144,8 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
         cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
         cy.get('[data-cy="existingTag"]').click();
@@ -171,12 +171,12 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
 
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
 
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
@@ -184,20 +184,20 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="newTag"]').type('New Tag 1')
         cy.get('[data-cy="saveDialogBtn"]').click()
 
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
 
         cy.get('[data-cy="skillTag-skill1-newtag1"]').should('exist')
         cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
         cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
 
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
 
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
@@ -206,9 +206,9 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').click()
 
 
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
 
         cy.get('[data-cy="skillTag-skill1-newtag1"]').should('not.exist')
         cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
@@ -224,8 +224,8 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 
@@ -267,8 +267,8 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 
@@ -291,8 +291,8 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 
@@ -303,7 +303,7 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
         cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
         cy.get('[data-pc-name="dialog"]').contains('The selected skills do not have any tags.')
@@ -321,7 +321,7 @@ describe('Tag Skills Tests', () => {
     it('after tagging skill selection is removed and focus is returned to the new skill button', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
         cy.get('[data-cy="newTag"]').type('New Tag 1')
@@ -329,7 +329,7 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
 
         for (let i= 0; i < 3 ; i++) {
-            cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+            cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
         }
         cy.get('[data-cy="newSkillButton"]').should('have.focus')
     });
@@ -337,32 +337,32 @@ describe('Tag Skills Tests', () => {
     it('cancel tagging should return focus to the Action button', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 
         cy.get('[data-cy="closeDialogBtn"]').click()
         cy.get('[data-cy="skillActionsBtn"]').should('have.focus')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
 
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
         cy.get('[data-pc-name="dialog"] [aria-label="Close"]').click()
         cy.get('[data-cy="skillActionsBtn"]').should('have.focus')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
     });
 
     it('after removing a tag selection is removed and focus is returned to the new skill button', () => {
         cy.addTagToSkills(1, ['skill1', 'skill2', 'skill3'], 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
         cy.get('[data-cy="existingTag"]').click();
@@ -370,7 +370,7 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').click()
 
         for (let i= 0; i < 3 ; i++) {
-            cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+            cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
         }
         cy.get('[data-cy="newSkillButton"]').should('have.focus')
     });
@@ -379,25 +379,25 @@ describe('Tag Skills Tests', () => {
         cy.addTagToSkills(1, ['skill1', 'skill2', 'skill3'], 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
 
         cy.get('[data-cy="closeDialogBtn"]').click()
         cy.get('[data-cy="skillActionsBtn"]').should('have.focus')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
 
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
 
         cy.get('[data-pc-name="dialog"] [aria-label="Close"]').click()
         cy.get('[data-cy="skillActionsBtn"]').should('have.focus')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
-        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
     });
 
 
@@ -409,8 +409,8 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 
@@ -430,8 +430,8 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
         cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 

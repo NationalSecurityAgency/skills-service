@@ -100,7 +100,7 @@ const close = () => {
         skill{{ pluralSupport.plural(finalizeInfo.numSkillsToFinalize) }} to finalize.
         Please note that the finalization process may take <i>several moments</i>.
       </p>
-      <p>
+      <div>
         The finalization process includes:
         <ul>
           <li>Imported skills will <b>now</b> contribute to the overall project and subject points.</li>
@@ -111,7 +111,7 @@ const close = () => {
             imported skills.
           </li>
         </ul>
-      </p>
+      </div>
       <Message
         v-if="finalizeInfo.skillsWithOutOfBoundsPoints && finalizeInfo.skillsWithOutOfBoundsPoints.length > 0"
         :closable="false"

@@ -89,7 +89,7 @@ describe('Group Skill Reuse Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="manageSkillLink_skill1"]')
-        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
@@ -182,7 +182,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.createSkillsGroup(1, 2, 12);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]')
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]')
 
@@ -216,7 +216,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="nameCell_group12Subj2"] [data-cy="numSkillsInGroup"]')
             .contains('2 skills');
 
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12Subj2"] [data-cy="nameCell_skill6STREUSESKILLST0"]')
             .contains('Reused');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12Subj2"] [data-cy="nameCell_skill7STREUSESKILLST0"]')
@@ -255,7 +255,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.createSkillsGroup(1, 1, 12);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]')
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]')
 
@@ -285,7 +285,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]')
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]')
 
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).first().click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).first().click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="nameCell_skill6STREUSESKILLST0"]')
             .contains('Reused');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="nameCell_skill7STREUSESKILLST0"]')
@@ -316,8 +316,8 @@ describe('Group Skill Reuse Tests', () => {
         ], 10, true, null, false);
 
         // validate groups points
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).first().click()
-        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-section="rowtoggler"]`).first().click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).first().click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]`).first().click()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
         cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
         cy.get('[data-pc-section="panel"] [data-pc-section="closeicon"]').click()
@@ -353,7 +353,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="pageHeaderStats_Points_reused"]')
             .should('have.text', '200');
 
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="deleteSkillButton_skill1STREUSESKILLST1"]')
             .click();
         cy.get('[data-cy="removalSafetyCheckMsg"]')
@@ -375,7 +375,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill1"]');
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="noContent"]')
             .contains('Group has no Skills');
         cy.get('[data-cy="manageSkillLink_skill1"]');
@@ -395,7 +395,7 @@ describe('Group Skill Reuse Tests', () => {
             .type('Delete Me');
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="noContent"]')
             .contains('Group has no Skills');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
@@ -406,7 +406,7 @@ describe('Group Skill Reuse Tests', () => {
             .should('not.exist');
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="noContent"]')
             .contains('Group has no Skills');
         cy.get('[data-cy="manageSkillLink_skill1"]')

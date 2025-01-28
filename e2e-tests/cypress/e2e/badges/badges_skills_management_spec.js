@@ -983,7 +983,7 @@ describe('Badges Tests', () => {
         cy.visit('/administrator/projects/proj1/badges/badge1');
         cy.get('[data-cy="deleteSkill_skill1"]').click();
         cy.contains('Remove Required Skill');
-        cy.get('[data-pc-name="acceptbutton"]').click();
+        cy.get('[data-pc-name="pcacceptbutton"]').click();
         cy.get('[data-cy="skillsSelector"] button').should('have.focus');
     })
 

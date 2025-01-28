@@ -577,7 +577,7 @@ describe('Finalize Imported Skills Tests', () => {
 
         cy.get('[data-cy="importFromCatalogBtn"]')
             .click();
-                cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+                cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="importBtn"]')

@@ -60,11 +60,21 @@ const badge = {
     }
 }
 
+const message = {
+    colorScheme: {
+        light: {
+            success: {
+                color: '{green.700}',
+            }
+        }
+    }
+}
+
 
 const defineSkillTreePreset = () => {
     return definePreset(Aura, {
         semantic: { colorScheme },
-        components: { button, badge }
+        components: { button, badge, message }
     });
 }
 

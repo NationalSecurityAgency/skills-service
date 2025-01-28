@@ -38,7 +38,7 @@ describe('Import Skills under a Group Tests', () => {
         cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="importSkillToGroupBtn-group5"]')
             .click();
-        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .click();
         cy.get('[data-cy="importSkillToGroupBtn-group5"]')

@@ -800,7 +800,7 @@ describe('Skills Table Tests', () => {
     cy.createSkill(1, 1,1 )
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
-    cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+    cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
     cy.get('[data-cy="enableDisplayOrderSort"] input').tab().type('{enter}');
     cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]')
     cy.focused().tab()

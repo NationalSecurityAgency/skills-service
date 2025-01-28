@@ -205,9 +205,9 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="manageSkillLink_skill2"]').invoke('attr', 'aria-label').should('contain', manageButtonTxt)
             cy.get('[data-cy="manageSkillLink_skill3"]').invoke('attr', 'aria-label').should('contain', manageButtonTxt)
 
-            cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`)
 
             if (assertChainPrepend == null) {
                 cy.get('[data-cy="enableDisplayOrderSort"]').click()
@@ -455,7 +455,7 @@ describe('Approver Role Tests', () => {
 
         const approvalHistoryTableSelector = '[data-cy="selfReportApprovalHistoryTable"]';
 
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="approveBtn"]').click();
         cy.get('[data-cy="saveDialogBtn"]').click();
         cy.validateTable(approvalHistoryTableSelector, [
@@ -468,7 +468,7 @@ describe('Approver Role Tests', () => {
             },],
         ]);
 
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="rejectBtn"]')
             .click();
         cy.get('[data-cy="saveDialogBtn"]').click();

@@ -261,7 +261,7 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="badgeSkillsTable"] tr').contains('proj1')
         cy.get('[data-cy="deleteSkill_skill1"]').click()
         cy.contains('Remove Required Skill');
-        cy.get('[data-pc-name="acceptbutton"]').click();
+        cy.get('[data-pc-name="pcacceptbutton"]').click();
         cy.get('[data-cy="skillsSelector"] button').should('have.focus');
     })
 

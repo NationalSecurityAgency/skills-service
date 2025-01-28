@@ -28,7 +28,7 @@ describe('Copy skills from one project to another Tests', () => {
 
         Cypress.Commands.add("initiateSkillsCopyModal", (skillIndexesToCopy, optionalExpandedGroupSelector = '') => {
             skillIndexesToCopy.forEach((index) => {
-                cy.get(`${optionalExpandedGroupSelector} ${tableSelector} [data-p-index="${index}"] [data-pc-name="rowcheckbox"] [data-pc-section="input"]`).click()
+                cy.get(`${optionalExpandedGroupSelector} ${tableSelector} [data-p-index="${index}"] [data-pc-name="pcrowcheckbox"] [data-pc-section="input"]`).click()
             })
             cy.get(`${optionalExpandedGroupSelector} [data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]`).should('have.text', skillIndexesToCopy.length)
             cy.get(`${optionalExpandedGroupSelector} [data-cy="skillActionsBtn"]`).click()
@@ -90,7 +90,7 @@ describe('Copy skills from one project to another Tests', () => {
         cy.addSkillToGroup(1, 1, 11, 6)
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get(`${tableSelector} [data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="1"] [data-pc-section="rowtogglebutton"]`).click()
         const expandedGroupSelector = '[data-cy="ChildRowSkillGroupDisplay_group10"]'
         cy.initiateSkillsCopyModal([0,2], expandedGroupSelector)
 
@@ -168,7 +168,7 @@ describe('Copy skills from one project to another Tests', () => {
 
         // project 2
         cy.visit('/administrator/projects/proj2/subjects/subj1')
-        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         const expandedGroupSelector = '[data-cy="ChildRowSkillGroupDisplay_group11"]'
         cy.get(`${expandedGroupSelector} [data-cy="manageSkillLink_skill1"]`)
         cy.get(`${expandedGroupSelector} [data-cy="manageSkillLink_skill3"]`)
@@ -189,7 +189,7 @@ describe('Copy skills from one project to another Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get(`${tableSelector} [data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="1"] [data-pc-section="rowtogglebutton"]`).click()
         const expandedGroupSelector = '[data-cy="ChildRowSkillGroupDisplay_group10"]'
         cy.initiateSkillsCopyModal([0,2], expandedGroupSelector)
 
@@ -224,7 +224,7 @@ describe('Copy skills from one project to another Tests', () => {
 
         // project 2
         cy.visit('/administrator/projects/proj2/subjects/subj1')
-        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         const expandedGroupSelectorP2 = '[data-cy="ChildRowSkillGroupDisplay_group11"]'
         cy.get(`${expandedGroupSelectorP2} [data-cy="manageSkillLink_skill3"]`)
         cy.get(`${expandedGroupSelectorP2} [data-cy="manageSkillLink_skill5"]`)
@@ -399,7 +399,7 @@ describe('Copy skills from one project to another Tests', () => {
         cy.addSkillToGroup(1, 1, 11, 6)
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get(`${tableSelector} [data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="1"] [data-pc-section="rowtogglebutton"]`).click()
         const expandedGroupSelector = '[data-cy="ChildRowSkillGroupDisplay_group10"]'
         cy.initiateSkillsCopyModal([0,2], expandedGroupSelector)
 

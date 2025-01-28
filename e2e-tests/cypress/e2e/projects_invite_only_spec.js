@@ -77,7 +77,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcacceptbutton"]').click()
 
         cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
@@ -169,7 +169,7 @@ describe('Projects Invite-Only Tests', () => {
                             .click();
                         cy.contains(`Are you sure you want to revoke ${userIdForDisplay}'s access to this Project? ${userIdForDisplay}'s achievements will NOT be deleted, however ${userIdForDisplay} will no longer be able to access the training profile.`)
                             .should('be.visible');
-                        cy.get('[data-pc-name="acceptbutton"]').click()
+                        cy.get('[data-pc-name="pcacceptbutton"]').click()
                         cy.wait('@removeAccess');
                         cy.wait('@getApprovedUsers');
                         cy.get('[data-cy=privateProjectUsersTable] [data-cy="skillsBTableTotalRows"]')
@@ -308,7 +308,7 @@ describe('Projects Invite-Only Tests', () => {
             cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
                 .eq(0)
                 .click();
-            cy.get('[data-pc-name="acceptbutton"]').click();
+            cy.get('[data-pc-name="pcacceptbutton"]').click();
             cy.wait('@revokeUser');
             cy.validateTable(tableSelector, [
                 [{
@@ -351,19 +351,19 @@ describe('Projects Invite-Only Tests', () => {
             cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
                 .eq(0)
                 .click();
-            cy.get('[data-pc-name="acceptbutton"]').click();
+            cy.get('[data-pc-name="pcacceptbutton"]').click();
             cy.wait('@revokeUser');
 
             cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
                 .eq(0)
                 .click();
-            cy.get('[data-pc-name="acceptbutton"]').click();
+            cy.get('[data-pc-name="pcacceptbutton"]').click();
             cy.wait('@revokeUser');
 
             cy.get('[data-cy=privateProjectUsersTable_revokeUserAccessBtn]')
                 .eq(0)
                 .click();
-            cy.get('[data-pc-name="acceptbutton"]').click();
+            cy.get('[data-pc-name="pcacceptbutton"]').click();
             cy.wait('@revokeUser');
 
             cy.validateTable(tableSelector, [
@@ -448,7 +448,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcacceptbutton"]').click()
 
         cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
@@ -522,7 +522,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcacceptbutton"]').click()
         cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
@@ -596,7 +596,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcacceptbutton"]').click()
         cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
@@ -673,7 +673,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcacceptbutton"]').click()
         cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
@@ -748,7 +748,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcacceptbutton"]').click()
         cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
@@ -825,7 +825,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcacceptbutton"]').click()
         cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
@@ -906,7 +906,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcacceptbutton"]').click()
         cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
@@ -936,7 +936,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-cy="remindUser-abc@abc.org"]').eq(0).should('be.enabled').click();
         cy.get('[data-pc-section="title"]').should('contain.text', 'Expired Invite');
         cy.wait('@loadInviteStatus');
-        cy.get('[data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="pcacceptbutton"]').click()
         cy.get('[data-cy="projectInviteStatusTable"] tr').should('have.length', 5); //account for header row
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(0).should('contain.text', 'abc@abc.org');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(2).should('contain.text', 'expired');
@@ -965,7 +965,7 @@ describe('Projects Invite-Only Tests', () => {
 
         cy.contains('Add Project Administrator?')
         cy.contains('The selected user will be added as an Administrator for this project and will be able to edit/add/delete all aspects of the Project.')
-        cy.get('[data-pc-name="acceptbutton"]').contains('Add Administrator!').click()
+        cy.get('[data-pc-name="pcacceptbutton"]').contains('Add Administrator!').click()
         const tableSelector = '[data-cy=roleManagerTable]';
         cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"]`);
 
@@ -995,7 +995,7 @@ describe('Projects Invite-Only Tests', () => {
 
         cy.contains('Add Project Approver?')
         cy.contains('The selected user will be added as an Approver for this project and will be able to view all aspects of the Project as well as approve and deny self reporting requests.')
-        cy.get('[data-pc-name="acceptbutton"]').contains('Add Approver!').click()
+        cy.get('[data-pc-name="pcacceptbutton"]').contains('Add Approver!').click()
         const tableSelector = '[data-cy=roleManagerTable]';
         cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"]`);
 
@@ -1099,7 +1099,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
             .should('be.visible')
             .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcacceptbutton"]').click()
         cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
