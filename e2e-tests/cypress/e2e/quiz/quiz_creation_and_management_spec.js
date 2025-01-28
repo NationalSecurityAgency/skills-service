@@ -700,7 +700,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
 
         cy.get('[data-cy="copyQuizButton_quiz1"]').click()
-        cy.get('[data-pc-section="closebuttonicon"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]').click()
         cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
 
     });

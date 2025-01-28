@@ -177,7 +177,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
     cy.get('[data-cy="pointIncrement"]').type('{selectall}11');
     cy.get('[data-cy="numPerformToCompletion"]').type('{selectall}11');
-    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
+    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
     cy.get('[data-cy=timeWindowCheckbox').click()
     cy.get('[data-cy="pointIncrementIntervalHrs"] input').type('{selectall}11');
     cy.get('[data-cy="pointIncrementIntervalMins"] input').type('{selectall}11');
@@ -225,7 +225,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
     cy.get('[data-cy="pointIncrement"]').type('{selectall}11');
     cy.get('[data-cy="numPerformToCompletion"]').type('{selectall}11');
-    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
+    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
     cy.get('[data-cy=timeWindowCheckbox').click()
     cy.get('[data-cy="pointIncrementIntervalHrs"]').type('{selectall}11');
     cy.get('[data-cy="pointIncrementIntervalMins"]').type('{selectall}11');

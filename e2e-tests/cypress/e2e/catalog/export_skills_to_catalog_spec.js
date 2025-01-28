@@ -633,9 +633,9 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Catalog"]').click()
-        cy.get('[data-pc-section="closebutton"]').click()
-        cy.get('[data-pc-section="headercontent"]').contains('Display').click()
-        cy.get('[data-pc-section="headercontent"]').contains('Display').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="columnheadercontent"]').contains('Display').click()
+        cy.get('[data-pc-section="columnheadercontent"]').contains('Display').click()
 
         cy.validateTable(tableSelector, [
             [{
@@ -688,7 +688,7 @@ describe('Export Skills to the Catalog Tests', () => {
             }],
         ], 10);
 
-        cy.get('[data-pc-section="headercontent"]').contains('Catalog').click()
+        cy.get('[data-pc-section="columnheadercontent"]').contains('Catalog').click()
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 5,
@@ -810,7 +810,7 @@ describe('Export Skills to the Catalog Tests', () => {
             .contains('Nothing Available for Import');
         cy.get('[data-cy="checkingCatalogStatus"]')
             .should('not.exist')
-        cy.get('[data-pc-section="closebutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]').click()
 
         // navigate to another project
         cy.get('[data-cy="breadcrumb-Projects"]')

@@ -59,7 +59,7 @@ const props = defineProps({
   },
   cancelButtonSeverity: {
     type: String,
-    default: 'warning'
+    default: 'warn'
   },
   validationSchema: Object,
   initialValues: Object,

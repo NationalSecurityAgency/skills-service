@@ -49,7 +49,7 @@ const props = defineProps({
   },
   cancelButtonSeverity: {
     type: String,
-    default: 'warning'
+    default: 'warn'
   },
   okButtonDisabled: Boolean,
   showOkButton: {
@@ -142,13 +142,13 @@ defineExpose({
     <div v-if="!loading" v-focustrap :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }">
       <slot></slot>
 
-      <div :class="`text-right ${footerClass}`">
+      <div :class="`text-right ${footerClass}`" class="flex justify-end">
         <SkillsButton
             v-if="showCancelButton"
             :label="cancelButtonLabel"
             :icon="cancelButtonIcon"
             :severity="cancelButtonSeverity"
-            outlined size="small"
+            outlined
             class="float-right mr-2"
             :disabled="submitting"
             @click="onCancel"
@@ -158,7 +158,7 @@ defineExpose({
             :label="okButtonLabel"
             :icon="okButtonIcon"
             :severity="okButtonSeverity"
-            outlined size="small"
+            outlined
             class="float-right"
             @click="onOk"
             :disabled="okButtonDisabled || submitting"

@@ -133,7 +133,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=numPerformToCompletionError]').contains('Occurrences must be less than or equal to 10000').should('be.visible')
     cy.get('[data-cy=saveDialogBtn]').should('be.disabled')
 
-    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
+    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
     cy.get('[data-cy=timeWindowCheckbox').click()
     cy.get('[data-cy=numPointIncrementMaxOccurrences]').type('{selectall}{del}')
     cy.get('[data-cy=numPointIncrementMaxOccurrencesError]').contains('Occurrences is a required field').should('be.visible')
@@ -229,7 +229,7 @@ describe('Skills Tests', () => {
     cy.intercept('POST', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('postNewSkill')
     cy.intercept('GET', `/admin/projects/proj1/subjects/subj1/skills/Skill1Skill`).as('getSkill')
 
-    const selectorOccurrencesToCompletion = '[data-cy="numPerformToCompletion"] [data-pc-name="input"]'
+    const selectorOccurrencesToCompletion = '[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]'
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.get('[data-cy="noContent"]')
     cy.get('[data-cy="newSkillButton"]').click()
@@ -397,7 +397,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="userIdInput"]').click().type('{selectall}fo{enter}')
     cy.wait('@suggestUsers')
     cy.get('[data-cy="userIdInput"]').click()
-    cy.get('.p-autocomplete-item').contains('foo').click({ force: true })
+    cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('foo').click({ force: true })
   })
 
   it('Cannot Add Skill Event if project does not have enough points', () => {
@@ -428,12 +428,12 @@ describe('Skills Tests', () => {
 
     // increase the points and make sure the warning is gone
     cy.get('[data-cy="editSkillButton_skill1"]').click()
-    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').type('{selectall}10')
+    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').type('{selectall}10')
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
 
     // decrease the points and make sure the warning returns
     cy.get('[data-cy="editSkillButton_skill1"]').click()
-    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').type('{selectall}5')
+    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').type('{selectall}5')
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
 
     cy.get('[data-cy="addSkillEventButton"]').should('not.be.enabled');
@@ -484,12 +484,12 @@ describe('Skills Tests', () => {
 
     // increase the points and make sure the warning is gone
     cy.get('[data-cy="editSkillButton_skill1"]').click()
-    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').type('{selectall}10')
+    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').type('{selectall}10')
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
 
     // decrease the points and make sure the warning returns
     cy.get('[data-cy="editSkillButton_skill1"]').click()
-    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').type('{selectall}5')
+    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').type('{selectall}5')
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
 
     cy.get('[data-cy="addSkillEventButton"]').should('not.be.enabled');
@@ -537,8 +537,8 @@ describe('Skills Tests', () => {
     //need to format year/month/day to match users screen
 
     cy.get('[data-cy="eventDatePicker"]').click()
-    cy.get('[data-pc-section="previousbutton"]').first().click()
-    cy.get('.p-datepicker-group-container').contains('10').click()
+    cy.get('[data-pc-name="pcprevbutton"]').first().click()
+    cy.get('[data-pc-section="day"]').contains('10').click()
 
     cy.get(addButtonSelector).click();
     cy.wait('@addSkillEvent')
@@ -791,7 +791,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=editSkillButton_skill2]').should('have.focus')
 
     cy.get('[data-cy=editSkillButton_skill2]').click()
-    cy.get('[data-pc-section="closebuttonicon"]').click()
+    cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]').click()
     cy.get('[data-cy=editSkillButton_skill2]').should('have.focus')
     cy.contains('Skill 2test 123')
 
@@ -813,7 +813,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=editSkillButton_skill1]').should('have.focus')
 
     cy.get('[data-cy=editSkillButton_skill1]').click()
-    cy.get('[data-pc-section="closebuttonicon"]').click()
+    cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]').click()
     cy.get('[data-cy=editSkillButton_skill1]').should('have.focus')
   })
 
@@ -997,7 +997,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=skillOverviewTotalpoints]').contains('20 points').should('be.visible')
     cy.get('[data-cy=skillOverviewTotalpoints]').contains('10 repetitions to Completion').should('be.visible')
     cy.get('[data-cy=editSkillButton_entirelyNewId]').click()
-    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
+    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
     cy.get('[data-cy=timeWindowCheckbox').click()
     cy.get('[data-cy=pointIncrementIntervalMins]').type('{selectall}59')
     cy.get('[data-cy=saveDialogBtn]').click()
@@ -1131,7 +1131,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="newSkillButton"]').click()
     cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
 
-    const textDecorationMatch = 'line-through solid rgb(9, 113, 81)'
+    const textDecorationMatch = 'line-through solid color(srgb 0.0862745 0.396078 0.203922)'
 
     // strike-through when url starts with http:// or https://
     cy.get('[data-cy="skillHelpUrl"]').type('https:/')
@@ -1375,7 +1375,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy*=copySkillButton]').should('be.disabled')
 
     cy.get('[data-cy=deleteSkillButton_skill1]').click()
-    cy.get('[data-cy=currentValidationText]').type('Delete Me')
+    cy.get('[data-cy=currentValidationText]').type('Delete Me', {delay: 0})
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
     cy.wait('@deleteSkill')
 
@@ -1400,7 +1400,7 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy=pageHeaderStat]').eq(1).should('contain.text', '5')
     cy.get('[data-cy=deleteSkillButton_skill5]').click()
-    cy.get('[data-cy=currentValidationText]').type('Delete Me')
+    cy.get('[data-cy=currentValidationText]').type('Delete Me', {delay: 0})
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
     cy.wait('@deleteSkill')
     cy.get('[data-cy=pageHeaderStat]').eq(1).should('contain.text', '4')

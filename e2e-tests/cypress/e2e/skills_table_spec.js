@@ -97,7 +97,7 @@ describe('Skills Table Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
     // force the order
-    cy.get('[data-pc-section="headercontent"]').contains('Display').click()
+    cy.get('[data-pc-section="columnheadercontent"]').contains('Display').click()
 
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Very Great Skill # 1' }, { colIndex: 3, value: 1 }],
@@ -147,7 +147,7 @@ describe('Skills Table Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
     // force the order
-    cy.get('[data-pc-section="headercontent"]').contains('Display').click()
+    cy.get('[data-pc-section="columnheadercontent"]').contains('Display').click()
 
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Very Great Skill # 1' }, { colIndex: 3, value: 1 }],

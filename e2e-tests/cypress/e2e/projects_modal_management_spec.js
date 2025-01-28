@@ -228,7 +228,7 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=newProjectButton]')
             .click();
         cy.get('[data-cy="projectName"]')
-        cy.get('[data-pc-group-section="headericon"][data-pc-section="closebutton"]')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]')
             .click();
         cy.get('[data-cy=newProjectButton]')
             .should('have.focus');
@@ -272,7 +272,7 @@ describe('Projects Modal Management Tests', () => {
 
         cy.get(proj1EditBtn).click();
         cy.get('[data-cy=projectName]').should('be.visible');
-        cy.get('[data-pc-group-section="headericon"][data-pc-section="closebutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]').click()
         cy.get('[data-cy=projectName]').should('not.exist');
         cy.wait(600)
         cy.get(proj1EditBtn).should('have.focus');
@@ -313,7 +313,7 @@ describe('Projects Modal Management Tests', () => {
 
         cy.get('[data-cy=addLevel]')
             .click();
-        cy.get('[data-pc-section="closebuttonicon"]')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]')
             .click();
         cy.get('[data-cy=addLevel]')
             .should('have.focus');
@@ -334,7 +334,7 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .eq(0)
             .click();
-        cy.get('[data-pc-section="closebuttonicon"]')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(0)
@@ -363,7 +363,7 @@ describe('Projects Modal Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .eq(3)
             .click();
-        cy.get('[data-pc-section="closebuttonicon"]')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]')
             .click();
         cy.get('[data-cy=editLevelButton]')
             .eq(3)

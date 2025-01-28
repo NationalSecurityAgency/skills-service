@@ -493,7 +493,7 @@ const saveSettings = handleSubmit((values) => {
             <Divider />
 
             <div class="flex flex-row">
-              <div class="">
+              <div class="flex gap-1">
                 <SkillsButton variant="outline-success"
                               label="Save"
                               icon="fas fa-arrow-circle-right"
