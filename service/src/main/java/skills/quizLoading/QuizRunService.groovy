@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.PublicProps
@@ -32,7 +33,6 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.result.model.MyQuizAttempt
-import skills.controller.result.model.QuizRun
 import skills.controller.result.model.QuizSkillResult
 import skills.controller.result.model.TableResult
 import skills.quizLoading.model.*
@@ -112,6 +112,15 @@ class QuizRunService {
 
     @Autowired
     UserCommunityService userCommunityService
+
+    @Autowired
+    SkillEventsSupportRepo skillEventsSupportRepo
+
+    @Autowired
+    SkillDefRepo skillDefRepo
+
+    @Autowired
+    UserQuizAttemptRepo userQuizAttemptRepo
 
     @Value('#{"${skills.config.ui.minimumSubjectPoints}"}')
     int minimumSubjectPoints
@@ -745,9 +754,14 @@ class QuizRunService {
 
     @Profile
     List<SkillEventResult> reportAnyAssociatedSkills(UserQuizAttempt userQuizAttempt, QuizDef quizDef) {
+        return reportAnyAssociatedSkills(userQuizAttempt, quizDef.id)
+    }
+
+    @Profile
+    List<SkillEventResult> reportAnyAssociatedSkills(UserQuizAttempt userQuizAttempt, Integer quizDefId) {
         List<SkillEventResult> res = []
         if (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED) {
-            List<QuizToSkillDefRepo.ProjectIdAndSkillId> skills = quizToSkillDefRepo.getSkillsForQuiz(quizDef.id)
+            List<QuizToSkillDefRepo.ProjectIdAndSkillId> skills = quizToSkillDefRepo.getSkillsForQuiz(quizDefId)
             if (skills){
                 skills.each {
                     SkillEventResult skillEventResult = skillEventsService.reportSkill(it.projectId, it.skillId, userQuizAttempt.userId, false, userQuizAttempt.completed,
@@ -757,6 +771,32 @@ class QuizRunService {
             }
         }
         return res
+    }
+
+    @Profile
+    void checkForDependentQuizzes(SkillEventResult res, String userId, SkillDefMin currentSkillDef) {
+        List<SkillDefMin> parents = skillEventsSupportRepo.findParentSkillsByChildIdAndType(currentSkillDef.id, [SkillRelDef.RelationshipType.Dependence])
+        Set<Integer> dependantQuizSkillIds = []
+        // check for dependent quiz skills or badges that contain quiz skills that are passed and then report via reportAnyAssociatedSkills
+        parents.each { SkillDefMin skillDefMin ->
+            if (skillDefMin.selfReportingType == SkillDef.SelfReportingType.Quiz) {
+                dependantQuizSkillIds.add(skillDefMin.id)
+            } else if (skillDefMin.type == SkillDef.ContainerType.Badge) {
+                List<SkillDef> badgeSkills = skillDefRepo.findChildSkillsByIdAndRelationshipType(skillDefMin.id, SkillRelDef.RelationshipType.BadgeRequirement)
+                dependantQuizSkillIds.addAll(badgeSkills.findAll { it.selfReportingType == SkillDef.SelfReportingType.Quiz }.collect {it.id})
+            }
+        }
+        dependantQuizSkillIds.each { quizSkillId ->
+            PageRequest onePlease = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "updated"))
+            List<UserQuizAttempt> passedAttempts = userQuizAttemptRepo.findBySkillRefIdAndUserIdAndByStatus(
+                    quizSkillId,
+                    userId,
+                    UserQuizAttempt.QuizAttemptStatus.PASSED, onePlease)
+            if (passedAttempts) {
+                List<SkillEventResult> results = reportAnyAssociatedSkills(passedAttempts.first(), passedAttempts.first().quizDefinitionRefId)
+                res.completed?.addAll((results.collect { it.completed }).flatten())
+            }
+        }
     }
 
     @Transactional

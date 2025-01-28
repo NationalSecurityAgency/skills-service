@@ -17,6 +17,7 @@ package skills.intTests.reportSkills
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
@@ -29,6 +30,7 @@ import skills.services.events.SkillEventsService
 class ReportSkillsTransactionalService {
 
     @Autowired
+    @Lazy
     SkillEventsService skillEventsService
 
     @Autowired
