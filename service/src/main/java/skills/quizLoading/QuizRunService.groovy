@@ -730,7 +730,7 @@ class QuizRunService {
         }
         Integer quizLength = getQuizLength(quizDef.id)
         if(quizLength == -1) {
-            quizLength = gradedQuestions.size()
+            quizLength = quizQuestionRepo.countByQuizId(quizId)
         }
         int numCorrect = (int)gradedQuestions.count { it.isCorrect }
         int numQuestionsNeedGrading = (int)gradedQuestions.count { it.status == UserQuizQuestionAttempt.QuizQuestionStatus.NEEDS_GRADING }
