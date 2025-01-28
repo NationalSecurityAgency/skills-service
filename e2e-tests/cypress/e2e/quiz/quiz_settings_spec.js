@@ -70,18 +70,18 @@ describe('Quiz Metrics Tests', () => {
 
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
-        cy.get('[data-cy="numAttemptsInput"] [data-pc-name="input"]').should('have.value', '3')
+        cy.get('[data-cy="numAttemptsInput"] [data-pc-name="pcinputtext"]').should('have.value', '3')
         cy.get('[data-cy="numAttemptsInput"]').type('0')
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="numAttemptsInput"] [data-pc-name="input"]').should('have.value', '30')
+        cy.get('[data-cy="numAttemptsInput"] [data-pc-name="pcinputtext"]').should('have.value', '30')
 
         cy.visit('/administrator/quizzes/quiz1/settings');
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="numAttemptsInput"] [data-pc-name="input"]').should('have.value', '30')
+        cy.get('[data-cy="numAttemptsInput"] [data-pc-name="pcinputtext"]').should('have.value', '30')
 
         cy.get('[data-cy="unlimitedAttemptsSwitch"] [role="switch"]').click({force: true})
         cy.get('[data-cy="numAttemptsInput"]').should('not.exist')
@@ -183,8 +183,8 @@ describe('Quiz Metrics Tests', () => {
         cy.get('[data-cy="timeLimitHoursInput"]').should('exist')
         cy.get('[data-cy="timeLimitMinutesInput"]').should('exist')
 
-        cy.get('[data-cy="timeLimitHoursInput"] [data-pc-name="input"]').should('have.value', '1')
-        cy.get('[data-cy="timeLimitMinutesInput"] [data-pc-name="input"]').should('have.value', '0')
+        cy.get('[data-cy="timeLimitHoursInput"] [data-pc-name="pcinputtext"]').should('have.value', '1')
+        cy.get('[data-cy="timeLimitMinutesInput"] [data-pc-name="pcinputtext"]').should('have.value', '0')
 
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="unsavedChangesAlert"]').should('exist')

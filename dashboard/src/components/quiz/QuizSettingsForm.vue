@@ -203,6 +203,7 @@ const updateTimeLimit = () => {
           <SkillsNumberInput
               label="Number of Attempts"
               id="numAttemptsInput"
+              :min="1"
               name="quizNumberOfAttempts"
               aria-label="Maximum Number of Attempts"
               data-cy="numAttemptsInput" />

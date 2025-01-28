@@ -71,7 +71,7 @@ describe('Export Skills to the Catalog Tests', () => {
             .should('be.disabled');
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Catalog"]').click()
-        cy.get('[data-pc-section="closebutton"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
 
         cy.validateTable(tableSelector, [
             [{

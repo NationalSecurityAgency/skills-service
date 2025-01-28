@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 import Message from 'primevue/message'
-import {computed, useAttrs} from "vue";
+import {computed, useAttrs, useSlots} from "vue";
 
 const props = defineProps({
   icon: String,
@@ -25,6 +25,7 @@ const props = defineProps({
   }
 })
 const attrs = useAttrs()
+const slots = useSlots()
 
 const msgIcon = computed(() => {
   if (props.icon) {
@@ -51,7 +52,7 @@ const marginCss = computed(() => {
 <template>
   <Message
       :pt="{ text: { class: 'flex-1' } }"
-      :class="marginCss" :icon="msgIcon"><slot /><template #container><slot name="container" /></template></Message>
+      :class="marginCss" :icon="msgIcon"><slot /><template v-if="slots.container" #container><slot name="container" /></template></Message>
 </template>
 
 <style scoped>
