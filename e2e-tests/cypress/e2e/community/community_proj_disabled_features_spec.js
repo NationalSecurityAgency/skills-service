@@ -40,7 +40,7 @@ describe('Community Project Creation Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1')
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]').should('have.text', '1');
 

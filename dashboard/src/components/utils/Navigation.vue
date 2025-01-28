@@ -99,7 +99,7 @@ onUnmounted(() => {
                            :to="{ name: navItem.page }"
                            v-slot="{ navigate, isExactActive }"
                            custom>
-                <li :class="{ 'bg-primary ': isExactActive }">
+                <li :class="{ 'bg-primary ': isExactActive }" :data-cy="`navLine-${navItem.name}`">
                   <Button link
                           class="no-underline w-full"
                           @click="(e) => { navigate(e); }"

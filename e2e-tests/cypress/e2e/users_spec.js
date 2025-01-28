@@ -150,8 +150,8 @@ describe('Users Tests', () => {
 
         cy.get('[data-cy="archiveUsersTableBtn"]').should('be.disabled');
 
-        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-p-index="3"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-p-index="3"] [data-pc-name="pcrowcheckbox"]').click()
 
         cy.get('[data-cy="archiveUsersTableBtn"]').should('be.enabled');
         cy.get('[data-cy="archiveUsersTableBtn"]').click()
@@ -206,7 +206,7 @@ describe('Users Tests', () => {
             [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(2, 'day')) }],
         ], 5);
 
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
 
         cy.get('[data-cy="archiveUsersTableBtn"]').should('be.enabled');
         cy.get('[data-cy="archiveUsersTableBtn"]').click()

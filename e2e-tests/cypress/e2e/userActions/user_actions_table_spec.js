@@ -66,11 +66,11 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="row9-userId"]')
         cy.get('[data-cy="row10-userId"]').should('not.exist')
 
-        cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="row0-expandedDetails"').contains('Skill Id:')
         cy.get('[data-cy="row0-expandedDetails"').contains('skill5')
 
-        cy.get('[data-p-index="2"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="2"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="row2-expandedDetails"').contains('Skill Id:')
         cy.get('[data-cy="row2-expandedDetails"').contains('skill4')
 

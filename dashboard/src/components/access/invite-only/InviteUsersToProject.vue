@@ -180,7 +180,6 @@ const sendInvites = () => {
         <Textarea id="currentEmailsInput"
                   v-model="currentEmails"
                   class="w-full"
-                  autoResize
                   rows="5"
                   aria-labelledby="inviteEmailLabel"
                   data-cy="inviteEmailInput" />

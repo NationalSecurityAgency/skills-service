@@ -41,8 +41,8 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
 
 
         cy.get('[data-cy="skillActionsBtn"]')
@@ -69,7 +69,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
           .click();
 
         for (let i= 0; i < 4 ; i++) {
-            cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+            cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
         }
 
         // verify badge contains all skills
@@ -267,7 +267,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
           .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
@@ -304,7 +304,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
           .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
@@ -385,7 +385,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill4"]');
 
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="3"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="3"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
           .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
@@ -428,7 +428,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-cy="closeButton"]').click()
         cy.get('[data-cy="skillActionsBtn"]').should('have.focus')
         for (let i= 0; i < 4 ; i++) {
-            cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
 
         // use dialog's close button on top right
@@ -439,7 +439,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-pc-name="dialog"] [aria-label="Close"]').click()
         cy.get('[data-cy="skillActionsBtn"]').should('have.focus')
         for (let i= 0; i < 4 ; i++) {
-            cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
     });
 
@@ -488,7 +488,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-cy="closeButton"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').should('have.focus')
         for (let i= 0; i < 2 ; i++) {
-            cy.get(`[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
 
         // use dialog's close button on top right
@@ -499,7 +499,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-pc-name="dialog"] [aria-label="Close"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]').should('have.focus')
         for (let i= 0; i < 2 ; i++) {
-            cy.get(`[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
     });
 

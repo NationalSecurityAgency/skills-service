@@ -360,15 +360,27 @@ describe('Client Display Tests', () => {
             .contains('Subject 1');
         cy.get('[data-cy=subjectTile]')
             .eq(0)
-            .find('[data-cy="subjectStars"] .p-rating-item')
+            .find('[data-cy="subjectStars"] [data-pc-section="option"]')
             .should('have.length', 6);
         cy.get('[data-cy=subjectTile]')
+            .eq(0)
+            .find('[data-cy="subjectStars"] [data-pc-section="option"][data-p-active="true"]')
+            .should('have.length', 2);
+        cy.get('[data-cy=subjectTile]')
+            .eq(0)
+            .find('[data-cy="subjectStars"] [data-pc-section="option"][data-p-active="false"]')
+            .should('have.length', 4);
+        cy.get('[data-cy=subjectTile]')
           .eq(1)
-          .find('[data-cy="subjectStars"] [data-pc-section="officon"]')
+          .find('[data-cy="subjectStars"] [data-pc-section="option"]')
           .should('have.length', 5);
         cy.get('[data-cy=subjectTile]')
+            .eq(1)
+            .find('[data-cy="subjectStars"] [data-pc-section="option"][data-p-active="false"]')
+            .should('have.length', 5);
+        cy.get('[data-cy=subjectTile]')
           .eq(2)
-          .find('[data-cy="subjectStars"] [data-pc-section="officon"]')
+          .find('[data-cy="subjectStars"] [data-pc-section="option"][data-p-active="false"]')
           .should('have.length', 5);
     });
 

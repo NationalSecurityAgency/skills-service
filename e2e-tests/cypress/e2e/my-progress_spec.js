@@ -746,19 +746,19 @@ describe('My Progress Tests', () => {
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 3', 'This is project 2', 'This is project 1']);
 
         cy.get('[data-cy="remove-proj3Btn"]').click()
-        cy.get('[data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="pcacceptbutton"]').click()
 
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1']);
         cy.get('[data-cy="project-link-card-proj3"]').should('not.exist');
 
         cy.get('[data-cy="remove-proj1Btn"]').click()
-        cy.get('[data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="pcacceptbutton"]').click()
 
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2']);
         cy.get('[data-cy="project-link-card-proj1"]').should('not.exist');
 
         cy.get('[data-cy="remove-proj2Btn"]').click()
-        cy.get('[data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="pcacceptbutton"]').click()
 
         cy.get('[data-cy="project-link-card-proj2"]').should('not.exist');
         cy.get('[data-cy="manageMyProjsBtnInNoContent"]').should('exist');
@@ -779,7 +779,7 @@ describe('My Progress Tests', () => {
         cy.get('.apexcharts-datalabels-group > .apexcharts-datalabel-value').contains('33');
 
         cy.get('[data-cy="remove-proj3Btn"]').click()
-        cy.get('[data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="pcacceptbutton"]').click()
 
         cy.get('[data-cy="numProjectsContributed"]').contains('1');
         cy.get('[data-cy="numProjectsAvailable"]').contains('2');
@@ -789,7 +789,7 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy="project-link-card-proj3"]').should('not.exist');
 
         cy.get('[data-cy="remove-proj1Btn"]').click()
-        cy.get('[data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="pcacceptbutton"]').click()
 
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2']);
         cy.get('[data-cy="project-link-card-proj1"]').should('not.exist');

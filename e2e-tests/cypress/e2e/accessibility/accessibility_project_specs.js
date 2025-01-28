@@ -180,7 +180,7 @@ describe('Accessibility Tests', () => {
             cy.get('[data-cy="pageHeader"]').contains('ID: proj1');
             cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '6');
 
-            cy.get('[data-p-index="3"] [data-pc-name="rowcheckbox"]').click()
+            cy.get('[data-p-index="3"] [data-pc-name="pcrowcheckbox"]').click()
             cy.get('[data-cy="archiveUsersTableBtn"]').should('be.enabled');
             cy.get('[data-cy="archiveUsersTableBtn"]').click()
             cy.get('[data-cy="userArchiveBtn"]').should('be.enabled');

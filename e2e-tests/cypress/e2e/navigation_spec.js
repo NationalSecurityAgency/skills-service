@@ -122,17 +122,17 @@ describe('Navigation Tests', () => {
     it('selected menu item should be highlighted', function () {
         cy.visit('/administrator/projects/proj1');
         cy.contains('ID: subj1');
-        cy.get('[data-cy=nav-Subjects]')
+        cy.get('[data-cy=navLine-Subjects]')
             .should('have.class', 'bg-primary');
-        cy.get('[data-cy=nav-Badges]')
+        cy.get('[data-cy=navLine-Badges]')
             .should('not.have.class', 'bg-primary');
 
-        cy.get('[data-cy=nav-Badges]')
+        cy.get('[data-cy=navLine-Badges]')
             .click();
         cy.contains('No Badges Yet');
-        cy.get('[data-cy=nav-Subjects]')
+        cy.get('[data-cy=navLine-Subjects]')
             .should('not.have.class', 'bg-primary');
-        cy.get('[data-cy=nav-Badges]')
+        cy.get('[data-cy=navLine-Badges]')
             .should('have.class', 'bg-primary');
     });
 
@@ -150,11 +150,11 @@ describe('Navigation Tests', () => {
         // expand menu
         cy.get('[data-cy=navSmallScreenExpandMenu]')
             .click();
-        cy.get('[data-pc-section="panel"] [aria-label="Option List"] [aria-label="Subjects"]')
-        cy.get('[data-pc-section="panel"] [aria-label="Option List"] [aria-label="Badges"]')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="Subjects"]')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="Badges"]')
 
         // navigate and make sure menu is collapsed again
-        cy.get('[data-pc-section="panel"] [aria-label="Option List"] [aria-label="Badges"]')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="Badges"]')
             .click();
         cy.contains('No Badges Yet');
         cy.get('[data-cy=nav-Subjects]')

@@ -47,8 +47,8 @@
     "vee-validate": "4.12.8",
     "video.js": "8.17.4",
     "vis-network": "9.1.9",
-    "vue": "3.4.27",
-    "vue-router": "4.3.2",
+    "vue": "3.5.13",
+    "vue-router": "4.5.0",
     "vue3-apexcharts": "1.7.0",
     "yup": "1.4.0"
   },

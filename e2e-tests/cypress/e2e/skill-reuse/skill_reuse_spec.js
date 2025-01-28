@@ -147,7 +147,7 @@ describe('Skill Reuse Tests', () => {
         cy.createSkillsGroup(1, 3, 16);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()

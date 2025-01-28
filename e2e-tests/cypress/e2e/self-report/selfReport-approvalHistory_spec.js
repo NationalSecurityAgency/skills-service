@@ -912,7 +912,7 @@ describe('Self Report Approval History Tests', () => {
         cy.get(approvalHistoryTableSelector)
             .contains(('There are no records to show'));
 
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="approveBtn"]').click();
         cy.get('[data-cy="saveDialogBtn"]').click();
         cy.validateTable(approvalHistoryTableSelector, [
@@ -925,7 +925,7 @@ describe('Self Report Approval History Tests', () => {
             },],
         ]);
 
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="rejectBtn"]')
             .click();
         cy.get('[data-cy="saveDialogBtn"]')
@@ -949,7 +949,7 @@ describe('Self Report Approval History Tests', () => {
 
         cy.wait(1000);
 
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="approveBtn"]').click();
         cy.get('[data-cy="saveDialogBtn"]').click();
 

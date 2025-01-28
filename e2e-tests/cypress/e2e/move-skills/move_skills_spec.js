@@ -35,8 +35,8 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
@@ -107,8 +107,8 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '1,200');
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
@@ -184,7 +184,7 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '1,200');
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
@@ -249,7 +249,7 @@ describe('Move Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         // must exist initially
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]');
@@ -259,9 +259,9 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '1,000');
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
           .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
@@ -319,7 +319,7 @@ describe('Move Skills Tests', () => {
 
         cy.get('[data-cy="nameCell_group11"] [data-cy="numSkillsInGroup"]')
             .should('have.text', '1 skill');
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill8"]');
 
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
@@ -327,8 +327,8 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '1,000');
 
-        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
 
         cy.get('[data-cy="skillActionsBtn"]').first().click()
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
@@ -368,7 +368,7 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '1,000');
 
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).first().click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).first().click()
         cy.get('[data-cy="manageSkillLink_skill6"]').should('not.exist')
         cy.get('[data-cy="manageSkillLink_skill7"]').should('not.exist')
     });
@@ -387,8 +387,8 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]');
         cy.get('[data-cy="manageSkillLink_skill3"]');
 
-        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
 
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
@@ -448,15 +448,15 @@ describe('Move Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         // must exist initially
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill6"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill7"]');
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_skill8"]');
 
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
 
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
             .click();

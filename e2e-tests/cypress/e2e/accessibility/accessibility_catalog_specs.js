@@ -239,7 +239,7 @@ describe('Accessibility Tests', () => {
               .click();
             // cy.get('[data-cy="expandDetailsBtn_proj1_skill1"]')
             //     .click();
-            cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+            cy.get(`[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
             cy.contains('This is where description goes');
 
             cy.customLighthouse();

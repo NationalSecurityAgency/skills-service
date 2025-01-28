@@ -31,7 +31,7 @@ describe('Quiz-skills in-project reuse Tests', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
@@ -65,7 +65,7 @@ describe('Quiz-skills in-project reuse Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get(`[data-cy="skillsTable"] thead tr th`).contains('Skill').click()
         cy.get(`[data-cy="skillsTable"] thead tr th`).contains('Skill').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
 

@@ -202,7 +202,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="approveBtn"]').should('be.disabled');
         cy.get('[data-cy="rejectBtn"]').should('be.disabled');
         // cy.get('[data-cy="approvalSelect_user1-skill3"]').click({ force: true });
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="approveBtn"]').should('be.enabled');
         cy.get('[data-cy="rejectBtn"]').should('be.enabled');
 
@@ -266,7 +266,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="approveBtn"]').should('be.disabled');
         cy.get('[data-cy="rejectBtn"]').should('be.disabled');
         // cy.get('[data-cy="approvalSelect_user1-skill3"]').click({ force: true });
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="approveBtn"]').should('be.enabled');
         cy.get('[data-cy="rejectBtn"]').should('be.enabled');
 

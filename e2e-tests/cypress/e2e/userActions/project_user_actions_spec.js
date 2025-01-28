@@ -42,7 +42,7 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="row1-item"]').contains('Subject')
         cy.get('[data-cy="row2-item"]').contains('Project')
 
-        cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="row0-expandedDetails"').contains('Skill Id:')
         cy.get('[data-cy="row0-expandedDetails"').contains('skill1')
     });
@@ -56,7 +56,7 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]')
             .should('have.text', '3')
         cy.get('[data-cy="itemFilter"]').click()
-        cy.get('[data-pc-section="itemlabel"]').contains('Subject').click()
+        cy.get('[data-pc-section="optionlabel"]').contains('Subject').click()
 
         cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]')
             .should('have.text', '1')
