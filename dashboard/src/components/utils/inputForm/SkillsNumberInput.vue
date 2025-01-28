@@ -66,7 +66,7 @@ const handleOnInput = (event) => {
   <div class="field flex-auto p-fluid" v-bind="fallthroughAttributes.rootAttrs.value">
     <label v-if="label" :for="`input${name}`" class="block"><span v-if="isRequired">*</span> {{ label }} </label>
       <InputNumber
-          inputClass="sm:w-12"
+          inputClass="sm:w-[6rem]"
           type="number"
           v-bind="fallthroughAttributes.inputAttrs.value"
           v-model="value"

@@ -30,9 +30,9 @@ describe('Settings Tests', () => {
                 cy.wait('@getProjects')
 
             }
-            cy.get('[data-pc-name="menu"] [data-pc-section="option"]').contains('Settings')
+            cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
                 .should('not.be.disabled');
-            cy.get('[data-pc-name="menu"] [data-pc-section="option"]').contains('Settings')
+            cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
                 .click({force: true});
         });
     });
@@ -290,7 +290,7 @@ describe('Settings Tests', () => {
             .contains('Projects');
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="option"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
@@ -331,7 +331,7 @@ describe('Settings Tests', () => {
 
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="option"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
@@ -415,7 +415,7 @@ describe('Settings Tests', () => {
         //     });
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="option"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
@@ -564,7 +564,7 @@ describe('Settings Tests', () => {
         //     });
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="option"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.wait('@checkRoot');
         cy.clickNav('Security');
@@ -623,7 +623,7 @@ describe('Settings Tests', () => {
         //     });
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="option"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.wait('@checkRoot');
         cy.contains('Security')
@@ -646,7 +646,7 @@ describe('Settings Tests', () => {
         //
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="option"]').contains('Settings').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
 
         cy.get('[data-cy="nav-Email"]')
             .click();
@@ -717,7 +717,7 @@ describe('Settings Tests', () => {
         cy.visit('/settings/email');
         cy.wait('@loadEmailSettings');
         cy.get('[data-cy=host]').should('have.value', 'localhost');
-        cy.get('[data-cy="port"] [data-pc-name="input"]').should('have.value', '1025');
+        cy.get('[data-cy="port"] [data-pc-name="pcinputtext"]').should('have.value', '1025');
         cy.get('[data-cy=protocol]')
             .should('have.value', 'smtp');
         cy.get('[data-cy=tlsSwitch] [data-pc-section="input"]').should('have.value', 'on');
@@ -745,7 +745,7 @@ describe('Settings Tests', () => {
         //
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="option"]').contains('Settings').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
         cy.get('[data-cy="nav-Email"]')
             .click();
         cy.wait('@loadEmailSettings');
@@ -849,7 +849,7 @@ describe('Settings Tests', () => {
         cy.wait('@loadEmailSettings');
         cy.get('[data-cy=host]')
             .should('have.value', 'localhost');
-        cy.get('[data-cy="port"] [data-pc-name="input"]').should('have.value', '1025');
+        cy.get('[data-cy="port"] [data-pc-name="pcinputtext"]').should('have.value', '1025');
         cy.get('[data-cy=protocol]').should('have.value', 'smtp');
         cy.get('[data-cy=publicUrl]')
             .should('have.value', 'http://localhost:8082');
@@ -862,7 +862,7 @@ describe('Settings Tests', () => {
         cy.wait('@getProjects')
 
         cy.get('[data-cy="settings-button"] button').click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="option"]').contains('Settings').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
         cy.get('[data-cy="nav-System"]')
             .click();
 
@@ -881,7 +881,7 @@ describe('Settings Tests', () => {
         cy.wait('@loadEmailSettings');
         cy.get('[data-cy=host]')
             .should('have.value', 'localhost');
-        cy.get('[data-cy="port"] [data-pc-name="input"]').should('have.value', '1025');
+        cy.get('[data-cy="port"] [data-pc-name="pcinputtext"]').should('have.value', '1025');
         cy.get('[data-cy=protocol]')
             .should('have.value', 'smtp');
         cy.get('[data-cy=publicUrl]')
@@ -905,7 +905,7 @@ describe('Settings Tests', () => {
         cy.wait('@getProjects')
 
         cy.get('[data-cy="settings-button"] button').click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="option"]').contains('Settings').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
 
         cy.get('[data-cy="nav-System"]')
             .click();
@@ -978,7 +978,7 @@ describe('Settings Tests', () => {
 
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="option"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.get('[data-cy="nav-System"]')
             .click();
@@ -1034,7 +1034,7 @@ describe('Settings Tests', () => {
 
         cy.get('[data-cy="settings-button"] button')
             .click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="option"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
             .click();
         cy.get('[data-cy="nav-Email"]')
             .click();
