@@ -47,7 +47,7 @@ describe('Move Skills Modal Tests', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
         cy.reuseSkillIntoAnotherSubject(1, 5, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 
@@ -94,14 +94,14 @@ describe('Move Skills Modal Tests', () => {
         cy.createSkill(1, 1, 4);
         cy.createSkill(1, 1, 5);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]')
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]')
 
         cy.moveSkillIntoAnotherSubject(1, 1, 2);
         cy.moveSkillIntoAnotherSubject(1, 3, 2);
         cy.moveSkillIntoAnotherSubject(1, 4, 2);
         cy.moveSkillIntoAnotherSubject(1, 5, 2);
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 

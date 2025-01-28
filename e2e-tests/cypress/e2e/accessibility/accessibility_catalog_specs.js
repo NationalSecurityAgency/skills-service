@@ -280,7 +280,7 @@ describe('Accessibility Tests', () => {
 
             // looks like AXE and PrimeVue lib disagree where `aria-selected="true"` can be applied
             // TODO: not really an issue but look into this further so this validation can be added back
-            // cy.get('[data-cy="skillsTable"]  [data-pc-name="headercheckbox"]').click()
+            // cy.get('[data-cy="skillsTable"]  [data-pc-name="pcheadercheckbox"]').click()
             //
             // cy.get('[data-cy="skillActionsBtn"]')
             //     .click();

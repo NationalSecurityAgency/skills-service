@@ -744,7 +744,7 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.wait('@loadExportedSkills');
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`)
             .should('have.text', '11');
-        cy.get(`${tableSelector} [data-pc-name="rowperpagedropdown"]`).click()
+        cy.get(`${tableSelector} [data-pc-name="pcrowperpagedropdown"]`).click()
         cy.get('[data-pc-section="list"] [aria-label="10"]').click()
         cy.wait('@loadExportedSkills');
         cy.get(`${tableSelector} table tbody [role="row"]`).should('have.length', 10)
@@ -799,7 +799,7 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 10);
 
-        cy.get(`${tableSelector} [data-pc-name="rowperpagedropdown"]`).click()
+        cy.get(`${tableSelector} [data-pc-name="pcrowperpagedropdown"]`).click()
         cy.get('[data-pc-section="list"] [aria-label="25"]').click()
         cy.validateTable(tableSelector, [
             [{
@@ -878,8 +878,8 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.wait('@saveSkill1');
         cy.get('[data-cy="nameCell_skill1"]')
             .contains('Very Great Skill 1A');
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
         cy.get('[data-pc-section="closebutton"]').click()
         cy.get('[data-cy="totalPointsCell_skill1"]')
             .contains('66 pts x 7 repetitions');

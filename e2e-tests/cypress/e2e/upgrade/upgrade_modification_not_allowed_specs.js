@@ -401,7 +401,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
       cy.wait(500);
       cy.get('#existingUserInput_0').click();
       cy.get('[data-cy="userRoleSelector"]').click()
-      cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
+      cy.get('[data-pc-section="overlay"] [aria-label="Administrator"]').click();
       cy.get('[data-cy="addUserBtn"]').click();
 
       cy.wait('@saveEndpoint')

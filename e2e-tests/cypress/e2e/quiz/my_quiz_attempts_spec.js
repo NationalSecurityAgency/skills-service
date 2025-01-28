@@ -91,7 +91,7 @@ describe('Display History of My quiz attempts Tests', () => {
         ]
         cy.validateTable(tableSelector, expectedRows, 10);
 
-        cy.get(`${tableSelector} [data-pc-name="rowperpagedropdown"]`).click();
+        cy.get(`${tableSelector} [data-pc-name="pcrowperpagedropdown"]`).click();
         cy.get('[data-pc-section="list"] [aria-label="20"]').click()
         cy.validateTable(tableSelector, expectedRows, 20);
 

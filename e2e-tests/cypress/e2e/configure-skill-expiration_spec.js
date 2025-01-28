@@ -333,8 +333,8 @@ describe('Configure Skill Expiration Tests', () => {
         cy.wait('@saveExpirationSettings')
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Expiration"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Expiration"]').click()
 
         cy.validateTable(tableSelector, [
             [{

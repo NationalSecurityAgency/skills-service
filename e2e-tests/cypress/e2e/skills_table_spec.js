@@ -292,8 +292,8 @@ describe('Skills Table Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
     // test points column
-    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-    cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+    cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
     cy.get(`${tableSelector} th`).contains('Points').click()
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Skill # 1' }, { colIndex: 5, value: 150 }],
@@ -312,8 +312,8 @@ describe('Skills Table Tests', () => {
     cy.get(`${tableSelector} tbody tr`).should('have.length', 3)
 
     // test version column
-    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-    cy.get('[data-pc-section="panel"] [aria-label="Version"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+    cy.get('[data-pc-section="overlay"] [aria-label="Version"]').click()
     cy.get(`${tableSelector} th`).contains('Version').click()
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Skill # 1' }, { colIndex: 6, value: 1 }],
@@ -355,8 +355,8 @@ describe('Skills Table Tests', () => {
 
     // test points column
     // cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Time Window').click();
-    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-    cy.get('[data-pc-section="panel"] [aria-label="Time Window"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+    cy.get('[data-pc-section="overlay"] [aria-label="Time Window"]').click()
     cy.get(`${tableSelector} th`).contains('Display').click()
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Skill # 0' }, { colIndex: 5, value: 'Time Window Disabled' }],
@@ -378,8 +378,8 @@ describe('Skills Table Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
-    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-    cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+    cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
     cy.get(`${tableSelector} th`).contains('Self Report').click()
 
     cy.validateTable(tableSelector, [
@@ -399,8 +399,8 @@ describe('Skills Table Tests', () => {
     cy.get('[data-cy="skillName"]').type('Disabled Test')
     cy.clickSave()
 
-    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-    cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+    cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
     cy.get(`${tableSelector} th`).contains('Self Report').click()
 
     cy.validateTable(tableSelector, [

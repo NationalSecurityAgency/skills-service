@@ -177,7 +177,7 @@ describe('Tag Skills Tests', () => {
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-tag1"]`).should('exist')
 
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]`).click();
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]`).click();
         for (let i= 0; i < 3 ; i++) {
             cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
@@ -208,7 +208,7 @@ describe('Tag Skills Tests', () => {
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-tag1"]`).should('exist')
 
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]`).click();
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]`).click();
         for (let i= 0; i < 3 ; i++) {
             cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }

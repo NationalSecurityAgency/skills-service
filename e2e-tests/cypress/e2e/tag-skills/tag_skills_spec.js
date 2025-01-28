@@ -236,7 +236,7 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
         cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
         cy.get('[data-cy="newTag"]').type('New Tag 2')

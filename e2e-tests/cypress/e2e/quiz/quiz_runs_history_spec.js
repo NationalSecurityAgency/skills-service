@@ -113,7 +113,7 @@ describe('Quiz Runs History Tests', () => {
         cy.runQuizForUser(1, 1, [{selectedIndex: [1]}]);
         cy.visit('/administrator/quizzes/quiz1/runs');
         cy.wait('@quizRuns')
-        cy.get(`${tableSelector} [data-pc-name="rowperpagedropdown"]`).click().get('[data-pc-section="item"]').contains('50').click();
+        cy.get(`${tableSelector} [data-pc-name="pcrowperpagedropdown"]`).click().get('[data-pc-section="option"]').contains('50').click();
 
         cy.get('[data-cy="row0-runtime"]').should('have.text', '0 ms')
         cy.get('[data-cy="row1-runtime"]').should('have.text', '5 ms')

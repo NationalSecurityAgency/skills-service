@@ -40,9 +40,9 @@ describe('Admin Group Member Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="item"]').contains('root@skills.org').click();
+        cy.get('[data-pc-section="option"]').contains('root@skills.org').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Group Owner"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Group Owner"]').click();
         cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
         cy.get('[data-cy="addUserBtn"]').click()
         cy.get('[data-cy="userCell_root@skills.org"]')
@@ -113,9 +113,9 @@ describe('Admin Group Member Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="item"]').contains('root@skills.org').click();
+        cy.get('[data-pc-section="option"]').contains('root@skills.org').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Group Member"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Group Member"]').click();
         cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
         cy.get('[data-cy="addUserBtn"]').click()
         cy.get('[data-cy="userCell_root@skills.org"]')
@@ -144,9 +144,9 @@ describe('Admin Group Member Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="item"]').contains('root@skills.org').click();
+        cy.get('[data-pc-section="option"]').contains('root@skills.org').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Group Member"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Group Member"]').click();
         cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
         cy.get('[data-cy="addUserBtn"]').click()
         cy.get('[data-cy="userCell_root@skills.org"]')
@@ -166,7 +166,7 @@ describe('Admin Group Member Management Tests', () => {
 
         cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`).click();
         cy.get('[data-cy="roleDropDown_root@skills.org"]').click()
-        cy.get('[data-pc-section="panel"] [data-pc-section="itemlabel"]').contains('Owner').click();
+        cy.get('[data-pc-section="overlay"] [data-pc-section="itemlabel"]').contains('Owner').click();
         cy.wait('@addOwner')
         if (Cypress.env('oauthMode')) {
             cy.validateTable(tableSelector, [
@@ -199,9 +199,9 @@ describe('Admin Group Member Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="item"]').contains('root@skills.org').click();
+        cy.get('[data-pc-section="option"]').contains('root@skills.org').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Group Owner"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Group Owner"]').click();
         cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
         cy.get('[data-cy="addUserBtn"]').click()
         cy.get('[data-cy="userCell_root@skills.org"]')
@@ -228,7 +228,7 @@ describe('Admin Group Member Management Tests', () => {
 
         cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`).click();
         cy.get('[data-cy="roleDropDown_root@skills.org"]').click()
-        cy.get('[data-pc-section="panel"] [data-pc-section="itemlabel"]').contains('Member').click();
+        cy.get('[data-pc-section="overlay"] [data-pc-section="itemlabel"]').contains('Member').click();
         cy.wait('@addMember')
         cy.validateTable(tableSelector, [
             [{ colIndex: 0,  value: 'root@' }, { colIndex: 1,  value: 'Member' }],

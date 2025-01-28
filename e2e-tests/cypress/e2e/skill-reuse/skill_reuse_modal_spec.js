@@ -115,7 +115,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.createSkill(1, 1, 4);
         cy.createSkill(1, 1, 5);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="reuseButton"]')
@@ -161,7 +161,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
         cy.reuseSkillIntoAnotherSubject(1, 5, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="reuseButton"]')
@@ -211,7 +211,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.reuseSkillIntoAnotherGroup(1, 6, 1, 12);
         cy.reuseSkillIntoAnotherGroup(1, 9, 1, 12);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="reuseButton"]')
@@ -257,7 +257,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.createSkill(1, 1, 3);
         cy.addLearningPathItem(1, 3, 1)
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
 
@@ -292,7 +292,7 @@ describe('Skill Reuse Modal Tests', () => {
             .should('not.exist');
 
         // now none of the skills available for reuse
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
 
@@ -336,7 +336,7 @@ describe('Skill Reuse Modal Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
 
@@ -373,7 +373,7 @@ describe('Skill Reuse Modal Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
 

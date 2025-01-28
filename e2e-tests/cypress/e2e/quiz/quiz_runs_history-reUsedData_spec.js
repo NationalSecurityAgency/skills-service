@@ -116,7 +116,7 @@ describe('Quiz Runs History With Reused Data Tests', () => {
 
     it('quiz run history page size', function () {
         cy.visit('/administrator/quizzes/quiz1/runs');
-        cy.get(`${tableSelector} [data-pc-name="rowperpagedropdown"]`).click().get('[data-pc-section="item"]').contains('20').click();
+        cy.get(`${tableSelector} [data-pc-name="pcrowperpagedropdown"]`).click().get('[data-pc-section="option"]').contains('20').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0, value: 'user11' }, { colIndex: 2, value: 'Passed' }],
             [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Failed' }],

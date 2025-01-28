@@ -133,7 +133,7 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="importFromCatalogBtn"]')
             .click();
 
-        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"] input').should('be.checked')
         cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"] input').should('be.checked')
         cy.get('[data-p-index="2"] [data-pc-name="pcrowcheckbox"] input').should('be.checked')
@@ -145,7 +145,7 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.validateNoSkillsSelected();
     });
 
@@ -162,7 +162,7 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
 
-        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
 
         for (let i= 0; i < 8 ; i++) {
             cy.get(`[data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
@@ -173,7 +173,7 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.validateNoSkillsSelected();
     });
 

@@ -69,8 +69,8 @@ describe('Export Skills to the Catalog Tests', () => {
 
         cy.get('[data-cy="skillActionsBtn"]')
             .should('be.disabled');
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Catalog"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Catalog"]').click()
         cy.get('[data-pc-section="closebutton"]').click()
 
         cy.validateTable(tableSelector, [
@@ -201,7 +201,7 @@ describe('Export Skills to the Catalog Tests', () => {
             .should('be.disabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '0');
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
@@ -291,7 +291,7 @@ describe('Export Skills to the Catalog Tests', () => {
             .should('be.disabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '0');
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
@@ -322,7 +322,7 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '0');
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="rowperpagedropdown"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcrowperpagedropdown"]').click()
         cy.get('[data-pc-section="list"] [aria-label="20"]').click()
 
         cy.get('[data-cy="exportedBadge-skill1"');
@@ -582,7 +582,7 @@ describe('Export Skills to the Catalog Tests', () => {
             cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
         }
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
@@ -591,7 +591,7 @@ describe('Export Skills to the Catalog Tests', () => {
             cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
@@ -631,8 +631,8 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.importSkillFromCatalog(1, 1, 2, 6); // 12 - imported
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Catalog"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Catalog"]').click()
         cy.get('[data-pc-section="closebutton"]').click()
         cy.get('[data-pc-section="headercontent"]').contains('Display').click()
         cy.get('[data-pc-section="headercontent"]').contains('Display').click()
@@ -1005,7 +1005,7 @@ describe('Export Skills to the Catalog Tests', () => {
             .should('not.exist');
 
         // multiple skills can be exported while some cannot
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
             .should('have.text', 5);
         cy.get('[data-cy="skillActionsBtn"]')
@@ -1070,7 +1070,7 @@ describe('Export Skills to the Catalog Tests', () => {
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="manageSkillLink_skill1"]')
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
             .should('have.text', 7);
 
@@ -1105,7 +1105,7 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="manageSkillLink_skill1"]');
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
         cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
             .should('have.text', 1);
 
@@ -1139,7 +1139,7 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.importSkillFromCatalog(2, 1, 1, 3);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
 
         cy.get('[data-cy=skillActionsNumSelected]')
             .contains('5');

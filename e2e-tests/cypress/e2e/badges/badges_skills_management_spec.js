@@ -739,13 +739,13 @@ describe('Badges Tests', () => {
                 value: 'skill4'
             }],
         ], 5, false, null, false);
-        cy.get('[data-pc-name="rowperpagedropdown"]').should('not.exist');
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').should('not.exist');
 
         // add one more skill to the badge to make 6 skills total
         // cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill5');
         cy.get('[data-cy="skillsSelector"]')
           .click();
-        cy.get('[data-pc-section="item"]').first().click();
+        cy.get('[data-pc-section="option"]').first().click();
 
         cy.validateTable(tableSelector, [
             [{
@@ -773,7 +773,7 @@ describe('Badges Tests', () => {
                 value: 'skill5'
             }],
         ], 5, true, null, false);
-        cy.get('[data-pc-name="rowperpagedropdown"]').should('exist');
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').should('exist');
 
         // now delete a skill to go back to 5 skills total
         cy.get('[data-cy="deleteSkill_skill2"]')
@@ -803,7 +803,7 @@ describe('Badges Tests', () => {
                 value: 'skill5'
             }],
         ], 5, false, null, false);
-        cy.get('[data-pc-name="rowperpagedropdown"]').should('not.exist');
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').should('not.exist');
     });
 
     it('Can add Skill requirements to disabled badge', () => {

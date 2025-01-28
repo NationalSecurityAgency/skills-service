@@ -73,7 +73,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@getSettings');
 
         cy.get('[data-cy="projectVisibilitySelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Private Invite Only"]').click();
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
@@ -86,7 +86,7 @@ describe('Projects Invite-Only Tests', () => {
             .click();
         cy.wait('@emailSupported');
         cy.get('[data-cy="inviteExpirationSelect"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="30 days"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="30 days"]').click()
         cy.get('[data-cy=addEmails]')
             .should('be.disabled');
         cy.get('[data-cy="sendInvites-btn"]')
@@ -444,7 +444,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@getSettings');
 
         cy.get('[data-cy="projectVisibilitySelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Private Invite Only"]').click();
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
@@ -518,7 +518,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@getSettings');
 
         cy.get('[data-cy="projectVisibilitySelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Private Invite Only"]').click();
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
@@ -592,7 +592,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@getSettings');
 
         cy.get('[data-cy="projectVisibilitySelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Private Invite Only"]').click();
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
@@ -669,7 +669,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@getSettings');
 
         cy.get('[data-cy="projectVisibilitySelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Private Invite Only"]').click();
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
@@ -744,7 +744,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@getSettings');
 
         cy.get('[data-cy="projectVisibilitySelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Private Invite Only"]').click();
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
@@ -821,7 +821,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@getSettings');
 
         cy.get('[data-cy="projectVisibilitySelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Private Invite Only"]').click();
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
@@ -902,7 +902,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@getSettings');
 
         cy.get('[data-cy="projectVisibilitySelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Private Invite Only"]').click();
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
@@ -960,7 +960,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('root@skills.org').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Administrator"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
 
         cy.contains('Add Project Administrator?')
@@ -989,7 +989,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('root@skills.org').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Approver"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Approver"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
 
 
@@ -1019,7 +1019,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('root@skills.org').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Approver"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Approver"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
 
         cy.contains('Add Project Approver?')
@@ -1095,7 +1095,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.wait('@getSettings');
 
         cy.get('[data-cy="projectVisibilitySelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Private Invite Only"]').click();
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
             .should('be.visible')
             .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')

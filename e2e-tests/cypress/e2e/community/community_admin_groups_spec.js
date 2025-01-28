@@ -107,9 +107,9 @@ describe('Community Admin Group Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="item"]').contains('root@skills.org').click();
+        cy.get('[data-pc-section="option"]').contains('root@skills.org').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Group Owner"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Group Owner"]').click();
         cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
         cy.get('[data-cy="addUserBtn"]').click()
         cy.get('[data-cy="userCell_root@skills.org"]')
@@ -129,9 +129,9 @@ describe('Community Admin Group Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('root');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="item"]').contains('root@skills.org').click();
+        cy.get('[data-pc-section="option"]').contains('root@skills.org').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Group Owner"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Group Owner"]').click();
         cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
         cy.get('[data-cy="addUserBtn"]').click()
         cy.get('[data-cy="userCell_root@skills.org"]')
@@ -151,9 +151,9 @@ describe('Community Admin Group Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type(allDragonsUser);
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="item"]').contains(allDragonsUser).click();
+        cy.get('[data-pc-section="option"]').contains(allDragonsUser).click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Group Owner"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Group Owner"]').click();
         cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
         cy.get('[data-cy="addUserBtn"]').click()
         cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
@@ -164,7 +164,7 @@ describe('Community Admin Group Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type(allDragonsUser);
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="item"]').contains(allDragonsUser)
+        cy.get('[data-pc-section="option"]').contains(allDragonsUser)
     })
 
     it('cannot assign non-UC user as group member to UC protected admin group', function () {
@@ -175,9 +175,9 @@ describe('Community Admin Group Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type(allDragonsUser);
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="item"]').contains(allDragonsUser).click();
+        cy.get('[data-pc-section="option"]').contains(allDragonsUser).click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Group Member"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Group Member"]').click();
         cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
         cy.get('[data-cy="addUserBtn"]').click()
         cy.get('[data-cy="userCell_root@skills.org"]').should('not.exist')
@@ -188,7 +188,7 @@ describe('Community Admin Group Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type(allDragonsUser);
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="item"]').contains(allDragonsUser)
+        cy.get('[data-pc-section="option"]').contains(allDragonsUser)
     })
 
     it('cannot add UC protected project to a non-UC admin group', function () {

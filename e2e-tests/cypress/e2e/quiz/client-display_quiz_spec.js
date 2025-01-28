@@ -295,7 +295,7 @@ describe('Client Display Quiz on a Skill Tests', () => {
 
         // q4
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('This is a question # 4')
-        cy.get('[data-cy="questionDisplayCard-4"] [data-pc-name="rating"] [data-pc-section="item"]')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-pc-name="rating"] [data-pc-section="option"]')
             .should('have.length', 5).as('ratingItems');
 
         cy.get('@ratingItems')

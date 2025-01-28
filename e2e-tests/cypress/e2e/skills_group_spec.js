@@ -370,7 +370,7 @@ describe('Skills Group Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-pc-section="headercontent"]').contains('Display').click()
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Time Window"]').click()
@@ -388,7 +388,7 @@ describe('Skills Group Tests', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
         cy.get('[data-pc-section="closebutton"]').click()
         cy.addSkillToGroupViaUI('group1', 1);
@@ -478,7 +478,7 @@ describe('Skills Group Tests', () => {
         const groupId = 'group1'
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
         cy.get('[data-pc-section="closebutton"]').click()
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('200');
@@ -502,7 +502,7 @@ describe('Skills Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="nameCell_group1"]')
 
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
         cy.get('[data-pc-section="closebutton"]').click()
 

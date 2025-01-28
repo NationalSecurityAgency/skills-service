@@ -18,7 +18,6 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import FileUpload from 'primevue/fileupload';
 import VirtualScroller from 'primevue/virtualscroller';
-import Message from 'primevue/message';
 import enquire from 'enquire.js';
 import FileUploadService from '@/common-components/utilities/FileUploadService';
 import fontAwesomeIconsCanonical from './font-awesome-index';

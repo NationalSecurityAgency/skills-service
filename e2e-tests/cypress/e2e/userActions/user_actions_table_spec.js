@@ -86,7 +86,7 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="row3-userId"]').should('not.exist')
 
         // test different page size
-        cy.get('[data-cy="dashboardActionsForEverything"] [data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('25').click();
+        cy.get('[data-cy="dashboardActionsForEverything"] [data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('25').click();
         cy.get('[data-cy="row12-userId"]')
         cy.get('[data-cy="row13-userId"]').should('not.exist')
     });

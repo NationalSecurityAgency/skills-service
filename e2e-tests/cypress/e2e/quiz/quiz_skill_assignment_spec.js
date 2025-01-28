@@ -49,8 +49,8 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="quizSelected-quiz1"]')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="saveDialogBtn"]').click()
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="selfReportCell-abcSkill-quiz"]').contains('Quiz-Based Validation')
         cy.get('[data-cy="selfReportCell-abcSkill-quiz"]').contains('Test Your Trivia Knowledge').click()
         cy.url().should('include', '/administrator/quizzes/quiz1');
@@ -94,8 +94,8 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
 
         cy.get('[data-cy="saveDialogBtn"]').click()
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="selfReportCell-abcSkill-quiz"]').contains('Quiz-Based Validation')
     });
 
@@ -126,8 +126,8 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="quizSelector"]').should('not.exist')
 
         cy.get('[data-cy="saveDialogBtn"]').click()
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="selfReportCell-skill1"]').contains('Disabled')
     });
 
@@ -158,8 +158,8 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="quizSelector"]').should('not.exist')
 
         cy.get('[data-cy="saveDialogBtn"]').click()
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="selfReportCell-skill1"]').contains('Honor System')
     });
 
@@ -178,8 +178,8 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="availableQuizSelection-quiz2"]').click()
         cy.get('[data-cy="quizSelected-quiz2"]')
         cy.get('[data-cy="saveDialogBtn"]').click()
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('Survey-Based Validation')
         cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('This is survey 2').click()
         cy.url().should('include', '/administrator/quizzes/quiz2');
