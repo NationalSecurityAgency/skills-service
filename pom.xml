@@ -32,11 +32,10 @@
         <guava.version>29.0-jre</guava.version>
 
         <!-- !!!!!IMPORTANT!!!!!: when changing the springboot.version property, make sure you also change it in the spring-boot-starter-parent definition -->
-        <springboot.version>3.4.1</springboot.version>
+        <springboot.version>3.4.2</springboot.version>
         <springcloud.version>3.1.1</springcloud.version>
 
-        <logback.version>1.5.15</logback.version>
-        <logback-access.version>2.0.5</logback-access.version>
+        <logback-access.version>2.0.6</logback-access.version>
 
         <greenmail.version>2.0.0</greenmail.version>
         <wiremock.version>2.27.2</wiremock.version>
@@ -56,7 +55,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <!-- !!!!!IMPORTANT!!!!!: when changing this version make sure to also update springboot.version property -->
-        <version>3.4.1</version>
+        <version>3.4.2</version>
         <relativePath/>
     </parent>
     <repositories>
