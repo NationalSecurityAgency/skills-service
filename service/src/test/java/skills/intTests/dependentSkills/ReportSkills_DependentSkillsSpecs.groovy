@@ -15,14 +15,21 @@
  */
 package skills.intTests.dependentSkills
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillDef
+import skills.storage.repos.UserPerformedSkillRepo
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
+
+    @Autowired
+    UserPerformedSkillRepo performedSkillRepository
 
     List<String> sampleUserIds // loaded from system props
 
@@ -920,10 +927,204 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
         res1.body.completed && !res1.body.completed.find { it.id == badge1.badgeId } && !res1.body.completed.find { it.id == skillWithQuiz.skillId }
     }
 
-    def runQuiz(String userId, def quiz, boolean pass) {
+    def "quiz completes 2 skills and subsequently completes 2 learning paths"() {
+        // two quizzes: quiz1 & quiz2
+        // quiz1=skill1 & quiz1=skill3
+        // quiz2=skill2 & quiz2=skill4
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def quiz1Questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(quiz1Questions)
+        def quiz2 = QuizDefFactory.createQuiz(2)
+        skillsService.createQuizDef(quiz2)
+        def quiz2Questions = QuizDefFactory.createChoiceQuestions(2, 2, 2)
+        skillsService.createQuizQuestionDefs(quiz2Questions)
+
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(4, 1, 1, 100)
+        p1Skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        p1Skills[0].quizId = quiz1.quizId
+        p1Skills[2].selfReportingType = SkillDef.SelfReportingType.Quiz
+        p1Skills[2].quizId = quiz1.quizId
+
+        p1Skills[1].selfReportingType = SkillDef.SelfReportingType.Quiz
+        p1Skills[1].quizId = quiz2.quizId
+        p1Skills[3].selfReportingType = SkillDef.SelfReportingType.Quiz
+        p1Skills[3].quizId = quiz2.quizId
+
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        // two learning paths: skill1->skill2 & skill3->skill4
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1Skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[3].skillId, p1Skills[2].skillId)
+
+        when:
+        // Now complete quiz2; no credit is given to any skill
+        // Now complete quiz1, causes credit for all 4 skills
+        String user = getRandomUsers(1)[0]
+        def quiz2Res1 = runQuiz(user, quiz2, true)
+        def quiz1Res2 = runQuiz(user, quiz1, true)
+
+        def performedSkills = getPerformedSkillsForUser(user, p1.projectId)
+
+        then:
+        true
+        quiz2Res1
+        quiz2Res1.passed
+        quiz2Res1.associatedSkillResults && quiz2Res1.associatedSkillResults.size() == 2
+        quiz2Res1.associatedSkillResults.find { it.skillId == p1Skills[1].skillId && !it.skillApplied && it.explanation == 'Not all dependent skills have been achieved. Missing achievements for 1 out of 1. Waiting on completion of [TestProject1:skill1].' }
+        quiz2Res1.associatedSkillResults.find { it.skillId == p1Skills[3].skillId && !it.skillApplied && it.explanation == 'Not all dependent skills have been achieved. Missing achievements for 1 out of 1. Waiting on completion of [TestProject1:skill3].' }
+
+        quiz1Res2
+        quiz1Res2.passed
+        quiz1Res2.associatedSkillResults && quiz1Res2.associatedSkillResults.size() == 2
+        quiz1Res2.associatedSkillResults.find { it.skillId == p1Skills[0].skillId && it.skillApplied }
+        quiz1Res2.associatedSkillResults.find { it.skillId == p1Skills[2].skillId && it.skillApplied }
+
+        performedSkills
+        performedSkills.size() == 4
+        performedSkills.find { it.skillId == p1Skills[0].skillId }
+        performedSkills.find { it.skillId == p1Skills[1].skillId }
+        performedSkills.find { it.skillId == p1Skills[2].skillId }
+        performedSkills.find { it.skillId == p1Skills[3].skillId }
+    }
+
+    def "quiz completes 2 skills and subsequently completes 2 learning paths across 2 projects"() {
+        // two quizzes: quiz1 & quiz2
+        // quiz1=skill1 & quiz1=skill3
+        // quiz2=skill2 & quiz2=skill4
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def quiz1Questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(quiz1Questions)
+        def quiz2 = QuizDefFactory.createQuiz(2)
+        skillsService.createQuizDef(quiz2)
+        def quiz2Questions = QuizDefFactory.createChoiceQuestions(2, 2, 2)
+        skillsService.createQuizQuestionDefs(quiz2Questions)
+
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(2, 1, 1, 100)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2Skills = createSkills(4, 2, 1, 100).subList(2, 4)
+
+        p1Skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        p1Skills[0].quizId = quiz1.quizId
+        p2Skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        p2Skills[0].quizId = quiz1.quizId
+
+        p1Skills[1].selfReportingType = SkillDef.SelfReportingType.Quiz
+        p1Skills[1].quizId = quiz2.quizId
+        p2Skills[1].selfReportingType = SkillDef.SelfReportingType.Quiz
+        p2Skills[1].quizId = quiz2.quizId
+
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
+
+        // two learning paths:
+        // project1: skill1->skill2
+        // project2: skill3->skill4
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[1].skillId, p1Skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(p2.projectId, p2Skills[1].skillId, p2Skills[0].skillId)
+
+        when:
+        // Now complete quiz2; no credit is given to any skill
+        // Now complete quiz1, causes credit for all 4 skills
+        String user = getRandomUsers(1)[0]
+        def quiz2Res1 = runQuiz(user, quiz2, true)
+        def quiz1Res2 = runQuiz(user, quiz1, true)
+
+        def performedSkills = getPerformedSkillsForUser(user, p1.projectId) + getPerformedSkillsForUser(user, p2.projectId)
+
+        then:
+        true
+        quiz2Res1
+        quiz2Res1.passed
+        quiz2Res1.associatedSkillResults && quiz2Res1.associatedSkillResults.size() == 2
+        quiz2Res1.associatedSkillResults.find { it.skillId == p1Skills[1].skillId && it.projectId == p1.projectId && !it.skillApplied && it.explanation == 'Not all dependent skills have been achieved. Missing achievements for 1 out of 1. Waiting on completion of [TestProject1:skill1].' }
+        quiz2Res1.associatedSkillResults.find { it.skillId == p2Skills[1].skillId && it.projectId == p2.projectId && !it.skillApplied && it.explanation == 'Not all dependent skills have been achieved. Missing achievements for 1 out of 1. Waiting on completion of [TestProject2:skill3].' }
+
+        quiz1Res2
+        quiz1Res2.passed
+        quiz1Res2.associatedSkillResults && quiz1Res2.associatedSkillResults.size() == 2
+        quiz1Res2.associatedSkillResults.find { it.skillId == p1Skills[0].skillId && it.projectId == p1.projectId  && it.skillApplied }
+        quiz1Res2.associatedSkillResults.find { it.skillId == p2Skills[0].skillId && it.projectId == p2.projectId && it.skillApplied }
+
+        performedSkills
+        performedSkills.size() == 4
+        performedSkills.find { it.skillId == p1Skills[0].skillId }
+        performedSkills.find { it.skillId == p1Skills[1].skillId }
+        performedSkills.find { it.skillId == p2Skills[0].skillId }
+        performedSkills.find { it.skillId == p2Skills[1].skillId }
+    }
+
+    def "make sure that other users achievements don't affect requested users: learning path of non-quiz-skill -> quiz-skill-done"(){
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.quizId
+
+        def skillWithoutQuiz = createSkill(1, 1, 2, 1, 1, 480, 200)
+
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [skillWithQuiz, skillWithoutQuiz])
+
+        // skill2 -> skill1 (quiz skill)
+        skillsService.addLearningPathPrerequisite(p1.projectId, skillWithQuiz.skillId, skillWithoutQuiz.skillId)
+
+        when:
+        List<String> users = getRandomUsers(2)
+        def quizRes1 = runQuiz(users[0], quiz, true)
+        def quizRes2 = runQuiz(users[1], quiz, true)
+        def res = skillsService.addSkill([projectId: p1.projectId, skillId: skillWithoutQuiz.skillId], users[0])
+
+        def performedSkillsUser0 = getPerformedSkillsForUser(users[0], p1.projectId)
+        def performedSkillsUser1 = getPerformedSkillsForUser(users[1], p1.projectId)
+
+        then:
+        quizRes1
+        quizRes1.passed
+        quizRes1.associatedSkillResults && quizRes1.associatedSkillResults.size() == 1
+        !quizRes1.associatedSkillResults[0].skillApplied
+        quizRes1.associatedSkillResults[0].explanation == "Not all dependent skills have been achieved. Missing achievements for 1 out of 1. Waiting on completion of [TestProject1:${skillWithoutQuiz.skillId}]."
+
+        quizRes2
+        quizRes2.passed
+        quizRes2.associatedSkillResults && quizRes2.associatedSkillResults.size() == 1
+        !quizRes2.associatedSkillResults[0].skillApplied
+        quizRes2.associatedSkillResults[0].explanation == "Not all dependent skills have been achieved. Missing achievements for 1 out of 1. Waiting on completion of [TestProject1:${skillWithoutQuiz.skillId}]."
+
+        res.body.skillApplied
+        res.body.explanation == "Skill event was applied"
+        res.body.completed && res.body.completed.find { it.id == skillWithQuiz.skillId }
+
+        performedSkillsUser0
+        performedSkillsUser0.size() == 2
+        performedSkillsUser0.find { it.skillId == skillWithQuiz.skillId }
+        performedSkillsUser0.find { it.skillId == skillWithoutQuiz.skillId }
+
+        !performedSkillsUser1
+    }
+
+    private def runQuiz(String userId, def quiz, boolean pass) {
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, userId).body
         skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, userId)
         skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[pass ? 0 : 1].id, userId)
         return skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, userId).body
+    }
+
+    private def getPerformedSkillsForUser(String userId, String projectId) {
+        PageRequest allPlease = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Direction.DESC, "performedOn"))
+        List<UserPerformedSkillRepo.PerformedSkillQRes> performedSkills = performedSkillRepository.findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, '', allPlease)
+        return performedSkills
     }
 }
