@@ -189,7 +189,7 @@ defineExpose({
               <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
               <span
                 class="text-secondary font-italic ml-1">{{ appConfig.userCommunityBeforeLabel }}</span> <span
-                class="font-weight-bold text-primary">{{ projectInternal.userCommunity }}</span> <span
+                class="text-primary">{{ projectInternal.userCommunity }}</span> <span
                 class="text-secondary font-italic">{{ appConfig.userCommunityAfterLabel }}</span>
             </div>
           </div>
