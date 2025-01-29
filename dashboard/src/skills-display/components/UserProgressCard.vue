@@ -58,7 +58,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <Card class="skills-my-rank w-min-15rem h-full" :data-cy="componentName" :pt="{ content: { class: 'py-0' } }">
+  <Card class="skills-progress-card w-min-15rem h-full" :data-cy="componentName" :pt="{ content: { class: 'py-0' } }">
     <template #subtitle>
       <div class="text-center text-xl font-medium" :data-cy="`${componentName}Title`">
         {{ title }}
@@ -74,7 +74,7 @@ const props = defineProps({
             Your position would be {{ userAchieved }} if you opt-in!
           </div>
         </div>
-        <div class="fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg" v-else>
+        <div class="fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg p-1" v-else>
           <div class="text-3xl" style="line-height: 1.2em" :data-cy="`${componentName}Position`">{{ userAchieved }}</div>
           <div class="mt-1">out of</div>
           <div>{{ totalAvailable }} {{ unit }}</div>
@@ -98,29 +98,29 @@ const props = defineProps({
 
 <style scoped>
 @media only screen and (min-width: 1200px) {
-  .skills-my-rank {
+  .skills-progress-card {
     min-width: 18rem !important;
   }
 }
 
-.skills-my-rank .skills-icon {
+.skills-progress-card .skills-icon {
   display: inline-block;
   color: #b1b1b1;
   margin: 5px 0;
 }
 
-.skills-my-rank .skills-icon.user-rank-stack {
+.skills-progress-card .skills-icon.user-rank-stack {
   margin: 14px 0;
   font-size: 4.1rem;
   width: 100%;
   //color: #0fcc15d1;
 }
 
-.skills-my-rank .skills-icon.user-rank-stack i {
+.skills-progress-card .skills-icon.user-rank-stack i {
   opacity: 0.38;
 }
 
-.skills-my-rank .user-rank-text {
+.skills-progress-card .user-rank-text {
   font-size: 0.4em;
   line-height: 0.9em;
   background: rgba(255, 255, 255, 0.6);
