@@ -973,4 +973,66 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         fifthResult.passed
     }
 
+    def "multiple failures prior to enabling setting"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 5, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert quizAttempt.questions.size() == 5
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[4].answerOptions[1].id)
+        def firstResult = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert !firstResult.passed
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert secondQuizAttempt.questions.size() == 5
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[3].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[4].answerOptions[1].id)
+        def secondResult = skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+        assert !secondResult.passed
+
+        def thirdQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert thirdQuizAttempt.questions.size() == 5
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[2].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[3].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[4].answerOptions[1].id)
+        def thirdResult = skillsService.completeQuizAttempt(quiz.quizId, thirdQuizAttempt.id).body
+        assert !thirdResult.passed
+
+        def fourthQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert fourthQuizAttempt.questions.size() == 5
+        skillsService.reportQuizAnswer(quiz.quizId, fourthQuizAttempt.id, fourthQuizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fourthQuizAttempt.id, fourthQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fourthQuizAttempt.id, fourthQuizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fourthQuizAttempt.id, fourthQuizAttempt.questions[3].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fourthQuizAttempt.id, fourthQuizAttempt.questions[4].answerOptions[1].id)
+        def fourthResult = skillsService.completeQuizAttempt(quiz.quizId, fourthQuizAttempt.id).body
+        assert !fourthResult.passed
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RetakeIncorrectQuestionsOnly.setting, value: 'true'],
+        ])
+
+        def fifthQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert fifthQuizAttempt.questions.size() == 4
+        skillsService.reportQuizAnswer(quiz.quizId, fifthQuizAttempt.id, fifthQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fifthQuizAttempt.id, fifthQuizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fifthQuizAttempt.id, fifthQuizAttempt.questions[2].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fifthQuizAttempt.id, fifthQuizAttempt.questions[3].answerOptions[0].id)
+        def fifthResult = skillsService.completeQuizAttempt(quiz.quizId, fifthQuizAttempt.id).body
+
+        then:
+        fifthResult.passed
+    }
 }

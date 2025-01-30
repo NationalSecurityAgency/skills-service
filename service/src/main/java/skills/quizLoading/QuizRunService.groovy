@@ -208,16 +208,32 @@ class QuizRunService {
         )
     }
 
-    private List<QuizQuestionInfo> loadQuizQuestionInfo(String quizId, boolean randomizeQuestions = false, boolean randomizeAnswers = false, QuizSetting quizLength = null, Integer attemptId = null) {
-        List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)
-        List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
+    private List<QuizQuestionDef> selectOnlyIncorrectQuestions(Integer quizId, String userId, List<QuizQuestionDef> questions) {
+        QuizToSkillDefRepo.QuizAttemptInfo latestQuizAttempt = getLatestQuizAttempt(quizId, userId)
+        if(latestQuizAttempt?.status == UserQuizAttempt.QuizAttemptStatus.FAILED) {
+            Integer latestQuizAttemptId = latestQuizAttempt?.attemptId
+            if(latestQuizAttemptId) {
+                List<Integer> questionIds = quizAttemptQuestionRepo.getWrongQuestionIdsForAttempt(latestQuizAttemptId)
+                questions = questions?.findAll { question -> questionIds.contains(question.id) }
+            }
+        }
+        return questions
+    }
+
+    private List<QuizQuestionInfo> loadQuizQuestionInfo(QuizDefWithDescription quizDefWithDescription, List<QuizSetting> quizSettings, String userId) {
+        List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizDefWithDescription.quizId)
+        List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizDefWithDescription.quizId)
         Map<Integer, List<QuizAnswerDef>> byQuizId = dbAnswersDef.groupBy { it.questionRefId }
 
+        QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
+        boolean randomizeQuestions = quizSettings?.find( { it.setting == QuizSettings.RandomizeQuestions.setting })?.value?.toBoolean()
+        boolean randomizeAnswers = quizSettings?.find( { it.setting == QuizSettings.RandomizeAnswers.setting })?.value?.toBoolean()
         boolean forceRandomizationOfQuestions = quizLength?.value != null && Integer.valueOf(quizLength.value) < dbQuestionDefs.size()
+        QuizSetting onlyIncorrect = quizSettings?.find({it.setting == QuizSettings.RetakeIncorrectQuestionsOnly.setting})
+        boolean onlyIncorrectQuestions = onlyIncorrect?.value?.toBoolean()
 
-        if(attemptId) {
-            List<Integer> questionIds = quizAttemptQuestionRepo.getWrongQuestionIdsForAttempt(attemptId)
-            dbQuestionDefs = dbQuestionDefs?.findAll { question -> questionIds.contains(question.id) }
+        if(onlyIncorrectQuestions) {
+            dbQuestionDefs = selectOnlyIncorrectQuestions(quizDefWithDescription.id, userId, dbQuestionDefs)
         }
 
         if(randomizeQuestions || forceRandomizationOfQuestions) {
@@ -264,22 +280,10 @@ class QuizRunService {
     QuizAttemptStartResult startQuizAttempt(String userId, String quizId, String skillId = null, String projectId = null) {
         QuizDefWithDescription quizDefWithDesc = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizId)
         List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
-        boolean randomizeQuestionsSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeQuestions.setting })?.value?.toBoolean()
-        boolean randomizeAnswersSetting = quizSettings?.find( { it.setting == QuizSettings.RandomizeAnswers.setting })?.value?.toBoolean()
         Integer quizTimeLimit = quizSettings?.find( { it.setting == QuizSettings.QuizTimeLimit.setting })?.value?.toInteger()
         QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
-        QuizSetting onlyIncorrect = quizSettings?.find({it.setting == QuizSettings.RetakeIncorrectQuestionsOnly.setting})
-        boolean onlyIncorrectQuestions = onlyIncorrect?.value?.toBoolean()
 
-        Integer latestQuizAttemptId = null
-        if(onlyIncorrectQuestions) {
-            QuizToSkillDefRepo.QuizAttemptInfo latestQuizAttempt = getLatestQuizAttempt(quizDefWithDesc.id, userId)
-            if(latestQuizAttempt?.status == UserQuizAttempt.QuizAttemptStatus.FAILED) {
-                latestQuizAttemptId = latestQuizAttempt?.attemptId
-            }
-        }
-
-        List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizId, randomizeQuestionsSetting, randomizeAnswersSetting, quizLength, latestQuizAttemptId)
+        List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizDefWithDesc, quizSettings, userId)
         List<QuizQuestionInfo> questionsForQuiz = []
         Integer quizLengthAsInteger = quizLength ? Integer.valueOf(quizLength.value) : 0
         Integer lengthSetting = quizLengthAsInteger > 0 ? quizLengthAsInteger : questions.size()
