@@ -788,11 +788,7 @@ class QuizRunService {
             }
         }
         dependantQuizSkillIds.each { quizSkill ->
-            PageRequest onePlease = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "updated"))
-            UserQuizAttempt passedQuizAttempt = userQuizAttemptRepo.findBySkillRefIdAndUserIdAndByStatus(
-                    quizSkill.skillRefId,
-                    userId,
-                    UserQuizAttempt.QuizAttemptStatus.PASSED, onePlease)?.first()
+            UserQuizAttempt passedQuizAttempt = findPassedUserQuizAttemptForSkillAndUser(quizSkill.skillRefId, userId)
             if (passedQuizAttempt) {
                 SkillEventResult skillEventResult = skillEventsService.reportSkill(
                         quizSkill.projectId, quizSkill.skillId, passedQuizAttempt.userId, false, passedQuizAttempt.completed,
@@ -835,6 +831,15 @@ class QuizRunService {
             throw new SkillQuizException("Supplied quizId of [${quizId}] does not match answer's quiz id  of [${answerDefPartialInfo.getQuizId()}]", ErrorCode.BadParam)
         }
         return answerDefPartialInfo
+    }
+
+    private UserQuizAttempt findPassedUserQuizAttemptForSkillAndUser(Integer skillRefId, String userId) {
+        PageRequest onePlease = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "updated"))
+        List<UserQuizAttempt> passedQuizAttempts = userQuizAttemptRepo.findBySkillRefIdAndUserIdAndByStatus(
+                skillRefId,
+                userId,
+                UserQuizAttempt.QuizAttemptStatus.PASSED, onePlease)
+        return passedQuizAttempts ? passedQuizAttempts.first() : null
     }
 
     @Canonical
