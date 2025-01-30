@@ -20,6 +20,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.quizLoading.QuizRunService
 import skills.services.BadgeUtils
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
@@ -43,6 +44,9 @@ class AchievedBadgeHandler {
     @Autowired
     SkillEventsSupportRepo skillEventsSupportRepo
 
+    @Autowired
+    QuizRunService quizRunService
+
     @Profile
     void checkForBadges(SkillEventResult res, String userId, SkillDefMin currentSkillDef, SkillDate skillDate) {
         List<SkillDefMin> parents = skillEventsSupportRepo.findParentSkillsByChildIdAndType(currentSkillDef.id, [SkillRelDef.RelationshipType.BadgeRequirement])
@@ -56,9 +60,10 @@ class AchievedBadgeHandler {
                     List<UserAchievement> badges = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, badge.projectId, badge.skillId)
                     if (!badges) {
                         Date achievedOn = getAchievedOnDate(userId, badge, skillDate)
-                        UserAchievement groupAchievement = new UserAchievement(userId: userId.toLowerCase(), projectId: badge.projectId, skillId: badge.skillId, skillRefId: badge?.id, achievedOn: achievedOn)
-                        achievedLevelRepo.save(groupAchievement)
+                        UserAchievement badgeAchievement = new UserAchievement(userId: userId.toLowerCase(), projectId: badge.projectId, skillId: badge.skillId, skillRefId: badge?.id, achievedOn: achievedOn)
+                        achievedLevelRepo.save(badgeAchievement)
                         res.completed.add(new CompletionItem(type: CompletionTypeUtil.getCompletionType(badge.type), id: badge.skillId, name: badge.name))
+                        quizRunService.checkForDependentQuizzes(res, userId, badge)
                     }
                 }
             }

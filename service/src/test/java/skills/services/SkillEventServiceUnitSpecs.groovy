@@ -18,6 +18,7 @@ package skills.services
 
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent
+import skills.quizLoading.QuizRunService
 import skills.services.admin.SkillCatalogService
 import skills.services.attributes.SkillAttributeService
 import skills.services.events.*
@@ -53,6 +54,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         SkillCatalogService mockCatalogService = Mock()
         SkillDefRepo skillDefRepo = Mock()
         SkillAttributeService mockSkillAttributeService = Mock()
+        QuizRunService mockQuizRunService = Mock()
 
         SkillEventsTransactionalService skillEventsTransactionalService = new SkillEventsTransactionalService(
                 skillEventPublisher: mockSkillEventPublisher,
@@ -70,6 +72,7 @@ class SkillEventServiceUnitSpecs extends Specification {
                 skillCatalogService: mockCatalogService,
                 skillDefRepo: skillDefRepo,
                 skillAttributeService: mockSkillAttributeService,
+                quizRunService: mockQuizRunService,
         )
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,

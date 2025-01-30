@@ -263,6 +263,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         s.numMaxOccurrencesIncrementInterval as numMaxOccurrencesIncrementInterval,
         s.totalPoints as totalPoints,
         s.type as type,
+        s.selfReportingType as selfReportingType,
         s.startDate as startDate,
         s.endDate as endDate,
         s.enabled as enabled,
