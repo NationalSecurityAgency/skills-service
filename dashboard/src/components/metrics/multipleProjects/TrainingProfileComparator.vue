@@ -117,6 +117,7 @@ const filter = (event) => {
             class="w-full"
             @complete="filter"
             data-cy="trainingProfileComparatorProjectSelector"
+            :pt="{ dropdown: { 'aria-label': 'click to select an item' } }"
             placeholder="Select option">
           <template #empty>
             <div v-if="projects.selected.length === 5" class="ml-6" data-cy="trainingProfileMaximumReached">

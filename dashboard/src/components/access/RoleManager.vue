@@ -557,30 +557,27 @@ defineExpose({
               </template>
               <template #body="slotProps">
                 <div v-if="!slotProps.data.adminGroupId || props.adminGroupId">
-                  <div class="float-right mr-1 flex gap-2" :data-cy="`controlsCell_${slotProps.data.userId}`">
-                    <!--            <i v-if="!notCurrentUser(slotProps.data.userId)"-->
-                    <!--               data-cy="cannotRemoveWarning"-->
-                    <!--               class="text-warning fas fa-exclamation-circle mr-1"-->
-                    <!--               aria-hidden="true"/>-->
-
-                    <SkillsButton v-if="!isOnlyOneRole" @click="editItem(slotProps.data)"
-                                  :disabled="!notCurrentUser(slotProps.data.userId)"
-                                  :aria-label="`edit access role from user ${getUserDisplay(slotProps.data)}`"
-                                  data-cy="editUserBtn" icon="fas fa-edit" label="Edit" size="small">
-                    </SkillsButton>
-                    <SkillsButton @click="deleteUserRoleConfirm(slotProps.data)"
-                                  :disabled="!notCurrentUser(slotProps.data.userId)"
-                                  :id="`removeUserBtn_${slotProps.data.userId}`"
-                                  :track-for-focus="true"
-                                  :aria-label="`remove access role from user ${getUserDisplay(slotProps.data)}`"
-                                  data-cy="removeUserBtn" icon="fas fa-trash" label="Delete" size="small">
-                    </SkillsButton>
-
+                  <div class="float-right mr-1 flex flex-col gap-2" :data-cy="`controlsCell_${slotProps.data.userId}`">
+                    <div  v-if="notCurrentUser(slotProps.data.userId)"  class="flex items-center">
+                      <SkillsButton v-if="!isOnlyOneRole" @click="editItem(slotProps.data)"
+                                    :disabled="!notCurrentUser(slotProps.data.userId)"
+                                    :aria-label="`edit access role from user ${getUserDisplay(slotProps.data)}`"
+                                    data-cy="editUserBtn" icon="fas fa-edit" label="Edit" size="small">
+                      </SkillsButton>
+                      <SkillsButton @click="deleteUserRoleConfirm(slotProps.data)"
+                                    :disabled="!notCurrentUser(slotProps.data.userId)"
+                                    :id="`removeUserBtn_${slotProps.data.userId}`"
+                                    :track-for-focus="true"
+                                    :aria-label="`remove access role from user ${getUserDisplay(slotProps.data)}`"
+                                    data-cy="removeUserBtn" icon="fas fa-trash" label="Delete" size="small">
+                      </SkillsButton>
+                    </div>
+                    <InlineMessage v-if="!notCurrentUser(slotProps.data.userId)" class="mt-1" severity="info" size="small"
+                                   aria-live="polite">
+                      Cannot modify yourself
+                    </InlineMessage>
                   </div>
-                  <InlineMessage v-if="!notCurrentUser(slotProps.data.userId)" class="mt-1" severity="info" size="small"
-                                 aria-live="polite">
-                    Can't remove or edit yourself
-                  </InlineMessage>
+
                 </div>
               </template>
             </Column>
