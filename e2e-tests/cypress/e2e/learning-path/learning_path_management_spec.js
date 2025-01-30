@@ -301,10 +301,10 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
-        cy.clickOnNode(130, 250);
+        cy.clickOnNode(300, 205);
         cy.get('[data-cy="learningPathFromSkillSelector"] input').should('have.value', 'Badge 1');
 
-        cy.clickOnNode(300, 400);
+        cy.clickOnNode(300, 300);
         cy.get('[data-cy="learningPathFromSkillSelector"] input').should('have.value', 'Badge 2');
     })
 
@@ -316,13 +316,13 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
-        cy.clickOnNode(300, 400);
+        cy.clickOnNode(300, 300);
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge2')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
 
         cy.get('[data-cy="learningPathError"]').contains('Badge 1 already exists in the learning path and adding it again will cause a circular/infinite learning path')
 
-        cy.clickOnNode(130, 250);
+        cy.clickOnNode(300, 205);
         cy.get('[data-cy="learningPathFromSkillSelector"] input').should('have.value', 'Badge 1');
         cy.get('[data-cy="learningPathToSkillSelector"] input').should('have.value', '');
         cy.get('[data-cy="learningPathError"]').should('not.exist')
@@ -336,7 +336,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
-        cy.clickOnNode(225, 330);
+        cy.clickOnNode(300, 250);
         cy.get('button').contains('Remove').click();
         cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet')
     })
