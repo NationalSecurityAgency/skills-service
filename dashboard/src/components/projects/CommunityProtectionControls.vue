@@ -21,6 +21,7 @@ import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import Avatar from 'primevue/avatar'
 import {useField, useIsValidating} from 'vee-validate'
 import { syncRef } from '@vueuse/core'
+import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 
 const props = defineProps({
   project: {
@@ -119,6 +120,7 @@ const userCommunityRestrictedDescriptor = computed(() => {
             <i class="fas fa-external-link-alt ml-1" aria-hidden="true" style="font-size: 0.9rem;" />
           </div>
         </div>
+        <SkillsSpinner v-if="isValidating && enableProtectedUserCommunity" :is-loading="true" class="my-0"/>
         <div v-if="!isValidating">
           <Message v-if="enableProtectedUserCommunity && !(errors && errors.length > 0)"
                    :closable="false"
