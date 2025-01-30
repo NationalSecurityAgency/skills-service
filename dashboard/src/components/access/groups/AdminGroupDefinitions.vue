@@ -247,7 +247,7 @@ defineExpose({
                   <div v-if="slotProps.data.userCommunity" class="my-2" data-cy="userCommunity">
                     <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
                     <span class="text-color-secondary font-italic ml-1">{{ communityLabels.beforeCommunityLabel.value }}</span> <span
-                        class="font-bold text-primary">{{ slotProps.data.userCommunity }}</span> <span
+                        class="text-primary">{{ slotProps.data.userCommunity }}</span> <span
                         class="text-color-secondary font-italic">{{ communityLabels.afterCommunityLabel.value }}</span>
                   </div>
                 </div>
