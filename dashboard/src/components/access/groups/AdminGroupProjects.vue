@@ -129,7 +129,7 @@ const clearErrorMessage = () => {
 <template>
   <sub-page-header title="Group Projects" />
 
-  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+  <Card :pt="{ body: { class: '!p-0' } }">
     <template #content>
       <loading-container :is-loading="isLoading" class="">
         <div class="w-full px-4 py-6">

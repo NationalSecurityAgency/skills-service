@@ -19,7 +19,7 @@ import UsersTable from './UsersTable.vue';
 
 <template>
   <div class="usersTable">
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
         <UsersTable />
       </template>

@@ -153,7 +153,7 @@ const loadEmailSubscriptionPreference = () => {
 <template>
   <div>
     <SubPageHeader title="Grading"/>
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
         <skills-spinner v-if="isLoading" :is-loading="isLoading" class="py-20"/>
         <div v-else>

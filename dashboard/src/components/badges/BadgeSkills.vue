@@ -197,7 +197,7 @@ const filterSkills = (searchQuery) => {
   <div>
     <sub-page-header title="Skills"/>
 
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
         <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp || loading.badgeInfo">
           <div class="p-4">
@@ -207,7 +207,6 @@ const filterSkills = (searchQuery) => {
                              class="search-and-nav border rounded"
                              v-on:added="skillAdded"
                              @search-change="filterSkills"
-                             select-label="Select skill(s)"
                              :internal-search="false"
                              :showClear="false">
             </skills-selector>

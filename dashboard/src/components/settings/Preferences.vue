@@ -188,14 +188,11 @@ function enableDarkModeChanged() {
                      @change="enableDarkModeChanged" />
         <span class="ml-2">{{ settings.enableDarkMode.value ? 'On' : 'Off'}}</span>
       </div>
-      <SkillsButton label="Save" icon="fas fa-arrow-circle-right" @click.stop="save" size="small" :disabled="!isDirty" data-cy="userPrefsSettingsSave"/>
-      <span v-if="isDirty" class="text-warning ml-2" data-cy="unsavedChangesAlert">
-              <i class="fa fa-exclamation-circle" /> Unsaved Changes
-      </span>
-      <span v-if="!isDirty && showSavedMsg" class="text-success ml-2" data-cy="settingsSavedAlert">
-        <i class="fa fa-check" />
-        Settings Updated!
-      </span>
+      <div class="mt-3 flex gap-2">
+        <SkillsButton label="Save" icon="fas fa-arrow-circle-right" @click.stop="save" size="small" :disabled="!isDirty" data-cy="userPrefsSettingsSave" />
+        <InlineMessage v-if="isDirty" data-cy="unsavedChangesAlert" severity="warn">Unsaved Changes</InlineMessage>
+        <InlineMessage v-if="!isDirty && showSavedMsg" data-cy="settingsSavedAlert" severity="success">Settings Updated!</InlineMessage>
+      </div>
     </template>
   </Card>
 </template>

@@ -80,9 +80,10 @@ onUnmounted(() => {
 
     <div class="flex">
       <div id="skillsNavigation" ref="skillsNavigation" class="flex-none hidden md:flex" data-cy="nav-col">
-        <div class="border border-surface-300 dark:border-surface-500 rounded-md border-surface font-medium bg-surface-0 dark:bg-surface-900" style="min-height: calc(100vh - 20rem); !important">
+        <Card style="min-height: calc(100vh - 20rem); !important" :pt="{ body: { class: '!p-0' } }">
+          <template #content>
             <div class="text-surface-900 dark:text-surface-0 font-semibold flex">
-              <div v-if="!showCollapsed" class="pt-4 px-4">Navigate</div>
+              <div v-if="!showCollapsed" class="pt-4 px-4 pb-1">Navigate</div>
               <div class="flex-1" :class="{ 'text-right': !showCollapsed, 'text-center': showCollapsed}">
                 <Button size="small" text
                         data-cy="navCollapseOrExpand"
@@ -93,38 +94,37 @@ onUnmounted(() => {
                 </Button>
               </div>
             </div>
-            <ul class="list-none p-0 text-color">
+            <ul class="list-none font-medium">
               <router-link v-for="(navItem, index) of navItems"
                            :key="navItem.name"
                            :to="{ name: navItem.page }"
                            v-slot="{ navigate, isExactActive }"
                            custom>
-                <li :class="{ 'bg-primary ': isExactActive }" :data-cy="`navLine-${navItem.name}`">
+                <li :class="{ 'bg-primary ': isExactActive }" :data-cy="`navLine-${navItem.name}`" class="pl-2 pr-5">
                   <Button link
                           class="no-underline w-full"
                           @click="(e) => { navigate(e); }"
                           :aria-label="`Navigate to ${navItem.name} page`"
                           :aria-current="isExactActive ? 'page' : false"
                           :data-cy="`nav-${navItem.name}`">
-                    <div class="flex justify-start w-full" :class="{'mr-4': !showCollapsed, 'text-zinc-100': isExactActive }">
+                    <div class="flex justify-start items-center w-full"
+                         :class="{'mr-4': !showCollapsed, 'text-zinc-100 dark:text-slate-900': isExactActive }">
                       <i :class="`${navItem.iconClass} ${colors.getTextClass(index)}${isExactActive ? ' text-primary bg-primary-contrast rounded-border border py-1' : ''}`"
                          class="fas mr-2 w-8"
-                         aria-hidden="true" /> <span v-if="!showCollapsed" class="font-medium">{{ navItem.name }}</span>
+                         aria-hidden="true"/> <span v-if="!showCollapsed" class="">{{ navItem.name }}</span>
                     </div>
                   </Button>
                 </li>
               </router-link>
             </ul>
-        </div>
+          </template>
+        </Card>
       </div>
 
       <div class="flex-1" ref="content">
         <div class="md:pl-4" id="mainContent2"
              tabindex="-1"
              aria-label="Main content area, click tab to navigate">
-<!--          <router-view id="mainContent2" -->
-<!--                       tabindex="-1" -->
-<!--                       aria-label="Main content area, click tab to navigate"></router-view>-->
           <router-view />
         </div>
       </div>

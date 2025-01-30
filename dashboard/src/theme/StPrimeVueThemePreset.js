@@ -20,17 +20,37 @@ const colorScheme = {
     light: {
         primary: {
             color: '{green.800}',
-                inverseColor: '#ffffff',
-                hoverColor: '{green.600}',
-                activeColor: '{green.700}'
+            inverseColor: '#ffffff',
+            hoverColor: '{green.600}',
+            activeColor: '{green.700}'
         },
         highlight: {
             background: '{green.800}',
-                focusBackground: '{green.800}',
-                color: '#ffffff',
-                focusColor: '#ffffff'
+            focusBackground: '{green.800}',
+            color: '#ffffff',
+            focusColor: '#ffffff'
         }
     },
+    dark: {
+        primary: {
+        },
+        highlight: {
+        },
+        surface: {
+            0: '#ffffff',
+            50: '{slate.50}',
+            100: '{slate.100}',
+            200: '{slate.200}',
+            300: '{slate.300}',
+            400: '{slate.400}',
+            500: '{slate.500}',
+            600: '{slate.600}',
+            700: '{slate.700}',
+            800: '{slate.800}',
+            900: '{slate.900}',
+            950: '{slate.950}'
+        }
+    }
 }
 
 const button = {
@@ -81,16 +101,24 @@ const message = {
         light: {
             success: {
                 color: '{green.700}',
+            },
+            warn: {
+                color: '{yellow.700}',
             }
         }
     }
 }
 
+const card = {
+    root: {
+        borderRadius: '{border.radius.md}',
+    },
+}
 
 const defineSkillTreePreset = () => {
     return definePreset(Aura, {
         semantic: { colorScheme },
-        components: { button, badge, message }
+        components: { button, badge, message, card }
     });
 }
 

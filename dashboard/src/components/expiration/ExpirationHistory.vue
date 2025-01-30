@@ -137,7 +137,7 @@ const calculateClientDisplayRoute = (props) => {
 <template>
   <SubPageHeader title="Skill Expiration History" />
 
-  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+  <Card :pt="{ body: { class: '!p-0' } }">
     <template #content>
       <SkillsDataTable
           tableStoredStateId="expirationHistoryTable"

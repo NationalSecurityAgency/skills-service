@@ -190,7 +190,7 @@ const deleteRun = () => {
     <QuizAttemptsTimeChart class="flex-1 w-full my-4" />
     <QuizUserTagsChart v-if="userTagsUtils.showUserTagColumn()" class="flex-1 w-full mb-4" />
 
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
         <SkillsDataTable
           tableStoredStateId="quizRunHistory"

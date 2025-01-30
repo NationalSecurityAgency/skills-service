@@ -159,7 +159,7 @@ const onShareWithAllProjects = (checked) => {
 
 <template>
   <Card class="mb-4"
-        :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"
+        :pt="{ body: { class: '!p-0' } }"
         data-cy="shareSkillsWithOtherProjectsCard">
     <template #header>
       <SkillsCardHeader title="Share skills from this project with other projects"></SkillsCardHeader>

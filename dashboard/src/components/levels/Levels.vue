@@ -286,7 +286,7 @@ const isFlex = computed(() => responsive.sm.value)
       </div>
     </sub-page-header>
 
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
         <SkillsDataTable tableStoredStateId="levels" v-if="!loading" :options="table.options" :loading="loading" :value="levels"
                    data-cy="levelsTable" striped-rows aria-label="Levels">

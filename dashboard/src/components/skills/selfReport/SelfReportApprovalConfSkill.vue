@@ -178,7 +178,7 @@ const removeTagConf = (removedItem) => {
 </script>
 
 <template>
-  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }" data-cy="splitWorkloadBySkillCard">
+  <Card :pt="{ body: { class: '!p-0' } }" data-cy="splitWorkloadBySkillCard">
     <template #header>
       <SkillsCardHeader title="Split Workload By Skill"></SkillsCardHeader>
     </template>

@@ -65,7 +65,7 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 </script>
 
 <template>
-  <div class="field text-left" v-bind="fallthroughAttributes.rootAttrs.value">
+  <div class="flex flex-col gap-2" v-bind="fallthroughAttributes.rootAttrs.value">
     <label v-if="label" :for="name"><span v-if="isRequired">*</span> {{ label }} </label>
     <InputGroup>
       <InputGroupAddon v-if="slots.addOnBefore">
