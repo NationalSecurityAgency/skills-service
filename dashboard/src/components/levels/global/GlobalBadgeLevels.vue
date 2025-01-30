@@ -190,7 +190,7 @@ const selectLevel = (level) => {
   <div>
     <sub-page-header title="Levels"/>
 
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
         <loading-container :is-loading="isLoading">
           <div class="mb-6 m-4 px-4 py-6">

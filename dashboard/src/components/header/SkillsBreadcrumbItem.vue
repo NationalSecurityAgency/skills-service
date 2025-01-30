@@ -37,7 +37,7 @@ const maxWidth = computed(() => props.label ? 'max-width:13rem' : '')
 </script>
 
 <template>
-  <div  class="sd-theme-breadcrumb-item flex" data-cy="breadcrumb-item">
+  <div  class="sd-theme-breadcrumb-item flex items-center" data-cy="breadcrumb-item">
     <i v-if="showSeparator"
        class="fas fa-angle-right ml-1 mr-1"
        aria-hidden="true"/>

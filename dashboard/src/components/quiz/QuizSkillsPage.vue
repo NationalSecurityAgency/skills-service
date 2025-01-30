@@ -112,7 +112,7 @@ const onFilter = (filterEvent) => {
 <template>
   <div>
     <SubPageHeader title="Associated Skills" />
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
         <LoadingContainer v-bind:is-loading="options.busy">
           <div v-if="skills.length > 0 && !options.busy">

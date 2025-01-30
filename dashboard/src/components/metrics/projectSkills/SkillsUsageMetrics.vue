@@ -99,7 +99,7 @@ const totalRows = computed(() => items.value.length);
 </script>
 
 <template>
-  <Card data-cy="skillsNavigator" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+  <Card data-cy="skillsNavigator" :pt="{ body: { class: '!p-0' } }">
     <template #header>
       <SkillsCardHeader title="Skills"></SkillsCardHeader>
     </template>

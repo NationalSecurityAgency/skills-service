@@ -214,7 +214,7 @@ const skillCreatedOrUpdated = (skill) => {
     </sub-page-header>
 
 
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
         <skills-spinner
           v-if="skillsState.loadingSubjectSkills && !skillsState.hasSkills "

@@ -180,6 +180,7 @@ defineExpose({
           :suggestions="internalSearch ? optionsInternal : options"
           :placeholder="placeholder"
           class="st-skills-selector"
+          :pt="{ dropdown: { 'aria-label': 'click to select a skill' } }"
           :class="props.class"
           :fluid="true"
           :dropdown="showDropdown"

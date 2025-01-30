@@ -254,8 +254,9 @@ const isQuizzesValueUnderProgressAndRanking = (value, items) => {
 </script>
 
 <template>
-  <div class="card">
-    <Breadcrumb :model="items"
+  <Card :pt="{ body: { class: '!p-0' } }" class="mx-3">
+    <template #content>
+      <Breadcrumb :model="items"
                 :class="{'dashboard-breadcrumb-vertical-mode': smallScreenMode}"
                 aria-label="SkillTree Dashboard Breadcrumb Bar"
                 data-cy="breadcrumb-bar">
@@ -283,7 +284,8 @@ const isQuizzesValueUnderProgressAndRanking = (value, items) => {
         </div>
       </template>
     </Breadcrumb>
-  </div>
+    </template>
+  </Card>
 </template>
 <style>
 .dashboard-breadcrumb-vertical-mode ol {

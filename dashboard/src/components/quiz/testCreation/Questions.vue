@@ -226,7 +226,7 @@ function handleNewQuestionBtnFocus() {
     </SubPageHeader>
 
     <BlockUI :blocked="operationInProgress">
-      <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+      <Card :pt="{ body: { class: '!p-0' } }">
         <template #content>
           <div>
             <SkillsSpinner :is-loading="isLoading" class="py-20"/>

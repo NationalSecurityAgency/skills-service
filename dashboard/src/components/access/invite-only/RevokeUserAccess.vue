@@ -149,7 +149,7 @@ const tableFilters = ref({
 </script>
 
 <template>
-  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+  <Card :pt="{ body: { class: '!p-0' } }">
     <template #header>
       <SkillsCardHeader title="Project User: Revoke">
         <template #headerIcon><i class="fas fa-user-lock mr-2 text-red-500"
