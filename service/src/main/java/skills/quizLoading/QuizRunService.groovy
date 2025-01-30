@@ -16,6 +16,7 @@
 package skills.quizLoading
 
 import callStack.profiler.Profile
+import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -776,25 +777,27 @@ class QuizRunService {
     @Profile
     void checkForDependentQuizzes(SkillEventResult res, String userId, SkillDefMin currentSkillDef) {
         List<SkillDefMin> parents = skillEventsSupportRepo.findParentSkillsByChildIdAndType(currentSkillDef.id, [SkillRelDef.RelationshipType.Dependence])
-        Set<Integer> dependantQuizSkillIds = []
-        // check for dependent quiz skills or badges that contain quiz skills that are passed and then report via reportAnyAssociatedSkills
+        Set<ProjectAndSkillId> dependantQuizSkillIds = []
+        // check for dependent quiz skills or badges that contain quiz skills that are passed, if so then report those skill(s)
         parents.each { SkillDefMin skillDefMin ->
             if (skillDefMin.selfReportingType == SkillDef.SelfReportingType.Quiz) {
-                dependantQuizSkillIds.add(skillDefMin.id)
+                dependantQuizSkillIds.add(new ProjectAndSkillId(skillDefMin.projectId, skillDefMin.skillId, skillDefMin.id))
             } else if (skillDefMin.type == SkillDef.ContainerType.Badge) {
                 List<SkillDef> badgeSkills = skillDefRepo.findChildSkillsByIdAndRelationshipType(skillDefMin.id, SkillRelDef.RelationshipType.BadgeRequirement)
-                dependantQuizSkillIds.addAll(badgeSkills.findAll { it.selfReportingType == SkillDef.SelfReportingType.Quiz }.collect {it.id})
+                dependantQuizSkillIds.addAll(badgeSkills.findAll { it.selfReportingType == SkillDef.SelfReportingType.Quiz }.collect {new ProjectAndSkillId(it.projectId, it.skillId, it.id)})
             }
         }
-        dependantQuizSkillIds.each { quizSkillId ->
+        dependantQuizSkillIds.each { quizSkill ->
             PageRequest onePlease = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "updated"))
-            List<UserQuizAttempt> passedAttempts = userQuizAttemptRepo.findBySkillRefIdAndUserIdAndByStatus(
-                    quizSkillId,
+            UserQuizAttempt passedQuizAttempt = userQuizAttemptRepo.findBySkillRefIdAndUserIdAndByStatus(
+                    quizSkill.skillRefId,
                     userId,
-                    UserQuizAttempt.QuizAttemptStatus.PASSED, onePlease)
-            if (passedAttempts) {
-                List<SkillEventResult> results = reportAnyAssociatedSkills(passedAttempts.first(), passedAttempts.first().quizDefinitionRefId)
-                res.completed?.addAll((results.collect { it.completed }).flatten())
+                    UserQuizAttempt.QuizAttemptStatus.PASSED, onePlease)?.first()
+            if (passedQuizAttempt) {
+                SkillEventResult skillEventResult = skillEventsService.reportSkill(
+                        quizSkill.projectId, quizSkill.skillId, passedQuizAttempt.userId, false, passedQuizAttempt.completed,
+                        new SkillEventsService.SkillApprovalParams(disableChecks: true, isFromPassingQuiz: true))
+                res.completed.addAll(skillEventResult.completed)
             }
         }
     }
@@ -834,4 +837,10 @@ class QuizRunService {
         return answerDefPartialInfo
     }
 
+    @Canonical
+    private static class ProjectAndSkillId {
+        String projectId
+        String skillId
+        Integer skillRefId
+    }
 }
