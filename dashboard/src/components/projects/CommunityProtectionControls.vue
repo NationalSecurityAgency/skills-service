@@ -19,7 +19,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import Avatar from 'primevue/avatar'
-import { useField } from 'vee-validate'
+import {useField, useIsValidating} from 'vee-validate'
 import { syncRef } from '@vueuse/core'
 
 const props = defineProps({
@@ -51,13 +51,12 @@ const authState = useAuthState()
 const appConfig = useAppConfig()
 const communityLabels = useCommunityLabels()
 
+const isValidating = useIsValidating()
 const { value, errors } = useField('enableProtectedUserCommunity')
 
 const initialValueForEnableProtectedUserCommunity = ref(null)
 const enableProtectedUserCommunity = defineModel('enableProtectedUserCommunity')
 const enableProtectedUserCommunitySynced = syncRef(enableProtectedUserCommunity, value)
-const invalid = ref(false)
-const pending = ref(false)
 
 onMounted(() => {
   initialValueForEnableProtectedUserCommunity.value = communityLabels.isRestrictedUserCommunity(props.project?.userCommunity)
@@ -120,7 +119,7 @@ const userCommunityRestrictedDescriptor = computed(() => {
             <i class="fas fa-external-link-alt ml-1" aria-hidden="true" style="font-size: 0.9rem;" />
           </div>
         </div>
-        <div v-if="!pending">
+        <div v-if="!isValidating">
           <Message v-if="enableProtectedUserCommunity && !(errors && errors.length > 0)"
                    :closable="false"
                    severity="warn"
