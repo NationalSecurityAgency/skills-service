@@ -30,15 +30,17 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 </script>
 
 <template>
-  <UserProgressCard
-      title="My Badges"
-      component-name="myBadges"
-      :user-achieved="badges.numBadgesCompleted"
-      :total-available="badges.numTotalBadges"
-      :unit="badges.numTotalBadges > 1 ? 'badges' : 'badge'"
-      icon="fa fa-award"
-      :route="{ name: skillsDisplayInfo.getContextSpecificRouteName('BadgesDetailsPage') }"
-      :is-summary-only="attributes.isSummaryOnly" />
+  <UserProgressCard title="My Badges" component-name="myBadges" icon="fa fa-award"
+                    :route="{ name: skillsDisplayInfo.getContextSpecificRouteName('BadgesDetailsPage') }"
+                    :is-summary-only="attributes.isSummaryOnly">
+    <template #userRanking>
+      <div class="fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg p-1">
+        <div class="text-3xl" style="line-height: 1.2em" data-cy="myBadgesPosition">{{ badges.numBadgesCompleted }}</div>
+        <div class="mt-1">out of</div>
+        <div>{{ badges.numTotalBadges }} {{ parseInt(badges.numTotalBadges) === 1 ? 'badge' : 'badges' }}</div>
+      </div>
+    </template>
+  </UserProgressCard>
 </template>
 
 <style scoped>

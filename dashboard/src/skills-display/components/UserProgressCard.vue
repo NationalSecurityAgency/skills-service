@@ -23,16 +23,6 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  userAchieved: {
-    required: true,
-  },
-  totalAvailable: {
-    required: true,
-  },
-  unit: {
-    type: String,
-    required: true,
-  },
   icon: {
     type: String,
     required: true
@@ -42,10 +32,6 @@ const props = defineProps({
     required: false,
   },
   isSummaryOnly: {
-    type: Boolean,
-    required: false,
-  },
-  optedOut: {
     type: Boolean,
     required: false,
   },
@@ -68,17 +54,7 @@ const props = defineProps({
       <div class="fa-stack skills-icon user-rank-stack text-blue-300 flex flex-wrap align-items-center" v-if="!loading">
         <i :class="`${icon} fa-stack-2x watermark-icon`" />
 
-        <div v-if="optedOut" class="pt-2 text-danger fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg" data-cy="optedOutMessage">
-          <div>Opted-Out</div>
-          <div style="font-size: 0.8rem; line-height: 1rem;" class="mb-2">
-            Your position would be {{ userAchieved }} if you opt-in!
-          </div>
-        </div>
-        <div class="fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg p-1" v-else>
-          <div class="text-3xl" style="line-height: 1.2em" :data-cy="`${componentName}Position`">{{ userAchieved }}</div>
-          <div class="mt-1">out of</div>
-          <div>{{ totalAvailable }} {{ unit }}</div>
-        </div>
+        <slot name="userRanking" />
       </div>
       <skills-spinner :is-loading="loading"/>
     </template>
@@ -96,7 +72,7 @@ const props = defineProps({
   </Card>
 </template>
 
-<style scoped>
+<style>
 @media only screen and (min-width: 1200px) {
   .skills-progress-card {
     min-width: 18rem !important;

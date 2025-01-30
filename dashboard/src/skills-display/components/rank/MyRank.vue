@@ -45,17 +45,23 @@ const toRankDetailsPage = computed(() => {
 </script>
 
 <template>
-  <UserProgressCard
-      title="My Rank"
-      component-name="myRank"
-      :user-achieved="`#${position}`"
-      :total-available="totalUsers"
-      :unit="totalUsers > 1 ? 'users' : 'user'"
-      icon="fa fa-users"
-      :route="toRankDetailsPage"
-      :is-summary-only="attributes.isSummaryOnly"
-      :loading="progress.loadingUserSkillsRanking"
-      :opted-out="optedOut" />
+  <UserProgressCard title="My Rank" icon="fa fa-users" :route="toRankDetailsPage" :is-summary-only="attributes.isSummaryOnly"
+                    component-name="myRank"
+                    :loading="progress.loadingUserSkillsRanking">
+    <template #userRanking>
+      <div v-if="optedOut" class="pt-2 text-danger fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg" data-cy="optedOutMessage">
+        <div>Opted-Out</div>
+        <div style="font-size: 0.8rem; line-height: 1rem;" class="mb-2">
+          Your position would be #{{ position }} if you opt-in!
+        </div>
+      </div>
+      <div class="fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg p-1" v-else>
+        <div class="text-3xl" style="line-height: 1.2em" data-cy="myRankPosition">#{{ position }}</div>
+        <div class="mt-1">out of</div>
+        <div>{{ totalUsers }} {{ parseInt(totalUsers) === 1 ? 'user' : 'users' }}</div>
+      </div>
+    </template>
+  </UserProgressCard>
 </template>
 
 <style scoped>
