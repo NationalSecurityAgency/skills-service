@@ -218,6 +218,7 @@ const loadTableData = () => {
               class="w-full mb-6"
               @complete="filterProjects"
               data-cy="projectSelector"
+              :pt="{ dropdown: { 'aria-label': 'click to select an item' } }"
               placeholder="Select option">
             <template #empty>
               <div v-if="projects.selected.length === 5" class="ml-6" data-cy="projectSelectorMaximumReached">

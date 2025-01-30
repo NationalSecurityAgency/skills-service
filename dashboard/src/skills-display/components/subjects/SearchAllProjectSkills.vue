@@ -79,6 +79,7 @@ const navToSkill = (event) => {
       @item-select="navToSkill"
       fluid
       data-cy="searchSkillsAcrossSubjects"
+      :pt="{ dropdown: { 'aria-label': 'click to select a skill' } }"
       aria-label="Search for a skill across subjects..."
       placeholder="Search for a skill across subjects..."
     >

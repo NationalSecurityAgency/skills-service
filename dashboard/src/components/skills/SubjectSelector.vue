@@ -146,20 +146,6 @@ const searchChanged = (query) => {
       </div>
     </template>
   </Select>
-<!--    -->
-<!--  <AutoComplete :suggestions="optionsInternal"-->
-<!--                dropdown-->
-<!--                :delay="500"-->
-<!--                optionLabel="name"-->
-<!--                :loading="isLoading"-->
-<!--                @complete="searchChanged"-->
-<!--                @item-select="added"-->
-<!--                @item-unselect="removed"-->
-<!--                v-model="selectedInternal"-->
-<!--                :placeholder="placeholder"-->
-<!--                class="st-skills-selector w-full"-->
-<!--                data-cy="subjectSelector">-->
-<!--  </AutoComplete>-->
 </template>
 
 <style scoped>

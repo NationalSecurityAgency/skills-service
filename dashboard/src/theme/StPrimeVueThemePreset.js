@@ -102,9 +102,18 @@ const message = {
             success: {
                 color: '{green.700}',
             },
+            info: {
+                color: '{blue.700}',
+            },
             warn: {
                 color: '{yellow.700}',
             }
+        },
+        dark: {
+            info: {
+                background: 'color-mix(in srgb, {blue.500}, transparent 84%)',
+                color: '{blue.400}',
+            },
         }
     }
 }
