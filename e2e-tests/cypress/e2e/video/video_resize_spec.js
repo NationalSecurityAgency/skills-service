@@ -44,24 +44,24 @@ describe('Configure Video Tests', () => {
             .trigger('mousedown', )
             .trigger('mousemove', )
             .trigger('mouseup', { force: true })
-        cy.get('[data-cy="defaultVideoSize"]').contains('691 x 478')
+        cy.get('[data-cy="defaultVideoSize"]').contains('705 x 488')
         cy.get('[data-cy="updateVideoSettings"]').should('exist')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '691px')
+        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '705px')
 
         cy.get('[data-cy="videoResizeHandle"]').should('be.visible')
             .trigger('mousedown', )
             .trigger('mousemove', )
             .trigger('mouseup', { force: true })
-        cy.get('[data-cy="defaultVideoSize"]').contains('673 x 466')
+        cy.get('[data-cy="defaultVideoSize"]').contains('687 x 475')
         cy.get('[data-cy="updateVideoSettings"]').should('exist')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '673px')
+        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '687px')
 
         cy.get('[data-cy="updateVideoSettings"]').click()
         cy.get('[data-cy="savedMsg"]')
-        cy.get('[data-cy="defaultVideoSize"]').contains('673 x 466')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '673px')
+        cy.get('[data-cy="defaultVideoSize"]').contains('687 x 475')
+        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '687')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
     });
 
@@ -79,24 +79,24 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
 
         cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{leftArrow}')
-        cy.get('[data-cy="defaultVideoSize"]').contains('658 x 455')
+        cy.get('[data-cy="defaultVideoSize"]').contains('672 x 465')
         cy.get('[data-cy="updateVideoSettings"]').should('exist')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '658px')
+        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '672px')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
 
         cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{leftArrow}')
-        cy.get('[data-cy="defaultVideoSize"]').contains('608 x 420')
+        cy.get('[data-cy="defaultVideoSize"]').contains('622 x 430')
         cy.get('[data-cy="updateVideoSettings"]').should('exist')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '608px')
+        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '622px')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
 
         cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{rightArrow}')
-        cy.get('[data-cy="defaultVideoSize"]').contains('658 x 455')
+        cy.get('[data-cy="defaultVideoSize"]').contains('672 x 464')
         cy.get('[data-cy="updateVideoSettings"]').click()
         cy.get('[data-cy="savedMsg"]')
-        cy.get('[data-cy="defaultVideoSize"]').contains('658 x 455')
+        cy.get('[data-cy="defaultVideoSize"]').contains('672 x 464')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '658px')
+        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '672px')
     });
 
     it('video on skills-display skill page uses configured default unless overridden by the user', () => {
@@ -110,21 +110,21 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="defaultVideoSize"]').contains('Not Configured')
         cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{leftArrow}')
         cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{leftArrow}')
-        cy.get('[data-cy="defaultVideoSize"]').contains('608 x 420')
+        cy.get('[data-cy="defaultVideoSize"]').contains('622 x 430')
         cy.get('[data-cy="updateVideoSettings"]').click()
         cy.get('[data-cy="savedMsg"]')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '608px')
+        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '622px')
 
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
-        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '608px')
+        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '622px')
 
         // user overrides the video size
         cy.get('[data-cy="contactOwnerBtn"]').tab().type('{enter}{leftArrow}')
-        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '558px')
+        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '572px')
 
         // user-set new size is used
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
-        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '558px')
+        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '572px')
     });
 
     it('video on skills-display size is controlled by the user', () => {

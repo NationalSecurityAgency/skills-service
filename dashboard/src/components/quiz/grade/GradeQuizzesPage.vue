@@ -180,7 +180,7 @@ const loadEmailSubscriptionPreference = () => {
             <template #header>
               <skills-spinner v-if="isEmailEnabled && loadingNotificationPreference" :is-loading="true" :size-in-rem="1"/>
               <div v-if="isEmailEnabled && !loadingNotificationPreference" data-cy="unsubscribeContainer" class="flex flex-row-reverse items-center">
-                  <InputSwitch id="emailSubscribeSwitch"
+                  <ToggleSwitch id="emailSubscribeSwitch"
                                v-model="emailSubscribed"
                                @update:modelValue="toggleSubscription"
                                aria-label="Enable to receive Quiz Grading request emails"

@@ -27,6 +27,7 @@ import ReuseOrMovePreview from '@/components/skills/reuseSkills/ReuseOrMovePrevi
 import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useFocusState } from '@/stores/UseFocusState.js'
+import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
 
 const props = defineProps({
   skills: {
@@ -127,6 +128,7 @@ const onVisibleChanged = (isVisible) => {
 const handleFocus = () => {
   focusState.focusOnLastElement()
 }
+const dialogUtils = useDialogUtils()
 </script>
 
 <template>
@@ -138,7 +140,7 @@ const handleFocus = () => {
     :close-on-escape="true"
     class="w-11/12 xl:w-8/12"
     v-model:visible="model"
-    :pt="{ maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }"
+    :pt="{ pcMaximizeButton: dialogUtils.getMaximizeButtonPassThrough() }"
   >
     <div data-cy="reuseOrMoveDialog">
       <skills-spinner :is-loading="isLoadingData" class="my-20" />

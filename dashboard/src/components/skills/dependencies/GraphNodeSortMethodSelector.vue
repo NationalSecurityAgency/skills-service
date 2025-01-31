@@ -46,7 +46,7 @@ watch(sortMethod, notifyOfChange);
   <div class="deps-overlay">
     <SelectButton v-model="sortMethod" :options="options" optionLabel="value" dataKey="value">
       <template #option="slotProps">
-        <i :class="slotProps.option.icon"></i> {{ slotProps.option.label }}
+        <div :class="{ 'text-gray-800 dark:text-gray-300': slotProps.option.value !== sortMethod.value }"><i :class="slotProps.option.icon"></i> {{ slotProps.option.label }}</div>
       </template>
     </SelectButton>
   </div>

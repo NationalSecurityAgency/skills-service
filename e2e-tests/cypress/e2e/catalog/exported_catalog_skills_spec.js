@@ -880,7 +880,7 @@ describe('Skills Exported to Catalog Tests', () => {
             .contains('Very Great Skill 1A');
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
-        cy.get('[data-pc-section="closebutton"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-cy="totalPointsCell_skill1"]')
             .contains('66 pts x 7 repetitions');
 

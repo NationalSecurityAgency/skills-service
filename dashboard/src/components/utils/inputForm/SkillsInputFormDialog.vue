@@ -22,6 +22,7 @@ import FormReloadWarning from '@/components/utils/inputForm/FormReloadWarning.vu
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
 
 onUnmounted(() => {
   inputFormResiliency.stop(false);
@@ -225,6 +226,8 @@ if (props.asyncLoadDataFunction) {
 watch(() => props.initialValues, (newValues) => {
   resetForm({values: newValues});
 })
+
+const dialogUtils = useDialogUtils()
 </script>
 
 <template>
@@ -247,7 +250,7 @@ watch(() => props.initialValues, (newValues) => {
     :cancel-button-label="cancelButtonLabel"
     :cancel-button-icon="cancelButtonIcon"
     :cancel-button-severity="cancelButtonSeverity"
-    :pt="{ content: { class: 'p-0' }, maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }"
+    :pt="{ content: { class: 'p-0' }, pcMaximizeButton: dialogUtils.getMaximizeButtonPassThrough() }"
     footer-class="px-4 pb-4"
   >
     <div class="p-4">
