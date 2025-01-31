@@ -22,6 +22,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue'
 import ScrollPanel from 'primevue/scrollpanel'
+import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -135,6 +136,7 @@ const handleExport = () => {
 const isExportable = computed(() => {
   return !allSkillsExportedAlready.value && !state.value.exported && !allSkillsAreDups.value && !insufficientSubjectPoints.value && !isUserCommunityRestricted.value
 })
+const dialogUtils = useDialogUtils()
 </script>
 
 <template>
@@ -146,7 +148,7 @@ const isExportable = computed(() => {
     class="w-11/12 xl:w-8/12"
     @update:visible="onUpdateVisible"
     v-model:visible="model"
-    :pt="{ maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }"
+    :pt="{ pcMaximizeButton: dialogUtils.getMaximizeButtonPassThrough() }"
   >
     <skills-spinner :is-loading="loadingData" />
     <div v-if="!loadingData">

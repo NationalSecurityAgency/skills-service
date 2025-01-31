@@ -197,7 +197,7 @@ const toggleRow = (row) => {
                        v-model:sort-order="sortOrder"
                        @page="pageChanged"
                        data-key="id"
-                       pt:paginator:paginatorWrapper:aria-label="Approval Paginator"
+                       pt:pcPaginator:paginatorContainer:aria-label="Approval Paginator"
                        @sort="sortTable">
         <Column selectionMode="multiple" :class="{'flex': responsive.md.value }">
           <template #header>

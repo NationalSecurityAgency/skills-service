@@ -46,8 +46,7 @@ const allDone = () => {
 </script>
 
 <template>
-  <Dialog modal v-model:visible="model" :maximizable="false" :closable="false" :header="title"
-          :pt="{ maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }">
+  <Dialog modal v-model:visible="model" :maximizable="false" :closable="false" :header="title">
 
     <div class="text-center" data-cy="lengthyOpModal">
       <div v-if="!isComplete">

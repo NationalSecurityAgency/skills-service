@@ -97,8 +97,7 @@ defineExpose({
       data-cy="idInputValue" />
 
     </InputGroup>
-    <Message v-if="errorMessage"
-             severity="error"
+    <Message severity="error"
              variant="simple"
              size="small"
              data-cy="idError"

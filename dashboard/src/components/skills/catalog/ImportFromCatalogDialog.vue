@@ -33,6 +33,7 @@ import { useFinalizeInfoState } from '@/stores/UseFinalizeInfoState.js'
 import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -202,6 +203,8 @@ const onUpdateVisible = (newVal) => {
     handleClose()
   }
 }
+
+const dialogUtils = useDialogUtils()
 </script>
 
 <template>
@@ -213,7 +216,7 @@ const onUpdateVisible = (newVal) => {
     class="w-11/12 xl:w-8/12"
     @update:visible="onUpdateVisible"
     v-model:visible="model"
-    :pt="{ maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }"
+    :pt="{ pcMaximizeButton: dialogUtils.getMaximizeButtonPassThrough() }"
   >
     <skills-spinner :is-loading="initialLoad" />
     <div v-if="!initialLoad">

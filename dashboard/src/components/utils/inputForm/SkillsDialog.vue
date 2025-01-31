@@ -18,6 +18,7 @@ import { onMounted, onBeforeUnmount } from 'vue';
 import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
+import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -124,6 +125,8 @@ const handleEscape = (event) => {
 defineExpose({
   handleClose
 })
+
+const dialogUtils = useDialogUtils()
 </script>
 
 <template>
@@ -132,9 +135,10 @@ defineExpose({
           :closable="!submitting"
           :close-on-escape="!shouldConfirmCancel && !submitting"
           v-model:visible="model"
-          :maximizable="false"
+          :maximizable="true"
           :header="header"
           :class="dialogClass"
+          :pt="{ pcMaximizeButton: dialogUtils.getMaximizeButtonPassThrough() }"
   >
     <skills-spinner :is-loading="loading" />
 

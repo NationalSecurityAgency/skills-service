@@ -92,6 +92,14 @@ const badge = {
                 background: '{sky.700}',
                 color: '{surface.0}'
             },
+            success: {
+                background: '{green.700}',
+                color: '{surface.0}'
+            },
+            secondary: {
+                background: '{surface.200}',
+                color: '{surface.600}'
+            },
         },
     }
 }
@@ -124,10 +132,21 @@ const card = {
     },
 }
 
+const togglebutton = {
+    colorScheme: {
+        light: {
+            root: {
+                background: '{surface.200}',
+                color: '{surface.700}',
+            },
+        }
+    }
+}
+
 const defineSkillTreePreset = () => {
     return definePreset(Aura, {
         semantic: { colorScheme },
-        components: { button, badge, message, card }
+        components: { button, badge, message, card, togglebutton }
     });
 }
 
