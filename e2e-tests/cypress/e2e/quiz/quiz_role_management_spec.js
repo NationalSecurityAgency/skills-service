@@ -72,7 +72,7 @@ describe('Quiz User Role Management Tests', () => {
           cy.request('POST', `/admin/quiz-definitions/quiz1/users/user2/roles/ROLE_QUIZ_ADMIN`);
           cy.visit('/administrator/quizzes/quiz1/access');
 
-          cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('be.disabled')
+          cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.exist')
           cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('be.enabled')
           cy.get('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
 
@@ -82,7 +82,7 @@ describe('Quiz User Role Management Tests', () => {
           cy.get('[data-cy="currentValidationText"]').type('Delete Me')
           cy.get('[data-cy="saveDialogBtn"]').click()
 
-          cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('be.disabled')
+          cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.exist')
           cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('not.exist')
           cy.get('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
 

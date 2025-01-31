@@ -206,21 +206,10 @@ describe('Settings Tests', () => {
             }],
         ], 5, true, null, false);
 
-        // attempt to remove myself - no go
+        // cannot remove myself - no go
         cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="removeUserBtn"]`)
-            .should('be.disabled');
-        // cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="cannotRemoveWarning"]`).should('exist')
-
-        cy.validateTable(rootUsrTableSelector, [
-            [{
-                colIndex: 0,
-                value: '(root@skills.org)'
-            }],
-            [{
-                colIndex: 0,
-                value: '(skills@skills.org)'
-            }],
-        ], 5, true, null, false);
+            .should('not.exist');
+        cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="cannotRemoveWarning"]`).should('exist')
 
         // must also be added to supervisor table
         cy.get(`${supervisorTableSelector} th`)
@@ -234,11 +223,9 @@ describe('Settings Tests', () => {
         ], 5, true, null, false);
 
         // remove the other user now
-        cy.get(`${rootUsrTableSelector} [data-cy="removeUserBtn"]`)
-            .eq(1)
-            .click();
+        cy.get(`${rootUsrTableSelector} [data-p-index="1"] [data-cy="removeUserBtn"]`).click();
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove skills@skills.org')
-        cy.get('[data-cy="currentValidationText"]').type('Delete Me')
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.wait('@deleteRootUser');
         cy.validateTable(rootUsrTableSelector, [
@@ -488,14 +475,9 @@ describe('Settings Tests', () => {
         cy.wait('@addSupervisor');
 
         // attempt to remove myself - no go
-        cy.get(`${supervisorTableSelector} [data-cy="removeUserBtn"]`)
-            .eq(0)
-            .should('be.disabled');
-        // cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="cannotRemoveWarning"]`).should('exist')
+        cy.get(`${supervisorTableSelector} [data-p-index="0"] [data-cy="cannotRemoveWarning"]`).should('exist')
+        cy.get(`${supervisorTableSelector} [data-p-index="0"] [data-cy="removeUserBtn"]`).should('not.exist');
 
-        // click away to remove tooltip
-        // cy.contains('SkillTree Dashboard')
-        //     .click();
         cy.validateTable(supervisorTableSelector, [
             [{
                 colIndex: 0,
@@ -508,11 +490,9 @@ describe('Settings Tests', () => {
         ], 5, true, null, false);
 
         // remove the other user now
-        cy.get(`${supervisorTableSelector} [data-cy="removeUserBtn"]`)
-            .eq(1)
-            .click();
+        cy.get(`${supervisorTableSelector} [data-p-index="1"] [data-cy="removeUserBtn"]`).click();
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove skills@skills.org')
-        cy.get('[data-cy="currentValidationText"]').type('Delete Me')
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.validateTable(supervisorTableSelector, [
             [{

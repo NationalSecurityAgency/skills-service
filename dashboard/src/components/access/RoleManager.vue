@@ -573,7 +573,7 @@ defineExpose({
                       </SkillsButton>
                     </div>
                     <InlineMessage v-if="!notCurrentUser(slotProps.data.userId)" class="mt-1" severity="info" size="small"
-                                   aria-live="polite">
+                                   aria-live="polite" data-cy="cannotRemoveWarning">
                       Cannot modify yourself
                     </InlineMessage>
                   </div>
