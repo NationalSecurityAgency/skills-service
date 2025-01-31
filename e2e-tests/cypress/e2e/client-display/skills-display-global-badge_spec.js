@@ -269,8 +269,8 @@ describe('Skills Display Global Badges Tests', () => {
     cy.loginAsProxyUser();
 
     cy.cdVisit('/');
-    cy.get('[data-cy=myBadges]')
-      .contains(' 0 ');
+    cy.get('[data-cy=myBadgesPosition]')
+      .contains('0');
   });
 
   it('global badge with project levels should not display no skill assigned message', () => {

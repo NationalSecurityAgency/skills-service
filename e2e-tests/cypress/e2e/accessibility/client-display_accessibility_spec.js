@@ -272,8 +272,8 @@ describe('Client Display Accessibility tests', () => {
             cy.cdVisit('/?isSummaryOnly=true');
             cy.injectAxe();
 
-            cy.get('[data-cy=myBadges]')
-              .contains('0 Badges');
+            cy.get('[data-cy=myBadgesPosition]')
+              .contains('0');
             cy.wait(4000); //need to wait on the pointHistoryChart to complete rendering before running a11y
 
             cy.customA11y();

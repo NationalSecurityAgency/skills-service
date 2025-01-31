@@ -16,12 +16,13 @@ limitations under the License.
 <script setup>
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import UserProgressCard from "@/skills-display/components/UserProgressCard.vue";
 
 const props = defineProps({
-  numBadgesCompleted: {
-    type: Number,
-    required: true
-  }
+  badges: {
+    type: Object,
+    required: true,
+  },
 })
 const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
@@ -29,68 +30,19 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 </script>
 
 <template>
-  <Card class="skills-my-rank w-min-15rem h-full"
-        data-cy="myBadges"
-        :pt="{ content: { class: 'py-0' } }">
-    <template #subtitle>
-      <div class="text-center text-xl font-medium" data-cy="myBadgesTitle">
-        My Badges
+  <UserProgressCard title="My Badges" component-name="myBadges" icon="fa fa-award"
+                    :route="{ name: skillsDisplayInfo.getContextSpecificRouteName('BadgesDetailsPage') }"
+                    :is-summary-only="attributes.isSummaryOnly">
+    <template #userRanking>
+      <div class="fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg p-1">
+        <div class="text-3xl" style="line-height: 1.2em" data-cy="myBadgesPosition">{{ badges.numBadgesCompleted }}</div>
+        <div class="mt-1">out of</div>
+        <div>{{ badges.numTotalBadges }} {{ parseInt(badges.numTotalBadges) === 1 ? 'badge' : 'badges' }}</div>
       </div>
     </template>
-    <template #content>
-    <span class="fa-stack skills-icon user-rank-stack text-blue-300">
-        <i class="fa fa-award fa-stack-2x watermark-icon" />
-
-       <strong class="fa-stack-1x user-rank-text sd-theme-primary-color text-blue-700">
-                  {{
-           numBadgesCompleted
-         }} <span>Badge{{ (numBadgesCompleted > 1 || numBadgesCompleted == 0) ? 's' : '' }}</span>
-       </strong>
-      </span>
-    </template>
-    <template #footer v-if="!attributes.isSummaryOnly">
-      <router-link
-        :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('BadgesDetailsPage') }"
-        aria-label="Click to navigate to My Badges page"
-        data-cy="myBadgesBtn" tabindex="-1">
-        <Button
-          label="View"
-          icon="far fa-eye"
-          outlined class="w-full" size="small" />
-      </router-link>
-    </template>
-  </Card>
+  </UserProgressCard>
 </template>
 
 <style scoped>
 
-@media only screen and (min-width: 1200px) {
-  .skills-my-rank {
-    min-width: 18rem !important;
-  }
-}
-
-.skills-my-rank .skills-icon {
-  display: inline-block;
-  color: #b1b1b1;
-  margin: 5px 0;
-}
-
-.skills-my-rank .skills-icon.user-rank-stack {
-  margin: 14px 0;
-  font-size: 4.1rem;
-  width: 100%;
-  //color: #0fcc15d1;
-}
-
-.skills-my-rank .skills-icon.user-rank-stack i {
-  opacity: 0.38;
-}
-
-.skills-my-rank .user-rank-text {
-  font-size: 0.5em;
-  line-height: 1.2em;
-  margin-top: 1.8em;
-  background: rgba(255, 255, 255, 0.6);
-}
 </style>

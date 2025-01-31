@@ -50,6 +50,7 @@ const showDescription = computed(() =>
 const hasBadges = computed(() => {
   return userProgress.userProgressSummary && userProgress.userProgressSummary.badges && userProgress.userProgressSummary.badges.enabled;
 })
+
 </script>
 
 <template>
@@ -68,7 +69,7 @@ const hasBadges = computed(() => {
           <point-progress-chart />
         </div>
         <div v-if="hasBadges" class="">
-          <my-badges :num-badges-completed="userProgress.userProgressSummary.badges.numBadgesCompleted"></my-badges>
+          <my-badges :badges="userProgress.userProgressSummary.badges"></my-badges>
         </div>
       </div>
 

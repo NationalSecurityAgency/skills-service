@@ -203,7 +203,7 @@ describe('Client Display Tests', () => {
             cy.get('[data-cy=myRank]')
                 .contains('1');
             cy.get('[data-cy=myBadges]')
-                .contains('1 Badge');
+                .contains('1');
             cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05 });
         });
 
