@@ -400,7 +400,8 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="deleteEventBtn"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="performedSkills-deleteSelected"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="performedSkills-deleteAll"]').should(`${chainerPrepend}exist`)
-            cy.get('.p-selection-column').should(`${chainerPrepend}exist`)
+            cy.get('[data-pc-name="pcheadercheckbox"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`)
 
         }
         runCheck(2)

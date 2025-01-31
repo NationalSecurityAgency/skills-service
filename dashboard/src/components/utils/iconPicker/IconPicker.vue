@@ -81,11 +81,24 @@ const themeHelper = useThemesHelper()
     </SkillsButton>
 
     <Popover ref="iconManagerOverlayPanel"
+             :pt="{ content : { class: '!p-0' } }"
                   :show-close-icon="true"
                   :dismissable="dismissable"
                   @hide="panelHidden"
                   :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }">
-      <icon-manager @selected-icon="onSelectedIcon" name="iconClass" @set-dismissable="setDismissable"></icon-manager>
+      <div class="absolute top-0 right-0 z-50">
+          <SkillsButton
+              icon="fas fa-times"
+              @click="iconManagerOverlayPanel.hide()"
+              text
+              data-cy="closeIconPickerBtn"
+              aria-label="Close icon picker" />
+      </div>
+      <icon-manager
+          class="pb-2 px-2"
+          @selected-icon="onSelectedIcon"
+          name="iconClass"
+          @set-dismissable="setDismissable"></icon-manager>
     </Popover>
   </div>
 </template>
