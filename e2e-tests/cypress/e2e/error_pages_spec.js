@@ -234,4 +234,42 @@ describe('Error Pages Tests', () => {
             .contains('You do not have permission to view/manage this Global Badge OR this Global Badge does not exist');
     });
 
+    it('User Not Authorized For Quiz', () => {
+        cy.register('user1', 'password1', false);
+        cy.register('user2', 'password2', false);
+        cy.logout();
+        cy.login('user1', 'password1');
+        cy.createQuizDef(1)
+        cy.logout();
+        cy.login('user2', 'password2');
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy=errorTitle]').should('have.text', 'User Not Authorized');
+        cy.get('[data-cy=errExplanation]').should('have.text','You do not have permission to view/manage this Quiz OR this Quiz does not exist');
+    });
+
+    it('User Not Authorized For Admin Group', () => {
+        cy.register('user1', 'password1', false);
+        cy.register('user2', 'password2', false);
+        cy.logout();
+        cy.login('user1', 'password1');
+        cy.createAdminGroupDef(1)
+        cy.logout();
+        cy.login('user2', 'password2');
+        cy.visit('/administrator/adminGroups/adminGroup1');
+
+        cy.get('[data-cy=errorTitle]').should('have.text', 'User Not Authorized');
+        cy.get('[data-cy=errExplanation]').should('have.text','You do not have permission to view/manage this Admin Group OR this Admin Group does not exist');
+    });
+
+    it('Default Message for Not Authorized', () => {
+        cy.intercept('GET', '/app/projects', { statusCode: 403 })
+            .as('getUserInfo');
+        cy.visit('/administrator');
+        cy.wait('@getUserInfo');
+
+        cy.get('[data-cy=errorTitle]').should('have.text', 'User Not Authorized');
+        cy.get('[data-cy=errExplanation]').should('have.text','You do not have permission to view this page');
+    });
+
 });

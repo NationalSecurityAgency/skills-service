@@ -79,7 +79,7 @@ export const useErrorHandling = () => {
         router.push(loginRoute);
       }
     } else if (errorCode === 403) {
-      let explanation;
+      let explanation = 'You do not have permission to view this page';
       let ec;
       let projectId;
       if (error.response && error.response.data && error.response.data.explanation) {
