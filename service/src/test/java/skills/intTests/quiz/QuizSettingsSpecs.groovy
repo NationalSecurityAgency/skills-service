@@ -590,5 +590,449 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         settings.setting == [QuizSettings.QuizUserRole.setting]
         settings.value == [RoleName.ROLE_QUIZ_READ_ONLY.toString()]
     }
-}
 
+    def "run quiz - retaking a failed quiz gives only the failed questions if setting is enabled"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 4, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: 'quizRetakeIncorrectQuestions', value: 'true'],
+        ])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        assert quizAttempt.questions.size() == 4
+        def firstResult = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[2].answerOptions[1].id)
+        assert secondQuizAttempt.questions.size() == 3
+        def secondResult = skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+
+        def thirdQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[1].answerOptions[1].id)
+        assert thirdQuizAttempt.questions.size() == 2
+        def thirdResult = skillsService.completeQuizAttempt(quiz.quizId, thirdQuizAttempt.id).body
+
+        def fourthQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, fourthQuizAttempt.id, fourthQuizAttempt.questions[0].answerOptions[0].id)
+        assert fourthQuizAttempt.questions.size() == 1
+        def fourthResult = skillsService.completeQuizAttempt(quiz.quizId, fourthQuizAttempt.id).body
+
+        then:
+        quizAttempt.questions.size() == 4
+        secondQuizAttempt.questions.size() == 3
+        thirdQuizAttempt.questions.size() == 2
+        fourthQuizAttempt.questions.size() == 1
+        secondQuizAttempt.questions[0].id == quizAttempt.questions[1].id
+        thirdQuizAttempt.questions[0].id == quizAttempt.questions[2].id
+        fourthQuizAttempt.questions[0].id == quizAttempt.questions[3].id
+        !firstResult.passed
+        !secondResult.passed
+        !thirdResult.passed
+        fourthResult.passed
+    }
+
+    def "run quiz - full quiz is given when retake suggestion is disabled"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 4, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: 'quizRetakeIncorrectQuestions', value: 'true'],
+        ])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        assert quizAttempt.questions.size() == 4
+        skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[2].answerOptions[1].id)
+        assert secondQuizAttempt.questions.size() == 3
+        skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: 'quizRetakeIncorrectQuestions', value: 'false'],
+        ])
+
+        def thirdQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[3].answerOptions[1].id)
+        skillsService.completeQuizAttempt(quiz.quizId, thirdQuizAttempt.id).body
+
+        then:
+        quizAttempt.questions.size() == 4
+        secondQuizAttempt.questions.size() == 3
+        thirdQuizAttempt.questions.size() == 4
+
+    }
+
+    def "run quiz - retaking a failed quiz with a subset of questions"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 6, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+            [setting: QuizSettings.RetakeIncorrectQuestionsOnly.setting, value: 'true'],
+            [setting: QuizSettings.QuizLength.setting, value: '4'],
+        ])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        assert quizAttempt.questions.size() == 4
+        def firstResult = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[0].id)
+        def secondResult = skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+
+        then:
+        quizAttempt.questions.size() == 4
+        secondQuizAttempt.questions.size() == 2
+        quizAttempt.questions.find{ question -> question.id == secondQuizAttempt.questions[0].id } != null
+        quizAttempt.questions.find{ question -> question.id == secondQuizAttempt.questions[1].id } != null
+        !firstResult.passed
+        secondResult.passed
+    }
+
+    def "run quiz - retaking a failed quiz with a subset of questions and lower passing requirement"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 6, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RetakeIncorrectQuestionsOnly.setting, value: 'true'],
+                [setting: QuizSettings.QuizLength.setting, value: '4'],
+                [setting: QuizSettings.MinNumQuestionsToPass.setting, value: '3']
+        ])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        assert quizAttempt.questions.size() == 4
+        def firstResult = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[0].id)
+        def secondResult = skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+
+        then:
+        quizAttempt.questions.size() == 4
+        secondQuizAttempt.questions.size() == 2
+        quizAttempt.questions.find{ question -> question.id == secondQuizAttempt.questions[0].id } != null
+        quizAttempt.questions.find{ question -> question.id == secondQuizAttempt.questions[1].id } != null
+        !firstResult.passed
+        secondResult.passed
+    }
+
+    def "run quiz - retaking a failed quiz with a subset of questions and lower passing requirement with multiple failures"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 10, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RetakeIncorrectQuestionsOnly.setting, value: 'true'],
+                [setting: QuizSettings.QuizLength.setting, value: '6'],
+                [setting: QuizSettings.MinNumQuestionsToPass.setting, value: '4']
+        ])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[4].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[5].answerOptions[1].id)
+        assert quizAttempt.questions.size() == 6
+        def quizAttemptResult = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[3].answerOptions[1].id)
+        def secondQuizAttemptResult = skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+
+        def thirdQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[2].answerOptions[0].id)
+        def thirdAttemptResult = skillsService.completeQuizAttempt(quiz.quizId, thirdQuizAttempt.id).body
+
+        then:
+        quizAttempt.questions.size() == 6
+        secondQuizAttempt.questions.size() == 4
+        thirdQuizAttempt.questions.size() == 3
+        quizAttempt.questions.find{ question -> question.id == secondQuizAttempt.questions[0].id } != null
+        quizAttempt.questions.find{ question -> question.id == secondQuizAttempt.questions[1].id } != null
+        !quizAttemptResult.passed
+        !secondQuizAttemptResult.passed
+        thirdAttemptResult.passed
+    }
+
+    def "multiple takes does not use the incorrect questions when quiz is passed"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 4, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RetakeIncorrectQuestionsOnly.setting, value: 'true'],
+                [setting: QuizSettings.MinNumQuestionsToPass.setting, value: '1'],
+                [setting: QuizSettings.MultipleTakes.setting, value: 'true'],
+        ])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        assert quizAttempt.questions.size() == 4
+        def firstResult = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[2].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[3].answerOptions[1].id)
+        def secondResult = skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+
+        then:
+        quizAttempt.questions.size() == 4
+        secondQuizAttempt.questions.size() == 4
+        firstResult.passed
+        secondResult.passed
+
+    }
+
+    def "multiple takes does use the incorrect questions when quiz is failed"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 4, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RetakeIncorrectQuestionsOnly.setting, value: 'true'],
+                [setting: QuizSettings.MinNumQuestionsToPass.setting, value: '3'],
+                [setting: QuizSettings.MultipleTakes.setting, value: 'true'],
+        ])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert quizAttempt.questions.size() == 4
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        def firstResult = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert secondQuizAttempt.questions.size() == 2
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[0].id)
+        def secondResult = skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+
+        then:
+        quizAttempt.questions.size() == 4
+        secondQuizAttempt.questions.size() == 2
+        secondQuizAttempt.questions[0].id == quizAttempt.questions[2].id
+        secondQuizAttempt.questions[1].id == quizAttempt.questions[3].id
+        !firstResult.passed
+        secondResult.passed
+    }
+
+    def "multiple takes does not use the incorrect questions when quiz is failed then passed"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 4, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RetakeIncorrectQuestionsOnly.setting, value: 'true'],
+                [setting: QuizSettings.MinNumQuestionsToPass.setting, value: '3'],
+                [setting: QuizSettings.MultipleTakes.setting, value: 'true'],
+        ])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert quizAttempt.questions.size() == 4
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        def firstResult = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert !firstResult.passed
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert secondQuizAttempt.questions.size() == 2
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[0].id)
+        def secondResult = skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+        assert secondResult.passed
+
+        def thirdQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert thirdQuizAttempt.questions.size() == 4
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[2].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[3].answerOptions[0].id)
+        def thirdResult = skillsService.completeQuizAttempt(quiz.quizId, thirdQuizAttempt.id).body
+        assert thirdResult.passed
+
+        then:
+        quizAttempt.questions.size() == 4
+        secondQuizAttempt.questions.size() == 2
+        thirdQuizAttempt.questions.size() == 4
+    }
+
+    def "continuously fail quiz until finally passing"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 5, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RetakeIncorrectQuestionsOnly.setting, value: 'true'],
+                [setting: QuizSettings.MultipleTakes.setting, value: 'true'],
+        ])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert quizAttempt.questions.size() == 5
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[4].answerOptions[1].id)
+        def firstResult = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert !firstResult.passed
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert secondQuizAttempt.questions.size() == 4
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[3].answerOptions[1].id)
+        def secondResult = skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+        assert !secondResult.passed
+
+        def thirdQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert thirdQuizAttempt.questions.size() == 3
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[2].answerOptions[1].id)
+        def thirdResult = skillsService.completeQuizAttempt(quiz.quizId, thirdQuizAttempt.id).body
+        assert !thirdResult.passed
+
+        def fourthQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert fourthQuizAttempt.questions.size() == 2
+        skillsService.reportQuizAnswer(quiz.quizId, fourthQuizAttempt.id, fourthQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fourthQuizAttempt.id, fourthQuizAttempt.questions[1].answerOptions[1].id)
+        def fourthResult = skillsService.completeQuizAttempt(quiz.quizId, fourthQuizAttempt.id).body
+        assert !fourthResult.passed
+
+        def fifthQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert fifthQuizAttempt.questions.size() == 1
+        skillsService.reportQuizAnswer(quiz.quizId, fifthQuizAttempt.id, fifthQuizAttempt.questions[0].answerOptions[0].id)
+        def fifthResult = skillsService.completeQuizAttempt(quiz.quizId, fifthQuizAttempt.id).body
+
+        then:
+        fifthResult.passed
+    }
+
+    def "multiple failures prior to enabling setting"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 5, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert quizAttempt.questions.size() == 5
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[4].answerOptions[1].id)
+        def firstResult = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert !firstResult.passed
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert secondQuizAttempt.questions.size() == 5
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[3].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[4].answerOptions[1].id)
+        def secondResult = skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+        assert !secondResult.passed
+
+        def thirdQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert thirdQuizAttempt.questions.size() == 5
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[2].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[3].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[4].answerOptions[1].id)
+        def thirdResult = skillsService.completeQuizAttempt(quiz.quizId, thirdQuizAttempt.id).body
+        assert !thirdResult.passed
+
+        def fourthQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert fourthQuizAttempt.questions.size() == 5
+        skillsService.reportQuizAnswer(quiz.quizId, fourthQuizAttempt.id, fourthQuizAttempt.questions[0].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fourthQuizAttempt.id, fourthQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fourthQuizAttempt.id, fourthQuizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fourthQuizAttempt.id, fourthQuizAttempt.questions[3].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fourthQuizAttempt.id, fourthQuizAttempt.questions[4].answerOptions[1].id)
+        def fourthResult = skillsService.completeQuizAttempt(quiz.quizId, fourthQuizAttempt.id).body
+        assert !fourthResult.passed
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RetakeIncorrectQuestionsOnly.setting, value: 'true'],
+        ])
+
+        def fifthQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        assert fifthQuizAttempt.questions.size() == 4
+        skillsService.reportQuizAnswer(quiz.quizId, fifthQuizAttempt.id, fifthQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fifthQuizAttempt.id, fifthQuizAttempt.questions[1].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fifthQuizAttempt.id, fifthQuizAttempt.questions[2].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, fifthQuizAttempt.id, fifthQuizAttempt.questions[3].answerOptions[0].id)
+        def fifthResult = skillsService.completeQuizAttempt(quiz.quizId, fifthQuizAttempt.id).body
+
+        then:
+        fifthResult.passed
+    }
+}

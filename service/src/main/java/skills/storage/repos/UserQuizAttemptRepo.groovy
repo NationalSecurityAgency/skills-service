@@ -187,13 +187,19 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
     @Nullable
     @Query(value = '''SELECT attemptId, status, quizDefRefId, updated
             FROM (
-                     SELECT attetmpt.id as attemptId, attetmpt.status as status, attetmpt.quiz_definition_ref_id as quizDefRefId, attetmpt.updated as updated,
-                            ROW_NUMBER() OVER (PARTITION BY attetmpt.quiz_definition_ref_id ORDER BY attetmpt.updated DESC) AS rowNumber
-                     FROM user_quiz_attempt attetmpt
-                     WHERE attetmpt.quiz_definition_ref_id = any(:quizRefIds) AND attetmpt.user_id = :userId
+                     SELECT attempt.id as attemptId, attempt.status as status, attempt.quiz_definition_ref_id as quizDefRefId, attempt.updated as updated,
+                            ROW_NUMBER() OVER (PARTITION BY attempt.quiz_definition_ref_id ORDER BY attempt.updated DESC) AS rowNumber
+                     FROM user_quiz_attempt attempt
+                     WHERE attempt.quiz_definition_ref_id = any(:quizRefIds) AND attempt.user_id = :userId
                  ) sub
             WHERE rowNumber = 1''', nativeQuery = true)
     List<QuizToSkillDefRepo.QuizAttemptInfo> getLatestQuizAttemptsForUserByQuizIds(@Param("quizRefIds") Integer [] quizRefIds, @Param("userId") String userId)
+
+    @Nullable
+    @Query(value = '''SELECT attempt.id as attemptId, attempt.status as status, attempt.quiz_definition_ref_id as quizDefRefId, attempt.updated as updated
+                     FROM user_quiz_attempt attempt
+                     WHERE attempt.quiz_definition_ref_id = :quizRefId AND attempt.user_id = :userId ORDER BY attempt.updated DESC LIMIT 1''', nativeQuery = true)
+    QuizToSkillDefRepo.QuizAttemptInfo getLatestQuizAttemptForUserByQuizId(@Param("quizRefId") Integer quizRefId, @Param("userId") String userId)
 
 
     List<UserQuizAttempt> findByUserIdAndQuizDefinitionRefIdAndStatus(String userId, Integer quizRefId, QuizAttemptStatus status)

@@ -51,6 +51,10 @@ const canStartQuiz = computed(() => {
   return (!props.quizInfo.userQuizPassed || props.multipleTakes) && !allAttemptsExhausted.value && numQuestions.value > 0 && props.quizInfo.canStartQuiz;
 })
 const needsGrading = computed(() => props.quizInfo.needsGrading)
+const questionsToTake = computed(() => props.quizInfo.numIncorrectQuestions)
+const onlyIncorrect = computed(() => {
+  return props.quizInfo.onlyIncorrectQuestions && !props.quizInfo.userQuizPassed && props.quizInfo.userLastQuizAttemptDate
+})
 
 const cancel = () => {
   emit('cancelQuizAttempt');
@@ -94,13 +98,17 @@ const start = () => {
           </template>
         </Card>
 
+        <Message v-if="onlyIncorrect" data-cy="onlyIncorrectMessage">
+          You only need to retake the questions you did not answer correctly on your last attempt. You need to answer {{ questionsToTake }} question(s).
+        </Message>
+
         <div class="flex flex-wrap flex-column md:flex-row gap-4 pt-2">
             <Card class="skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2' } }" data-cy="quizInfoCard">
               <template #content>
                 <div class="px-3">
                   <i class="fas fa-question-circle text-primary" style="font-size: 1.3rem;" aria-hidden="true"></i>
                   <span class="text-color-secondary font-italic ml-1">Questions:</span>
-                  <span class="uppercase ml-1 font-bold" data-cy="numQuestions">{{ numQuestions }}</span>
+                  <span class="uppercase ml-1 font-bold" data-cy="numQuestions">{{ onlyIncorrect ? questionsToTake : numQuestions }}</span>
                 </div>
               </template>
             </Card>

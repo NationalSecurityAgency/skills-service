@@ -25,7 +25,8 @@ enum QuizSettings {
     QuizTimeLimit('quizTimeLimit'),
     MultipleTakes('quizMultipleTakes'),
     AlwaysShowCorrectAnswers('quizAlwaysShowCorrectAnswers'),
-    UserCommunityOnlyQuiz("user_community"),;
+    UserCommunityOnlyQuiz("user_community"),
+    RetakeIncorrectQuestionsOnly('quizRetakeIncorrectQuestions');
 
     String setting;
 
