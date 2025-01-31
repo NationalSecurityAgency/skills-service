@@ -398,4 +398,52 @@ describe('Projects Modal Management Tests', () => {
             .type('user1{enter}');
         cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '1');
     });
+
+    it('Edit project modal does not populate new project modal', function () {
+        cy.intercept('GET', '/app/projects')
+            .as('loadProjects');
+        cy.intercept('GET', '/app/userInfo')
+            .as('loadUserInfo');
+
+        cy.intercept('POST', '/app/projects/test')
+            .as('postNewProject');
+
+        cy.visit('/administrator/');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadProjects');
+        cy.get('[data-cy="inception-button"]').contains('Level');
+
+        cy.get('[data-cy="newProjectButton"]').click();
+        cy.get('[data-cy="projectName"]')
+            .type('test');
+        cy.get('[data-cy="projectName"]')
+            .type('{enter}');
+
+        cy.wait('@postNewProject');
+
+        cy.contains('test');
+
+        cy.get('[data-cy=editProjBtn]')
+            .focus();
+        cy.realPress('Enter');
+
+        cy.get('[data-cy="projectName"]')
+            .should('have.value', 'test');
+        cy.get('[data-cy="projectNameError"]')
+            .should('have.value', '');
+        cy.get('.p-dialog-header').contains('Editing Existing Project')
+        cy.get('[data-cy=closeDialogBtn]')
+            .click();
+
+        cy.get('[data-cy="newProjectButton"]').click();
+        cy.get('[data-cy="projectName"]').should('have.value', '');
+        cy.get('.p-dialog-header').contains('New Project')
+        cy.get('[data-cy="projectName"]')
+            .type('second project');
+        cy.get('[data-cy="projectName"]')
+            .type('{enter}');
+
+        cy.contains('test');
+        cy.contains('second project');
+    });
 });
