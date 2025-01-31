@@ -87,8 +87,7 @@ const handleOnInput = (event) => {
              variant="simple"
              size="small"
              :data-cy="`${name}Error`"
-             :id="`${name}Error`">{{ errorMessage || '' }}
-    </Message>
+             :id="`${name}Error`">{{ errorMessage || '' }}</Message>
   </div>
 </template>
 

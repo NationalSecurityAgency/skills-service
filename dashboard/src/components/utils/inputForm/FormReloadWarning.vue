@@ -31,12 +31,11 @@ const handleDiscard = () => {
 <template>
   <Message
     v-if="visible"
+    icon="fas fa-trash-restore"
     severity="error"
     :closable="false" :visible="visible">
-    <template #container>
-      <div class="flex w-full p-message-wrapper">
-        <div class="p-message-text" data-cy="contentRestoredMessage">
-          <i class="fas fa-trash-restore pr-2 text-xl" aria-hidden="true"></i>
+      <div class="flex items-center gap-4">
+        <div  data-cy="contentRestoredMessage">
           Form's values have been restored from backup.
         </div>
         <div class="flex-1 text-right">
@@ -50,7 +49,6 @@ const handleDiscard = () => {
           />
         </div>
       </div>
-    </template>
   </Message>
 </template>
 

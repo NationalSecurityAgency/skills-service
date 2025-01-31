@@ -407,7 +407,7 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
 
         // filter should clear paging params and display the first page
-        cy.get('[data-pc-section="pagebutton"]').contains('2').click();
+        cy.get('[data-pc-section="page"]').contains('2').click();
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
@@ -533,7 +533,7 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
 
         cy.get(`${tableSelector}`).contains('User').click();
-        cy.get('[data-pc-section="pagebutton"]').contains('2').click();
+        cy.get('[data-pc-section="page"]').contains('2').click();
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [

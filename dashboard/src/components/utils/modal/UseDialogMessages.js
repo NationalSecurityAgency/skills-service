@@ -62,8 +62,14 @@ export const useDialogMessages = () => {
       target: targetElement,
       message,
       header,
+      position: 'center',
+      icon: 'fas fa-exclamation-triangle',
       acceptLabel: acceptLabel,
+      acceptClass: 'p-button-success p-button-outlined',
+      acceptIcon: 'far fa-check-circle',
       rejectLabel: rejectLabel,
+      rejectClass: 'p-button-warn p-button-outlined',
+      rejectIcon: 'far fa-times-circle',
       onShow: () => {
         announcer.polite(message);
         onShowHandler.call()

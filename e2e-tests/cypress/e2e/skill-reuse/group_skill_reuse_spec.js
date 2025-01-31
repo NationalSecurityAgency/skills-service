@@ -234,7 +234,7 @@ describe('Group Skill Reuse Tests', () => {
         const tableSelector = '[data-cy="ChildRowSkillGroupDisplay_group12Subj2"] [data-cy="skillsTable"]';
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12Subj2"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
-        cy.get('[data-pc-section="overlay"] [data-pc-section="closeicon"]').click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group12Subj2"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 5,
@@ -303,7 +303,7 @@ describe('Group Skill Reuse Tests', () => {
         const tableSelector = '[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="skillsTable"]';
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]`).click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
-        cy.get('[data-pc-section="overlay"] [data-pc-section="closeicon"]').click()
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]`).click()
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 5,
@@ -320,7 +320,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]`).first().click()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
-        cy.get('[data-pc-section="overlay"] [data-pc-section="closeicon"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
 
         cy.validateTable('[data-cy="skillsTable"]', [
             [{
@@ -359,7 +359,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('this action will only remove the reused skill');
         cy.get('[data-cy="currentValidationText"]')
-            .type('Delete Me');
+            .type('Delete Me', {delay: 0});
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="noContent"]')
@@ -392,7 +392,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('Deleting this skill will also remove its reused copies');
         cy.get('[data-cy="currentValidationText"]')
-            .type('Delete Me');
+            .type('Delete Me', {delay: 0});
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
