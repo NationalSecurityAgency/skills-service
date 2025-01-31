@@ -237,6 +237,12 @@ const focusOnProjectCard = (projectId) => {
 const hasData = computed(() => {
   return !isLoading.value && projects.value && projects.value.length > 0
 })
+
+const createNewProject = () => {
+  newProject.value.isEdit = false
+  newProject.value.project = {}
+  newProject.value.show = true
+};
 </script>
 
 <template>
@@ -260,7 +266,7 @@ const hasData = computed(() => {
         icon="fas fa-plus-circle"
         id="newProjectBtn"
         ref="newProjButton"
-        @click="newProject.show = true"
+        @click="createNewProject"
         outlined class="bg-primary-reverse"
         size="small"
         :disabled="addProjectDisabled"
@@ -325,6 +331,7 @@ const hasData = computed(() => {
       :project="newProject.project"
       :is-edit="newProject.isEdit"
       @project-saved="saveProject"
+      @close="newProject.show = false"
       :enable-return-focus="true" />
     <pin-projects v-if="showSearchProjectModal" v-model="showSearchProjectModal"
                   @done="pinModalClosed" />
