@@ -17,7 +17,10 @@ package skills.intTests.community.quiz
 
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
@@ -27,13 +30,22 @@ import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
 import skills.quizLoading.QuizUserPreferences
 import skills.services.quiz.QuizQuestionType
+import skills.storage.model.SkillDef
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.auth.RoleName
+import skills.storage.repos.UserPerformedSkillRepo
 import skills.utils.GroovyToJavaByteUtils
+
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSkill
+import static skills.intTests.utils.SkillsFactory.createSubject
 
 @Slf4j
 class UserCommunityQuizAuthSpecs extends DefaultIntSpec {
     SkillsService rootSkillsService
+
+    @Autowired
+    UserPerformedSkillRepo performedSkillRepository
 
     def setup() {
         rootSkillsService = createRootSkillService()
@@ -522,6 +534,77 @@ class UserCommunityQuizAuthSpecs extends DefaultIntSpec {
         pristineDragonsUser.downloadAttachmentAsText(quizAttachment.href) == "Test is a test"
         println quizAttachment.href
         validateForbidden { allDragonsUser.downloadAttachment(quizAttachment.href) }
+    }
+
+    def "non-UC user is not given credit for non-UC quiz associated with UC protected skill"() {
+        when:
+        List<String> users = getRandomUsers(3)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService adminUser = createService(users[2])
+        rootSkillsService.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootSkillsService.saveUserTag(adminUser.userName, 'dragons', ['DivineDragon'])
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        adminUser.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
+        adminUser.createQuizQuestionDefs(questions)
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def subjP1 = createSubject(1, 1)
+
+        def skillWithQuizP1 = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuizP1.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuizP1.quizId = quiz.quizId
+        adminUser.createProjectAndSubjectAndSkills(p1, subjP1, [skillWithQuizP1])
+
+        def p2 = createProject(2)
+        p2.enableProtectedUserCommunity = false
+        def subjP2 = createSubject(2, 1)
+
+        def skillWithQuizP2 = createSkill(2, 1, 1, 1, 1, 480, 200)
+        skillWithQuizP2.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuizP2.quizId = quiz.quizId
+        adminUser.createProjectAndSubjectAndSkills(p2, subjP2, [skillWithQuizP2])
+
+        def runQuiz = { SkillsService userService, boolean pass ->
+            def quizAttempt = userService.startQuizAttempt(quiz.quizId).body
+            int answerIndex = pass ? 0 : 1
+            userService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[answerIndex].id)
+            return userService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        }
+        def allDragonsUserAttempt = runQuiz(allDragonsUser, true)
+        def pristineDragonAttempt = runQuiz(pristineDragonsUser, true)
+
+        def allDragonsUserPerformedSkillsP1 = getPerformedSkillsForUser(allDragonsUser.userName, p1.projectId)
+        def pristineDragonsUserPerformedSkillsP1 = getPerformedSkillsForUser(pristineDragonsUser.userName, p1.projectId)
+
+        def allDragonsUserPerformedSkillsP2 = getPerformedSkillsForUser(allDragonsUser.userName, p2.projectId)
+        def pristineDragonsUserPerformedSkillsP2 = getPerformedSkillsForUser(pristineDragonsUser.userName, p2.projectId)
+
+        then:
+        allDragonsUserAttempt.passed
+        pristineDragonAttempt.passed
+
+        !allDragonsUserPerformedSkillsP1
+        pristineDragonsUserPerformedSkillsP1
+        pristineDragonsUserPerformedSkillsP1.size() == 1
+        pristineDragonsUserPerformedSkillsP1[0].skillId == skillWithQuizP1.skillId
+
+        allDragonsUserPerformedSkillsP2
+        allDragonsUserPerformedSkillsP2.size() == 1
+        allDragonsUserPerformedSkillsP2
+        pristineDragonsUserPerformedSkillsP2[0].skillId == skillWithQuizP1.skillId
+        pristineDragonsUserPerformedSkillsP2.size() == 1
+        pristineDragonsUserPerformedSkillsP2[0].skillId == skillWithQuizP1.skillId
+    }
+
+    def getPerformedSkillsForUser(String userId, String projectId) {
+        PageRequest allPlease = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Direction.DESC, "performedOn"))
+        List<UserPerformedSkillRepo.PerformedSkillQRes> performedSkills = performedSkillRepository.findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, '', allPlease)
+        return performedSkills
     }
 
     private static boolean validateForbidden(Closure c) {
