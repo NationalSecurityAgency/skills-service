@@ -305,12 +305,15 @@ const reportTestRunToBackend = () => {
         const numTotal = quizInfo.value.quizLength;
         const numCorrect = numTotal - gradedRes.numQuestionsGotWrong;
         const percentCorrect = Math.trunc(((numCorrect * 100) / numTotal));
+        const minNumQuestionsToPass = quizInfo.value.minNumQuestionsToPass;
+        const numQuestionsGotWrong = gradedRes.numQuestionsGotWrong;
+        const missedBy = minNumQuestionsToPass > 0 ? minNumQuestionsToPass - numCorrect : numQuestionsGotWrong;
         quizResult.value = {
           gradedRes,
           numCorrect,
           numTotal,
           percentCorrect,
-          missedBy: gradedRes.numQuestionsGotWrong,
+          missedBy,
         };
 
         if (gradedRes.gradedQuestions && gradedRes.gradedQuestions.length > 0) {
