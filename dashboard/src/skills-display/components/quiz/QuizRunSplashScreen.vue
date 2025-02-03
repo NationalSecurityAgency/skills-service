@@ -47,16 +47,22 @@ const allAttemptsExhausted = computed(() => {
 const minNumQuestionsToPass = computed(() => {
   return props.quizInfo.minNumQuestionsToPass > 0 ? props.quizInfo.minNumQuestionsToPass : numQuestions.value;
 })
+
 const canStartQuiz = computed(() => {
   return (!props.quizInfo.userQuizPassed || props.multipleTakes) && !allAttemptsExhausted.value && numQuestions.value > 0 && props.quizInfo.canStartQuiz;
 })
 const needsGrading = computed(() => props.quizInfo.needsGrading)
 const questionsToTake = computed(() => props.quizInfo.numIncorrectQuestions)
-
+const numberCorrect = computed(() => {
+  return numQuestions.value - questionsToTake.value;
+})
+const remainingQuestions = computed(() => {
+  return minNumQuestionsToPass.value - numberCorrect.value
+});
 const onlyIncorrect = computed(() => {
   return props.quizInfo.onlyIncorrectQuestions && ((!props.quizInfo.userQuizPassed && props.quizInfo.userLastQuizAttemptDate) || props.quizInfo.multipleTakes)
 })
-console.log(props.quizInfo)
+
 const cancel = () => {
   emit('cancelQuizAttempt');
 }
@@ -101,8 +107,8 @@ const start = () => {
 
         <Message v-if="onlyIncorrect" data-cy="onlyIncorrectMessage">
           You only need to retake the questions you did not answer correctly on your last attempt.
-          <span v-if="!quizInfo.userQuizPassed">You've already answered <Tag severity="success">{{ numQuestions - questionsToTake }}</Tag> correctly, so you need to answer <Tag severity="warning">{{ minNumQuestionsToPass - questionsToTake }}</Tag> question(s) to pass.</span>
-          <span v-else>You need to answer <Tag severity="warning">{{ minNumQuestionsToPass - questionsToTake }}</Tag> question(s) to pass.</span>
+          <span v-if="!quizInfo.userQuizPassed">You've already answered <Tag severity="success">{{ numberCorrect }}</Tag> correctly, so you need to answer <Tag severity="warning">{{ remainingQuestions }}</Tag> question(s) to pass.</span>
+          <span v-else>You need to answer <Tag severity="warning">{{ remainingQuestions }}</Tag> question(s) to pass.</span>
         </Message>
 
         <div class="flex flex-wrap flex-column md:flex-row gap-4 pt-2">

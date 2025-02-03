@@ -1602,7 +1602,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="runQuizAgainBtn"]').click()
 
         cy.get('[data-cy="onlyIncorrectMessage"]').should('exist')
-        cy.get('[data-cy="onlyIncorrectMessage"]').contains('You need to answer 1 question(s)')
+        cy.get('[data-cy="onlyIncorrectMessage"]').contains('You only need to retake the questions you did not answer correctly on your last attempt. You\'ve already answered 2 correctly, so you need to answer 1 question(s) to pass.')
 
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"]').should('exist');
@@ -1612,6 +1612,51 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_1"]').contains('This is a question # 3')
 
         cy.get('[data-cy="question_1"] [data-cy="answer_3"]').click()
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+    });
+
+    it('Take quiz multiple times when limiting to only failed questions is configured with subset of questions', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+        cy.createQuizQuestionDef(1, 4);
+        cy.setLimitToIncorrectQuestions(1, true)
+        cy.setMinNumQuestionsToPass(1, 2)
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('Must get 2 / 4 questions')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('50%')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_4"] [data-cy="answer_2"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="runQuizAgainBtn"]').click()
+
+        cy.get('[data-cy="onlyIncorrectMessage"]').should('exist')
+        cy.get('[data-cy="onlyIncorrectMessage"]').contains('You only need to retake the questions you did not answer correctly on your last attempt. You\'ve already answered 1 correctly, so you need to answer 1 question(s) to pass.')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"]').should('exist');
+        cy.get('[data-cy="question_2"]').should('exist');
+        cy.get('[data-cy="question_3"]').should('exist');
+        cy.get('[data-cy="question_4"]').should('not.exist');
+
+        cy.get('[data-cy="question_1"]').contains('This is a question # 2')
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
     });
