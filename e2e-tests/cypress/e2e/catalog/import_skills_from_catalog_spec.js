@@ -35,7 +35,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="closeButton"]')
             .should('not.exist');
 
-        cy.get('[data-pc-section="closebutton"]')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]')
             .click();
         cy.get('[data-cy="catalogSkillImportModal-NoData"]')
             .should('not.exist');
@@ -63,7 +63,7 @@ describe('Import skills from Catalog Tests', () => {
             .should('not.exist');
         cy.get('[data-cy="closeButton"]')
             .should('not.exist');
-        cy.get('[data-pc-section="closebutton"]')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]')
           .click();
         cy.get('[data-cy="catalogSkillImportModal-NoData"]')
             .should('not.exist');
@@ -107,7 +107,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="importedBadge-skill1"]');
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Catalog"]').click()
-        cy.get('[data-pc-section="closebutton"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.validateTable('[data-cy="skillsTable"]', [
             [{
                 colIndex: 5,
@@ -354,7 +354,7 @@ describe('Import skills from Catalog Tests', () => {
             .click();
         cy.get('[data-cy="catalogSkillImportModal-NoData"]')
             .contains('Nothing Available for Import');
-        cy.get('[data-pc-section="closebutton"]')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]')
             .click();
         cy.get('[data-cy="catalogSkillImportModal-NoData"]')
             .should('not.exist');

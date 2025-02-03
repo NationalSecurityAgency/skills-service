@@ -99,7 +99,7 @@ describe('Client Display Survey Tests', () => {
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
-        cy.get('[data-cy="question_4"] .p-rating-item').first().click()
+        cy.get('[data-cy="question_4"] [data-pc-name="rating"] [data-pc-section="option"]').first().click()
 
         cy.get('[data-cy="completeQuizBtn"]').click()
         cy.get('[data-cy="surveyCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by completing the survey')
@@ -248,7 +248,7 @@ describe('Client Display Survey Tests', () => {
             cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
 
             cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
-            cy.get('[data-cy="question_4"] .p-rating-item').first().click()
+            cy.get('[data-cy="question_4"] [data-pc-name="rating"] [data-pc-section="option"]').first().click()
 
             cy.wait('@reportAnswer')
             cy.wait('@reportAnswer')
@@ -427,7 +427,7 @@ describe('Client Display Survey Tests', () => {
             cy.get('[data-cy="questions[2].quizAnswersError"]').contains('At least 1 choice must be selected')
             cy.get('[data-cy="questions[3].answerRatingError"]').contains('A rating must be selected')
 
-            cy.get('[data-cy="question_4"] .p-rating-item').first().click()
+            cy.get('[data-cy="question_4"] [data-pc-name="rating"] [data-pc-section="option"]').first().click()
             cy.get('[data-cy="questions[3].answerRatingError"]').should('not.exist')
             cy.get('[data-cy="questions[2].quizAnswersError"]').contains('At least 1 choice must be selected')
             cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').should('not.be.visible')

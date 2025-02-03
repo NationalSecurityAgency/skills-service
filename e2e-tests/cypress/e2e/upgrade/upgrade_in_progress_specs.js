@@ -68,7 +68,7 @@ describe('Show warning when upgrade is in progress', () => {
     cy.wait('@loadGroupProjects');
     cy.get('[data-cy="pageHeaderStat_Projects"] [data-cy="statValue"]').should('have.text', '0');
     cy.get('[data-cy="noContent"]')
-    cy.get('span.p-dropdown-label.p-inputtext').contains('Search available projects...').should('be.visible')
+    cy.get('[data-cy="projectSelector"] [data-pc-section="label"]').contains('Search available projects...').should('be.visible')
     cy.get('[data-cy="projectSelector"]').click()
     cy.get('[data-cy="availableProjectSelection-proj1"]').click()
 
@@ -89,7 +89,7 @@ describe('Show warning when upgrade is in progress', () => {
     cy.wait('@loadGroupQuizzes');
     cy.get('[data-cy="pageHeaderStat_Quizzes and Surveys"] [data-cy="statValue"]').should('have.text', '0');
     cy.get('[data-cy="noContent"]')
-    cy.get('span.p-dropdown-label.p-inputtext').contains('Search available quizzes and surveys...').should('be.visible')
+    cy.get('[data-cy="quizSelector"] [data-pc-section="label"]').contains('Search available quizzes and surveys...').should('be.visible')
     cy.get('[data-cy="quizSelector"]').click()
     cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
 
