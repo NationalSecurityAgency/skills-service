@@ -52,10 +52,11 @@ const canStartQuiz = computed(() => {
 })
 const needsGrading = computed(() => props.quizInfo.needsGrading)
 const questionsToTake = computed(() => props.quizInfo.numIncorrectQuestions)
-const onlyIncorrect = computed(() => {
-  return props.quizInfo.onlyIncorrectQuestions && !props.quizInfo.userQuizPassed && props.quizInfo.userLastQuizAttemptDate
-})
 
+const onlyIncorrect = computed(() => {
+  return props.quizInfo.onlyIncorrectQuestions && ((!props.quizInfo.userQuizPassed && props.quizInfo.userLastQuizAttemptDate) || props.quizInfo.multipleTakes)
+})
+console.log(props.quizInfo)
 const cancel = () => {
   emit('cancelQuizAttempt');
 }
@@ -99,7 +100,9 @@ const start = () => {
         </Card>
 
         <Message v-if="onlyIncorrect" data-cy="onlyIncorrectMessage">
-          You only need to retake the questions you did not answer correctly on your last attempt. You need to answer {{ questionsToTake }} question(s).
+          You only need to retake the questions you did not answer correctly on your last attempt.
+          <span v-if="!quizInfo.userQuizPassed">You've already answered <Tag severity="success">{{ numQuestions - questionsToTake }}</Tag> correctly, so you need to answer <Tag severity="warning">{{ minNumQuestionsToPass - questionsToTake }}</Tag> question(s) to pass.</span>
+          <span v-else>You need to answer <Tag severity="warning">{{ minNumQuestionsToPass - questionsToTake }}</Tag> question(s) to pass.</span>
         </Message>
 
         <div class="flex flex-wrap flex-column md:flex-row gap-4 pt-2">
