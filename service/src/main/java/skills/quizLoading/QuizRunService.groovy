@@ -856,7 +856,7 @@ class QuizRunService {
     }
 
     private Boolean userCanReportSkill(String userId, String projectId) {
-        return userCommunityService.isUserCommunityMember(userId) || !userCommunityService.isUserCommunityOnlyProject(projectId)
+        return !userCommunityService.isUserCommunityOnlyProject(projectId) || userCommunityService.isUserCommunityMember(userId)
     }
 
     @Transactional
