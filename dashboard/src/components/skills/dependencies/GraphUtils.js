@@ -28,7 +28,20 @@ export default {
                 <span style="font-style: italic; color: #444444">ID:</span> ${skillItem.skillId}<br/>`;
     if(skillItem.type === 'Skill') {
       html += `<span style="font-style: italic; color: #444444">Point Increment:</span> ${skillItem.pointIncrement}<br/>
-      <span style="font-style: italic; color: #444444">Total Points:</span> ${skillItem.totalPoints}`;
+      <span style="font-style: italic; color: #444444">Total Points:</span> ${skillItem.totalPoints}<br/>`;
+    }
+    if(skillItem.type === 'Badge') {
+      if(skillItem.containedSkills && skillItem.containedSkills.length > 0) {
+        const skillNames = skillItem.containedSkills.map((it) => it.name);
+        html += `<span style="font-style: italic; color: #444444">Skills:</span>`
+        for (const [index, skillName] of skillNames.entries()) {
+          html += `<br/><span style="padding: 1rem;">${skillName}</span>`
+          if (index >= 9) {
+            html += `<br/><span style="padding: 1rem;">and ${skillNames.length-(index+1)} more skills...</span>`
+            break
+          }
+        }
+      }
     }
     container.innerHTML = html;
     return container;
