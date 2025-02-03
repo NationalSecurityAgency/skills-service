@@ -890,7 +890,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="percentCorrectInfoCard"] [data-cy="percentCorrect"]').should('have.text', '33%')
         cy.get('[data-cy="percentCorrectInfoCard"] [data-cy="percentToPass"]').should('have.text', '66%')
         cy.get('[data-cy="numCorrectInfoCard"] [data-cy="numCorrect"]').contains('1 out of 3')
-        cy.get('[data-cy="numCorrectInfoCard"] [data-cy="subTitleMsg"]').contains('Missed by 2 questions')
+        cy.get('[data-cy="numCorrectInfoCard"] [data-cy="subTitleMsg"]').contains('Missed by 1 question')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"] .fa-infinity')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Unlimited Attempts')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('1 attempt so far')

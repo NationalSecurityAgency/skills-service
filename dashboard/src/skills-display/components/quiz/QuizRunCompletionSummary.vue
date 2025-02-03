@@ -59,8 +59,8 @@ const runAgain = () => {
       <div class="mb-1 mt-4 text-3xl">
         <span class="font-bold text-success mb-2 skills-page-title-text-color">{{ quizInfo.name }}</span>
         <div v-if="!needsGrading" class="text-3xl inline-block ml-2">
-          <Tag v-if="!quizResult.gradedRes.passed" class="uppercase text-2xl" severity="warning" data-cy="quizFailed"><i class="far fa-times-circle" aria-hidden="true"></i> Failed</Tag>
-          <Tag v-if="quizResult.gradedRes.passed" class="uppercase text-2xl" severity="success" data-cy="quizPassed"><i class="fas fa-check-double" aria-hidden="true"></i> Passed</Tag>
+          <Tag v-if="!quizResult.gradedRes.passed" class="uppercase text-2xl" severity="warning" data-cy="quizFailed"><i class="far fa-times-circle mr-1" aria-hidden="true"></i>Failed</Tag>
+          <Tag v-if="quizResult.gradedRes.passed" class="uppercase text-2xl" severity="success" data-cy="quizPassed"><i class="fas fa-check-double mr-1" aria-hidden="true"></i>Passed</Tag>
         </div>
       </div>
       
