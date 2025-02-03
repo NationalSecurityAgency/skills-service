@@ -500,7 +500,7 @@ defineExpose({
               aria-label="User Roles"
               striped-rows
               paginator
-              :pt:paginator:paginatorWrapper:aria-label='`${title} Paginator`'
+              :pt:pcPaginator:paginatorContainer:aria-label='`${title} Paginator`'
               :row-class="showExpansion"
               v-model:expandedRows="expandedRows"
               v-model:sort-field="sortInfo.sortBy"

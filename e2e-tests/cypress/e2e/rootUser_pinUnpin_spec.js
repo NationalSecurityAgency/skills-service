@@ -279,7 +279,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.contains('Pin Projects');
                 cy.get('[data-cy=pinProjectsLoadAllButton]')
                     .click();
-                cy.get('[data-pc-section="headertitle"]').contains('Name').click()
+                cy.get('[data-pc-section="columnheadercontent"]').contains('Name').click()
                 cy.wait(1000)
                 cy.get('[data-cy=skillsBTableTotalRows]')
                     .contains('5');
