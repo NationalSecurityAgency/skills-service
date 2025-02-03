@@ -57,7 +57,11 @@ const numberCorrect = computed(() => {
   return numQuestions.value - questionsToTake.value;
 })
 const remainingQuestions = computed(() => {
-  return minNumQuestionsToPass.value - numberCorrect.value
+  if(props.quizInfo.multipleTakes && props.quizInfo.userQuizPassed) {
+    return minNumQuestionsToPass.value - questionsToTake.value
+  } else {
+    return minNumQuestionsToPass.value - numberCorrect.value
+  }
 });
 const onlyIncorrect = computed(() => {
   return props.quizInfo.onlyIncorrectQuestions && ((!props.quizInfo.userQuizPassed && props.quizInfo.userLastQuizAttemptDate) || props.quizInfo.multipleTakes)
