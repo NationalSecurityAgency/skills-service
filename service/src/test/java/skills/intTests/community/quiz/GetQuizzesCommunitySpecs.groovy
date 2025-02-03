@@ -15,7 +15,6 @@
  */
 package skills.intTests.community.quiz
 
-
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.transaction.PlatformTransactionManager
@@ -23,12 +22,9 @@ import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
-import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserTagRepo
-
-import static skills.intTests.utils.SkillsFactory.createProject
 
 class GetQuizzesCommunitySpecs extends DefaultIntSpec {
 
@@ -142,6 +138,24 @@ class GetQuizzesCommunitySpecs extends DefaultIntSpec {
 
         q2Def.quizId == q2.quizId
         q2Def.userCommunity == null
+    }
+
+    def "change quiz name with UC enabled"() {
+        SkillsService pristineDragonsUser = createService(getRandomUsers(1))
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        def q1CreatedRes = pristineDragonsUser.createQuizDef(q1)
+
+        when:
+        q1.name = 'new name'
+        def q1UpdatedRes = pristineDragonsUser.createQuizDef(q1, q1.quizId)
+
+        then:
+        q1CreatedRes.body.name == 'Test Quiz #1'
+        q1UpdatedRes.body.name == 'new name'
     }
 
     private static boolean validateForbidden(Closure c) {

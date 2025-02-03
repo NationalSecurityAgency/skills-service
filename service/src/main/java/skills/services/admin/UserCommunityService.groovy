@@ -101,10 +101,12 @@ class UserCommunityService {
         this.restrictedUserCommunityName = uiConfigProperties.ui.userCommunityRestrictedDescriptor;
     }
 
+    @Transactional(readOnly = true)
     Boolean isUserCommunityConfigured() {
         return this.userCommunityUserTagKey && this.userCommunityUserTagValue
     }
 
+    @Transactional(readOnly = true)
     Boolean isUserCommunityMember(String userId) {
         Boolean belongsToUserCommunity = false
         if (isUserCommunityConfigured() && StringUtils.isNotBlank(userId)) {
@@ -114,6 +116,7 @@ class UserCommunityService {
         return belongsToUserCommunity as Boolean
     }
 
+    @Transactional(readOnly = true)
     EnableUserCommunityValidationRes validateAdminGroupForCommunity(String adminGroupId) {
         EnableUserCommunityValidationRes res = new EnableUserCommunityValidationRes(isAllowed: true, unmetRequirements: [])
         userRoleRepo.findProjectIdsByAdminGroupId(adminGroupId).each { projectId ->
@@ -135,6 +138,7 @@ class UserCommunityService {
         return res
     }
 
+    @Transactional(readOnly = true)
     EnableUserCommunityValidationRes validateProjectForCommunity(String projId, EnableUserCommunityValidationRes existingValidationRes = null) {
         EnableUserCommunityValidationRes res = existingValidationRes ? existingValidationRes : new EnableUserCommunityValidationRes(isAllowed: true, unmetRequirements: [])
 
@@ -167,6 +171,7 @@ class UserCommunityService {
         return res;
     }
 
+    @Transactional(readOnly = true)
     EnableUserCommunityValidationRes validateQuizForCommunity(String quizId, EnableUserCommunityValidationRes existingValidationRes = null) {
         EnableUserCommunityValidationRes res = existingValidationRes ? existingValidationRes : new EnableUserCommunityValidationRes(isAllowed: true, unmetRequirements: [])
 

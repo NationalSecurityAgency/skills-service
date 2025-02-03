@@ -325,7 +325,7 @@ class QuizDefService {
             throw new SkillQuizException(customValidationResult.msg, quizDefWithDescription.quizId, ErrorCode.BadParam)
         }
 
-        QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)
+        QuizDefWithDescription updatedDef = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)
         return convert(updatedDef)
     }
 
