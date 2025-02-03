@@ -17,6 +17,7 @@ limitations under the License.
 import { onMounted, ref, computed } from 'vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import { useThemesHelper } from "@/components/header/UseThemesHelper.js";
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import { useRoute } from 'vue-router'
@@ -29,6 +30,7 @@ const skillsDisplayService = useSkillsDisplayService()
 const route = useRoute()
 const attributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
+const themeHelper = useThemesHelper()
 const animationEnded = ref(false)
 const numFormat = useNumberFormat()
 
@@ -115,6 +117,9 @@ const chartOptions = ref({
     toolbar: {
       offsetY: -38
     }
+  },
+  tooltip: {
+    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
   },
   annotations: {
     points: []
