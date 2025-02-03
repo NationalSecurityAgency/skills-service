@@ -810,11 +810,12 @@ class QuizRunService {
         List<SkillEventResult> res = []
         if (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED) {
             List<QuizToSkillDefRepo.ProjectIdAndSkillId> skills = quizToSkillDefRepo.getSkillsForQuiz(quizDefId)
-            if (skills){
+            if (skills) {
                 skills.each {
-                    SkillEventResult skillEventResult = skillEventsService.reportSkill(it.projectId, it.skillId, userQuizAttempt.userId, false, userQuizAttempt.completed,
-                            new SkillEventsService.SkillApprovalParams(disableChecks: true, isFromPassingQuiz: true))
-                    res.add(skillEventResult)
+                    SkillEventResult skillEventResult = reportSkill(it.projectId, it.skillId, userQuizAttempt.userId, userQuizAttempt.completed)
+                    if (skillEventResult) {
+                        res.add(skillEventResult)
+                    }
                 }
             }
         }
@@ -837,12 +838,25 @@ class QuizRunService {
         dependantQuizSkillIds.each { quizSkill ->
             UserQuizAttempt passedQuizAttempt = findPassedUserQuizAttemptForSkillAndUser(quizSkill.skillRefId, userId)
             if (passedQuizAttempt) {
-                SkillEventResult skillEventResult = skillEventsService.reportSkill(
-                        quizSkill.projectId, quizSkill.skillId, passedQuizAttempt.userId, false, passedQuizAttempt.completed,
-                        new SkillEventsService.SkillApprovalParams(disableChecks: true, isFromPassingQuiz: true))
-                res.completed.addAll(skillEventResult.completed)
+                SkillEventResult skillEventResult = reportSkill(quizSkill.projectId, quizSkill.skillId, passedQuizAttempt.userId, passedQuizAttempt.completed)
+                if (skillEventResult) {
+                    res.completed.addAll(skillEventResult.completed)
+                }
             }
         }
+    }
+
+    private SkillEventResult reportSkill(String projectId, String skillId, String userId, Date incomingSkillDate) {
+        SkillEventResult skillEventResult = null
+        if (userCanReportSkill(userId, projectId)) {
+            skillEventResult = skillEventsService.reportSkill(projectId, skillId, userId, false, incomingSkillDate,
+                    new SkillEventsService.SkillApprovalParams(disableChecks: true, isFromPassingQuiz: true))
+        }
+        return skillEventResult
+    }
+
+    private Boolean userCanReportSkill(String userId, String projectId) {
+        return !userCommunityService.isUserCommunityOnlyProject(projectId) || userCommunityService.isUserCommunityMember(userId)
     }
 
     @Transactional
