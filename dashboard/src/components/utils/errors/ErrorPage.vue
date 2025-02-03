@@ -38,7 +38,7 @@ const goHomeAndRefresh = () => {
             </div>
           </div>
         </div>
-        <div class="text-2xl text-primary">{{ errorState.title }}</div>
+        <div class="text-2xl text-primary" data-cy="errorTitle">{{ errorState.title }}</div>
 
         <p v-if="errorState.explanation" data-cy="errExplanation">
           {{ errorState.explanation }}

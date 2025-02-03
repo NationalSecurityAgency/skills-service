@@ -21,6 +21,8 @@ import skills.auth.inviteOnly.InviteOnlyAccessDeniedException
 class AccessDeniedExplanationGenerator {
     public static final String PRIVATE_PROJECT_CODE = "private_project"
     public static final String ACCESS_DENIED_PROJECT_NOT_FOUND = "project_permission"
+    public static final String ACCESS_DENIED_QUIZ_NOT_FOUND = "quiz_permission"
+    public static final String ACCESS_DENIED_ADMIN_GROUP_NOT_FOUND = "admin_group_permission"
     public static final String GLOBAL_BADGE_NOT_FOUND = "global_badge_permission"
 
     AccessDeniedExplanation generateExplanation(String requestPath, AccessDeniedException accessDeniedException) {
@@ -33,6 +35,10 @@ class AccessDeniedExplanationGenerator {
             return new AccessDeniedExplanation(errorCode: ACCESS_DENIED_PROJECT_NOT_FOUND, explanation: "You do not have permission to view/manage this Project OR this Project does not exist")
         } else if (requestPath?.startsWith("/supervisor/badges")) {
             return new AccessDeniedExplanation(errorCode: GLOBAL_BADGE_NOT_FOUND, explanation: "You do not have permission to view/manage this Global Badge OR this Global Badge does not exist")
+        } else if (requestPath?.startsWith("/admin/quiz-definitions")) {
+            return new AccessDeniedExplanation(errorCode: ACCESS_DENIED_QUIZ_NOT_FOUND, explanation: "You do not have permission to view/manage this Quiz OR this Quiz does not exist")
+        } else if (requestPath?.startsWith("/admin/admin-group-definitions")) {
+            return new AccessDeniedExplanation(errorCode: ACCESS_DENIED_ADMIN_GROUP_NOT_FOUND, explanation: "You do not have permission to view/manage this Admin Group OR this Admin Group does not exist")
         } else {
             return null;
         }
