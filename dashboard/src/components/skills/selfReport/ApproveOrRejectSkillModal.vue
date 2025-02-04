@@ -85,7 +85,7 @@ const done = () => {
                          :header="modalTitle">
     <div id="rejectionApprovalTitleInModal" class="flex gap-2" :data-cy="isReject ? 'rejectionTitle' : 'approvalTitle'">
       <div class="flex text-center">
-        <i class="far fa-thumbs-down text-warning" style="font-size: 3rem"/>
+        <i :class="`far ${ isReject ? 'fa-thumbs-down' : 'fa-thumbs-up'} text-warning`" style="font-size: 3rem"/>
       </div>
       <div class="flex flex-1">
         <p class="h6">This will {{ isReject ? 'reject' : 'approve' }} user's request(s) to get points. Users will be notified and you can provide an optional message below.</p>
