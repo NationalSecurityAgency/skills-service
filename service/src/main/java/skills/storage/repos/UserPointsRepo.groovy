@@ -47,6 +47,17 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     toDef.copied_from_skill_ref = up.skill_ref_id and
                     toDef.copied_from_skill_ref = fromDef.id and
                     up.skill_ref_id in (:fromSkillRefIds)
+                   and (not exists(
+                        select 1
+                        from settings s
+                        where s.project_id = toDef.project_id
+                          and s.setting = 'user_community' and s.value = 'true'
+                       ) or (exists(
+                        select 1
+                        from user_tags ut
+                        where ut.user_id = up.user_id
+                          and ut.key = :userCommunityUserTagKey and ut.value = :userCommunityUserTagValue
+                       )))     
                     and not exists(
                         select 1
                         from user_points innerUP
@@ -55,7 +66,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                           and toDef.skill_id = innerUP.skill_id
                     )
                 ''', nativeQuery = true)
-    void copySkillUserPointsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
+    void copySkillUserPointsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds, @Param('userCommunityUserTagKey') String userCommunityUserTagKey, @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
 
     @Modifying
     @Query(value = '''INSERT INTO user_points(user_id, project_id, skill_id, skill_ref_id, points)
@@ -95,13 +106,24 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
               and skill.id = :skillRefId
               and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
               and q_to_s.skill_ref_id = skill.id
+              and (not exists(
+                    select 1
+                    from settings s
+                    where s.project_id = skill.project_id
+                      and s.setting = 'user_community' and s.value = 'true'
+                   ) or (exists(
+                    select 1
+                    from user_tags ut
+                    where ut.user_id = q_attempt.user_id
+                      and ut.key = :userCommunityUserTagKey and ut.value = :userCommunityUserTagValue
+                   )))     
               and not exists(
                     select 1
                     from user_points innerUP
                     where skill.id = innerUP.skill_ref_id
                       and q_attempt.user_id = innerUP.user_id
                 )''', nativeQuery = true)
-    void createSkillUserPointsFromPassedQuizzes(@Param('quizRefId') Integer quizRefId, @Param('skillRefId') Integer skillRefId)
+    void createSkillUserPointsFromPassedQuizzes(@Param('quizRefId') Integer quizRefId, @Param('skillRefId') Integer skillRefId, @Param('userCommunityUserTagKey') String userCommunityUserTagKey, @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
 
     @Modifying
     @Query(value = '''insert into user_points (user_id, project_id, skill_ref_id, skill_id, points, created, updated)
@@ -119,13 +141,24 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
               and skill.project_id = :projectId
               and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
               and q_to_s.skill_ref_id = skill.id
+              and (not exists(
+                    select 1
+                    from settings s
+                    where s.project_id = skill.project_id
+                      and s.setting = 'user_community' and s.value = 'true'
+                   ) or (exists(
+                    select 1
+                    from user_tags ut
+                    where ut.user_id = q_attempt.user_id
+                      and ut.key = :userCommunityUserTagKey and ut.value = :userCommunityUserTagValue
+                   )))
               and not exists(
                     select 1
                     from user_points innerUP
                     where skill.id = innerUP.skill_ref_id
                       and q_attempt.user_id = innerUP.user_id
                 )''', nativeQuery = true)
-    void createSkillUserPointsFromPassedQuizzesForProject(@Param('projectId') String projectId)
+    void createSkillUserPointsFromPassedQuizzesForProject(@Param('projectId') String projectId, @Param('userCommunityUserTagKey') String userCommunityUserTagKey, @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
 
     @Modifying
     @Query(value = '''insert into user_performed_skill (user_id, project_id, skill_ref_id, skill_id, performed_on)
@@ -143,13 +176,24 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
               and skill.id = :skillRefId
               and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
               and q_to_s.skill_ref_id = skill.id
+              and (not exists(
+                    select 1
+                    from settings s
+                    where s.project_id = skill.project_id
+                      and s.setting = 'user_community' and s.value = 'true'
+                   ) or (exists(
+                    select 1
+                    from user_tags ut
+                    where ut.user_id = q_attempt.user_id
+                      and ut.key = :userCommunityUserTagKey and ut.value = :userCommunityUserTagValue
+                   )))
               and not exists(
                     select 1
                     from user_performed_skill innerUP
                     where skill.id = innerUP.skill_ref_id
                       and q_attempt.user_id = innerUP.user_id
                 );''', nativeQuery = true)
-    void createUserPerformedEntriesFromPassedQuizzes(@Param('quizRefId') Integer quizRefId, @Param('skillRefId') Integer skillRefId)
+    void createUserPerformedEntriesFromPassedQuizzes(@Param('quizRefId') Integer quizRefId, @Param('skillRefId') Integer skillRefId, @Param('userCommunityUserTagKey') String userCommunityUserTagKey, @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
 
     @Modifying
     @Query(value = '''insert into user_performed_skill (user_id, project_id, skill_ref_id, skill_id, performed_on)
@@ -165,13 +209,24 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
               and skill.project_id = :projectId
               and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
               and q_to_s.skill_ref_id = skill.id
+              and (not exists(
+                    select 1
+                    from settings s
+                    where s.project_id = skill.project_id
+                      and s.setting = 'user_community' and s.value = 'true'
+                   ) or (exists(
+                    select 1
+                    from user_tags ut
+                    where ut.user_id = q_attempt.user_id
+                      and ut.key = :userCommunityUserTagKey and ut.value = :userCommunityUserTagValue
+                   )))
               and not exists(
                     select 1
                     from user_performed_skill innerUP
                     where skill.id = innerUP.skill_ref_id
                       and q_attempt.user_id = innerUP.user_id
                 );''', nativeQuery = true)
-    void createUserPerformedEntriesFromPassedQuizzesForProject(@Param('projectId') String projectId)
+    void createUserPerformedEntriesFromPassedQuizzesForProject(@Param('projectId') String projectId, @Param('userCommunityUserTagKey') String userCommunityUserTagKey, @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
 
     @Modifying
     @Query(value = '''insert into user_achievement (user_id, project_id, skill_ref_id, skill_id, points_when_achieved, notified, achieved_on)
@@ -191,13 +246,24 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
               and skill.id = :skillRefId
               and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
               and q_to_s.skill_ref_id = skill.id
+              and (not exists(
+                    select 1
+                    from settings s
+                    where s.project_id = skill.project_id
+                      and s.setting = 'user_community' and s.value = 'true'
+                   ) or (exists(
+                    select 1
+                    from user_tags ut
+                    where ut.user_id = q_attempt.user_id
+                      and ut.key = :userCommunityUserTagKey and ut.value = :userCommunityUserTagValue
+                   )))
               and not exists(
                     select 1
                     from user_achievement innerUP
                     where skill.id = innerUP.skill_ref_id
                       and q_attempt.user_id = innerUP.user_id
                 );''', nativeQuery = true)
-    void createUserAchievementsFromPassedQuizzes(@Param('quizRefId') Integer quizRefId, @Param('skillRefId') Integer skillRefId)
+    void createUserAchievementsFromPassedQuizzes(@Param('quizRefId') Integer quizRefId, @Param('skillRefId') Integer skillRefId, @Param('userCommunityUserTagKey') String userCommunityUserTagKey, @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
 
     @Modifying
     @Query(value = '''insert into user_achievement (user_id, project_id, skill_ref_id, skill_id, points_when_achieved, notified, achieved_on)
@@ -215,13 +281,24 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
               and skill.project_id = :projectId
               and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
               and q_to_s.skill_ref_id = skill.id
+              and (not exists(
+                    select 1
+                    from settings s
+                    where s.project_id = skill.project_id
+                      and s.setting = 'user_community' and s.value = 'true'
+                   ) or (exists(
+                    select 1
+                    from user_tags ut
+                    where ut.user_id = q_attempt.user_id
+                      and ut.key = :userCommunityUserTagKey and ut.value = :userCommunityUserTagValue
+                   )))
               and not exists(
                     select 1
                     from user_achievement innerUP
                     where skill.id = innerUP.skill_ref_id
                       and q_attempt.user_id = innerUP.user_id
                 );''', nativeQuery = true)
-    void createUserAchievementsFromPassedQuizzesForProject(@Param('projectId') String projectId)
+    void createUserAchievementsFromPassedQuizzesForProject(@Param('projectId') String projectId, @Param('userCommunityUserTagKey') String userCommunityUserTagKey, @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
 
     @Modifying
     @Query(value = '''INSERT INTO user_points(user_id, points, project_id)

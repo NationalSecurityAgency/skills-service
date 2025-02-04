@@ -55,13 +55,24 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
               and skill.id = :skillRefId
               and q_to_s.quiz_ref_id = q_attempt.quiz_definition_ref_id
               and q_to_s.skill_ref_id = skill.id
+              and (not exists(
+                    select 1
+                    from settings s
+                    where s.project_id = skill.project_id
+                      and s.setting = 'user_community' and s.value = 'true'
+                   ) or (exists(
+                    select 1
+                    from user_tags ut
+                    where ut.user_id = q_attempt.user_id
+                      and ut.key = :userCommunityUserTagKey and ut.value = :userCommunityUserTagValue
+                   )))
               and not exists(
                     select 1
                     from user_events innerUP
                     where skill.id = innerUP.skill_ref_id
                       and q_attempt.user_id = innerUP.user_id
                 );''', nativeQuery = true)
-    void createUserEventEntriesFromPassedQuizzes(@Param('quizRefId') Integer quizRefId, @Param('skillRefId') Integer skillRefId)
+    void createUserEventEntriesFromPassedQuizzes(@Param('quizRefId') Integer quizRefId, @Param('skillRefId') Integer skillRefId, @Param('userCommunityUserTagKey') String userCommunityUserTagKey, @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
 
     @Nullable
     @Query(value="""SELECT min(all_events.project_id) as projectId, all_events.week_number as weekNumber, sum(all_events.count) as count FROM

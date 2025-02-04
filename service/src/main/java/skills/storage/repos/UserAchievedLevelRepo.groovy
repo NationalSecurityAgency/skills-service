@@ -969,6 +969,17 @@ select count(distinct ua) from UserAchievement ua where ua.projectId = :projectI
                  skill_definition toDef
             WHERE toDef.copied_from_skill_ref = ua.skill_ref_id
               and ua.skill_ref_id in (:fromSkillRefIds)
+              and (not exists(
+                    select 1
+                    from settings s
+                    where s.project_id = toDef.project_id
+                      and s.setting = 'user_community' and s.value = 'true'
+                   ) or (exists(
+                    select 1
+                    from user_tags ut
+                    where ut.user_id = ua.user_id
+                      and ut.key = :userCommunityUserTagKey and ut.value = :userCommunityUserTagValue
+                   )))     
               and not exists(
                     select 1
                     from user_achievement innerTable
@@ -977,7 +988,7 @@ select count(distinct ua) from UserAchievement ua where ua.projectId = :projectI
                       and toDef.skill_id = innerTable.skill_id
                 )
             ''', nativeQuery = true)
-    void copySkillAchievementsToTheImportedProjects(@Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
+    void copySkillAchievementsToTheImportedProjects(@Param('fromSkillRefIds') List<Integer> fromSkillRefIds, @Param('userCommunityUserTagKey') String userCommunityUserTagKey, @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
 
     @Modifying
     @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved, achieved_on)

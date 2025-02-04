@@ -77,7 +77,8 @@ class BatchOperationsTransactionalAccessor {
     @Autowired
     UserPerformedSkillRepo userPerformedSkillRepo
 
-
+    @Autowired
+    UserCommunityService userCommunityService
 
     @Transactional
     @Profile
@@ -148,7 +149,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void copySkillUserPointsToTheImportedProjects(String toProjectId, List<Integer> fromSkillRefIds) {
         log.info("Copying [{}] skills UserPoints to the imported project [{}]", fromSkillRefIds.size(), toProjectId)
-        userPointsRepo.copySkillUserPointsToTheImportedProjects(toProjectId, fromSkillRefIds)
+        userPointsRepo.copySkillUserPointsToTheImportedProjects(toProjectId, fromSkillRefIds, userCommunityService.userCommunityUserTagKey, userCommunityService.userCommunityUserTagValue)
         log.info("Done copying [{}] skills UserPoints to the imported project [{}]", fromSkillRefIds.size(), toProjectId)
     }
 
@@ -164,7 +165,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void copySkillAchievementsToTheImportedProjects(String projectId, List<Integer> fromSkillRefIds) {
         log.info("Copying [{}] skills achievements to the imported project [{}]", fromSkillRefIds.size(), projectId)
-        userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(fromSkillRefIds)
+        userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(fromSkillRefIds, userCommunityService.userCommunityUserTagKey, userCommunityService.userCommunityUserTagValue)
         log.info("Done copying [{}] skills achievements to the imported project [{}]", fromSkillRefIds.size(), projectId)
     }
 
@@ -201,7 +202,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void createSkillUserPointsFromPassedQuizzes(Integer quizRefId, Integer skillRefId) {
         log.info("Creating UserPoints for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
-        userPointsRepo.createSkillUserPointsFromPassedQuizzes(quizRefId, skillRefId)
+        userPointsRepo.createSkillUserPointsFromPassedQuizzes(quizRefId, skillRefId, userCommunityService.userCommunityUserTagKey, userCommunityService.userCommunityUserTagValue)
         log.info("Completed creating UserPoints for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
     }
 
@@ -209,7 +210,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void createSkillUserPointsFromPassedQuizzesForProject(String projectId) {
         log.info("Creating UserPoints for users that passed the quiz: projectId=[{}]", projectId)
-        userPointsRepo.createSkillUserPointsFromPassedQuizzesForProject(projectId)
+        userPointsRepo.createSkillUserPointsFromPassedQuizzesForProject(projectId, userCommunityService.userCommunityUserTagKey, userCommunityService.userCommunityUserTagValue)
         log.info("Completed creating UserPoints for users that passed the quiz: projectId=[{}]", projectId)
     }
 
@@ -218,7 +219,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void createUserPerformedEntriesFromPassedQuizzes(Integer quizRefId, Integer skillRefId) {
         log.info("Creating UserPerformedSkills for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
-        userPointsRepo.createUserPerformedEntriesFromPassedQuizzes(quizRefId, skillRefId)
+        userPointsRepo.createUserPerformedEntriesFromPassedQuizzes(quizRefId, skillRefId, userCommunityService.userCommunityUserTagKey, userCommunityService.userCommunityUserTagValue)
         log.info("Completed creating UserPerformedSkills for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
     }
 
@@ -227,7 +228,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void createUserEventEntriesFromPassedQuizzes(Integer quizRefId, Integer skillRefId) {
         log.info("Creating UserEvents for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
-        userEventsRepo.createUserEventEntriesFromPassedQuizzes(quizRefId, skillRefId)
+        userEventsRepo.createUserEventEntriesFromPassedQuizzes(quizRefId, skillRefId, userCommunityService.userCommunityUserTagKey, userCommunityService.userCommunityUserTagValue)
         log.info("Completed creating UserEvents for users that passed the quiz: quizRefId=[{}], skillId=[{}]", quizRefId, skillRefId)
     }
 
@@ -235,7 +236,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void createUserPerformedEntriesFromPassedQuizzesForProject(String projectId) {
         log.info("Creating UserPerformedSkills for users that passed the quiz: projectId=[{}]", projectId)
-        userPointsRepo.createUserPerformedEntriesFromPassedQuizzesForProject(projectId)
+        userPointsRepo.createUserPerformedEntriesFromPassedQuizzesForProject(projectId, userCommunityService.userCommunityUserTagKey, userCommunityService.userCommunityUserTagValue)
         log.info("Completed creating UserPerformedSkills for users that passed the quiz: projectId=[{}]", projectId)
     }
 
@@ -243,7 +244,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void createUserAchievementsFromPassedQuizzes(Integer quizRefId, Integer skillRefId) {
         log.info("Creating UserAchievements for users that passed the quiz: quizRefId=[{}], skillRefId=[{}]", quizRefId, skillRefId)
-        userPointsRepo.createUserAchievementsFromPassedQuizzes(quizRefId, skillRefId)
+        userPointsRepo.createUserAchievementsFromPassedQuizzes(quizRefId, skillRefId, userCommunityService.userCommunityUserTagKey, userCommunityService.userCommunityUserTagValue)
         log.info("Completed creating UserAchievements for users that passed the quiz: quizRefId=[{}], skillRefId=[{}]", quizRefId, skillRefId)
     }
 
@@ -251,7 +252,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void createUserAchievementsFromPassedQuizzes(String projectId) {
         log.info("Creating UserAchievements for users that passed the quiz: projectId=[{}]", projectId)
-        userPointsRepo.createUserAchievementsFromPassedQuizzesForProject(projectId)
+        userPointsRepo.createUserAchievementsFromPassedQuizzesForProject(projectId, userCommunityService.userCommunityUserTagKey, userCommunityService.userCommunityUserTagValue)
         log.info("Completed creating UserAchievements for users that passed the quiz: projectId=[{}]", projectId)
     }
 

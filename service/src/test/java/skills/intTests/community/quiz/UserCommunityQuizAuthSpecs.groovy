@@ -31,6 +31,10 @@ import skills.quizLoading.QuizSettings
 import skills.quizLoading.QuizUserPreferences
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.SkillDef
+import skills.storage.model.UserAchievement
+import skills.storage.model.UserEvent
+import skills.storage.model.UserPerformedSkill
+import skills.storage.model.UserPoints
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserPerformedSkillRepo
@@ -38,6 +42,7 @@ import skills.utils.GroovyToJavaByteUtils
 
 import static skills.intTests.utils.SkillsFactory.createProject
 import static skills.intTests.utils.SkillsFactory.createSkill
+import static skills.intTests.utils.SkillsFactory.createSkills
 import static skills.intTests.utils.SkillsFactory.createSubject
 
 @Slf4j
@@ -600,6 +605,238 @@ class UserCommunityQuizAuthSpecs extends DefaultIntSpec {
         pristineDragonsUserPerformedSkillsP2.size() == 1
         pristineDragonsUserPerformedSkillsP2[0].skillId == skillWithQuizP1.skillId
     }
+
+    def "non-UC user is not given credit for non-UC quiz associated with UC protected skill - quiz associated after non-UC user(s) passed it"() {
+        List<String> users = getRandomUsers(3)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService adminUser = createService(users[2])
+        rootSkillsService.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootSkillsService.saveUserTag(adminUser.userName, 'dragons', ['DivineDragon'])
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        adminUser.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 2)
+        adminUser.createQuizQuestionDefs(questions)
+
+        def runQuiz = { SkillsService userService, boolean pass ->
+            def quizAttempt = userService.startQuizAttempt(quiz.quizId).body
+            int answerIndex = pass ? 0 : 1
+            userService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[answerIndex].id)
+            return userService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        }
+        def allDragonsUserAttempt = runQuiz(allDragonsUser, true)
+        def pristineDragonAttempt = runQuiz(pristineDragonsUser, true)
+
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def subjP1 = createSubject(1, 1)
+
+        def skillWithQuizP1 = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuizP1.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuizP1.quizId = quiz.quizId
+
+        def p2 = createProject(2)
+        p2.enableProtectedUserCommunity = false
+        def subjP2 = createSubject(2, 1)
+
+        def skillWithQuizP2 = createSkill(2, 1, 1, 1, 1, 480, 200)
+        skillWithQuizP2.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuizP2.quizId = quiz.quizId
+
+        when:
+        adminUser.createProjectAndSubjectAndSkills(p1, subjP1, [skillWithQuizP1])
+        adminUser.createProjectAndSubjectAndSkills(p2, subjP2, [skillWithQuizP2])
+
+
+        def allDragonsUserPerformedSkillsP1 = getPerformedSkillsForUser(allDragonsUser.userName, p1.projectId)
+        def pristineDragonsUserPerformedSkillsP1 = getPerformedSkillsForUser(pristineDragonsUser.userName, p1.projectId)
+
+        def allDragonsUserPerformedSkillsP2 = getPerformedSkillsForUser(allDragonsUser.userName, p2.projectId)
+        def pristineDragonsUserPerformedSkillsP2 = getPerformedSkillsForUser(pristineDragonsUser.userName, p2.projectId)
+
+        List<UserPoints> userPoints = userPointsRepo.findAll()
+        List<UserPoints> userPointsP1 = userPoints.findAll { it.projectId == p1.projectId }
+        List<UserPoints> userPointsP2 = userPoints.findAll { it.projectId == p2.projectId }
+
+        List<UserPerformedSkill> userPerformedSkills = userPerformedSkillRepo.findAll()
+        List<UserPerformedSkill> userPerformedSkillsP1 = userPerformedSkills.findAll { it.projectId == p1.projectId }
+        List<UserPerformedSkill> userPerformedSkillsP2 = userPerformedSkills.findAll { it.projectId == p2.projectId }
+
+        List<UserEvent> userEvents = userEventsRepo.findAll()
+        List<UserEvent> userEventsP1 = userEvents.findAll { it.projectId == p1.projectId }
+        List<UserEvent> userEventsP2 = userEvents.findAll { it.projectId == p2.projectId }
+
+        List<UserAchievement> userAchievements = userAchievedRepo.findAll()
+        List<UserAchievement> userAchievementsP1 = userAchievements.findAll { it.projectId == p1.projectId }
+        List<UserAchievement> userAchievementsP2 = userAchievements.findAll { it.projectId == p2.projectId }
+        then:
+        allDragonsUserAttempt.passed
+        pristineDragonAttempt.passed
+
+        !allDragonsUserPerformedSkillsP1
+        pristineDragonsUserPerformedSkillsP1
+        pristineDragonsUserPerformedSkillsP1.size() == 1
+        pristineDragonsUserPerformedSkillsP1[0].skillId == skillWithQuizP1.skillId
+
+        allDragonsUserPerformedSkillsP2
+        allDragonsUserPerformedSkillsP2.size() == 1
+        allDragonsUserPerformedSkillsP2
+        pristineDragonsUserPerformedSkillsP2[0].skillId == skillWithQuizP1.skillId
+        pristineDragonsUserPerformedSkillsP2.size() == 1
+        pristineDragonsUserPerformedSkillsP2[0].skillId == skillWithQuizP1.skillId
+
+        userPointsP1.size() == 3
+        userPointsP1.userId.unique() == [pristineDragonsUser.userName]
+        userPointsP1.find { !it.skillId }.points == 200
+        userPointsP1.find { it.skillId == skillWithQuizP1.skillId }.points == 200
+        userPointsP1.find { it.skillId == subjP1.subjectId }.points == 200
+
+        userPointsP2.size() == 6
+        userPointsP2.userId.unique().sort() == [pristineDragonsUser.userName, allDragonsUser.userName].sort()
+        List<UserPoints> userPointsP2AllDragons = userPointsP2.findAll { it.userId == allDragonsUser.userName }
+        List<UserPoints> userPointsP2PristineDragons = userPointsP2.findAll { it.userId == pristineDragonsUser.userName }
+        userPointsP2AllDragons.find { !it.skillId }.points == 200
+        userPointsP2AllDragons.find { it.skillId == skillWithQuizP1.skillId }.points == 200
+        userPointsP2AllDragons.find { it.skillId == subjP1.subjectId }.points == 200
+
+        userPointsP2PristineDragons.find { !it.skillId }.points == 200
+        userPointsP2PristineDragons.find { it.skillId == skillWithQuizP1.skillId }.points == 200
+        userPointsP2PristineDragons.find { it.skillId == subjP1.subjectId }.points == 200
+
+        userPerformedSkillsP1.userId == [pristineDragonsUser.userName]
+        userPerformedSkillsP1.skillId == [skillWithQuizP1.skillId]
+        userPerformedSkillsP2.userId.sort() == [allDragonsUser.userName, pristineDragonsUser.userName].sort()
+        userPerformedSkillsP2.skillId == [skillWithQuizP2.skillId, skillWithQuizP2.skillId]
+
+        userEventsP1.userId == [pristineDragonsUser.userName]
+        userEventsP1.skillRefId == [skillDefRepo.findByProjectIdAndSkillId(p1.projectId, skillWithQuizP1.skillId).id]
+        userEventsP2.userId.sort() == [allDragonsUser.userName, pristineDragonsUser.userName].sort()
+        Integer skillP2Id = skillDefRepo.findByProjectIdAndSkillId(p2.projectId, skillWithQuizP2.skillId).id
+        userEventsP2.skillRefId == [skillP2Id, skillP2Id]
+
+        userAchievementsP1.size() == 11
+        userAchievementsP1.userId.unique() == [pristineDragonsUser.userName]
+        userAchievementsP1.findAll { !it.skillId }.level.sort() == [1, 2, 3, 4, 5]
+        userAchievementsP1.findAll { it.skillId == subjP1.skillId }.level.sort() == [1, 2, 3, 4, 5]
+        userAchievementsP1.findAll { it.skillId == skillWithQuizP1.subjectId }
+
+        userAchievementsP2.size() == 22
+        userAchievementsP2.userId.unique().sort() == [pristineDragonsUser.userName, allDragonsUser.userName].sort()
+        List<UserAchievement> userAchievementsP2AllDragons = userAchievementsP2.findAll { it.userId == allDragonsUser.userName }
+        List<UserAchievement> userAchievementsP2PristineDragons = userAchievementsP2.findAll { it.userId == pristineDragonsUser.userName }
+        userAchievementsP2AllDragons.findAll { !it.skillId }.level.sort() == [1, 2, 3, 4, 5]
+        userAchievementsP2AllDragons.findAll { it.skillId == subjP1.skillId }.level.sort() == [1, 2, 3, 4, 5]
+        userAchievementsP2AllDragons.findAll { it.skillId == skillWithQuizP1.subjectId }
+        userAchievementsP2PristineDragons.findAll { !it.skillId }.level.sort() == [1, 2, 3, 4, 5]
+        userAchievementsP2PristineDragons.findAll { it.skillId == subjP1.skillId }.level.sort() == [1, 2, 3, 4, 5]
+        userAchievementsP2PristineDragons.findAll { it.skillId == skillWithQuizP1.subjectId }
+    }
+
+    def "non-UC user is not given credit for non-UC quiz associated with UC protected skill - quiz associated after non-UC user(s) passed it - many users and many skills"() {
+        List<String> users = getRandomUsers(10)
+
+        SkillsService adminUser = createService(users[0])
+        rootSkillsService.saveUserTag(adminUser.userName, 'dragons', ['DivineDragon'])
+
+        List<SkillsService> allDragonsUsers = [createService(users[1]), createService(users[2]), createService(users[3]), createService(users[4])]
+        List<SkillsService> pristineDragonsUsers = [createService(users[5]), createService(users[6]), createService(users[7]), createService(users[8]), createService(users[9])]
+        pristineDragonsUsers.each {
+            rootSkillsService.saveUserTag(it.userName, 'dragons', ['DivineDragon'])
+        }
+
+        List quizzes = [
+                QuizDefFactory.createQuiz(1),
+                QuizDefFactory.createQuiz(2),
+                QuizDefFactory.createQuiz(3),
+                QuizDefFactory.createQuiz(4),
+                QuizDefFactory.createQuiz(5),
+                QuizDefFactory.createQuiz(6)
+                ]
+        quizzes.eachWithIndex { quiz, index ->
+            adminUser.createQuizDef(quiz)
+            def questions = QuizDefFactory.createChoiceQuestions(index+1, 1, 2)
+            adminUser.createQuizQuestionDefs(questions)
+        }
+
+        def runQuiz = { SkillsService userService, def quiz,boolean pass ->
+            def quizAttempt = userService.startQuizAttempt(quiz.quizId).body
+            int answerIndex = pass ? 0 : 1
+            userService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[answerIndex].id)
+            return userService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        }
+        quizzes.each {quiz ->
+            allDragonsUsers.each {user ->
+                runQuiz(user, quiz, true)
+            }
+            pristineDragonsUsers.each { user ->
+                runQuiz(user, quiz, true)
+            }
+        }
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def subjP1 = createSubject(1, 1)
+
+        List p1Skills = createSkills(10, 1, 1, 1, 1, )
+        p1Skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        p1Skills[0].quizId = quizzes[0].quizId
+
+        def p2 = createProject(2)
+        p2.enableProtectedUserCommunity = false
+        def subjP2 = createSubject(2, 1)
+
+        List p2Skills = createSkills(10, 2, 1, 1, 1, )
+        p2Skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        p2Skills[0].quizId = quizzes[0].quizId
+
+        when:
+        adminUser.createProjectAndSubjectAndSkills(p1, subjP1, p1Skills)
+        adminUser.createProjectAndSubjectAndSkills(p2, subjP2, p2Skills)
+
+        List<UserPoints> userPoints = userPointsRepo.findAll()
+        List<UserPoints> userPointsP1 = userPoints.findAll { it.projectId == p1.projectId }
+        List<UserPoints> userPointsP2 = userPoints.findAll { it.projectId == p2.projectId }
+
+        List<UserPerformedSkill> userPerformedSkills = userPerformedSkillRepo.findAll()
+        List<UserPerformedSkill> userPerformedSkillsP1 = userPerformedSkills.findAll { it.projectId == p1.projectId }
+        List<UserPerformedSkill> userPerformedSkillsP2 = userPerformedSkills.findAll { it.projectId == p2.projectId }
+
+        List<UserEvent> userEvents = userEventsRepo.findAll()
+        List<UserEvent> userEventsP1 = userEvents.findAll { it.projectId == p1.projectId }
+        List<UserEvent> userEventsP2 = userEvents.findAll { it.projectId == p2.projectId }
+
+        List<UserAchievement> userAchievements = userAchievedRepo.findAll()
+        List<UserAchievement> userAchievementsP1 = userAchievements.findAll { it.projectId == p1.projectId }
+        List<UserAchievement> userAchievementsP2 = userAchievements.findAll { it.projectId == p2.projectId }
+        then:
+        // user points
+        userPointsP1.size() == 15
+        userPointsP1.userId.unique().sort() == pristineDragonsUsers.collect { it.userName }.sort()
+        userPointsP2.size() == 27
+        userPointsP2.userId.unique().sort() == [allDragonsUsers.collect { it.userName }, pristineDragonsUsers.collect { it.userName }].flatten().sort()
+
+        // performed skills
+        userPerformedSkillsP1.size() == 5
+        userPerformedSkillsP1.userId.unique().sort() == pristineDragonsUsers.collect { it.userName }.sort()
+        userPerformedSkillsP2.size() == 9
+        userPerformedSkillsP2.userId.unique().sort() == [allDragonsUsers.collect { it.userName }, pristineDragonsUsers.collect { it.userName }].flatten().sort()
+
+        // user events
+        userEventsP1.size() == 5
+        userEventsP1.userId.sort() == pristineDragonsUsers.collect { it.userName }.sort()
+        userEventsP2.size() == 9
+        userEventsP2.userId.unique().sort() == [allDragonsUsers.collect { it.userName }, pristineDragonsUsers.collect { it.userName }].flatten().sort()
+
+        // achievements
+        userAchievementsP1.size() == 55
+        userAchievementsP1.userId.unique().sort() == pristineDragonsUsers.collect { it.userName }.sort()
+        userAchievementsP2.size() == 99
+        userAchievementsP2.userId.unique().sort() == [allDragonsUsers.collect { it.userName }, pristineDragonsUsers.collect { it.userName }].flatten().sort()
+    }
+
 
     def getPerformedSkillsForUser(String userId, String projectId) {
         PageRequest allPlease = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Direction.DESC, "performedOn"))
