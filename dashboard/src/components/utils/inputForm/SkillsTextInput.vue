@@ -95,6 +95,7 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
         severity="error"
         variant="simple"
         size="small"
+        :closable="false"
         :data-cy="`${name}Error`"
         :id="`${name}Error`">{{ errorMessage || '' }}
     </Message>

@@ -279,7 +279,7 @@ describe('Contact Project Admins Specs', () => {
         cy.get('[data-cy="emailUsers_subject"]').clear();
         cy.get('[data-cy="emailUsers_subject"]').type('test');
         cy.get('[data-cy="emailUsers-submitBtn"]').should('be.enabled');
-        cy.get('#subjectLineError').should('be.empty');
+        cy.get('#subjectLineError').should('not.be.visible');
 
         cy.get('[data-cy="emailUsers_body"]').type('jabberwocky');
         cy.wait('@validateDescription');
@@ -290,7 +290,7 @@ describe('Contact Project Admins Specs', () => {
         cy.get('[data-cy="emailUsers_body"]').type('test');
         cy.wait('@validateDescription');
         cy.get('[data-cy="emailUsers-submitBtn"]').should('be.enabled');
-        cy.get('#emailBodyError').should('be.empty');
+        cy.get('#emailBodyError').should('not.be.visible');
     });
 
 });

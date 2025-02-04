@@ -101,6 +101,7 @@ defineExpose({
              variant="simple"
              size="small"
              data-cy="idError"
+             :closable="false"
              id="idError">{{ errorMessage || '' }}</Message>
   </div>
 </template>
