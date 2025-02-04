@@ -149,7 +149,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void copySkillUserPointsToTheImportedProjects(String toProjectId, List<Integer> fromSkillRefIds) {
         log.info("Copying [{}] skills UserPoints to the imported project [{}]", fromSkillRefIds.size(), toProjectId)
-        userPointsRepo.copySkillUserPointsToTheImportedProjects(toProjectId, fromSkillRefIds)
+        userPointsRepo.copySkillUserPointsToTheImportedProjects(toProjectId, fromSkillRefIds, userCommunityService.userCommunityUserTagKey, userCommunityService.userCommunityUserTagValue)
         log.info("Done copying [{}] skills UserPoints to the imported project [{}]", fromSkillRefIds.size(), toProjectId)
     }
 
@@ -165,7 +165,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void copySkillAchievementsToTheImportedProjects(String projectId, List<Integer> fromSkillRefIds) {
         log.info("Copying [{}] skills achievements to the imported project [{}]", fromSkillRefIds.size(), projectId)
-        userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(fromSkillRefIds)
+        userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(fromSkillRefIds, userCommunityService.userCommunityUserTagKey, userCommunityService.userCommunityUserTagValue)
         log.info("Done copying [{}] skills achievements to the imported project [{}]", fromSkillRefIds.size(), projectId)
     }
 
