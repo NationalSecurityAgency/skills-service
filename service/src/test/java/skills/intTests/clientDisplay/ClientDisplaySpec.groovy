@@ -38,6 +38,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
         res.subjects.size() == 1
         res.subjects.first().subjectId == subj1.subjectId
         res.subjects.first().totalPoints == 0
+        res.totalSkills == 0
     }
 
     def "only return project description if setting show_project_description_everywhere=true"() {
@@ -262,6 +263,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
         projectSummary.subjects
         projectSummary.subjects[0].skillsLevel == 0
         projectSummary.subjects[0].totalPoints == 20
+        projectSummary.totalSkills == 2
     }
 
     def "skills group calculate totalPoints based on all skills regardless of numSkillsRequired"() {
@@ -291,6 +293,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
         projectSummary.subjects
         projectSummary.subjects[0].skillsLevel == 0
         projectSummary.subjects[0].totalPoints == 20
+        projectSummary.totalSkills == 2
     }
 
     def "project summary includes description if set"() {

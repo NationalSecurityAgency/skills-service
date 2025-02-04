@@ -22,6 +22,10 @@ describe('Achieved Sills Progress Tests', () => {
     cy.createSkill(1, 1, 1, { numPerformToCompletion: 1 })
     cy.createSkill(1, 1, 2, { numPerformToCompletion: 1 })
     cy.createSkill(1, 1, 3, { numPerformToCompletion: 1 })
+    cy.createSkillsGroup(1, 1, 1);
+    cy.addSkillToGroup(1, 1, 1, 4);
+    cy.addSkillToGroup(1, 1, 1, 5);
+    cy.addSkillToGroup(1, 1, 1, 6);
     cy.createSubject(1, 2)
     cy.createSkill(1, 2, 4, { numPerformToCompletion: 1 })
     cy.createSkill(1, 2, 5, { numPerformToCompletion: 1 })
@@ -31,15 +35,15 @@ describe('Achieved Sills Progress Tests', () => {
 
     cy.cdVisit('/')
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '3')
-    cy.get('[data-cy="numTotalSkills"]').should('have.text', '5')
+    cy.get('[data-cy="numTotalSkills"]').should('have.text', '8')
 
     cy.get('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click()
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '2')
-    cy.get('[data-cy="numTotalSkills"]').should('have.text', '3')
+    cy.get('[data-cy="numTotalSkills"]').should('have.text', '6')
 
     cy.get('[data-cy="breadcrumb-proj1"]').click()
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '3')
-    cy.get('[data-cy="numTotalSkills"]').should('have.text', '5')
+    cy.get('[data-cy="numTotalSkills"]').should('have.text', '8')
 
     cy.get('[data-cy="subjectTile-subj2"] [data-cy="subjectTileBtn"]').click()
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '1')
@@ -47,7 +51,7 @@ describe('Achieved Sills Progress Tests', () => {
 
     cy.cdVisit('/subjects/subj1')
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '2')
-    cy.get('[data-cy="numTotalSkills"]').should('have.text', '3')
+    cy.get('[data-cy="numTotalSkills"]').should('have.text', '6')
     cy.get('[data-cy="skillProgress_index-0"]')
 
     cy.cdVisit('/subjects/subj2')

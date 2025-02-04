@@ -77,6 +77,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[1].skillId }
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[1].skillId }.points == 100
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[1].skillId }.totalPoints == 100
+        subjectSummary.totalSkills == 2
     }
 
     def "achieve group skill - optional skills"() {
@@ -128,6 +129,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummary.skills[0].children.find { it.skillId = skillId }
         subjectSummary.skills[0].children.find { it.skillId = skillId }.points == 100
         subjectSummary.skills[0].children.find { it.skillId = skillId }.totalPoints == 100
+        subjectSummary.totalSkills == 2
     }
 
     def "achieve group skill after lowering numSkillsRequired"() {
@@ -186,6 +188,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummary.skills[0].children.find { it.skillId = skillId }
         subjectSummary.skills[0].children.find { it.skillId = skillId }.points == 100
         subjectSummary.skills[0].children.find { it.skillId = skillId }.totalPoints == 100
+        subjectSummary.totalSkills == 2
     }
 
     def "cannot achieve child skills if group is not enabled"() {
@@ -279,6 +282,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[1].skillId }
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[1].skillId }.points == 100
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[1].skillId }.totalPoints == 100
+        subjectSummary.totalSkills == 2
     }
 
     def "deleting child skill updates points and achievements properly"() {
@@ -352,6 +356,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[2].skillId }
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[2].skillId }.points == 100
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[2].skillId }.totalPoints == 100
+        subjectSummary.totalSkills == 3
 
         subjectSummaryAfter
         subjectSummaryAfter.points == 200
@@ -371,6 +376,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummaryAfter.skills[0].children.find { it.skillId == groupChildren[1].skillId }
         subjectSummaryAfter.skills[0].children.find { it.skillId == groupChildren[1].skillId }.points == 100
         subjectSummaryAfter.skills[0].children.find { it.skillId == groupChildren[1].skillId }.totalPoints == 100
+        subjectSummaryAfter.totalSkills == 2
 
         groupAchievementsAfter
         groupAchievementsAfter.size() == 1
@@ -450,6 +456,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[1].skillId }
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[1].skillId }.points == 100
         subjectSummary.skills[0].children.find { it.skillId == groupChildren[1].skillId }.totalPoints == 100
+        subjectSummary.totalSkills == 2
     }
 
     def "cannot earn more points than the skills group numSkillsRequired will allow"() {
@@ -505,6 +512,7 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummary.skills[0].children.find { it.skillId = groupChildren[1].skillId }
         subjectSummary.skills[0].children.find { it.skillId = groupChildren[1].skillId }.points == 100
         subjectSummary.skills[0].children.find { it.skillId = groupChildren[1].skillId }.totalPoints == 100
+        subjectSummary.totalSkills == 2
     }
 
     def "cannot add skill for a skills group itself"() {
