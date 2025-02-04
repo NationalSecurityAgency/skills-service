@@ -124,8 +124,10 @@ describe('Approver Config Tests', () => {
 
             cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
             cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
-            cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userb', true, true);
-            // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] .vs__dropdown-option`).contains('userA').click({force: true});
+            // cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userb', true, true);
+            cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]`).click()
+            cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('userb').click();
+
             cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
             cy.get(`[data-cy="workloadCell_${user1}"]`).contains('1 Specific User')
 
@@ -179,10 +181,10 @@ describe('Approver Config Tests', () => {
 
             cy.visit('/administrator/projects/proj1/self-report/configure');
 
-            cy.get('[data-pc-section="pagebutton"]').contains('2').click();
+            cy.get('[data-pc-section="page"]').contains('2').click();
             cy.get('[data-cy="approvalConfNotAvailable"]').should('not.exist');
 
-            cy.get('[data-pc-section="pagebutton"]').contains('1').click();
+            cy.get('[data-pc-section="page"]').contains('1').click();
 
             const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
 
@@ -244,10 +246,10 @@ describe('Approver Config Tests', () => {
 
             cy.visit('/administrator/projects/proj1/self-report/configure');
 
-            cy.get('[data-pc-section="pagebutton"]').contains('2').click();
+            cy.get('[data-pc-section="page"]').contains('2').click();
             cy.get('[data-cy="approvalConfNotAvailable"]').should('not.exist');
 
-            cy.get('[data-pc-section="pagebutton"]').contains('1').click();
+            cy.get('[data-pc-section="page"]').contains('1').click();
 
             const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
 
@@ -376,10 +378,10 @@ describe('Approver Config Tests', () => {
 
             cy.visit('/administrator/projects/proj1/self-report/configure');
 
-            cy.get('[data-pc-section="pagebutton"]').contains('2').click();
+            cy.get('[data-pc-section="page"]').contains('2').click();
             cy.get('[data-cy="approvalConfNotAvailable"]').should('not.exist');
 
-            cy.get('[data-pc-section="pagebutton"]').contains('1').click();
+            cy.get('[data-pc-section="page"]').contains('1').click();
 
             const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
 
@@ -451,10 +453,10 @@ describe('Approver Config Tests', () => {
 
             cy.visit('/administrator/projects/proj1/self-report/configure');
 
-            cy.get('[data-pc-section="pagebutton"]').contains('2').click();
+            cy.get('[data-pc-section="page"]').contains('2').click();
             cy.get('[data-cy="approvalConfNotAvailable"]').should('not.exist');
 
-            cy.get('[data-pc-section="pagebutton"]').contains('1').click();
+            cy.get('[data-pc-section="page"]').contains('1').click();
 
             const tableSelector = '[data-cy="skillApprovalConfTable"]'
             cy.validateTable(tableSelector, [
@@ -502,7 +504,7 @@ describe('Approver Config Tests', () => {
                 }],
             ], 5);
 
-            cy.get('[data-pc-section="pagebutton"]').contains('1').click();
+            cy.get('[data-pc-section="page"]').contains('1').click();
 
             cy.get('[data-cy="editApprovalBtn"]').eq(4).should('not.be.enabled');
         });

@@ -52,7 +52,7 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '3')
 
         cy.get('[data-cy="itemFilter"]').click()
-        cy.get('[data-pc-section="itemlabel"]').contains('Quiz').click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="optionlabel"]').contains('Quiz').click()
 
         cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]')
             .should('have.text', '1')

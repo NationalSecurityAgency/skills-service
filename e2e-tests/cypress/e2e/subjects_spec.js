@@ -181,7 +181,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy=idError]').contains(msg).should('be.visible');
         cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
         cy.get('[data-cy="subjectName"]').type('{backspace}');
-        cy.get('[data-cy=idError]').should('be.empty');
+        cy.get('[data-cy=idError]').should('be.not.visible');
         cy.get('[data-cy=saveDialogBtn]').should('be.enabled');
     });
 

@@ -237,7 +237,7 @@ describe('Expired Skill Table Tests', () => {
             }],
         ], 10, true, 20);
 
-        cy.get('[data-pc-section="pagebutton"]').contains('2').click();
+        cy.get('[data-pc-section="page"]').contains('2').click();
 
         cy.validateTable(tableSelector, [
             [{
@@ -354,7 +354,7 @@ describe('Expired Skill Table Tests', () => {
             }],
         ], 1);
 
-        cy.get('[data-pc-section="filterclearicon"]').eq(1).click()
+        cy.get('[data-pc-section="filter"] [data-pc-name="button"]').click()
 
         cy.validateTable(tableSelector, [
             [{

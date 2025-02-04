@@ -54,7 +54,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizName"]').type('My First Survey')
         // cy.get('[data-cy="quizTypeSelector"]').select('Survey')
         cy.get('[data-cy="quizTypeSelector"]').click()
-        cy.get('[data-pc-section="itemlabel"]').contains('Survey').click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="optionlabel"]').contains('Survey').click()
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="quizName"]').should('not.exist')
         cy.get('[data-cy="btn_Quizzes And Surveys"]').should('have.focus')

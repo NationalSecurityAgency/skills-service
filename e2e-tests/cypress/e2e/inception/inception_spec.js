@@ -99,7 +99,7 @@ describe('Inception Tests', () => {
         cy.get('[data-cy="subjectTile-subj1"]')
 
         cy.get('[data-cy="settings-button"]').click()
-        cy.get('[aria-label="Project Admin"] [data-pc-section="action"]').click()
+        cy.get('[data-pc-name="menu"] [aria-label="Project Admin"] [data-pc-section="itemlink"]').click()
 
         cy.get('[data-cy="inception-button"]').click();
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains('Dashboard Skills');

@@ -390,7 +390,7 @@ describe('Skills Group Tests', () => {
 
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
-        cy.get('[data-pc-section="closebutton"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.addSkillToGroupViaUI('group1', 1);
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('100');
     });
@@ -480,7 +480,7 @@ describe('Skills Group Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
-        cy.get('[data-pc-section="closebutton"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('200');
         cy.get(`${tableSelector} [data-cy="totalPointsCell_group1"]`).contains('from 4 skills');
 
@@ -504,17 +504,17 @@ describe('Skills Group Tests', () => {
 
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
-        cy.get('[data-pc-section="closebutton"]').click()
+        // cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
 
         cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="tokenlabel"]').contains('Points')
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-name="pcchip"] [data-pc-section="label"]').contains('Points')
 
         cy.get('[data-cy="editSkillButton_skill2"]').click();
         cy.get('[data-cy="skillName"]').clear().type('other');
         cy.get('[data-cy="enableIdInput"]').click()
         cy.get('[data-cy="idInputValue"]').clear().type('newId');
         cy.get('[data-cy="pointIncrement"]').clear().type(50);
-        cy.get('button').contains('Save').click();
+        cy.get('[data-cy="saveDialogBtn"]').click();
 
         cy.get('[data-cy="editSkillButton_skill2"]').should('not.exist');
         cy.get('[data-cy="editSkillButton_newId"]')
@@ -596,8 +596,8 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="userIdInput"] input').should('have.value', 'user1')
 
         cy.get('[data-cy="eventDatePicker"]').click()
-        cy.get('[data-pc-section="previousbutton"]').first().click()
-        cy.get('.p-datepicker-group-container').contains('10').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="calendarcontainer"] [data-pc-name="pcprevbutton"]').first().click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="calendarcontainer"]  [data-pc-section="day"]').contains('10').click()
 
         cy.get('[data-cy="addSkillEventButton"]').should('be.enabled');
     });

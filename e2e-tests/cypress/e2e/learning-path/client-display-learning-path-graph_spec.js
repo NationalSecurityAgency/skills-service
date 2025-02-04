@@ -138,7 +138,7 @@ describe('Client Display Prerequisites Tests', () => {
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '8')
-        cy.clickOnNode(240, 335);
+        cy.clickOnNode(230, 335);
         cy.contains('Project: This is project 2');
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
         cy.get('[data-cy="crossProjAlert"]').contains('cross-project skill');
@@ -314,7 +314,7 @@ describe('Client Display Prerequisites Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill7');
 
-        cy.get('[data-pc-section="headertitle"]').contains('Prerequisite Name').click()
+        cy.get('[data-pc-section="columntitle"]').contains('Prerequisite Name').click()
 
         cy.get('[data-cy="prereqTable"] [data-p-index="0"] [data-cy="skillLink-proj1-skill1"]').contains('Skill 1')
         cy.get('[data-cy="prereqTable"] [data-p-index="1"] [data-cy="skillLink-proj1-skill2"]').contains('Skill 2')

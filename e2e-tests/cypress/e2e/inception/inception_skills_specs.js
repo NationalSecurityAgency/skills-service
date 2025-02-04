@@ -466,7 +466,9 @@ describe('Inception Skills Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noUserConf"]`).should('exist')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
-        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'usera', true, true);
+        // cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'usera', true, true);
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]`).click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('usera').click();
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.enabled')
 
         cy.assertInceptionPoints('Skills', 'ConfigureSelfApprovalWorkload', 0, false)

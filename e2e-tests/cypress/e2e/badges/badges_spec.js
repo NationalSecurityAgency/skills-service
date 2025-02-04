@@ -194,7 +194,7 @@ describe('Badges Tests', () => {
         cy.wait(500);
         cy.wait('@loadSkills');
         cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
-        cy.contains('.p-menuitem', 'Badges')
+        cy.contains('[data-cy="breadcrumbItemValue"]', 'Badges')
             .click();
 
         cy.contains('Test Badge');
@@ -247,7 +247,7 @@ describe('Badges Tests', () => {
         cy.wait(500);
         cy.wait('@loadSkills');
         cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
-        cy.contains('.p-menuitem', 'Badges')
+        cy.contains('[data-cy="breadcrumbItemValue"]', 'Badges')
             .click();
 
         cy.contains('Test Badge');
@@ -595,7 +595,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="rootHelpUrlSetting"]')
             .contains('https://SomeArticleRepo.com');
 
-        const textDecorationMatch = 'line-through solid rgb(9, 113, 81)';
+        const textDecorationMatch = 'line-through solid color(srgb 0.0862745 0.396078 0.203922)';
 
         // strike-through when url starts with http:// or https://
         cy.get('[data-cy="skillHelpUrl"]')
@@ -822,9 +822,9 @@ describe('Badges Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').first()
           .click();
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-name="tabmenu"] [data-pc-section="itemlink"]').contains('Custom').click();
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
         cy.wait('@uploadIcon');
         cy.get('[data-cy="iconPicker"] .proj1-validiconpng');
         cy.get('[data-cy="name"]').type('customIcon');
