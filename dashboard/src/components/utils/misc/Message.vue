@@ -22,6 +22,10 @@ const props = defineProps({
   marginY: {
     type: Number,
     default: 3
+  },
+  closable: {
+    type: Boolean,
+    default: true
   }
 })
 const attrs = useAttrs()
@@ -52,6 +56,7 @@ const marginCss = computed(() => {
 <template>
   <Message
       :pt="{ text: { class: 'flex-1' } }"
+      :closable="closable"
       :class="marginCss" :icon="msgIcon"><slot /><template v-if="slots.container" #container><slot name="container" /></template></Message>
 </template>
 

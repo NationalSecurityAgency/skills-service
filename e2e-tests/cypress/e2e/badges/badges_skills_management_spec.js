@@ -87,7 +87,7 @@ describe('Badges Tests', () => {
             }],
         ], 5, false, null, false);
 
-        cy.contains('.p-menuitem', 'Badges')
+        cy.contains('[data-cy="breadcrumbItemValue"]', 'Badges')
           .click();
         cy.contains('Test Badge')
           .should('exist');
@@ -114,7 +114,7 @@ describe('Badges Tests', () => {
           .click();
         cy.contains('No Skills Selected Yet');
 
-        cy.contains('.p-menuitem', 'Badges')
+        cy.contains('[data-cy="breadcrumbItemValue"]', 'Badges')
           .click();
         cy.contains('Test Badge')
           .should('exist');
@@ -834,7 +834,7 @@ describe('Badges Tests', () => {
         cy.wait(500);
         cy.wait('@loadSkills');
         cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
-        cy.contains('.p-menuitem', 'Badges')
+        cy.contains('[data-cy="breadcrumbItemValue"]', 'Badges')
           .click();
         cy.contains('Test Badge')
           .should('exist');
@@ -995,7 +995,7 @@ describe('Badges Tests', () => {
         cy.visit('/administrator/projects/proj1/badges/badge1');
         cy.get('[data-cy="deleteSkill_skill1"]').click();
         cy.contains('Remove Required Skill');
-        cy.get('[data-pc-name="rejectbutton"]').click();
+        cy.get('[data-pc-name="pcrejectbutton"]').click();
         cy.get('[data-cy="deleteSkill_skill1"]').should('have.focus');
     })
 });

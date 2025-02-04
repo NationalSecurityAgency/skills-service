@@ -86,6 +86,7 @@ const handleOnInput = (event) => {
              severity="error"
              variant="simple"
              size="small"
+             :closable="false"
              :data-cy="`${name}Error`"
              :id="`${name}Error`">{{ errorMessage || '' }}</Message>
   </div>
