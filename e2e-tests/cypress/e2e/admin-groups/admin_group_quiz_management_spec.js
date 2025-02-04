@@ -39,7 +39,7 @@ describe('Admin Group Quiz Management Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Quizzes and Surveys"] [data-cy="statValue"]').should('have.text', '0');
         cy.get('[data-cy="noContent"]')
         cy.get('[data-cy="quizSelector"]').click()
-        cy.get('li.p-dropdown-empty-message').contains('You currently do not administer any quizzes or surveys.').should('be.visible')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="emptymessage"]').contains('You currently do not administer any quizzes or surveys.').should('be.visible')
     });
 
     it('admin groups quiz page, add quiz to group', function () {
@@ -50,7 +50,7 @@ describe('Admin Group Quiz Management Tests', () => {
         cy.wait('@loadGroupQuizzes');
         cy.get('[data-cy="pageHeaderStat_Quizzes and Surveys"] [data-cy="statValue"]').should('have.text', '0');
         cy.get('[data-cy="noContent"]')
-        cy.get('span.p-dropdown-label.p-inputtext').contains('Search available quizzes and surveys...').should('be.visible')
+        cy.get('[data-cy="quizSelector"] [data-pc-section="label"]').contains('Search available quizzes and surveys...').should('be.visible')
         cy.get('[data-cy="quizSelector"]').click()
         cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
 
@@ -62,7 +62,7 @@ describe('Admin Group Quiz Management Tests', () => {
             }],
         ], 5);
         cy.get('[data-cy="quizSelector"]').click()
-        cy.get('li.p-dropdown-empty-message').contains('All of your available quizzes and surveys have already been assigned to this admin group.').should('be.visible')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="emptymessage"]').contains('All of your available quizzes and surveys have already been assigned to this admin group.').should('be.visible')
     });
 
     it('admin groups quiz page, remove quiz from group', function () {

@@ -56,6 +56,11 @@ const colorScheme = {
 const button = {
     colorScheme: {
         light: {
+            root: {
+                info: {
+                    background: '{sky.700}',
+                }
+            },
             outlined: {
                 info: {
                     borderColor: '{sky.300}',
@@ -79,7 +84,7 @@ const button = {
                 help: {
                     borderColor: '{purple.300}',
                     color: '{purple.800}'
-                }
+                },
             },
         },
     }

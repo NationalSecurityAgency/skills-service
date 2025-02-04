@@ -162,7 +162,7 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.disabled')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).click();
-        cy.get(`[data-pc-section="filterinput"]`).type('s');
+        cy.get(`[data-pc-name="pcfilter"]`).type('s');
         cy.get(`[data-cy="subjectSelectionItem-proj1-subj2"]`).click()
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.enabled')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
@@ -217,7 +217,7 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.disabled')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).click();
-        cy.get(`[data-pc-section="filterinput"]`).type('s');
+        cy.get(`[data-pc-name="pcfilter"]`).type('s');
         cy.get(`[data-cy="subjectSelectionItem-proj1-subj2"]`).click()
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.enabled')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
@@ -304,7 +304,7 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '1')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).click();
-        cy.get(`[data-pc-section="filterinput"]`).type('s');
+        cy.get(`[data-pc-name="pcfilter"]`).type('s');
         cy.get(`[data-cy="subjectSelectionItem-proj1-subj1"]`).click()
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
 
@@ -312,7 +312,7 @@ describe('Approver Config Skills Tests', () => {
 
         // re-add again
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).click();
-        cy.get(`[data-pc-section="filterinput"]`).type('s');
+        cy.get(`[data-pc-name="pcfilter"]`).type('s');
         cy.get(`[data-cy="subjectSelectionItem-proj1-subj1"]`).click()
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
 
@@ -345,7 +345,7 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '2')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).click();
-        cy.get(`[data-pc-section="filterinput"]`).type('s');
+        cy.get(`[data-pc-name="pcfilter"]`).type('s');
         cy.get(`[data-cy="subjectSelectionItem-proj1-subj1"]`).click()
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
 
