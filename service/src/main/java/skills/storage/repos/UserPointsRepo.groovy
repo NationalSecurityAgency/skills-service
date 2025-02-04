@@ -47,6 +47,17 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     toDef.copied_from_skill_ref = up.skill_ref_id and
                     toDef.copied_from_skill_ref = fromDef.id and
                     up.skill_ref_id in (:fromSkillRefIds)
+                   and (not exists(
+                        select 1
+                        from settings s
+                        where s.project_id = skill.project_id
+                          and s.setting = 'user_community' and s.value = 'true'
+                       ) or (exists(
+                        select 1
+                        from user_tags ut
+                        where ut.user_id = q_attempt.user_id
+                          and ut.key = :userCommunityUserTagKey and ut.value = :userCommunityUserTagValue
+                       )))     
                     and not exists(
                         select 1
                         from user_points innerUP
