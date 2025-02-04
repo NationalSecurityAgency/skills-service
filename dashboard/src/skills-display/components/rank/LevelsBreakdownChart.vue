@@ -41,7 +41,12 @@ onMounted(() => {
     }
   })
 })
-
+const chartAxisColor = () => {
+  if (themeState.theme.charts.axisLabelColor) {
+    return themeState.theme.charts.axisLabelColor
+  }
+  return themeHelper.isDarkTheme ? 'white' : undefined
+}
 const usersPerLevelLoading = ref(true)
 const usersPerLevel = ref({})
 const loadData = () => {
@@ -118,9 +123,6 @@ const chartOptions = ref({
       offsetY: -38
     }
   },
-  tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
-  },
   annotations: {
     points: []
   },
@@ -146,7 +148,7 @@ const chartOptions = ref({
     labels: {
       rotate: -45,
       style: {
-        colors: themeState.theme.charts.axisLabelColor
+        colors: chartAxisColor()
       }
     }
   },
@@ -161,7 +163,7 @@ const chartOptions = ref({
     },
     labels: {
       style: {
-        colors: [themeState.theme.charts.axisLabelColor]
+        colors: chartAxisColor()
       },
       formatter: function format(val) {
         if (val === Infinity) {
