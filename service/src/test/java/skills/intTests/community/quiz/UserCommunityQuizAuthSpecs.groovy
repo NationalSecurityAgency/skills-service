@@ -708,12 +708,12 @@ class UserCommunityQuizAuthSpecs extends DefaultIntSpec {
 
         userPerformedSkillsP1.userId == [pristineDragonsUser.userName]
         userPerformedSkillsP1.skillId == [skillWithQuizP1.skillId]
-        userPerformedSkillsP2.userId.sort() == [allDragonsUser.userName, pristineDragonsUser.userName]
+        userPerformedSkillsP2.userId.sort() == [allDragonsUser.userName, pristineDragonsUser.userName].sort()
         userPerformedSkillsP2.skillId == [skillWithQuizP2.skillId, skillWithQuizP2.skillId]
 
         userEventsP1.userId == [pristineDragonsUser.userName]
         userEventsP1.skillRefId == [skillDefRepo.findByProjectIdAndSkillId(p1.projectId, skillWithQuizP1.skillId).id]
-        userEventsP2.userId.sort() == [allDragonsUser.userName, pristineDragonsUser.userName]
+        userEventsP2.userId.sort() == [allDragonsUser.userName, pristineDragonsUser.userName].sort()
         Integer skillP2Id = skillDefRepo.findByProjectIdAndSkillId(p2.projectId, skillWithQuizP2.skillId).id
         userEventsP2.skillRefId == [skillP2Id, skillP2Id]
 
