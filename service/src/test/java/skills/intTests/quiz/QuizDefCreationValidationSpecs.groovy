@@ -211,5 +211,15 @@ class QuizDefCreationValidationSpecs extends DefaultIntSpec {
         skillsClientException.message.contains("Not supported quiz type [Some] please select one from [Survey, Quiz]")
     }
 
+    def "quiz creation returns created date"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+
+        when:
+        def createdQuiz = skillsService.createQuizDef(quiz1).body
+
+        then:
+        createdQuiz.quizId == quiz1.quizId
+        createdQuiz.created
+    }
 }
 
