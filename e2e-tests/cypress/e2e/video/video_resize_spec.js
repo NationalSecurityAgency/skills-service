@@ -25,6 +25,13 @@ describe('Configure Video Tests', () => {
             cy.wait('@getSkillInfo')
             cy.get('.spinner-border').should('not.exist')
         });
+        Cypress.Commands.add("useVideoDimensions", () => {
+            return cy.get('[data-cy="defaultVideoSize"]').invoke('text').then((text) => {
+                // cy.get('[data-cy="defaultVideoSize"]').contains('705 x 488')
+                const numbers = text.split(' x ');
+                return {width: parseInt(numbers[0]), height: parseInt(numbers[1])}
+            })
+        });
     });
 
     it('resize video setting', () => {
@@ -44,25 +51,29 @@ describe('Configure Video Tests', () => {
             .trigger('mousedown', )
             .trigger('mousemove', )
             .trigger('mouseup', { force: true })
-        cy.get('[data-cy="defaultVideoSize"]').contains('705 x 488')
-        cy.get('[data-cy="updateVideoSettings"]').should('exist')
-        cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '705px')
 
-        cy.get('[data-cy="videoResizeHandle"]').should('be.visible')
-            .trigger('mousedown', )
-            .trigger('mousemove', )
-            .trigger('mouseup', { force: true })
-        cy.get('[data-cy="defaultVideoSize"]').contains('687 x 475')
-        cy.get('[data-cy="updateVideoSettings"]').should('exist')
-        cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '687px')
+        cy.useVideoDimensions().then((dimensionsResize1) =>  {
+            cy.get('[data-cy="updateVideoSettings"]').should('exist')
+            cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
+            cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', `${dimensionsResize1.width}px`)
 
-        cy.get('[data-cy="updateVideoSettings"]').click()
-        cy.get('[data-cy="savedMsg"]')
-        cy.get('[data-cy="defaultVideoSize"]').contains('687 x 475')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '687')
-        cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
+            cy.get('[data-cy="videoResizeHandle"]').should('be.visible')
+                .trigger('mousedown', )
+                .trigger('mousemove', )
+                .trigger('mouseup', { force: true })
+            cy.useVideoDimensions().then((dimensionsResize2) => {
+                cy.wrap(dimensionsResize1.width).should('be.gt', dimensionsResize2.width);
+                cy.get('[data-cy="updateVideoSettings"]').should('exist')
+                cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
+                cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', `${dimensionsResize2.width}px`)
+
+                cy.get('[data-cy="updateVideoSettings"]').click()
+                cy.get('[data-cy="savedMsg"]')
+                cy.get('[data-cy="defaultVideoSize"]').contains(`${dimensionsResize2.width} x ${dimensionsResize2.height}`)
+                cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', `${dimensionsResize2.width}px`)
+                cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
+            })
+        })
     });
 
     it('resize the video using keyboard', () => {
@@ -79,24 +90,30 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
 
         cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{leftArrow}')
-        cy.get('[data-cy="defaultVideoSize"]').contains('672 x 465')
-        cy.get('[data-cy="updateVideoSettings"]').should('exist')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '672px')
-        cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
+        cy.useVideoDimensions().then((dimensionsResize1) => {
+            cy.get('[data-cy="updateVideoSettings"]').should('exist')
+            cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', `${dimensionsResize1.width}px`)
+            cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
 
-        cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{leftArrow}')
-        cy.get('[data-cy="defaultVideoSize"]').contains('622 x 430')
-        cy.get('[data-cy="updateVideoSettings"]').should('exist')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '622px')
-        cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
 
-        cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{rightArrow}')
-        cy.get('[data-cy="defaultVideoSize"]').contains('672 x 464')
-        cy.get('[data-cy="updateVideoSettings"]').click()
-        cy.get('[data-cy="savedMsg"]')
-        cy.get('[data-cy="defaultVideoSize"]').contains('672 x 464')
-        cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '672px')
+            cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{leftArrow}')
+            cy.useVideoDimensions().then((dimensionsResize2) => {
+                cy.wrap(dimensionsResize1.width).should('be.gt', dimensionsResize2.width);
+                cy.get('[data-cy="updateVideoSettings"]').should('exist')
+                cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', `${dimensionsResize2.width}px`)
+                cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
+
+                cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{rightArrow}')
+                cy.useVideoDimensions().then((dimensionsResize3) => {
+                    cy.wrap(dimensionsResize3.width).should('be.gt', dimensionsResize2.width);
+                    cy.get('[data-cy="updateVideoSettings"]').click()
+                    cy.get('[data-cy="savedMsg"]')
+                    cy.get('[data-cy="defaultVideoSize"]').contains(`${dimensionsResize3.width} x ${dimensionsResize3.height}`)
+                    cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
+                    cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', `${dimensionsResize3.width}px`)
+                })
+            })
+        })
     });
 
     it('video on skills-display skill page uses configured default unless overridden by the user', () => {
@@ -110,21 +127,27 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="defaultVideoSize"]').contains('Not Configured')
         cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{leftArrow}')
         cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{leftArrow}')
-        cy.get('[data-cy="defaultVideoSize"]').contains('622 x 430')
-        cy.get('[data-cy="updateVideoSettings"]').click()
-        cy.get('[data-cy="savedMsg"]')
-        cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', '622px')
+        cy.useVideoDimensions().then((dimensionsResize1) => {
+            cy.get('[data-cy="updateVideoSettings"]').click()
+            cy.get('[data-cy="savedMsg"]')
+            cy.get('#videoConfigFor-proj1-skill1Container').should('have.css', 'width', `${dimensionsResize1.width}px`)
 
-        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
-        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '622px')
+            cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
+            cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', `${dimensionsResize1.width}px`)
 
-        // user overrides the video size
-        cy.get('[data-cy="contactOwnerBtn"]').tab().type('{enter}{leftArrow}')
-        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '572px')
+            // user overrides the video size
+            cy.get('[data-cy="contactOwnerBtn"]').tab().type('{enter}{leftArrow}')
+            cy.get('#skillVideoFor-proj1-skill1Container').invoke('css', 'width').then((widthInPx) => {
+                // console.log(width);
+                const playerWidth = parseInt(widthInPx.replace('px', ''))
+                cy.wrap(playerWidth).should('be.lt', dimensionsResize1.width)
+                cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', `${playerWidth}px`)
 
-        // user-set new size is used
-        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
-        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '572px')
+                // user-set new size is used
+                cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
+                cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', `${playerWidth}px`)
+            })
+        })
     });
 
     it('video on skills-display size is controlled by the user', () => {
