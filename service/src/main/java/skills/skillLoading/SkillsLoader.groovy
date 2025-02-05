@@ -1015,13 +1015,20 @@ class SkillsLoader {
         if (skillsRes && version >= 500) {
             points = skillsRes ? skillsRes.collect({ it.points }).sum() as Integer : 0
             todaysPoints = skillsRes ? skillsRes.collect({ it.todaysPoints }).sum() as Integer : 0
-            skillsAchieved = skillsRes ? skillsRes.collect({ it.points == it.totalPoints ? 1 : 0 }).sum() as Integer : 0
+            List<SkillSummary> flattenChildSkills = skillsRes ? (List<SkillSummary>)skillsRes.collect {
+                if (it instanceof SkillsSummaryGroup) {
+                    return it.children ?: []
+                }
+                return it
+            }.flatten() : []
+            skillsAchieved = flattenChildSkills ? flattenChildSkills.collect({SkillSummary skillSummary -> skillSummary.points == skillSummary.totalPoints ? 1 : 0 }).sum() as Integer : 0
+            totalSkills = flattenChildSkills ? flattenChildSkills.size() : 0
         } else {
             points = calculatePointsForSubject(projDef.projectId, userId, subjectDefinition)
             todaysPoints= calculateTodayPoints(userId, subjectDefinition)
-            skillsAchieved = achievedLevelRepository.countAchievedChildren(userId, projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
+            skillsAchieved = achievedLevelRepository.countAchievedChildSkills(userId, projDef.projectId, subjectDefinition.skillId)
+            totalSkills = skillDefRepo.countSkillChildren(projDef.projectId, subjectDefinition.skillId)
         }
-        totalSkills = skillDefRepo.getSkillsCountsForParentId(subjectDefinition.id)?.getEnabledSkillsCount() ?: 0
 
         // convert null result to 0
         points = points ?: 0
