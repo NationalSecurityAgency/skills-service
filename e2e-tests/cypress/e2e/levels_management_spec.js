@@ -163,7 +163,7 @@ describe('Levels Management Tests', () => {
             .should('be.disabled');
     });
 
-    it.only('warn if there are not enough points declared for a level', () => {
+    it('warn if there are not enough points declared for a level', () => {
         cy.intercept('/admin/projects/proj1/levels').as('getLevels')
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
