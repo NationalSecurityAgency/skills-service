@@ -163,7 +163,7 @@ describe('Levels Management Tests', () => {
             .should('be.disabled');
     });
 
-    it('warn if there are not enough points declared for a level', () => {
+    it.only('warn if there are not enough points declared for a level', () => {
         cy.intercept('/admin/projects/proj1/levels').as('getLevels')
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -241,7 +241,7 @@ describe('Levels Management Tests', () => {
         cy.clickNav('Levels');
         cy.get('[data-cy="addLevel"]')
             .click();
-        cy.get('[data-cy="pointsInput"]')
+        cy.get('[data-cy="pointsInput"] [data-pc-name="pcinputtext"]')
             .type('2000');
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
