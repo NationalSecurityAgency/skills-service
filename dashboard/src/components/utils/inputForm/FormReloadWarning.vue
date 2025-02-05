@@ -43,7 +43,7 @@ const handleDiscard = () => {
             data-cy="discardContentButton"
             label="Discard Restored"
             icon="fas fa-trash"
-            severity="warning"
+            severity="warn"
             size="small"
             @click="handleDiscard"
           />

@@ -59,7 +59,7 @@ const runAgain = () => {
       <div class="mb-1 mt-6 text-3xl">
         <span class="font-bold text-success mb-2 skills-page-title-text-color">{{ quizInfo.name }}</span>
         <div v-if="!needsGrading" class="text-3xl inline-block ml-2">
-          <Tag v-if="!quizResult.gradedRes.passed" class="uppercase text-2xl" severity="warning" data-cy="quizFailed"><i class="far fa-times-circle mr-1" aria-hidden="true"></i>Failed</Tag>
+          <Tag v-if="!quizResult.gradedRes.passed" class="uppercase text-2xl" severity="warn" data-cy="quizFailed"><i class="far fa-times-circle mr-1" aria-hidden="true"></i>Failed</Tag>
           <Tag v-if="quizResult.gradedRes.passed" class="uppercase text-2xl" severity="success" data-cy="quizPassed"><i class="fas fa-check-double mr-1" aria-hidden="true"></i>Passed</Tag>
         </div>
       </div>
@@ -74,7 +74,7 @@ const runAgain = () => {
               <i class="fas fa-hourglass-end"></i> Time Expired
             </div>
             <div class="text-muted-color mt-2" data-cy="subTitleMsg">
-              <span v-if="!quizResult.gradedRes.passed && quizResult.missedBy > 0 && !quizResult.outOfTime">Missed by <Tag severity="warning">{{ quizResult.missedBy }}</Tag> question{{ quizResult.missedBy > 1 ? 's' : '' }}</span>
+              <span v-if="!quizResult.gradedRes.passed && quizResult.missedBy > 0 && !quizResult.outOfTime">Missed by <Tag severity="warn">{{ quizResult.missedBy }}</Tag> question{{ quizResult.missedBy > 1 ? 's' : '' }}</span>
               <span v-else-if="!quizResult.gradedRes.passed && quizResult.outOfTime">You've run out of time!</span>
 
               <span v-else>Well done!</span>
@@ -123,8 +123,8 @@ const runAgain = () => {
             </span>
             </div>
             <div class="text-muted-color mt-2" data-cy="subTitle">
-              <span v-if="unlimitedAttempts">Unlimited Attempts - <Tag severity="warning">{{ quizInfo.userNumPreviousQuizAttempts  + 1 }}</Tag> attempt so far</span>
-              <span v-if="!unlimitedAttempts">Used <Tag severity="warning">{{ quizInfo.userNumPreviousQuizAttempts  + 1 }}</Tag> out of <Tag severity="success">{{ quizInfo.maxAttemptsAllowed }}</Tag> attempts</span>
+              <span v-if="unlimitedAttempts">Unlimited Attempts - <Tag severity="warn">{{ quizInfo.userNumPreviousQuizAttempts  + 1 }}</Tag> attempt so far</span>
+              <span v-if="!unlimitedAttempts">Used <Tag severity="warn">{{ quizInfo.userNumPreviousQuizAttempts  + 1 }}</Tag> out of <Tag severity="success">{{ quizInfo.maxAttemptsAllowed }}</Tag> attempts</span>
             </div>
           </template>
         </Card>

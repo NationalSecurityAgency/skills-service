@@ -195,7 +195,7 @@ describe('Import Skills under a Group Tests', () => {
         cy.get('[data-cy="deleteSkillButton_skill1"]')
             .click();
         cy.get('[data-cy="currentValidationText"]')
-            .type('Delete Me');
+            .type('Delete Me', {delay: 0});
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [

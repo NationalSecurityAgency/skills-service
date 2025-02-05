@@ -174,13 +174,13 @@ const isReuseBtnDisabled = computed(() => {
             </Message>
           </div>
           <div v-if="skillsForReuse.alreadyExist.length > 0">
-            <Tag severity="warning">{{ skillsForReuse.alreadyExist.length }}</Tag>
+            <Tag severity="warn">{{ skillsForReuse.alreadyExist.length }}</Tag>
             selected skill{{ pluralSupport.pluralWithHave(skillsForReuse.alreadyExist) }} <span
             class="text-primary font-weight-bold">already</span> been reused in that <span
             v-if="destination.groupName">group</span><span v-else>subject</span>!
           </div>
           <div v-if="skillsForReuse.skillsWithDeps.length > 0">
-            <Tag severity="warning">{{ skillsForReuse.skillsWithDeps.length }}</Tag>
+            <Tag severity="warn">{{ skillsForReuse.skillsWithDeps.length }}</Tag>
             selected skill{{ pluralSupport.pluralWithHave(skillsForReuse.skillsWithDeps) }} other skill
             dependencies, reusing skills with dependencies is not allowed!
           </div>
@@ -194,7 +194,7 @@ const isReuseBtnDisabled = computed(() => {
           icon="far fa-times-circle"
           outlined
           class="mr-2"
-          severity="warning"
+          severity="warn"
           data-cy="closeButton"
           @click="emits('on-cancel')" />
         <SkillsButton

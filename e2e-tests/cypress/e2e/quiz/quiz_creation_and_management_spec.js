@@ -432,7 +432,7 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="deleteQuizButton_quiz2"]').click()
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove This is survey 2 Survey')
-        cy.get('[data-cy="currentValidationText"]').type('Delete Me')
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
         cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.get(`${quizTableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', 3)

@@ -72,7 +72,7 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
               <QuizRunStatus :quiz-type="runInfo.quizType" :status="runInfo.status"/>
             </div>
             <div v-if="QuizStatus.isInProgress(runInfo.status)">
-              <Tag severity="warning">{{ numQuestionsAnswered }}</Tag>
+              <Tag severity="warn">{{ numQuestionsAnswered }}</Tag>
               /
               <Tag>{{ runInfo.numQuestions }}</Tag>
             </div>

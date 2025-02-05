@@ -215,7 +215,7 @@ const addSkillsToBadge = (navToNextStep) => {
                       icon="far fa-times-circle"
                       outlined
                       class="mr-2"
-                      severity="warning"
+                      severity="warn"
                       data-cy="closeButton"
                       @click="onCancel" />
                     <SkillsButton
@@ -249,7 +249,7 @@ const addSkillsToBadge = (navToNextStep) => {
                     </Message>
                     <div
                       v-if="skillsForBadge.skillsWithLearningPathViolations.length === 0 && skillsForBadge.alreadyExist.length > 0">
-                      <Tag severity="warning">{{ skillsForBadge.alreadyExist.length }}</Tag>
+                      <Tag severity="warn">{{ skillsForBadge.alreadyExist.length }}</Tag>
                       selected skill{{ pluralSupport.pluralWithHave(skillsForBadge.alreadyExist) }} <span
                       class="text-primary font-weight-bold">already</span> been added to that badge!
                     </div>
@@ -274,7 +274,7 @@ const addSkillsToBadge = (navToNextStep) => {
                       icon="far fa-times-circle"
                       outlined
                       class="mr-2"
-                      severity="warning"
+                      severity="warn"
                       data-cy="closeButton"
                       @click="onCancel" />
                     <SkillsButton

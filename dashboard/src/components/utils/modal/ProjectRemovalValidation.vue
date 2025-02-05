@@ -187,7 +187,7 @@ const hasUsers = computed(() => {
                   <label for="stepOneCheck" class="ml-2">I understand that this is permanent and cannot be undone</label>
                 </div>
                 <div class="flex mt-2 w-full justify-end">
-                  <SkillsButton label="Cancel" icon="far fa-times-circle" outlined class="mr-2" severity="warning" data-cy="closeButton" @click="publishHidden" />
+                  <SkillsButton label="Cancel" icon="far fa-times-circle" outlined class="mr-2" severity="secondary" data-cy="closeButton" @click="publishHidden" />
                   <SkillsButton label="Next" icon="fas fa-arrow-circle-right float-right" @click="activateCallback('2')" :disabled="!confirmStepOne" data-cy="firstNextButton"/>
                 </div>
               </div>
@@ -216,7 +216,7 @@ const hasUsers = computed(() => {
                   <label for="stepTwoCheck" class="ml-2">I understand that this project will be deleted for ALL users.</label>
                 </div>
                 <div class="flex mt-2 w-full justify-end">
-                  <SkillsButton label="Cancel" icon="far fa-times-circle" outlined class="mr-2" severity="warning" data-cy="closeButton" @click="publishHidden" />
+                  <SkillsButton label="Cancel" icon="far fa-times-circle" outlined class="mr-2" severity="secondary" data-cy="closeButton" @click="publishHidden" />
                   <SkillsButton label="Next" icon="fas fa-arrow-circle-right" @click="activateCallback('3')" :disabled="!confirmStepTwo" data-cy="secondNextButton" />
                 </div>
               </div>
@@ -235,8 +235,8 @@ const hasUsers = computed(() => {
                          aria-label="Type 'Delete This Project' text here to enable the removal operation. Please make sure that 'D' and 'M' are uppercase." />
             </div>
             <div class="flex mt-2 w-full justify-end">
-              <SkillsButton label="Cancel" icon="far fa-times-circle" outlined class="mr-2" severity="warning" data-cy="closeButton" @click="publishHidden" />
-              <SkillsButton label="Delete" @click="removeAction" :disabled="removeDisabled" data-cy="deleteProjectButton" />
+              <SkillsButton label="Cancel" icon="far fa-times-circle" outlined class="mr-2" severity="secondary" data-cy="closeButton" @click="publishHidden" />
+              <SkillsButton label="Delete" icon="fas fa-trash-alt" @click="removeAction" :disabled="removeDisabled" data-cy="deleteProjectButton" severity="danger"/>
             </div>
           </StepPanel>
         </StepPanels>

@@ -71,10 +71,10 @@ const manuallyGradedInfo = computed(() => {
   <div data-cy="questionDisplayCard">
     <div :data-cy="`questionDisplayCard-${questionNum}`">
       <div v-if="needsGrading" class="flex flex-row" data-cy="noAnswer">
-        <Tag severity="warning" class="uppercase" data-cy="needsGradingTag"><i class="fas fa-user-check mr-1" aria-hidden="true"></i> Needs Grading</Tag>
+        <Tag severity="warn" class="uppercase" data-cy="needsGradingTag"><i class="fas fa-user-check mr-1" aria-hidden="true"></i> Needs Grading</Tag>
       </div>
       <div v-if="!hasAnswer" class="flex flex-row" data-cy="noAnswer">
-        <Tag severity="warning">No Answer</Tag>
+        <Tag severity="warn">No Answer</Tag>
       </div>
       <div class="flex flex-row flex-wrap gap-0 mb-4">
         <div class="col-auto py-4 pr-2">

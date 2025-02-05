@@ -282,11 +282,10 @@ const toDate = (value) => {
         <div>
           <div v-if="badges && badges.length"
                id="badgeCards"
-               class="grid grid-cols-12 gap-4">
+               class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4">
             <div v-for="(badge) of badges"
                  :id="badge.badgeId"
-                 :key="badge.badgeId"
-                 class="col-span-12 xl:col-span-6 xlPlus:col-4 xlPlusPlus:col-3">
+                 :key="badge.badgeId">
               <BlockUI :blocked="sortOrder.loading">
                 <div class="absolute z-50 top-1/2 w-full text-center" v-if="sortOrder.loading" :data-cy="`${badge.badgeId}_overlayShown`">
                   <div v-if="badge.badgeId===sortOrder.loadingBadgeId" data-cy="updatingSortMsg">

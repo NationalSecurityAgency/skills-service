@@ -216,7 +216,7 @@ const dialogUtils = useDialogUtils()
                       icon="far fa-times-circle"
                       outlined
                       class="mr-2"
-                      severity="warning"
+                      severity="warn"
                       data-cy="closeButton"
                       @click="onCancel" />
                     <SkillsButton

@@ -91,7 +91,7 @@ const submit = handleSubmit(formValues => {
           icon="fas fa-times-circle"
           outlined
           size="small"
-          severity="warning"
+          severity="warn"
           :disabled="isSubmitting"
           class="uppercase mr-1 skills-theme-btn"
           data-cy="selfReportApprovalCancelBtn"

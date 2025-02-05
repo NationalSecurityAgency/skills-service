@@ -208,8 +208,8 @@ describe('Levels Management Tests', () => {
 
         cy.get('[data-cy="addLevel"]')
             .click();
-        cy.get('[data-cy="pointsInput"]')
-            .type('2000');
+        cy.get('[data-cy="pointsInput"] [data-pc-name="pcinputtext"]')
+            .type('2000', {delay: 0});
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
 
@@ -242,7 +242,7 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy="addLevel"]')
             .click();
         cy.get('[data-cy="pointsInput"] [data-pc-name="pcinputtext"]')
-            .type('2000');
+            .type('2000', {delay: 0});
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
 

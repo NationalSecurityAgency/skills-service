@@ -625,7 +625,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
                 <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
                   <div>Default Video Size:</div>
                   <div>
-                    <span class="text-primary" data-cy="defaultVideoSize">{{ configuredResolution }}</span> <Tag v-if="unsavedVideoSizeChanges" severity="warning" data-cy="unsavedVideoSizeChanges"><i class="fas fa-exclamation-circle mr-1" aria-hidden="true"></i>Unsaved Changes</Tag>
+                    <span class="text-primary" data-cy="defaultVideoSize">{{ configuredResolution }}</span> <Tag v-if="unsavedVideoSizeChanges" severity="warn" data-cy="unsavedVideoSizeChanges"><i class="fas fa-exclamation-circle mr-1" aria-hidden="true"></i>Unsaved Changes</Tag>
                     <div class="text-sm italic">** Change the size by dragging the handle at the bottom right of the video and click Save Changes button.</div>
                   </div>
                 </div>

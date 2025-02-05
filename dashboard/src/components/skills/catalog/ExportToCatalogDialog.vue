@@ -217,13 +217,13 @@ const dialogUtils = useDialogUtils()
                 <li v-for="dupSkill in notExportableSkills" :key="dupSkill.skillId"
                     :data-cy="`dupSkill-${dupSkill.skillId}`" class="leading-loose">
                   {{ dupSkill.name }}
-                  <Tag severity="warning" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">
+                  <Tag severity="warn" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">
                     Name Conflict
                   </Tag>
-                  <Tag severity="warning" v-if="dupSkill.skillIdConflictsWithExistingCatalogSkill" class="ml-1">ID
+                  <Tag severity="warn" v-if="dupSkill.skillIdConflictsWithExistingCatalogSkill" class="ml-1">ID
                     Conflict
                   </Tag>
-                  <Tag severity="warning" v-if="dupSkill.hasDependencies" class="ml-1">Has Prerequisites
+                  <Tag severity="warn" v-if="dupSkill.hasDependencies" class="ml-1">Has Prerequisites
                   </Tag>
                 </li>
               </ul>
@@ -241,7 +241,7 @@ const dialogUtils = useDialogUtils()
             <SkillsButton
               label="Cancel"
               icon="far fa-times-circle"
-              severity="warning"
+              severity="warn"
               size="small"
               outlined
               class="mr-2"

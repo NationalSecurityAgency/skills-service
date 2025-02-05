@@ -189,13 +189,12 @@ const sortOrderUpdate = (updateEvent) => {
                        :aria-label="'new subject'"/>
       <jump-to-skill />
       <div v-if="subjectsState.subjects && subjectsState.subjects.length"
-           class="grid grid-cols-12 gap-4"
+           class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4"
            id="subjectCards"
            data-cy="subjectCards">
         <div v-for="(subject) of subjectsState.subjects"
              :key="subject.subjectId"
              :id="subject.subjectId"
-             class="col-span-12 xl:col-span-6 xlPlus:col-4 xlPlusPlus:col-3"
              :data-cy="`${subject.subjectId}_card`">
           <BlockUI :blocked="sortOrder.loading" class="h-full">
               <div class="absolute z-50 top-1/2 w-full text-center" v-if="sortOrder.loading" :data-cy="`${subject.subjectId}_overlayShown`">

@@ -404,7 +404,7 @@ const dialogUtils = useDialogUtils()
         <SkillsButton
           label="Cancel"
           icon="fas fa-times"
-          severity="warning"
+          severity="warn"
           size="small"
           class="mr-2"
           outlined
