@@ -36,4 +36,12 @@ class AttachmentValidator {
             throw new SkillException("Invalid media type [${contentType}]", ErrorCode.BadParam)
         }
     }
+
+    static boolean isAllowedAttachmentMimeTypeBoolean(String contentType, List<MediaType> allowedAttachmentMimeTypes) {
+        boolean foundAllowedMediaType = false
+        try {
+            foundAllowedMediaType = allowedAttachmentMimeTypes.contains(MediaType.parseMediaType(contentType))
+        } catch (Exception e) { }
+        return foundAllowedMediaType
+    }
 }

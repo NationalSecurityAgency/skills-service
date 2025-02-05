@@ -194,7 +194,7 @@ const skillId = computed(() => {
           <span v-if="skill.selfReporting.type === 'Approval'" data-cy="selfReportApprovalTag"><span
             class="sr-spelled-out mr-1">Request</span>Approval</span>
           <span v-if="skill.selfReporting.type === 'Video'" data-cy="selfReportApprovalTag"><span
-            class="sr-spelled-out mr-1">Watch</span>Video</span>
+            class="sr-spelled-out mr-1">Watch </span>Video/<span class="sr-spelled-out mr-1">Listen to </span>Audio</span>
         </Tag>
         <Tag v-if="showLastViewedIndicator" id="lastViewedIndicator"
              data-cy="lastViewedIndicator" severity="info"

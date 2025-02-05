@@ -75,6 +75,7 @@ onMounted(() => {
   const player = videojs(vidPlayerId, {
     playbackRates: [0.5, 1, 1.5, 2],
     enableSmoothSeeking: true,
+    audioOnlyMode: props.options.isAudio,
   }, () => {
     player.on('durationchange', () => {
       watchProgress.value.videoDuration = player.duration();
@@ -147,6 +148,9 @@ const updateResizableInfo = () => {
   emit('on-resize', width, height);
 }
 const createResizeSupport = () => {
+  if(props.options.isAudio) {
+    return
+  }
   function makeResizableDiv() {
     const handle = document.querySelectorAll( `#${vidPlayerId}ResizeHandle`)[0]
 
@@ -184,7 +188,7 @@ const createResizeSupport = () => {
     <div :class="{ 'flex-1' : !isConfiguredVideoSize }">
   <div :id="`${vidPlayerId}Container`" data-cy="videoPlayer"  :style="playerWidth ? `width: ${playerWidth}px;` : ''"
        class="videoPlayerContainer p-0 border rounded border-surface-200 dark:border-surface-600">
-      <i v-if="!isPlaying"
+      <i v-if="!isPlaying && !options.isAudio"
          class="fas fa-expand-alt fa-rotate-90 handle border border-surface-500 dark:border-surface-300 p-1 text-primary bg-primary-contrast rounded-border"
          :id="`${vidPlayerId}ResizeHandle`"
          data-cy="videoResizeHandle"

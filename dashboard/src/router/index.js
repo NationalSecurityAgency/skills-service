@@ -648,7 +648,7 @@ const routes = [
       meta: {
         requiresAuth: true,
         announcer: {
-          message: 'Configure Video',
+          message: 'Configure Media',
         },
       },
       props: true,

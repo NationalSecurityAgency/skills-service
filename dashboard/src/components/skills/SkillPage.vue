@@ -82,7 +82,7 @@ const navItems = ref([])
 const buildNavItems = () => {
   const items = []
   items.push({ name: 'Overview', iconClass: 'fa-info-circle skills-color-overview', page: 'SkillOverview' })
-  items.push({ name: 'Video', iconClass: 'fa-video skills-color-video', page: 'ConfigureVideo' })
+  items.push({ name: 'Audio/Video', iconClass: 'fa-play-circle skills-color-video', page: 'ConfigureVideo' })
   items.push({
     name: 'Expiration',
     iconClass: 'fa-hourglass-end skills-color-expiration',

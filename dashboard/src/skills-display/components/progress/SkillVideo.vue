@@ -82,6 +82,7 @@ const videoConf = computed(() => {
     videoId: props.skill.skillId,
     url: props.skill.videoSummary.videoUrl,
     videoType: props.skill.videoSummary.videoType ? props.skill.videoSummary.videoType : null,
+    isAudio: props.skill.videoSummary.videoType ? props.skill.videoSummary.videoType.includes('audio/') : null,
     captionsUrl,
     width: props.skill.videoSummary.width,
     height: props.skill.videoSummary.height,
