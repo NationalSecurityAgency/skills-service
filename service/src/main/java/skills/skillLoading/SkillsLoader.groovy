@@ -1016,13 +1016,12 @@ class SkillsLoader {
             points = skillsRes ? skillsRes.collect({ it.points }).sum() as Integer : 0
             todaysPoints = skillsRes ? skillsRes.collect({ it.todaysPoints }).sum() as Integer : 0
             skillsAchieved = skillsRes ? skillsRes.collect({ it.points == it.totalPoints ? 1 : 0 }).sum() as Integer : 0
-            totalSkills = skillsRes ? skillsRes.size() : 0
         } else {
             points = calculatePointsForSubject(projDef.projectId, userId, subjectDefinition)
             todaysPoints= calculateTodayPoints(userId, subjectDefinition)
             skillsAchieved = achievedLevelRepository.countAchievedChildren(userId, projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
-            totalSkills = skillDefRepo.countChildren(projDef.projectId, subjectDefinition.skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
         }
+        totalSkills = skillDefRepo.getSkillsCountsForParentId(subjectDefinition.id)?.getEnabledSkillsCount() ?: 0
 
         // convert null result to 0
         points = points ?: 0
