@@ -79,7 +79,7 @@ const contactProjAdmins = (projInfo) => {
               <div class="flex-1">
                 <div>{{ slotProps.data.importingProjectName }}</div>
                 <div v-if="slotProps.data.enabled !== 'true'" class="uppercase">
-                  <Tag severity="warning">Disabled</Tag>
+                  <Tag severity="warn">Disabled</Tag>
                 </div>
               </div>
               <div class="">

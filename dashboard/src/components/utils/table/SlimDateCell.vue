@@ -33,7 +33,7 @@ const isToday = (timestamp) => {
 
 <template>
     <span v-if="!value" class="text-primary">
-      <Badge severity="warning">Never</Badge>
+      <Badge severity="warn">Never</Badge>
     </span>
   <span v-else-if="isToday(value)" class="text-primary">
       <Badge severity="info">Today</Badge>

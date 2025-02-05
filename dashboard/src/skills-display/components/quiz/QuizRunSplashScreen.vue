@@ -111,8 +111,8 @@ const start = () => {
 
         <Message v-if="onlyIncorrect" data-cy="onlyIncorrectMessage">
           You only need to retake the questions you did not answer correctly on your last attempt.
-          <span v-if="!quizInfo.userQuizPassed">You've already answered <Tag severity="success">{{ numberCorrect }}</Tag> correctly, so you need to answer <Tag severity="warning">{{ remainingQuestions }}</Tag> question(s) to pass.</span>
-          <span v-else>You need to answer <Tag severity="warning">{{ remainingQuestions }}</Tag> question(s) to pass.</span>
+          <span v-if="!quizInfo.userQuizPassed">You've already answered <Tag severity="success">{{ numberCorrect }}</Tag> correctly, so you need to answer <Tag severity="warn">{{ remainingQuestions }}</Tag> question(s) to pass.</span>
+          <span v-else>You need to answer <Tag severity="warn">{{ remainingQuestions }}</Tag> question(s) to pass.</span>
         </Message>
 
         <div class="flex flex-wrap flex-col md:flex-row gap-6 pt-2">

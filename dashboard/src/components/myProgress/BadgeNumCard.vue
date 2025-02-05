@@ -48,7 +48,7 @@ const myProgress = computed(() => myProgressState.myProgress)
       </div>
       <div v-if="myProgress.gemCount > 0">
         <Tag
-          severity="warning"
+          severity="warn"
           class="mt-1"
           data-cy="numAchievedGemBadges">Gems:
           {{ myProgress.numAchievedGemBadges }} /

@@ -206,7 +206,9 @@ defineExpose({
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center justify-center mt-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center justify-center mt-2" :class="{
+          'lg:grid-cols-4' : !projectsState.shouldTileProjectsCards,
+        }">
           <div v-for="(stat) in stats" :key="stat.label" class="col mt-1" style="min-width: 10rem;">
             <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="h-full rounded-border border border-surface-300 dark:border-surface-500 stat-card bg-surface-100 dark:bg-surface-700">
               <i :class="stat.icon" aria-hidden="true" class="text-xl text-primary"/>
@@ -291,13 +293,13 @@ defineExpose({
 }
 
 .sort-control {
-  font-size: 1.3rem !important;
+  font-size: 1.1rem !important;
   top: 0rem;
   right: 0rem;
   border-bottom-left-radius:.25rem!important
 }
 
 .sort-control:hover, .sort-control i:hover {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 </style>

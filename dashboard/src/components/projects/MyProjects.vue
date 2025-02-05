@@ -287,14 +287,14 @@ const createNewProject = () => {
 
     <div v-if="hasData" id="projectCards"
          :class="{
-      'grid grid-cols-12 gap-4': projectsState.shouldTileProjectsCards,
+      'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4': projectsState.shouldTileProjectsCards,
       '': !projectsState.shouldTileProjectsCards
     }">
       <div v-for="project of projects"
            :key="project.projectId"
            class="mb-4"
            :class="{
-            'col-span-12 xl:col-span-6 xlPlus:col-4 xlPlusPlus:col-3': projectsState.shouldTileProjectsCards,
+            '': projectsState.shouldTileProjectsCards,
             '': !projectsState.shouldTileProjectsCards
             }"
            :id="project.projectId">

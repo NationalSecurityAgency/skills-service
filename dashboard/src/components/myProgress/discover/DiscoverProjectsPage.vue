@@ -282,7 +282,7 @@ const contactProject = (name, id) => {
                         outlined
                         class="ml-2"
                         size="small"
-                        severity="warning"
+                        severity="warn"
                         :data-cy="`removeBtn-${slotProps.data.projectId}`"
                         :loading="slotProps.data.loading"
                         :aria-label="`remove project ${slotProps.data.projectId} from my projects`"/>
