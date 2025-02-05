@@ -209,17 +209,11 @@ const notAllZeros = (data) => {
             display="chip"
             optionLabel="projectName"
             aria-label="Select projects"
+            placeholder="Select projects"
             class="w-full"
             :selection-limit="5"
             data-cy="eventHistoryChartProjectSelector">
-          <template #empty>
-            <div v-if="projects.selected.length === 5" class="ml-6" data-cy="trainingProfileMaximumReached">
-              Maximum of 5 options selected. First remove a selected option to select another.
-            </div>
-            <div v-else class="ml-6">
-              No results found
-            </div>
-          </template>
+
         </MultiSelect>
       </div>
       <MetricsOverlay :loading="loading" :has-data="hasData" :no-data-msg="noDataMessage">

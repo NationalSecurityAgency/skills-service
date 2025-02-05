@@ -1031,7 +1031,7 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy=removeLevel]').should('have.focus');
 
         cy.get('[data-cy=removeLevel]').click();
-        cy.get('[data-pc-section="closebutton"]').click();
+        cy.get('[data-pc-name="pcrejectbutton"]').click();
         cy.get('[data-cy=removeLevel]').should('have.focus');
 
         cy.get('[data-cy=removeLevel]').click();
