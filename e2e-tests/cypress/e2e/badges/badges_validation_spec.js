@@ -24,21 +24,15 @@ describe('Badges Tests', () => {
             .as('createProject');
 
         Cypress.Commands.add('gemNextMonth', () => {
-            cy.get('[data-cy="gemDates"] [data-pc-section="nextbutton"]')
-                .first()
-                .click();
+            cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-name="pcnextbutton"]').click()
             cy.wait(150);
         });
         Cypress.Commands.add('gemPrevMonth', () => {
-            cy.get('[data-cy="gemDates"] [data-pc-section="previousbutton"]')
-                .first()
-                .click();
+            cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-name="pcprevbutton"]').click()
             cy.wait(150);
         });
         Cypress.Commands.add('gemSetDay', (dayNum) => {
-            cy.get(`[data-cy="gemDates"] [data-pc-section="table"] [aria-label="${dayNum}"]`)
-              .not('[data-p-other-month="true"]')
-                .click();
+            cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="day"]').contains(`${dayNum}`).click()
         });
 
         cy.intercept('POST', '/admin/projects/proj1/badgeNameExists')

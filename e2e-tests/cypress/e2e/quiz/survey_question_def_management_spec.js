@@ -675,7 +675,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="questionDisplayCard-1"] [data-pc-name="rating"] [data-pc-section="option"]').should('have.length', 5)
 
         cy.get('[data-cy="copyQuestionButton_1"]').click();
-        cy.get('[data-cy="questionText"]').type(' With more description', {delay: 0})
+        cy.get('[data-cy="questionText"] .toastui-editor-ww-container .toastui-editor-contents').type(' With more description', {delay: 0})
         cy.get('[data-cy="ratingScaleSelect"]').click()
         cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('8').click();
         cy.get('[data-cy="saveDialogBtn"]').click()

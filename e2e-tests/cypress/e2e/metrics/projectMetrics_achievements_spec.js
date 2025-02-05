@@ -21,28 +21,22 @@ describe('Metrics Tests - Achievements', () => {
 
     beforeEach(() => {
         Cypress.Commands.add('filterNextMonth', () => {
-            cy.get('.p-datepicker [data-pc-section="nextbutton"]')
-                .first()
-                .click();
+            cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-name="pcnextbutton"]').click()
             cy.wait(150);
         });
         Cypress.Commands.add('filterPrevMonth', () => {
-            cy.get('.p-datepicker [data-pc-section="previousbutton"]')
-                .first()
-                .click();
+            cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-name="pcprevbutton"]').click()
             cy.wait(150);
         });
         Cypress.Commands.add('filterSetDay', (dayNum) => {
-            cy.get(`.p-datepicker [data-pc-section="table"] [aria-label="${dayNum}"]`)
-                .not('[data-p-other-month="true"]')
-                .click();
+            cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="day"]').contains(`${dayNum}`).click()
         });
         Cypress.Commands.add('filterSetYear', (yearNum) => {
-            cy.get('.p-datepicker-year').click()
-            cy.get('.p-yearpicker-year').contains(yearNum).click()
+            cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="selectyear"]').click()
+            cy.get('[data-pc-section="panel"] [data-pc-section="year"]').contains(yearNum).click()
         })
         Cypress.Commands.add('filterSetMonth', (month) => {
-            cy.get('.p-monthpicker-month').contains(month).click()
+            cy.get('[data-pc-section="panel"] [data-pc-section="month"]').contains(month).click()
         })
 
         cy.request('POST', '/app/projects/proj1', {
@@ -579,7 +573,7 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('[data-cy=achievementsNavigator-toDateInput]')
             .click();
         cy.wait(200);
-        cy.get('.p-datepicker [data-pc-section="table"] [aria-label="14"] > [data-pc-section="daylabel"]').should('have.class', 'p-disabled')
+        cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="day"]').contains('14').should('have.class', 'p-disabled')
         cy.wait(100);
 
         cy.get('[data-cy=achievementsNavigator-fromDateInput]').click();
@@ -835,8 +829,6 @@ describe('Metrics Tests - Achievements', () => {
             .click();
         cy.wait('@userAchievementsChartBuilder');
 
-        // const now = new Date(2020, 8, 12).getTime();
-        // cy.clock(now);
         cy.get('[data-cy=achievementsNavigator-fromDateInput]').click()
         cy.filterSetYear(2020);
         cy.filterSetMonth('Sep');

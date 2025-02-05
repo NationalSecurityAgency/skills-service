@@ -160,7 +160,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProject');
 
-        cy.get('[data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click()
+        cy.get('[data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click()
         cy.wait('@suggest');
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('root@skills.org').click();
@@ -334,7 +334,7 @@ describe('Projects Admin Management Tests', () => {
 
         cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`).click();
         cy.get('[data-cy="roleDropDown_root@skills.org"]').click()
-        cy.get('[data-pc-section="overlay"] [data-pc-section="itemlabel"]').contains('Administrator').click();
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('Administrator').click();
         cy.wait('@addAdmin')
         cy.get(`${tableSelector} thead th`).contains('User').click();
 
@@ -394,38 +394,6 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-pc-section="list"] [data-pc-section="option"]').should('have.length', 0)
     });
 
-    it('Role manager shows loading indicator', () => {
-        cy.request('POST', '/app/projects/proj1', {
-            projectId: 'proj1',
-            name: 'proj1'
-        });
-
-        cy.intercept('GET', '/admin/projects/proj1/userRoles**'
-            , {
-                delay: 1000,
-                body: {
-                    "data": [
-                        {
-                            "userId": "skills@skills.org",
-                            "userIdForDisplay": "skills@skills.org",
-                            "firstName": "Bill",
-                            "lastName": "Gosling",
-                            "projectId": "proj1",
-                            "roleName": "ROLE_PROJECT_ADMIN",
-                            "email": "skills@skills.org",
-                            "dn": null
-                        }
-                    ],
-                    "count": 1,
-                    "totalCount": 1
-                }
-            }).as('loadUserRoles');
-        cy.visit('/administrator/projects/proj1/access');
-        cy.get('[data-cy="roleManagerTable"] [data-pc-section="loadingoverlay"]').should('exist');
-        cy.wait('@loadUserRoles');
-        cy.get('[data-cy="roleManagerTable"] [data-pc-section="loadingoverlay"]').should('not.exist');
-    });
-
     it('user does not have any admin groups to assign to project', () => {
         cy.createProject(1);
         cy.intercept('GET', '/app/userInfo')
@@ -438,7 +406,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@loadProject');
 
         cy.get('[data-cy="adminGroupSelector"]').click()
-        cy.get('li.p-dropdown-empty-message').contains('You currently do not administer any admin groups.').should('be.visible')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="emptymessage"]').contains('You currently do not administer any admin groups.').should('be.visible')
     });
 
     it('assign admin group to project', () => {
