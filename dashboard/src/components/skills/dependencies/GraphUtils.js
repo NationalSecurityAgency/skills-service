@@ -36,7 +36,8 @@ export default {
         html += `<span style="font-style: italic; color: #444444">Skills:</span>`
         for (const [index, skillName] of skillNames.entries()) {
           html += `<br/><span style="padding: 1rem;">${skillName}</span>`
-          if (index >= 9) {
+          if (index >= 9 && skillNames.length > 11) {
+            // stop at 10 and truncate if there's more than 11
             html += `<br/><span style="padding: 1rem;">and ${skillNames.length-(index+1)} more skills...</span>`
             break
           }
