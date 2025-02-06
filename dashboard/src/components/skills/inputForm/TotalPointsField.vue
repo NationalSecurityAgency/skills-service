@@ -26,7 +26,7 @@ const totalPoints = computed(() => {
 </script>
 
 <template>
-  <div class="field w-full lg:w-auto">
+  <div class="flex flex-col gap-2">
     <label id="totalPointsLabel" for="totalPoints">Total Points</label>
     <InputGroup>
       <InputGroupAddon><i class="fas fa-equals"></i></InputGroupAddon>

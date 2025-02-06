@@ -73,11 +73,13 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
         <slot name="option" :option="slotProps.option"></slot>
       </template>
     </Select>
-    <small v-if="errorMessage"
-        role="alert"
-        class="p-error"
-        :data-cy="`${name}Error`"
-        :id="`${name}Error`">{{ errorMessage || '&nbsp;' }}</small>
+    <Message v-if="errorMessage"
+             severity="error"
+             variant="simple"
+             size="small"
+             :closable="false"
+             :data-cy="`${name}Error`"
+             :id="`${name}Error`">{{ errorMessage || '' }}</Message>
   </div>
 </template>
 

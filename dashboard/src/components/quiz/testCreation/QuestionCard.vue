@@ -120,7 +120,7 @@ const moveQuestion = (changeIndexBy) => {
               rows="2"/>
         </div>
       </div>
-      <div v-if="!quizConfig.isReadOnlyQuiz" class="flex flex-none justify-center">
+      <div v-if="!quizConfig.isReadOnlyQuiz" class="flex flex-none justify-center items-start">
         <ButtonGroup class="ml-1 mt-2 mr-4">
           <SkillsButton @click="editQuestion"
                         icon="fas fa-edit"

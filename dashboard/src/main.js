@@ -103,7 +103,7 @@ app.use(PrimeVue, {
         preset: defineSkillTreePreset(),
         options: {
             prefix: 'p',
-            darkModeSelector: '.my-dark-mode',
+            darkModeSelector: '.st-dark-theme',
             cssLayer: false
         }
     }

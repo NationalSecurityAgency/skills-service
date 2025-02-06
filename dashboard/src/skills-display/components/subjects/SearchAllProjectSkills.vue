@@ -84,8 +84,8 @@ const navToSkill = (event) => {
       placeholder="Search for a skill across subjects..."
     >
       <template #option="slotProps">
-        <div class="py-1 skill-res-row" :data-cy="`searchRes-${slotProps.option.skillId}`">
-          <div class="flex">
+        <div class="py-1 skill-res-row w-full" :data-cy="`searchRes-${slotProps.option.skillId}`">
+          <div class="flex gap-2">
             <div
               class="flex-1 flex items-center"
               data-cy="skillName"

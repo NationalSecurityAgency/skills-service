@@ -51,10 +51,12 @@ const props = defineProps({
       </div>
     </template>
     <template #content>
-      <div class="fa-stack skills-icon user-rank-stack text-blue-300 flex flex-wrap align-items-center" v-if="!loading">
+      <div class="fa-stack skills-icon user-rank-stack flex flex-wrap align-items-center" v-if="!loading">
         <i :class="`${icon} fa-stack-2x watermark-icon`" />
 
-        <slot name="userRanking" />
+        <div class="text-blue-600 dark:text-blue-800 fa-stack-1x">
+          <slot name="userRanking" />
+        </div>
       </div>
       <skills-spinner :is-loading="loading"/>
     </template>
@@ -97,8 +99,9 @@ const props = defineProps({
 }
 
 .skills-progress-card .user-rank-text {
-  font-size: 0.4em;
+  font-size: 0.3em;
   line-height: 0.9em;
   background: rgba(255, 255, 255, 0.6);
+  border-radius: 5px;
 }
 </style>

@@ -49,16 +49,18 @@ const toRankDetailsPage = computed(() => {
                     component-name="myRank"
                     :loading="progress.loadingUserSkillsRanking">
     <template #userRanking>
-      <div v-if="optedOut" class="pt-2 text-danger fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg" data-cy="optedOutMessage">
-        <div>Opted-Out</div>
-        <div style="font-size: 0.8rem; line-height: 1rem;" class="mb-2">
-          Your position would be #{{ position }} if you opt-in!
+      <div class="py-2 sd-theme-primary-color user-rank-text">
+        <div v-if="optedOut" data-cy="optedOutMessage">
+          <div class="text-2xl">Opted-Out</div>
+          <div style="font-size: 0.8rem; line-height: 1rem;" class="mt-2">
+            Your position would be <b>#{{ position }}</b> if you opt-in!
+          </div>
         </div>
-      </div>
-      <div class="fa-stack-1x user-rank-text sd-theme-primary-color font-bold text-blue-700 text-lg p-1" v-else>
-        <div class="text-3xl" style="line-height: 1.2em" data-cy="myRankPosition">#{{ position }}</div>
-        <div class="mt-1">out of</div>
-        <div>{{ totalUsers }} {{ parseInt(totalUsers) === 1 ? 'user' : 'users' }}</div>
+        <div v-else>
+          <div class="text-3xl font-semibold" style="line-height: 1.2em" data-cy="myRankPosition">#{{ position }}</div>
+          <div class="mt-2">out of</div>
+          <div><span class="font-semibold">{{ totalUsers }}</span> {{ parseInt(totalUsers) === 1 ? 'user' : 'users' }}</div>
+        </div>
       </div>
     </template>
   </UserProgressCard>

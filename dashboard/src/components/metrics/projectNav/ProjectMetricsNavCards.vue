@@ -15,15 +15,18 @@ limitations under the License.
 */
 <script setup>
 import MetricNavCard from "@/components/metrics/projectNav/MetricNavCard.vue";
+import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 
 defineProps(['navCards'])
+const colors = useColors()
+
 </script>
 
 <template>
   <div class="flex flex-wrap gap-4 flex-col lg:flex-row mt-6">
-      <metric-nav-card v-for="(navItem) in navCards" :key="navItem.title" class="flex-1"
+      <metric-nav-card v-for="(navItem, index) in navCards" :key="navItem.title" class="flex-1"
                        :title="navItem.title" :subtitle="navItem.subtitle" :description="navItem.description"
-                       :path-name="navItem.pathName" :icon="navItem.icon" />
+                       :path-name="navItem.pathName" :icon="`${navItem.icon} ${colors.getTextClass(index)}`" />
   </div>
 </template>
 

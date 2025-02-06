@@ -266,14 +266,16 @@ defineExpose({
                              :aria-label="`Manage Quiz ${slotProps.data.name}`" tabindex="-1">
                   <SkillsButton label="Manage"
                                 icon="fas fa-arrow-circle-right"
-                                  class="shrink"
+                                class="shrink"
                                 outlined
+                                severity="info"
                                 size="small"/>
                 </router-link>
                 <ButtonGroup class="flex flex-nowrap">
                   <SkillsButton @click="showUpdateModal(slotProps.data)"
                                 icon="fas fa-edit"
                                 outlined
+                                severity="info"
                                 :data-cy="`editQuizButton_${slotProps.data.quizId}`"
                                 :aria-label="`Edit Quiz ${slotProps.data.name}`"
                                 :ref="`edit_${slotProps.data.quizId}`"
@@ -284,6 +286,7 @@ defineExpose({
                   <SkillsButton @click="showCopyModal(slotProps.data)"
                                 icon="fas fa-copy"
                                 outlined
+                                severity="info"
                                 :data-cy="`copyQuizButton_${slotProps.data.quizId}`"
                                 :aria-label="`Copy Quiz ${slotProps.data.name}`"
                                 :ref="`copy_${slotProps.data.quizId}`"
@@ -294,6 +297,7 @@ defineExpose({
                   <SkillsButton @click="showDeleteWarningModal(slotProps.data)"
                                 icon="text-warning fas fa-trash"
                                 outlined
+                                severity="info"
                                 :data-cy="`deleteQuizButton_${slotProps.data.quizId}`"
                                 :aria-label="'delete Quiz '+slotProps.data.name"
                                 :ref="`delete_${slotProps.data.quizId}`"

@@ -67,7 +67,7 @@ defineExpose( {
 </script>
 
 <template>
-  <div v-if="model && model.length > 0" clas="mt-2">
+  <div v-if="model && model.length > 0" class="mt-2">
     <div v-for="(answer, index) in fields" :key="answer.key" class="flex flex-wrap items-center gap-0" :data-cy="`answer-${index}`">
       <SelectCorrectAnswer
           v-if="isQuizType"
@@ -87,7 +87,7 @@ defineExpose( {
           :id="`answer_${index}`"
           :name="`answers[${index}].answer`"/>
 
-      <ButtonGroup class="ml-1 field">
+      <ButtonGroup class="ml-1">
         <SkillsButton
           :disabled="noMoreAnswers"
           :aria-label="`Add New Answer at index ${index}`"

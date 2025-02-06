@@ -158,6 +158,7 @@ const updateTimeLimit = () => {
 </script>
 
 <template>
+  <div class="flex flex-col gap-3">
   <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
     <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
       <label for="quizNumQuestions"># of Questions per Quiz Attempt:</label>
@@ -304,11 +305,11 @@ const updateTimeLimit = () => {
     </div>
   </div>
 
-  <div class="field grid align-items-start" v-if="!isSurvey">
-    <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+  <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
+    <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
       <label for="retakeIncorrectQuestions">Limit Retake to Incorrect Questions:</label>
     </div>
-    <div class="col-12 md:col-9">
+    <div class="col-span-12 md:col-span-9">
       <SkillsInputSwitch
           name="quizRetakeIncorrectQuestions"
           inputId="retakeIncorrectQuestions"
@@ -347,6 +348,7 @@ const updateTimeLimit = () => {
                      data-cy="settingsSavedAlert">
         Settings Updated!
       </InlineMessage>
+  </div>
   </div>
 </template>
 

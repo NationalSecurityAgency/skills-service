@@ -30,7 +30,7 @@ const totalRuns = computed(() => myProgress.value.numQuizAttempts + myProgress.v
   <my-progress-info-card-util title="Quizzes and Surveys">
     <template #left-content>
       <div>
-        <div class="text-4xl text-color-warn" data-cy="numQuizAndSurveyRuns">{{ totalRuns }}</div>
+        <div class="text-4xl text-orange-700 dark:text-orange-400" data-cy="numQuizAndSurveyRuns">{{ totalRuns }}</div>
         <div class="flex">
           <span class="mr-1 w-20">Quizzes:</span> <Tag severity="info" data-cy="numQuizzes">{{ myProgress.numQuizAttempts }}</Tag>
         </div>
