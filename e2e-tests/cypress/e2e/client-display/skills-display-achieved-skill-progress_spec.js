@@ -60,4 +60,46 @@ describe('Achieved Sills Progress Tests', () => {
     cy.get('[data-cy="skillProgress_index-0"]')
   })
 
+  it('Achieved skill count should get updated when an Honor skill is completed by reporting from the subject page', () => {
+    cy.createProject(1)
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1, 1, {
+      numPerformToCompletion: 1,
+      selfReportingType: 'HonorSystem',
+      pointIncrement: 100,
+    })
+
+    cy.cdVisit('/')
+    cy.cdClickSubj(0);
+    cy.get('[data-cy="numAchievedSkills"]').should('have.text', '0')
+    cy.get('[data-cy="numTotalSkills"]').should('have.text', '1')
+
+    cy.get('[data-cy=toggleSkillDetails]').click();
+    cy.get('[data-cy="skillProgress_index-0"] [data-cy="claimPointsBtn"]').click();
+
+    cy.get('[data-cy="numAchievedSkills"]').should('have.text', '1')
+    cy.get('[data-cy="numTotalSkills"]').should('have.text', '1')
+  })
+
+  it('Achieved skill count should not get updated when an Honor skill is not completed by reporting from the subject page', () => {
+    cy.createProject(1)
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1, 1, {
+      numPerformToCompletion: 2,
+      selfReportingType: 'HonorSystem',
+      pointIncrement: 100,
+    })
+
+    cy.cdVisit('/')
+    cy.cdClickSubj(0);
+    cy.get('[data-cy="numAchievedSkills"]').should('have.text', '0')
+    cy.get('[data-cy="numTotalSkills"]').should('have.text', '1')
+
+    cy.get('[data-cy=toggleSkillDetails]').click();
+    cy.get('[data-cy="skillProgress_index-0"] [data-cy="claimPointsBtn"]').click();
+
+    cy.get('[data-cy="numAchievedSkills"]').should('have.text', '0')
+    cy.get('[data-cy="numTotalSkills"]').should('have.text', '1')
+  })
+
 })
