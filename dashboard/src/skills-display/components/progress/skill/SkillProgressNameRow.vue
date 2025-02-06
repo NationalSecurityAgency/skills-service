@@ -156,7 +156,7 @@ const skillId = computed(() => {
                     v-if="skill.isSkillsGroupType"
                     outlined
                     :aria-label="!isExpanded ? 'Expand Group' : 'Collapse Group'"
-                    style="padding: 0.3rem 0.3rem 0.3rem 0.1rem;"
+                    style="padding: 0.3rem 0.3rem 0.3rem 0.3rem;"
                     class="ml-2"
                     :data-cy="`toggleGroup-${skillId}`"
                     @click="emit('toggle-row')">
@@ -182,7 +182,7 @@ const skillId = computed(() => {
         </div>
 
         <Tag v-if="skill.selfReporting && skill.selfReporting.enabled"
-             class="self-report-badge ml-2">
+             class="self-report-badge ml-2 max-h-8">
           <i
             class="fas fa-user-check mr-1"></i><span class="sr-spelled-out mr-1">Self Reportable:</span>
           <span v-if="skill.selfReporting.type === 'Quiz'" data-cy="selfReportQuizTag"><span
@@ -198,14 +198,13 @@ const skillId = computed(() => {
         </Tag>
         <Tag v-if="showLastViewedIndicator" id="lastViewedIndicator"
              data-cy="lastViewedIndicator" severity="info"
-             size="small"
              class="ml-2 overflow-hidden max-h-8">
           <i class="fas fa-eye mr-1"></i> Last Viewed
         </Tag>
       </div>
     </div>
     <div class="text-right justify-end flex flex-col"
-         :class="{ 'text-color-success' : isSkillComplete }"
+         :class="{ 'text-green-700 dark:text-green-400' : isSkillComplete }"
          data-cy="skillProgress-ptsOverProgressBard">
 
       <div>

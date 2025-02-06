@@ -291,7 +291,6 @@ const toggle = (event) => {
                   @click.prevent="scrollToLastViewedSkill"
                   class="skills-theme-btn"
                   outlined
-                  size="small"
                   serverit="info"
                   :aria-label="`Jump to Last Viewed Skill`"
                   data-cy="jumpToLastViewedButton" />
@@ -331,23 +330,21 @@ const toggle = (event) => {
           </div>
 
         </div>
-        <div v-if="selectedTagFilters.length > 0" class="flex mt-2">
-          <div class="">
+        <div v-if="selectedTagFilters.length > 0" class="flex gap-2 mt-2">
             <Chip
               v-for="(tag, index) in selectedTagFilters"
               :label="tag.tagValue"
               icon="fas fa-tag"
               :data-cy="`skillTagFilter-${index}`"
               :key="tag.tagId"
-              class="py-0 pl-0 pr-4 mr-2"
+              :pt="{ root: { class: '!p-0'}}"
               @remove="removeTagFilter(tag)"
               outlined
               removable>
-              <span class="bg-primary text-primary-contrast rounded-full w-8 h-8 flex items-center justify-center"><i
-                class="fas fa-tag" /></span>
-              <span class="ml-2 font-medium">{{ tag.tagValue }}</span>
+              <span class="bg-primary text-primary-contrast rounded-full w-7 h-7 flex items-center justify-center"><i
+                class="fas fa-tag" aria-hidden="true"/></span>
+              <span class="font-medium">{{ tag.tagValue }}</span>
             </Chip>
-          </div>
         </div>
       </div>
     </template>

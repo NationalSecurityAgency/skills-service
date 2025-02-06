@@ -237,12 +237,11 @@ const dialogUtils = useDialogUtils()
             Skills were</span> <span class="text-success font-weight-bold">successfully</span> exported to the catalog!
           </Message>
 
-          <div v-if="isExportable" class="text-right">
+          <div v-if="isExportable" class="text-right mt-3">
             <SkillsButton
               label="Cancel"
               icon="far fa-times-circle"
               severity="warn"
-              size="small"
               outlined
               class="mr-2"
               @click="handleClose"
@@ -252,7 +251,6 @@ const dialogUtils = useDialogUtils()
               icon="far fa-arrow-alt-circle-up"
               outlined
               severity="success"
-              size="small"
               @click="handleExport"
               :disabled="loadingData"
               data-cy="exportToCatalogButton" />

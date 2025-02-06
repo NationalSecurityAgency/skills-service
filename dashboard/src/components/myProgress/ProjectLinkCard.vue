@@ -178,7 +178,7 @@ const remove = () => {
              class="small mb-1"
              :aria-label="`${proj.points} out of ${proj.totalPoints} available points`"
              data-cy="project-card-project-points">
-          <span class="text-color-warn text-xl">{{ numberFormat.pretty(proj.points) }}</span>
+          <span class="text-orange-700 dark:text-orange-400 text-xl">{{ numberFormat.pretty(proj.points) }}</span>
           <span>/</span>
           <span>{{ numberFormat.pretty(proj.totalPoints) }}</span>
         </div>

@@ -672,7 +672,7 @@ const saveSettings = ((dirtyChanges) => {
 
           <Message v-if="errMsg" severity="error" :closable="false">{{ errMsg }}</Message>
 
-          <div class="flex flex-row">
+          <div class="flex flex-row mt-2">
             <SkillsButton variant="outline-success" @click="save" :disabled="!meta.valid || !isDirty"
                           data-cy="saveSettingsBtn" icon="fas fa-arrow-circle-right" label="Save">
             </SkillsButton>

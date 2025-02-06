@@ -367,11 +367,12 @@ const onSavedQuestion = (savedQuestion) => {
             :aria-invalid="!!answersErrorMessage"
             aria-errormessage="answersError"
               aria-describedby="answersError" />
-        <small
-            role="alert"
-            class="p-error"
-            data-cy="answersError"
-            id="answersError">{{ answersErrorMessage || '' }}</small>
+        <Message severity="error"
+                 variant="simple"
+                 size="small"
+                 :closable="false"
+                 data-cy="answersError"
+                 id="answersError">{{ answersErrorMessage || '' }}</Message>
       </div>
     </template>
   </SkillsInputFormDialog>

@@ -327,7 +327,12 @@ const editorStyle = computed(() => {
       </Message>
     </div>
     </BlockUI>
-    <small role="alert" class="p-error" :id="`${name}Error`" data-cy="descriptionError">{{ errorMessage || '' }}</small>
+    <Message severity="error"
+             variant="simple"
+             size="small"
+             :closable="false"
+             data-cy="descriptionError"
+             :id="`${name}Error`">{{ errorMessage || '' }}</Message>
 
     <input @change="attachFile"
            type="file"

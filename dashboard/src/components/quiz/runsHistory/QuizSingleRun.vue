@@ -60,7 +60,7 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
     <div v-if="showCards" class="flex flex-col md:flex-row flex-wrap gap-4">
       <div v-if="showUserCard" class="flex-1 w-min-12rem">
         <quiz-single-run-card title="User" data-cy="userInfoCard">
-          <div class="text-color-success font-bold">{{ runInfo.userIdForDisplay }}</div>
+          <div class="text-green-700 dark:text-green-400 font-bold">{{ runInfo.userIdForDisplay }}</div>
           <div v-if="userTagsUtils.showUserTagColumn() && runInfo.userTag">
             <span class="text-info italic">{{ userTagsUtils.userTagLabel() }}</span>: {{ runInfo.userTag }}
           </div>
@@ -96,7 +96,7 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
       </div>
       <div class="flex-1 w-min-12rem">
         <quiz-single-run-card title="Date & Time">
-          <div class="text-color-success font-bold">{{ timeUtils.formatDate(runInfo.started) }}</div>
+          <div class="text-green-700 dark:text-green-400 font-bold">{{ timeUtils.formatDate(runInfo.started) }}</div>
           <div class="mt-1">
             <span class="italic">Runtime:</span>
             <span class="text-primary ml-2">{{

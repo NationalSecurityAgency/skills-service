@@ -126,12 +126,12 @@ const levelStats = computed(() => {
         <div class="w-11/12">
         <div class="flex mb-1" :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`">
           <div class="flex-1 text-lg font-medium">Achieved Skills</div>
-          <div><span class="text-color-warn font-medium sd-theme-primary-color" data-cy="numAchievedSkills">{{skillsAchieved}}</span> / <span data-cy="numTotalSkills">{{totalSkills}}</span></div>
+          <div><span class="text-orange-700 dark:text-orange-400 font-medium sd-theme-primary-color" data-cy="numAchievedSkills">{{skillsAchieved}}</span> / <span data-cy="numTotalSkills">{{totalSkills}}</span></div>
         </div>
         <vertical-progress-bar
           :total-progress="skillsPercentAchieved"
           :barSize="8"
-          beforeTodayBarColor="bg-primary text-primary-contrast"
+          :disable-daily-color="true"
           :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`"
         />
         </div>

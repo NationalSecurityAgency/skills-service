@@ -97,8 +97,7 @@ watch(() => authState.userInfo, async (newUserInfo) => {
 })
 
 watch(() => themeHelper.currentTheme, (newTheme, oldTheme) => {
-  // PrimeVue.changeTheme(oldTheme.value, newTheme.value, 'theme-link')
-  document.documentElement.classList.toggle('my-dark-mode');
+  document.documentElement.classList.toggle('st-dark-theme');
 })
 
 const iframeInit = useIframeInit()

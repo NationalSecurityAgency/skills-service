@@ -56,7 +56,7 @@ defineExpose({
           <router-link v-if="options.icon"
                        :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink" aria-hidden="true"
                        tabindex="-1" class="">
-            <div class="d-inline-block mr-2 border text-center rounded-border w-16 subject-icon-container"
+            <div class="d-inline-block mr-2 border text-center rounded-border w-16 subject-icon-container text-primary"
                  aria-hidden="true">
               <i :class="[`${options.icon} subject-icon`]" aria-hidden="true" />
             </div>

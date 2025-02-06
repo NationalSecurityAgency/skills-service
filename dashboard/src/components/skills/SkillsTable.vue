@@ -550,9 +550,9 @@ const exportSkills = () => {
                 :disabled="selectedSkills.length === 0"
                 :track-for-focus="true"
                 data-cy="skillActionsBtn">
-              <i class="fas fa-tools mr-1" aria-hidden="true"></i>
+              <i class="fas fa-tools" aria-hidden="true"></i>
               <span>Action</span>
-              <Tag data-cy="skillActionsNumSelected" class="ml-1" severity="info">{{ selectedSkills.length }}</Tag>
+              <Tag data-cy="skillActionsNumSelected" severity="info">{{ selectedSkills.length }}</Tag>
               <i class="fas fa-caret-down ml-2"></i>
             </SkillsButton>
             <Menu ref="skillsActionsMenu"
@@ -671,14 +671,14 @@ const exportSkills = () => {
                   :data-cy="`exportedBadge-${slotProps.data.skillId}`">
                   <span><i class="fas fa-book" aria-hidden="true"></i> Exported</span>
                 </Tag>
-                <Tag
-                  v-for="(tag) in slotProps.data.tags"
-                  :key="tag.tagId"
-                  class="mt-1"
-                  :data-cy="`skillTag-${slotProps.data.skillId}-${tag.tagId}`"
-                  severity="info">
-                  <span><i class="fas fa-tag"></i> {{ tag.tagValue }}</span>
-                </Tag>
+                <Chip :pt="{ root: { class: '!p-0'}}"
+                      v-for="(tag) in slotProps.data.tags"
+                      :key="tag.tagId"
+                      :data-cy="`skillTag-${slotProps.data.skillId}-${tag.tagId}`">
+                  <span class="bg-primary text-primary-contrast rounded-full w-6 h-6 flex items-center justify-center"><i
+                      class="fas fa-tag text-sm" aria-hidden="true"/></span>
+                        <span class="font-medium pr-3">{{ tag.tagValue }}</span>
+                </Chip>
               </div>
             </div>
             <div class="flex items-start justify-end">

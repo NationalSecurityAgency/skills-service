@@ -76,7 +76,7 @@ const start = () => {
 </script>
 
 <template>
-  <Card data-cy="quizSplashScreen" :pt="{ content: { class: 'p-0' } }">
+  <Card data-cy="quizSplashScreen" :pt="{ content: { class: '!p-0' } }">
     <template #content>
       <div class="text-xl">
         <Message v-if="quizInfo.userQuizPassed && !multipleTakes " :closable="false" severity="success">
@@ -102,7 +102,7 @@ const start = () => {
           <span class="font-bold text-success skills-page-title-text-color">{{ quizInfo.name }}</span>
         </div>
 
-        <Card v-if="!isSurveyType && canStartQuiz" class="my-2 text-xl skills-card-theme-border" :pt="{ content: { class: 'p-0' } }" data-cy="quizPassInfo">
+        <Card v-if="!isSurveyType && canStartQuiz" class="my-2 text-xl skills-card-theme-border" :pt="{ content: { class: '!p-0' } }" data-cy="quizPassInfo">
           <template #content>
             <i class="fas fa-check-circle text-primary" aria-hidden="true"></i>
             Must get <Tag severity="success">{{ minNumQuestionsToPass }}</Tag> / <Tag severity="secondary">{{ numQuestions }}</Tag> questions <span class="text-muted-color italic">({{ quizInfo.percentToPass }}%)</span> to <span class="text-primary uppercase">pass</span>. Good Luck!
@@ -116,7 +116,7 @@ const start = () => {
         </Message>
 
         <div class="flex flex-wrap flex-col md:flex-row gap-6 pt-2">
-            <Card class="skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2' } }" data-cy="quizInfoCard">
+            <Card class="skills-card-theme-border flex-1" :pt="{ body: { class: '!p-0' }, content: { class: '!py-2' } }" data-cy="quizInfoCard">
               <template #content>
                 <div class="px-4">
                   <i class="fas fa-question-circle text-primary" style="font-size: 1.3rem;" aria-hidden="true"></i>
@@ -125,7 +125,7 @@ const start = () => {
                 </div>
               </template>
             </Card>
-            <Card v-if="!isSurveyType"  class="skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2' } }" data-cy="quizTimeLimitCard">
+            <Card v-if="!isSurveyType"  class="skills-card-theme-border flex-1" :pt="{ body: { class: '!p-0' }, content: { class: 'py-2' } }" data-cy="quizTimeLimitCard">
               <template #content>
                 <div class="px-4">
                   <i class="fas fa-business-time text-primary" style="font-size: 1.3rem;"></i>
@@ -135,7 +135,7 @@ const start = () => {
                 </div>
               </template>
             </Card>
-            <Card v-if="!isSurveyType"  class="skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2' } }" data-cy="quizInfoCard">
+            <Card v-if="!isSurveyType"  class="skills-card-theme-border flex-1" :pt="{ body: { class: '!p-0' }, content: { class: 'py-2' } }" data-cy="quizInfoCard">
               <template #content>
                 <div class="px-4">
                   <i class="fas fa-redo-alt text-primary" style="font-size: 1.3rem;" aria-hidden="true"></i>

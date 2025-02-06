@@ -41,7 +41,7 @@ const conf = useAppConfig()
               <Tag>2.</Tag>
               Create or edit a project and then navigate to the <span class="text-primary">Settings</span> tab
             </p>
-            <p>
+            <p class="mt-2">
               <Tag>3.</Tag>
               Change <span class="text-primary">Project Discoverability</span> to <span class="text-primary">Add to the Project Catalog</span>
             </p>

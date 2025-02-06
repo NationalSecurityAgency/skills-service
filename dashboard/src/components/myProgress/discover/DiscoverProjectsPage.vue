@@ -301,7 +301,7 @@ const contactProject = (name, id) => {
                     <Tag>{{ slotProps.data.numSubjects }}</Tag>
                     Subjects
                   </p>
-                  <p>
+                  <p class="my-1">
                     <Tag>{{ slotProps.data.numBadges }}</Tag>
                     Badges
                   </p>
