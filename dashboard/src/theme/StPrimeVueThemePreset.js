@@ -105,6 +105,10 @@ const badge = {
                 background: '{surface.200}',
                 color: '{surface.600}'
             },
+            warn: {
+                background: '{orange.700}',
+                color: '{surface.0}'
+            }
         },
     }
 }
