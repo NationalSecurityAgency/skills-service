@@ -130,6 +130,10 @@ describe('Client Display Theme Components Tests', () => {
       name: 'beforeTodayColor and  incompleteColor apply to CircleProgress comoponent'
     })
 
+    cy.matchSnapshotImageForElement('[data-cy="achievedSkillsProgress"]', {
+      name: 'achieved skills progress component'
+    })
+
     cy.cdClickSubj(0, 'Subject 1', true)
     cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"] [data-pc-section="body"]', {
       name: 'progressIndicators settings - skill list - beforeTodayColor earnedTodayColor and incompleteColor',
