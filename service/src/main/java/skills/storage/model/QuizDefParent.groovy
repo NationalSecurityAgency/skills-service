@@ -16,6 +16,7 @@
 package skills.storage.model
 
 import groovy.transform.CompileStatic
+import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 
 import jakarta.persistence.*
@@ -39,6 +40,8 @@ class QuizDefParent implements Serializable {
     @Enumerated(EnumType.STRING)
     QuizType type
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreatedDate
     @Column(name="created", updatable = false, insertable = false)
     Date created
 

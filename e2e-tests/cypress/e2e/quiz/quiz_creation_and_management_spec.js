@@ -728,5 +728,24 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizNameError"]').should('exist');
         cy.get('[data-cy="quizNameError"]').contains('The value for the Quiz/Survey Name is already taken');
     });
+
+    it('created quiz has a created date', function () {
+        cy.visit('/administrator/quizzes/')
+        cy.get('[data-cy="noQuizzesYet"]')
+
+        cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
+        cy.get('.p-dialog-header').contains('New Quiz/Survey')
+
+        cy.get('[data-cy="quizName"]').type('My First Quiz')
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'MyFirstQuiz')
+
+        cy.get('[data-cy="quizDescription"]').type('Some cool Description')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="quizName"]').should('not.exist')
+        cy.get('[data-cy="btn_Quizzes And Surveys"]').should('have.focus')
+        cy.get(quizTableSelector).should('contain', 'a few seconds ago')
+        cy.get(quizTableSelector).should('not.contain','Invalid Date')
+    });
 });
 
