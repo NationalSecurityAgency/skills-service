@@ -377,7 +377,7 @@ describe('Badges Tests', () => {
             .click();
         cy.contains('Removal Safety Check');
         cy.get('[data-cy=currentValidationText]')
-            .type('Delete Me');
+            .type('Delete Me', {delay: 0});
         cy.get('[data-cy=saveDialogBtn]')
             .should('be.enabled')
             .click();
