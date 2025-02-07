@@ -127,7 +127,7 @@ describe('Configure Video Validation Tests', () => {
         cy.fixture(videoFile, null).as('videoFile');
         cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="videoFileInputError"]').contains('Unsupported [image/png] file type, supported types: [video/webm,video/mp4]')
+        cy.get('[data-cy="videoFileInputError"]').contains('Unsupported [image/png] file type, supported types: [video/webm,video/mp4,audio/wav,audio/mpeg,audio/mp4,audio/aac,audio/aacp,audio/ogg,audio/webm,audio/flac]')
     });
 
     it('validate maximum size of the video', () => {

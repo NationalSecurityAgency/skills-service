@@ -431,7 +431,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
               Users are required to {{ computedVideoConf.isAudio ? 'listen to this audio' : 'watch this video'}} in order to earn the skill and its points.
             </Message>
             <Message v-else severity="info" icon="fas fa-exclamation-triangle" :closable="false">
-              Optionally set <i>Self Reporting</i> type to <Tag>Audio/Video</Tag> in order to award the skill for watching this video. Click the <i>Edit</i> button above to update the <i>Self Reporting</i> type.
+              Optionally set <i>Self Reporting</i> type to <Tag>Audio / Video</Tag> in order to award the skill for {{ computedVideoConf.isAudio ? 'listening to this audio' : 'watching this video'}}. Click the <i>Edit</i> button above to update the <i>Self Reporting</i> type.
             </Message>
           </div>
 
@@ -494,7 +494,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
             </div>
           </div>
 
-          <div data-cy="videoCaptionsInputFields" :class="{'flex flex-col gap-2': responsive.md.value }">
+          <div data-cy="videoCaptionsInputFields" :class="{'flex flex-col gap-2': responsive.md.value }" v-if="!computedVideoConf.isAudio">
             <div class="flex flex-col md:flex-row gap-2 md:mb-2">
               <div class="flex-1 content-end">
                 <label for="videoCaptions">Captions:</label>
@@ -526,7 +526,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
             />
           </div>
 
-          <div data-cy="videoTranscriptInput" v-if="videoSelected">
+          <div data-cy="videoTranscriptInput">
             <div class="flex mb-2">
               <div class="flex-1 content-end">
                 <label for="videoTranscript">Transcript:</label>

@@ -181,7 +181,7 @@ const filters = computed(() => {
         {
           icon: 'fas fa-play-circle',
           key: 'video',
-          label: 'Media',
+          label: 'Audio/Videy',
           count: 0,
         }
       ]

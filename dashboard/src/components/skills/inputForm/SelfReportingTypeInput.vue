@@ -40,7 +40,7 @@ const categories = ref([
   { name: 'Approval Queue', key: approvalKey },
   { name: 'Honor System', key: honorKey },
   { name: 'Quiz/Survey', key: quizKey },
-  { name: 'Media', key: videoKey }
+  { name: 'Audio/Video', key: videoKey }
 ])
 const setFieldValue = inject('setFieldValue')
 const onEnabledChanged = (newVal) => {
