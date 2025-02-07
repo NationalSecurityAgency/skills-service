@@ -41,7 +41,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="btn_Questions"]').should('be.enabled')
         cy.get('[data-cy="btn_Questions"]').click()
         cy.get('[data-cy="btn_Questions"]').click({force: true})
-        cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
+        cy.typeQuestion('What is 2 + 2?')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
@@ -68,7 +68,7 @@ describe('Survey Question CRUD Tests', () => {
 
         // single choice question
         cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
-        cy.get('[data-cy="questionText"]').type('What is 1 + 2?')
+        cy.typeQuestion('What is 1 + 2?')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('1')
         cy.get('[data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
@@ -96,7 +96,7 @@ describe('Survey Question CRUD Tests', () => {
 
         // q3 - text input question
         cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
-        cy.get('[data-cy="questionText"]').type('Enter Text Here Please')
+        cy.typeQuestion('Enter Text Here Please')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]')
@@ -133,7 +133,7 @@ describe('Survey Question CRUD Tests', () => {
 
         // rating choice question
         cy.get('[data-cy="btn_Questions"]').click()
-        cy.get('[data-cy="questionText"]').type('How is this quiz?')
+        cy.typeQuestion('How is this quiz?')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_Rating"]').click()
 
@@ -178,7 +178,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="btn_Questions"]').click()
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
-        cy.get('[data-cy="questionText"]').type('a')
+        cy.typeQuestion('a')
 
         cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').should('not.exist')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
@@ -196,7 +196,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="btn_Questions"]').click()
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
-        cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
+        cy.typeQuestion('What is 2 + 2?')
 
         cy.get(`[data-cy="answer-0"] [data-cy="addNewAnswer"]`).click()
         cy.get(`[data-cy="answer-2"] [data-cy="addNewAnswer"]`).click()
@@ -219,7 +219,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="btn_Questions"]').click()
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
-        cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
+        cy.typeQuestion('What is 2 + 2?')
 
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('2')
@@ -300,7 +300,7 @@ describe('Survey Question CRUD Tests', () => {
         // multiple choice question
         cy.get('[data-cy="btn_Questions"]').click()
 
-        cy.get('[data-cy="questionText"]').type('How is this quiz?')
+        cy.typeQuestion('How is this quiz?')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_Rating"]').click()
 
@@ -310,7 +310,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="questionDisplayCard-1"] [data-pc-name="rating"] [data-pc-section="option"]').should('have.length', 5)
 
         cy.get('[data-cy="editQuestionButton_1"]').click();
-        cy.get('[data-cy="questionText"]').type(' With more description')
+        cy.typeQuestion(' With more description')
         cy.get('[data-cy="ratingScaleSelect"]').click()
         cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('8').click();
         // cy.get('[data-cy="saveDialogBtn"]').click()
@@ -542,7 +542,7 @@ describe('Survey Question CRUD Tests', () => {
         const q2Card = '[data-cy="questionDisplayCard-2"] [data-cy="sortControlHandle"]';
 
         cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
-        cy.get('[data-cy="questionText"]').type('question # 1')
+        cy.typeQuestion('question # 1')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
         cy.get('[data-cy="saveDialogBtn"]').click()
@@ -552,7 +552,7 @@ describe('Survey Question CRUD Tests', () => {
 
         cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
         cy.get('[data-cy="answerTypeSelector"]').should('exist')
-        cy.get('[data-cy="questionText"]').type('question # 2')
+        cy.typeQuestion('question # 2')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_TextInput"]').click()
         cy.get('[data-cy="saveDialogBtn"]').click()
@@ -665,7 +665,7 @@ describe('Survey Question CRUD Tests', () => {
         // multiple choice question
         cy.get('[data-cy="btn_Questions"]').click()
 
-        cy.get('[data-cy="questionText"]').type('How is this quiz?')
+        cy.typeQuestion('How is this quiz?')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_Rating"]').click()
 

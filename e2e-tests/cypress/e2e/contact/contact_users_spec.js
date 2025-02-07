@@ -542,7 +542,7 @@ describe('Contact Project Users Specs', () => {
         cy.get('[data-cy="emailUsers_body"] [data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
         cy.get('[data-cy="emailUsers_body"]').type('test');
         cy.get('[data-cy="previewUsersEmail"]').should('be.enabled');
-        cy.get('[data-cy="descriptionError"]').should('be.empty');
+        cy.get('[data-cy="descriptionError"]').should('be.not.visible');
     });
 
     it('email body and subject validation for community-protected project still uses non-community validator', () => {
