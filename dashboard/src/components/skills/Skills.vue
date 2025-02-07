@@ -128,7 +128,7 @@ const skillCreatedOrUpdated = (skill) => {
   }
   if (skill.groupId) {
     skillsState.setGroupSkills(skill.groupId, skills)
-    const parentGroup = skillsState.subjectSkills.find((item) => item.skillId = skill.groupId)
+    const parentGroup = skillsState.subjectSkills.find((item) => item.skillId === skill.groupId)
     const groupSkills = skillsState.getGroupSkills(skill.groupId)
     parentGroup.totalPoints = groupSkills
       .map((item) => item.totalPoints)

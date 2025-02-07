@@ -68,6 +68,34 @@ describe('Skills Group Tests', () => {
         cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
     });
 
+    it('create mulitple skills group and assign child to group 2', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="noContent"]').contains('No Skills');
+        const group1 = 'group1';
+        const group2 = 'group2';
+        cy.createGroupViaUI(group1);
+        cy.createGroupViaUI(group2);
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2,  value: group2 }, { colIndex: 3, value: '2' }],
+            [{ colIndex: 2,  value: group1 }, { colIndex: 3, value: '1' }],
+        ], 5, false, null, false);
+        cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
+
+        cy.addSkillToGroupViaUI(`${group2}Group`, 1, 0);
+        cy.validateTable(`[data-cy="ChildRowSkillGroupDisplay_${group2}Group"] [data-cy="skillsTable"]`, [
+            [{
+                colIndex: 2,
+                value: 'Skill 1'
+            }],
+        ], 5, true, null, false);
+
+        cy.get(`[data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${group1}Group"] [data-cy="requiredAllSkills"]`).contains('all skills')
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${group1}Group"] [data-cy="noContent"]`)
+            .contains('Group has no Skills');
+    });
+
     it('create group with description', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="noContent"]').contains('No Skills');
