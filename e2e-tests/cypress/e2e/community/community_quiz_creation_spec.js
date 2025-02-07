@@ -538,7 +538,7 @@ describe('Community Quiz Creation Tests', () => {
         })
     });
 
-    it.only('copy a quiz with restricted community', () => {
+    it('copy a quiz with restricted community', () => {
         cy.createQuizDef(1, {enableProtectedUserCommunity: true})
 
         cy.visit('/administrator/quizzes/')
