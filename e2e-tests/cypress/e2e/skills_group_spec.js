@@ -68,7 +68,7 @@ describe('Skills Group Tests', () => {
         cy.get(`${tableSelector} tbody tr`).should('have.length', 2);
     });
 
-    it('create mulitple skills group and assign child to group 2', () => {
+    it('create multiple skills group and assign child to group 2', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="noContent"]').contains('No Skills');
         const group1 = 'group1';
@@ -89,7 +89,7 @@ describe('Skills Group Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.get(`[data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="1"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${group1}Group"] [data-cy="requiredAllSkills"]`).contains('all skills')
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${group1}Group"] [data-cy="noContent"]`)
