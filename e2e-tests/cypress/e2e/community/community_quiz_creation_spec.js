@@ -552,5 +552,66 @@ describe('Community Quiz Creation Tests', () => {
 
         cy.get('[data-p-index="1"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
 
+        cy.reload()
+        cy.get('[data-p-index="1"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
+    });
+
+    it('copy a non-protected quiz and make it protected during copy', () => {
+        cy.createQuizDef(1, { name: 'Quiz 1' });
+        cy.createSurveyDef(2, { name: 'Survey 1' });
+
+        cy.visit('/administrator/quizzes/')
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 0, value: 'For All Dragons Nation' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Survey 1' }, { colIndex: 0, value: 'For All Dragons Nation' }, { colIndex: 1, value: 'Survey' }],
+        ], 5);
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
+
+        cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
+        const warningMsg = 'Please note that once the restriction is enabled it cannot be lifted/disabled';
+        cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg).should('not.exist')
+        cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
+
+        cy.intercept('POST', '/api/validation/description*').as('validateDescription');
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.wait('@validateDescription');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 0, value: 'For All Dragons Nation' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Survey 1' }, { colIndex: 0, value: 'For All Dragons Nation' }, { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'Copy of Quiz 1' }, { colIndex: 0, value: 'For Divine Dragon Nation' }, { colIndex: 1, value: 'Quiz' }],
+        ], 5);
+
+        cy.get('[data-cy="copyQuizButton_quiz2"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Survey 1')
+
+        cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
+        cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg).should('not.exist')
+        cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 0, value: 'For All Dragons Nation' },   { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Survey 1' }, { colIndex: 0, value: 'For All Dragons Nation' },   { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'Copy of Quiz 1' }, { colIndex: 0, value: 'For Divine Dragon Nation' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Copy of Survey 1' }, { colIndex: 0, value: 'For Divine Dragon Nation' }, { colIndex: 1, value: 'Survey' }],
+        ], 5);
+
+        cy.reload()
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 0, value: 'For All Dragons Nation' },   { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Survey 1' }, { colIndex: 0, value: 'For All Dragons Nation' },   { colIndex: 1, value: 'Survey' }],
+            [{ colIndex: 0, value: 'Copy of Quiz 1' }, { colIndex: 0, value: 'For Divine Dragon Nation' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Copy of Survey 1' }, { colIndex: 0, value: 'For Divine Dragon Nation' }, { colIndex: 1, value: 'Survey' }],
+        ], 5);
     });
 });
