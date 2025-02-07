@@ -95,6 +95,7 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
                   subjectSummary.value.levelPoints = res.levelPoints
                   subjectSummary.value.levelTotalPoints = res.levelTotalPoints
                   subjectSummary.value.totalLevels = res.totalLevels
+                  subjectSummary.value.skillsAchieved = res.skillsAchieved
                 })
             } else if (subjectSummary.value.badgeId) {
               if (foundSkill.meta.complete) {
