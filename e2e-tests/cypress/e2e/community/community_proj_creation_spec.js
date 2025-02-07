@@ -343,22 +343,4 @@ describe('Community Project Creation Tests', () => {
         })
     });
 
-    it('copy a project with restricted community', () => {
-        cy.createProject(1, {enableProtectedUserCommunity: true})
-
-        cy.visit('/administrator')
-        cy.get('[data-cy="inception-button"]').contains('Level');
-        cy.get('[data-cy="projectCard_proj1"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
-
-        cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click()
-        cy.get('[data-cy="protectedCopyMessage"]').contains('Copying a project whose access is restricted to Divine Dragon users only and cannot be lifted/disabled')
-
-        cy.get('[data-cy="projectName"]').type('Project Copy');
-        cy.get('[data-cy="saveDialogBtn"]').click();
-        cy.get('[data-cy="allDoneBtn"]').click();
-
-        cy.get('[data-cy="projectCard_ProjectCopy"]').should('exist')
-        cy.get('[data-cy="projectCard_ProjectCopy"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
-
-    });
 });

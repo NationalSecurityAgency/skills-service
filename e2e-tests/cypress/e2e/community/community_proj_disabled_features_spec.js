@@ -64,7 +64,7 @@ describe('Community Project Creation Tests', () => {
 
         cy.visit('/administrator/')
         cy.get('[data-cy="copyProjBtn"]').click()
-        cy.get('[data-cy="restrictCommunityControls"]').contains('Copying project whose access is restricted to Divine Dragon')
+        cy.get('[data-cy="restrictCommunityControls"]').contains('Copying a project whose access is restricted to Divine Dragon')
         cy.get('[data-cy="projectName"]').type('copy')
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="allDoneBtn"]').click()
