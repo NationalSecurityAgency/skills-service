@@ -103,6 +103,9 @@ class DefaultIntSpec extends Specification {
     @Autowired
     QuizDefRepo quizDefRepo
 
+    @Autowired
+    QuizSettingsRepo quizSettingsRepo
+
     @PersistenceContext
     EntityManager entityManager
 

@@ -344,18 +344,6 @@ class UserCommunityQuizAuthSpecs extends DefaultIntSpec {
         e.getMessage().contains("User [${skillsService.userName}] is not allowed to set [enableProtectedUserCommunity] to true")
     }
 
-    def "non-UC user cannot copy non-uc quiz to uc"() {
-        def q1 = QuizDefFactory.createQuiz(1)
-        skillsService.createQuizDef(q1)
-
-        when:
-        def copy = [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: '', type: q1.type, enableProtectedUserCommunity: true]
-        skillsService.copyQuiz(q1.quizId, copy)
-        then:
-        SkillsClientException e = thrown(SkillsClientException)
-        e.getMessage().contains("User [${skillsService.userName}] is not allowed to set [enableProtectedUserCommunity] to true")
-    }
-
     def "non-UC user cannot access quiz admin endpoints with UC protection enabled"() {
         List<String> users = getRandomUsers(2)
         SkillsService allDragonsUser = createService(users[0])

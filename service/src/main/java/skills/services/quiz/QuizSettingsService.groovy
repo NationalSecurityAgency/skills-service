@@ -26,6 +26,7 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
+import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizPreference
 import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.QuizPreferenceRes
@@ -69,10 +70,14 @@ class QuizSettingsService {
     UserAttrsRepo userAttrsRepo
 
     @Transactional
-    void copySettings(String fromQuizId, String toQuizId) {
+    void copySettings(String fromQuizId, String toQuizId, boolean enableProtectedUserCommunity) {
         List<QuizSettingsRes> fromSettings = getSettings(fromQuizId)
         List<QuizSettingsRequest> toSettings = new ArrayList<QuizSettingsRequest>()
 
+        if (enableProtectedUserCommunity) {
+            fromSettings = fromSettings.findAll { it.setting != QuizSettings.UserCommunityOnlyQuiz.setting }
+            toSettings.add(new QuizSettingsRequest(value: Boolean.TRUE.toString(), setting: QuizSettings.UserCommunityOnlyQuiz.setting))
+        }
         fromSettings.forEach( setting -> {
             QuizSettingsRequest request = new QuizSettingsRequest(value: setting.value, setting: setting.setting)
             toSettings.add(request)
