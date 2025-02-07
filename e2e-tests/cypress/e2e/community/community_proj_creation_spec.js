@@ -342,4 +342,5 @@ describe('Community Project Creation Tests', () => {
             cy.get(`button.attachment-button`).should('exist');
         })
     });
+
 });
