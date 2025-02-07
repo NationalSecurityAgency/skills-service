@@ -1595,3 +1595,13 @@ Cypress.Commands.add('approveAllRequests', () => {
 Cypress.Commands.add('assignUserAsAdmin', (projId, userId) => {
     cy.request('PUT', `/admin/projects/${projId}/users/${userId}/roles/ROLE_PROJECT_ADMIN`)
 })
+
+Cypress.Commands.add('typeInMarkdownEditor', (selector, text) => {
+    const fullSelector = `${selector} .toastui-editor-ww-container`
+    cy.get(fullSelector).should('be.visible')
+    cy.get(fullSelector).type(text, {delay:0 })
+})
+
+Cypress.Commands.add('typeQuestion', (text) => {
+    cy.typeInMarkdownEditor('[data-cy="questionText"]', text)
+})

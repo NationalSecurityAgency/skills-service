@@ -558,7 +558,7 @@ defineExpose({
               <template #body="slotProps">
                 <div v-if="!slotProps.data.adminGroupId || props.adminGroupId">
                   <div class="float-right mr-1 flex flex-col gap-2" :data-cy="`controlsCell_${slotProps.data.userId}`">
-                    <div  v-if="notCurrentUser(slotProps.data.userId)"  class="flex items-center">
+                    <ButtonGroup v-if="notCurrentUser(slotProps.data.userId)">
                       <SkillsButton v-if="!isOnlyOneRole" @click="editItem(slotProps.data)"
                                     :disabled="!notCurrentUser(slotProps.data.userId)"
                                     :aria-label="`edit access role from user ${getUserDisplay(slotProps.data)}`"
@@ -571,7 +571,7 @@ defineExpose({
                                     :aria-label="`remove access role from user ${getUserDisplay(slotProps.data)}`"
                                     data-cy="removeUserBtn" icon="fas fa-trash" label="Delete" size="small">
                       </SkillsButton>
-                    </div>
+                    </ButtonGroup>
                     <InlineMessage v-if="!notCurrentUser(slotProps.data.userId)" class="mt-1" severity="info" size="small"
                                    aria-live="polite" data-cy="cannotRemoveWarning">
                       Cannot modify yourself
