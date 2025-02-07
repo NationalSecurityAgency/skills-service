@@ -537,4 +537,20 @@ describe('Community Quiz Creation Tests', () => {
             cy.get(`button.attachment-button`).should('exist');
         })
     });
+
+    it.only('copy a quiz with restricted community', () => {
+        cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+
+        cy.visit('/administrator/quizzes/')
+        cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-p-index="0"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="protectedCopyMessage"]').contains('Copying a quiz whose access is restricted to Divine Dragon users only and cannot be lifted/disabled')
+
+        cy.get('[data-cy="saveDialogBtn"]').click();
+
+        cy.get('[data-p-index="1"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
+
+    });
 });

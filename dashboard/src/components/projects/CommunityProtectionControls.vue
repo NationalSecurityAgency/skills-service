@@ -58,6 +58,15 @@ const { value, errors } = useField('enableProtectedUserCommunity')
 const initialValueForEnableProtectedUserCommunity = ref(null)
 const enableProtectedUserCommunity = defineModel('enableProtectedUserCommunity')
 const enableProtectedUserCommunitySynced = syncRef(enableProtectedUserCommunity, value)
+const typeLabel = computed(() => {
+  if(props.project) {
+    return 'a project'
+  } else if (props.quiz) {
+    return 'a quiz'
+  } else if (props.adminGroup) {
+    return 'an admin group'
+  }
+})
 
 onMounted(() => {
   initialValueForEnableProtectedUserCommunity.value = communityLabels.isRestrictedUserCommunity(props.project?.userCommunity)
@@ -90,9 +99,9 @@ const userCommunityRestrictedDescriptor = computed(() => {
         :pt="{ body: { class: 'p-0' }, content: { class: 'py-3 px-3' } }"
         data-cy="restrictCommunityControls">
     <template #content>
-      <div v-if="isCopyAndCommunityProtected" severity="error" :closable="false">
+      <div v-if="isCopyAndCommunityProtected" severity="error" :closable="false" data-cy="protectedCopyMessage">
         <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
-        Copying project whose access is restricted to <b
+        Copying {{typeLabel}} whose access is restricted to <b
         class="text-primary">{{ userCommunityRestrictedDescriptor }}</b> users only and <b>cannot</b> be lifted/disabled
       </div>
       <div v-if="isEditAndCommunityProtected" severity="error" :closable="false">
