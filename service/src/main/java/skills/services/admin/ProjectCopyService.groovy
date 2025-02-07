@@ -348,6 +348,11 @@ class ProjectCopyService {
             ProjDef toProj = saveToProject(projectRequest)
             saveProjectSettings(fromProject, toProj)
 
+            CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
+            if (!customValidationResult.valid) {
+                throw new SkillException(customValidationResult.msg)
+            }
+
             pinProjectForRootUser(toProj)
 
             List<SkillInfo> allCollectedSkills = []
@@ -719,10 +724,6 @@ class ProjectCopyService {
 
     @Profile
     private void validate(ProjectRequest projectRequest) {
-        CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
-        if (!customValidationResult.valid) {
-            throw new SkillException(customValidationResult.msg)
-        }
         if (!userInfoService.isCurrentUserASuperDuperUser()){
             createdResourceLimitsValidator.validateNumProjectsCreated(userInfoService.getCurrentUserId())
         }
