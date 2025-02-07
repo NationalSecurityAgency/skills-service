@@ -178,6 +178,7 @@ describe('Accessibility Tests', () => {
             cy.setDarkModeIfNeeded(darkMode)
             cy.visit('/administrator/projects/proj1/users');
             cy.get('[data-cy="pageHeader"]').contains('ID: proj1');
+            cy.get('[data-cy="exportUsersTableBtn"]')
             cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '6');
 
             cy.get('[data-p-index="3"] [data-pc-name="pcrowcheckbox"]').click()
