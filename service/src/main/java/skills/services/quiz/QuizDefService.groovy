@@ -30,12 +30,9 @@ import skills.auth.UserInfoService
 import skills.controller.PublicPropsBasedValidator
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
+import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillQuizException
-import skills.controller.request.model.ActionPatchRequest
-import skills.controller.request.model.QuizAnswerDefRequest
-import skills.controller.request.model.QuizDefRequest
-import skills.controller.request.model.QuizQuestionDefRequest
-import skills.controller.request.model.QuizSettingsRequest
+import skills.controller.request.model.*
 import skills.controller.result.model.*
 import skills.quizLoading.QuizSettings
 import skills.services.*
@@ -211,8 +208,13 @@ class QuizDefService {
         ))
 
         copyQuestions(originalQuizId, newQuizId)
-        quizSettingsService.copySettings(originalQuizId, newQuizId)
+        quizSettingsService.copySettings(originalQuizId, newQuizId, quizDefRequest.enableProtectedUserCommunity)
         accessSettingsStorageService.addQuizDefUserRoleForUser(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
+
+        CustomValidationResult customValidationResult = customValidator.validate(quizDefRequest)
+        if (!customValidationResult.valid) {
+            throw new SkillException(customValidationResult.msg)
+        }
 
         QuizDef updatedDef = quizDefRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)
         return convert(updatedDef)

@@ -71,7 +71,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="projectCard_copy"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
     });
 
-    it('copy non-protected projects and make it protected during copy', () => {
+    it('copy a non-protected project and make it protected during copy', () => {
         cy.createProject(1, {enableProtectedUserCommunity: false})
 
         cy.visit('/administrator/')
@@ -84,10 +84,18 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
 
+        cy.intercept('POST', '/api/validation/description*').as('validateDescription');
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.wait('@validateDescription');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="allDoneBtn"]').click()
         cy.get('[data-cy="projectCard_copy"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
-    });
 
+        cy.reload()
+        cy.get('[data-cy="projectCard_copy"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
+    });
 
 });
