@@ -131,6 +131,7 @@ export const useGlobalNavGuards = () => {
           		newRoute.name = getLandingPage();
 	          } else if (isSaml2()) {
                 window.location = `/saml2/authenticate/${registrationId()}`;
+                return;
               } else {
 	            newRoute.name = 'Login';
 	          }
