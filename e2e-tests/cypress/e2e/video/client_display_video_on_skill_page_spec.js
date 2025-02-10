@@ -258,7 +258,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.addLearningPathItem(1, 2, 1)
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="videoIsLockedMsg"]').contains('Complete this skill\'s prerequisites to unlock the video')
+        cy.get('[data-cy="videoIsLockedMsg"]').contains('Complete this skill\'s prerequisites to unlock the audio/video')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"]').should('not.exist')
         cy.get('[data-cy="viewTranscriptBtn"]').should('not.exist')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"]').should('not.exist')

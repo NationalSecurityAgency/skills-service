@@ -234,7 +234,7 @@ const loadTranscript = () => {
                 Earn <b>{{ skill.totalPoints }}</b> points for the  {{ attributes.skillDisplayName.toLowerCase() }} {{ videoConf.isAudio ? 'by listening to this Audio.' : 'by watching this Video.' }}
               </div>
               <div v-if="justAchieved">
-                <i class="fas fa-birthday-cake text-success mr-1 animate__bounceIn" style="font-size: 1.2rem"></i> Congrats! You just earneded <span
+                <i class="fas fa-birthday-cake text-success mr-1 animate__bounceIn" style="font-size: 1.2rem"></i> Congrats! You just earned <span
                   class="text-success font-weight-bold">{{ skill.totalPoints }}</span> points<span> and <b>completed</b> the {{ attributes.skillDisplayName.toLowerCase() }}</span>!
               </div>
             </div>
