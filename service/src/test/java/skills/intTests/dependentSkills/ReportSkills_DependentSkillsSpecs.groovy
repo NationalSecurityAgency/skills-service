@@ -22,7 +22,10 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillDef
+import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.UserPerformedSkillRepo
+import skills.storage.repos.UserPointsRepo
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -30,6 +33,15 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
 
     @Autowired
     UserPerformedSkillRepo performedSkillRepository
+
+    @Autowired
+    UserAchievedLevelRepo achievedLevelRepo
+
+    @Autowired
+    UserEventsRepo userEventsRepo
+
+    @Autowired
+    UserPointsRepo userPointsRepo
 
     List<String> sampleUserIds // loaded from system props
 
@@ -1113,6 +1125,104 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
         performedSkillsUser0.find { it.skillId == skillWithoutQuiz.skillId }
 
         !performedSkillsUser1
+    }
+
+    def "Assigning quiz to a skill with unfulfilled prerequisites must not give credit right away"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+
+        def skillWithoutQuiz = createSkill(1, 1, 2, 1, 1, 480, 200)
+
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [skillWithQuiz, skillWithoutQuiz])
+
+        // skill2 -> skill1 (quiz skill)
+        skillsService.addLearningPathPrerequisite(p1.projectId, skillWithQuiz.skillId, skillWithoutQuiz.skillId)
+
+        when:
+        List<String> users = getRandomUsers(2)
+        def quizRes1 = runQuiz(users[0], quiz, true)
+        def quizRes2 = runQuiz(users[1], quiz, true)
+
+        // assign quiz to skill after users passed, should not award skills since the skill2 has not been completed yet
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.quizId
+        skillsService.updateSkill(skillWithQuiz)
+
+        def performedSkillsUser0 = getPerformedSkillsForUser(users[0], p1.projectId)
+        def performedSkillsUser1 = getPerformedSkillsForUser(users[1], p1.projectId)
+
+        then:
+        quizRes1
+        quizRes1.passed
+
+        quizRes2
+        quizRes2.passed
+
+        !performedSkillsUser0
+        !performedSkillsUser1
+        performedSkillRepository.findAll().size() == 0
+        achievedLevelRepo.findAll().size() == 0
+        userEventsRepo.findAll().size() == 0
+        userPointsRepo.findAll().size() == 0
+    }
+
+    def "Assigning quiz to a skill with unfulfilled badge prerequisites must not give credit right away"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+
+        def skillWithoutQuiz = createSkill(1, 1, 2, 1, 1, 480, 200)
+
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [skillWithQuiz, skillWithoutQuiz])
+
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: skillWithoutQuiz.skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        // badge -> skill1 (quiz skill)
+        skillsService.addLearningPathPrerequisite(p1.projectId, skillWithQuiz.skillId, badge1.badgeId)
+
+        when:
+        List<String> users = getRandomUsers(2)
+        def quizRes1 = runQuiz(users[0], quiz, true)
+        def quizRes2 = runQuiz(users[1], quiz, true)
+
+        // assign quiz to skill after users passed, should not award skills since the skill2 has not been completed yet
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.quizId
+        skillsService.updateSkill(skillWithQuiz)
+
+        def performedSkillsUser0 = getPerformedSkillsForUser(users[0], p1.projectId)
+        def performedSkillsUser1 = getPerformedSkillsForUser(users[1], p1.projectId)
+
+        then:
+        quizRes1
+        quizRes1.passed
+
+        quizRes2
+        quizRes2.passed
+
+        !performedSkillsUser0
+        !performedSkillsUser1
+        performedSkillRepository.findAll().size() == 0
+        achievedLevelRepo.findAll().size() == 0
+        userEventsRepo.findAll().size() == 0
+        userPointsRepo.findAll().size() == 0
     }
 
     private def runQuiz(String userId, def quiz, boolean pass) {

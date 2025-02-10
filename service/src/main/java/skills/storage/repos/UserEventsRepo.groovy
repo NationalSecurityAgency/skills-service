@@ -66,6 +66,31 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                     where ut.user_id = q_attempt.user_id
                       and ut.key = :userCommunityUserTagKey and ut.value = :userCommunityUserTagValue
                    )))
+              and not exists (
+                  select 1
+                  FROM skill_definition sdParent,
+                       skill_relationship_definition srd,
+                       skill_definition sdChild
+                       LEFT JOIN user_achievement ua
+                         ON sdChild.project_id = ua.project_id AND sdChild.skill_id = ua.skill_id AND ua.user_id = q_attempt.user_id
+                  WHERE srd.parent_ref_id = sdParent.id
+                    AND srd.child_ref_id = sdChild.id
+                    AND srd.type = 'Dependence'
+                    AND (
+                      sdParent.id = :skillRefId
+                      OR sdParent.id IN (
+                        SELECT badge.id
+                        FROM skill_definition badge,
+                             skill_relationship_definition badge_to_skill,
+                             skill_definition skill
+                        WHERE badge_to_skill.parent_ref_id = badge.id
+                          AND badge_to_skill.child_ref_id = skill.id
+                          AND badge_to_skill.type = 'BadgeRequirement'
+                          AND skill.id = :skillRefId
+                      )
+                    )
+                    AND ua.skill_id IS NULL
+                )
               and not exists(
                     select 1
                     from user_events innerUP
