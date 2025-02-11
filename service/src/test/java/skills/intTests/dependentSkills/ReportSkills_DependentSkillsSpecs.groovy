@@ -1155,8 +1155,9 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
         skillWithQuiz.quizId = quiz.quizId
         skillsService.updateSkill(skillWithQuiz)
 
-        def performedSkillsUser0 = getPerformedSkillsForUser(users[0], p1.projectId)
-        def performedSkillsUser1 = getPerformedSkillsForUser(users[1], p1.projectId)
+        // coping a project should also not award skills with unfulfilled prerequisites
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
 
         then:
         quizRes1
@@ -1165,8 +1166,6 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
         quizRes2
         quizRes2.passed
 
-        !performedSkillsUser0
-        !performedSkillsUser1
         performedSkillRepository.findAll().size() == 0
         achievedLevelRepo.findAll().size() == 0
         userEventsRepo.findAll().size() == 0
@@ -1207,9 +1206,6 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
         skillWithQuiz.quizId = quiz.quizId
         skillsService.updateSkill(skillWithQuiz)
 
-        def performedSkillsUser0 = getPerformedSkillsForUser(users[0], p1.projectId)
-        def performedSkillsUser1 = getPerformedSkillsForUser(users[1], p1.projectId)
-
         then:
         quizRes1
         quizRes1.passed
@@ -1217,8 +1213,6 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
         quizRes2
         quizRes2.passed
 
-        !performedSkillsUser0
-        !performedSkillsUser1
         performedSkillRepository.findAll().size() == 0
         achievedLevelRepo.findAll().size() == 0
         userEventsRepo.findAll().size() == 0
