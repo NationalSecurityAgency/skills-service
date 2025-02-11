@@ -18,6 +18,7 @@ describe('Configure Video Tests', () => {
 
     const testVideo = '/static/videos/create-quiz.mp4'
     const videoFile = 'create-subject.webm';
+    const audioFile = 'soundfile.wav';
     const captionsButtonSelector = '.vjs-menu-button  button[title="Captions"]'
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
@@ -236,4 +237,44 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
     });
 
+    it('upload an audio file, set transcript, preview the file', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visitVideoConfPage();
+
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.visible')
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile({contents: `cypress/fixtures/${audioFile}`, mimeType: 'audio/wav'},  { force: true })
+        // cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: audioFile, encoding: 'binary'});
+        cy.get('[data-cy="videoTranscript"]').type('transcript', {delay: 0})
+        cy.get('[data-cy="saveVideoSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.visible')
+
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', audioFile)
+        cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTotalDuration"]').should('have.text', '5 seconds')
+        cy.get('[data-cy="videoPreviewCard"] [title="Play"]').click()
+
+        // audio is 5.9 seconds
+        cy.wait(6000)
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', '100%')
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTimeWatched"]').should('have.text', '5 seconds')
+
+        // refresh and re-validate
+        cy.visitVideoConfPage();
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', audioFile)
+        cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTotalDuration"]').should('have.text', '5 seconds')
+        cy.get('[data-cy="videoPreviewCard"] [title="Play"]').click()
+        cy.wait(6000)
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', '100%')
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTimeWatched"]').should('have.text', '5 seconds')
+    });
 });

@@ -222,4 +222,16 @@ describe('Configure Video Tests', () => {
         cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '868px')
     });
 
+    it('audio only does not have a resize button', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        const vid = { file: 'soundfile.wav', captions: '', transcript: 'great' }
+        cy.saveVideoAttrs(1, 1, vid)
+
+        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('#skillVideoFor-proj1-skill1Container')
+
+        cy.get('[data-cy="videoResizeHandle"]').should('not.exist')
+    });
 });

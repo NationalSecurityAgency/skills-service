@@ -488,7 +488,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
                                name="videoUrl"
                                data-cy="videoUrl"
                                @input="validate"
-                               placeholder="Please enter video external URL"
+                               placeholder="Please enter audio/video external URL"
                                :disabled="isReadOnly"
               />
             </div>

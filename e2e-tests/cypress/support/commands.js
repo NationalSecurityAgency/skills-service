@@ -207,7 +207,14 @@ Cypress.Commands.add("saveVideoAttrs", (projNum, skillNum, videoAttrs) => {
     let requestDone = false;
     cy.getCookie('XSRF-TOKEN').should('exist').then((xsrfCookie) => {
         if (videoAttrs.file) {
-            const fileType = videoAttrs.file.endsWith('mp4') ? 'video/mp4' : 'video/webm';
+            let fileType
+            if(videoAttrs.file.endsWith('mp4')) {
+                fileType = 'video/mp4'
+            } else if(videoAttrs.file.endsWith('webm')) {
+                fileType = 'video/webm'
+            } else if(videoAttrs.file.endsWith('wav')) {
+                fileType = 'audio/wav'
+            }
             cy.readFile(`cypress/fixtures/${videoAttrs.file}`, 'binary')
               .then((binaryFile) => {
                   const blob = Cypress.Blob.binaryStringToBlob(binaryFile, fileType);
