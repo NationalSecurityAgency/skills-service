@@ -577,7 +577,7 @@ describe('Skills Group Tests', () => {
 
         cy.get('[data-cy="manageSkillLink_skill2"]').click();
         cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 2');
-        cy.get('[data-cy="pageHeader"]').contains('Group ID: group1');
+        cy.get('[data-cy="pageHeader"]').contains('Group: Awesome Group 1');
         cy.get('[data-cy="disabledGroupBadge-group1"]').should('not.exist');
 
         cy.get('[data-cy="nav-Add Event"]').should('be.enabled');
@@ -616,7 +616,7 @@ describe('Skills Group Tests', () => {
 
         cy.get('[data-cy="manageSkillLink_skill2"]').click();
         cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 2');
-        cy.get('[data-cy="pageHeader"]').contains('Group ID: group1');
+        cy.get('[data-cy="pageHeader"]').contains('Group: Awesome Group 1');
         cy.get('[data-cy="nav-Add Event"]').should('be.enabled');
 
         // nav directly to the page and nav item is disabled
