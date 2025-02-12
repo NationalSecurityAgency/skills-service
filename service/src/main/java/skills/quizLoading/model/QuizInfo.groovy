@@ -39,4 +39,6 @@ class QuizInfo {
 
     Boolean onlyIncorrectQuestions
     Integer numIncorrectQuestions
+
+    Boolean showDescriptionOnQuizPage
 }

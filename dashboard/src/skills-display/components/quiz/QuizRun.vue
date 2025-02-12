@@ -33,6 +33,7 @@ import { useForm } from "vee-validate";
 import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
+import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 
 const props = defineProps({
   quizId: String,
@@ -412,6 +413,15 @@ const doneWithThisRun = () => {
               <span v-if="quizInfo.quizTimeLimit > 0 && dateTimer !== null"> | {{ timeUtils.formatDurationDiff(currentDate, quizInfo.deadline, false, true)}}</span>
             </div>
           </div>
+
+          <Card :pt="{ body: { class: 'p-1' }, content: { class: 'p-1' } }" v-if="quizInfo.description && quizInfo.showDescriptionOnQuizPage">
+            <template #content>
+              <markdown-text
+                  :text="quizInfo.description"
+                  instance-id="quizDescriptionText"
+                  data-cy="quizDescription" />
+            </template>
+          </Card>
 
           <SkillsOverlay :show="isCompleting" opacity="0.2">
             <div v-for="(q, index) in quizInfo.questions" :key="q.id">

@@ -225,4 +225,29 @@ describe('Quiz Metrics Tests', () => {
         cy.get('[data-cy="retakeIncorrectQuestionsSwitch"] [role="switch"]').should('be.checked')
     });
 
+    it('quiz setting: show description on quiz', function () {
+        cy.createQuizDef(1);
+        for(var x = 1; x < 3; x++) {
+            cy.createQuizQuestionDef(1, x);
+        }
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1')
+        cy.get('[data-cy="quizDescription"]').should('not.exist')
+
+        cy.visit('/administrator/quizzes/quiz1/settings');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="showDescriptionOnQuizPageSwitch"] [role="switch"]').click({force: true});
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+
+        cy.visit('/administrator/quizzes/quiz1/settings');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="showDescriptionOnQuizPageSwitch"] [role="switch"]').should('be.checked')
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1')
+        cy.get('[data-cy="quizDescription"]').should('exist')
+    });
+
 });

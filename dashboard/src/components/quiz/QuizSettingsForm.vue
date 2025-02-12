@@ -67,6 +67,7 @@ const schema = props.isSurvey ? yup.object().shape({'quizMultipleTakes': yup.boo
   'quizMultipleTakes': yup.boolean(),
   'quizAlwaysShowCorrectAnswers': yup.boolean(),
   'retakeIncorrectQuestions': yup.boolean(),
+  'showDescriptionOnQuizPage': yup.boolean(),
   'quizTimeLimitUnlimited': yup.boolean(),
   'quizTimeLimitHours': yup.number()
       .when('quizTimeLimitUnlimited', {
@@ -315,6 +316,20 @@ const updateTimeLimit = () => {
           inputId="retakeIncorrectQuestions"
           aria-label="Allow retaking the quiz after passing"
           data-cy="retakeIncorrectQuestionsSwitch"/>
+      <span class="mx-2 vertical-align-top">Enabled</span>
+    </div>
+  </div>
+
+  <div class="field grid align-items-start" v-if="!isSurvey">
+    <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+      <label for="showDescriptionOnQuizPage">Show Quiz Description During Quiz:</label>
+    </div>
+    <div class="col-12 md:col-9">
+      <SkillsInputSwitch
+          name="quizShowDescriptionOnQuizPage"
+          inputId="showDescriptionOnQuizPage"
+          aria-label="Show the quiz description on the quiz run"
+          data-cy="showDescriptionOnQuizPageSwitch"/>
       <span class="mx-2 vertical-align-top">Enabled</span>
     </div>
   </div>

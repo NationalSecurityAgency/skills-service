@@ -26,7 +26,8 @@ enum QuizSettings {
     MultipleTakes('quizMultipleTakes'),
     AlwaysShowCorrectAnswers('quizAlwaysShowCorrectAnswers'),
     UserCommunityOnlyQuiz("user_community"),
-    RetakeIncorrectQuestionsOnly('quizRetakeIncorrectQuestions');
+    RetakeIncorrectQuestionsOnly('quizRetakeIncorrectQuestions'),
+    ShowDescriptionOnQuizPage('quizShowDescriptionOnQuizPage');
 
     String setting;
 
