@@ -285,16 +285,16 @@ export default {
         styleName: 'background-color'
       }],
       incompleteColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.p-progressbar-determinate,' +
-            'body #app .sd-theme-home .user-skill-progress-layers .p-progressbar.p-component.p-progressbar-determinate',
+        selector: 'body #app .sd-theme-home .p-progressbar.p-component.p-progressbar-determinate.today-progress.is-not-completed,' +
+            'body #app .sd-theme-home .sd-theme-achieved-skills-progress .p-progressbar.p-component.p-progressbar-determinate.is-completed',
         styleName: 'background-color'
       }],
       beforeTodayColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.total-progress.is-not-completed .p-progressbar-value',
+        selector: 'body #app .sd-theme-home .p-progressbar.p-component.total-progress.is-not-completed  .p-progressbar-value',
         styleName: 'background-color'
       }],
       earnedTodayColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.today-progress.is-not-completed .p-progressbar-value',
+        selector: 'body #app .sd-theme-home .p-progressbar.p-component.p-progressbar-determinate.today-progress.is-not-completed .p-progressbar-value',
         styleName: 'background-color'
       }]
     },

@@ -122,7 +122,7 @@ const levelStats = computed(() => {
           </circle-progress>
         </div>
       </div>
-      <div class="mt-12 mx-8 flex justify-center" data-cy="achievedSkillsProgress">
+      <div class="mt-12 mx-8 flex justify-center sd-theme-achieved-skills-progress" data-cy="achievedSkillsProgress">
         <div class="w-11/12">
         <div class="flex mb-1" :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`">
           <div class="flex-1 text-lg font-medium">Achieved Skills</div>
