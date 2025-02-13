@@ -320,11 +320,11 @@ const updateTimeLimit = () => {
     </div>
   </div>
 
-  <div class="field grid align-items-start" v-if="!isSurvey">
-    <div class="col-12 mb-2 md:col-3 md:mb-0 text-color-secondary">
+  <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
+    <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
       <label for="showDescriptionOnQuizPage">Show Quiz Description During Quiz:</label>
     </div>
-    <div class="col-12 md:col-9">
+    <div class="col-span-12 md:col-span-9">
       <SkillsInputSwitch
           name="quizShowDescriptionOnQuizPage"
           inputId="showDescriptionOnQuizPage"
