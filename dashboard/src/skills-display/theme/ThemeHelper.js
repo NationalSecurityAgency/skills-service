@@ -205,11 +205,11 @@ export default {
     },
     stars: {
       unearnedColor: {
-        selector: 'body #app .sd-theme-home .p-rating .p-rating-item .p-icon.p-rating-icon',
+        selector: 'body #app .sd-theme-home .p-rating .p-rating-option .p-icon.p-rating-icon.p-rating-off-icon',
         styleName: 'color'
       },
       earnedColor: {
-        selector: 'body #app .sd-theme-home .p-rating .p-rating-item.p-rating-item-active .p-icon.p-rating-icon',
+        selector: 'body #app .sd-theme-home .p-rating .p-rating-option.p-rating-option-active .p-icon.p-rating-icon.p-rating-on-icon',
         styleName: 'color'
       }
     },
