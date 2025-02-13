@@ -66,7 +66,7 @@ onUnmounted(() => {
                 <div class="flex justify-center lg:justify-end flex-wrap">
                   <div v-for="(stat, index) in options.stats" :key="stat.label" data-cy="pageHeaderStat"
                        class="w-full md:w-6/12 lg:w-auto mb-1">
-                    <Card class="ml-4 mt-2 h-full" :pt="{ body: { class: 'p-3' }, content: { class: 'p-0' } }">
+                    <Card :class="{ 'md:ml-4' : index % 2 === 1, 'lg:ml-4' : index !== 0 }" class="mt-2 h-full" :pt="{ body: { class: 'p-3' }, content: { class: 'p-0' } }">
                       <template #content>
                         <div class="flex">
                           <div class="" :data-cy="`pageHeaderStat_${stat.label}`">
