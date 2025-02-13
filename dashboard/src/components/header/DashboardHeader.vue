@@ -35,10 +35,10 @@ const themeHelper = useThemesHelper()
 <template>
   <div class="header">
     <skip-to-content></skip-to-content>
-    <div class="bg-primary-reverse">
+    <div class="text-primary bg-primary-contrast">
       <upgrade-in-progress-warning />
-      <div class="flex flex-wrap pt-3 px-3 pb-2 justify-content-center mb-3 border-bottom-1 border-200">
-        <div class="flex-1 justify-content-center">
+      <div class="flex flex-wrap pt-4 px-4 pb-2 justify-center mb-4 border-b border-surface-200 dark:border-surface-600">
+        <div class="flex-1 justify-center">
           <div class="flex">
             <router-link data-cy="skillTreeLogo" class="" to="/">
               <SkillTreeHeaderSvgIcon />
@@ -64,7 +64,7 @@ const themeHelper = useThemesHelper()
         </div>
       </div>
     </div>
-    <skills-breadcrumb class="px-3"></skills-breadcrumb>
+    <skills-breadcrumb class="px-4"></skills-breadcrumb>
   </div>
 </template>
 

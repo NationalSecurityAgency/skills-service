@@ -31,13 +31,13 @@ const totalLevels = computed(() => props.userProgress.totalLevels)
 <template>
   <div class="progress-circle-wrapper" data-cy="overallLevel">
     <div class="text-2xl font-medium" data-cy="overallLevelTitle">My {{ attributes.levelDisplayName }}</div>
-    <div class="mt-4">
+    <div class="mt-6 flex justify-center">
      <TrophySvgIcon :level="level" data-cy="trophyIcon" />
     </div>
-    <div data-cy="overallLevelDesc" class="mt-3">
+    <div data-cy="overallLevelDesc" class="mt-4">
       {{ attributes.levelDisplayName }} <Tag severity="info">{{ level }}</Tag> out of <Tag>{{ totalLevels }}</Tag>
     </div>
-    <div class="flex justify-content-center mt-2 overall-progress-stars-icons">
+    <div class="flex justify-center mt-2 overall-progress-stars-icons">
       <LevelsProgress :level="level" :totalLevels="totalLevels" data-cy="overallStars"/>
     </div>
   </div>

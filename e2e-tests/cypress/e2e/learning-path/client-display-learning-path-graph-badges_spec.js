@@ -64,7 +64,7 @@ describe('Client Display Prerequisites Badges Tests', () => {
         cy.cdVisit('/subjects/subj1');
         cy.cdClickSkill(1);
 
-        cy.get('[data-pc-section="headertitle"]').contains('Prerequisite Name').click()
+        cy.get('[data-pc-section="headercell"]').contains('Prerequisite Name').click()
 
         cy.get('[data-cy="prereqTable"] [data-p-index="0"] [data-cy="skillLink-proj1-badge1"]').contains('Badge 1')
         cy.get('[data-cy="prereqTable"] [data-p-index="1"] [data-cy="skillLink-proj1-skill3"]').contains('Skill 3')
@@ -91,7 +91,7 @@ describe('Client Display Prerequisites Badges Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill2');
 
-        cy.get('[data-pc-section="headertitle"]').contains('Prerequisite Name').click()
+        cy.get('[data-pc-section="headercell"]').contains('Prerequisite Name').click()
 
         cy.get('[data-cy="prereqTable"] [data-p-index="0"] [data-cy="skillLink-proj1-badge1"]').contains('Badge 1')
         cy.get('[data-cy="prereqTable"] [data-p-index="1"]').should('not.exist')
@@ -168,7 +168,7 @@ describe('Client Display Prerequisites Badges Tests', () => {
 
         cy.cdVisit('/badges/badge1');
 
-        cy.get('[data-pc-section="headertitle"]').contains('Prerequisite Name').click()
+        cy.get('[data-pc-section="headercell"]').contains('Prerequisite Name').click()
 
         cy.get('[data-cy="prereqTable"] [data-p-index="0"] [data-cy="skillLink-proj1-badge2"]').contains('Badge 2')
         cy.get('[data-cy="prereqTable"] [data-p-index="1"] [data-cy="skillLink-proj1-badge3"]').contains('Badge 3')

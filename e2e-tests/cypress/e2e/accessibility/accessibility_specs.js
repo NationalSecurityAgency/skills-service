@@ -369,7 +369,7 @@ describe('Accessibility Tests', () => {
                 cy.visit('/administrator/projects/proj1/subjects/subj1');
                 cy.injectAxe();
 
-                cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+                cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
                 cy.get('[data-cy="editSkillButton_skill11"]');
                 cy.get('[data-cy="editSkillButton_skill22"]');
 
@@ -384,7 +384,7 @@ describe('Accessibility Tests', () => {
                 cy.visit('/administrator/projects/proj1/subjects/subj1');
                 cy.injectAxe();
 
-                cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+                cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
                 cy.get('[data-cy="editSkillButton_skill11"]');
                 cy.get('[data-cy="editSkillButton_skill22"]');
 

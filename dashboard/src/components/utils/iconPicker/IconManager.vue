@@ -18,7 +18,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import FileUpload from 'primevue/fileupload';
 import VirtualScroller from 'primevue/virtualscroller';
-import Message from 'primevue/message';
+import ScrollPanel from 'primevue/scrollpanel';
 import enquire from 'enquire.js';
 import FileUploadService from '@/common-components/utilities/FileUploadService';
 import fontAwesomeIconsCanonical from './font-awesome-index';
@@ -240,7 +240,11 @@ const deleteIcon = (file, projectId) => {
       accept: () => {
         IconManagerService.deleteIcon(iconName, projectId).then(() => {
           iconPacks.value[2].defaultIcons = iconPacks.value[2].defaultIcons.filter((element) => element.filename !== iconName);
-          iconPacks.value[2].icons = [iconPacks.value[2].defaultIcons];
+          if (iconPacks.value[2].defaultIcons && iconPacks.value[2].defaultIcons.length > 0) {
+            iconPacks.value[2].icons = [iconPacks.value[2].defaultIcons];
+          } else {
+            iconPacks.value[2].icons = [];
+          }
         });
       },
       reject: () => {
@@ -267,7 +271,8 @@ const uploadFromInput = (event) => {
   }
 }
 const beforeUpload = (upload) => {
-  const isImageTypeValid = isValidImageType(upload.files[0].type);
+  console.log(upload.files[0]?.type)
+  const isImageTypeValid = isValidImageType(upload.files[0]?.type);
 
   if (!isImageTypeValid) {
     displayError('File is not an image format');
@@ -306,7 +311,7 @@ const beforeUpload = (upload) => {
 
 const displayError = (message) => {
   errorMessage.value = message;
-  uploader.value.clear();
+  // uploader.value.clear();
   fileInfo.value = null;
 }
 
@@ -315,56 +320,87 @@ const closeError = () => {
 }
 </script>
 
-<template xmlns:v-if="http://www.w3.org/1999/xlink">
-    <div class="flex flex-column gap-3" :style="`width: ${modalWidth}`">
-        <InputText type="text" class="w-full" :placeholder="searchPlaceholder" autofocus v-model="filterCriteria"
-               @keyup="filter" ref="iconFilterInput" data-cy="icon-search" aria-label="search by icon name" />
+<template>
+    <div class="flex flex-col gap-2" :style="`width: ${modalWidth}`">
 
       <TabMenu :model="iconPacks" @tab-change="onChange" v-model:activeIndex="active">
         <template #item="{ item, props }">
-          <a v-bind="props.action" class="flex align-items-center gap-2">
+          <a v-bind="props.action" class="flex items-center gap-2">
             <i :class="item.headerIcon"></i> {{ item.packName }}
           </a>
         </template>
       </TabMenu>
 
+      <InputText v-if="activePack !== 'Custom'"
+                 type="text" class="w-full"
+                 :placeholder="searchPlaceholder"
+                 autofocus
+                 v-model="filterCriteria"
+                 @keyup="filter" ref="iconFilterInput" data-cy="icon-search" aria-label="search by icon name" />
       <VirtualScroller v-if="activePack !== 'Custom' && iconPacks[active]?.icons?.length > 0" :items="iconPacks[active]?.icons" :itemSize="[100, 100]" orientation="both" style="height: 360px; width: 100%;" data-cy="virtualIconList" :tabindex="-1">
         <template v-slot:item="{ item, options }">
           <IconRow :item="item" :options="options" @icon-selected="getIcon($event, iconPacks[active]?.iconPack)" />
         </template>
       </VirtualScroller>
-      <FileUpload ref="uploader" @select="beforeUpload" v-if="activePack === 'Custom'" name="customIcon" :accept="acceptType" :maxFileSize="1000000" customUpload @uploader="beforeUpload">
-        <template #header>
-          <div class="w-full">
-            <InputText class="w-full" data-cy="fileInput" placeholder="Browse..." type="file" @change="uploadFromInput($event)" v-model="fileInfo" />
-            <p class="text-muted text-right text-primary font-italic">* custom icons must be between {{minDimensionsString}} and {{maxDimensionsString}}</p>
+      <FileUpload ref="uploader"
+                  @select="beforeUpload"
+                  v-if="activePack === 'Custom'"
+                  name="customIcon"
+                  :accept="acceptType"
+                  :maxFileSize="1000000"
+                  customUpload
+                  :auto="true"
+                  @uploader="beforeUpload">
+        <template #header="{ chooseCallback, uploadCallback, clearCallback, files }">
+          <div class="flex flex-wrap justify-between items-center flex-1 gap-4 pb-2 border-b-2">
+            <div class="">
+              <SkillsButton @click="chooseCallback()" icon="fas fa-upload" label="Upload New Icon" severity="info"></SkillsButton>
+            </div>
+            <div class="flex-1 text-right text-primary">
+              <InlineMessage class="text-muted italic" severity="warn">Custom icons must be between {{minDimensionsString}} and {{maxDimensionsString}}</InlineMessage>
+            </div>
           </div>
         </template>
         <template #content>
-          <Message data-cy="iconErrorMessage" v-if="errorMessage" @close="closeError" severity="error">{{ errorMessage }}</Message>
-          <p>Drag and drop file here to upload.</p>
+          <Message data-cy="iconErrorMessage" v-if="errorMessage" @close="closeError" severity="error" :closable="true">{{ errorMessage }}</Message>
+          <Message severity="info" icon="fas fa-cloud-upload-alt" v-if="iconPacks[2].icons.length > 0 && !loadingIcons" :marginY="0">Drag and drop file here to upload or select an existing icon below</Message>
           <div v-if="iconPacks[2].icons.length > 0 && !loadingIcons">
-            <div v-for="(icons, index) of iconPacks[2].icons" v-bind:key="index" class="flex">
-              <div v-for="(file) of icons" :key="file.filename" class="card m-0 px-6 flex flex-wrap border-1 surface-border align-items-center gap-3">
-                <div class="icon-item" style="max-width: 100px;">
-                  <button class="p-link text-blue-400"
-                     :aria-label="`Select icon ${file.filename}`"
-                     @click.stop.prevent="selectIcon(file.filename, file.cssClassname, 'Custom Icons')"
-                     :class="`item ${selectedCss === file.cssClassname ? 'selected' : ''}`">
-                            <span class="icon is-large text-info">
-                              <i :class="file.cssClassname" style="background-size: contain;"></i>
-                            </span>
-                  </button>
-                  <br/>
-                  <span class="iconName">
-                    <button class="p-link text-blue-400 delete-icon" @click="deleteIcon(file, route.params.projectId)" :aria-label="`Delete icon ${file.filename}`">
-                      <span class="icon is-tiny"><i style="font-size:1rem;height:1rem;width:1rem;" class="fas fa-trash"></i></span>
-                    </button>
-                    <span>{{ file.filename }}</span>
-                  </span>
+            <ScrollPanel style="width: 100%; height: 230px">
+              <div v-for="(icons, index) of iconPacks[2].icons" v-bind:key="index" class="flex flex-wrap gap-4">
+              <div v-for="(file) of icons" :key="file.filename"
+                   class="p-3 rounded-border flex flex-col border border-surface items-center gap-4 mb-3 w-40">
+                <button
+                    class="p-link text-blue-400"
+                    :aria-label="`Select icon ${file.filename}`"
+                    @click.stop.prevent="selectIcon(file.filename, file.cssClassname, 'Custom Icons')"
+                    :class="`item ${selectedCss === file.cssClassname ? 'selected' : ''}`">
+                  <div class="icon is-large text-info">
+                    <i :class="file.cssClassname" style="background-size: contain;"></i>
+                  </div>
+                  <div class="font-semibold w-30 overflow-hidden text-overflow-ellipsis break-all">{{
+                      file.filename
+                    }}
+                  </div>
+                </button>
+                <div class="flex justify-center">
+                  <SkillsButton
+                      severity="warn"
+                      rounded
+                      @click="deleteIcon(file, route.params.projectId)"
+                      data-cy="deleteIconBtn"
+                      :aria-label="`Delete icon ${file.filename}`">
+                    <i class="fas fa-trash"></i>
+                  </SkillsButton>
                 </div>
               </div>
             </div>
+            </ScrollPanel>
+          </div>
+        </template>
+        <template #empty v-if="iconPacks[2].icons.length === 0 && !loadingIcons">
+          <div class="flex items-center justify-center flex-col py-4">
+            <i class="fas fa-cloud-upload-alt !border-2 !rounded-full !p-8 !text-4xl !text-muted-color" />
+            <p class="mt-6 mb-0">Drag and drop files to here to upload.</p>
           </div>
         </template>
       </FileUpload>
@@ -374,54 +410,5 @@ const closeError = () => {
 </template>
 
 <style>
-  .p-fileupload-content {
-    height: 300px;
-    overflow: auto;
-  }
 
-  .icon-row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    padding-top: 12px;
-    padding-bottom: 12px;
-  }
-
-  .iconManager_header {
-    padding: 1em;
-    border-radius: 8px 8px 0 0;
-    border: 1px solid #ccc;
-  }
-
-  .icon-item {
-    border-radius: 3px;
-    color: inherit;
-    flex: auto;
-    text-align: center;
-  }
-
-  .icon-item i {
-    box-sizing: content-box;
-    text-align: center;
-    border-radius: 3px;
-    font-size: 3rem;
-    width: 48px;
-    height: 48px;
-    display: inline-block;
-  }
-
-  .tab-content div {
-    width: 100%;
-  }
-
-  .delete-icon {
-    left: 0;
-  }
-
-  .is-tiny {
-    height: .5rem;
-    width: .5rem;
-    font-size:.5rem;
-    padding-right: .5rem;
-  }
 </style>

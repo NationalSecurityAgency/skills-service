@@ -34,13 +34,13 @@ describe('Tag Skills Tests', () => {
 
         // must exist initially
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get(`${groupSelector} [data-cy="manageSkillLink_skill23"]`);
         cy.get(`${groupSelector} [data-cy="manageSkillLink_skill22"]`);
         cy.get(`${groupSelector} [data-cy="manageSkillLink_skill21"]`);
 
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]`).click()
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]`).click()
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]`).click()
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]`).click()
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 
@@ -52,7 +52,7 @@ describe('Tag Skills Tests', () => {
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-newtag1"]`).should('exist')
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-newtag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-newtag1"]`).should('not.exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-newtag1"]`).should('exist')
@@ -63,13 +63,13 @@ describe('Tag Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-tag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('not.exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-tag1"]`).should('exist')
 
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]`).click()
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]`).click()
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
         cy.get('[data-cy="existingTag"]').click();
@@ -81,7 +81,7 @@ describe('Tag Skills Tests', () => {
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-tag1"]`).should('exist')
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-tag1"]`).should('not.exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('not.exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-tag1"]`).should('exist')
@@ -92,13 +92,13 @@ describe('Tag Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-tag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('not.exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-tag1"]`).should('exist')
 
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]`).click()
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]`).click()
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
         cy.get('[data-pc-name="dialog"]').contains('The selected skills do not have any tags.')
@@ -108,14 +108,14 @@ describe('Tag Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]`).click()
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]`).click()
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]`).click()
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]`).click()
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]`).click()
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]`).click()
 
         for (let i= 0; i < 3 ; i++) {
-            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
 
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).click();
@@ -129,7 +129,7 @@ describe('Tag Skills Tests', () => {
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-newtag1"]`).should('exist')
 
         for (let i= 0; i < 3 ; i++) {
-            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
         }
         cy.get('[data-cy="addSkillToGroupBtn-group2"]').should('have.focus')
     });
@@ -138,14 +138,14 @@ describe('Tag Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]`).click()
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]`).click()
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]`).click()
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]`).click()
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]`).click()
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]`).click()
 
         for (let i= 0; i < 3 ; i++) {
-            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
 
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).click();
@@ -154,7 +154,7 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="closeDialogBtn"]').click()
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).should('have.focus')
         for (let i= 0; i < 3 ; i++) {
-            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
 
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).click();
@@ -162,7 +162,7 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-pc-name="dialog"] [aria-label="Close"]').click()
         cy.get('[data-cy="skillActionsBtn"]').should('have.focus')
         for (let i= 0; i < 3 ; i++) {
-            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
     });
 
@@ -171,15 +171,15 @@ describe('Tag Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-tag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-tag1"]`).should('exist')
 
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]`).click();
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]`).click();
         for (let i= 0; i < 3 ; i++) {
-            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
@@ -192,7 +192,7 @@ describe('Tag Skills Tests', () => {
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-tag1"]`).should('not.exist')
 
         for (let i= 0; i < 3 ; i++) {
-            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
         }
         cy.get('[data-cy="addSkillToGroupBtn-group2"]').should('have.focus')
     });
@@ -202,15 +202,15 @@ describe('Tag Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         const groupSelector = '[data-cy="skillsTable"] [data-cy="ChildRowSkillGroupDisplay_group2"]'
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
 
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-tag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-tag1"]`).should('exist')
 
-        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]`).click();
+        cy.get(`${groupSelector} [data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]`).click();
         for (let i= 0; i < 3 ; i++) {
-            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
@@ -221,7 +221,7 @@ describe('Tag Skills Tests', () => {
         cy.get(`${groupSelector} [data-cy="skillTag-skill23-tag1"]`).should('exist')
 
         for (let i= 0; i < 3 ; i++) {
-            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).should('have.focus')
 
@@ -230,7 +230,7 @@ describe('Tag Skills Tests', () => {
 
         cy.get('[data-pc-name="dialog"] [aria-label="Close"]').click()
         for (let i= 0; i < 3 ; i++) {
-            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).should('have.focus')
     });

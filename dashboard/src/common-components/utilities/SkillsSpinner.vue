@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <template>
-  <div v-if="isLoading" class="d-flex justify-content-center mt-5">
+  <div v-if="isLoading" class="d-flex justify-center mt-8">
     <b-spinner label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
   </div>
 </template>

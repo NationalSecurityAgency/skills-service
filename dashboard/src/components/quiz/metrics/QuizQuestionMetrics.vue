@@ -163,11 +163,17 @@ const qNum = computed(() => {
 const numberOfStars = computed(() => {
   return props.q.answers.length
 })
+const removeExpanderClass = (rowData) => {
+  if (!(rowData?.numAnswered && rowData.numAnswered > 0) ){
+    return 'no-expander'
+  }
+  return ''
+}
 </script>
 
 <template>
   <div :data-cy="`metrics-q${qNum}`">
-    <div class="p-4">
+    <div class="p-6">
       <div class="text-3xl">Question #{{ qNum }}
         <Tag class="text-lg" severity="info" data-cy="qType">{{ questionTypeLabel }}</Tag>
       </div>
@@ -184,9 +190,9 @@ const numberOfStars = computed(() => {
       </div>
     </div>
 
-    <div v-if="isRating && averageScore" class="flex align-items-baseline flex-wrap pl-3">
+    <div v-if="isRating && averageScore" class="flex items-baseline flex-wrap pl-4">
       Average Score:
-      <Rating class="flex-initial border-round py-3 px-4" v-model="averageScore" :stars="numberOfStars" readonly
+      <Rating class="flex-initial rounded-border py-4 px-6" v-model="averageScore" :stars="numberOfStars" readonly
               :cancel="false" />
       <span class="text-lg">{{ averageScore }}</span>
     </div>
@@ -197,13 +203,7 @@ const numberOfStars = computed(() => {
       v-model:expandedRows="expandedRows"
       :expander="true"
       expander-label="Expand Answer History"
-      :expander-pt="{
-                rowToggler: ({ instance: { rowData } }) => ({
-                  class: {
-                    hidden: !(rowData?.numAnswered && rowData.numAnswered > 0),
-                  },
-                }),
-              }"
+      :row-class="removeExpanderClass"
       :value="answers">
       <Column v-for="col of tableOptions.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
               :class="{'flex': responsive.md.value }">
@@ -229,11 +229,11 @@ const numberOfStars = computed(() => {
         <QuizAnswerHistory :answer-def-id="slotProps.data.id"
                            :is-survey="isSurvey"
                            :data-cy="`row${slotProps.index}-answerHistory`"
-                           class="mb-4" />
+                           class="mb-6" />
       </template>
     </SkillsDataTable>
 
-    <div v-if="!isSurvey && isMultipleChoice" class="surface-100 p-2 text-sm" data-cy="multipleChoiceQuestionWarning">
+    <div v-if="!isSurvey && isMultipleChoice" class="bg-surface-100 dark:bg-surface-700 p-2 text-sm" data-cy="multipleChoiceQuestionWarning">
       *** All of the required choices must be selected for the question to be counted as <span
       class="text-primary uppercase">correct</span> ***
     </div>
@@ -249,4 +249,9 @@ const numberOfStars = computed(() => {
 
 <style scoped>
 
+</style>
+<style>
+.p-datatable .p-datatable-tbody > tr.no-expander > td .p-datatable-row-toggle-button {
+  display: none;
+}
 </style>

@@ -62,16 +62,16 @@ const hasSkillsWithApprovals = () => {
     <skills-spinner :is-loading="loading" />
 
     <div v-if="!loading">
-      <self-report-info-cards :self-report-stats="selfReportStats" class="mb-3"/>
+      <self-report-info-cards :self-report-stats="selfReportStats" class="mb-4"/>
       <email-not-enabled-warning v-if="showEmailServiceWarning"/>
 
       <div v-if="hasSkillsWithApprovals()">
         <self-report-approval @approval-action="handleApprovalAction" />
-        <self-report-approval-history ref="selfReportApprovalHistory" class="mt-3"/>
+        <self-report-approval-history ref="selfReportApprovalHistory" class="mt-4"/>
       </div>
       <no-content2 v-else title="No Skills Require Approval" data-cy="noApprovalTableMsg"
                    message="Currently there are no skills that require approval. Self Reporting type of 'Approval' can be configured when creating or editing a skill."
-                   class="no-skills-msg pt-5"/>
+                   class="no-skills-msg pt-8"/>
 
     </div>
   </div>

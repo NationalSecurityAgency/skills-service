@@ -53,7 +53,7 @@ const keepIt = () => {
     severity="error"
     :closable="false"
     class="mt-2">
-    <div class="flex gap-2 flex-column md:flex-row align-items-center">
+    <div class="flex gap-2 flex-col md:flex-row items-center">
       <div class="flex-1">
         Project has not been used in over <Tag severity="danger">{{ appConfig.expireUnusedProjectsOlderThan }} days</Tag> and will be
         deleted <Tag severity="danger">{{ fromExpirationDate }}</Tag>.

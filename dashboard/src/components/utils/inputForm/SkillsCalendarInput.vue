@@ -69,12 +69,13 @@ const handleOnInput = (event) => {
               :inputId="`input${name}`"
               :id="name"
               :data-cy="$attrs['data-cy'] || name" />
-    <small
-        v-if="errorMessage"
-        role="alert"
-        class="p-error block"
-        :data-cy="`${name}Error`"
-        :id="`${name}Error`">{{ errorMessage || '' }}</small>
+    <Message v-if="errorMessage"
+             severity="error"
+             variant="simple"
+             size="small"
+             :closable="false"
+             :data-cy="`${name}Error`"
+             :id="`${name}Error`">{{ errorMessage || '' }}</Message>
 
   </div>
 </template>

@@ -199,8 +199,8 @@ const archiveUsers = () => {
 
 <template>
   <div class="w-full">
-    <div class="px-4 py-3">
-      <div class="flex flex-column lg:flex-row gap-4 my-2">
+    <div class="px-6 py-4">
+      <div class="flex flex-col lg:flex-row gap-6 my-2">
         <div class="flex-1">
           <div>
             <label for="userFilter">User Filter</label>
@@ -213,25 +213,25 @@ const archiveUsers = () => {
           <div class="flex gap-2">
             <div class="flex-1">
               <label for="minimumProgress">Minimum User Progress</label>
-              <div class="flex mt-3 align-items-center">
-                <span class="mr-3">0%</span>
-                <div class="flex flex-1 flex-column">
+              <div class="flex mt-4 items-center">
+                <span class="mr-4">0%</span>
+                <div class="flex flex-1 flex-col">
                   <Slider v-model="filters.progress" v-on:keydown.enter="applyFilters" :min="0" :max="100"
                           data-cy="users-progress-range" aria-label="user progress range filter" />
                 </div>
-                <span class="ml-3">100%</span>
+                <span class="ml-4">100%</span>
               </div>
             </div>
             <div class="flex">
               <InputText v-model.number="filters.progress" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="minimumProgress"
                          data-cy="users-progress-input" aria-label="user progress input filter" inputId="minimumProgress"
-                         class="w-4rem" />
+                         class="w-16" />
             </div>
           </div>
         </div>
       </div>
 
-      <div class="flex gap-2 mt-2 mb-4">
+      <div class="flex gap-2 mt-2 mb-6">
         <SkillsButton icon="fa fa-filter" label="Filter" outlined @click="applyFilters" data-cy="users-filterBtn" size="small" />
         <SkillsButton icon="fa fa-times" label="Reset" outlined @click="reset" class="ml-1" data-cy="users-resetBtn" size="small" />
       </div>
@@ -256,7 +256,7 @@ const archiveUsers = () => {
           </div>
         </template>
         <template v-if="isProjectLevel" #header>
-          <div class="flex justify-content-end flex-wrap">
+          <div class="flex justify-end flex-wrap">
             <SkillsButton
                 v-if="!projConfig.isReadOnlyProj"
                 class="mr-2"
@@ -325,19 +325,20 @@ const archiveUsers = () => {
                         :aria-label="`${calcPercent(slotProps.data.totalPoints)} percent completed`"
                         data-cy="progressPercent">{{ calcPercent(slotProps.data.totalPoints) }}%</span>
                 </div>
-                <div class="flex flex-auto justify-content-end">
+                <div class="flex flex-auto justify-end">
                   <span class="text-primary font-weight-bold"
                         :aria-label="`${slotProps.data.totalPoints} out of ${totalPoints} total points`"
                         data-cy="progressCurrentPoints">{{ slotProps.data.totalPoints?.toLocaleString() }}</span> /
-                  <span class="font-italic" data-cy="progressTotalPoints">{{ totalPoints?.toLocaleString() }}</span>
+                  <span class="italic" data-cy="progressTotalPoints">{{ totalPoints?.toLocaleString() }}</span>
                 </div>
               </div>
               <ProgressBar style="height: 5px;" :value="calcPercent(slotProps.data.totalPoints)" :showValue="false"
+                           class="lg:min-w-[12rem] xl:min-w-[20rem]"
                            :aria-label="`Progress for ${slotProps.data.userId} user`" />
               <div v-if="slotProps.data.userMaxLevel || slotProps.data.userMaxLevel === 0" class="row"
                    data-cy="progressLevels">
                 <div class="col">
-                  <i class="fas fa-trophy skills-color-levels" aria-hidden="true" /> <span class="font-italic">Current Level: </span>
+                  <i class="fas fa-trophy skills-color-levels" aria-hidden="true" /> <span class="italic">Current Level: </span>
                   <span v-if="slotProps.data.userMaxLevel === 0" data-cy="progressCurrentLevel">None</span>
                   <span v-else class="font-weight-bold" data-cy="progressCurrentLevel">{{ slotProps.data.userMaxLevel
                     }}</span>
@@ -368,10 +369,10 @@ const archiveUsers = () => {
         </template>
 
         <template #empty>
-          <div class="flex justify-content-center flex-wrap">
-            <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle"
+          <div class="flex justify-center flex-wrap">
+            <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle"
                aria-hidden="true"></i>
-            <span class="flex align-items-center justify-content-center">There are no records to show
+            <span class="flex items-center justify-center">There are no records to show
               </span>
           </div>
         </template>

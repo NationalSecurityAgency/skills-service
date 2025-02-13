@@ -61,11 +61,12 @@ const rootHelpUrl = computed(() => {
       </InputGroupAddon>
       <InputText v-model="value" data-cy="skillHelpUrl" id="skillHelpUrl"></InputText>
     </InputGroup>
-    <small
-        role="alert"
-        class="p-error"
-        data-cy="skillHelpUrlError"
-        :id="`${name}Error`">{{ errorMessage || '' }}</small>
+    <Message severity="error"
+             variant="simple"
+             size="small"
+             :closable="false"
+             data-cy="skillHelpUrlError"
+             :id="`${name}Error`">{{ errorMessage || '' }}</Message>
   </div>
 </template>
 

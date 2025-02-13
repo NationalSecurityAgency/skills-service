@@ -208,8 +208,8 @@ describe('Levels Management Tests', () => {
 
         cy.get('[data-cy="addLevel"]')
             .click();
-        cy.get('[data-cy="pointsInput"]')
-            .type('2000');
+        cy.get('[data-cy="pointsInput"] [data-pc-name="pcinputtext"]')
+            .type('2000', {delay: 0});
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
 
@@ -241,8 +241,8 @@ describe('Levels Management Tests', () => {
         cy.clickNav('Levels');
         cy.get('[data-cy="addLevel"]')
             .click();
-        cy.get('[data-cy="pointsInput"]')
-            .type('2000');
+        cy.get('[data-cy="pointsInput"] [data-pc-name="pcinputtext"]')
+            .type('2000', {delay: 0});
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
 
@@ -813,16 +813,18 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy=editLevelButton]')
             .first()
             .click();
-        cy.get('[data-cy=percent]')
-            .type('{selectall}1000');
+        cy.get('[data-cy=percent] [data-pc-name="pcinputtext"]').clear()
+        cy.get('[data-cy=percent] [data-pc-name="pcinputtext"]')
+            .type('1000');
         cy.get('[data-cy=percentError]')
             .contains('Percent must be less than or equal to 100');
         cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
 
-        cy.get('[data-cy=percent')
-            .type('{selectall}50');
-        cy.get('[data-cy=percentError')
+        cy.get('[data-cy=percent] [data-pc-name="pcinputtext"]').clear()
+        cy.get('[data-cy=percent] [data-pc-name="pcinputtext"]')
+            .type('50');
+        cy.get('[data-cy=percentError]')
             .contains('Percent must not overlap with other levels');
         cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
@@ -1031,7 +1033,7 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy=removeLevel]').should('have.focus');
 
         cy.get('[data-cy=removeLevel]').click();
-        cy.get('[data-pc-section="closebutton"]').click();
+        cy.get('[data-pc-name="pcrejectbutton"]').click();
         cy.get('[data-cy=removeLevel]').should('have.focus');
 
         cy.get('[data-cy=removeLevel]').click();

@@ -153,9 +153,9 @@ const loadEmailSubscriptionPreference = () => {
 <template>
   <div>
     <SubPageHeader title="Grading"/>
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
-        <skills-spinner v-if="isLoading" :is-loading="isLoading" class="py-8"/>
+        <skills-spinner v-if="isLoading" :is-loading="isLoading" class="py-20"/>
         <div v-else>
           <SkillsDataTable
               v-if="hasGradableQuestionsDefined"
@@ -179,8 +179,8 @@ const loadEmailSubscriptionPreference = () => {
               v-model:sort-order="sortInfo.sortOrder">
             <template #header>
               <skills-spinner v-if="isEmailEnabled && loadingNotificationPreference" :is-loading="true" :size-in-rem="1"/>
-              <div v-if="isEmailEnabled && !loadingNotificationPreference" data-cy="unsubscribeContainer" class="flex flex-row-reverse align-items-center">
-                  <InputSwitch id="emailSubscribeSwitch"
+              <div v-if="isEmailEnabled && !loadingNotificationPreference" data-cy="unsubscribeContainer" class="flex flex-row-reverse items-center">
+                  <ToggleSwitch id="emailSubscribeSwitch"
                                v-model="emailSubscribed"
                                @update:modelValue="toggleSubscription"
                                aria-label="Enable to receive Quiz Grading request emails"
@@ -196,10 +196,10 @@ const loadEmailSubscriptionPreference = () => {
               </template>
               <template #body="slotProps">
                 <div :data-cy="`userCell_${slotProps.data.userId}`" class="flex flex-row flex-wrap">
-                  <div class="flex align-items-start justify-content-start font-medium">
+                  <div class="flex items-start justify-start font-medium">
                     {{ userInfo.getUserDisplay(slotProps.data, true) }}
                   </div>
-                  <div class="flex flex-grow-1 align-items-start justify-content-end">
+                  <div class="flex grow items-start justify-end">
                     <SkillsButton v-if="!slotProps.data.isGraded"
                                   icon="fas fa-pencil-alt"
                                   label="Grade"
@@ -233,7 +233,7 @@ const loadEmailSubscriptionPreference = () => {
             </template>
             <template #expansion="slotProps">
               <grade-quiz-attempt
-                  class="ml-4"
+                  class="ml-6"
                   :quiz-attempt-id="slotProps.data.attemptId"
                   :user-id="slotProps.data.userId"
                   @on-graded="onGraded(slotProps.data, $event)"
@@ -245,7 +245,7 @@ const loadEmailSubscriptionPreference = () => {
 
           <NoContent2
               v-if="!hasGradableQuestionsDefined"
-              title="No Manual Grading Required" class="pt-5 pb-8">
+              title="No Manual Grading Required" class="pt-8 pb-20">
             No Input Text questions have been added to this quiz. Note that only free-form Input Text answers require
             manual grading. If you add questions with Input Text answers, additional grading controls will become
             available on this page.

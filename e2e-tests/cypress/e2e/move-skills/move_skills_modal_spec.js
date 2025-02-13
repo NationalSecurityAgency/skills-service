@@ -23,7 +23,7 @@ describe('Move Skills Modal Tests', () => {
 
     it('no destination', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 
@@ -47,7 +47,7 @@ describe('Move Skills Modal Tests', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
         cy.reuseSkillIntoAnotherSubject(1, 5, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 
@@ -94,14 +94,14 @@ describe('Move Skills Modal Tests', () => {
         cy.createSkill(1, 1, 4);
         cy.createSkill(1, 1, 5);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]')
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]')
 
         cy.moveSkillIntoAnotherSubject(1, 1, 2);
         cy.moveSkillIntoAnotherSubject(1, 3, 2);
         cy.moveSkillIntoAnotherSubject(1, 4, 2);
         cy.moveSkillIntoAnotherSubject(1, 5, 2);
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 
@@ -119,7 +119,7 @@ describe('Move Skills Modal Tests', () => {
     it('cancel modal will focus on the new skill button', () => {
         cy.createSubject(1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 
@@ -130,7 +130,7 @@ describe('Move Skills Modal Tests', () => {
 
         // close with X on top right
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
 
@@ -143,7 +143,7 @@ describe('Move Skills Modal Tests', () => {
     it('if no skills were left after the move then New Skill button should get the focus', () => {
         cy.createSubject(1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
@@ -162,8 +162,8 @@ describe('Move Skills Modal Tests', () => {
         cy.addSkillToGroup(1, 1, 11, 6);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
-        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"]  [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
+        cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"]  [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()

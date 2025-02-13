@@ -174,24 +174,13 @@ if (props.isEdit) {
       :style="{ width: '40rem !important' }">
 
     <template #default>
-      <template v-if="isEdit">
-        <div class="w-full">
-          <SkillsNumberInput isRequired :min="1" label="Level" name="level" disabled />
-        </div>
-        <template v-if="!levelAsPoints">
-          <div class="w-full">
-            <SkillsNumberInput showButtons isRequired :min="0" :max="100" suffix="%" label="Percent" name="percent" />
-          </div>
-        </template>
-        <template v-else>
-          <div class="w-full">
-            <SkillsNumberInput showButtons isRequired :min="0" label="Points From" name="pointsFrom" />
-          </div>
-          <div class="w-full">
-            <SkillsNumberInput showButtons isRequired :min="0" label="Points To" name="pointsTo" />
-          </div>
-        </template>
-      </template>
+      <div v-if="isEdit" class="flex flex-col gap-3">
+        <SkillsNumberInput isRequired :min="1" label="Level" name="level" disabled/>
+        <SkillsNumberInput v-if="!levelAsPoints" showButtons isRequired :min="0" :max="100" suffix="%" label="Percent"
+                           name="percent"/>
+        <SkillsNumberInput v-if="levelAsPoints" showButtons isRequired :min="0" label="Points From" name="pointsFrom"/>
+        <SkillsNumberInput v-if="levelAsPoints" showButtons isRequired :min="0" label="Points To" name="pointsTo"/>
+      </div>
       <template v-else>
         <template v-if="!levelAsPoints">
           <div class="w-full">

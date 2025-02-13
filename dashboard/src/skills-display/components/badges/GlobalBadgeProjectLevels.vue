@@ -58,13 +58,13 @@ const calculatePercent = (projectLevel) => {
 </script>
 
 <template>
-  <Card v-if="projectSummaries && projectSummaries.length > 0" class="mt-3" data-cy="globalBadgeProjectLevels">
+  <Card v-if="projectSummaries && projectSummaries.length > 0" class="mt-4" data-cy="globalBadgeProjectLevels">
     <template #content>
       <div v-for="projectSummary in projectSummaries"
            :key="projectSummary.projectId" class="mt-1"
            :data-cy="'gb_'+projectSummary.projectId">
 
-        <div class="text-2xl"><span class="font-italic text-color-secondary">{{ attributes.projectDisplayName }}:</span> {{ projectSummary.projectName }}</div>
+        <div class="text-2xl"><span class="italic text-muted-color">{{ attributes.projectDisplayName }}:</span> {{ projectSummary.projectName }}</div>
         <div class="flex mt-2">
           <div class="text-xl flex-1 mb-1"> Requires {{ attributes.levelDisplayName }} {{ projectSummary.projectLevel?.requiredLevel }}</div>
           <div :class="{ 'text-green-600': projectSummary.isFullyComplete }">

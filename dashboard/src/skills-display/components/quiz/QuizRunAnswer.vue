@@ -107,7 +107,7 @@ const flipSelected = () => {
        @keydown.prevent.space="flipSelected"
        @click="flipSelected"
        :tabindex="a.isGraded ? -1 : 0"
-       :class="{ 'surface-200 border-primary border-round-sm font-semibold': selected, 'point-cursor hover:border-primary answer-row-editable skills-theme-quiz-selected-answer-row' : !a.isGraded }"
+       :class="{ 'surface-200 border-primary rounded font-semibold': selected, 'point-cursor hover:!border-green-400 border-dashed answer-row-editable skills-theme-quiz-selected-answer-row' : !a.isGraded }"
        :style="styleObject"
        :aria-label="ariaLabel">
     <div class="flex gap-0" :data-cy="`selected_${selected}`">

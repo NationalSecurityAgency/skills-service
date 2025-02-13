@@ -258,7 +258,7 @@ describe('Accessibility Badges Tests', () => {
             cy.get('[data-cy="MyNewtestProject_option"]').click();
             cy.get('#level-selector').click();
             cy.wait('@getProjectLevels')
-            cy.get('[data-pc-section="item"]').contains(2).click();
+            cy.get('[data-pc-section="option"]').contains(2).click();
             // cy.get('.multiselect__select').eq(0).click();
             // cy.get('.multiselect__element').eq(0).click();
             // cy.get('.multiselect__select').eq(1).click();

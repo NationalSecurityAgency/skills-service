@@ -41,16 +41,16 @@ const close = () => {
         </slot>
       </div>
 
-      <div class="mb-1 mt-4 text-3xl">
+      <div class="mb-1 mt-6 text-3xl">
         <span class="font-bold text-success mb-2 skills-page-title-text-color">{{ quizInfo.name }}</span>
       </div>
 
-      <div class="flex gap-4 flex-column md:flex-row pt-2 pb-1 text-center">
+      <div class="flex gap-6 flex-col md:flex-row pt-2 pb-1 text-center">
         <div class="flex">
           <Card class="text-center skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2 px-3' } }">
             <template #content>
               <i class="fas fa-question-circle text-primary skills-theme-quiz-correct-answer" style="font-size: 1.3rem;" aria-hidden="true"></i>
-              <span class="text-color-secondary font-italic ml-1">Questions:</span>
+              <span class="text-muted-color italic ml-1">Questions:</span>
               <span class="uppercase ml-1 font-bold">{{ quizInfo.questions.length }}</span>
             </template>
           </Card>
@@ -59,7 +59,7 @@ const close = () => {
           <Card class="text-center skills-card-theme-border flex-1" :pt="{ body: { class: 'p-0' }, content: { class: 'py-2 px-3' } }">
             <template #content>
               <i class="fas fa-business-time text-primary skills-theme-quiz-correct-answer" style="font-size: 1.3rem;" aria-hidden="true"></i>
-              <span class="text-color-secondary font-italic ml-1">Completed In:</span>
+              <span class="text-muted-color italic ml-1">Completed In:</span>
               <span class="uppercase ml-1 font-bold">{{ timeUtils.formatDurationDiff(quizResult.gradedRes.started, quizResult.gradedRes.completed) }}</span>
             </template>
           </Card>
@@ -67,7 +67,7 @@ const close = () => {
         <div class="flex-1"></div>
       </div>
 
-      <div class="mt-5">
+      <div class="mt-8">
         <SkillsButton severity="success" outlined
                       label="Close"
                       icon="fas fas fa-times-circle"

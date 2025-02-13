@@ -37,9 +37,9 @@ const emailFeatureConfigured = computed(() => { return appInfo.emailEnabled });
 <template>
   <div>
     <Card v-if="privateProject"
-          :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"
+          :pt="{ body: { class: '!p-0' } }"
           data-cy="inviteUser"
-          class="my-4">
+          class="my-6">
       <template #header>
         <SkillsCardHeader title="Project User: Invite">
           <template #headerIcon><i class="fas fa-user-lock mr-2 text-red-500"
@@ -63,7 +63,7 @@ const emailFeatureConfigured = computed(() => { return appInfo.emailEnabled });
             />
           </template>
         </Card>
-        <Card class="mt-3">
+        <Card class="mt-4">
           <template #subtitle>Invites Pending Acceptance</template>
           <template #content>
             <invite-statuses ref="inviteStatuses" />
@@ -74,7 +74,7 @@ const emailFeatureConfigured = computed(() => { return appInfo.emailEnabled });
       </template>
     </Card>
 
-    <revoke-user-access v-if="privateProject" class="my-4" />
+    <revoke-user-access v-if="privateProject" class="my-6" />
   </div>
 </template>
 

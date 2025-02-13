@@ -30,7 +30,7 @@ const myProgress = computed(() => myProgressState.myProgress)
     <template #left-content>
       <div class="">
         <span
-          class="text-4xl text-color-warn"
+          class="text-4xl text-orange-700 dark:text-orange-400"
           data-cy="numAchievedBadges">{{ myProgress.numAchievedBadges }}</span>
         <span
           class="text-secondary"
@@ -48,7 +48,7 @@ const myProgress = computed(() => myProgressState.myProgress)
       </div>
       <div v-if="myProgress.gemCount > 0">
         <Tag
-          severity="warning"
+          severity="warn"
           class="mt-1"
           data-cy="numAchievedGemBadges">Gems:
           {{ myProgress.numAchievedGemBadges }} /
@@ -57,14 +57,14 @@ const myProgress = computed(() => myProgressState.myProgress)
       </div>
     </template>
     <template #right-content>
-      <div class="flex justify-content-center sm:justify-content-end">
-        <div class="flex justify-content-center">
+      <div class="flex justify-center sm:justify-end">
+        <div class="flex justify-center">
           <progress-card-icon icon="fas fa-trophy" />
         </div>
       </div>
     </template>
     <template #footer>
-      <div class="flex gap-2 align-items-center flex-column sm:flex-row">
+      <div class="flex gap-2 items-center flex-col sm:flex-row">
         <div data-cy="badges-num-footer" class="flex-1 w-min-10rem">
           Be proud to earn those badges!!
         </div>

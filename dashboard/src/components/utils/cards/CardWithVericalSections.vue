@@ -20,7 +20,7 @@ limitations under the License.
 <template>
   <Card :pt="{ content: { class: 'p-0 h-full' }, body: { class: 'p-0 h-full' } }">
     <template #content>
-      <div class="flex flex-column h-full">
+      <div class="flex flex-col h-full">
         <div>
           <slot name="header"></slot>
         </div>

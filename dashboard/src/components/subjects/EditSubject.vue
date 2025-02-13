@@ -172,9 +172,9 @@ const onSubjectSaved = (subject) => {
         id-suffix="Subject"
         :name-to-id-sync-enabled="!props.isEdit">
         <template #beforeName>
-          <div class="flex justify-content-center">
+          <div class="flex justify-center">
             <icon-picker
-              class="mb-3"
+              class="mb-4"
               :startIcon="currentIcon"
               @selected-icon="onSelectedIcon"
             />
@@ -183,7 +183,7 @@ const onSubjectSaved = (subject) => {
       </SkillsNameAndIdInput>
 
       <markdown-editor class="" name="description" />
-      <help-url-input class="mt-3"
+      <help-url-input class="mt-4"
                       :next-focus-el="previousFocus"
                       name="helpUrl"
                       @keydown-enter="emit('keydown-enter')" />

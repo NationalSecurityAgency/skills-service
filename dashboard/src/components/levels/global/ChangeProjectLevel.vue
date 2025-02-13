@@ -75,7 +75,7 @@ const selectLevel = (level) => {
       :okButtonDisabled="newLevel === null || newLevel === oldLevel"
       :style="{ width: '40rem !important' }">
 
-    <div class="mb-4">
+    <div class="mb-6">
       <div>
         <label for="existingLevel">Existing level</label>
       </div>
@@ -84,7 +84,7 @@ const selectLevel = (level) => {
       </div>
     </div>
 
-    <div class="mb-4">
+    <div class="mb-6">
       <label for="newLevel">New level</label>
       <level-selector v-model="newLevel"
                       :load-immediately="true"

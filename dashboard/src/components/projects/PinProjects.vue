@@ -128,16 +128,16 @@ watch(() => searchValue.value, useDebounceFn((newValue) => {
 
 <template>
   <SkillsDialog v-model="model"
-                :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"
+                :pt="{ body: { class: '!p-0' } }"
                 header="Pin Projects"
                 :show-ok-button="false"
                 @on-cancel="done"
-                footer-class="p-3"
+                footer-class="p-4"
                 cancel-button-label="Done"
                 cancel-button-icon=""
                 cancel-button-severity="success">
     <div data-cy="pinProjects">
-      <div class="flex gap-4 mb-4 p-3 align-items-center">
+      <div class="flex gap-6 mb-6 p-4 items-center">
         <InputGroup class="flex-1">
           <InputText v-model="searchValue"
                      placeholder="Search projects to pin"
@@ -169,7 +169,7 @@ watch(() => searchValue.value, useDebounceFn((newValue) => {
                 <div class="flex flex-1">
                   {{ slotProps.data.name }}
                 </div>
-                <div class="flex flex-1 gap-2 justify-content-end">
+                <div class="flex flex-1 gap-2 justify-end">
                   <SkillsButton v-if="!slotProps.data.pinned" @click="pinProject(slotProps.data)" variant="outline-primary"
                                 size="small"
                                 data-cy="pinButton"

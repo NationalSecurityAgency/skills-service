@@ -240,7 +240,7 @@ const sortTable = (sortContext) => {
 </script>
 
 <template>
-  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+  <Card :pt="{ body: { class: '!p-0' } }">
     <template #header>
       <SkillsCardHeader title="Configure Approval Workload"></SkillsCardHeader>
     </template>
@@ -288,10 +288,10 @@ const sortTable = (sortContext) => {
             <span class=""><i class="fas fa-users" :class="colors.getTextClass(2)" aria-hidden="true"/> Approval Workload</span>
           </template>
           <template #body="slotProps">
-            <div class="flex gap-2 flex-column sm:flex-row" :data-cy="`workloadCell_${slotProps.data.userId}`">
-              <div class="flex flex-1 gap-2 align-items-center">
-                <div v-if="!slotProps.data.hasConf" class="flex flex-1 gap-2 align-items-center">
-                  <InputSwitch
+            <div class="flex gap-2 flex-col sm:flex-row" :data-cy="`workloadCell_${slotProps.data.userId}`">
+              <div class="flex flex-1 gap-2 items-center">
+                <div v-if="!slotProps.data.hasConf" class="flex flex-1 gap-2 items-center">
+                  <ToggleSwitch
                       :aria-label="`Enable and disable fallback for ${slotProps.data.userId} approve`"
                       @update:modelValue="handleFallback($event, slotProps.data)"
                       data-cy="fallbackSwitch"
@@ -301,7 +301,7 @@ const sortTable = (sortContext) => {
                     <span v-if="slotProps.data.fallbackConf">Assigned Fallback - All Unmatched Requests</span>
                 </div>
                 <div v-if="slotProps.data.tagConf && slotProps.data.tagConf.length > 0">
-                  <div v-for="tConf in slotProps.data.tagConf" :key="tConf.userTagValue">Users in <span class="font-italic text-secondary">{{tConf.userTagKeyLabel}}:</span> <span>{{tConf.userTagValue}}</span></div>
+                  <div v-for="tConf in slotProps.data.tagConf" :key="tConf.userTagValue">Users in <span class="italic text-secondary">{{tConf.userTagKeyLabel}}:</span> <span>{{tConf.userTagValue}}</span></div>
                 </div>
                 <div v-if="slotProps.data.userConf && slotProps.data.userConf.length > 0" >
                   <Tag variant="success">{{slotProps.data.userConf.length}}</Tag> Specific User{{ slotProps.data.userConf.length > 1 ? 's' : '' }}
@@ -341,17 +341,17 @@ const sortTable = (sortContext) => {
                 :user-info="slotProps.data"
                 @conf-added="updatedConf"
                 @conf-removed="removeConf"
-                class="mt-3"/>
+                class="mt-4"/>
             <self-report-approval-conf-specific-users
                 :user-info="slotProps.data"
                 @conf-added="updatedConf"
                 @conf-removed="removeConf"
-                class="mt-3"/>
+                class="mt-4"/>
           </div>
         </template>
       </SkillsDataTable>
 
-      <no-content2 v-if="!shouldLoadTable && !loading" title="Not Available" class="py-8" icon="fas fa-cogs" data-cy="approvalConfNotAvailable">
+      <no-content2 v-if="!shouldLoadTable && !loading" title="Not Available" class="py-20" icon="fas fa-cogs" data-cy="approvalConfNotAvailable">
         The ability to split the approval workload is unavailable because <span v-if="roleCount === 1">there is only <Badge variant="info">1</Badge> Admin</span><span v-else>there are no admins</span> for this project.
         Please add <b>Admins</b> or <b>Approvers</b> on the <router-link :to="{ name: 'ProjectAccess' }" style="text-decoration: underline" class="font-bold" data-cy="navToAccessPage"><i class="fas fa-shield-alt skills-color-access" aria-hidden="true"/>Access</router-link> page in order to start using this feature.
       </no-content2>

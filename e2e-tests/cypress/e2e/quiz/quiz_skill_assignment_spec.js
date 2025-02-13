@@ -32,7 +32,7 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="newSkillButton"]').click()
         cy.get('[data-cy="skillName"]').type('abc')
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').type('5')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').type('5')
         cy.get('[data-cy="selfReportEnableCheckbox"]').click() 
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
@@ -41,16 +41,16 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="quizSelected-quiz1"]').should('not.exist')
 
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 1)
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.disabled')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('be.disabled')
 
         cy.get('[data-cy="quizSelector"]').click()
         cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
         cy.get('[data-cy="quizSelected-quiz1"]')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="saveDialogBtn"]').click()
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="selfReportCell-abcSkill-quiz"]').contains('Quiz-Based Validation')
         cy.get('[data-cy="selfReportCell-abcSkill-quiz"]').contains('Test Your Trivia Knowledge').click()
         cy.url().should('include', '/administrator/quizzes/quiz1');
@@ -65,37 +65,38 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="newSkillButton"]').click()
         cy.get('[data-cy="skillName"]').type('abc')
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').type('5')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').type('5')
         cy.get('[data-cy="selfReportEnableCheckbox"]').click();
 
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 15)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 15)
 
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').click({ force: true });
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 15)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 15)
 
         cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').click({ force: true })
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 1)
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.disabled')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('be.disabled')
 
         cy.get('[data-cy="quizSelector"]').click()
         cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
 
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').click({ force: true });
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 1)
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.enabled')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('be.enabled')
 
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').type('2')
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 12)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').type('2')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 12)
 
         cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').click({ force: true })
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 1)
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.disabled')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('be.disabled')
         cy.get('[data-cy="quizSelector"]').click()
         cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
 
         cy.get('[data-cy="saveDialogBtn"]').click()
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-cy="selfReportCell-abcSkill-quiz"]').contains('Quiz-Based Validation')
     });
 
@@ -113,12 +114,12 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="quizSelected-quiz1"]')
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('not.be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 1)
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.disabled')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('be.disabled')
 
         cy.get('[data-cy="selfReportEnableCheckbox"]').click();
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 1)
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.enabled')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('be.enabled')
 
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('be.disabled');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.disabled');
@@ -126,8 +127,9 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="quizSelector"]').should('not.exist')
 
         cy.get('[data-cy="saveDialogBtn"]').click()
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-cy="selfReportCell-skill1"]').contains('Disabled')
     });
 
@@ -145,12 +147,12 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="quizSelected-quiz1"]')
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('not.be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('not.be.checked');
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 1)
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.disabled')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('be.disabled')
 
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').click({ force: true });
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 1)
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.enabled')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('be.enabled')
 
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]').should('not.be.checked');
         cy.get('[data-cy="selfReportTypeSelector"] [value="HonorSystem"]').should('be.checked');
@@ -158,8 +160,9 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="quizSelector"]').should('not.exist')
 
         cy.get('[data-cy="saveDialogBtn"]').click()
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-cy="selfReportCell-skill1"]').contains('Honor System')
     });
 
@@ -178,8 +181,8 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="availableQuizSelection-quiz2"]').click()
         cy.get('[data-cy="quizSelected-quiz2"]')
         cy.get('[data-cy="saveDialogBtn"]').click()
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('Survey-Based Validation')
         cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('This is survey 2').click()
         cy.url().should('include', '/administrator/quizzes/quiz2');
@@ -198,7 +201,7 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').click({ force: true })
         cy.get('[data-cy="quizSelector"]').click()
 
-        cy.get('li.p-dropdown-empty-message').contains('You currently do not administer any')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="emptymessage"]').contains('You currently do not administer any')
     });
 
     it('search quizzes and surveys when selecting', function () {
@@ -232,42 +235,43 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="availableQuizSelection-quiz13"]')
         cy.get('[data-cy="availableQuizSelection-quiz14"]')
 
-        cy.get('[data-pc-section="filterinput"]').type('1')
+        cy.get('[data-pc-section="overlay"] [data-pc-name="pcfilter"]').type('1')
 
-        cy.get('[data-cy="availableQuizSelection-quiz1"]')
-        cy.get('[data-cy="availableQuizSelection-quiz2"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz3"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz4"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz5"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz6"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz7"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz8"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz9"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz10"]')
-        cy.get('[data-cy="availableQuizSelection-quiz11"]')
-        cy.get('[data-cy="availableQuizSelection-quiz12"]')
-        cy.get('[data-cy="availableQuizSelection-quiz13"]')
-        cy.get('[data-cy="availableQuizSelection-quiz14"]')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz1"]')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz10"]')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz11"]')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz12"]')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz13"]')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz14"]')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz2"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz3"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz4"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz5"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz6"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz7"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz8"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz9"]').should('not.exist')
 
-        cy.get('[data-pc-section="filterinput"]').type('2')
+        cy.get('[data-cy="quizSelector"]').click()
+        cy.get('[data-pc-section="overlay"] [data-pc-name="pcfilter"]').type('2')
 
-        cy.get('[data-cy="availableQuizSelection-quiz1"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz2"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz3"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz4"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz5"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz6"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz7"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz8"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz9"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz10"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz11"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz12"]')
-        cy.get('[data-cy="availableQuizSelection-quiz13"]').should('not.exist')
-        cy.get('[data-cy="availableQuizSelection-quiz14"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz12"]')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz1"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz2"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz3"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz4"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz5"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz6"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz7"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz8"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz9"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz10"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz11"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz13"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz14"]').should('not.exist')
 
-        cy.get('[data-pc-section="filterinput"]').type('a')
-        cy.get('li.p-dropdown-empty-message').contains('No results')
+        cy.get('[data-pc-section="overlay"] [data-pc-name="pcfilter"]').type('a')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="emptymessage"]').contains('No results')
     });
 
     it('reporting to quiz-based skill is not allowed', function () {
@@ -281,7 +285,7 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="pageHeader"]').contains('Very Great Skill 1')
         const userIdSelector = '[data-cy="userIdInput"] [data-cy="existingUserInputDropdown"]';
         const addButtonSelector = '[data-cy=addSkillEventButton]';
-        cy.get(`${userIdSelector} [data-pc-section="input"]`).should('be.enabled')
+        cy.get(`${userIdSelector} [data-pc-name="pcinputtext"]`).should('be.enabled')
         cy.get(userIdSelector).type('oTHIGHJK{enter}');
         cy.get(addButtonSelector).should('not.be.disabled')
         cy.get(addButtonSelector).click();

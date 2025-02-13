@@ -133,18 +133,18 @@ const isReuseBtnDisabled = computed(() => {
 
 <template>
   <div role="alert">
-    <skills-spinner :is-loading="isLoading" class="my-5" />
+    <skills-spinner :is-loading="isLoading" class="my-8" />
     <div v-if="!isLoading">
       <no-content2
         v-if="skillsWereMovedOrReusedAlready"
-        class="mt-3"
+        class="mt-4"
         title="Please Refresh"
         :show-refresh-action="true"
         message="Skills were moved or reused in another browser tab OR modified by another project administrator." />
 
-      <div v-if="!skillsWereMovedOrReusedAlready" class="flex flex-column h-12rem">
+      <div v-if="!skillsWereMovedOrReusedAlready" class="flex flex-col h-48">
         <div
-          class="p-4 border-2 border-dashed surface-border border-round surface-ground flex-auto flex flex-column gap-2 justify-content-center align-items-center font-medium">
+          class="p-6 border-2 border-dashed border-surface rounded-border bg-surface-50 dark:bg-surface-950 flex-auto flex flex-col gap-2 justify-center items-center font-medium">
 
           <div v-if="skillsForReuse.available.length > 0">
             <Tag severity="info">{{ skillsForReuse.available.length }}</Tag>
@@ -174,13 +174,13 @@ const isReuseBtnDisabled = computed(() => {
             </Message>
           </div>
           <div v-if="skillsForReuse.alreadyExist.length > 0">
-            <Tag severity="warning">{{ skillsForReuse.alreadyExist.length }}</Tag>
+            <Tag severity="warn">{{ skillsForReuse.alreadyExist.length }}</Tag>
             selected skill{{ pluralSupport.pluralWithHave(skillsForReuse.alreadyExist) }} <span
             class="text-primary font-weight-bold">already</span> been reused in that <span
             v-if="destination.groupName">group</span><span v-else>subject</span>!
           </div>
           <div v-if="skillsForReuse.skillsWithDeps.length > 0">
-            <Tag severity="warning">{{ skillsForReuse.skillsWithDeps.length }}</Tag>
+            <Tag severity="warn">{{ skillsForReuse.skillsWithDeps.length }}</Tag>
             selected skill{{ pluralSupport.pluralWithHave(skillsForReuse.skillsWithDeps) }} other skill
             dependencies, reusing skills with dependencies is not allowed!
           </div>
@@ -188,13 +188,13 @@ const isReuseBtnDisabled = computed(() => {
         </div>
       </div>
 
-      <div class="flex pt-4 justify-content-end">
+      <div class="flex pt-6 justify-end">
         <SkillsButton
           label="Cancel"
           icon="far fa-times-circle"
           outlined
           class="mr-2"
-          severity="warning"
+          severity="warn"
           data-cy="closeButton"
           @click="emits('on-cancel')" />
         <SkillsButton

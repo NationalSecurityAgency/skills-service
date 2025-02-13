@@ -117,19 +117,20 @@ const filter = (event) => {
             class="w-full"
             @complete="filter"
             data-cy="trainingProfileComparatorProjectSelector"
+            :pt="{ dropdown: { 'aria-label': 'click to select an item' } }"
             placeholder="Select option">
           <template #empty>
-            <div v-if="projects.selected.length === 5" class="ml-4" data-cy="trainingProfileMaximumReached">
+            <div v-if="projects.selected.length === 5" class="ml-6" data-cy="trainingProfileMaximumReached">
               Maximum of 5 options selected. First remove a selected option to select another.
             </div>
-            <div v-else class="ml-4">
+            <div v-else class="ml-6">
               No results found
             </div>
           </template>
         </AutoComplete>
       </div>
       <div v-if="!loading && enoughProjectsSelected">
-        <div class="flex flex-column xl:flex-row gap-4 mt-4">
+        <div class="flex flex-col xl:flex-row gap-6 mt-6">
           <div class="flex flex-1">
             <training-profile-comparison-chart :series="numSkillsChart.series" :labels="numSkillsChart.labels"
                                                title="Number of Skills" title-icon="fas fa-graduation-cap" data-cy="numOfSkillsChart"/>
@@ -142,7 +143,7 @@ const filter = (event) => {
                                                data-cy="totalAvailablePointsChart"/>
           </div>
         </div>
-        <div class="flex flex-column xl:flex-row gap-4 mt-4">
+        <div class="flex flex-col xl:flex-row gap-6 mt-6">
           <div class="flex flex-1">
             <training-profile-comparison-chart :series="numSubjectsChart.series" :labels="numSubjectsChart.labels"
                                                title="Number of Subjects" title-icon="fas fa-cubes" data-cy="numOfSubjChart"/>
@@ -155,12 +156,12 @@ const filter = (event) => {
       </div>
 
       <no-content2 v-if="!loading && !enoughOverallProjects"
-                   class="my-5"
+                   class="my-8"
                    title="Feature is disabled"
                    icon="fas fa-poo"
                    message="At least 2 projects must exist for this feature to work. Please create more projects to enable this feature."/>
       <no-content2 v-if="!loading && enoughOverallProjects && !enoughProjectsSelected"
-                   class="my-5"
+                   class="my-8"
                    title="Need more projects"
                    message="Please select at least 2 projects using the search above"/>
     </template>

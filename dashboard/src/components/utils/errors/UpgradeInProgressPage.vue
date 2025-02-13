@@ -17,13 +17,13 @@ limitations under the License.
 </script>
 
 <template>
-  <Card class="mt-4" data-cy="upgradeInProgressError">
+  <Card class="mt-6" data-cy="upgradeInProgressError">
     <template #content>
-      <div class="text-center py-5">
-        <div class="text-color-secondary">
-          <div class="flex justify-content-center">
-            <div class="border-circle w-6rem h-6rem m-2 surface-500 font-bold flex align-items-center justify-content-center">
-              <i class="text-0 text-6xl fas fa-tools"></i>
+      <div class="text-center py-8">
+        <div class="text-muted-color">
+          <div class="flex justify-center">
+            <div class="rounded-full w-24 h-24 m-2 bg-surface-500 dark:bg-surface-300 font-bold flex items-center justify-center">
+              <i class="text-surface-0 dark:text-surface-900 text-6xl fas fa-tools"></i>
             </div>
           </div>
         </div>
@@ -42,7 +42,7 @@ limitations under the License.
             size="medium"
             severity="info"
             data-cy=takeMeHome
-            class="mt-5" />
+            class="mt-8" />
         </router-link>
       </div>
     </template>

@@ -21,7 +21,10 @@ import InputText from 'primevue/inputtext';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import Stepper from 'primevue/stepper'
-import StepperPanel from 'primevue/stepperpanel'
+import StepList from 'primevue/steplist';
+import StepPanels from 'primevue/steppanels';
+import StepPanel from 'primevue/steppanel';
+import Step from 'primevue/step';
 import AccessService from "@/components/access/AccessService.js";
 import projectService from "@/components/projects/ProjectService.js";
 
@@ -152,90 +155,91 @@ const hasUsers = computed(() => {
       @on-cancel="publishHidden"
       :enable-return-focus="true"
       :style="{ width: '40rem !important' }">
-    <skills-spinner v-if="loading" :is-loading="loading" class="my-4"/>
+    <skills-spinner v-if="loading" :is-loading="loading" class="my-6"/>
     <div v-if="!loading" class="px-2">
-      <Stepper linear @step-change="clearSettings">
-        <StepperPanel>
-          <template #content="{ nextCallback }">
+      <Stepper linear @step-change="clearSettings" value="1">
+        <StepList>
+          <Step value="1"></Step>
+          <Step value="2"></Step>
+          <Step value="3"></Step>
+        </StepList>
+        <StepPanels>
+          <StepPanel value="1" v-slot="{ activateCallback }">
             <div data-cy="removalSafetyCheckMsg">
-              <div v-if="!removalNotAvailable">
-                {{ removalTextPrefix }} <span class="font-bold text-primary">{{ itemName }}</span><span v-if="itemType">&nbsp;{{ itemType }}</span>.
-              </div>
-              <Message severity="warn" :closable="false">
-                Deletion <b>cannot</b> be undone and permanently removes all skill subject definitions, skill
-                definitions and users' performed skills for this Project.
-
-                <div class="mt-4" v-if="hasContent">
-                  This will delete:
-                  <ul>
-                    <li v-if="project.numSubjects > 0">{{ project.numSubjects }} Subject(s)</li>
-                    <li v-if="project.numSkills > 0">{{ project.numSkills }} Skill(s)</li>
-                    <li v-if="project.numBadges > 0">{{ project.numBadges }} Badge(s)</li>
-                  </ul>
+                <div v-if="!removalNotAvailable">
+                  {{ removalTextPrefix }} <span class="font-bold text-primary">{{ itemName }}</span><span v-if="itemType">&nbsp;{{ itemType }}</span>.
                 </div>
-              </Message>
-              <div class="flex">
-                <Checkbox inputId="stepOneCheck" :binary="true" name="Confirm" v-model="confirmStepOne" data-cy="confirmCheckbox" />
-                <label for="stepOneCheck" class="ml-2">I understand that this is permanent and cannot be undone</label>
+                <Message severity="warn" :closable="false">
+                  Deletion <b>cannot</b> be undone and permanently removes all skill subject definitions, skill
+                  definitions and users' performed skills for this Project.
+
+                  <div class="mt-6" v-if="hasContent">
+                    This will delete:
+                    <ul>
+                      <li v-if="project.numSubjects > 0">{{ project.numSubjects }} Subject(s)</li>
+                      <li v-if="project.numSkills > 0">{{ project.numSkills }} Skill(s)</li>
+                      <li v-if="project.numBadges > 0">{{ project.numBadges }} Badge(s)</li>
+                    </ul>
+                  </div>
+                </Message>
+                <div class="flex">
+                  <Checkbox inputId="stepOneCheck" :binary="true" name="Confirm" v-model="confirmStepOne" data-cy="confirmCheckbox" />
+                  <label for="stepOneCheck" class="ml-2">I understand that this is permanent and cannot be undone</label>
+                </div>
+                <div class="flex mt-2 w-full justify-end">
+                  <SkillsButton label="Cancel" icon="far fa-times-circle" outlined class="mr-2" severity="secondary" data-cy="closeButton" @click="publishHidden" />
+                  <SkillsButton label="Next" icon="fas fa-arrow-circle-right float-right" @click="activateCallback('2')" :disabled="!confirmStepOne" data-cy="firstNextButton"/>
+                </div>
               </div>
-              <div class="flex mt-2 w-full justify-content-end">
-                <SkillsButton label="Cancel" icon="far fa-times-circle" outlined class="mr-2" severity="warning" data-cy="closeButton" @click="publishHidden" />
-                <SkillsButton label="Next" icon="fas fa-arrow-circle-right float-right" @click="nextCallback" :disabled="!confirmStepOne" data-cy="firstNextButton"/>
-              </div>
-            </div>
-          </template>
-        </StepperPanel>
-        <StepperPanel>
-          <template #content="{ nextCallback }">
+          </StepPanel>
+          <StepPanel value="2" v-slot="{ activateCallback }">
             <div data-cy="userRemovalMsg">
-              <Message severity="warn" :closable="false">
-                Deleting this project will also delete it for all administrators and users associated with it.
+                <Message severity="warn" :closable="false">
+                  Deleting this project will also delete it for all administrators and users associated with it.
 
-                <div class="mt-4" v-if="hasUsers">
-                  This will remove the project for:
-                  <ul>
-                    <li v-if="adminCount > 0">{{ adminCount }} Administrator(s)</li>
-                    <li v-if="userCount > 0">{{ userCount }} User(s)</li>
-                  </ul>
+                  <div class="mt-6" v-if="hasUsers">
+                    This will remove the project for:
+                    <ul>
+                      <li v-if="adminCount > 0">{{ adminCount }} Administrator(s)</li>
+                      <li v-if="userCount > 0">{{ userCount }} User(s)</li>
+                    </ul>
+                  </div>
+                </Message>
+                <div class="flex flex-1 mt-2">
+                  <Checkbox
+                      inputId="stepTwoCheck"
+                      :binary="true"
+                      name="Confirm"
+                      data-cy="confirmCheckbox"
+                      v-model="confirmStepTwo"
+                  />
+                  <label for="stepTwoCheck" class="ml-2">I understand that this project will be deleted for ALL users.</label>
                 </div>
-              </Message>
-              <div class="flex flex-1 mt-2">
-                <Checkbox
-                    inputId="stepTwoCheck"
-                    :binary="true"
-                    name="Confirm"
-                    data-cy="confirmCheckbox"
-                    v-model="confirmStepTwo"
-                />
-                <label for="stepTwoCheck" class="ml-2">I understand that this project will be deleted for ALL users.</label>
+                <div class="flex mt-2 w-full justify-end">
+                  <SkillsButton label="Cancel" icon="far fa-times-circle" outlined class="mr-2" severity="secondary" data-cy="closeButton" @click="publishHidden" />
+                  <SkillsButton label="Next" icon="fas fa-arrow-circle-right" @click="activateCallback('3')" :disabled="!confirmStepTwo" data-cy="secondNextButton" />
+                </div>
               </div>
-              <div class="flex mt-2 w-full justify-content-end">
-                <SkillsButton label="Cancel" icon="far fa-times-circle" outlined class="mr-2" severity="warning" data-cy="closeButton" @click="publishHidden" />
-                <SkillsButton label="Next" icon="fas fa-arrow-circle-right" @click="nextCallback" :disabled="!confirmStepTwo" data-cy="secondNextButton" />
-              </div>
-            </div>
-          </template>
-        </StepperPanel>
-        <StepperPanel>
-          <template #content>
+          </StepPanel>
+          <StepPanel value="3">
             <Message severity="warn" :closable="false">
               Are you SURE you want to delete <span class="font-bold text-primary">{{ itemName }}</span>? Remember: This action is permanent and can not be recovered!
             </Message>
-            <div v-if="!removalNotAvailable" class="mb-4">
+            <div v-if="!removalNotAvailable" class="mb-6">
               <p
                   :aria-label="`Please type ${validationText} in the input box to permanently remove the record. To complete deletion press 'Yes, Do Remove' button!`">
-                Please type <span class="font-italic font-bold text-primary">{{ validationText }}</span> to permanently
+                Please type <span class="italic font-bold text-primary">{{ validationText }}</span> to permanently
                 remove the record.
               </p>
               <InputText v-model="currentValidationText" data-cy="currentValidationText" aria-required="true" style="width: 100%"
                          aria-label="Type 'Delete This Project' text here to enable the removal operation. Please make sure that 'D' and 'M' are uppercase." />
             </div>
-            <div class="flex mt-2 w-full justify-content-end">
-              <SkillsButton label="Cancel" icon="far fa-times-circle" outlined class="mr-2" severity="warning" data-cy="closeButton" @click="publishHidden" />
-              <SkillsButton label="Delete" @click="removeAction" :disabled="removeDisabled" data-cy="deleteProjectButton" />
+            <div class="flex mt-2 w-full justify-end">
+              <SkillsButton label="Cancel" icon="far fa-times-circle" outlined class="mr-2" severity="secondary" data-cy="closeButton" @click="publishHidden" />
+              <SkillsButton label="Delete" icon="fas fa-trash-alt" @click="removeAction" :disabled="removeDisabled" data-cy="deleteProjectButton" severity="danger"/>
             </div>
-          </template>
-        </StepperPanel>
+          </StepPanel>
+        </StepPanels>
       </Stepper>
 
     </div>

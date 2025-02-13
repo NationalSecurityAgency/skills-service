@@ -62,7 +62,7 @@ const onGraded = (gradedInfo) => {
 <template>
   <div>
     <skills-spinner v-if="loadingQuestionsToGrade" :is-loading="loadingQuestionsToGrade"/>
-    <div v-else class="mb-7">
+    <div v-else class="mb-16">
       <div v-for="(q, index) in questionsToGrade" :key="q.id">
         <grade-single-question
             :question="q"
@@ -70,7 +70,7 @@ const onGraded = (gradedInfo) => {
             :quiz-attempt-id="quizAttemptId"
             @on-graded="onGraded"
         />
-        <hr v-if="index < questionsToGrade.length - 1" class="mb-6"/>
+        <hr v-if="index < questionsToGrade.length - 1" class="mb-12"/>
       </div>
     </div>
   </div>

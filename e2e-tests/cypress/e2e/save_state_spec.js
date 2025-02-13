@@ -177,8 +177,8 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
     cy.get('[data-cy="pointIncrement"]').type('{selectall}11');
     cy.get('[data-cy="numPerformToCompletion"]').type('{selectall}11');
-    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
-    cy.get('[data-cy=timeWindowCheckbox').click()
+    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
+    cy.get('[data-cy=timeWindowCheckbox]').click()
     cy.get('[data-cy="pointIncrementIntervalHrs"] input').type('{selectall}11');
     cy.get('[data-cy="pointIncrementIntervalMins"] input').type('{selectall}11');
     cy.get('[data-cy="numPointIncrementMaxOccurrences"] input').type('{selectall}11');
@@ -190,22 +190,22 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="newSkillButton"]').click();
     cy.get('[data-cy="skillName"]').should('have.value', 'Skill One');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
-    cy.get('[data-cy="pointIncrement"] [data-pc-name="input"]').should('have.value', '11');
-    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', '11');
-    cy.get('[data-cy="pointIncrementIntervalHrs"] [data-pc-name="input"]').should('have.value', '11');
-    cy.get('[data-cy="pointIncrementIntervalMins"] [data-pc-name="input"]').should('have.value', '11');
-    cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('have.value', '11');
+    cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]').should('have.value', '11');
+    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', '11');
+    cy.get('[data-cy="pointIncrementIntervalHrs"] [data-pc-name="pcinputtext"]').should('have.value', '11');
+    cy.get('[data-cy="pointIncrementIntervalMins"] [data-pc-name="pcinputtext"]').should('have.value', '11');
+    cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="pcinputtext"]').should('have.value', '11');
     cy.get('[data-cy="selfReportEnableCheckbox"] input').should('be.checked');
     cy.get('[data-cy=closeDialogBtn]').click();
 
     cy.get('[data-cy="newSkillButton"]').click();
     cy.get('[data-cy="skillName"]').should('have.value', '');
     cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
-    cy.get('[data-cy="pointIncrement"] [data-pc-name="input"]').should('have.value', '100');
-    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', '1');
-    cy.get('[data-cy="pointIncrementIntervalHrs"] [data-pc-name="input"]').should('have.value', '8');
-    cy.get('[data-cy="pointIncrementIntervalMins"] [data-pc-name="input"]').should('have.value', '0');
-    cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('have.value', '1');
+    cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]').should('have.value', '100');
+    cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', '1');
+    cy.get('[data-cy="pointIncrementIntervalHrs"] [data-pc-name="pcinputtext"]').should('have.value', '8');
+    cy.get('[data-cy="pointIncrementIntervalMins"] [data-pc-name="pcinputtext"]').should('have.value', '0');
+    cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="pcinputtext"]').should('have.value', '1');
     cy.get('[data-cy="selfReportEnableCheckbox"]  input').should('not.be.checked');
   })
 
@@ -225,7 +225,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
     cy.get('[data-cy="pointIncrement"]').type('{selectall}11');
     cy.get('[data-cy="numPerformToCompletion"]').type('{selectall}11');
-    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
+    cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
     cy.get('[data-cy=timeWindowCheckbox').click()
     cy.get('[data-cy="pointIncrementIntervalHrs"]').type('{selectall}11');
     cy.get('[data-cy="pointIncrementIntervalMins"]').type('{selectall}11');

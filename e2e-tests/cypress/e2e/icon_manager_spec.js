@@ -47,7 +47,8 @@ describe('Icon Manager Tests', () => {
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
 
         cy.get('[data-cy="iconPicker"]').click();
-        cy.get('.p-menuitem-link').contains('Font Awesome Free').click();
+        // ensure font awesome is selected by default
+        cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Font Awesome Free')
         cy.wait(1500);
         // cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
         cy.get('[data-cy=virtualIconList]').scrollTo(0,540);
@@ -73,7 +74,8 @@ describe('Icon Manager Tests', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
         cy.get('[data-cy="iconPicker"]').click();
-        cy.get('.p-menuitem-link').contains('Material').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Material').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Material')
         cy.wait(2500);
         // cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
         cy.get('[data-cy=virtualIconList]').scrollTo(0,540);
@@ -100,7 +102,7 @@ describe('Icon Manager Tests', () => {
         cy.get('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]').click();
 
         cy.get('[data-cy="iconPicker"]').click();
-        cy.get('.p-menuitem-link').contains('Font Awesome Free').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Font Awesome Free')
         cy.wait(1500);
         // cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
         cy.get('[data-cy=virtualIconList]').scrollTo(0,540);
@@ -126,7 +128,8 @@ describe('Icon Manager Tests', () => {
         cy.visit('/administrator/projects/proj1/badges');
         cy.get('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]').click();
         cy.get('[data-cy="iconPicker"]').click();
-        cy.get('.p-menuitem-link').contains('Material').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Material').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Material')
         cy.wait(2500);
         // cy.get('[role=tabpanel][aria-hidden=false]').should('be.visible');
         cy.get('[data-cy=virtualIconList]').scrollTo(0,540);
@@ -155,18 +158,21 @@ describe('Icon Manager Tests', () => {
         cy.get('[data-cy=icon-search]').type('run');
         cy.get('.fas.fa-running').should('be.visible');
         //filter should persist between tab changes
-        cy.get('.p-menuitem-link').contains('Material').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Material').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Material')
         cy.get('.mi.mi-directions-run').should('be.visible');
 
-        cy.get('.p-menuitem-link').contains('Font Awesome Free').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Font Awesome Free').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Font Awesome Free')
         cy.get('.fas.fa-running').should('be.visible');
 
         //filter should not persist when icon manager is re-opened
-        cy.get('.p-overlaypanel-close-icon').click();
+        cy.get('[data-cy="closeIconPickerBtn"]').click();
         cy.get('[data-cy="iconPicker"]').click();
         cy.get('[data-cy=icon-search]').should('have.value', '');
         cy.get('i.fas.fa-ad').should('be.visible');
-        cy.get('.p-menuitem-link').contains('Material').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Material').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Material')
         cy.get('i.mi.mi-3d-rotation').should('be.visible');
     });
 
@@ -177,25 +183,21 @@ describe('Icon Manager Tests', () => {
             name: "Subject 1"
         });
 
-
-        // TODO - waiting on https://github.com/cypress-io/cypress/issues/1647
-        // cy.intercept('/admin/projects/proj1/icons/upload').as('uploadIcon');
-
         cy.visit('/administrator/projects/proj1/');
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Custom')
 
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
         cy.wait('@uploadIcon')
 
         cy.get('.proj1-validiconpng');
     });
-
 
     it('upload custom icon - invalid mime type client validation', () => {
         cy.intercept('/app/projects/proj1/customIcons').as('getCustomIcons')
@@ -208,21 +210,45 @@ describe('Icon Manager Tests', () => {
         });
 
         cy.visit('/administrator/projects/proj1/');
-        // cy.wait('@getCustomIconsCss')
 
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
 
         cy.get('[data-cy="iconPicker"]').click();
-        // cy.wait('@getCustomIcons')
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
         // cy.get('[data-cy="customIconUpload"]').contains('Drag your file here to upload')
         cy.wait(2000)
 
         const filename = 'invalid_file.txt';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
 
         cy.get('[data-cy="iconErrorMessage"]').contains('File is not an image format');
+    });
+
+    it('upload custom icon - invalid icon dimensions', () => {
+        cy.intercept('/app/projects/proj1/customIcons').as('getCustomIcons')
+        cy.intercept('/api/projects/proj1/customIconCss').as('getCustomIconsCss')
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: "Subject 1"
+        });
+
+        cy.visit('/administrator/projects/proj1/');
+
+        cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
+
+        cy.get('[data-cy="iconPicker"]').click();
+
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
+        // cy.get('[data-cy="customIconUpload"]').contains('Drag your file here to upload')
+        cy.wait(2000)
+
+        const filename = 'icon_with_wrong_dimensions.png';
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
+
+        cy.get('[data-cy="iconErrorMessage"]').contains('Invalid image dimensions, dimensions must be square and must be between 48px x 48px and 100px x 100px');
     });
 
     it('upload custom icon - server side error', () => {
@@ -243,10 +269,10 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
 
         cy.get('[data-cy="iconErrorMessage"]').contains('Encountered error when uploading');
     });
@@ -268,10 +294,10 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
         cy.wait('@uploadIcon')
 
         cy.get('[data-cy=saveDialogBtn]').click();
@@ -294,10 +320,10 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
         cy.wait('@uploadIcon')
 
         cy.get('[data-cy=saveDialogBtn]').click();
@@ -321,10 +347,10 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
         cy.wait('@uploadIcon')
 
         cy.get('[data-cy=saveDialogBtn]').click();
@@ -338,18 +364,18 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
-        cy.get('.delete-icon').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
+        cy.get('[data-cy="deleteIconBtn"]').click();
 
         cy.contains('Are you sure you want to delete valid_icon.png? This icon is currently used by: Subject 1');
         cy.contains('Cancel').click();
 
-        cy.get('.delete-icon').should('exist');
-        cy.get('.delete-icon').click();
+        cy.get('[data-cy="deleteIconBtn"]').should('exist');
+        cy.get('[data-cy="deleteIconBtn"]').click();
 
         cy.contains('Are you sure you want to delete valid_icon.png? This icon is currently used by: Subject 1');
         cy.contains('YES, Delete It').click();
-        cy.get('.delete-icon').should('not.exist');
+        cy.get('[data-cy="deleteIconBtn"]').should('not.exist');
     });
 
     it('subject - upload custom icon - persists when navigating from another project', () => {
@@ -370,10 +396,10 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
         cy.wait('@uploadIcon')
 
         cy.get('[data-cy=saveDialogBtn]').click();
@@ -407,10 +433,10 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
         cy.wait('@uploadIcon')
 
         cy.get('[data-cy=saveDialogBtn]').click();
@@ -443,10 +469,10 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
         cy.wait('@uploadIcon')
 
         cy.get('[data-cy=saveDialogBtn]').click();
@@ -472,10 +498,10 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
         cy.wait('@uploadIcon')
 
         cy.get('[data-cy=saveDialogBtn]').click();
@@ -499,10 +525,10 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
         cy.wait('@uploadIcon')
 
         cy.get('[data-cy=saveDialogBtn]').click();
@@ -516,18 +542,18 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
-        cy.get('.delete-icon').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
+        cy.get('[data-cy="deleteIconBtn"]').click();
 
         cy.contains('Are you sure you want to delete valid_icon.png? This icon is currently used by: Badge 1');
         cy.contains('Cancel').click();
 
-        cy.get('.delete-icon').should('exist');
-        cy.get('.delete-icon').click();
+        cy.get('[data-cy="deleteIconBtn"]').should('exist');
+        cy.get('[data-cy="deleteIconBtn"]').click();
 
         cy.contains('Are you sure you want to delete valid_icon.png? This icon is currently used by: Badge 1');
         cy.contains('YES, Delete It').click();
-        cy.get('.delete-icon').should('not.exist');
+        cy.get('[data-cy="deleteIconBtn"]').should('not.exist');
     });
 
     it('badge - upload custom icon - persists when navigating from another project', () => {
@@ -548,10 +574,10 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
         cy.wait('@uploadIcon')
 
         cy.get('[data-cy=saveDialogBtn]').click();
@@ -587,10 +613,10 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
         cy.wait('@uploadIcon')
 
         cy.get('[data-cy=saveDialogBtn]').click();
@@ -629,19 +655,19 @@ describe('Icon Manager Tests', () => {
         cy.get('[data-cy="iconPicker"]').click();
         // cy.wait('@getCustomIcons')
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
         // cy.get('[data-cy="customIconUpload"]').contains('Drag your file here to upload')
         cy.wait(2000)
 
         const filename = 'invalid_file.txt';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
 
         cy.get('[data-cy="iconErrorMessage"]').contains('File is not an image format');
 
-        cy.get('.p-message-close').click();
+        cy.get('[data-cy="iconErrorMessage"] [data-pc-section="closeicon"]').click();
         cy.get('[data-cy="iconErrorMessage"]').should('not.exist');
 
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
 
         cy.get('[data-cy="iconErrorMessage"]').contains('File is not an image format');
     });
@@ -662,10 +688,10 @@ describe('Icon Manager Tests', () => {
         cy.get('[data-cy="btn_edit-subject"]').click();
         cy.get('[data-cy="iconPicker"]').click();
 
-        cy.get('.p-menuitem-link').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
 
         const filename = 'valid_icon.png';
-        cy.get('[data-cy="fileInput"]').attachFile(filename);
+        cy.get('[data-pc-name="fileupload"] input').attachFile(filename);
         cy.wait('@uploadIcon')
 
         cy.get('[data-cy=saveDialogBtn]').click();

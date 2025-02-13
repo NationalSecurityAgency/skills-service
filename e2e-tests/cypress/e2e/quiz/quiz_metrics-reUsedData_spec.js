@@ -78,15 +78,15 @@ describe('Quiz Metrics With Reused Data Tests', () => {
 
         cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-cy="num"]').should('have.text', '6')
         cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-cy="percent"]').should('have.text', '54%')
-        cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-pc-section="rowtoggler"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]').should('be.enabled')
 
         cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-cy="num"]').should('have.text', '5')
         cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-cy="percent"]').should('have.text', '45%')
-        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtoggler"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]').should('be.enabled')
 
         cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-cy="num"]').should('have.text', '0')
         cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-cy="percent"]').should('have.text', '0%')
-        cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-pc-section="rowtoggler"]').should('not.be.visible')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-pc-section="rowtogglebutton"]').should('not.be.visible')
 
         cy.get('[data-cy="metrics-q1"] [data-cy="multipleChoiceQuestionWarning"]').should('not.exist')
     });
@@ -107,26 +107,26 @@ describe('Quiz Metrics With Reused Data Tests', () => {
 
         cy.get('[data-cy="metrics-q2"] [data-p-index="0"] [data-cy="num"]').should('have.text', '11')
         cy.get('[data-cy="metrics-q2"] [data-p-index="0"] [data-cy="percent"]').should('have.text', '100%')
-        cy.get('[data-cy="metrics-q2"] [data-p-index="0"] [data-pc-section="rowtoggler"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]').should('be.enabled')
 
         cy.get('[data-cy="metrics-q2"] [data-p-index="1"] [data-cy="num"]').should('have.text', '0')
         cy.get('[data-cy="metrics-q2"] [data-p-index="1"] [data-cy="percent"]').should('have.text', '0%')
-        cy.get('[data-cy="metrics-q2"] [data-p-index="1"] [data-pc-section="rowtoggler"]').should('not.be.visible')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]').should('not.be.visible')
 
         cy.get('[data-cy="metrics-q2"] [data-p-index="2"] [data-cy="num"]').should('have.text', '9')
         cy.get('[data-cy="metrics-q2"] [data-p-index="2"] [data-cy="percent"]').should('have.text', '81%')
-        cy.get('[data-cy="metrics-q2"] [data-p-index="2"] [data-pc-section="rowtoggler"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="2"] [data-pc-section="rowtogglebutton"]').should('be.enabled')
 
         cy.get('[data-cy="metrics-q2"] [data-p-index="3"] [data-cy="num"]').should('have.text', '0')
         cy.get('[data-cy="metrics-q2"] [data-p-index="3"] [data-cy="percent"]').should('have.text', '0%')
-        cy.get('[data-cy="metrics-q2"] [data-p-index="3"] [data-pc-section="rowtoggler"]').should('not.be.visible')
+        cy.get('[data-cy="metrics-q2"] [data-p-index="3"] [data-pc-section="rowtogglebutton"]').should('not.be.visible')
 
         cy.get('[data-cy="metrics-q2"] [data-cy="multipleChoiceQuestionWarning"]').should('exist')
     });
 
     it('single answer history', function () {
         cy.visit('/administrator/quizzes/quiz1/results');
-        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]').click()
 
         const tableSelector = '[data-cy="metrics-q1"] [data-cy="row1-answerHistory"] [data-cy="quizAnswerHistoryTable"]';
         const headerSelector = `${tableSelector} thead tr th`;
@@ -144,7 +144,7 @@ describe('Quiz Metrics With Reused Data Tests', () => {
 
     it('sort column and order is saved in local storage', () => {
         cy.visit('/administrator/quizzes/quiz1/results');
-        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]').click()
 
         const tableSelector = '[data-cy="metrics-q1"] [data-cy="row1-answerHistory"] [data-cy="quizAnswerHistoryTable"]';
         const headerSelector = `${tableSelector} thead tr th`;
@@ -178,7 +178,7 @@ describe('Quiz Metrics With Reused Data Tests', () => {
         ], 5);
 
         cy.visit('/administrator/quizzes/quiz1/results');
-        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]').click()
         cy.validateTable(tableSelector, [
             [{ colIndex: 0, value: 'user9' }],
             [{ colIndex: 0, value: 'user8' }],

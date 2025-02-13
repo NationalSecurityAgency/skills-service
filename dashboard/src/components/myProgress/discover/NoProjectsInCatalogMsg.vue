@@ -25,7 +25,7 @@ const conf = useAppConfig()
     <no-content2 title="No Discoverable Projects"
                  :message="`Projects can be created and managed from the Project Admin view.`" />
 
-    <div class="flex justify-content-center mt-5 text-xl">
+    <div class="flex justify-center mt-8 text-xl">
       <div class="">
         <Card>
           <template #subtitle>Instructions:</template>
@@ -41,12 +41,12 @@ const conf = useAppConfig()
               <Tag>2.</Tag>
               Create or edit a project and then navigate to the <span class="text-primary">Settings</span> tab
             </p>
-            <p>
+            <p class="mt-2">
               <Tag>3.</Tag>
               Change <span class="text-primary">Project Discoverability</span> to <span class="text-primary">Add to the Project Catalog</span>
             </p>
 
-            <p class="mt-6">
+            <p class="mt-12">
               To learn more please visit <a class="font-bold" target="_blank"
               :href="`${conf.docsHost}/dashboard/user-guide/projects.html#setting-project-discoverability`">Setting:
               Project Discoverability</a> section in the documentation.

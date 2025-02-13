@@ -40,7 +40,7 @@ function openNewTestModal() {
                    :title-level="1"
                    @add-action="openNewTestModal">
     </SubPageHeader>
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
         <QuizDefinitions ref="quizDefinitionsRef"/>
       </template>

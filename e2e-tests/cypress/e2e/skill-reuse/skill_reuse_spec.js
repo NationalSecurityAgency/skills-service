@@ -35,7 +35,7 @@ describe('Skill Reuse Tests', () => {
         cy.get('[data-cy="nameCell_skill1STREUSESKILLST0"] [data-cy="highlightedValue"]')
             .should('have.text', 'Very Great Skill 1');
 
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]');
 
         // navigate down to a skill page
@@ -68,7 +68,7 @@ describe('Skill Reuse Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: subj2')
         cy.get('[data-cy="manageSkillLink_skill1STREUSESKILLST0"]')
-        cy.get(`[data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"]').contains('Original Skill')
         cy.get('[data-cy="childRowDisplay_skill1STREUSESKILLST0"] [data-cy="reusedAlert"] [data-cy="linkToTheOriginalSkill"]')
             .click();
@@ -147,7 +147,7 @@ describe('Skill Reuse Tests', () => {
         cy.createSkillsGroup(1, 3, 16);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
@@ -181,7 +181,7 @@ describe('Skill Reuse Tests', () => {
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('this action will only remove the reused skill');
         cy.get('[data-cy="currentValidationText"]')
-            .type('Delete Me');
+            .type('Delete Me', {delay:0});
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="noContent"]')
@@ -209,7 +209,7 @@ describe('Skill Reuse Tests', () => {
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('Deleting this skill will also remove its reused copies');
         cy.get('[data-cy="currentValidationText"]')
-            .type('Delete Me');
+            .type('Delete Me', {delay: 0});
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
         cy.get('[data-cy="noContent"]')

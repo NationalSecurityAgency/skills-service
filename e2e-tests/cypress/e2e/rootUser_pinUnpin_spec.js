@@ -279,7 +279,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.contains('Pin Projects');
                 cy.get('[data-cy=pinProjectsLoadAllButton]')
                     .click();
-                cy.get('[data-pc-section="headertitle"]').contains('Name').click()
+                cy.get('[data-pc-section="columnheadercontent"]').contains('Name').click()
                 cy.wait(1000)
                 cy.get('[data-cy=skillsBTableTotalRows]')
                     .contains('5');
@@ -404,19 +404,12 @@ describe('Root Pin and Unpin Tests', () => {
                 const tableSelector = '[data-cy=roleManagerTable]';
                 const rowSelector = `${tableSelector} tbody tr`;
                 cy.log('removing user');
-                if (!Cypress.env('oauthMode')) {
-                    cy.get(`${tableSelector} [data-cy="removeUserBtn"]`)
-                        .eq(0)
-                        .click();
-                } else {
-                    // in oauth mode the default user name is different which affects how the users are sorted
-                    cy.get(`${tableSelector} [data-cy="removeUserBtn"]`)
-                        .eq(1)
-                        .click();
-                }
+                cy.get(`${tableSelector} [data-cy="removeUserBtn"]`)
+                    .eq(0)
+                    .click();
 
                 cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove')
-                cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
+                cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
                 cy.get('[data-cy="saveDialogBtn"]').click()
                 cy.wait('@loadProjectAdmins');
                 cy.get(rowSelector)

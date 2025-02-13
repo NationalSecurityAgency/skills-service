@@ -52,7 +52,7 @@ cards.value = cards.value.map((c) => {
 </script>
 
 <template>
-  <div class="flex flex-column md:flex-row gap-2">
+  <div class="flex flex-col md:flex-row gap-2">
     <div class="flex flex-1" v-for="(card, index) in cards" :key="card.label">
       <Card class="h-full w-full" :pt="{ body: { class: 'p-3' }, content: { class: 'p-0' } }">
         <template #content>

@@ -74,13 +74,13 @@ watch(() => timer.value, (value) => {
 </script>
 
 <template>
-  <Card class="mt-3">
+  <Card class="mt-4">
     <template #content>
       <skills-spinner :is-loading="loading" />
       <div v-if="!loading">
-        <div class="text-center mt-5">
+        <div class="text-center mt-8">
           <i class="fa fa-users fa-4x text-secondary" :class="colors.getTextClass(1)"></i>
-          <h2 class="mt-3 text-primary">
+          <h2 class="mt-4 text-primary">
             <span>Join Project</span>
           </h2>
           <div v-if="!joined">
@@ -105,7 +105,7 @@ watch(() => timer.value, (value) => {
           </div>
           <div v-if="joined">
             You have successfully joined Project <span class="text-primary font-bold">{{ projectName }}</span>!
-            <div class="flex justify-content-center mt-3">
+            <div class="flex justify-center mt-4">
             <router-link :to="{ path: `/progress-and-rankings/projects/${route.params.pid}` }" tabindex="-1">
               <Button
                 label="View Project Now"
@@ -118,7 +118,7 @@ watch(() => timer.value, (value) => {
             <p>You will be forwarded to in <Tag>{{ timer }}</Tag> seconds.</p>
 
           </div>
-          <div v-if="inviteInvalid" class="mt-3 text-danger" role="alert">{{ invalidMsg }}</div>
+          <div v-if="inviteInvalid" class="mt-4 text-danger" role="alert">{{ invalidMsg }}</div>
         </div>
       </div>
     </template>

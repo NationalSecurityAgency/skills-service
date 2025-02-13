@@ -87,7 +87,7 @@ describe('Badges Tests', () => {
             }],
         ], 5, false, null, false);
 
-        cy.contains('.p-menuitem', 'Badges')
+        cy.contains('[data-cy="breadcrumbItemValue"]', 'Badges')
           .click();
         cy.contains('Test Badge')
           .should('exist');
@@ -114,7 +114,7 @@ describe('Badges Tests', () => {
           .click();
         cy.contains('No Skills Selected Yet');
 
-        cy.contains('.p-menuitem', 'Badges')
+        cy.contains('[data-cy="breadcrumbItemValue"]', 'Badges')
           .click();
         cy.contains('Test Badge')
           .should('exist');
@@ -739,13 +739,13 @@ describe('Badges Tests', () => {
                 value: 'skill4'
             }],
         ], 5, false, null, false);
-        cy.get('[data-pc-name="rowperpagedropdown"]').should('not.exist');
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').should('not.exist');
 
         // add one more skill to the badge to make 6 skills total
         // cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill5');
         cy.get('[data-cy="skillsSelector"]')
           .click();
-        cy.get('[data-pc-section="item"]').first().click();
+        cy.get('[data-pc-section="option"]').first().click();
 
         cy.validateTable(tableSelector, [
             [{
@@ -773,7 +773,7 @@ describe('Badges Tests', () => {
                 value: 'skill5'
             }],
         ], 5, true, null, false);
-        cy.get('[data-pc-name="rowperpagedropdown"]').should('exist');
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').should('exist');
 
         // now delete a skill to go back to 5 skills total
         cy.get('[data-cy="deleteSkill_skill2"]')
@@ -803,7 +803,7 @@ describe('Badges Tests', () => {
                 value: 'skill5'
             }],
         ], 5, false, null, false);
-        cy.get('[data-pc-name="rowperpagedropdown"]').should('not.exist');
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').should('not.exist');
     });
 
     it('Can add Skill requirements to disabled badge', () => {
@@ -834,7 +834,7 @@ describe('Badges Tests', () => {
         cy.wait(500);
         cy.wait('@loadSkills');
         cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
-        cy.contains('.p-menuitem', 'Badges')
+        cy.contains('[data-cy="breadcrumbItemValue"]', 'Badges')
           .click();
         cy.contains('Test Badge')
           .should('exist');
@@ -983,7 +983,7 @@ describe('Badges Tests', () => {
         cy.visit('/administrator/projects/proj1/badges/badge1');
         cy.get('[data-cy="deleteSkill_skill1"]').click();
         cy.contains('Remove Required Skill');
-        cy.get('[data-pc-name="acceptbutton"]').click();
+        cy.get('[data-pc-name="pcacceptbutton"]').click();
         cy.get('[data-cy="skillsSelector"] button').should('have.focus');
     })
 
@@ -995,7 +995,7 @@ describe('Badges Tests', () => {
         cy.visit('/administrator/projects/proj1/badges/badge1');
         cy.get('[data-cy="deleteSkill_skill1"]').click();
         cy.contains('Remove Required Skill');
-        cy.get('[data-pc-name="rejectbutton"]').click();
+        cy.get('[data-pc-name="pcrejectbutton"]').click();
         cy.get('[data-cy="deleteSkill_skill1"]').should('have.focus');
     })
 });

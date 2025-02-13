@@ -127,16 +127,16 @@ const projectsNotContributedToYet = computed(() => myProjects.value.length - myP
 <template>
   <my-progress-info-card-util title="Projects">
     <template #left-content>
-      <span class="text-4xl text-color-warn mr-1" data-cy="numProjectsContributed">{{ myProgress.numProjectsContributed }}</span>
+      <span class="text-4xl text-orange-700 dark:text-orange-400 mr-1" data-cy="numProjectsContributed">{{ myProgress.numProjectsContributed }}</span>
       <span class="text-secondary" data-cy="numProjectsAvailable">/ {{ myProjects.length }}</span>
     </template>
     <template #right-content>
-      <div class="flex justify-content-center sm:justify-content-end">
+      <div class="flex justify-center sm:justify-end">
         <apexchart type="radialBar" height="200" width="200" :options="chartOptions" :series="series"></apexchart>
       </div>
     </template>
     <template #footer>
-      <div class="flex gap-2 align-items-center flex-column sm:flex-row">
+      <div class="flex gap-2 items-center flex-col sm:flex-row">
         <div v-if="projectsNotContributedToYet > 0"
              data-cy="info-snap-footer"
              class="w-min-12rem">

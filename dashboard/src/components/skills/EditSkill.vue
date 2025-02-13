@@ -305,7 +305,7 @@ const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
           :name-to-id-sync-enabled="!props.isEdit" />
       </div>
 
-      <div class="lg:max-w-10rem lg:ml-3 w-full">
+      <div class="lg:max-w-40 lg:ml-4 w-full">
         <SkillsNumberInput
           showButtons
           :disabled="isEdit"
@@ -315,18 +315,16 @@ const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
       </div>
     </div>
 
-    <div class="flex flex-wrap lg:flex-no-wrap">
+    <div class="flex flex-col md:flex-row gap-2 mt-2">
       <SkillsNumberInput
-        class="flex-1"
-        style="min-width: 14rem;"
+        class="flex-1 min-w-[13rem]"
         :min="1"
         :is-required="true"
         label="Point Increment"
         name="pointIncrement" />
 
       <SkillsNumberInput
-        class="flex-1 sm:ml-2"
-        style="min-width: 16rem;"
+        class="flex-1 min-w-[15rem]"
         showButtons
         :min="0"
         :is-required="true"
@@ -334,18 +332,18 @@ const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
         label="Occurrences to Completion"
         name="numPerformToCompletion" />
 
-      <total-points-field class="lg:ml-2" />
+      <total-points-field class="min-w-[8rem]"/>
     </div>
 
-    <time-window-input :disabled="occurrencesToCompletionAndTimeWindowDisabled" class="mb-3"/>
+    <time-window-input :disabled="occurrencesToCompletionAndTimeWindowDisabled" class="mb-4"/>
 
     <self-reporting-type-input @self-reporting-type-changed="selfReportingType = $event" :initial-skill-data="initialSkillData" :is-edit="isEdit" class="mt-1"/>
 
     <markdown-editor
-      class="mt-5"
+      class="mt-8"
       name="description" />
 
-    <help-url-input class="mt-3"
+    <help-url-input class="mt-4"
                     name="helpUrl" />
 
   </SkillsInputFormDialog>

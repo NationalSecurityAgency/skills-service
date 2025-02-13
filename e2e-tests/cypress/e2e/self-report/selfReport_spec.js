@@ -203,8 +203,8 @@ describe('Self Report Skills Management Tests', () => {
             .should('have.length', 5);
 
         const tableSelector = '[data-cy="skillsReportApprovalTable"]';
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-name="rowperpagedropdown"]')
-          .click().get('[data-pc-section="item"]').contains('10').click();
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-name="pcrowperpagedropdown"]')
+          .click().get('[data-pc-section="option"]').contains('10').click();
         cy.get(rowSelector)
             .should('have.length', 7);
     });

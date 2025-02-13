@@ -93,13 +93,13 @@ describe('Cross-project Skills Tests', () => {
                 .type(`{selectall}${skillText}`)
             cy.get('[data-cy="skillsSelector-skillName"]').contains(skillText).first()
                 .click()
-            cy.get('[data-cy="shareButton"')
+            cy.get('[data-cy="shareButton"]')
                 .should('be.disabled');
 
             cy.get('[data-cy="projectSelector"]')
                 .click()
             if (projText) {
-                cy.get('[data-pc-section="filterinput"]')
+                cy.get('[data-pc-name="pcfilter"]')
                   .type(`${projText}`)
                 cy.get('[data-cy="projectSelector-projectName"]').contains(projText).first()
                   .click()

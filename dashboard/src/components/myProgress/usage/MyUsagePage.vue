@@ -41,7 +41,7 @@ const loadProjects = () => {
 <div>
   <my-progress-title title="My Usage" />
   <SkillsSpinner :is-loading="loading"/>
-  <div class="my-4 w-min-17rem">
+  <div class="my-6 w-min-17rem">
     <EventHistoryChart v-if="!loading" :availableProjects="projects" />
   </div>
 </div>

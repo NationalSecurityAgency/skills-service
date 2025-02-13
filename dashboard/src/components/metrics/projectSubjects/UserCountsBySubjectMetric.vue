@@ -153,8 +153,8 @@ const hasData = computed(() => !loading.value && series.value && series.value?.l
       <SkillsCardHeader title="Number of users for each level for each subject"></SkillsCardHeader>
     </template>
     <template #content>
-        <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="Users have not achieved any levels, yet..." class="mt-4">
-          <apexchart ref="chartRef" type="bar" height="350" :options="chartOptions" :series="series" class="mt-4"></apexchart>
+        <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="Users have not achieved any levels, yet..." class="mt-6">
+          <apexchart ref="chartRef" type="bar" height="350" :options="chartOptions" :series="series" class="mt-6"></apexchart>
         </metrics-overlay>
     </template>
   </Card>

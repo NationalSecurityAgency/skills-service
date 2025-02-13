@@ -54,11 +54,11 @@ export default {
         styleName: 'color'
       }],
       borderColor: {
-        selector: '.sd-theme-home .skills-theme-page-title',
+        selector: 'body #app .sd-theme-home .p-card.p-component.skills-theme-page-title',
         styleName: 'border-color'
       },
       borderStyle: {
-        selector: 'body #app .sd-theme-home .skills-theme-page-title',
+        selector: 'body #app .sd-theme-home .p-card.p-component.skills-theme-page-title',
         styleName: 'border-style'
       },
       backgroundColor: {
@@ -281,11 +281,12 @@ export default {
     },
     progressIndicators: {
       completeColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.is-completed',
+        selector: 'body #app .sd-theme-home .p-progressbar.p-component.is-completed .p-progressbar-value',
         styleName: 'background-color'
       }],
       incompleteColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.today-progress.is-not-completed',
+        selector: 'body #app .sd-theme-home .p-progressbar.p-component.p-progressbar-determinate,' +
+            'body #app .sd-theme-home .user-skill-progress-layers .p-progressbar.p-component.p-progressbar-determinate',
         styleName: 'background-color'
       }],
       beforeTodayColor: [{
@@ -299,18 +300,18 @@ export default {
     },
     breadcrumb: {
       linkColor: [{
-        selector: '.sd-theme-home .skills-theme-breadcrumb-container .p-menuitem-link .sd-theme-breadcrumb-item .text-primary,' +
-          '.sd-theme-home .skills-theme-breadcrumb-container .p-menuitem-link .sd-theme-breadcrumb-item .text-color-secondary',
+        selector: '.sd-theme-home .skills-theme-breadcrumb-container .p-breadcrumb-item-link .sd-theme-breadcrumb-item .text-primary,' +
+          '.sd-theme-home .skills-theme-breadcrumb-container .p-breadcrumb-item-link .sd-theme-breadcrumb-item .text-muted-color',
         styleName: 'color'
       }],
       linkHoverColor: [{
-        selector: '.sd-theme-home .skills-theme-breadcrumb-container .p-menuitem-link .sd-theme-breadcrumb-item:hover .text-primary,' +
-          '.sd-theme-home .skills-theme-breadcrumb-container .p-menuitem-link .sd-theme-breadcrumb-item:hover .text-color-secondary',
+        selector: '.sd-theme-home .skills-theme-breadcrumb-container .p-breadcrumb-item-link .sd-theme-breadcrumb-item:hover .text-primary,' +
+          '.sd-theme-home .skills-theme-breadcrumb-container .p-breadcrumb-item-link .sd-theme-breadcrumb-item:hover .text-muted-color',
         styleName: 'color'
       }],
       currentPageColor: [{
         selector: '.sd-theme-home .skills-theme-breadcrumb-container .sd-theme-breadcrumb-item .text-color,' +
-          '.sd-theme-home .skills-theme-breadcrumb-container .sd-theme-breadcrumb-item .text-color-secondary',
+          '.sd-theme-home .skills-theme-breadcrumb-container .sd-theme-breadcrumb-item .text-muted-color',
         styleName: 'color'
       }],
       align: [{
@@ -387,7 +388,9 @@ export default {
         '.sd-theme-home .badge-catalog-item .p-card { border-style: solid !important; border-width: 1px !important; } ' +
         '.sd-theme-home .toastui-editor-toolbar-group button { background-color: #f5f5f5 !important; color: #454545 !important; } ' +
         '.sd-theme-home .attachment-button.toastui-editor-toolbar-icons { color: #454545 !important; }',
-      'textPrimaryColor': '.sd-theme-home .p-avatar.p-component { border-style: solid !important; border-width: 1px !important; } body #app .sd-theme-home .p-chip.p-component  { border-style: solid !important; border-width: 1px !important; }  body #app .sd-theme-home .skills-card-theme-border { border-style: solid !important; border-width: 1px !important; }'
+      'textPrimaryColor': '.sd-theme-home .p-avatar.p-component { border-style: solid !important; border-width: 1px !important; } body #app .sd-theme-home .p-chip.p-component  { border-style: solid !important; border-width: 1px !important; }  body #app .sd-theme-home .skills-card-theme-border { border-style: solid !important; border-width: 1px !important; }',
+      'pageTitle.borderColor': '.sd-theme-home .skills-theme-page-title.p-card { border-width: 2px !important; }',
+      'pageTitle.borderStyle': '.sd-theme-home .skills-theme-page-title.p-card { border-width: 2px !important; }',
     }
 
     if (theme?.tiles?.backgroundColor) {
@@ -479,7 +482,7 @@ export default {
         const tilesMenuHoverColor = tinycolor(theme.tiles.backgroundColor).lighten(10).toString();
         theme.tilesMenuLinkHoverCalculatedColor=tilesMenuHoverColor
         selectorKey.tilesMenuLinkHoverCalculatedColor = {
-          selector: '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link:hover',
+          selector: '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-breadcrumb-item-link:hover',
           styleName: 'background-color'
         }
       }

@@ -68,7 +68,7 @@ const props = defineProps({
 
 const model = defineModel()
 
-let currentValidationText = ref('');
+const currentValidationText = ref('');
 
 const removeDisabled = computed(() => {
   return currentValidationText.value !== props.validationText;
@@ -116,7 +116,7 @@ const hasSlot = computed(() => {
       @on-cancel="publishHidden"
       :enable-return-focus="true"
       :style="{ width: '40rem !important' }">
-    <skills-spinner v-if="loading" :is-loading="loading" class="my-4"/>
+    <skills-spinner v-if="loading" :is-loading="loading" class="my-6"/>
     <div v-if="!loading" class="px-2">
       <div data-cy="removalSafetyCheckMsg">
         <div v-if="!removalNotAvailable">
@@ -128,10 +128,10 @@ const hasSlot = computed(() => {
         </Message>
       </div>
 
-      <div v-if="!removalNotAvailable" class="mb-4">
+      <div v-if="!removalNotAvailable" class="mb-6">
         <p
             :aria-label="`Please type ${validationText} in the input box to permanently remove the record. To complete deletion press 'Yes, Do Remove' button!`">
-          Please type <span class="font-italic font-bold text-primary">{{ validationText }}</span> to permanently
+          Please type <span class="italic font-bold text-primary">{{ validationText }}</span> to permanently
           remove the record.
         </p>
         <InputText v-model="currentValidationText" data-cy="currentValidationText" aria-required="true" style="width: 100%"

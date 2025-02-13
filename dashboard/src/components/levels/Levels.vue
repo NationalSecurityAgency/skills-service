@@ -286,7 +286,7 @@ const isFlex = computed(() => responsive.sm.value)
       </div>
     </sub-page-header>
 
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
         <SkillsDataTable tableStoredStateId="levels" v-if="!loading" :options="table.options" :loading="loading" :value="levels"
                    data-cy="levelsTable" striped-rows aria-label="Levels">
@@ -310,7 +310,7 @@ const isFlex = computed(() => responsive.sm.value)
                   <span v-if="slotProps.data.pointsTo">{{ slotProps.data.pointsTo }}</span>
                   <span v-else><i class="fas fa-infinity"/></span>
                 </span>
-              <div v-else aria-label="Points cannot be calculated. Please create more skills first." class="flex align-items-center">N/A
+              <div v-else aria-label="Points cannot be calculated. Please create more skills first." class="flex items-center">N/A
                   <InlineMessage severity="warn" class="ml-1"> Please create more skills first</InlineMessage>
               </div>
             </template>

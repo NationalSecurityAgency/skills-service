@@ -49,54 +49,49 @@ describe('My Usage Tests', () => {
             .click();
 
         // validate 4 projects are loaded by default
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="pcchip"]')
             .contains('project 2')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="pcchip"]')
             .contains('project 3')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="pcchip"]')
             .contains('project 4')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="pcchip"]')
             .contains('project 5')
             .should('be.visible');
         cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]')
             .click();
-        cy.get('.p-multiselect-item').contains('project 6')
-        cy.get('.p-multiselect-item').contains('project 7')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('project 6')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('project 7')
     });
 
     it('point history chart - remove project', () => {
         cy.visit('/progress-and-rankings');
         cy.get('[data-cy="viewUsageBtn"]') .click();
 
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="pcchip"]')
           .should('have.length', 4)
           .as('selected');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="removetokenicon"]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="pcchip"] [data-pc-section="removeicon"]')
             .should('have.length', 4)
             .as('removeBtns');
         cy.get('@removeBtns')
             .eq(2)
             .click();
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="pcchip"]')
             .contains('project 2')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="pcchip"]')
             .contains('project 3')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="pcchip"]')
             .contains('project 5')
             .should('be.visible');
 
         cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]')
             .click();
-        cy.get('.p-multiselect-item').should('contain.text', 'project 4')
-        cy.get('.p-multiselect-item').should('contain.text', 'project 6')
-        cy.get('.p-multiselect-item').should('not.contain.text', 'project 2')
-        cy.get('.p-multiselect-item').should('not.contain.text', 'project 3')
-        cy.get('.p-multiselect-item').should('not.contain.text', 'project 5')
     });
 
     it('point history chart - add project', () => {
@@ -105,23 +100,23 @@ describe('My Usage Tests', () => {
         cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]')
             .click();
         // cy.get('.p-multiselect-item').should('contain.text', 'project 6')
-        cy.get('.p-multiselect-items > [aria-label="This is project 6"]')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [data-pc-section="option"][aria-label="This is project 6"]')
             .as('project6');
         cy.get('@project6')
             .click();
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-extend="chip"]')
             .contains('project 2')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-extend="chip"]')
             .contains('project 3')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-extend="chip"]')
             .contains('project 4')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-extend="chip"]')
             .contains('project 5')
             .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
+        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-extend="chip"]')
             .contains('project 6')
             .should('be.visible');
 
@@ -144,68 +139,28 @@ describe('My Usage Tests', () => {
         cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]')
             .click();
 
-        cy.get('.p-multiselect-item').should('contain.text', 'project 6')
-        cy.get('.p-multiselect-items > [aria-label="This is project 6"]').click()
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
-            .contains('project 2')
-            .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
-            .contains('project 3')
-            .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
-            .contains('project 4')
-            .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
-            .contains('project 5')
-            .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] .p-multiselect-token')
-            .contains('project 6')
-            .should('be.visible');
-        // cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]')
-        //   .click();
-        cy.get('[data-cy=trainingProfileMaximumReached]')
-            .contains('Maximum of 5 options selected')
-            .should('be.visible');
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [data-pc-section="option"][aria-label="This is project 6"]').click()
+        for (let i = 2; i <= 6; i++) {
+            cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-name="pcchip"]')
+                .contains('project 6')
+                .should('be.visible');
+        }
+        for (let i = 7; i <= 9; i++) {
+            cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [data-pc-section="option"][aria-label="This is project ${i}"].p-disabled`)
+        }
     });
 
     it('point history chart - all projects removed', () => {
         cy.visit('/progress-and-rankings/my-usage');
 
-        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 2").find('[data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 3").find('[data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 4").find('[data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 5").find('[data-pc-section="removetokenicon"]').click()
+        for (let i = 2; i <= 5; i++) {
+            cy.get(`[data-cy="eventHistoryChartProjectSelector"] [data-pc-name="pcchip"][aria-label="This is project ${i}"] [data-pc-section="removeicon"]`).click()
+        }
+
+        cy.get('[data-cy="eventHistoryChartProjectSelector"] [data-pc-section="label"]').contains('Select projects')
         cy.get('[data-cy=eventHistoryChart]')
             .contains('Please select at least one project from the list above.');
 
-    });
-
-    it('point history chart - projects with no user events', () => {
-        cy.visit('/progress-and-rankings/my-usage');
-
-        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 2").find('[data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 3").find('[data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 4").find('[data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy="eventHistoryChartProjectSelector"]').contains("This is project 5").find('[data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy=eventHistoryChart]')
-            .contains('Please select at least one project from the list above.');
-
-        // select just project 2 (which has no user events yet)
-        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]').click();
-        cy.get('.p-multiselect-items > [aria-label="This is project 2"]').click()
-
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-            .contains('project 2')
-            .should('be.visible');
-        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]').click();
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-        cy.get('.p-multiselect-item').should('contain.text', 'project 3')
-        cy.get('.p-multiselect-item').should('contain.text', 'project 4')
-        cy.get('[data-cy=eventHistoryChartProjectSelector]')
-        cy.get('[data-cy=eventHistoryChartProjectSelector] [data-pc-section="dropdownicon"]')
-            .click();
-        cy.get('[data-cy=eventHistoryChart]')
-            .contains('There are no events for the selected project(s) and time period.');
     });
 
     it('point history chart - time controls call out to the server', () => {

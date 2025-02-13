@@ -150,8 +150,8 @@ describe('Users Tests', () => {
 
         cy.get('[data-cy="archiveUsersTableBtn"]').should('be.disabled');
 
-        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-p-index="3"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-p-index="3"] [data-pc-name="pcrowcheckbox"]').click()
 
         cy.get('[data-cy="archiveUsersTableBtn"]').should('be.enabled');
         cy.get('[data-cy="archiveUsersTableBtn"]').click()
@@ -206,7 +206,7 @@ describe('Users Tests', () => {
             [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(2, 'day')) }],
         ], 5);
 
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
 
         cy.get('[data-cy="archiveUsersTableBtn"]').should('be.enabled');
         cy.get('[data-cy="archiveUsersTableBtn"]').click()
@@ -249,9 +249,9 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Users');
         cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '12')
-        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('15').click();
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('15').click();
 
-        cy.get(`${tableSelector} [data-pc-name="headercheckbox"] [data-pc-section="input"]`).click();
+        cy.get(`${tableSelector} [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]`).click();
         cy.get('[data-cy="archiveUsersTableBtn"]').should('be.enabled');
         cy.get('[data-cy="archiveUsersTableBtn"]').click()
 
@@ -274,7 +274,7 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'usere@skills.org' }],
         ], 5, true, 12);
 
-        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('10').click();
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('10').click();
         cy.validateTable(archivedUsersTableSelector, [
             [{ colIndex: 0,  value: 'usera@skills.org' }],
             [{ colIndex: 0,  value: 'userb@skills.org' }],
@@ -288,7 +288,7 @@ describe('Users Tests', () => {
             [{ colIndex: 0,  value: 'userj@skills.org' }],
         ], 10, true, 12);
 
-        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('20').click();
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('20').click();
         cy.validateTable(archivedUsersTableSelector, [
             [{ colIndex: 0,  value: 'usera@skills.org' }],
             [{ colIndex: 0,  value: 'userb@skills.org' }],
@@ -328,7 +328,7 @@ describe('Users Tests', () => {
             [{ colIndex: 1,  value: 'usere@skills.org' }],
         ], 5, true, 12);
 
-        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('10').click();
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('10').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'usera@skills.org' }],
             [{ colIndex: 1,  value: 'userb@skills.org' }],
@@ -342,7 +342,7 @@ describe('Users Tests', () => {
             [{ colIndex: 1,  value: 'userj@skills.org' }],
         ], 10, true, 12);
 
-        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('15').click();
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('15').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'usera@skills.org' }],
             [{ colIndex: 1,  value: 'userb@skills.org' }],
@@ -407,7 +407,7 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
 
         // filter should clear paging params and display the first page
-        cy.get('[data-pc-section="pagebutton"]').contains('2').click();
+        cy.get('[data-pc-section="page"]').contains('2').click();
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
@@ -533,7 +533,7 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
 
         cy.get(`${tableSelector}`).contains('User').click();
-        cy.get('[data-pc-section="pagebutton"]').contains('2').click();
+        cy.get('[data-pc-section="page"]').contains('2').click();
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
@@ -938,7 +938,7 @@ describe('Users Tests', () => {
         // validate project's users
         cy.visit('/administrator/projects/proj1/users');
         cy.wait('@getUsers')
-        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('10').click();
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('10').click();
         cy.wait('@getUsers')
         cy.get(`${tableSelector}`).contains('User').click();
         cy.wait('@getUsers')
@@ -961,7 +961,7 @@ describe('Users Tests', () => {
         // validate subject's users
         cy.visit('/administrator/projects/proj1/subjects/subj2/users');
         cy.wait('@getSubjUsers');
-        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('20').click();
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('20').click();
         cy.wait('@getSubjUsers');
         cy.get(`${tableSelector}`).contains('User').click();
         cy.wait('@getSubjUsers');
@@ -981,7 +981,7 @@ describe('Users Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill1Subj2"]').click();
         cy.clickNav('Users');
         cy.wait('@getSkill1Users')
-        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('10').click();
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('10').click();
         cy.wait('@getSkill1Users')
         cy.get(`${tableSelector}`).contains('User').click();
         cy.wait('@getSkill1Users')
@@ -999,7 +999,7 @@ describe('Users Tests', () => {
         // validate badge's users
         cy.visit('/administrator/projects/proj1/badges/badge1/users');
         cy.wait('@getBadgeUsers');
-        cy.get('[data-pc-name="rowperpagedropdown"]').click().get('[data-pc-section="item"]').contains('20').click();
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('20').click();
         cy.wait('@getBadgeUsers');
         cy.get(`${tableSelector}`).contains('User').click();
         cy.wait('@getBadgeUsers');

@@ -158,22 +158,22 @@ const onShareWithAllProjects = (checked) => {
 </script>
 
 <template>
-  <Card class="mb-3"
-        :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"
+  <Card class="mb-4"
+        :pt="{ body: { class: '!p-0' } }"
         data-cy="shareSkillsWithOtherProjectsCard">
     <template #header>
       <SkillsCardHeader title="Share skills from this project with other projects"></SkillsCardHeader>
     </template>
     <template #content>
       <no-content2 v-if="restrictedUserCommunity" title="Cannot Be Added" icon="fas fa-shield-alt"
-                   class="my-5 mx-4" data-cy="restrictedUserCommunityWarning">
+                   class="my-8 mx-6" data-cy="restrictedUserCommunityWarning">
         This project's access is
         restricted to <b class="text-primary">{{ appConfig.userCommunityRestrictedDescriptor }}</b> users
         only and its skills <b class="text-primary">cannot</b> be added as dependencies in other Projects.
       </no-content2>
       <div v-if="!restrictedUserCommunity">
-        <div class="p-3">
-          <div class="flex gap-2 flex-wrap flex-column lg:flex-row">
+        <div class="p-4">
+          <div class="flex gap-2 flex-wrap flex-col lg:flex-row">
             <div class="flex-1 field">
               <skills-selector :options="allSkills"
                                v-on:added="onSelectedSkill"
@@ -193,14 +193,14 @@ const onShareWithAllProjects = (checked) => {
             </div>
           </div>
 
-          <div class="flex gap-4 mt-2">
-            <div class="flex flex-1 justify-content-end">
+          <div class="flex gap-6 mt-2">
+            <div class="flex flex-1 justify-end">
               <Checkbox v-model="shareWithAllProjects" inputId="shareToggle" @change="onShareWithAllProjects" :disabled="selectedProject !== null"
                         :binary="true" data-cy="shareWithAllProjectsCheckbox"></Checkbox>
               <label for="shareToggle" class="ml-1">Share With All Projects</label>
               <SkillsButton size="small"
                             v-on:click="shareSkill"
-                            class="ml-4"
+                            class="ml-6"
                             icon="fas fa-share-alt"
                             label="Share"
                             aria-label="Share skill with another project"
@@ -214,12 +214,12 @@ const onShareWithAllProjects = (checked) => {
           <span v-html="errorMessage"></span>
         </Message>
 
-        <div v-if="sharedSkills && sharedSkills.length > 0" class="my-4">
+        <div v-if="sharedSkills && sharedSkills.length > 0" class="my-6">
           <shared-skills-table :shared-skills="sharedSkills"
                                v-on:skill-removed="deleteSharedSkill"></shared-skills-table>
         </div>
         <div v-else>
-          <no-content2 title="Not Selected Yet..." icon="fas fa-share-alt" class="p-5"
+          <no-content2 title="Not Selected Yet..." icon="fas fa-share-alt" class="p-8"
                        message="To make your project's skills eligible please select a skill and then the project that you want to share this skill with." />
         </div>
       </div>

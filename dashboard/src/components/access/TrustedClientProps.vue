@@ -63,15 +63,15 @@ const resetClientSecret = () => {
       <SkillsCardHeader title="Trusted Client Properties"></SkillsCardHeader>
     </template>
     <template #content>
-      <skills-spinner v-if="loadingSecret" :is-loading="loadingSecret" class="my-5" />
+      <skills-spinner v-if="loadingSecret" :is-loading="loadingSecret" class="my-8" />
       <div v-if="!loadingSecret">
-        <div class="flex flex-column sm:flex-row gap-2">
-          <div class="text-color-secondary">Client ID:</div>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <div class="text-muted-color">Client ID:</div>
           <div class="">{{ projectId }}</div>
         </div>
-        <div class="mt-2 flex flex-column sm:flex-row gap-2">
-          <div class="text-color-secondary">Client Secret:</div>
-          <div style="text-wrap: wrap; overflow-wrap: break-word;" class="max-w-12rem sm:max-w-max">{{ clientSecret }}</div>
+        <div class="mt-2 flex flex-col sm:flex-row gap-2">
+          <div class="text-muted-color">Client Secret:</div>
+          <div style="text-wrap: wrap; overflow-wrap: break-word;" class="max-w-48 sm:max-w-max">{{ clientSecret }}</div>
         </div>
         <SkillsButton
           label="Reset Client Secret"
@@ -80,7 +80,7 @@ const resetClientSecret = () => {
           id="resetClientButton"
           :track-for-focus="true"
           @click="resetClientSecret"
-          class="mt-3" />
+          class="mt-4" />
       </div>
     </template>
   </Card>

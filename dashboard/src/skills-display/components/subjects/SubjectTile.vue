@@ -77,19 +77,19 @@ const activePointsColor = computed(() => {
   <div data-cy="subjectTile" class="h-full">
   <CardWithVericalSections class="h-full text-center" :data-cy="`subjectTile-${subject.subjectId}`">
     <template #content>
-      <div class="px-3 pt-4">
+      <div class="px-4 pt-6">
         <ribbon :color="ribbonColor" class="subject-tile-ribbon">
-          <div class="flex justify-content-center">
-            <div class="overflow-hidden text-overflow-ellipsis text-center" style="max-width:20rem">{{ subject.subject }}</div>
+          <div class="flex justify-center">
+            <div class="overflow-hidden text-ellipsis text-center" style="max-width:20rem">{{ subject.subject }}</div>
           </div>
         </ribbon>
       </div>
     </template>
     <template #footer>
-      <div  class="px-3 pb-3">
-        <i :class="subject.iconClass" class="text-7xl text-500 sd-theme-subject-tile-icon" aria-hidden="true"/>
+      <div  class="px-4 pb-4">
+        <i :class="subject.iconClass" class="text-7xl text-surface-500 dark:text-surface-300 sd-theme-subject-tile-icon" aria-hidden="true"/>
         <div class="text-xl pt-1 font-medium" data-cy="levelTitle">{{ attributes.levelDisplayName }} {{ subject.skillsLevel }}</div>
-        <div class="flex justify-content-center mt-2 subject-progress-stars-icons">
+        <div class="flex justify-center mt-2 subject-progress-stars-icons">
           <LevelsProgress :level="subject.skillsLevel" :totalLevels="subject.totalLevels" data-cy="subjectStars"/>
         </div>
 
@@ -112,7 +112,7 @@ const activePointsColor = computed(() => {
           />
         </div>
 
-        <div class=" mt-4">
+        <div class=" mt-6">
           <div class="flex">
             <div v-if="!progress.allLevelsComplete" class="flex-1 text-left">
               <div class="skill-label" style="min-width: 10rem;">Next {{ attributes.levelDisplayName
@@ -146,7 +146,7 @@ const activePointsColor = computed(() => {
             <!--                                 :total-progress-before-today="progress.levelBeforeToday"/>-->
           </div>
         </div>
-        <div class="pt-4" >
+        <div class="pt-6" >
           <router-link v-if="!attributes.isSummaryOnly"
             :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('SubjectDetailsPage'), params: { subjectId: subject.subjectId } }"
             :aria-label="`Click to navigate to the ${subject.subject} subject page.`"

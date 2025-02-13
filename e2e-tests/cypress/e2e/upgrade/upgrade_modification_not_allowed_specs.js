@@ -157,7 +157,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
     cy.wait('@loadConfigWithDbInProgressUpgrade')
 
     cy.get('[data-cy="importFromCatalogBtn"]').click();
-    cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+    cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
     cy.get('[data-cy="numSelectedSkills"]').should('have.text', '1');
     cy.get('[data-cy="importBtn"]').should('be.enabled').click();
     cy.wait('@saveEndpoint')
@@ -262,7 +262,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
     cy.wait('@loadConfigWithDbInProgressUpgrade')
 
     cy.get('[data-cy="goLive"]').click();
-    cy.get('[data-pc-name="acceptbutton"]').click();
+    cy.get('[data-pc-name="pcacceptbutton"]').click();
 
     cy.wait('@saveEndpoint')
 
@@ -300,7 +300,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
     cy.visit('/administrator/projects/proj1/self-report');
     cy.wait('@loadConfigWithDbInProgressUpgrade')
 
-    cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+    cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
     cy.get('[data-cy="approveBtn"]').click();
     cy.get('[data-cy="saveDialogBtn"]').click();
 
@@ -324,7 +324,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
     cy.visit('/administrator/projects/proj1/self-report');
     cy.wait('@loadConfigWithDbInProgressUpgrade')
 
-    cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
+    cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
     cy.get('[data-cy="rejectBtn"]').click();
     cy.get('[data-cy="saveDialogBtn"]').click();
 
@@ -401,7 +401,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
       cy.wait(500);
       cy.get('#existingUserInput_0').click();
       cy.get('[data-cy="userRoleSelector"]').click()
-      cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
+      cy.get('[data-pc-section="overlay"] [aria-label="Administrator"]').click();
       cy.get('[data-cy="addUserBtn"]').click();
 
       cy.wait('@saveEndpoint')

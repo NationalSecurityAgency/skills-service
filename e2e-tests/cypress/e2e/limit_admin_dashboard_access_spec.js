@@ -56,10 +56,10 @@ describe('Limit Admin Dashboard Access Tests', () => {
     cy.get(limitAdminAccessRoleManagerSelector)
 
     const addUser = (userId) => {
-      cy.get(`${limitAdminAccessRoleManagerSelector} [data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]`).click();
+      cy.get(`${limitAdminAccessRoleManagerSelector} [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]`).click();
       cy.get(`${limitAdminAccessRoleManagerSelector} [data-cy="existingUserInputDropdown"]`).clear().type(userId);
 
-      cy.get('[data-pc-section="item"]')
+      cy.get('[data-pc-section="option"]')
         .contains(userId)
         .click({ force: true });
       cy.get(`${limitAdminAccessRoleManagerSelector} [data-cy="addUserBtn"]`).should('be.enabled').click();

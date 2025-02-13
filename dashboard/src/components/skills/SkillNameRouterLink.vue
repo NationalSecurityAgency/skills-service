@@ -63,7 +63,7 @@ const highlightedValue = computed(() => {
                  :to="{ name:'SkillOverview', params: { projectId: skill.projectId, subjectId: subjectId, skillId: skill.skillId }}"
                  :aria-label="`${readOnly ? 'View' : 'Manage'} skill ${skill.name} via link`">
       <div data-cy="highlightedValue"
-           class="text-lg overflow-hidden text-overflow-ellipsis"
+           class="text-lg overflow-hidden text-ellipsis"
            style="overflow-wrap: anywhere;"
            :title="toDisplay?.length > 30 ? toDisplay : ''"
            v-html="highlightedValue" />

@@ -534,7 +534,7 @@ describe('Self Report Approval History Tests', () => {
         cy.visit('/administrator/projects/proj1/self-report');
         cy.get(`${approvalHistoryTableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '7')
         cy.get(approvalHistoryTableSelector)
-            .get('[data-pc-name="paginator"]')
+            .get('[data-pc-name="pcpaginator"]')
             .contains('2')
             .click();
         cy.get(approvalHistoryTableSelector)
@@ -693,9 +693,9 @@ describe('Self Report Approval History Tests', () => {
 
         cy.visit('/administrator/projects/proj1/self-report');
 
-        cy.get(approvalHistoryTableSelector).find('[data-pc-name="rowperpagedropdown"]').click();
+        cy.get(approvalHistoryTableSelector).find('[data-pc-name="pcrowperpagedropdown"]').click();
 
-        cy.get('.p-dropdown-item-label').contains(10).click();
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains(10).click();
 
         cy.validateTable(approvalHistoryTableSelector, [
             [{
@@ -912,7 +912,7 @@ describe('Self Report Approval History Tests', () => {
         cy.get(approvalHistoryTableSelector)
             .contains(('There are no records to show'));
 
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="approveBtn"]').click();
         cy.get('[data-cy="saveDialogBtn"]').click();
         cy.validateTable(approvalHistoryTableSelector, [
@@ -925,7 +925,7 @@ describe('Self Report Approval History Tests', () => {
             },],
         ]);
 
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="rejectBtn"]')
             .click();
         cy.get('[data-cy="saveDialogBtn"]')
@@ -949,7 +949,7 @@ describe('Self Report Approval History Tests', () => {
 
         cy.wait(1000);
 
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="approveBtn"]').click();
         cy.get('[data-cy="saveDialogBtn"]').click();
 

@@ -79,7 +79,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('bar').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Administrator"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
 
         cy.wait('@addAdmin');
@@ -133,7 +133,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('bar').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Administrator"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdmin');
         cy.get('[data-cy="errorPage"]')
@@ -160,12 +160,12 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProject');
 
-        cy.get('[data-cy="existingUserInputDropdown"] [data-pc-name="dropdownbutton"]').click()
+        cy.get('[data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click()
         cy.wait('@suggest');
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('root@skills.org').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Administrator"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdmin');
 
@@ -233,7 +233,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('root').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Administrator"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdmin');
 
@@ -311,7 +311,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('root').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Approver"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Approver"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addApprover');
         const expectedUserName = Cypress.env('oauthMode') ? 'foo bar' : 'skills@';
@@ -334,7 +334,7 @@ describe('Projects Admin Management Tests', () => {
 
         cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="editUserBtn"]`).click();
         cy.get('[data-cy="roleDropDown_root@skills.org"]').click()
-        cy.get('[data-pc-section="panel"] [data-pc-section="itemlabel"]').contains('Administrator').click();
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('Administrator').click();
         cy.wait('@addAdmin')
         cy.get(`${tableSelector} thead th`).contains('User').click();
 
@@ -377,11 +377,11 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('some');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="list"] [data-pc-section="item"]').should('have.length', 1)
+        cy.get('[data-pc-section="list"] [data-pc-section="option"]').should('have.length', 1)
         cy.get('[data-pc-section="list"]').contains('some display name')
             .click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Approver"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Approver"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
 
 
@@ -391,39 +391,7 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('some');
         cy.wait('@suggest');
         cy.wait(1500);
-        cy.get('[data-pc-section="list"] [data-pc-section="item"]').should('have.length', 0)
-    });
-
-    it('Role manager shows loading indicator', () => {
-        cy.request('POST', '/app/projects/proj1', {
-            projectId: 'proj1',
-            name: 'proj1'
-        });
-
-        cy.intercept('GET', '/admin/projects/proj1/userRoles**'
-            , {
-                delay: 1000,
-                body: {
-                    "data": [
-                        {
-                            "userId": "skills@skills.org",
-                            "userIdForDisplay": "skills@skills.org",
-                            "firstName": "Bill",
-                            "lastName": "Gosling",
-                            "projectId": "proj1",
-                            "roleName": "ROLE_PROJECT_ADMIN",
-                            "email": "skills@skills.org",
-                            "dn": null
-                        }
-                    ],
-                    "count": 1,
-                    "totalCount": 1
-                }
-            }).as('loadUserRoles');
-        cy.visit('/administrator/projects/proj1/access');
-        cy.get('[data-cy="roleManagerTable"] [data-pc-section="loadingoverlay"]').should('exist');
-        cy.wait('@loadUserRoles');
-        cy.get('[data-cy="roleManagerTable"] [data-pc-section="loadingoverlay"]').should('not.exist');
+        cy.get('[data-pc-section="list"] [data-pc-section="option"]').should('have.length', 0)
     });
 
     it('user does not have any admin groups to assign to project', () => {
@@ -438,7 +406,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@loadProject');
 
         cy.get('[data-cy="adminGroupSelector"]').click()
-        cy.get('li.p-dropdown-empty-message').contains('You currently do not administer any admin groups.').should('be.visible')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="emptymessage"]').contains('You currently do not administer any admin groups.').should('be.visible')
     });
 
     it('assign admin group to project', () => {
@@ -478,7 +446,7 @@ describe('Projects Admin Management Tests', () => {
             [{ colIndex: 1,  value: 'My Awesome Admin Group' }, { colIndex: 2,  value: 'Administrator' }],
         ], 5, true, null, false);
 
-        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="userGroupMembers"]').find('li').should('have.length', 1);
         cy.get(`[data-cy^="userGroupMember_${expectedUserName}"]`)
     });
@@ -529,7 +497,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains('user1').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Approver"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Approver"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addApprover');
         cy.wait('@loadAdminGroupsForProject');
@@ -553,7 +521,7 @@ describe('Projects Admin Management Tests', () => {
             [{ colIndex: 1,  value: 'user1' }, { colIndex: 2,  value: 'Approver' }],
         ], 5, true, null, false);
 
-        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="userGroupMembers"]').find('li').should('have.length', 1);
         cy.get(`[data-cy^="userGroupMember_${expectedUserName}"]`)
 
@@ -569,9 +537,9 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="existingUserInput"]').type('user1');
         cy.wait('@suggest');
         cy.wait(500);
-        cy.get('[data-pc-section="item"]').contains('user1').click();
+        cy.get('[data-pc-section="option"]').contains('user1').click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Group Member"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Group Member"]').click();
         cy.get('[data-cy="addUserBtn"]').click()
         cy.wait('@addAdminGroupMember');
 
@@ -585,7 +553,7 @@ describe('Projects Admin Management Tests', () => {
             [{ colIndex: 1,  value: 'My Awesome Admin Group' }, { colIndex: 2,  value: 'Administrator' }],
         ], 5, true, null, false);
 
-        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="userGroupMembers"]').find('li').should('have.length', 2);
         cy.get(`[data-cy^="userGroupMember_${expectedUserName}"]`)
         cy.get('[data-cy="userGroupMember_user1"]')

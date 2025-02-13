@@ -77,9 +77,9 @@ const openFileDialog = (event) => {
                    variant="filled"
                    @click="openFileDialog"
                    placeholder="Upload file from my computer by clicking Browse or drag-n-dropping it here..."/>
-        <InputGroupAddon class="p-0 m-0">
+        <InputGroupAddon>
           <FileUpload
-              :pt="{ root: { class: 'border-round-right border-left-none bg-primary' }, input: { id: 'videoFileInput'} }"
+              :pt="{ root: { class: 'border-round-right border-l-0 bg-primary' }, input: { id: 'videoFileInput'} }"
               data-cy="videoFileUpload"
               mode="basic"
               :auto="true"
@@ -93,27 +93,26 @@ const openFileDialog = (event) => {
     </div>
 
     <!-- file chosen or already uploaded and internally hosted via SkillTree -->
-    <div v-if="isInternallyHosted" class="flex align-items-start">
+    <div v-if="isInternallyHosted" class="flex items-start">
       <InputGroup>
-        <InputGroupAddon style="height: 1%">
-          <label class="text-600" for="videoFileInput"><i class="fas fa-server mr-1"></i>SkillTree Hosted</label>
-        </InputGroupAddon>
         <SkillsTextInput id="videoFileInput"
-                         class="flex-1"
+                         class="flex-1 rounded-none"
                          v-model="props.hostedFileName"
                          data-cy="videoFileInput"
                          name="videoFileInput"
-                         :disabled="true"/>
-        <SkillsButton
-            data-cy="resetBtn"
-            size="small"
-            style="height: 1%; padding: 0.8rem"
-            outlined
-            aria-label="Reset Video Upload input option"
-            @click="emit('reset')"
-            icon="fa fa-broom"
-            label="Reset">
-        </SkillsButton>
+                         :disabled="true">
+          <template #addOnBefore><label class="text-surface-600 dark:text-surface-200" for="videoFileInput"><i class="fas fa-server mr-1"></i>SkillTree Hosted</label></template>
+          <template #addOnAfter><SkillsButton
+              data-cy="resetBtn"
+              aria-label="Reset Video Upload input option"
+              @click="emit('reset')"
+              icon="fa fa-broom"
+              :outlined="false"
+              severity="secondary"
+              label="Reset">
+          </SkillsButton></template>
+        </SkillsTextInput>
+
       </InputGroup>
     </div>
   </div>

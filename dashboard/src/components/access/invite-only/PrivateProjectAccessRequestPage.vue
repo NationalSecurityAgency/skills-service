@@ -30,17 +30,17 @@ const projectId = computed(() => route.params.projectId)
 </script>
 
 <template>
-  <div class="mt-8">
-    <div class="flex justify-content-center">
-      <div class="border-circle w-6rem h-6rem m-2 surface-500 font-bold flex align-items-center justify-content-center">
-        <i class="text-0 text-7xl fas fa-shield-alt"></i>
+  <div class="mt-20">
+    <div class="flex justify-center">
+      <div class="rounded-full w-24 h-24 m-2 bg-surface-500 dark:bg-surface-300 font-bold flex items-center justify-center">
+        <i class="text-surface-0 dark:text-surface-900 text-7xl fas fa-shield-alt"></i>
       </div>
     </div>
     <div class="text-center">
       <div class="text-2xl text-primary">Invite Only Project</div>
     </div>
 
-    <div class="row justify-content-center text-danger mt-3">
+    <div class="row justify-center text-danger mt-4">
       <div class="col col-sm-8 col-md-6 col-lg-4 text-center" data-cy="notAuthorizedExplanation">
         <p>
           This Project is configured for Invite Only access. You can concat project's administrators to request access.

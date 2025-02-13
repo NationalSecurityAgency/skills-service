@@ -78,7 +78,7 @@ const canDeleteHappen = computed(() => !skillBelongsToGlobalBadge.value)
         the group's skills. All the associated users' performed skills and any dependency
         associations will also be removed.
       </div>
-      <div v-if="loadedStats.isExported" class="alert alert-info mt-3">
+      <div v-if="loadedStats.isExported" class="alert alert-info mt-4">
         <div>
           <p>
             This will <span class="font-bold">PERMANENTLY</span> remove <span
@@ -93,7 +93,7 @@ const canDeleteHappen = computed(() => !skillBelongsToGlobalBadge.value)
           </p>
         </div>
       </div>
-      <div v-if="loadedStats.isReusedLocally" class="alert alert-info mt-3">
+      <div v-if="loadedStats.isReusedLocally" class="alert alert-info mt-4">
         Please note that the skill is currently
         <reused-tag />
         in this project.

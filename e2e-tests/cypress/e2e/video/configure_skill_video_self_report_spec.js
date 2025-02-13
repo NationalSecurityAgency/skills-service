@@ -60,7 +60,7 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.get('[data-cy="videoSelectionMsg"]').contains('Please configure video settings first')
     });
 
-    it('set skill self-report type to video', () => {
+    it('set skill self-report type to video from subject page', () => {
         cy.intercept('/admin/projects/proj1/subjects/subj1').as('getSubjectSkills')
         cy.createProject(1)
         cy.createSubject(1, 1);
@@ -69,11 +69,11 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.get('[data-cy="editSkillButton_skill1"]').click()
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 4)
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.enabled')
-        cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
-        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('have.value', 2)
-        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('be.enabled')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 4)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('be.enabled')
+        cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
+        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="pcinputtext"]').should('have.value', 2)
+        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="pcinputtext"]').should('be.enabled')
         cy.get('[data-cy=timeWindowCheckbox] [data-pc-section="input"]').should('be.checked')
 
         cy.get('[data-cy="videoSelectionMsg"]').should('not.exist')
@@ -86,25 +86,26 @@ describe('Configure Self Report Video Type Tests', () => {
 
         cy.get('[data-cy="selfReportTypeSelector"] [value="Video"]')
             .click({ force: true });
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('have.value', 1)
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="input"]').should('be.disabled')
-        cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglericon"]').click()
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 1)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('be.disabled')
+        cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
         cy.get('[data-cy=timeWindowCheckbox] [data-pc-section="input"]').should('not.be.checked')
-        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('have.value', 1)
-        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="input"]').should('be.disabled')
+        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="pcinputtext"]').should('have.value', 1)
+        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="pcinputtext"]').should('be.disabled')
 
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
         cy.wait('@getSubjectSkills').then(() => {
             cy.wait(1000)
             cy.get('[data-cy="skillsTable"] [data-cy="manageSkillLink_skill1"]')
-            cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-            cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+            cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+            cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
+            cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
             cy.get('[data-cy="skillsTable"] [data-cy="selfReportCell-skill1"]').contains('Video')
         })
     });
 
-    it('set skill self-report type to video', () => {
+    it('set skill self-report type to video from single skill page', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, {numPerformToCompletion: 4, numMaxOccurrencesIncrementInterval: 2})

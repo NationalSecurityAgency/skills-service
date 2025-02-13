@@ -148,7 +148,7 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
 
 <template>
   <loading-container class="child-row" v-bind:is-loading="loading" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
-    <div v-if="isImported" class="mt-3 alert alert-info" header="Skill Catalog">
+    <div v-if="isImported" class="mt-4 alert alert-info" header="Skill Catalog">
       This skill was <b>imported</b> from the
       <Badge class=""><i class="fas fa-book"></i> CATALOG</Badge>
       and was initially
@@ -157,7 +157,7 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
       <Badge>Read-Only</Badge>
       and can only be edited in the <b class="text-primary">{{ skillInfo.copiedFromProjectName }}</b> project
     </div>
-    <div v-if="isReused" class="mt-3 alert alert-info" header="Skill Catalog" data-cy="reusedAlert">
+    <div v-if="isReused" class="mt-4 alert alert-info" header="Skill Catalog" data-cy="reusedAlert">
       This skill is a
       <Badge class="text-uppercase"><i class="fas fa-recycle"></i> reused</Badge>
       copy
@@ -170,7 +170,7 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
       <!--                          link-label="Original Skill" data-cy="linkToTheOriginalSkill"/>-->
       .
     </div>
-    <div v-if="isImported && isDisabled" class="mt-3 alert alert-warning" header="Skill Catalog">
+    <div v-if="isImported && isDisabled" class="mt-4 alert alert-warning" header="Skill Catalog">
       <i class="fas fa-exclamation-circle"></i> This skill is <b>disabled</b> because import was not
       finalized yet.
     </div>
@@ -247,14 +247,14 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
       </template>
     </Card>
 
-    <InputGroup class="mt-3">
+    <InputGroup class="mt-4">
       <InputGroupAddon>
-        <div class="input-group-text text-700"><i class="fas fa-link mr-1" aria-hidden="true" /> Help URL:</div>
+        <div class="input-group-text text-surface-700 dark:text-surface-100"><i class="fas fa-link mr-1" aria-hidden="true" /> Help URL:</div>
       </InputGroupAddon>
       <div class="p-inputtext p-component">
         <div v-if="helpUrl">
           <a :href="helpUrl" target="_blank" rel="noopener" class="skill-url" data-cy="skillOverviewHelpUrl">
-            <span v-if="rootHelpUrl" class="surface-200 border-50 border-x-2 border-round"
+            <span v-if="rootHelpUrl" class="bg-surface-200 dark:bg-surface-600 border-surface-50 dark:border-surface-800 border-x-2 rounded-border"
                   aria-label="Root Help URL was configured in the project's settings.">
               <i class="fas fa-cogs"></i> {{ rootHelpUrl }}</span>{{ skillInfo.helpUrl }}
           </a>

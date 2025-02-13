@@ -147,11 +147,6 @@ const beforeListSlotText = computed(() => {
 watch(() => projects.value.selected, () => {
   timeProps.value.projIds = projects.value.selected.map((project) => project.projectId);
   loadData();
-  if(projects.value.selected.length < 5) {
-    projects.value.available = props.availableProjects.map((proj) => ({...proj})).filter((el) => !projects.value.selected.some((sel) => sel.projectId === el.projectId));
-  } else {
-    projects.value.available = [];
-  }
 })
 
 const updateTimeRange = (timeEvent) => {
@@ -214,20 +209,11 @@ const notAllZeros = (data) => {
             display="chip"
             optionLabel="projectName"
             aria-label="Select projects"
+            placeholder="Select projects"
             class="w-full"
             :selection-limit="5"
             data-cy="eventHistoryChartProjectSelector">
-          <template #chip="slotProps">
-            {{ slotProps.value.projectName }}
-          </template>
-          <template #empty>
-            <div v-if="projects.selected.length === 5" class="ml-4" data-cy="trainingProfileMaximumReached">
-              Maximum of 5 options selected. First remove a selected option to select another.
-            </div>
-            <div v-else class="ml-4">
-              No results found
-            </div>
-          </template>
+
         </MultiSelect>
       </div>
       <MetricsOverlay :loading="loading" :has-data="hasData" :no-data-msg="noDataMessage">

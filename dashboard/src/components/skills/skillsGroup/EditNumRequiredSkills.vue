@@ -76,7 +76,7 @@ onMounted(() => {
     :enable-return-focus="true"
     :enable-input-form-resiliency="false"
     :data-cy="`editRequiredModal-${group.skillId}`"
-    dialog-class="w-11 sm:w-10 lg:w-9 xl:w-7"
+    dialog-class="w-11/12 sm:w-10/12 lg:w-9/12 xl:w-7/12"
     @saved="afterSaved">
 
     <reminder-message id="editNumRequiredSkillsMsg">

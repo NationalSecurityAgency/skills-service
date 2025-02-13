@@ -398,7 +398,7 @@ describe('Project Settings Tests', () => {
         cy.selectItem('[data-cy="projectVisibilitySelector"]', 'Add to the Project Catalog');
         // cy.get('[data-cy="projectVisibilitySelector"]')
         //     .select('dpr');
-        cy.get('[data-cy="saveSettingsBtn"')
+        cy.get('[data-cy="saveSettingsBtn"]')
             .click();
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
@@ -415,12 +415,12 @@ describe('Project Settings Tests', () => {
         cy.selectItem('[data-cy="projectVisibilitySelector"]', 'Private Invite Only');
         // cy.get('[data-cy="projectVisibilitySelector"]')
         //     .select('pio');
-        cy.get('.p-confirm-dialog')
+        cy.get('[data-pc-name="dialog"]')
             .should('be.visible')
             .should('include.text', 'Changing to Invite Only')
             .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users.');
         cy.clickButton('Ok');
-        cy.get('[data-cy="saveSettingsBtn"')
+        cy.get('[data-cy="saveSettingsBtn"]')
             .click({ force: true });
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
@@ -495,8 +495,8 @@ describe('Project Settings Tests', () => {
         cy.loginAsProxyUser();
         cy.visit('/progress-and-rankings/manage-my-projects');
         cy.wait('@loadMyProjects');
-        cy.get('[data-pc-section="rowtoggler"]').should('have.length', 3);
-        cy.get('[data-pc-section="rowtoggler"]').first().click();
+        cy.get('[data-pc-section="rowtogglebutton"]').should('have.length', 3);
+        cy.get('[data-pc-section="rowtogglebutton"]').first().click();
         cy.wait('@loadProj1Description');
         cy.get('[data-cy="projectDescriptionRow_proj1"]').should('exist');
         cy.get('[data-cy="projectDescriptionRow_proj1"]').should('contain.text', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque vitae tellus.');

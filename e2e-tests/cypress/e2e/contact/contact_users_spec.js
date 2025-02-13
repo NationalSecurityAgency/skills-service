@@ -528,21 +528,21 @@ describe('Contact Project Users Specs', () => {
 
         cy.get('[data-cy="emailUsers_subject"]').type('jabberwocky');
         cy.get('[data-cy="previewUsersEmail"]').should('be.disabled');
-        cy.get('#subjectLineError').contains('paragraphs may not contain jabberwocky')
+        cy.get('[data-cy="subjectLineError"]').contains('paragraphs may not contain jabberwocky')
         //
         cy.get('[data-cy="emailUsers_subject"]').clear();
         cy.get('[data-cy="emailUsers_subject"]').type('test');
         cy.get('[data-cy="previewUsersEmail"]').should('be.enabled');
-        cy.get('#subjectLineError').should('be.empty');
+        cy.get('[data-cy="subjectLineError"]').should('be.not.visible');
 
         cy.get('[data-cy="emailUsers_body"]').type('jabberwocky');
         cy.get('[data-cy="previewUsersEmail"]').should('be.disabled');
-        cy.get('#emailBodyError').contains('paragraphs may not contain jabberwocky')
+        cy.get('[data-cy="descriptionError"]').contains('paragraphs may not contain jabberwocky')
 
         cy.get('[data-cy="emailUsers_body"] [data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
         cy.get('[data-cy="emailUsers_body"]').type('test');
         cy.get('[data-cy="previewUsersEmail"]').should('be.enabled');
-        cy.get('#emailBodyError').should('be.empty');
+        cy.get('[data-cy="descriptionError"]').should('be.not.visible');
     });
 
     it('email body and subject validation for community-protected project still uses non-community validator', () => {

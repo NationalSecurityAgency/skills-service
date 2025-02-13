@@ -213,22 +213,22 @@ const isProjectExpiring = computed(() => {
         <project-expiration-warning :project="project" @extended="project.expiring = false" />
       </template>
       <template #subTitle v-if="project">
-        <div v-if="project.userCommunity" class="mb-3" data-cy="userCommunity">
+        <div v-if="project.userCommunity" class="mb-4" data-cy="userCommunity">
           <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
           <span
-            class="text-secondary font-italic ml-1">{{ appConfig.userCommunityBeforeLabel }}</span> <span
+            class="text-secondary italic ml-1">{{ appConfig.userCommunityBeforeLabel }}</span> <span
           class="text-primary">{{ project.userCommunity }}</span> <span
-          class="text-secondary font-italic">{{ appConfig.userCommunityAfterLabel }}</span>
+          class="text-secondary italic">{{ appConfig.userCommunityAfterLabel }}</span>
         </div>
         <div class="">
-          <span class="border-1 border-round px-1 mr-2">
+          <span class="border rounded-border px-1 mr-2">
            <i class="fas fa-fingerprint" aria-hidden="true" />
           </span>
-          <span class="font-italic text-color-secondary">Project ID</span>: {{ project.projectId }}
+          <span class="italic text-muted-color">Project ID</span>: {{ project.projectId }}
         </div>
       </template>
       <template #subSubTitle v-if="project">
-        <div v-if="!isReadOnlyProj" class="flex gap-1 flex-wrap justify-content-center lg:justify-content-start">
+        <div v-if="!isReadOnlyProj" class="flex gap-1 flex-wrap justify-center lg:justify-start">
           <SkillsButton
             id="editProjectBtn"
             @click="editProject = true"
@@ -273,13 +273,13 @@ const isProjectExpiring = computed(() => {
             :aria-label="`Share ${project.name} with new users`">
           </SkillsButton>
         </div>
-        <div data-cy="projectCreated" class="mt-3">
+        <div data-cy="projectCreated" class="mt-4">
           <i class="fas fa-clock text-primary mr-1" aria-hidden="true" />
           <ProjectDates :created="project.created" :load-last-reported-date="true" />
         </div>
         <div v-if="projConfig.userProjRole">
           <i class="fas fa-user-shield text-primary header-status-icon" aria-hidden="true" /> <span
-          class="text-secondary font-italic small">Role:</span> <span class="small text-primary"
+          class="text-secondary italic small">Role:</span> <span class="small text-primary"
                                                                       data-cy="userRole">{{ UserRolesUtil.userRoleFormatter(projConfig.userProjRole)
           }}</span>
         </div>

@@ -53,7 +53,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="show" class="ml-3 text-info" data-cy="activityHistoryStartRecordingWarning">
+  <div v-if="show" class="ml-4 text-info" data-cy="activityHistoryStartRecordingWarning">
     <i class="fas fa-exclamation-circle" aria-hidden="true"/> Started recording user activity on <b>{{ actionsTrackingStartDate }}</b>
   </div>
 </template>

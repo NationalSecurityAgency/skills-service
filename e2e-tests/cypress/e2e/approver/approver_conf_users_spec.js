@@ -62,9 +62,9 @@ describe('Approver Config Users Tests', () => {
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.disabled')
 
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
-        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'usera', true, true);
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] .p-dropdown-option`).contains('userA').click();
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]`).click();
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('usera').click();
+
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.enabled')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
@@ -78,9 +78,9 @@ describe('Approver Config Users Tests', () => {
         ], 5);
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('1 Specific User')
 
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
-        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userb', true, true);
-        // cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] .p-dropdown-option`).contains('userB').click();
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]`).click();
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('userb').click();
+
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.enabled')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
 
@@ -161,13 +161,12 @@ describe('Approver Config Users Tests', () => {
         cy.get(`${tableSelector} [data-cy="userIdCell-userb"]`)
         cy.get(`[data-cy="workloadCell_${user1}"]`).contains('2 Specific Users')
 
-        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput [data-pc-name="dropdownbutton"]`).click();
-        cy.get('[data-pc-section="item"]').contains('userB').should('not.exist');
-        cy.get('[data-pc-section="item"]').contains('userA').should('not.exist');
-        cy.get('[data-pc-section="item"]').contains('userc').click();
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]`).click();
+        cy.get('[data-pc-section="option"]').contains('userB').should('not.exist');
+        cy.get('[data-pc-section="option"]').contains('userA').should('not.exist');
+        cy.get('[data-pc-section="option"]').contains('userc').click();
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.enabled')
-        // cy.get('[data-cy="userIdInputErr"]').should('not.be.visible')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', '3')
@@ -200,7 +199,10 @@ describe('Approver Config Users Tests', () => {
 
         cy.fixture('vars.json').then((vars) => {
             const defaultUser = Cypress.env('oauthMode') ? 'foo' : vars.defaultUser
-            cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, defaultUser, true, true);
+
+            cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]`).click();
+            cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains(defaultUser).click();
+
             cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
 
             const compare = (a, b) => {

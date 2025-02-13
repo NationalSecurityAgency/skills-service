@@ -22,6 +22,7 @@ import FormReloadWarning from '@/components/utils/inputForm/FormReloadWarning.vu
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
 
 onUnmounted(() => {
   inputFormResiliency.stop(false);
@@ -59,7 +60,7 @@ const props = defineProps({
   },
   cancelButtonSeverity: {
     type: String,
-    default: 'warning'
+    default: 'warn'
   },
   validationSchema: Object,
   initialValues: Object,
@@ -82,7 +83,7 @@ const props = defineProps({
   },
   dialogClass: {
     type: String,
-    default: 'w-11 xl:w-10'
+    default: 'w-11/12 xl:w-10/12'
   },
   enableInputFormResiliency: {
     type: Boolean,
@@ -225,6 +226,8 @@ if (props.asyncLoadDataFunction) {
 watch(() => props.initialValues, (newValues) => {
   resetForm({values: newValues});
 })
+
+const dialogUtils = useDialogUtils()
 </script>
 
 <template>
@@ -247,10 +250,10 @@ watch(() => props.initialValues, (newValues) => {
     :cancel-button-label="cancelButtonLabel"
     :cancel-button-icon="cancelButtonIcon"
     :cancel-button-severity="cancelButtonSeverity"
-    :pt="{ content: { class: 'p-0' }, maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }"
-    footer-class="px-3 pb-3"
+    :pt="{ content: { class: 'p-0' }, pcMaximizeButton: dialogUtils.getMaximizeButtonPassThrough() }"
+    footer-class="px-4 pb-4"
   >
-    <div class="p-3">
+    <div class="p-4">
       <form-reload-warning
         v-if="inputFormResiliency.isRestoredFromStore && enableInputFormResiliency"
         @discard-changes="inputFormResiliency.discard" />

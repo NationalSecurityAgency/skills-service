@@ -22,7 +22,7 @@ defineProps({
 <template>
   <Card class="w-full h-full">
     <template #content>
-      <div class="uppercase text-color-secondary">{{ title }}</div>
+      <div class="uppercase text-muted-color">{{ title }}</div>
       <div class="mt-1">
         <slot></slot>
       </div>

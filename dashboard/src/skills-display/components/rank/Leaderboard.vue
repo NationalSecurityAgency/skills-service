@@ -100,7 +100,7 @@ const getProgressPercent = (item) => {
 <template>
   <Card :pt="{ body: { class: 'p-0 m-0' }}" data-cy="leaderboard">
     <template #header>
-      <div class="flex-column sm:flex-row flex gap-1 pt-3 px-3">
+      <div class="flex-col sm:flex-row flex gap-1 pt-4 px-4">
         <div class="uppercase text-2xl flex-1">Leaderboard</div>
         <div v-if="!optedOut">
           <SelectButton v-model="selected"
@@ -117,7 +117,7 @@ const getProgressPercent = (item) => {
     </template>
 
     <template #content>
-      <Message v-if="optedOut" class="mx-3" :closable="false" severity="warn" icon="fas fa-users-slash">
+      <Message v-if="optedOut" class="mx-4" :closable="false" severity="warn" icon="fas fa-users-slash">
         You selected to <b>opt-out</b> from ranking. Your name will <b>not</b> appear in the leaderboard and you will
         not be ranked against other users.
         If you want to re-enter the leaderboard and ranking then please adjust your preferences in the SkillTree
@@ -134,7 +134,7 @@ const getProgressPercent = (item) => {
           data-cy="leaderboardTable">
           <template #empty>
             <no-content2
-              class="my-5"
+              class="my-8"
               title="No Users" :message="`Leaderboard is empty because there no users with ${ attributes.pointDisplayName.toLowerCase() }s yet...`" />
           </template>
 
@@ -151,7 +151,7 @@ const getProgressPercent = (item) => {
               <i class="far fa-user mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
-              <div class="text-left flex align-items-center" data-cy="userColumn">
+              <div class="text-left flex items-center" data-cy="userColumn">
                 <Avatar icon="fas fa-user skills-theme-primary-color" class="mr-2" shape="circle" />
                 <div class="align-text-bottom text-info skills-theme-primary-color">{{ getUser(slotProps.data) }}</div>
                 <i v-if="slotProps.data.rank <=3" class="fas fa-medal ml-2"
@@ -172,7 +172,7 @@ const getProgressPercent = (item) => {
             <template #body="slotProps">
               <div>
                 <span class="font-medium">{{ numFormat.pretty(slotProps.data.points) }}</span> <span
-                class="font-italic">{{ attributes.pointDisplayName }}s</span>
+                class="italic">{{ attributes.pointDisplayName }}s</span>
               </div>
               <vertical-progress-bar
                 :total-progress="getProgressPercent(slotProps.data)"

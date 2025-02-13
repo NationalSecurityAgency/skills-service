@@ -33,26 +33,26 @@ const timer = setInterval(() => {
 </script>
 
 <template>
-  <div class="my-5">
-    <div class="text-center text-color-secondary">
-      <div class="flex justify-content-center">
-        <div class="border-circle w-6rem h-6rem m-2 surface-500 font-bold flex align-items-center justify-content-center">
-          <i class="text-0 text-6xl fas fa-exclamation-triangle"></i>
+  <div class="my-8">
+    <div class="text-center text-muted-color">
+      <div class="flex justify-center">
+        <div class="rounded-full w-24 h-24 m-2 bg-surface-500 dark:bg-surface-300 font-bold flex items-center justify-center">
+          <i class="text-surface-0 dark:text-surface-900 text-6xl fas fa-exclamation-triangle"></i>
         </div>
       </div>
     </div>
-    <div class="text-center text-color-secondary text-2xl mt-2">
+    <div class="text-center text-muted-color text-2xl mt-2">
       This page has moved
     </div>
 
     <div class="container-fluid">
-      <div class="row justify-content-center mt-3">
+      <div class="row justify-center mt-4">
         <div class="col col-sm-8 col-md-6 col-lg-4 text-center" data-cy="redirectExplanation">
           You seem to have followed an old link.
           You will be redirected to <router-link :to="route.query.nextPage" data-cy="newLink">{{ route.query.nextPage }}</router-link> shortly.
           Please update your bookmarks to the new link.
 
-          <div class="mt-5">
+          <div class="mt-8">
             <div v-if="timeoutForDisplay > 0">
               Redirecting you to the new page in {{ timeoutForDisplay }} seconds...
             </div>
@@ -62,7 +62,7 @@ const timer = setInterval(() => {
           </div>
         </div>
       </div>
-      <div class="text-center mt-5">
+      <div class="text-center mt-8">
         <router-link :to="route.query.nextPage" tabindex="-1">
           <SkillsButton
               label="Take Me There Now"

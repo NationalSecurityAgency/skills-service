@@ -74,9 +74,9 @@ describe('Project and Ranking Views are disabled Tests', () => {
 
         cy.visit('/administrator/projects/proj1/settings');
         cy.get('[data-cy="projectVisibilitySelector"]').click()
-        cy.get(`[data-pc-section="panel"] ${addToCatalogLabel}`).should('exist')
-        cy.get(`[data-pc-section="panel"] ${notInCatalogLabel}`).should('exist')
-        cy.get(`[data-pc-section="panel"] ${notEnabledLabel}`).should('not.exist')
+        cy.get(`[data-pc-section="overlay"] ${addToCatalogLabel}`).should('exist')
+        cy.get(`[data-pc-section="overlay"] ${notInCatalogLabel}`).should('exist')
+        cy.get(`[data-pc-section="overlay"] ${notEnabledLabel}`).should('not.exist')
         // cy.get('[ data-cy="productionModeSetting"]').should('exist');
         cy.intercept('GET', '/public/config', (req) => {
             req.reply({
@@ -90,9 +90,9 @@ describe('Project and Ranking Views are disabled Tests', () => {
         cy.visit('/administrator/projects/proj1/settings');
         cy.wait('@getConfig');
         cy.get('[data-cy="projectVisibilitySelector"]').click()
-        cy.get(`[data-pc-section="panel"] ${addToCatalogLabel}`).should('not.exist')
-        cy.get(`[data-pc-section="panel"] ${notInCatalogLabel}`).should('not.exist')
-        cy.get(`[data-pc-section="panel"] ${notEnabledLabel}`).should('exist')
+        cy.get(`[data-pc-section="overlay"] ${addToCatalogLabel}`).should('not.exist')
+        cy.get(`[data-pc-section="overlay"] ${notInCatalogLabel}`).should('not.exist')
+        cy.get(`[data-pc-section="overlay"] ${notEnabledLabel}`).should('exist')
     });
 
     it('do not show Progress and Ranking in the breadcrumb when those views are disabled', function () {

@@ -40,7 +40,7 @@ const navCards = [{
 </script>
 
 <template>
-  <div class="mb-3">
+  <div class="mb-4">
     <sub-page-header title="Metrics">
       <project-metrics-small-nav :nav-cards="navCards" />
     </sub-page-header>

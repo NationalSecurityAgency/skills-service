@@ -74,20 +74,20 @@ describe('Survey Metrics With Reused Data Tests', () => {
 
         cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-cy="num"]').should('have.text', '2')
         cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-cy="percent"]').should('have.text', '25%')
-        cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-pc-section="rowtoggler"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]').should('be.enabled')
 
         cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-cy="num"]').should('have.text', '0')
         cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-cy="percent"]').should('have.text', '0%')
-        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtoggler"]').should('not.be.visible')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]').should('not.be.visible')
 
         cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-cy="num"]').should('have.text', '7')
         cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-cy="percent"]').should('have.text', '87%')
-        cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-pc-section="rowtoggler"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-pc-section="rowtogglebutton"]').should('be.enabled')
     });
 
     it('single answer history with paging', function () {
         cy.visit('/administrator/quizzes/quiz2/results');
-        cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-pc-section="rowtogglebutton"]').click()
 
         // const tableSelector = '[data-cy="metrics-q1"] [data-cy="quizAnswerHistoryTable"]';
         const tableSelector = '[data-cy="metrics-q1"] [data-cy="row2-answerHistory"] [data-cy="quizAnswerHistoryTable"]';
@@ -109,7 +109,7 @@ describe('Survey Metrics With Reused Data Tests', () => {
 
     it('single answer history expand to a larger page size', function () {
         cy.visit('/administrator/quizzes/quiz2/results');
-        cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-pc-section="rowtogglebutton"]').click()
 
         const tableSelector = '[data-cy="metrics-q1"] [data-cy="row2-answerHistory"] [data-cy="quizAnswerHistoryTable"]';
         const headerSelector = `${tableSelector} thead tr th`;
@@ -117,7 +117,7 @@ describe('Survey Metrics With Reused Data Tests', () => {
         cy.get(headerSelector)
             .contains('User')
             .click();
-        cy.get(`${tableSelector} [data-pc-name="rowperpagedropdown"]`).click().get('[data-pc-section="item"]').contains('10').click();
+        cy.get(`${tableSelector} [data-pc-name="pcrowperpagedropdown"]`).click().get('[data-pc-section="option"]').contains('10').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 0, value: 'user1' }],
             [{ colIndex: 0, value: 'user10' }],
@@ -152,7 +152,7 @@ describe('Survey Metrics With Reused Data Tests', () => {
         cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-p-index="3"]`).contains('user3')
         cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-p-index="4"]`).contains('user6')
 
-        cy.get(`[data-cy="metrics-q${qNum}"] [data-pc-name="paginator"] [aria-label="Page 2"]`).click()
+        cy.get(`[data-cy="metrics-q${qNum}"] [data-pc-name="pcpaginator"] [aria-label="Page 2"]`).click()
         cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row0-colAnswerTxt"]`).should('contain', 'A5:')
         cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row1-colAnswerTxt"]`).should('contain', 'A6:')
         cy.get(`[data-cy="metrics-q${qNum}"] [data-cy="quizAnswerHistoryTable"] [data-cy="row2-colAnswerTxt"]`).should('contain', 'A7:')
@@ -169,17 +169,17 @@ describe('Survey Metrics With Reused Data Tests', () => {
 
         cy.get('[data-cy="metrics-q3"] [data-p-index="0"] [data-cy="num"]').should('have.text', '1')
         cy.get('[data-cy="metrics-q3"] [data-p-index="0"] [data-cy="percent"]').should('have.text', '12%')
-        cy.get('[data-cy="metrics-q3"] [data-p-index="0"] [data-pc-section="rowtoggler"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q3"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]').should('be.enabled')
 
         cy.get('[data-cy="metrics-q3"] [data-p-index="1"] [data-cy="num"]').should('have.text', '6')
         cy.get('[data-cy="metrics-q3"] [data-p-index="1"] [data-cy="percent"]').should('have.text', '75%')
-        cy.get('[data-cy="metrics-q3"] [data-p-index="1"] [data-pc-section="rowtoggler"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q3"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]').should('be.enabled')
 
         cy.get('[data-cy="metrics-q3"] [data-p-index="2"] [data-cy="num"]').should('have.text', '1')
         cy.get('[data-cy="metrics-q3"] [data-p-index="2"] [data-cy="percent"]').should('have.text', '12%')
-        cy.get('[data-cy="metrics-q3"] [data-p-index="2"] [data-pc-section="rowtoggler"]').should('be.enabled')
+        cy.get('[data-cy="metrics-q3"] [data-p-index="2"] [data-pc-section="rowtogglebutton"]').should('be.enabled')
 
-        cy.get('[data-cy="metrics-q3"] [data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-cy="metrics-q3"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="metrics-q3"] [data-cy="row0-answerHistory"] [data-cy="row0-colUserId"]').contains('user1')
     });
 });

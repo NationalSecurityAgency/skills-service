@@ -59,7 +59,7 @@ describe('Catalog Accessibility Tests', () => {
         cy.get('[data-cy="importFromCatalogBtn"]')
             .click();
 
-        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="importBtn"]')
@@ -76,7 +76,7 @@ describe('Catalog Accessibility Tests', () => {
         cy.get('[data-cy="newSkillButton"]')
             .should('not.have.focus');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
@@ -92,7 +92,7 @@ describe('Catalog Accessibility Tests', () => {
             .click();
         cy.get('[data-cy="okButton"]')
             .click();
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
         cy.get('[data-cy="skillActionsBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
@@ -109,8 +109,8 @@ describe('Catalog Accessibility Tests', () => {
         cy.get('[data-cy=skillActionsBtn]')
             .should('not.have.focus');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
@@ -123,7 +123,7 @@ describe('Catalog Accessibility Tests', () => {
         cy.contains('This will export [Very Great Skill 1] Skill');
         cy.get('[data-cy="closeButton"]')
             .click();
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
@@ -140,8 +140,8 @@ describe('Catalog Accessibility Tests', () => {
         cy.get('[data-cy=newSkillButton]')
             .should('not.have.focus');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')
@@ -157,7 +157,7 @@ describe('Catalog Accessibility Tests', () => {
             .click();
         cy.get('[aria-label="Close"]')
             .click();
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
         cy.get('[data-cy="skillActionsBtn"]')
             .should('be.disabled');
         cy.get('[data-cy="skillActionsNumSelected"]')

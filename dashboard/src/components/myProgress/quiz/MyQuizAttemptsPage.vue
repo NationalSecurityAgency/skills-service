@@ -28,7 +28,7 @@ import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 import InputGroup from "primevue/inputgroup";
 import InputText from "primevue/inputtext";
 import InputGroupAddon from "primevue/inputgroupaddon";
-import {FilterMatchMode} from "primevue/api";
+import {FilterMatchMode} from '@primevue/core/api';
 import HighlightedValue from "@/components/utils/table/HighlightedValue.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import BackToMyProgressBtn from "@/components/myProgress/BackToMyProgressBtn.vue";
@@ -102,18 +102,18 @@ const hasAttempts = computed(() => attemptHistory.value.length > 0)
         <back-to-my-progress-btn />
       </template>
     </my-progress-title>
-    <Card class="my-4" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card class="my-6" :pt="{ body: { class: '!p-0' } }">
       <template #content>
-        <SkillsSpinner v-if="loadingQuizAttemptsInitially" :is-loading="true" class="my-8"/>
+        <SkillsSpinner v-if="loadingQuizAttemptsInitially" :is-loading="true" class="my-20"/>
         <div v-else>
 
-          <div class="p-3">
+          <div class="p-4">
             <div class="flex gap-1">
               <InputGroup>
                 <InputGroupAddon>
                   <i class="fas fa-search" aria-hidden="true"/>
                 </InputGroupAddon>
-                <InputText class="flex flex-grow-1"
+                <InputText class="flex grow"
                            v-model="filters['global'].value"
                            v-on:keydown.enter="onFilter"
                            data-cy="quizNameFilter"
@@ -121,7 +121,7 @@ const hasAttempts = computed(() => attemptHistory.value.length > 0)
                            aria-label="Name Filter"/>
               </InputGroup>
             </div>
-            <div class="flex flex-wrap pt-3">
+            <div class="flex flex-wrap pt-4">
               <SkillsButton label="Filter"
                             icon="fa fa-filter"
                             size="small"
@@ -232,7 +232,7 @@ const hasAttempts = computed(() => attemptHistory.value.length > 0)
 
           <NoContent2 v-if="!hasAttempts"
                       data-cy="noQuizzesOrSurveys"
-                      title="No Quizzes or Surveys Completed Yet" class="py-8"
+                      title="No Quizzes or Surveys Completed Yet" class="py-20"
                       message="Quizzes and Surveys are often associated to projects' skills and once completed will be listed on this page. "
           />
         </div>

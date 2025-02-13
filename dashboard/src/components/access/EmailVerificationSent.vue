@@ -23,11 +23,11 @@ const emailVerificationInfo = useEmailVerificationInfo()
 
 <template>
   <div>
-    <div class="flex justify-content-center text-center" data-cy="emailVerificationSentConfirmation">
+    <div class="flex justify-center text-center" data-cy="emailVerificationSentConfirmation">
       <div class="" style="min-width: 20rem;">
-        <div class="mt-5">
+        <div class="mt-8">
           <logo1 />
-          <div class="h3 mt-4 text-primary">Email Verification Sent!</div>
+          <div class="h3 mt-6 text-primary">Email Verification Sent!</div>
         </div>
         <Card>
           <template #content>

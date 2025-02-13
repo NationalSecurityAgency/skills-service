@@ -136,7 +136,7 @@ describe('Accessibility Tests', () => {
 
             // looks like AXE and PrimeVue lib disagree where `aria-selected="true"` can be applied
             // TODO: not really an issue but look into this further so this validation can be added back
-            // cy.get('[data-pc-name="headercheckbox"]').click();
+            // cy.get('[data-pc-name="pcheadercheckbox"]').click();
             // cy.get('[data-cy="rejectBtn"]').click();
             // cy.get('[data-cy="rejectionTitle"]').contains('This will reject user\'s request(s) to get points');
             // cy.wait(500); // wait for modal to continue loading, if background doesn't load the contract checks will fail
@@ -178,9 +178,10 @@ describe('Accessibility Tests', () => {
             cy.setDarkModeIfNeeded(darkMode)
             cy.visit('/administrator/projects/proj1/users');
             cy.get('[data-cy="pageHeader"]').contains('ID: proj1');
+            cy.get('[data-cy="exportUsersTableBtn"]')
             cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '6');
 
-            cy.get('[data-p-index="3"] [data-pc-name="rowcheckbox"]').click()
+            cy.get('[data-p-index="3"] [data-pc-name="pcrowcheckbox"]').click()
             cy.get('[data-cy="archiveUsersTableBtn"]').should('be.enabled');
             cy.get('[data-cy="archiveUsersTableBtn"]').click()
             cy.get('[data-cy="userArchiveBtn"]').should('be.enabled');

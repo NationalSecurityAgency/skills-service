@@ -189,16 +189,15 @@ const sortOrderUpdate = (updateEvent) => {
                        :aria-label="'new subject'"/>
       <jump-to-skill />
       <div v-if="subjectsState.subjects && subjectsState.subjects.length"
-           class="grid"
+           class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4"
            id="subjectCards"
            data-cy="subjectCards">
         <div v-for="(subject) of subjectsState.subjects"
              :key="subject.subjectId"
              :id="subject.subjectId"
-             class="col-12 xl:col-6 xlPlus:col-4 xlPlusPlus:col-3"
              :data-cy="`${subject.subjectId}_card`">
           <BlockUI :blocked="sortOrder.loading" class="h-full">
-              <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${subject.subjectId}_overlayShown`">
+              <div class="absolute z-50 top-1/2 w-full text-center" v-if="sortOrder.loading" :data-cy="`${subject.subjectId}_overlayShown`">
                 <div v-if="subject.subjectId===sortOrder.loadingSubjectId" data-cy="updatingSortMsg">
                   <div class="text-info uppercase mb-1">Updating sort order!</div>
                   <skills-spinner :is-loading="sortOrder.loading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
@@ -215,7 +214,7 @@ const sortOrderUpdate = (updateEvent) => {
         </div>
       </div>
 
-      <no-content2 v-else class="mt-4"
+      <no-content2 v-else class="mt-6"
                    title="No Subjects Yet" message="Subjects are a way to group and organize skill definitions within a gameified training profile."></no-content2>
     </loading-container>
 

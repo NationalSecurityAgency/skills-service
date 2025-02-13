@@ -52,25 +52,25 @@ defineExpose({
   <CardWithVericalSections class="h-full">
     <template #content>
       <div class="flex mb-2">
-        <div class="flex flex-1 pt-4 pl-4">
+        <div class="flex flex-1 pt-6 pl-6">
           <router-link v-if="options.icon"
                        :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink" aria-hidden="true"
                        tabindex="-1" class="">
-            <div class="d-inline-block mr-2 border-1 text-center border-round w-4rem subject-icon-container"
+            <div class="d-inline-block mr-2 border text-center rounded-border w-16 subject-icon-container text-primary"
                  aria-hidden="true">
               <i :class="[`${options.icon} subject-icon`]" aria-hidden="true" />
             </div>
           </router-link>
           <div class="media-body">
             <div
-              class="text-xl font-semibold no-underline overflow-hidden text-overflow-ellipsis white-space-nowrap"
+              class="text-xl font-semibold no-underline overflow-hidden text-ellipsis whitespace-nowrap"
               style="max-width:17rem">
               <router-link v-if="options.icon" :to="options.navTo" data-cy="titleLink" class="no-underline"
                            :aria-label="`${isReadOnlyProj ? 'View' : 'Manage'} ${options.controls.type} ${options.controls.name}`">
                 {{ options.title }}
               </router-link>
             </div>
-            <div class="text-secondary text-xs overflow-hidden text-overflow-ellipsis white-space-nowrap"
+            <div class="text-secondary text-xs overflow-hidden text-ellipsis whitespace-nowrap"
                  style="max-width:15rem"
                  data-cy="subTitle">{{ options.subTitle }}
             </div>
@@ -84,7 +84,7 @@ defineExpose({
                @keyup.down="moveDown"
                @keyup.up="moveUp"
                @click.prevent.self
-               class="sort-control px-2 py-1 text-xl border-left-1 border-bottom-1 border-round-bottom-left-md surface-border text-color-secondary hover:shadow-3 hover:text-primary"
+               class="sort-control px-2 py-1 text-xl border-l border-b border-round-bottom-left-md border-surface text-muted-color hover:shadow-md hover:text-primary"
                tabindex="0"
                :aria-label="`Sort Control. Current position for ${options.title} is ${options.displayOrder}. Press up or down to change the order.`"
                role="button"
@@ -93,13 +93,13 @@ defineExpose({
         </div>
       </div>
 
-      <div class="mt-4 px-4">
+      <div class="mt-6 px-6">
         <slot name="underTitle"></slot>
       </div>
 
-      <div class="flex gap-2 flex-column sm:flex-row text-center justify-content-center my-3 px-4">
+      <div class="flex gap-2 flex-col sm:flex-row text-center justify-center my-4 px-6">
         <div v-for="(stat) in options.stats" :key="stat.label" class="flex-1" style="min-width: 10rem;">
-          <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="h-full border-round border-1 border-300 surface-100 p-3">
+          <div :data-cy="`pagePreviewCardStat_${stat.label}`" class="h-full rounded-border border border-surface-300 dark:border-surface-500 bg-surface-100 dark:bg-surface-700 p-4">
             <i :class="stat.icon" class="text-xl"></i>
             <div class="uppercase mt-1">{{ stat.label }}</div>
             <div class="text-2xl mt-2" data-cy="statNum">{{ stat.count }}</div>
@@ -117,12 +117,12 @@ defineExpose({
           </div>
         </div>
       </div>
-      <div v-if="options.warnMsg" class="mt-1 px-4 pb-3">
+      <div v-if="options.warnMsg" class="mt-1 px-6 pb-4">
         <InlineMessage icon="fas fa-exclamation-circle" severity="warn">{{ options.warnMsg}}</InlineMessage>
       </div>
     </template>
     <template #footer>
-      <div class="px-4 pb-4">
+      <div class="px-6 pb-6">
         <slot name="footer"></slot>
       </div>
     </template>

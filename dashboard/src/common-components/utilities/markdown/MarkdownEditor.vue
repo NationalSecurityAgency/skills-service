@@ -281,10 +281,9 @@ const editorStyle = computed(() => {
 </script>
 
 <template>
-  <div id="markdown-editor" @drop="attachFile" class="field text-left" :data-cy="`${name}MarkdownEditor`">
+  <div id="markdown-editor" @drop="attachFile" class="flex flex-col gap-2 text-left" :data-cy="`${name}MarkdownEditor`">
     <label v-if="showLabel"
            data-cy="markdownEditorLabel"
-           class="mb-3"
            :class="`${labelClass}`"
            :for="name" @click="focusOnMarkdownEditor">{{ label }}</label>
     <BlockUI :blocked="disabled">
@@ -305,7 +304,7 @@ const editorStyle = computed(() => {
                        @keydown="onKeydown"
                        @focus="handleFocus"
                        @load="onLoad" />
-      <div class="border-1 surface-border surface-100 border-round-bottom px-2 py-2 sd-theme-tile-background">
+      <div class="border border-surface bg-surface-100 dark:bg-surface-700 rounded-b px-2 py-2 sd-theme-tile-background">
       <div  class="flex text-xs">
         <div v-if="allowInsertImages" class="">
           Insert images and attach files by pasting, dragging & dropping, or selecting from toolbar.
@@ -328,7 +327,12 @@ const editorStyle = computed(() => {
       </Message>
     </div>
     </BlockUI>
-    <small role="alert" class="p-error" :id="`${name}Error`" data-cy="descriptionError">{{ errorMessage || '' }}</small>
+    <Message severity="error"
+             variant="simple"
+             size="small"
+             :closable="false"
+             data-cy="descriptionError"
+             :id="`${name}Error`">{{ errorMessage || '' }}</Message>
 
     <input @change="attachFile"
            type="file"

@@ -37,10 +37,10 @@ axios.interceptors.response.use(
 </script>
 
 <template>
-  <Message v-if="appVersionState.isVersionDifferent" :closable="false" data-cy="newSoftwareVersion" class="mb-3">
-    <div class="flex align-items-center">
+  <Message v-if="appVersionState.isVersionDifferent" :closable="false" data-cy="newSoftwareVersion" class="mb-4">
+    <div class="flex items-center">
     New SkillTree Software Version is Available!!
-      <div v-if="!skillsDisplayInfo.isSkillsClientPath()" class="flex align-items-center ml-2">Please <SkillsButton @click="refresh" data-cy="newSoftwareVersionReload" size="small" class="mx-2" icon="fas fa-sync" label="Reload"/> the page.</div>
+      <div v-if="!skillsDisplayInfo.isSkillsClientPath()" class="flex items-center ml-2">Please <SkillsButton @click="refresh" data-cy="newSoftwareVersionReload" size="small" class="mx-2" icon="fas fa-sync" label="Reload"/> the page.</div>
       <div v-else>Please refresh the page.</div>
     </div>
   </Message>

@@ -241,7 +241,7 @@ const onSavedQuiz = (savedQuiz) => {
             :isRequired="true"
             :disabled="isEdit || isCopy"
             :options="['Quiz', 'Survey']" />
-          <div v-if="isEdit || isCopy" class="text-color-secondary font-italic text-ms">** Can only be modified for a new quiz/survey **</div>
+          <div v-if="isEdit || isCopy" class="text-muted-color italic text-ms">** Can only be modified for a new quiz/survey **</div>
       </div>
 
       <markdown-editor
@@ -249,7 +249,7 @@ const onSavedQuiz = (savedQuiz) => {
           :quiz-id="isEdit ? quiz.quizId : null"
           :allow-attachments="isEdit || !communityLabels.showManageUserCommunity.value"
           data-cy="quizDescription"
-          class="mt-5"
+          class="mt-8"
           name="description" />
 
     </template>

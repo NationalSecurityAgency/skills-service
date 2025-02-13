@@ -187,7 +187,7 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="newGroupButton"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="newSkillButton"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="skillActionsBtn"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="skillsTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').should(`${chainerPrepend}exist`)
 
             cy.get('[data-cy="editSkillButton_skill1"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="editSkillButton_skill2"]').should(`${chainerPrepend}exist`)
@@ -205,9 +205,9 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="manageSkillLink_skill2"]').invoke('attr', 'aria-label').should('contain', manageButtonTxt)
             cy.get('[data-cy="manageSkillLink_skill3"]').invoke('attr', 'aria-label').should('contain', manageButtonTxt)
 
-            cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="rowcheckbox"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="rowcheckbox"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`)
 
             if (assertChainPrepend == null) {
                 cy.get('[data-cy="enableDisplayOrderSort"]').click()
@@ -400,7 +400,8 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="deleteEventBtn"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="performedSkills-deleteSelected"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="performedSkills-deleteAll"]').should(`${chainerPrepend}exist`)
-            cy.get('.p-selection-column').should(`${chainerPrepend}exist`)
+            cy.get('[data-pc-name="pcheadercheckbox"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`)
 
         }
         runCheck(2)
@@ -455,7 +456,7 @@ describe('Approver Role Tests', () => {
 
         const approvalHistoryTableSelector = '[data-cy="selfReportApprovalHistoryTable"]';
 
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="approveBtn"]').click();
         cy.get('[data-cy="saveDialogBtn"]').click();
         cy.validateTable(approvalHistoryTableSelector, [
@@ -468,7 +469,7 @@ describe('Approver Role Tests', () => {
             },],
         ]);
 
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="rejectBtn"]')
             .click();
         cy.get('[data-cy="saveDialogBtn"]').click();

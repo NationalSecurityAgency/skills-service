@@ -204,11 +204,11 @@ defineExpose({
     <quiz-footer :skill="skillInternal"/>
     <Message v-if="isHonorSystem && selfReportAvailable && !isCompleted" class="mb-2 alert alert-info">
       <template #container>
-        <div class="flex gap-2 p-3 align-content-center">
+        <div class="flex gap-2 p-4 content-center">
           <div>
             <i class="fas fa-user-shield text-2xl" aria-hidden="true"></i>
           </div>
-          <div class="flex-1 font-italic pt-1" data-cy="honorSystemAlert">
+          <div class="flex-1 italic pt-1" data-cy="honorSystemAlert">
             This skill can be submitted under the <span class="font-size-1">Honor System</span>, claim <span class="font-size-1">
             <Tag severity="info">{{ numFormat.pretty(skillInternal.pointIncrement) }}</Tag></span> points once you've completed the skill.
           </div>
@@ -231,11 +231,11 @@ defineExpose({
     </Message>
     <Message v-else-if="isHonorSystem && selfReportAvailable && !firstReport && isMotivationalSkill && skillInternal.expirationDate">
       <template #container>
-        <div class="flex gap-2 p-3 align-content-center">
+        <div class="flex gap-2 p-4 content-center">
           <div>
             <i class="fas fa-user-shield text-2xl" aria-hidden="true"></i>
           </div>
-          <div class="flex-1 font-italic pt-1" data-cy="honorSystemAlert">
+          <div class="flex-1 italic pt-1" data-cy="honorSystemAlert">
             This skill's achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skillInternal.expirationDate) }}</span>, but your <span class="font-size-1">
             <Tag severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> points can be retained by performing another <span class="font-size-1">Honor System</span> request.
           </div>
@@ -259,8 +259,8 @@ defineExpose({
              v-if="(firstReport || !isCompleted) && isApprovalRequired && selfReportAvailable && !selfReportDisabled && !isRejected"
              class="mb-2">
       <template #container>
-        <div class="p-3">
-          <div class="flex gap-2 sm:align-items-center flex-column sm:flex-row">
+        <div class="p-4">
+          <div class="flex gap-2 sm:items-center flex-col sm:flex-row">
             <div>
               <i class="fas fa-traffic-light text-2xl" aria-hidden="true"></i>
             </div>
@@ -287,7 +287,7 @@ defineExpose({
           <BlockUI :blocked="requestApprovalLoading">
             <justification-input v-if="showApprovalJustification"
                                  ref="justificationInput"
-                                 class="mt-3"
+                                 class="mt-4"
                                  @report-skill="reportSkill"
                                  @cancel="showApprovalJustification = false; focusOnId('beginRequestBtn')"
                                  :skill="skillInternal"
@@ -300,8 +300,8 @@ defineExpose({
     </Message>
     <Message v-else-if="(!firstReport || isCompleted) && isApprovalRequired && selfReportAvailable && !selfReportDisabled && !isRejected && isMotivationalSkill">
       <template #container>
-        <div class="p-3">
-          <div class="flex gap-2 sm:align-items-center flex-column sm:flex-row">
+        <div class="p-4">
+          <div class="flex gap-2 sm:items-center flex-col sm:flex-row">
             <div>
               <i class="fas fa-traffic-light text-2xl" aria-hidden="true"></i>
             </div>
@@ -327,7 +327,7 @@ defineExpose({
           <BlockUI :blocked="requestApprovalLoading">
             <justification-input v-if="showApprovalJustification"
                                  ref="justificationInput"
-                                 class="mt-3"
+                                 class="mt-4"
                                  @report-skill="reportSkill"
                                  @cancel="showApprovalJustification = false; focusOnId('beginRequestBtn')"
                                  :skill="skillInternal"
@@ -342,7 +342,7 @@ defineExpose({
     <Message :closable="false"
              icon="far fa-clock"
              severity="warn"
-             v-if="isPendingApproval() && !showTimeline && selfReport.msgHidden" class="mb-2 alert alert-info font-italic"
+             v-if="isPendingApproval() && !showTimeline && selfReport.msgHidden" class="mb-2 alert alert-info italic"
              data-cy="pendingApprovalStatus">
       This skill is <span class="font-size-1 normal-font">pending approval</span>.
       Submitted {{ timeUtils.relativeTime(skillInternal.selfReporting.requestedOn) }}
@@ -351,8 +351,8 @@ defineExpose({
       <BlockUI :blocked="removeRejectionLoading">
         <Message severity="error">
           <template #container>
-            <div class="flex p-3 align-content-center">
-              <div class="flex-1 align-content-center">
+            <div class="flex p-4 content-center">
+              <div class="flex-1 content-center">
                 <i class="fas fa-heart-broken text-xl" aria-hidden="true"></i>
                 Unfortunately your request from
                 <b>{{ timeUtils.formatDate(skillInternal.selfReporting.requestedOn, 'MM/DD/YYYY') }}</b> was rejected

@@ -45,7 +45,7 @@ const hasTags = computed(()=> props.skill.tags && props.skill.tags.length > 0)
 </script>
 
 <template>
-  <div v-if="showBadgesAndTagsRow" class="pt-1">
+  <div v-if="showBadgesAndTagsRow" class="pt-1 items-center">
     <div v-if="hasBadges" class="pr-0" data-cy="skillBadges">
       <i class="fa fa-award text-purple-500" aria-hidden="true"></i> Badges:
       <span v-for="(badge, index) in skill.badges" :data-cy="`skillBadge-${index}`" class="overflow-hidden"
@@ -55,22 +55,23 @@ const hasTags = computed(()=> props.skill.tags && props.skill.tags.length > 0)
               <span v-if="index != (skill.badges.length - 1)">, </span>
             </span>
     </div>
-    <div v-if="hasTags" data-cy="skillTags" :class="{ 'mt-2': hasBadges }">
+    <div v-if="hasTags" data-cy="skillTags" :class="{ 'mt-2': hasBadges }" class="flex gap-2">
       <Chip v-for="(tag, index) in skill.tags"
             :data-cy="`skillTag-${index}`"
-            v-bind:key="tag.tagId"
-            class="py-0 pl-0 pr-3 mr-2">
-        <span class="bg-primary border-circle w-2rem h-2rem flex align-items-center justify-content-center"><i
-          class="fas fa-tag" /></span>
-        <span class="ml-2 font-medium">{{ tag.tagValue }}</span>
-      <SkillsButton
-        icon="fas fa-search-plus"
-        size="small"
-        class="py-1 pl-0 pr-1 text-sm ml-1"
-        severity="secondary"
-        data-cy="addTagBtn"
-        text
-        @click="addTagFilter(tag)" />
+            :pt="{ root: { class: '!p-0'}}"
+            v-bind:key="tag.tagId">
+        <span class="bg-primary text-primary-contrast rounded-full w-7 h-7 flex items-center justify-center"><i
+            class="fas fa-tag" /></span>
+        <span class="font-medium" :class="{ 'pr-3' : !enableToAddTag }">{{ tag.tagValue }}</span>
+        <SkillsButton
+            v-if="enableToAddTag"
+            icon="fas fa-search-plus"
+            size="small"
+            class="text-sm"
+            severity="primary"
+            data-cy="addTagBtn"
+            text
+            @click="addTagFilter(tag)" />
       </Chip>
     </div>
   </div>

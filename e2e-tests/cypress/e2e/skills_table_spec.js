@@ -97,7 +97,7 @@ describe('Skills Table Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
     // force the order
-    cy.get('[data-pc-section="headercontent"]').contains('Display').click()
+    cy.get('[data-pc-section="columnheadercontent"]').contains('Display').click()
 
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Very Great Skill # 1' }, { colIndex: 3, value: 1 }],
@@ -111,8 +111,8 @@ describe('Skills Table Tests', () => {
     cy.get(`${makdownDivSelector}`).should('have.text', 'generic description')
     cy.get('[data-cy=skillName]').should('have.value', 'Copy of Very Great Skill # 2')
     cy.get('#idInput').should('have.value', 'copy_of_skill2')
-    cy.get('[data-cy=numPerformToCompletion] [data-pc-name="input"]').should('have.value', '1')
-    cy.get('[data-cy=pointIncrement] [data-pc-name="input"]').should('have.value', '150')
+    cy.get('[data-cy=numPerformToCompletion] [data-pc-name="pcinputtext"]').should('have.value', '1')
+    cy.get('[data-cy=pointIncrement] [data-pc-name="pcinputtext"]').should('have.value', '150')
     cy.get(makdownDivSelector).type('{selectall}copy description edit')
     cy.wait('@validateDescription')
     cy.get('[data-cy=numPerformToCompletion]').type('5')
@@ -147,7 +147,7 @@ describe('Skills Table Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
     // force the order
-    cy.get('[data-pc-section="headercontent"]').contains('Display').click()
+    cy.get('[data-pc-section="columnheadercontent"]').contains('Display').click()
 
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Very Great Skill # 1' }, { colIndex: 3, value: 1 }],
@@ -292,8 +292,9 @@ describe('Skills Table Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
     // test points column
-    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-    cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+    cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
     cy.get(`${tableSelector} th`).contains('Points').click()
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Skill # 1' }, { colIndex: 5, value: 150 }],
@@ -312,8 +313,9 @@ describe('Skills Table Tests', () => {
     cy.get(`${tableSelector} tbody tr`).should('have.length', 3)
 
     // test version column
-    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-    cy.get('[data-pc-section="panel"] [aria-label="Version"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+    cy.get('[data-pc-section="overlay"] [aria-label="Version"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
     cy.get(`${tableSelector} th`).contains('Version').click()
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Skill # 1' }, { colIndex: 6, value: 1 }],
@@ -355,8 +357,9 @@ describe('Skills Table Tests', () => {
 
     // test points column
     // cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Time Window').click();
-    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-    cy.get('[data-pc-section="panel"] [aria-label="Time Window"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+    cy.get('[data-pc-section="overlay"] [aria-label="Time Window"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
     cy.get(`${tableSelector} th`).contains('Display').click()
     cy.validateTable(tableSelector, [
       [{ colIndex: 2, value: 'Skill # 0' }, { colIndex: 5, value: 'Time Window Disabled' }],
@@ -378,8 +381,9 @@ describe('Skills Table Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
-    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-    cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+    cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
     cy.get(`${tableSelector} th`).contains('Self Report').click()
 
     cy.validateTable(tableSelector, [
@@ -399,8 +403,9 @@ describe('Skills Table Tests', () => {
     cy.get('[data-cy="skillName"]').type('Disabled Test')
     cy.clickSave()
 
-    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-    cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+    cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
     cy.get(`${tableSelector} th`).contains('Self Report').click()
 
     cy.validateTable(tableSelector, [
@@ -732,20 +737,20 @@ describe('Skills Table Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.get(`${tableSelector} th`).contains('Skill').click()
-    cy.get('[data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+    cy.get('[data-p-index="1"] [data-pc-section="rowtogglebutton"]').click()
     cy.get('[data-cy="childRowDisplay_skill2"]').contains('Minimum Time Window between occurrences')
     cy.get('[data-cy="childRowDisplay_skill2"]').contains('300 Points')
 
     // cy.get('[data-cy="expandDetailsBtn_skill1"]').click()
-    cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+    cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
     cy.get('[data-cy="childRowDisplay_skill1"]').contains('150 Points')
     cy.get('[data-cy="childRowDisplay_skill1"]').contains('Time Window N/A')
 
-    cy.get('[data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+    cy.get('[data-p-index="1"] [data-pc-section="rowtogglebutton"]').click()
     cy.get('[data-cy="childRowDisplay_skill2"]').should('not.exist')
 
     cy.get('[data-cy="childRowDisplay_skill1"]').contains('150 Points')
-    cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+    cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
     cy.get('[data-cy="childRowDisplay_skill1"]').should('not.exist')
   })
 
@@ -800,7 +805,7 @@ describe('Skills Table Tests', () => {
     cy.createSkill(1, 1,1 )
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
-    cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+    cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
     cy.get('[data-cy="enableDisplayOrderSort"] input').tab().type('{enter}');
     cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]')
     cy.focused().tab()

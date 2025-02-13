@@ -23,7 +23,7 @@ import { useColors } from '@/skills-display/components/utilities/UseColors.js';
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import dayjs from 'dayjs'
 import InputGroup from 'primevue/inputgroup';
-import { FilterMatchMode } from 'primevue/api';
+import { FilterMatchMode } from '@primevue/core/api';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import InputGroupAddon from 'primevue/inputgroupaddon';
@@ -269,7 +269,7 @@ const selectedSkills = ref([]);
   <SubPageHeader title="Performed Skills" aria-label="Performed Skills" />
 
   <Message v-if="overallErrMsg" severity="error">{{overallErrMsg}}</Message>
-  <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+  <Card :pt="{ body: { class: '!p-0' } }">
     <template #content>
 
       <SkillsSpinner :is-loading="!table.options.fields"/>
@@ -301,7 +301,7 @@ const selectedSkills = ref([]);
                 <InputGroupAddon>
                   <i class="fas fa-search" aria-hidden="true" />
                 </InputGroupAddon>
-                <InputText class="flex flex-grow-1"
+                <InputText class="flex grow"
                            v-model="filters['global'].value"
                            v-on:keydown.enter="onFilter"
                            data-cy="performedSkills-skillIdFilter"
@@ -309,7 +309,7 @@ const selectedSkills = ref([]);
                            aria-label="Skill ID Filter" />
               </InputGroup>
             </div>
-            <div class="flex flex-wrap pt-3">
+            <div class="flex flex-wrap pt-4">
               <div class="flex-1">
                 <SkillsButton label="Filter"
                               icon="fa fa-filter"
@@ -357,13 +357,13 @@ const selectedSkills = ref([]);
           </template>
 
           <template #empty>
-            <div class="flex justify-content-center flex-wrap h-12rem">
-              <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle fa-3x"
+            <div class="flex justify-center flex-wrap h-48">
+              <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle fa-3x"
                  aria-hidden="true"></i>
               <span class="w-full">
-                  <span class="flex align-items-center justify-content-center">There are no records to show</span>
-                  <span v-if="filtering" class="flex align-items-center justify-content-center">  Click
-                      <SkillsButton class="flex flex align-items-center justify-content-center px-1"
+                  <span class="flex items-center justify-center">There are no records to show</span>
+                  <span v-if="filtering" class="flex items-center justify-center">  Click
+                      <SkillsButton class="flex flex items-center justify-center px-1"
                                     label="Reset"
                                     link
                                     size="small"
@@ -390,8 +390,8 @@ const selectedSkills = ref([]);
             <template #body="slotProps">
               <div v-if="slotProps.field === 'skillId'" class="flex flex-row flex-wrap"
                    :data-cy="`row${slotProps.index}-skillCell`">
-                <div class="flex flex-column">
-                  <div class="flex align-items-start justify-content-start">
+                <div class="flex flex-col">
+                  <div class="flex items-start justify-start">
                     <highlighted-value :value="slotProps.data.skillName"
                                        :filter="filters.global.value"/>
                     <Tag v-if="slotProps.data.importedSkill === true" severity="success" class="uppercase ml-1"
@@ -403,7 +403,7 @@ const selectedSkills = ref([]);
                                :text="`ID: ${highlight(slotProps.data.skillId)}`"/>
                   </div>
                 </div>
-                <div class="flex flex-grow-1 align-items-start justify-content-end">
+                <div class="flex grow items-start justify-end">
                   <SkillsButton icon="fas fa-search-plus"
                                 outlined
                                 class="ml-2"

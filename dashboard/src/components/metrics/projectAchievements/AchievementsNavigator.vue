@@ -134,14 +134,14 @@ const getQueryParams = () => {
 </script>
 
 <template>
-  <Card data-cy="achievementsNavigator" :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+  <Card data-cy="achievementsNavigator" :pt="{ body: { class: '!p-0' } }">
     <template #header>
       <SkillsCardHeader title="Achievements"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="p-3">
-        <div class="flex pb-2 flex-column lg:flex-row">
-          <div class="flex flex-1 flex-column lg:border-right-1 lg:surface-border lg:pr-3 gap-2">
+      <div class="p-4">
+        <div class="flex pb-2 flex-col lg:flex-row">
+          <div class="flex flex-1 flex-col lg:border-r lg:border-surface lg:pr-4 gap-2">
             <div class="field">
               <label for="user-name-filter">User Name Filter:</label>
               <InputText class="w-full"
@@ -163,7 +163,7 @@ const getQueryParams = () => {
               </div>
             </div>
           </div>
-          <div class="flex flex-1 flex-column gap-2 lg:border-right-1 lg:surface-border lg:pl-2 lg:pr-2">
+          <div class="flex flex-1 flex-col gap-2 lg:border-r lg:border-surface lg:pl-2 lg:pr-2">
             <SkillsCalendarInput
               v-model="fromDayFilter"
               id="from-date-filter"
@@ -184,7 +184,7 @@ const getQueryParams = () => {
                 v-model="levels.selected"
                 :options="levels.available" />
           </div>
-          <div class="flex flex-1 flex-column lg:gap-2 lg:pl-2">
+          <div class="flex flex-1 flex-col lg:gap-2 lg:pl-2">
             <SkillsCalendarInput
               v-model="toDayFilter"
               id="to-date-filter"
@@ -204,7 +204,7 @@ const getQueryParams = () => {
             </div>
           </div>
         </div>
-        <div class="flex lg:pl-3 mb-3 lg:mt-3">
+        <div class="flex lg:pl-4 mb-4 lg:mt-4">
         <SkillsButton size="small" aria-label="Filter" @click="reloadTable" data-cy="achievementsNavigator-filterBtn" icon="fa fa-filter" label="Filter" />
         <SkillsButton size="small" aria-label="Reset" @click="reset" class="ml-1" data-cy="achievementsNavigator-resetBtn" icon="fa fa-times" label="Reset" />
       </div>
@@ -233,7 +233,7 @@ const getQueryParams = () => {
           </div>
         </template>
         <template #header>
-          <div class="flex justify-content-end flex-wrap">
+          <div class="flex justify-end flex-wrap">
             <SkillsButton
                 :disabled="totalRows <= 0"
                 size="small"
@@ -295,9 +295,9 @@ const getQueryParams = () => {
         </template>
 
         <template #empty>
-          <div class="flex justify-content-center flex-wrap" data-cy="emptyTable">
-            <i class="flex align-items-center justify-content-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
-            <span class="flex align-items-center justify-content-center">There are no records to show</span>
+          <div class="flex justify-center flex-wrap" data-cy="emptyTable">
+            <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
+            <span class="flex items-center justify-center">There are no records to show</span>
           </div>
         </template>
       </SkillsDataTable>

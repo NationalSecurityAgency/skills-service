@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import { ref } from 'vue'
 import IconManager from '@/components/utils/iconPicker/IconManager.vue'
-import OverlayPanel from 'primevue/overlaypanel'
+import {Popover} from "primevue";
 import { useFocusState } from '@/stores/UseFocusState.js'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
@@ -75,18 +75,31 @@ const themeHelper = useThemesHelper()
       aria-label="icon selector"
       :disabled="disabled"
       data-cy="iconPicker">
-      <div class="text-primary text-5xl w-6rem h-5rem flex align-items-center justify-content-center m-0">
+      <div class="text-primary text-5xl w-24 h-20 flex items-center justify-center m-0">
         <i :class="[startIcon]" />
       </div>
     </SkillsButton>
 
-    <OverlayPanel ref="iconManagerOverlayPanel"
+    <Popover ref="iconManagerOverlayPanel"
+             :pt="{ content : { class: '!p-0' } }"
                   :show-close-icon="true"
                   :dismissable="dismissable"
                   @hide="panelHidden"
                   :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }">
-      <icon-manager @selected-icon="onSelectedIcon" name="iconClass" @set-dismissable="setDismissable"></icon-manager>
-    </OverlayPanel>
+      <div class="absolute top-0 right-0 z-50">
+          <SkillsButton
+              icon="fas fa-times"
+              @click="iconManagerOverlayPanel.hide()"
+              text
+              data-cy="closeIconPickerBtn"
+              aria-label="Close icon picker" />
+      </div>
+      <icon-manager
+          class="pb-2 px-2"
+          @selected-icon="onSelectedIcon"
+          name="iconClass"
+          @set-dismissable="setDismissable"></icon-manager>
+    </Popover>
   </div>
 </template>
 

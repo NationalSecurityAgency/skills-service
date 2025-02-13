@@ -22,9 +22,9 @@ defineProps({
 <template>
   <Card :pt="{  content: { class: 'p-0' }, body: { class: 'p-3' } }" class="h-full">
     <template #content>
-      <div class="flex flex-column sm:h-16rem align-items-stretch justify-content-center">
-        <div class="flex flex-column sm:flex-row flex-1 gap-2 align-items-stretch justify-content-center">
-          <div class="flex-1 pt-3 text-center sm:text-left">
+      <div class="flex flex-col sm:h-64 items-stretch justify-center">
+        <div class="flex flex-col sm:flex-row flex-1 gap-2 items-stretch justify-center">
+          <div class="flex-1 pt-4 text-center sm:text-left">
             <div class="uppercase">
               <slot name="title">{{ title }}</slot>
             </div>
@@ -38,7 +38,7 @@ defineProps({
         </div>
         <div>
           <Divider />
-          <div class="px-3 pb-3 sm:h-4rem text-center sm:text-left">
+          <div class="px-4 pb-4 sm:h-16 text-center sm:text-left">
             <slot name="footer"></slot>
           </div>
         </div>

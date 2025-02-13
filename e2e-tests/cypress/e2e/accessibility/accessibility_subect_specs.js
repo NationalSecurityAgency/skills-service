@@ -229,8 +229,8 @@ describe('Accessibility Subject Tests', () => {
             cy.customA11y();
             cy.get('[data-cy=addLevel]')
               .click();
-            cy.get('[data-cy="percent"]')
-              .type('105');
+            cy.get('[data-cy="percent"] [data-pc-name="pcinputtext"]').clear()
+            cy.get('[data-cy="percent"] [data-pc-name="pcinputtext"]').type('105');
             cy.contains('Percent must be less than or equal to 100');
             cy.customA11y();
 

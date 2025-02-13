@@ -201,10 +201,10 @@ const handleFocus = () => {
         <div v-if="(!badges || badges.length === 0) && isLoading">
           <skills-spinner :is-loading="isLoading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
         </div>
-        <div v-if="badges && badges.length" id="badgeCards" class="flex flex-wrap gap-3 align-items-stretch justify-content-center">
+        <div v-if="badges && badges.length" id="badgeCards" class="flex flex-wrap gap-4 items-stretch justify-center">
           <div v-for="(badge) of badges" :id="badge.badgeId" :key="badge.badgeId" style="min-width: 23rem;">
             <BlockUI :blocked="sortOrder.loading">
-              <div class="absolute z-5 top-50 w-full text-center" v-if="sortOrder.loading" :data-cy="`${badge.badgeId}_overlayShown`">
+              <div class="absolute z-50 top-1/2 w-full text-center" v-if="sortOrder.loading" :data-cy="`${badge.badgeId}_overlayShown`">
                 <div v-if="badge.badgeId===sortOrder.loadingBadgeId" data-cy="updatingSortMsg">
                   <div class="text-info text-uppercase mb-1">Updating sort order!</div>
                   <skills-spinner :is-loading="sortOrder.loading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
@@ -215,7 +215,7 @@ const handleFocus = () => {
                            @badge-updated="saveBadge"
                            @badge-deleted="deleteBadge"
                            @publish-badge="publishBadge"
-                           class="flex align-items-stretch"
+                           class="flex items-stretch"
                            @sort-changed-requested="sortOrderUpdate"
                            :ref="(el) => (badgeRef[badge.badgeId] = el)"
                            :disable-sort-control="badges.length === 1"/>
@@ -223,7 +223,7 @@ const handleFocus = () => {
           </div>
         </div>
 
-        <no-content2 v-else title="No Badges Yet" class="mt-4"
+        <no-content2 v-else title="No Badges Yet" class="mt-6"
                        message="Global Badges are a special kind of badge that is made up of a collection of skills and/or levels that span across project boundaries."/>
       </div>
 <!--      </transition>-->

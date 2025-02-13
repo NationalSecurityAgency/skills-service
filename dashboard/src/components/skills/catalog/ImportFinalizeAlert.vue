@@ -125,7 +125,7 @@ const checkFinalizationState = () => {
       severity="warn"
       v-if="!finalizeInfo.finalizeSuccessfullyCompleted && !finalizeInfo.finalizeCompletedAndFailed && !finalizeInfo.finalizeIsRunning"
       :closable="false">
-      <div class="sm:flex gap-2 align-items-center">
+      <div class="sm:flex gap-2 items-center">
         <div>There {{ pluralSupport.areOrIs(finalizeInfo.numSkillsToFinalize) }}
           <Tag>{{ finalizeInfo.numSkillsToFinalize }}</Tag>
           imported skill{{ pluralSupport.sOrNone(finalizeInfo.numSkillsToFinalize) }} in this project that

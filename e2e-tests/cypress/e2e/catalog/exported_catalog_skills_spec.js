@@ -744,7 +744,7 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.wait('@loadExportedSkills');
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`)
             .should('have.text', '11');
-        cy.get(`${tableSelector} [data-pc-name="rowperpagedropdown"]`).click()
+        cy.get(`${tableSelector} [data-pc-name="pcrowperpagedropdown"]`).click()
         cy.get('[data-pc-section="list"] [aria-label="10"]').click()
         cy.wait('@loadExportedSkills');
         cy.get(`${tableSelector} table tbody [role="row"]`).should('have.length', 10)
@@ -799,7 +799,7 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 10);
 
-        cy.get(`${tableSelector} [data-pc-name="rowperpagedropdown"]`).click()
+        cy.get(`${tableSelector} [data-pc-name="pcrowperpagedropdown"]`).click()
         cy.get('[data-pc-section="list"] [aria-label="25"]').click()
         cy.validateTable(tableSelector, [
             [{
@@ -878,9 +878,9 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.wait('@saveSkill1');
         cy.get('[data-cy="nameCell_skill1"]')
             .contains('Very Great Skill 1A');
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Points"]').click()
-        cy.get('[data-pc-section="closebutton"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-cy="totalPointsCell_skill1"]')
             .contains('66 pts x 7 repetitions');
 
@@ -942,11 +942,11 @@ describe('Skills Exported to Catalog Tests', () => {
                 value: '1'
             }],
         ], 5);
-        cy.get(`${tableSelector} [data-p-index="1"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="1"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill2"')
             .contains('This skill has not been imported by any other projects yet...');
 
-        cy.get(`${tableSelector} [data-p-index="2"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="2"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]')
             .should('exist');
         cy.validateTable('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]', [
@@ -956,7 +956,7 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill3"] [data-cy="importedSkillsTable"]')
             .should('exist');
         cy.validateTable('[data-cy="importSkillInfo-proj1_skill3"] [data-cy="importedSkillsTable"]', [
@@ -988,7 +988,7 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.get('[data-cy="exportedSkillsTable"] [data-cy="skillsBTableTotalRows"]')
           .should('have.text', '3')
 
-        cy.get(`[data-cy="exportedSkillsTable"] [data-p-index="2"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="exportedSkillsTable"] [data-p-index="2"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]')
           .should('exist')
         cy.validateTable('[data-cy="importSkillInfo-proj1_skill1"] [data-cy="importedSkillsTable"]', [

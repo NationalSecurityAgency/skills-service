@@ -163,14 +163,14 @@ describe('Learning Path Management Validation Tests', () => {
 
         cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet')
         cy.get('[data-cy="learningPathFromSkillSelector"]').type( '15')
-        cy.get('[data-pc-section="list"] [data-pc-section="item"]')
+        cy.get('[data-pc-section="list"] [data-pc-section="option"]')
             .should('have.length', 1)
 
         cy.get('[data-cy="learningPathFromSkillSelector"]').type('{selectall}1');
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill1');
 
         cy.get('[data-cy="learningPathFromSkillSelector"]').type( '{selectall}15')
-        cy.get('[data-pc-section="list"] [data-pc-section="item"]')
+        cy.get('[data-pc-section="list"] [data-pc-section="option"]')
             .should('have.length', 1)
     });
 

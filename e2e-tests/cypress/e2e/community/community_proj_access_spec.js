@@ -55,7 +55,7 @@ describe('Community Project Creation Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains(allDragonsUser).click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Administrator"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Administrator"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addAdminAttempt').its('response.statusCode').should('eq', 400);
         cy.get('[data-cy=error-msg]')
@@ -83,7 +83,7 @@ describe('Community Project Creation Tests', () => {
         cy.wait(500);
         cy.get('#existingUserInput_0').contains(allDragonsUser).click();
         cy.get('[data-cy="userRoleSelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Approver"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Approver"]').click();
         cy.get('[data-cy="addUserBtn"]').click();
         cy.wait('@addApproverAttempt').its('response.statusCode').should('eq', 400);
         cy.get('[data-cy=error-msg]')
@@ -137,11 +137,11 @@ describe('Community Project Creation Tests', () => {
         cy.wait('@getSettings');
 
         cy.get('[data-cy="projectVisibilitySelector"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Private Invite Only"]').click();
+        cy.get('[data-pc-section="overlay"] [aria-label="Private Invite Only"]').click();
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]')
           .should('be.visible')
           .should('include.text', 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="acceptbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcacceptbutton"]').click()
         cy.get('[data-cy="saveSettingsBtn"').click()
         cy.wait('@saveSettings');
         cy.wait('@getSettings');
@@ -150,7 +150,7 @@ describe('Community Project Creation Tests', () => {
           .click();
         cy.wait('@emailSupported');
         cy.get('[data-cy="inviteExpirationSelect"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="30 minutes"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="30 minutes"]').click()
         cy.get('[data-cy=addEmails]')
           .should('be.disabled');
         cy.get('[data-cy="sendInvites-btn"]')

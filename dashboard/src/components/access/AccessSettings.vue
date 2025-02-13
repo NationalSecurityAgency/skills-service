@@ -56,7 +56,7 @@ onMounted(() => {
   <div>
     <sub-page-header title="Access Management" />
 
-    <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-8"/>
+    <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-20"/>
     <div v-if="!isLoading">
       <role-manager :project-id="route.params.projectId"
                     title="Project Management Users"
@@ -65,7 +65,7 @@ onMounted(() => {
 
       <private-invite-only-proj-management v-if="privateProject"/>
 
-      <trusted-client-props v-if="showTrustedClientProps" class="my-4"/>
+      <trusted-client-props v-if="showTrustedClientProps" class="my-6"/>
     </div>
   </div>
 </template>

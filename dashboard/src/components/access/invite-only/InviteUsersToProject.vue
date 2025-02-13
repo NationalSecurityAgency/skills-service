@@ -154,11 +154,11 @@ const sendInvites = () => {
   <div class="">
     <skills-spinner :is-loading="loading" />
     <div v-if="!loading">
-      <div class="mb-3 field" data-cy="inviteExpiration">
+      <div class="mb-4 field" data-cy="inviteExpiration">
         <label class="" id="inviteExpirationLabel" for="expirationTime">
           Invite Expiration:
         </label>
-        <Dropdown id="expirationTime"
+        <Select id="expirationTime"
                   v-model="expirationTime"
                   :options="expirationOptions"
                   optionLabel="text"
@@ -166,12 +166,12 @@ const sendInvites = () => {
                   aria-labelledby="inviteExpirationLabel"
                   data-cy="inviteExpirationSelect"
                   class="w-full" />
-        <small class="font-italic">
+        <small class="italic">
           ** How long the project invite will be valid for before it expires.
         </small>
       </div>
 
-      <div class="field pt-3" data-cy="inviteEmail">
+      <div class="field pt-4" data-cy="inviteEmail">
         <label class="text-secondary" id="inviteEmailLabel" for="currentEmailsInput">
           Email Addresses:
         </label>
@@ -180,11 +180,10 @@ const sendInvites = () => {
         <Textarea id="currentEmailsInput"
                   v-model="currentEmails"
                   class="w-full"
-                  autoResize
                   rows="5"
                   aria-labelledby="inviteEmailLabel"
                   data-cy="inviteEmailInput" />
-        <small class="font-italic">
+        <small class="italic">
           ** Email Addresses of users to invite to access this project. Must be unique as each email address will be
           sent a one-time use invite token. Comma separated, semi-colon separated, and one email per line input formats
           are supported.
@@ -216,7 +215,7 @@ const sendInvites = () => {
 
       </div>
 
-      <div class="mb-3" data-cy="inviteRecipients">
+      <div class="mb-4" data-cy="inviteRecipients">
         <Chip v-for="(email) of inviteRecipients"
               :key="email"
               :label="email"

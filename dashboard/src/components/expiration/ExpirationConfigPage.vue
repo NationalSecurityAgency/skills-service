@@ -313,7 +313,7 @@ const saveSettings = handleSubmit((values) => {
   <div>
     <SubPageHeader title="Configure Expiration" />
     <SkillsOverlay :show="loading || skillsState.loadingSkill">
-<!--      :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"-->
+<!--      :pt="{ body: { class: '!p-0' } }"-->
       <Card v-if="saving || (!loading && !skillsState.loadingSkill)">
         <template #content>
           <Message v-if="isReadOnly" severity="info" icon="fas fa-exclamation-triangle" data-cy="readOnlyAlert" :closable="false">
@@ -322,12 +322,12 @@ const saveSettings = handleSubmit((values) => {
             <span v-if="isReused"><Tag severity="success"><i class="fas fa-recycle mr-1" aria-hidden="true"/> Reused</Tag></span>
             skills are read-only.
           </Message>
-          <div class="flex flex-column" data-cy="expirationTypeSelector">
+          <div class="flex flex-col" data-cy="expirationTypeSelector">
 
-            <div class="border-round p-3" :class="{ 'surface-100' : expirationType === NEVER}">
-              <div class="flex align-items-center justify-content-start">
+            <div class="rounded-border p-4" :class="{ 'surface-100' : expirationType === NEVER}">
+              <div class="flex items-center justify-start">
                 <div class="flex flex-wrap">
-                  <div class="flex align-items-center">
+                  <div class="flex items-center">
                     <SkillsRadioButtonInput v-model="expirationType"
                                  inputId="expirationTypeNone"
                                  name="expirationType"
@@ -341,10 +341,10 @@ const saveSettings = handleSubmit((values) => {
 
             <Divider />
 
-            <div class="border-round p-3 mb-3" :class="{ 'surface-100' : expirationType === YEARLY}">
-              <div class="flex align-items-center justify-content-start">
+            <div class="rounded-border p-4 mb-4" :class="{ 'surface-100' : expirationType === YEARLY}">
+              <div class="flex items-center justify-start">
                 <div class="flex flex-wrap">
-                  <div class="flex align-items-center">
+                  <div class="flex items-center">
                     <SkillsRadioButtonInput v-model="expirationType"
                                  inputId="yearlyRadio"
                                  name="expirationType"
@@ -355,8 +355,8 @@ const saveSettings = handleSubmit((values) => {
                 </div>
               </div>
 
-              <div class="flex flex-wrap md:flex-nowrap ml-5 gap-2" :class="{ 'text-color-secondary' : expirationType !== YEARLY}" data-cy="yearlyFormGroup">
-                <div class="flex flex-column md:flex-row gap-2 align-items-baseline gap-2" :class="{'w-full': responsive.md.value }">
+              <div class="flex flex-wrap md:flex-nowrap ml-8 gap-2" :class="{ 'text-color-secondary' : expirationType !== YEARLY}" data-cy="yearlyFormGroup">
+                <div class="flex flex-col md:flex-row gap-2 items-baseline gap-2" :class="{'w-full': responsive.md.value }">
                   <label for="inputyearlyYears" class="">Skills will expire every</label>
                   <SkillsNumberInput
                       id="yearlyYears-sb"
@@ -365,14 +365,14 @@ const saveSettings = handleSubmit((values) => {
                       :disabled="expirationType !== 'YEARLY'"
                       :class="{'w-full': responsive.md.value }"
                       name="yearlyYears"
-                      inputClass="w-6rem"
+                      inputClass="w-24"
                       inputId="minmax-buttons"
                       showButtons
                       :suffix="` year${yearlyYears > 1 ? 's' : ''}`"
                       :min="0" :max="99"/>
                   <!--                  <span class="ml-2">year{{yearlyYears > 1 ? 's' : ''}} on:</span>-->
                 </div>
-                <div class="flex align-items-baseline flex-column md:flex-row gap-2" :class="{'w-full': responsive.md.value }">
+                <div class="flex items-baseline flex-col md:flex-row gap-2" :class="{'w-full': responsive.md.value }">
                   <span class="">on:</span>
                   <SkillsDropDown :options="monthsOptions"
                                   v-model="yearlyMonth"
@@ -397,10 +397,10 @@ const saveSettings = handleSubmit((values) => {
               </div>
             </div>
 
-            <div class="border-round p-3" :class="{ 'surface-100' : expirationType === MONTHLY}" data-cy="monthlyFormGroup">
-              <div class="flex align-items-center justify-content-start">
+            <div class="rounded-border p-4" :class="{ 'surface-100' : expirationType === MONTHLY}" data-cy="monthlyFormGroup">
+              <div class="flex items-center justify-start">
                 <div class="flex flex-wrap">
-                  <div class="flex align-items-center">
+                  <div class="flex items-center">
                     <SkillsRadioButtonInput v-model="expirationType"
                                  inputId="monthlyRadio"
                                  name="expirationType"
@@ -411,8 +411,8 @@ const saveSettings = handleSubmit((values) => {
                 </div>
               </div>
 
-              <div class="flex flex-wrap md:flex-nowrap ml-5 gap-2" :class="{ 'text-color-secondary' : expirationType !== MONTHLY}">
-                <div class="flex flex-column md:flex-row align-items-baseline gap-2" :class="{'w-full': responsive.md.value }">
+              <div class="flex flex-wrap md:flex-nowrap ml-8 gap-2" :class="{ 'text-color-secondary' : expirationType !== MONTHLY}">
+                <div class="flex flex-col md:flex-row items-baseline gap-2" :class="{'w-full': responsive.md.value }">
                   <label for="inputmonthlyMonths" class="">Skills will expire every</label>
                   <SkillsNumberInput
                       id="monthlyMonths-sb"
@@ -421,18 +421,18 @@ const saveSettings = handleSubmit((values) => {
                       :class="{'w-full': responsive.md.value }"
                       :disabled="expirationType !== MONTHLY"
                       name="monthlyMonths"
-                      inputClass="w-6rem"
+                      inputClass="w-24"
                       inputId="minmax-buttons"
                       showButtons
                       :suffix="` month${monthlyMonths > 1 ? 's' : ''}`"
                       :min="0" :max="99"/>
                   <!--                  <span class="ml-2">year{{monthlyMonths > 1 ? 's' : ''}} on:</span>-->
                 </div>
-                <div class="flex align-items-baseline flex-column md:flex-row gap-2" :class="{'w-full': responsive.md.value }">
+                <div class="flex items-baseline flex-col md:flex-row gap-2" :class="{'w-full': responsive.md.value }">
                   <div class="flex gap-2">
                     <span class="">on:</span>
-                    <div class="flex flex-wrap flex-column md:flex-row gap-3" data-cy="monthlyDayOption">
-                      <div v-for="category in monthlyDayCategories" :key="category.key" class="flex align-items-center">
+                    <div class="flex flex-wrap flex-col md:flex-row gap-4" data-cy="monthlyDayOption">
+                      <div v-for="category in monthlyDayCategories" :key="category.key" class="flex items-center">
                         <SkillsRadioButtonInput v-model="monthlyDayOption" :inputId="category.key"
                                                 :disabled="expirationType !== MONTHLY"
                                                 name="monthlyDayOption" :value="category.key"/>
@@ -455,10 +455,10 @@ const saveSettings = handleSubmit((values) => {
 
             <Divider/>
 
-            <div class="border-round p-3" :class="{ 'surface-100' : expirationType === DAILY}" data-cy="dailyFormGroup">
-              <div class="flex align-items-center justify-content-start">
+            <div class="rounded-border p-4" :class="{ 'surface-100' : expirationType === DAILY}" data-cy="dailyFormGroup">
+              <div class="flex items-center justify-start">
                 <div class="flex flex-wrap">
-                  <div class="flex align-items-center mb-2 md:mb-0">
+                  <div class="flex items-center mb-2 md:mb-0">
                     <SkillsRadioButtonInput v-model="expirationType"
                                  inputId="dailyRadio"
                                  name="expirationType"
@@ -469,8 +469,8 @@ const saveSettings = handleSubmit((values) => {
                 </div>
               </div>
 
-              <div class="flex flex-wrap md:flex-nowrap ml-5 gap-2" :class="{ 'text-color-secondary' : expirationType !== DAILY}">
-                <div class="flex align-items-baseline flex-column md:flex-row gap-2" :class="{'w-full': responsive.md.value }">
+              <div class="flex flex-wrap md:flex-nowrap ml-8 gap-2" :class="{ 'text-color-secondary' : expirationType !== DAILY}">
+                <div class="flex items-baseline flex-col md:flex-row gap-2" :class="{'w-full': responsive.md.value }">
                   <label for="dailyDays-sb" class="">Achievement will expire after</label>
                   <SkillsNumberInput
                       id="dailyDays-sb"
@@ -480,7 +480,7 @@ const saveSettings = handleSubmit((values) => {
                       :class="{'w-full': responsive.md.value }"
                       :aria-label="`Skills will expire every ${dailyDays} days after user earns an achievement`"
                       name="dailyDays"
-                      inputClass="w-6rem"
+                      inputClass="w-24"
                       inputId="minmax-buttons"
                       showButtons
                       :suffix="` day${dailyDays > 1 ? 's' : ''}`"
@@ -493,7 +493,7 @@ const saveSettings = handleSubmit((values) => {
             <Divider />
 
             <div class="flex flex-row">
-              <div class="">
+              <div class="flex gap-1">
                 <SkillsButton variant="outline-success"
                               label="Save"
                               icon="fas fa-arrow-circle-right"

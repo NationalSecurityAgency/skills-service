@@ -39,8 +39,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card class="mb-3"
-        :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }"
+  <Card class="mb-4"
+        :pt="{ body: { class: '!p-0' } }"
         data-cy="skillsSharedWithMeCard">
     <template #header>
       <SkillsCardHeader title="Available skills from other projects for use as prerequisites"></SkillsCardHeader>
@@ -51,7 +51,7 @@ onMounted(() => {
       </div>
       <div v-else>
         <no-content2 title="No Skills Available Yet..." icon="far fa-handshake"
-                     class="p-5"
+                     class="p-8"
                      message="Coordinate with other projects to share skills with this project."></no-content2>
       </div>
     </template>

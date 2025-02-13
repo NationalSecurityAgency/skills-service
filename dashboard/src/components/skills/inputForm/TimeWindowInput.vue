@@ -53,7 +53,7 @@ const resetTimeWindow = (checked) => {
     data-cy="timeWindowInput"
     @update:collapsed="updateCollapsed"
     :collapsed="timeWindowCollapsed">
-    <div class="flex align-items-center mb-2 mt-3 mx-2">
+    <div class="flex items-center mb-2 mt-4 mx-2">
       <SkillsCheckboxInput
         class="mb-2"
         :binary="true"
@@ -63,9 +63,9 @@ const resetTimeWindow = (checked) => {
         name="timeWindowEnabled"
         data-cy="timeWindowCheckbox"
         :value="true" />
-      <label for="timeWindowEnabled" class="ml-2 font-italic" :class="{ 'text-color-secondary' : disabled }">Time Window Enabled</label>
+      <label for="timeWindowEnabled" class="ml-2 italic" :class="{ 'text-color-secondary' : disabled }">Time Window Enabled</label>
     </div>
-    <div class="flex m-0 flex-wrap flex-column lg:flex-row">
+    <div class="flex m-0 flex-wrap flex-col lg:flex-row">
       <SkillsNumberInput
         class="flex-1 mx-2"
         :class="{ 'text-color-secondary' : disabled }"

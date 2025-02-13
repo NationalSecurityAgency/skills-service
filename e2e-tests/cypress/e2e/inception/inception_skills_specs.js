@@ -169,7 +169,7 @@ describe('Inception Skills Tests', () => {
 
         cy.get('[data-cy="saveDialogBtn"]')
             .click();
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get(`[data-cy="addSkillToGroupBtn-GroupGroup"]`).click();
         cy.get('[data-cy="skillName"]').type('Skill');
 
@@ -266,8 +266,8 @@ describe('Inception Skills Tests', () => {
 
         cy.assertInceptionPoints('Skills', 'SkillsTableAdditionalColumns', 0, false)
         // cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Time Window').click();
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Time Window"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Time Window"]').click()
         cy.assertInceptionPoints('Skills', 'SkillsTableAdditionalColumns', 5)
     })
 
@@ -281,7 +281,7 @@ describe('Inception Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
@@ -312,7 +312,7 @@ describe('Inception Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
@@ -351,7 +351,7 @@ describe('Inception Skills Tests', () => {
 
         cy.get('[data-cy="importFromCatalogBtn"]')
             .click();
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"] input').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"] input').click()
         cy.assertInceptionPoints('Skills', 'ImportSkillfromCatalog', 0, false)
         cy.get('[data-cy="importBtn"]')
             .click();
@@ -367,7 +367,7 @@ describe('Inception Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable"]  [data-pc-name="headercheckbox"]').click()
+        cy.get('[data-cy="skillsTable"]  [data-pc-name="pcheadercheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click()
@@ -466,7 +466,9 @@ describe('Inception Skills Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noUserConf"]`).should('exist')
 
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
-        cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'usera', true, true);
+        // cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'usera', true, true);
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]`).click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('usera').click();
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).should('be.enabled')
 
         cy.assertInceptionPoints('Skills', 'ConfigureSelfApprovalWorkload', 0, false)
@@ -516,7 +518,7 @@ describe('Inception Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
@@ -537,7 +539,7 @@ describe('Inception Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
         cy.get('[data-cy="existingTag"]').click();

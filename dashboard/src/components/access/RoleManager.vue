@@ -428,22 +428,22 @@ defineExpose({
 
 <template>
   <div>
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #header>
         <SkillsCardHeader v-if="title" :title="title"></SkillsCardHeader>
       </template>
       <template #content>
         <slot name="underHeader"/>
         <div>
-          <div class="p-3">
+          <div class="p-4">
             <div>
               <existing-user-input :suggest="true" :validate="true" :user-type="userType"
                                    :excluded-suggestions="assignedUserIds"
                                    v-model="selectedUser" data-cy="existingUserInput"/>
             </div>
-            <div class="mt-3 mb-3 flex gap-2 flex-column sm:flex-row">
+            <div class="mt-4 mb-4 flex gap-2 flex-col sm:flex-row">
               <div v-if="!isOnlyOneRole" class="flex-1">
-                <Dropdown class="w-full" v-model="userRole.selected" :options="userRole.options"
+                <Select class="w-full" v-model="userRole.selected" :options="userRole.options"
                           data-cy="userRoleSelector"
                           placeholder="Please select user's Role" optionLabel="text" optionValue="value"/>
               </div>
@@ -456,11 +456,11 @@ defineExpose({
               </div>
             </div>
             <div v-if="adminGroupsSupported">
-              <div class="text-center my-4 font-semibold">
+              <div class="text-center my-6 font-semibold">
                 OR
               </div>
               <div>
-                <Dropdown
+                <Select
                     class="w-full"
                     :aria-label="`Select Admin Group to assign to this ${props.projectId ? 'Project' : 'Quiz'}`"
                     data-cy="adminGroupSelector"
@@ -483,7 +483,7 @@ defineExpose({
                       <span class="h6 ml-2">{{ slotProps.option.name }}</span>
                     </div>
                   </template>
-                </Dropdown>
+                </Select>
               </div>
             </div>
 
@@ -500,7 +500,7 @@ defineExpose({
               aria-label="User Roles"
               striped-rows
               paginator
-              :pt:paginator:paginatorWrapper:aria-label='`${title} Paginator`'
+              :pt:pcPaginator:paginatorContainer:aria-label='`${title} Paginator`'
               :row-class="showExpansion"
               v-model:expandedRows="expandedRows"
               v-model:sort-field="sortInfo.sortBy"
@@ -541,14 +541,14 @@ defineExpose({
               </template>
               <template #body="slotProps">
                 <div v-if="!slotProps.data.isEdited">{{ getRoleDisplay(slotProps.data.roleName) }}</div>
-                <Dropdown v-else v-model="slotProps.data.roleName"
+                <Select v-else v-model="slotProps.data.roleName"
                           :options="userRole.options"
                           optionLabel="text"
                           optionValue="value"
                           :aria-label="`select new access role for user ${getUserDisplay(slotProps.data)}`"
                           :data-cy="`roleDropDown_${slotProps.data.userId}`"
                           @change="updateUserRole">
-                </Dropdown>
+                </Select>
               </template>
             </Column>
             <Column :class="{'flex': responsive.md.value }">
@@ -557,30 +557,27 @@ defineExpose({
               </template>
               <template #body="slotProps">
                 <div v-if="!slotProps.data.adminGroupId || props.adminGroupId">
-                  <div class="float-right mr-1 flex gap-2" :data-cy="`controlsCell_${slotProps.data.userId}`">
-                    <!--            <i v-if="!notCurrentUser(slotProps.data.userId)"-->
-                    <!--               data-cy="cannotRemoveWarning"-->
-                    <!--               class="text-warning fas fa-exclamation-circle mr-1"-->
-                    <!--               aria-hidden="true"/>-->
-
-                    <SkillsButton v-if="!isOnlyOneRole" @click="editItem(slotProps.data)"
-                                  :disabled="!notCurrentUser(slotProps.data.userId)"
-                                  :aria-label="`edit access role from user ${getUserDisplay(slotProps.data)}`"
-                                  data-cy="editUserBtn" icon="fas fa-edit" label="Edit" size="small">
-                    </SkillsButton>
-                    <SkillsButton @click="deleteUserRoleConfirm(slotProps.data)"
-                                  :disabled="!notCurrentUser(slotProps.data.userId)"
-                                  :id="`removeUserBtn_${slotProps.data.userId}`"
-                                  :track-for-focus="true"
-                                  :aria-label="`remove access role from user ${getUserDisplay(slotProps.data)}`"
-                                  data-cy="removeUserBtn" icon="fas fa-trash" label="Delete" size="small">
-                    </SkillsButton>
-
+                  <div class="float-right mr-1 flex flex-col gap-2" :data-cy="`controlsCell_${slotProps.data.userId}`">
+                    <ButtonGroup v-if="notCurrentUser(slotProps.data.userId)">
+                      <SkillsButton v-if="!isOnlyOneRole" @click="editItem(slotProps.data)"
+                                    :disabled="!notCurrentUser(slotProps.data.userId)"
+                                    :aria-label="`edit access role from user ${getUserDisplay(slotProps.data)}`"
+                                    data-cy="editUserBtn" icon="fas fa-edit" label="Edit" size="small">
+                      </SkillsButton>
+                      <SkillsButton @click="deleteUserRoleConfirm(slotProps.data)"
+                                    :disabled="!notCurrentUser(slotProps.data.userId)"
+                                    :id="`removeUserBtn_${slotProps.data.userId}`"
+                                    :track-for-focus="true"
+                                    :aria-label="`remove access role from user ${getUserDisplay(slotProps.data)}`"
+                                    data-cy="removeUserBtn" icon="fas fa-trash" label="Delete" size="small">
+                      </SkillsButton>
+                    </ButtonGroup>
+                    <InlineMessage v-if="!notCurrentUser(slotProps.data.userId)" class="mt-1" severity="info" size="small"
+                                   aria-live="polite" data-cy="cannotRemoveWarning">
+                      Cannot modify yourself
+                    </InlineMessage>
                   </div>
-                  <InlineMessage v-if="!notCurrentUser(slotProps.data.userId)" class="mt-1" severity="info"
-                                 aria-live="polite">
-                    Can't remove or edit yourself
-                  </InlineMessage>
+
                 </div>
               </template>
             </Column>
@@ -598,7 +595,7 @@ defineExpose({
               }}</span>
             </template>
             <template #empty>
-              <span class="flex align-items-center justify-content-center">There are no records to show</span>
+              <span class="flex items-center justify-center">There are no records to show</span>
             </template>
           </SkillsDataTable>
         </div>

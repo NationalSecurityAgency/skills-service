@@ -57,12 +57,12 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
 
 <template>
   <div>
-    <div v-if="showCards" class="flex flex-column md:flex-row flex-wrap gap-3">
+    <div v-if="showCards" class="flex flex-col md:flex-row flex-wrap gap-4">
       <div v-if="showUserCard" class="flex-1 w-min-12rem">
         <quiz-single-run-card title="User" data-cy="userInfoCard">
-          <div class="text-color-success font-bold">{{ runInfo.userIdForDisplay }}</div>
+          <div class="text-green-700 dark:text-green-400 font-bold">{{ runInfo.userIdForDisplay }}</div>
           <div v-if="userTagsUtils.showUserTagColumn() && runInfo.userTag">
-            <span class="text-info font-italic">{{ userTagsUtils.userTagLabel() }}</span>: {{ runInfo.userTag }}
+            <span class="text-info italic">{{ userTagsUtils.userTagLabel() }}</span>: {{ runInfo.userTag }}
           </div>
         </quiz-single-run-card>
       </div>
@@ -72,12 +72,12 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
               <QuizRunStatus :quiz-type="runInfo.quizType" :status="runInfo.status"/>
             </div>
             <div v-if="QuizStatus.isInProgress(runInfo.status)">
-              <Tag severity="warning">{{ numQuestionsAnswered }}</Tag>
+              <Tag severity="warn">{{ numQuestionsAnswered }}</Tag>
               /
               <Tag>{{ runInfo.numQuestions }}</Tag>
             </div>
             <div v-if="QuizStatus.isFailed(runInfo.status)">Missed by <span
-                class="text-danger font-italic">{{ runInfo.numQuestionsToPass - numQuestionsRight }}</span>
+                class="text-danger italic">{{ runInfo.numQuestionsToPass - numQuestionsRight }}</span>
               questions
             </div>
         </quiz-single-run-card>
@@ -90,15 +90,15 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
               /
               <Tag>{{ runInfo.numQuestions }}</Tag>
             </div>
-            <div>Need <span class="text-info font-italic">{{ runInfo.numQuestionsToPass }}</span> question{{ runInfo.numQuestionsToPass > 1 ? 's' : ''}} to pass
+            <div>Need <span class="text-info italic">{{ runInfo.numQuestionsToPass }}</span> question{{ runInfo.numQuestionsToPass > 1 ? 's' : ''}} to pass
             </div>
         </quiz-single-run-card>
       </div>
       <div class="flex-1 w-min-12rem">
         <quiz-single-run-card title="Date & Time">
-          <div class="text-color-success font-bold">{{ timeUtils.formatDate(runInfo.started) }}</div>
+          <div class="text-green-700 dark:text-green-400 font-bold">{{ timeUtils.formatDate(runInfo.started) }}</div>
           <div class="mt-1">
-            <span class="font-italic">Runtime:</span>
+            <span class="italic">Runtime:</span>
             <span class="text-primary ml-2">{{
                 timeUtils.formatDurationDiff(runInfo.started, runInfo.completed)
               }}
@@ -120,7 +120,7 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
     <Message v-if="!runInfo.questions && QuizStatus.isFailed(runInfo.status)" severity="warn" :closable="false" data-cy="allQuestionsNotDisplayedMsg">
       Questions and answers are not displayed so not to give away the correct answers.
     </Message>
-    <Message v-if="runInfo.questions && !runInfo.allQuestionsReturned" severity="warn" :closable="false" class="mt-5" data-cy="someQuestionsNotDisplayedMsg">
+    <Message v-if="runInfo.questions && !runInfo.allQuestionsReturned" severity="warn" :closable="false" class="mt-8" data-cy="someQuestionsNotDisplayedMsg">
       The rest of the questions and answers are not displayed so not to give away the correct answers.
     </Message>
   </div>

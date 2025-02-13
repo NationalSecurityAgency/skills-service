@@ -22,6 +22,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue'
 import ScrollPanel from 'primevue/scrollpanel'
+import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -135,6 +136,7 @@ const handleExport = () => {
 const isExportable = computed(() => {
   return !allSkillsExportedAlready.value && !state.value.exported && !allSkillsAreDups.value && !insufficientSubjectPoints.value && !isUserCommunityRestricted.value
 })
+const dialogUtils = useDialogUtils()
 </script>
 
 <template>
@@ -143,10 +145,10 @@ const isExportable = computed(() => {
     header="Export Skill to the Catalog"
     :maximizable="true"
     :close-on-escape="true"
-    class="w-11 xl:w-8"
+    class="w-11/12 xl:w-8/12"
     @update:visible="onUpdateVisible"
     v-model:visible="model"
-    :pt="{ maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }"
+    :pt="{ pcMaximizeButton: dialogUtils.getMaximizeButtonPassThrough() }"
   >
     <skills-spinner :is-loading="loadingData" />
     <div v-if="!loadingData">
@@ -192,7 +194,7 @@ const isExportable = computed(() => {
               of this skill.
             </p>
             <p v-if="numAlreadyExported > 0">
-              <span class="font-italic"><i class="fas fa-exclamation-triangle text-warning" /> Note:</span> The are
+              <span class="italic"><i class="fas fa-exclamation-triangle text-warning" /> Note:</span> The are
               already
               <Tag severity="info">{{ numAlreadyExported }}</Tag>
               skill(s) in the Skill Catalog from the provided selection.
@@ -209,19 +211,19 @@ const isExportable = computed(() => {
                       },
                       bary: 'hover:bg-primary-400 bg-primary-300 opacity-100'
                   }"
-                class="mb-3"
+                class="mb-4"
                 style="width: 100%; max-height: 200px">
               <ul>
                 <li v-for="dupSkill in notExportableSkills" :key="dupSkill.skillId"
-                    :data-cy="`dupSkill-${dupSkill.skillId}`" class="line-height-4">
+                    :data-cy="`dupSkill-${dupSkill.skillId}`" class="leading-loose">
                   {{ dupSkill.name }}
-                  <Tag severity="warning" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">
+                  <Tag severity="warn" v-if="dupSkill.skillNameConflictsWithExistingCatalogSkill" class="ml-1">
                     Name Conflict
                   </Tag>
-                  <Tag severity="warning" v-if="dupSkill.skillIdConflictsWithExistingCatalogSkill" class="ml-1">ID
+                  <Tag severity="warn" v-if="dupSkill.skillIdConflictsWithExistingCatalogSkill" class="ml-1">ID
                     Conflict
                   </Tag>
-                  <Tag severity="warning" v-if="dupSkill.hasDependencies" class="ml-1">Has Prerequisites
+                  <Tag severity="warn" v-if="dupSkill.hasDependencies" class="ml-1">Has Prerequisites
                   </Tag>
                 </li>
               </ul>
@@ -235,12 +237,11 @@ const isExportable = computed(() => {
             Skills were</span> <span class="text-success font-weight-bold">successfully</span> exported to the catalog!
           </Message>
 
-          <div v-if="isExportable" class="text-right">
+          <div v-if="isExportable" class="text-right mt-3">
             <SkillsButton
               label="Cancel"
               icon="far fa-times-circle"
-              severity="warning"
-              size="small"
+              severity="warn"
               outlined
               class="mr-2"
               @click="handleClose"
@@ -250,7 +251,6 @@ const isExportable = computed(() => {
               icon="far fa-arrow-alt-circle-up"
               outlined
               severity="success"
-              size="small"
               @click="handleExport"
               :disabled="loadingData"
               data-cy="exportToCatalogButton" />

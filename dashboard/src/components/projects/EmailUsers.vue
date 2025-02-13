@@ -544,7 +544,7 @@ const previewEmail = () => {
         </Message>
 
         <BlockUI :blocked="!emailFeatureConfigured">
-          <div class="font-bold text-lg  uppercase mb-3">Filters</div>
+          <div class="font-bold text-lg  uppercase mb-4">Filters</div>
           <div class="">
             <SkillsDropDown
               label="Type"
@@ -558,7 +558,7 @@ const previewEmail = () => {
               optionValue="value"
               v-model="currentFilterType"
               :options="filterOptions" />
-            <div class="flex flex-1 gap-2 flex-column ml-4">
+            <div class="flex flex-1 gap-3 flex-col ml-6">
               <SkillsDropDown
                   v-if="currentFilterType && currentFilterType !== 'project'"
                   :disabled="(currentFilterType && currentFilterType === 'project') || !emailFeatureConfigured"
@@ -584,7 +584,7 @@ const previewEmail = () => {
                   v-model="levels.selected"
                   :options="levels.available" />
 
-              <div class="flex mb-3" v-if="currentFilterType && currentFilterType==='skill'">
+              <div class="flex mb-4" v-if="currentFilterType && currentFilterType==='skill'">
                 <SkillsInputSwitch
                     v-model="skills.achieved"
                     inputId="skillAchieved"
@@ -595,8 +595,8 @@ const previewEmail = () => {
                 <label for="skillAchieved" class="ml-2"> {{ skills.achieved ? 'Achieved' : 'Not Achieved' }} </label>
               </div>
             </div>
-            <div>
-              <SkillsButton class="ml-4" @click="addCriteria" data-cy="emailUsers-addBtn" :track-for-focus="true" id="addCriteriaButton"
+            <div class="mt-3">
+              <SkillsButton class="" @click="addCriteria" data-cy="emailUsers-addBtn" :track-for-focus="true" id="addCriteriaButton"
                             :disabled="isAddDisabled || maxTagsReached || !emailFeatureConfigured" label="Add" icon="fas fa-plus-circle" />
               <transition name="fade">
                 <span v-if="alreadyApplied" data-cy="filterExists" class="pt-2 pl-1" role="alert">Filter already exists</span>
@@ -605,8 +605,8 @@ const previewEmail = () => {
             </div>
           </div>
 
-          <div class="pr-3 pb-3 pt-4 mr-3 ml-1">
-            <div class="flex flex-wrap gap-2 pb-3 mt-1 ml-3">
+          <div class="pr-4 pb-4 pt-6 mr-4 ml-1">
+            <div class="flex flex-wrap gap-2 pb-4 mt-1 ml-4">
               <Chip v-for="(tag) of tags" :key="tag.display" :label="tag.display" data-cy="filterBadge" removable @remove="deleteCriteria(tag)" />
             </div>
             <div class="h5 uppercase" data-cy="usersMatchingFilters"><Badge variant="info">{{currentCount}}</Badge> Users Selected</div>
@@ -637,7 +637,7 @@ const previewEmail = () => {
           </div>
 
           <div class="flex ">
-            <SkillsButton class="mr-3" data-cy="previewUsersEmail"
+            <SkillsButton class="mr-4" data-cy="previewUsersEmail"
                           :disabled="isPreviewDisabled || !meta.valid || !emailFeatureConfigured"
                           @click="previewEmail"
                           label="Preview"

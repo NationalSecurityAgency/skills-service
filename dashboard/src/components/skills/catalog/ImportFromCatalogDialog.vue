@@ -33,6 +33,7 @@ import { useFinalizeInfoState } from '@/stores/UseFinalizeInfoState.js'
 import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -202,6 +203,8 @@ const onUpdateVisible = (newVal) => {
     handleClose()
   }
 }
+
+const dialogUtils = useDialogUtils()
 </script>
 
 <template>
@@ -210,21 +213,21 @@ const onUpdateVisible = (newVal) => {
     header="Import Skills from the Catalog"
     :maximizable="true"
     :close-on-escape="true"
-    class="w-11 xl:w-8"
+    class="w-11/12 xl:w-8/12"
     @update:visible="onUpdateVisible"
     v-model:visible="model"
-    :pt="{ maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }"
+    :pt="{ pcMaximizeButton: dialogUtils.getMaximizeButtonPassThrough() }"
   >
     <skills-spinner :is-loading="initialLoad" />
     <div v-if="!initialLoad">
-      <no-content2 v-if="emptyCatalog && !isInFinalizeState" class="mt-4 mb-5"
+      <no-content2 v-if="emptyCatalog && !isInFinalizeState" class="mt-6 mb-8"
                    icon="fas fa-user-clock"
                    title="Nothing Available for Import" data-cy="catalogSkillImportModal-NoData">
         When other projects export Skills to the Catalog then they will be available here
         to be imported.
       </no-content2>
 
-      <no-content2 v-if="isInFinalizeState" class="mt-4 mb-5"
+      <no-content2 v-if="isInFinalizeState" class="mt-6 mb-8"
                    title="Finalization in Progress" data-cy="catalogSkillImport-finalizationInProcess">
         Cannot import while imported skills are being finalized. Unfortunately will have to wait, thank you for the
         patience!
@@ -264,7 +267,7 @@ const onUpdateVisible = (newVal) => {
               class="w-full" />
           </div>
         </div>
-        <div class="mb-3 mt-1">
+        <div class="mb-4 mt-1">
           <SkillsButton
             label="Filter"
             icon="fa fa-filter"
@@ -329,7 +332,7 @@ const onUpdateVisible = (newVal) => {
               <i class="fas fa-tasks mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
-              <div class="flex align-items-center">
+              <div class="flex items-center">
                 <div class="flex-1">
                   {{ slotProps.data.projectName }}
                 </div>
@@ -350,7 +353,7 @@ const onUpdateVisible = (newVal) => {
               <i class="fas fa-cubes mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
-              <div class="flex align-items-center">
+              <div class="flex items-center">
                 <div class="flex-1">
                   {{ slotProps.data.subjectName }}
                 </div>
@@ -397,11 +400,11 @@ const onUpdateVisible = (newVal) => {
         <Tag>{{ skillsState.totalNumSkillsInSubject }}</Tag>
       </Message>
 
-      <div v-if="!emptyCatalog" class="text-right mt-3">
+      <div v-if="!emptyCatalog" class="text-right mt-4">
         <SkillsButton
           label="Cancel"
           icon="fas fa-times"
-          severity="warning"
+          severity="warn"
           size="small"
           class="mr-2"
           outlined

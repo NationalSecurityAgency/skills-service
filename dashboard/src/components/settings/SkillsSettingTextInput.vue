@@ -49,7 +49,7 @@ const emit = defineEmits(['input'])
 const { value, errorMessage } = useField(() => props.name);
 
 const labelClass = computed(() => {
-  return props.label ? 'text-secondary w-min-11rem max-w-11rem' : null
+  return props.label ? 'text-secondary w-min-11rem max-w-44' : null
 })
 
 const inputClass = computed(() => {
@@ -64,7 +64,7 @@ const inputId = computed(() => {
 <!--v-bind="projectDisplayNameAttrs"-->
 <template>
   <settings-item :label="label" :input-id="inputId" :label-width-in-rem="labelWidthInRem">
-    <div class="flex flex-column flex-1">
+    <div class="flex flex-col flex-1">
       <InputText v-model="value"
                  :data-cy="`${name}TextInput`"
                  :id="inputId"

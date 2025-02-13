@@ -146,7 +146,7 @@ describe('Multiple Project Metrics', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] .p-autocomplete-token')
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] [role="option"][data-pc-section="chipitem"]')
             .should('have.length', 4)
             .as('selected');
         cy.get('@selected')
@@ -196,9 +196,9 @@ describe('Multiple Project Metrics', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
-        cy.get('[data-cy=trainingProfileComparatorProjectSelector] [aria-label="Grand Project 2"] [data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy=trainingProfileComparatorProjectSelector] [aria-label="Grand Project 1"] [data-pc-section="removetokenicon"]').click()
-        cy.get('[data-cy=trainingProfileComparatorProjectSelector] [aria-label="Grand Project 0"] [data-pc-section="removetokenicon"]').click()
+        cy.get('[data-cy=trainingProfileComparatorProjectSelector] [aria-label="Grand Project 2"] [data-pc-section="removeicon"]').click()
+        cy.get('[data-cy=trainingProfileComparatorProjectSelector] [aria-label="Grand Project 1"] [data-pc-section="removeicon"]').click()
+        cy.get('[data-cy=trainingProfileComparatorProjectSelector] [aria-label="Grand Project 0"] [data-pc-section="removeicon"]').click()
 
         cy.trainingProf()
             .contains('Need more projects');
@@ -209,10 +209,10 @@ describe('Multiple Project Metrics', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] [data-pc-name="dropdownbutton"]').click();
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] [data-pc-section="dropdown"]').click();
         cy.trainingProf().get('[aria-label="Grand Project 4"]').click();
 
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] [data-pc-name="dropdownbutton"]')
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] [data-pc-section="dropdown"]')
             .click();
         cy.get('[data-cy=trainingProfileMaximumReached]').should('exist');
 
@@ -222,7 +222,7 @@ describe('Multiple Project Metrics', () => {
         cy.visit('/administrator/');
         cy.clickNav('Metrics');
 
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] [data-pc-section="removetokenicon"]')
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] [data-pc-section="removeicon"]')
             .should('have.length', 4)
             .as('removeBtns');
         cy.get('@removeBtns')
@@ -280,7 +280,7 @@ describe('Multiple Project Metrics', () => {
             .contains('Grand Project 5')
             .should('not.exist');
 
-        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] [data-pc-name="dropdownbutton"]').click();
+        cy.trainingProf('[data-cy=trainingProfileComparatorProjectSelector] [data-pc-section="dropdown"]').click();
         cy.trainingProf().get('[aria-label="Grand Project 5"]').click();
 
         // validate x axis
@@ -335,12 +335,12 @@ describe('Multiple Project Metrics', () => {
         cy.usrsInCommon()
             .contains('No Projects Selected');
 
-        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-        cy.get('.p-autocomplete-items > [aria-label="Grand Project 0"]').click()
+        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="Grand Project 0"]').click()
         cy.usrsInCommon('[data-cy=findUsersBtn]').should('be.disabled');
 
-        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-        cy.get('.p-autocomplete-items > [aria-label="Grand Project 3"]').click()
+        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="Grand Project 3"]').click()
         cy.usrsInCommon('[data-cy=findUsersBtn]').should('be.enabled');
     });
 
@@ -351,11 +351,11 @@ describe('Multiple Project Metrics', () => {
             .contains('No Projects Selected');
 
         for (let i = 0; i < 5; i += 1) {
-            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-            cy.get(`.p-autocomplete-items > [aria-label="Grand Project ${i}"]`).click()
+            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+            cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="Grand Project ${i}"]`).click()
         }
 
-        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]')
+        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]')
             .click();
         cy.get('[data-cy=projectSelectorMaximumReached]').should('exist');
     });
@@ -367,8 +367,8 @@ describe('Multiple Project Metrics', () => {
             .contains('No Projects Selected');
 
         for (let i = 0; i < 5; i += 1) {
-            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-            cy.get(`.p-autocomplete-items > [aria-label="Grand Project ${i}"]`).click()
+            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+            cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="Grand Project ${i}"]`).click()
         }
 
         const tableSelector = `${multiProjSel} tbody tr`;
@@ -393,8 +393,8 @@ describe('Multiple Project Metrics', () => {
 
         cy.get('@row1')
             .eq(5)
-            .find('[data-cy=minLevelSelector] [data-pc-section="trigger"]').click();
-        cy.get('[data-pc-section="item"]').contains('2').click();
+            .find('[data-cy=minLevelSelector] [data-pc-section="dropdownicon"]').click();
+        cy.get('[data-pc-section="option"]').contains('2').click();
 
         cy.get('@row1')
             .eq(5)
@@ -420,8 +420,8 @@ describe('Multiple Project Metrics', () => {
             .contains('No Projects Selected');
 
         for (let i = 0; i < 5; i += 1) {
-            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-            cy.get(`.p-autocomplete-items > [aria-label="Grand Project ${i}"]`).click()
+            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+            cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="Grand Project ${i}"]`).click()
         }
 
         const tableSelector = `${multiProjSel} tbody tr`;
@@ -435,8 +435,8 @@ describe('Multiple Project Metrics', () => {
 
         cy.get('@row1')
             .eq(5)
-            .find('[data-cy=minLevelSelector] [data-pc-section="trigger"]').click();
-        cy.get('[data-pc-section="item"]').contains('7').click();
+            .find('[data-cy=minLevelSelector] [data-pc-section="dropdownicon"]').click();
+        cy.get('[data-pc-section="option"]').contains('7').click();
 
         cy.get('@row1')
             .eq(5)
@@ -462,8 +462,8 @@ describe('Multiple Project Metrics', () => {
             .contains('No Projects Selected');
 
         for (let i = 0; i < 2; i += 1) {
-            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-            cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project ${i}`).click();
+            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+            cy.usrsInCommon().get(`[data-pc-section="option"]`).contains(`Grand Project ${i}`).click();
         }
 
 
@@ -567,8 +567,8 @@ describe('Multiple Project Metrics', () => {
             .contains('No Projects Selected');
 
         for (let i = 0; i < 2; i += 1) {
-            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-            cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project ${i}`).click();
+            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+            cy.usrsInCommon().get(`[data-pc-section="option"]`).contains(`Grand Project ${i}`).click();
         }
 
         const tableSelector = `${multiProjSel} tbody tr`;
@@ -578,7 +578,7 @@ describe('Multiple Project Metrics', () => {
         cy.get('[data-cy=findUsersBtn]')
             .click();
 
-        cy.get(`${multiProjSel} [data-pc-name="rowperpagedropdown"]`).click().get('[data-pc-section="item"]').contains('10').click();
+        cy.get(`${multiProjSel} [data-pc-name="pcrowperpagedropdown"]`).click().get('[data-pc-section="option"]').contains('10').click();
 
         const resTable = '[data-cy=usersInCommonResultTable]';
         const expected = [
@@ -628,11 +628,11 @@ describe('Multiple Project Metrics', () => {
         cy.usrsInCommon()
             .contains('No Projects Selected');
 
-        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-        cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project 0`).click();
+        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+        cy.usrsInCommon().get(`[data-pc-section="option"]`).contains(`Grand Project 0`).click();
 
-        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-        cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project 5`).click();
+        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+        cy.usrsInCommon().get(`[data-pc-section="option"]`).contains(`Grand Project 5`).click();
 
         const tableSelector = `${multiProjSel} tbody tr`;
         cy.get(tableSelector)
@@ -746,8 +746,8 @@ describe('Multiple Project Metrics', () => {
             .as('row1');
         cy.get('@row1')
             .eq(5)
-            .find('[data-cy=minLevelSelector] [data-pc-section="trigger"]').click();
-        cy.get('[data-pc-section="item"]').contains('3').click();
+            .find('[data-cy=minLevelSelector] [data-pc-section="dropdownicon"]').click();
+        cy.get('[data-pc-section="option"]').contains('3').click();
 
         cy.get('[data-cy=findUsersBtn]')
             .click();
@@ -813,8 +813,8 @@ describe('Multiple Project Metrics', () => {
 
         cy.get('@row2')
             .eq(5)
-            .find('[data-cy=minLevelSelector] [data-pc-section="trigger"]').click();
-        cy.get('[data-pc-section="item"]').contains('3').click();
+            .find('[data-cy=minLevelSelector] [data-pc-section="dropdownicon"]').click();
+        cy.get('[data-pc-section="option"]').contains('3').click();
 
         cy.get('[data-cy=findUsersBtn]')
             .click();
@@ -870,8 +870,8 @@ describe('Multiple Project Metrics', () => {
 
         cy.get('@row1')
             .eq(5)
-            .find('[data-cy=minLevelSelector] [data-pc-section="trigger"]').click();
-        cy.get('[data-pc-section="item"]').contains('7').click();
+            .find('[data-cy=minLevelSelector] [data-pc-section="dropdownicon"]').click();
+        cy.get('[data-pc-section="option"]').contains('7').click();
 
         cy.get('[data-cy=findUsersBtn]')
             .click();
@@ -927,8 +927,8 @@ describe('Multiple Project Metrics', () => {
 
         cy.get('@row2')
             .eq(5)
-            .find('[data-cy=minLevelSelector] [data-pc-section="trigger"]').click();
-        cy.get('[data-pc-section="item"]').contains('5').click();
+            .find('[data-cy=minLevelSelector] [data-pc-section="dropdownicon"]').click();
+        cy.get('[data-pc-section="option"]').contains('5').click();
 
         cy.get('[data-cy=findUsersBtn]')
             .click();
@@ -943,11 +943,11 @@ describe('Multiple Project Metrics', () => {
         cy.usrsInCommon()
             .contains('No Projects Selected');
 
-        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-        cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project 0`).click();
+        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+        cy.usrsInCommon().get(`[data-pc-section="option"]`).contains(`Grand Project 0`).click();
 
-        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-        cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project 5`).click();
+        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+        cy.usrsInCommon().get(`[data-pc-section="option"]`).contains(`Grand Project 5`).click();
 
         const tableSelector = `${multiProjSel} tbody tr`;
         cy.get(tableSelector)
@@ -972,8 +972,8 @@ describe('Multiple Project Metrics', () => {
             .eq(2)
             .contains('Grand Project 5');
 
-        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-        cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project 4`).click();
+        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+        cy.usrsInCommon().get(`[data-pc-section="option"]`).contains(`Grand Project 4`).click();
 
         cy.get('[data-cy=findUsersBtn]')
             .click();
@@ -993,7 +993,7 @@ describe('Multiple Project Metrics', () => {
             .eq(3)
             .contains('Grand Project 4');
 
-        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="removetokenicon"]')
+        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="removeicon"]')
             .should('have.length', 3)
             .as('removeBtns');
         cy.get('@removeBtns')
@@ -1022,14 +1022,14 @@ describe('Multiple Project Metrics', () => {
         cy.usrsInCommon()
             .contains('No Projects Selected');
 
-        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-        cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project 0`).click();
+        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+        cy.usrsInCommon().get(`[data-pc-section="option"]`).contains(`Grand Project 0`).click();
 
-        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-        cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project 5`).click();
+        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+        cy.usrsInCommon().get(`[data-pc-section="option"]`).contains(`Grand Project 5`).click();
 
-        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-        cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project 4`).click();
+        cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+        cy.usrsInCommon().get(`[data-pc-section="option"]`).contains(`Grand Project 4`).click();
 
         const tableSelector = `${multiProjSel} [data-cy=multiProjectUsersInCommon-inputProjs] tbody tr`;
         cy.get(tableSelector)
@@ -1056,7 +1056,7 @@ describe('Multiple Project Metrics', () => {
             .eq(3)
             .contains('Grand Project 4');
 
-        cy.get(`${multiProjSel} [data-cy=projectSelector] [data-pc-section="removetokenicon"]`)
+        cy.get(`${multiProjSel} [data-cy=projectSelector] [data-pc-section="removeicon"]`)
             .should('have.length', 3)
             .as('removeBtns');
         cy.get('@removeBtns')
@@ -1073,8 +1073,8 @@ describe('Multiple Project Metrics', () => {
             .contains('No Projects Selected');
 
         for (let i = 0; i < 2; i += 1) {
-            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-            cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project ${i}`).click();
+            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+            cy.usrsInCommon().get(`[data-pc-section="option"]`).contains(`Grand Project ${i}`).click();
         }
 
 
@@ -1176,8 +1176,8 @@ describe('Multiple Project Metrics', () => {
             .contains('No Projects Selected');
 
         for (let i = 0; i < 2; i += 1) {
-            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-            cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project ${i}`).click();
+            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+            cy.usrsInCommon().get(`[data-pc-section="option"]`).contains(`Grand Project ${i}`).click();
         }
 
         cy.get(tableSelector)
@@ -1196,8 +1196,8 @@ describe('Multiple Project Metrics', () => {
             .contains('No Projects Selected');
 
         for (let i = 0; i < 2; i += 1) {
-            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-name="dropdownbutton"]').click();
-            cy.usrsInCommon().get(`[data-pc-section="item"]`).contains(`Grand Project ${i}`).click();
+            cy.usrsInCommon('[data-cy=projectSelector] [data-pc-section="dropdown"]').click();
+            cy.usrsInCommon().get(`[data-pc-section="option"]`).contains(`Grand Project ${i}`).click();
         }
 
         cy.get(tableSelector)

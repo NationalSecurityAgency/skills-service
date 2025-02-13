@@ -658,10 +658,12 @@ Cypress.Commands.add("finalizeCatalogImport", (projNum = 1) => {
 
 
 Cypress.Commands.add("acceptRemovalSafetyCheck", () => {
-    cy.contains('Delete Action CANNOT be undone');
-    cy.get('[data-cy="currentValidationText"]').type('Delete Me')
-    cy.get('[data-cy="saveDialogBtn"]').click();
-    cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
+    cy.get('[data-pc-name="dialog"]').contains('Delete Action CANNOT be undone');
+    cy.get('[data-pc-name="dialog"] [data-cy="saveDialogBtn"]').should('be.disabled')
+    cy.get('[data-pc-name="dialog"] [data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
+    cy.get('[data-pc-name="dialog"] [data-cy="saveDialogBtn"]').should('be.enabled')
+    cy.get('[data-pc-name="dialog"] [data-cy="saveDialogBtn"]').click();
+    cy.get('[data-pc-name="dialog"] [data-cy="saveDialogBtn"]').should('not.exist')
 });
 
 Cypress.Commands.add("discardChanges", () => {
@@ -1312,7 +1314,7 @@ Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, on
             const nextPage = (i / pageSize) + 1;
             const nextPageSize = (i + pageSize <= numRows) ? pageSize : (numRows % pageSize);
             cy.log(`Going to the next page #${nextPage}, next page size is [${nextPageSize}]`);
-            cy.get(`${tableSelector} [data-pc-name="paginator"] [aria-label="Page ${nextPage}"]`).click();
+            cy.get(`${tableSelector} [data-pc-name="pcpaginator"] [aria-label="Page ${nextPage}"]`).click();
             cy.get(tableSelector).contains('Loading...').should('not.exist')
             cy.get(rowSelector).should('have.length', nextPageSize).as('cyRows');
         }
@@ -1528,11 +1530,11 @@ Cypress.Commands.add('visitAdmin', () => {
 
 Cypress.Commands.add('selectItem', (selector, item, openPicker = true, autoCompleteDropdown = false) => {
     if (openPicker) {
-        const trigger = autoCompleteDropdown ? '[data-pc-name="dropdownbutton"]' : '[data-pc-section="trigger"]';
+        const trigger = autoCompleteDropdown ? '[data-pc-name="dropdownbutton"]' : '[data-pc-section="dropdownicon"]';
         const itemToSelect = `${selector} ${trigger}`;
         cy.get(itemToSelect).click();
     }
-    cy.get('[data-pc-section="item"]').contains(item).click();
+    cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains(item).click();
 })
 
 Cypress.Commands.add('selectSkill', (selector, skillId, searchString = '', projId='proj1') => {
@@ -1592,4 +1594,14 @@ Cypress.Commands.add('approveAllRequests', () => {
 
 Cypress.Commands.add('assignUserAsAdmin', (projId, userId) => {
     cy.request('PUT', `/admin/projects/${projId}/users/${userId}/roles/ROLE_PROJECT_ADMIN`)
+})
+
+Cypress.Commands.add('typeInMarkdownEditor', (selector, text) => {
+    const fullSelector = `${selector} .toastui-editor-ww-container`
+    cy.get(fullSelector).should('be.visible')
+    cy.get(fullSelector).type(text, {delay:0 })
+})
+
+Cypress.Commands.add('typeQuestion', (text) => {
+    cy.typeInMarkdownEditor('[data-cy="questionText"]', text)
 })

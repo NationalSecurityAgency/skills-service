@@ -180,6 +180,7 @@ defineExpose({
           :suggestions="internalSearch ? optionsInternal : options"
           :placeholder="placeholder"
           class="st-skills-selector"
+          :pt="{ dropdown: { 'aria-label': 'click to select a skill' } }"
           :class="props.class"
           :fluid="true"
           :dropdown="showDropdown"
@@ -187,7 +188,6 @@ defineExpose({
           :disabled="disabled"
           :loading="isLoading"
           @complete="searchChanged"
-          @item-select="added"
           @option-select="added"
           @clear="added"
           @blur="handleBlur"
@@ -210,30 +210,30 @@ defineExpose({
               <div style="font-size: 0.8rem;">
               <span class="skills-option-id">
                 <span v-if="showProject" data-cy="skillsSelectionItem-projectId"><span
-                    class="uppercase mr-1 font-italic">Project ID:</span><span
+                    class="uppercase mr-1 italic">Project ID:</span><span
                     class="font-bold"
                     data-cy="skillsSelector-projectId">{{ slotProps.option.projectId }}</span></span>
                 <span v-if="!showProject" data-cy="skillsSelectionItem-skillId">
-                  <span class="uppercase mr-1 font-italic">ID:</span>
+                  <span class="uppercase mr-1 italic">ID:</span>
                   <span class="font-bold" data-cy="skillsSelector-skillId">
                   {{ removeReuseTag(slotProps.option.skillId) }}
                   </span>
                 </span>
               </span>
                 <span class="mx-2" v-if="slotProps.option.type !== 'Badge'">|</span>
-                <span v-if="slotProps.option.type === 'Skill'" class="uppercase mr-1 font-italic"
+                <span v-if="slotProps.option.type === 'Skill'" class="uppercase mr-1 italic"
                       data-cy="skillsSelectionItem-subjectId">Subject:</span>
                 <span v-if="slotProps.option.type === 'Skill'"
                       class="font-bold skills-option-subject-name"
                       data-cy="skillsSelector-subjectName">{{ slotProps.option.subjectName }}</span>
-                <span v-if="slotProps.option.type === 'Shared Skill'" class="uppercase mr-1 font-italic"
+                <span v-if="slotProps.option.type === 'Shared Skill'" class="uppercase mr-1 italic"
                       data-cy="skillsSelectionItem-projectName">Project:</span>
                 <span v-if="slotProps.option.type === 'Shared Skill'"
                       class="font-bold skills-option-subject-name"
                       data-cy="skillsSelector-projectName">{{ slotProps.option.projectName }}</span>
                 <span v-if="slotProps.option.groupName">
                 <span class="mx-2">|</span>
-                <span class="uppercase mr-1 font-italic skills-option-group-name" data-cy="skillsSelectionItem-group">Group:</span><span
+                <span class="uppercase mr-1 italic skills-option-group-name" data-cy="skillsSelectionItem-group">Group:</span><span
                     class="font-bold skills-id"
                     data-cy="skillsSelector-groupName">{{ slotProps.option.groupName }}</span>
               </span>
@@ -247,9 +247,9 @@ defineExpose({
           </li>
         </template>
         <template #empty>
-          <span v-if="emptyWithoutSearch && !internalSearch && !currentSearch" class="px-3"><i class="fas fa-search"/> Type to <span
+          <span v-if="emptyWithoutSearch && !internalSearch && !currentSearch" class="px-4"><i class="fas fa-search"/> Type to <span
             class="font-bold">search</span> for skills...</span>
-          <span class="px-3" v-else>No results found. Consider changing the search query</span>
+          <span class="px-4" v-else>No results found. Consider changing the search query</span>
         </template>
       </AutoComplete>
     </div>

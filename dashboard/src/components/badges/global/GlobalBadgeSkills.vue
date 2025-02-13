@@ -142,21 +142,23 @@ const focusOnSkillsSelector = () => {
   })
 }
 const skillAdded = (newItem) => {
-  loading.value.skillOp = true;
-  GlobalBadgeService.assignSkillToBadge(badgeId.value, newItem.projectId, newItem.skillId)
-      .then(() => {
-        badgeSkills.value.push(newItem);
-        availableSkills.value = availableSkills.value.filter((item) => `${item.projectId}${item.skillId}` !== `${newItem.projectId}${newItem.skillId}`);
-        badgeState.loadGlobalBadgeDetailsState( badgeId.value ).then(() => {
-          announcer.polite('skill has been added to global badge')
-          badge.value = badgeState.badge;
-        });
-        loading.value.skillOp = false;
-        emit('skills-changed', newItem);
-      })
-      .finally(() => {
-        focusOnSkillsSelector()
-      })
+  if (newItem) {
+    loading.value.skillOp = true;
+    GlobalBadgeService.assignSkillToBadge(badgeId.value, newItem.projectId, newItem.skillId)
+        .then(() => {
+          badgeSkills.value.push(newItem);
+          availableSkills.value = availableSkills.value.filter((item) => `${item.projectId}${item.skillId}` !== `${newItem.projectId}${newItem.skillId}`);
+          badgeState.loadGlobalBadgeDetailsState(badgeId.value).then(() => {
+            announcer.polite('skill has been added to global badge')
+            badge.value = badgeState.badge;
+          });
+          loading.value.skillOp = false;
+          emit('skills-changed', newItem);
+        })
+        .finally(() => {
+          focusOnSkillsSelector()
+        })
+  }
   searchChanged('');
 };
 
@@ -170,10 +172,10 @@ const searchChanged = (query) => {
   <div>
     <sub-page-header title="Skills"/>
 
-    <Card :pt="{ body: { class: 'p-0' }, content: { class: 'p-0' } }">
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
         <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp">
-          <div class="px-3 py-4">
+          <div class="px-4 py-6">
            <skills-selector :options="availableSkills"
                             ref="skillsSelector"
                             v-on:added="skillAdded" v-on:search-change="searchChanged"
@@ -221,7 +223,7 @@ const searchChanged = (query) => {
             </SkillsDataTable>
           </div>
 
-          <no-content2 v-else title="No Skills Added Yet..." icon="fas fa-award" class="py-5"
+          <no-content2 v-else title="No Skills Added Yet..." icon="fas fa-award" class="py-8"
                        message="Please use drop-down above to start adding skills to this badge!"></no-content2>
         </loading-container>
       </template>

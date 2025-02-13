@@ -418,7 +418,7 @@ describe('Markdown Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@inceptionLevel');
         cy.get('[data-cy="inception-button"]').contains('Level 0');
-        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtoggler"]`).click()
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]').contains('Emojis');
         cy.get('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]').contains('👍 👍 👍 👍');
     });

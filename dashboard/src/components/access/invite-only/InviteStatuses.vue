@@ -228,10 +228,9 @@ defineExpose({
             <i class="fas fa-hourglass-half mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
           </template>
           <template #body="slotProps">
-            <div class="flex align-items-center">
+            <div class="flex items-center">
               <InlineMessage
                 v-if="isExpired(slotProps.data.expires)"
-                icon="fas fa-exclamation-triangle"
                 class="mr-1"
                 severity="error">
                 expired
@@ -260,7 +259,7 @@ defineExpose({
                       :id="`extendMenuSelection-${slotProps.index}`"
                       :model="inviteExtensionMenuItems" :popup="true">
                   <template #item="{ item }">
-                    <div class="pb-2 pl-4">
+                    <div class="pb-2 pl-6">
                       <a
                         :data-cy="`invite-${slotProps.index}-extension`"
                         @click="extendExpiration(item.value)">{{ item.label }}</a>

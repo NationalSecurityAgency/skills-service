@@ -79,7 +79,7 @@ const onSkillSaved = (skill) => {
     @saved="onSkillSaved">
 
     <Message :closable="false" icon="fas fa-book">
-      This skill was imported from <span class="font-italic">{{ skill.copiedFromProjectName }}</span> and can only be modified in that project.
+      This skill was imported from <span class="italic">{{ skill.copiedFromProjectName }}</span> and can only be modified in that project.
       You can change the <b>Point Increment</b> in order to scale the total points to your project's point layout.
     </Message>
 

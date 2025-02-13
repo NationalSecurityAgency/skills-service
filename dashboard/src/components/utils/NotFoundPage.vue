@@ -20,20 +20,20 @@ defineProps({
 </script>
 
 <template>
-  <div class="my-5">
-    <div class="text-center text-color-secondary">
-      <div class="flex justify-content-center">
-        <div class="border-circle w-6rem h-6rem m-2 surface-500 font-bold flex align-items-center justify-content-center">
-          <i class="text-0 text-6xl fas fa-exclamation-triangle"></i>
+  <div class="my-8">
+    <div class="text-center text-muted-color">
+      <div class="flex justify-center">
+        <div class="rounded-full w-24 h-24 m-2 bg-surface-500 dark:bg-surface-300 font-bold flex items-center justify-center">
+          <i class="text-surface-0 dark:text-surface-900 text-6xl fas fa-exclamation-triangle"></i>
         </div>
       </div>
     </div>
-    <div class="text-center text-color-secondary text-2xl mt-2">
+    <div class="text-center text-muted-color text-2xl mt-2">
       Resource Not Found
     </div>
 
     <div class="container-fluid">
-      <div class="row justify-content-center text-red-500 mt-3">
+      <div class="row justify-center text-red-500 mt-4">
         <div class="col col-sm-8 col-md-6 col-lg-4 text-center" data-cy="notFoundExplanation">
           <p v-if="explanation">
             {{ explanation }}

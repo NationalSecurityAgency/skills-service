@@ -66,7 +66,7 @@ const contactProjectAdmins = (values) => {
     save-button-icon="fas fa-envelope-open-text"
     :cancelButtonLabel="sent ? 'OK' : 'Cancel'"
     :cancel-button-icon="sent ? 'fas fa-check' : 'fas fa-times'"
-    :cancel-button-severity="sent ? 'success' : 'warning'"
+    :cancel-button-severity="sent ? 'success' : 'warn'"
     :show-save-button="!sent"
     :save-data-function="contactProjectAdmins"
     :header="`Contact ${props.projectName ? props.projectName : 'Project'}`"

@@ -66,12 +66,12 @@ defineExpose({
 </script>
 
 <template>
-  <div class="field w-full">
+  <div class="flex flex-col gap-2">
     <label for="idInput">* {{ label }}</label>
     <InputGroup>
       <InputGroupAddon>
         <div style="width: 3.3rem !important;">
-          <InputSwitch
+          <ToggleSwitch
             v-model="canEdit"
             style="height:1rem !important;"
             size="small"
@@ -97,8 +97,12 @@ defineExpose({
       data-cy="idInputValue" />
 
     </InputGroup>
-    <!--        @input="dataChanged"-->
-    <small role="alert" class="p-error" data-cy="idError" id="idError">{{ errorMessage }}</small>
+    <Message severity="error"
+             variant="simple"
+             size="small"
+             data-cy="idError"
+             :closable="false"
+             id="idError">{{ errorMessage || '' }}</Message>
   </div>
 </template>
 

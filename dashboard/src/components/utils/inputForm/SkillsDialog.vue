@@ -18,6 +18,7 @@ import { onMounted, onBeforeUnmount } from 'vue';
 import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
+import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -49,7 +50,7 @@ const props = defineProps({
   },
   cancelButtonSeverity: {
     type: String,
-    default: 'warning'
+    default: 'warn'
   },
   okButtonDisabled: Boolean,
   showOkButton: {
@@ -66,7 +67,7 @@ const props = defineProps({
   },
   dialogClass: {
     type: String,
-    default: 'w-11 xl:w-10'
+    default: 'w-11/12 xl:w-10/12'
   },
   footerClass: {
     type: String,
@@ -124,6 +125,8 @@ const handleEscape = (event) => {
 defineExpose({
   handleClose
 })
+
+const dialogUtils = useDialogUtils()
 </script>
 
 <template>
@@ -135,20 +138,20 @@ defineExpose({
           :maximizable="true"
           :header="header"
           :class="dialogClass"
-          :pt="{ maximizableButton: { 'aria-label': 'Expand to full screen and collapse back to the original size of the dialog' } }"
+          :pt="{ pcMaximizeButton: dialogUtils.getMaximizeButtonPassThrough() }"
   >
     <skills-spinner :is-loading="loading" />
 
     <div v-if="!loading" v-focustrap :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }">
       <slot></slot>
 
-      <div :class="`text-right ${footerClass}`">
+      <div :class="`text-right ${footerClass}`" class="flex justify-end">
         <SkillsButton
             v-if="showCancelButton"
             :label="cancelButtonLabel"
             :icon="cancelButtonIcon"
             :severity="cancelButtonSeverity"
-            outlined size="small"
+            outlined
             class="float-right mr-2"
             :disabled="submitting"
             @click="onCancel"
@@ -158,7 +161,7 @@ defineExpose({
             :label="okButtonLabel"
             :icon="okButtonIcon"
             :severity="okButtonSeverity"
-            outlined size="small"
+            outlined
             class="float-right"
             @click="onOk"
             :disabled="okButtonDisabled || submitting"

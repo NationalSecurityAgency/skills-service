@@ -110,8 +110,8 @@ describe('Quiz Read Only Role Tests', () => {
         })
 
         cy.visit(`/administrator/projects/proj1/subjects/subj1/`);
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="selfReportCell-skill2-quiz"]').contains('This is quiz 2').click()
         cy.get('[data-cy="pageHeader"] [data-cy="userRole"]').should('have.text', 'Admin')
         cy.runCheck()

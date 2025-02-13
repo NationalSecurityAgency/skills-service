@@ -45,15 +45,15 @@ const supportLinksProps = computed(() => {
 </script>
 
 <template>
-  <div class="mt-4 py-4 px-3 flex bg-primary-reverse border-top border-top-1 border-200 flex-column sm:flex-row gap-3 sm:gap-0"
+  <div class="mt-6 py-6 px-4 text-gray-600 dark:text-gray-100 flex bg-primary-contrast border-top border-t border-surface-200 dark:border-surface-600 flex-col sm:flex-row gap-4 sm:gap-0"
        data-cy="dashboardFooter">
-    <div class="flex-1 flex sm:justify-content-start align-items-end align-content-end text-left">
+    <div class="flex-1 flex sm:justify-start items-end content-end text-left">
       <skill-tree-arrows />
       <div>
-        <div>
+        <div class="text-primary">
           SkillTree Dashboard
         </div>
-        <div v-if="supportLinksProps && supportLinksProps.length > 0">
+        <div v-if="supportLinksProps && supportLinksProps.length > 0" class="">
               <span v-for="(supportLink, index) in supportLinksProps" :key="supportLink.label">
                 <a :href="supportLink.link" class="underline" :data-cy="`supportLink-${supportLink.label}`"
                    target="_blank"><i :class="supportLink.icon" class="mr-1" aria-hidden="true"/>{{ supportLink.label}}</a>
@@ -62,7 +62,7 @@ const supportLinksProps = computed(() => {
         </div>
       </div>
     </div>
-    <div class="flex align-items-end ml-3 sm:ml-0" data-cy="dashboardVersionContainer">
+    <div class="flex items-end ml-4 sm:ml-0" data-cy="dashboardVersionContainer">
       <div class="mr-2"
             :title="skillTreeVersionTitle"
             data-cy="dashboardVersion">v{{ appConfig.dashboardVersion }}</div>

@@ -96,7 +96,7 @@ describe('Import From Catalog Table Tests', () => {
 
         Cypress.Commands.add('validateNoSkillsSelected', (numSkills = 5) => {
             for (let i= 0; i <numSkills ; i++) {
-                cy.get(`[data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('not.be.checked')
+                cy.get(`[data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
             }
         });
 
@@ -115,14 +115,14 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="numSelectedSkills"]')
             .should('have.text', '0');
 
-        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"]').click()
-        cy.get('[data-p-index="3"] [data-pc-name="rowcheckbox"]').click()
+        cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-p-index="3"] [data-pc-name="pcrowcheckbox"]').click()
 
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"] input').should('not.be.checked')
-        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"] input').should('be.checked')
-        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"] input').should('not.be.checked')
-        cy.get('[data-p-index="3"] [data-pc-name="rowcheckbox"] input').should('be.checked')
-        cy.get('[data-p-index="4"] [data-pc-name="rowcheckbox"] input').should('not.be.checked')
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"] input').should('not.be.checked')
+        cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"] input').should('be.checked')
+        cy.get('[data-p-index="2"] [data-pc-name="pcrowcheckbox"] input').should('not.be.checked')
+        cy.get('[data-p-index="3"] [data-pc-name="pcrowcheckbox"] input').should('be.checked')
+        cy.get('[data-p-index="4"] [data-pc-name="pcrowcheckbox"] input').should('not.be.checked')
 
         cy.get('[data-cy="numSelectedSkills"]').should('have.text', '2');
         cy.get('[data-cy="importBtn"]').should('be.enabled');
@@ -133,19 +133,19 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="importFromCatalogBtn"]')
             .click();
 
-        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
-        cy.get('[data-p-index="0"] [data-pc-name="rowcheckbox"] input').should('be.checked')
-        cy.get('[data-p-index="1"] [data-pc-name="rowcheckbox"] input').should('be.checked')
-        cy.get('[data-p-index="2"] [data-pc-name="rowcheckbox"] input').should('be.checked')
-        cy.get('[data-p-index="3"] [data-pc-name="rowcheckbox"] input').should('be.checked')
-        cy.get('[data-p-index="4"] [data-pc-name="rowcheckbox"] input').should('be.checked')
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"] input').should('be.checked')
+        cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"] input').should('be.checked')
+        cy.get('[data-p-index="2"] [data-pc-name="pcrowcheckbox"] input').should('be.checked')
+        cy.get('[data-p-index="3"] [data-pc-name="pcrowcheckbox"] input').should('be.checked')
+        cy.get('[data-p-index="4"] [data-pc-name="pcrowcheckbox"] input').should('be.checked')
 
         cy.get('[data-cy="numSelectedSkills"]')
             .should('have.text', '5');
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.validateNoSkillsSelected();
     });
 
@@ -162,10 +162,10 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
 
-        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
 
         for (let i= 0; i < 8 ; i++) {
-            cy.get(`[data-p-index="${i}"] [data-pc-name="rowcheckbox"] input`).should('be.checked')
+            cy.get(`[data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
         }
 
         cy.get('[data-cy="numSelectedSkills"]')
@@ -173,7 +173,7 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="importBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="headercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="importSkillsFromCatalogTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.validateNoSkillsSelected();
     });
 
@@ -427,7 +427,7 @@ describe('Import From Catalog Table Tests', () => {
 
         cy.get(`${tableSelector} [data-cy="skillsBTableTotalRows"]`)
             .should('have.text', '8');
-        cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="skillToImportInfo-proj1_skill1"]')
             .contains('Self Report: N/A');
         cy.get('[data-cy="skillToImportInfo-proj1_skill1"]')
@@ -442,7 +442,7 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="skillToImportInfo-proj1_skill1"] [data-cy="totalPts"]')
             .should('have.text', '80');
 
-        cy.get('[data-p-index="1"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="1"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="skillToImportInfo-proj2_skill2"]')
             .contains('Self Report: Requires Approval');
         cy.get('[data-cy="skillToImportInfo-proj2_skill2"] [data-cy="importedSkillInfoDescription"]')
@@ -454,7 +454,7 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="skillToImportInfo-proj2_skill2"] [data-cy="totalPts"]')
             .should('have.text', '105');
 
-        cy.get('[data-p-index="2"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="2"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="skillToImportInfo-proj2_skill3Subj3"]')
             .contains('Self Report: Honor System');
         cy.get('[data-cy="skillToImportInfo-proj2_skill3Subj3"] [data-cy="projId"]')
@@ -464,7 +464,7 @@ describe('Import From Catalog Table Tests', () => {
         cy.get('[data-cy="skillToImportInfo-proj2_skill3Subj3"] [data-cy="totalPts"]')
             .should('have.text', '80');
 
-        cy.get('[data-p-index="3"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="3"] [data-pc-section="rowtogglebutton"]').click()
         // make sure markdown is not shown
         cy.get('[data-cy="skillToImportInfo-proj1_skill4Subj2"] [data-cy="importedSkillInfoDescription"]')
             .should('have.text', 'Title\n');

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { inject } from 'vue'
+import { inject, useSlots } from 'vue'
 import { useField } from 'vee-validate'
 import {
   useSkillsInputFallthroughAttributes
@@ -49,6 +49,7 @@ const props = defineProps({
     default: ''
   },
 })
+const slots = useSlots()
 const emit = defineEmits(['input', 'keydown-enter'])
 
 const { value, errorMessage } = useField(() => props.name);
@@ -60,13 +61,16 @@ const onEnter = (event) => {
   emit('keydown-enter', event.target.value)
 }
 const fallthroughAttributes = useSkillsInputFallthroughAttributes()
+
 </script>
 
 <template>
-  <div class="field text-left" v-bind="fallthroughAttributes.rootAttrs.value">
+  <div class="flex flex-col gap-2" v-bind="fallthroughAttributes.rootAttrs.value">
     <label v-if="label" :for="name"><span v-if="isRequired">*</span> {{ label }} </label>
     <InputGroup>
-      <slot name="addOnBefore"></slot>
+      <InputGroupAddon v-if="slots.addOnBefore">
+        <slot name="addOnBefore"></slot>
+      </InputGroupAddon>
       <InputText
           class="w-full"
           type="text"
@@ -83,12 +87,18 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
           :aria-invalid="!!errorMessage"
           :aria-errormessage="`${name}Error`"
           :aria-describedby="`${name}Error`"/>
+      <InputGroupAddon v-if="slots.addOnAfter">
+        <slot name="addOnAfter"></slot>
+      </InputGroupAddon>
     </InputGroup>
-      <small
-        role="alert"
-        class="p-error"
+    <Message
+        severity="error"
+        variant="simple"
+        size="small"
+        :closable="false"
         :data-cy="`${name}Error`"
-        :id="`${name}Error`">{{ errorMessage || '' }}</small>
+        :id="`${name}Error`">{{ errorMessage || '' }}
+    </Message>
     <slot name="footer"/>
   </div>
 </template>

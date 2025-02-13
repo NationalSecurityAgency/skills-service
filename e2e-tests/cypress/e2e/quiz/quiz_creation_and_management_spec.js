@@ -54,7 +54,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizName"]').type('My First Survey')
         // cy.get('[data-cy="quizTypeSelector"]').select('Survey')
         cy.get('[data-cy="quizTypeSelector"]').click()
-        cy.get('[data-pc-section="itemlabel"]').contains('Survey').click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="optionlabel"]').contains('Survey').click()
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="quizName"]').should('not.exist')
         cy.get('[data-cy="btn_Quizzes And Surveys"]').should('have.focus')
@@ -432,7 +432,7 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="deleteQuizButton_quiz2"]').click()
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove This is survey 2 Survey')
-        cy.get('[data-cy="currentValidationText"]').type('Delete Me')
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
         cy.get('[data-cy="saveDialogBtn"]').click()
 
         cy.get(`${quizTableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', 3)
@@ -700,7 +700,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
 
         cy.get('[data-cy="copyQuizButton_quiz1"]').click()
-        cy.get('[data-pc-section="closebuttonicon"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]').click()
         cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
 
     });

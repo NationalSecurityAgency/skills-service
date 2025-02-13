@@ -60,17 +60,17 @@ const getApprover = (item) => {
 
 <template>
   <div class="pt-2">
-    <Timeline :pt="{ opposite: { class: 'p-0 flex-none' } }" :value="props.events" align="left" data-cy="approvalHistoryTimeline">
+    <Timeline :pt="{ eventOpposite: { class: '!p-0 !flex-none' } }" :value="props.events" align="left" data-cy="approvalHistoryTimeline">
       <template #marker="slotProps">
-        <span class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1" :class="getIconBackground(slotProps.item)">
+        <div class="w-[2rem] h-[2rem] p-0 rounded-full text-white flex items-center justify-center" :class="getIconBackground(slotProps.item)">
             <i :class="getIconClass(slotProps.item)"></i>
-        </span>
+        </div>
       </template>
       <template #content="slotProps">
-        <div class="py-2">
+        <div class="flex items-center gap-1">
           <span class="font-bold">{{ slotProps.item.eventStatus }}</span>
-          <span v-if="getApprover(slotProps.item)" class="text-muted text-sm pl-0" data-cy="approver"> (<span class="font-italic">by</span> {{ getApprover(slotProps.item) }})</span>
-          <i class="fas fa-circle px-2 text-400" style="font-size: .5rem;"></i>
+          <span v-if="getApprover(slotProps.item)" class="text-muted text-sm pl-0" data-cy="approver"> (<span class="italic">by</span> {{ getApprover(slotProps.item) }})</span>
+          <i class="fas fa-circle px-1 text-surface-400" style="font-size: .5rem;"></i>
           <small class="text-muted py-2" :title="`${timeUtils.formatDate(slotProps.item.eventTime)}`">{{timeUtils.relativeTime(slotProps.item.eventTime)}}</small>
         </div>
         <div v-if="selfReportHelper.isFailed(slotProps.item.eventStatus)" class="pb-2">

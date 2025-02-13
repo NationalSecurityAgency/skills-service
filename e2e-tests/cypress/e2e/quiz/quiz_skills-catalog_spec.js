@@ -35,7 +35,7 @@ describe('Quiz Skills Catalog Tests', () => {
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="importFromCatalogBtn"]')
             .click();
-        cy.get('[data-p-index="0"] [data-pc-section="rowtoggler"]').click()
+        cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="skillToImportInfo-proj1_skill1"]').contains('Self Report: Quiz/Survey')
     });
 
@@ -53,8 +53,8 @@ describe('Quiz Skills Catalog Tests', () => {
         cy.importSkillFromCatalog(2, 1, 1, 1);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
-        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="trigger"]').click()
-        cy.get('[data-pc-section="panel"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('Survey-Based Validation')
         cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('This is survey 1').should('not.exist')
     });
