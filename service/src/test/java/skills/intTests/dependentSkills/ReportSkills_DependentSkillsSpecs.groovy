@@ -15,33 +15,18 @@
  */
 package skills.intTests.dependentSkills
 
-import org.springframework.beans.factory.annotation.Autowired
+
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.SkillDef
-import skills.storage.repos.UserAchievedLevelRepo
-import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.UserPerformedSkillRepo
-import skills.storage.repos.UserPointsRepo
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
-
-    @Autowired
-    UserPerformedSkillRepo performedSkillRepository
-
-    @Autowired
-    UserAchievedLevelRepo achievedLevelRepo
-
-    @Autowired
-    UserEventsRepo userEventsRepo
-
-    @Autowired
-    UserPointsRepo userPointsRepo
 
     List<String> sampleUserIds // loaded from system props
 
@@ -1166,8 +1151,8 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
         quizRes2
         quizRes2.passed
 
-        performedSkillRepository.findAll().size() == 0
-        achievedLevelRepo.findAll().size() == 0
+        userPerformedSkillRepo.findAll().size() == 0
+        userAchievedRepo.findAll().size() == 0
         userEventsRepo.findAll().size() == 0
         userPointsRepo.findAll().size() == 0
     }
@@ -1213,8 +1198,8 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
         quizRes2
         quizRes2.passed
 
-        performedSkillRepository.findAll().size() == 0
-        achievedLevelRepo.findAll().size() == 0
+        userPerformedSkillRepo.findAll().size() == 0
+        userAchievedRepo.findAll().size() == 0
         userEventsRepo.findAll().size() == 0
         userPointsRepo.findAll().size() == 0
     }
@@ -1228,7 +1213,7 @@ class ReportSkills_DependentSkillsSpecs extends DefaultIntSpec {
 
     private def getPerformedSkillsForUser(String userId, String projectId) {
         PageRequest allPlease = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(Sort.Direction.DESC, "performedOn"))
-        List<UserPerformedSkillRepo.PerformedSkillQRes> performedSkills = performedSkillRepository.findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, '', allPlease)
+        List<UserPerformedSkillRepo.PerformedSkillQRes> performedSkills = userPerformedSkillRepo.findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(userId, projectId, '', allPlease)
         return performedSkills
     }
 }
