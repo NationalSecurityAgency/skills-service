@@ -311,7 +311,7 @@ describe('Client Display Theme Components Tests', () => {
     cy.assignSkillToBadge(1, 1, 2)
     cy.enableBadge(1, 1)
 
-    const url = '/subjects/subj1/?themeParam=textPrimaryColor|black'
+    const url = '/subjects/subj1/?themeParam=textPrimaryColor|purple'
     cy.cdVisit(url)
     cy.get('[data-cy="clearSkillsSearchInput"]').tab().type('{enter}')
     cy.matchSnapshotImageForElement('[data-pc-name="panelmenu"]')
