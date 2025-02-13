@@ -20,6 +20,7 @@ import skills.services.quiz.QuizQuestionType
 class QuizQuestionDefResult {
     Integer id
     String question
+    String answerHint
     QuizQuestionType questionType
 
     List<QuizAnswerDefResult> answers

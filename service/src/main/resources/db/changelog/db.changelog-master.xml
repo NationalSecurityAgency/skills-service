@@ -2821,4 +2821,10 @@
                                  referencedTableName="user_attrs"/>
     </changeSet>
 
+    <changeSet id="50" author="skills team">
+        <addColumn tableName="quiz_question_definition">
+            <column name="answer_hint" type="text"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

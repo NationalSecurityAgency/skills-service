@@ -552,6 +552,7 @@ class QuizDefService {
         QuizQuestionDef questionDef = new QuizQuestionDef(
                 quizId: quizDef.quizId,
                 question: InputSanitizer.sanitize(questionDefRequest.question),
+                answerHint: questionDefRequest.answerHint,
                 type: questionDefRequest.questionType,
                 displayOrder: displayOrder,
         )
@@ -563,6 +564,7 @@ class QuizDefService {
     private QuizQuestionDef updateQuizQuestionDef(String quizId, int existingQuestionId, QuizQuestionDefRequest questionDefRequest) {
         QuizQuestionDef existing = getQuestingDef(quizId, existingQuestionId)
         existing.question = InputSanitizer.sanitize(questionDefRequest.question)
+        existing.answerHint = questionDefRequest.answerHint
         existing.type = questionDefRequest.questionType
         QuizQuestionDef savedQuestion = quizQuestionRepo.saveAndFlush(existing)
         return savedQuestion
@@ -773,6 +775,7 @@ class QuizDefService {
         new QuizQuestionDefResult(
                 id: savedQuestion.id,
                 question: InputSanitizer.unsanitizeForMarkdown(savedQuestion.question),
+                answerHint: savedQuestion.answerHint,
                 questionType: savedQuestion.type,
                 answers: savedAnswers.collect { convert (it)}.sort { it.displayOrder},
                 displayOrder: savedQuestion.displayOrder,
@@ -946,6 +949,7 @@ class QuizDefService {
         QuizValidator.isNotNull(questionDefRequest.questionType, "questionType", quizId)
 
         propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Question", questionDefRequest.question, quizDef.quizId)
+        propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizAnswerHintLength, "Answer Hint", questionDefRequest.answerHint, quizDef.quizId)
         int numQuestions = quizQuestionRepo.countByQuizId(quizDef.quizId)
         propsBasedValidator.quizValidationMaxIntValue(PublicProps.UiProp.maxQuestionsPerQuiz, "Number of Questions", numQuestions + 1, quizDef.quizId)
         CustomValidationResult customValidationResult = customValidator.validateDescription(questionDefRequest.question, null, null, quizDef.quizId)

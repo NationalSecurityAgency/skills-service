@@ -190,6 +190,16 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="answersError"]').should('not.be.visible')
     });
 
+    it('modal validation: answer tip is not shown on survey questions', function () {
+        cy.createSurveyDef(1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="btn_Questions"]').click()
+
+        cy.get('[data-cy="answerHintSection"]').should('not.exist')
+        cy.get('[data-cy="answerHintEnableCheckbox"]').should('not.exist')
+        cy.get('[data-cy="answerHint"]').should('not.exist')
+    });
+
     it('empty answers are ignored', function () {
         cy.createSurveyDef(1);
         cy.visit('/administrator/quizzes/quiz1');

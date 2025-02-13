@@ -54,6 +54,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '0')
 
         cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
+        cy.get('[data-cy="answerHintEnableCheckbox"]').click()
+        cy.get('[data-cy="answerHint"]').type('Trying counting with your fingers :)')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
@@ -75,6 +77,8 @@ describe('Quiz Question CRUD Tests', () => {
 
         cy.openDialog('[data-cy="newQuestionOnBottomBtn"]', true)
         cy.get('[data-cy="questionText"]').type('What is 1 + 2?')
+        cy.get('[data-cy="answerHintEnableCheckbox"]').click()
+        cy.get('[data-cy="answerHint"]').type('Trying counting with your fingers for this one too :)')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
         cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('1')
@@ -172,6 +176,57 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="questionText"] div.toastui-editor-contents[contenteditable="true"]').clear()
         cy.get('[data-cy="descriptionError"]').contains('Question is a required field')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+    });
+
+    it('modal validation: answer hint text', function () {
+        cy.createQuizDef(1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="answerHintEnableCheckbox"]').click()
+        cy.get('[data-cy="answerHintError"]').should('not.be.visible')
+
+        cy.get('[data-cy="answerHint"]').type('What is jabberwocky?')
+        cy.get('[data-cy="answerHintError"]').contains('Answer Hint - paragraphs may not contain jabberwocky')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="answerHint"]').clear().type('a hint')
+        cy.get('[data-cy="answerHintError"]').should('not.be.visible')
+    });
+
+    it('modal validation: answer hint text is required when enabled', function () {
+        cy.createQuizDef(1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+
+        cy.get('[data-cy="questionText"]').type('a')
+
+        cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="answersError"]').contains('Must have at least 2 answers')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('2')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="answerHint"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerHintEnableCheckbox"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="answerHintError"]').should('not.be.visible')
+
+        cy.get('[data-cy="answerHint"]').type('This is a hint')
+        cy.get('[data-cy="answerHintError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerHint"]').clear()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="answerHintEnableCheckbox"]').click()
+        cy.get('[data-cy="answerHint"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
     });
 
     it('modal validation: at least 2 answers are required', function () {
@@ -338,6 +393,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
         cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
+        cy.get('[data-cy="answerHintEnableCheckbox"]').click()
+        cy.get('[data-cy="answerHint"]').type('Trying counting with your fingers :)')
 
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('2')
@@ -375,6 +432,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-0"] [data-cy="removeAnswer"]').click()
 
         cy.get('[data-cy="questionText"]  div.toastui-editor-contents[contenteditable="true"]').clear().type('All diff?')
+        cy.get('[data-cy="answerHint"]').clear().type('This hint is totally different')
 
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('All diff?')

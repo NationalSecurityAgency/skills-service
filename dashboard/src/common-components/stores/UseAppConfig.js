@@ -69,6 +69,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxAdminGroupNameLength = computed(() => config.value.maxAdminGroupNameLength)
   const maxProjectNameLength = computed(() => config.value.maxProjectNameLength)
   const maxQuizNameLength = computed(() => config.value.maxQuizNameLength)
+  const maxQuizAnswerHintLength = computed(() => config.value.maxQuizAnswerHintLength)
   const nameValidationRegex = computed(() => config.value.nameValidationRegex)
   const minIdLength = computed(() => config.value.minIdLength)
   const maxIdLength = computed(() => config.value.maxIdLength)
@@ -165,6 +166,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxAdminGroupNameLength,
     maxProjectNameLength,
     maxQuizNameLength,
+    maxQuizAnswerHintLength,
     nameValidationRegex,
     minIdLength,
     maxIdLength,

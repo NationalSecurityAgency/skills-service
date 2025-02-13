@@ -37,6 +37,9 @@ class QuizQuestionDef {
     String quizId
 
     String question
+
+    String answerHint
+
     @Enumerated(EnumType.STRING)
     QuizQuestionType type
 
