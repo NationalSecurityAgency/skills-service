@@ -318,7 +318,7 @@ const onSavedQuestion = (savedQuestion) => {
               name="answerHintEnable"
               data-cy=answerHintEnableCheckbox />
           <div class="flex-1 align-content-end">
-            <label for="answerHintInput" class="font-bold text-primary ml-2">Enable Answer Hint</label>
+            <label for="answerHintEnable" class="font-bold text-primary ml-2">Enable Answer Hint</label>
           </div>
         </div>
         <SkillsTextarea v-if="showHint"
