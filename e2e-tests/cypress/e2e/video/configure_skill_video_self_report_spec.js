@@ -34,7 +34,7 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.createSubject(1, 1);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="newSkillButton"]').click()
+        cy.openNewSkillDialog()
         cy.get('[data-cy="videoSelectionMsg"]').contains('Please create skill and configure video settings first')
         cy.get('[data-cy="selfReportEnableCheckbox"]').click()
         cy.get('[data-cy="selfReportTypeSelector"] [value="Approval"]')

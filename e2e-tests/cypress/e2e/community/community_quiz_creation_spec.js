@@ -412,7 +412,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.createQuizDef(1, {enableProtectedUserCommunity: false})
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="newSkillButton"]').click()
+        cy.openNewSkillDialog()
         cy.get('[data-cy="skillName"]').type('abc')
         cy.get('[data-cy="selfReportEnableCheckbox"]').click()
         cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').click({ force: true })
@@ -442,7 +442,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.createQuizDef(1, {enableProtectedUserCommunity: true})
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="newSkillButton"]').click()
+        cy.openNewSkillDialog()
         cy.get('[data-cy="skillName"]').type('abc')
         cy.get('[data-cy="selfReportEnableCheckbox"]').click()
         cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').click({ force: true })
@@ -460,7 +460,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.createQuizDef(1, {enableProtectedUserCommunity: true})
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="newSkillButton"]').click()
+        cy.openNewSkillDialog()
         cy.get('[data-cy="skillName"]').type('abc')
         cy.get('[data-cy="selfReportEnableCheckbox"]').click()
         cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').click({ force: true })
@@ -480,7 +480,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.createQuizDef(1, {enableProtectedUserCommunity: false})
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="newSkillButton"]').click()
+        cy.openNewSkillDialog()
         cy.get('[data-cy="skillName"]').type('abc')
         cy.get('[data-cy="selfReportEnableCheckbox"]').click()
         cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').click({ force: true })

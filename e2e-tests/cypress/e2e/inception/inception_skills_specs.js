@@ -186,8 +186,7 @@ describe('Inception Skills Tests', () => {
         cy.createSubject(1, 1)
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.get('[data-cy="newSkillButton"]')
-            .click();
+        cy.openNewSkillDialog()
 
         cy.get('[data-cy="skillName"]')
             .type('Skill');

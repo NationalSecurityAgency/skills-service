@@ -227,8 +227,7 @@ describe('Global Badges Tests', () => {
         cy.wait('@getGlobalBadges');
         cy.wait('@checkSupervisorRole');
 
-        cy.get('[data-cy=badgeCard-JustABadgeBadge] [data-cy="deleteBtn"]')
-            .click();
+        cy.openDialog('[data-cy=badgeCard-JustABadgeBadge] [data-cy="deleteBtn"]')
         cy.contains('Removal Safety Check');
         cy.get('[data-cy=currentValidationText]')
             .type('Delete Me');

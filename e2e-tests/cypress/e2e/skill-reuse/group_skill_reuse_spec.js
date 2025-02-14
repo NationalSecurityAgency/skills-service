@@ -354,8 +354,7 @@ describe('Group Skill Reuse Tests', () => {
             .should('have.text', '200');
 
         cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
-        cy.get('[data-cy="deleteSkillButton_skill1STREUSESKILLST1"]')
-            .click();
+        cy.openDialog('[data-cy="deleteSkillButton_skill1STREUSESKILLST1"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('this action will only remove the reused skill');
         cy.get('[data-cy="currentValidationText"]')
@@ -387,8 +386,7 @@ describe('Group Skill Reuse Tests', () => {
         cy.reuseSkillIntoAnotherGroup(1, 1, 1, 12);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="deleteSkillButton_skill1"]')
-            .click();
+        cy.openDialog('[data-cy="deleteSkillButton_skill1"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('Deleting this skill will also remove its reused copies');
         cy.get('[data-cy="currentValidationText"]')

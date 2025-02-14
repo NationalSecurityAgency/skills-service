@@ -90,6 +90,8 @@ export default {
         '.sd-theme-home .text-primary,' +
         '.sd-theme-home .text-color,' +
         '.sd-theme-home .skills-display-test-link a,' +
+        '.sd-theme-home .p-chip-icon,' +
+        '.sd-theme-home .p-icon,' +
         'body #app .sd-theme-home .p-datatable .p-datatable-tbody > tr,' +
         'body #app .sd-theme-home .p-datatable .p-datatable-thead > tr > th,' +
         'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link,' +
@@ -107,14 +109,15 @@ export default {
         '.p-autocomplete-panel.p-component .p-autocomplete-item,' +
         '.p-autocomplete-panel.p-component .p-autocomplete-item .text-orange-600,' +
         '.p-autocomplete-panel.p-component .p-autocomplete-item .text-orange-700,' +
-        '.p-overlaypanel-content .p-panelmenu.p-component .p-panelmenu-header-content,' +
-        '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-menuitem-link,' +
+        '.p-popover.p-component .p-panelmenu-panel .p-panelmenu-item-link,' +
+        '.p-popover.p-component .p-panelmenu-panel .p-panelmenu-header-content,' +
         'body .sd-theme-home a, body .sd-theme-home .skills-theme-skills-progress a,' +
         '.sd-theme-home .editor-help-footer,' +
         '.sd-theme-home .editor-help-footer i',
       styleName: 'color'
     }, {
-      selector: '.toastui-editor-popup [data-type="Heading"]:hover',
+      selector: '.toastui-editor-popup [data-type="Heading"]:hover,' +
+          '.p-popover.p-component .p-panelmenu.p-component .p-panelmenu-header:focus .p-panelmenu-header-content .sd-theme-menu-header',
       styleName: 'background-color'
     }, {
       selector: '.sd-theme-home .p-avatar.p-component, ' +
@@ -167,8 +170,8 @@ export default {
           + 'body #app .sd-theme-home .p-paginator.p-component,'
           + 'body #app .sd-theme-home .p-chip.p-component,'
           + '.p-autocomplete-panel.p-component,'
-          + '.p-overlaypanel-content .p-panelmenu.p-component .p-panelmenu-header-content,'
-          + '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content,'
+          + '.p-popover.p-component,'
+          + '.p-popover.p-component .p-panelmenu-panel,'
           + '.sd-theme-home .apexcharts-menu.apexcharts-menu-open,'
           + '.sd-theme-home .p-avatar.p-component,'
           + '.sd-theme-home .toastui-editor-ww-container,'
@@ -186,8 +189,9 @@ export default {
           '.p-autocomplete-panel.p-component .p-autocomplete-item:hover .text-orange-600,' +
           '.p-autocomplete-panel.p-component .p-autocomplete-item.p-focus .text-orange-700,' +
           '.p-autocomplete-panel.p-component .p-autocomplete-item:hover .text-orange-700,' +
+          '.p-popover.p-component .p-panelmenu-item.p-focus > .p-panelmenu-item-content .p-panelmenu-item-link,' +
+          '.p-popover.p-component .p-panelmenu.p-component .p-panelmenu-header:focus .p-panelmenu-header-content .sd-theme-menu-header,' +
           'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link.p-highlight,' +
-          '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-avatar-icon,' +
           'body #app .sd-theme-home .fa-stack .fa-stack-1x.fa-inverse,' +
           'body #app .sd-theme-home .toastui-editor-contents pre code,' +
           'body #app .sd-theme-home .toastui-editor-popup [data-type="Heading"]:hover,' +
@@ -205,11 +209,11 @@ export default {
     },
     stars: {
       unearnedColor: {
-        selector: 'body #app .sd-theme-home .p-rating .p-rating-item .p-icon.p-rating-icon',
+        selector: 'body #app .sd-theme-home .p-rating .p-rating-option .p-icon.p-rating-icon.p-rating-off-icon',
         styleName: 'color'
       },
       earnedColor: {
-        selector: 'body #app .sd-theme-home .p-rating .p-rating-item.p-rating-item-active .p-icon.p-rating-icon',
+        selector: 'body #app .sd-theme-home .p-rating .p-rating-option.p-rating-option-active .p-icon.p-rating-icon.p-rating-on-icon',
         styleName: 'color'
       }
     },
@@ -285,16 +289,16 @@ export default {
         styleName: 'background-color'
       }],
       incompleteColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.p-progressbar-determinate,' +
-            'body #app .sd-theme-home .user-skill-progress-layers .p-progressbar.p-component.p-progressbar-determinate',
+        selector: 'body #app .sd-theme-home .p-progressbar.p-component.p-progressbar-determinate.today-progress.is-not-completed,' +
+            'body #app .sd-theme-home .sd-theme-achieved-skills-progress .p-progressbar.p-component.p-progressbar-determinate.is-completed',
         styleName: 'background-color'
       }],
       beforeTodayColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.total-progress.is-not-completed .p-progressbar-value',
+        selector: 'body #app .sd-theme-home .p-progressbar.p-component.total-progress.is-not-completed  .p-progressbar-value',
         styleName: 'background-color'
       }],
       earnedTodayColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.today-progress.is-not-completed .p-progressbar-value',
+        selector: 'body #app .sd-theme-home .p-progressbar.p-component.p-progressbar-determinate.today-progress.is-not-completed .p-progressbar-value',
         styleName: 'background-color'
       }]
     },
@@ -482,7 +486,7 @@ export default {
         const tilesMenuHoverColor = tinycolor(theme.tiles.backgroundColor).lighten(10).toString();
         theme.tilesMenuLinkHoverCalculatedColor=tilesMenuHoverColor
         selectorKey.tilesMenuLinkHoverCalculatedColor = {
-          selector: '.p-overlaypanel-content .p-panelmenu .p-panelmenu-content .p-breadcrumb-item-link:hover',
+          selector: '.p-popover.p-component .p-panelmenu-panel .p-panelmenu-item-content:hover, .p-popover.p-component .p-panelmenu-panel .p-panelmenu-header-content:hover',
           styleName: 'background-color'
         }
       }

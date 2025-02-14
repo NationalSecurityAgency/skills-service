@@ -102,7 +102,7 @@ const focusOnProgressGroup = () => {
       <div>
         <PanelMenu :model="filtersInternal" class="w-full md:w-80" v-model:expandedKeys="expandedKeys">
           <template #item="{ item, props, root, active }">
-            <div text v-if="root" class="p-4" :id="item.key" :data-cy="`filter_${item.key}`">
+            <div text v-if="root" class="p-4 sd-theme-menu-header" :id="item.key" :data-cy="`filter_${item.key}`">
               <i v-if="!active" class="far fa-arrow-alt-circle-right"></i>
               <i v-else class="far fa-arrow-alt-circle-down"></i>
               <span class="ml-2" v-html="item.label" />

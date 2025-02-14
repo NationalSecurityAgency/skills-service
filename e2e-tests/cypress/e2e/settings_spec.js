@@ -223,7 +223,7 @@ describe('Settings Tests', () => {
         ], 5, true, null, false);
 
         // remove the other user now
-        cy.get(`${rootUsrTableSelector} [data-p-index="1"] [data-cy="removeUserBtn"]`).click();
+        cy.openDialog(`${rootUsrTableSelector} [data-p-index="1"] [data-cy="removeUserBtn"]`)
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove skills@skills.org')
         cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
         cy.get('[data-cy="saveDialogBtn"]').click()
@@ -490,7 +490,7 @@ describe('Settings Tests', () => {
         ], 5, true, null, false);
 
         // remove the other user now
-        cy.get(`${supervisorTableSelector} [data-p-index="1"] [data-cy="removeUserBtn"]`).click();
+        cy.openDialog(`${supervisorTableSelector} [data-p-index="1"] [data-cy="removeUserBtn"]`)
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove skills@skills.org')
         cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
         cy.get('[data-cy="saveDialogBtn"]').click()

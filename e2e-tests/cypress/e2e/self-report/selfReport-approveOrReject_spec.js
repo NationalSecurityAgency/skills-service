@@ -75,8 +75,7 @@ describe('Self Report Skills Management Tests', () => {
     cy.get('[data-cy="rejectBtn"]')
       .should('be.enabled');
 
-    cy.get('[data-cy="approveBtn"]')
-      .click();
+    cy.openDialog('[data-cy="approveBtn"]')
     cy.get('[data-cy="approvalTitle"]')
         .contains('This will approve user\'s request(s) to get points');
     cy.get('[data-cy="approvalInputMsg"]')
@@ -147,8 +146,7 @@ describe('Self Report Skills Management Tests', () => {
     cy.get('[data-cy="rejectBtn"]')
       .should('be.enabled');
 
-    cy.get('[data-cy="rejectBtn"]')
-      .click();
+    cy.openDialog('[data-cy="rejectBtn"]')
     cy.get('[data-cy="rejectionTitle"]')
       .contains('This will reject user\'s request(s) to get points');
     cy.get('[data-cy="rejectionInputMsg"]')
@@ -192,8 +190,7 @@ describe('Self Report Skills Management Tests', () => {
     cy.visit('/administrator/projects/proj1/self-report');
 
     cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
-    cy.get('[data-cy="rejectBtn"]')
-      .click();
+    cy.openDialog('[data-cy="rejectBtn"]')
     cy.get('[data-cy="rejectionTitle"]')
       .contains('This will reject user\'s request(s) to get points');
 
@@ -268,8 +265,7 @@ describe('Self Report Skills Management Tests', () => {
     cy.visit('/administrator/projects/proj1/self-report');
 
     cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
-    cy.get('[data-cy="approveBtn"]')
-        .click();
+    cy.openDialog('[data-cy="approveBtn"]')
     cy.get('[data-cy="approvalTitle"]')
         .contains('This will approve user\'s request(s) to get points');
 
@@ -348,8 +344,7 @@ describe('Self Report Skills Management Tests', () => {
 
     const tableSelector = '[data-cy="skillsReportApprovalTable"]';
     cy.get(`${tableSelector} [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]`).click();
-    cy.get('[data-cy="approveBtn"]')
-      .click();
+    cy.openDialog('[data-cy="approveBtn"]')
     cy.get('[data-cy="saveDialogBtn"]').click();
 
     cy.validateTable(tableSelector, [
@@ -437,8 +432,7 @@ describe('Self Report Skills Management Tests', () => {
     const tableSelector = '[data-cy="skillsReportApprovalTable"]';
     cy.get(`${tableSelector} [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]`).click();
 
-    cy.get('[data-cy="rejectBtn"]')
-      .click();
+    cy.openDialog('[data-cy="rejectBtn"]')
     cy.get('[data-cy="rejectionTitle"]')
       .contains('This will reject user\'s request(s) to get points');
     cy.get('[data-cy="rejectionInputMsg"]')

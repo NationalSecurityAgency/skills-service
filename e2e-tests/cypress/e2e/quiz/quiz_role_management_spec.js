@@ -76,7 +76,7 @@ describe('Quiz User Role Management Tests', () => {
           cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('be.enabled')
           cy.get('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
 
-          cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').click()
+          cy.openDialog('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]')
 
           cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove user1 from having admin privileges.')
           cy.get('[data-cy="currentValidationText"]').type('Delete Me')

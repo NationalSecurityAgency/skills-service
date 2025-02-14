@@ -399,7 +399,7 @@ describe('Skills Table Tests', () => {
   it('display Disabled for self reporting type for a new (non self-reporting) skill', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
     cy.get('[data-cy="skillName"]').type('Disabled Test')
     cy.clickSave()
 

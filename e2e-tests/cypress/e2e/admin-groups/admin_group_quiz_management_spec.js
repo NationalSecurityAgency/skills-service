@@ -92,7 +92,7 @@ describe('Admin Group Quiz Management Tests', () => {
                     [{colIndex: 0, value: 'This is quiz 2'}],
                     [{colIndex: 0, value: 'This is quiz 1'}]
                 ], 5);
-                cy.get('[data-cy="removeQuiz_quiz2"]').click()
+                cy.openDialog('[data-cy="removeQuiz_quiz2"]')
                 cy.get('[data-cy="removalSafetyCheckMsg"]').contains(`This will remove the This is quiz 2 quiz from this admin group. All members of this admin group other than ${userIdForDisplay} will lose admin access to this quiz.`)
                 cy.get('[data-cy="currentValidationText"]').type('Delete Me')
                 cy.get('[data-cy="saveDialogBtn"]').click()

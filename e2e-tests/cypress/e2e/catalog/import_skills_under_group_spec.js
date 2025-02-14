@@ -192,8 +192,7 @@ describe('Import Skills under a Group Tests', () => {
             }],
         ], 5, true, null, false);
 
-        cy.get('[data-cy="deleteSkillButton_skill1"]')
-            .click();
+        cy.openDialog('[data-cy="deleteSkillButton_skill1"]')
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me', {delay: 0});
         cy.get('[data-cy="saveDialogBtn"]')
@@ -291,8 +290,7 @@ describe('Import Skills under a Group Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
-        cy.get('[data-cy="deleteSkillButton_skill21"]')
-            .click();
+        cy.openDialog('[data-cy="deleteSkillButton_skill21"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('This will PERMANENTLY remove [Very Great Skill 21] Skill from the catalog');
         cy.get('[data-cy="currentValidationText"]')

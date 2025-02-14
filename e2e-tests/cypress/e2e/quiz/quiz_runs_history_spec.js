@@ -161,7 +161,7 @@ describe('Quiz Runs History Tests', () => {
         cy.get('[data-cy="row1-userCell"]').contains('user2')
         cy.get('[data-cy="row2-userCell"]').contains('user1')
 
-        cy.get('[data-cy="row1-deleteBtn"]').click()
+        cy.openDialog('[data-cy="row1-deleteBtn"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove the Survey result for user2 user')
         cy.get('[data-cy="currentValidationText"]').type('Delete Me')
         cy.get('[data-cy="saveDialogBtn"]').click()

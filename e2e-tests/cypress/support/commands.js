@@ -1605,3 +1605,23 @@ Cypress.Commands.add('typeInMarkdownEditor', (selector, text) => {
 Cypress.Commands.add('typeQuestion', (text) => {
     cy.typeInMarkdownEditor('[data-cy="questionText"]', text)
 })
+
+Cypress.Commands.add('openDialog', (selector, hasMaximizeButton = false) => {
+    cy.get(selector).click();
+    if (hasMaximizeButton) {
+        cy.get('[data-pc-name="pcmaximizebutton"]').should('have.focus')
+    } else {
+        cy.get('[data-pc-name="pcclosebutton"]').should('have.focus')
+    }
+})
+
+Cypress.Commands.add('openDialogWithMaximimzeButton', (selector) => {
+   cy.openDialog(selector, true)
+})
+
+Cypress.Commands.add('openNewSkillDialog', ()  => {
+    cy.get('[data-cy="newSkillButton"]').click();
+    cy.get('[data-cy="skillName"]').should('have.focus')
+})
+
+

@@ -58,8 +58,7 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5);
 
-        cy.get('[data-cy="deleteSkillButton_skill1"]')
-            .click();
+        cy.openDialog('[data-cy="deleteSkillButton_skill1"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 0 projects.');
         cy.get('[data-cy="removalSafetyCheckMsg"]')
@@ -121,8 +120,7 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5);
 
-        cy.get('[data-cy="deleteSkillButton_skill1"]')
-            .click();
+        cy.openDialog('[data-cy="deleteSkillButton_skill1"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 0 projects.');
         cy.get('[data-cy="saveDialogBtn"]')
@@ -181,8 +179,7 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5);
 
-        cy.get(`[data-cy="deleteSkillButton_${skillId}"]`)
-            .click();
+        cy.openDialog(`[data-cy="deleteSkillButton_${skillId}"]`)
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains(`This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 0 projects.`);
         cy.get('[data-cy="saveDialogBtn"]')
@@ -997,7 +994,7 @@ describe('Skills Exported to Catalog Tests', () => {
                 value: 'This is project 2'
             }]
         ], 5, true, null, false)
-        cy.get('[data-cy="contactOwnerBtn_proj2"]').should('be.visible').click()
+        cy.openDialog('[data-cy="contactOwnerBtn_proj2"]', true)
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist')
         cy.get('[data-cy="contactOwnersMsgInput"]').type('aaa bbb this is a message')
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,475 characters remaining')
