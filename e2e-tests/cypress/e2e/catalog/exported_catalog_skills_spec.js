@@ -994,7 +994,7 @@ describe('Skills Exported to Catalog Tests', () => {
                 value: 'This is project 2'
             }]
         ], 5, true, null, false)
-        cy.get('[data-cy="contactOwnerBtn_proj2"]').should('be.visible').click()
+        cy.openDialog('[data-cy="contactOwnerBtn_proj2"]', true)
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist')
         cy.get('[data-cy="contactOwnersMsgInput"]').type('aaa bbb this is a message')
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,475 characters remaining')

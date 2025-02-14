@@ -330,9 +330,9 @@ describe('Community Project Creation Tests', () => {
         cy.createProject(2)
 
         const validateDefaultCustomValidatorIsUsed = () => {
-            cy.get('[data-cy="pointHistoryChartNoData"')
+            cy.get('[data-cy="pointHistoryChartNoData"]')
             cy.get('[data-cy="myRankBtn"]')
-            cy.get('[data-cy="contactOwnerBtn"]').click()
+            cy.openDialog('[data-cy="contactOwnerBtn"]', true)
             cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
             cy.get('[data-cy="contactOwnersMsgInput"]').type('ldkj aljdl aj\n\nndivinedragon');
@@ -425,9 +425,9 @@ describe('Community Project Creation Tests', () => {
 
         cy.visit('/progress-and-rankings/projects/proj1');
 
-        cy.get('[data-cy="pointHistoryChartNoData"')
+        cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.get('[data-cy="myRankBtn"]')
-        cy.get('[data-cy="contactOwnerBtn"]').click()
+        cy.openDialog('[data-cy="contactOwnerBtn"]', true)
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         cy.get('[data-cy="contactOwnersMsgInput"]').type('l{enter}d{enter}k{enter}{enter}j');

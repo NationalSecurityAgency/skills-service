@@ -67,9 +67,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.contains('No Projects Yet...')
                     .should('be.visible');
 
-                cy.get('[data-cy=subPageHeaderControls]')
-                    .contains('Pin')
-                    .click();
+                cy.openDialog('[data-cy=subPageHeaderControls] [data-cy="pinProjectsButton"]', true)
                 cy.contains('Pin Projects');
                 cy.contains('Search Project Catalog');
 
@@ -162,9 +160,7 @@ describe('Root Pin and Unpin Tests', () => {
                     .contains('four');
 
                 // make sure the pinned project is still pinned
-                cy.get('[data-cy=subPageHeaderControls]')
-                    .contains('Pin')
-                    .click();
+                cy.openDialog('[data-cy=subPageHeaderControls] [data-cy="pinProjectsButton"]', true)
                 cy.get('[data-cy=pinProjectsLoadAllButton]')
                     .click();
                 cy.get(rowSelector)
@@ -236,9 +232,7 @@ describe('Root Pin and Unpin Tests', () => {
                 const projectsSelector = '[data-cy=projectCard]';
 
                 // pin all projects
-                cy.get('[data-cy=subPageHeaderControls]')
-                    .contains('Pin')
-                    .click();
+                cy.openDialog('[data-cy=subPageHeaderControls] [data-cy="pinProjectsButton"]', true)
                 cy.contains('Search Project Catalog');
                 cy.get('[data-cy=pinProjectsLoadAllButton]')
                     .click();
@@ -273,9 +267,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.get('[data-cy="projectCard_proj4"]')
 
                 // unpin from the component
-                cy.get('[data-cy=subPageHeaderControls]')
-                    .contains('Pin')
-                    .click();
+                cy.openDialog('[data-cy=subPageHeaderControls] [data-cy="pinProjectsButton"]', true)
                 cy.contains('Pin Projects');
                 cy.get('[data-cy=pinProjectsLoadAllButton]')
                     .click();
@@ -462,9 +454,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.contains('No Projects Yet...')
                     .should('be.visible');
 
-                cy.get('[data-cy=subPageHeaderControls]')
-                    .contains('Pin')
-                    .click();
+                cy.openDialog('[data-cy=subPageHeaderControls] [data-cy="pinProjectsButton"]', true)
                 cy.contains('Pin Projects');
                 cy.contains('Search Project Catalog');
 
@@ -559,10 +549,8 @@ describe('Root Pin and Unpin Tests', () => {
                     .should('be.visible');
 
                 // open the pin projects modal
-                cy.get('[data-cy=subPageHeaderControls]')
-                    .contains('Pin')
-                    .click();
-                cy.get('[data-cy=pinProjects')
+                cy.openDialog('[data-cy=subPageHeaderControls] [data-cy="pinProjectsButton"]', true)
+                cy.get('[data-cy=pinProjects]')
                     .should('exist'); // dialog exists
                 cy.contains('Pin Projects');
                 cy.contains('Search Project Catalog');
@@ -570,14 +558,12 @@ describe('Root Pin and Unpin Tests', () => {
                 // close with escape
                 cy.get('[data-cy=pinProjectsSearchInput]')
                     .type('{esc}', { force: true });
-                cy.get('[data-cy=pinProjects')
+                cy.get('[data-cy=pinProjects]')
                     .should('not.exist'); // dialog does not exists
 
                 // can re-open the pin modal
-                cy.get('[data-cy=subPageHeaderControls]')
-                    .contains('Pin')
-                    .click();
-                cy.get('[data-cy=pinProjects')
+                cy.openDialog('[data-cy=subPageHeaderControls] [data-cy="pinProjectsButton"]', true)
+                cy.get('[data-cy=pinProjects]')
                     .should('exist'); // dialog exists
                 cy.contains('Pin Projects');
                 cy.contains('Search Project Catalog');
@@ -585,14 +571,14 @@ describe('Root Pin and Unpin Tests', () => {
                 // close with escape
                 cy.get('[data-cy=pinProjectsSearchInput]')
                     .type('{esc}', { force: true });
-                cy.get('[data-cy=pinProjects')
+                cy.get('[data-cy=pinProjects]')
                     .should('not.exist'); // dialog does not exists
 
                 // open the new project modal
                 cy.get('[data-cy="newProjectButton"]')
                     .click();
                 cy.contains('New Project'); // new project dialog does exist
-                cy.get('[data-cy=pinProjects')
+                cy.get('[data-cy=pinProjects]')
                     .should('not.exist'); // pin project dialog does not exists
             });
 
@@ -644,9 +630,7 @@ describe('Root Pin and Unpin Tests', () => {
                 const headerSelector = '[data-cy=pinProjectsSearchResults] thead tr th';
 
                 // load all projects in default (ASC) order
-                cy.get('[data-cy=subPageHeaderControls]')
-                    .contains('Pin')
-                    .click();
+                cy.openDialog('[data-cy=subPageHeaderControls] [data-cy="pinProjectsButton"]', true)
                 cy.contains('Search Project Catalog');
                 cy.get('[data-cy=pinProjectsLoadAllButton]')
                     .click();
@@ -829,10 +813,8 @@ describe('Root Pin and Unpin Tests', () => {
                     .should('be.visible');
 
                 // open the pin projects modal
-                cy.get('[data-cy=subPageHeaderControls]')
-                    .contains('Pin')
-                    .click();
-                cy.get('[data-cy=pinProjects')
+                cy.openDialog('[data-cy=subPageHeaderControls] [data-cy="pinProjectsButton"]', true)
+                cy.get('[data-cy=pinProjects]')
                     .should('exist'); // dialog exists
                 cy.contains('Pin Projects');
                 cy.contains('Search Project Catalog');
@@ -840,17 +822,15 @@ describe('Root Pin and Unpin Tests', () => {
                 // close with escape
                 cy.get('[data-cy=pinProjectsSearchInput]')
                     .type('{esc}', { force: true });
-                cy.get('[data-cy=pinProjects')
+                cy.get('[data-cy=pinProjects]')
                     .should('not.exist'); // dialog does not exists
                 cy.get('[data-cy=subPageHeaderControls]')
                     .contains('Pin')
                     .should('have.focus');
 
                 // can re-open the pin modal
-                cy.get('[data-cy=subPageHeaderControls]')
-                    .contains('Pin')
-                    .click();
-                cy.get('[data-cy=pinProjects')
+                cy.openDialog('[data-cy=subPageHeaderControls] [data-cy="pinProjectsButton"]', true)
+                cy.get('[data-cy=pinProjects]')
                     .should('exist'); // dialog exists
                 cy.contains('Pin Projects');
                 cy.contains('Search Project Catalog');
@@ -860,9 +840,7 @@ describe('Root Pin and Unpin Tests', () => {
                     .contains('Pin')
                     .should('have.focus');
 
-                cy.get('[data-cy=subPageHeaderControls]')
-                    .contains('Pin')
-                    .click();
+                cy.openDialog('[data-cy=subPageHeaderControls] [data-cy="pinProjectsButton"]', true)
                 cy.contains('Pin Projects');
                 cy.contains('Search Project Catalog');
                 cy.get('[aria-label=Close]')
@@ -895,9 +873,7 @@ describe('Root Pin and Unpin Tests', () => {
                 const rowSelector = '[data-cy=pinProjectsSearchResults] tbody tr';
 
                 // view project from "Pin" dialog
-                cy.get('[data-cy=subPageHeaderControls]')
-                    .contains('Pin')
-                    .click();
+                cy.openDialog('[data-cy=subPageHeaderControls] [data-cy="pinProjectsButton"]', true)
                 cy.contains('Search Project Catalog');
                 cy.get('[data-cy=pinProjectsLoadAllButton]')
                     .click();
@@ -970,9 +946,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.contains('No Projects Yet...')
                     .should('be.visible');
 
-                cy.get('[data-cy=subPageHeaderControls]')
-                    .contains('Pin')
-                    .click();
+                cy.openDialog('[data-cy=subPageHeaderControls] [data-cy="pinProjectsButton"]', true)
                 cy.contains('Pin Projects');
                 cy.contains('Search Project Catalog');
 

@@ -1606,7 +1606,11 @@ Cypress.Commands.add('typeQuestion', (text) => {
     cy.typeInMarkdownEditor('[data-cy="questionText"]', text)
 })
 
-Cypress.Commands.add('openDialog', (selector) => {
+Cypress.Commands.add('openDialog', (selector, hasMaximizeButton = false) => {
     cy.get(selector).click();
-    cy.get('[data-pc-name="pcclosebutton"]').should('have.focus')
+    if (hasMaximizeButton) {
+        cy.get('[data-pc-name="pcmaximizebutton"]').should('have.focus')
+    } else {
+        cy.get('[data-pc-name="pcclosebutton"]').should('have.focus')
+    }
 })

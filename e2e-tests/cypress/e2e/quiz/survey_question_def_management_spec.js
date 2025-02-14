@@ -67,7 +67,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="btn_Questions"]').should('have.focus')
 
         // single choice question
-        cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
+        cy.openDialog('[data-cy="newQuestionOnBottomBtn"]', true)
         cy.typeQuestion('What is 1 + 2?')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('1')
@@ -95,7 +95,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="newQuestionOnBottomBtn"]').should('have.focus')
 
         // q3 - text input question
-        cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
+        cy.openDialog('[data-cy="newQuestionOnBottomBtn"]', true)
         cy.typeQuestion('Enter Text Here Please')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]')
@@ -541,7 +541,7 @@ describe('Survey Question CRUD Tests', () => {
         const q1Card = '[data-cy="questionDisplayCard-1"] [data-cy="sortControlHandle"]';
         const q2Card = '[data-cy="questionDisplayCard-2"] [data-cy="sortControlHandle"]';
 
-        cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
+        cy.openDialog('[data-cy="newQuestionOnBottomBtn"]', true)
         cy.typeQuestion('question # 1')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
@@ -550,7 +550,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get(q1Card).should('not.exist')
         cy.get(q2Card).should('not.exist')
 
-        cy.get('[data-cy="newQuestionOnBottomBtn"]').click()
+        cy.openDialog('[data-cy="newQuestionOnBottomBtn"]', true)
         cy.get('[data-cy="answerTypeSelector"]').should('exist')
         cy.typeQuestion('question # 2')
         cy.get('[data-cy="answerTypeSelector"]').click()
