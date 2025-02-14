@@ -631,7 +631,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
         cy.visit('/administrator/quizzes/quiz1');
 
-        cy.get('[data-cy="copyQuestionButton_2"]').click();
+        cy.openDialogWithMaximimzeButton('[data-cy="copyQuestionButton_2"]')
         cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"]').should('have.value', 'Question 2 - Second Answer')
@@ -649,7 +649,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.validateChoiceAnswer(4, 2, 'c', false)
         cy.get('[data-cy="copyQuestionButton_2"]').should('have.focus')
 
-        cy.get('[data-cy="copyQuestionButton_4"]').click();
+        cy.openDialogWithMaximimzeButton('[data-cy="copyQuestionButton_4"]')
         cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2-more')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer-more')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"]').should('have.value', 'b')
@@ -674,7 +674,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('How is this quiz?')
         cy.get('[data-cy="questionDisplayCard-1"] [data-pc-name="rating"] [data-pc-section="option"]').should('have.length', 5)
 
-        cy.get('[data-cy="copyQuestionButton_1"]').click();
+        cy.openDialogWithMaximimzeButton('[data-cy="copyQuestionButton_1"]')
         cy.get('[data-cy="questionText"] .toastui-editor-ww-container .toastui-editor-contents').type(' With more description', {delay: 0})
         cy.get('[data-cy="ratingScaleSelect"]').click()
         cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('8').click();
@@ -695,7 +695,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
         cy.visit('/administrator/quizzes/quiz1');
 
-        cy.get('[data-cy="copyQuestionButton_2"]').click();
+        cy.openDialogWithMaximimzeButton('[data-cy="copyQuestionButton_2"]')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
 
@@ -712,7 +712,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
         cy.visit('/administrator/quizzes/quiz1');
 
-        cy.get('[data-cy="copyQuestionButton_3"]').click();
+        cy.openDialogWithMaximimzeButton('[data-cy="copyQuestionButton_3"]')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_MultipleChoice"]').click()
 
@@ -729,7 +729,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
         cy.visit('/administrator/quizzes/quiz1');
 
-        cy.get('[data-cy="copyQuestionButton_2"]').click();
+        cy.openDialogWithMaximimzeButton('[data-cy="copyQuestionButton_2"]')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_TextInput"]').click()
 
@@ -753,7 +753,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
         cy.visit('/administrator/quizzes/quiz1');
 
-        cy.get('[data-cy="copyQuestionButton_3"]').click();
+        cy.openDialogWithMaximimzeButton('[data-cy="copyQuestionButton_3"]')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_TextInput"]').click()
 
@@ -777,7 +777,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
         cy.visit('/administrator/quizzes/quiz1');
 
-        cy.get('[data-cy="copyQuestionButton_1"]').click();
+        cy.openDialogWithMaximimzeButton('[data-cy="copyQuestionButton_1"]')
         cy.get('[data-cy="answerTypeSelector"]').contains('Input Text')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
@@ -797,7 +797,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
         cy.visit('/administrator/quizzes/quiz1');
 
-        cy.get('[data-cy="copyQuestionButton_1"]').click();
+        cy.openDialogWithMaximimzeButton('[data-cy="copyQuestionButton_1"]')
         cy.get('[data-cy="answerTypeSelector"]').contains('Input Text')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_MultipleChoice"]').click()
@@ -817,7 +817,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
         cy.visit('/administrator/quizzes/quiz1');
 
-        cy.get('[data-cy="copyQuestionButton_3"]').click();
+        cy.openDialogWithMaximimzeButton('[data-cy="copyQuestionButton_3"]')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').type( 'new')
 
@@ -835,7 +835,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.createSurveyMultipleChoiceQuestionDef(1, 3, { questionType: 'SingleChoice' });
         cy.visit('/administrator/quizzes/quiz1');
 
-        cy.get('[data-cy="copyQuestionButton_3"]').click();
+        cy.openDialogWithMaximimzeButton('[data-cy="copyQuestionButton_3"]')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="removeAnswer"]').click()
 
         cy.get('[data-cy="saveDialogBtn"]').click()
