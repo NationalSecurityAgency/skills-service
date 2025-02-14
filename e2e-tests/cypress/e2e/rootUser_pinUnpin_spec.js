@@ -396,7 +396,7 @@ describe('Root Pin and Unpin Tests', () => {
                 const tableSelector = '[data-cy=roleManagerTable]';
                 const rowSelector = `${tableSelector} tbody tr`;
                 cy.log('removing user');
-                cy.openDialog(`${tableSelector} [data-p-index="0"] [data-cy="removeUserBtn"]`)
+                cy.openDialog(`${tableSelector} [data-cy="removeUserBtn"]`)
 
                 cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove')
                 cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})

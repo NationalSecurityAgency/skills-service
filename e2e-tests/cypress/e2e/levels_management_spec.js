@@ -152,8 +152,7 @@ describe('Levels Management Tests', () => {
         }
 
         cy.clickNav('Levels');
-        cy.get('[data-cy="addLevel"]')
-            .click();
+        cy.openDialog('[data-cy="addLevel"]', true)
         cy.get('[data-cy="pointsInput"]')
             .type('20000');
         cy.get('[data-cy="saveDialogBtn"]')
@@ -206,8 +205,7 @@ describe('Levels Management Tests', () => {
         cy.wait('@getLevels')
         cy.get('[data-cy="levelsTable"]')
 
-        cy.get('[data-cy="addLevel"]')
-            .click();
+        cy.openDialog('[data-cy="addLevel"]', true)
         cy.get('[data-cy="pointsInput"] [data-pc-name="pcinputtext"]')
             .type('2000', {delay: 0});
         cy.get('[data-cy="saveDialogBtn"]')
@@ -239,8 +237,7 @@ describe('Levels Management Tests', () => {
         // do the same for a subject
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Levels');
-        cy.get('[data-cy="addLevel"]')
-            .click();
+        cy.openDialog('[data-cy="addLevel"]', true)
         cy.get('[data-cy="pointsInput"] [data-pc-name="pcinputtext"]')
             .type('2000', {delay: 0});
         cy.get('[data-cy="saveDialogBtn"]')
@@ -321,8 +318,7 @@ describe('Levels Management Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Levels');
-        cy.get('[data-cy="addLevel"]')
-            .click();
+        cy.openDialog('[data-cy="addLevel"]', true)
         cy.get('[data-cy="pointsInput"]')
             .type('20000');
         cy.get('[data-cy="saveDialogBtn"]')

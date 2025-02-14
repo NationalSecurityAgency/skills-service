@@ -30,7 +30,7 @@ describe('Quiz Skill Assignment Tests', () => {
 
         cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="newSkillButton"]').click()
+        cy.openNewSkillDialog()
         cy.get('[data-cy="skillName"]').type('abc')
         cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').type('5')
         cy.get('[data-cy="selfReportEnableCheckbox"]').click() 
@@ -63,7 +63,7 @@ describe('Quiz Skill Assignment Tests', () => {
 
         cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="newSkillButton"]').click()
+        cy.openNewSkillDialog()
         cy.get('[data-cy="skillName"]').type('abc')
         cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').type('5')
         cy.get('[data-cy="selfReportEnableCheckbox"]').click();
@@ -195,7 +195,7 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.createSubject(1,1)
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="newSkillButton"]').click()
+        cy.openNewSkillDialog()
         cy.get('[data-cy="skillName"]').type('abc')
         cy.get('[data-cy="selfReportEnableCheckbox"]').click();
         cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').click({ force: true })
@@ -216,7 +216,7 @@ describe('Quiz Skill Assignment Tests', () => {
             }
         }
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="newSkillButton"]').click()
+        cy.openNewSkillDialog()
         cy.get('[data-cy="selfReportEnableCheckbox"]').click();
         cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').click({ force: true })
         cy.get('[data-cy="quizSelector"]').click()

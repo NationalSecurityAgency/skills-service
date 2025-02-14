@@ -89,7 +89,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.wait('@loadConfigWithDbInProgressUpgrade')
 
-    cy.get('[data-cy="newSkillButton"]').click();
+    cy.openNewSkillDialog();
     cy.get('[data-cy="skillName"]').type('new');
     cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
     cy.wait('@saveSkill')

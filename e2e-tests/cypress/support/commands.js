@@ -1614,3 +1614,14 @@ Cypress.Commands.add('openDialog', (selector, hasMaximizeButton = false) => {
         cy.get('[data-pc-name="pcclosebutton"]').should('have.focus')
     }
 })
+
+Cypress.Commands.add('openDialogWithMaximimzeButton', (selector) => {
+   cy.openDialog(selector, true)
+})
+
+Cypress.Commands.add('openNewSkillDialog', ()  => {
+    cy.get('[data-cy="newSkillButton"]').click();
+    cy.get('[data-cy="skillName"]').should('have.focus')
+})
+
+

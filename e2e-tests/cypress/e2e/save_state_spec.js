@@ -172,7 +172,7 @@ describe('Save State Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
 
-    cy.get('[data-cy="newSkillButton"]').click();
+    cy.openNewSkillDialog()
     cy.get('[data-cy="skillName"]').type('Skill One')
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
     cy.get('[data-cy="pointIncrement"]').type('{selectall}11');
@@ -187,7 +187,7 @@ describe('Save State Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
 
-    cy.get('[data-cy="newSkillButton"]').click();
+    cy.openNewSkillDialog();
     cy.get('[data-cy="skillName"]').should('have.value', 'Skill One');
     cy.get('[data-cy="markdownEditorInput"]').contains('test description');
     cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]').should('have.value', '11');
@@ -198,7 +198,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="selfReportEnableCheckbox"] input').should('be.checked');
     cy.get('[data-cy=closeDialogBtn]').click();
 
-    cy.get('[data-cy="newSkillButton"]').click();
+    cy.openNewSkillDialog();
     cy.get('[data-cy="skillName"]').should('have.value', '');
     cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
     cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]').should('have.value', '100');
@@ -220,7 +220,7 @@ describe('Save State Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
 
-    cy.get('[data-cy="newSkillButton"]').click();
+    cy.openNewSkillDialog();
     cy.get('[data-cy="skillName"]').type('Skill One')
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
     cy.get('[data-cy="pointIncrement"]').type('{selectall}11');
@@ -282,7 +282,7 @@ describe('Save State Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1');
     cy.wait('@loadSubject');
 
-    cy.get('[data-cy="newSkillButton"]').click();
+    cy.openNewSkillDialog();
     cy.get('[data-cy="skillName"]').type('Skill One')
     cy.get('[data-cy="markdownEditorInput"]').type('test description');
     cy.get('[data-cy=saveDialogBtn]').click();
@@ -315,7 +315,7 @@ describe('Save State Tests', () => {
     cy.createQuizDef(1);
     cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
     cy.visit('/administrator/projects/proj1/subjects/subj1');
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
     const valToType = 'Yckd'
     cy.get('[data-cy="skillName"]').type(valToType)
     cy.get('[data-cy="skillName"]').should('have.value', valToType)

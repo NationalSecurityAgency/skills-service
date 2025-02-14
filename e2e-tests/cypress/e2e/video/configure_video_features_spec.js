@@ -280,7 +280,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
         cy.get('[data-cy="manageBtn_subj1Subject"]').click()
 
-        cy.get('[data-cy="newSkillButton"]').click()
+        cy.openNewSkillDialog()
         cy.get('[data-cy="skillName"]').type('skill1')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
         cy.get('[data-cy="manageSkillLink_skill1Skill"]').click()

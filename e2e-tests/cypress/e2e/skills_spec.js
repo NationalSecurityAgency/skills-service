@@ -67,7 +67,7 @@ describe('Skills Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.wait('@loadSubject')
 
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
     cy.get('[data-cy=closeDialogBtn]').click()
     cy.get('[data-cy=closeDialogBtn]').should('not.exist')
   })
@@ -92,7 +92,7 @@ describe('Skills Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.wait('@loadSubject')
 
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
     cy.get('[data-cy=skillName]').type('Skill123')
     cy.get('[data-cy=markdownEditorInput]').type('loremipsum')
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled')
@@ -189,7 +189,7 @@ describe('Skills Tests', () => {
   it('help url validation', () => {
     cy.intercept('POST', '/api/validation/url').as('customUrlValidation')
     cy.visit('/administrator/projects/proj1/subjects/subj1')
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
 
     cy.get('[data-cy=skillName]').type('name')
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled')
@@ -232,7 +232,7 @@ describe('Skills Tests', () => {
     const selectorOccurrencesToCompletion = '[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]'
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.get('[data-cy="noContent"]')
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
     cy.get(selectorOccurrencesToCompletion).should('have.value', '1')
     cy.get('[data-cy=skillName]').type('Skill 1')
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
@@ -265,7 +265,7 @@ describe('Skills Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.wait('@loadSubject')
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
 
     cy.get('#skillName').type(providedName)
 
@@ -290,7 +290,7 @@ describe('Skills Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.wait('@loadSubject')
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
 
     cy.get('[data-cy="skillName"]').type(providedName)
 
@@ -681,7 +681,7 @@ describe('Skills Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.wait('@loadSubject')
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
 
     cy.get('[data-cy="skillName"]').type(providedName)
 
@@ -712,19 +712,19 @@ describe('Skills Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.wait('@loadSubject')
 
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
     cy.get('[data-cy=closeDialogBtn]').click()
     cy.get('[data-cy="newSkillButton"]').should('have.focus')
 
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
     cy.get('[data-cy=skillName]').type('{esc}')
     cy.get('[data-cy="newSkillButton"]').should('have.focus')
 
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
     cy.get('[aria-label=Close]').click()
     cy.get('[data-cy="newSkillButton"]').should('have.focus')
 
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
     cy.get('[data-cy=skillName]').type('foobarbaz')
     cy.get('[data-cy=saveDialogBtn]').click()
     cy.get('[data-cy="newSkillButton"]').should('have.focus')
@@ -823,7 +823,7 @@ describe('Skills Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.wait('@loadSubject')
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
 
     cy.get('[data-cy="skillName"]').type('Great Name')
     cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
@@ -841,7 +841,7 @@ describe('Skills Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.wait('@loadSubject')
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
 
     cy.get('[data-cy="skillName"]').type('Great Name')
     cy.get('[data-cy="skillNameError"]')
@@ -866,7 +866,7 @@ describe('Skills Tests', () => {
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
     cy.wait('@loadSubject')
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
 
     cy.get('[data-cy="skillName"]').type('Great Name 1 2 33')
     cy.get('[data-cy=enableIdInput]').click();
@@ -1058,7 +1058,7 @@ describe('Skills Tests', () => {
 
   it('skill modal allows Help Url to have spaces', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
     cy.get('[data-cy="skillName"]').type('skill1')
     cy.get('[data-cy="skillHelpUrl"]').type('https://someCoolWebsite.com/some url with spaces')
     cy.get('[data-cy="skillHelpUrlError"]').should('not.be.visible')
@@ -1128,7 +1128,7 @@ describe('Skills Tests', () => {
     cy.createSkill(1, 1, 2, { helpUrl: 'https://www.OverrideHelpUrl.com/other/path' })
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
     cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
 
     const textDecorationMatch = 'line-through solid color(srgb 0.0862745 0.396078 0.203922)'
@@ -1163,7 +1163,7 @@ describe('Skills Tests', () => {
       value: ''
     })
     cy.visit('/administrator/projects/proj1/subjects/subj1')
-    cy.get('[data-cy="newSkillButton"]').click()
+    cy.openNewSkillDialog()
     cy.get('[data-cy="skillHelpUrl"]')
     cy.get('[data-cy="rootHelpUrlSetting"]').should('not.exist')
     cy.get('[data-cy="closeDialogBtn"]').click()

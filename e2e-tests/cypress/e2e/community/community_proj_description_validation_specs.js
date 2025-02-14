@@ -103,7 +103,7 @@ describe('Community Project Creation Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
-        cy.get('[data-cy="newSkillButton"]').click();
+        cy.openNewSkillDialog();
 
         cy.get('[data-cy="skillName"]').type('Great Name');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
@@ -131,7 +131,7 @@ describe('Community Project Creation Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.wait('@loadSubject');
-        cy.get('[data-cy="newSkillButton"]').click();
+        cy.openNewSkillDialog();
 
         cy.get('[data-cy="skillName"]').type('Great Name');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
