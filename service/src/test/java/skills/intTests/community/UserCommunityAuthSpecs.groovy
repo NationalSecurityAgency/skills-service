@@ -421,7 +421,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
 
         SkillsClientException e = thrown(SkillsClientException)
         e.message.contains("Not Allowed to set [enableProtectedUserCommunity] to true for adminGroupId [${adminGroup.adminGroupId}]")
-        e.message.contains("This admin group has the user ${nonUserCommunityUserId} for display who not authorized")
+        e.message.contains("This admin group has the user ${nonUserCommunityUserId} for display who is not authorized")
     }
 
     def "cannot disable UC protection for admin group after it has already been enabled"() {

@@ -130,7 +130,7 @@ class UserCommunityService {
                     String userIdForDisplay = userWithRole.userIdForDisplay
 
                     res.isAllowed = false
-                    String requirementString = "This admin group has the user ${userIdForDisplay} who not authorized".toString()
+                    String requirementString = "This admin group has the user ${userIdForDisplay} who is not authorized".toString()
                     if(!res.unmetRequirements.contains(requirementString)) {
                         res.unmetRequirements.add(requirementString)
                     }

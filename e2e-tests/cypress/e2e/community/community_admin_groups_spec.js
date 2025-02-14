@@ -264,7 +264,7 @@ describe('Community Admin Group Tests', () => {
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg).should('not.exist')
         cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
         cy.get('[data-cy="communityProtectionErrors"]').contains('Unable to restrict access to Divine Dragon users only')
-        cy.get('[data-cy="communityProtectionErrors"]').contains(`Has existing ${allDragonsUser} user that is not authorized`)
+        cy.get('[data-cy="communityProtectionErrors"]').contains(`This admin group has the user ${allDragonsUser} who is not authorized`)
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="communityRestrictionWarning"]').should('not.exist')
     })
