@@ -168,7 +168,7 @@ const skillId = computed(() => {
           <show-more :limit="54" :text="skillId"></show-more>
         </div>
         <div class="h5 text-muted" v-if="skillsState.skill && skillsState.skill.groupId">
-          <span style="font-size: 1rem">Group ID:</span> <span>{{ skillsState.skill.groupId }}</span>
+          <span style="font-size: 1rem">Group:</span> <span>{{ skillsState.skill.groupName }}</span>
         </div>
       </template>
       <template #subSubTitle v-if="!isImported">
