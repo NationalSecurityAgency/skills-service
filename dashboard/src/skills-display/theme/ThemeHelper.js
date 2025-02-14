@@ -271,15 +271,15 @@ export default {
     },
     badges: {
       backgroundColor: [{
-        selector: 'body #app .p-tag.p-component',
+        selector: 'body #app .sd-theme-home .p-tag.p-component',
         styleName: 'background-color'
       }],
       backgroundColorSecondary: [{
-        selector: 'body #app .p-tag.p-component.p-tag-secondary',
+        selector: 'body #app .sd-theme-home .p-tag.p-component.p-tag-secondary',
         styleName: 'background-color'
       }],
       foregroundColor: [{
-        selector: 'body #app .sd-theme-home .badge',
+        selector: 'body #app .sd-theme-home .p-tag.p-component',
         styleName: 'color'
       }]
     },
