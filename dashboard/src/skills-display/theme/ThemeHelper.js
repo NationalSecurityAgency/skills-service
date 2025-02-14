@@ -137,7 +137,7 @@ export default {
       styleName: 'background-color'
     }],
     textSecondaryColor: {
-      selector: '.sd-theme-home .text-color-secondary,' +
+      selector: '.sd-theme-home .text-muted-color,' +
         '.p-autocomplete-panel.p-component i',
       styleName: 'color'
     },
@@ -191,6 +191,7 @@ export default {
           '.p-autocomplete-panel.p-component .p-autocomplete-item:hover .text-orange-700,' +
           '.p-popover.p-component .p-panelmenu-item.p-focus > .p-panelmenu-item-content .p-panelmenu-item-link,' +
           '.p-popover.p-component .p-panelmenu.p-component .p-panelmenu-header:focus .p-panelmenu-header-content .sd-theme-menu-header,' +
+          'body #app .sd-theme-home .sd-theme-tile-background-color,' +
           'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link.p-highlight,' +
           'body #app .sd-theme-home .fa-stack .fa-stack-1x.fa-inverse,' +
           'body #app .sd-theme-home .toastui-editor-contents pre code,' +

@@ -20,7 +20,7 @@ limitations under the License.
 <template>
   <div class="absolute left-0 right-0" role="alert">
     <div class="flex justify-center">
-      <div class="text-primary bg-primary-contrast py-2 px-4 border rounded-border text-center" style="z-index: 1000 !important;">
+      <div class="text-primary bg-primary-contrast py-2 px-4 border rounded-border text-center sd-theme-tile-background-color" style="z-index: 1000 !important;">
         <slot />
       </div>
     </div>

@@ -26,7 +26,7 @@ const topPositions = useTopPositionsUtils()
   <div v-if="badge.achievementPosition > 0 && badge.achievementPosition <= 3">
     <Badge
       :aria-label="`You finished in ${topPositions.positionNameShort[badge.achievementPosition - 1]} place`"
-    ><i class="fas fa-award"></i> {{ topPositions.positionNameShort[badge.achievementPosition - 1]
+    ><i class="fas fa-award mr-1"></i>{{ topPositions.positionNameShort[badge.achievementPosition - 1]
       }} place
     </Badge>
   </div>
