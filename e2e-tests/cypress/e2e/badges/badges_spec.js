@@ -359,8 +359,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="badgeCard-badge2"]')
             .should('exist');
 
-        cy.get('[data-cy="badgeCard-badge2"] [data-cy="deleteBtn"]')
-            .click();
+        cy.openDialog('[data-cy="badgeCard-badge2"] [data-cy="deleteBtn"]')
         cy.contains('Removal Safety Check');
         cy.get('[data-cy=currentValidationText]')
             .type('Delete Me');
@@ -373,8 +372,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="badgeCard-badge2"]')
             .should('not.exist');
 
-        cy.get('[data-cy="badgeCard-badge1"] [data-cy="deleteBtn"]')
-            .click();
+        cy.openDialog('[data-cy="badgeCard-badge1"] [data-cy="deleteBtn"]')
         cy.contains('Removal Safety Check');
         cy.get('[data-cy=currentValidationText]')
             .type('Delete Me', {delay: 0});

@@ -1605,3 +1605,8 @@ Cypress.Commands.add('typeInMarkdownEditor', (selector, text) => {
 Cypress.Commands.add('typeQuestion', (text) => {
     cy.typeInMarkdownEditor('[data-cy="questionText"]', text)
 })
+
+Cypress.Commands.add('openDialog', (selector) => {
+    cy.get(selector).click();
+    cy.get('[data-pc-name="pcclosebutton"]').should('have.focus')
+})

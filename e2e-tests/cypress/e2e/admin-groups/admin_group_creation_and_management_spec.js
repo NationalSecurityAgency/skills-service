@@ -261,7 +261,7 @@ describe('Admin Group CRUD Tests', () => {
         cy.get('[data-cy="deleteAdminGroupButton_adminGroup3"]').should('exist')
         cy.get('[data-cy="deleteAdminGroupButton_adminGroup4"]').should('exist')
 
-        cy.get('[data-cy="deleteAdminGroupButton_adminGroup2"]').click()
+        cy.openDialog('[data-cy="deleteAdminGroupButton_adminGroup2"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove This is admin group 2 Admin Group')
         cy.get('[data-cy="currentValidationText"]').type('Delete Me')
         cy.get('[data-cy="saveDialogBtn"]').click()

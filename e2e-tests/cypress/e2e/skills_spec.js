@@ -1374,7 +1374,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy*=copySkillButton]').should('have.length', 5)
     cy.get('[data-cy*=copySkillButton]').should('be.disabled')
 
-    cy.get('[data-cy=deleteSkillButton_skill1]').click()
+    cy.openDialog('[data-cy=deleteSkillButton_skill1]')
     cy.get('[data-cy=currentValidationText]').type('Delete Me', {delay: 0})
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
     cy.wait('@deleteSkill')
@@ -1399,7 +1399,7 @@ describe('Skills Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
     cy.get('[data-cy=pageHeaderStat]').eq(1).should('contain.text', '5')
-    cy.get('[data-cy=deleteSkillButton_skill5]').click()
+    cy.openDialog('[data-cy=deleteSkillButton_skill5]')
     cy.get('[data-cy=currentValidationText]').type('Delete Me', {delay: 0})
     cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
     cy.wait('@deleteSkill')

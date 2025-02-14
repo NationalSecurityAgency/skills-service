@@ -176,8 +176,7 @@ describe('Skill Reuse Tests', () => {
     it('remove the reused skill', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
         cy.visit('/administrator/projects/proj1/subjects/subj2');
-        cy.get('[data-cy="deleteSkillButton_skill1STREUSESKILLST0"]')
-            .click();
+        cy.openDialog('[data-cy="deleteSkillButton_skill1STREUSESKILLST0"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('this action will only remove the reused skill');
         cy.get('[data-cy="currentValidationText"]')
@@ -204,8 +203,7 @@ describe('Skill Reuse Tests', () => {
         cy.reuseSkillIntoAnotherSubject(1, 1, 2);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="deleteSkillButton_skill1"]')
-            .click();
+        cy.openDialog('[data-cy="deleteSkillButton_skill1"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('Deleting this skill will also remove its reused copies');
         cy.get('[data-cy="currentValidationText"]')

@@ -430,7 +430,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="deleteQuizButton_quiz3"]').should('exist')
         cy.get('[data-cy="deleteQuizButton_quiz4"]').should('exist')
 
-        cy.get('[data-cy="deleteQuizButton_quiz2"]').click()
+        cy.openDialog('[data-cy="deleteQuizButton_quiz2"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove This is survey 2 Survey')
         cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
         cy.get('[data-cy="saveDialogBtn"]').click()
@@ -458,7 +458,7 @@ describe('Quiz CRUD Tests', () => {
 
         cy.visit('/administrator/quizzes/')
 
-        cy.get('[data-cy="deleteQuizButton_quiz1"]').click()
+        cy.openDialog('[data-cy="deleteQuizButton_quiz1"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('Cannot remove the quiz since it is currently assigned to 1 skill')
         cy.get('[data-cy="currentValidationText"]').should('not.exist')
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')

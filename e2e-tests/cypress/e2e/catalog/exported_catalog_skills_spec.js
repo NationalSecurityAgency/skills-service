@@ -58,8 +58,7 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5);
 
-        cy.get('[data-cy="deleteSkillButton_skill1"]')
-            .click();
+        cy.openDialog('[data-cy="deleteSkillButton_skill1"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 0 projects.');
         cy.get('[data-cy="removalSafetyCheckMsg"]')
@@ -121,8 +120,7 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5);
 
-        cy.get('[data-cy="deleteSkillButton_skill1"]')
-            .click();
+        cy.openDialog('[data-cy="deleteSkillButton_skill1"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains('This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 0 projects.');
         cy.get('[data-cy="saveDialogBtn"]')
@@ -181,8 +179,7 @@ describe('Skills Exported to Catalog Tests', () => {
             }],
         ], 5);
 
-        cy.get(`[data-cy="deleteSkillButton_${skillId}"]`)
-            .click();
+        cy.openDialog(`[data-cy="deleteSkillButton_${skillId}"]`)
         cy.get('[data-cy="removalSafetyCheckMsg"]')
             .contains(`This will PERMANENTLY remove [Very Great Skill 1] Skill from the catalog. This skill is currently imported by 0 projects.`);
         cy.get('[data-cy="saveDialogBtn"]')

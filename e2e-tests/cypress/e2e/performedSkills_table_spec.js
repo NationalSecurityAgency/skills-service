@@ -669,7 +669,7 @@ describe('Performed Skills Table Tests', () => {
             }],
         ], 5);
 
-        cy.get('[data-cy="performedSkills-deleteAll"]').click()
+        cy.openDialog('[data-cy="performedSkills-deleteAll"]')
         cy.contains('This will delete all skill events for user1@skills.org.');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me')
         cy.get('[data-cy="saveDialogBtn"]').click();

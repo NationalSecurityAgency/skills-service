@@ -490,7 +490,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get(q1Card).should('exist')
         cy.get(q2Card).should('exist')
 
-        cy.get('[data-cy="deleteQuestionButton_2"]').click()
+        cy.openDialog('[data-cy="deleteQuestionButton_2"]')
         cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
         cy.get('[data-cy="saveDialogBtn"]').click()
 
@@ -502,7 +502,7 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="btn_Questions"]').should('have.focus')
 
         cy.get('[data-cy="noQuestionsYet"]').should('not.exist')
-        cy.get('[data-cy="deleteQuestionButton_1"]').click()
+        cy.openDialog('[data-cy="deleteQuestionButton_1"]')
         cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
         cy.get('[data-cy="saveDialogBtn"]').click()
 

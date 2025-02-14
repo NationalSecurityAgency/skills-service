@@ -92,7 +92,7 @@ describe('Admin Group Project Management Tests', () => {
                     [{colIndex: 0, value: 'This is project 1'}],
                     [{colIndex: 0, value: 'This is project 2'}],
                 ], 5);
-                cy.get('[data-cy="removeProject_proj2"]').click()
+                cy.openDialog('[data-cy="removeProject_proj2"]')
                 cy.get('[data-cy="removalSafetyCheckMsg"]').contains(`This will remove the This is project 2 project from this admin group. All members of this admin group other than ${userIdForDisplay} will lose admin access to this project.`)
                 cy.get('[data-cy="currentValidationText"]').type('Delete Me')
                 cy.get('[data-cy="saveDialogBtn"]').click()

@@ -92,7 +92,7 @@ describe('Quiz Input Text Question Tests', () => {
         cy.get('[data-cy="deleteQuestionButton_2"]').should('exist')
         cy.get('[data-cy="deleteQuestionButton_3"]').should('exist')
 
-        cy.get('[data-cy="deleteQuestionButton_3"]').click()
+        cy.openDialog('[data-cy="deleteQuestionButton_3"]')
         cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
         cy.get('[data-cy="saveDialogBtn"]').click()
 
