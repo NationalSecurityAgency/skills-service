@@ -61,6 +61,14 @@ class QuizSkillAchievements_CopyProjectSpecs extends QuizSkillAchievementsBaseIn
         passQuiz(userServices[2], quiz2)
         passQuiz(userServices[2], quiz3)
 
+        // subj2Skills[4] -> subj2Skills[3] (quiz skill)
+        skillsService.addLearningPathPrerequisite(proj.projectId, subj2Skills[3].skillId, subj2Skills[4].skillId)
+
+        // assign quiz to skill after users passed, should not award skills since the subj2Skills[4] has not been completed yet (in both original and copied project)
+        subj2Skills[3].selfReportingType = SkillDef.SelfReportingType.Quiz
+        subj2Skills[3].quizId = quiz1.quizId
+        skillsService.updateSkill(subj2Skills[3])
+
         when:
         def projToCopy = createProject(2)
         skillsService.copyProject(proj.projectId, projToCopy)
@@ -221,6 +229,14 @@ class QuizSkillAchievements_CopyProjectSpecs extends QuizSkillAchievementsBaseIn
         passQuiz(userServices[2], quiz1)
         passQuiz(userServices[2], quiz2)
         passQuiz(userServices[2], quiz3)
+
+        // subj2Skills[4] -> subj2Skills[3] (quiz skill)
+        skillsService.addLearningPathPrerequisite(proj.projectId, subj2Skills[3].skillId, subj2Skills[4].skillId)
+
+        // assign quiz to skill after users passed, should not award skills since the subj2Skills[4] has not been completed yet (in both original and copied project)
+        subj2Skills[3].selfReportingType = SkillDef.SelfReportingType.Quiz
+        subj2Skills[3].quizId = quiz1.quizId
+        skillsService.updateSkill(subj2Skills[3])
 
         when:
         def user1Progress_t0 = skillsService.getSkillSummary(userServices[0].userName, proj.projectId, subj.subjectId)
@@ -559,6 +575,15 @@ class QuizSkillAchievements_CopyProjectSpecs extends QuizSkillAchievementsBaseIn
         passQuiz(userServices[0], quiz1)
 
         Integer skillRefId = skillDefRepo.findByProjectIdAndSkillId(proj.projectId, skills[0].skillId).id
+
+        // skills[4] -> skills[3] (quiz skill)
+        skillsService.addLearningPathPrerequisite(proj.projectId, skills[3].skillId, skills[4].skillId)
+
+        // assign quiz to skill after users passed, should not award skills since the skills[4] has not been completed yet (in both original and copied project)
+        skills[3].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[3].quizId = quiz1.quizId
+        skillsService.updateSkill(skills[3])
+
         when:
         def projToCopy = createProject(2)
         skillsService.copyProject(proj.projectId, projToCopy)
