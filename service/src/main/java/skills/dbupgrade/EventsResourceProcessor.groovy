@@ -62,6 +62,7 @@ class EventsResourceProcessor {
                             skr.timestamp = queuedSkillEvent.requestTime.getTime()
                         } else if (!skr.userId) {
                             skr.userId = queuedSkillEvent.userId
+                            skr.idType = null
                         }
                         addSkillHelper.addSkill(queuedSkillEvent.projectId, queuedSkillEvent.skillId, skr)
                     } catch (Exception e) {
