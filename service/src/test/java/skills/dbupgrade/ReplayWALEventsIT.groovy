@@ -26,10 +26,14 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.PathResource
 import org.springframework.core.io.WritableResource
 import skills.SpringBootApp
+import skills.auth.UserInfoService
+import skills.controller.request.model.SkillEventRequest
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.UserAttrs
 import skills.utils.WaitFor
+import spock.lang.IgnoreIf
 import spock.lang.Shared
 
 @Slf4j
@@ -110,6 +114,147 @@ class ReplayWALEventsIT extends DefaultIntSpec {
         then:
         projectUsers.data.size() == numRecordsToExpect
         projectUsers.data.userId.sort() == ['user1', 'user3'].sort()
+    }
+
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] != "pki" })
+    def "pki mode - some events with empty userId have incorrect ID type"() {
+        List<String> users = getRandomUsers(3)
+        List<SkillsService> usersServices = users.collect {
+            createService(it)
+        }
+        List<UserAttrs> userAttrs = users.collect {
+            userAttrsRepo.findByUserIdIgnoreCase(it)
+        }
+
+        PathResource file1 = new PathResource("./target/queued_skill_events-file2.jsonsequence")
+        SequenceWriter sequenceWriter = createSequenceWriter(file1)
+        sequenceWriter.write(new QueuedSkillEvent(
+                projectId: proj.projectId, skillId: skills[0].skillId,
+                userId: userAttrs[0].dn, requestTime: new Date(),
+                skillEventRequest: new SkillEventRequest(
+                        userId: null,
+                        idType: UserInfoService.ID_IDTYPE,
+                        timestamp: new Date().getTime()
+                )
+        ))
+        sequenceWriter.write(new QueuedSkillEvent(
+                projectId: proj.projectId, skillId: skills[0].skillId,
+                userId: userAttrs[1].dn, requestTime: new Date(),
+                skillEventRequest: new SkillEventRequest(
+                        userId: userAttrs[2].dn,
+                        idType: UserInfoService.DN_IDTYPE,
+                        timestamp: new Date().getTime()
+                )
+        ))
+        sequenceWriter.close()
+
+        int numRecordsToExpect = 2
+        SkillsService validRootUser = createService(users[2])
+        rootUser.addRootRole(validRootUser.userName)
+        when:
+        validRootUser.runReplayEventsAfterUpgrade()
+        WaitFor.wait { skillsService.getProjectUsers(proj.projectId).data.size() == numRecordsToExpect }
+        def projectUsers = skillsService.getProjectUsers(proj.projectId)
+        then:
+        projectUsers.data.size() == numRecordsToExpect
+        projectUsers.data.userId.sort() == [userAttrs[0].userId, userAttrs[2].userId].sort()
+    }
+
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] != "pki" })
+    def "pki mode - events with idType of 'ID' work correctly"() {
+        List<String> users = getRandomUsers(3)
+        List<SkillsService> usersServices = users.collect {
+            createService(it)
+        }
+        List<UserAttrs> userAttrs = users.collect {
+            userAttrsRepo.findByUserIdIgnoreCase(it)
+        }
+
+        PathResource file1 = new PathResource("./target/queued_skill_events-file3.jsonsequence")
+        SequenceWriter sequenceWriter = createSequenceWriter(file1)
+        sequenceWriter.write(new QueuedSkillEvent(
+                projectId: proj.projectId, skillId: skills[0].skillId,
+                userId: userAttrs[0].dn, requestTime: new Date(),
+                skillEventRequest: new SkillEventRequest(
+                        userId: userAttrs[1].userId,
+                        idType: UserInfoService.ID_IDTYPE,
+                        timestamp: new Date().getTime()
+                )
+        ))
+        sequenceWriter.write(new QueuedSkillEvent(
+                projectId: proj.projectId, skillId: skills[0].skillId,
+                userId: userAttrs[0].dn, requestTime: new Date(),
+                skillEventRequest: new SkillEventRequest(
+                        userId: userAttrs[2].userId,
+                        idType: UserInfoService.ID_IDTYPE,
+                        timestamp: new Date().getTime()
+                )
+        ))
+        sequenceWriter.close()
+
+        int numRecordsToExpect = 2
+        SkillsService validRootUser = createService(users[2])
+        rootUser.addRootRole(validRootUser.userName)
+        when:
+        validRootUser.runReplayEventsAfterUpgrade()
+        WaitFor.wait { skillsService.getProjectUsers(proj.projectId).data.size() == numRecordsToExpect }
+        def projectUsers = skillsService.getProjectUsers(proj.projectId)
+        then:
+        projectUsers.data.size() == numRecordsToExpect
+        projectUsers.data.userId.sort() == [userAttrs[1].userId, userAttrs[2].userId].sort()
+    }
+
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] != "pki" })
+    def "pki mode - when id type is not correct simply skip the event"() {
+        List<String> users = getRandomUsers(4)
+        List<SkillsService> usersServices = users.collect {
+            createService(it)
+        }
+        List<UserAttrs> userAttrs = users.collect {
+            userAttrsRepo.findByUserIdIgnoreCase(it)
+        }
+
+        PathResource file1 = new PathResource("./target/queued_skill_events-file3.jsonsequence")
+        SequenceWriter sequenceWriter = createSequenceWriter(file1)
+        sequenceWriter.write(new QueuedSkillEvent(
+                projectId: proj.projectId, skillId: skills[0].skillId,
+                userId: userAttrs[0].dn, requestTime: new Date(),
+                skillEventRequest: new SkillEventRequest(
+                        userId: userAttrs[1].userId,
+                        idType: UserInfoService.ID_IDTYPE,
+                        timestamp: new Date().getTime()
+                )
+        ))
+        sequenceWriter.write(new QueuedSkillEvent(
+                projectId: proj.projectId, skillId: skills[0].skillId,
+                userId: userAttrs[0].dn, requestTime: new Date(),
+                skillEventRequest: new SkillEventRequest(
+                        userId: userAttrs[2].dn,
+                        idType: UserInfoService.ID_IDTYPE,
+                        timestamp: new Date().getTime()
+                )
+        ))
+        sequenceWriter.write(new QueuedSkillEvent(
+                projectId: proj.projectId, skillId: skills[0].skillId,
+                userId: userAttrs[0].dn, requestTime: new Date(),
+                skillEventRequest: new SkillEventRequest(
+                        userId: userAttrs[3].userId,
+                        idType: UserInfoService.ID_IDTYPE,
+                        timestamp: new Date().getTime()
+                )
+        ))
+        sequenceWriter.close()
+
+        int numRecordsToExpect = 2
+        SkillsService validRootUser = createService(users[2])
+        rootUser.addRootRole(validRootUser.userName)
+        when:
+        validRootUser.runReplayEventsAfterUpgrade()
+        WaitFor.wait { skillsService.getProjectUsers(proj.projectId).data.size() == numRecordsToExpect }
+        def projectUsers = skillsService.getProjectUsers(proj.projectId)
+        then:
+        projectUsers.data.size() == numRecordsToExpect
+        projectUsers.data.userId.sort() == [userAttrs[1].userId, userAttrs[3].userId].sort()
     }
 
     @Autowired
