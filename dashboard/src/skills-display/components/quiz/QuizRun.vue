@@ -414,7 +414,7 @@ const doneWithThisRun = () => {
             </div>
           </div>
 
-          <Card :pt="{ body: { class: '!p-1' }, content: { class: '!p-1' } }" v-if="quizInfo.description && quizInfo.showDescriptionOnQuizPage">
+          <Card :pt="{ body: { class: '!p-1' }, content: { class: '!p-1' } }" class="mb-3" v-if="quizInfo.description && quizInfo.showDescriptionOnQuizPage">
             <template #content>
               <markdown-text
                   :text="quizInfo.description"
