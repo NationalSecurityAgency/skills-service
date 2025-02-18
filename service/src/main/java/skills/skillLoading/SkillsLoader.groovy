@@ -682,7 +682,7 @@ class SkillsLoader {
                 copiedFromProjectName: isReusedSkill ? null : InputSanitizer.unsanitizeName(copiedFromProjectName),
                 badges: badges,
                 tags: loadSkillTags(skillDef.id),
-                videoSummary: getVideoSummary(skillDef),
+                videoSummary: getVideoSummary(skillDef.copiedFrom ?: skillDef.id),
                 expirationDate: expirationDate,
                 isMotivationalSkill: isMotivationalSkill,
                 daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
@@ -695,8 +695,7 @@ class SkillsLoader {
     }
 
     @Profile
-    private VideoSummary getVideoSummary(SkillDefWithExtra skillDef) {
-        Integer skillDefId = skillDef.copiedFrom ?: skillDef.id
+    private VideoSummary getVideoSummary(Integer skillDefId) {
         VideoSummary res = null
         SkillAttributesDefRepo.VideoSummaryAttributes videoSummaryAttributes = skillAttributesDefRepo.getVideoSummary(skillDefId)
         if (videoSummaryAttributes) {
@@ -1422,6 +1421,7 @@ class SkillsLoader {
                         daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
                         mostRecentlyPerformedOn: mostRecentlyPerformedOn,
                         lastExpirationDate: lastExpirationDate,
+                        videoSummary: getVideoSummary(skillDef.copiedFrom ?: skillDef.id),
                 )
             }
         }

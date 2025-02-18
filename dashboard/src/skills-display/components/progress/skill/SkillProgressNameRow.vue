@@ -123,6 +123,10 @@ const skillId = computed(() => {
   }
   return res
 })
+
+const isAudio = computed(() => {
+  return props.skill.videoSummary?.videoType?.includes('audio/')
+})
 </script>
 
 <template>
@@ -194,7 +198,9 @@ const skillId = computed(() => {
           <span v-if="skill.selfReporting.type === 'Approval'" data-cy="selfReportApprovalTag"><span
             class="sr-spelled-out mr-1">Request</span>Approval</span>
           <span v-if="skill.selfReporting.type === 'Video'" data-cy="selfReportApprovalTag">
-            <span class="sr-spelled-out mr-1">Listen to </span>Audio/<span class="sr-spelled-out mr-1">Watch </span>Video</span>
+            <span v-if="isAudio"><span class="sr-spelled-out mr-1">Listen to </span>Audio</span>
+            <span v-else><span class="sr-spelled-out mr-1">Watch </span>Video</span>
+          </span>
         </Tag>
         <Tag v-if="showLastViewedIndicator" id="lastViewedIndicator"
              data-cy="lastViewedIndicator" severity="info"

@@ -200,7 +200,7 @@ const saveSettings = () => {
       data.append('videoUrl', videoConf.value.url);
     }
   }
-  if (videoConf.value.captions) {
+  if (videoConf.value.captions && !computedVideoConf.value.isAudio) {
     data.append('captions', videoConf.value.captions);
   }
   if (videoConf.value.transcript) {
