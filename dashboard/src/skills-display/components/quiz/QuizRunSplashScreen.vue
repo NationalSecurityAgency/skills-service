@@ -115,8 +115,8 @@ const start = () => {
           <span v-else>You need to answer <Tag severity="warn">{{ remainingQuestions }}</Tag> question(s) to pass.</span>
         </Message>
 
-        <div class="flex flex-wrap flex-col md:flex-row gap-6 pt-2">
-            <Card class="skills-card-theme-border flex-1" :pt="{ body: { class: '!p-0' }, content: { class: '!py-2' } }" data-cy="quizInfoCard">
+        <div class="flex flex-col flex-wrap md:flex-row gap-6 pt-2">
+            <Card class="skills-card-theme-border flex-1 min-w-80" :pt="{ body: { class: '!p-0' }, content: { class: '!py-2' } }" data-cy="quizInfoCard">
               <template #content>
                 <div class="px-4">
                   <i class="fas fa-question-circle text-primary" style="font-size: 1.3rem;" aria-hidden="true"></i>
@@ -125,7 +125,7 @@ const start = () => {
                 </div>
               </template>
             </Card>
-            <Card v-if="!isSurveyType"  class="skills-card-theme-border flex-1" :pt="{ body: { class: '!p-0' }, content: { class: 'py-2' } }" data-cy="quizTimeLimitCard">
+            <Card v-if="!isSurveyType"  class="skills-card-theme-border flex-1 min-w-80" :pt="{ body: { class: '!p-0' }, content: { class: 'py-2' } }" data-cy="quizTimeLimitCard">
               <template #content>
                 <div class="px-4">
                   <i class="fas fa-business-time text-primary" style="font-size: 1.3rem;"></i>
@@ -135,12 +135,12 @@ const start = () => {
                 </div>
               </template>
             </Card>
-            <Card v-if="!isSurveyType"  class="skills-card-theme-border flex-1" :pt="{ body: { class: '!p-0' }, content: { class: 'py-2' } }" data-cy="quizInfoCard">
+            <Card v-if="!isSurveyType"  class="skills-card-theme-border flex-1 min-w-80" :pt="{ body: { class: '!p-0' }, content: { class: 'py-2' } }" data-cy="quizInfoCard">
               <template #content>
-                <div class="px-4">
+                <div class="px-4 ">
                   <i class="fas fa-redo-alt text-primary" style="font-size: 1.3rem;" aria-hidden="true"></i>
                   <span class="text-muted-color italic ml-1">Attempts:</span>
-                  <span class="uppercase ml-1 font-bold" data-cy="numAttempts"><Tag severity="secondary">{{quizInfo.userNumPreviousQuizAttempts}}</Tag> / <Tag severity="secondary">{{ maxAttemptsDisplay }}</Tag></span>
+                  <span class="uppercase ml-1 font-bold text-sm" data-cy="numAttempts"><Tag severity="secondary">{{quizInfo.userNumPreviousQuizAttempts}}</Tag> / <Tag severity="secondary">{{ maxAttemptsDisplay }}</Tag></span>
                 </div>
               </template>
             </Card>
