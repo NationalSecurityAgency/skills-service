@@ -15,7 +15,7 @@
  */
 package skills.dbupgrade
 
-
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
@@ -36,6 +36,7 @@ class DBCheckPointer implements CheckPointer {
     @PersistenceContext
     EntityManager entityManager;
 
+    @Profile
     @Override
     @Transactional()
     int getRecordToStartOn(String filename) {
@@ -46,6 +47,7 @@ class DBCheckPointer implements CheckPointer {
         return 0
     }
 
+    @Profile
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     void recordRecord(String filename, int recordNum) {
@@ -61,6 +63,7 @@ class DBCheckPointer implements CheckPointer {
         entityManager.flush()
     }
 
+    @Profile
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     void cleanup(String filename) {
