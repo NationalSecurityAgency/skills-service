@@ -323,8 +323,8 @@ const onSavedQuestion = (savedQuestion) => {
         </div>
         <SkillsTextarea v-if="showHint"
             id="answerHintInput"
-            placeholder="Hint to be presented to user on retake attempts"
-            aria-label="Hint to be presented to user on retake attempts"
+            placeholder="Hint to be presented to user"
+            aria-label="Hint to be presented to user"
             rows="3"
             max-rows="3"
             name="answerHint"
