@@ -21,11 +21,11 @@ import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkil
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import GraphLegend from '@/skills-display/components/skill/prerequisites/GraphLegend.vue'
+import GraphUtils from '@/components/skills/dependencies/GraphUtils';
 import UserPrerequisitesProgress from '@/skills-display/components/skill/prerequisites/UserPrerequisitesProgress.vue'
 import PrerequisitesTable from '@/skills-display/components/skill/prerequisites/PrerequisitesTable.vue'
 import { useNavToSkillUtil } from '@/skills-display/components/skill/prerequisites/UseNavToSkillUtil.js'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
-
 
 const props = defineProps({
   dependencies: Array
@@ -273,7 +273,7 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
     createdSkillIds.push(skill.id)
     const skillColor = skill.isThisSkill ? themeState.graphThisSkillColor : themeState.graphSkillColor
     const isAchieved = achievedIds.includes(skill.id)
-    let label = isCrossProject ? `Shared from\n<b>${skill.projectName}</b>\n${skill.skillName}` : skill.skillName
+    let label = isCrossProject ? `Shared from\n<b>${skill.projectName}</b>\n${GraphUtils.truncate(skill.skillName)}` : GraphUtils.truncate(skill.skillName)
     if (skill.isThisSkill) {
       label = `<b>This Skill</b>\n${label}`
     } else if (skill.isThisBadge) {
