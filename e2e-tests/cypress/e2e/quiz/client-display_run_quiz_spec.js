@@ -1798,7 +1798,7 @@ describe('Client Display Quiz Tests', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1, {  answerHint: '' });
         cy.createQuizQuestionDef(1, 2, {  answerHint: '' });
-        cy.createQuizQuestionDef(1, 3), {  answerHint: null };
+        cy.createQuizQuestionDef(1, 3, {  answerHint: null });
         cy.createQuizQuestionDef(1, 4, {  answerHint: null });
         cy.setMinNumQuestionsToPass(1, 2)
 

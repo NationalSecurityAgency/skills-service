@@ -211,7 +211,7 @@ const needsGrading = computed(() => QuizStatus.isNeedsGrading(props.q.gradedInfo
                             :q-num="num"
                             :can-select-more-than-one="isMultipleChoice"/>
           </div>
-          <div class="bg-green-500d flex" v-if="q.answerHint" data-cy="answerHint">
+          <div class="flex" v-if="q.answerHint" data-cy="answerHint">
             <Message size="small" severity="warn" icon="fas fa-lightbulb" :closable="false" class="mt-2" data-cy="answerHintMsg">
               {{ q.answerHint }}
             </Message>
