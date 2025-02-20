@@ -15,6 +15,7 @@
  */
 package skills.dbupgrade
 
+import callStack.profiler.CProf
 import com.fasterxml.jackson.databind.MappingIterator
 import com.fasterxml.jackson.databind.ObjectWriter
 import com.fasterxml.jackson.databind.json.JsonMapper
@@ -41,6 +42,19 @@ class EventsResourceProcessor {
     DBCheckPointer checkPointer
 
     void processFile(Resource file) {
+        String profNme = "process file".toString()
+        CProf.start(profNme)
+        try {
+            doProcessFile(file)
+        } finally {
+            CProf.stop(profNme)
+        }
+
+        log.info("\nProfiling processing of [{}]\": \n{}", file.filename, CProf.prettyPrint())
+        CProf.clear()
+    }
+
+    private void doProcessFile(Resource file) {
         String fileName = file.filename
         log.info("processing queued skill event file [${fileName}]")
         ObjectWriter errorSerializer = jsonMapper.writerFor(QueuedSkillEvent)
