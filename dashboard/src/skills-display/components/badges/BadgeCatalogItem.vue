@@ -59,6 +59,7 @@ const percent = computed(() => {
 const showHeader = computed(() => props.badge.gem || props.badge.global)
 const iconCardPt = computed(() => {
   return {
+    root: { class: '!border' },
     content:
       {
         class: showHeader.value ? 'p-0' : ''

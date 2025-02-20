@@ -92,6 +92,7 @@ export default {
         '.sd-theme-home .skills-display-test-link a,' +
         '.sd-theme-home .p-chip-icon,' +
         '.sd-theme-home .p-icon,' +
+        '.sd-theme-home .p-avatar-icon,' +
         'body #app .sd-theme-home .p-datatable .p-datatable-tbody > tr,' +
         'body #app .sd-theme-home .p-datatable .p-datatable-thead > tr > th,' +
         'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link,' +

@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import CardWithVericalSections from "@/components/utils/cards/CardWithVericalSections.vue";
+
 const props = defineProps({
   title: {
     type: String,
@@ -44,34 +46,38 @@ const props = defineProps({
 </script>
 
 <template>
-  <Card class="skills-progress-card w-min-15rem h-full" :data-cy="componentName" :pt="{ content: { class: 'py-0' } }">
-    <template #subtitle>
-      <div class="text-center text-xl font-medium" :data-cy="`${componentName}Title`">
+  <CardWithVericalSections class="skills-progress-card w-min-15rem h-full" :data-cy="componentName">
+    <template #header>
+      <div class="text-center text-xl font-medium pt-4 px-4 pb-5" :data-cy="`${componentName}Title`">
         {{ title }}
       </div>
     </template>
     <template #content>
-      <div class="fa-stack skills-icon user-rank-stack flex flex-wrap align-items-center" v-if="!loading">
-        <i :class="`${icon} fa-stack-2x watermark-icon`" />
+      <div class="px-4">
+        <div class="fa-stack skills-icon user-rank-stack flex flex-wrap align-items-center" v-if="!loading">
+          <i :class="`${icon} fa-stack-2x watermark-icon`" />
 
-        <div class="text-blue-600 dark:text-blue-800 fa-stack-1x">
-          <slot name="userRanking" />
+          <div class="text-blue-600 dark:text-blue-800 fa-stack-1x">
+            <slot name="userRanking" />
+          </div>
         </div>
+        <skills-spinner :is-loading="loading"/>
       </div>
-      <skills-spinner :is-loading="loading"/>
     </template>
     <template #footer v-if="!isSummaryOnly">
-      <router-link
-          :to="route"
-          :aria-label="`Click to navigate to ${title} page`"
-          :data-cy="`${componentName}Btn`" tabindex="-1">
-        <Button
-            label="View"
-            icon="far fa-eye"
-            outlined class="w-full" size="small" />
-      </router-link>
+      <div class="p-4">
+        <router-link
+            :to="route"
+            :aria-label="`Click to navigate to ${title} page`"
+            :data-cy="`${componentName}Btn`" tabindex="-1">
+          <Button
+              label="View"
+              icon="far fa-eye"
+              outlined class="w-full" size="small" />
+        </router-link>
+      </div>
     </template>
-  </Card>
+  </CardWithVericalSections>
 </template>
 
 <style>

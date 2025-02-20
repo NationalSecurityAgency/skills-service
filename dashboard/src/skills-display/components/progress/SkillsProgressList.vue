@@ -267,7 +267,7 @@ const toggle = (event) => {
                     :aria-label="`Search ${attributes.skillDisplayName}s`"
                     data-cy="skillsSearchInput" />
                   <InputGroupAddon class="p-0 m-0">
-                    <SkillsButton
+                    <SkillsButton :pt="{ root: { class: '!border-0' } }"
                       icon="fas fa-times"
                       text
                       outlined
