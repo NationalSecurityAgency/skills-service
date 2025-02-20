@@ -49,7 +49,7 @@ const toRankDetailsPage = computed(() => {
                     component-name="myRank"
                     :loading="progress.loadingUserSkillsRanking">
     <template #userRanking>
-      <div class="py-2 sd-theme-primary-color sd-theme-tile-background-color user-rank-text">
+      <div class="py-2 user-rank-text">
         <div v-if="optedOut" data-cy="optedOutMessage">
           <div class="text-2xl">Opted-Out</div>
           <div style="font-size: 0.8rem; line-height: 1rem;" class="mt-2">
