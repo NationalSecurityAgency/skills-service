@@ -70,7 +70,8 @@ class QuizRoleService {
         if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
             throw new SkillQuizException("Cannot add roles to myself. userId=[${userId}]", quizId, ErrorCode.AccessDenied)
         }
-        if (userRoleRepo.isUserQuizGroupAdmin(userId, quizId)) {
+        Boolean addingAsLocalAdmin = adminGroupId == null && roleName == RoleName.ROLE_QUIZ_ADMIN;
+        if (addingAsLocalAdmin && userRoleRepo.isUserQuizGroupAdmin(userId, quizId)) {
             throw new SkillQuizException("User is already part of an Admin Group and cannot be added as a local admin. userId=[${userId}]", quizId, ErrorCode.AccessDenied)
         }
         accessSettingsStorageService.addQuizDefUserRoleForUser(userId, quizDef.quizId, roleName, adminGroupId)
