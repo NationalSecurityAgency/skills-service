@@ -515,4 +515,33 @@ describe('Markdown Tests', () => {
             expect(text).to.eq('<p><br class="ProseMirror-trailingBreak"></p><p><img src="https://github.com/NationalSecurityAgency/skills-service/raw/master/skilltree_logo.png" alt="image" contenteditable="false"><img class="ProseMirror-separator" alt=""><br class="ProseMirror-trailingBreak"></p>');
         })
     });
+
+    it('markdown on quiz page', () => {
+        cy.createQuizDef(1, {description: markdown});
+        for(var x = 1; x < 3; x++) {
+            cy.createQuizQuestionDef(1, x);
+        }
+
+        cy.visit('/administrator/quizzes/quiz1/settings');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="showDescriptionOnQuizPageSwitch"] [role="switch"]').click({force: true});
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1')
+
+        cy.get('[data-cy="quizDescription"]').contains('Emojis');
+        cy.get('[data-cy="quizDescription"]').contains('👍 👍 👍 👍');
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="quizDescription"]').contains('Emojis');
+        cy.get('[data-cy="quizDescription"]').contains('👍 👍 👍 👍');
+
+        cy.matchSnapshotImageForElement('[data-cy="quizDescription"]', {
+            errorThreshold: 0.1
+        });
+    })
 });
