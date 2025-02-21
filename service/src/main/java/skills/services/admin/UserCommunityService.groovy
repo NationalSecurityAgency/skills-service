@@ -149,7 +149,7 @@ class UserCommunityService {
         ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(projId)
         if (projDef) {
             List<UserRole> allRoles = userRoleRepo.findAllByProjectIdIgnoreCase(projDef.projectId)
-            checkAllUsersAreUCMembers(allRoles, res)
+            checkAllUsersAreUCMembers(allRoles, res, adminGroupView)
 
             if (exportedSkillRepo.countSkillsExportedByProject(projDef.projectId) > 0) {
                 res.isAllowed = false
@@ -202,7 +202,7 @@ class UserCommunityService {
         return res;
     }
 
-    private void checkAllUsersAreUCMembers(List<UserRole> roles, EnableUserCommunityValidationRes res) {
+    private void checkAllUsersAreUCMembers(List<UserRole> roles, EnableUserCommunityValidationRes res, Boolean adminGroupView = false) {
         if (roles) {
             List<UserRole> unique = roles.unique { it.userId }
             unique.each { UserRole userWithRole ->
@@ -210,7 +210,11 @@ class UserCommunityService {
                     String userIdForDisplay = userAttrsRepo.findByUserIdIgnoreCase(userWithRole.userId).userIdForDisplay
 
                     res.isAllowed = false
-                    res.unmetRequirements.add("Has existing ${userIdForDisplay} user that is not authorized".toString())
+                    if(adminGroupView) {
+                        res.unmetRequirements.add("This admin group has the user ${userIdForDisplay} who is not authorized".toString())
+                    } else {
+                        res.unmetRequirements.add("This project has the user ${userIdForDisplay} who is not authorized".toString())
+                    }
                 }
             }
         }

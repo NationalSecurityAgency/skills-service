@@ -16,10 +16,12 @@
 package skills.intTests.community
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.auth.RoleName
 
+import static skills.intTests.utils.AdminGroupDefFactory.createAdminGroup
 import static skills.intTests.utils.SkillsFactory.*
 
 class EnableCommunityValidationSpecs extends DefaultIntSpec {
@@ -84,7 +86,7 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         def res = pristineDragonsUser.validateProjectForEnablingCommunity(p1.projectId)
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["Has existing ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} user that is not authorized"]
+        res.unmetRequirements == ["This project has the user ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} who is not authorized"]
 
     }
 
@@ -109,7 +111,7 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         def res = pristineDragonsUser.validateProjectForEnablingCommunity(p1.projectId)
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["Has existing ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} user that is not authorized"]
+        res.unmetRequirements == ["This project has the user ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} who is not authorized"]
     }
 
     def "validation endpoint - cannot enable community because number of requirements are not met"() {
@@ -135,8 +137,8 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         then:
         res.isAllowed == false
         res.unmetRequirements.sort() == [
-                "Has existing ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} user that is not authorized",
-                "Has existing ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser1.userName).userIdForDisplay} user that is not authorized",
+                "This project has the user ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} who is not authorized",
+                "This project has the user ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser1.userName).userIdForDisplay} who is not authorized",
                 "Has skill(s) that have been exported to the Skills Catalog"
         ].sort()
     }
@@ -201,5 +203,79 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
 
         res1.isAllowed == false
         res1.unmetRequirements == ["This project is part of one or more Global Badges"]
+    }
+
+    def "cannot enable UC protection on admin group if it contains a non-UC member"() {
+        SkillsService rootUser = createRootSkillService()
+        String userCommunityUserId =  skillsService.userName
+        rootUser.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def adminGroup = createAdminGroup(1)
+        adminGroup.enableProtectedUserCommunity = false
+        rootUser.createAdminGroupDef(adminGroup)
+
+        when:
+
+        def res = rootUser.validateAdminGroupForEnablingCommunity(adminGroup.adminGroupId)
+
+        then:
+        res.isAllowed == false
+        res.unmetRequirements == ["This admin group has the user rootUser for display who is not authorized"]
+    }
+
+
+    def "cannot enable UC protection on project if non-UC group is assigned to it already"() {
+        SkillsService rootUser = createRootSkillService()
+        String userCommunityUserId =  skillsService.userName
+        rootUser.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        def adminGroup = createAdminGroup(1)
+        adminGroup.enableProtectedUserCommunity = false
+        skillsService.createAdminGroupDef(adminGroup)
+
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        when:
+
+        proj.enableProtectedUserCommunity = true
+        def res = skillsService.validateProjectForEnablingCommunity(proj.projectId)
+
+        then:
+        res.isAllowed == false
+        res.unmetRequirements == ["This project is part of one or more Admin Groups that has not enabled user community protection"]
+    }
+
+    def "cannot enable UC protection on project if non-UC group is assigned to it already, multiple members in group"() {
+        SkillsService rootUser = createRootSkillService()
+        String userCommunityUserId =  skillsService.userName
+        rootUser.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def otherUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService otherUserCommunityUser = createService(otherUserCommunityUserId)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        def adminGroup = createAdminGroup(1)
+        adminGroup.enableProtectedUserCommunity = false
+        skillsService.createAdminGroupDef(adminGroup)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserCommunityUserId)
+
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        when:
+        proj.enableProtectedUserCommunity = true
+        def res = skillsService.validateProjectForEnablingCommunity(proj.projectId)
+
+        then:
+        res.isAllowed == false
+        res.unmetRequirements == ["This project has the user user3 for display who is not authorized", "This project is part of one or more Admin Groups that has not enabled user community protection"]
     }
 }
