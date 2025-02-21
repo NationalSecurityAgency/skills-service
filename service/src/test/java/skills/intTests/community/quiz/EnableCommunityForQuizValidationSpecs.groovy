@@ -70,7 +70,7 @@ class EnableCommunityForQuizValidationSpecs extends DefaultIntSpec {
         pristineDragonsUser.createQuizDef(q1, q1.quizId)
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.getMessage().contains("Has existing ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} user that is not authorized")
+        e.getMessage().contains("This quiz has the user ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} who is not authorized")
     }
 
     def "validation endpoint - cannot enable community if quiz has admin that doesn't belong to the community"() {
@@ -94,7 +94,7 @@ class EnableCommunityForQuizValidationSpecs extends DefaultIntSpec {
         def res = pristineDragonsUser.validateQuizForEnablingCommunity(q1.quizId)
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["Has existing ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} user that is not authorized"]
+        res.unmetRequirements == ["This quiz has the user ${userAttrsRepo.findByUserIdIgnoreCase(allDragonsUser.userName).userIdForDisplay} who is not authorized"]
     }
 
     def "cannot enable community if quiz has an admin group with an admin that doesn't belong to the community"() {
@@ -364,7 +364,7 @@ class EnableCommunityForQuizValidationSpecs extends DefaultIntSpec {
         pristineDragonsUser.createQuizDef(q1, q1.quizId)
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.getMessage().contains("Has existing ${allDragonsUser.userName} for display user that is not authorized".toString()) ||
+        e.getMessage().contains("This quiz has the user ${allDragonsUser.userName} for display who is not authorized".toString()) ||
                 e.getMessage().contains("This quiz is linked to the following project(s) that do not have Divine Dragon permission: ${p1.projectId}")
     }
 
@@ -402,7 +402,7 @@ class EnableCommunityForQuizValidationSpecs extends DefaultIntSpec {
         then:
         res.isAllowed == false
         res.unmetRequirements.sort() == [
-                "Has existing ${allDragonsUser.userName} for display user that is not authorized".toString(),
+                "This quiz has the user ${allDragonsUser.userName} for display who is not authorized".toString(),
                 "This quiz is linked to the following project(s) that do not have Divine Dragon permission: ${p1.projectId}".toString()
         ].sort()
     }

@@ -149,7 +149,7 @@ class UserCommunityService {
         ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(projId)
         if (projDef) {
             List<UserRole> allRoles = userRoleRepo.findAllByProjectIdIgnoreCase(projDef.projectId)
-            checkAllUsersAreUCMembers(allRoles, res, adminGroupView)
+            checkAllUsersAreUCMembers(allRoles, res, adminGroupView ? "admin group" : "project")
 
             if (exportedSkillRepo.countSkillsExportedByProject(projDef.projectId) > 0) {
                 res.isAllowed = false
@@ -187,7 +187,7 @@ class UserCommunityService {
         QuizDef quizDef = quizDefRepo.findByQuizIdIgnoreCase(quizId)
         if (quizDef) {
             List<UserRole> allRoles = userRoleRepo.findAllByQuizIdIgnoreCase(quizDef.quizId)
-            checkAllUsersAreUCMembers(allRoles, res)
+            checkAllUsersAreUCMembers(allRoles, res, "quiz")
             if(adminGroupDefRepo.doesAdminGroupContainNonUserCommunityQuiz(quizDef.quizId)) {
                 res.isAllowed = false
                 res.unmetRequirements.add("This quiz is part of one or more Admin Groups that do no have ${getCommunityNameBasedOnConfAndItemStatus(true)} permission".toString())
@@ -202,7 +202,7 @@ class UserCommunityService {
         return res;
     }
 
-    private void checkAllUsersAreUCMembers(List<UserRole> roles, EnableUserCommunityValidationRes res, Boolean adminGroupView = false) {
+    private void checkAllUsersAreUCMembers(List<UserRole> roles, EnableUserCommunityValidationRes res, String type = "project") {
         if (roles) {
             List<UserRole> unique = roles.unique { it.userId }
             unique.each { UserRole userWithRole ->
@@ -210,11 +210,7 @@ class UserCommunityService {
                     String userIdForDisplay = userAttrsRepo.findByUserIdIgnoreCase(userWithRole.userId).userIdForDisplay
 
                     res.isAllowed = false
-                    if(adminGroupView) {
-                        res.unmetRequirements.add("This admin group has the user ${userIdForDisplay} who is not authorized".toString())
-                    } else {
-                        res.unmetRequirements.add("This project has the user ${userIdForDisplay} who is not authorized".toString())
-                    }
+                    res.unmetRequirements.add("This ${type} has the user ${userIdForDisplay} who is not authorized".toString())
                 }
             }
         }
