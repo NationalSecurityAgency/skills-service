@@ -49,17 +49,6 @@ export default {
     container.innerHTML = html;
     return container;
   },
-  getSimpleTitle(skillItem, isCrossProject) {
-    const container = document.createElement('div');
-
-    let crossProjInfo = '';
-    if (isCrossProject) {
-      crossProjInfo = `<span style="border-bottom: 1px dotted black; font-weight: bold;"><i class="fas fa-handshake"></i> Cross Project Dependency</span><br/>
-                           <span>Project ID: ${skillItem.projectId}</span><br/>`;
-    }
-    container.innerHTML = `${crossProjInfo}<span style="font-style: italic; color: #444444">Name:</span> ${skillItem.skillName}`;
-    return container;
-  },
   getLabel(skillItem, isCrossProject) {
     return isCrossProject ? `Shared from\n<b>${this.truncate(skillItem.projectName)}</b>\n${this.truncate(skillItem.name)} ` : this.truncate(skillItem.name);
   },
