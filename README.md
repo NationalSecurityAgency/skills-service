@@ -1,4 +1,6 @@
-![SkillTree](skilltree_logo.png)
+<p align="center">
+  <img alt="skilltree logo" src="skilltree_logo.png" />
+</p>
 
 # SkillTree Service, Dashboard and Client Display
 SkillTree is a micro-learning gamification platform providing out-of-the-box UI visualizations, convenient client integration libraries, and a dashboard for managing the creation and administration of Gamified Training Profiles.  
