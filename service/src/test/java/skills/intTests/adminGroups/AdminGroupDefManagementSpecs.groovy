@@ -758,4 +758,50 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupsForProjectsAsMember.find { it.adminGroupId == adminGroup.adminGroupId }
         adminGroupsForProjectsAsMember.find { it.adminGroupId == adminGroup2.adminGroupId }
     }
+
+    def "user can be a member of multiple admin groups that are assigned to the same quiz"() {
+
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        createService(otherUserId)
+
+        def adminGroup1 = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup1)
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        skillsService.addQuizToAdminGroup(adminGroup1.adminGroupId, quiz.quizId)
+        skillsService.addAdminGroupMember(adminGroup1.adminGroupId, otherUserId)
+
+        def adminGroup2 = createAdminGroup(2)
+        skillsService.createAdminGroupDef(adminGroup2)
+        skillsService.addQuizToAdminGroup(adminGroup2.adminGroupId, quiz.quizId)
+
+        when:
+        skillsService.addAdminGroupMember(adminGroup2.adminGroupId, otherUserId)
+
+        def adminGroup1Res = skillsService.getAdminGroupDef(adminGroup1.adminGroupId)
+        def adminGroup1QuizzesAndSurveys = skillsService.getAdminGroupQuizzesAndSurveys(adminGroup1.adminGroupId)
+
+        def adminGroup2Res = skillsService.getAdminGroupDef(adminGroup2.adminGroupId)
+        def adminGroup2QuizzesAndSurveys = skillsService.getAdminGroupQuizzesAndSurveys(adminGroup2.adminGroupId)
+
+        then:
+        adminGroup1Res.adminGroupId == adminGroup1.adminGroupId
+        adminGroup1Res.numberOfOwners == 1
+        adminGroup1Res.numberOfProjects == 0
+        adminGroup1Res.numberOfQuizzesAndSurveys == 1
+
+        adminGroup1QuizzesAndSurveys.adminGroupId == adminGroup1.adminGroupId
+        adminGroup1QuizzesAndSurveys.assignedQuizzes.size() == 1 && adminGroup1QuizzesAndSurveys.assignedQuizzes.find { it.quizId == quiz.quizId }
+
+
+        adminGroup2Res.adminGroupId == adminGroup2.adminGroupId
+        adminGroup2Res.numberOfOwners == 1
+        adminGroup2Res.numberOfProjects == 0
+        adminGroup2Res.numberOfQuizzesAndSurveys == 1
+
+        adminGroup2QuizzesAndSurveys.adminGroupId == adminGroup2.adminGroupId
+        adminGroup2QuizzesAndSurveys.assignedQuizzes.size() == 1 && adminGroup1QuizzesAndSurveys.assignedQuizzes.find { it.quizId == quiz.quizId }
+    }
+
 }
