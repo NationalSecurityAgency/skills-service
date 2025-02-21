@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// import TruncateFilter from '../../../filters/TruncateFilter';
+import { useStringUtils } from '@/common-components/utilities/UseStringUtils.js'
+
+const stringUtils = useStringUtils();
 
 export default {
   getTitle(skillItem, isCrossProject) {
@@ -48,11 +50,15 @@ export default {
     return container;
   },
   getLabel(skillItem, isCrossProject) {
-    return isCrossProject ? `Shared from\n<b>${this.truncate(skillItem.projectName)}</b>\n${skillItem.name} ` : skillItem.name;
+    return isCrossProject ? `Shared from\n<b>${this.truncate(skillItem.projectName)}</b>\n${this.truncate(skillItem.name)} ` : this.truncate(skillItem.name);
   },
-  truncate(strValue, truncateTo = 35) {
-    // return TruncateFilter(strValue, truncateTo);
+  truncate(strValue, truncateTo = 25) {
+    let chunks = strValue.split(' ');
+    if(chunks.length > 1) {
+      return stringUtils.addNewlinesToChunks(chunks, truncateTo)
+    } else if (strValue.length > truncateTo) {
+      return stringUtils.addNewlinesToString(strValue, truncateTo)
+    }
     return strValue;
   },
-
 };
