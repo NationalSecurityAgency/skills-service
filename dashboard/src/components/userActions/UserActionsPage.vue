@@ -74,6 +74,7 @@ const isAllEvents = ref(true)
 const totalRows = ref(0)
 const items = ref([])
 const expandedRows = ref([])
+const preFilterPage = ref(1)
 
 onMounted(() => {
   isAllEvents.value = !(route.params.projectId || route.params.quizId);
@@ -172,9 +173,12 @@ const formatLabel = (originalLabel) => {
 
 const clearFilter = () => {
   filters.value.global.value = null
+  tableOptions.value.pagination.currentPage = preFilterPage.value
   loadData().then(() => filtering.value = false)
 }
 const onFilter = (filterEvent) => {
+  preFilterPage.value = tableOptions.value.pagination.currentPage
+  tableOptions.value.pagination.currentPage = 1
   loadData().then(() => filtering.value = true)
 }
 const pageChanged = (pagingInfo) => {
