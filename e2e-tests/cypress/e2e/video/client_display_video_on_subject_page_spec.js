@@ -226,7 +226,7 @@ describe('Display Video on Subject Page Tests', () => {
         cy.cdVisit('/subjects/subj1/');
         cy.get('[data-cy=toggleSkillDetails]').click();
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').click()
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoIsLockedMsg"]').contains('Complete this skill\'s prerequisites to unlock the audio/video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoIsLockedMsg"]').contains('Complete this skill\'s prerequisites to unlock the video')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"]').should('not.exist')
 
         cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').click()
