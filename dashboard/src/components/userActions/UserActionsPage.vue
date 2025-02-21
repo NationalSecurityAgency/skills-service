@@ -175,6 +175,7 @@ const clearFilter = () => {
   loadData().then(() => filtering.value = false)
 }
 const onFilter = (filterEvent) => {
+  tableOptions.value.pagination.currentPage = 1
   loadData().then(() => filtering.value = true)
 }
 const pageChanged = (pagingInfo) => {

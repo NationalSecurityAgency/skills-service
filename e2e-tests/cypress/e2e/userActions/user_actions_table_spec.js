@@ -253,4 +253,89 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="row0-quizId"]').contains('quiz2')
         cy.get('[data-cy="row1-quizId"]').should('not.exist')
     })
+
+    it('Filter user activity history on multiple pages', () => {
+        cy.createProject(1)
+        cy.createProject(2)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' })
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        cy.createSkill(1, 1, 3)
+        cy.createSkill(1, 1, 4)
+        cy.createSkill(1, 1, 4)
+        cy.createSkill(1, 1, 5)
+        cy.createSkill(1, 1, 5)
+        cy.fixture('vars.json').then((vars) => {
+            cy.logout();
+            cy.login(vars.rootUser, vars.defaultPass, true);
+        });
+
+        cy.visit('/administrator/userActions')
+        cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '13')
+
+        cy.get('[data-cy="row0-userId"]').contains(adminUserIdForDisplay)
+        cy.get('[data-cy="row0-action"]').contains('Edit')
+        cy.get('[data-cy="row0-item"]').contains('Skill')
+        cy.get('[data-cy="row0-itemId"]').contains('skill5')
+        cy.get('[data-cy="row0-projectId"]').contains('proj1')
+        cy.get('[data-cy="row0-quizId"]').should('be.empty')
+
+        cy.get('[data-cy="row3-userId"]').contains(adminUserIdForDisplay)
+        cy.get('[data-cy="row3-action"]').contains('Create')
+        cy.get('[data-cy="row3-item"]').contains('Skill')
+        cy.get('[data-cy="row3-itemId"]').contains('skill4')
+        cy.get('[data-cy="row3-projectId"]').contains('proj1')
+        cy.get('[data-cy="row3-quizId"]').should('be.empty')
+
+        cy.get('[data-cy="row9-userId"]')
+        cy.get('[data-cy="row10-userId"]').should('not.exist')
+
+        cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
+        cy.get('[data-cy="row0-expandedDetails"').contains('Skill Id:')
+        cy.get('[data-cy="row0-expandedDetails"').contains('skill5')
+
+        cy.get('[data-p-index="2"] [data-pc-section="rowtogglebutton"]').click()
+        cy.get('[data-cy="row2-expandedDetails"').contains('Skill Id:')
+        cy.get('[data-cy="row2-expandedDetails"').contains('skill4')
+
+        // testing pagination
+        cy.get('[data-pc-section="page"]').contains('2').click();
+        cy.get('[data-cy="row0-userId"]').contains(adminUserIdForDisplay)
+        cy.get('[data-cy="row0-action"]').contains('Create')
+        cy.get('[data-cy="row0-item"]').contains('Project')
+        cy.get('[data-cy="row0-itemId"]').contains('proj2')
+        cy.get('[data-cy="row0-projectId"]').contains('proj2')
+        cy.get('[data-cy="row0-quizId"]').should('be.empty')
+        cy.get('[data-cy="row1-userId"]').contains(adminUserIdForDisplay)
+        cy.get('[data-cy="row2-userId"]')
+        cy.get('[data-cy="row3-userId"]').should('not.exist')
+        cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '13')
+
+        cy.get('[data-cy="projectIdFilter"]').type('2')
+
+        cy.get('[data-cy="row0-userId"]').contains(adminUserIdForDisplay)
+        cy.get('[data-cy="row0-action"]').contains('Create')
+        cy.get('[data-cy="row0-item"]').contains('Project')
+        cy.get('[data-cy="row0-itemId"]').contains('proj2')
+        cy.get('[data-cy="row0-projectId"]').contains('proj2')
+        cy.get('[data-cy="row0-quizId"]').should('be.empty')
+        cy.get('[data-cy="row1-userId"]').should('not.exist')
+        cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+
+        cy.get('[data-pc-section="filterclearicon"]').click()
+        cy.get('[data-pc-section="page"]').contains('2').click();
+        cy.get('[data-cy="row0-userId"]').contains(adminUserIdForDisplay)
+        cy.get('[data-cy="row0-action"]').contains('Create')
+        cy.get('[data-cy="row0-item"]').contains('Project')
+        cy.get('[data-cy="row0-itemId"]').contains('proj2')
+        cy.get('[data-cy="row0-projectId"]').contains('proj2')
+        cy.get('[data-cy="row0-quizId"]').should('be.empty')
+        cy.get('[data-cy="row1-userId"]').contains(adminUserIdForDisplay)
+        cy.get('[data-cy="row2-userId"]')
+        cy.get('[data-cy="row3-userId"]').should('not.exist')
+        cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '13')
+    });
+
 });
