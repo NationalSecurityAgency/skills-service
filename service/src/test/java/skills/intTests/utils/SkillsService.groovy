@@ -134,6 +134,10 @@ class SkillsService {
     def validateQuizForEnablingCommunity(String quizId) {
         wsHelper.adminGet("/quiz-definitions/${quizId}/validateEnablingCommunity")
     }
+    @Profile
+    def validateAdminGroupForEnablingCommunity(String adminGroupId) {
+        wsHelper.adminGet("/admin-group-definitions/${adminGroupId}/validateEnablingCommunity")
+    }
 
     @Profile
     def copyProject(String fromProjId, Map toProjProps) {

@@ -120,7 +120,7 @@ class UserCommunityService {
     EnableUserCommunityValidationRes validateAdminGroupForCommunity(String adminGroupId) {
         EnableUserCommunityValidationRes res = new EnableUserCommunityValidationRes(isAllowed: true, unmetRequirements: [])
         userRoleRepo.findProjectIdsByAdminGroupId(adminGroupId).each { projectId ->
-            res = validateProjectForCommunity(projectId, res)
+            res = validateProjectForCommunity(projectId, res, true)
         }
         List<UserRoleRes> allAdminGroupMembers = accessSettingsStorageService.findAllAdminGroupMembers(adminGroupId)
         if (allAdminGroupMembers) {
@@ -130,7 +130,10 @@ class UserCommunityService {
                     String userIdForDisplay = userWithRole.userIdForDisplay
 
                     res.isAllowed = false
-                    res.unmetRequirements.add("Has existing ${userIdForDisplay} user that is not authorized".toString())
+                    String requirementString = "This admin group has the user ${userIdForDisplay} who is not authorized".toString()
+                    if(!res.unmetRequirements.contains(requirementString)) {
+                        res.unmetRequirements.add(requirementString)
+                    }
                 }
             }
         }
@@ -139,14 +142,14 @@ class UserCommunityService {
     }
 
     @Transactional(readOnly = true)
-    EnableUserCommunityValidationRes validateProjectForCommunity(String projId, EnableUserCommunityValidationRes existingValidationRes = null) {
+    EnableUserCommunityValidationRes validateProjectForCommunity(String projId, EnableUserCommunityValidationRes existingValidationRes = null, adminGroupView = false) {
         EnableUserCommunityValidationRes res = existingValidationRes ? existingValidationRes : new EnableUserCommunityValidationRes(isAllowed: true, unmetRequirements: [])
 
         // only applicable if project already exist; also normalizes project ids case
         ProjDef projDef = projDefRepo.findByProjectIdIgnoreCase(projId)
         if (projDef) {
             List<UserRole> allRoles = userRoleRepo.findAllByProjectIdIgnoreCase(projDef.projectId)
-            checkAllUsersAreUCMembers(allRoles, res)
+            checkAllUsersAreUCMembers(allRoles, res, adminGroupView ? "admin group" : "project")
 
             if (exportedSkillRepo.countSkillsExportedByProject(projDef.projectId) > 0) {
                 res.isAllowed = false
@@ -165,7 +168,12 @@ class UserCommunityService {
 
             if(adminGroupDefRepo.doesAdminGroupContainNonUserCommunityProject(projDef.projectId)) {
                 res.isAllowed = false
-                res.unmetRequirements.add("This project is part of one or more Admin Groups that has not enabled user community protection")
+                if(!adminGroupView) {
+                    res.unmetRequirements.add("This project is part of one or more Admin Groups that has not enabled user community protection")
+                }
+                else {
+                    res.unmetRequirements.add("This Admin Group is connected to a project that is not compatible with user community protection")
+                }
             }
         }
         return res;
@@ -179,7 +187,7 @@ class UserCommunityService {
         QuizDef quizDef = quizDefRepo.findByQuizIdIgnoreCase(quizId)
         if (quizDef) {
             List<UserRole> allRoles = userRoleRepo.findAllByQuizIdIgnoreCase(quizDef.quizId)
-            checkAllUsersAreUCMembers(allRoles, res)
+            checkAllUsersAreUCMembers(allRoles, res, "quiz")
             if(adminGroupDefRepo.doesAdminGroupContainNonUserCommunityQuiz(quizDef.quizId)) {
                 res.isAllowed = false
                 res.unmetRequirements.add("This quiz is part of one or more Admin Groups that do no have ${getCommunityNameBasedOnConfAndItemStatus(true)} permission".toString())
@@ -194,7 +202,7 @@ class UserCommunityService {
         return res;
     }
 
-    private void checkAllUsersAreUCMembers(List<UserRole> roles, EnableUserCommunityValidationRes res) {
+    private void checkAllUsersAreUCMembers(List<UserRole> roles, EnableUserCommunityValidationRes res, String type = "project") {
         if (roles) {
             List<UserRole> unique = roles.unique { it.userId }
             unique.each { UserRole userWithRole ->
@@ -202,7 +210,7 @@ class UserCommunityService {
                     String userIdForDisplay = userAttrsRepo.findByUserIdIgnoreCase(userWithRole.userId).userIdForDisplay
 
                     res.isAllowed = false
-                    res.unmetRequirements.add("Has existing ${userIdForDisplay} user that is not authorized".toString())
+                    res.unmetRequirements.add("This ${type} has the user ${userIdForDisplay} who is not authorized".toString())
                 }
             }
         }
