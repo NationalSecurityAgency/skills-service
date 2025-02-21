@@ -35,6 +35,7 @@ import skills.storage.repos.SkillAttributesDefRepo
 import java.time.LocalDateTime
 
 import static java.time.temporal.TemporalAdjusters.lastDayOfMonth
+import static skills.storage.model.SkillAttributesDef.SkillAttributesType.AchievementExpiration
 
 @Service
 @Slf4j
@@ -59,7 +60,12 @@ class UserAchievementExpirationService {
         return new TableResult(data: data, count: data.size(), totalCount: totalExpirations)
     }
 
-    @Transactional()
+    @Transactional(readOnly = true)
+    List<SkillAttributesDef> getSkillAttributesForExpirationCheck() {
+        return skillAttributesDefRepo.findAllByType(AchievementExpiration)
+    }
+
+    @Transactional
     void checkAndExpireIfNecessary(SkillAttributesDef skillAttributesDef) {
         LocalDateTime now = LocalDateTime.now()
         ExpirationAttrs expirationAttrs = skillAttributeService.convertAttrs(skillAttributesDef, ExpirationAttrs)
