@@ -70,6 +70,10 @@ const settings = ref({
   retakeIncorrectQuestions: {
     value: false,
     setting: 'quizRetakeIncorrectQuestions'
+  },
+  showDescriptionOnQuizPage: {
+    value: false,
+    setting: 'quizShowDescriptionOnQuizPage'
   }
 });
 const hoursForQuiz = ref(1)
@@ -122,7 +126,7 @@ const loadAndUpdateQuizSettings = () => {
                   minutesForQuiz.value =  remainingTime / 60;
                   settings.value.quizTimeLimit.unlimited = false;
                 }
-              } else if ([settings.value.randomizeQuestions.setting, settings.value.randomizeAnswers.setting, settings.value.multipleTakes.setting, settings.value.alwaysShowCorrectAnswers.setting, settings.value.retakeIncorrectQuestions.setting].includes(foundFromServer.setting)) {
+              } else if ([settings.value.randomizeQuestions.setting, settings.value.randomizeAnswers.setting, settings.value.multipleTakes.setting, settings.value.alwaysShowCorrectAnswers.setting, settings.value.retakeIncorrectQuestions.setting, settings.value.showDescriptionOnQuizPage.setting].includes(foundFromServer.setting)) {
                 settings.value[key].value = (/true/i).test(foundFromServer.value);
               } else {
                 settings.value[key].value = foundFromServer.value;
@@ -142,7 +146,8 @@ const loadAndUpdateQuizSettings = () => {
               quizTimeLimitUnlimited: settings.value.quizTimeLimit.unlimited,
               quizTimeLimitHours: hoursForQuiz.value,
               quizTimeLimitMinutes: minutesForQuiz.value,
-              quizRetakeIncorrectQuestions: settings.value.retakeIncorrectQuestions.value
+              quizRetakeIncorrectQuestions: settings.value.retakeIncorrectQuestions.value,
+            quizShowDescriptionOnQuizPage: settings.value.showDescriptionOnQuizPage.value,
           }
         }
       });

@@ -158,6 +158,8 @@ class QuizRunService {
         QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
         QuizSetting quizTimeLimit = quizSettings?.find( { it.setting == QuizSettings.QuizTimeLimit.setting })
         QuizSetting onlyIncorrect = quizSettings?.find({it.setting == QuizSettings.RetakeIncorrectQuestionsOnly.setting})
+        QuizSetting showDescriptionOnQuizPage = quizSettings?.find({it.setting == QuizSettings.ShowDescriptionOnQuizPage.setting})
+        boolean showDescription = showDescriptionOnQuizPage?.value?.toBoolean()
 
         Integer quizLengthAsInteger = quizLength ? Integer.valueOf(quizLength.value) : 0
         Integer lengthSetting = quizLengthAsInteger > 0 ? quizLengthAsInteger : numberOfQuestions
@@ -214,7 +216,8 @@ class QuizRunService {
                 needsGrading: needsGrading,
                 needsGradingAttemptDate: needsGradingAttemptDate,
                 onlyIncorrectQuestions: onlyIncorrectQuestions,
-                numIncorrectQuestions: numIncorrectQuestions
+                numIncorrectQuestions: numIncorrectQuestions,
+                showDescriptionOnQuizPage: showDescription
         )
     }
 
@@ -431,7 +434,19 @@ class QuizRunService {
 
     @Profile
     private List<QuizSetting> loadQuizSettings(Integer quizRefId) {
-        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId, [QuizSettings.MaxNumAttempts.setting, QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.RandomizeQuestions.setting, QuizSettings.RandomizeAnswers.setting, QuizSettings.QuizLength.setting, QuizSettings.QuizTimeLimit.setting, QuizSettings.MultipleTakes.setting, QuizSettings.RetakeIncorrectQuestionsOnly.setting])
+        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId,
+                [
+                    QuizSettings.MaxNumAttempts.setting,
+                    QuizSettings.MinNumQuestionsToPass.setting,
+                    QuizSettings.RandomizeQuestions.setting,
+                    QuizSettings.RandomizeAnswers.setting,
+                    QuizSettings.QuizLength.setting,
+                    QuizSettings.QuizTimeLimit.setting,
+                    QuizSettings.MultipleTakes.setting,
+                    QuizSettings.RetakeIncorrectQuestionsOnly.setting,
+                    QuizSettings.ShowDescriptionOnQuizPage.setting,
+                ]
+        )
     }
 
     @Profile
