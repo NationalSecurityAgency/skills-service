@@ -220,7 +220,7 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
 
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["This admin group has the user rootUser for display who is not authorized"]
+        res.unmetRequirements == ["This admin group has the user ${rootUser.userName} for display who is not authorized"]
     }
 
 
@@ -276,6 +276,6 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
 
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["This project has the user user3 for display who is not authorized", "This project is part of one or more Admin Groups that has not enabled user community protection"]
+        res.unmetRequirements == ["This project has the user ${otherUserCommunityUserId} for display who is not authorized", "This project is part of one or more Admin Groups that has not enabled user community protection"]
     }
 }
