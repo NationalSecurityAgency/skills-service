@@ -956,6 +956,10 @@ class QuizDefService {
         if (!customValidationResult.valid) {
             throw new SkillQuizException("Question: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
         }
+        customValidationResult = customValidator.validateDescription(questionDefRequest.answerHint, null, null, quizDef.quizId)
+        if (!customValidationResult.valid) {
+            throw new SkillQuizException("Answer Hint: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
+        }
 
         if (questionDefRequest.questionType != QuizQuestionType.TextInput && questionDefRequest.questionType != QuizQuestionType.Rating) {
             QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)

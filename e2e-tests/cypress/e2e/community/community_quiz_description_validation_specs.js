@@ -212,6 +212,189 @@ describe('Community Quiz Description Validation Tests', () => {
         cy.wait('@saveQuiz1Question');
     });
 
+    it('answer hint text is validated against custom validators', () => {
+        cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+        cy.createQuizDef(2, {enableProtectedUserCommunity: false})
+
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/questions').as('loadQuiz1Questions');
+        cy.intercept('POST', '/admin/quiz-definitions/quiz1/create-question').as('saveQuiz1Question');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz2/questions').as('loadQuiz2Questions');
+        cy.intercept('POST', '/admin/quiz-definitions/quiz2/create-question').as('saveQuiz2Question');
+
+        // navigate directly to quiz 1
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.wait('@loadQuiz1Questions');
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerHintEnableCheckbox"]').click()
+
+        cy.get('[data-cy="answerHint"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="answerHint"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerHint"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="answerHint"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="answerHintError"]').contains('Answer Hint - May not contain divinedragon word');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="answerHint"]').type('{backspace}');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveQuiz1Question');
+
+        // navigate using ui to quiz 2
+        cy.get('[data-cy=breadcrumb-Quizzes]').click();
+        cy.get('[data-cy="managesQuizBtn_quiz2"]').click()
+        cy.wait('@loadQuiz2Questions');
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerHintEnableCheckbox"]').click()
+
+        cy.get('[data-cy="answerHint"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="answerHint"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="answerHintError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerHint"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="answerHint"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="answerHintError"]').contains('Answer Hint - paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="answerHint"]').type('{backspace}');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveQuiz2Question');
+
+        // navigate directly back to quiz 1
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.wait('@loadQuiz1Questions');
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('2')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('5')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerHintEnableCheckbox"]').click()
+
+        cy.get('[data-cy="answerHint"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="answerHint"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="answerHintError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerHint"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="answerHint"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="answerHintError"]').contains('Answer Hint - May not contain divinedragon word');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="answerHint"]').type('{backspace}');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveQuiz1Question');
+
+        // navigate directly back to quiz 2
+        cy.visit('/administrator/quizzes/quiz2');
+        cy.wait('@loadQuiz2Questions');
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('2')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('5')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerHintEnableCheckbox"]').click()
+
+        cy.get('[data-cy="answerHint"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="answerHint"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="answerHintError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerHint"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="answerHint"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="answerHintError"]').contains('Answer Hint - paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="answerHint"]').type('{backspace}');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveQuiz2Question');
+
+        // finally, navigate back to quiz 1 again using ui controls
+        cy.get('[data-cy=breadcrumb-Quizzes]').click();
+        cy.get('[data-cy="managesQuizBtn_quiz1"]').click()
+        cy.wait('@loadQuiz1Questions');
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('6')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('8')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerHintEnableCheckbox"]').click()
+
+        cy.get('[data-cy="answerHint"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="answerHint"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="answerHintError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerHint"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="answerHint"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="answerHintError"]').contains('Answer Hint - May not contain divinedragon word');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="answerHint"]').type('{backspace}');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@saveQuiz1Question');
+    });
+
     it('Input Text answer is validated against custom validators', () => {
         cy.intercept('GET', '/api/projects/*/pointHistory').as('getPointHistory');
 
