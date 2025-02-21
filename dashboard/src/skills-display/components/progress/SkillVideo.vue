@@ -184,7 +184,7 @@ const loadTranscript = () => {
       <template #overlay>
         <div class="text-center text-primary bg-surface-0 dark:bg-surface-900 p-2 rounded-border mb-20" data-cy="videoIsLockedMsg">
           <i class="fas fa-lock" style="font-size: 1.2rem;"></i>
-          <div class="font-weight-bold">Complete this {{ attributes.skillDisplayName.toLowerCase() }}'s prerequisites to unlock the audio/video</div>
+          <div class="font-weight-bold">Complete this {{ attributes.skillDisplayName.toLowerCase() }}'s prerequisites to unlock the {{ videoConf.isAudio ? 'audio' : 'video'}}</div>
         </div>
       </template>
       <div class="flex" style="padding: 0rem 1rem 0rem 1rem !important;">
@@ -271,7 +271,7 @@ const loadTranscript = () => {
       </div>
       <Card v-if="transcript.show" class="mt-1 skills-card-theme-border">
         <template #content>
-          <label for="transcriptDisplay" class="h4">Audio/Video Transcript:</label>
+          <label for="transcriptDisplay" class="h4">{{ videoConf.isAudio ? 'Audio' : 'Video'}} Transcript:</label>
           <Panel id="transcriptDisplay" data-cy="videoTranscript">
             <p class="m-0">{{ transcript.transcript }}</p>
           </Panel>

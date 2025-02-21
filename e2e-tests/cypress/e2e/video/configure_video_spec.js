@@ -247,7 +247,6 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
         cy.get('[data-cy="showExternalUrlBtn"]').should('be.visible')
         cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile({contents: `cypress/fixtures/${audioFile}`, mimeType: 'audio/wav'},  { force: true })
-        // cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: audioFile, encoding: 'binary'});
         cy.get('[data-cy="videoTranscript"]').type('transcript', {delay: 0})
         cy.get('[data-cy="saveVideoSettingsBtn"]').click()
         cy.get('[data-cy="savedMsg"]')
@@ -276,5 +275,40 @@ describe('Configure Video Tests', () => {
         cy.wait(6000)
         cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', '100%')
         cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTimeWatched"]').should('have.text', '5 seconds')
+    });
+
+    it('captions are cleared for audio files', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visitVideoConfPage();
+
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.visible')
+        cy.get('[data-cy="videoCaptions"]').type('captions')
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile({contents: `cypress/fixtures/${audioFile}`, mimeType: 'audio/wav'},  { force: true })
+        cy.get('[data-cy="videoTranscript"]').type('transcript', {delay: 0})
+        cy.get('[data-cy="videoCaptions"]').should('not.exist')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.visible')
+
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', audioFile)
+        cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTotalDuration"]').should('have.text', '5 seconds')
+        cy.get('[data-cy="videoPreviewCard"] [title="Play"]').click()
+
+        // refresh and re-validate
+        cy.visitVideoConfPage();
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', audioFile)
+        cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
+        cy.get('[data-cy="videoCaptions"]').should('not.exist')
+
+        cy.get('[data-cy="resetBtn"]').click();
+        cy.get('[data-cy="videoCaptions"]').should('exist')
+        cy.get('[data-cy="videoCaptions"]').should('not.have.value','captions')
+
     });
 });

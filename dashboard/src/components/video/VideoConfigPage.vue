@@ -591,7 +591,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
           <!-- Video Preview -->
           <Card v-if="preview" class="mt-4" data-cy="videoPreviewCard" :pt="{ body: { class: '!p-0' } }">
             <template #header>
-              <div class="border border-surface rounded-t bg-surface-100 dark:bg-surface-700 p-4">Audio/Video Preview</div>
+              <div class="border border-surface rounded-t bg-surface-100 dark:bg-surface-700 p-4">{{computedVideoConf.isAudio ? 'Audio' : 'Video'}} Preview</div>
             </template>
             <template #content>
               <VideoPlayer
