@@ -293,7 +293,8 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
         color: skillColor
       },
       chosen: !skill.isThisSkill,
-      font: { multi: 'html', size: 20 }
+      font: { multi: 'html', size: 20 },
+      title: GraphUtils.getSimpleTitle(skill, isCrossProject),
     }
 
     const themePrimaryColor = themeState.graphTextPrimaryColor
