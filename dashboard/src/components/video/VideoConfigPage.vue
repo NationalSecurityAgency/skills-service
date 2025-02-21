@@ -81,6 +81,9 @@ const configuredWidth = ref(null);
 const isConfiguredVideoSize = computed(() => configuredWidth.value && configuredHeight.value)
 const configuredResolution = computed(() => isConfiguredVideoSize.value ? configuredWidth.value + " x " + configuredHeight.value : 'Not Configured')
 const configuredHeight = ref(null);
+const videoSelected = computed(() => {
+  return (videoConf.value.file || videoConf.value.url)
+})
 const computedVideoConf = computed(() => {
   const captionsUrl = videoConf.value.captions && videoConf.value.captions.trim().length > 0
       ? `/api/projects/${route.params.projectId}/skills/${route.params.skillId}/videoCaptions`
@@ -88,6 +91,7 @@ const computedVideoConf = computed(() => {
   return {
     url: videoConf.value.url,
     videoType: videoConf.value.videoType,
+    isAudio: videoConf.value.videoType ? videoConf.value.videoType.includes('audio/') : false,
     captionsUrl,
     width: configuredWidth.value,
     height: configuredHeight.value,
@@ -162,6 +166,7 @@ const onFileSelectedEvent = (selectFileEvent) => {
   videoConf.value.hostedFileName = newFile.name;
   // basically a placeholder
   videoConf.value.url = `/${newFile.name}`;
+  videoConf.value.videoType = newFile.type
   validate();
 }
 const switchToFileUploadOption = () => {
@@ -177,6 +182,8 @@ const clearVideoOptions = () => {
   videoConf.value.hostedFileName = '';
   videoConf.value.url = '';
   videoConf.value.file = null;
+  delete videoConf.value.videoType;
+  preview.value = false;
   validate();
 }
 const saveSettings = () => {
@@ -193,7 +200,7 @@ const saveSettings = () => {
       data.append('videoUrl', videoConf.value.url);
     }
   }
-  if (videoConf.value.captions) {
+  if (videoConf.value.captions && !computedVideoConf.value.isAudio) {
     data.append('captions', videoConf.value.captions);
   }
   if (videoConf.value.transcript) {
@@ -401,7 +408,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
 
 <template>
   <div>
-    <SubPageHeader title="Configure Video" />
+    <SubPageHeader title="Configure Audio/Video" />
     <SkillsOverlay :show="loading.video || skillsState.loadingSkill || appConfig.isLoadingConfig">
       <template v-if="videoConf.file" #overlay>
         <div class="text-center text-success pt-8">
@@ -420,18 +427,18 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
             skills are read-only.
           </Message>
           <div v-if="!isReadOnly && savedAtLeastOnce && skillsState.skill && hasVideoUrl" data-cy="videoSelfReportAlert">
-            <Message v-if="skillsState.skill.selfReportingType === 'Video'" severity="success" icon="fas fa-file-video" class="alert alert-success" :closable="false">
-              Users are required to watch this video in order to earn the skill and its points.
+            <Message v-if="skillsState.skill.selfReportingType === 'Video'" severity="success" icon="fas fa-play-circle" class="alert alert-success" :closable="false">
+              Users are required to {{ computedVideoConf.isAudio ? 'listen to this audio' : 'watch this video'}} in order to earn the skill and its points.
             </Message>
             <Message v-else severity="info" icon="fas fa-exclamation-triangle" :closable="false">
-             Optionally set <i>Self Reporting</i> type to <Tag>Video</Tag> in order to award the skill for watching this video. Click the <i>Edit</i> button above to update the <i>Self Reporting</i> type.
+              Optionally set <i>Self Reporting</i> type to <Tag>Audio / Video</Tag> in order to award the skill for {{ computedVideoConf.isAudio ? 'listening to this audio' : 'watching this video'}}. Click the <i>Edit</i> button above to update the <i>Self Reporting</i> type.
             </Message>
           </div>
 
           <div data-cy="videoInputFields" class="mb-6" :class="{'flex flex-col gap-2': responsive.md.value }">
             <div class="flex flex-col md:flex-row gap-2 md:mb-2">
               <div class="flex-1 content-end">
-                <label>* Video:</label>
+                <label>* Audio/Video:</label>
               </div>
               <div class="flex" >
                 <SkillsButton
@@ -481,13 +488,13 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
                                name="videoUrl"
                                data-cy="videoUrl"
                                @input="validate"
-                               placeholder="Please enter video external URL"
+                               placeholder="Please enter audio/video external URL"
                                :disabled="isReadOnly"
               />
             </div>
           </div>
 
-          <div data-cy="videoCaptionsInputFields" :class="{'flex flex-col gap-2': responsive.md.value }">
+          <div data-cy="videoCaptionsInputFields" :class="{'flex flex-col gap-2': responsive.md.value }" v-if="!computedVideoConf.isAudio">
             <div class="flex flex-col md:flex-row gap-2 md:mb-2">
               <div class="flex-1 content-end">
                 <label for="videoCaptions">Captions:</label>
@@ -528,8 +535,8 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
             <SkillsTextarea
                 id="videoTranscriptInput"
                 v-model="videoConf.transcript"
-                placeholder="Please enter video's transcript here. Video transcript will be available for download (optional)"
-                aria-label="Please enter video's transcript here. Video transcript will be available for download (optional)"
+                placeholder="Please enter the transcript here. The transcript will be available for download (optional)"
+                aria-label="Please enter the transcript here. The transcript will be available for download (optional)"
                 rows="6"
                 max-rows="6"
                 name="videoTranscript"
@@ -584,7 +591,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
           <!-- Video Preview -->
           <Card v-if="preview" class="mt-4" data-cy="videoPreviewCard" :pt="{ body: { class: '!p-0' } }">
             <template #header>
-              <div class="border border-surface rounded-t bg-surface-100 dark:bg-surface-700 p-4">Video Preview</div>
+              <div class="border border-surface rounded-t bg-surface-100 dark:bg-surface-700 p-4">{{computedVideoConf.isAudio ? 'Audio' : 'Video'}} Preview</div>
             </template>
             <template #content>
               <VideoPlayer
@@ -598,7 +605,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
               />
               <div v-if="watchedProgress" class="p-4 pt-6 flex flex-col gap-2">
                 <Message v-if="!isDurationAvailable" severity="warn" icon="fas fa-exclamation-triangle" :closable="false" data-cy="noDurationWarning">
-                  Browser cannot derive the duration of this video. Percentage will only be updated after the video is fully watched.
+                  Browser cannot derive the duration of this media. Percentage will only be updated after the media is fully viewed.
                 </Message>
                 <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
                   <div>Total Duration:</div>
@@ -608,11 +615,11 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
                   </div>
                 </div>
                 <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
-                  <div>Time Watched:</div>
+                  <div>Time Played:</div>
                   <div><span class="text-primary" data-cy="videoTimeWatched">{{ timeUtils.formatDuration(Math.trunc(watchedProgress.totalWatchTime * 1000), true) }}</span></div>
                 </div>
                 <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
-                  <div>% Watched:</div>
+                  <div>% Played:</div>
                   <div>
                     <span v-if="watchedProgress.videoDuration === Infinity" class="text-danger" data-cy="percentWatched">N/A</span>
                     <span v-else class="text-primary" data-cy="percentWatched">{{ watchedProgress.percentWatched }}%</span>
@@ -622,7 +629,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
                   <div>Current Position:</div>
                   <div><span class="text-primary">{{ watchedProgress.currentPosition.toFixed(2) }}</span> <span class="italic">Seconds</span></div>
                 </div>
-                <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
+                <div class="grid md:grid-cols-[10rem_1fr] md:gap-4" v-if="!computedVideoConf.isAudio">
                   <div>Default Video Size:</div>
                   <div>
                     <span class="text-primary" data-cy="defaultVideoSize">{{ configuredResolution }}</span> <Tag v-if="unsavedVideoSizeChanges" severity="warn" data-cy="unsavedVideoSizeChanges"><i class="fas fa-exclamation-circle mr-1" aria-hidden="true"></i>Unsaved Changes</Tag>
@@ -630,7 +637,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
                   </div>
                 </div>
                 <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
-                  <div>Watched Segments:</div>
+                  <div>Played Segments:</div>
                   <div>
                     <div v-if="watchedProgress.currentStart !== null && watchedProgress.lastKnownStopPosition"> <span class="text-primary">{{ watchedProgress.currentStart.toFixed(2) }}</span>
                       <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/>

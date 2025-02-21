@@ -63,6 +63,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -127,6 +128,9 @@ class UserSkillsController {
 
     @Value("${skills.config.allowedAttachmentMimeTypes}")
     List<MediaType> allowedAttachmentMimeTypes;
+
+    @Value("${skills.config.allowedVideoUploadMimeTypes}")
+    List<MediaType> allowedMediaUploadTypes;
 
     @Value("${skills.config.maxAttachmentSize:10MB}")
     DataSize maxAttachmentSize;
@@ -534,7 +538,7 @@ class UserSkillsController {
         return videoCaptionsService.getVideoTranscript(projectId, skillId);
     }
 
-    @RequestMapping(value = "/download/{uuid}", method = RequestMethod.GET)
+    @RequestMapping(value = "/download/{uuid}", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @Transactional(readOnly = true)
     public void download(@PathVariable("uuid") String uuid,
                          HttpServletResponse response) {
@@ -556,10 +560,11 @@ class UserSkillsController {
             if (!StringUtils.equalsIgnoreCase(attachment.getContentType(), "application/pdf")) {
                 response.setHeader("Content-Disposition", "attachment; filename=\"" + attachment.getFilename() + "\"");
             }
-            if (StringUtils.equalsIgnoreCase(attachment.getContentType(), "video/mp4") || StringUtils.equalsIgnoreCase(attachment.getContentType(), "video/webm")) {
-                response.setContentType(attachment.getContentType());
+
+            String contentType = attachment.getContentType().toLowerCase();
+            if (AttachmentValidator.isAllowedAttachmentMimeTypeBoolean(contentType, allowedMediaUploadTypes)) {
                 response.setHeader("Content-Length", attachment.getSize().toString());
-                Long attachmentSize = attachment.getSize() - 1;
+                long attachmentSize = attachment.getSize() - 1;
                 response.setHeader("Content-Range", "bytes 0-" + attachmentSize + "/" + attachment.getSize().toString());
                 response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
             }

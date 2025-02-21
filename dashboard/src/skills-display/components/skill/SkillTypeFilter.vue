@@ -179,9 +179,9 @@ const filters = computed(() => {
           count: 0,
         },
         {
-          icon: 'fas fa-video',
+          icon: 'fas fa-play-circle',
           key: 'video',
-          label: 'Video',
+          label: 'Audio/Video',
           count: 0,
         }
       ]

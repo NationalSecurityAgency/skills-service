@@ -117,11 +117,11 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.get('[data-cy="videoSelfReportAlert"]').should('not.exist')
         cy.get('[data-cy="saveVideoSettingsBtn"]').click()
         cy.get('[data-cy="savedMsg"]')
-        cy.get('[data-cy="videoSelfReportAlert"]').contains('Optionally set Self Reporting type to Video in order to award the skill for watching this video')
+        cy.get('[data-cy="videoSelfReportAlert"]').contains('Optionally set Self Reporting type to Audio / Video in order to award the skill for watching this video')
 
         // refresh and re-validate
         cy.visitVideoConfPage()
-        cy.get('[data-cy="videoSelfReportAlert"]').contains('Optionally set Self Reporting type to Video in order to award the skill for watching this video')
+        cy.get('[data-cy="videoSelfReportAlert"]').contains('Optionally set Self Reporting type to Audio / Video in order to award the skill for watching this video')
 
         cy.get('[data-cy="editSkillButton_skill1"]').click()
         cy.get('[data-cy="videoSelectionMsg"]').should('not.exist')

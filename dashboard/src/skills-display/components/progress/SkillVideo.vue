@@ -82,6 +82,7 @@ const videoConf = computed(() => {
     videoId: props.skill.skillId,
     url: props.skill.videoSummary.videoUrl,
     videoType: props.skill.videoSummary.videoType ? props.skill.videoSummary.videoType : null,
+    isAudio: props.skill.videoSummary.videoType ? props.skill.videoSummary.videoType.includes('audio/') : null,
     captionsUrl,
     width: props.skill.videoSummary.width,
     height: props.skill.videoSummary.height,
@@ -165,7 +166,7 @@ const loadTranscript = () => {
       <template #container>
         <div class="flex items-center p-4">
           <div class="flex-1"><i class="fas fa-tv mr-1" style="font-size: 1.2rem;" aria-hidden="true"/> This
-            {{ attributes.skillDisplayName }} has a video.
+            {{ attributes.skillDisplayName }} has {{ videoConf.isAudio? 'an audio track' : 'a video'}}.
           </div>
           <div class="flex">
             <SkillsButton severity="info"
@@ -183,7 +184,7 @@ const loadTranscript = () => {
       <template #overlay>
         <div class="text-center text-primary bg-surface-0 dark:bg-surface-900 p-2 rounded-border mb-20" data-cy="videoIsLockedMsg">
           <i class="fas fa-lock" style="font-size: 1.2rem;"></i>
-          <div class="font-weight-bold">Complete this {{ attributes.skillDisplayName.toLowerCase() }}'s prerequisites to unlock the video</div>
+          <div class="font-weight-bold">Complete this {{ attributes.skillDisplayName.toLowerCase() }}'s prerequisites to unlock the {{ videoConf.isAudio ? 'audio' : 'video'}}</div>
         </div>
       </template>
       <div class="flex" style="padding: 0rem 1rem 0rem 1rem !important;">
@@ -213,7 +214,7 @@ const loadTranscript = () => {
             </div>
             <div class="flex-1 italic pt-1" data-cy="videoAlert">
               This skill's achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skill.expirationDate) }}</span>, but your <span class="font-size-1">
-            <Tag severity="info">{{ numFormat.pretty(skill.totalPoints) }}</Tag></span> points can be retained by watching the video again.
+            <Tag severity="info">{{ numFormat.pretty(skill.totalPoints) }}</Tag></span> points can be retained by {{ videoConf.isAudio ? 'listening to the audio again.' : 'watching the video again.'}}
             </div>
           </div>
         </template>
@@ -230,7 +231,7 @@ const loadTranscript = () => {
             <div class="flex-1" data-cy="watchVideoMsg">
               <div v-if="!justAchieved">
                 <i class="fas fa-video font-size-2 mr-1 animate__bounceIn" aria-hidden="true"></i>
-                Earn <b>{{ skill.totalPoints }}</b> points for the  {{ attributes.skillDisplayName.toLowerCase() }} by watching this Video.
+                Earn <b>{{ skill.totalPoints }}</b> points for the  {{ attributes.skillDisplayName.toLowerCase() }} {{ videoConf.isAudio ? 'by listening to this Audio.' : 'by watching this Video.' }}
               </div>
               <div v-if="justAchieved">
                 <i class="fas fa-birthday-cake text-success mr-1 animate__bounceIn" style="font-size: 1.2rem"></i> Congrats! You just earned <span
@@ -270,7 +271,7 @@ const loadTranscript = () => {
       </div>
       <Card v-if="transcript.show" class="mt-1 skills-card-theme-border">
         <template #content>
-          <label for="transcriptDisplay" class="h4">Video Transcript:</label>
+          <label for="transcriptDisplay" class="h4">{{ videoConf.isAudio ? 'Audio' : 'Video'}} Transcript:</label>
           <Panel id="transcriptDisplay" data-cy="videoTranscript">
             <p class="m-0">{{ transcript.transcript }}</p>
           </Panel>

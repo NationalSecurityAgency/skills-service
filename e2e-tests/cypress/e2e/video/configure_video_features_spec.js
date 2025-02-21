@@ -113,7 +113,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="nav-Overview"]').click()
         cy.get('[data-cy="skillOverviewTotalpoints"] [data-cy="mediaInfoCardTitle"]').should('have.text', '200 Points')
 
-        cy.get('[data-cy="nav-Video"]').click()
+        cy.get('[data-cy="nav-Audio/Video"]').click()
         cy.wait('@getVideoProps')
         cy.get('.spinner-border').should('not.exist')
         cy.wait(5000)
@@ -159,7 +159,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
 
         cy.get('[data-cy="manageBtn_subj1"]').click()
         cy.get('[data-cy="manageSkillLink_skill1"]').click()
-        cy.get('[data-cy="nav-Video"').click();
+        cy.get('[data-cy="nav-Audio/Video"').click();
         cy.wait('@getVideoPropsProj2')
         cy.wait('@getSkillInfoProj2')
         cy.get('.spinner-border').should('not.exist')
@@ -171,7 +171,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
         cy.get('[data-cy="manageBtn_subj1"]').click()
         cy.get('[data-cy="manageSkillLink_skill1"]').click()
-        cy.get('[data-cy="nav-Video"').click();
+        cy.get('[data-cy="nav-Audio/Video"').click();
         cy.wait('@getVideoProps')
         cy.wait('@getSkillInfo')
         cy.get('.spinner-border').should('not.exist')
@@ -231,7 +231,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
 
         cy.get('[data-cy="manageBtn_subj1"]').click()
         cy.get('[data-cy="manageSkillLink_skill1"]').click()
-        cy.get('[data-cy="nav-Video"]').click()
+        cy.get('[data-cy="nav-Audio/Video"]').click()
         cy.wait('@getVideoProps')
         cy.wait('@getSkillInfo')
         cy.get('.spinner-border').should('not.exist')
@@ -284,7 +284,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="skillName"]').type('skill1')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
         cy.get('[data-cy="manageSkillLink_skill1Skill"]').click()
-        cy.get('[data-cy="nav-Video"]').click()
+        cy.get('[data-cy="nav-Audio/Video"]').click()
         cy.wait('@getVideoProps1')
         cy.wait('@getSkillInfo1')
         cy.get('.spinner-border').should('not.exist')
