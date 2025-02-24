@@ -16,6 +16,8 @@
 
 describe('Configure Video Tests', () => {
 
+    const defaultCaption = Cypress.env("defaultCaptions")
+
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
@@ -38,7 +40,7 @@ describe('Configure Video Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        const vid = { file: 'create-subject.webm', captions: 'cool caption', transcript: 'great' }
+        const vid = { file: 'create-subject.webm', captions: defaultCaption, transcript: 'great' }
         cy.saveVideoAttrs(1, 1, vid)
         cy.visitVideoConfPage();
 
@@ -80,7 +82,7 @@ describe('Configure Video Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        const vid = { file: 'create-subject.webm', captions: 'cool caption', transcript: 'great' }
+        const vid = { file: 'create-subject.webm', captions: defaultCaption, transcript: 'great' }
         cy.saveVideoAttrs(1, 1, vid)
         cy.visitVideoConfPage();
 
@@ -120,7 +122,7 @@ describe('Configure Video Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        const vid = { file: 'create-subject.webm', captions: 'cool caption', transcript: 'great' }
+        const vid = { file: 'create-subject.webm', captions: defaultCaption, transcript: 'great' }
         cy.saveVideoAttrs(1, 1, vid)
         cy.visitVideoConfPage();
 
@@ -154,7 +156,7 @@ describe('Configure Video Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        const vid = { file: 'create-subject.webm', captions: 'cool caption', transcript: 'great' }
+        const vid = { file: 'create-subject.webm', captions: defaultCaption, transcript: 'great' }
         cy.saveVideoAttrs(1, 1, vid)
 
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
@@ -174,7 +176,7 @@ describe('Configure Video Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        const vid = { file: 'create-subject.webm', captions: 'cool caption', transcript: 'great' }
+        const vid = { file: 'create-subject.webm', captions: defaultCaption, transcript: 'great' }
         cy.saveVideoAttrs(1, 1, vid)
 
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
@@ -191,7 +193,7 @@ describe('Configure Video Tests', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
-        const vid = { file: 'create-subject.webm', captions: 'cool caption', transcript: 'great' }
+        const vid = { file: 'create-subject.webm', captions: defaultCaption, transcript: 'great' }
         cy.saveVideoAttrs(1, 1, vid)
 
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
