@@ -365,7 +365,11 @@ const videoMaxSizeValidation = (value, context) => {
   });
 }
 const webvttValidation = (value, context) => {
-  const tree = parser.parse(videoConf.value.captions, 'metadata');
+  if(!value || value?.length === 0) {
+    return true;
+  }
+
+  const tree = parser.parse(value, 'metadata');
 
   if(tree.errors.length === 0) {
     return true;
