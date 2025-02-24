@@ -114,8 +114,8 @@ const flipSelected = () => {
       <div class="flex">
         <SkillsOverlay v-if="a.isGraded && a.selected !== a.isCorrect" show opacity="0">
           <template #overlay>
-            <i v-if="a.selected" class="fa fa-ban text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1.5rem;" data-cy="wrongSelection" aria-hidden="true"></i>
-            <i v-else class="fa fa-check text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1rem;" data-cy="missedSelection" aria-hidden="true"></i>
+            <i v-if="a.selected" class="fa fa-ban text-red-800 skills-theme-quiz-incorrect-answer" style="font-size: 1.5rem;" data-cy="wrongSelection" aria-hidden="true"></i>
+            <i v-else class="fa fa-check text-red-800 skills-theme-quiz-incorrect-answer" style="font-size: 1rem;" data-cy="missedSelection" aria-hidden="true"></i>
           </template>
           <span class="checkmark">
              <i :class="selectionIconObject" aria-hidden="true"/>
@@ -147,9 +147,6 @@ const flipSelected = () => {
   cursor: pointer;
 }
 
-i {
-  color: #b6b5b5;
-}
 .checkmark {
   font-size: 1.2rem;
 }

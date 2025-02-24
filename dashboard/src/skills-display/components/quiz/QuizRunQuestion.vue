@@ -169,8 +169,8 @@ const needsGrading = computed(() => QuizStatus.isNeedsGrading(props.q.gradedInfo
           {{ num }}
         </Tag>
         <span v-if="q.gradedInfo && !needsGrading" class="ml-1 pt-1">
-          <span v-if="q.gradedInfo.isCorrect" class="text-success skills-theme-quiz-correct-answer" style="font-size: 1.1rem;" data-cy="questionAnsweredCorrectly"><i class="fas fa-check-double" aria-hidden="true"></i></span>
-          <span v-if="!q.gradedInfo.isCorrect" class="text-danger skills-theme-quiz-incorrect-answer" style="font-size: 1.1rem;" data-cy="questionAnsweredWrong"><i class="fas fa-times-circle" aria-hidden="true"></i></span>
+          <span v-if="q.gradedInfo.isCorrect" class="text-green-700 dark:text-green-400 skills-theme-quiz-correct-answer" style="font-size: 1.1rem;" data-cy="questionAnsweredCorrectly"><i class="fas fa-check-double" aria-hidden="true"></i></span>
+          <span v-if="!q.gradedInfo.isCorrect" class="text-red-700 skills-theme-quiz-incorrect-answer" style="font-size: 1.1rem;" data-cy="questionAnsweredWrong"><i class="fas fa-times-circle" aria-hidden="true"></i></span>
         </span>
       </div>
       <div class="flex flex-1">
