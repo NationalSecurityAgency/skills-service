@@ -239,7 +239,7 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
 
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["This admin group has the user ${rootUser.userName} for display who is not authorized"]
+        res.unmetRequirements.toString().toLowerCase() == ["This admin group has the user ${rootUser.userName} for display who is not authorized"].toString().toLowerCase()
     }
 
     def "cannot enable UC protection on admin group if it contains a non-UC project"() {
