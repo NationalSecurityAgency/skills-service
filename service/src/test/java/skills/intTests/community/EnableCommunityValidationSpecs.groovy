@@ -16,7 +16,7 @@
 package skills.intTests.community
 
 import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.auth.RoleName
@@ -205,7 +205,7 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         res1.unmetRequirements == ["This project is part of one or more Global Badges"]
     }
 
-    def "cannot enable UC protection on admin group if it contains a non-UC member"() {
+    def "cannot enable UC protection on admin group if it contains a non-UC owner"() {
         SkillsService rootUser = createRootSkillService()
         String userCommunityUserId =  skillsService.userName
         rootUser.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
@@ -223,6 +223,72 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         res.unmetRequirements == ["This admin group has the user ${rootUser.userName} for display who is not authorized"]
     }
 
+    def "cannot enable UC protection on admin group if it contains a non-UC member"() {
+        SkillsService rootUser = createRootSkillService()
+        String userCommunityUserId =  skillsService.userName
+        rootUser.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def adminGroup = createAdminGroup(1)
+        adminGroup.enableProtectedUserCommunity = false
+        skillsService.createAdminGroupDef(adminGroup)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, rootUser.userName)
+
+        when:
+
+        def res = skillsService.validateAdminGroupForEnablingCommunity(adminGroup.adminGroupId)
+
+        then:
+        res.isAllowed == false
+        res.unmetRequirements == ["This admin group has the user ${rootUser.userName} for display who is not authorized"]
+    }
+
+    def "cannot enable UC protection on admin group if it contains a non-UC project"() {
+        SkillsService rootUser = createRootSkillService()
+        String userCommunityUserId =  skillsService.userName
+        rootUser.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        def adminGroup = createAdminGroup(1)
+        adminGroup.enableProtectedUserCommunity = false
+        skillsService.createAdminGroupDef(adminGroup)
+
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        when:
+
+        def res = skillsService.validateAdminGroupForEnablingCommunity(adminGroup.adminGroupId)
+
+        then:
+        res.isAllowed == false
+        res.unmetRequirements == ['This Admin Group is connected to a project that is not compatible with user community protection']
+    }
+
+    def "cannot enable UC protection on admin group if it contains a non-UC quiz"() {
+        SkillsService rootUser = createRootSkillService()
+        String userCommunityUserId =  skillsService.userName
+        rootUser.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+
+        def adminGroup = createAdminGroup(1)
+        adminGroup.enableProtectedUserCommunity = false
+        skillsService.createAdminGroupDef(adminGroup)
+
+        skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
+
+        when:
+
+        def res = skillsService.validateAdminGroupForEnablingCommunity(adminGroup.adminGroupId)
+
+        then:
+        res.isAllowed == false
+        res.unmetRequirements == ['This Admin Group is connected to a quiz that is not compatible with user community protection']
+    }
 
     def "cannot enable UC protection on project if non-UC group is assigned to it already"() {
         SkillsService rootUser = createRootSkillService()
