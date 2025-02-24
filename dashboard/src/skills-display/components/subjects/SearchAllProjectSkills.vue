@@ -84,18 +84,18 @@ const navToSkill = (event) => {
       placeholder="Search for a skill across subjects..."
     >
       <template #option="slotProps">
-        <div class="py-1 skill-res-row w-full" :data-cy="`searchRes-${slotProps.option.skillId}`">
+        <div class="py-1 skill-res-row w-full sd-theme-primary-color" :data-cy="`searchRes-${slotProps.option.skillId}`">
           <div class="flex gap-2">
             <div
               class="flex-1 flex items-center"
               data-cy="skillName"
               :aria-label="`Selected ${slotProps.option.skillName} skill from ${slotProps.option.subjectName} subject. You have earned ${slotProps.option.userCurrentPoints} points out of ${slotProps.option.totalPoints} for this skill. Click to navigate to the skill. Type to search for a skill across all subjects.`">
-              <i class="fas fa-graduation-cap skills-theme-primary-color mr-1 text-xl text-green-800"
+              <i class="fas fa-graduation-cap mr-1 text-xl text-green-800"
                  aria-hidden="true" />
               <highlighted-value :value="slotProps.option.skillName" :filter="query" class="text-xl" />
             </div>
             <div
-              class=" skills-theme-primary-color"
+              class=""
               data-cy="points"
               :class="{'font-green-300': slotProps.option.userAchieved}" aria-hidden="true">
               <i option v-if="slotProps.option.userAchieved" class="fas fa-check mr-1" aria-hidden="" />

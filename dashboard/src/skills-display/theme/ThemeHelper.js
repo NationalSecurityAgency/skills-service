@@ -86,6 +86,7 @@ export default {
     textPrimaryColor: [{
       selector: '.sd-theme-home .p-card,' +
         '.sd-theme-home .sd-theme-primary-color,' +
+        '.p-autocomplete-overlay.p-component .sd-theme-primary-color,' +
         '.sd-theme-home .p-card-subtitle,' +
         '.sd-theme-home .text-primary,' +
         '.sd-theme-home .text-color,' +
@@ -172,6 +173,7 @@ export default {
           + 'body #app .sd-theme-home .p-chip.p-component,'
           + '.p-autocomplete-panel.p-component,'
           + '.p-popover.p-component,'
+          + '.p-autocomplete-overlay.p-component,'
           + '.p-popover.p-component .p-panelmenu-panel,'
           + '.sd-theme-home .apexcharts-menu.apexcharts-menu-open,'
           + '.sd-theme-home .p-avatar.p-component,'
@@ -183,6 +185,7 @@ export default {
         styleName: 'background-color'
       }, {
         selector: '.p-autocomplete-panel.p-component .p-autocomplete-item:hover,' +
+          '.p-autocomplete-overlay.p-component .sd-theme-primary-color:hover,' +
           '.p-autocomplete-panel.p-component .p-autocomplete-item.p-focus,' +
           '.p-autocomplete-panel.p-component .p-autocomplete-item.p-focus i,' +
           '.p-autocomplete-panel.p-component .p-autocomplete-item:hover i,' +

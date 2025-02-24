@@ -112,7 +112,7 @@ const buildBadgeLink = (badge) => {
                   <extra-badge-award v-if="badge.achievedWithinExpiration"
                                      :icon-class="badge.awardAttrs.iconClass"
                                      :name="badge.awardAttrs.name"
-                                      class="mt-4"/>
+                                      class="my-4"/>
                 </div>
                 <div>
                   <router-link

@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import {OverlayBadge} from "primevue";
+
 defineProps({
   name: String,
   iconClass: String,
@@ -22,7 +24,9 @@ defineProps({
 
 <template>
   <div>
-    <Avatar :icon="iconClass" size="large" v-badge.success="'✔'" aria-hidden="true"></Avatar>
+    <OverlayBadge value="✓"  severity="success" class="inline-flex">
+      <Avatar :icon="iconClass" size="large" aria-hidden="true"></Avatar>
+    </OverlayBadge>
     <div class="text-green-800 font-semibold"
          :aria-label="`You got the ${name} bonus`"
     >{{ name }}</div>
