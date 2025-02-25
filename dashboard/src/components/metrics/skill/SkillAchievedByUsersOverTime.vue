@@ -40,7 +40,7 @@ const chartOptions = ref ({
     type: 'area',
     toolbar: {
       show: true,
-      offsetY: -52,
+      offsetY: -85,
       autoSelected: 'zoom',
       tools: {
         pan: false,
