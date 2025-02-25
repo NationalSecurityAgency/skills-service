@@ -16,7 +16,7 @@
 
 describe('Configure Video Tests', () => {
 
-    const defaultCaption = Cypress.env("defaultCaptions")
+    const defaultCaption = "WEBVTT\n\n1\n00:00:00.500 --> 00:00:04.000\nThis is the very first caption!"
 
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')

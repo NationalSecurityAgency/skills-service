@@ -212,7 +212,7 @@ const saveSettings = () => {
   const endpoint = `/admin/projects/${route.params.projectId}/skills/${route.params.skillId}/video`;
   FileUploadService.upload(endpoint, data, (response) => {
     savedAtLeastOnce.value = true;
-    // updateVideoSettings(response.data);
+    updateVideoSettings(response.data);
     showSavedMsg.value = true;
     loading.value.video = false;
     unsavedVideoSizeChanges.value = false;
@@ -272,7 +272,7 @@ const loadSettings = () => {
 const updateVideoSettings = (settingRes) => {
   videoConf.value.url = settingRes.videoUrl;
   videoConf.value.videoType = settingRes.videoType;
-  videoConf.value.captions = settingRes.captions;
+  videoConf.value.captions = settingRes.captions ? settingRes.captions.replaceAll('&gt;', '>') : '';
   videoConf.value.transcript = settingRes.transcript;
   videoConf.value.isInternallyHosted = settingRes.isInternallyHosted;
   videoConf.value.hostedFileName = settingRes.internallyHostedFileName;
