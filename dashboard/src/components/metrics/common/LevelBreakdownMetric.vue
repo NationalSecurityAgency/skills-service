@@ -50,7 +50,7 @@ const chartOptions = ref({
     toolbar: {
       show: true,
       offsetX: -20,
-      offsetY: -35,
+      offsetY: -85,
     },
   },
   plotOptions: {
@@ -160,7 +160,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card data-cy="levelsChart" :pt="{ body: { class: 'p-0 pt-2' }, content: { class: 'p-0' } }">
+  <Card data-cy="levelsChart">
     <template #header>
       <SkillsCardHeader :title="title"></SkillsCardHeader>
     </template>
