@@ -48,7 +48,8 @@ module.exports = defineConfig({
     "visualRegressionType": "regression",
     "visualRegressionBaseDirectory": "cypress/visualRegression/base",
     "visualRegressionDiffDirectory": "cypress/visualRegression/diff",
-    "visualRegressionGenerateDiff": "fail"
+    "visualRegressionGenerateDiff": "fail",
+    "defaultCaptions": "WEBVTT\n\n1\n00:00:00.500 --> 00:00:04.000\nThis is the very first caption!"
   },
   reporter: 'mochawesome',
   reporterOptions: {

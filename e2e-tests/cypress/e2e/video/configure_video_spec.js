@@ -16,7 +16,7 @@
 
 describe('Configure Video Tests', () => {
 
-    const defaultCaption = "WEBVTT\n\n1\n00:00:00.500 --> 00:00:04.000\nThis is the very first caption!"
+    const defaultCaption = Cypress.env("defaultCaptions")
     const testVideo = '/static/videos/create-quiz.mp4'
     const videoFile = 'create-subject.webm';
     const audioFile = 'soundfile.wav';

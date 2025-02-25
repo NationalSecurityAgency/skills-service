@@ -188,14 +188,6 @@ Cypress.Commands.add("enableProdMode", (projNum) => {
     });
 });
 
-Cypress.Commands.add("getDefaultCaptions", () => {
-    return 'WEBVTT\n'
-        + '\n'
-        + '1\n'
-        + '00:00:00.500 --> 00:00:04.000\n'
-        + 'This is the very first caption!\n'
-})
-
 Cypress.Commands.add("saveVideoAttrs", (projNum, skillNum, videoAttrs) => {
     const url = `/admin/projects/proj${projNum}/skills/skill${skillNum}/video`;
     const formData = new FormData();
