@@ -17,6 +17,7 @@
 describe('Configure Video Validation Tests', () => {
 
     const testVideo = '/static/videos/create-quiz.mp4'
+    const defaultCaption = "WEBVTT\n\n1\n00:00:00.500 --> 00:00:04.000\nThis is the very first caption!"
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
@@ -35,7 +36,7 @@ describe('Configure Video Validation Tests', () => {
         cy.visitVideoConfPage();
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="videoCaptions"]').type('captions', { delay: 0 })
+        cy.get('[data-cy="videoCaptions"]').type(defaultCaption, { delay: 0 })
         cy.get('[data-cy="videoCaptionsError"]').contains('Captions is not valid without Video field')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
@@ -100,12 +101,12 @@ describe('Configure Video Validation Tests', () => {
         cy.visitVideoConfPage();
         cy.get('[data-cy="showExternalUrlBtn"]').click()
         cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
-        const invalidValue = Array(110).fill('a').join('');
+        const invalidValue = Array(101).fill('a').join('');
         cy.get('[data-cy="videoCaptions"]').type(invalidValue, { delay: 0 })
         cy.get('[data-cy="videoCaptionsError"]').contains('Captions must be at most 100 characters')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="videoCaptions"]').type('{backspace}');
-        cy.get('[data-cy="videoCaptionsError"]').should('not.be.visible')
+        cy.get('[data-cy="videoCaptionsError"]').should('not.have.text', 'Captions must be at most 100 characters')
     });
 
     it('only allow upload of valid video mime types', () => {
