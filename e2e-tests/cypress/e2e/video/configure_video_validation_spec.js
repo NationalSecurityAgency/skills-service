@@ -100,7 +100,7 @@ describe('Configure Video Validation Tests', () => {
         cy.visitVideoConfPage();
         cy.get('[data-cy="showExternalUrlBtn"]').click()
         cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
-        const invalidValue = Array(50).fill('a').join('');
+        const invalidValue = Array(110).fill('a').join('');
         cy.get('[data-cy="videoCaptions"]').type(invalidValue, { delay: 0 })
         cy.get('[data-cy="videoCaptionsError"]').contains('Captions must be at most 100 characters')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
