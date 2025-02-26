@@ -393,14 +393,14 @@ const schema = yup.object().shape({
   'videoCaptions': yup.string()
       .nullable()
       .max(appConfig.maxVideoCaptionsLength)
-      .test('videoUrlMustBePresent', 'Captions is not valid without Video field',(value) => videoUrlMustBePresent(value))
+      .test('videoUrlMustBePresent', 'Captions are not valid without a Video',(value) => videoUrlMustBePresent(value))
       .test('videoCaptionValidation', (value, context) => webvttValidation(value, context))
       .label('Captions'),
   'videoTranscript': string()
       .nullable()
       .max(appConfig.maxVideoTranscriptLength)
       .customDescriptionValidator('Video Transcript')
-      .test('videoUrlMustBePresent', 'Transcript is not valid without Video field',(value) => videoUrlMustBePresent(value))
+      .test('videoUrlMustBePresent', 'Transcript is not valid without a Video',(value) => videoUrlMustBePresent(value))
       .label('Video Transcript'),
 })
 
