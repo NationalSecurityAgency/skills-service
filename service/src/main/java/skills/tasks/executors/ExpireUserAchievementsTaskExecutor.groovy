@@ -25,12 +25,8 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.services.admin.UserAchievementExpirationService
-import skills.services.attributes.SkillAttributeService
 import skills.storage.model.SkillAttributesDef
-import skills.storage.repos.SkillAttributesDefRepo
 import skills.tasks.data.ExpireUserAchievements
-
-import static skills.storage.model.SkillAttributesDef.SkillAttributesType.AchievementExpiration
 
 @Slf4j
 @Component
@@ -39,13 +35,7 @@ class ExpireUserAchievementsTaskExecutor implements VoidExecutionHandler<ExpireU
     private static final long LOGGING_THRESHOLD = 5000
 
     @Autowired
-    SkillAttributeService skillAttributeService
-
-    @Autowired
     UserAchievementExpirationService userAchievementExpirationService
-
-    @Autowired
-    SkillAttributesDefRepo skillAttributesDefRepo
 
     @Override
     @Profile
@@ -65,7 +55,7 @@ class ExpireUserAchievementsTaskExecutor implements VoidExecutionHandler<ExpireU
 
     void removeExpiredUserAchievements() {
         log.info("Checking for expiring user achievements.")
-        List<SkillAttributesDef> skillAttributesDefList = skillAttributesDefRepo.findAllByType(AchievementExpiration)
+        List<SkillAttributesDef> skillAttributesDefList = userAchievementExpirationService.getSkillAttributesForExpirationCheck()
         for (SkillAttributesDef skillAttributesDef: skillAttributesDefList) {
             try {
                 userAchievementExpirationService.checkAndExpireIfNecessary(skillAttributesDef)
