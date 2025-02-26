@@ -88,7 +88,7 @@ const chartOptions = ref({
     },
     toolbar: {
       autoSelected: 'zoom',
-      offsetY: -52,
+      offsetY: -30,
     },
   },
   dataLabels: {

@@ -42,7 +42,7 @@ const exportTranscriptToPdf = () => {
         <div class="flex-1">
           You have Completed
           <Tag>{{ skillsAchieved }}</Tag>
-          out of {{ totalSkills }} skill{{ plural.plural(totalSkills) }}!
+          out of <Tag severity="secondary">{{ totalSkills }}</Tag> skill{{ plural.plural(totalSkills) }}!
         </div>
         <div>
           <SkillsButton

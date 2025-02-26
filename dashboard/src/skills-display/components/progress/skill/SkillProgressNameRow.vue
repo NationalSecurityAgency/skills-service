@@ -178,9 +178,9 @@ const isAudio = computed(() => {
                             `of other ${attributes.skillDisplayName}s within a ${attributes.projectDisplayName}. A ${attributes.skillDisplayName} Group can require the completion of some or all of the included ${attributes.skillDisplayName}s before the group be achieved.`"
           class="text-sm content-center ml-2"
           data-cy="groupSkillsRequiredBadge">
-          <span class="">Requires </span>
+          <span class="mr-1">Requires </span>
           <Tag severity="success">{{ skill.numSkillsRequired }}</Tag>
-          <span class="italic"> out of </span>
+          <span class="italic mx-1"> out of </span>
           <Tag severity="secondary">{{ skill.children.length }}</Tag>
           skills
         </div>

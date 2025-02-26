@@ -66,6 +66,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
         class="h-full w-min-13rem"
         icon-class="fa fa-running"
         :icon-color="themeState.infoCards().iconColors[0]"
+        :add-border="true"
         data-cy="overallPointsEarnedCard">
         <Tag>Overall</Tag> {{ attributes.pointDisplayName }}s Earned
       </media-info-card>
@@ -77,6 +78,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
         class="h-full sm:w-min-13rem"
         icon-class="far fa-clock"
         :icon-color="themeState.infoCards().iconColors[1]"
+        :add-border="true"
         data-cy="pointsAchievedTodayCard">
         {{ attributes.pointDisplayName }}s Achieved <Tag>Today</Tag>
       </media-info-card>
@@ -88,6 +90,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
         class="h-full sm:w-min-13rem"
         icon-class="fas fa-flag-checkered"
         :icon-color="themeState.infoCards().iconColors[2]"
+        :add-border="true"
         data-cy="pointsPerOccurrenceCard">
         {{ attributes.pointDisplayName }}s per Occurrence
       </media-info-card>
@@ -99,6 +102,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
           class="h-full sm:w-min-13rem"
           icon-class="fas fa-spell-check"
           :icon-color="themeState.infoCards().iconColors[2]"
+          :add-border="true"
           data-cy="quizRequirementCard">
         <div v-if="QuizType.isQuiz(skill.selfReporting.type)">
           <div v-if="skill.selfReporting.quizOrSurveyPassed">
@@ -127,6 +131,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
         class="h-full sm:w-min-13rem"
         icon-class="fas fa-hourglass-half"
         :icon-color="themeState.infoCards().iconColors[3]"
+        :add-border="true"
         data-cy="timeWindowPts">
         {{ timeWindowLabel }}
       </media-info-card>

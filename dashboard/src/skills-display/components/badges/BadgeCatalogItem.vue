@@ -59,6 +59,7 @@ const percent = computed(() => {
 const showHeader = computed(() => props.badge.gem || props.badge.global)
 const iconCardPt = computed(() => {
   return {
+    root: { class: '!border' },
     content:
       {
         class: showHeader.value ? 'p-0' : ''
@@ -117,7 +118,7 @@ const otherUsersAchieved = computed(() => {
             <extra-badge-award v-if="badge.achievedWithinExpiration"
                                :icon-class="badge.awardAttrs.iconClass"
                                :name="badge.awardAttrs.name"
-                               class="mt-4"/>
+                               class="my-4"/>
           </div>
         </template>
       </Card>

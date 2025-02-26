@@ -151,8 +151,10 @@ const getProgressPercent = (item) => {
               <i class="far fa-user mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
-              <div class="text-left flex items-center" data-cy="userColumn">
-                <Avatar icon="fas fa-user skills-theme-primary-color" class="mr-2" shape="circle" />
+              <div class="text-left flex gap-1 items-center" data-cy="userColumn">
+                <div class="w-12">
+                  <Avatar icon="fas fa-user" size="medium" class="mr-2" shape="circle" />
+                </div>
                 <div class="align-text-bottom text-info skills-theme-primary-color">{{ getUser(slotProps.data) }}</div>
                 <i v-if="slotProps.data.rank <=3" class="fas fa-medal ml-2"
                    :class="colors.getRankTextClass(slotProps.data.rank)"

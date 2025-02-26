@@ -114,8 +114,8 @@ const saml2Login = (registrationId) => {
       <div class="mt-8 justify-center">
         <logo1 />
       </div>
-      <div class="grid grid-cols-12 gap-4 ">
-        <div class="col-span-12 sm:col-span-8 sm:col-start-3 md:col-span-6 md:col-start-4 lg:col-span-4 lg:col-start-5">
+      <div class="">
+        <div class="max-w-md lg:max-w-xl mx-auto">
           <Card v-if="!appConfig.oAuthOnly && !appConfig.saml2RegistrationId" class="mt-4">
             <template #content>
               <form @submit="onSubmit">
@@ -139,7 +139,14 @@ const saml2Login = (registrationId) => {
                       aria-describedby="username-error"
                       aria-errormessage="username-error" />
                   </InputGroup>
-                  <small role="alert" class="p-error" id="username-error">{{ errors.username || '&nbsp;' }}</small>
+                  <Message
+                      severity="error"
+                      variant="simple"
+                      size="small"
+                      :closable="false"
+                      data-cy="usernameError"
+                      id="username-error">{{ errors.username || '&nbsp;' }}
+                  </Message>
                 </div>
 
                 <div class="flex flex-col gap-1 text-left">
@@ -168,7 +175,14 @@ const saml2Login = (registrationId) => {
                       aria-describedby="password-error"
                       aria-errormessage="password-error" />
                   </InputGroup>
-                  <small role="alert" class="p-error" id="password-error">{{ errors.password || '&nbsp;' }}</small>
+                  <Message
+                      severity="error"
+                      variant="simple"
+                      size="small"
+                      :closable="false"
+                      data-cy="passwordError"
+                      id="password-error">{{ errors.password || '&nbsp;' }}
+                  </Message>
                 </div>
 
                 <div class="mt-1">
@@ -186,7 +200,7 @@ const saml2Login = (registrationId) => {
               <Divider />
               <p class="text-center">
                 <small>
-                  Don't have a SkillTree account? <router-link data-cy="signUpButton" :to="{ name: 'RequestAccount', query: route.query }">Sign up</router-link>
+                  Don't have a SkillTree account? <router-link data-cy="signUpButton" :to="{ name: 'RequestAccount', query: route.query }" class="underline">Sign up</router-link>
                 </small>
               </p>
             </template>

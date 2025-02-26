@@ -41,11 +41,11 @@ watch(timer, (value) => {
 
 <template>
   <div>
-    <div class="grid grid-cols-12 gap-4 justify-center text-center" data-cy="resetRequestConfirmation">
-      <div class="col md:col-span-8 lg:col-span-7 xl:col-span-4 mt-4" style="min-width: 20rem;">
-        <div class="mt-8">
-          <logo1 />
-          <div class="text-3xl mt-6 text-primary">Reset Password For SkillTree Dashboard</div>
+    <div class="pt-10" data-cy="resetRequestConfirmation">
+      <div class="max-w-md lg:max-w-xl mx-auto">
+        <div class="mt-8 text-center">
+          <logo1 class="mb-4" />
+          <Message :closable="false" role="heading" aria-level="1">Reset Password For SkillTree Dashboard</Message>
         </div>
         <Card class="mt-4 text-left">
           <template #content>

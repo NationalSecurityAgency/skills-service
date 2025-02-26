@@ -76,10 +76,10 @@ const buildBadgeLink = (badge) => {
       <no-content2 v-if="!badges || badges.length === 0" title="No badges earned yet."
                    message="Take a peak at the catalog below to get started!" />
 
-      <div v-if="badges && badges.length > 0" class="flex-col md:flex-row flex flex-wrap justify-center gap-4">
+      <div v-if="badges && badges.length > 0" class="flex-col md:flex-row flex flex-wrap justify-center gap-4 ">
           <Card class="skills-card-theme-border skills-earned-badge"
                 v-for="(badge, index) in badges" v-bind:key="badge.badgeId"
-                :pt="{ content: { class: 'h-full' }, body: { class: 'h-full' } }" :data-cy="`achievedBadge-${badge.badgeId}`">
+                :pt="{ root: { class: '!border' }, content: { class: '!h-full' }, body: { class: '!h-full' } }" :data-cy="`achievedBadge-${badge.badgeId}`">
             <template #header>
               <div class="pt-4 px-4 flex">
                 <div class="flex-1">
@@ -112,7 +112,7 @@ const buildBadgeLink = (badge) => {
                   <extra-badge-award v-if="badge.achievedWithinExpiration"
                                      :icon-class="badge.awardAttrs.iconClass"
                                      :name="badge.awardAttrs.name"
-                                      class="mt-4"/>
+                                      class="my-4"/>
                 </div>
                 <div>
                   <router-link

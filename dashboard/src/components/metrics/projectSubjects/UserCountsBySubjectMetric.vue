@@ -51,7 +51,7 @@ const chartOptions = ref({
     toolbar: {
       show: true,
       offsetX: 0,
-      offsetY: -60,
+      offsetY: -85,
     },
   },
   plotOptions: {

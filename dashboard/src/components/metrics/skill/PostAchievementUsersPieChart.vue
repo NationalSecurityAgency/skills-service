@@ -31,7 +31,7 @@ const chartOptions = ref({
     toolbar: {
       show: true,
       offsetX: 0,
-      offsetY: -40,
+      offsetY: -75,
     },
   },
   colors: ['#17a2b8', '#28a745'],

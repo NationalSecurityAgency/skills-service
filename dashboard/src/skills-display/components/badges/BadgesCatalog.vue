@@ -102,12 +102,12 @@ const buildBadgeLink = (badge) => {
               aria-label="Search badges"
               data-cy="badgeSearchInput" />
             <InputGroupAddon class="p-0 m-0">
-              <SkillsButton
+              <SkillsButton :pt="{ root: { class: '!border-0' } }"
                 icon="fas fa-times"
                 text
                 outlined
                 @click="searchString = ''"
-                class="position-absolute skills-theme-btn" variant="outline-info" style="right: 0rem;"
+                class="position-absolute skills-theme-btn m-0 h-full"
                 aria-label="clear search input"
                 data-cy="clearSkillsSearchInput" />
             </InputGroupAddon>

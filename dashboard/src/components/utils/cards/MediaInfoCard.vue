@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { reactive} from 'vue'
+import {computed, reactive} from 'vue'
 import Card from 'primevue/card'
 
 const props = defineProps({
@@ -24,8 +24,20 @@ const props = defineProps({
   iconColor: {
     type: String,
     require: false,
+  },
+  addBorder: {
+    type: Boolean,
+    default: false
   }
 });
+
+const cardPt = computed(() => {
+  const res = {content: {class: 'p-0'} };
+  if (props.addBorder) {
+    res.root = {class: '!border'}
+  }
+  return res
+})
 
 const styleObject = {
   color: props.iconColor,
@@ -33,15 +45,15 @@ const styleObject = {
 </script>
 
 <template>
-  <Card :pt="{content: { class: 'p-0' } }">
+  <Card :pt="cardPt">
     <template #content>
-      <div class="flex flex-col sm:flex-row text-center sm:text-left">
-        <div style="min-width: 5rem;" class="text-center">
+      <div class="flex flex-col gap-3 sm:flex-row text-center sm:text-left">
+        <div class="text-center sm:min-w-20">
           <i class="fa-3x" :class="iconClass" :style="styleObject" aria-hidden="true"/>
         </div>
         <div>
           <div class="text-2xl mb-2 uppercase" data-cy="mediaInfoCardTitle" style="overflow-wrap: break-word; text-wrap: wrap;">{{ title }}</div>
-          <div class="text-sm w-min-10rem" data-cy="mediaInfoCardSubTitle">
+          <div class="text-sm md:min-w-40" data-cy="mediaInfoCardSubTitle">
             <slot>
               {{ subTitle }}
             </slot>

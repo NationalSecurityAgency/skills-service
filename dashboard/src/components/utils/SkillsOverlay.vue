@@ -34,7 +34,7 @@ defineProps({
 
 <template>
   <BlockUI :blocked="show" :auto-z-index="false"
-           :pt:mask:class="`opacity-${opacity}`"
+           :pt="{ mask: { class: `opacity-[.${opacity}]` } }"
   >
     <slot></slot>
     <div v-if="show" class="text-center overlay-content">

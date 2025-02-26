@@ -34,7 +34,7 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
                     :route="{ name: skillsDisplayInfo.getContextSpecificRouteName('BadgesDetailsPage') }"
                     :is-summary-only="attributes.isSummaryOnly">
     <template #userRanking>
-      <div class="user-rank-text sd-theme-primary-color text-lg py-2">
+      <div class="user-rank-text text-lg py-2">
         <div class="text-3xl font-semibold" style="line-height: 1.2em" data-cy="myBadgesPosition">{{ badges.numBadgesCompleted }}</div>
         <div class="mt-2">out of</div>
         <div><span class="font-semibold">{{ badges.numTotalBadges }}</span> {{ parseInt(badges.numTotalBadges) === 1 ? 'badge' : 'badges' }}</div>

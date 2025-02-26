@@ -38,7 +38,7 @@ const handleClick = (index) => {
 <template>
   <span data-cy="modeSelector">
     <Badge v-for="(item, index) in options" :key="`${index}`"
-             :class="{'can-select' : (index !== selectedIndex) }"
+             :class="{'can-select' : (index !== selectedIndex) , 'mr-1': index !== options.length - 1}"
              :severity="getVariant(index)" @click="handleClick(index)" @keyup.enter="handleClick(index)" tabindex="0">
       {{ item.label }}
     </Badge>
