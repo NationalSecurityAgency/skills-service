@@ -208,7 +208,7 @@ describe('Metrics Tests - Subject', () => {
         cy.wait('@distinctUsersOverTimeForProject');
     });
 
-    it.only('subject users per day - with user counts', () => {
+    it('subject users per day - with user counts', () => {
         cy
             .intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
                 {
