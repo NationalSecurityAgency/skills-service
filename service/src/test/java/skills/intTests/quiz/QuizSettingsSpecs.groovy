@@ -686,6 +686,134 @@ class QuizSettingsSpecs extends DefaultIntSpec {
 
     }
 
+    def "run quiz - answer hints are only shown on retakes when setting is enabled"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 4, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.ShowAnswerHintsOnRetakeAttemptsOnly.setting, value: 'true'],
+        ])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[2].answerOptions[1].id)
+        skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: 'quizRetakeIncorrectQuestions', value: 'false'],
+        ])
+
+        def thirdQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[3].answerOptions[1].id)
+        skillsService.completeQuizAttempt(quiz.quizId, thirdQuizAttempt.id).body
+
+        then:
+        quizAttempt.questions.size() == 4
+        quizAttempt.questions.findAll({ it.answerHint == null }).size() == 4
+        secondQuizAttempt.questions.size() == 4
+        secondQuizAttempt.questions.findAll({ it.answerHint != null }).size() == 4
+        thirdQuizAttempt.questions.size() == 4
+        thirdQuizAttempt.questions.findAll({ it.answerHint != null }).size() == 4
+    }
+
+    def "run quiz - answer hints are always shown when settings is explicitly disabled)"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 4, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.ShowAnswerHintsOnRetakeAttemptsOnly.setting, value: 'false'],
+        ])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[2].answerOptions[1].id)
+        skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: 'quizRetakeIncorrectQuestions', value: 'false'],
+        ])
+
+        def thirdQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[3].answerOptions[1].id)
+        skillsService.completeQuizAttempt(quiz.quizId, thirdQuizAttempt.id).body
+
+        then:
+        quizAttempt.questions.size() == 4
+        quizAttempt.questions.findAll({ it.answerHint != null }).size() == 4
+        secondQuizAttempt.questions.size() == 4
+        secondQuizAttempt.questions.findAll({ it.answerHint != null }).size() == 4
+        thirdQuizAttempt.questions.size() == 4
+        thirdQuizAttempt.questions.findAll({ it.answerHint != null }).size() == 4
+    }
+
+    def "run quiz - answer hints are always shown by default (when settings is not present)"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 4, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[1].id)
+        skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        def secondQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, secondQuizAttempt.id, secondQuizAttempt.questions[2].answerOptions[1].id)
+        skillsService.completeQuizAttempt(quiz.quizId, secondQuizAttempt.id).body
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: 'quizRetakeIncorrectQuestions', value: 'false'],
+        ])
+
+        def thirdQuizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[0].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[1].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[2].answerOptions[1].id)
+        skillsService.reportQuizAnswer(quiz.quizId, thirdQuizAttempt.id, thirdQuizAttempt.questions[3].answerOptions[1].id)
+        skillsService.completeQuizAttempt(quiz.quizId, thirdQuizAttempt.id).body
+
+        then:
+        quizAttempt.questions.size() == 4
+        quizAttempt.questions.findAll({ it.answerHint != null }).size() == 4
+        secondQuizAttempt.questions.size() == 4
+        secondQuizAttempt.questions.findAll({ it.answerHint != null }).size() == 4
+        thirdQuizAttempt.questions.size() == 4
+        thirdQuizAttempt.questions.findAll({ it.answerHint != null }).size() == 4
+    }
+
     def "run quiz - retaking a failed quiz with a subset of questions"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)

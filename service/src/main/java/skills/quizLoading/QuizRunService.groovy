@@ -244,6 +244,8 @@ class QuizRunService {
         boolean forceRandomizationOfQuestions = quizLength?.value != null && Integer.valueOf(quizLength.value) < dbQuestionDefs.size()
         QuizSetting onlyIncorrect = quizSettings?.find({it.setting == QuizSettings.RetakeIncorrectQuestionsOnly.setting})
         boolean onlyIncorrectQuestions = onlyIncorrect?.value?.toBoolean()
+        Boolean showAnswerHintsOnRetakesOnly = quizSettings?.find( { it.setting == QuizSettings.ShowAnswerHintsOnRetakeAttemptsOnly.setting })?.value?.toBoolean()
+        Boolean includeAnswerHints = !showAnswerHintsOnRetakesOnly || isRetakeAttempt(quizDefWithDescription, userId)
 
         if(onlyIncorrectQuestions) {
             dbQuestionDefs = selectOnlyIncorrectQuestions(quizDefWithDescription.id, userId, dbQuestionDefs)
@@ -269,10 +271,16 @@ class QuizRunService {
                                 id: it.id,
                                 answerOption: it.answer
                         )
-                    }
+                    },
+                    answerHint: includeAnswerHints ? it.answerHint : null
             )
         }
         return questions
+    }
+    private Boolean isRetakeAttempt(QuizDefWithDescription quizDefWithDescription, String userId) {
+        Boolean isRetakeAttempt = quizDefWithDescription.type == QuizDef.QuizType.Quiz && quizAttemptRepo.getUserAttemptsStats(userId, quizDefWithDescription.id,
+                UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED).userNumPreviousQuizAttempts > 0
+        return isRetakeAttempt
     }
 
     LocalDateTime calculateDeadline(LocalDateTime started, Integer timeLimitInSeconds) {
@@ -434,19 +442,18 @@ class QuizRunService {
 
     @Profile
     private List<QuizSetting> loadQuizSettings(Integer quizRefId) {
-        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId,
-                [
-                    QuizSettings.MaxNumAttempts.setting,
-                    QuizSettings.MinNumQuestionsToPass.setting,
-                    QuizSettings.RandomizeQuestions.setting,
-                    QuizSettings.RandomizeAnswers.setting,
-                    QuizSettings.QuizLength.setting,
-                    QuizSettings.QuizTimeLimit.setting,
-                    QuizSettings.MultipleTakes.setting,
-                    QuizSettings.RetakeIncorrectQuestionsOnly.setting,
-                    QuizSettings.ShowDescriptionOnQuizPage.setting,
-                ]
-        )
+        return quizSettingsRepo.findAllByQuizRefIdAndSettingIn(quizRefId, [
+                QuizSettings.MaxNumAttempts.setting,
+                QuizSettings.MinNumQuestionsToPass.setting,
+                QuizSettings.RandomizeQuestions.setting,
+                QuizSettings.RandomizeAnswers.setting,
+                QuizSettings.QuizLength.setting,
+                QuizSettings.QuizTimeLimit.setting,
+                QuizSettings.MultipleTakes.setting,
+                QuizSettings.RetakeIncorrectQuestionsOnly.setting,
+                QuizSettings.ShowAnswerHintsOnRetakeAttemptsOnly.setting,
+                QuizSettings.ShowDescriptionOnQuizPage.setting,
+        ])
     }
 
     @Profile
