@@ -124,6 +124,20 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
         skillsClientException.message.contains("[Question] must not exceed [2000] chars")
     }
 
+    def "answer hint text <= 2000 chars"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1)
+
+        when:
+        question.answerHint = (1..2001).collect { "a" }.join("")
+        skillsService.createQuizQuestionDefs([question])
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("[Answer Hint] must not exceed [2000] chars")
+    }
+
     def "quiz SingleChoice question must fill in each answer"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)

@@ -21,6 +21,7 @@ import skills.services.quiz.QuizQuestionType
 @Canonical
 class QuizQuestionDefRequest {
     String question
+    String answerHint
     QuizQuestionType questionType
 
     List<QuizAnswerDefRequest> answers

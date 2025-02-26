@@ -43,6 +43,7 @@ const route = useRoute()
 const loadingComponent = ref(false)
 const currentScaleOptions = ref([3, 4, 5, 6, 7, 8, 9, 10])
 const answersRef = ref(null)
+const showHint = ref(false)
 
 const modalTitle = computed(() => {
   if( props.isEdit ) {
@@ -61,6 +62,9 @@ onMounted(() => {
   }
   if (props.isEdit || props.isCopy) {
     questionType.value.selectedType = questionType.value.options.find((o) => o.id === props.questionDef.questionType)
+  }
+  if (isQuizType.value && props.questionDef.answerHint) {
+    showHint.value = true;
   }
 });
 
@@ -207,6 +211,11 @@ const schema = object({
       .max(appConfig.descriptionMaxLength)
       .customDescriptionValidator('Question', false)
       .label('Question'),
+  'answerHint': string()
+      .test('answerHintRequired', 'Answer Hint is required when enabled', (value) => !!(!showHint.value || value))
+      .max(appConfig.maxQuizAnswerHintLength)
+      .customDescriptionValidator('Answer Hint', false)
+      .label('Answer Hint'),
   'answers': array()
       .of(
           object({
@@ -225,6 +234,7 @@ const schema = object({
 const initialQuestionData = {
   questionType: props.isEdit || props.isCopy ? questionType.value.options.find((o) => o.id === props.questionDef.questionType) : questionType.value.selectedType,
   question: props.questionDef.question || '',
+  answerHint: props.questionDef.answerHint || '',
   answers: props.questionDef.answers || [],
   currentScaleValue: props.questionDef.questionType === QuestionType.Rating && props.isEdit || props.isCopy ? props.questionDef.answers.length : 5,
 }
@@ -232,7 +242,7 @@ const initialQuestionData = {
 const close = () => { model.value = false }
 
 const saveQuiz = (values) => {
-  const { question, answers, currentScaleValue } = values
+  const { question, answerHint, answers, currentScaleValue } = values
   const removeEmptyQuestions = answers.filter((a) => (a.answer && a.answer.trim().length > 0));
   const numCorrect = answers.filter((a) => a.isCorrect).length;
   let { questionType : { id : questionType } } = values
@@ -240,6 +250,7 @@ const saveQuiz = (values) => {
     id: props.questionDef.id,
     quizId: quizId.value,
     question,
+    answerHint,
     questionType,
     answers: (questionType === QuestionType.TextInput || questionType === QuestionType.Rating) ? [] : removeEmptyQuestions,
   };
@@ -298,6 +309,30 @@ const onSavedQuestion = (savedQuestion) => {
           :resizable="true"
           markdownHeight="150px"
           name="question" />
+      <div data-cy="answerHintSection" v-if="isQuizType">
+        <div class="flex mb-2">
+          <SkillsCheckboxInput
+              v-model="showHint"
+              :binary="true"
+              inputId="answerHintEnable"
+              name="answerHintEnable"
+              data-cy=answerHintEnableCheckbox />
+          <div class="flex-1 align-content-end">
+            <label for="answerHintEnable" class="font-bold text-primary ml-2">Enable Answer Hint</label>
+          </div>
+        </div>
+        <SkillsTextarea v-if="showHint"
+            id="answerHintInput"
+            placeholder="Hint to be presented to user"
+            aria-label="Hint to be presented to user"
+            rows="3"
+            max-rows="3"
+            name="answerHint"
+            data-cy="answerHint"
+            :submit-on-enter="false"
+            :disabled="!showHint"
+        />
+      </div>
 
       <div class="mt-4 mb-2">
         <span class="font-bold text-primary">Answers</span>

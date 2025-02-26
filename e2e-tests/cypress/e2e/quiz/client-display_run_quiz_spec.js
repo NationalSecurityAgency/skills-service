@@ -1693,6 +1693,140 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="onlyIncorrectMessage"]').contains('You only need to retake the questions you did not answer correctly on your last attempt. You need to answer 3 question(s) to pass.')
 
     });
+
+    it('Take quiz multiple times when limiting answer hints to only be displayed on retakes', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+        cy.createQuizQuestionDef(1, 4);
+        cy.setMinNumQuestionsToPass(1, 2)
+
+        cy.request('POST', `/admin/quiz-definitions/quiz1/settings`, [{
+            setting: 'quizShowAnswerHintsOnRetakeAttemptsOnly',
+            value: 'true'
+        }]);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('Must get 2 / 4 questions')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('50%')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="answerHint"]').should('not.exist')
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_4"] [data-cy="answer_2"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="runQuizAgainBtn"]').click()
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="answerHint"]').should('exist')
+
+        cy.get('[data-cy="question_1"] [data-cy="answerHint"]').contains('This is a hint for question # 1');
+        cy.get('[data-cy="question_2"] [data-cy="answerHint"]').contains('This is a hint for question # 2');
+        cy.get('[data-cy="question_3"] [data-cy="answerHint"]').contains('This is a hint for question # 3');
+        cy.get('[data-cy="question_4"] [data-cy="answerHint"]').contains('This is a hint for question # 4');
+    });
+
+    it('Answer hints are always displayed by default', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+        cy.createQuizQuestionDef(1, 4);
+        cy.setMinNumQuestionsToPass(1, 2)
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('Must get 2 / 4 questions')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('50%')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="answerHint"]').should('exist')
+
+        cy.get('[data-cy="question_1"] [data-cy="answerHint"]').contains('This is a hint for question # 1');
+        cy.get('[data-cy="question_2"] [data-cy="answerHint"]').contains('This is a hint for question # 2');
+        cy.get('[data-cy="question_3"] [data-cy="answerHint"]').contains('This is a hint for question # 3');
+        cy.get('[data-cy="question_4"] [data-cy="answerHint"]').contains('This is a hint for question # 4');
+    });
+
+    it('Answer hints are always displayed when retakes settings is not true', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+        cy.createQuizQuestionDef(1, 4);
+        cy.setMinNumQuestionsToPass(1, 2)
+
+        cy.request('POST', `/admin/quiz-definitions/quiz1/settings`, [{
+            setting: 'quizShowAnswerHintsOnRetakeAttemptsOnly',
+            value: 'false'
+        }]);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('Must get 2 / 4 questions')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('50%')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="answerHint"]').should('exist')
+
+        cy.get('[data-cy="question_1"] [data-cy="answerHint"]').contains('This is a hint for question # 1');
+        cy.get('[data-cy="question_2"] [data-cy="answerHint"]').contains('This is a hint for question # 2');
+        cy.get('[data-cy="question_3"] [data-cy="answerHint"]').contains('This is a hint for question # 3');
+        cy.get('[data-cy="question_4"] [data-cy="answerHint"]').contains('This is a hint for question # 4');
+    });
+
+    it('Answer hints are not displayed when null or empty string', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1, {  answerHint: '' });
+        cy.createQuizQuestionDef(1, 2, {  answerHint: '' });
+        cy.createQuizQuestionDef(1, 3, {  answerHint: null });
+        cy.createQuizQuestionDef(1, 4, {  answerHint: null });
+        cy.setMinNumQuestionsToPass(1, 2)
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('Must get 2 / 4 questions')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizPassInfo"]').contains('50%')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="answerHint"]').should('not.exist')
+
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="question_4"] [data-cy="answer_2"]').click()
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="runQuizAgainBtn"]').click()
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="answerHint"]').should('not.exist')
+    });
+
 });
 
 

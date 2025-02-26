@@ -276,4 +276,24 @@ describe('Quiz Metrics Tests', () => {
         cy.visit('/progress-and-rankings/quizzes/quiz1')
         cy.get('[data-cy="quizDescription"]').should('not.exist')
     });
+
+  it('quiz setting: only show answer hints for retakes', function () {
+    cy.createQuizDef(1);
+    for(var x = 1; x < 3; x++) {
+      cy.createQuizQuestionDef(1, x);
+    }
+
+    cy.visit('/administrator/quizzes/quiz1/settings');
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+
+    cy.get('[data-cy="quizShowAnswerHintsOnRetakeAttemptsOnlySwitch"] [role="switch"]').should('not.be.checked')
+    cy.get('[data-cy="quizShowAnswerHintsOnRetakeAttemptsOnlySwitch"] [role="switch"]').click({force: true});
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+    cy.get('[data-cy="unsavedChangesAlert"]').should('exist')
+    cy.get('[data-cy="saveSettingsBtn"]').click()
+
+    cy.visit('/administrator/quizzes/quiz1/settings');
+    cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+    cy.get('[data-cy="quizShowAnswerHintsOnRetakeAttemptsOnlySwitch"] [role="switch"]').should('be.checked')
+  });
 });

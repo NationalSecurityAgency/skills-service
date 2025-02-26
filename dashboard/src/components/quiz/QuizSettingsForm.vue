@@ -67,6 +67,7 @@ const schema = props.isSurvey ? yup.object().shape({'quizMultipleTakes': yup.boo
   'quizMultipleTakes': yup.boolean(),
   'quizAlwaysShowCorrectAnswers': yup.boolean(),
   'retakeIncorrectQuestions': yup.boolean(),
+  'quizShowAnswerHintsOnRetakeAttemptsOnly': yup.boolean(),
   'showDescriptionOnQuizPage': yup.boolean(),
   'quizTimeLimitUnlimited': yup.boolean(),
   'quizTimeLimitHours': yup.number()
@@ -316,23 +317,37 @@ const updateTimeLimit = () => {
           inputId="retakeIncorrectQuestions"
           aria-label="Allow retaking the quiz after passing"
           data-cy="retakeIncorrectQuestionsSwitch"/>
-      <span class="mx-2 vertical-align-top">Enabled</span>
+      <span class="mx-2 align-top">Enabled</span>
     </div>
   </div>
 
   <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
     <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
-      <label for="showDescriptionOnQuizPage">Show Quiz Description During Quiz:</label>
+      <label for="quizShowAnswerHintsOnRetakeAttemptsOnly">Only Show Hingts on Retake Attempts:</label>
     </div>
     <div class="col-span-12 md:col-span-9">
       <SkillsInputSwitch
-          name="quizShowDescriptionOnQuizPage"
-          inputId="showDescriptionOnQuizPage"
-          aria-label="Show the quiz description on the quiz run"
-          data-cy="showDescriptionOnQuizPageSwitch"/>
-      <span class="mx-2 vertical-align-top">Enabled</span>
+          name="quizShowAnswerHintsOnRetakeAttemptsOnly"
+          inputId="quizShowAnswerHintsOnRetakeAttemptsOnly"
+          aria-label="Only Show Hints on Retake Attempts"
+          data-cy="quizShowAnswerHintsOnRetakeAttemptsOnlySwitch"/>
+      <span class="mx-2 align-top">Enabled</span>
     </div>
   </div>
+
+    <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
+      <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
+        <label for="showDescriptionOnQuizPage">Show Quiz Description During Quiz:</label>
+      </div>
+      <div class="col-span-12 md:col-span-9">
+        <SkillsInputSwitch
+            name="quizShowDescriptionOnQuizPage"
+            inputId="showDescriptionOnQuizPage"
+            aria-label="Show the quiz description on the quiz run"
+            data-cy="showDescriptionOnQuizPageSwitch"/>
+        <span class="mx-2 align-top">Enabled</span>
+      </div>
+    </div>
 
   <div v-if="errMsg" class="alert alert-danger text-red-500">
     {{ errMsg }}

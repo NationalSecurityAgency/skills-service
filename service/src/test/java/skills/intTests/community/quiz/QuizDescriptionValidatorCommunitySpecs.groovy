@@ -506,4 +506,133 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
         e.message.contains("User [${skillsService.userName}] is not allowed to validate using user community validation")
     }
 
+////////
+
+    def "quiz answer hint custom validation on create - UC quiz fails"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        q1.description = "fine"
+        pristineDragonsUser.createQuizDef(q1)
+        def q1Question = QuizDefFactory.createChoiceQuestion(1, 1, 4, QuizQuestionType.SingleChoice)
+        q1Question.question = 'fine'
+        q1Question.answerHint = notValidProtectedCommunity
+
+        def q2 = QuizDefFactory.createQuiz(2)
+        q2.enableProtectedUserCommunity = true
+        q2.description = notValidDefault
+        pristineDragonsUser.createQuizDef(q2)
+        def q2Question = QuizDefFactory.createChoiceQuestion(2, 1, 4, QuizQuestionType.SingleChoice)
+        q2Question.question = 'fine'
+        q2Question.answerHint = notValidDefault
+        pristineDragonsUser.createQuizQuestionDef(q2Question) // good
+
+        when:
+        pristineDragonsUser.createQuizQuestionDef(q1Question)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains(notValidProtectedCommunityErrMsg)
+    }
+
+    def "quiz answer hint custom validation on create - non-UC quiz fails"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.description = "fine"
+        pristineDragonsUser.createQuizDef(q1)
+        def q1Question = QuizDefFactory.createChoiceQuestion(1, 1, 4, QuizQuestionType.SingleChoice)
+        q1Question.question = 'fine'
+        q1Question.answerHint = notValidDefault
+
+        def q2 = QuizDefFactory.createQuiz(2)
+        q2.description = notValidProtectedCommunity
+        pristineDragonsUser.createQuizDef(q2)
+        def q2Question = QuizDefFactory.createChoiceQuestion(2, 1, 4, QuizQuestionType.SingleChoice)
+        q2Question.question = 'fine'
+        q2Question.answerHint = notValidProtectedCommunity
+        pristineDragonsUser.createQuizQuestionDef(q2Question) // good
+
+        when:
+        pristineDragonsUser.createQuizQuestionDef(q1Question)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains(notValidDefaultErrMsg)
+    }
+
+    def "quiz answer hint custom validation on edit - UC quiz fails"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        q1.description = "fine"
+        pristineDragonsUser.createQuizDef(q1)
+        def q1Question = QuizDefFactory.createChoiceQuestion(1, 1, 4, QuizQuestionType.SingleChoice)
+        q1Question.question = 'fine'
+        q1Question.answerHint = notValidDefault
+        def q1QuestionToUpdate = pristineDragonsUser.createQuizQuestionDef(q1Question).body
+
+        def q2 = QuizDefFactory.createQuiz(2)
+        q2.enableProtectedUserCommunity = true
+        q2.description = notValidDefault
+        pristineDragonsUser.createQuizDef(q2)
+        def q2Question = QuizDefFactory.createChoiceQuestion(2, 1, 4, QuizQuestionType.SingleChoice)
+        q2Question.question = 'fine'
+        q2Question.answerHint = notValidDefault
+        pristineDragonsUser.createQuizQuestionDef(q2Question) // good
+
+        when:
+        q1QuestionToUpdate.quizId = q1.quizId
+        q1QuestionToUpdate.question = notValidProtectedCommunity
+        pristineDragonsUser.updateQuizQuestionDef(q1QuestionToUpdate)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains(notValidProtectedCommunityErrMsg)
+    }
+
+    def "quiz answer hint custom validation on edit - non-UC quiz fails"(){
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.description = "fine"
+        pristineDragonsUser.createQuizDef(q1)
+        def q1Question = QuizDefFactory.createChoiceQuestion(1, 1, 4, QuizQuestionType.SingleChoice)
+        q1Question.question = 'fine'
+        q1Question.answerHint = notValidDefault
+
+        def q2 = QuizDefFactory.createQuiz(2)
+        q2.description = notValidProtectedCommunity
+        pristineDragonsUser.createQuizDef(q2)
+        def q2Question = QuizDefFactory.createChoiceQuestion(2, 1, 4, QuizQuestionType.SingleChoice)
+        q2Question.question = 'fine'
+        q2Question.answerHint = notValidProtectedCommunity
+        pristineDragonsUser.createQuizQuestionDef(q2Question) // good
+
+        when:
+        pristineDragonsUser.createQuizQuestionDef(q1Question)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains(notValidDefaultErrMsg)
+    }
+
 }

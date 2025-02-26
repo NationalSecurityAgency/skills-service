@@ -506,6 +506,7 @@ Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, ove
         quizId: `quizId${quizNum}`,
         question: `This is a question # ${questionNum}`,
         questionType: 'SingleChoice',
+        answerHint: `This is a hint for question # ${questionNum}`,
         answers: [{
             answer: `Question ${questionNum} - First Answer`,
             isCorrect: questionNum == 1 || questionNum > 3 ? true : false,

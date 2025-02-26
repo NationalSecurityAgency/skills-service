@@ -27,7 +27,8 @@ enum QuizSettings {
     AlwaysShowCorrectAnswers('quizAlwaysShowCorrectAnswers'),
     UserCommunityOnlyQuiz("user_community"),
     RetakeIncorrectQuestionsOnly('quizRetakeIncorrectQuestions'),
-    ShowDescriptionOnQuizPage('quizShowDescriptionOnQuizPage');
+    ShowDescriptionOnQuizPage('quizShowDescriptionOnQuizPage'),
+    ShowAnswerHintsOnRetakeAttemptsOnly('quizShowAnswerHintsOnRetakeAttemptsOnly');
 
     String setting;
 

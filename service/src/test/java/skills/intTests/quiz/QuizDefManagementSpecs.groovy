@@ -190,6 +190,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         then:
         newQuestion.body.id
         newQuestion.body.question == question.question
+        newQuestion.body.answerHint == question.answerHint
         newQuestion.body.questionType == QuizQuestionType.MultipleChoice.toString()
         newQuestion.body.answers.size() == 3
         newQuestion.body.answers[0].id
@@ -211,6 +212,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         then:
         newQuestion.body.id
         newQuestion.body.question == question.question
+        newQuestion.body.answerHint == question.answerHint
         newQuestion.body.questionType == QuizQuestionType.SingleChoice.toString()
         newQuestion.body.answers.size() == 2
         newQuestion.body.answers[0].id
@@ -237,6 +239,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         questions[0].id
         questions[1].id
         questions.question == [question1.question, question2.question]
+        questions.answerHint == [question1.answerHint, question2.answerHint]
         questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
 
         questions[0].answers[0].id
@@ -271,6 +274,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         questions[0].id
         questions[1].id
         questions.question == [question1.question, question2.question]
+        questions.answerHint == [question1.answerHint, question2.answerHint]
         questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
 
         questions[0].answers[0].id
@@ -338,6 +342,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         def q1 = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 3, QuizQuestionType.SingleChoice)).body
         def q2 = skillsService.createQuizQuestionDef(questionDef).body
         q2.question = "New Cool Questions?"
+        q2.answerHint = "New Cool Questions Hint"
         q2.answers[0].answer = "New answer 1"
         q2.answers[2].answer = "New answer 3"
         q2.answers[0].isCorrect = false
@@ -353,6 +358,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
 
         then:
         updatedQuestion.question == "New Cool Questions?"
+        updatedQuestion.answerHint == "New Cool Questions Hint"
         updatedQuestion.questionType == QuizQuestionType.SingleChoice.toString()
         updatedQuestion.answers.answer == ["New answer 1", "Answer #2", "New answer 3", "Answer #4"]
         updatedQuestion.answers.isCorrect == [false, true, false, false]
@@ -385,12 +391,14 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
 
         then:
         updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.answerHint ==  "This is a hint for question #2"
         updatedQuestion.questionType == QuizQuestionType.MultipleChoice.toString()
         updatedQuestion.answers.answer == ["Answer #1", "Answer #2", "Answer #3", "Answer #4"]
         updatedQuestion.answers.isCorrect == [false, false, true, true]
         updatedQuestion.answers.displayOrder == [1, 2, 3, 4]
 
         updatedQuestions.questions.question == ["This is questions #1", "This is questions #2"]
+        updatedQuestions.questions.answerHint == ["This is a hint for question #1", "This is a hint for question #2"]
         updatedQuestions.questions.questionType == [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()]
         updatedQuestions.questions[1].answers.answer == ["Answer #1", "Answer #2", "Answer #3", "Answer #4"]
         updatedQuestions.questions[1].answers.isCorrect == [false, false, true, true]
@@ -415,6 +423,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
 
         then:
         updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.answerHint ==  "This is a hint for question #2"
         updatedQuestion.questionType == QuizQuestionType.SingleChoice.toString()
         updatedQuestion.answers.answer == ["Answer #1", "Answer #2", "Answer #3", "Answer #4"]
         updatedQuestion.answers.isCorrect == [false, false, true, false]
@@ -436,6 +445,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
 
         then:
         updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.answerHint ==  "This is a hint for question #2"
         updatedQuestion.questionType == QuizQuestionType.SingleChoice.toString()
         updatedQuestion.answers.answer == ["Answer #2", "Answer #3", "Answer #4"]
         updatedQuestion.answers.isCorrect == [true, false, false]
@@ -459,6 +469,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
 
         then:
         updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.answerHint ==  "This is a hint for question #2"
         updatedQuestion.questionType == QuizQuestionType.SingleChoice.toString()
         updatedQuestion.answers.answer == ["Answer #1", "Answer #2", "Answer #3", "Answer #4", "New"]
         updatedQuestion.answers.isCorrect == [true, false, false, false, false]
@@ -482,6 +493,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
 
         then:
         updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.answerHint ==  "This is a hint for question #2"
         updatedQuestion.questionType == QuizQuestionType.SingleChoice.toString()
         updatedQuestion.answers.answer == ["Answer #1", "New", "Answer #2", "Answer #3", "Answer #4"]
         updatedQuestion.answers.isCorrect == [true, false, false, false, false]
@@ -511,6 +523,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
 
         then:
         updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.answerHint ==  "This is a hint for question #2"
         updatedQuestion.questionType == QuizQuestionType.MultipleChoice.toString()
         updatedQuestion.answers.answer == ["New", "Answer #1", "Answer #2", "Answer #4"]
         updatedQuestion.answers.isCorrect == [true, true, true, false]
@@ -541,6 +554,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
 
         then:
         updatedQuestion.question ==  "This is questions #2"
+        updatedQuestion.answerHint ==  "This is a hint for question #2"
         updatedQuestion.questionType == QuizQuestionType.MultipleChoice.toString()
         updatedQuestion.answers.answer == ["n1", "n2", "n3"]
         updatedQuestion.answers.isCorrect == [false, true, true]

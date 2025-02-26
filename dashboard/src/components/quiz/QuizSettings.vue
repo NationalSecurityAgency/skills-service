@@ -71,6 +71,10 @@ const settings = ref({
     value: false,
     setting: 'quizRetakeIncorrectQuestions'
   },
+  quizShowAnswerHintsOnRetakeAttemptsOnly: {
+    value: false,
+    setting: 'quizShowAnswerHintsOnRetakeAttemptsOnly'
+  },
   showDescriptionOnQuizPage: {
     value: false,
     setting: 'quizShowDescriptionOnQuizPage'
@@ -126,7 +130,7 @@ const loadAndUpdateQuizSettings = () => {
                   minutesForQuiz.value =  remainingTime / 60;
                   settings.value.quizTimeLimit.unlimited = false;
                 }
-              } else if ([settings.value.randomizeQuestions.setting, settings.value.randomizeAnswers.setting, settings.value.multipleTakes.setting, settings.value.alwaysShowCorrectAnswers.setting, settings.value.retakeIncorrectQuestions.setting, settings.value.showDescriptionOnQuizPage.setting].includes(foundFromServer.setting)) {
+              } else if ([settings.value.randomizeQuestions.setting, settings.value.randomizeAnswers.setting, settings.value.multipleTakes.setting, settings.value.alwaysShowCorrectAnswers.setting, settings.value.retakeIncorrectQuestions.setting, settings.value.quizShowAnswerHintsOnRetakeAttemptsOnly.setting, settings.value.showDescriptionOnQuizPage.setting].includes(foundFromServer.setting)) {
                 settings.value[key].value = (/true/i).test(foundFromServer.value);
               } else {
                 settings.value[key].value = foundFromServer.value;
@@ -135,18 +139,19 @@ const loadAndUpdateQuizSettings = () => {
           });
 
           initialValues.value = {
-              quizLength: settings.value.quizLength.value,
-              quizPassingReq: settings.value.passingReq.value,
-              quizNumberOfAttemptsUnlimited: settings.value.numAttempts.unlimited,
-              quizNumberOfAttempts: settings.value.numAttempts.value,
-              quizRandomizeQuestions: settings.value.randomizeQuestions.value,
-              quizRandomizeAnswers: settings.value.randomizeAnswers.value,
-              quizMultipleTakes: settings.value.multipleTakes.value,
-              quizAlwaysShowCorrectAnswers: settings.value.alwaysShowCorrectAnswers.value,
-              quizTimeLimitUnlimited: settings.value.quizTimeLimit.unlimited,
-              quizTimeLimitHours: hoursForQuiz.value,
-              quizTimeLimitMinutes: minutesForQuiz.value,
-              quizRetakeIncorrectQuestions: settings.value.retakeIncorrectQuestions.value,
+            quizLength: settings.value.quizLength.value,
+            quizPassingReq: settings.value.passingReq.value,
+            quizNumberOfAttemptsUnlimited: settings.value.numAttempts.unlimited,
+            quizNumberOfAttempts: settings.value.numAttempts.value,
+            quizRandomizeQuestions: settings.value.randomizeQuestions.value,
+            quizRandomizeAnswers: settings.value.randomizeAnswers.value,
+            quizMultipleTakes: settings.value.multipleTakes.value,
+            quizAlwaysShowCorrectAnswers: settings.value.alwaysShowCorrectAnswers.value,
+            quizTimeLimitUnlimited: settings.value.quizTimeLimit.unlimited,
+            quizTimeLimitHours: hoursForQuiz.value,
+            quizTimeLimitMinutes: minutesForQuiz.value,
+            quizRetakeIncorrectQuestions: settings.value.retakeIncorrectQuestions.value,
+            quizShowAnswerHintsOnRetakeAttemptsOnly: settings.value.quizShowAnswerHintsOnRetakeAttemptsOnly.value,
             quizShowDescriptionOnQuizPage: settings.value.showDescriptionOnQuizPage.value,
           }
         }

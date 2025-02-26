@@ -149,6 +149,7 @@ skills:
       maxProjectNameLength: 50
       maxQuizNameLength: 75
       maxQuizTextAnswerLength: 2000
+      maxQuizAnswerHintLength: 2000
       maxTakeQuizInputTextAnswerLength: 50000
       maxSkillNameLength: 100
       maxSubjectNameLength: 50
