@@ -44,7 +44,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         });
     });
 
-    it.skip('skill prerequisite graph', () => {
+    it('skill prerequisite graph', () => {
         cy.createSkill(1, 1, 1)
         cy.createSkill(1, 1, 2)
         cy.createSkill(1, 1, 3)
@@ -73,7 +73,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapshotOptions);
     });
 
-    it.skip('skill prerequisite graph - with paging', () => {
+    it('skill prerequisite graph - with paging', () => {
         const numSkills = 10;
         for (let i = 0; i < numSkills; i += 1) {
             cy.createSkill(1, 1, i, {
@@ -94,7 +94,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapshotOptions);
     });
 
-    it.skip('skill prerequisite graph on badge page', () => {
+    it('skill prerequisite graph on badge page', () => {
 
         cy.createSkill(1, 1, 1)
         cy.createSkill(1, 1, 2)
