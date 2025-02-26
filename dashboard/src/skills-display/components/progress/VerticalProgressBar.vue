@@ -64,7 +64,7 @@ const ariaLabelFullMsg = computed(() => {
   <div class="user-skill-progress-layers" :style="`height: ${props.barSize+2}px`">
     <ProgressBar v-if="!isCompleted && !disableDailyColor" :value="totalProgress"
                  :pt="{ value: { class: '!bg-teal-300' }}"
-                 class="today-progress is-not-completed"
+                 class="progress-bar is-not-completed"
                  :class="{ 'is-completed': isCompleted, 'is-not-completed': !isCompleted }"
                  :show-value="false"
                  :ariaLabel="ariaLabelFullMsg"
@@ -72,21 +72,21 @@ const ariaLabelFullMsg = computed(() => {
     <ProgressBar v-if="!isCompleted && !disableDailyColor" :value="computedTotalProgressBeforeToday"
                  :pt="{ value: { class: '!bg-teal-600' },
                     root: { class: '!opacity-100 !bg-transparent' }}"
-                 class="total-progress is-not-completed"
+                 class="progress-bar is-not-completed"
                  :class="{ 'is-completed': isCompleted, 'is-not-completed': !isCompleted }"
                  :show-value="false"
                  :ariaLabel="ariaLabelFullMsg"
                  :style="styleObject"></ProgressBar>
     <ProgressBar v-if="isCompleted || disableDailyColor" :value="totalProgress"
                  :pt="{ value: { class: '!bg-green-700' }}"
-                 class="is-completed"
+                 class="is-completed progress-bar"
                  :show-value="false"
                  :ariaLabel="ariaLabelFullMsg"
                  :style="styleObject"></ProgressBar>
     <div v-if="isLocked" class="absolute left-0 right-0" data-cy="progressBarWithLock">
       <div class="flex justify-center">
         <div class="text-center" style="z-index: 1000 !important;">
-          <i class="fas fa-lock" aria-hidden="true"/>
+          <i class="fas fa-lock" :class="{ 'text-orange-200': isCompleted }" aria-hidden="true"/>
         </div>
       </div>
     </div>
@@ -99,7 +99,7 @@ const ariaLabelFullMsg = computed(() => {
 }
 </style>
 <style scoped>
-.total-progress {
+.progress-bar {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -107,13 +107,6 @@ const ariaLabelFullMsg = computed(() => {
   left: 0px;
 }
 
-.today-progress {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0px;
-  left: 0px;
-}
 
 .user-skill-progress-layers {
   position: relative;
