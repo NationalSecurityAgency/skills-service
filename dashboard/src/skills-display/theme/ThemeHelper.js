@@ -294,16 +294,16 @@ export default {
         styleName: 'background-color'
       }],
       incompleteColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.p-progressbar-determinate.today-progress.is-not-completed,' +
+        selector: 'body #app .sd-theme-home .p-progressbar.p-component.p-progressbar-determinate.sd-theme-today-progress.is-not-completed,' +
             'body #app .sd-theme-home .sd-theme-achieved-skills-progress .p-progressbar.p-component.p-progressbar-determinate.is-completed',
         styleName: 'background-color'
       }],
       beforeTodayColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.total-progress.is-not-completed  .p-progressbar-value',
+        selector: 'body #app .sd-theme-home .p-progressbar.p-component.sd-theme-total-progress.is-not-completed  .p-progressbar-value',
         styleName: 'background-color'
       }],
       earnedTodayColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.p-progressbar-determinate.today-progress.is-not-completed .p-progressbar-value',
+        selector: 'body #app .sd-theme-home .p-progressbar.p-component.p-progressbar-determinate.sd-theme-today-progress.is-not-completed .p-progressbar-value',
         styleName: 'background-color'
       }]
     },

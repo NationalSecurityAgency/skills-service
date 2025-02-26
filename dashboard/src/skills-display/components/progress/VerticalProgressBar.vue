@@ -64,7 +64,7 @@ const ariaLabelFullMsg = computed(() => {
   <div class="user-skill-progress-layers" :style="`height: ${props.barSize+2}px`">
     <ProgressBar v-if="!isCompleted && !disableDailyColor" :value="totalProgress"
                  :pt="{ value: { class: '!bg-teal-300' }}"
-                 class="progress-bar is-not-completed"
+                 class="progress-bar sd-theme-today-progress is-not-completed"
                  :class="{ 'is-completed': isCompleted, 'is-not-completed': !isCompleted }"
                  :show-value="false"
                  :ariaLabel="ariaLabelFullMsg"
@@ -72,7 +72,7 @@ const ariaLabelFullMsg = computed(() => {
     <ProgressBar v-if="!isCompleted && !disableDailyColor" :value="computedTotalProgressBeforeToday"
                  :pt="{ value: { class: '!bg-teal-600' },
                     root: { class: '!opacity-100 !bg-transparent' }}"
-                 class="progress-bar is-not-completed"
+                 class="progress-bar sd-theme-total-progress  is-not-completed"
                  :class="{ 'is-completed': isCompleted, 'is-not-completed': !isCompleted }"
                  :show-value="false"
                  :ariaLabel="ariaLabelFullMsg"
