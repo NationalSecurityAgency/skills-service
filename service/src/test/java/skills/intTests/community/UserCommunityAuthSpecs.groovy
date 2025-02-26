@@ -503,6 +503,54 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         e.message.contains("This project is part of one or more Admin Groups that has not enabled user community protection")
     }
 
+    def "cannot enable UC protection for admin group if it contains a non UC project"() {
+
+        String userCommunityUserId =  skillsService.userName
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = SkillsFactory.createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        when:
+        adminGroup.enableProtectedUserCommunity = true
+        skillsService.updateAdminGroupDef(adminGroup)
+
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Not Allowed to set [enableProtectedUserCommunity] to true for adminGroupId [${adminGroup.adminGroupId}]")
+        e.message.contains("This Admin Group is connected to a project that is not compatible with user community protection")
+    }
+
+    def "cannot enable UC protection for admin group if it contains a non UC quiz"() {
+
+        String userCommunityUserId =  skillsService.userName
+        rootSkillsService.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
+
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
+
+        when:
+        adminGroup.enableProtectedUserCommunity = true
+        skillsService.updateAdminGroupDef(adminGroup)
+
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Not Allowed to set [enableProtectedUserCommunity] to true for adminGroupId [${adminGroup.adminGroupId}]")
+        e.message.contains("This Admin Group is connected to a quiz that is not compatible with user community protection")
+    }
+
     String extractInviteFromEmail(String emailBody) {
         def regex = /join-project\/([^\/]+)\/([^?]+)/
         def matcher = emailBody =~ regex

@@ -122,6 +122,9 @@ class UserCommunityService {
         userRoleRepo.findProjectIdsByAdminGroupId(adminGroupId).each { projectId ->
             res = validateProjectForCommunity(projectId, res, true)
         }
+        userRoleRepo.findQuizIdsByAdminGroupId(adminGroupId).each { quizId ->
+            res = validateQuizForCommunity(quizId, res, true)
+        }
         List<UserRoleRes> allAdminGroupMembers = accessSettingsStorageService.findAllAdminGroupMembers(adminGroupId)
         if (allAdminGroupMembers) {
             List<UserRoleRes> unique = allAdminGroupMembers.unique { it.userId }
@@ -180,7 +183,7 @@ class UserCommunityService {
     }
 
     @Transactional(readOnly = true)
-    EnableUserCommunityValidationRes validateQuizForCommunity(String quizId, EnableUserCommunityValidationRes existingValidationRes = null) {
+    EnableUserCommunityValidationRes validateQuizForCommunity(String quizId, EnableUserCommunityValidationRes existingValidationRes = null, adminGroupView = false) {
         EnableUserCommunityValidationRes res = existingValidationRes ? existingValidationRes : new EnableUserCommunityValidationRes(isAllowed: true, unmetRequirements: [])
 
         // only applicable if quiz already exists; also normalizes quiz ids case
@@ -190,7 +193,12 @@ class UserCommunityService {
             checkAllUsersAreUCMembers(allRoles, res, "quiz")
             if(adminGroupDefRepo.doesAdminGroupContainNonUserCommunityQuiz(quizDef.quizId)) {
                 res.isAllowed = false
-                res.unmetRequirements.add("This quiz is part of one or more Admin Groups that do no have ${getCommunityNameBasedOnConfAndItemStatus(true)} permission".toString())
+                if(!adminGroupView) {
+                    res.unmetRequirements.add("This quiz is part of one or more Admin Groups that do no have ${getCommunityNameBasedOnConfAndItemStatus(true)} permission".toString())
+                }
+                else {
+                    res.unmetRequirements.add("This Admin Group is connected to a quiz that is not compatible with user community protection")
+                }
             }
 
             List<String> nonCommunityProjects = quizToSkillDefRepo.getNonCommunityProjectsThatThisQuizIsLinkedTo(quizDef.id)?.sort()
