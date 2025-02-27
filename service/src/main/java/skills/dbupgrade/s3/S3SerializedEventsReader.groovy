@@ -17,8 +17,8 @@ package skills.dbupgrade.s3
 
 import groovy.util.logging.Slf4j
 import io.awspring.cloud.s3.S3PathMatchingResourcePatternResolver
-import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Conditional
 import org.springframework.core.io.Resource
@@ -27,8 +27,10 @@ import org.springframework.stereotype.Component
 import skills.controller.AddSkillHelper
 import skills.dbupgrade.EventsResourceProcessor
 import skills.dbupgrade.ReportedSkillEventQueue
-import skills.services.LockingService
 import software.amazon.awssdk.services.s3.S3Client
+
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 @Slf4j
 @Component
@@ -46,8 +48,8 @@ class S3SerializedEventsReader {
     @Autowired
     EventsResourceProcessor eventsResourceProcessor
 
-    @Autowired
-    LockingService lockingService
+    @Value('#{"${skills.queued-event.num-threads-to-process:5}"}')
+    Integer numThreadsToProcess
 
     @Autowired
     void setupResolver(S3Client s3Client, ApplicationContext applicationContext) {
@@ -68,17 +70,23 @@ class S3SerializedEventsReader {
         return justBucketName
     }
 
-    @Transactional()
     void readAndProcess(String queuedEventFileDir) throws IOException {
-        lockingService.lockForReplayingSkillEvents()
-        Resource[] allTxtFilesInFolder = this.resourcePatternResolver.getResources("${queuedEventFileDir}/*.${ReportedSkillEventQueue.FILE_EXT}".toString());
-        allTxtFilesInFolder.each { Resource resource ->
-            log.info("processing queued skill event file [${resource.filename}]")
-            String justBucketName = getBucketName(queuedEventFileDir, resource)
-            eventsResourceProcessor.processFile(resource)
+        ExecutorService executor = Executors.newFixedThreadPool(numThreadsToProcess)
+        try {
+            Resource[] allTxtFilesInFolder = this.resourcePatternResolver.getResources("${queuedEventFileDir}/*.${ReportedSkillEventQueue.FILE_EXT}".toString());
+            log.info("processing [{}] files with [{}] threads", allTxtFilesInFolder.length, numThreadsToProcess)
+            allTxtFilesInFolder.each { Resource resource ->
+                executor.submit {
+                    log.info("processing skill event file [${resource.filename}]")
+                    String justBucketName = getBucketName(queuedEventFileDir, resource)
+                    eventsResourceProcessor.processFile(resource)
 
-            log.info("Deleting S3 object [${resource.filename}] from [${justBucketName}]")
-            s3Client.deleteObject(request -> request.bucket(justBucketName).key(resource.filename))
+                    log.info("Deleting S3 object [${resource.filename}] from [${justBucketName}]")
+                    s3Client.deleteObject(request -> request.bucket(justBucketName).key(resource.filename))
+                }
+            }
+        } finally {
+            executor.shutdown()
         }
     }
 }

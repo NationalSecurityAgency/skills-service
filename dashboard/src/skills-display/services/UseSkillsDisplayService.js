@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import axios from 'axios'
-import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
-import { useRoute } from 'vue-router'
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import {useRoute} from 'vue-router'
+import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
 
 export const useSkillsDisplayService = () => {
   const servicePath = '/api/projects'
@@ -115,6 +115,10 @@ export const useSkillsDisplayService = () => {
 
 
   const updateSkillHistory = (projectId, skillId) => {
+    if (appConfig.dbUpgradeInProgress) {
+      return Promise.resolve({})
+    }
+
     return axios.post(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(projectId)}/skills/visited/${encodeURIComponent(skillId)}`).then((res) => res.data)
   }
 

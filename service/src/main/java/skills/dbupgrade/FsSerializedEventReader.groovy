@@ -15,18 +15,17 @@
  */
 package skills.dbupgrade
 
-
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.PathResource
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import skills.controller.AddSkillHelper
-import skills.controller.exceptions.SkillException
-import skills.services.LockingService
 
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 @Slf4j
 @Component
@@ -38,8 +37,8 @@ class FsSerializedEventReader {
     @Autowired
     EventsResourceProcessor eventsResourceProcessor
 
-    @Autowired
-    LockingService lockingService
+    @Value('#{"${skills.queued-event.num-threads-to-process:5}"}')
+    Integer numThreadsToProcess
 
     String fileExtension = ReportedSkillEventQueue.FILE_EXT
 
@@ -49,13 +48,18 @@ class FsSerializedEventReader {
         if (Files.isDirectory(fileDir)) {
             List<Path> queuedEventFiles = getQueuedEventFiles(fileDir)
             if (queuedEventFiles) {
-                log.info("processing queued skill event files [${queuedEventFiles.join(', ')}]")
-                Thread.start {
-                    queuedEventFiles.forEach({
-                        log.debug("identified queued event file [{}] to process", it.getFileName())
-                        eventsResourceProcessor.processFile(new PathResource(it))
-                        Files.delete(it)
+                log.info("processing queued skill event files [${queuedEventFiles.join(', ')}] with [${numThreadsToProcess}] threads")
+                ExecutorService executor = Executors.newFixedThreadPool(numThreadsToProcess)
+                try {
+                    queuedEventFiles.forEach({ Path pathToProcess ->
+                        executor.submit {
+                            log.debug("identified queued event file [{}] to process", pathToProcess.getFileName())
+                            eventsResourceProcessor.processFile(new PathResource(pathToProcess))
+                            Files.delete(pathToProcess)
+                        }
                     })
+                } finally {
+                    executor.shutdown()
                 }
             }
         }

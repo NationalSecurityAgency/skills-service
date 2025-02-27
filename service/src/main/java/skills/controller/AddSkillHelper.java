@@ -17,6 +17,7 @@ package skills.controller;
 
 import callStack.profiler.CProf;
 import groovy.lang.Closure;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
@@ -74,10 +75,11 @@ public class AddSkillHelper {
         SkillEventResult result;
         String currentUser = userInfoService.getCurrentUserId();
         boolean forAnotherUser = requestedUserId != null && currentUser != null && !requestedUserId.equalsIgnoreCase(currentUser);
-        String userId = userInfoService.getUserName(requestedUserId, false, skillEventRequest != null ? skillEventRequest.getIdType() : null);
+        String idType = (skillEventRequest != null && StringUtils.isNotBlank(skillEventRequest.getUserId())) ? skillEventRequest.getIdType() : null;
+        String userId = userInfoService.getUserName(requestedUserId, false, idType);
         if (log.isInfoEnabled()) {
-            log.info("ReportSkill (ProjectId=[{}], SkillId=[{}], CurrentUser=[{}], RequestUser=[{}], RequestDate=[{}], IsRetry=[{}])",
-                    new String[]{projectId, skillId, userInfoService.getCurrentUserId(), requestedUserId, toDateString(requestedTimestamp), isRetry.toString()});
+            log.info("ReportSkill (ProjectId=[{}], SkillId=[{}], CurrentUser=[{}], RequestUser=[{}], UserId=[{}], RequestDate=[{}], IsRetry=[{}])",
+                    projectId, skillId, userInfoService.getCurrentUserId(), requestedUserId, userId, toDateString(requestedTimestamp), isRetry.toString());
         }
 
         String prof = "retry-reportSkill";

@@ -30,7 +30,7 @@ limitations under the License.
         <div class="text-2xl text-primary">A database upgrade is in progress!</div>
 
         <p data-cy="errExplanation">
-          A database upgrade is currently in progress, no modifications or changes to Projects/Subjects/Skills/Badges
+          A database upgrade is currently in progress, no modifications or changes to Projects/Subjects/Skills/Badges/Quizzes/Surveys
           are allowed until the upgrade has completed. Please try again later.
         </p>
 

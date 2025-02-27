@@ -17,6 +17,7 @@ package skills.dbupgrade
 
 import com.google.common.collect.Sets
 import groovy.util.logging.Slf4j
+import org.codehaus.plexus.util.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.core.annotation.Order
@@ -102,6 +103,10 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
         ServletServerHttpRequest serverHttpRequest = new ServletServerHttpRequest(request)
         if (queuedSkillEvent) {
             SkillEventRequest skillEventRequest = readEventRequest(serverHttpRequest)
+            // id type does not make sense if userId is not provided
+            if (skillEventRequest && StringUtils.isBlank(skillEventRequest?.userId)) {
+                skillEventRequest.idType = null
+            }
             queuedSkillEvent.skillEventRequest = skillEventRequest
             queuedSkillEvent.userId = userInfo?.username
             if (userInfo?.userDn) {
@@ -134,13 +139,15 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
 
     private SkillEventRequest readEventRequest(ServletServerHttpRequest serverHttpRequest) {
         MediaType mediaType = serverHttpRequest.getHeaders().getContentType()
-
-        for (HttpMessageConverter messageConverter : configuredMessageConverters) {
-            if (messageConverter.canRead(SkillEventRequest, mediaType)) {
-                SkillEventRequest skillEventRequest = (SkillEventRequest)messageConverter.read(SkillEventRequest, serverHttpRequest)
-                return skillEventRequest
+        if (serverHttpRequest?.getHeaders() && serverHttpRequest.getHeaders().getContentLength() > 0) {
+            for (HttpMessageConverter messageConverter : configuredMessageConverters) {
+                if (messageConverter.canRead(SkillEventRequest, mediaType)) {
+                    SkillEventRequest skillEventRequest = (SkillEventRequest) messageConverter.read(SkillEventRequest, serverHttpRequest)
+                    return skillEventRequest
+                }
             }
         }
+        return null
     }
 
     private boolean writeResponse(HttpServletResponse response, ServletServerHttpRequest serverHttpRequest, Class clazz, Object eventResult) {
