@@ -114,13 +114,27 @@ class UserActionsHistoryService {
                                 String quizFilter,
                                 String itemIdFilter,
                                 DashboardAction actionFilter) {
+        // xxxNotProvided variables/params are a workaround for an issues introduced in
+        // spring-boot:3.4.3 where usage of the same named parameter in query such as
+        //    `(:projectIdFilter is null OR lower(action.projectId) like :projectIdFilter)`
+        // yields `org.hibernate.QueryParameterException: No argument for named parameter ':projectIdFilter_1'
+
         String projectIdFilterQuery = projectIdFilter ? '%' + projectIdFilter.toLowerCase() + '%' : null
+        String projectIdFilterQueryNotProvided = projectIdFilter ? "false" : "true"
         String userFilterQuery = userFilter ? '%' + userFilter.toLowerCase() + '%' : null
+        String userFilterQueryNotProvided = userFilter ? "false" : "true"
         String quizFilterQuery = quizFilter ? '%' + quizFilter.toLowerCase() + '%' : null
+        String quizFilterQueryNotProvided = quizFilter ? "false" : "true"
         String itemIdFilterQuery = itemIdFilter ? '%' + itemIdFilter.toLowerCase() + '%' : null
+        String itemIdFilterQueryNotProvided = itemIdFilter ? "false" : "true"
         Page<UserActionsHistoryRepo.UserActionsPreview> userActionsPreviewFromDB = userActionsHistoryRepo.getActions(
                 projectId?.toLowerCase(), quizId?.toLowerCase(),
-                projectIdFilterQuery, itemFilter, userFilterQuery, quizFilterQuery, itemIdFilterQuery, actionFilter, pageRequest)
+                projectIdFilterQuery, projectIdFilterQueryNotProvided,
+                itemFilter,
+                userFilterQuery, userFilterQueryNotProvided,
+                quizFilterQuery, quizFilterQueryNotProvided,
+                itemIdFilterQuery, itemIdFilterQueryNotProvided,
+                actionFilter, pageRequest)
         Long totalRows = userActionsPreviewFromDB.getTotalElements()
         List<DashboardUserActionRes> actionResList = userActionsPreviewFromDB.getContent().collect {
             new DashboardUserActionRes(
