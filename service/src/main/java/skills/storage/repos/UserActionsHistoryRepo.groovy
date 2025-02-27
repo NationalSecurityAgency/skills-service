@@ -60,24 +60,28 @@ interface UserActionsHistoryRepo extends CrudRepository<UserActionsHistory, Long
                 where action.userId = userAttrs.userId
                     and (:projectId is null OR lower(action.projectId) = :projectId)
                     and (:quizId is null OR lower(action.quizId) = :quizId)
-                    and (:projectIdFilter is null OR lower(action.projectId) like :projectIdFilter)
+                    and (:projectIdFilterNotProvided = 'true' OR lower(action.projectId) like :projectIdFilter)
                     and (:itemFilter is null OR action.item = :itemFilter)
-                    and (:userFilter is null OR (
+                    and (:userFilterNotProvided = 'true' OR (
                         lower(userAttrs.userIdForDisplay) like :userFilter) OR 
                         ((lower(CONCAT(userAttrs.firstName, ' ', userAttrs.lastName, ' (',  userAttrs.userIdForDisplay, ')')) like :userFilter) OR
                         (lower(CONCAT(userAttrs.userIdForDisplay, ' (', userAttrs.lastName, ', ', userAttrs.firstName,  ')')) like :userFilter))
                     )
-                    and (:quizFilter is null OR lower(action.quizId) like :quizFilter)
-                    and (:itemIdFilter is null OR lower(action.itemId) like :itemIdFilter)
+                    and (:quizFilterNotProvided = 'true' OR lower(action.quizId) like :quizFilter)
+                    and (:itemIdFilterNotProvided = 'true' OR lower(action.itemId) like :itemIdFilter)
                     and (:actionFilter is null OR action.action = :actionFilter)
     ''')
     Page<UserActionsPreview> getActions(@Nullable @Param("projectId") String projectId,
                                         @Nullable @Param("quizId") String quizId,
                                         @Nullable @Param("projectIdFilter") String projectIdFilter,
+                                        @Nullable @Param("projectIdFilterNotProvided") String projectIdFilterNotProvided,
                                         @Nullable @Param("itemFilter") DashboardItem itemFilter,
                                         @Nullable @Param("userFilter") String userFilter,
+                                        @Nullable @Param("userFilterNotProvided") String userFilterNotProvided,
                                         @Nullable @Param("quizFilter") String quizFilter,
+                                        @Nullable @Param("quizFilterNotProvided") String quizFilterNotProvided,
                                         @Nullable @Param("itemIdFilter") String itemIdFilter,
+                                        @Nullable @Param("itemIdFilterNotProvided") String itemIdFilterNotProvided,
                                         @Nullable @Param("actionFilter") DashboardAction actionFilter,
                                         Pageable pageable)
 
