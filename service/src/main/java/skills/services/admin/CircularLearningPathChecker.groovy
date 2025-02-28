@@ -318,6 +318,7 @@ class CircularLearningPathChecker {
         for ( SkillInfo pNode : prereqNodes ) {
             SkillInfo nodeCopy = pNode.clone()
             nodeCopy.circularCheckBadgeLoadedDueToPreviousSkill = current.circularCheckBadgeLoadedDueToPreviousSkill
+            nodeCopy.circularCheckProvidedBecauseFollowingSkillsUnderBadge = current.circularCheckProvidedBecauseFollowingSkillsUnderBadge
             nodeCopy.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId = current.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId
             DependencyCheckResult res = recursiveCircularPrerequisiteCheck(nodeCopy, pathCopy, currentIter+1)
             if (!res.possible) {

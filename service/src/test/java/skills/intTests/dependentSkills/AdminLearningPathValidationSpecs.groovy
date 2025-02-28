@@ -353,4 +353,41 @@ class AdminLearningPathValidationSpecs extends DefaultIntSpec {
         SkillsClientException e = thrown(SkillsClientException)
         e.message.contains("Skill [TestProject1:skill1] is not shared (or does not exist) to [TestProject2] project")
     }
+
+    def "skill-only learning path shall work even if skills belong to badges that theoretically would cause circular path if any of those badges were on the learning path"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(6, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[5].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[4].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[2].skillId, p1Skills[3].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, p1Skills[5].skillId)
+
+        when:
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1Skills[1].skillId)
+        then:
+        noExceptionThrown()
+        def graph = skillsService.getDependencyGraph(p1.projectId)
+        def idMap = graph.nodes.collectEntries {[it.skillId, it.id]}
+        graph.edges.collect { "${it.fromId}->${it.toId}".toString() }.sort() == [
+                "${idMap.get(p1Skills[2].skillId)}->${idMap.get(p1Skills[3].skillId)}".toString(),
+                "${idMap.get(p1Skills[4].skillId)}->${idMap.get(p1Skills[5].skillId)}".toString(),
+                "${idMap.get(p1Skills[0].skillId)}->${idMap.get(p1Skills[1].skillId)}".toString(),
+        ].sort()
+    }
 }
