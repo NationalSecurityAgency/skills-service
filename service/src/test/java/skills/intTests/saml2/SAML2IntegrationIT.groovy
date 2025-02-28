@@ -44,8 +44,8 @@ import java.time.Duration
                 'server.port=10100',
                 'skills.authorization.authMode=SAML2',
                 'spring.security.saml2.registrationId=keycloak',
-                'saml2.rp.signing.key-location=keycloak/private_key.pem',
-                'saml2.rp.signing.cert-location=keycloak/certificate.pem',
+                'saml2.rp.signing.key-location=keycloak/fake_test_key.pem',
+                'saml2.rp.signing.cert-location=keycloak/fake_test_certificate.pem',
                 'spring.security.saml2.metadata-location=http://localhost:10101/realms/master/protocol/saml/descriptor'
         ])
 class SAML2IntegrationIT extends Specification{
