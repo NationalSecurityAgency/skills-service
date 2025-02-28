@@ -767,4 +767,35 @@ class LearningPathValidationEndpointSpecs extends DefaultIntSpec {
         then:
         result.possible == true
     }
+
+    def "skill-only learning path shall work even if skills belong to badges that theoretically would cause circular path if any of those badges were on the learning path"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(6, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[1].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[5].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[3].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[4].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[2].skillId, p1Skills[3].skillId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[4].skillId, p1Skills[5].skillId)
+
+        when:
+        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1.projectId,  p1Skills[1].skillId)
+
+        then:
+        result.possible == true
+    }
 }
