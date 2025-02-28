@@ -22,6 +22,7 @@ import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import skills.SpringBootApp
+import skills.auth.UserInfoService
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsService
 import skills.storage.model.UserAttrs
@@ -58,12 +59,14 @@ class UpgradeModeOnIT extends DefaultIntSpec {
         when:
         SkillsService user1 = createService(users[0]) // will fill in DN in case of PKI MOde
         SkillsService user2 = createService(users[1])
-        skillsService.addSkill(['projectId': 'Proj1', skillId: 'CreateProject'], users[0], new Date())
-        skillsService.addSkill(['projectId': 'Proj2', skillId: 'CreateSubject'], users[1], new Date())
+        Date date = new Date()
+        skillsService.addSkill(['projectId': 'Proj1', skillId: 'CreateProject'], users[0], date)
+        skillsService.wsHelper.apiPost("/projects/Proj2/skills/CreateSubject", [ userId : users[0], timestamp:date.time, idType: UserInfoService.ID_IDTYPE])
 
-        4.times {
-            skillsService.addSkill(['projectId': 'Proj3', skillId: "Skill${it}"], users[1], new Date())
-        }
+        skillsService.wsHelper.apiPost("/projects/Proj3/skills/Skill0", [ userId : users[1], timestamp:date.time, idType: UserInfoService.DN_IDTYPE])
+        skillsService.wsHelper.apiPost("/projects/Proj3/skills/Skill1", [ timestamp:date.time, idType: UserInfoService.ID_IDTYPE])
+        skillsService.wsHelper.apiPost("/projects/Proj3/skills/Skill2")
+        skillsService.wsHelper.apiPost("/projects/Proj3/skills/Skill3", [ userId :  users[1], approvalRequestedMsg: "what a message"])
 
         List<File> files = dir.listFiles().findAll({ it.name.endsWith('.jsonsequence') }).sort {it.lastModified() }
         List<QueuedSkillEvent> file1SkillEvents = getEvents(files[0].text)
@@ -78,27 +81,47 @@ class UpgradeModeOnIT extends DefaultIntSpec {
         file1SkillEvents[0].skillId == 'CreateProject'
         file1SkillEvents[0].projectId == 'Proj1'
         file1SkillEvents[0].userId == user1Attrs.dn ?: user1Attrs.userId
+        file1SkillEvents[0].skillEventRequest.userId == user1Attrs.dn ?: user1Attrs.userId
+        !file1SkillEvents[0].skillEventRequest.idType
+        file1SkillEvents[0].skillEventRequest.timestamp == date.getTime()
 
         file1SkillEvents[1].skillId == 'CreateSubject'
         file1SkillEvents[1].projectId == 'Proj2'
         file1SkillEvents[1].userId == user2Attrs.dn ?: user2Attrs.userId
+        file1SkillEvents[1].skillEventRequest.userId == user2Attrs.dn ?: user2Attrs.userId
+        file1SkillEvents[1].skillEventRequest.idType == UserInfoService.ID_IDTYPE
+        file1SkillEvents[1].skillEventRequest.timestamp == date.getTime()
+        !file1SkillEvents[1].skillEventRequest.approvalRequestedMsg
 
         file1SkillEvents[2].skillId == 'Skill0'
         file1SkillEvents[2].projectId == 'Proj3'
         file1SkillEvents[2].userId == user2Attrs.dn ?: user2Attrs.userId
+        file1SkillEvents[2].skillEventRequest.userId == user2Attrs.dn ?: user2Attrs.userId
+        file1SkillEvents[2].skillEventRequest.idType == UserInfoService.DN_IDTYPE
+        file1SkillEvents[2].skillEventRequest.timestamp == date.getTime()
+        !file1SkillEvents[2].skillEventRequest.approvalRequestedMsg
 
         file1SkillEvents[3].skillId == 'Skill1'
         file1SkillEvents[3].projectId == 'Proj3'
         file1SkillEvents[3].userId == user2Attrs.dn ?: user2Attrs.userId
+        !file1SkillEvents[3].skillEventRequest.userId
+        !file1SkillEvents[3].skillEventRequest.idType
+        file1SkillEvents[3].skillEventRequest.timestamp == date.getTime()
+        !file1SkillEvents[3].skillEventRequest.approvalRequestedMsg
 
         file1SkillEvents[4].skillId == 'Skill2'
         file1SkillEvents[4].projectId == 'Proj3'
         file1SkillEvents[4].userId == user2Attrs.dn ?: user2Attrs.userId
+        !file1SkillEvents[4].skillEventRequest
 
         file2SkillEvents.size() == 1
         file2SkillEvents[0].skillId == 'Skill3'
         file2SkillEvents[0].projectId == 'Proj3'
         file2SkillEvents[0].userId == user2Attrs.dn ?: user2Attrs.userId
+        file2SkillEvents[0].skillEventRequest.userId == user2Attrs.dn ?: user2Attrs.userId
+        !file2SkillEvents[0].skillEventRequest.idType
+        !file2SkillEvents[0].skillEventRequest.timestamp
+        file2SkillEvents[0].skillEventRequest.approvalRequestedMsg == "what a message"
     }
 
     private  List<QueuedSkillEvent> getEvents(String text) {
