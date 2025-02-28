@@ -103,10 +103,18 @@ const toggle = (event) => {
     <div id="user_settings_menu">
       <Menu ref="menu" :model="items" :popup="true" role="navigation">
         <template #start>
-          <div class="px-2 py-3">
-            <Avatar icon="fas fa-user" class="bg-lime-900 text-white" />
+          <div class="px-3 py-3">
+            <span class="mr-2">
+              <Avatar icon="fas fa-user" :pt="{icon: {class: 'text-blue-800 dark:text-blue-400'}}" />
+            </span>
             <span data-cy="settingsButton-loggedInName" class="ml-1">{{ displayName }}</span>
           </div>
+        </template>
+        <template #item="{ item, props }">
+          <a :href="item.url" target="_blank" v-bind="props.action">
+            <span class="w-7 border text-center rounded text-green-800 bg-green-50 dark:bg-gray-900 dark:text-green-500 dark:border-green-700"><i :class="item.icon"/></span>
+            <span class="">{{ item.label }}</span>
+          </a>
         </template>
       </Menu>
     </div>
