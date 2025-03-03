@@ -251,7 +251,7 @@ const loadTranscript = () => {
                               @click="loadTranscript" />
               </span>
               <span aria-hidden="true" class="mr-1" v-if="showPercent && skill.videoSummary.hasTranscript">|</span>
-              <span v-if="showPercent"><span class="italic">Watched: </span> <b data-cy="percentWatched">{{ percentWatched }}</b>%</span>
+              <span v-if="showPercent"><span class="italic">{{ videoConf.isAudio ? 'Listened To' : 'Watched'}}: </span> <b data-cy="percentWatched">{{ percentWatched }}</b>%</span>
             </div>
           </div>
         </template>
