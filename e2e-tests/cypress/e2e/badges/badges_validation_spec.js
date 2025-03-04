@@ -32,7 +32,8 @@ describe('Badges Tests', () => {
             cy.wait(150);
         });
         Cypress.Commands.add('gemSetDay', (dayNum) => {
-            cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="day"]').contains(`${dayNum}`).click()
+            let re = new RegExp(String.raw`^${dayNum}$`)
+            cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="day"]').contains(re).click()
         });
 
         cy.intercept('POST', '/admin/projects/proj1/badgeNameExists')
