@@ -18,11 +18,13 @@ import { addMethod, string } from 'yup'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useDebounceFn } from '@vueuse/core'
 import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
+import { useCheckIfAnswerChangedForValidation } from '@/common-components/utilities/UseCheckIfAnswerChangedForValidation.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 
 export const useCustomGlobalValidators = () => {
 
   const descriptionValidatorService = useDescriptionValidatorService()
+  const checkIfAnswerChangedForValidation = useCheckIfAnswerChangedForValidation()
   const log = useLog()
 
   function customNameValidator(fieldName = '') {
@@ -44,8 +46,11 @@ export const useCustomGlobalValidators = () => {
 
   function customDescriptionValidator(fieldName = '', enableProjectIdParam = true, useProtectedCommunityValidator = null, fieldNameFunction = null, enableQuizIdParam = true) {
     const appConfig = useAppConfig()
-    const validateName = useDebounceFn((value, context) => {
+    const validateDescription = useDebounceFn((value, context) => {
       if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
+        return true
+      }
+      if (!checkIfAnswerChangedForValidation.hasValueChanged(value, context)) {
         return true
       }
       return descriptionValidatorService.validateDescription(value, enableProjectIdParam, useProtectedCommunityValidator, enableQuizIdParam).then((result) => {
@@ -63,7 +68,7 @@ export const useCustomGlobalValidators = () => {
       })
     }, appConfig.formFieldDebounceInMs)
 
-    return this.test("customDescriptionValidator", null, (value, context) => validateName(value, context));
+    return this.test("customDescriptionValidator", null, (value, context) => validateDescription(value, context));
   }
 
   function nullValueNotAllowed() {
