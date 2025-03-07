@@ -57,6 +57,7 @@ export const useCustomGlobalValidators = () => {
         if (result.valid) {
           return true
         }
+        checkIfAnswerChangedForValidation.removeAnswer(context)
         let fieldNameToUse = fieldName ? fieldName : '';
         if (!fieldNameToUse && fieldNameFunction) {
           fieldNameToUse = fieldNameFunction(context);

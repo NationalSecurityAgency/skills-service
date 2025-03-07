@@ -30,8 +30,16 @@ export const useCheckIfAnswerChangedForValidation = () => {
   const reset = () => {
     cache.clear()
   }
+  const removeAnswer = (testContext) => {
+    const quizAnswers = testContext?.parent.quizAnswers
+    if (quizAnswers && quizAnswers.length === 1 && quizAnswers[0].id) {
+      const answerId = quizAnswers[0].id
+      cache.delete(context)
+    }
+  }
   return {
     hasValueChanged,
+    removeAnswer,
     reset
   }
 }
