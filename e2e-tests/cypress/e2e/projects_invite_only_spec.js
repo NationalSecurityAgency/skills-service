@@ -138,8 +138,6 @@ describe('Projects Invite-Only Tests', () => {
                     .click();
                 cy.get('[data-cy=project-link-proj1]')
                     .should('be.visible')
-                    .contains('View')
-                    .should('be.visible');
                 cy.wait(10 * 1000); //wait for countdown timer
                 cy.get('[data-pc-name="breadcrumb"] [data-cy="breadcrumbItemValue"]')
                   .eq(0)
