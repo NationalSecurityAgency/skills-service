@@ -50,7 +50,7 @@ export const useCustomGlobalValidators = () => {
       if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
         return true
       }
-      if (!isSubmitting && !checkIfAnswerChangedForValidation.hasValueChanged(value, context)) {
+      if (!isSubmitting && !checkIfAnswerChangedForValidation.hasValueChanged(context.originalValue, context)) {
         return true
       }
       return descriptionValidatorService.validateDescription(value, enableProjectIdParam, useProtectedCommunityValidator, enableQuizIdParam).then((result) => {
