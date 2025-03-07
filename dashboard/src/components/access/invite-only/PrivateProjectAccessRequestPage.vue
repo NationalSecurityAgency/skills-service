@@ -30,29 +30,30 @@ const projectId = computed(() => route.params.projectId)
 </script>
 
 <template>
-  <div class="mt-20">
+  <div class="my-20">
     <div class="flex justify-center">
-      <div class="rounded-full w-24 h-24 m-2 bg-surface-500 dark:bg-surface-300 font-bold flex items-center justify-center">
-        <i class="text-surface-0 dark:text-surface-900 text-7xl fas fa-shield-alt"></i>
+      <div class="rounded-lg w-24 h-24 m-2 bg-red-400 font-bold flex items-center justify-center">
+        <i class="text-surface-0 dark:text-surface-900 text-7xl fas fa-shield-alt" aria-hidden="true"></i>
       </div>
     </div>
     <div class="text-center">
-      <div class="text-2xl text-primary">Invite Only Project</div>
+      <h1 class="text-2xl text-orange-800 dark:text-orange-400">Restricted Access</h1>
     </div>
 
-    <div class="row justify-center text-danger mt-4">
-      <div class="col col-sm-8 col-md-6 col-lg-4 text-center" data-cy="notAuthorizedExplanation">
-        <p>
-          This Project is configured for Invite Only access. You can concat project's administrators to request access.
-        </p>
-        <p v-if="appInfo.emailEnabled">
+    <div class="max-w-md lg:max-w-xl mx-auto text-center mt-4" data-cy="notAuthorizedExplanation">
+      <Card>
+        <template #content>
+          <p class="mb-5">
+            Access to this training is currently restricted. If you're interested in participating, please reach out to the project administrators to request an invitation.
+          </p>
           <SkillsButton
-            label="Contact Project"
+            v-if="appInfo.emailEnabled"
+            label="Contact Administrators"
             icon="fas fa-mail-bulk"
             @click="showContact=true"
             data-cy="contactOwnerBtn" />
-        </p>
-      </div>
+        </template>
+      </Card>
     </div>
     <contact-owners-dialog v-if="showContact"
                            v-model="showContact"

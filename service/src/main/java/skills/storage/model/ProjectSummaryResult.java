@@ -40,6 +40,9 @@ public interface ProjectSummaryResult {
     public abstract String getOrderVal();
 
     @Convert(converter = BooleanConverter.class)
+    Boolean getInviteOnlyEnabled();
+
+    @Convert(converter = BooleanConverter.class)
     Boolean getProtectedCommunityEnabled();
 
 }

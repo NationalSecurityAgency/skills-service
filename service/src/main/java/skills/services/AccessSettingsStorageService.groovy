@@ -34,6 +34,7 @@ import skills.controller.exceptions.SkillQuizException
 import skills.controller.result.model.TableResult
 import skills.controller.result.model.UserInfoRes
 import skills.controller.result.model.UserRoleRes
+import skills.services.admin.ProjAdminService
 import skills.services.admin.UserCommunityService
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
@@ -256,14 +257,27 @@ class AccessSettingsStorageService {
     @Transactional()
     void deleteUserRole(String userId, String projectId, RoleName roleName, boolean saveUserAction = false) {
         userId = userId?.toLowerCase()
-        if (userId != userInfoService.getCurrentUser().username.toLowerCase() || roleName == RoleName.ROLE_PRIVATE_PROJECT_USER) {
+        boolean isPrivateProjRole = roleName == RoleName.ROLE_PRIVATE_PROJECT_USER
+        if (userId != userInfoService.getCurrentUser().username.toLowerCase() || isPrivateProjRole) {
             deleteUserRoleInternal(userId, projectId, roleName)
+            if (isPrivateProjRole) {
+                additionalCleanupForPrivateProjectUserRole(userId, projectId)
+            }
             if (saveUserAction) {
                 saveUserRoleActions(userId, roleName, DashboardAction.Delete)
             }
         } else {
             throw new SkillException("You cannot delete yourself.")
         }
+    }
+
+    private void additionalCleanupForPrivateProjectUserRole(String userId, String projectId) {
+        settingsService.deleteUserProjectSetting(
+                userId,
+                ProjAdminService.myProjectGroup,
+                ProjAdminService.myProjectSetting,
+                projectId
+        )
     }
 
     @Transactional(readOnly = true)

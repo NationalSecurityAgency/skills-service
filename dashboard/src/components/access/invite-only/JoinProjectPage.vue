@@ -74,55 +74,63 @@ watch(() => timer.value, (value) => {
 </script>
 
 <template>
-  <Card class="mt-4">
-    <template #content>
+  <div class="mt-10 mb-20">
+    <div class="flex justify-center">
+      <div class="rounded-lg w-24 h-24 p-2 m-2 bg-green-600 font-bold flex items-center justify-center">
+        <i class="text-surface-0 dark:text-surface-900 text-6xl fa fa-users" aria-hidden="true"></i>
+      </div>
+    </div>
+    <div class="text-center">
+      <h1 class="text-2xl text-primary"><span v-if="joined">Enrolled!</span><span v-else>Enroll in Training</span></h1>
+    </div>
+    <div class="max-w-lg lg:max-w-xl mx-auto text-center mt-4">
+      <Card class="mt-4">
+        <template #content>
       <skills-spinner :is-loading="loading" />
       <div v-if="!loading">
-        <div class="text-center mt-8">
-          <i class="fa fa-users fa-4x text-secondary" :class="colors.getTextClass(1)"></i>
-          <h2 class="mt-4 text-primary">
-            <span>Join Project</span>
-          </h2>
+        <div class="text-center">
           <div v-if="!joined">
             <div class="mb-2">
-              <p>Great News! You have been invited to join the <span
-                class="text-primary font-bold">{{ projectName }}</span> Project.</p>
-              <p><span class="text-primary font-bold">{{ projectName }}</span> is a gamified micro-learning
-                experience
-                built using the SkillTree platform.
-                Click 'Join Now' button to explore <span class="text-primary font-bold">{{ projectName
-                  }}</span> and see how you can earn points and achievements!
+              <p>
+                Exciting News! You're Invited to <span class="text-primary font-bold">{{ projectName }}</span>!
               </p>
+              <p class="mt-2">
+                Discover a unique gamified learning experience, powered by SkillTree. Join <span
+                  class="text-primary font-bold">{{ projectName }}</span>
+                to embark on a journey of bite-sized learning, earning rewards and achievements along the way.
+              </p>
+
             </div>
-            <div>
-              <SkillsButton
+            <SkillsButton
+                class="mt-3"
                 label="Join Now"
                 :icon="joinIcon"
                 @click="join"
                 :disabled="inviteInvalid"
                 data-cy="joinProject" />
-            </div>
           </div>
           <div v-if="joined">
-            You have successfully joined Project <span class="text-primary font-bold">{{ projectName }}</span>!
-            <div class="flex justify-center mt-4">
+            Congratulations! You're now a member of <span class="text-primary font-bold">{{ projectName }}</span>!
+            <div class="flex justify-center mt-4 mb-2">
             <router-link :to="{ path: `/progress-and-rankings/projects/${route.params.pid}` }" tabindex="-1">
               <Button
-                label="View Project Now"
+                label="Get Started"
                 :aria-label="`Click to navigate to ${projectName} project page.`"
                 :data-cy="`project-link-${route.params.pid}`"
                 icon="far fa-eye"
                 outlined class="w-full" size="small"/>
             </router-link>
             </div>
-            <p>You will be forwarded to in <Tag>{{ timer }}</Tag> seconds.</p>
+            <Message :closable="false" class="mt-3">Click 'Get Started' to proceed immediately, or wait and you'll be redirected automatically in <Tag>{{ timer }}</Tag> seconds.</Message>
 
           </div>
-          <div v-if="inviteInvalid" class="mt-4 text-danger" role="alert">{{ invalidMsg }}</div>
+          <Message v-if="inviteInvalid" :closable="false" severity="error">{{ invalidMsg }}</Message>
         </div>
       </div>
     </template>
-  </Card>
+      </Card>
+    </div>
+  </div>
 </template>
 
 <style scoped>
