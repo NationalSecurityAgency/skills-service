@@ -188,7 +188,6 @@ Cypress.Commands.add("enableProdMode", (projNum) => {
     });
 });
 
-
 Cypress.Commands.add("saveVideoAttrs", (projNum, skillNum, videoAttrs) => {
     const url = `/admin/projects/proj${projNum}/skills/skill${skillNum}/video`;
     const formData = new FormData();

@@ -17,6 +17,7 @@
 describe('Configure Video Validation Tests', () => {
 
     const testVideo = '/static/videos/create-quiz.mp4'
+    const defaultCaption = Cypress.env("defaultCaptions")
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/video').as('getVideoProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
@@ -35,13 +36,13 @@ describe('Configure Video Validation Tests', () => {
         cy.visitVideoConfPage();
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="videoCaptions"]').type('captions', { delay: 0 })
-        cy.get('[data-cy="videoCaptionsError"]').contains('Captions is not valid without Video field')
+        cy.get('[data-cy="videoCaptions"]').type(defaultCaption, { delay: 0 })
+        cy.get('[data-cy="videoCaptionsError"]').contains('Captions are not valid without a Video')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
 
         cy.get('[data-cy="videoTranscript"]').type('transcript', { delay: 0 })
-        cy.get('[data-cy="videoTranscriptError"]').contains('Transcript is not valid without Video field')
+        cy.get('[data-cy="videoTranscriptError"]').contains('Transcript is not valid without a Video')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
 
@@ -100,12 +101,12 @@ describe('Configure Video Validation Tests', () => {
         cy.visitVideoConfPage();
         cy.get('[data-cy="showExternalUrlBtn"]').click()
         cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
-        const invalidValue = Array(50).fill('a').join('');
+        const invalidValue = Array(101).fill('a').join('');
         cy.get('[data-cy="videoCaptions"]').type(invalidValue, { delay: 0 })
-        cy.get('[data-cy="videoCaptionsError"]').contains('Captions must be at most 49 characters')
+        cy.get('[data-cy="videoCaptionsError"]').contains('Captions must be at most 100 characters')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="videoCaptions"]').type('{backspace}');
-        cy.get('[data-cy="videoCaptionsError"]').should('not.be.visible')
+        cy.get('[data-cy="videoCaptionsError"]').should('not.have.text', 'Captions must be at most 100 characters')
     });
 
     it('only allow upload of valid video mime types', () => {
@@ -161,4 +162,48 @@ describe('Configure Video Validation Tests', () => {
         cy.get('[data-cy="videoFileInputError"]').contains('File exceeds maximum size of 300 KB')
     });
 
+    it('captions must use WEBVTT format', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visitVideoConfPage();
+        cy.get('[data-cy="showExternalUrlBtn"]').click()
+        cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
+
+        cy.get('[data-cy="videoCaptions"]').type('test caption', { delay: 0 })
+        cy.get('[data-cy="videoCaptionsError"]').contains('No valid signature. (File needs to start with "WEBVTT".) (Line 1)')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="videoCaptions"]').type('{selectall}WEBVTT');
+        cy.get('[data-cy="videoCaptionsError"]').should('not.be.visible')
+
+        cy.get('[data-cy="videoCaptions"]').type('\n\ntest caption', { delay: 0 })
+        cy.get('[data-cy="videoCaptionsError"]').contains('Cue identifier cannot be standalone. (Line 4)')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="videoCaptions"]').type('{selectall}WEBVTT\n\n00:00:00.000\nabc');
+        cy.get('[data-cy="videoCaptionsError"]').contains('Cue identifier cannot be standalone. (Line 4)')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="videoCaptions"]').type('{selectall}WEBVTT\n\n00:00:00.000-->00:00:30.000\nabc');
+        cy.get('[data-cy="videoCaptionsError"]').contains("Timestamp not separated from '-->' by whitespace. (Line 3)")
+
+        cy.get('[data-cy="videoCaptions"]').type('{selectall}WEBVTT\n\n00:00:00.000 -->00:00:30.000\nabc');
+        cy.get('[data-cy="videoCaptionsError"]').contains("'-->' not separated from timestamp by whitespace. (Line 3)")
+
+        cy.get('[data-cy="videoCaptions"]').type('{selectall}WEBVTT\n\n00:00:40.000 --> 00:00:30.000\nabc');
+        cy.get('[data-cy="videoCaptionsError"]').contains("End timestamp is not greater than start timestamp. (Line 3)")
+
+        cy.get('[data-cy="videoCaptions"]').type('{selectall}WEBVTT\n\n00:00:1.000 --> 00:00:30.000\nabc');
+        cy.get('[data-cy="videoCaptionsError"]').contains("Must be exactly two digits. (Line 3)")
+
+        cy.get('[data-cy="videoCaptions"]').type('{selectall}WEBVTT\n\n00:00:00.1000 --> 00:00:30.000\nabc');
+        cy.get('[data-cy="videoCaptionsError"]').contains("Milliseconds must be given in three digits. (Line 3)")
+
+        cy.get('[data-cy="videoCaptions"]').type('{selectall}WEBVTT\n\na00:00:00.000 --> 00:00:30.000\nabc');
+        cy.get('[data-cy="videoCaptionsError"]').contains("Timestamp must start with a character in the range 0-9. (Line 3)")
+
+        cy.get('[data-cy="videoCaptions"]').type('{selectall}WEBVTT\n\n00:00:00.000 --> 00:00:30.000\nabc');
+        cy.get('[data-cy="videoCaptionsError"]').should('not.be.visible')
+    });
 });

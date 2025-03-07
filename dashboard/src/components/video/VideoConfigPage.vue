@@ -27,7 +27,6 @@ import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js';
 import FileUploadService from '@/common-components/utilities/FileUploadService.js';
 import VideoService from '@/components/video/VideoService.js';
-import MsgLogService from '@/common-components/utilities/MsgLogService.js';
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
 import LengthyOperationProgressBar from '@/components/utils/LengthyOperationProgressBar.vue';
@@ -38,7 +37,9 @@ import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
 import { useProjectCommunityReplacement } from '@/components/customization/UseProjectCommunityReplacement.js'
+import { WebVTTParser } from 'webvtt-parser';
 
+const parser = new WebVTTParser();
 const dialogMessages = useDialogMessages()
 const VideoPlayer = defineAsyncComponent(() =>
   import('@/common-components/video/VideoPlayer.vue')
@@ -81,9 +82,6 @@ const configuredWidth = ref(null);
 const isConfiguredVideoSize = computed(() => configuredWidth.value && configuredHeight.value)
 const configuredResolution = computed(() => isConfiguredVideoSize.value ? configuredWidth.value + " x " + configuredHeight.value : 'Not Configured')
 const configuredHeight = ref(null);
-const videoSelected = computed(() => {
-  return (videoConf.value.file || videoConf.value.url)
-})
 const computedVideoConf = computed(() => {
   const captionsUrl = videoConf.value.captions && videoConf.value.captions.trim().length > 0
       ? `/api/projects/${route.params.projectId}/skills/${route.params.skillId}/videoCaptions`
@@ -274,7 +272,7 @@ const loadSettings = () => {
 const updateVideoSettings = (settingRes) => {
   videoConf.value.url = settingRes.videoUrl;
   videoConf.value.videoType = settingRes.videoType;
-  videoConf.value.captions = settingRes.captions;
+  videoConf.value.captions = settingRes.captions ? settingRes.captions.replaceAll('&gt;', '>') : '';
   videoConf.value.transcript = settingRes.transcript;
   videoConf.value.isInternallyHosted = settingRes.isInternallyHosted;
   videoConf.value.hostedFileName = settingRes.internallyHostedFileName;
@@ -366,6 +364,21 @@ const videoMaxSizeValidation = (value, context) => {
     message: `File exceeds maximum size of ${byteFormat.prettyBytes(maxSize)}`,
   });
 }
+const webvttValidation = (value, context) => {
+  if(!value || value?.length === 0) {
+    return true;
+  }
+
+  const tree = parser.parse(value, 'metadata');
+
+  if(tree.errors.length === 0) {
+    return true;
+  }
+
+  return context.createError({
+    message: `${tree.errors[0].message} (Line ${tree.errors[0].line})`
+  })
+}
 const schema = yup.object().shape({
   'videoUrl': string()
       .nullable()
@@ -380,13 +393,14 @@ const schema = yup.object().shape({
   'videoCaptions': yup.string()
       .nullable()
       .max(appConfig.maxVideoCaptionsLength)
-      .test('videoUrlMustBePresent', 'Captions is not valid without Video field',(value) => videoUrlMustBePresent(value))
+      .test('videoUrlMustBePresent', 'Captions are not valid without a Video',(value) => videoUrlMustBePresent(value))
+      .test('videoCaptionValidation', (value, context) => webvttValidation(value, context))
       .label('Captions'),
   'videoTranscript': string()
       .nullable()
       .max(appConfig.maxVideoTranscriptLength)
       .customDescriptionValidator('Video Transcript')
-      .test('videoUrlMustBePresent', 'Transcript is not valid without Video field',(value) => videoUrlMustBePresent(value))
+      .test('videoUrlMustBePresent', 'Transcript is not valid without a Video',(value) => videoUrlMustBePresent(value))
       .label('Video Transcript'),
 })
 
@@ -404,6 +418,7 @@ const videoResized = (width, height) => {
 }
 
 const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap-4')
+
 </script>
 
 <template>

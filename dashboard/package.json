@@ -11,7 +11,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
     "getDashboardVersion": "node ../scripts/getDashboardVersion.js",
-    "licenseDepCheck": "license-checker --excludePrivatePackages --production --onlyAllow='MIT;ISC;Apache-2.0;0BSD;BSD-2-Clause;BSD-3-Clause;BlueOak-1.0.0;Unlicense;Custom: https://travis-ci.org/component/emitter.png' --summary",
+    "licenseDepCheck": "license-checker --excludePrivatePackages --production --onlyAllow='MIT;ISC;Apache-2.0;0BSD;BSD-2-Clause;BSD-3-Clause;BlueOak-1.0.0;CC0-1.0;Unlicense;Custom: https://travis-ci.org/component/emitter.png' --summary",
     "licenseCheck": "npm run licenseDepCheck",
     "removeServiceResources": "rm -rf ../service/src/main/resources/public/assets && rm -rf ../service/src/main/resources/public/themes && rm ../service/src/main/resources/public/index.html && rm ../service/src/main/resources/public/skilltree.ico",
     "copyDistToService": "cp -rT dist ../service/src/main/resources/public/ && cp -rT dist ../service/target/classes/public/",
@@ -50,6 +50,7 @@
     "vue": "3.5.13",
     "vue-router": "4.5.0",
     "vue3-apexcharts": "1.7.0",
+    "webvtt-parser": "2.2.0",
     "yup": "1.4.0"
   },
   "devDependencies": {
