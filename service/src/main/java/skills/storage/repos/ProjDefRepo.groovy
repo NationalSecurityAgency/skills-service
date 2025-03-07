@@ -441,6 +441,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                    (SELECT COALESCE(count(*), 1) FROM UserPoints WHERE projectId = pd.projectId and skillId is NULL) as totalUsers,
                    (SELECT COALESCE(count(*)+1, 1) FROM UserPoints WHERE projectId = pd.projectId and skillId is NULL and points > up.points) as rank,
                    COALESCE((SELECT value FROM Setting WHERE projectId = pd.projectId AND setting = 'user_community' and value = 'true'), 'false') as protectedCommunityEnabled,
+                   COALESCE((SELECT value FROM Setting WHERE projectId = pd.projectId AND setting = 'invite_only' and value = 'true'), 'false') as inviteOnlyEnabled,
                    pd.totalPoints as totalPoints,
                    ss.value as orderVal
             FROM Setting s, Setting ss, Users uu, ProjDef pd

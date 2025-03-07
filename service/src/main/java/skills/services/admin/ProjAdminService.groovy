@@ -56,8 +56,8 @@ import skills.utils.Props
 class ProjAdminService {
 
     static final String rootUserPinnedProjectGroup = "pinned_project"
-    private static final String myProjectGroup = "my_projects"
-    private static final String myProjectSetting = "my_project"
+    static final String myProjectGroup = "my_projects"
+    static final String myProjectSetting = "my_project"
     public static final String PINNED = "pinned"
 
     @Autowired

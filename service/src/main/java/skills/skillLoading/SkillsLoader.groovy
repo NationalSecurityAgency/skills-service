@@ -53,6 +53,7 @@ import skills.services.settings.SettingsService
 import skills.settings.CommonSettings
 import skills.skillLoading.model.*
 import skills.storage.model.*
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.*
 import skills.storage.repos.nativeSql.GraphRelWithAchievement
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
@@ -160,6 +161,9 @@ class SkillsLoader {
     UserCommunityService userCommunityService
 
     @Autowired
+    UserRoleRepo userRoleRepo
+
+    @Autowired
     SkillAttributesDefRepo skillAttributesDefRepo
 
     @Autowired
@@ -231,6 +235,12 @@ class SkillsLoader {
 
         if (!userCommunityService.isUserCommunityMember(userId)) {
             projectSummaries = projectSummaries.findAll { !it.protectedCommunityEnabled }
+        }
+        List<ProjectSummaryResult> inviteOnlyProjects = projectSummaries?.findAll { it.getInviteOnlyEnabled() }
+        if (inviteOnlyProjects) {
+            List<String> inviteOnlyProjectIds = inviteOnlyProjects.collect { it.projectId }
+            List<String> inviteOnlyAuthorizedProjectIds = userRoleRepo.findProjectIdsByUserIdAndRoleNameAndProjectIdIn(userId, RoleName.ROLE_PRIVATE_PROJECT_USER, inviteOnlyProjectIds)
+            projectSummaries = projectSummaries.findAll {!it.getInviteOnlyEnabled() || inviteOnlyAuthorizedProjectIds.contains(it.projectId) }
         }
         List<SettingsResult> customLevelTextForProjects = settingsService.getProjectSettingsForAllProjects('level.displayName')
         for (ProjectSummaryResult summaryResult : projectSummaries.sort({it.getOrderVal()})) {
