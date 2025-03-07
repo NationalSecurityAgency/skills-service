@@ -98,7 +98,7 @@ const schema = object({
                   then: (sch)  => sch
                       .trim()
                       .required((d) => `Answer to question #${getQuestionNumFromPath(d.path)} is required`)
-                      .customDescriptionValidator(null, false, null, (d) => `Answer to question #${getQuestionNumFromPath(d.path)}`, true, isSubmitting.value),
+                      .customDescriptionValidator(null, false, null, (d) => `Answer to question #${getQuestionNumFromPath(d.path)}`, true, isSubmitting.value, errors.value),
                 }),
             'answerRating': number()
                 .when('questionType', {

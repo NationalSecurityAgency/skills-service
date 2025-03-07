@@ -44,13 +44,14 @@ export const useCustomGlobalValidators = () => {
     return this.test("customNameValidator", null, (value, context) => validateName(value, context));
   }
 
-  function customDescriptionValidator(fieldName = '', enableProjectIdParam = true, useProtectedCommunityValidator = null, fieldNameFunction = null, enableQuizIdParam = true, isSubmitting = false) {
+  function customDescriptionValidator(fieldName = '', enableProjectIdParam = true, useProtectedCommunityValidator = null, fieldNameFunction = null, enableQuizIdParam = true, isSubmitting = false, errors = null) {
     const appConfig = useAppConfig()
     const validateDescription = useDebounceFn((value, context) => {
       if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
         return true
       }
-      if (!isSubmitting && !checkIfAnswerChangedForValidation.hasValueChanged(context.originalValue, context)) {
+      const forceAnswerValidation = isSubmitting || errors?.hasOwnProperty(context.path)
+      if (!forceAnswerValidation && !checkIfAnswerChangedForValidation.hasValueChanged(context.originalValue, context)) {
         return true
       }
       return descriptionValidatorService.validateDescription(value, enableProjectIdParam, useProtectedCommunityValidator, enableQuizIdParam).then((result) => {
