@@ -34,7 +34,7 @@ export const useCheckIfAnswerChangedForValidation = () => {
     const quizAnswers = testContext?.parent.quizAnswers
     if (quizAnswers && quizAnswers.length === 1 && quizAnswers[0].id) {
       const answerId = quizAnswers[0].id
-      cache.delete(context)
+      cache.delete(answerId)
     }
   }
   return {
