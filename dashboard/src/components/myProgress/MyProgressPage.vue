@@ -23,7 +23,7 @@ import LastEarnedCard from '@/components/myProgress/LastEarnedCard.vue'
 import BadgeNumCard from '@/components/myProgress/BadgeNumCard.vue'
 import MyCurrentProjects from '@/components/myProgress/MyCurrentProjects.vue'
 import MyProgressTitle from '@/components/myProgress/MyProgressTitle.vue'
-import MuQuizzesCard from "@/components/myProgress/MuQuizzesCard.vue";
+import MyQuizzesCard from "@/components/myProgress/MyQuizzesCard.vue";
 
 const myProgressState = useMyProgressState()
 const loading = ref(true)
@@ -59,7 +59,7 @@ onMounted(() => {
             <info-snapshot-card />
           </div>
           <div class="flex-1">
-            <mu-quizzes-card />
+            <my-quizzes-card />
           </div>
           <div class="flex-1">
             <last-earned-card />

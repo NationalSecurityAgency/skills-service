@@ -58,7 +58,7 @@ const totalRuns = computed(() => myProgress.value.numQuizAttempts + myProgress.v
                 icon="fas fa-spell-check"
                 outlined
                 size="small"
-                aria-label="View my quiz and survey hisotyr"
+                aria-label="View my quiz and survey history"
                 data-cy="viewQuizzesAttemptsBtn" />
           </router-link>
         </div>
