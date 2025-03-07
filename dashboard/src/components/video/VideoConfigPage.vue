@@ -541,7 +541,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
             />
           </div>
 
-          <div data-cy="videoTranscriptInput">
+          <div data-cy="videoTranscriptInput" class="mt-4">
             <div class="flex mb-2">
               <div class="flex-1 content-end">
                 <label for="videoTranscript">Transcript:</label>
