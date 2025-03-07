@@ -121,9 +121,9 @@ describe('Projects Invite-Only Tests', () => {
                 cy.login('uuuuuu', 'password');
 
                 cy.visit('/progress-and-rankings/projects/proj1');
-                cy.contains('Invite Only Project')
+                cy.contains('Restricted Access')
                     .should('be.visible');
-                cy.get('[data-cy="notAuthorizedExplanation"]').should('contain.text', 'This Project is configured for Invite Only access.');
+                cy.get('[data-cy="notAuthorizedExplanation"]').should('contain.text', 'Access to this training is currently restricted');
                 cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
                 cy.wait(500);//give animation time to complete
                 cy.get('[data-cy="contactOwnersMsgInput"]').should('be.visible');
@@ -178,9 +178,9 @@ describe('Projects Invite-Only Tests', () => {
                         cy.login('uuuuuu', 'password');
 
                         cy.visit('/progress-and-rankings/projects/proj1');
-                        cy.contains('Invite Only Project')
+                        cy.contains('Restricted Access')
                             .should('be.visible');
-                        cy.get('[data-cy="notAuthorizedExplanation"]').should('contain.text', 'This Project is configured for Invite Only access.');
+                        cy.get('[data-cy="notAuthorizedExplanation"]').should('contain.text', 'Access to this training is currently restricted');
                         cy.get('[data-cy="contactOwnerBtn"]').should('be.visible');
                     });
             });
