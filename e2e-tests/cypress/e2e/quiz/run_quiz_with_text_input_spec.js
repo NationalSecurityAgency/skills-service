@@ -295,6 +295,80 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
     });
 
+    it('Input Text validation: validation endpoint only called for question being updated', () => {
+        cy.intercept({ method: 'POST', url:'/api/validation/description*'}, (req) => {
+            if (req.body.value.includes('Answer to question #1')) {
+                req.alias = 'validateDescriptionAnswer1'
+            }
+        });
+        cy.intercept({ method: 'POST', url:'/api/validation/description*'}, (req) => {
+            if (req.body.value.includes('Answer to question #2')) {
+                req.alias = 'validateDescriptionAnswer2'
+            }
+        });
+
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createTextInputQuestionDef(1, 2)
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer to question #1')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer to question #2')
+
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('X')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Y')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Z')
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 4)
+    });
+
+    it('Input Text validation: validation endpoint is always called on submit', () => {
+        cy.intercept({ method: 'POST', url:'/api/validation/description*'}, (req) => {
+            if (req.body.value.includes('Answer to question #1')) {
+                req.alias = 'validateDescriptionAnswer1'
+            }
+        });
+        cy.intercept({ method: 'POST', url:'/api/validation/description*'}, (req) => {
+            if (req.body.value.includes('Answer to question #2')) {
+                req.alias = 'validateDescriptionAnswer2'
+            }
+        });
+
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createTextInputQuestionDef(1, 2)
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer to question #1')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer to question #2')
+
+        cy.get('[data-cy="completeQuizBtn"]').click()
+
+        // validation called once when user typed answer, and again on submit
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 2)
+    });
+
 });
 
 
