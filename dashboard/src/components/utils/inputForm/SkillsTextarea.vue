@@ -99,13 +99,12 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
       :aria-errormessage="`${name}Error`"
       :aria-describedby="`${name}Error`" />
     <div class="sm:flex">
-      <div class="flex-1">
-        <small
-          role="alert"
-          class="p-error"
-          :data-cy="`${name}Error`"
-          :id="`${name}Error`">{{ errorMessage || '' }}</small>
-      </div>
+      <Message severity="error"
+               variant="simple"
+               size="small"
+               :closable="false"
+               :data-cy="`${name}Error`"
+               :id="`${name}Error`">{{ errorMessage || '' }}</Message>
       <div v-if="maxNumChars">
         <small
           role="alert"
