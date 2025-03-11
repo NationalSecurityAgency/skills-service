@@ -70,7 +70,6 @@ pageVisitService.reportPageVisit(route.path, route.fullPath, true, displayAttrib
     class="skills-client-app"
     ref="content"
     tabindex="-1"
-    role="main"
     :style="appStyleObject"
     aria-label="SkillTree Skills Display">
       <skills-display-home class="skills-display-home"/>
