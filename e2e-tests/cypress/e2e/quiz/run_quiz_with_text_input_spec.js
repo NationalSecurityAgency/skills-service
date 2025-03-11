@@ -330,6 +330,45 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 4)
     });
 
+    it('Input Text validation: validation endpoint is always called for invalid answers', () => {
+        cy.intercept({ method: 'POST', url:'/api/validation/description*'}, (req) => {
+            if (req.body.value.includes('Answer to question #1')) {
+                req.alias = 'validateDescriptionAnswer1'
+            }
+            if (req.body.value.includes('Answer to question #2')) {
+                req.alias = 'validateDescriptionAnswer2'
+            }
+        });
+
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createTextInputQuestionDef(1, 2)
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer to question #1')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer to question #2 jabberwocky')
+        cy.get('[data-cy="question_2"] [data-cy="descriptionError"]').contains('Answer to question #2 - paragraphs may not contain jabberwocky')
+
+        cy.wait('@validateDescriptionAnswer1')
+        cy.wait('@validateDescriptionAnswer2')
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 13)
+
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('X')
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 14)
+    });
+
     it('Input Text validation: validation endpoint is always called on submit', () => {
         cy.intercept({ method: 'POST', url:'/api/validation/description*'}, (req) => {
             if (req.body.value.includes('Answer to question #1')) {
@@ -363,6 +402,134 @@ describe('Run Quizzes With Text Input Questions', () => {
         // validation called once when user typed answer, and again on submit
         cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 2)
+    });
+
+    it('Input Text validation: answer cache is reset when starting a quiz (after refresh), and validation endpoint called for all questions', () => {
+        cy.intercept({ method: 'POST', url:'/api/validation/description*'}, (req) => {
+            if (req.body.value.includes('Answer to question #1')) {
+                req.alias = 'validateDescriptionAnswer1'
+            }
+            if (req.body.value.includes('Answer to question #2')) {
+                req.alias = 'validateDescriptionAnswer2'
+            }
+        });
+
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createTextInputQuestionDef(1, 2)
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer to question #1')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer to question #2')
+
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('X')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Y')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Z')
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 4)
+
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Z')
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 5)
+
+        // reload the page, all answers are revalidated on load
+        cy.reload()
+        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]')
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 6)
+
+        // update answer 2 and only answer 2 gets revalidated
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Z')
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 7)
+    });
+
+    it('Input Text validation: answer cache is reset when starting a quiz (after navigating away), and validation endpoint called for all questions', () => {
+        cy.intercept({ method: 'POST', url:'/api/validation/description*'}, (req) => {
+            if (req.body.value.includes('Answer to question #1')) {
+                req.alias = 'validateDescriptionAnswer1'
+            }
+            if (req.body.value.includes('Answer to question #2')) {
+                req.alias = 'validateDescriptionAnswer2'
+            }
+        });
+
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createTextInputQuestionDef(1, 2)
+
+        cy.createQuizDef(2);
+        cy.createTextInputQuestionDef(2, 1)
+        cy.createTextInputQuestionDef(2, 2)
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer to question #1')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer to question #2')
+
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('X')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Y')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Z')
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 4)
+
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Z')
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 5)
+
+        cy.visit('/progress-and-rankings/quizzes/quiz2');
+        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #2! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer to question #1')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer to question #2')
+
+        // one more for each question
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 6)
+
+        // update answer 2 and only answer 2 gets revalidated
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Z')
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 7)
+
+        // navigate back to quiz 1, all answers are revalidated on load
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 8)
+
+        // update answer 1 and only answer 1 gets revalidated
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Z')
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 3)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 9)
     });
 
 });
