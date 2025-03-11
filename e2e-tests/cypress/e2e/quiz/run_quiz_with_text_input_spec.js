@@ -300,8 +300,6 @@ describe('Run Quizzes With Text Input Questions', () => {
             if (req.body.value.includes('Answer to question #1')) {
                 req.alias = 'validateDescriptionAnswer1'
             }
-        });
-        cy.intercept({ method: 'POST', url:'/api/validation/description*'}, (req) => {
             if (req.body.value.includes('Answer to question #2')) {
                 req.alias = 'validateDescriptionAnswer2'
             }
@@ -337,8 +335,6 @@ describe('Run Quizzes With Text Input Questions', () => {
             if (req.body.value.includes('Answer to question #1')) {
                 req.alias = 'validateDescriptionAnswer1'
             }
-        });
-        cy.intercept({ method: 'POST', url:'/api/validation/description*'}, (req) => {
             if (req.body.value.includes('Answer to question #2')) {
                 req.alias = 'validateDescriptionAnswer2'
             }
