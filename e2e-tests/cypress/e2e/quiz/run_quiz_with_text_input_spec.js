@@ -448,6 +448,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]')
         cy.wait('@validateDescriptionAnswer1')
         cy.wait('@validateDescriptionAnswer2')
+        cy.pause(1000)
         cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 6)
 
@@ -527,6 +528,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="subPageHeader"]').contains('Quiz')
         cy.wait('@validateDescriptionAnswer1')
         cy.wait('@validateDescriptionAnswer2')
+        cy.pause(1000)
         cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 8)
 
