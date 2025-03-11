@@ -21,10 +21,12 @@ import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue'
 import NumberFormatter from '@/components/utils/NumberFormatter.js'
+import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 
 const route = useRoute();
 const themeState = useSkillsDisplayThemeState()
 const themeHelper = useThemesHelper()
+const layoutSizes = useLayoutSizesState()
 
 const chartAxisColor = () => {
   if (themeState.theme.charts.axisLabelColor) {
@@ -148,13 +150,13 @@ const hasData = computed(() => !loading.value && series.value && series.value?.l
 </script>
 
 <template>
-  <Card data-cy="userCountsBySubjectMetric">
+  <Card data-cy="userCountsBySubjectMetric" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
     <template #header>
       <SkillsCardHeader title="Number of users for each level for each subject"></SkillsCardHeader>
     </template>
     <template #content>
         <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="Users have not achieved any levels, yet..." class="mt-6">
-          <apexchart ref="chartRef" type="bar" height="350" :options="chartOptions" :series="series" class="mt-6"></apexchart>
+          <apexchart ref="chartRef" type="bar" width="100%" height="350" :options="chartOptions" :series="series" class="mt-6"></apexchart>
         </metrics-overlay>
     </template>
   </Card>

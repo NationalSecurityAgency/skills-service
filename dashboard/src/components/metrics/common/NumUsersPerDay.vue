@@ -24,6 +24,7 @@ import TimeLengthSelector from "@/components/metrics/common/TimeLengthSelector.v
 import NumberFormatter from '@/components/utils/NumberFormatter.js'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
+import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 
 
 const appConfig = useAppConfig();
@@ -38,6 +39,7 @@ const props = defineProps({
 
 const themeState = useSkillsDisplayThemeState()
 const themeHelper = useThemesHelper()
+const layoutSizes = useLayoutSizesState()
 
 const chartAxisColor = () => {
   if (themeState.theme.charts.axisLabelColor) {
@@ -176,7 +178,7 @@ const loadData = () => {
 </script>
 
 <template>
-  <Card data-cy="distinctNumUsersOverTime" class="w-full">
+  <Card data-cy="distinctNumUsersOverTime" class="w-full" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
     <template #header>
       <SkillsCardHeader :title="mutableTitle">
         <template #headerContent>
@@ -186,7 +188,7 @@ const loadData = () => {
     </template>
     <template #content>
       <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity." class="mt-6">
-        <apexchart type="area" height="350" :options="chartOptions" :series="distinctUsersOverTime" data-cy="apexchart"></apexchart>
+        <apexchart type="area" height="350" width="100%" :options="chartOptions" :series="distinctUsersOverTime" data-cy="apexchart"></apexchart>
       </metrics-overlay>
     </template>
   </Card>

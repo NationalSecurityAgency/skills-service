@@ -21,6 +21,7 @@ import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDis
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 import NumberFormatter from '@/components/utils/NumberFormatter.js'
 import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue';
+import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 
 const route = useRoute();
 const props = defineProps({
@@ -32,6 +33,7 @@ const props = defineProps({
 });
 const themeState = useSkillsDisplayThemeState()
 const themeHelper = useThemesHelper()
+const layoutSizes = useLayoutSizesState()
 
 const chartAxisColor = () => {
   if (themeState.theme.charts.axisLabelColor) {
@@ -160,13 +162,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card data-cy="levelsChart">
+  <Card data-cy="levelsChart" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
     <template #header>
       <SkillsCardHeader :title="title"></SkillsCardHeader>
     </template>
     <template #content>
       <metrics-overlay :loading="isLoading" :has-data="!isLoading && !isEmpty" no-data-icon="fa fa-info-circle" no-data-msg="No one reached Level 1 yet...">
-        <apexchart v-if="!isLoading" type="bar" height="350" :options="chartOptions" :series="series" class="mt-8" />
+        <apexchart v-if="!isLoading" type="bar" width="100%" height="350" :options="chartOptions" :series="series" class="mt-8" />
       </metrics-overlay>
     </template>
   </Card>

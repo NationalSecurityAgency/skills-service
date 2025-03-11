@@ -19,9 +19,11 @@ import { useRoute } from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import { useUserTagChartConfig } from '@/components/metrics/common/UserTagChartConfig.js';
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
+import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 
 const route = useRoute();
 const userTagChartConfig = useUserTagChartConfig();
+const layoutSizes = useLayoutSizesState()
 
 const props = defineProps({
   tagKey: {
@@ -103,7 +105,7 @@ const loadData = () => {
 </script>
 
 <template>
-  <Card data-cy="userTagChart">
+  <Card data-cy="userTagChart" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
     <template #header>
       <SkillsCardHeader :title="titleInternal"></SkillsCardHeader>
     </template>
@@ -111,7 +113,7 @@ const loadData = () => {
       <skills-spinner :is-loading="isLoading" v-if="isLoading" />
       <div v-if="!isLoading">
         <metrics-overlay :loading="isLoading" :has-data="!isEmpty" no-data-msg="No data yet...">
-          <apexchart :type="chartType" :height="`${heightInPx}px`"  :options="chartOptions" :series="series"></apexchart>
+          <apexchart :type="chartType" width="100%" :height="`${heightInPx}px`"  :options="chartOptions" :series="series"></apexchart>
         </metrics-overlay>
       </div>
     </template>
