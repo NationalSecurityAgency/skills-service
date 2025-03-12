@@ -119,6 +119,11 @@ const moveQuestion = (changeIndexBy) => {
               data-cy="textAreaPlaceHolder"
               rows="2"/>
         </div>
+        <div class="flex" v-if="question.answerHint" data-cy="answerHint">
+          <Message size="small" severity="warn" icon="fas fa-lightbulb" :closable="false" class="mt-2" data-cy="answerHintMsg">
+            {{ question.answerHint }}
+          </Message>
+        </div>
       </div>
       <div v-if="!quizConfig.isReadOnlyQuiz" class="flex flex-none justify-center items-start">
         <ButtonGroup class="ml-1 mt-2 mr-4">

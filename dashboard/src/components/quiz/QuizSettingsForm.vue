@@ -323,7 +323,7 @@ const updateTimeLimit = () => {
 
   <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
     <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
-      <label for="quizShowAnswerHintsOnRetakeAttemptsOnly">Only Show Hingts on Retake Attempts:</label>
+      <label for="quizShowAnswerHintsOnRetakeAttemptsOnly">Only Show Hints on Retake Attempts:</label>
     </div>
     <div class="col-span-12 md:col-span-9">
       <SkillsInputSwitch
