@@ -18,6 +18,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { object, string, number, array } from 'yup';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
+import { useCheckIfAnswerChangedForValidation } from '@/common-components/utilities/UseCheckIfAnswerChangedForValidation.js'
 import dayjs from '@/common-components/DayJsCustomizer.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 
@@ -59,6 +60,7 @@ const announcer = useSkillsAnnouncer()
 const timeUtils = useTimeUtils()
 const appConfig = useAppConfig()
 const numFormat = useNumberFormat()
+const checkIfAnswerChangedForValidation = useCheckIfAnswerChangedForValidation()
 
 const isLoading = ref(true);
 const isCompleting = ref(false);
@@ -96,7 +98,7 @@ const schema = object({
                   then: (sch)  => sch
                       .trim()
                       .required((d) => `Answer to question #${getQuestionNumFromPath(d.path)} is required`)
-                      .customDescriptionValidator(null, false, null, (d) => `Answer to question #${getQuestionNumFromPath(d.path)}`),
+                      .customDescriptionValidator(null, false, null, (d) => `Answer to question #${getQuestionNumFromPath(d.path)}`, true, isSubmitting.value, errors.value),
                 }),
             'answerRating': number()
                 .when('questionType', {
@@ -266,6 +268,7 @@ const initializeFormData = (copy) => {
       answerRating: answerRating ? Number(answerRating.answerOption) : 0,
     }
   })
+  checkIfAnswerChangedForValidation.reset()
   resetForm({ values: { questions: formQuestions }, errors: {} });
 }
 const updateSelectedAnswers = (questionSelectedAnswer) => {
