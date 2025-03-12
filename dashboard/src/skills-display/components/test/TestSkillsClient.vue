@@ -82,7 +82,7 @@ const isThemeApplied = computed(() => route.query.enableTheme && route.query.ena
 </script>
 
 <template>
-  <div class="mt-4 p-4" :class="{'themed-applied': isThemeApplied}">
+  <div class="mt-4 p-4" role="heading" aria-level="1" :class="{'themed-applied': isThemeApplied}">
     <div id="skills-client-container">
     </div>
   </div>
