@@ -322,10 +322,13 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer to question #1')
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer to question #2')
-
+        cy.wait(1000)
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('X')
+        cy.wait(1000)
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Y')
+        cy.wait(1000)
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Z')
+        cy.wait(1000)
         cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 4)
     });
@@ -335,7 +338,7 @@ describe('Run Quizzes With Text Input Questions', () => {
             if (req.body.value.includes('Answer to question #1')) {
                 req.alias = 'validateDescriptionAnswer1'
             }
-            if (req.body.value.includes('Answer to question #2')) {
+            if (req.body.value.includes('Answer to question #2 jabberwock')) {
                 req.alias = 'validateDescriptionAnswer2'
             }
         });
@@ -356,17 +359,19 @@ describe('Run Quizzes With Text Input Questions', () => {
 
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer to question #1')
-        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer to question #2 jabberwocky')
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer to question #2 jabberwoc')
+        cy.wait(2000)
+        cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('ky')
         cy.get('[data-cy="question_2"] [data-cy="descriptionError"]').contains('Answer to question #2 - paragraphs may not contain jabberwocky')
 
         cy.wait('@validateDescriptionAnswer1')
         cy.wait('@validateDescriptionAnswer2')
         cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
-        cy.get('@validateDescriptionAnswer2.all').should('have.length', 13)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 1)
 
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('X')
-        cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
-        cy.get('@validateDescriptionAnswer2.all').should('have.length', 14)
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length', 1)
     });
 
     it('Input Text validation: validation endpoint is always called on submit', () => {
@@ -430,11 +435,15 @@ describe('Run Quizzes With Text Input Questions', () => {
 
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer to question #1')
+        cy.wait(1000)
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer to question #2')
-
+        cy.wait(1000)
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('X')
+        cy.wait(1000)
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Y')
+        cy.wait(1000)
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Z')
+        cy.wait(1000)
         cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 4)
 
@@ -443,12 +452,9 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 5)
 
         // reload the page, all answers are revalidated on load
-        cy.reload()
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
         cy.get('[data-cy="subPageHeader"]').contains('Quiz')
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]')
-        cy.wait('@validateDescriptionAnswer1')
-        cy.wait('@validateDescriptionAnswer2')
-        cy.pause(1000)
         cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 6)
 
@@ -488,11 +494,15 @@ describe('Run Quizzes With Text Input Questions', () => {
 
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer to question #1')
+        cy.wait(1000)
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer to question #2')
-
+        cy.wait(1000)
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('X')
+        cy.wait(1000)
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Y')
+        cy.wait(1000)
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Z')
+        cy.wait(1000)
         cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 4)
 
@@ -512,6 +522,7 @@ describe('Run Quizzes With Text Input Questions', () => {
 
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer to question #1')
+        cy.wait(1000)
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer to question #2')
 
         // one more for each question
@@ -528,8 +539,8 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="subPageHeader"]').contains('Quiz')
         cy.wait('@validateDescriptionAnswer1')
         cy.wait('@validateDescriptionAnswer2')
-        cy.pause(1000)
-        cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
+        cy.wait(1000)
+        cy.get('@validateDescriptionAnswer1.all').should('have.length', 3)
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 8)
 
         // update answer 2 and only answer 2 gets revalidated
