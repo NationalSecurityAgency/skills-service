@@ -119,7 +119,7 @@ const moveQuestion = (changeIndexBy) => {
               data-cy="textAreaPlaceHolder"
               rows="2"/>
         </div>
-        <div class="flex" v-if="question.answerHint" data-cy="answerHint">
+        <div class="flex" v-if="question.answerHint">
           <Message size="small" severity="warn" icon="fas fa-lightbulb" :closable="false" class="mt-2" data-cy="answerHintMsg">
             {{ question.answerHint }}
           </Message>
