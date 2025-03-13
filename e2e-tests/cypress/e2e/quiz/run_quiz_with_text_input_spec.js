@@ -451,15 +451,18 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 5)
 
-        // reload the page, all answers are revalidated on load
+        // reload the page, all answers are revalidated on load (or visit?)
         cy.visit('/progress-and-rankings/quizzes/quiz1');
         cy.get('[data-cy="subPageHeader"]').contains('Quiz')
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]')
+        cy.wait('@validateDescriptionAnswer1')
+        cy.wait('@validateDescriptionAnswer2')
         cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 6)
 
         // update answer 2 and only answer 2 gets revalidated
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Z')
+        cy.wait('@validateDescriptionAnswer2')
         cy.get('@validateDescriptionAnswer1.all').should('have.length', 2)
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 7)
     });
@@ -544,8 +547,8 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 8)
 
         // update answer 2 and only answer 2 gets revalidated
-        cy.wait('@validateDescriptionAnswer2')
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Z')
+        cy.wait('@validateDescriptionAnswer2')
         cy.get('@validateDescriptionAnswer1.all').should('have.length', 3)
         cy.get('@validateDescriptionAnswer2.all').should('have.length', 9)
     });

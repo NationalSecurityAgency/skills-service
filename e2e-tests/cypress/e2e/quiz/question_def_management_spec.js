@@ -443,6 +443,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.validateDisplayAnswer(1, 0, false, false)
         cy.validateDisplayAnswer(1, 1, true, false)
         cy.validateDisplayAnswer(1, 2, true, false)
+        cy.get('[data-cy="answerHintMsg"]').should('have.text', 'This hint is totally different')
     });
 
     it('edit a question', function () {
