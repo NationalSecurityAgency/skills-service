@@ -22,6 +22,8 @@ import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import QuizRunService from '@/skills-display/components/quiz/QuizRunService.js';
 import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEditor.vue";
 import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
+import {useDebounceFn} from "@vueuse/core";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
 const props = defineProps({
   q: Object,
@@ -33,6 +35,8 @@ const props = defineProps({
 
 const isLoading = ref(true);
 const emit = defineEmits(['answer-text-changed', 'selected-answer'])
+
+const appConfig = useAppConfig()
 
 const answerOptions = ref([])
 const answerRating = ref(0)
@@ -113,6 +117,8 @@ const textAnswerChanged = (providedAnswerText) => {
     });
   });
 }
+const textAnswerChangedDebounced = useDebounceFn((providedAnswerTextOuter) => textAnswerChanged(providedAnswerTextOuter), appConfig.formFieldDebounceInMs, appConfig.formFieldDebounceInMs)
+
 const selectionChanged = (currentAnswer) => { 
   reportAnswer(currentAnswer).then((reportAnswerPromise) => {
     emit('selected-answer', {
@@ -189,7 +195,7 @@ const needsGrading = computed(() => QuizStatus.isNeedsGrading(props.q.gradedInfo
                              data-cy="textInputAnswer"
                              markdownHeight="250px"
                              label="Answer"
-                             @value-changed="textAnswerChanged"
+                             @value-changed="textAnswerChangedDebounced"
                              :show-label="false"
                              :name="fieldName"
                              :allow-attachments="false"

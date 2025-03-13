@@ -35,6 +35,8 @@ import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
+import {useDebounceFn} from "@vueuse/core";
+import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
 
 const props = defineProps({
   quizId: String,
@@ -61,6 +63,7 @@ const timeUtils = useTimeUtils()
 const appConfig = useAppConfig()
 const numFormat = useNumberFormat()
 const checkIfAnswerChangedForValidation = useCheckIfAnswerChangedForValidation()
+const descriptionValidatorService = useDescriptionValidatorService()
 
 const isLoading = ref(true);
 const isCompleting = ref(false);
@@ -86,19 +89,61 @@ const ratingSelected = (value) => {
 const getQuestionNumFromPath = (path) => {
   return Number(path.split('[').pop().split(']')[0]) + 1;
 }
+
+const validateFunCache = new Map()
+const createValidateAnswerFn = (valueOuter, contextOuter) => {
+  if (!QuestionType.isTextInput(contextOuter.parent.questionType)) {
+    return true
+  }
+  const doValidateAnswer = (value, context) => {
+    if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
+      return true
+    }
+    const forceAnswerValidation = isSubmitting.value
+    if (!forceAnswerValidation && !checkIfAnswerChangedForValidation.hasValueChanged(context.originalValue, context)) {
+      return true
+    }
+    return descriptionValidatorService.validateDescription(value, false, null, true).then((result) => {
+      if (result.valid) {
+        return true
+      }
+      checkIfAnswerChangedForValidation.removeAnswer(context)
+      if (result.msg) {
+        return context.createError({ message: `Answer to question #${getQuestionNumFromPath(context.path)} - ${result.msg}` })
+      }
+      return context.createError({ message: `'Field' is invalid` })
+    })
+  }
+
+  if (isSubmitting.value) {
+    return doValidateAnswer(valueOuter, contextOuter)
+  }
+  let validateFn = validateFunCache.get(contextOuter.path)
+  if (!validateFn) {
+    validateFn = useDebounceFn((valueDebounce, contextDebounce) => {
+      return doValidateAnswer(valueDebounce, contextDebounce)
+    }, appConfig.formFieldDebounceInMs)
+
+    validateFunCache.set(contextOuter.path, validateFn)
+  }
+  return validateFn(valueOuter, contextOuter)
+}
 const schema = object({
   'questions': array()
       .of(
           object({
             'questionType': string(),
             'answerText': string()
+                .trim()
                 .max(appConfig.maxTakeQuizInputTextAnswerLength, (d) => `Answer to question #${getQuestionNumFromPath(d.path)} must not exceed ${numFormat.pretty(appConfig.maxTakeQuizInputTextAnswerLength)} characters`)
                 .when('questionType', {
                   is: QuestionType.TextInput,
                   then: (sch)  => sch
                       .trim()
                       .required((d) => `Answer to question #${getQuestionNumFromPath(d.path)} is required`)
-                      .customDescriptionValidator(null, false, null, (d) => `Answer to question #${getQuestionNumFromPath(d.path)}`, true, isSubmitting.value, errors.value),
+                      .test('customAnswerValidator',"", async (value, context) => {
+                        return await createValidateAnswerFn(value, context)
+                      }),
                 }),
             'answerRating': number()
                 .when('questionType', {
@@ -122,7 +167,6 @@ const schema = object({
 const { values, meta, handleSubmit, isSubmitting, resetForm, setFieldValue, validate, validateField, errors, errorBag, setErrors } = useForm({
   validationSchema: schema,
 })
-// const { remove, push, fields } = useFieldArray('questions');
 
 onMounted(() => {
   if (props.quiz) {

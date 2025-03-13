@@ -18,13 +18,11 @@ import { addMethod, string } from 'yup'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useDebounceFn } from '@vueuse/core'
 import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
-import { useCheckIfAnswerChangedForValidation } from '@/common-components/utilities/UseCheckIfAnswerChangedForValidation.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 
 export const useCustomGlobalValidators = () => {
 
   const descriptionValidatorService = useDescriptionValidatorService()
-  const checkIfAnswerChangedForValidation = useCheckIfAnswerChangedForValidation()
   const log = useLog()
 
   function customNameValidator(fieldName = '') {
@@ -44,21 +42,16 @@ export const useCustomGlobalValidators = () => {
     return this.test("customNameValidator", null, (value, context) => validateName(value, context));
   }
 
-  function customDescriptionValidator(fieldName = '', enableProjectIdParam = true, useProtectedCommunityValidator = null, fieldNameFunction = null, enableQuizIdParam = true, isSubmitting = false, errors = null) {
+  function customDescriptionValidator(fieldName = '', enableProjectIdParam = true, useProtectedCommunityValidator = null, fieldNameFunction = null, enableQuizIdParam = true) {
     const appConfig = useAppConfig()
     const validateDescription = useDebounceFn((value, context) => {
       if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
-        return true
-      }
-      const forceAnswerValidation = isSubmitting || errors?.hasOwnProperty(context.path)
-      if (!forceAnswerValidation && !checkIfAnswerChangedForValidation.hasValueChanged(context.originalValue, context)) {
         return true
       }
       return descriptionValidatorService.validateDescription(value, enableProjectIdParam, useProtectedCommunityValidator, enableQuizIdParam).then((result) => {
         if (result.valid) {
           return true
         }
-        checkIfAnswerChangedForValidation.removeAnswer(context)
         let fieldNameToUse = fieldName ? fieldName : '';
         if (!fieldNameToUse && fieldNameFunction) {
           fieldNameToUse = fieldNameFunction(context);
