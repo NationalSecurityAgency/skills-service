@@ -121,7 +121,7 @@ const moveQuestion = (changeIndexBy) => {
         </div>
         <div class="flex" v-if="question.answerHint">
           <Message size="small" severity="warn" icon="fas fa-lightbulb" :closable="false" class="mt-2" data-cy="answerHintMsg">
-            {{ question.answerHint }}
+            <span data-cy="answerHintMsgContent" v-html="question.answerHint.replace(/\n/g, '<br>')"></span>
           </Message>
         </div>
       </div>

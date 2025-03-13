@@ -432,7 +432,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-0"] [data-cy="removeAnswer"]').click()
 
         cy.get('[data-cy="questionText"]  div.toastui-editor-contents[contenteditable="true"]').clear().type('All diff?')
-        cy.get('[data-cy="answerHint"]').clear().type('This hint is totally different')
+        cy.get('[data-cy="answerHint"]').clear().type('This hint is totally different\nthis is a new line')
 
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('All diff?')
@@ -443,7 +443,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.validateDisplayAnswer(1, 0, false, false)
         cy.validateDisplayAnswer(1, 1, true, false)
         cy.validateDisplayAnswer(1, 2, true, false)
-        cy.get('[data-cy="answerHintMsg"]').should('have.text', 'This hint is totally different')
+        cy.get('[data-cy="answerHintMsgContent"]').should('contains.html', 'This hint is totally different<br>this is a new line')
     });
 
     it('edit a question', function () {

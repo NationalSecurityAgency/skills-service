@@ -1731,10 +1731,10 @@ describe('Client Display Quiz Tests', () => {
 
         cy.get('[data-cy="answerHint"]').should('exist')
 
-        cy.get('[data-cy="question_1"] [data-cy="answerHint"]').contains('This is a hint for question # 1');
-        cy.get('[data-cy="question_2"] [data-cy="answerHint"]').contains('This is a hint for question # 2');
-        cy.get('[data-cy="question_3"] [data-cy="answerHint"]').contains('This is a hint for question # 3');
-        cy.get('[data-cy="question_4"] [data-cy="answerHint"]').contains('This is a hint for question # 4');
+        cy.get('[data-cy="question_1"] [data-cy="answerHintMsgContent"]').contains('This is a hint for question # 1');
+        cy.get('[data-cy="question_2"] [data-cy="answerHintMsgContent"]').contains('This is a hint for question # 2');
+        cy.get('[data-cy="question_3"] [data-cy="answerHintMsgContent"]').contains('This is a hint for question # 3');
+        cy.get('[data-cy="question_4"] [data-cy="answerHintMsgContent"]').contains('This is a hint for question # 4');
     });
 
     it('Answer hints are always displayed by default', () => {
@@ -1757,10 +1757,10 @@ describe('Client Display Quiz Tests', () => {
 
         cy.get('[data-cy="answerHint"]').should('exist')
 
-        cy.get('[data-cy="question_1"] [data-cy="answerHint"]').contains('This is a hint for question # 1');
-        cy.get('[data-cy="question_2"] [data-cy="answerHint"]').contains('This is a hint for question # 2');
-        cy.get('[data-cy="question_3"] [data-cy="answerHint"]').contains('This is a hint for question # 3');
-        cy.get('[data-cy="question_4"] [data-cy="answerHint"]').contains('This is a hint for question # 4');
+        cy.get('[data-cy="question_1"] [data-cy="answerHintMsgContent"]').contains('This is a hint for question # 1');
+        cy.get('[data-cy="question_2"] [data-cy="answerHintMsgContent"]').contains('This is a hint for question # 2');
+        cy.get('[data-cy="question_3"] [data-cy="answerHintMsgContent"]').contains('This is a hint for question # 3');
+        cy.get('[data-cy="question_4"] [data-cy="answerHintMsgContent"]').contains('This is a hint for question # 4');
     });
 
     it('Answer hints are always displayed when retakes settings is not true', () => {
@@ -1788,10 +1788,28 @@ describe('Client Display Quiz Tests', () => {
 
         cy.get('[data-cy="answerHint"]').should('exist')
 
-        cy.get('[data-cy="question_1"] [data-cy="answerHint"]').contains('This is a hint for question # 1');
-        cy.get('[data-cy="question_2"] [data-cy="answerHint"]').contains('This is a hint for question # 2');
-        cy.get('[data-cy="question_3"] [data-cy="answerHint"]').contains('This is a hint for question # 3');
-        cy.get('[data-cy="question_4"] [data-cy="answerHint"]').contains('This is a hint for question # 4');
+        cy.get('[data-cy="question_1"] [data-cy="answerHintMsgContent"]').contains('This is a hint for question # 1');
+        cy.get('[data-cy="question_2"] [data-cy="answerHintMsgContent"]').contains('This is a hint for question # 2');
+        cy.get('[data-cy="question_3"] [data-cy="answerHintMsgContent"]').contains('This is a hint for question # 3');
+        cy.get('[data-cy="question_4"] [data-cy="answerHintMsgContent"]').contains('This is a hint for question # 4');
+    });
+
+    it('Answer hints honor new lines', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1, { answerHint: 'This is a hint for line #1\nThis is a hint for line #2\nThis is a hint for line #3' });
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="answerHint"]').should('exist')
+
+        cy.get('[data-cy="answerHintMsgContent"]')
+          .should('contains.html', 'This is a hint for line #1<br>This is a hint for line #2<br>This is a hint for line #3')
     });
 
     it('Answer hints are not displayed when null or empty string', () => {
