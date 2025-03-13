@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import {computed, nextTick, onMounted, onUnmounted, ref, watch} from 'vue'
 import { useRouter } from 'vue-router'
 import { useStorage } from '@vueuse/core'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
@@ -22,7 +22,7 @@ import { useContentMaxWidthState } from '@/stores/UseContentMaxWidthState.js'
 import { useLayoutSizesState } from '@/stores/UseLayoutSizesState.js'
 
 const router = useRouter();
-defineProps(['navItems']);
+const props = defineProps(['navItems']);
 const collapsed = useStorage('navigationCollapsed', false)
 const mainContentWidth = useContentMaxWidthState()
 const colors = useColors()
@@ -51,6 +51,12 @@ onMounted(() => {
 })
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
+})
+
+watch(() => props.navItems, () => {
+  nextTick(() => {
+    handleResize()
+  })
 })
 
 </script>
