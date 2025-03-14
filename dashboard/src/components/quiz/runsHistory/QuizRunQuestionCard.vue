@@ -80,7 +80,7 @@ const manuallyGradedInfo = computed(() => {
         <div class="col-auto py-4 pr-2">
           <SkillsOverlay :show="!isSurvey && isWrong" opacity="0">
             <template #overlay>
-              <i class="fa fa-ban text-danger text-red-500" style="font-size: 2.1rem; opacity: 0.8"
+              <i class="fa fa-ban text-red-500" style="font-size: 2.1rem; opacity: 0.8"
                  data-cy="wrongAnswer"></i>
             </template>
             <Tag severity="primary" :aria-label="`Question number ${questionNum}`">{{ questionNum }}</Tag>
