@@ -23,7 +23,6 @@ import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 
 
 export const useAuthState = defineStore('authState', () => {
-    const token = ref(null)
     const userInfoState = ref(null)
     const userInfo = computed(() => userInfoState.value)
     const restoringSessionState = ref(true)
@@ -39,13 +38,6 @@ export const useAuthState = defineStore('authState', () => {
     const setAuthUser = (authData) => {
         localAuth.value = true
         localStorage.setItem('localAuth', 'true')
-        if (authData.token) {
-            token.value = authData.token
-            SkillsConfiguration.setAuthToken(token.value)
-            localStorage.setItem('token', authData.token)
-            localStorage.setItem('expirationDate', authData.expirationDate.getTime().toString())
-        }
-        axios.defaults.headers.common.Authorization = authData.token
     }
     const storeUser = (newInfo) => {
         if (newInfo) {
@@ -60,28 +52,24 @@ export const useAuthState = defineStore('authState', () => {
         restoringSessionState.value = value
     }
     const clearAuthData = () => {
-        token.value = null
         userInfoState.value = null
         localAuth.value = false
         oAuthAuth.value = false
         SkillsConfiguration.logout()
         localStorage.removeItem('localAuth')
         localStorage.removeItem('oAuthAuth')
-        localStorage.removeItem('token')
         localStorage.removeItem('expirationDate')
         localStorage.removeItem('userInfo')
         delete axios.defaults.headers.common.Authorization
     }
 
     const handleLogin = (result) => {
-        const token = result.headers.authorization
-        let expirationDate
         // special handling for oAuth
         if (result.headers.tokenexpirationtimestamp) {
-            expirationDate = new Date(Number(result.headers.tokenexpirationtimestamp))
+            const expirationDate = new Date(Number(result.headers.tokenexpirationtimestamp))
             setLogoutTimer(expirationDate)
         }
-        setAuthUser({ token, expirationDate })
+        setAuthUser()
     }
 
     const signup = (authData) => {
@@ -125,47 +113,23 @@ export const useAuthState = defineStore('authState', () => {
         setRestoringSession(true)
         return new Promise((resolve, reject) => {
             let reAuthenticated = false
-            const token = localStorage.getItem('token')
-            if (token) {
-                let tokenExpired = true
-                let expirationDate = localStorage.getItem('expirationDate')
-                if (expirationDate) {
-                    expirationDate = new Date(Number(expirationDate))
-                    if (expirationDate > new Date()) {
-                        tokenExpired = false
-                    }
-                }
-                if (tokenExpired) {
-                    clearAuthData()
-                } else {
-                    // found valid token, update authentication properties
-                    const userInfo = JSON.parse(localStorage.getItem('userInfo'))
-                    storeUser(userInfo)
-                    setAuthUser({ token, expirationDate })
-                    setLogoutTimer(expirationDate)
-                    reAuthenticated = true
-                }
-                setRestoringSession(false)
-                resolve(reAuthenticated)
-            } else {
-                // attempt to retrieve userInfo using PKI (2-way ssl)
-                // (or username/password if being redirected after successful login)
-                fetchUser(false)
-                  .then(() => {
-                      if (userInfoState.value) {
-                          reAuthenticated = true
-                          localAuth.value = !appConfig.isPkiAuthenticated.value
-                      } else {
-                          // cannot obtain userInfo, so clear any other lingering auth data
-                          clearAuthData()
-                      }
-                      resolve(reAuthenticated)
-                  })
-                  .catch((error) => reject(error))
-                  .finally(() => {
-                      setRestoringSession(false)
-                  })
-            }
+            // attempt to retrieve userInfo using PKI (2-way ssl)
+            // (or username/password if being redirected after successful login)
+            fetchUser(false)
+              .then(() => {
+                  if (userInfoState.value) {
+                      reAuthenticated = true
+                      localAuth.value = !appConfig.isPkiAuthenticated.value
+                  } else {
+                      // cannot obtain userInfo, so clear any other lingering auth data
+                      clearAuthData()
+                  }
+                  resolve(reAuthenticated)
+              })
+              .catch((error) => reject(error))
+              .finally(() => {
+                  setRestoringSession(false)
+              })
         })
     }
     const logout =() => {
@@ -221,8 +185,7 @@ export const useAuthState = defineStore('authState', () => {
 
     const isAuthenticated = computed(() => {
         return (
-          (token.value !== null ||
-            appConfig.isPkiAuthenticated ||
+          (appConfig.isPkiAuthenticated ||
             appConfig.isSAML2Authenticated ||
             localAuth.value ||
             oAuthAuth.value) &&
