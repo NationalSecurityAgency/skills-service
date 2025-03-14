@@ -22,10 +22,12 @@ import MetricsService from "@/components/metrics/MetricsService.js";
 import SubjectsService from "@/components/subjects/SubjectsService.js";
 import NumberFormatter from '@/components/utils/NumberFormatter.js'
 import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue'
+import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 
 const route = useRoute();
 const themeState = useSkillsDisplayThemeState()
 const themeHelper = useThemesHelper()
+const layoutSizes = useLayoutSizesState()
 
 const chartAxisColor = () => {
   if (themeState.theme.charts.axisLabelColor) {
@@ -134,7 +136,7 @@ const overlayMessage  = computed(() => {
 </script>
 
 <template>
-  <Card data-cy="subjectNumUsersPerLevelOverTime">
+  <Card data-cy="subjectNumUsersPerLevelOverTime" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
     <template #header>
       <SkillsCardHeader title="Number of users for each level over time"></SkillsCardHeader>
     </template>
@@ -153,7 +155,7 @@ const overlayMessage  = computed(() => {
         <SkillsButton variant="outline-info" class="ml-2" :disabled="!subjects.selected" @click="loadChart" icon="fas fa-paint-roller" label="Generate" />
       </div>
       <metrics-overlay :loading="loading.charts" :has-data="!isSeriesEmpty" :no-data-msg="overlayMessage" class="mt-6">
-        <apexchart type="area" height="300" :options="chartOptions" :series="series"></apexchart>
+        <apexchart type="area" height="300" width="100%" :options="chartOptions" :series="series"></apexchart>
       </metrics-overlay>
     </template>
   </Card>

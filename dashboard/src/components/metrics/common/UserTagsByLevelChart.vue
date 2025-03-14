@@ -21,12 +21,14 @@ import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import NumberFormatter from '@/components/utils/NumberFormatter.js';
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
+import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 
 const props = defineProps(['tag']);
 const route = useRoute();
 
 const themeState = useSkillsDisplayThemeState()
 const themeHelper = useThemesHelper()
+const layoutSizes = useLayoutSizesState()
 
 const chartAxisColor = () => {
   if (themeState.theme.charts.axisLabelColor) {
@@ -175,14 +177,14 @@ const loadData = () => {
 </script>
 
 <template>
-  <Card :data-cy="`numUsersByTag-${tag.key}`">
+  <Card :data-cy="`numUsersByTag-${tag.key}`" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
     <template #header>
       <SkillsCardHeader :title="`Top 20 ${tag.label} Level Breakdown`"></SkillsCardHeader>
     </template>
     <template #content>
       <div style="max-height: 800px; overflow-y: auto; overflow-x: clip;">
         <metrics-overlay :loading="loading" :has-data="series.length > 0" no-data-msg="No users currently">
-          <apexchart v-if="!loading" type="bar" :height="chartHeight" :options="chartOptions" :series="series"></apexchart>
+          <apexchart v-if="!loading" width="100%" type="bar" :height="chartHeight" :options="chartOptions" :series="series"></apexchart>
         </metrics-overlay>
       </div>
     </template>

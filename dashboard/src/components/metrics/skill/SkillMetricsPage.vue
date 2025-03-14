@@ -28,10 +28,12 @@ import SkillEventsOverTime from "@/components/metrics/skill/SkillEventsOverTime.
 import SkillAchievedByUsersOverTime from "@/components/metrics/skill/SkillAchievedByUsersOverTime.vue";
 import UsersByTagChart from "@/components/metrics/skill/UsersByTagChart.vue";
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 
 const appConfig = useAppConfig();
 const route = useRoute();
 const timeUtils = useTimeUtils();
+const layoutSizes = useLayoutSizesState()
 
 const loading = ref(true);
 const numUsersAchieved = ref(0);
@@ -68,7 +70,7 @@ onMounted(() => {
     <skills-spinner :is-loading="loading" />
 
     <!-- on FF charts end up pushing column to the next row; this is a workaround -->
-    <div v-if="!loading" style="width: 99%;">
+    <div v-if="!loading" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
       <div class="flex flex-col lg:flex-row mb-4 gap-6">
         <stats-card class="flex flex-1" title="Achieved" :statNum="numUsersAchieved" :icon="`fa fa-trophy ${colors.getTextClass(0)}`" data-cy="numUserAchievedStatCard">
           Number of users that achieved this skill
