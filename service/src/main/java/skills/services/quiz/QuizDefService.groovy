@@ -475,7 +475,7 @@ class QuizDefService {
                 new QuizAnswerDef(
                         quizId: savedQuestion.quizId,
                         questionRefId: savedQuestion.id,
-                        answer: answerDefRequest.answer,
+                        answer: InputSanitizer.sanitize(answerDefRequest.answer),
                         isCorrectAnswer: answerDefRequest.isCorrect,
                         displayOrder: index + 1,
                 )
@@ -552,7 +552,7 @@ class QuizDefService {
         QuizQuestionDef questionDef = new QuizQuestionDef(
                 quizId: quizDef.quizId,
                 question: InputSanitizer.sanitize(questionDefRequest.question),
-                answerHint: questionDefRequest.answerHint,
+                answerHint: InputSanitizer.sanitize(questionDefRequest.answerHint),
                 type: questionDefRequest.questionType,
                 displayOrder: displayOrder,
         )

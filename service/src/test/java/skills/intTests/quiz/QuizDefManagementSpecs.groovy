@@ -560,5 +560,27 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         updatedQuestion.answers.isCorrect == [false, true, true]
         updatedQuestion.answers.displayOrder == [1, 2, 3]
     }
+
+    def "quiz answers and answer hints are sanitized"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 2, QuizQuestionType.SingleChoice)
+        question.question = "sanitized <script>alert('xss')</script> question"
+        question.answerHint = "sanitized <script>alert('xss')</script> hint"
+        question.answers[0].answer = "sanitized <script>alert('xss')</script> answer"
+
+        when:
+        def newQuestion = skillsService.createQuizQuestionDef(question)
+        def res = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        then:
+        res
+        res.questions
+        res.questions.size() == 1
+        res.questions[0].question == 'sanitized  question'
+        res.questions[0].answerHint == 'sanitized  hint'
+        res.questions[0].answers[0].answer == 'sanitized  answer'
+    }
 }
 
