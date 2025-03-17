@@ -1809,7 +1809,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="answerHint"]').should('exist')
 
         cy.get('[data-cy="answerHintMsgContent"]')
-          .should('contains.html', 'This is a hint for line #1<br>This is a hint for line #2<br>This is a hint for line #3')
+          .should('contains.html', 'This is a hint for line #1\nThis is a hint for line #2\nThis is a hint for line #3')
     });
 
     it('Answer hints are not displayed when null or empty string', () => {
