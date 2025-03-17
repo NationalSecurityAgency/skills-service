@@ -97,7 +97,7 @@ onMounted(()=> {
     <template #title>Runs Over Time</template>
     <template #content>
       <MetricsOverlay :loading="loading" :has-data="hasData && numItems > 1" no-data-msg="This chart needs at least 2 days worth of runs">
-        <apexchart type="line" :height="chartOptions.chart.height" :options="chartOptions" :series="series"></apexchart>
+        <apexchart type="line" width="100%" :height="chartOptions.chart.height" :options="chartOptions" :series="series"></apexchart>
       </MetricsOverlay>
     </template>
   </Card>

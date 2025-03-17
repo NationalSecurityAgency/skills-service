@@ -39,6 +39,7 @@ import InputText from 'primevue/inputtext'
 import QuizRunStatus from '@/components/quiz/runsHistory/QuizRunStatus.vue'
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 
 const route = useRoute()
 const userInfo = useUserInfo()
@@ -50,6 +51,7 @@ const announcer = useSkillsAnnouncer()
 const responsive = useResponsiveBreakpoints()
 const colors = useColors()
 const numberFormat = useNumberFormat()
+const layoutSizes = useLayoutSizesState()
 
 const quizType = ref('')
 const runsHistory = ref([])
@@ -187,8 +189,10 @@ const deleteRun = () => {
     <SubPageHeader title="Runs"
                    aria-label="Runs">
     </SubPageHeader>
-    <QuizAttemptsTimeChart class="flex-1 w-full my-4" />
-    <QuizUserTagsChart v-if="userTagsUtils.showUserTagColumn()" class="flex-1 w-full mb-4" />
+    <div :style="`width: ${layoutSizes.tableMaxWidth}px;`">
+      <QuizAttemptsTimeChart class="flex-1 w-full my-4"/>
+      <QuizUserTagsChart v-if="userTagsUtils.showUserTagColumn()" class="flex-1 w-full mb-4" :style="`width: ${layoutSizes.tableMaxWidth}px;`"/>
+    </div>
 
     <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
