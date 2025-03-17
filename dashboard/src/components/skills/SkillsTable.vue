@@ -563,6 +563,12 @@ const exportSkills = () => {
                   @blur="actionMenuOnBlur"
                   aria-label="Menu to perform actions on selected skills"
                   :popup="true">
+              <template #item="{ item, props }">
+                <a :href="item.url" target="_blank" v-bind="props.action">
+                  <span class="w-7 border text-center rounded text-green-800 bg-green-50 dark:bg-gray-900 dark:text-green-500 dark:border-green-700"><i :class="item.icon"/></span>
+                  <span class="">{{ item.label }}</span>
+                </a>
+              </template>
             </Menu>
           </div>
         </div>
