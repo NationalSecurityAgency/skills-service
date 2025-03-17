@@ -443,7 +443,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.validateDisplayAnswer(1, 0, false, false)
         cy.validateDisplayAnswer(1, 1, true, false)
         cy.validateDisplayAnswer(1, 2, true, false)
-        cy.get('[data-cy="answerHintMsgContent"]').should('contains.html', 'This hint is totally different<br>this is a new line')
+        cy.get('[data-cy="answerHintMsgContent"]').should('contains.html', 'This hint is totally different\nthis is a new line')
     });
 
     it('edit a question', function () {
