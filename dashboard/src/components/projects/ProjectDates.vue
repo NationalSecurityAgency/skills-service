@@ -59,7 +59,7 @@ const doLoadDate = () => {
       <ProgressSpinner
         v-if="isLoading"
         aria-label="Loading"
-        class="ml-1 w-4 h-4" />
+        class="ml-1 !w-[1.5rem] !h-[1.5rem]" />
       <SlimDateCell v-if="!isLoading" :value="lastReportedSkill" :fromStartOfDay="true" data-cy="projectLastReportedSkillValue"/>
     </span>
   </span>
