@@ -40,7 +40,6 @@ const data = ref([]);
 const loading = ref(true);
 const pageSize = ref(5);
 const possiblePageSizes = [5, 10, 15, 20];
-const currentPage = ref(1);
 const totalRows = ref(0);
 const sortBy = ref('userId');
 const sortOrder = ref(-1);
@@ -85,15 +84,15 @@ const maxConfigReached = computed(() => {
 
 const loadData = () => {
   const pageParams = {
-    limit: pageSize.value,
+    limit: 200,
+    page: 1,
     ascending: sortOrder.value === 1,
-    page: currentPage.value,
     orderBy: sortBy.value,
   };
 
   const roles = ['ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER'];
   AccessService.getUserRoles(route.params.projectId, roles, pageParams).then((users) => {
-    totalRows.value = users.totalCount;
+    const userRole = {}
     SelfReportService.getApproverConf(route.params.projectId).then((approverConf) => {
       const basicTableInfo = users.data.map((u) => {
         const allConf = approverConf.filter((c) => c.approverUserId === u.userId);
@@ -103,7 +102,15 @@ const loadData = () => {
           roleName: u.roleName,
           allConf,
         };
+      }).filter((tableRow) => {
+        const key = `${tableRow.userId}_${tableRow.roleName}`;
+        if (userRole[key]) {
+          return false;
+        }
+        userRole[key] = true;
+        return true;
       });
+      totalRows.value = basicTableInfo.length;
       updateTable(basicTableInfo);
     }).finally(() => {
       loading.value = false;
@@ -223,20 +230,6 @@ const collapseRow = (row) => {
   expandedRows.value = { ...expandedRows.value };
 }
 
-const pageChanged = (pagingInfo) => {
-  currentPage.value = pagingInfo.page + 1;
-  pageSize.value = pagingInfo.rows;
-  loadData();
-};
-
-const sortTable = (sortContext) => {
-  sortBy.value = sortContext.sortField;
-  sortOrder.value = sortContext.sortOrder;
-
-  // set to the first page
-  currentPage.value = 1;
-  loadData();
-};
 </script>
 
 <template>
@@ -254,12 +247,9 @@ const sortTable = (sortContext) => {
                        dataKey="userId"
                        show-gridlines
                        striped-rows
-                       lazy
                        paginator
                        :rows="pageSize"
                        :rowsPerPageOptions="possiblePageSizes"
-                       @page="pageChanged"
-                       @sort="sortTable"
                        @tableReady="loadData"
                        :totalRecords="totalRows"
                        v-model:sort-field="sortBy"
