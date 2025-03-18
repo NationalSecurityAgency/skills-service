@@ -509,4 +509,78 @@ describe('Approver Config Tests', () => {
             cy.get('[data-cy="editApprovalBtn"]').eq(4).should('not.be.enabled');
         });
     });
+
+    it('local admins, local approvers and group admins are de-duplicated in the approver table', function () {
+        cy.fixture('vars.json').then((vars) => {
+            cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
+
+            cy.createAdminGroupDef(1, { name: 'Admin Group 1' });
+            cy.request('POST', `/admin/admin-group-definitions/adminGroup1/users/user2/roles/ROLE_ADMIN_GROUP_OWNER`);
+            cy.request('POST', `/admin/admin-group-definitions/adminGroup1/users/user3/roles/ROLE_ADMIN_GROUP_OWNER`);
+            cy.request('POST', `/admin/admin-group-definitions/adminGroup1/users/user4/roles/ROLE_ADMIN_GROUP_OWNER`);
+            cy.addProjectToAdminGroupDef(1, 1)
+
+            cy.createAdminGroupDef(2, { name: 'Admin Group 2' });
+            cy.request('POST', `/admin/admin-group-definitions/adminGroup2/users/user3/roles/ROLE_ADMIN_GROUP_OWNER`);
+            cy.request('POST', `/admin/admin-group-definitions/adminGroup2/users/user4/roles/ROLE_ADMIN_GROUP_OWNER`);
+            cy.request('POST', `/admin/admin-group-definitions/adminGroup2/users/user5/roles/ROLE_ADMIN_GROUP_OWNER`);
+            cy.addProjectToAdminGroupDef(2, 1)
+
+            cy.visit('/administrator/projects/proj1/self-report/configure');
+
+            cy.get('[data-pc-section="page"]').contains('2').click();
+            cy.get('[data-cy="approvalConfNotAvailable"]').should('not.exist');
+
+            cy.get('[data-pc-section="page"]').contains('1').click();
+
+            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
+
+            const tableSelector = '[data-cy="skillApprovalConfTable"]'
+            cy.validateTable(tableSelector, [
+                [{
+                    colIndex: 0,
+                    value: 'user5'
+                }, {
+                    colIndex: 1,
+                    value: 'Admin'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user4'
+                }, {
+                    colIndex: 1,
+                    value: 'Admin'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user3'
+                }, {
+                    colIndex: 1,
+                    value: 'Admin'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user2'
+                }, {
+                    colIndex: 1,
+                    value: 'Admin'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user1'
+                }, {
+                    colIndex: 1,
+                    value: 'Approver'
+                }],
+                [{
+                    colIndex: 0,
+                    value: defaultUser
+                }, {
+                    colIndex: 1,
+                    value: 'Admin'
+                }],
+            ], 5);
+        });
+    });
 });
