@@ -43,9 +43,9 @@ const handleClick = (name, cssClass) => {
 </script>
 
 <template>
-  <div :class="['flex p-2 align-items-center', { 'surface-hover': options.odd }]" style="height: 100px">
+  <div :class="['flex flex-row justify-content-start p-2', { 'surface-hover': options.odd }]" style="height: 100px">
     <template v-for="(el, index) of item" :key="index">
-      <div class="icon-item flex-1">
+      <div class="icon-item w-[5rem]">
         <button class="p-link text-blue-400"
            @click.stop.prevent="handleClick(el.name, el.cssClass)"
            :class="`icon-${el.name}`"

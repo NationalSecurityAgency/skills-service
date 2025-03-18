@@ -146,7 +146,7 @@ const start = () => {
             </Card>
         </div>
 
-        <Message v-if="!quizInfo.userQuizPassed && allAttemptsExhausted" severity="error" :closable="false" data-cy="noMoreAttemptsAlert">
+        <Message v-if="(!quizInfo.userQuizPassed || quizInfo.multipleTakes) && allAttemptsExhausted" severity="error" :closable="false" data-cy="noMoreAttemptsAlert">
           No more attempts available. This quiz allows <Tag severity="secondary">{{quizInfo.maxAttemptsAllowed}}</Tag> maximum attempt<span v-if="quizInfo.maxAttemptsAllowed > 1">s</span>.
         </Message>
         <Message v-if="numQuestions === 0" severity="error" :closable="false" data-cy="quizHasNoQuestions">

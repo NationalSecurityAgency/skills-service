@@ -36,6 +36,58 @@ describe('Run Quiz Tests', () => {
         cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the Quiz')
     });
 
+    it('Tests "no more attempts" message', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.setQuizMaxNumAttempts(1, 2)
+        cy.setQuizMultipleTakes(1, true)
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"]').contains('This is quiz 1')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizFailed"]')
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"]').contains('This is quiz 1')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizFailed"]')
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="noMoreAttemptsAlert"]').contains('This quiz allows 2 maximum attempts')
+    });
+
+    it('Tests "no more attempts" message after passing and then failing a retakeable quiz.', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.setQuizMaxNumAttempts(1, 2)
+        cy.setQuizMultipleTakes(1, true)
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"]').contains('This is quiz 1')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the Quiz')
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="quizSplashScreen"]').contains('This is quiz 1')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
+        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.get('[data-cy="quizFailed"]')
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="noMoreAttemptsAlert"]').contains('This quiz allows 2 maximum attempts')
+    });
+
 });
 
 
