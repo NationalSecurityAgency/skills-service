@@ -453,7 +453,7 @@ const doneWithThisRun = () => {
         <template #content>
           <div class="flex flex-wrap items-center justify-center border-b py-2 mb-4" data-cy="subPageHeader">
             <div class="flex">
-              <div class="text-2xl text-primary font-bold skills-page-title-text-color" data-cy="quizName">{{ quizInfo.name }}</div>
+              <div class="text-2xl text-primary font-bold skills-page-title-text-color" data-cy="quizName" role="heading" aria-level="1">{{ quizInfo.name }}</div>
             </div>
             <div class="flex-1 text-right text-muted">
               <Tag severity="success" data-cy="numQuestions">{{quizInfo.quizLength}}</Tag> <span class="uppercase">questions</span>

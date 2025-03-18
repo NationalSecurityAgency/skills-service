@@ -153,7 +153,7 @@ const sortField = (column) => {
           <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
                   :class="{'flex': responsive.md.value }">
             <template #header>
-                <span class="text-primary"><i class="fas fa-user skills-color-users" aria-hidden="true"></i> {{ col.label }}</span>
+                <span><i class="fas fa-user skills-color-users" aria-hidden="true"></i> {{ col.label }}</span>
             </template>
             <template #body="slotProps">
               <div v-if="slotProps.field === 'userIdForDisplay'" class="flex flex-row flex-wrap"

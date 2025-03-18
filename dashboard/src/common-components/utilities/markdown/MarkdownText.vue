@@ -104,4 +104,8 @@ const setMarkdownText = (newText) => {
 .markdown-text-theme-dark pre {
   color: rgba(255, 255, 255, 0.87) !important;
 }
+
+.markdown .toastui-editor-contents  blockquote p {
+  color: #636363;
+}
 </style>

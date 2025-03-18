@@ -51,6 +51,7 @@ const moreThan1Badge = computed(() => recentlyAchievedBadges.value?.length > 1 )
           <span v-for="(badge, index) in recentlyAchievedBadges" :key="badge.badgeId">
             <router-link
                 :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('badgeDetails'), params: { badgeId: badge.badgeId } }"
+                class="sd-theme-tile-background-color"
                 :data-cy="`badgeLink-${badge.badgeId}`">{{ badge.badgeName }}</router-link>
             <span v-if="index !== (recentlyAchievedBadges.length - 1)">, </span>
           </span>.

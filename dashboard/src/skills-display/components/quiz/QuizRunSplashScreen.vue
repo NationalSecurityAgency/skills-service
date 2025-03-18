@@ -99,7 +99,7 @@ const start = () => {
         </Message>
         <slot name="aboveTitle" />
         <div class="mb-1 mt-1 text-3xl">
-          <span class="font-bold text-success skills-page-title-text-color">{{ quizInfo.name }}</span>
+          <span class="font-bold text-success skills-page-title-text-color" role="heading" aria-level="1">{{ quizInfo.name }}</span>
         </div>
 
         <Card v-if="!isSurveyType && canStartQuiz" class="my-2 text-xl skills-card-theme-border" :pt="{ content: { class: '!p-0' } }" data-cy="quizPassInfo">
@@ -146,7 +146,7 @@ const start = () => {
             </Card>
         </div>
 
-        <Message v-if="!quizInfo.userQuizPassed && allAttemptsExhausted" severity="error" :closable="false" data-cy="noMoreAttemptsAlert">
+        <Message v-if="(!quizInfo.userQuizPassed || quizInfo.multipleTakes) && allAttemptsExhausted" severity="error" :closable="false" data-cy="noMoreAttemptsAlert">
           No more attempts available. This quiz allows <Tag severity="secondary">{{quizInfo.maxAttemptsAllowed}}</Tag> maximum attempt<span v-if="quizInfo.maxAttemptsAllowed > 1">s</span>.
         </Message>
         <Message v-if="numQuestions === 0" severity="error" :closable="false" data-cy="quizHasNoQuestions">
