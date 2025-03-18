@@ -448,4 +448,8 @@ div.toastui-editor-contents {
 .toastui-editor-defaultUI-toolbar {
   flex-wrap: wrap;
 }
+
+.toastui-editor .toastui-editor-contents  blockquote p {
+  color: #636363;
+}
 </style>

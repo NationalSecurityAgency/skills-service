@@ -43,6 +43,7 @@ const moreThan1Badge = computed(() => recentlyAchievedBadges.value?.length > 1 )
       <achievement-msg-content v-if="!moreThan1Badge" title="Badge Achieved!">
         Bravo!
         <router-link
+            class="sd-theme-tile-background-color"
             :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('badgeDetails'), params: { badgeId: recentlyAchievedBadges[0].badgeId } }"
             :data-cy="`badgeLink-${recentlyAchievedBadges[0].badgeId}`">{{ recentlyAchievedBadges[0].badgeName }}</router-link> badge is all yours!
       </achievement-msg-content>
