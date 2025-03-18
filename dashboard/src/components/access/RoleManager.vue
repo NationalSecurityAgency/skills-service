@@ -30,6 +30,7 @@ import { useDialogMessages } from '@/components/utils/modal/UseDialogMessages.js
 import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
 import QuizService from '@/components/quiz/QuizService.js';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
+import { SkillsReporter } from '@skilltree/skills-client-js'
 
 const dialogMessages = useDialogMessages()
 // role constants
@@ -293,6 +294,9 @@ const addQuizUserRole = (role) => {
 const completeAddRole = (role) => {
   announcer.polite(`${getRoleDisplay(role)} role was added for ${getUserDisplay({ ...selectedUser.value, firstName: selectedUser.value.first, lastName: selectedUser.value.last })}`);
   emit('role-added', { userId: selectedUser.value.userId, role });
+  if (UserRolesUtil.isProjectAdminRole(role)) {
+    SkillsReporter.reportSkill('AddAdmin')
+  }
   loadData();
 }
 

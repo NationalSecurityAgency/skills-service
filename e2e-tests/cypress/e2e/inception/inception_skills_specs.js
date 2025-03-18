@@ -548,4 +548,31 @@ describe('Inception Skills Tests', () => {
         cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 10)
         cy.get('[data-cy="skillTag-skill1-tag1"]').should('not.exist')
     });
+
+    it('add project administrator', () => {
+        cy.createProject(1);
+        cy.visit('/administrator/projects/proj1/access')
+
+        cy.get('[data-cy="existingUserInput"]').type('root');
+        cy.get('#existingUserInput_0').contains('root').click();
+        cy.get('[data-cy="userRoleSelector"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Administrator"]').click();
+        cy.get('[data-cy="addUserBtn"]').click();
+
+        const tableSelector = '[data-cy=roleManagerTable]';
+        cy.get(`${tableSelector} [data-cy="userCell_root@skills.org"]`);
+
+        cy.assertInceptionPoints('Projects', 'AddAdmin', 50, false)
+    });
+
+    it('Expand Skills Details on Skills Page', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
+
+        cy.assertInceptionPoints('Skills', 'ExpandSkillDetailsSkillsPage', 5, false)
+    })
 });

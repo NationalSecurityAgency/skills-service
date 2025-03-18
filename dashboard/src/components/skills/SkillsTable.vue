@@ -488,6 +488,10 @@ const exportSkills = () => {
     isExporting.value = false
   })
 }
+
+const onRowExpand = () => {
+  SkillsReporter.reportSkill('ExpandSkillDetailsSkillsPage')
+}
 </script>
 
 <template>
@@ -596,6 +600,7 @@ const exportSkills = () => {
       :exportFilename="`skilltree-${subjectId}-skills`"
       :row-class="disableRow"
       :expander="true"
+      @rowExpand="onRowExpand"
       aria-label="Skills"
       data-cy="skillsTable">
 
