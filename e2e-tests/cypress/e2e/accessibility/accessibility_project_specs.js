@@ -269,5 +269,21 @@ describe('Accessibility Tests', () => {
             cy.customLighthouse();
             cy.customA11y()
         });
+
+        it(`blockquote minimum contrast ratio${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/administrator');
+            cy.get('[data-cy="projCard_proj1_manageBtn"]')
+            cy.get('[data-cy="newProjectButton"]').click()
+            cy.get('[data-cy="projectName"]').should('have.focus')
+            cy.injectAxe();
+            cy.get('[aria-label="Blockquote"]').click()
+            cy.get('[data-cy="markdownEditorInput"]').type('this is a quote')
+            cy.customLighthouse();
+            cy.customA11y()
+        });
+
     })
+
+
 });
