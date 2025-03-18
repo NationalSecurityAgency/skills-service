@@ -41,13 +41,12 @@ const getIconClass = (item) => {
 }
 
 const getIconBackground = (item) => {
-  const prefix = 'bg-'
   if (selfReportHelper.isApprovalRequest(item.eventStatus) || selfReportHelper.isAwaitingGrading(item.eventStatus)) {
-    return `${prefix}yellow-500`;
+    return 'bg-yellow-500';
   } else if (selfReportHelper.isApproved(item.eventStatus) || selfReportHelper.isPassed(item.eventStatus) || selfReportHelper.isCompleted(item.eventStatus)) {
-    return `${prefix}green-500`;
+    return 'bg-green-600 dark:bg-green-500';
   } else if (selfReportHelper.isRejected(item.eventStatus) || selfReportHelper.isFailed(item.eventStatus)) {
-    return `${prefix}red-500`;
+    return 'bg-red-500';
   }
   return 'bg-gray-500'
 }

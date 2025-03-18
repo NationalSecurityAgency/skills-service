@@ -99,7 +99,7 @@ const start = () => {
         </Message>
         <slot name="aboveTitle" />
         <div class="mb-1 mt-1 text-3xl">
-          <span class="font-bold text-success skills-page-title-text-color">{{ quizInfo.name }}</span>
+          <span class="font-bold text-success skills-page-title-text-color" role="heading" aria-level="1">{{ quizInfo.name }}</span>
         </div>
 
         <Card v-if="!isSurveyType && canStartQuiz" class="my-2 text-xl skills-card-theme-border" :pt="{ content: { class: '!p-0' } }" data-cy="quizPassInfo">
