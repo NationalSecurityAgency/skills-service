@@ -77,7 +77,7 @@ class AttachmentService {
     }
 
     @Transactional
-    Attachment copyAttachmentWithNewUuid(Attachment attachment, String newProjectId = null, String newQuizId = null) {
+    Attachment copyAttachmentWithNewUuid(Attachment attachment, String newProjectId = null, String newQuizId = null, String skillId = null) {
         String uuid = UUID.randomUUID().toString()
         Attachment res = new Attachment(
                 filename: attachment.filename,
@@ -87,7 +87,7 @@ class AttachmentService {
                 userId: attachment.userId,
                 projectId: newProjectId ?: attachment.projectId,
                 quizId: newProjectId ? null : (newQuizId ?: attachment.quizId), // then now a quiz for sure
-                skillId: newProjectId ? null : attachment.skillId, // if a new project then skillId may not exist
+                skillId: skillId ?: (newProjectId ? null : attachment.skillId), // if a new project then skillId may not exist
                 content: attachment.content
         )
         attachmentRepo.save(res)
