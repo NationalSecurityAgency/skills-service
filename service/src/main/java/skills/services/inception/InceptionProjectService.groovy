@@ -84,6 +84,7 @@ class InceptionProjectService {
     static final String subjectDashboardId = "Dashboard"
 
     @EventListener
+    @Transactional
     void init(ContextRefreshedEvent event) {
         log.info("Context initialized [${event}], checking if Inception skills need to be updated")
         updateSkillsIfNeeded()

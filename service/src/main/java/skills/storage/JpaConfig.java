@@ -15,8 +15,16 @@
  */
 package skills.storage;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
+import javax.sql.DataSource;
 
 /**
  * This @EnableJpaAuditing is required to support @CreatedDate and @LastModifiedDate annotations
@@ -24,5 +32,39 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @Configuration
 @EnableJpaAuditing()
 public class JpaConfig {
+
+    static final Logger log = LoggerFactory.getLogger(JpaConfig.class);
+
+    @Value("${spring.datasource.url}")
+    private String writerDataSourceUrl;
+
+    @Value("${spring.datasource.read-replica.url:null}")
+    private String readerDataSourceUrl;
+
+    @Value("${spring.datasource.username}")
+    private String username;
+
+    @Value("${spring.datasource.password}")
+    private String password;
+
+    @Bean
+    public DataSource routingDataSource() {
+        String readerUrl = (readerDataSourceUrl != null && !readerDataSourceUrl.equals("null")) ? readerDataSourceUrl : writerDataSourceUrl;
+        log.info("Writer dataSource URL: [{}], Reader dataSource URL: [{}]", writerDataSourceUrl, readerUrl);
+        return new RoutingDataSource(
+                dataSource(writerDataSourceUrl, false, false),
+                dataSource(readerUrl, true, false)
+        );
+    }
+
+    private DataSource dataSource(String url, boolean readOnly, boolean isAutoCommit) {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(url);
+        config.setUsername(username);
+        config.setPassword(password);
+        config.setReadOnly(readOnly);
+        config.setAutoCommit(isAutoCommit);
+        return new HikariDataSource(config);
+    }
 
 }
