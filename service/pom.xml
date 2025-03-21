@@ -753,6 +753,7 @@
                                 <exclude>**/*.mp4</exclude>
                                 <exclude>**/*.webm</exclude>
                                 <exclude>src/test/resources/certs/*.*</exclude>
+                                <exclude>src/test/resources/keycloak/*.*</exclude>
                                 <exclude>src/main/resources/public/**</exclude>
                                 <exclude>src/main/resources/templates/**</exclude>
                                 <exclude>**/license/*.properties</exclude>

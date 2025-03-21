@@ -16,22 +16,19 @@
 package skills.controller.filters;
 
 
-import com.google.common.collect.Lists;
 import groovy.util.logging.Slf4j;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import skills.storage.ReadOnlyDataSourceContext;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 
 @Component
 @Order(SecurityProperties.DEFAULT_FILTER_ORDER - 2)
@@ -56,7 +53,17 @@ public class ClientLibVersionFilter extends OncePerRequestFilter {
         response.addHeader("Access-Control-Expose-Headers", ALLOWED_HEADERS);
         response.addHeader(HEADER_UPGRADE_IN_PROGRESS, Boolean.valueOf(upgradeInProgress).toString());
 
-        filterChain.doFilter(request, response);
+        boolean isGet = request.getMethod().equalsIgnoreCase("GET");
+        if (isGet) {
+            ReadOnlyDataSourceContext.start();
+        }
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            if (isGet) {
+                ReadOnlyDataSourceContext.end();
+            }
+        }
     }
 
 }
