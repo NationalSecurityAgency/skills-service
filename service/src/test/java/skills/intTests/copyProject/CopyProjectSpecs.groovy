@@ -943,6 +943,144 @@ class CopyProjectSpecs extends CopyIntSpec {
         file.bytes == contents.getBytes()
     }
 
+    def "copy a project with skills that have internally hosted videos - videos should be copied"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        Resource video = new ClassPathResource("/testVideos/create-quiz.mp4")
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                file: video,
+                transcript: "transcript",
+                captions: "captions",
+                width: 600,
+                height: 400
+        ])
+
+        Resource video1 = new ClassPathResource("/testVideos/create-project.webm")
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[1].skillId, [
+                file: video1,
+                transcript: "transcript1",
+                captions: "captions1",
+                width: 601,
+                height: 401
+        ])
+
+        when:
+        List<Attachment> attachments_t1 = attachmentRepo.findAll()
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        List<Attachment> attachments_t2 = attachmentRepo.findAll()
+
+        def p1Skill1VideoAttributes = skillsService.getSkillVideoAttributes(p1.projectId, p1Skills[0].skillId)
+        def p1Skill2VideoAttributes = skillsService.getSkillVideoAttributes(p1.projectId, p1Skills[1].skillId)
+
+        def p2Skill1VideoAttributes = skillsService.getSkillVideoAttributes(projToCopy.projectId, p1Skills[0].skillId)
+        def p2Skill2VideoAttributes = skillsService.getSkillVideoAttributes(projToCopy.projectId, p1Skills[1].skillId)
+        then:
+        attachments_t1.size() == 2
+        Attachment originalCreateQuizVideo = attachments_t1.find { it.filename == 'create-quiz.mp4' }
+        Attachment originalCreateProjectVideo = attachments_t1.find { it.filename == 'create-project.webm' }
+
+        originalCreateQuizVideo.projectId == p1.projectId
+        originalCreateQuizVideo.skillId == p1Skills[0].skillId
+
+        originalCreateProjectVideo.projectId == p1.projectId
+        originalCreateProjectVideo.skillId == p1Skills[1].skillId
+
+        attachments_t2.size() == 4
+        Attachment originalCreateQuizVideo_t1 = attachments_t1.find { it.filename == 'create-quiz.mp4' && it.uuid == originalCreateQuizVideo.uuid }
+        Attachment originalCreateProjectVideo_t1 = attachments_t1.find { it.filename == 'create-project.webm' && it.uuid == originalCreateProjectVideo.uuid }
+
+        originalCreateQuizVideo_t1.projectId == p1.projectId
+        originalCreateQuizVideo_t1.skillId == p1Skills[0].skillId
+
+        originalCreateProjectVideo_t1.projectId == p1.projectId
+        originalCreateProjectVideo_t1.skillId == p1Skills[1].skillId
+
+        Attachment newCreateQuizVideo_t1 = attachments_t2.find { it.filename == 'create-quiz.mp4' && it.uuid != originalCreateQuizVideo.uuid }
+        Attachment newCreateProjectVideo_t1 = attachments_t2.find { it.filename == 'create-project.webm' && it.uuid != originalCreateProjectVideo.uuid }
+
+        newCreateQuizVideo_t1.projectId == projToCopy.projectId
+        newCreateQuizVideo_t1.skillId == p1Skills[0].skillId
+
+        newCreateProjectVideo_t1.projectId == projToCopy.projectId
+        newCreateProjectVideo_t1.skillId == p1Skills[1].skillId
+
+        p1Skill1VideoAttributes.videoUrl.toString().startsWith('/api/download/' + originalCreateQuizVideo.uuid)
+        p1Skill1VideoAttributes.internallyHostedAttachmentUuid == originalCreateQuizVideo.uuid
+        p1Skill2VideoAttributes.videoUrl.toString().startsWith('/api/download/' + originalCreateProjectVideo.uuid)
+        p1Skill2VideoAttributes.internallyHostedAttachmentUuid == originalCreateProjectVideo.uuid
+
+        p2Skill1VideoAttributes.videoUrl.toString().startsWith('/api/download/' + newCreateQuizVideo_t1.uuid)
+        p2Skill1VideoAttributes.internallyHostedAttachmentUuid == newCreateQuizVideo_t1.uuid
+        p2Skill2VideoAttributes.videoUrl.toString().startsWith('/api/download/' + newCreateProjectVideo_t1.uuid)
+        p2Skill2VideoAttributes.internallyHostedAttachmentUuid == newCreateProjectVideo_t1.uuid
+
+        p2Skill1VideoAttributes.transcript == p1Skill1VideoAttributes.transcript
+        p2Skill1VideoAttributes.captions == p1Skill1VideoAttributes.captions
+        p2Skill1VideoAttributes.width == p1Skill1VideoAttributes.width
+        p2Skill1VideoAttributes.height == p1Skill1VideoAttributes.height
+        p2Skill1VideoAttributes.isInternallyHosted == p1Skill1VideoAttributes.isInternallyHosted
+        p2Skill1VideoAttributes.internallyHostedFileName == p1Skill1VideoAttributes.internallyHostedFileName
+        p2Skill1VideoAttributes.videoType == p1Skill1VideoAttributes.videoType
+    }
+
+    def "copy a project with skills that have externally hosted videos"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [
+                videoUrl: "http://some.url",
+                transcript: "transcript",
+                captions: "captions",
+                width: 600,
+                height: 400
+        ])
+
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[1].skillId, [
+                videoUrl: "http://some1.url",
+                transcript: "transcript1",
+                captions: "captions1",
+                width: 601,
+                height: 401
+        ])
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def p1Skill1VideoAttributes = skillsService.getSkillVideoAttributes(p1.projectId, p1Skills[0].skillId)
+        def p1Skill2VideoAttributes = skillsService.getSkillVideoAttributes(p1.projectId, p1Skills[1].skillId)
+
+        def p2Skill1VideoAttributes = skillsService.getSkillVideoAttributes(projToCopy.projectId, p1Skills[0].skillId)
+        def p2Skill2VideoAttributes = skillsService.getSkillVideoAttributes(projToCopy.projectId, p1Skills[1].skillId)
+        then:
+        attachmentRepo.findAll().size() == 0
+
+        p1Skill1VideoAttributes.videoUrl.toString().startsWith('http://some.url')
+        !p1Skill1VideoAttributes.internallyHostedAttachmentUuid
+        p1Skill2VideoAttributes.videoUrl.toString().startsWith('http://some1.url')
+        !p1Skill2VideoAttributes.internallyHostedAttachmentUuid
+
+        p2Skill1VideoAttributes.videoUrl.toString().startsWith('http://some.url')
+        !p2Skill1VideoAttributes.internallyHostedAttachmentUuid
+        p2Skill2VideoAttributes.videoUrl.toString().startsWith('http://some1.url')
+        !p2Skill2VideoAttributes.internallyHostedAttachmentUuid
+
+        p2Skill1VideoAttributes.transcript == p1Skill1VideoAttributes.transcript
+        p2Skill1VideoAttributes.captions == p1Skill1VideoAttributes.captions
+        p2Skill1VideoAttributes.width == p1Skill1VideoAttributes.width
+        p2Skill1VideoAttributes.height == p1Skill1VideoAttributes.height
+        p2Skill1VideoAttributes.isInternallyHosted == p1Skill1VideoAttributes.isInternallyHosted
+        p2Skill1VideoAttributes.internallyHostedFileName == p1Skill1VideoAttributes.internallyHostedFileName
+        p2Skill1VideoAttributes.videoType == p1Skill1VideoAttributes.videoType
+    }
+
     def "copied percent-based levels do not have from/to points set in DB"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
