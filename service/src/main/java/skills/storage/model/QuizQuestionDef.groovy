@@ -20,6 +20,8 @@ import groovy.transform.ToString
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import skills.services.quiz.QuizQuestionType
+import org.hibernate.annotations.Type
+import io.hypersistence.utils.hibernate.type.json.JsonType
 
 import jakarta.persistence.*
 
@@ -52,4 +54,7 @@ class QuizQuestionDef {
     @LastModifiedDate
     Date updated
 
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb")
+    String attributes
 }

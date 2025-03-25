@@ -21,7 +21,9 @@ import { useQuizConfig } from "@/stores/UseQuizConfig.js";
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
+import {useRoute} from "vue-router";
 
+const route = useRoute()
 const quizConfig = useQuizConfig()
 
 const props = defineProps({
@@ -177,6 +179,12 @@ const moveQuestion = (changeIndexBy) => {
           Any associated answers and metrics for this question will also be removed. Please proceed with caution.
         </div>
       </removal-validation>
+    </div>
+    <div>
+      <router-link :aria-label="`Configure video for question ${question.id}`"
+                   :to="`/administrator/quizzes/${route.params.quizId}/questions/${question.id}/config-video`" tabindex="-1">
+        Configure Video
+      </router-link>
     </div>
   </div>
 

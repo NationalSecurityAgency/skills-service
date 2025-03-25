@@ -2827,4 +2827,9 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="51" author="skills team">
+        <addColumn tableName="quiz_question_definition">
+            <column name="attributes" type="jsonb" />
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
