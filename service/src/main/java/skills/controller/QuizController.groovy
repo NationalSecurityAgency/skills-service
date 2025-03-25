@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
+import skills.PublicProps
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
@@ -35,12 +37,15 @@ import skills.quizLoading.QuizRunService
 import skills.quizLoading.QuizSettings
 import skills.quizLoading.model.*
 import skills.services.adminGroup.AdminGroupService
+import skills.services.attributes.SkillAttributeService
+import skills.services.attributes.SkillVideoAttrs
 import skills.services.quiz.QuizDefService
 import skills.services.quiz.QuizRoleService
 import skills.services.quiz.QuizSettingsService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionsHistoryService
+import skills.services.video.QuizVideoService
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.auth.RoleName
 import skills.utils.TablePageUtil
@@ -73,6 +78,15 @@ class QuizController {
 
     @Autowired
     AdminGroupService adminGroupService
+
+    @Autowired
+    SkillAttributeService skillAttributeService
+
+    @Autowired
+    PublicPropsBasedValidator propsBasedValidator
+
+    @Autowired
+    QuizVideoService quizVideoService
 
     @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -156,6 +170,42 @@ class QuizController {
         quizDefService.setDisplayOrder(quizId, questionId, patchRequest)
         return RequestResult.success()
     }
+
+    @RequestMapping(value = "/{quizId}/questions/{questionId}/video", method = RequestMethod.DELETE)
+    RequestResult deleteQuestionVideoAttrs(@PathVariable("quizId") String quizId, @PathVariable("questionId") Integer questionId) {
+        quizVideoService.deleteVideoAttrs(quizId, questionId)
+        return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/{quizId}/questions/{questionId}/video", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    SkillVideoAttrs getQuestionVideoAttrs(@PathVariable("quizId") String quizId, @PathVariable("questionId") Integer questionId) {
+        return quizVideoService.getVideoAttrs(quizId, questionId)
+    }
+
+    @RequestMapping(value = "/{quizId}/questions/{questionId}/video", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    SkillVideoAttrs updateVideoForQuestion(@PathVariable("quizId") String quizId,
+                                                 @PathVariable("questionId") Integer questionId,
+                                                 @RequestParam(name = "file", required = false) MultipartFile file,
+                                                 @RequestParam(name = "videoUrl", required = false) String videoUrl,
+                                                 @RequestParam(name = "isAlreadyHosted", required = false, defaultValue = "false") Boolean isAlreadyHosted,
+                                                 @RequestParam(name = "captions", required = false) String captions,
+                                                 @RequestParam(name = "transcript", required = false) String transcript,
+                                                 @RequestParam(name = "width", required = false) Double width,
+                                                 @RequestParam(name = "height", required = false) Double height) {
+
+        if (captions) {
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxVideoCaptionsLength, "Captions", captions)
+        }
+        if (transcript) {
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxVideoTranscriptLength, "Transcript", transcript)
+        }
+
+        SkillVideoAttrs res = quizVideoService.saveVideo(quizId, questionId, isAlreadyHosted, file, videoUrl, captions, transcript, width, height)
+        return res
+    }
+
 
     @RequestMapping(value = "/{quizId}/questions", method = [RequestMethod.GET], produces = "application/json")
     @ResponseBody
