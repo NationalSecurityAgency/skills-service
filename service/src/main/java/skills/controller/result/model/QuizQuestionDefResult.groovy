@@ -25,4 +25,6 @@ class QuizQuestionDefResult {
 
     List<QuizAnswerDefResult> answers
     int displayOrder
+
+    String attributes
 }

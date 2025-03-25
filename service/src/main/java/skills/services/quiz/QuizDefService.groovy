@@ -16,6 +16,7 @@
 package skills.services.quiz
 
 import callStack.profiler.Profile
+import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,6 +40,7 @@ import skills.services.*
 import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.ServiceValidatorHelper
 import skills.services.admin.UserCommunityService
+import skills.services.attributes.SkillVideoAttrs
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
@@ -589,6 +591,26 @@ class QuizDefService {
         }
     }
 
+    void deleteVideoAttrs(String quizId, Integer questionId) {
+      quizQuestionRepo.deleteVideoAttrs(quizId, questionId)
+    }
+
+    @Transactional
+    SkillVideoAttrs getVideoAttributesForQuestion(String quizId, Integer questionId) {
+        String attributes = quizQuestionRepo.getVideoAttributes(quizId, questionId)
+        if(attributes) {
+            SkillVideoAttrs res = mapper.readValue(attributes, SkillVideoAttrs.class)
+            return res
+        }
+        return null
+    }
+
+    static final ObjectMapper mapper = new ObjectMapper()
+    @Transactional
+    void saveVideoAttributesForQuestion(String quizId, Integer questionId, SkillVideoAttrs videoAttrs) {
+        quizQuestionRepo.saveVideoAttributes(quizId, questionId, mapper.writeValueAsString(videoAttrs))
+    }
+
     @Transactional
     QuizQuestionsResult getQuestionDefs(String quizId) {
         QuizDef quizDef = findQuizDef(quizId)
@@ -779,6 +801,7 @@ class QuizDefService {
                 questionType: savedQuestion.type,
                 answers: savedAnswers.collect { convert (it)}.sort { it.displayOrder},
                 displayOrder: savedQuestion.displayOrder,
+                attributes: savedQuestion.attributes
         )
     }
 
