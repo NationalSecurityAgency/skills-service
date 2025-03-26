@@ -23,4 +23,5 @@ class QuizQuestionInfo {
     String questionType
     String answerHint
     Integer displayOrder
+    String mediaAttributes
 }

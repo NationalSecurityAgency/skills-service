@@ -128,7 +128,7 @@ const createQuizRoutes = () => {
         },
       },
     }, {
-      name: 'ConfigureVideo',
+      name: 'ConfigureQuizVideo',
       path: 'questions/:questionId/config-video',
       component: VideoConfigPage,
       meta: {

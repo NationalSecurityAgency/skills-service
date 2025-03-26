@@ -24,6 +24,7 @@ import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEdito
 import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 import {useDebounceFn} from "@vueuse/core";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import VideoPlayer from "@/common-components/video/VideoPlayer.vue";
 
 const props = defineProps({
   q: Object,
@@ -42,6 +43,24 @@ const answerOptions = ref([])
 const answerRating = ref(0)
 const answerText = ref(props.q.questionType === QuestionType.TextInput ? (props.q.answerOptions[0]?.answerText || '') : '')
 
+const mediaAttributes = computed(() => {
+  const attr = props.q.mediaAttributes ? JSON.parse(props.q.mediaAttributes) : null;
+  const captionsUrl = attr.captions
+      ? `/admin/quiz-definitions/${props.quizId}/questions/${props.q.id}/videoCaptions`
+      : null;
+  if(attr) {
+    return {
+      videoId: props.q.id,
+      url: attr.videoUrl,
+      videoType: attr.videoType ? attr.videoType : null,
+      isAudio: attr.videoType ? attr.videoType.includes('audio/') : null,
+      captionsUrl,
+      width: attr.width,
+      height: attr.height,
+    };
+  }
+  return null;
+})
 const isMultipleChoice = computed(() => {
   return props.q.questionType === QuestionType.MultipleChoice;
 })
@@ -187,6 +206,11 @@ const needsGrading = computed(() => QuizStatus.isNeedsGrading(props.q.gradedInfo
       <div class="flex flex-1">
         <div class="flex flex-col w-full">
           <markdown-text :text="q.question" data-cy="questionsText" :instance-id="`${q.id}`" />
+          <div v-if="mediaAttributes">
+            <video-player :video-player-id="`quizVideoFor-${q.id}`"
+                          :options="mediaAttributes"
+                          :storeAndRecoverSizeFromStorage="true" />
+          </div>
           <div v-if="isTextInput">
             <div v-if="needsGrading" class="border rounded-border border-surface px-4">
               <markdown-text
