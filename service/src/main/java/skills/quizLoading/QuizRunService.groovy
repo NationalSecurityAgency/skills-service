@@ -272,7 +272,8 @@ class QuizRunService {
                                 answerOption: it.answer
                         )
                     },
-                    answerHint: includeAnswerHints ? it.answerHint : null
+                    answerHint: includeAnswerHints ? it.answerHint : null,
+                    mediaAttributes: it.attributes
             )
         }
         return questions

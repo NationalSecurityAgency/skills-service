@@ -90,7 +90,7 @@ const requestEndpoint = computed(() => {
   return isSkill ? `projects/${container}/skills/${item}` : `quiz-definitions/${container}/questions/${item}`;
 })
 const captionsEndpoint = computed(() => {
-  return `/api/${requestEndpoint}/videoCaptions`
+  return isSkill ? `/api/${requestEndpoint.value}/videoCaptions` : `/admin/${requestEndpoint.value}/videoCaptions`
 })
 const computedVideoConf = computed(() => {
   const captionsUrl = videoConf.value.captions && videoConf.value.captions.trim().length > 0
