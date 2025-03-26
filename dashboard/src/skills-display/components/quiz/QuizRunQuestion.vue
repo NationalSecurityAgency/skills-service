@@ -147,13 +147,18 @@ const ratingChanged = (value) => {
   }
 }
 const reportAnswer = (answer) => {
-  if (!isLoading.value && props.validate) {
-    return props.validate(fieldName.value).then((validationResults) => {
-      if (validationResults.valid) {
-        return QuizRunService.reportAnswer(props.quizId, props.quizAttemptId, answer.changedAnswerId, answer.changedAnswerIdSelected, answer.answerText)
-      }
-      return null;
-    })
+  if (!isLoading.value) {
+    const reportAnswer = () => QuizRunService.reportAnswer(props.quizId, props.quizAttemptId, answer.changedAnswerId, answer.changedAnswerIdSelected, answer.answerText)
+    if (props.validate && QuestionType.isTextInput(props.q.questionType)) {
+      return props.validate(fieldName.value).then((validationResults) => {
+        if (validationResults.valid) {
+          return reportAnswer()
+        }
+        return null;
+      })
+    } else {
+      return reportAnswer()
+    }
   }
   return new Promise((resolve) => {
     resolve(null);
