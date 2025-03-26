@@ -52,7 +52,7 @@ public class JpaConfig {
         String readerUrl = (readerDataSourceUrl != null && !readerDataSourceUrl.equals("null")) ? readerDataSourceUrl : writerDataSourceUrl;
         log.info("Writer dataSource URL: [{}], Reader dataSource URL: [{}]", writerDataSourceUrl, readerUrl);
         return new RoutingDataSource(
-                dataSource(writerDataSourceUrl, false, false),
+                dataSource(writerDataSourceUrl, false, true),
                 dataSource(readerUrl, true, false)
         );
     }

@@ -43,7 +43,7 @@
 
         <micrometer-registry.version>1.10.3</micrometer-registry.version>
 
-        <db-scheduler.version>11.6</db-scheduler.version>
+        <db-scheduler.version>15.3.0</db-scheduler.version>
 
         <caffeine.version>3.1.1</caffeine.version>
 
