@@ -15,6 +15,7 @@
  */
 package skills.controller
 
+import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,6 +37,7 @@ import skills.controller.result.model.*
 import skills.quizLoading.QuizRunService
 import skills.quizLoading.QuizSettings
 import skills.quizLoading.model.*
+import skills.services.VideoCaptionsService
 import skills.services.adminGroup.AdminGroupService
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
@@ -87,6 +89,9 @@ class QuizController {
 
     @Autowired
     QuizVideoService quizVideoService
+
+    @Autowired
+    VideoCaptionsService videoCaptionsService;
 
     @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -206,6 +211,19 @@ class QuizController {
         return res
     }
 
+    @GetMapping(value = "/{quizId}/questions/{questionId}/videoCaptions", produces = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseBody
+    @Profile
+    String getVideoCaptions(@PathVariable("quizId") String quizId, @PathVariable("questionId") Integer questionId) {
+        return videoCaptionsService.getVideoCaptionsForQuiz(quizId, questionId);
+    }
+
+    @GetMapping(value = "/{quizId}/questions/{questionId}/videoTranscript", produces = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseBody
+    @Profile
+    String getVideoTranscript(@PathVariable("quizId") String quizId, @PathVariable("questionId") Integer questionId) {
+        return videoCaptionsService.getVideoTranscriptForQuiz(quizId, questionId);
+    }
 
     @RequestMapping(value = "/{quizId}/questions", method = [RequestMethod.GET], produces = "application/json")
     @ResponseBody

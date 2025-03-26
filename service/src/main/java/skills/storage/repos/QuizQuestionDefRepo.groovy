@@ -67,4 +67,21 @@ interface QuizQuestionDefRepo extends JpaRepository<QuizQuestionDef, Long> {
     void deleteVideoAttrs(String quizId, Integer questionId)
 
     Integer countByQuizId(String quizId)
+
+    @Nullable
+    @Query(value = '''select attributes ->> 'captions'
+        from quiz_question_definition
+        where quiz_id = ?1
+              and id = ?2
+    ''', nativeQuery = true)
+    String getVideoCaptions(String quizId, Integer questionId)
+
+    @Nullable
+    @Query(value = '''select attributes ->> 'transcript'
+        from quiz_question_definition
+        where quiz_id = ?1
+            and id = ?2
+    ''', nativeQuery = true)
+    String getVideoTranscripts(String quizId, Integer questionId)
+
 }
