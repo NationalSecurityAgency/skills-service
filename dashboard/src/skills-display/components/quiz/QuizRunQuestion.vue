@@ -25,6 +25,8 @@ import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 import {useDebounceFn} from "@vueuse/core";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import VideoPlayer from "@/common-components/video/VideoPlayer.vue";
+import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
+import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 
 const props = defineProps({
   q: Object,
@@ -57,6 +59,7 @@ const mediaAttributes = computed(() => {
       captionsUrl,
       width: attr.width,
       height: attr.height,
+      transcript: attr.transcript,
     };
   }
   return null;
@@ -184,6 +187,11 @@ const reportAnswer = (answer) => {
   });
 }
 const needsGrading = computed(() => QuizStatus.isNeedsGrading(props.q.gradedInfo?.status))
+
+const showTranscript = ref(false);
+const toggleTranscript = () => {
+  showTranscript.value = !showTranscript.value;
+}
 </script>
 
 <template>
@@ -210,6 +218,26 @@ const needsGrading = computed(() => QuizStatus.isNeedsGrading(props.q.gradedInfo
             <video-player :video-player-id="`quizVideoFor-${q.id}`"
                           :options="mediaAttributes"
                           :storeAndRecoverSizeFromStorage="true" />
+            <div v-if="mediaAttributes.transcript" class="text-center">
+              <SkillsButton style="text-decoration: underline; padding-right: 0.25rem; padding-left: 0.5rem;"
+                            class="skills-theme-primary-color"
+                            :label="!showTranscript ? 'View Transcript' : 'Hide Transcript'"
+                            variant="link"
+                            size="small"
+                            text
+                            data-cy="viewTranscriptBtn"
+                            @click="toggleTranscript">
+
+              </SkillsButton>
+            </div>
+            <Card v-if="mediaAttributes.transcript && showTranscript">
+              <template #content>
+                <label for="transcriptDisplay" class="h4">{{ mediaAttributes.isAudio ? 'Audio' : 'Video'}} Transcript:</label>
+                <Panel id="transcriptDisplay" data-cy="videoTranscript">
+                  <p class="m-0">{{ mediaAttributes.transcript }}</p>
+                </Panel>
+              </template>
+            </Card>
           </div>
           <div v-if="isTextInput">
             <div v-if="needsGrading" class="border rounded-border border-surface px-4">
