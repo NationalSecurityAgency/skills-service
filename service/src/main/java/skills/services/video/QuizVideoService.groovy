@@ -64,7 +64,7 @@ class QuizVideoService {
 
         SkillVideoAttrs videoAttrs = new SkillVideoAttrs()
         if (isAlreadyHosted) {
-            SkillsValidator.isTrue(existingVideoAttributes?.isInternallyHosted, "Expected video to already be internally hosted but it was not present.", quizId, questionId)
+            SkillsValidator.isTrue(existingVideoAttributes?.isInternallyHosted, "Expected video to already be internally hosted but it was not present.", quizId, questionId.toString())
             videoAttrs.videoUrl = existingVideoAttributes.videoUrl
             videoAttrs.videoType = existingVideoAttributes.videoType
             videoAttrs.isInternallyHosted = existingVideoAttributes.isInternallyHosted
@@ -74,7 +74,7 @@ class QuizVideoService {
             videoAttrs.height = existingVideoAttributes.height
         } else  {
             if (StringUtils.isBlank(videoUrl) && !file) {
-                throw new SkillException("Either videoUrl or file must be supplied", quizId, questionId)
+                throw new SkillException("Either videoUrl or file must be supplied", quizId, questionId.toString())
             }
 
             if (existingVideoAttributes?.internallyHostedAttachmentUuid) {
