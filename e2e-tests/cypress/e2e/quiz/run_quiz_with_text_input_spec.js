@@ -295,6 +295,37 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
     });
 
+    it('text value is only saved if validation passes', () => {
+        cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/answers/*').as('reportAnswer')
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('jabberwoc')
+        cy.wait(2000)
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('k')
+        cy.wait('@reportAnswer')
+        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').should('not.be.visible')
+
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('y')
+        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky')
+
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('{backspace}')
+        cy.wait('@reportAnswer')
+        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').should('not.be.visible')
+
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('y')
+        cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky')
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"] .toastui-editor-main-container').contains('jabberwock')
+        cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"] .toastui-editor-main-container').contains('jabberwocky').should('not.exist')
+    });
+
     it('Input Text validation: validation endpoint only called for question being updated', () => {
         cy.intercept({ method: 'POST', url:'/api/validation/description*'}, (req) => {
             if (req.body.value.includes('Answer to question #1')) {
