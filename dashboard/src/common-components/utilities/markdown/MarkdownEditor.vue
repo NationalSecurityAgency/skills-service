@@ -27,8 +27,11 @@ import { useByteFormat } from '@/common-components/filter/UseByteFormat.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import FileUploadService from '@/common-components/utilities/FileUploadService.js'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
+import { useDebounceFn } from '@vueuse/core'
+import {useLog} from "@/components/utils/misc/useLog.js";
 
 const appConfig = useAppConfig()
+const log = useLog()
 
 const props = defineProps({
   value: String,
@@ -168,26 +171,42 @@ function onLoad() {
   markdownAccessibilityFixes.fixAccessibilityIssues(idForToastUIEditor, props.allowInsertImages)
 }
 
-function onEditorChange() {
+const handleOnChange = () => {
   attachmentError.value = ''
 
-  // This looks for an image at the start of the description and adds a newline before it
-  // eslint-disable-next-line no-useless-escape
-  const imgMatch = /^\!\[.*\]\(.*\)/
-  const current = markdownText()
-  if (current.match(imgMatch)) {
-    moveCursorToStart()
-    insertText('\n')
-    moveCursorToStart()
-  }
-
+  const startTime = performance.now();
   if (props.useHtml) {
     value.value = htmlText()
   } else {
     value.value = markdownText()
   }
+  const endTime = performance.now();
+  const totalMs = endTime - startTime;
+  const functionCandidate = debounceBasedOnRetrievingTextLatency(totalMs)
+  if (functionCandidate.func !== onChangeFunc.value) {
+    log.info(`Change handleOnChange function to ${functionCandidate.message}`)
+    onChangeFunc.value = functionCandidate.func
+  }
   emit('value-changed', value.value)
 }
+const debounceBasedOnRetrievingTextLatency = (latencyInMs) => {
+  if (latencyInMs < 20) {
+    return { func: debounce200, message: '200ms debounce' }
+  } else if (latencyInMs < 50) {
+    return { func: debounce400, message: '400ms debounce' }
+  } else if (latencyInMs < 80) {
+    return { func: debounce600, message: '600ms debounce' }
+  } else if (latencyInMs < 120) {
+    return { func: debounce800, message: '800ms debounce' }
+  }
+  return { func: debounce1000, message: '1s debounce' }
+}
+const debounce200 = useDebounceFn(handleOnChange, 200)
+const debounce400 = useDebounceFn(handleOnChange, 400)
+const debounce600 = useDebounceFn(handleOnChange, 600)
+const debounce800 = useDebounceFn(handleOnChange, 800)
+const debounce1000 = useDebounceFn(handleOnChange, 1000)
+const onChangeFunc = ref(debounce200)
 
 const editorFeatureLinkRef = ref(null)
 function onKeydown(mode, event) {
@@ -300,7 +319,7 @@ const editorStyle = computed(() => {
                        :options="editorOptions"
                        :height="markdownHeight"
                        :disabled="disabled"
-                       @change="onEditorChange"
+                       @change="onChangeFunc"
                        @keydown="onKeydown"
                        @focus="handleFocus"
                        @load="onLoad" />
