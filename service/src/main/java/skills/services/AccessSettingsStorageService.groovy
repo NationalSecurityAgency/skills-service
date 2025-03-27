@@ -516,38 +516,6 @@ class AccessSettingsStorageService {
         return new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
     }
 
-    /**
-     * Retreives the existing User and UserAttrs or creates a new one if they do not
-     * already exist. This method DOES NOT update any attributes on existing records
-     * @param userInfo
-     * @return
-     */
-    @Transactional()
-    @Profile
-    UserAndUserAttrsHolder getOrCreate(UserInfo userInfo) {
-        userInfoValidator.validate(userInfo)
-        String userId = userInfo.username?.toLowerCase()
-        UserAttrs userAttrs = userAttrsService.getOrCreate(userId, userInfo)
-
-        User user = loadUserFromLocalDb(userId)
-
-        if (user) {
-            new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
-        } else {
-            // create new user with APP_USER role
-            log.debug("Creating new app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
-            userAttrsService.lockUser(userId)
-            user = loadUserFromLocalDb(userId)
-            if (!user) {
-                user = createNewUser(userInfo)
-                log.debug("Created new user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
-            } else {
-                log.debug("Was going to create but already exist for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
-            }
-            return new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
-        }
-    }
-
     @Transactional(readOnly=true)
     @Profile
     UserAndUserAttrsHolder get(UserInfo userInfo) {
