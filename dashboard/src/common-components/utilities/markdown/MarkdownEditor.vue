@@ -182,15 +182,26 @@ const handleOnChange = () => {
   }
   const endTime = performance.now();
   const totalMs = endTime - startTime;
-  const functionCandidate = debounceBasedOnRetrievingTextLatency(totalMs)
-  if (functionCandidate.func !== onChangeFunc.value) {
-    log.info(`Change handleOnChange function to ${functionCandidate.message}`)
-    onChangeFunc.value = functionCandidate.func
+
+  const minLenToConsiderDebounce = 5000
+  if (value.value?.length < minLenToConsiderDebounce) {
+    if (onChangeFunc.value !== withoutDebounce) {
+      log.info(`Message is too small, change handleOnChange back to default - no debounce`)
+      onChangeFunc.value = withoutDebounce
+    }
+  } else if ( value.value?.length > minLenToConsiderDebounce) {
+    const functionCandidate = debounceBasedOnRetrievingTextLatency(totalMs)
+    if (functionCandidate.func !== onChangeFunc.value) {
+      log.info(`Change handleOnChange function to ${functionCandidate.message}`)
+      onChangeFunc.value = functionCandidate.func
+    }
   }
   emit('value-changed', value.value)
 }
 const debounceBasedOnRetrievingTextLatency = (latencyInMs) => {
-  if (latencyInMs < 20) {
+  if (latencyInMs < 10) {
+    return { func: withoutDebounce, message: 'no debounce' }
+  } else if (latencyInMs < 30) {
     return { func: debounce200, message: '200ms debounce' }
   } else if (latencyInMs < 50) {
     return { func: debounce400, message: '400ms debounce' }
@@ -201,12 +212,13 @@ const debounceBasedOnRetrievingTextLatency = (latencyInMs) => {
   }
   return { func: debounce1000, message: '1s debounce' }
 }
+const withoutDebounce = handleOnChange
 const debounce200 = useDebounceFn(handleOnChange, 200)
 const debounce400 = useDebounceFn(handleOnChange, 400)
 const debounce600 = useDebounceFn(handleOnChange, 600)
 const debounce800 = useDebounceFn(handleOnChange, 800)
 const debounce1000 = useDebounceFn(handleOnChange, 1000)
-const onChangeFunc = ref(debounce200)
+const onChangeFunc = ref(withoutDebounce)
 
 const editorFeatureLinkRef = ref(null)
 function onKeydown(mode, event) {
