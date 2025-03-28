@@ -127,45 +127,53 @@ const moveQuestion = (changeIndexBy) => {
           </Message>
         </div>
       </div>
-      <div v-if="!quizConfig.isReadOnlyQuiz" class="flex flex-none justify-center items-start">
-        <ButtonGroup class="ml-1 mt-2 mr-4">
-          <SkillsButton @click="editQuestion"
-                        icon="fas fa-edit"
-                        label="Edit"
-                        outlined
-                        size="small"
-                        :data-cy="`editQuestionButton_${questionNum}`"
-                        :aria-label="`Edit Question Number ${questionNum}`"
-                        :ref="`editQuestion_${question.id}`"
-                        :id="`editQuestion_${question.id}`"
-                        :track-for-focus="true"
-                        title="Edit Question">
-          </SkillsButton>
-          <SkillsButton @click="copyQuestion"
-                        icon="fas fa-copy"
-                        label="Copy"
-                        outlined
-                        size="small"
-                        :data-cy="`copyQuestionButton_${questionNum}`"
-                        :aria-label="`Copy Question Number ${questionNum}`"
-                        :ref="`copyQuestion_${question.id}`"
-                        :id="`copyQuestion_${question.id}`"
-                        :track-for-focus="true"
-                        title="Copy Question">
-          </SkillsButton>
-          <SkillsButton @click="showDeleteDialog = true"
-                        icon="text-warning fas fa-trash"
-                        label="Delete"
-                        outlined
-                        size="small"
-                        :data-cy="`deleteQuestionButton_${questionNum}`"
-                        :aria-label="`delete question number ${questionNum}`"
-                        :ref="`deleteQuestion_${question.id}`"
-                        :id="`deleteQuestion_${question.id}`"
-                        :track-for-focus="true"
-                        title="Delete Question">
-          </SkillsButton>
-        </ButtonGroup>
+      <div v-if="!quizConfig.isReadOnlyQuiz" class="flex flex-col gap-4">
+        <div>
+          <ButtonGroup class="ml-1 mt-2 mr-4">
+            <SkillsButton @click="editQuestion"
+                          icon="fas fa-edit"
+                          label="Edit"
+                          outlined
+                          size="small"
+                          :data-cy="`editQuestionButton_${questionNum}`"
+                          :aria-label="`Edit Question Number ${questionNum}`"
+                          :ref="`editQuestion_${question.id}`"
+                          :id="`editQuestion_${question.id}`"
+                          :track-for-focus="true"
+                          title="Edit Question">
+            </SkillsButton>
+            <SkillsButton @click="copyQuestion"
+                          icon="fas fa-copy"
+                          label="Copy"
+                          outlined
+                          size="small"
+                          :data-cy="`copyQuestionButton_${questionNum}`"
+                          :aria-label="`Copy Question Number ${questionNum}`"
+                          :ref="`copyQuestion_${question.id}`"
+                          :id="`copyQuestion_${question.id}`"
+                          :track-for-focus="true"
+                          title="Copy Question">
+            </SkillsButton>
+            <SkillsButton @click="showDeleteDialog = true"
+                          icon="text-warning fas fa-trash"
+                          label="Delete"
+                          outlined
+                          size="small"
+                          :data-cy="`deleteQuestionButton_${questionNum}`"
+                          :aria-label="`delete question number ${questionNum}`"
+                          :ref="`deleteQuestion_${question.id}`"
+                          :id="`deleteQuestion_${question.id}`"
+                          :track-for-focus="true"
+                          title="Delete Question">
+            </SkillsButton>
+          </ButtonGroup>
+        </div>
+        <div class="flex justify-end mr-4">
+          <router-link :aria-label="`Configure video for question ${question.id}`" style="text-decoration: underline;"
+                       :to="`/administrator/quizzes/${route.params.quizId}/questions/${question.id}/config-video`" tabindex="-1">
+            <Avatar icon="far fa-play-circle" shape="circle" /> {{ question.attributes ? "Edit Audio/Video" : "Add Audio/Video"}}
+          </router-link>
+        </div>
       </div>
 
       <removal-validation
@@ -179,12 +187,6 @@ const moveQuestion = (changeIndexBy) => {
           Any associated answers and metrics for this question will also be removed. Please proceed with caution.
         </div>
       </removal-validation>
-    </div>
-    <div>
-      <router-link :aria-label="`Configure video for question ${question.id}`"
-                   :to="`/administrator/quizzes/${route.params.quizId}/questions/${question.id}/config-video`" tabindex="-1">
-        Configure Video
-      </router-link>
     </div>
   </div>
 
