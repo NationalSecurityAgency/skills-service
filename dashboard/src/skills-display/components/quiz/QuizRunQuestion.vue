@@ -47,7 +47,7 @@ const answerText = ref(props.q.questionType === QuestionType.TextInput ? (props.
 
 const mediaAttributes = computed(() => {
   const attr = props.q.mediaAttributes ? JSON.parse(props.q.mediaAttributes) : null;
-  const captionsUrl = attr.captions
+  const captionsUrl = attr?.captions
       ? `/admin/quiz-definitions/${props.quizId}/questions/${props.q.id}/videoCaptions`
       : null;
   if(attr) {
