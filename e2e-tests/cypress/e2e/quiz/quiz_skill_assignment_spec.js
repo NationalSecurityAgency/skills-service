@@ -159,7 +159,7 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').should('not.be.checked');
         cy.get('[data-cy="quizSelector"]').should('not.exist')
 
-        cy.clickSaveDialogBtn()').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
