@@ -171,19 +171,33 @@ function onLoad() {
   markdownAccessibilityFixes.fixAccessibilityIssues(idForToastUIEditor, props.allowInsertImages)
 }
 
-const handleOnChange = () => {
-  attachmentError.value = ''
-
-  const startTime = performance.now();
+const updateValue = () => {
   if (props.useHtml) {
     value.value = htmlText()
   } else {
     value.value = markdownText()
   }
+}
+const imgMatch = /^\!\[.*\]\(.*\)/
+
+const handleOnChange = () => {
+  attachmentError.value = ''
+
+  const startTime = performance.now();
+  updateValue()
   const endTime = performance.now();
   const totalMs = endTime - startTime;
 
-  const minLenToConsiderDebounce = 5000
+  // This looks for an image at the start of the description and adds a newline before it
+  const maxLenToConsiderInsertingNewLine = 100000
+  if (value.value && value.value.length < maxLenToConsiderInsertingNewLine && value.value.match(imgMatch)) {
+    moveCursorToStart()
+    insertText('\n')
+    moveCursorToStart()
+    updateValue()
+  }
+
+  const minLenToConsiderDebounce = 10000
   if (value.value?.length < minLenToConsiderDebounce) {
     if (onChangeFunc.value !== withoutDebounce) {
       log.info(`Message is too small, change handleOnChange back to default - no debounce`)
