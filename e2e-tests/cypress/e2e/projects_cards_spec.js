@@ -42,7 +42,7 @@ describe('Projects Cards Tests', () => {
 
         cy.get('[data-cy="newProjectButton"]').click();
         cy.get('[data-cy="projectName"]').type('Another');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="projCard_proj1_manageLink"]')
         cy.get('[data-cy="projCard_proj2_manageLink"]')

@@ -155,8 +155,7 @@ describe('Levels Management Tests', () => {
         cy.openDialog('[data-cy="addLevel"]', true)
         cy.get('[data-cy="pointsInput"]')
             .type('20000');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="addLevel"]')
             .should('be.disabled');
@@ -208,8 +207,7 @@ describe('Levels Management Tests', () => {
         cy.openDialog('[data-cy="addLevel"]', true)
         cy.get('[data-cy="pointsInput"] [data-pc-name="pcinputtext"]')
             .type('2000', {delay: 0});
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
 
         const tableSelector = '[data-cy=levelsTable] tbody tr';
         cy.get(tableSelector)
@@ -240,8 +238,7 @@ describe('Levels Management Tests', () => {
         cy.openDialog('[data-cy="addLevel"]', true)
         cy.get('[data-cy="pointsInput"] [data-pc-name="pcinputtext"]')
             .type('2000', {delay: 0});
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
 
         cy.get(tableSelector)
             .should('have.length', 6)
@@ -321,8 +318,7 @@ describe('Levels Management Tests', () => {
         cy.openDialog('[data-cy="addLevel"]', true)
         cy.get('[data-cy="pointsInput"]')
             .type('20000');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="addLevel"]')
             .should('be.disabled');

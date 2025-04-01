@@ -58,8 +58,7 @@ describe('Import Skills under a Group Tests', () => {
 
         cy.get('[data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
         cy.get('[data-cy="importFinalizeAlert"]')
@@ -138,8 +137,7 @@ describe('Import Skills under a Group Tests', () => {
         cy.get('[data-cy="pointIncrement"]')
             .clear()
             .type('33');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
             [{
                 colIndex: 2,
@@ -195,8 +193,7 @@ describe('Import Skills under a Group Tests', () => {
         cy.openDialog('[data-cy="deleteSkillButton_skill1"]')
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me', {delay: 0});
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
             [{
                 colIndex: 2,
@@ -295,8 +292,7 @@ describe('Import Skills under a Group Tests', () => {
             .contains('This will PERMANENTLY remove [Very Great Skill 21] Skill from the catalog');
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me', {delay: 0});
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="deleteSkillButton_skill21"]')
             .should('not.exist');
     });

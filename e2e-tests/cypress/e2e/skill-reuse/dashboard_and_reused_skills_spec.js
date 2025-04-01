@@ -138,8 +138,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="finalizeBtn"]')
             .click();
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()

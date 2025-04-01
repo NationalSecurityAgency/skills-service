@@ -400,7 +400,7 @@ describe('Root Pin and Unpin Tests', () => {
 
                 cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove')
                 cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
-                cy.get('[data-cy="saveDialogBtn"]').click()
+                cy.clickSaveDialogBtn()
                 cy.wait('@loadProjectAdmins');
                 cy.get(rowSelector)
                     .should('have.length', 1)

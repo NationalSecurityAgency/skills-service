@@ -109,7 +109,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
@@ -213,7 +213,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
@@ -320,7 +320,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
@@ -428,7 +428,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
@@ -541,7 +541,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
@@ -655,7 +655,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
@@ -745,7 +745,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_3"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="quizFailed"]')
 
@@ -855,7 +855,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_1"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
         cy.get('[data-cy="percentCorrectInfoCard"] [data-cy="percentCorrect"]').should('have.text', '66%')
@@ -885,7 +885,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_1"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizFailed"]')
         cy.get('[data-cy="percentCorrectInfoCard"] [data-cy="percentCorrect"]').should('have.text', '33%')
         cy.get('[data-cy="percentCorrectInfoCard"] [data-cy="percentToPass"]').should('have.text', '66%')
@@ -917,7 +917,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_1"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizFailed"]')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"]').contains('2 More Attempts')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Used 1 out of 3 attempts')
@@ -944,7 +944,7 @@ describe('Client Display Quiz Tests', () => {
 
         cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizFailed"]')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="title"]').contains('1 More Attempt')
         cy.get('[data-cy="numAttemptsInfoCard"] [data-cy="subTitle"]').contains('Used 2 out of 3 attempts')
@@ -1017,7 +1017,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizFailed"]')
 
         cy.get('[data-cy="quizCompletion"] [data-cy="runQuizAgainBtn"]').should('not.exist')
@@ -1096,7 +1096,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
@@ -1297,7 +1297,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
 
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
         cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
@@ -1310,7 +1310,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
 
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
         cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
@@ -1356,7 +1356,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
 
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
@@ -1367,7 +1367,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
 
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
     });
 
@@ -1394,7 +1394,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
 
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
@@ -1422,7 +1422,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_3"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="quizFailed"]')
         cy.get('[data-cy="quizRunQuestions"]').should('not.exist');
@@ -1437,7 +1437,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_3"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="quizFailed"]')
 
@@ -1568,7 +1568,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
 
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
@@ -1598,7 +1598,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_1"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="runQuizAgainBtn"]').click()
 
         cy.get('[data-cy="onlyIncorrectMessage"]').should('exist')
@@ -1612,7 +1612,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_1"]').contains('This is a question # 3')
 
         cy.get('[data-cy="question_1"] [data-cy="answer_3"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
     });
 
@@ -1640,7 +1640,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_4"] [data-cy="answer_2"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="runQuizAgainBtn"]').click()
 
         cy.get('[data-cy="onlyIncorrectMessage"]').should('exist')
@@ -1657,7 +1657,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
     });
 
@@ -1684,7 +1684,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
         cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
@@ -1724,7 +1724,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_4"] [data-cy="answer_2"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="runQuizAgainBtn"]').click()
 
         cy.get('[data-cy="startQuizAttempt"]').click()
@@ -1837,7 +1837,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_4"] [data-cy="answer_2"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="runQuizAgainBtn"]').click()
 
         cy.get('[data-cy="startQuizAttempt"]').click()

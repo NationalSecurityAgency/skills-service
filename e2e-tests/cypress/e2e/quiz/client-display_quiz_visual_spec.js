@@ -100,7 +100,7 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="question_4"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_4"] [data-cy="answer_2"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
 
@@ -137,7 +137,7 @@ describe('Client Display Quiz Visual Tests', () => {
         cy.get('[data-cy="question_4"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_4"] [data-cy="answer_2"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizFailed"]')
 
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapConfig);
@@ -204,7 +204,7 @@ describe('Client Display Quiz Visual Tests', () => {
         // must wait so "Completed In: <N> SECONDS" card renders consistently, otherwise
         // it will sometimes execute in 1 second and the singular form will fail the comparison
         cy.wait(2000)
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="surveyCompletion"]').contains('Congrats!! You just earned 150 points')
 
         cy.wait(500)

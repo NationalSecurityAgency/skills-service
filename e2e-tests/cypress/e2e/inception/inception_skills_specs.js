@@ -50,8 +50,7 @@ describe('Inception Skills Tests', () => {
             .click();
         cy.get('[data-cy="projectName"]')
             .type('New Project');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="lengthyOpModal"] [data-cy="successMessage"]')
             .contains('Project\'s training profile was successfully copied');
         cy.get('[data-cy="allDoneBtn"]')
@@ -167,15 +166,14 @@ describe('Inception Skills Tests', () => {
         cy.get('[data-cy="name"]')
             .type('Group');
 
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get(`[data-cy="addSkillToGroupBtn-GroupGroup"]`).click();
         cy.get('[data-cy="skillName"]').type('Skill');
 
         cy.assertInceptionPoints('Skills', 'CreateSkillGroup', 0, false)
 
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist');
 
         cy.assertInceptionPoints('Skills', 'CreateSkillGroup', 25)
@@ -193,7 +191,7 @@ describe('Inception Skills Tests', () => {
 
         cy.assertInceptionPoints('Skills', 'CreateSkill', 0, false)
 
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="manageSkillLink_SkillSkill"]')
 
         cy.assertInceptionPoints('Skills', 'CreateSkill', 10)
@@ -525,7 +523,7 @@ describe('Inception Skills Tests', () => {
         cy.get('[data-cy="newTag"]').type('New Tag 1')
 
         cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 0, false)
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 10)
     });
 
@@ -544,7 +542,7 @@ describe('Inception Skills Tests', () => {
         cy.get('[data-cy="existingTag"]').click();
         cy.get('[data-pc-section="list"]').contains('TAG 1').click()
         cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 0, false)
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 10)
         cy.get('[data-cy="skillTag-skill1-tag1"]').should('not.exist')
     });

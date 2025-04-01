@@ -50,7 +50,7 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer # 1')
 
-        cy.get('[data-cy="completeQuizBtn"]').should('be.enabled').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
@@ -89,7 +89,7 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer # 1')
         cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').should('be.enabled').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
@@ -132,7 +132,7 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="question_4"] [data-cy="markdownEditorInput"]').type('Answer # 2')
         cy.get('[data-cy="question_5"] [data-cy="markdownEditorInput"]').type('Answer # 3')
 
-        cy.get('[data-cy="completeQuizBtn"]').should('be.enabled').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
@@ -172,7 +172,7 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]').type('Answer # 1')
         cy.get('[data-cy="question_3"] [data-cy="answer_2"]').click()
 
-        cy.get('[data-cy="completeQuizBtn"]').should('be.enabled').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
@@ -278,7 +278,7 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('Answer # 1')
 
-        cy.get('[data-cy="completeQuizBtn"]').should('be.enabled').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
@@ -321,13 +321,13 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"] .toastui-editor-contents').invoke('text', str)
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('b')
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 must not exceed 2,000 characters')
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.wait(1000)
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 must not exceed 2,000 characters')
 
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('{backspace}')
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').should('not.be.visible')
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
@@ -359,13 +359,13 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('some jabberwocky')
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky')
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.wait(1000)
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky')
 
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('{backspace}')
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').should('not.be.visible')
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
 
         cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
