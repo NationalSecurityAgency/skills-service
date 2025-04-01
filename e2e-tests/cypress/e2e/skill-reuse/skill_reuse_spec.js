@@ -181,8 +181,7 @@ describe('Skill Reuse Tests', () => {
             .contains('this action will only remove the reused skill');
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me', {delay:0});
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="noContent"]')
             .contains('No Skills Yet');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
@@ -208,8 +207,7 @@ describe('Skill Reuse Tests', () => {
             .contains('Deleting this skill will also remove its reused copies');
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me', {delay: 0});
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="noContent"]')
             .contains('No Skills Yet');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')

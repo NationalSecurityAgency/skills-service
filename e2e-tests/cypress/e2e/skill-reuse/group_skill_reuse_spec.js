@@ -359,8 +359,7 @@ describe('Group Skill Reuse Tests', () => {
             .contains('this action will only remove the reused skill');
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me', {delay: 0});
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="noContent"]')
             .contains('Group has no Skills');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]')
@@ -391,8 +390,7 @@ describe('Group Skill Reuse Tests', () => {
             .contains('Deleting this skill will also remove its reused copies');
         cy.get('[data-cy="currentValidationText"]')
             .type('Delete Me', {delay: 0});
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group12"] [data-cy="noContent"]')
             .contains('Group has no Skills');

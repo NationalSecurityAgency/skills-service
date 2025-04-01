@@ -97,7 +97,7 @@ describe('Community Quiz Description Validation Tests', () => {
 
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveQuiz1Question');
 
         // navigate using ui to quiz 2
@@ -126,7 +126,7 @@ describe('Community Quiz Description Validation Tests', () => {
 
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveQuiz2Question');
 
         // navigate directly back to quiz 1
@@ -153,7 +153,7 @@ describe('Community Quiz Description Validation Tests', () => {
 
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveQuiz1Question');
 
         // navigate directly back to quiz 2
@@ -180,7 +180,7 @@ describe('Community Quiz Description Validation Tests', () => {
 
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveQuiz2Question');
 
         // finally, navigate back to quiz 1 again using ui controls
@@ -208,7 +208,7 @@ describe('Community Quiz Description Validation Tests', () => {
 
         cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveQuiz1Question');
     });
 
@@ -253,7 +253,7 @@ describe('Community Quiz Description Validation Tests', () => {
 
         cy.get('[data-cy="answerHint"]').type('{backspace}');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveQuiz1Question');
 
         // navigate using ui to quiz 2
@@ -288,7 +288,7 @@ describe('Community Quiz Description Validation Tests', () => {
 
         cy.get('[data-cy="answerHint"]').type('{backspace}');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveQuiz2Question');
 
         // navigate directly back to quiz 1
@@ -322,7 +322,7 @@ describe('Community Quiz Description Validation Tests', () => {
 
         cy.get('[data-cy="answerHint"]').type('{backspace}');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveQuiz1Question');
 
         // navigate directly back to quiz 2
@@ -356,7 +356,7 @@ describe('Community Quiz Description Validation Tests', () => {
 
         cy.get('[data-cy="answerHint"]').type('{backspace}');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveQuiz2Question');
 
         // finally, navigate back to quiz 1 again using ui controls
@@ -391,7 +391,7 @@ describe('Community Quiz Description Validation Tests', () => {
 
         cy.get('[data-cy="answerHint"]').type('{backspace}');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveQuiz1Question');
     });
 
@@ -447,7 +447,7 @@ describe('Community Quiz Description Validation Tests', () => {
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - May not contain divinedragon word');
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.wait(1000)
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - May not contain divinedragon word');
 
@@ -483,7 +483,7 @@ describe('Community Quiz Description Validation Tests', () => {
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\n');
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky');
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.wait(1000)
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky');
 
@@ -510,7 +510,7 @@ describe('Community Quiz Description Validation Tests', () => {
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - May not contain divinedragon word');
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.wait(1000)
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - May not contain divinedragon word');
 
@@ -533,7 +533,7 @@ describe('Community Quiz Description Validation Tests', () => {
         cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\n');
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky');
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.wait(1000)
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').contains('Answer to question #1 - paragraphs may not contain jabberwocky');
 

@@ -1027,6 +1027,17 @@ Cypress.Commands.add("logout", () => {
     cy.log('Logged out')
 });
 
+Cypress.Commands.add("clickSaveDialogBtn", () => {
+    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+    cy.get('[data-cy="saveDialogBtn"]').click()
+});
+
+Cypress.Commands.add("clickCompleteQuizBtn", () => {
+    cy.get('[data-cy="completeQuizBtn"]').should('be.enabled')
+    cy.get('[data-cy="completeQuizBtn"]').click()
+});
+
+
 Cypress.Commands.add("clickSave", () => {
     cy.get("button:contains('Save')").click();
     cy.closeToasts();

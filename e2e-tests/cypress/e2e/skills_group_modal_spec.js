@@ -195,7 +195,7 @@ describe('Skills Group Modal Tests', () => {
 
         cy.get('[data-cy="descriptionMarkdownEditor"] [data-cy="markdownEditorInput"]').clear().type('another value');
         cy.get('[data-cy="name"]').clear().type('Updated Group Name');
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="EditSkillGroupModal"]').should('not.exist');
 
         cy.get('[data-cy="nameCell_group2"]').contains('Updated Group Name')
@@ -218,7 +218,7 @@ describe('Skills Group Modal Tests', () => {
         cy.get('[data-cy=enableIdInput]').click();
         cy.get('[data-cy="idInputValue"]').should('have.value','group2');
         cy.get('[data-cy="idInputValue"]').clear().type('newId');
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="editSkillButton_newId"]').should('exist');
         cy.get('[data-cy="editSkillButton_group2"]').should('not.exist');

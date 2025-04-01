@@ -45,8 +45,7 @@ describe('Edit Imported Skill Tests', () => {
             .should('have.value', '100');
         cy.get('[data-cy="pointIncrement"]')
             .type('1');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
@@ -246,8 +245,7 @@ describe('Edit Imported Skill Tests', () => {
             .should('have.value', '100');
         cy.get('[data-cy="pointIncrement"]')
             .type('1');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Points"]').click()
@@ -309,8 +307,7 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="pointIncrement"]')
             .clear()
             .type('33');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '266');
     });
@@ -341,8 +338,7 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="pointIncrement"]')
             .clear()
             .type('33');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.wait('@updateImportedSkill');
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '200');
@@ -404,8 +400,7 @@ describe('Edit Imported Skill Tests', () => {
             .should('have.value', '150');
         cy.get('[data-cy="pointIncrement"]')
             .type('1');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();

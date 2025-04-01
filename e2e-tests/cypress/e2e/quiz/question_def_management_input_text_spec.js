@@ -36,7 +36,7 @@ describe('Quiz Input Text Question Tests', () => {
         cy.get('[data-cy="textAreaPlaceHolder"]')
 
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('What is 2 + 2?')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="textAreaPlaceHolder"]')
@@ -71,7 +71,7 @@ describe('Quiz Input Text Question Tests', () => {
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('not.exist')
         cy.get('[data-cy="textAreaPlaceHolder"]')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-0_displayText"]').should('have.text', 'Question 1 - First Answer')
@@ -94,7 +94,7 @@ describe('Quiz Input Text Question Tests', () => {
 
         cy.openDialog('[data-cy="deleteQuestionButton_3"]')
         cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="deleteQuestionButton_1"]').should('exist')
         cy.get('[data-cy="deleteQuestionButton_2"]').should('exist')

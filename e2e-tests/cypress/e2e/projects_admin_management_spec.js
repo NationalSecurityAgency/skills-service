@@ -248,7 +248,7 @@ describe('Projects Admin Management Tests', () => {
         cy.openDialog(`${tableSelector} [data-cy="controlsCell_root@skills.org"] [data-cy="removeUserBtn"]`)
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove root@skills.org from having admin privileges.')
         cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get(`${tableSelector} [data-cy="controlsCell_root@skills.org"]`).should('not.exist')
         cy.get(rowSelector)

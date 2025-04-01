@@ -90,9 +90,7 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy=enableIdInput]').click();
         cy.get('input[data-cy=idInputValue]')
             .type('{selectall}editedProjectId');
-        cy.get('button[data-cy="saveDialogBtn"]')
-          .should('be.enabled')
-          .click();
+        cy.clickSaveDialogBtn()
         cy.wait('@newIdSubjects');
         cy.contains('ID: proj1')
             .should('not.exist');

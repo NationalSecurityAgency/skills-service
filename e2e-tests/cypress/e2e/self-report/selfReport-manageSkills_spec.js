@@ -195,7 +195,7 @@ describe('Self Report Skills Management Tests', () => {
 
     cy.get('[data-cy=skillName]')
       .type('skill1');
-    cy.get('[data-cy="saveDialogBtn"]').click()
+    cy.clickSaveDialogBtn()
     cy.get('[data-cy="editSkillButton_skill1Skill"]')
       .click();
     cy.get('[data-cy="selfReportEnableCheckbox"] input')
@@ -237,7 +237,7 @@ describe('Self Report Skills Management Tests', () => {
 
     cy.get('[data-cy=skillName]')
       .type('skill1');
-    cy.get('[data-cy="saveDialogBtn"]').click()
+    cy.clickSaveDialogBtn()
     cy.get('[data-cy="editSkillButton_skill1Skill"]')
       .click();
     cy.get('[data-cy="selfReportEnableCheckbox"] input')
@@ -286,7 +286,7 @@ describe('Self Report Skills Management Tests', () => {
 
     cy.get('[data-cy=skillName]')
       .type('skill1');
-    cy.get('[data-cy="saveDialogBtn"]').click()
+    cy.clickSaveDialogBtn()
     cy.get('[data-cy="editSkillButton_skill1Skill"]')
       .click();
     cy.get('[data-cy="selfReportEnableCheckbox"] input')
@@ -573,7 +573,7 @@ describe('Self Report Skills Management Tests', () => {
     cy.get('[data-cy="selfReportingTypeWarning"]')
       .contains('Remove 1 rejected request');
 
-    cy.get('[data-cy="saveDialogBtn"]').click()
+    cy.clickSaveDialogBtn()
     cy.get('[data-cy="editSkillButton_skill1"]')
       .click();
     cy.get('[data-cy="selfReportingTypeWarning"]')

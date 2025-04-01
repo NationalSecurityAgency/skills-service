@@ -30,7 +30,7 @@ describe('Skills Group Tests', () => {
             }
             cy.get('[data-cy="EditSkillGroupModal"]').contains('New Skills Group');
 
-            cy.get('[data-cy="saveDialogBtn"]').click();
+            cy.clickSaveDialogBtn()
             cy.get('[data-cy="EditSkillGroupModal"]').should('not.exist');
             cy.get('[data-cy="newGroupButton"]').should('have.focus')
         });
@@ -42,7 +42,7 @@ describe('Skills Group Tests', () => {
             }
             cy.get(`[data-cy="addSkillToGroupBtn-${groupId}"]`).click();
             cy.get('[data-cy="skillName"]').type(skillName);
-            cy.get('[data-cy="saveDialogBtn"]').click();
+            cy.clickSaveDialogBtn()
             cy.get('[data-cy="saveDialogBtn"]').should('not.exist');
             cy.get(`[data-cy="manageSkillLink_Skill${skillNum}Skill"]`).should('have.text', skillName);
         });
@@ -514,7 +514,7 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="enableIdInput"]').click()
         cy.get('[data-cy="idInputValue"]').clear().type('newId');
         cy.get('[data-cy="pointIncrement"]').clear().type(50);
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="editSkillButton_skill2"]').should('not.exist');
         cy.get('[data-cy="editSkillButton_newId"]')
@@ -669,7 +669,7 @@ describe('Skills Group Tests', () => {
 
         cy.addSkillToGroupViaUI(groupId, 1, null);
         cy.get('[data-cy="copySkillButton_Skill1Skill"]').click();
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist');
         cy.get('[data-cy="manageSkillLink_copy_of_Skill1Skill"]').should('have.text', 'Copy of Skill 1');
 
@@ -678,7 +678,7 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).contains('All Skills')
         cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).click()
         cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [data-pc-section="option"]').contains('1 out of 2').click()
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).contains('1')
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('2')
@@ -701,7 +701,7 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).contains('All Skills')
         cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).click()
         cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [data-pc-section="option"]').contains('1 out of 2').click()
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).contains('1')
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('2')
@@ -740,7 +740,7 @@ describe('Skills Group Tests', () => {
 
         cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).click()
         cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [data-pc-section="option"]').contains('2 out of 4').click()
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).contains('2')
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('4')

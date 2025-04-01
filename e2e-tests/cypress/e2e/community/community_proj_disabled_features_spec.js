@@ -66,7 +66,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="copyProjBtn"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains('Copying a project whose access is restricted to Divine Dragon')
         cy.get('[data-cy="projectName"]').type('copy')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="allDoneBtn"]').click()
         cy.get('[data-cy="projectCard_copy"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
     });
@@ -90,7 +90,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="allDoneBtn"]').click()
         cy.get('[data-cy="projectCard_copy"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
 

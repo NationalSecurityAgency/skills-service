@@ -48,7 +48,7 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
         cy.get('[data-cy="quizSelected-quiz1"]')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="selfReportCell-abcSkill-quiz"]').contains('Quiz-Based Validation')
@@ -93,7 +93,7 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="quizSelector"]').click()
         cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
@@ -126,7 +126,7 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').should('be.disabled');
         cy.get('[data-cy="quizSelector"]').should('not.exist')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
@@ -159,7 +159,7 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="selfReportTypeSelector"] [value="Quiz"]').should('not.be.checked');
         cy.get('[data-cy="quizSelector"]').should('not.exist')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()').click()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
@@ -180,7 +180,7 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-cy="quizSelector"]').click()
         cy.get('[data-cy="availableQuizSelection-quiz2"]').click()
         cy.get('[data-cy="quizSelected-quiz2"]')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
         cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('Survey-Based Validation')

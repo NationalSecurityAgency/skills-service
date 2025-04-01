@@ -509,7 +509,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="addNewAnswer"]').last().click();
     cy.get('[data-cy="answer-2"]').type('Answer Three')
     cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click();
-    cy.get('[data-cy="saveDialogBtn"]').click();
+    cy.clickSaveDialogBtn()
     cy.get('[data-cy="editQuestionButton_1"]')
 
     cy.visit('/administrator/quizzes/quiz1/')

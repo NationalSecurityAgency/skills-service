@@ -116,7 +116,7 @@ describe('Skills Table Tests', () => {
     cy.get(makdownDivSelector).type('{selectall}copy description edit')
     cy.wait('@validateDescription')
     cy.get('[data-cy=numPerformToCompletion]').type('5')
-    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
+    cy.clickSaveDialogBtn()
     cy.wait('@saveSkill')
 
     cy.validateTable(tableSelector, [

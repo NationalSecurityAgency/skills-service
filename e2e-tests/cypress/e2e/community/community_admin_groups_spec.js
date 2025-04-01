@@ -76,7 +76,7 @@ describe('Community Admin Group Tests', () => {
         cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="adminGroupName"]').should('not.exist')
         cy.get('[data-cy="btn_Admin Groups"]').should('have.focus')
         cy.validateTable(adminGroupTableSelector, [

@@ -32,7 +32,7 @@ describe('Run Quiz Tests', () => {
 
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the Quiz')
     });
 
@@ -47,7 +47,7 @@ describe('Run Quiz Tests', () => {
 
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizFailed"]')
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
@@ -55,7 +55,7 @@ describe('Run Quiz Tests', () => {
 
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizFailed"]')
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
@@ -73,7 +73,7 @@ describe('Run Quiz Tests', () => {
 
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the Quiz')
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
@@ -81,7 +81,7 @@ describe('Run Quiz Tests', () => {
 
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizFailed"]')
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
@@ -109,7 +109,7 @@ describe('Run Quiz Tests', () => {
         cy.wait('@reportAnswer')
         cy.wait('@reportAnswer')
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Thank you for completing the Quiz')
         cy.get('[data-cy="quizPassed"]')
 
@@ -158,7 +158,7 @@ describe('Run Quiz Tests', () => {
         cy.wait('@reportAnswer')
         cy.wait('@reportAnswer')
 
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizFailed"]')
 
         cy.get('[data-cy="question_1"] [data-cy="answer_1"] [data-cy="selected_false"]')

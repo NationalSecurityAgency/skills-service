@@ -65,8 +65,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
         cy.get('[data-cy="answer-2"] [data-cy="answerText"]').type('3')
 
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('What is 2 + 2?')
         cy.validateDisplayAnswer(1, 0, false, true)
@@ -90,8 +89,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answer-3"] [data-cy="answerText"]').type('4')
 
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         // q2
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('What is 1 + 2?')
@@ -206,7 +204,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
 
         cy.get('[data-cy="answersError"]').should('not.be.visible')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="answersError"]').contains('Must have at least 2 answers')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('2')
         cy.get('[data-cy="answersError"]').should('not.be.visible')
@@ -242,7 +240,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
 
         cy.get('[data-cy="answersError"]').should('not.be.visible')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="answersError"]').contains('Must have at least 2 answers')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('2')
         cy.get('[data-cy="answersError"]').should('not.be.visible')
@@ -261,7 +259,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('2')
 
         cy.get('[data-cy="answersError"]').should('not.be.visible')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="answersError"]').contains('Multiple Answers Question must have at least 2 correct answers')
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answersError"]').should('not.be.visible')
@@ -280,7 +278,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('2')
 
         cy.get('[data-cy="answersError"]').should('not.be.visible')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="answersError"]').contains('Must have at least 1 correct answer selected')
         cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answersError"]').should('not.be.visible')
@@ -303,7 +301,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-2"] [data-cy="answerText"]').type('3')
 
         cy.get('[data-cy="answersError"]').should('not.be.visible')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="answersError"]').contains('Answers labeled as correct must have text')
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answersError"]').should('not.be.visible')
@@ -379,7 +377,7 @@ describe('Quiz Question CRUD Tests', () => {
 
         cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"]').click()
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('What is 2 + 2?')
         cy.validateDisplayAnswer(1, 0, false, true)
         cy.validateDisplayAnswer(1, 1, true, true)
@@ -434,7 +432,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="questionText"]  div.toastui-editor-contents[contenteditable="true"]').clear().type('All diff?')
         cy.get('[data-cy="answerHint"]').clear().type('This hint is totally different\nthis is a new line')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('All diff?')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-0_displayText"]').should('have.text', '1a-2')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-1_displayText"]').should('have.text', '1b-3')
@@ -474,7 +472,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('This is a question # 2-more')
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-0_displayText"]').should('have.text', 'Question 2 - First Answer-more')
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-1_displayText"]').should('have.text', 'b')
@@ -518,7 +516,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="selectionItem_MultipleChoice"]').click()
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.validateDisplayAnswer(2, 0, true, false)
         cy.validateDisplayAnswer(2, 1, true, false)
         cy.validateDisplayAnswer(2, 2, false, false)
@@ -536,7 +534,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').type( 'new')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="selectCorrectAnswer"]').click()
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.validateDisplayAnswer(3, 0, true, false)
         cy.validateDisplayAnswer(3, 1, false, false)
         cy.validateDisplayAnswer(3, 2, true, false)
@@ -563,7 +561,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="answer-0_displayText"]').should('have.text', 'Third Answer')
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="answer-1_displayText"]').should('have.text', 'Fourth Answer')
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="answer-2_displayText"]').should('not.exist')
@@ -605,7 +603,7 @@ describe('Quiz Question CRUD Tests', () => {
 
         cy.openDialog('[data-cy="deleteQuestionButton_2"]')
         cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="deleteQuestionButton_2"]').should('not.exist')
         cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '1')
@@ -614,7 +612,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="noQuestionsYet"]').should('not.exist')
         cy.openDialog('[data-cy="deleteQuestionButton_1"]')
         cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="deleteQuestionButton_2"]').should('not.exist')
         cy.get('[data-cy="deleteQuestionButton_1"]').should('not.exist')
@@ -656,7 +654,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.openDialog('[data-cy="newQuestionOnBottomBtn"]', true)
         cy.get('[data-cy="questionText"]').type('question # 2', {delay: 0})
@@ -665,7 +663,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         const q1Card = '[data-cy="questionDisplayCard-1"] [data-cy="sortControlHandle"]';
         const q2Card = '[data-cy="questionDisplayCard-2"] [data-cy="sortControlHandle"]';
@@ -756,7 +754,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="questionDisplayCard-4"]').should('exist')
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]').contains('This is a question # 2-more')
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-0_displayText"]').should('have.text', 'Question 2 - First Answer-more')
@@ -799,7 +797,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="selectionItem_MultipleChoice"]').click()
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.validateDisplayAnswer(4, 0, true, false)
         cy.validateDisplayAnswer(4, 1, true, false)
         cy.validateDisplayAnswer(4, 2, false, false)
@@ -817,7 +815,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').type( 'new')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="selectCorrectAnswer"]').click()
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.validateDisplayAnswer(4, 0, true, false)
         cy.validateDisplayAnswer(4, 1, false, false)
         cy.validateDisplayAnswer(4, 2, true, false)
@@ -844,7 +842,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-0_displayText"]').should('have.text', 'Third Answer')
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-1_displayText"]').should('have.text', 'Fourth Answer')
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-2_displayText"]').should('not.exist')

@@ -159,7 +159,7 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="name"]').type('badge1')
         cy.get('[data-cy="skillHelpUrl"]').type('https://someCoolWebsite.com/some url with spaces')
         cy.get('[data-cy="skillHelpUrlError"]').should('not.be.visible');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="badgeCard-badge1Badge"] [data-cy="editBtn"]').click()
         cy.get('[data-cy="skillHelpUrl"]').should('have.value', 'https://someCoolWebsite.com/some%20url%20with%20spaces')
     })
@@ -743,8 +743,7 @@ describe('Badges Tests', () => {
             .type('{selectall}22');
         cy.get('[data-cy="timeLimitMinutes"]')
             .type('{selectall}30');
-        cy.get('button[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
 
         cy.wait('@saveBadge');
 
@@ -788,8 +787,7 @@ describe('Badges Tests', () => {
             .type('{selectall}22');
         cy.get('[data-cy="timeLimitMinutes"]')
             .type('{selectall}30');
-        cy.get('button[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
 
         cy.wait('@saveBadge');
 
@@ -826,7 +824,7 @@ describe('Badges Tests', () => {
         cy.wait('@uploadIcon');
         cy.get('[data-cy="iconPicker"] .proj1-validiconpng');
         cy.get('[data-cy="name"]').type('customIcon');
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="badgeCard-customIconBadge"] .proj1-validiconpng');
 

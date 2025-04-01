@@ -217,8 +217,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
 
         cy.get('[data-cy="approvalInputMsg"]').type('{backspace}');
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
 
         cy.wait('@approve');
 
@@ -281,8 +280,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
 
         cy.get('[data-cy="rejectionInputMsg"]').type('{backspace}');
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
 
         cy.wait('@reject');
 
@@ -442,7 +440,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('@contact').should('not.have.been.called');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.wait('@contactProject');
         cy.get('@contact').should('have.been.calledOnce');
     });
