@@ -45,7 +45,7 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 
         cy.get('[data-cy="newTag"]').type('New Tag 1')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-newtag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-newtag1"]`).should('not.exist')
@@ -74,7 +74,7 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
         cy.get('[data-cy="existingTag"]').click();
         cy.get('[data-pc-section="list"]').contains('TAG 1').click()
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-tag1"]`).should('not.exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('not.exist')
@@ -122,7 +122,7 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
 
         cy.get('[data-cy="newTag"]').type('New Tag 1')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-newtag1"]`).should('exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-newtag1"]`).should('exist')
@@ -185,7 +185,7 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Remove Tag"]').click()
         cy.get('[data-cy="existingTag"]').click();
         cy.get('[data-pc-section="list"]').contains('TAG 1').click()
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get(`${groupSelector} [data-cy="skillTag-skill21-tag1"]`).should('not.exist')
         cy.get(`${groupSelector} [data-cy="skillTag-skill22-tag1"]`).should('not.exist')

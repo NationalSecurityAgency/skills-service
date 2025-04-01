@@ -59,7 +59,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
     cy.get('[data-cy="newProjectButton"]').click()
     cy.get('[data-cy="projectName"]')
       .type('My New test Project');
-    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
+    cy.clickSaveDialogBtn()
     cy.wait('@saveProject')
 
     cy.get('[data-cy="upgradeInProgressError"]')
@@ -75,7 +75,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
 
     cy.get('[data-cy="btn_Subjects"]').click();
     cy.get('[data-cy="subjectName"]').type('new');
-    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
+    cy.clickSaveDialogBtn()
     cy.wait('@saveSubject')
 
     cy.get('[data-cy="upgradeInProgressError"]')
@@ -91,7 +91,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
 
     cy.openNewSkillDialog();
     cy.get('[data-cy="skillName"]').type('new');
-    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
+    cy.clickSaveDialogBtn()
     cy.wait('@saveSkill')
 
     cy.get('[data-cy="upgradeInProgressError"]')
@@ -107,7 +107,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
 
     cy.get('[data-cy="editSkillButton_skill2"]').click();
     cy.get('[data-cy="skillName"]').type('1');
-    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
+    cy.clickSaveDialogBtn()
     cy.wait('@saveSkill')
 
     cy.get('[data-cy="upgradeInProgressError"]')
@@ -123,7 +123,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
 
     cy.get('[data-cy="newGroupButton"]').click();
     cy.get('[data-cy="name"]').type('new');
-    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
+    cy.clickSaveDialogBtn()
     cy.wait('@saveEndpoint')
 
     cy.get('[data-cy="upgradeInProgressError"]')
@@ -140,7 +140,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
 
     cy.get('[data-cy="editSkillButton_group5"]').click();
     cy.get('[data-cy="name"]').type('new');
-    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
+    cy.clickSaveDialogBtn()
     cy.wait('@saveEndpoint')
 
     cy.get('[data-cy="upgradeInProgressError"]')
@@ -212,7 +212,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
 
     cy.get('[data-cy="btn_Badges"]').click();
     cy.get('[data-cy="name"]').type('new');
-    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
+    cy.clickSaveDialogBtn()
     cy.wait('@saveEndpoint')
 
     cy.get('[data-cy="upgradeInProgressError"]')
@@ -229,7 +229,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
 
     cy.get('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]').click();
     cy.get('[data-cy="name"]').type('1');
-    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
+    cy.clickSaveDialogBtn()
     cy.wait('@saveEndpoint')
 
     cy.get('[data-cy="upgradeInProgressError"]')
@@ -302,7 +302,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
 
     cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
     cy.get('[data-cy="approveBtn"]').click();
-    cy.get('[data-cy="saveDialogBtn"]').click();
+    cy.clickSaveDialogBtn()
 
     cy.wait('@saveEndpoint')
 
@@ -326,7 +326,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
 
     cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
     cy.get('[data-cy="rejectBtn"]').click();
-    cy.get('[data-cy="saveDialogBtn"]').click();
+    cy.clickSaveDialogBtn()
 
     cy.wait('@saveEndpoint')
 

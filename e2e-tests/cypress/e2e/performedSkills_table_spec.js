@@ -672,7 +672,7 @@ describe('Performed Skills Table Tests', () => {
         cy.openDialog('[data-cy="performedSkills-deleteAll"]')
         cy.contains('This will delete all skill events for user1@skills.org.');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me')
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
 
         cy.get(tableSelector).contains('There are no records to show').should('exist')

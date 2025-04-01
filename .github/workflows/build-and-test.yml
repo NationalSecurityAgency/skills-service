@@ -236,7 +236,7 @@ jobs:
       fail-fast: false
       matrix:
         # run in parallel
-        containers: [1]
+        containers: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 
     services:
       postgres:
@@ -301,7 +301,6 @@ jobs:
           group: 'skills-service tests'
           tag: "${{ github.workflow }}"
           browser: chrome
-          spec: cypress/e2e/quiz/grade_quiz_spec.js
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

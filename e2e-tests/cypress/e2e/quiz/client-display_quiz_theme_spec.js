@@ -89,7 +89,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_3"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.wait('@completeSurvey')
         cy.get('[data-cy="quizPassed"]').should('exist')
         cy.get('[data-cy="quizCompletion"]').contains('You just earned 150 points')
@@ -123,7 +123,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.get('[data-cy="question_2"] [data-cy="answer_3"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_4"] [data-cy="answer_2"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.wait('@completeSurvey')
         cy.get('[data-cy="quizPassed"]').should('exist')
         cy.get('[data-cy="quizCompletion"]').contains('You just earned 150 points')
@@ -144,7 +144,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizFailed"]').should('exist')
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
     });
@@ -208,7 +208,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.wait('@completeSurvey')
         cy.get('[data-cy="surveyCompletion"]').contains('You just earned 150 points')
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');

@@ -37,7 +37,7 @@ describe('Copy Subject from one project to another Tests', () => {
 
         cy.get('[data-cy="validationPassedMsg"]').should('be.visible');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="copySuccessMsg"]').contains('Subject was copied to This is project 2')
         cy.get('[data-cy="closeDialogBtn"]').contains('Close')
@@ -72,7 +72,7 @@ describe('Copy Subject from one project to another Tests', () => {
 
         cy.get('[data-cy="validationPassedMsg"]').should('be.visible');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="closeDialogBtn"]').contains('Close')
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')

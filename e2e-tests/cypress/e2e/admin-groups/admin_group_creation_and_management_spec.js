@@ -35,7 +35,7 @@ describe('Admin Group CRUD Tests', () => {
         cy.get('[data-cy="adminGroupName"]').type('My First Admin Group')
         cy.get('[data-cy="idInputValue"]').should('have.value', 'MyFirstAdminGroup')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="adminGroupName"]').should('not.exist')
         cy.get('[data-cy="btn_Admin Groups"]').should('have.focus')
         cy.validateTable(adminGroupTableSelector, [
@@ -159,7 +159,7 @@ describe('Admin Group CRUD Tests', () => {
         cy.get('[data-cy="idInputValue"]').should('have.value', 'adminGroup1')
 
         cy.get('[data-cy="adminGroupName"]').type('A')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="adminGroupName"]').should('not.exist')
 
         cy.get(`${adminGroupTableSelector} [data-p-index="0"]`).contains('This is admin group 1A')
@@ -196,7 +196,7 @@ describe('Admin Group CRUD Tests', () => {
         cy.get('[data-cy="idInputValue"]').should('have.value', 'adminGroup1')
 
         cy.get('[data-cy="adminGroupName"]').type('A')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="adminGroupName"]').should('not.exist')
 
         cy.get('[data-cy="pageHeader"]').contains('This is admin group 1A')
@@ -218,7 +218,7 @@ describe('Admin Group CRUD Tests', () => {
         cy.get('[data-cy="adminGroupName"]').type(providedName, { delay: 100 })
         cy.get('[data-cy="idInputValue"]').should('have.value', expectedId)
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="adminGroupName"]').should('not.exist')
 
         // id is not derived from name during edit
@@ -264,7 +264,7 @@ describe('Admin Group CRUD Tests', () => {
         cy.openDialog('[data-cy="deleteAdminGroupButton_adminGroup2"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove This is admin group 2 Admin Group')
         cy.get('[data-cy="currentValidationText"]').type('Delete Me')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get(`${adminGroupTableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', 3)
         cy.get('[data-cy="deleteAdminGroupButton_adminGroup1"]').should('exist')

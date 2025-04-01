@@ -802,7 +802,7 @@ describe('Subjects Tests', () => {
         cy.get('[data-cy="subjectName"]').type('subj1')
         cy.get('[data-cy="skillHelpUrl"]').type('https://someCoolWebsite.com/some url with spaces')
         cy.get('[data-cy="skillHelpUrlError"]').should('not.be.visible');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="subjectCard-subj1Subject"] [data-cy="editBtn"]').click()
         cy.get('[data-cy="skillHelpUrl"]').should('have.value', 'https://someCoolWebsite.com/some%20url%20with%20spaces')
     })

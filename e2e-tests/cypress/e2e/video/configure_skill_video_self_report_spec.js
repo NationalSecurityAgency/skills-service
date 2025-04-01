@@ -93,7 +93,7 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="pcinputtext"]').should('have.value', 1)
         cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="pcinputtext"]').should('be.disabled')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
         cy.wait('@getSubjectSkills').then(() => {
             cy.wait(1000)
@@ -128,7 +128,7 @@ describe('Configure Self Report Video Type Tests', () => {
         cy.get('[data-cy="selfReportEnableCheckbox"]').click();
         cy.get('[data-cy="selfReportTypeSelector"] [value="Video"]')
             .click({ force: true });
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
         cy.get('[data-cy="videoSelfReportAlert"]').contains('Users are required to watch this video in order to earn the skill and its points')
 

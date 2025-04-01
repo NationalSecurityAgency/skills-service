@@ -74,10 +74,7 @@ describe('Skills Exported to Catalog Tests', () => {
             .should('be.disabled');
         cy.get('[data-cy="currentValidationText"]')
             .type('{backspace}');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 1,
@@ -133,10 +130,7 @@ describe('Skills Exported to Catalog Tests', () => {
             .should('be.disabled');
         cy.get('[data-cy="currentValidationText"]')
             .type('{backspace}');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="noExportedSkills"]')
           .contains('No skills exported to Skills Catalog');
@@ -192,10 +186,7 @@ describe('Skills Exported to Catalog Tests', () => {
             .should('be.disabled');
         cy.get('[data-cy="currentValidationText"]')
             .type('{backspace}');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 1,
@@ -870,8 +861,7 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.get('[data-cy="numPerformToCompletion"]')
             .clear()
             .type('7');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.wait('@saveSkill1');
         cy.get('[data-cy="nameCell_skill1"]')
             .contains('Very Great Skill 1A');
@@ -998,8 +988,7 @@ describe('Skills Exported to Catalog Tests', () => {
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist')
         cy.get('[data-cy="contactOwnersMsgInput"]').type('aaa bbb this is a message')
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,475 characters remaining')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@contact')
         cy.get('[data-cy="closeDialogBtn"]').should('contain.text', 'OK')
         cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'Message sent!')
