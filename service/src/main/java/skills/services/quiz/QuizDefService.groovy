@@ -17,6 +17,7 @@ package skills.services.quiz
 
 import callStack.profiler.Profile
 import com.fasterxml.jackson.databind.ObjectMapper
+import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,6 +46,7 @@ import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
+import skills.services.video.QuizVideoService
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.*
@@ -134,6 +136,11 @@ class QuizDefService {
 
     @Autowired
     UserCommunityService userCommunityService
+
+    @Autowired
+    QuizVideoService quizVideoService
+
+    JsonSlurper jsonSlurper = new JsonSlurper()
 
     @Transactional(readOnly = true)
     List<QuizDefResult> getCurrentUsersQuizDefs() {
@@ -246,10 +253,12 @@ class QuizDefService {
             String updateQuestion = attachmentService.copyAttachmentsForIncomingDescription(question.question, null, null, newQuizId)
             newQuestion.question = updateQuestion
             newQuestion.questionType = question.questionType
+
             List<QuizAnswerDefRequest> newAnswers = answers.collect( it -> {
                 return new QuizAnswerDefRequest(answer: it.answer, isCorrect: it.isCorrect)
             })
             newQuestion.answers = newAnswers
+            newQuestion.attributes = question.attributes
             newQuestions.add(newQuestion)
         })
 
@@ -391,6 +400,28 @@ class QuizDefService {
             QuizQuestionDef savedQuestion
             List<QuizAnswerDef> savedAnswers
             savedQuestion = createQuizQuestionDef(quizDef, questionRequest)
+
+            if(questionRequest.attributes) {
+                def parsed = jsonSlurper.parseText(questionRequest.attributes)
+                String uuid = parsed["internallyHostedAttachmentUuid"].toString()
+                Attachment attachment = attachmentService.getAttachment(uuid)
+                if(attachment) {
+                    Boolean isInternallyHosted = parsed["isInternallyHosted"]
+                    Attachment newAttachment = attachmentService.copyAttachmentWithNewUuid(attachment, null, quizDef.quizId)
+                    SkillVideoAttrs newAttrs = new SkillVideoAttrs()
+                    newAttrs.videoUrl = isInternallyHosted ? "/api/download/" + newAttachment.uuid : parsed["videoUrl"]
+                    newAttrs.videoType = newAttachment.contentType
+                    newAttrs.captions = parsed["captions"]
+                    newAttrs.transcript = parsed["transcript"]
+                    newAttrs.isInternallyHosted = isInternallyHosted
+                    newAttrs.internallyHostedFileName = parsed["internallyHostedFileName"]
+                    newAttrs.internallyHostedAttachmentUuid = newAttachment.uuid
+                    newAttrs.width = parsed["width"]
+                    newAttrs.height = parsed["height"]
+
+                    saveVideoAttributesForQuestion(quizDef.quizId, savedQuestion.id, newAttrs)
+                }
+            }
             savedAnswers = createQuizQuestionAnswerDefs(questionRequest, savedQuestion)
             addSavedQuestionUserAction(quizDef.quizId, savedQuestion, savedAnswers)
         })
@@ -557,6 +588,7 @@ class QuizDefService {
                 answerHint: InputSanitizer.sanitize(questionDefRequest.answerHint),
                 type: questionDefRequest.questionType,
                 displayOrder: displayOrder,
+                attributes: questionDefRequest.attributes
         )
         QuizQuestionDef savedQuestion = quizQuestionRepo.saveAndFlush(questionDef)
         return  savedQuestion

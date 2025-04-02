@@ -59,6 +59,9 @@ class QuizVideoService {
     @Autowired
     QuizDefService quizDefService
 
+    @Autowired
+    VideoHelperService videoHelperService
+
     @Value('#{"${skills.config.ui.maxVideoUploadSize:250MB}"}')
     DataSize maxAttachmentSize;
 
@@ -80,13 +83,7 @@ class QuizVideoService {
         SkillVideoAttrs videoAttrs = new SkillVideoAttrs()
         if (isAlreadyHosted) {
             SkillsValidator.isTrue(existingVideoAttributes?.isInternallyHosted, "Expected video to already be internally hosted but it was not present.", quizId, questionId.toString())
-            videoAttrs.videoUrl = existingVideoAttributes.videoUrl
-            videoAttrs.videoType = existingVideoAttributes.videoType
-            videoAttrs.isInternallyHosted = existingVideoAttributes.isInternallyHosted
-            videoAttrs.internallyHostedFileName = existingVideoAttributes.internallyHostedFileName
-            videoAttrs.internallyHostedAttachmentUuid = existingVideoAttributes.internallyHostedAttachmentUuid
-            videoAttrs.width = existingVideoAttributes.width
-            videoAttrs.height = existingVideoAttributes.height
+            videoAttrs = videoHelperService.updateExistingVideo(videoAttrs, existingVideoAttributes)
         } else  {
             if (StringUtils.isBlank(videoUrl) && !file) {
                 throw new SkillException("Either videoUrl or file must be supplied", quizId, questionId.toString())
@@ -96,30 +93,12 @@ class QuizVideoService {
                 attachmentRepo.deleteByUuid(existingVideoAttributes.internallyHostedAttachmentUuid)
             }
 
-            if (file) {
-                SkillsValidator.isTrue(StringUtils.isBlank(videoUrl), "If file param is provided then videoUrl must be null/blank. Provided url=[${videoUrl}]", quizId)
-                AttachmentValidator.isWithinMaxAttachmentSize(file.getSize(), maxAttachmentSize);
-                AttachmentValidator.isAllowedAttachmentMimeType(file.getContentType(), allowedAttachmentMimeTypes);
-                saveVideoFileAndUpdateAttributes(quizId, questionId, file, videoAttrs)
-            } else {
-                videoAttrs.isInternallyHosted = false
-                videoAttrs.videoUrl = videoUrl
-            }
+            videoAttrs = videoHelperService.validateAndSave(videoUrl, quizId, null, file, videoAttrs, true)
 
         }
 
-        if (StringUtils.isNotBlank(captions)){
-            videoAttrs.captions = InputSanitizer.sanitize(captions)?.trim()
-        }
-        if (StringUtils.isNotBlank(transcript)){
-            videoAttrs.transcript = InputSanitizer.sanitize(transcript)?.trim()
-        }
-        if(width && height) {
-            videoAttrs.width = width
-            videoAttrs.height = height
-        }
-//        boolean isReadOnly = skillDefRepo.isImportedFromCatalog(quizId, questionId)
-//        SkillsValidator.isTrue(!isReadOnly, "Cannot set video attributes of read-only skill", quizId, questionId)
+        videoAttrs = videoHelperService.verifyCaptionsAndTranscript(videoAttrs, captions, transcript)
+        videoAttrs = videoHelperService.setDimensions(videoAttrs, width, height)
 
         quizDefService.saveVideoAttributesForQuestion(quizId, questionId, videoAttrs)
 
@@ -132,28 +111,6 @@ class QuizVideoService {
         ))
 
         return videoAttrs
-    }
-
-    void saveVideoFileAndUpdateAttributes(String quizId, Integer questionId, MultipartFile file, SkillVideoAttrs videoAttrs) {
-        String userId = userInfoService.getCurrentUserId();
-        String uuid = UUID.randomUUID().toString()
-
-        Attachment attachment = new Attachment(
-                filename: file.originalFilename,
-                contentType: file.contentType,
-                uuid: uuid,
-                size: file.size,
-                userId: userId,
-                quizId: quizId)
-//                skillId: questionId)
-        attachment.setContent(BlobProxy.generateProxy(file.inputStream, file.size))
-        attachmentRepo.save(attachment)
-
-        videoAttrs.videoType = attachment.contentType
-        videoAttrs.videoUrl = "/api/download/${uuid}"
-        videoAttrs.isInternallyHosted = true
-        videoAttrs.internallyHostedFileName = attachment.filename
-        videoAttrs.internallyHostedAttachmentUuid = attachment.uuid
     }
 
     @Transactional
