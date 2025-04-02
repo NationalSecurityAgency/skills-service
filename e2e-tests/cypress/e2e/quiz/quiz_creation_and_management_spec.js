@@ -37,7 +37,7 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="quizDescription"]').type('Some cool Description')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="quizName"]').should('not.exist')
         cy.get('[data-cy="btn_Quizzes And Surveys"]').should('have.focus')
         cy.validateTable(quizTableSelector, [
@@ -55,7 +55,7 @@ describe('Quiz CRUD Tests', () => {
         // cy.get('[data-cy="quizTypeSelector"]').select('Survey')
         cy.get('[data-cy="quizTypeSelector"]').click()
         cy.get('[data-pc-section="overlay"] [data-pc-section="optionlabel"]').contains('Survey').click()
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="quizName"]').should('not.exist')
         cy.get('[data-cy="btn_Quizzes And Surveys"]').should('have.focus')
         cy.validateTable(quizTableSelector, [
@@ -268,7 +268,8 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="quizName"]').type('A')
         cy.get('[data-cy="quizDescription"]').type('A')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="quizName"]').should('not.exist')
 
         cy.get(`${quizTableSelector} [data-p-index="0"]`).contains('This is quiz 1A')
@@ -301,7 +302,7 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="enableIdInput"]').click()
         cy.get('[data-cy="idInputValue"]').type('A');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="quizName"]').should('not.exist')
 
         cy.get('[data-cy="managesQuizLink_quiz2"]').should('not.exist')
@@ -331,7 +332,7 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="quizName"]').type('A')
         cy.get('[data-cy="quizDescription"]').type('A')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="quizName"]').should('not.exist')
 
         cy.get('[data-cy="pageHeader"]').contains('This is quiz 1A')
@@ -360,7 +361,7 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="enableIdInput"]').click()
         cy.get('[data-cy="idInputValue"]').type('A');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="quizName"]').should('not.exist')
 
         cy.get('[data-cy="pageHeader"]').contains('This is quiz 1')
@@ -387,7 +388,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizName"]').type(providedName, { delay: 100 })
         cy.get('[data-cy="idInputValue"]').should('have.value', expectedId)
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="quizName"]').should('not.exist')
 
         // id is not derived from name during edit
@@ -433,7 +434,7 @@ describe('Quiz CRUD Tests', () => {
         cy.openDialog('[data-cy="deleteQuizButton_quiz2"]')
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove This is survey 2 Survey')
         cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get(`${quizTableSelector} [data-cy="skillsBTableTotalRows"]`).should('have.text', 3)
         cy.get('[data-cy="deleteQuizButton_quiz1"]').should('exist')
@@ -498,7 +499,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="quizTypeSection"]').contains('Can only be modified for a new quiz/survey')
 
         cy.get('button.quote').click({force: true})
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveQuiz')
 
         cy.visit('/administrator/quizzes/quiz1')
@@ -572,7 +573,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="copyQuizButton_quiz1"]').click()
         cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.validateTable(quizTableSelector, [
             [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
@@ -583,7 +584,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="copyQuizButton_quiz2"]').click()
         cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Survey 1')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.validateTable(quizTableSelector, [
             [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
@@ -608,7 +609,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="copyQuizButton_quiz1"]').click()
         cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.validateTable(quizTableSelector, [
             [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
@@ -619,7 +620,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="copyQuizButton_quiz2"]').click()
         cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Survey 1')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.validateTable(quizTableSelector, [
             [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
@@ -657,11 +658,11 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="copyQuizButton_quiz1"]').click()
         cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="copyQuizButton_quiz2"]').click()
         cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Survey 1')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.validateTable(quizTableSelector, [
             [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
@@ -688,7 +689,7 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="copyQuizButton_quiz1"]').click()
         cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="copyQuizButton_quiz1"]').should('have.focus');
 
         cy.get('[data-cy="copyQuizButton_quiz1"]').click()
@@ -714,7 +715,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="copyQuizButton_quiz1"]').click()
         cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.validateTable(quizTableSelector, [
             [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
@@ -741,7 +742,7 @@ describe('Quiz CRUD Tests', () => {
 
         cy.get('[data-cy="quizDescription"]').type('Some cool Description')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="quizName"]').should('not.exist')
         cy.get('[data-cy="btn_Quizzes And Surveys"]').should('have.focus')
         cy.get(quizTableSelector).should('contain', 'a few seconds ago')

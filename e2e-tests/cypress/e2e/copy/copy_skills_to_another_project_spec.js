@@ -65,7 +65,7 @@ describe('Copy skills from one project to another Tests', () => {
         cy.get('[data-cy="validationPassedMsg"]').contains('Validation Passed! 3 skill(s) are eligible to be copied to This is project 2 project')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
         cy.get('[data-cy="closeDialogBtn"]').contains('Cancel')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="closeDialogBtn"]').contains('Close')
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
@@ -112,7 +112,7 @@ describe('Copy skills from one project to another Tests', () => {
         cy.get('[data-cy="validationPassedMsg"]').contains('Validation Passed! 2 skill(s) are eligible to be copied to This is project 2 project')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
         cy.get('[data-cy="closeDialogBtn"]').contains('Cancel')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="closeDialogBtn"]').contains('Close')
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
@@ -157,7 +157,7 @@ describe('Copy skills from one project to another Tests', () => {
         cy.get('[data-cy="validationPassedMsg"]').contains('Validation Passed! 3 skill(s) are eligible to be copied to This is project 2 project')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
         cy.get('[data-cy="closeDialogBtn"]').contains('Cancel')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="closeDialogBtn"]').contains('Close')
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
@@ -213,7 +213,7 @@ describe('Copy skills from one project to another Tests', () => {
         cy.get('[data-cy="validationPassedMsg"]').contains('Validation Passed! 2 skill(s) are eligible to be copied to This is project 2 project')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
         cy.get('[data-cy="closeDialogBtn"]').contains('Cancel')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="closeDialogBtn"]').contains('Close')
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')

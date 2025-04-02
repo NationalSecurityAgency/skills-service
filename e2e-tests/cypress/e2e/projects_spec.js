@@ -54,7 +54,7 @@ describe('Projects Tests', () => {
         cy.get('[data-cy="newProjectButton"]').click();
         cy.get('[data-cy="projectName"]')
             .type('My New & test Project');
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.wait('@postNewProject');
 
@@ -307,8 +307,7 @@ describe('Projects Tests', () => {
         cy.wait('@loadDescription');
         cy.get(makdownDivSelector).invoke('text').invoke('trim').should('equal', '')
         cy.get('[data-cy="markdownEditorInput"]').type('I am a description');
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.wait('@saveProject');
         cy.get('[data-cy="btn_edit-project"]').click();
         cy.wait('@loadDescription');
@@ -321,8 +320,7 @@ describe('Projects Tests', () => {
         cy.get('[data-cy="markdownEditorInput"]').click().type('{selectall}I am a description sans jw');
         cy.wait('@validateDescription');
         cy.get('[data-cy="descriptionError"]').should('not.be.visible');
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.wait('@saveProject');
         cy.visit('/administrator/');
         cy.contains('This is project 1');
@@ -330,8 +328,7 @@ describe('Projects Tests', () => {
         cy.wait('@loadDescription');
         cy.get(makdownDivSelector).should('have.text', 'I am a description sans jw');
         cy.get('[data-cy="markdownEditorInput"]').click().type('{selectall}Am I a description?');
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.wait('@saveProject');
         cy.contains('This is project 1');
         cy.get('[data-cy="editProjBtn"]').click();

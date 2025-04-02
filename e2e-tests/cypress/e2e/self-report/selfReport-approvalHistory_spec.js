@@ -914,7 +914,7 @@ describe('Self Report Approval History Tests', () => {
 
         cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="approveBtn"]').click();
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.validateTable(approvalHistoryTableSelector, [
             [{
                 colIndex: 0,
@@ -928,8 +928,7 @@ describe('Self Report Approval History Tests', () => {
         cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="rejectBtn"]')
             .click();
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.validateTable(approvalHistoryTableSelector, [
             [{
                 colIndex: 0,
@@ -951,7 +950,7 @@ describe('Self Report Approval History Tests', () => {
 
         cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="approveBtn"]').click();
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
 
         cy.validateTable(approvalHistoryTableSelector, [
             [{

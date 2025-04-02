@@ -690,8 +690,7 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy="messageError"]').should('contain.text', 'paragraphs may not contain jabberwocky');
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,475 characters remaining');
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.wait('@contact');
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist');
         cy.get('[data-cy="closeDialogBtn"]').should('contain.text', 'OK');
@@ -722,8 +721,7 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
         cy.get('[data-cy="contactOwnersMsgInput"]').click().fill('aaa bbb this is a message');
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,475 characters remaining');
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.wait('@contact');
         cy.get('[data-cy="closeDialogBtn"]').should('contain.text', 'OK');
         cy.get('[data-cy="contactOwnerSuccessMsg"]').should('contain.text', 'Message sent!');

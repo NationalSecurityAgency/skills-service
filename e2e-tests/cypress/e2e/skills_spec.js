@@ -699,7 +699,7 @@ describe('Skills Tests', () => {
     cy.getIdField().clear().type(newId)
     cy.wait('@skillIdExists')
 
-    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
+    cy.clickSaveDialogBtn()
     cy.wait('@postNewSkill')
   })
 
@@ -892,7 +892,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="idError"]').contains(errMsg).should('not.exist')
     cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
-    cy.get('[data-cy="saveDialogBtn"]').click()
+    cy.clickSaveDialogBtn()
   })
 
   it('skill id validation special characters can be URL encoded', () => {
@@ -919,9 +919,8 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="idInputValue"]').clear().type(`${encodeURIComponent(providedName)}_blah`)
     cy.get('[data-cy="idError"]').contains(errMsg).should('not.exist')
     cy.get('[data-cy=idError]').should('not.be.visible')
-    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
-    cy.get('[data-cy="saveDialogBtn"]').click()
+    cy.clickSaveDialogBtn()
   })
 
   it('edit skill on page', () => {
@@ -1062,7 +1061,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="skillName"]').type('skill1')
     cy.get('[data-cy="skillHelpUrl"]').type('https://someCoolWebsite.com/some url with spaces')
     cy.get('[data-cy="skillHelpUrlError"]').should('not.be.visible')
-    cy.get('[data-cy="saveDialogBtn"]').click()
+    cy.clickSaveDialogBtn()
     cy.get('[data-cy="editSkillButton_skill1Skill"]').click()
     cy.get('[data-cy="skillHelpUrl"]').should('have.value', 'https://someCoolWebsite.com/some%20url%20with%20spaces')
     cy.get('[data-cy="closeDialogBtn"]').click()

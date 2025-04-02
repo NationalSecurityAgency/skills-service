@@ -35,8 +35,7 @@ describe('Copy Project Tests', () => {
             .should('be.enabled');
         cy.get('[data-cy="saveDialogBtn"]')
             .should('have.text', 'Copy Project');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="lengthyOpModal"] [data-cy="successMessage"]')
             .contains('Project\'s training profile was successfully copied');
         cy.get('[data-cy="allDoneBtn"]')
@@ -102,8 +101,7 @@ describe('Copy Project Tests', () => {
             .click();
         cy.get('[data-cy="projectName"]')
             .type('New Project');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="allDoneBtn"]')
             .should('exist');
         cy.get('[data-cy="allDoneBtn"]')

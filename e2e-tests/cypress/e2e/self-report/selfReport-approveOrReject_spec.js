@@ -80,8 +80,7 @@ describe('Self Report Skills Management Tests', () => {
         .contains('This will approve user\'s request(s) to get points');
     cy.get('[data-cy="approvalInputMsg"]')
         .type('Approval message!');
-    cy.get('[data-cy="saveDialogBtn"]')
-        .click();
+    cy.clickSaveDialogBtn()
 
     cy.validateTable(tableSelector, [
       [{
@@ -151,8 +150,7 @@ describe('Self Report Skills Management Tests', () => {
       .contains('This will reject user\'s request(s) to get points');
     cy.get('[data-cy="rejectionInputMsg"]')
       .type('Rejection message!');
-    cy.get('[data-cy="saveDialogBtn"]')
-      .click();
+    cy.clickSaveDialogBtn()
 
     cy.wait('@reject');
 
@@ -242,8 +240,7 @@ describe('Self Report Skills Management Tests', () => {
     cy.get('[data-cy="saveDialogBtn"]')
       .should('be.enabled');
 
-    cy.get('[data-cy="saveDialogBtn"]')
-      .click();
+    cy.clickSaveDialogBtn()
     cy.wait('@reject');
   });
 
@@ -317,8 +314,7 @@ describe('Self Report Skills Management Tests', () => {
     cy.get('[data-cy="saveDialogBtn"]')
         .should('be.enabled');
 
-    cy.get('[data-cy="saveDialogBtn"]')
-        .click();
+    cy.clickSaveDialogBtn()
     cy.wait('@approve');
   });
 
@@ -345,7 +341,7 @@ describe('Self Report Skills Management Tests', () => {
     const tableSelector = '[data-cy="skillsReportApprovalTable"]';
     cy.get(`${tableSelector} [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]`).click();
     cy.openDialog('[data-cy="approveBtn"]')
-    cy.get('[data-cy="saveDialogBtn"]').click();
+    cy.clickSaveDialogBtn()
 
     cy.validateTable(tableSelector, [
       [{
@@ -437,8 +433,7 @@ describe('Self Report Skills Management Tests', () => {
       .contains('This will reject user\'s request(s) to get points');
     cy.get('[data-cy="rejectionInputMsg"]')
       .type('Rejection message!');
-    cy.get('[data-cy="saveDialogBtn"]')
-      .click();
+    cy.clickSaveDialogBtn()
 
 
     cy.validateTable(tableSelector, [

@@ -810,8 +810,7 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
         cy.get('[data-cy="importFinalizeAlert"]')

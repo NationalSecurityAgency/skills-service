@@ -37,6 +37,8 @@ import skills.controller.result.model.SkillDefPartialRes
 import skills.icons.CustomIconFacade
 import skills.services.*
 import skills.services.admin.skillReuse.SkillReuseService
+import skills.services.attributes.SkillAttributeService
+import skills.services.attributes.SkillVideoAttrs
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.storage.model.*
@@ -128,6 +130,9 @@ class ProjectCopyService {
 
     @Autowired
     UserCommunityService userCommunityService
+
+    @Autowired
+    SkillAttributeService skillAttributeService
 
     @Transactional
     @Profile
@@ -665,7 +670,6 @@ class ProjectCopyService {
                 }
     }
 
-
     private final ThreadLocal<Map<String,String>> copiedAttachmentUuidsThreadLocal = new ThreadLocal<>();
     @Profile
     private String handleAttachmentsInDescription(String description, String newProjectId) {
@@ -692,13 +696,39 @@ class ProjectCopyService {
     private void handleSkillAttributes(SkillDefWithExtra fromSkill, SkillsAdminService.SaveSkillTmpRes toSkill) {
         List<SkillAttributesDef> skillAttributesDefs =skillAttributesDefRepo.findAllBySkillRefId(fromSkill.id)
         skillAttributesDefs?.each {
-            SkillAttributesDef copySkillAttributeDef = new SkillAttributesDef()
-            copySkillAttributeDef.type = it.type
-            copySkillAttributeDef.attributes = it.attributes
-            copySkillAttributeDef.skillRefId = toSkill.skillRefId
+            boolean isHandled = handleInternallyHostedVideo(it, fromSkill, toSkill)
+            if (!isHandled) {
+                SkillAttributesDef copySkillAttributeDef = new SkillAttributesDef()
+                copySkillAttributeDef.type = it.type
+                copySkillAttributeDef.attributes = it.attributes
+                copySkillAttributeDef.skillRefId = toSkill.skillRefId
 
-            skillAttributesDefRepo.save(copySkillAttributeDef)
+                skillAttributesDefRepo.save(copySkillAttributeDef)
+            }
         }
+    }
+
+    @Profile
+    private boolean handleInternallyHostedVideo(SkillAttributesDef attributesDef, SkillDefWithExtra fromSkill, SkillsAdminService.SaveSkillTmpRes toSkill) {
+        if (attributesDef.type == SkillAttributesDef.SkillAttributesType.Video) {
+            SkillVideoAttrs videoAttrs = skillAttributeService.convertAttrs(attributesDef, SkillVideoAttrs.class)
+            if (!videoAttrs.isInternallyHosted) {
+                return false
+            }
+            String uuid = videoAttrs.videoUrl.split("/")[-1]
+            Attachment videoAttachment = attachmentService.getAttachment(uuid)
+            Attachment newVideoAttachment = attachmentService.copyAttachmentWithNewUuid(videoAttachment, toSkill.projectId, null, toSkill.skillId)
+            String newVideoUrl = videoAttrs.videoUrl.replaceAll(uuid, newVideoAttachment.uuid)
+            SkillVideoAttrs copy = new SkillVideoAttrs()
+            Props.copy(videoAttrs, copy)
+            copy.videoUrl = newVideoUrl
+            copy.internallyHostedAttachmentUuid = newVideoAttachment.uuid
+            skillAttributeService.saveVideoAttrs(toSkill.projectId, toSkill.skillId, copy)
+
+            return true
+        }
+
+        return false
     }
 
 

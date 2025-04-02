@@ -131,8 +131,7 @@ describe('Register Root Users', () => {
         cy.wait(2000)
         cy.get('[data-cy="projectName"]')
             .type('New Project');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="projCard_NewProject_manageLink"]');
     });
 

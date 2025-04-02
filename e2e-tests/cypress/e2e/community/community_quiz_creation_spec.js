@@ -49,7 +49,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.validateTable(quizTableSelector, [
             [{
                 colIndex: 0,
@@ -91,7 +91,7 @@ describe('Community Quiz Creation Tests', () => {
 
         cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.validateTable(quizTableSelector, [
             [{
                 colIndex: 0,
@@ -130,7 +130,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.validateTable(quizTableSelector, [
             [{
                 colIndex: 0,
@@ -163,7 +163,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
 
         cy.get('[data-cy="editQuizButton"]').click()
@@ -419,8 +419,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="quizSelector"]').click()
         cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
         cy.get('[data-cy="quizSelected-quiz1"]')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveSkill')
 
         cy.visit('/administrator/quizzes');
@@ -468,8 +467,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
         cy.get('[data-cy="quizSelected-quiz1"]')
         cy.get('[data-cy="associatedQuizError"]').should('not.exist')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveSkill')
     });
 
@@ -488,8 +486,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="availableQuizSelection-quiz1"]').click()
         cy.get('[data-cy="quizSelected-quiz1"]')
         cy.get('[data-cy="associatedQuizError"]').should('not.exist')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.wait('@saveSkill')
     });
 
@@ -510,7 +507,7 @@ describe('Community Quiz Creation Tests', () => {
 
         cy.get(`button.attachment-button`).should('not.exist');
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.validateTable(quizTableSelector, [
             [{
                 colIndex: 0,
@@ -548,7 +545,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="copyQuizButton_quiz1"]').click()
         cy.get('[data-cy="protectedCopyMessage"]').contains('Copying a quiz whose access is restricted to Divine Dragon users only and cannot be lifted/disabled')
 
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-p-index="1"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
 
@@ -581,7 +578,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.validateTable(quizTableSelector, [
             [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 0, value: 'For All Dragons Nation' }, { colIndex: 1, value: 'Quiz' }],
@@ -597,7 +594,7 @@ describe('Community Quiz Creation Tests', () => {
         cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.validateTable(quizTableSelector, [
             [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 0, value: 'For All Dragons Nation' },   { colIndex: 1, value: 'Quiz' }],

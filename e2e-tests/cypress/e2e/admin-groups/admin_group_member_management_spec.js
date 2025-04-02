@@ -90,7 +90,7 @@ describe('Admin Group Member Management Tests', () => {
 
           cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove user1 from having admin privileges.')
           cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
-          cy.get('[data-cy="saveDialogBtn"]').click()
+          cy.clickSaveDialogBtn()
 
 
           cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '2');
@@ -272,7 +272,7 @@ describe('Admin Group Member Management Tests', () => {
 
                 cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove user1 from having admin privileges.')
                 cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
-                cy.get('[data-cy="saveDialogBtn"]').click()
+                cy.clickSaveDialogBtn()
 
                 cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '2');
                 cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.exist')

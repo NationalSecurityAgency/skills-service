@@ -127,7 +127,7 @@ describe('Quiz-skills in-project reuse Tests', () => {
         cy.get('[data-cy="group-group3Subj2_skillProgress-skill1STREUSESKILLST1"] [data-cy="skillDescription-skill1STREUSESKILLST1"] [data-cy="takeQuizBtn"]').click()
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
 
@@ -169,7 +169,7 @@ describe('Quiz-skills in-project reuse Tests', () => {
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillDescription-skill1STREUSESKILLST0"] [data-cy="takeQuizBtn"]').click()
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
-        cy.get('[data-cy="completeQuizBtn"]').click()
+        cy.clickCompleteQuizBtn()
         cy.get('[data-cy="surveyCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by completing the survey.')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
 

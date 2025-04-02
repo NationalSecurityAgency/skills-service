@@ -47,7 +47,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="projectCard_one"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
     });
 
@@ -78,7 +78,7 @@ describe('Community Project Creation Tests', () => {
 
         cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="projectCard_one"] [data-cy="userCommunity"]').contains('For All Dragons Nation')
     });
 
@@ -96,7 +96,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="projectCard_proj1"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
 
         cy.get('[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]').click()
@@ -119,7 +119,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
 
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
         cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
 
         cy.get('[data-cy="btn_edit-project"]').click()

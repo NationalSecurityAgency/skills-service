@@ -490,8 +490,7 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="skillName"]')
             .type('new skill', { delay: 100, waitForAnimations: true });
         cy.get('[data-cy="skillName"]').should('have.value', 'new skill');
-        cy.get('[data-cy="saveDialogBtn"]')
-            .click();
+        cy.clickSaveDialogBtn()
 
         // validate skill was created
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="manageSkillLink_newskillSkill"]');

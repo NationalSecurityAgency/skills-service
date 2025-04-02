@@ -103,8 +103,7 @@ describe('Markdown Tests', () => {
         cy.get(markdownInput).focus().selectFile('cypress/attachments/test-file.invalid', { action: 'drag-drop' })
         cy.get('[data-cy="attachmentError"]').contains('Unable to upload attachment - File type is not supported.')
         cy.get(markdownInput).get('a[href^="/api/download/"]').should('not.exist')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="editSkillButton_sk1Skill"]').click()
         cy.get(markdownInput).contains('k')

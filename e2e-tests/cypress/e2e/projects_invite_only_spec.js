@@ -622,7 +622,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.openDialog('[data-cy="controls_abc@abc.org"] [data-cy="deleteInvite"]')
         cy.contains('Removal Safety Check').should('be.visible');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me');
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.wait('@deleteInvite');
         cy.wait('@loadInviteStatus');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc1@abc.org');
@@ -697,7 +697,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.openDialog('[data-cy="controls_abc@abc.org"] [data-cy="deleteInvite"]')
         cy.contains('Removal Safety Check').should('be.visible');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me');
-        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.clickSaveDialogBtn()
         cy.wait('@deleteInvite');
         cy.wait('@loadInviteStatus');
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(1).children('td').eq(0).should('contain.text', 'abc1@abc.org');

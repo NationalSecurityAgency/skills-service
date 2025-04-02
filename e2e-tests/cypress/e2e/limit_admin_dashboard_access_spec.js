@@ -123,7 +123,7 @@ describe('Limit Admin Dashboard Access Tests', () => {
     cy.openDialog(`${userTableSelector} [data-p-index="1"] [data-cy="removeUserBtn"]`)
     cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove skills2@skills.org')
     cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
-    cy.get('[data-cy="saveDialogBtn"]').click()
+    cy.clickSaveDialogBtn()
     cy.validateTable(userTableSelector, [
       [{
         colIndex: 0,
@@ -138,11 +138,11 @@ describe('Limit Admin Dashboard Access Tests', () => {
     cy.openDialog(`${userTableSelector} [data-p-index="0"] [data-cy="removeUserBtn"]`)
     cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove skills1@skills.org')
     cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
-    cy.get('[data-cy="saveDialogBtn"]').click()
+    cy.clickSaveDialogBtn()
     cy.openDialog(`${userTableSelector} [data-p-index="0"] [data-cy="removeUserBtn"]`)
     cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove skills3@skills.org')
     cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
-    cy.get('[data-cy="saveDialogBtn"]').click()
+    cy.clickSaveDialogBtn()
     cy.get(userTableSelector).contains('There are no records to show')
   })
 
