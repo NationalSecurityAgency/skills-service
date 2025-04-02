@@ -31,6 +31,7 @@ import SkillVideo from '@/skills-display/components/progress/SkillVideo.vue';
 import dayjs from 'dayjs';
 import {useStorage} from "@vueuse/core";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import UserComments from "@/skills-display/components/communication/UserComments.vue";
 
 const props = defineProps({
   skill: Object,
@@ -244,6 +245,7 @@ watch(() => props.expandGroups, (newValue) => {
         <div>
           <skill-overview-footer ref="skillOverviewFooter" :skill="skill" />
         </div>
+        <user-comments />
       </div>
     </div>
 
