@@ -198,7 +198,7 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy=project-link-card-proj1] [data-cy=project-card-project-rank]')
             .contains('Rank: 1 / 1');
         cy.get('[data-cy=project-link-card-proj1] [data-cy=project-card-project-points]')
-            .contains('400/800');
+            .contains('400 / 800');
 
         cy.get('[data-cy=inception-button]')
             .should('not.exist');
@@ -629,12 +629,12 @@ describe('My Progress Tests', () => {
         // proj 2 has no progress
         const proj2Selector = '[data-cy="project-link-card-proj2"]'
         cy.get(`${proj2Selector} [data-cy="project-card-project-level"]`).should('have.text', 'Level 0')
-        cy.get(`${proj2Selector} [data-cy="project-card-project-points"]`).should('have.text', '0/1,200')
+        cy.get(`${proj2Selector} [data-cy="project-card-project-points"]`).should('have.text', '0 / 1,200')
         cy.get(`${proj2Selector} .apexcharts-text.apexcharts-datalabel-value`).should('have.text', '0%')
 
         const proj1Selector = '[data-cy="project-link-card-proj1"]'
         cy.get(`${proj1Selector} [data-cy="project-card-project-level"]`).should('have.text', 'Level 3')
-        cy.get(`${proj1Selector} [data-cy="project-card-project-points"]`).should('have.text', '400/800')
+        cy.get(`${proj1Selector} [data-cy="project-card-project-points"]`).should('have.text', '400 / 800')
         cy.get(`${proj1Selector} .apexcharts-text.apexcharts-datalabel-value`).should('have.text', '50%')
     });
 
