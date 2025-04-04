@@ -205,6 +205,7 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     Long countAllUserIdsWithRoleAndEmail(@Param("roleName") RoleName roleName)
 
     boolean existsByUserIdAndRoleName(String userId, RoleName roleName)
+    boolean existsByUserIdAndProjectIdAndRoleNameIn(String userId, String projectId, List<RoleName> roleName)
 
     @Query(value='''
         select ur.projectId from UserRole ur where ur.userId=?1 and ur.roleName=?2

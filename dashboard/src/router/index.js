@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
+import {createMemoryHistory, createRouter, createWebHistory} from 'vue-router'
 import Login from '@/components/access/Login.vue'
 import MyProgress from '@/components/myProgress/MyProgress.vue'
 import createAdminRoutes from './AdminRoutes.js'
@@ -94,6 +94,7 @@ import SkillsClientPath from '@/router/SkillsClientPath.js'
 import log from 'loglevel'
 import UserArchivePage from '@/components/users/UserArchivePage.vue';
 import UsersTablePage from '@/components/users/UsersTablePage.vue';
+import UserCommentsPage from "@/components/userComments/UserCommentsPage.vue";
 
 const routes = [
   {
@@ -447,6 +448,16 @@ const routes = [
           },
         },
       }],
+    }, {
+      name: 'UserComments',
+      path: '/administrator/projects/:projectId/user-comments',
+      component: UserCommentsPage,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Project Skills Catalog',
+        },
+      },
     }, {
       name: 'SkillsCatalog',
       path: '/administrator/projects/:projectId/skills-catalog',

@@ -1840,6 +1840,21 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/invites/extend", body)
     }
 
+    def saveUserComment(String projectId, String skillId, String comment, String toUserId = null) {
+        String url = "/projects/${projectId}/skills/${skillId}/comment".toString()
+        toUserId ? wsHelper.adminPost(url, [comment: comment, toUserId: toUserId]) : wsHelper.apiPost(url, [comment: comment])
+    }
+
+    def respondToUserComment(String projectId, Integer threadId, String comment, String toUserId = null) {
+        String url = "/projects/${projectId}/commentThreads/${threadId}".toString()
+        toUserId ? wsHelper.adminPost(url, [comment: comment, toUserId: toUserId]) : wsHelper.apiPost(url, [comment: comment])
+    }
+
+    def getUserComments(String projectId, String skillId) {
+        String url = "/projects/${projectId}/skills/${skillId}/comments".toString()
+        wsHelper.apiGet(url)
+    }
+
     def getQuizDefs() {
         wsHelper.appGet("/quiz-definitions")
     }

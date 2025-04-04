@@ -62,6 +62,7 @@ const navItems = computed(() => {
     { name: 'Subjects', iconClass: 'fa-cubes skills-color-subjects', page: 'Subjects' },
     { name: 'Badges', iconClass: 'fa-award skills-color-badges', page: 'Badges' },
     { name: 'Self Report', iconClass: 'fa-laptop skills-color-selfreport', page: 'SelfReport' },
+    { name: 'User Comments', iconClass: 'far fa-comment-dots', page: 'UserComments' },
     { name: 'Learning Path', iconClass: 'fa-project-diagram skills-color-dependencies', page: 'FullDependencyGraph' }
   ]
 

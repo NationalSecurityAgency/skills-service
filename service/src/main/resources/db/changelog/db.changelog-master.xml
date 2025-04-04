@@ -2827,4 +2827,152 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="51" author="skills team">
+        <createTable tableName="user_comment_thread">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="project_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_id" type="varchar(255)" />
+
+            <column name="needs_response" type="varchar(255)" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="original_comment_id" type="int" />
+            <column name="last_comment_id" type="int" />
+            <column name="last_comment_date" type="DATETIME" />
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="index_user_comment_thread_project_id"
+                     tableName="user_comment_thread">
+            <column name="project_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_comment_thread_skill_id"
+                     tableName="user_comment_thread">
+            <column name="skill_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="project_id"
+                                 baseTableName="user_comment_thread"
+                                 constraintName="fk_user_comment_thread_project_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id"
+                                 referencedTableName="project_definition"/>
+        <addForeignKeyConstraint baseColumnNames="project_id,skill_id"
+                                 baseTableName="user_comment_thread"
+                                 constraintName="fk_user_comment_thread_proj_id_skill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="project_id,skill_id"
+                                 referencedTableName="skill_definition"/>
+
+        <createIndex indexName="index_user_comment_thread_needs_response"
+                     tableName="user_comment_thread">
+            <column name="needs_response" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_comment_thread_last_comment_date"
+                     tableName="user_comment_thread">
+            <column name="last_comment_date" type="DATETIME"/>
+        </createIndex>
+
+        <createIndex indexName="index_user_comment_thread_original_comment_id"
+                     tableName="user_comment_thread">
+            <column name="original_comment_id" type="int"/>
+        </createIndex>
+        <createIndex indexName="index_user_comment_thread_last_comment_id"
+                     tableName="user_comment_thread">
+            <column name="last_comment_id" type="int"/>
+        </createIndex>
+
+
+        <createTable tableName="user_comment">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_comment_thread_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="from_user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="to_user_id" type="varchar(255)" />
+
+            <column name="comment" type="text" />
+
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="original_comment_id"
+                                 baseTableName="user_comment_thread"
+                                 constraintName="fk_user_user_comment_thread_original_comment_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_comment"/>
+        <addForeignKeyConstraint baseColumnNames="last_comment_id"
+                                 baseTableName="user_comment_thread"
+                                 constraintName="fk_user_user_comment_thread_last_comment_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_comment"/>
+
+        <createIndex indexName="index_user_comment_from_user_id"
+                     tableName="user_comment">
+            <column name="from_user_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_user_comment_to_user_id"
+                     tableName="user_comment">
+            <column name="to_user_id" type="varchar(255)"/>
+        </createIndex>
+
+        <createIndex indexName="index_user_comment_user_comment_thread_id"
+                     tableName="user_comment">
+            <column name="user_comment_thread_id" type="int"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="from_user_id"
+                                 baseTableName="user_comment"
+                                 constraintName="fk_user_comment_from_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+        <addForeignKeyConstraint baseColumnNames="to_user_id"
+                                 baseTableName="user_comment"
+                                 constraintName="fk_user_comment_to_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+
+
+        <addForeignKeyConstraint baseColumnNames="user_comment_thread_id"
+                                 baseTableName="user_comment"
+                                 constraintName="fk_user_comment_user_comment_thread_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_comment_thread"/>
+
+    </changeSet>
+
+
 </databaseChangeLog>
