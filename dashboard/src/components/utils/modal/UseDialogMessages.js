@@ -42,7 +42,7 @@ export const useDialogMessages = () => {
       accept: () => {
         focusState.focusOnLastElement()
       },
-      rejectClass: 'hidden',
+      rejectClass: '!hidden',
       acceptLabel: okButtonTitle,
     });
   }
