@@ -169,7 +169,7 @@ const moveQuestion = (changeIndexBy) => {
           </ButtonGroup>
         </div>
         <div class="flex justify-end mr-4">
-          <router-link :aria-label="`Configure video for question ${question.id}`" style="text-decoration: underline;"
+          <router-link :aria-label="`Configure video for question ${question.id}`" style="text-decoration: underline;" :data-cy="`add-video-question-${questionNum}`"
                        :to="`/administrator/quizzes/${route.params.quizId}/questions/${question.id}/config-video`" tabindex="-1">
             <Avatar icon="far fa-play-circle" shape="circle" /> {{ question.attributes ? "Edit Audio/Video" : "Add Audio/Video"}}
           </router-link>
