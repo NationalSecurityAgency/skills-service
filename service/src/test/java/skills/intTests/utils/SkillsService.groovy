@@ -2059,7 +2059,7 @@ class SkillsService {
         return wsHelper.adminPost(url, [])
     }
 
-    def saveSkillVideoAttributes(String projectId, String skillId, Map videoAttrs) {
+    def saveSkillVideoAttributes(String quizOrProjectId, String questionOrSkillId, Map videoAttrs, Boolean isQuiz = false) {
         Map body = [:]
         if (videoAttrs.file) { body.put("file", videoAttrs.file) }
         if (videoAttrs.videoUrl) { body.put("videoUrl", videoAttrs.videoUrl)}
@@ -2069,23 +2069,23 @@ class SkillsService {
         if (videoAttrs.height) { body.put("height", videoAttrs.height)}
         if (videoAttrs.width) { body.put("width", videoAttrs.width)}
 
-        String url = "/projects/${projectId}/skills/${skillId}/video"
+        String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId.toInteger()}/video"
         return wsHelper.adminUpload(url, body, true)
     }
-    def getSkillVideoAttributes(String projectId, String skillId) {
-        String url = "/projects/${projectId}/skills/${skillId}/video"
+    def getSkillVideoAttributes(String quizOrProjectId, String questionOrSkillId, Boolean isQuiz = false) {
+        String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId.toInteger()}/video"
         return wsHelper.adminGet(url)
     }
-    def deleteSkillVideoAttributes(String projectId, String skillId) {
-        String url = "/projects/${projectId}/skills/${skillId}/video"
+    def deleteSkillVideoAttributes(String quizOrProjectId, String questionOrSkillId, Boolean isQuiz = false) {
+        String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId}/video"
         return wsHelper.adminDelete(url)
     }
-    def getVideoCaptions(String projectId, String skillId) {
-        String url = "/projects/${projectId}/skills/${skillId}/videoCaptions"
+    def getVideoCaptions(String quizOrProjectId, String questionOrSkillId, Boolean isQuiz = false) {
+        String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId}/videoCaptions"
         return wsHelper.get(url, "api", null, false)
     }
-    def getVideoTranscript(String projectId, String skillId) {
-        String url = "/projects/${projectId}/skills/${skillId}/videoTranscript"
+    def getVideoTranscript(String quizOrProjectId, String questionOrSkillId, Boolean isQuiz = false) {
+        String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId}/videoTranscript"
         return wsHelper.get(url, "api", null, false)
     }
 

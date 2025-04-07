@@ -15,10 +15,12 @@
  */
 package skills.controller
 
+import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.auth.UserInfoService
 import skills.auth.aop.AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied
@@ -27,6 +29,7 @@ import skills.controller.result.model.TableResult
 import skills.controller.result.model.UserGradedQuizQuestionsResult
 import skills.quizLoading.QuizRunService
 import skills.quizLoading.model.*
+import skills.services.VideoCaptionsService
 import skills.services.quiz.QuizDefService
 import skills.utils.TablePageUtil
 
@@ -47,6 +50,9 @@ class UserQuizController {
 
     @Autowired
     UserInfoService userInfoService
+
+    @Autowired
+    VideoCaptionsService videoCaptionsService
 
     @RequestMapping(value = "/quizzes/{quizId}", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
@@ -115,5 +121,19 @@ class UserQuizController {
     @ResponseBody
     UserGradedQuizQuestionsResult getSingleQuizAttempt(@PathVariable Integer attemptId) {
         return quizDefService.getCurrentUserAttemptGradedResult(attemptId);
+    }
+
+    @GetMapping(value = "/quiz-definitions/{quizId}/questions/{questionId}/videoCaptions", produces = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseBody
+    @Profile
+    String getVideoCaptions(@PathVariable("quizId") String quizId, @PathVariable("questionId") Integer questionId) {
+        return videoCaptionsService.getVideoCaptionsForQuiz(quizId, questionId);
+    }
+
+    @GetMapping(value = "/quiz-definitions/{quizId}/questions/{questionId}/videoTranscript", produces = MediaType.TEXT_PLAIN_VALUE)
+    @ResponseBody
+    @Profile
+    String getVideoTranscript(@PathVariable("quizId") String quizId, @PathVariable("questionId") Integer questionId) {
+        return videoCaptionsService.getVideoTranscriptForQuiz(quizId, questionId);
     }
 }

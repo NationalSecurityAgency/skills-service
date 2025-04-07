@@ -211,20 +211,6 @@ class QuizController {
         return res
     }
 
-    @GetMapping(value = "/{quizId}/questions/{questionId}/videoCaptions", produces = MediaType.TEXT_PLAIN_VALUE)
-    @ResponseBody
-    @Profile
-    String getVideoCaptions(@PathVariable("quizId") String quizId, @PathVariable("questionId") Integer questionId) {
-        return videoCaptionsService.getVideoCaptionsForQuiz(quizId, questionId);
-    }
-
-    @GetMapping(value = "/{quizId}/questions/{questionId}/videoTranscript", produces = MediaType.TEXT_PLAIN_VALUE)
-    @ResponseBody
-    @Profile
-    String getVideoTranscript(@PathVariable("quizId") String quizId, @PathVariable("questionId") Integer questionId) {
-        return videoCaptionsService.getVideoTranscriptForQuiz(quizId, questionId);
-    }
-
     @RequestMapping(value = "/{quizId}/questions", method = [RequestMethod.GET], produces = "application/json")
     @ResponseBody
     QuizQuestionsResult getQuestionDefs(@PathVariable("quizId") String quizId) {
