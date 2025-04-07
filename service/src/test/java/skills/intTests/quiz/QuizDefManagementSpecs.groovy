@@ -16,6 +16,7 @@
 package skills.intTests.quiz
 
 import groovy.util.logging.Slf4j
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
@@ -581,6 +582,74 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         res.questions[0].question == 'sanitized  question'
         res.questions[0].answerHint == 'sanitized  hint'
         res.questions[0].answers[0].answer == 'sanitized  answer'
+    }
+
+    def "add a video to a quiz"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice))
+        Integer questionId = question.body.id
+        skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice))
+
+        when:
+        skillsService.saveSkillVideoAttributes(quiz.quizId, questionId.toString(), [
+                videoUrl: "http://some.url",
+                transcript: "transcript",
+                captions: "captions",
+        ], true )
+        def result = skillsService.getSkillVideoAttributes(quiz.quizId, questionId.toString(), true)
+
+        then:
+        result
+        result.videoUrl == "http://some.url"
+        result.captions == "captions"
+        result.transcript == "transcript"
+        result.isInternallyHosted == false
+    }
+
+    def "delete a video from a quiz question"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice))
+        Integer questionId = question.body.id
+        skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice))
+        skillsService.saveSkillVideoAttributes(quiz.quizId, questionId.toString(), [
+                videoUrl: "http://some.url",
+                transcript: "transcript",
+                captions: "captions",
+        ], true )
+
+        skillsService.deleteSkillVideoAttributes(quiz.quizId, questionId.toString(), true)
+
+        when:
+        def noResult = skillsService.getSkillVideoAttributes(quiz.quizId, questionId.toString(), true)
+
+        then:
+        SkillsClientException exception = thrown()
+        !noResult
+    }
+
+    def "get captions and transcripts from a quiz video"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice))
+        Integer questionId = question.body.id
+        skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice))
+
+        when:
+        skillsService.saveSkillVideoAttributes(quiz.quizId, questionId.toString(), [
+                videoUrl: "http://some.url",
+                transcript: "transcript",
+                captions: "captions",
+        ], true )
+        def captions = skillsService.getVideoCaptions(quiz.quizId, questionId.toString(), true)
+        def transcript = skillsService.getVideoTranscript(quiz.quizId, questionId.toString(), true)
+
+        then:
+        captions
+        transcript
+        captions == "captions"
+        transcript == "transcript"
     }
 }
 
