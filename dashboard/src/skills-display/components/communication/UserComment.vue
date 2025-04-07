@@ -30,10 +30,6 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-  showVisibility: {
-    type: Boolean,
-    default: true
-  },
   hasParent: Boolean,
 })
 const emit = defineEmits(['reportLocation'])
@@ -45,7 +41,6 @@ const userAvatar = ref(null)
 const avatarLocInfo = ref(null)
 const childLocations = ref(new Map())
 const updateChildLocation = (loc) => {
-  console.log(`updating location for ${loc.id} with ${loc.y}`)
   childLocations.value.set(loc.id, loc)
 }
 const connectorLengths = computed(() => {
@@ -68,7 +63,6 @@ onMounted(() => {
           height: clientRect.height
         }
       } else if(props.hasParent) {
-        console.log(clientRect)
         emit('reportLocation', {id: props.comment.id, x: clientRect.x, y: clientRect.y})
       }
     }
@@ -103,28 +97,12 @@ onMounted(() => {
           <div class="flex-1 flex gap-2 items-center">
             <div class="font-bold">{{ comment.usernameForDisplay }}</div>
             <div class="text-gray-600">{{ timeUtils.relativeTime(comment.time) }}</div>
-<!--            <Tag v-if="showVisibility">Internal</Tag>-->
           </div>
         </div>
         <div class="mt-3">{{ comment.text }}</div>
 
         <div class="flex">
           <div class="flex-1 flex gap-1">
-<!--            <Button icon="far fa-thumbs-up"-->
-<!--                    badge="0"-->
-<!--                    :pt="{ root: { class: '!gap-0' }}"-->
-<!--                    text/>-->
-
-<!--            <Button icon="far fa-heart"-->
-<!--                    badge="0"-->
-<!--                    severity="danger"-->
-<!--                    :pt="{ root: { class: '!gap-0' }}"-->
-<!--                    text/>-->
-
-<!--            <Button text severity="secondary" :pt="{ root: { class: '!gap-1' }}">-->
-<!--              <i class="far fa-smile"></i><i class="far fa-plus-square"></i>-->
-<!--            </Button>-->
-
             <Button v-if="showReply" text icon="far fa-comment" label="Comment" severity="info" class=""
                     size="small"></Button>
 

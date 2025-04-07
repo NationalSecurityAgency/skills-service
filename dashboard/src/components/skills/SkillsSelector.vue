@@ -20,6 +20,7 @@ import Badge from 'primevue/badge';
 // import Fluid from 'primevue/fluid';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
+import SkillsSelectorSlotProps from "@/components/skills/SkillsSelectorSlotProps.vue";
 
 const announcer = useSkillsAnnouncer();
 const emit = defineEmits(['added', 'search-change']);
@@ -89,10 +90,6 @@ const isMounted = ref(false);
 watch(() => props.selected, async () => {
   setSelectedInternal();
 })
-// methods
-const removeReuseTag = (val) => {
-  return SkillReuseIdUtil.removeTag(val);
-};
 
 const setSelectedInternal = () => {
   if (props.selected && (props.selected.length || props.selected.name)) {
@@ -197,48 +194,10 @@ defineExpose({
 
         <template #option="slotProps">
           <slot name="dropdown-item" :option="slotProps">
-            <div :data-cy="`skillsSelectionItem-${slotProps.option.projectId}-${slotProps.option.skillId}`">
-              <div class="text-xl text-info skills-option-name" data-cy="skillsSelector-skillName"><span
-                  v-if="showType">{{
-                  slotProps.option.type
-                }}:</span> {{ slotProps.option.name }}
-                <Tag v-if="slotProps.option.isReused" variant="success" size="sm" class="uppercase"
-                     data-cy="reusedBadge"
-                     style="font-size: 0.85rem !important;"><i class="fas fa-recycle"></i> reused
-                </Tag>
-              </div>
-              <div style="font-size: 0.8rem;">
-              <span class="skills-option-id">
-                <span v-if="showProject" data-cy="skillsSelectionItem-projectId"><span
-                    class="uppercase mr-1 italic">Project ID:</span><span
-                    class="font-bold"
-                    data-cy="skillsSelector-projectId">{{ slotProps.option.projectId }}</span></span>
-                <span v-if="!showProject" data-cy="skillsSelectionItem-skillId">
-                  <span class="uppercase mr-1 italic">ID:</span>
-                  <span class="font-bold" data-cy="skillsSelector-skillId">
-                  {{ removeReuseTag(slotProps.option.skillId) }}
-                  </span>
-                </span>
-              </span>
-                <span class="mx-2" v-if="slotProps.option.type !== 'Badge'">|</span>
-                <span v-if="slotProps.option.type === 'Skill'" class="uppercase mr-1 italic"
-                      data-cy="skillsSelectionItem-subjectId">Subject:</span>
-                <span v-if="slotProps.option.type === 'Skill'"
-                      class="font-bold skills-option-subject-name"
-                      data-cy="skillsSelector-subjectName">{{ slotProps.option.subjectName }}</span>
-                <span v-if="slotProps.option.type === 'Shared Skill'" class="uppercase mr-1 italic"
-                      data-cy="skillsSelectionItem-projectName">Project:</span>
-                <span v-if="slotProps.option.type === 'Shared Skill'"
-                      class="font-bold skills-option-subject-name"
-                      data-cy="skillsSelector-projectName">{{ slotProps.option.projectName }}</span>
-                <span v-if="slotProps.option.groupName">
-                <span class="mx-2">|</span>
-                <span class="uppercase mr-1 italic skills-option-group-name" data-cy="skillsSelectionItem-group">Group:</span><span
-                    class="font-bold skills-id"
-                    data-cy="skillsSelector-groupName">{{ slotProps.option.groupName }}</span>
-              </span>
-              </div>
-            </div>
+            <skills-selector-slot-props
+                :option="slotProps.option"
+                :show-project="showProject"
+                :show-type="showType" />
           </slot>
         </template>
         <template #footer v-if="afterListSlotText">

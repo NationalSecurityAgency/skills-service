@@ -36,10 +36,7 @@ const focusState = useFocusState();
 const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 
 const props = defineProps({
-  fieldLabel: {
-    default: 'Skills User',
-    type: String,
-  },
+  label: String,
   placeholder: {
     default: 'Enter user id',
     type: String,
@@ -195,13 +192,14 @@ const suggestUsers = (query) => {
 </script>
 
 <template>
-  <div data-cy="existingUserInput" v-bind="fallthroughAttributes.rootAttrs.value">
+  <div data-cy="existingUserInput" v-bind="fallthroughAttributes.rootAttrs.value" class="flex flex-col gap-2">
+    <label v-if="label" for="existingUserInput">{{ label }}</label>
     <div class="flex flex-col sm:flex-row gap-2">
       <Select v-if="hasUserSuggestOptions" data-cy="userSuggestOptionsDropdown" v-model="selectedSuggestOption" :options="userSuggestOptions" class="md:mr-2"/>
       <AutoComplete v-bind="fallthroughAttributes.inputAttrs.value"
                     v-model="currentSelectedUser"
                     data-cy="existingUserInputDropdown"
-                    id="existingUserInput"
+                    input-id="existingUserInput"
                     class="w-full"
                     :dropdown="true"
                     :suggestions="suggestions"

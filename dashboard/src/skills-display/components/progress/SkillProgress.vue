@@ -15,23 +15,23 @@ limitations under the License.
 */
 <script setup>
 import SkillProgressNameRow from '@/skills-display/components/progress/skill/SkillProgressNameRow.vue'
-import { useRoute } from 'vue-router'
-import { computed, ref, watch, onMounted } from 'vue'
-import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import {useRoute} from 'vue-router'
+import {computed, ref, watch} from 'vue'
+import {useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillsSummaryCards from '@/skills-display/components/progress/SkillsSummaryCards.vue'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 import SkillOverviewFooter from '@/skills-display/components/skill/SkillOverviewFooter.vue'
 import SkillProgressBar from '@/skills-display/components/progress/skill/SkillProgressBar.vue'
 import AchievementDate from '@/skills-display/components/skill/AchievementDate.vue'
 import SkillBadgesAndTags from '@/skills-display/components/progress/skill/SkillBadgesAndTags.vue'
-import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import CatalogImportStatus from '@/skills-display/components/progress/CatalogImportStatus.vue'
 import PartialPointsAlert from '@/skills-display/components/skill/PartialPointsAlert.vue'
 import SkillVideo from '@/skills-display/components/progress/SkillVideo.vue';
 import dayjs from 'dayjs';
 import {useStorage} from "@vueuse/core";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
-import UserComments from "@/skills-display/components/communication/UserComments.vue";
+import UserCommentsWithMessaging from "@/skills-display/components/communication/UserCommentsWithMessaging.vue";
 
 const props = defineProps({
   skill: Object,
@@ -245,7 +245,7 @@ watch(() => props.expandGroups, (newValue) => {
         <div>
           <skill-overview-footer ref="skillOverviewFooter" :skill="skill" />
         </div>
-        <user-comments />
+        <user-comments-with-messaging />
       </div>
     </div>
 
