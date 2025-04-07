@@ -2069,11 +2069,11 @@ class SkillsService {
         if (videoAttrs.height) { body.put("height", videoAttrs.height)}
         if (videoAttrs.width) { body.put("width", videoAttrs.width)}
 
-        String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId.toInteger()}/video"
+        String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId}/video"
         return wsHelper.adminUpload(url, body, true)
     }
     def getSkillVideoAttributes(String quizOrProjectId, String questionOrSkillId, Boolean isQuiz = false) {
-        String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId.toInteger()}/video"
+        String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId}/video"
         return wsHelper.adminGet(url)
     }
     def deleteSkillVideoAttributes(String quizOrProjectId, String questionOrSkillId, Boolean isQuiz = false) {
