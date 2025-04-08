@@ -52,7 +52,7 @@ const schema = yup.object({
   pointDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Point Display Text'),
 });
 
-const { values, defineField, errors, meta, handleSubmit, setFieldValue } = useForm({
+const { values, defineField, errors, meta, handleSubmit, setFieldValue, resetForm } = useForm({
   validationSchema: schema,
   initialValues: {
     levelDisplayName: 'Level',
@@ -68,6 +68,7 @@ onMounted(() => {
   loadSettings();
 })
 
+const labelsHaveBeenCleared = ref(false);
 let isLoading = ref(true);
 let showCustomLabelsConfigToggle = ref(false);
 let selfReport = ref({
@@ -219,7 +220,7 @@ const showSavedMsg = ref(false);
 
 // computed
 const isDirty = computed(() => {
-  const foundDirty = Object.values(settings.value).find((item) => item.dirty);
+  const foundDirty = Object.values(settings.value).find((item) => item.dirty) || labelsHaveBeenCleared.value;
   return !!foundDirty;
 });
 
@@ -230,8 +231,7 @@ const approvalSelected = computed(() => {
 });
 
 const shouldShowCustomLabelsConfig = computed(() => {
-  return showCustomLabelsConfigToggle.value
-      || settings.value.projectDisplayName.value !== 'Project' || settings.value.projectDisplayName.dirty
+  return settings.value.projectDisplayName.value !== 'Project' || settings.value.projectDisplayName.dirty
       || settings.value.subjectDisplayName.value !== 'Subject' || settings.value.subjectDisplayName.dirty
       || settings.value.groupDisplayName.value !== 'Group' || settings.value.groupDisplayName.dirty
       || settings.value.skillDisplayName.value !== 'Skill' || settings.value.skillDisplayName.dirty
@@ -434,26 +434,17 @@ const setSyntheticSetting = ((settingsResponse) => {
 });
 
 const save = (() => {
-  // $refs.observer.validate()
-  //     .then((res1) => {
-  //       if (!res1) {
-  //         errMsg.value = 'Form did NOT pass validation, please fix and try to Save again';
-  //       } else {
-          const dirtyChanges = Object.values(settings.value).filter((item) => item.dirty && !item.setting.startsWith('synthetic.'));
-          if (dirtyChanges) {
-            // isLoading.value = true;
-            SettingService.checkSettingsValidity(route.params.projectId, dirtyChanges)
-                .then((res) => {
-                  if (res.valid) {
-                    saveSettings(dirtyChanges);
-                  } else {
-                    errMsg.value = res.explanation;
-                    // isLoading.value = false;
-                  }
-                });
-          }
-      //   }
-      // });
+  const dirtyChanges = Object.values(settings.value).filter((item) => item.dirty && !item.setting.startsWith('synthetic.'));
+  if (dirtyChanges) {
+    SettingService.checkSettingsValidity(route.params.projectId, dirtyChanges)
+    .then((res) => {
+      if (res.valid) {
+        saveSettings(dirtyChanges);
+      } else {
+        errMsg.value = res.explanation;
+      }
+    });
+  }
 });
 
 const saveSettings = ((dirtyChanges) => {
@@ -475,12 +466,32 @@ const saveSettings = ((dirtyChanges) => {
             SkillsReporter.reportSkill('ConfigureProjectRootHelpUrl');
           }
         });
+        labelsHaveBeenCleared.value = false;
         projConfig.loadProjConfigState({ projectId: route.params.projectId, updateLoadingVar: false })
       })
       .finally(() => {
         // isLoading.value = false;
       });
 });
+
+const toggleCustomLabelConfig = () => {
+  resetForm()
+  if(!showCustomLabelsConfigToggle.value) {
+    labelsHaveBeenCleared.value = true;
+    settings.value.projectDisplayName.value = 'Project'
+    settings.value.projectDisplayName.dirty = true
+    settings.value.subjectDisplayName.value = 'Subject'
+    settings.value.subjectDisplayName.dirty = true
+    settings.value.groupDisplayName.value = 'Group'
+    settings.value.groupDisplayName.dirty = true
+    settings.value.skillDisplayName.value = 'Skill'
+    settings.value.skillDisplayName.dirty = true
+    settings.value.levelDisplayName.value = 'Level'
+    settings.value.levelDisplayName.dirty = true
+    settings.value.pointDisplayName.value = 'Point'
+    settings.value.pointDisplayName.dirty = true
+  }
+}
 </script>
 
 <template>
@@ -595,10 +606,11 @@ const saveSettings = ((dirtyChanges) => {
                              inputId="showCustomLabelsConfigToggle"
                              name="check-button"
                              aria-labelledby="customLabelsLabel"
+                             @change="toggleCustomLabelConfig"
                              data-cy="customLabelsSwitch"/>
                 <span class="ml-1">{{ showCustomLabelsConfigLabel }}</span>
               </div>
-              <Card class="mt-4" v-if="shouldShowCustomLabelsConfig">
+              <Card class="mt-4" v-if="showCustomLabelsConfigToggle">
                 <template #content>
                   <SkillsSettingTextInput name="projectDisplayName"
                                           label="Project Display Text"
