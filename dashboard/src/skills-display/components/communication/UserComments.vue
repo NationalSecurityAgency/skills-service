@@ -14,22 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {ref} from 'vue'
 import UserComment from "@/skills-display/components/communication/UserComment.vue";
 
+defineProps({
+  comments: Array
+})
 
-const availableCommentTypes = ref([
-  {name: 'Internal', code: 'Internal', title: 'Only visible to you and project admins'},
-  {name: 'Public', code: 'Public', title: 'Visible to anyone who can see this skill'},
-]);
-
-const comments = []
 
 </script>
 
 <template>
   <div class="mt-5 px-2 flex flex-col gap-2">
-    <div v-for="(comment, index) in comments" :key="comment.id">
+    <div v-for="(comment, index) in comments" :key="comment.threadId">
       <user-comment :comment="comment" :comment-index="index"/>
     </div>
   </div>

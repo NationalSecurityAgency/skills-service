@@ -73,6 +73,6 @@ class AdminCommentsController {
                              @RequestParam String orderBy,
                              @RequestParam Boolean ascending) {
         PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending);
-        return new TableResult()
+        return userCommentsService.getCommentsTableResult(projectId, pageRequest)
     }
 }

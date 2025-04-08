@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-https://www.apache.org/licenses/LICENSE-2.0
+    https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,6 @@ import {ref} from "vue";
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import NewCommentDialog from "@/components/userComments/NewCommentDialog.vue";
 import UserCommentsTable from "@/components/userComments/UserCommentsTable.vue";
-import UserComments from "@/skills-display/components/communication/UserComments.vue";
 
 
 const showNewCommentDialog = ref(false)
@@ -33,9 +32,8 @@ const doShowNewCommentDialog = () => {
     <sub-page-header title="User Comments"
                      action="New Comment"
                      @add-action="doShowNewCommentDialog"/>
-    <Card>
+    <Card :pt="{ body: { class: '!p-0' } }">
       <template #content>
-        <user-comments />
         <user-comments-table />
       </template>
     </Card>

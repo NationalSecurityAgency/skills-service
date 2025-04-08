@@ -26,6 +26,9 @@ interface UserCommentRepo extends JpaRepository<UserComment, Long> {
         String getUserIdForDisplay()
         String getComment()
         Date getCreated()
+        String getSkillId()
+        String getSkillName()
+        Boolean getNeedsResponse()
     }
 
     @Query('''SELECT comment.userCommentThreadId as userCommentThreadId, userAttrs.userIdForDisplay as userIdForDisplay, comment.comment as comment, comment.created as created
@@ -37,10 +40,19 @@ interface UserCommentRepo extends JpaRepository<UserComment, Long> {
             ''')
     List<SimpleUserComment> findAllByUserIdAndThreadIdIn(String userId, List<Integer> threadIds)
 
-    @Query('''SELECT comment.userCommentThreadId as userCommentThreadId, userAttrs.userIdForDisplay as userIdForDisplay, comment.comment as comment, comment.created as created
-        from  UserComment  comment, UserAttrs userAttrs 
+    @Query('''SELECT 
+            comment.userCommentThreadId as userCommentThreadId, 
+            userAttrs.userIdForDisplay as userIdForDisplay, 
+            comment.comment as comment, 
+            comment.created as created,
+            commentThread.skillId as skillId,
+            skill.name as skillName,
+            commentThread.needsResponse as needsResponse
+        from  UserCommentThread commentThread, UserComment  comment, UserAttrs userAttrs, SkillDef skill
         where
            userAttrs.userId = comment.fromUserId
+           and commentThread.id = comment.userCommentThreadId
+           and commentThread.projectId = skill.projectId and commentThread.skillId = skill.skillId
            and comment.userCommentThreadId in (:threadIds)
             ''')
     List<SimpleUserComment> findAllByThreadIdIn(List<Integer> threadIds)

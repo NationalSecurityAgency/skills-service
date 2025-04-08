@@ -174,7 +174,10 @@ class UserCommentsService {
                     threadId: thread.id,
                     userIdForDisplay: firstComment?.userIdForDisplay,
                     comment: firstComment?.comment,
-                    commentedOn: firstComment?.created
+                    commentedOn: firstComment?.created,
+                    skillId: firstComment.skillId,
+                    skillName: firstComment.skillName,
+                    needsResponse: firstComment.needsResponse
             )
 
             if (commentsForThread.size() > 1) {
@@ -185,7 +188,9 @@ class UserCommentsService {
                                     threadId: thread.id,
                                     userIdForDisplay: replyComment?.userIdForDisplay,
                                     comment: replyComment?.comment,
-                                    commentedOn: replyComment?.created
+                                    commentedOn: replyComment?.created,
+                                    skillId: replyComment.skillId,
+                                    skillName: replyComment.skillName
                             ))
                         }
             }

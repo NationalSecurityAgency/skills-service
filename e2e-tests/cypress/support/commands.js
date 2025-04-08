@@ -1642,4 +1642,10 @@ Cypress.Commands.add('openNewSkillDialog', ()  => {
     cy.get('[data-cy="skillName"]').should('have.focus')
 })
 
-
+Cypress.Commands.add("createUserComment", (projNum = 1, skillNum =1, comment, toUserId = null) => {
+    const urlStart = toUserId ? 'admin' : 'api'
+    cy.request('POST', `/${urlStart}/projects/proj${projNum}/skills/skill${skillNum}/comment`, {
+        comment: comment,
+        toUserId: toUserId,
+    });
+});

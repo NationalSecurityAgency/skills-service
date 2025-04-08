@@ -30,6 +30,14 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
+  replyLabel: {
+    type: String,
+    default: 'Comment'
+  },
+  canEdit: {
+    type: Boolean,
+    default: true
+  },
   hasParent: Boolean,
 })
 const emit = defineEmits(['reportLocation'])
@@ -78,7 +86,7 @@ onMounted(() => {
       <div class="flex flex-col items-center relative">
         <div ref="userAvatar">
           <Avatar
-            :label="comment.userInitials"
+            :label="comment.userInitials || 'U'"
             :class="avatarBgColor"
             shape="circle"
             :pt="{icon: {class: 'text-blue-800 dark:text-blue-400'}}"/>
@@ -95,18 +103,18 @@ onMounted(() => {
       <div class=" flex-1">
         <div class="flex gap-2">
           <div class="flex-1 flex gap-2 items-center">
-            <div class="font-bold">{{ comment.usernameForDisplay }}</div>
+            <div class="font-bold">{{ comment.userIdForDisplay }}</div>
             <div class="text-gray-600">{{ timeUtils.relativeTime(comment.time) }}</div>
           </div>
         </div>
-        <div class="mt-3">{{ comment.text }}</div>
+        <div class="mt-3">{{ comment.comment }}</div>
 
         <div class="flex">
           <div class="flex-1 flex gap-1">
-            <Button v-if="showReply" text icon="far fa-comment" label="Comment" severity="info" class=""
+            <Button v-if="showReply" text icon="far fa-comment" :label="replyLabel" severity="info" class=""
                     size="small"></Button>
 
-            <Button text icon="far fa-edit" label="Edit" severity="secondary" class="" size="small"></Button>
+            <Button v-if="canEdit" text icon="far fa-edit" label="Edit" severity="secondary" class="" size="small"></Button>
           </div>
         </div>
 
@@ -117,7 +125,6 @@ onMounted(() => {
                   :comment="comment"
                   @report-location="updateChildLocation"
                   :show-reply="false"
-                  :show-visibility="false"
                   :comment-index="index"
                   :has-parent="true"/>
             </div>

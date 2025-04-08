@@ -14,39 +14,56 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, ref} from 'vue'
-import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEditor.vue";
+import {onMounted, ref} from 'vue'
 import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
-import UserComment from "@/skills-display/components/communication/UserComment.vue";
 import UserComments from "@/skills-display/components/communication/UserComments.vue";
+import {useSkillsDisplayService} from "@/skills-display/services/UseSkillsDisplayService.js";
+import {useRoute} from "vue-router";
 
 const commentInput = ref('')
+
+const skillsDisplayService = useSkillsDisplayService()
+const route = useRoute()
+
+const isLoadingComments = ref(true)
+const comments = ref([])
+const loadComments = () => {
+  skillsDisplayService.getUserComments(route.params.skillId)
+      .then(res => comments.value = res.comments)
+      .finally(() => isLoadingComments.value = false)
+}
+
+onMounted(() => {
+  loadComments()
+})
+
 </script>
 
 <template>
   <div class="my-5">
-    <div class="p-4 bg-gray-100 rounded-2xl text-right">
+    <BlockUI :blocked="isLoadingComments">
+      <div class="p-4 bg-gray-100 rounded-2xl text-right">
       <Textarea v-model="commentInput" rows="2" fluid
                 variant="filled"
                 :pt="{ root: { class: '!border-0' } }"
                 placeholder="Add a message or comment"/>
-      <div class="flex gap-4 text-left">
-        <div class="mt-2 flex-1">
-          <SkillsButton label="Submit"
-                        :outlined="false"
-                        icon="far fa-paper-plane"
-                        severity="warn"
-                        rounded
-                        size="small"/>
-        </div>
-        <div>
-          <small>Visible only to you and training admins</small>
+        <div class="flex gap-4 text-left">
+          <div class="mt-2 flex-1">
+            <SkillsButton label="Submit"
+                          :outlined="false"
+                          icon="far fa-paper-plane"
+                          severity="warn"
+                          rounded
+                          size="small"/>
+          </div>
+          <div>
+            <small>Visible only to you and training admins</small>
+          </div>
         </div>
       </div>
-    </div>
 
-    <user-comments />
-
+      <user-comments :comments="comments"/>
+    </BlockUI>
   </div>
 </template>
 

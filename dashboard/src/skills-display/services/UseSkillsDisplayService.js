@@ -262,6 +262,12 @@ export const useSkillsDisplayService = () => {
     return axios.get('/app/userInfo').then((response) => response.data)
   }
 
+  const getUserComments = (skillId) => {
+    return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skills/${encodeURIComponent(skillId)}/comments`, {
+      params: getUserIdAndVersionParams()
+    }).then((result) => result.data)
+  }
+
   return {
     loadUserProjectSummary,
     loadSubjectSummary,
@@ -281,6 +287,7 @@ export const useSkillsDisplayService = () => {
     getRankingDistributionUsersPerLevel,
     getLeaderboard,
     getVideoTranscript,
-    getLoggedInUserInfo
+    getLoggedInUserInfo,
+    getUserComments
   }
 }
