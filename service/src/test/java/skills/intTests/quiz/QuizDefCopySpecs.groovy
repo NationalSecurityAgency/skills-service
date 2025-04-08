@@ -834,6 +834,89 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         questions_t2[1].question.contains(newAttachments[1].uuid)
     }
 
+    def "copy quiz - copy a quiz with a video"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice))
+        Integer questionId = question.body.id
+        skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice))
+
+        when:
+        skillsService.saveSkillVideoAttributes(quiz.quizId, questionId.toString(), [
+                videoUrl: "http://some.url",
+                transcript: "transcript",
+                captions: "captions",
+        ], true )
+        def result = skillsService.getSkillVideoAttributes(quiz.quizId, questionId.toString(), true)
+        assert result
+        def copyResult = skillsService.copyQuiz(quiz.quizId, [quizId: 'newQuizId', name: 'Copy of Quiz', description: '', type: quiz.type]).body
+        assert copyResult
+        def copiedQuestions = skillsService.getQuizQuestionDefs(copyResult.quizId)
+        def copiedQuestion = copiedQuestions.questions[0]
+        def copiedQuizVideo = skillsService.getSkillVideoAttributes(copyResult.quizId, copiedQuestion.id.toString(), true)
+
+        then:
+        copiedQuizVideo == result
+    }
+
+    def "copy quiz - deleting a copied quiz with a video does not impact the original quiz"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice))
+        Integer questionId = question.body.id
+        skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice))
+
+        when:
+        skillsService.saveSkillVideoAttributes(quiz.quizId, questionId.toString(), [
+                videoUrl: "http://some.url",
+                transcript: "transcript",
+                captions: "captions",
+        ], true )
+        def result = skillsService.getSkillVideoAttributes(quiz.quizId, questionId.toString(), true)
+        assert result
+        def copyResult = skillsService.copyQuiz(quiz.quizId, [quizId: 'newQuizId', name: 'Copy of Quiz', description: '', type: quiz.type]).body
+        assert copyResult
+        def copiedQuestions = skillsService.getQuizQuestionDefs(copyResult.quizId)
+        def copiedQuestion = copiedQuestions.questions[0]
+        def copiedQuizVideo = skillsService.getSkillVideoAttributes(copyResult.quizId, copiedQuestion.id.toString(), true)
+        assert copiedQuizVideo
+
+        skillsService.removeQuizDef(copyResult.quizId)
+        def originalResult = skillsService.getSkillVideoAttributes(quiz.quizId, questionId.toString(), true)
+
+        then:
+        originalResult == result
+    }
+
+    def "copy quiz - deleting a quiz with a video that has been copied does not impact the copy"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice))
+        Integer questionId = question.body.id
+        skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 4, QuizQuestionType.SingleChoice))
+
+        when:
+        skillsService.saveSkillVideoAttributes(quiz.quizId, questionId.toString(), [
+                videoUrl: "http://some.url",
+                transcript: "transcript",
+                captions: "captions",
+        ], true )
+        def result = skillsService.getSkillVideoAttributes(quiz.quizId, questionId.toString(), true)
+        assert result
+        def copyResult = skillsService.copyQuiz(quiz.quizId, [quizId: 'newQuizId', name: 'Copy of Quiz', description: '', type: quiz.type]).body
+        assert copyResult
+        def copiedQuestions = skillsService.getQuizQuestionDefs(copyResult.quizId)
+        def copiedQuestion = copiedQuestions.questions[0]
+        def copiedQuizVideo = skillsService.getSkillVideoAttributes(copyResult.quizId, copiedQuestion.id.toString(), true)
+        assert copiedQuizVideo
+
+        skillsService.removeQuizDef(quiz.quizId)
+        def copiedQuizVideoAfter = skillsService.getSkillVideoAttributes(copyResult.quizId, copiedQuestion.id.toString(), true)
+
+        then:
+        copiedQuizVideo == copiedQuizVideoAfter
+    }
+
     void runQuiz(String userId, def quiz, def quizInfo, boolean pass) {
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, userId).body
         skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, userId)
