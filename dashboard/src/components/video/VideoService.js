@@ -16,18 +16,18 @@
 import axios from 'axios';
 
 export default {
-  saveVideoSettings(projectId, skillId, videoSettings) {
-    const url = `/admin/projects/${projectId}/skills/${skillId}/video`;
+  saveVideoSettings(container, item, videoSettings, isSkill = true) {
+    const url = isSkill ? `/admin/projects/${container}/skills/${item}/video` : `/admin/quiz-definitions/${container}/questions/${item}/video`
     return axios.post(url, videoSettings)
       .then((response) => response.data);
   },
-  deleteVideoSettings(projectId, skillId) {
-    const url = `/admin/projects/${projectId}/skills/${skillId}/video`;
+  deleteVideoSettings(container, item, isSkill = true) {
+    const url = isSkill ? `/admin/projects/${container}/skills/${item}/video` : `/admin/quiz-definitions/${container}/questions/${item}/video`
     return axios.delete(url)
       .then((response) => response.data);
   },
-  getVideoSettings(projectId, skillId) {
-    const url = `/admin/projects/${projectId}/skills/${skillId}/video`;
+  getVideoSettings(container, item, isSkill = true) {
+    const url = isSkill ? `/admin/projects/${container}/skills/${item}/video` : `/admin/quiz-definitions/${container}/questions/${item}/video`
     return axios.get(url)
       .then((response) => response.data);
   },

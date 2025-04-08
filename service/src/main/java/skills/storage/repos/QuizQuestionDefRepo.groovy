@@ -19,7 +19,9 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.lang.Nullable
+import skills.services.attributes.SkillVideoAttrs
 import skills.storage.model.QuizQuestionDef
+import org.springframework.data.repository.query.Param
 
 interface QuizQuestionDefRepo extends JpaRepository<QuizQuestionDef, Long> {
 
@@ -52,6 +54,34 @@ interface QuizQuestionDefRepo extends JpaRepository<QuizQuestionDef, Long> {
     @Query('''update QuizQuestionDef set displayOrder = ?2 where id = ?1''')
     void updateDisplayOrder(Integer id, Integer newDisplayOrder)
 
+    @Nullable
+    @Query('''select attributes from QuizQuestionDef where quizId = ?1 and id=?2''')
+    String getVideoAttributes(String quizId, Integer questionId)
+
+    @Modifying
+    @Query(value="update quiz_question_definition set attributes = CAST(:attrs AS JSONB) where quiz_id = :quizId and id = :questionId", nativeQuery = true)
+    void saveVideoAttributes(@Param("quizId") String quizId, @Param("questionId") Integer questionId, @Param("attrs") String attrs)
+
+    @Modifying
+    @Query('''update QuizQuestionDef set attributes = null where quizId = ?1 and id = ?2''')
+    void deleteVideoAttrs(String quizId, Integer questionId)
 
     Integer countByQuizId(String quizId)
+
+    @Nullable
+    @Query(value = '''select attributes ->> 'captions'
+        from quiz_question_definition
+        where quiz_id = ?1
+              and id = ?2
+    ''', nativeQuery = true)
+    String getVideoCaptions(String quizId, Integer questionId)
+
+    @Nullable
+    @Query(value = '''select attributes ->> 'transcript'
+        from quiz_question_definition
+        where quiz_id = ?1
+            and id = ?2
+    ''', nativeQuery = true)
+    String getVideoTranscripts(String quizId, Integer questionId)
+
 }

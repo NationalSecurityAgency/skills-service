@@ -56,6 +56,9 @@ const timeUtils = useTimeUtils()
 const announcer = useSkillsAnnouncer()
 const byteFormat = useByteFormat()
 const responsive = useResponsiveBreakpoints()
+const container = route.params.projectId ? route.params.projectId : route.params.quizId;
+const item = route.params.skillId ? route.params.skillId : route.params.questionId;
+const isSkill = !!route.params.skillId;
 
 const videoConf = ref({
   file: null,
@@ -72,8 +75,9 @@ const preview = ref(false);
 const refreshingPreview = ref(false);
 const loading = ref({
   video: true,
-  skill: true,
+  skill: isSkill,
 });
+
 const showSavedMsg = ref(false);
 const overallErrMsg = ref(null);
 const showFileUpload = ref(true);
@@ -82,9 +86,15 @@ const configuredWidth = ref(null);
 const isConfiguredVideoSize = computed(() => configuredWidth.value && configuredHeight.value)
 const configuredResolution = computed(() => isConfiguredVideoSize.value ? configuredWidth.value + " x " + configuredHeight.value : 'Not Configured')
 const configuredHeight = ref(null);
+const requestEndpoint = computed(() => {
+  return isSkill ? `projects/${container}/skills/${item}` : `quiz-definitions/${container}/questions/${item}`;
+})
+const captionsEndpoint = computed(() => {
+  return isSkill ? `/api/${requestEndpoint.value}/videoCaptions` : `/admin/${requestEndpoint.value}/videoCaptions`
+})
 const computedVideoConf = computed(() => {
   const captionsUrl = videoConf.value.captions && videoConf.value.captions.trim().length > 0
-      ? `/api/projects/${route.params.projectId}/skills/${route.params.skillId}/videoCaptions`
+      ? captionsEndpoint.value
       : null;
   return {
     url: videoConf.value.url,
@@ -124,7 +134,7 @@ const isReadOnly = computed(() => {
 const videoUploadWarningMessage = computed(() => {
   const warningMessageValue = appConfig?.videoUploadWarningMessage;
   try {
-    return projectCommunityReplacement.populateProjectCommunity(warningMessageValue, projConfig.getProjectCommunityValue(), `projId=[${route.params.projectId}], skillId=[${route.params.skillId}] config.videoUploadWarningMessage `);
+    return projectCommunityReplacement.populateProjectCommunity(warningMessageValue, projConfig.getProjectCommunityValue(), `projId=[${container}], skillId=[${item}] config.videoUploadWarningMessage `);
   } catch(err) {
     // eslint-disable-next-line vue/no-side-effects-in-computed-properties
     router.push({ name: 'ErrorPage', query: { err } });
@@ -188,6 +198,7 @@ const saveSettings = () => {
   isDurationAvailable.value = true;
   preview.value = false;
   loading.value.video = true;
+
   const data = new FormData();
   if (videoConf.value.file) {
     data.append('file', videoConf.value.file);
@@ -209,7 +220,7 @@ const saveSettings = () => {
     data.append('height', configuredHeight.value)
   }
 
-  const endpoint = `/admin/projects/${route.params.projectId}/skills/${route.params.skillId}/video`;
+  const endpoint = `/admin/${requestEndpoint.value}/video`;
   FileUploadService.upload(endpoint, data, (response) => {
     savedAtLeastOnce.value = true;
     updateVideoSettings(response.data);
@@ -246,7 +257,7 @@ const clearSettings = () => {
   preview.value = false;
   isDurationAvailable.value = true;
   switchToFileUploadOption();
-  VideoService.deleteVideoSettings(route.params.projectId, route.params.skillId)
+  VideoService.deleteVideoSettings(container, item, isSkill)
       .finally(() => {
         loading.value.video = false;
         validate();
@@ -262,7 +273,7 @@ const discardChanges = () => {
 }
 const loadSettings = () => {
   loading.value.video = true;
-  return VideoService.getVideoSettings(route.params.projectId, route.params.skillId)
+  return VideoService.getVideoSettings(container, item, isSkill)
       .then((settingRes) => {
         updateVideoSettings(settingRes);
       }).finally(() => {
@@ -424,7 +435,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
 <template>
   <div>
     <SubPageHeader title="Configure Audio/Video" />
-    <SkillsOverlay :show="loading.video || skillsState.loadingSkill || appConfig.isLoadingConfig">
+    <SkillsOverlay :show="loading.video || (isSkill ? skillsState.loadingSkill : false) || appConfig.isLoadingConfig">
       <template v-if="videoConf.file" #overlay>
         <div class="text-center text-success pt-8">
           <div class="text-2xl mb-4"><i class="fas fa-video" aria-hidden="true"/> Uploading Video</div>
@@ -441,7 +452,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
             <span v-if="isReused"><Tag severity="success"><i class="fas fa-recycle mr-1" aria-hidden="true"/> Reused</Tag></span>
             skills are read-only.
           </Message>
-          <div v-if="!isReadOnly && savedAtLeastOnce && skillsState.skill && hasVideoUrl" data-cy="videoSelfReportAlert">
+          <div v-if="!isReadOnly && savedAtLeastOnce && isSkill && skillsState.skill && hasVideoUrl" data-cy="videoSelfReportAlert">
             <Message v-if="skillsState.skill.selfReportingType === 'Video'" severity="success" icon="fas fa-play-circle" class="alert alert-success" :closable="false">
               Users are required to {{ computedVideoConf.isAudio ? 'listen to this audio' : 'watch this video'}} in order to earn the skill and its points.
             </Message>
@@ -611,7 +622,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
             <template #content>
               <VideoPlayer
                   v-if="!refreshingPreview"
-                  :video-player-id="`videoConfigFor-${route.params.projectId}-${route.params.skillId}`"
+                  :video-player-id="`videoConfigFor-${container}-${item}`"
                   :options="computedVideoConf"
                   @player-destroyed="turnOffRefresh"
                   @watched-progress="updatedWatchProgress"
