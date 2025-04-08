@@ -81,6 +81,7 @@ describe('Badges Tests', () => {
             .click();
         cy.contains('This Badge has no assigned Skills. A Badge cannot be published without at least one assigned Skill.')
             .should('be.visible');
+        cy.get('[data-pc-name="pcrejectbutton"]').should('not.be.visible');
         cy.get('[data-cy=badgeStatus]')
             .contains('Status: Disabled')
             .should('exist');
