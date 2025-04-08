@@ -1,11 +1,13 @@
-FROM eclipse-temurin:19-jdk-jammy
+FROM eclipse-temurin:24-jdk-alpine-3.21
 
 # install netcat so start script can use nc command to wait for DB to come up
-RUN apt-get update && apt-get install -y \
+RUN apk update && apk upgrade \
+&& apk add --no-cache \
 netcat-openbsd \
 wget \
 procps \
-&& rm -rf /var/lib/apt/lists/*
+bash \
+&& rm -rf /var/cache/apk/*
 
 ARG BUILD_DATE
 ARG VERSION
