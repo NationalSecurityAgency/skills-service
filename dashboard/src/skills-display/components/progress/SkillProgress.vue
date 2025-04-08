@@ -113,6 +113,9 @@ const childSkillsInternal = computed(() => {
 })
 const isSkillLocked = computed(() => {
   let hasBadgeDependency = false;
+  if(isSkillComplete.value) {
+    return false;
+  }
   const sk = props.skill;
   if (sk.badgeDependencyInfo && sk.badgeDependencyInfo.length > 0) {
     if (sk.badgeDependencyInfo.find((item) => !item.achieved)) {
