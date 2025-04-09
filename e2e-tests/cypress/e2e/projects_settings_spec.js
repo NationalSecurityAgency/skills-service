@@ -379,6 +379,65 @@ describe('Project Settings Tests', () => {
             .should('not.exist');
     });
 
+    it('project-level settings: custom labels can be turned off without resetting values', () => {
+        let labelsSwitch = '[data-cy="customLabelsSwitch"] [data-pc-section="input"]';
+        cy.createProject(1);
+        cy.visit('/administrator/projects/proj1/settings');
+
+        cy.get(labelsSwitch).should('not.be.checked');
+        cy.get(labelsSwitch).click({ force: true });
+        cy.get(labelsSwitch).should('be.checked');
+        cy.get('[data-cy="projectDisplayNameTextInput"]').should('have.value', 'Project');
+        cy.get('[data-cy="subjectDisplayNameTextInput"]').should('have.value', 'Subject');
+        cy.get('[data-cy="groupDisplayNameTextInput"]').should('have.value', 'Group');
+        cy.get('[data-cy="skillDisplayNameTextInput"]').should('have.value', 'Skill');
+        cy.get('[data-cy="levelDisplayNameTextInput"]').should('have.value', 'Level');
+        cy.get('[data-cy="pointDisplayNameTextInput"]').should('have.value', 'Point');
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
+        cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+        cy.get('[data-cy=projectDisplayNameTextInput]').clear().type('Work Role');
+        cy.get('[data-cy=subjectDisplayNameTextInput]').clear().type('Competency');
+        cy.get('[data-cy=groupDisplayNameTextInput]').clear().type('KSA');
+        cy.get('[data-cy=skillDisplayNameTextInput]').clear().type('Course');
+        cy.get('[data-cy=levelDisplayNameTextInput]').clear().type('Stage');
+        cy.get('[data-cy=pointDisplayNameTextInput]').clear().type('Hour');
+
+        cy.get('[data-cy="projectDisplayNameTextInput"]').should('have.value', 'Work Role');
+        cy.get('[data-cy="subjectDisplayNameTextInput"]').should('have.value', 'Competency');
+        cy.get('[data-cy="groupDisplayNameTextInput"]').should('have.value', 'KSA');
+        cy.get('[data-cy="skillDisplayNameTextInput"]').should('have.value', 'Course');
+        cy.get('[data-cy="levelDisplayNameTextInput"]').should('have.value', 'Stage');
+        cy.get('[data-cy="pointDisplayNameTextInput"]').should('have.value', 'Hour');
+        cy.get('[data-cy="unsavedChangesAlert"]').contains('Unsaved Changes');
+        cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="saveSettingsBtn"]').click();
+        cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+        cy.get(labelsSwitch).should('be.checked');
+        cy.get(labelsSwitch).click();
+        cy.get(labelsSwitch).should('not.be.checked');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
+        cy.get('[data-cy="saveSettingsBtn"]').click();
+        cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
+
+        cy.get(labelsSwitch).should('not.be.checked');
+        cy.get(labelsSwitch).click();
+        cy.get(labelsSwitch).should('be.checked');
+        cy.get('[data-cy="projectDisplayNameTextInput"]').should('have.value', 'Project');
+        cy.get('[data-cy="subjectDisplayNameTextInput"]').should('have.value', 'Subject');
+        cy.get('[data-cy="groupDisplayNameTextInput"]').should('have.value', 'Group');
+        cy.get('[data-cy="skillDisplayNameTextInput"]').should('have.value', 'Skill');
+        cy.get('[data-cy="levelDisplayNameTextInput"]').should('have.value', 'Level');
+        cy.get('[data-cy="pointDisplayNameTextInput"]').should('have.value', 'Point');
+
+    });
+
     it('project-level settings: project visibility', () => {
 
         cy.createProject(1);
