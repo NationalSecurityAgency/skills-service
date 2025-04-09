@@ -388,6 +388,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.contains('Very Great Skill 1');
         const msg = 'Congrats! You completed this skill before the prerequisites were added';
         cy.contains(msg);
+        cy.get('[data-cy="progressBarWithLock"]').should('not.exist')
 
         cy.wait(4000);
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
