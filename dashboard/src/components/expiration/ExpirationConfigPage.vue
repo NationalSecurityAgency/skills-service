@@ -446,7 +446,7 @@ const saveSettings = handleSubmit((values) => {
                   </div>
                   <SkillsDropDown v-model="monthlyDay"
                                   :options="dayOptions"
-                                  :disabled="expirationType !== MONTHLY || monthlyDayOption !== 'SET_DAY_OF_MONTH' || isReadOnly"
+                                  :disabled="expirationType !== MONTHLY || monthlyDayOption !== 'SET_DAY_OF_MONTH'"
                                   :class="{'w-full': responsive.md.value }"
                                   aria-label="Set day of month"
                                   name="monthlyDay"
