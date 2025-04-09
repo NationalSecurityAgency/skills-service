@@ -322,13 +322,15 @@ const saveSettings = handleSubmit((values) => {
             <span v-if="isReused"><Tag severity="success"><i class="fas fa-recycle mr-1" aria-hidden="true"/> Reused</Tag></span>
             skills are read-only.
           </Message>
-          <div class="flex flex-col" data-cy="expirationTypeSelector">
+          <BlockUI :blocked="isReadOnly">
+            <div class="flex flex-col" data-cy="expirationTypeSelector">
 
             <div class="rounded-border p-4" :class="{ 'surface-100' : expirationType === NEVER}">
               <div class="flex items-center justify-start">
                 <div class="flex flex-wrap">
                   <div class="flex items-center">
                     <SkillsRadioButtonInput v-model="expirationType"
+                                            :disabled="isReadOnly"
                                  inputId="expirationTypeNone"
                                  name="expirationType"
                                  data-cy="expirationNeverRadio"
@@ -346,6 +348,7 @@ const saveSettings = handleSubmit((values) => {
                 <div class="flex flex-wrap">
                   <div class="flex items-center">
                     <SkillsRadioButtonInput v-model="expirationType"
+                                            :disabled="isReadOnly"
                                  inputId="yearlyRadio"
                                  name="expirationType"
                                  data-cy="yearlyRadio"
@@ -362,7 +365,7 @@ const saveSettings = handleSubmit((values) => {
                       id="yearlyYears-sb"
                       data-cy="yearlyYears-sb"
                       v-model="yearlyYears"
-                      :disabled="expirationType !== 'YEARLY'"
+                      :disabled="expirationType !== 'YEARLY' || isReadOnly"
                       :class="{'w-full': responsive.md.value }"
                       name="yearlyYears"
                       inputClass="w-24"
@@ -376,7 +379,7 @@ const saveSettings = handleSubmit((values) => {
                   <span class="">on:</span>
                   <SkillsDropDown :options="monthsOptions"
                                   v-model="yearlyMonth"
-                                  :disabled="expirationType !== YEARLY"
+                                  :disabled="expirationType !== YEARLY || isReadOnly"
                                   :class="{'w-full': responsive.md.value }"
                                   name="yearlyMonth"
                                   optionLabel="text"
@@ -386,7 +389,7 @@ const saveSettings = handleSubmit((values) => {
                                   data-cy="yearlyMonth"/>
                   <SkillsDropDown v-model="yearlyDayOfMonth"
                                   :options="dayOptions"
-                                  :disabled="expirationType !== YEARLY"
+                                  :disabled="expirationType !== YEARLY || isReadOnly"
                                   :class="{'w-full': responsive.md.value }"
                                   aria-label="Day of month"
                                   name="yearlyDayOfMonth"
@@ -405,6 +408,7 @@ const saveSettings = handleSubmit((values) => {
                                  inputId="monthlyRadio"
                                  name="expirationType"
                                  data-cy="monthlyRadio"
+                                 :disabled="isReadOnly"
                                  :value="MONTHLY" />
                     <label for="monthlyRadio" class="ml-2 font-bold">Monthly</label>
                   </div>
@@ -419,7 +423,7 @@ const saveSettings = handleSubmit((values) => {
                       data-cy="monthlyMonths-sb"
                       v-model="monthlyMonths"
                       :class="{'w-full': responsive.md.value }"
-                      :disabled="expirationType !== MONTHLY"
+                      :disabled="expirationType !== MONTHLY || isReadOnly"
                       name="monthlyMonths"
                       inputClass="w-24"
                       inputId="minmax-buttons"
@@ -434,7 +438,7 @@ const saveSettings = handleSubmit((values) => {
                     <div class="flex flex-wrap flex-col md:flex-row gap-4" data-cy="monthlyDayOption">
                       <div v-for="category in monthlyDayCategories" :key="category.key" class="flex items-center">
                         <SkillsRadioButtonInput v-model="monthlyDayOption" :inputId="category.key"
-                                                :disabled="expirationType !== MONTHLY"
+                                                :disabled="expirationType !== MONTHLY || isReadOnly"
                                                 name="monthlyDayOption" :value="category.key"/>
                         <label :for="category.key" class="ml-2">{{ category.name }}</label>
                       </div>
@@ -442,7 +446,7 @@ const saveSettings = handleSubmit((values) => {
                   </div>
                   <SkillsDropDown v-model="monthlyDay"
                                   :options="dayOptions"
-                                  :disabled="expirationType !== MONTHLY || monthlyDayOption !== 'SET_DAY_OF_MONTH'"
+                                  :disabled="expirationType !== MONTHLY || monthlyDayOption !== 'SET_DAY_OF_MONTH' || isReadOnly"
                                   :class="{'w-full': responsive.md.value }"
                                   aria-label="Set day of month"
                                   name="monthlyDay"
@@ -463,6 +467,7 @@ const saveSettings = handleSubmit((values) => {
                                  inputId="dailyRadio"
                                  name="expirationType"
                                  data-cy="dailyRadio"
+                                 :disabled="isReadOnly"
                                  :value="DAILY" />
                     <label for="dailyRadio" class="ml-2 font-bold">Daily with ability to retain</label>
                   </div>
@@ -476,7 +481,7 @@ const saveSettings = handleSubmit((values) => {
                       id="dailyDays-sb"
                       data-cy="dailyDays-sb"
                       v-model="dailyDays"
-                      :disabled="expirationType !== DAILY"
+                      :disabled="expirationType !== DAILY || isReadOnly"
                       :class="{'w-full': responsive.md.value }"
                       :aria-label="`Skills will expire every ${dailyDays} days after user earns an achievement`"
                       name="dailyDays"
@@ -498,7 +503,7 @@ const saveSettings = handleSubmit((values) => {
                               label="Save"
                               icon="fas fa-arrow-circle-right"
                               @click="saveSettings"
-                              :disabled="!meta.valid || !isDirty"
+                              :disabled="!meta.valid || !isDirty || isReadOnly"
                               aria-label="Save Settings"
                               data-cy="saveSettingsBtn">
                 </SkillsButton>
@@ -520,7 +525,7 @@ const saveSettings = handleSubmit((values) => {
             </div>
 
           </div>
-
+          </BlockUI>
         </template>
       </Card>
     </SkillsOverlay>

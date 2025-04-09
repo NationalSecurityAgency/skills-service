@@ -29,6 +29,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  disabled: {
+    type: Boolean,
+    required: false
+  },
 })
 
 onUpdated(() => {
@@ -73,7 +77,7 @@ const openFileDialog = (event) => {
         <InputText :pt="{ root: { readOnly: true } }"
                    id="videoFileInputDropTarget"
                    data-cy="videoFileInputDropTarget"
-                   :disabled="false"
+                   :disabled="disabled"
                    variant="filled"
                    @click="openFileDialog"
                    placeholder="Upload file from my computer by clicking Browse or drag-n-dropping it here..."/>
@@ -82,6 +86,7 @@ const openFileDialog = (event) => {
               :pt="{ root: { class: 'border-round-right border-l-0 bg-primary' }, input: { id: 'videoFileInput'} }"
               data-cy="videoFileUpload"
               mode="basic"
+              :disabled="disabled"
               :auto="true"
               :show-upload-button="false"
               :custom-upload="true"
@@ -108,6 +113,7 @@ const openFileDialog = (event) => {
               @click="emit('reset')"
               icon="fa fa-broom"
               :outlined="false"
+              :disabled="disabled"
               severity="secondary"
               label="Reset">
           </SkillsButton></template>
