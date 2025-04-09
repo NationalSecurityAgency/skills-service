@@ -24,12 +24,12 @@
 
         <commons.lang.version>3.14.0</commons.lang.version>
         <commons.collections.version>4.4</commons.collections.version>
-        <commons.io.version>2.16.1</commons.io.version>
+        <commons.io.version>2.18.0</commons.io.version>
 
         <frontend-maven-plugin.version>1.10.3</frontend-maven-plugin.version>
         <node.version>v14.21.3</node.version>
 
-        <guava.version>29.0-jre</guava.version>
+        <guava.version>33.4.6-jre</guava.version>
 
         <!-- !!!!!IMPORTANT!!!!!: when changing the springboot.version property, make sure you also change it in the spring-boot-starter-parent definition -->
         <springboot.version>3.4.4</springboot.version>
@@ -49,6 +49,9 @@
 
         <pretty-time.version>5.0.3.Final</pretty-time.version>
         <surefire.version>3.5.1</surefire.version>
+
+        <bouncycastle.version>1.80</bouncycastle.version>
+        <velocity.version>2.4.1</velocity.version>
     </properties>
 
     <parent>
