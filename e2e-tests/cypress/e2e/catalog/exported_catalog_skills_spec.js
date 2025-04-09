@@ -1000,6 +1000,32 @@ describe('Skills Exported to Catalog Tests', () => {
             expect(emails[0].text).to.contain('This is project 2')
         })
     })
+
+    it('Exported skill can not have expiration or video configured when imported', () => {
+        cy.createSkill(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.wait(100);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.importSkillFromCatalog(2, 1, 1, 1);
+        cy.finalizeCatalogImport(2);
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1/skills/skill1/config-expiration');
+
+        cy.get('[data-cy="readOnlyAlert"]').should('be.visible');
+        cy.get('[data-cy="expirationNeverRadio"]').should('have.class', 'p-disabled');
+        cy.get('[data-cy="yearlyRadio"]').should('have.class', 'p-disabled');
+        cy.get('[data-cy="monthlyRadio"]').should('have.class', 'p-disabled');
+        cy.get('[data-cy="dailyRadio"]').should('have.class', 'p-disabled');
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1/skills/skill1/config-video');
+        cy.get('[data-cy="readOnlyAlert"]').should('be.visible');
+        cy.get('[data-cy="videoFileInputDropTarget"]').should('be.disabled');
+        cy.get('[data-cy="videoCaptions"]').should('be.disabled');
+        cy.get('[data-cy="videoTranscript"]').should('be.disabled');
+    });
+
 });
 
 
