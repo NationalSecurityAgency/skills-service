@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useFieldArray } from "vee-validate";
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
@@ -60,6 +60,21 @@ function removeAnswer(index) {
 const replaceAnswers = (answers) => {
   replace(answers)
 }
+const answerSelected = (answerNumber) => {
+  if(QuestionType.isSingleChoice(props.questionType)) {
+    const adjustedAnswer = answerNumber - 1;
+    for(let answerValue in fields.value) {
+      const answerValueAsInt = parseInt(answerValue);
+      if(answerValueAsInt !== adjustedAnswer) {
+        if(fields.value[answerValueAsInt].value.isCorrect) {
+          answersRef.value[answerValueAsInt].resetValue()
+        }
+      }
+    }
+  }
+}
+
+const answersRef = ref([]);
 
 defineExpose( {
   replaceAnswers
@@ -73,9 +88,11 @@ defineExpose( {
           v-if="isQuizType"
           :id="`answers[${index}].isCorrect`"
           :answer-number="index+1"
+          ref="answersRef"
           :name="`answers[${index}].isCorrect`"
           v-model="answer.value.isCorrect"
           :is-radio-icon="QuestionType.isSingleChoice(questionType)"
+          @answerSelected="answerSelected"
           class="flex flex-initial mr-2 field"/>
       <SkillsTextInput
           class="flex flex-1"
