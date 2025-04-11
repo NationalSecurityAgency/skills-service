@@ -59,6 +59,9 @@ class DefaultIntSpec extends Specification {
     UserAttrsRepo userAttrsRepo
 
     @Autowired
+    UserRoleRepo userRoleRepo
+
+    @Autowired
     SkillDefRepo skillDefRepo
 
     @Autowired

@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2025 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.repos
+package skills.storage
 
-import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.CrudRepository
-import org.springframework.lang.Nullable
-import skills.storage.model.auth.User
+class UserGlobalCache {
 
-interface UserRepo extends CrudRepository<User, Integer> {
 
-    @Nullable
-    User findByUserId(String userId)
-
-    @Query("select id from User where userId = ?1")
-    Integer findIdByUserId(String userId)
-
-    boolean existsByUserIdIgnoreCase(String userId)
 }

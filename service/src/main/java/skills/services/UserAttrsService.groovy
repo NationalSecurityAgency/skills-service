@@ -21,11 +21,13 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.storage.WriterDatasourceService
 import skills.storage.model.UserAttrs
 import skills.storage.model.UserTag
 import skills.storage.repos.UserAttrsRepo
@@ -49,7 +51,6 @@ class UserAttrsService {
     @Value('#{"${skills.config.attrsAndUserTagsUpdateIntervalHours:7}"}')
     private int attrsAndUserTagsUpdateIntervalHours
 
-    @Transactional
     @Profile
     UserAttrs saveUserAttrs(String userId, UserInfo userInfo) {
         validateUserId(userId)
@@ -95,10 +96,13 @@ class UserAttrsService {
         return userAttrs
     }
 
+    @Autowired
+    WriterDatasourceService writerDatasourceService
+
     @Profile
     private UserAttrs updateIfNecessary(boolean updateUserTags, boolean updateUserAttrs, String userId, UserAttrs userAttrs, UserInfo userInfo) {
         if (updateUserTags || updateUserAttrs) {
-            lockUser(userId)
+            writerDatasourceService.lockUser(userId)
             if (!userAttrs.id) {
                 // this is an insert, reload UserAttrs to verify that another request has not already inserted
                 UserAttrs userAttrs2 = loadUserAttrsFromLocalDb(userId)
@@ -118,12 +122,6 @@ class UserAttrsService {
             replaceUserTags(userId?.toLowerCase(), userInfo)
         }
         return userAttrs
-    }
-
-    @Profile
-    void lockUser(String userId) {
-        log.debug("locking user [{}]", userId)
-        lockingService.lockForUserCreateOrUpdate(userId)
     }
 
     @Profile
@@ -201,7 +199,11 @@ class UserAttrsService {
 
     @Profile
     private void saveUserAttrsInLocalDb(UserAttrs userAttrs) {
-        userAttrsRepo.save(userAttrs)
+        if (userAttrs.id) {
+            writerDatasourceService.updateUserAttrs(userAttrs)
+        } else {
+            writerDatasourceService.insertUserAttrs(userAttrs)
+        }
     }
 
     @Profile

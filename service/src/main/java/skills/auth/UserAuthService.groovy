@@ -139,7 +139,6 @@ class UserAuthService {
         return loadByUserId(userInfo.username)
     }
 
-    @Transactional
     @Profile
     UserInfo createOrUpdateUser(UserInfo userInfo, boolean refreshSecurityContext=true) {
         AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.createAppUser(userInfo, true)

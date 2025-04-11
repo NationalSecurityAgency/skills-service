@@ -19,10 +19,12 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 
@@ -55,6 +57,11 @@ public class JpaConfig {
                 dataSource(writerDataSourceUrl, false, true),
                 dataSource(readerUrl, true, false)
         );
+    }
+
+    @Bean
+    public JdbcTemplate writerJdbcTemplate() {
+        return new JdbcTemplate(dataSource(writerDataSourceUrl, false, true));
     }
 
     private DataSource dataSource(String url, boolean readOnly, boolean isAutoCommit) {

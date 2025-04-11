@@ -42,6 +42,7 @@ import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
+import skills.storage.WriterDatasourceService
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
@@ -64,6 +65,9 @@ class AccessSettingsStorageService {
 
     @Autowired
     UserRepo userRepository
+
+    @Autowired
+    WriterDatasourceService writerDatasourceService
 
     @Autowired
     UserInfoService userInfoService
@@ -488,7 +492,6 @@ class AccessSettingsStorageService {
         return tableResult
     }
 
-    @Transactional()
     @Profile
     UserAndUserAttrsHolder createAppUser(UserInfo userInfo, boolean createOrUpdate) {
         userInfoValidator.validate(userInfo)
@@ -576,12 +579,14 @@ class AccessSettingsStorageService {
                 userId: userId,
                 password: userInfo.password,
         )
-        userRepository.save(user)
-
-        User savedUser = userRepository.findByUserId(user.userId)
+        writerDatasourceService.insertUser(user)
+        Integer userRefId = writerDatasourceService.getUserRefId(user.userId)
+        if (!userRefId) {
+            throw new SkillException("Must find user id for [${user.userId}]")
+        }
         List<UserRole> roles = getRoles(userInfo)
-        roles.each {it.userRefId = savedUser.id }
-        userRoleRepository.saveAll(roles)
+        roles.each {it.userRefId = userRefId }
+        writerDatasourceService.insertUserRoles(roles)
 
         return user
     }
