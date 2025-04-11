@@ -126,6 +126,11 @@ export const useTimeUtils = () => {
     return dayjs(date).isAfter(now.subtract(days, 'days'));
   }
 
+  const isInThePast = (date) => {
+    const now = dayjs();
+    return dayjs(date).isBefore(now);
+  }
+
   return {
     timeFromNow,
     isToday,
@@ -134,6 +139,7 @@ export const useTimeUtils = () => {
     formatDurationDiff,
     simpleClockFilter,
     relativeTime,
-    isWithinNDays
+    isWithinNDays,
+    isInThePast
   }
 }

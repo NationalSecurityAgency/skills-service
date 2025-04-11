@@ -106,7 +106,7 @@ const otherUsersAchieved = computed(() => {
             <i :class="iconCss" style="font-size: 5rem;" />
             <placement-badge :badge="badge" class="mt-2" />
             <div v-if="badge.gem" class="text-muted text-orange-800">
-              <small aria-label="`This is a gem badge and it expires in ${timeUtils.relativeTime(badge.endDate)}`">Expires {{ timeUtils.relativeTime(badge.endDate) }}</small>
+              <small aria-label="`This is a gem badge and it ${timeUtils.isInThePast(badge.endDate) ? 'expired' : 'expires'} ${timeUtils.relativeTime(badge.endDate)}`">{{timeUtils.isInThePast(badge.endDate) ? 'Expired' : 'Expires'}} {{ timeUtils.relativeTime(badge.endDate) }}</small>
             </div>
             <div v-if="badge.global" class="text-muted">
               <small><b>Global Badge</b></small>
