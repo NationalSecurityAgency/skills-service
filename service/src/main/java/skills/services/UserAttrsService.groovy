@@ -126,7 +126,7 @@ class UserAttrsService {
 
     @Profile
     private void replaceUserTags(String userId, UserInfo userInfo) {
-        userTagsRepository.deleteByUserId(userId)
+        writerDatasourceService.deleteUserTagsByUserId(userId)
         List<UserTag> userTags = userInfo.userTags.collect {
             if (isCollectionOrArray(it.value)) {
                 it.value.collect { value ->
@@ -138,7 +138,7 @@ class UserAttrsService {
         }.flatten()
 
         if (userTags) {
-            userTagsRepository.saveAll(userTags)
+            writerDatasourceService.saveUserTags(userTags)
         }
     }
 

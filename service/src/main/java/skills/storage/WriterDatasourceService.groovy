@@ -22,11 +22,13 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import skills.services.LockingService
 import skills.storage.model.UserAttrs
+import skills.storage.model.UserTag
 import skills.storage.model.auth.User
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
 import skills.storage.repos.UserRoleRepo
+import skills.storage.repos.UserTagRepo
 
 @Service
 @Slf4j
@@ -43,6 +45,9 @@ class WriterDatasourceService {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
+
+    @Autowired
+    UserTagRepo userTagRepo
 
     @Autowired
     LockingService lockingService
@@ -121,6 +126,25 @@ class WriterDatasourceService {
         writerJdbcTemplate.execute("select * from f_select_lock_and_insert('${userId}');".toString())
     }
 
+    void deleteUserTagsByUserId(String userId) {
+        if (isWriterDataSource()) {
+            userTagRepo.deleteByUserId(userId)
+            return
+        }
+        String sql = "delete from user_tags where lower(user_id) = lower('${userId}')".toString()
+        writerJdbcTemplate.execute(sql)
+    }
+
+    void saveUserTags(List<UserTag> userTags) {
+        if (isWriterDataSource()) {
+            userTagRepo.saveAll(userTags)
+            return
+        }
+        userTags.each {
+            String sql = "INSERT INTO user_tags (user_id, key, value) VALUES (${param(it.userId)}, ${param(it.key)}, ${param(it.value)});"
+            writerJdbcTemplate.execute(sql)
+        }
+    }
 
     private static String getUserAttrsSqlParams(UserAttrs userAttrs) {
         List<String> params = [

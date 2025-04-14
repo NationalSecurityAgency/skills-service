@@ -145,6 +145,7 @@ class DefaultIntSpec extends Specification {
         log.info(msg)
 
         dataResetHelper.resetData()
+        MockUserInfoService.resetUserTags()
 
         skillsService = createService()
     }

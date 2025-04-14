@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.intTests.utils;
-
+package skills.intTests.utils
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
@@ -24,6 +23,8 @@ import com.github.tomakehurst.wiremock.extension.ResponseDefinitionTransformer
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.ResponseDefinition
 import groovy.util.logging.Slf4j
+import jakarta.annotation.PostConstruct
+import jakarta.annotation.PreDestroy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Conditional
@@ -31,12 +32,9 @@ import org.springframework.stereotype.Component
 import skills.auth.SecurityMode
 import skills.storage.repos.UserAttrsRepo
 
-import jakarta.annotation.PostConstruct
-import jakarta.annotation.PreDestroy;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.*
-import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import static com.google.common.net.HttpHeaders.CONTENT_TYPE
 
 @Slf4j
 @Conditional(SecurityMode.PkiAuth)
@@ -51,6 +49,20 @@ public class MockUserInfoService {
 
     @Autowired
     CertificateRegistry certificateRegistry
+
+    private final static Map<String, List<Tuple2<String,String>>> currentUserTags = Collections.synchronizedMap([:])
+
+    static void resetUserTags() {
+        currentUserTags.clear()
+    }
+    static void addUserTags(String username, String key, String value) {
+        List<Tuple2<String,String>> tags = currentUserTags[username.toLowerCase()]
+        if (tags == null) {
+            tags = []
+            currentUserTags[username] = tags
+        }
+        tags.add(new Tuple2(key, value))
+    }
 
     static final Map<String, FirstnameLastname> DN_TO_NAME = [
             "cn=jdoe@email.foo, ou=integration tests, o=skilltree test, c=us": new FirstnameLastname("John", "Doe"),
@@ -156,15 +168,14 @@ public class MockUserInfoService {
             }
 
             String email = EmailUtils.generateEmaillAddressFor(usernamified)
-
             def existingEmail = userAttrsRepo.findEmailByUserId(usernamified.toLowerCase())
             if (existingEmail) {
                 email = existingEmail
             }
 
-            return new ResponseDefinitionBuilder()
-                    .withHeader(CONTENT_TYPE, "application/json")
-                    .withBody("""
+            List<Tuple2<String,String>> tags = currentUserTags.get(usernamified.toLowerCase())
+
+            String body = """
                     {
                         "firstName" : "${fname}",
                         "lastName": "${lname}",
@@ -172,9 +183,15 @@ public class MockUserInfoService {
                         "email": "${email.toLowerCase()}",
                         "username": "${usernamified}",
                         "usernameForDisplay": "${usernamifiedForDisplay}",
-                        "userDn": "${dnQuery}"
-                    }
-                    """).build()
+                        "userDn": "${dnQuery}" """
+            if (tags) {
+                body += """,
+                    "userTags": {${tags.collect({"\"${it.v1}\": \"${it.v2}\""}).join(", ")}}"""
+            }
+            body += "}"
+            return new ResponseDefinitionBuilder()
+                    .withHeader(CONTENT_TYPE, "application/json")
+                    .withBody(body).build()
         }
 
         @Override

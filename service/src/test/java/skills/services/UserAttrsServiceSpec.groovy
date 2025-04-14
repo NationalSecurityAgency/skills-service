@@ -17,6 +17,7 @@ package skills.services
 
 import groovy.time.TimeCategory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.intTests.utils.DefaultIntSpec
@@ -39,6 +40,9 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
     @Autowired
     UserAttrsRepo userAttrsRepo
 
+    @Autowired
+    UserAttrsTestServiceWrapper userAttrsTestServiceWrapper
+
     def "do not override existing user attributes with null values"() {
         String userId = "${UserAttrsServiceSpec.getSimpleName()}User1"
         UserInfo userInfo = new UserInfo(
@@ -50,9 +54,9 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
                 username: userId.toLowerCase(),
                 usernameForDisplay: userId
         )
-        userAttrsService.saveUserAttrs(userId, userInfo)
+        userAttrsTestServiceWrapper.saveUserAttrs(userId, userInfo)
         when:
-        userAttrsService.saveUserAttrs(userId, new UserInfo(
+        userAttrsTestServiceWrapper.saveUserAttrs(userId, new UserInfo(
                 username: userId.toLowerCase(),
                 usernameForDisplay: userId
         ))
@@ -79,9 +83,9 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
                 username: userId.toLowerCase(),
                 usernameForDisplay: userId
         )
-        userAttrsService.saveUserAttrs(userId, userInfo)
+        userAttrsTestServiceWrapper.saveUserAttrs(userId, userInfo)
         when:
-        userAttrsService.saveUserAttrs(userId, new UserInfo(
+        userAttrsTestServiceWrapper.saveUserAttrs(userId, new UserInfo(
                 username: userId.toLowerCase(),
                 usernameForDisplay: userId,
                 lastName: "lastNew"
@@ -109,9 +113,9 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
                 username: userId.toLowerCase(),
                 usernameForDisplay: userId
         )
-        userAttrsService.saveUserAttrs(userId, userInfo)
+        userAttrsTestServiceWrapper.saveUserAttrs(userId, userInfo)
         when:
-        userAttrsService.saveUserAttrs(userId, new UserInfo(
+        userAttrsTestServiceWrapper.saveUserAttrs(userId, new UserInfo(
                 username: userId.toLowerCase(),
                 usernameForDisplay: userId,
                 firstName: "firstNew",
@@ -142,7 +146,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
                 username: userId.toLowerCase(),
                 usernameForDisplay: "${userId} for display"
         )
-        userAttrsService.saveUserAttrs(userId, userInfo)
+        userAttrsTestServiceWrapper.saveUserAttrs(userId, userInfo)
 
         when:
         String res = userInfoService.getUserName(userId)
@@ -173,7 +177,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         )
 
         when:
-        userAttrsService.saveUserAttrs(userId, userInfo)
+        userAttrsTestServiceWrapper.saveUserAttrs(userId, userInfo)
 
         then:
         !userInfo.usernameForDisplay
@@ -201,7 +205,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         )
 
         when:
-        userAttrsService.saveUserAttrs(userId, userInfo)
+        userAttrsTestServiceWrapper.saveUserAttrs(userId, userInfo)
 
         then:
         userInfo.usernameForDisplay
@@ -230,7 +234,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         )
 
         when:
-        userAttrsService.saveUserAttrs(userId, userInfo)
+        userAttrsTestServiceWrapper.saveUserAttrs(userId, userInfo)
 
         then:
 
@@ -254,13 +258,13 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         userAttrsService.attrsAndUserTagsUpdateIntervalHours = 7
 
         when:
-        Date userTagsLastUpdated1 = userAttrsService.saveUserAttrs(userId, userInfo).userTagsLastUpdated
+        Date userTagsLastUpdated1 = userAttrsTestServiceWrapper.saveUserAttrs(userId, userInfo).userTagsLastUpdated
         List<UserTag> foundUserTags1 = userTagRepo.findAllByUserId(userId?.toLowerCase())
 
         // remove a userTag and update another
         userInfo.userTags.remove('Organization')
         userInfo.userTags.put('Agency', 'DEF')
-        Date userTagsLastUpdated2 = userAttrsService.saveUserAttrs(userId, userInfo).userTagsLastUpdated
+        Date userTagsLastUpdated2 = userAttrsTestServiceWrapper.saveUserAttrs(userId, userInfo).userTagsLastUpdated
         List<UserTag> foundUserTags2 = userTagRepo.findAllByUserId(userId?.toLowerCase())
 
         then:
@@ -293,7 +297,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         userAttrsService.attrsAndUserTagsUpdateIntervalHours = 7
 
         when:
-        Date userTagsLastUpdated1 = userAttrsService.saveUserAttrs(userId, userInfo).userTagsLastUpdated
+        Date userTagsLastUpdated1 = userAttrsTestServiceWrapper.saveUserAttrs(userId, userInfo).userTagsLastUpdated
         List<UserTag> foundUserTags1 = userTagRepo.findAllByUserId(userId?.toLowerCase())
 
         // force userTagsLastUpdated date to be before attrsAndUserTagsUpdateIntervalDays
@@ -306,7 +310,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         // remove a userTag and update another
         userInfo.userTags.remove('Organization')
         userInfo.userTags.put('Agency', 'DEF')
-        Date userTagsLastUpdated2 = userAttrsService.saveUserAttrs(userId, userInfo).userTagsLastUpdated
+        Date userTagsLastUpdated2 = userAttrsTestServiceWrapper.saveUserAttrs(userId, userInfo).userTagsLastUpdated
         List<UserTag> foundUserTags2 = userTagRepo.findAllByUserId(userId?.toLowerCase())
 
         then:
