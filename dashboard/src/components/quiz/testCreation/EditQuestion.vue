@@ -84,6 +84,10 @@ function questionTypeChanged(inputItem) {
         isCorrect: false,
       }]);
     })
+  } else {
+    if(answersRef.value) {
+      answersRef.value.resetAnswers();
+    }
   }
 
 }

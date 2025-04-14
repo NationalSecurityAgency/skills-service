@@ -62,13 +62,23 @@ const replaceAnswers = (answers) => {
 }
 const answerSelected = (answerNumber) => {
   if(QuestionType.isSingleChoice(props.questionType)) {
-    const adjustedAnswer = answerNumber - 1;
-    for(let answerValue in fields.value) {
-      const answerValueAsInt = parseInt(answerValue);
+    resetAnswers(answerNumber);
+  }
+}
+
+const resetAnswers = (answerToPreserve = null) => {
+  for(let answerValue in fields.value) {
+    const answerValueAsInt = parseInt(answerValue);
+    if(answerToPreserve) {
+      const adjustedAnswer = answerToPreserve - 1
       if(answerValueAsInt !== adjustedAnswer) {
         if(fields.value[answerValueAsInt].value.isCorrect) {
           answersRef.value[answerValueAsInt].resetValue()
         }
+      }
+    } else {
+      if(fields.value[answerValueAsInt].value.isCorrect) {
+        answersRef.value[answerValueAsInt].resetValue()
       }
     }
   }
@@ -77,7 +87,8 @@ const answerSelected = (answerNumber) => {
 const answersRef = ref([]);
 
 defineExpose( {
-  replaceAnswers
+  replaceAnswers,
+  resetAnswers
 })
 </script>
 
