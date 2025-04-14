@@ -121,6 +121,13 @@ const isSkillLocked = computed(() => {
   }
   return (sk.dependencyInfo && !sk.dependencyInfo.achieved) || hasBadgeDependency;
 })
+const shouldDisplayLock = computed(() => {
+  if(isSkillComplete.value) {
+    return false;
+  } else {
+    return isSkillLocked.value;
+  }
+})
 const pointsEarned = (pts) => {
   props.skill.mostRecentlyPerformedOn = dayjs()
   skillOverviewFooter.value.updateEarnedPoints({pointsEarned: pts})
@@ -178,7 +185,7 @@ watch(() => props.expandGroups, (newValue) => {
         :aria-label="`Navigate to ${skill.skill}`">
         <div class="relative">
           <skill-progress-bar data-cy="skillProgressBar"
-                              :is-locked="isSkillLocked"
+                              :is-locked="shouldDisplayLock"
                               class="border border-transparent hover:border-orange-700 rounded-border"
                               :skill="skill" />
 
@@ -187,7 +194,7 @@ watch(() => props.expandGroups, (newValue) => {
       <skill-progress-bar
         v-else
         :skill="skill"
-        :is-locked="isSkillLocked"
+        :is-locked="shouldDisplayLock"
         data-cy="skillProgressBar" />
 
       <!--        <progress-bar :skill="skill" v-on:progressbar-clicked="skillClicked"-->
