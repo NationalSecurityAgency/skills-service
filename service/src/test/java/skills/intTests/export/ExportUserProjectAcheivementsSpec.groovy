@@ -64,15 +64,15 @@ class ExportUserProjectAcheivementsSpec extends ExportBaseIntSpec {
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
                 ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 1", "", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Skill", "Test Skill 1", "", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Subject", "Test Subject #1", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Skill", "Test Skill 1 Subject2", "", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Subject", "Test Subject #2", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 1", "", formatDate(dates[1])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "1.0", formatDate(dates[1])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Overall", "Overall", "1.0", formatDate(dates[1])],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Skill", "Test Skill 1", "", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Subject", "Test Subject #1", "1.0", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Overall", "Overall", "1.0", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Skill", "Test Skill 1 Subject2", "", formatDate(dates[1], 2)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Subject", "Test Subject #2", "1.0", formatDate(dates[1], 2)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Overall", "Overall", "1.0", formatDate(dates[1], 2)],
                 ["For All Dragons Only"],
         ])
     }
@@ -115,15 +115,15 @@ class ExportUserProjectAcheivementsSpec extends ExportBaseIntSpec {
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
                 ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "Skill", "Test Skill 1", "", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "Subject", "Test Subject #1", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Skill", "Test Skill 1", "", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Subject", "Test Subject #1", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Skill", "Test Skill 1 Subject2", "", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Subject", "Test Subject #2", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "Skill", "Test Skill 1", "", formatDate(dates[1])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "Subject", "Test Subject #1", "1.0", formatDate(dates[1])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "Overall", "Overall", "1.0", formatDate(dates[1])],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Skill", "Test Skill 1", "", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Subject", "Test Subject #1", "1.0", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Overall", "Overall", "1.0", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Skill", "Test Skill 1 Subject2", "", formatDate(dates[1], 2)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Subject", "Test Subject #2", "1.0", formatDate(dates[1], 2)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Overall", "Overall", "1.0", formatDate(dates[1], 2)],
                 ["For All Dragons Only"],
         ])
     }
@@ -201,15 +201,15 @@ class ExportUserProjectAcheivementsSpec extends ExportBaseIntSpec {
         List<List<String>> expectedDataForQuery = [
                 ["For All Dragons Only"],
                 ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 1", "", dates[1].format("dd-MMM-yyyy")],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Overall", "Overall", "1.0", formatDate(dates[1])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "1.0", formatDate(dates[1])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 1", "", formatDate(dates[1])],
                 ["For All Dragons Only"],
         ]
 
         then:
-        validateSortAchievedOn(excelExportSortAchievedAsc.file, dates[1].format("dd-MMM-yyyy"), dates[2].format("dd-MMM-yyyy"))
-        validateSortAchievedOn(excelExportSortAchievedDesc.file, dates[2].format("dd-MMM-yyyy"), dates[1].format("dd-MMM-yyyy"))
+        validateSortAchievedOn(excelExportSortAchievedAsc.file, formatDate(dates[1]), formatDate(dates[2], 2))
+        validateSortAchievedOn(excelExportSortAchievedDesc.file, formatDate(dates[2], 2), formatDate(dates[1]))
         validateExport(excelExportQueryFilter.file, expectedDataForQuery)
     }
 

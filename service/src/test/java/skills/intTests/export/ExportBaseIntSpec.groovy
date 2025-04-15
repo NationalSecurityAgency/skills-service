@@ -51,13 +51,8 @@ class ExportBaseIntSpec extends DefaultIntSpec {
 
     def setupSpec() {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        use(TimeCategory) {
-            dates = (10..0).collect({
-                return it.days.ago;
-            })
-        }
     }
-    
+
     def setup() {
         rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
         if (!rootSkillsService.isRoot()) {
@@ -65,6 +60,17 @@ class ExportBaseIntSpec extends DefaultIntSpec {
         }
         isPkiMode = mockUserInfoService != null
         users = new ArrayList<>(getRandomUsers(4))
+
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        use(TimeCategory) {
+            dates = (10..0).collect({
+                return it.days.ago;
+            })
+        }
+        today = new Date()
+        oneDayAgo = new Date()-1
+        fiveDaysAgo = new Date()-5
+        tenDaysAgo = new Date()-10
     }
 
     protected void validateExport(File file, List<List<String>> data) {
@@ -164,6 +170,12 @@ class ExportBaseIntSpec extends DefaultIntSpec {
                 found = res.body.completed.findAll({ it.type == type })?.find { it.level == level }
                 skillIndex++
             }
+        }
+    }
+
+    static String formatDate(Date date, Integer extraHours = 0) {
+        use(TimeCategory) {
+            return (date + extraHours.hour).format("M/d/yy H:mm")
         }
     }
 }
