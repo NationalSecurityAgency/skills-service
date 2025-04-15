@@ -33,7 +33,7 @@ class ExportProjectSkillMetricsSpec extends ExportBaseIntSpec {
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        List<Date> days
+        List<Date> days = []
 
         use(TimeCategory) {
             days = (5..0).collect { int day -> day.days.ago }
@@ -53,11 +53,11 @@ class ExportProjectSkillMetricsSpec extends ExportBaseIntSpec {
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
                 ["Skill Name", "Skill ID", "# Users Achieved", "# Users In Progress", "Date Last Reported (UTC)", "Date Last Achieved (UTC)"],
-                ["Test Skill 1", "skill1", "1.0", "4.0",  today.format("dd-MMM-yyyy"), today.format("dd-MMM-yyyy")],
-                ["Test Skill 2", "skill2", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
-                ["Test Skill 3", "skill3", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
-                ["Test Skill 4", "skill4", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
-                ["Test Skill 5", "skill5", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
+                ["Test Skill 1", "skill1", "1.0", "4.0",  days.last().format("M/d/yy H:mm"), days.last().format("M/d/yy H:mm")],
+                ["Test Skill 2", "skill2", "0.0", "5.0",  days.last().format("M/d/yy H:mm"), ""],
+                ["Test Skill 3", "skill3", "0.0", "5.0",  days.last().format("M/d/yy H:mm"), ""],
+                ["Test Skill 4", "skill4", "0.0", "5.0",  days.last().format("M/d/yy H:mm"), ""],
+                ["Test Skill 5", "skill5", "0.0", "5.0",  days.last().format("M/d/yy H:mm"), ""],
                 ["Test Skill 6", "skill6", "0.0", "0.0",  "", ""],
                 ["Test Skill 7", "skill7", "0.0", "0.0",  "", ""],
                 ["Test Skill 8", "skill8", "0.0", "0.0",  "", ""],
@@ -83,7 +83,7 @@ class ExportProjectSkillMetricsSpec extends ExportBaseIntSpec {
         pristineDragonsUser.createSubject(subj)
         pristineDragonsUser.createSkills(skills)
 
-        List<Date> days
+        List<Date> days = []
 
         use(TimeCategory) {
             days = (5..0).collect { int day -> day.days.ago }
@@ -103,11 +103,11 @@ class ExportProjectSkillMetricsSpec extends ExportBaseIntSpec {
         validateExport(excelExport.file, [
                 ["For Divine Dragon Only"],
                 ["Skill Name", "Skill ID", "# Users Achieved", "# Users In Progress", "Date Last Reported (UTC)", "Date Last Achieved (UTC)"],
-                ["Test Skill 1", "skill1", "1.0", "4.0",  today.format("dd-MMM-yyyy"), today.format("dd-MMM-yyyy")],
-                ["Test Skill 2", "skill2", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
-                ["Test Skill 3", "skill3", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
-                ["Test Skill 4", "skill4", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
-                ["Test Skill 5", "skill5", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
+                ["Test Skill 1", "skill1", "1.0", "4.0",  days.last().format("M/d/yy H:mm"), days.last().format("M/d/yy H:mm")],
+                ["Test Skill 2", "skill2", "0.0", "5.0",  days.last().format("M/d/yy H:mm"), ""],
+                ["Test Skill 3", "skill3", "0.0", "5.0",  days.last().format("M/d/yy H:mm"), ""],
+                ["Test Skill 4", "skill4", "0.0", "5.0",  days.last().format("M/d/yy H:mm"), ""],
+                ["Test Skill 5", "skill5", "0.0", "5.0",  days.last().format("M/d/yy H:mm"), ""],
                 ["Test Skill 6", "skill6", "0.0", "0.0",  "", ""],
                 ["Test Skill 7", "skill7", "0.0", "0.0",  "", ""],
                 ["Test Skill 8", "skill8", "0.0", "0.0",  "", ""],

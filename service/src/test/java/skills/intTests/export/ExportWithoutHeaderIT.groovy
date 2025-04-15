@@ -64,8 +64,8 @@ class ExportWithoutHeaderIT extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
-                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "60.0", "0.2", today.format("dd-MMM-yyyy"), today.format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "2.0", "100.0", "0.3333333333", fiveDaysAgo.format("dd-MMM-yyyy"), oneDayAgo.format("dd-MMM-yyyy")],
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "60.0", "0.2", formatDate(today), formatDate(today)],
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "2.0", "100.0", "0.3333333333", formatDate(fiveDaysAgo), formatDate(oneDayAgo)],
         ])
     }
 
@@ -104,15 +104,15 @@ class ExportWithoutHeaderIT extends ExportBaseIntSpec {
         excelExport
         validateExport(excelExport.file, [
                 ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 1", "", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Skill", "Test Skill 1", "", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Subject", "Test Subject #1", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Skill", "Test Skill 1 Subject2", "", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Subject", "Test Subject #2", "1.0", dates[1].format("dd-MMM-yyyy")],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Overall", "Overall", "1.0", dates[1].format("dd-MMM-yyyy")],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 1", "", formatDate(dates[1])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "1.0", formatDate(dates[1])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Overall", "Overall", "1.0", formatDate(dates[1])],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Skill", "Test Skill 1", "", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Subject", "Test Subject #1", "1.0", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Overall", "Overall", "1.0", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Skill", "Test Skill 1 Subject2", "", formatDate(dates[1], 2)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Subject", "Test Subject #2", "1.0", formatDate(dates[1], 2)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Overall", "Overall", "1.0", formatDate(dates[1], 2)],
         ])
     }
 
@@ -127,7 +127,7 @@ class ExportWithoutHeaderIT extends ExportBaseIntSpec {
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        List<Date> days
+        List<Date> days = []
 
         use(TimeCategory) {
             days = (5..0).collect { int day -> day.days.ago }
@@ -146,11 +146,11 @@ class ExportWithoutHeaderIT extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["Skill Name", "Skill ID", "# Users Achieved", "# Users In Progress", "Date Last Reported (UTC)", "Date Last Achieved (UTC)"],
-                ["Test Skill 1", "skill1", "1.0", "4.0",  today.format("dd-MMM-yyyy"), today.format("dd-MMM-yyyy")],
-                ["Test Skill 2", "skill2", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
-                ["Test Skill 3", "skill3", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
-                ["Test Skill 4", "skill4", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
-                ["Test Skill 5", "skill5", "0.0", "5.0",  today.format("dd-MMM-yyyy"), ""],
+                ["Test Skill 1", "skill1", "1.0", "4.0",  days.last().format("M/d/yy H:mm"), days.last().format("M/d/yy H:mm")],
+                ["Test Skill 2", "skill2", "0.0", "5.0",  days.last().format("M/d/yy H:mm"), ""],
+                ["Test Skill 3", "skill3", "0.0", "5.0",  days.last().format("M/d/yy H:mm"), ""],
+                ["Test Skill 4", "skill4", "0.0", "5.0",  days.last().format("M/d/yy H:mm"), ""],
+                ["Test Skill 5", "skill5", "0.0", "5.0",  days.last().format("M/d/yy H:mm"), ""],
                 ["Test Skill 6", "skill6", "0.0", "0.0",  "", ""],
                 ["Test Skill 7", "skill7", "0.0", "0.0",  "", ""],
                 ["Test Skill 8", "skill8", "0.0", "0.0",  "", ""],
@@ -209,12 +209,12 @@ class ExportWithoutHeaderIT extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)", "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version"],
-                ["Test Skill 1", "skill1", "", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "Approval", "Exported", "", "", "0.0"],
-                ["Test Skill 2", "skill2", "", "New Tag",  today.format("dd-MMM-yyyy"), "200.0", "50.0", "4.0", "Approval", "", "Every year on ${expirationDate.format("MM/dd")}", "8 Hours 7 Minutes, Up to 2 Occurrences", "1.0"],
-                ["Test Skill 3", "skill3", "", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "Honor System", "", "", "", "0.0"],
-                ["Test Skill 4", "skill4", "Test Skill 10", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
-                ["Test Skill 5", "skill5", "Test Skill 10", "New Tag",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
-                ["Test Skill 1 Subject2", "skill1subj2", "", "",  today.format("dd-MMM-yyyy"), "50.0", "50.0", "1.0", "", "Imported", "", "", "1.0"],
+                ["Test Skill 1", "skill1", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Approval", "Exported", "", "", "0.0"],
+                ["Test Skill 2", "skill2", "", "New Tag",  formatDate(today), "200.0", "50.0", "4.0", "Approval", "", "Every year on ${expirationDate.format("MM/dd")}", "8 Hours 7 Minutes, Up to 2 Occurrences", "1.0"],
+                ["Test Skill 3", "skill3", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Honor System", "", "", "", "0.0"],
+                ["Test Skill 4", "skill4", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
+                ["Test Skill 5", "skill5", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
+                ["Test Skill 1 Subject2", "skill1subj2", "", "",  formatDate(today), "50.0", "50.0", "1.0", "", "Imported", "", "", "1.0"],
         ])
     }
 }
