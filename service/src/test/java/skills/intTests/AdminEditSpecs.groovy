@@ -1502,8 +1502,8 @@ class AdminEditSpecs extends DefaultIntSpec {
         assert badgeUsers.data.find { it.userId == user1 && it.totalPoints == 100 }
         assert badgeUsers.data.find { it.userId == user2 && it.totalPoints == 60 }
         def userTagUsers = skillsService.getUserTagUsers(project.projectId, 'someTag', 'ABC')
-        assert userTagUsers.data.find { it.userId == user1 && it.totalPoints == 100 }
-        assert userTagUsers.data.find { it.userId == user2 && it.totalPoints == 60 }
+        assert userTagUsers.data.find { it.userId?.toLowerCase() == user1 && it.totalPoints == 100 }
+        assert userTagUsers.data.find { it.userId.toLowerCase() == user2 && it.totalPoints == 60 }
 
         when:
 

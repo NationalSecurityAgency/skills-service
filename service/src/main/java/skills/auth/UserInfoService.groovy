@@ -65,11 +65,6 @@ class UserInfoService {
         return currentUser
     }
 
-    @Profile
-    UserAttrs getCurrentUserAttrs() {
-        String userId = getCurrentUser().username
-        return userAttrsService.findByUserId(userId)
-    }
 
     @Profile
     boolean isCurrentUserASuperDuperUser() {
@@ -80,7 +75,7 @@ class UserInfoService {
     }
 
     String getCurrentUserId() {
-        return getCurrentUser()?.username
+        return getCurrentUser()?.username?.toLowerCase()
     }
 
     /**

@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.AuthMode
 import skills.auth.UserInfo
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
@@ -49,6 +50,10 @@ class UserAttrsService {
     @Value('#{"${skills.config.attrsAndUserTagsUpdateIntervalHours:7}"}')
     private int attrsAndUserTagsUpdateIntervalHours
 
+
+    @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
+    AuthMode authMode
+
     @Transactional
     @Profile
     UserAttrs saveUserAttrs(String userId, UserInfo userInfo) {
@@ -56,17 +61,15 @@ class UserAttrsService {
 
         UserAttrs userAttrs = loadUserAttrsFromLocalDb(userId)
         boolean updateUserAttrs = false
-        boolean updateUserTags = false
+        // update user tags is PKI-only feature
+        boolean updateUserTags = authMode == AuthMode.PKI
 
         if (!userAttrs) {
             // no userAttrs existed, creating for the first time
-            userAttrs = new UserAttrs(userId: userId?.toLowerCase(), userIdForDisplay: userId)
+            userAttrs = new UserAttrs(userId: userId?.toLowerCase(), userIdForDisplay: userId, userTagsLastUpdated: new Date())
             updateUserAttrs = true
-            updateUserTags = true
         } else {
             updateUserAttrs = shouldUpdateUserAttrs(userInfo, userAttrs)
-            // always update tags
-            updateUserTags = true
 
             if (log.isTraceEnabled()) {
                 use(TimeCategory) {

@@ -208,7 +208,7 @@ class AdminUsersService {
         result.totalPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
         Long totalProjectUsersWithUserTag = userPointsRepo.countDistinctUserIdByProjectIdAndUserTag(projectId, userTagKey, userTagValue)
         if (totalProjectUsersWithUserTag) {
-            query = query ? query.trim() : ''
+            query = query ? query.trim().toLowerCase() : ''
             result.totalCount = totalProjectUsersWithUserTag
             List<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersByProjectIdAndUserTagAndUserIdLike(projectId, usersTableAdditionalUserTagKey, userTagKey, userTagValue, query, pageRequest)
             result.data = projectUsers

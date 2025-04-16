@@ -30,6 +30,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import skills.auth.pki.ExtractCertUtil;
 import skills.auth.pki.PkiUserLookup;
 import skills.storage.ReadOnlyDataSourceContext;
+import skills.storage.ReadOnlyEligible;
 
 import java.io.IOException;
 
@@ -71,17 +72,9 @@ public class ClientLibVersionFilter extends OncePerRequestFilter {
         }
 
         boolean shouldStartReadOnly = isGet && !inPkiModeAndUserIsNotCached;
-        if (shouldStartReadOnly) {
-            ReadOnlyDataSourceContext.start();
-        }
-        try {
-            filterChain.doFilter(request, response);
-        } finally {
-            if (shouldStartReadOnly) {
-                ReadOnlyDataSourceContext.end();
-            }
-        }
+        ReadOnlyEligible.setReadOnlyEligible(shouldStartReadOnly);
 
+        filterChain.doFilter(request, response);
     }
 
 }
