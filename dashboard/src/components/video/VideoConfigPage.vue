@@ -450,239 +450,243 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
             </Message>
           </div>
 
-          <div data-cy="videoInputFields" class="mb-6" :class="{'flex flex-col gap-2': responsive.md.value }">
-            <div class="flex flex-col md:flex-row gap-2 md:mb-2">
-              <div class="flex-1 content-end">
-                <label>* Audio/Video:</label>
+          <BlockUI :blocked="isReadOnly">
+            <div data-cy="videoInputFields" class="mb-6" :class="{'flex flex-col gap-2': responsive.md.value }">
+              <div class="flex flex-col md:flex-row gap-2 md:mb-2">
+                <div class="flex-1 content-end">
+                  <label>* Audio/Video:</label>
+                </div>
+                <div class="flex" >
+                  <SkillsButton
+                      v-if="!showFileUpload"
+                      data-cy="showFileUploadBtn"
+                      :disabled="isReadOnly"
+                      size="small"
+                      severity="info"
+                      outlined
+                      :class="{'w-full': responsive.md.value }"
+                      aria-label="Switch to Video Upload input option"
+                      @click="switchToFileUploadOption"
+                      icon="fas fa-arrow-circle-up"
+                      label="Switch to Upload">
+                  </SkillsButton>
+                  <SkillsButton
+                      v-if="showFileUpload"
+                      data-cy="showExternalUrlBtn"
+                      :disabled="isReadOnly"
+                      size="small"
+                      severity="info"
+                      outlined
+                      :class="{'w-full': responsive.md.value }"
+                      aria-label="Switch to External Link input option"
+                      @click="switchToExternalUrlOption"
+                      icon="fas fa-globe"
+                      label="Switch to External Link">
+                  </SkillsButton>
+                </div>
               </div>
-              <div class="flex" >
-                <SkillsButton
-                    v-if="!showFileUpload"
-                    data-cy="showFileUploadBtn"
-                    size="small"
-                    severity="info"
-                    outlined
-                    :class="{'w-full': responsive.md.value }"
-                    aria-label="Switch to Video Upload input option"
-                    @click="switchToFileUploadOption"
-                    icon="fas fa-arrow-circle-up"
-                    label="Switch to Upload">
-                </SkillsButton>
-                <SkillsButton
-                    v-if="showFileUpload"
-                    data-cy="showExternalUrlBtn"
-                    size="small"
-                    severity="info"
-                    outlined
-                    :class="{'w-full': responsive.md.value }"
-                    aria-label="Switch to External Link input option"
-                    @click="switchToExternalUrlOption"
-                    icon="fas fa-globe"
-                    label="Switch to External Link">
-                </SkillsButton>
+
+              <!-- upload file input component -->
+              <VideoFileInput @file-selected="onFileSelectedEvent"
+                              @reset="switchToFileUploadOption"
+                              :disabled="isReadOnly"
+                              name="selectedFile"
+                              :showFileUpload="showFileUpload"
+                              :hostedFileName="videoConf.hostedFileName"
+                              :isInternallyHosted="videoConf.isInternallyHosted"
+                              data-cy="videoFileInput"/>
+
+              <Message v-if="videoConf.file && videoUploadWarningMessage" data-cy="videoUploadWarningMessage" severity="error" icon="fas fa-exclamation-circle" :closable="false">
+                {{ videoUploadWarningMessage }}
+              </Message>
+
+              <!-- external URL input component-->
+              <div v-if="!showFileUpload && !videoConf.isInternallyHosted">
+                <SkillsTextInput id="videoUrlInput"
+                                 v-model="videoConf.url"
+                                 name="videoUrl"
+                                 data-cy="videoUrl"
+                                 @input="validate"
+                                 placeholder="Please enter audio/video external URL"
+                                 :disabled="isReadOnly"
+                />
               </div>
             </div>
 
-            <!-- upload file input component -->
-            <VideoFileInput @file-selected="onFileSelectedEvent"
-                            @reset="switchToFileUploadOption"
-                            name="selectedFile"
-                            :showFileUpload="showFileUpload"
-                            :hostedFileName="videoConf.hostedFileName"
-                            :isInternallyHosted="videoConf.isInternallyHosted"
-                            data-cy="videoFileInput"/>
+            <div data-cy="videoCaptionsInputFields" :class="{'flex flex-col gap-2': responsive.md.value }" v-if="!computedVideoConf.isAudio">
+              <div class="flex flex-col md:flex-row gap-2 md:mb-2">
+                <div class="flex-1 content-end">
+                  <label for="videoCaptions">Captions:</label>
+                </div>
+                <div v-if="!videoConf.captions && !isReadOnly" class="flex">
+                  <SkillsButton
+                      data-cy="fillCaptionsExamples"
+                      size="small"
+                      severity="info"
+                      outlined
+                      :class="{'w-full': responsive.md.value }"
+                      aria-label="Click to fill in sample captions using The Web Video Text Tracks (WEBVTT) format"
+                      @click="fillInCaptionsExample"
+                      icon="fas fa-plus"
+                      label="Add Example">
+                  </SkillsButton>
+                </div>
+              </div>
+              <SkillsTextarea
+                  id="videoCaptionsInput"
+                  v-model="videoConf.captions"
+                  placeholder="Enter captions using The Web Video Text Tracks (WebVTT) format (optional)"
+                  aria-label="Enter captions using The Web Video Text Tracks (WebVTT) format (optional)"
+                  rows="6"
+                  max-rows="6"
+                  name="videoCaptions"
+                  data-cy="videoCaptions"
+                  :disabled="isReadOnly"
+              />
+            </div>
 
-            <Message v-if="videoConf.file && videoUploadWarningMessage" data-cy="videoUploadWarningMessage" severity="error" icon="fas fa-exclamation-circle" :closable="false">
-              {{ videoUploadWarningMessage }}
+            <div data-cy="videoTranscriptInput" class="mt-4">
+              <div class="flex mb-2">
+                <div class="flex-1 content-end">
+                  <label for="videoTranscript">Transcript:</label>
+                </div>
+              </div>
+              <SkillsTextarea
+                  id="videoTranscriptInput"
+                  v-model="videoConf.transcript"
+                  placeholder="Please enter the transcript here. The transcript will be available for download (optional)"
+                  aria-label="Please enter the transcript here. The transcript will be available for download (optional)"
+                  rows="6"
+                  max-rows="6"
+                  name="videoTranscript"
+                  data-cy="videoTranscript"
+                  :disabled="isReadOnly"
+              />
+            </div>
+
+            <Message severity="error" v-if="overallErrMsg">
+              {{ overallErrMsg }}
             </Message>
 
-            <!-- external URL input component-->
-            <div v-if="!showFileUpload && !videoConf.isInternallyHosted">
-              <SkillsTextInput id="videoUrlInput"
-                               v-model="videoConf.url"
-                               name="videoUrl"
-                               data-cy="videoUrl"
-                               @input="validate"
-                               placeholder="Please enter audio/video external URL"
-                               :disabled="isReadOnly"
-              />
-            </div>
-          </div>
-
-          <div data-cy="videoCaptionsInputFields" :class="{'flex flex-col gap-2': responsive.md.value }" v-if="!computedVideoConf.isAudio">
-            <div class="flex flex-col md:flex-row gap-2 md:mb-2">
-              <div class="flex-1 content-end">
-                <label for="videoCaptions">Captions:</label>
-              </div>
-              <div v-if="!videoConf.captions && !isReadOnly" class="flex">
+            <div v-if="!isReadOnly" data-cy="updateButtons" class="my-4 flex flex-col md:flex-row gap-2">
+              <div class="flex-1">
                 <SkillsButton
-                    data-cy="fillCaptionsExamples"
-                    size="small"
-                    severity="info"
-                    outlined
+                    severity="success"
                     :class="{'w-full': responsive.md.value }"
-                    aria-label="Click to fill in sample captions using The Web Video Text Tracks (WEBVTT) format"
-                    @click="fillInCaptionsExample"
-                    icon="fas fa-plus"
-                    label="Add Example">
-                </SkillsButton>
+                    outlined
+                    :disabled="!hasVideoUrl || !meta.valid"
+                    data-cy="saveVideoSettingsBtn"
+                    aria-label="Save video settings"
+                    @click="submitSaveSettingsForm"
+                    icon="fas fa-save"
+                    label="Save and Preview" />
+                <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success" data-cy="savedMsg"><i class="fas fa-check" /> Saved</span>
+              </div>
+              <div class="flex flex-col md:flex-row gap-2">
+                <SkillsButton
+                    severity="secondary"
+                    class="md:mr-2"
+                    :class="{'w-full': responsive.md.value }"
+                    outlined
+                    data-cy="discardChangesBtn"
+                    aria-label="Discard Unsaved"
+                    @click="discardChanges"
+                    icon="fas fa-sync"
+                    label="Discard Changes" />
+                <SkillsButton
+                    severity="danger"
+                    outlined
+                    :disabled="!formHasAnyData"
+                    data-cy="clearVideoSettingsBtn"
+                    id="clearVideoSettingsBtn"
+                    :track-for-focus="true"
+                    aria-label="Clear video settings"
+                    @click="confirmClearSettings"
+                    icon="fas fa-trash-alt"
+                    label="Clear" />
               </div>
             </div>
-            <SkillsTextarea
-                id="videoCaptionsInput"
-                v-model="videoConf.captions"
-                placeholder="Enter captions using The Web Video Text Tracks (WebVTT) format (optional)"
-                aria-label="Enter captions using The Web Video Text Tracks (WebVTT) format (optional)"
-                rows="6"
-                max-rows="6"
-                name="videoCaptions"
-                data-cy="videoCaptions"
-                :disabled="isReadOnly"
-            />
-          </div>
 
-          <div data-cy="videoTranscriptInput" class="mt-4">
-            <div class="flex mb-2">
-              <div class="flex-1 content-end">
-                <label for="videoTranscript">Transcript:</label>
-              </div>
-            </div>
-            <SkillsTextarea
-                id="videoTranscriptInput"
-                v-model="videoConf.transcript"
-                placeholder="Please enter the transcript here. The transcript will be available for download (optional)"
-                aria-label="Please enter the transcript here. The transcript will be available for download (optional)"
-                rows="6"
-                max-rows="6"
-                name="videoTranscript"
-                data-cy="videoTranscript"
-                :disabled="isReadOnly"
-            />
-          </div>
-
-          <Message severity="error" v-if="overallErrMsg">
-            {{ overallErrMsg }}
-          </Message>
-
-          <div v-if="!isReadOnly" data-cy="updateButtons" class="my-4 flex flex-col md:flex-row gap-2">
-            <div class="flex-1">
-              <SkillsButton
-                  severity="success"
-                  :class="{'w-full': responsive.md.value }"
-                  outlined
-                  :disabled="!hasVideoUrl || !meta.valid"
-                  data-cy="saveVideoSettingsBtn"
-                  aria-label="Save video settings"
-                  @click="submitSaveSettingsForm"
-                  icon="fas fa-save"
-                  label="Save and Preview" />
-              <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success" data-cy="savedMsg"><i class="fas fa-check" /> Saved</span>
-            </div>
-            <div class="flex flex-col md:flex-row gap-2">
-              <SkillsButton
-                  severity="secondary"
-                  class="md:mr-2"
-                  :class="{'w-full': responsive.md.value }"
-                  outlined
-                  data-cy="discardChangesBtn"
-                  aria-label="Discard Unsaved"
-                  @click="discardChanges"
-                  icon="fas fa-sync"
-                  label="Discard Changes" />
-              <SkillsButton
-                  severity="danger"
-                  outlined
-                  :disabled="!formHasAnyData"
-                  data-cy="clearVideoSettingsBtn"
-                  id="clearVideoSettingsBtn"
-                  :track-for-focus="true"
-                  aria-label="Clear video settings"
-                  @click="confirmClearSettings"
-                  icon="fas fa-trash-alt"
-                  label="Clear" />
-            </div>
-          </div>
-
-          <!-- Video Preview -->
-          <Card v-if="preview" class="mt-4" data-cy="videoPreviewCard" :pt="{ body: { class: '!p-0' } }">
-            <template #header>
-              <div class="border border-surface rounded-t bg-surface-100 dark:bg-surface-700 p-4">{{computedVideoConf.isAudio ? 'Audio' : 'Video'}} Preview</div>
-            </template>
-            <template #content>
-              <VideoPlayer
-                  v-if="!refreshingPreview"
-                  :video-player-id="`videoConfigFor-${route.params.projectId}-${route.params.skillId}`"
-                  :options="computedVideoConf"
-                  @player-destroyed="turnOffRefresh"
-                  @watched-progress="updatedWatchProgress"
-                  @on-resize="videoResized"
-                  :loadFromServer="true"
-              />
-              <div v-if="watchedProgress" class="p-4 pt-6 flex flex-col gap-2">
-                <Message v-if="!isDurationAvailable" severity="warn" icon="fas fa-exclamation-triangle" :closable="false" data-cy="noDurationWarning">
-                  Browser cannot derive the duration of this media. Percentage will only be updated after the media is fully viewed.
-                </Message>
-                <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
-                  <div>Total Duration:</div>
-                  <div>
-                    <span v-if="watchedProgress.videoDuration === Infinity" class="text-danger" data-cy="videoTotalDuration">N/A</span>
-                    <span v-else class="text-primary" data-cy="videoTotalDuration">{{ timeUtils.formatDuration(Math.trunc(watchedProgress.videoDuration * 1000), true) }}</span>
-                  </div>
-                </div>
-                <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
-                  <div>Time Played:</div>
-                  <div><span class="text-primary" data-cy="videoTimeWatched">{{ timeUtils.formatDuration(Math.trunc(watchedProgress.totalWatchTime * 1000), true) }}</span></div>
-                </div>
-                <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
-                  <div>% Played:</div>
-                  <div>
-                    <span v-if="watchedProgress.videoDuration === Infinity" class="text-danger" data-cy="percentWatched">N/A</span>
-                    <span v-else class="text-primary" data-cy="percentWatched">{{ watchedProgress.percentWatched }}%</span>
-                  </div>
-                </div>
-                <div class="grid grid-cols-[10rem_1fr] md:gap-4">
-                  <div>Current Position:</div>
-                  <div><span class="text-primary">{{ watchedProgress.currentPosition.toFixed(2) }}</span> <span class="italic">Seconds</span></div>
-                </div>
-                <div class="grid md:grid-cols-[10rem_1fr] md:gap-4" v-if="!computedVideoConf.isAudio">
-                  <div>Default Video Size:</div>
-                  <div>
-                    <span class="text-primary" data-cy="defaultVideoSize">{{ configuredResolution }}</span> <Tag v-if="unsavedVideoSizeChanges" severity="warn" data-cy="unsavedVideoSizeChanges"><i class="fas fa-exclamation-circle mr-1" aria-hidden="true"></i>Unsaved Changes</Tag>
-                    <div class="text-sm italic">** Change the size by dragging the handle at the bottom right of the video and click Save Changes button.</div>
-                  </div>
-                </div>
-                <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
-                  <div>Played Segments:</div>
-                  <div>
-                    <div v-if="watchedProgress.currentStart !== null && watchedProgress.lastKnownStopPosition"> <span class="text-primary">{{ watchedProgress.currentStart.toFixed(2) }}</span>
-                      <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/>
-                      <span class="text-primary">{{ watchedProgress.lastKnownStopPosition.toFixed(2) }}</span> <span class="italic">Seconds</span>
-                    </div>
-                    <div v-for="segment in watchedProgress.watchSegments" :key="segment.start"><span class="text-primary">{{ segment.start.toFixed(2) }}</span>
-                      <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/><span class="text-primary">{{ segment.stop.toFixed(2) }}</span> <span class="italic">Seconds</span>
+            <!-- Video Preview -->
+            <Card v-if="preview" class="mt-4" data-cy="videoPreviewCard" :pt="{ body: { class: '!p-0' } }">
+              <template #header>
+                <div class="border border-surface rounded-t bg-surface-100 dark:bg-surface-700 p-4">{{computedVideoConf.isAudio ? 'Audio' : 'Video'}} Preview</div>
+              </template>
+              <template #content>
+                <VideoPlayer
+                    v-if="!refreshingPreview"
+                    :video-player-id="`videoConfigFor-${route.params.projectId}-${route.params.skillId}`"
+                    :options="computedVideoConf"
+                    @player-destroyed="turnOffRefresh"
+                    @watched-progress="updatedWatchProgress"
+                    @on-resize="videoResized"
+                    :loadFromServer="true"
+                />
+                <div v-if="watchedProgress" class="p-4 pt-6 flex flex-col gap-2">
+                  <Message v-if="!isDurationAvailable" severity="warn" icon="fas fa-exclamation-triangle" :closable="false" data-cy="noDurationWarning">
+                    Browser cannot derive the duration of this media. Percentage will only be updated after the media is fully viewed.
+                  </Message>
+                  <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
+                    <div>Total Duration:</div>
+                    <div>
+                      <span v-if="watchedProgress.videoDuration === Infinity" class="text-danger" data-cy="videoTotalDuration">N/A</span>
+                      <span v-else class="text-primary" data-cy="videoTotalDuration">{{ timeUtils.formatDuration(Math.trunc(watchedProgress.videoDuration * 1000), true) }}</span>
                     </div>
                   </div>
+                  <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
+                    <div>Time Played:</div>
+                    <div><span class="text-primary" data-cy="videoTimeWatched">{{ timeUtils.formatDuration(Math.trunc(watchedProgress.totalWatchTime * 1000), true) }}</span></div>
+                  </div>
+                  <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
+                    <div>% Played:</div>
+                    <div>
+                      <span v-if="watchedProgress.videoDuration === Infinity" class="text-danger" data-cy="percentWatched">N/A</span>
+                      <span v-else class="text-primary" data-cy="percentWatched">{{ watchedProgress.percentWatched }}%</span>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-[10rem_1fr] md:gap-4">
+                    <div>Current Position:</div>
+                    <div><span class="text-primary">{{ watchedProgress.currentPosition.toFixed(2) }}</span> <span class="italic">Seconds</span></div>
+                  </div>
+                  <div class="grid md:grid-cols-[10rem_1fr] md:gap-4" v-if="!computedVideoConf.isAudio">
+                    <div>Default Video Size:</div>
+                    <div>
+                      <span class="text-primary" data-cy="defaultVideoSize">{{ configuredResolution }}</span> <Tag v-if="unsavedVideoSizeChanges" severity="warn" data-cy="unsavedVideoSizeChanges"><i class="fas fa-exclamation-circle mr-1" aria-hidden="true"></i>Unsaved Changes</Tag>
+                      <div class="text-sm italic">** Change the size by dragging the handle at the bottom right of the video and click Save Changes button.</div>
+                    </div>
+                  </div>
+                  <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
+                    <div>Played Segments:</div>
+                    <div>
+                      <div v-if="watchedProgress.currentStart !== null && watchedProgress.lastKnownStopPosition"> <span class="text-primary">{{ watchedProgress.currentStart.toFixed(2) }}</span>
+                        <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/>
+                        <span class="text-primary">{{ watchedProgress.lastKnownStopPosition.toFixed(2) }}</span> <span class="italic">Seconds</span>
+                      </div>
+                      <div v-for="segment in watchedProgress.watchSegments" :key="segment.start"><span class="text-primary">{{ segment.start.toFixed(2) }}</span>
+                        <i class="fas fa-arrow-circle-right text-secondary mx-2" :aria-hidden="true"/><span class="text-primary">{{ segment.stop.toFixed(2) }}</span> <span class="italic">Seconds</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-if="!isReadOnly && hasBeenResized" class="flex items-center">
+                    <SkillsButton
+                        severity="success"
+                        class="mt-2"
+                        :class="{'w-full': responsive.md.value }"
+                        outlined
+                        :disabled="!hasVideoUrl || !meta.valid"
+                        data-cy="updateVideoSettings"
+                        aria-label="Save video settings"
+                        @click="submitSaveSettingsForm"
+                        icon="fas fa-save"
+                        label="Save Changes" />
+                    <InlineMessage v-if="showSavedMsg" aria-hidden="true" class="ml-4" data-cy="savedMsg" severity="success" size="small" icon="fas fa-check">Saved</InlineMessage>
+                  </div>
                 </div>
 
-                <div v-if="!isReadOnly && hasBeenResized" class="flex items-center">
-                  <SkillsButton
-                      severity="success"
-                      class="mt-2"
-                      :class="{'w-full': responsive.md.value }"
-                      outlined
-                      :disabled="!hasVideoUrl || !meta.valid"
-                      data-cy="updateVideoSettings"
-                      aria-label="Save video settings"
-                      @click="submitSaveSettingsForm"
-                      icon="fas fa-save"
-                      label="Save Changes" />
-                  <InlineMessage v-if="showSavedMsg" aria-hidden="true" class="ml-4" data-cy="savedMsg" severity="success" size="small" icon="fas fa-check">Saved</InlineMessage>
-                </div>
-              </div>
-
-            </template>
-          </Card>
-
+              </template>
+            </Card>
+          </BlockUI>
 
         </template>
 
