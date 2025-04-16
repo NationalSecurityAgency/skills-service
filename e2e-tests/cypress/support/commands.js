@@ -188,8 +188,9 @@ Cypress.Commands.add("enableProdMode", (projNum) => {
     });
 });
 
-Cypress.Commands.add("saveVideoAttrs", (projNum, skillNum, videoAttrs) => {
-    const url = `/admin/projects/proj${projNum}/skills/skill${skillNum}/video`;
+Cypress.Commands.add("saveVideoAttrs", (container, item, videoAttrs, quiz = false) => {
+    const url = quiz ? `/admin/quiz-definitions/quiz${container}/questions/${item}/video` : `/admin/projects/proj${container}/skills/skill${item}/video`;
+
     const formData = new FormData();
     if (videoAttrs.videoUrl) {
         formData.set('videoUrl', videoAttrs.videoUrl);
@@ -500,7 +501,7 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldCom
         });
 });
 
-Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
+Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}, videoAttrs = null) => {
     cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
         quizId: `quizId${quizNum}`,
         question: `This is a question # ${questionNum}`,
@@ -516,7 +517,15 @@ Cypress.Commands.add("createQuizQuestionDef", (quizNum = 1, questionNum = 1, ove
             answer: `Question ${questionNum} - Third Answer`,
             isCorrect: questionNum == 3 ? true : false,
         }],
-    }, overrideProps));
+    }, overrideProps)).as('createQuestion');
+
+    if(videoAttrs) {
+        let questionId
+        cy.get("@createQuestion").then((response) => {
+            questionId = response.body.id;
+            cy.saveVideoAttrs(quizNum, questionId, videoAttrs, true)
+        })
+    }
 });
 
 Cypress.Commands.add("createQuizMultipleChoiceQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {

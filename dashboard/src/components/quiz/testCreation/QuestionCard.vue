@@ -21,7 +21,9 @@ import { useQuizConfig } from "@/stores/UseQuizConfig.js";
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
+import {useRoute} from "vue-router";
 
+const route = useRoute()
 const quizConfig = useQuizConfig()
 
 const props = defineProps({
@@ -49,6 +51,13 @@ const isDragAndDropControlsVisible = computed(() => {
 })
 const numberOfStars = computed(() => {
   return props.question.answers ? props.question.answers.length : 3;
+})
+const mediaAttributes = computed(() => {
+  const media = props.question.attributes ? JSON.parse(props.question.attributes) : null
+  if(media) {
+    media.isAudio = media.videoType?.includes('audio/')
+  }
+  return media
 })
 const editQuestion = () => {
   emit('editQuestion', props.question)
@@ -89,6 +98,9 @@ const moveQuestion = (changeIndexBy) => {
               :instance-id="`${question.id}`"
               data-cy="questionDisplayText"/>
         </div>
+        <div v-if="mediaAttributes" class="mb-3">
+          <i :class="`far ${mediaAttributes.isAudio ? 'fa-file-audio' : 'fa-file-video'} fa-lg text-primary`"></i> <span class="font-bold">{{ mediaAttributes.internallyHostedFileName }}</span> is configured
+        </div>
         <div v-if="!isTextInputType && !isRatingType">
           <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
             <div class="flex items-center justify-center pb-1" :data-cy="`answerDisplay-${index}`">
@@ -125,45 +137,53 @@ const moveQuestion = (changeIndexBy) => {
           </Message>
         </div>
       </div>
-      <div v-if="!quizConfig.isReadOnlyQuiz" class="flex flex-none justify-center items-start">
-        <ButtonGroup class="ml-1 mt-2 mr-4">
-          <SkillsButton @click="editQuestion"
-                        icon="fas fa-edit"
-                        label="Edit"
-                        outlined
-                        size="small"
-                        :data-cy="`editQuestionButton_${questionNum}`"
-                        :aria-label="`Edit Question Number ${questionNum}`"
-                        :ref="`editQuestion_${question.id}`"
-                        :id="`editQuestion_${question.id}`"
-                        :track-for-focus="true"
-                        title="Edit Question">
-          </SkillsButton>
-          <SkillsButton @click="copyQuestion"
-                        icon="fas fa-copy"
-                        label="Copy"
-                        outlined
-                        size="small"
-                        :data-cy="`copyQuestionButton_${questionNum}`"
-                        :aria-label="`Copy Question Number ${questionNum}`"
-                        :ref="`copyQuestion_${question.id}`"
-                        :id="`copyQuestion_${question.id}`"
-                        :track-for-focus="true"
-                        title="Copy Question">
-          </SkillsButton>
-          <SkillsButton @click="showDeleteDialog = true"
-                        icon="text-warning fas fa-trash"
-                        label="Delete"
-                        outlined
-                        size="small"
-                        :data-cy="`deleteQuestionButton_${questionNum}`"
-                        :aria-label="`delete question number ${questionNum}`"
-                        :ref="`deleteQuestion_${question.id}`"
-                        :id="`deleteQuestion_${question.id}`"
-                        :track-for-focus="true"
-                        title="Delete Question">
-          </SkillsButton>
-        </ButtonGroup>
+      <div v-if="!quizConfig.isReadOnlyQuiz" class="flex flex-col gap-4">
+        <div>
+          <ButtonGroup class="ml-1 mt-2 mr-4">
+            <SkillsButton @click="editQuestion"
+                          icon="fas fa-edit"
+                          label="Edit"
+                          outlined
+                          size="small"
+                          :data-cy="`editQuestionButton_${questionNum}`"
+                          :aria-label="`Edit Question Number ${questionNum}`"
+                          :ref="`editQuestion_${question.id}`"
+                          :id="`editQuestion_${question.id}`"
+                          :track-for-focus="true"
+                          title="Edit Question">
+            </SkillsButton>
+            <SkillsButton @click="copyQuestion"
+                          icon="fas fa-copy"
+                          label="Copy"
+                          outlined
+                          size="small"
+                          :data-cy="`copyQuestionButton_${questionNum}`"
+                          :aria-label="`Copy Question Number ${questionNum}`"
+                          :ref="`copyQuestion_${question.id}`"
+                          :id="`copyQuestion_${question.id}`"
+                          :track-for-focus="true"
+                          title="Copy Question">
+            </SkillsButton>
+            <SkillsButton @click="showDeleteDialog = true"
+                          icon="text-warning fas fa-trash"
+                          label="Delete"
+                          outlined
+                          size="small"
+                          :data-cy="`deleteQuestionButton_${questionNum}`"
+                          :aria-label="`delete question number ${questionNum}`"
+                          :ref="`deleteQuestion_${question.id}`"
+                          :id="`deleteQuestion_${question.id}`"
+                          :track-for-focus="true"
+                          title="Delete Question">
+            </SkillsButton>
+          </ButtonGroup>
+        </div>
+        <div class="flex justify-end mr-4">
+          <router-link :aria-label="`Configure video for question ${question.id}`" style="text-decoration: underline;" :data-cy="`add-video-question-${questionNum}`"
+                       :to="`/administrator/quizzes/${route.params.quizId}/questions/${question.id}/config-video`" tabindex="-1">
+            <Avatar icon="far fa-play-circle" shape="circle" /> {{ question.attributes ? "Edit Audio/Video" : "Add Audio/Video"}}
+          </router-link>
+        </div>
       </div>
 
       <removal-validation
