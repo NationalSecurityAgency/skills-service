@@ -217,7 +217,8 @@ const toggleTranscript = () => {
           <div v-if="mediaAttributes">
             <video-player :video-player-id="`quizVideoFor-${q.id}`"
                           :options="mediaAttributes"
-                          :storeAndRecoverSizeFromStorage="true" />
+                          :storeAndRecoverSizeFromStorage="true"
+                          :align-center="false" />
             <div v-if="mediaAttributes.transcript" class="text-center">
               <SkillsButton style="text-decoration: underline; padding-right: 0.25rem; padding-left: 0.5rem;"
                             class="skills-theme-primary-color"

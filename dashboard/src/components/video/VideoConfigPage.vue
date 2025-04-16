@@ -434,7 +434,11 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
 
 <template>
   <div>
-    <SubPageHeader title="Configure Audio/Video" />
+    <SubPageHeader title="Configure Audio/Video">
+      <router-link :to="{ name: 'Questions' }" v-if="route.params.quizId" tabindex="-1">
+        <SkillsButton size="small" icon="fas fa-arrow-alt-circle-left" label="Back" />
+      </router-link>
+    </SubPageHeader>
     <SkillsOverlay :show="loading.video || (isSkill ? skillsState.loadingSkill : false) || appConfig.isLoadingConfig">
       <template v-if="videoConf.file" #overlay>
         <div class="text-center text-success pt-8">
