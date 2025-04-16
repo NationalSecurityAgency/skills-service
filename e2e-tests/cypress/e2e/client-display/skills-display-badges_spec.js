@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const moment = require("moment-timezone");
 describe('Skills Display Badges Tests', () => {
   beforeEach(() => {
     Cypress.env('disabledUILoginProp', true);
@@ -271,5 +272,78 @@ describe('Skills Display Badges Tests', () => {
     cy.get('[data-cy="skillProgressTitle"]').contains('Search blah skill 1');
     cy.get('[data-cy="toggleSkillDetails"]').click()
     cy.get('[data-cy="skillDescription-skill1"] [data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]')
+  });
+
+  it('badge with an expiring gem', () => {
+    cy.resetDb();
+    cy.fixture('vars.json')
+        .then((vars) => {
+          if (!Cypress.env('oauthMode')) {
+            cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+          }
+        });
+    cy.loginAsProxyUser();
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
+    cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
+    cy.createSkill(1, 1, 3, { name: 'find Blah other skill 3' });
+    cy.createSkill(1, 1, 4, { name: 'Search nothing skill 4' });
+
+    const anHourAgo = new Date().getTime() - (1000 * 60 * 60)
+    const twoDaysAgo = new Date().getTime() - (1000 * 60 * 60 * 48)
+    const tomorrow = moment.utc().add(1, 'day').format('YYYY-MM-DD[T]HH:mm:ss[Z]');
+    const twoDaysAgoMoment = moment.utc().subtract(2, 'day').format('YYYY-MM-DD[T]HH:mm:ss[Z]')
+
+    cy.createBadge(1, 1)
+    cy.assignSkillToBadge(1, 1, 1);
+    cy.createBadge(1, 1, { enabled: true, startDate: twoDaysAgoMoment, endDate: tomorrow })
+
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), twoDaysAgo);
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), anHourAgo); // achieve badge
+
+    cy.cdVisit('/', true);
+    cy.cdClickBadges();
+    cy.get('[data-cy=achievedBadges]').contains('Badge 1');
+
+    cy.get('[data-cy="earnedBadgeLink_badge1"]').click();
+    cy.get('[data-cy="badge_badge1_gem"]').contains('Expires in a day')
+  });
+
+  it('badge with an expired gem', () => {
+    cy.resetDb();
+    cy.fixture('vars.json')
+        .then((vars) => {
+          if (!Cypress.env('oauthMode')) {
+            cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+          }
+        });
+    cy.loginAsProxyUser();
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
+    cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
+    cy.createSkill(1, 1, 3, { name: 'find Blah other skill 3' });
+    cy.createSkill(1, 1, 4, { name: 'Search nothing skill 4' });
+
+    const anHourAgo = new Date().getTime() - (1000 * 60 * 60)
+    const twoDaysAgo = new Date().getTime() - (1000 * 60 * 60 * 48)
+    const yesterday = moment.utc().subtract(1, 'day').format('YYYY-MM-DD[T]HH:mm:ss[Z]')
+    const twoDaysAgoMoment = moment.utc().subtract(2, 'day').format('YYYY-MM-DD[T]HH:mm:ss[Z]')
+
+    cy.createBadge(1, 1)
+    cy.assignSkillToBadge(1, 1, 1);
+    cy.createBadge(1, 1, { enabled: true, startDate: twoDaysAgoMoment, endDate: yesterday })
+
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), twoDaysAgo);
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), anHourAgo); // achieve badge
+
+    cy.cdVisit('/', true);
+    cy.cdClickBadges();
+    cy.get('[data-cy=availableBadges]').contains('Badge 1');
+    cy.get('[data-cy="badge_badge1_gem"]').contains('Expired a day ago')
+
+    cy.get('[data-cy="badgeDetailsLink_badge1"]').click();
+    cy.get('[data-cy="badge_badge1_gem"]').contains('Expired a day ago')
   });
 })
