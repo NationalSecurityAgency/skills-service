@@ -52,6 +52,13 @@ const isDragAndDropControlsVisible = computed(() => {
 const numberOfStars = computed(() => {
   return props.question.answers ? props.question.answers.length : 3;
 })
+const mediaAttributes = computed(() => {
+  const media = props.question.attributes ? JSON.parse(props.question.attributes) : null
+  if(media) {
+    media.isAudio = media.videoType?.includes('audio/')
+  }
+  return media
+})
 const editQuestion = () => {
   emit('editQuestion', props.question)
 }
@@ -90,6 +97,9 @@ const moveQuestion = (changeIndexBy) => {
               :text="question.question"
               :instance-id="`${question.id}`"
               data-cy="questionDisplayText"/>
+        </div>
+        <div v-if="mediaAttributes" class="mb-3">
+          <i :class="`far ${mediaAttributes.isAudio ? 'fa-file-audio' : 'fa-file-video'} fa-lg text-primary`"></i> <span class="font-bold">{{ mediaAttributes.internallyHostedFileName }}</span> is configured
         </div>
         <div v-if="!isTextInputType && !isRatingType">
           <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">

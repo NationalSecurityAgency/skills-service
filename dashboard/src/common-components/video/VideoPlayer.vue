@@ -33,6 +33,10 @@ const props = defineProps({
   storeAndRecoverSizeFromStorage: {
     type: Boolean,
     default: false
+  },
+  alignCenter: {
+    type: Boolean,
+    default: true
   }
 })
 const announcer = useSkillsAnnouncer()
@@ -184,7 +188,7 @@ const createResizeSupport = () => {
 </script>
 
 <template>
-  <div class="flex justify-center mt-2">
+  <div :class="`flex ${ alignCenter ? 'justify-center' : ''} mt-2`">
     <div :class="{ 'flex-1' : !isConfiguredVideoSize }">
       <div :id="`${vidPlayerId}Container`" data-cy="videoPlayer"  :style="playerWidth ? `width: ${playerWidth}px;` : ''"
            class="videoPlayerContainer p-0 border rounded border-surface-200 dark:border-surface-600">
